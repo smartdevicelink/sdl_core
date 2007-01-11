@@ -36,7 +36,7 @@ FFW.RPCObserver = Em.Object.extend( {
         Em.Logger.log( "FFW.RPCObserver.Registered" );
     },
 
-    onRPCUnregistred: function() {
+    onRPCUnregistered: function() {
         Em.Logger.log( "FFW.RPCObserver.onUnregistered" );
     },
 

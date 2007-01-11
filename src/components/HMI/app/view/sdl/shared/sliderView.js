@@ -119,7 +119,7 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
         this.set( 'sliderRequestId', message.id );
 
         this.set( 'headerLabel.content', data.sliderHeader );
-        this.set( 'footerLabel.content', data.sliderFooter[0] );
+        this.set( 'footerLabel.content', data.sliderFooter ? data.sliderFooter : '' );
         this.get( 'adjustControl.sliderValue' ).set( 'range', data.numTicks );
         this.get( 'adjustControl.sliderValue' ).set( 'value', data.position );
 
