@@ -5,7 +5,7 @@
  *      Author: vsalo
  */
 
-#include "RegistryItem.h"
+#include "AppMgr/RegistryItem.h"
 
 RegistryItem::RegistryItem( )
 {

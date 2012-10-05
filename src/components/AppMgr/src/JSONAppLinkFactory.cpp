@@ -5,7 +5,13 @@
  *      Author: vsalo
  */
 
-#include "JSONAppLinkFactory.h"
+#include "AppMgr/JSONAppLinkFactory.h"
+
+static JSONAppLinkFactory& JSONAppLinkFactory::getInstance( )
+{
+	JSONAppLinkFactory factory;
+	return factory;
+}
 
 JSONAppLinkFactory::JSONAppLinkFactory( )
 {

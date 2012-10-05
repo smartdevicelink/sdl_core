@@ -7,6 +7,12 @@
 
 #include "AppMgr.h"
 
+static AppMgr& AppMgr::getInstance( )
+{
+	AppMgr appMgr;
+	return appMgr;
+}
+
 AppMgr::AppMgr()
 {
 }

@@ -11,8 +11,12 @@
 class JSONRPCFactory
 {
 public:
-	JSONRPCFactory( );
 	~JSONRPCFactory( );
+
+	static JSONRPCFactory& getInstance();
+
+private:
+	JSONRPCFactory( );
 };
 
 #endif /* JSONRPCFACTORY_H_ */

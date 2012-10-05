@@ -5,7 +5,13 @@
  *      Author: vsalo
  */
 
-#include "JSONRPCFactory.h"
+#include "AppMgr/JSONRPCFactory.h"
+
+static JSONRPCFactory& JSONRPCFactory::getInstance( )
+{
+	static JSONRPCFactory factory;
+	return factory;
+}
 
 JSONRPCFactory::JSONRPCFactory( )
 {

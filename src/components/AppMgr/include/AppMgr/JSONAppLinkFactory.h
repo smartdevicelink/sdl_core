@@ -11,8 +11,11 @@
 class JSONAppLinkFactory
 {
 public:
-	JSONAppLinkFactory( );
 	~JSONAppLinkFactory( );
+	static JSONAppLinkFactory& getInstance();
+
+private:
+	JSONAppLinkFactory( );
 };
 
 #endif /* JSONAPPLINKFACTORY_H_ */

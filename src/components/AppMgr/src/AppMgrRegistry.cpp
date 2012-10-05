@@ -5,7 +5,17 @@
  *      Author: vsalo
  */
 
-#include "AppMgrRegistry.h"
+#include "AppMgr/AppMgrRegistry.h"
+
+static AppMgrRegistry& AppMgrRegistry::getInstance( )
+{
+	static AppMgrRegistry registry;
+	return registry;
+}
+
+void AppMgrRegistry::unregisterApplication( RegistryItem& item )
+{
+}
 
 AppMgrRegistry::AppMgrRegistry( )
 {

@@ -5,7 +5,7 @@
  *      Author: vsalo
  */
 
-#include "Application.h"
+#include "AppMgr/Application.h"
 
 Application::Application( )
 {

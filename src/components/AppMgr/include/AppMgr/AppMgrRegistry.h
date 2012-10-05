@@ -16,13 +16,16 @@
 class AppMgrRegistry
 {
 public:
-	AppMgrRegistry( );
 	~AppMgrRegistry( );
+
+	static AppMgrRegistry& getInstance();
 
 	RegistryItem& registerApplication( IApplication* app );
 	void unregisterApplication( RegistryItem& item  );
 
 private:
+	AppMgrRegistry( );
+
 	std::set<RegistryItem> mRegistryItems;
 };
 

@@ -5,7 +5,7 @@
  *      Author: vsalo
  */
 
-#include "AppFactory.h"
+#include "AppMgr/AppFactory.h"
 
 AppFactory::AppFactory( )
 {

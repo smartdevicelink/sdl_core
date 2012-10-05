@@ -5,7 +5,7 @@
  *      Author: vsalo
  */
 
-#include "MessageBrokerClient.h"
+#include "AppMgr/MessageBrokerClient.h"
 
 MessageBrokerClient::MessageBrokerClient( )
 {

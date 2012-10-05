@@ -9,16 +9,18 @@
 #define APPMGR_H_
 
 #include "IApplication.h"
-
-#include <set>
+#include "AppMgrRegistry.h"
+#include "AppPolicy.h"
 
 class AppMgr
 {
 public:
-	AppMgr();
 	~AppMgr();
 
+	static AppMgr& getInstance();
 
+private:
+	AppMgr();
 };
 
 
