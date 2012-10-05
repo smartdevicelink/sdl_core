@@ -18,3 +18,6 @@ AppMgrRegistry::~AppMgrRegistry( )
 	// TODO Auto-generated destructor stub
 }
 
+RegistryItem& AppMgrRegistry::registerApplication( IApplication* app )
+{
+}

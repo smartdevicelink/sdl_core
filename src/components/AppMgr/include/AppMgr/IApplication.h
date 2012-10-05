@@ -14,6 +14,7 @@ public:
 	IApplication( )=0;
 	virtual ~IApplication( )=0;
 
+	void setApplicationPriority()=0;
 
 };
 
