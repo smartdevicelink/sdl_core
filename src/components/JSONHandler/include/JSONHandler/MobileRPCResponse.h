@@ -4,7 +4,7 @@ class MobileRPCMessage;
 class MobileRPCResponse : public MobileRPCMessage
 {
 public:
-    MobileRPCResponse(arguments);
+    MobileRPCResponse( unsigned int protocolVersion, unsigned int correlationID = 0 );
     ~MobileRPCResponse();
 
     /* data */

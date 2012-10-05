@@ -1,8 +1,10 @@
 
-#include "MobileRPCMessage.h"
-#include "MobileRPCRequest.h"
+#include "JSONHandler/MobileRPCMessage.h"
+#include "JSONHandler/MobileRPCRequest.h"
 
 MobileRPCRequest::MobileRPCRequest( unsigned int protocolVersion, unsigned int correlationID )
 :MobileRPCMessage( protocolVersion, REQUEST, correlationID )
 {}
 
+MobileRPCRequest::~MobileRPCRequest() 
+{}
