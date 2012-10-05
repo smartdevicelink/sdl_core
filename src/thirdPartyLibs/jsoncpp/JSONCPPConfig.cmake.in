@@ -1,0 +1,1 @@
+get_filename_component(JSONCPP_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)

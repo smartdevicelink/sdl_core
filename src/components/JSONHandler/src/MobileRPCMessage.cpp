@@ -1,7 +1,8 @@
+#include "JSONHandler/MobileRPCMessage.h"
 
-
-MobileRPCMessage( uint protocolVersion, MessageType messageType, 
-        uint correlationID = 0 )
+MobileRPCMessage::MobileRPCMessage( 
+    unsigned int protocolVersion, MessageType messageType, 
+        unsigned int correlationID )
 :mProtocolVersion( protocolVersion )
 ,mMessageType( messageType )
 ,mCorrelationID( correlationID )
@@ -10,24 +11,24 @@ MobileRPCMessage( uint protocolVersion, MessageType messageType,
 ,mJSONMessageSize( 0 )
 {}
 
-MobileRPCMessage::MobileRPCMessage( uint protocolVersion, MessageType messageType, 
-        uint correlationID, Parameters params, std::string functionName )
+MobileRPCMessage::MobileRPCMessage( unsigned int protocolVersion, MessageType messageType, 
+        unsigned int correlationID, Parameters params, std::string functionName )
 {
     MobileRPCMessage(protocolVersion, messageType, 
         correlationID, params, functionName, 0, 0);
 }
 
-MobileRPCMessage::MobileRPCMessage( uint protocolVersion, MessageType messageType, 
-        uint correlationID, Parameters params,
-        uint functionID, uint messageSize )
+MobileRPCMessage::MobileRPCMessage( unsigned int protocolVersion, MessageType messageType, 
+        unsigned int correlationID, Parameters params,
+        unsigned int functionID, unsigned int messageSize )
 {
     MobileRPCMessage(protocolVersion, messageType, 
         correlationID, params, "", functionID, messageSize);
 }
 
-MobileRPCMessage::MobileRPCMessage( uint protocolVersion, MessageType messageType, 
-        uint correlationID, Parameters params, std::string functionName,
-        uint functionID, uint messageSize )
+MobileRPCMessage::MobileRPCMessage( unsigned int protocolVersion, MessageType messageType, 
+        unsigned int correlationID, Parameters params, std::string functionName,
+        unsigned int functionID, unsigned int messageSize )
 :mProtocolVersion( protocolVersion )
 ,mMessageType( messageType )
 ,mCorrelationID( correlationID )
@@ -37,3 +38,14 @@ MobileRPCMessage::MobileRPCMessage( uint protocolVersion, MessageType messageTyp
 ,mJSONMessageSize( messageSize )
 { }
 
+MobileRPCMessage::~MobileRPCMessage() {}
+
+MobileRPCMessage::MessageType MobileRPCMessage::getMessageType() const
+{
+    return mMessageType;
+}
+
+void MobileRPCMessage::setCorrelationID( unsigned int correlationID )
+{
+    mCorrelationID = correlationID;
+}

@@ -1,3 +1,6 @@
+#ifndef MOBILERPCMESSAGE_CLASS
+#define MOBILERPCMESSAGE_CLASS 
+
 #include <string>
 #include <map>
 
@@ -19,7 +22,7 @@ public:
     MobileRPCMessage( unsigned int protocolVersion, MessageType messageType, 
         unsigned int correlationID, Parameters params, std::string functionName,
         unsigned int functionID, unsigned int messageSize );
-    ~MobileRPCMessage();
+    virtual ~MobileRPCMessage();
 
     void setParameters( Parameters params );
     void addParameter( std::string key, std::string value );
@@ -34,8 +37,9 @@ public:
     const std::string & getFunctionName() const;
     unsigned int getFunctionID() const;
     unsigned int getJSONMessageSize() const;
-    
 
+    void setCorrelationID( unsigned int correlationID );
+    
 protected:
     /* data */
     unsigned int mProtocolVersion;
@@ -46,3 +50,5 @@ protected:
     unsigned int mFunctionID;
     unsigned int mJSONMessageSize;
 };
+
+#endif
