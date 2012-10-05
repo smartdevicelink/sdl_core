@@ -7,10 +7,9 @@
 
 #include "AppMgr/Application.h"
 
-Application::Application( )
+Application::Application( const std::string& name )
+: IApplication(name)
 {
-	// TODO Auto-generated constructor stub
-
 }
 
 Application::~Application( )
@@ -18,3 +17,7 @@ Application::~Application( )
 	// TODO Auto-generated destructor stub
 }
 
+void Application::setApplicationPriority( const AppPriority& priority )
+{
+	mPriority = priority;
+}

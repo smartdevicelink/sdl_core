@@ -5,11 +5,11 @@
  *      Author: vsalo
  */
 
-#include "AppMgr.h"
+#include "AppMgr/AppMgr.h"
 
-static AppMgr& AppMgr::getInstance( )
+AppMgr& AppMgr::getInstance( )
 {
-	AppMgr appMgr;
+	static AppMgr appMgr;
 	return appMgr;
 }
 

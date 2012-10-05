@@ -12,15 +12,16 @@
 #include "RegistryItem.h"
 
 #include <set>
+#include <string>
 
 class AppMgrRegistry
 {
 public:
 	~AppMgrRegistry( );
 
-	static AppMgrRegistry& getInstance();
+	static AppMgrRegistry& getInstance( );
 
-	RegistryItem& registerApplication( IApplication* app );
+	const RegistryItem& registerApplication( const IApplication& app );
 	void unregisterApplication( RegistryItem& item  );
 
 private:

@@ -8,11 +8,24 @@
 #ifndef REGISTRYITEM_H_
 #define REGISTRYITEM_H_
 
+#include "IApplication.h"
+#include "AppPolicy.h"
+#include <set>
+
 class RegistryItem
 {
 public:
-	RegistryItem( );
+	RegistryItem( const IApplication& app );
 	~RegistryItem( );
+
+	const AppPolicy& registerPolicy( const std::string& hash );
+	void unregisterPolicy( AppPolicy& policy );
+	const IApplication& getApplication() const;
+	bool operator<(const RegistryItem& item2) const;
+
+private:
+	std::set<AppPolicy> mAppPolicies;
+	const IApplication& mApplication;
 };
 
 #endif /* REGISTRYITEM_H_ */

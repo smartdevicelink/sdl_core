@@ -7,9 +7,9 @@
 
 #include "AppMgr/JSONAppLinkFactory.h"
 
-static JSONAppLinkFactory& JSONAppLinkFactory::getInstance( )
+JSONAppLinkFactory& JSONAppLinkFactory::getInstance( )
 {
-	JSONAppLinkFactory factory;
+	static JSONAppLinkFactory factory;
 	return factory;
 }
 

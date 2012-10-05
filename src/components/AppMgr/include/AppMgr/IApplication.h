@@ -8,14 +8,29 @@
 #ifndef IAPPLICATION_H_
 #define IAPPLICATION_H_
 
+#include <string>
+
+typedef enum Priority
+{
+	ACTIVE,
+	BACKDROUND,
+	NONE
+} AppPriority;
+
 class IApplication
 {
 public:
-	IApplication( )=0;
+	IApplication( const std::string& name );
 	virtual ~IApplication( )=0;
 
-	void setApplicationPriority()=0;
+	virtual void setApplicationPriority()=0;
+	virtual const std::string& getName() const;
 
+protected:
+	IApplication(const IApplication&);
+
+	const std::string mName;
+	AppPriority mPriority;
 };
 
 #endif /* IAPPLICATION_H_ */

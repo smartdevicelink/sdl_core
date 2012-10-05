@@ -7,7 +7,7 @@
 
 #include "AppMgr/JSONRPCFactory.h"
 
-static JSONRPCFactory& JSONRPCFactory::getInstance( )
+JSONRPCFactory& JSONRPCFactory::getInstance( )
 {
 	static JSONRPCFactory factory;
 	return factory;

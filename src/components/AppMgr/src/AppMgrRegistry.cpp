@@ -7,7 +7,7 @@
 
 #include "AppMgr/AppMgrRegistry.h"
 
-static AppMgrRegistry& AppMgrRegistry::getInstance( )
+AppMgrRegistry& AppMgrRegistry::getInstance( )
 {
 	static AppMgrRegistry registry;
 	return registry;
@@ -15,6 +15,8 @@ static AppMgrRegistry& AppMgrRegistry::getInstance( )
 
 void AppMgrRegistry::unregisterApplication( RegistryItem& item )
 {
+	std::set<RegistryItem>::iterator registryItemIterator = mRegistryItems.find(item);
+	mRegistryItems.erase(registryItemIterator);
 }
 
 AppMgrRegistry::AppMgrRegistry( )
@@ -28,6 +30,9 @@ AppMgrRegistry::~AppMgrRegistry( )
 	// TODO Auto-generated destructor stub
 }
 
-RegistryItem& AppMgrRegistry::registerApplication( IApplication* app )
+const RegistryItem& AppMgrRegistry::registerApplication( const IApplication& app )
 {
+	RegistryItem item(app);
+	mRegistryItems.insert(item);
+	return *mRegistryItems.find(item);
 }

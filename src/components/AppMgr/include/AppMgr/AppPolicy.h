@@ -8,11 +8,18 @@
 #ifndef APPPOLICY_H_
 #define APPPOLICY_H_
 
+#include <string>
+
 class AppPolicy
 {
 public:
-	AppPolicy( );
+	AppPolicy( const std::string& policy );
 	~AppPolicy( );
+	bool operator<(const AppPolicy& item2) const;
+	const std::string& getPolicyHash() const;
+
+private:
+	const std::string mPolicy;
 };
 
 #endif /* APPPOLICY_H_ */
