@@ -12,34 +12,35 @@ public:
     typedef std::map<std::string,std::string> Parameters;
 
 public:
+    MobileRPCMessage( unsigned int protocolVersion, MessageType messageType );
     MobileRPCMessage( unsigned int protocolVersion, MessageType messageType, 
-        unsigned int correlationID = 0 );
-    MobileRPCMessage( unsigned int protocolVersion, MessageType messageType, 
-        unsigned int correlationID, Parameters params, std::string functionName );
-    MobileRPCMessage( unsigned int protocolVersion, MessageType messageType, 
-        unsigned int correlationID, Parameters params,
-        unsigned int functionID, unsigned int messageSize );
+        std::string functionName );
+    MobileRPCMessage( unsigned int protocolVersion, MessageType messageType,
+        unsigned int functionID );
     MobileRPCMessage( unsigned int protocolVersion, MessageType messageType, 
         unsigned int correlationID, Parameters params, std::string functionName,
         unsigned int functionID, unsigned int messageSize );
     virtual ~MobileRPCMessage();
 
-    void setParameters( Parameters params );
-    void addParameter( std::string key, std::string value );
-    void changeParameter( std::string key, std::string newValue );
+    virtual void setParameters( Parameters params );
+    virtual void addParameter( std::string key, std::string value );
+    virtual void changeParameter( std::string key, std::string newValue );
 
-    Parameters getParameters() const;
-    std::string getParameter( std::string key ) const;
+    virtual Parameters getParameters() const;
+    virtual std::string getParameter( std::string key ) const;
 
-    unsigned int getProtocolVersion() const;
-    MessageType getMessageType() const;
-    unsigned int getCorrelationID() const;
-    const std::string & getFunctionName() const;
-    unsigned int getFunctionID() const;
-    unsigned int getJSONMessageSize() const;
+    virtual unsigned int getProtocolVersion() const;
+    virtual MessageType getMessageType() const;
+    virtual unsigned int getCorrelationID() const;
+    virtual const std::string & getFunctionName() const;
+    virtual unsigned int getFunctionID() const;
+    virtual unsigned int getJSONMessageSize() const;
 
-    void setCorrelationID( unsigned int correlationID );
-    
+    virtual void setCorrelationID( unsigned int correlationID );
+    virtual void setFunctionName( const std::string & functionName );
+    virtual void setFunctionID( unsigned int functionID );
+    virtual void setJSONMessageSize( unsigned int messageSize );
+
 protected:
     /* data */
     unsigned int mProtocolVersion;

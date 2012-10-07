@@ -1,2 +1,0 @@
-get_filename_component(JSONHANDLER_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-

@@ -26,7 +26,8 @@ int main () {
         std::string json_string( json_content );
         if ( !json_string.empty() ) {
             MobileRPCMessage * message = JSONHandler::createObjectFromJSON( json_string );
-            std::cout<<"type: "<< message->getMessageType() << std::endl;
+            std::cout << "type: " << message->getMessageType() << std::endl;
+            std::cout << "protocol version: " << message->getProtocolVersion() << std::endl;
             //result = parseJson( json_string );
         }
 

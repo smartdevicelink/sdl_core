@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
-project (TESTJSONHANDLER) 
+project (testJsonHandler) 
 
-set(CMAKE_MODULE_PATH ../../../src/thirdPartyLibs/jsoncpp)
-find_package(JSONCPP)
-#add_binarydiirectory(../../../src/thirdPartyLibs/jsoncpp/)
-#add_subdirectory(../../../src/components/JSONHandler)
-#add_dependencies(testJsonHandler JSONCPP)
 link_directories(../../../src/thirdPartyLibs/jsoncpp ../../../src/components/JSONHandler)
 
 include_directories (../../../src/components/JSONHandler/include/ ../../../src/thirdPartyLibs/jsoncpp/include/) 
@@ -13,4 +8,19 @@ add_executable(testJsonHandler main.cpp)
 target_link_libraries(testJsonHandler jsonCpp jsonHandler)
  
 
+include(ExternalProject)
+ExternalProject_Add(
+   jsonHandler
+   SOURCE_DIR ../../../src/components/JSONHandler
+   DOWNLOAD_COMMAND ""
+   CMAKE_COMMAND cmake
+   BUILD_IN_SOURCE 1 
+#   BINARY_DIR ../../../src/components/JSONHandler/bin  
+   BUILD_COMMAND make
+   INSTALL_DIR ../../../src/components/JSONHandler/bin
+   INSTALL_COMMAND make install
+)
+
+set(CMAKE_INSTALL_PREFIX .)
+install (TARGETS testJsonHandler DESTINATION bin)
 
