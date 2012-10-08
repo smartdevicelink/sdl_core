@@ -14,8 +14,14 @@
 char * readJsonContent ( const char * file_name );
 int parseJson ( const std::string & json_content );
 
-int main () {
-    char * json_content = readJsonContent( "/home/dev/Projects/Ford/source/workspace/jsonSample/connection_log_json_only" );
+int main( int argc, char* argv[] ) {
+    char * fileName = "/home/dev/Projects/Ford/source/workspace/jsonSample/connection_log_json_only" ;    
+    if ( argc > 1 )
+    {
+        fileName = argv[1];
+    }
+
+    char * json_content = readJsonContent( fileName );
 
     int result = 0;
     size_t next_message_pos = 0;
@@ -28,13 +34,16 @@ int main () {
             MobileRPCMessage * message = JSONHandler::createObjectFromJSON( json_string );
             std::cout << "type: " << message->getMessageType() << std::endl;
             std::cout << "protocol version: " << message->getProtocolVersion() << std::endl;
-            //result = parseJson( json_string );
+            std::cout << "correation id: " << message -> getCorrelationID() << std::endl;
+            std::cout << "function name: " << message -> getFunctionName() << std::endl;
+            std::cout << "original string: " << message -> getOriginalString() << std::endl;
+            delete message;
         }
 
         next_message_pos = json_string.find( "\n" );
         json_content += next_message_pos + 1;
 
-        sleep( 1 );
+        //sleep( 1 );
     }
 
     delete [] json_content_beginning;

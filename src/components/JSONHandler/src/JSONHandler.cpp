@@ -19,6 +19,7 @@ MobileRPCMessage * JSONHandler::createObjectFromJSON( const std::string & jsonSt
     result = checkMessageTypeForProtocol1( root );
     if ( result )
     {
+        result -> setOriginalString( jsonString );
         return result;
     } 
     else 
@@ -33,26 +34,35 @@ MobileRPCMessage * JSONHandler::checkMessageTypeForProtocol1 ( const Json::Value
     {
         return generateRequestVersion1( root["request"] );
     }
+    if ( !root["response"].isNull() )
+    {
+        return generateResponseVersion1( root["response"] );
+    }
+    if ( !root["notification"].isNull() )
+    {
+        return generateNotificationVersion1( root["notification"] );
+    }
 
     return 0;
 }
 
-MobileRPCRequest * JSONHandler::generateRequestVersion1 ( const Json::Value & root ) 
+MobileRPCRequest * JSONHandler::generateRequestVersion1( const Json::Value & root ) 
 {
     MobileRPCRequest * request = new MobileRPCRequest( 1 );
     return (MobileRPCRequest *)fillMessageWithData( root, request );
 }
 
-/*MobileRPCResponse * generateResponseVersion1 ( const Json::Value & root ) 
+MobileRPCResponse * JSONHandler::generateResponseVersion1( const Json::Value & root ) 
 {
-    unsigned int correlationID = 0;
-    Json::Value value;
-    value = root["correlationID"];
-    if ( !value.isNull() ) {
-        correlationID = value.asInt();
-    }
-    return new MobileRPCResponse( 1, correlationID );
-}*/
+    MobileRPCResponse * response = new MobileRPCResponse( 1 );
+    return (MobileRPCResponse *)fillMessageWithData( root, response );
+}
+
+MobileRPCNotification * JSONHandler::generateNotificationVersion1( const Json::Value & root )
+{
+    MobileRPCNotification * notification = new MobileRPCNotification( 1 );
+    return (MobileRPCNotification *) fillMessageWithData( root, notification );
+}
 
 MobileRPCMessage * JSONHandler::fillMessageWithData ( const Json::Value & jsonMessage, 
     MobileRPCMessage * message )
@@ -62,7 +72,14 @@ MobileRPCMessage * JSONHandler::fillMessageWithData ( const Json::Value & jsonMe
     value = jsonMessage["correlationID"];
     if ( !value.isNull() ) {
         correlationID = value.asInt();
+        message->setCorrelationID( correlationID );
+    }    
+
+    value = jsonMessage["name"];
+    if ( !value.isNull() )
+    {
+        message->setFunctionName( value.asString() );
     }
-    message->setCorrelationID( correlationID );
+
     return message;
 }

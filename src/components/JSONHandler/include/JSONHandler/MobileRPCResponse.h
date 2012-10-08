@@ -4,8 +4,10 @@ class MobileRPCMessage;
 class MobileRPCResponse : public MobileRPCMessage
 {
 public:
-    MobileRPCResponse( unsigned int protocolVersion, unsigned int correlationID = 0 );
-    ~MobileRPCResponse();
+    MobileRPCResponse( unsigned int protocolVersion );
+    MobileRPCResponse( unsigned int protocolVersion, std::string functionName );
+    MobileRPCResponse( unsigned int protocolVersion, unsigned int functionID );
+    virtual ~MobileRPCResponse();
 
     /* data */
 };
