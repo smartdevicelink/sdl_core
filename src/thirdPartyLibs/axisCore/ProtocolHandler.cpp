@@ -15,16 +15,47 @@ ProtocolHandler::ProtocolHandler(IProtocolObserver *observer) :
 
 ProtocolHandler::~ProtocolHandler()
 {
+    std::map<UInt32, Message *>::iterator it;
+    for (it = mIncompleteMultiFrameMessages.begin() ; it != mIncompleteMultiFrameMessages.end() ; it++)
+        delete (*it).second;
 
+    mIncompleteMultiFrameMessages.clear();
+
+    for (it = mOutMessagesMap.begin() ; it != mOutMessagesMap.end() ; it++)
+        delete (*it).second;
+
+    mOutMessagesMap.clear();
 }
 
 ERROR_CODE ProtocolHandler::startSession(UInt8 servType)
 {
+    ProtocolPacketHeader header(PROTOCOL_VERSION_1,
+                                COMPRESS_OFF,
+                                FRAME_TYPE_CONTROL,
+                                SERVICE_TYPE_RPC,
+                                FRAME_DATA_START_SESSION,
+                                0,
+                                0,
+                                0);
+
+    //TODO send
+
     return ERR_OK;
 }
 
 ERROR_CODE ProtocolHandler::endSession(UInt8 sessionID)
 {
+    ProtocolPacketHeader header(PROTOCOL_VERSION_1,
+                                COMPRESS_OFF,
+                                FRAME_TYPE_CONTROL,
+                                SERVICE_TYPE_RPC,
+                                FRAME_DATA_END_SESSION,
+                                sessionID,
+                                0,
+                                0);
+
+    //TODO send
+
     return ERR_OK;
 }
 
@@ -34,6 +65,19 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                    , UInt8 *data
                                    , bool compress)
 {
+    ProtocolPacketHeader header(PROTOCOL_VERSION_1,
+                                COMPRESS_OFF,
+                                FRAME_TYPE_SINGLE,
+                                SERVICE_TYPE_RPC,
+                                0,
+                                sessionID,
+                                dataSize,
+                                mMessageID);
+
+    //TODO send
+
+    mMessageID++;
+
     return ERR_OK;
 }
 
@@ -50,8 +94,8 @@ ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
         {
             memcpy(data, currentMessage->getMessageData(), receivedDataSize);
 
-            mOutMessagesMap.erase(messageID);
             delete currentMessage;
+            mOutMessagesMap.erase(messageID);
         }
         else
             return ERR_FAIL;
@@ -64,6 +108,8 @@ ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
 
 ERROR_CODE ProtocolHandler::sendData()
 {
+    //TODO send data to BT
+
     return ERR_OK;
 }
 
@@ -137,6 +183,8 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
         if (header.frameData == FRAME_DATA_END_SESSION)
         {
             // end session
+
+            mState = BEFORE_HANDSHAKE;
         }
         else
         {

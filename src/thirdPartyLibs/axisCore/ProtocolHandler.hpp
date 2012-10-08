@@ -2,7 +2,6 @@
 #define PROTOCOL_HANDLER_HPP
 
 #include <stdlib.h>
-#include <queue>
 #include <map>
 
 #include "Message.hpp"
@@ -68,7 +67,7 @@ private:
     UInt8 mSessionID;
     UInt32 mMessageID;
     std::map<UInt32, Message *> mOutMessagesMap;
-    std::map<UInt32, Message *> mInMessagesMap;
+    //std::map<UInt32, Message *> mInMessagesMap;
     std::map<UInt32, Message *> mIncompleteMultiFrameMessages;
 };
 
