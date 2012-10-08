@@ -21,6 +21,8 @@ ExternalProject_Add(
    INSTALL_COMMAND make install
 )
 
+ADD_DEPENDENCIES(testJsonHandler jsonHandler)
+
 set(CMAKE_INSTALL_PREFIX .)
 install (TARGETS testJsonHandler DESTINATION bin)
 
