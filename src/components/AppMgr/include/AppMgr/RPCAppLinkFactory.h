@@ -8,11 +8,15 @@
 #ifndef RPCAPPLINKFACTORY_H_
 #define RPCAPPLINKFACTORY_H_
 
+#include "AppMgr/RPCAppLinkObject.h"
+
 class RPCAppLinkFactory
 {
 public:
 	~RPCAppLinkFactory( );
 	static RPCAppLinkFactory& getInstance();
+
+	RPCAppLinkObject* createNewRPCAppLinkObject();
 
 private:
 	RPCAppLinkFactory( );

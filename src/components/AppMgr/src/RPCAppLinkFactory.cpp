@@ -13,6 +13,11 @@ RPCAppLinkFactory& RPCAppLinkFactory::getInstance( )
 	return factory;
 }
 
+RPCAppLinkObject* RPCAppLinkFactory::createNewRPCAppLinkObject( )
+{
+	return 0;
+}
+
 RPCAppLinkFactory::RPCAppLinkFactory( )
 {
 	// TODO Auto-generated constructor stub

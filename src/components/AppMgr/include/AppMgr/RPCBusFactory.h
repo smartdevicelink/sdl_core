@@ -8,12 +8,15 @@
 #ifndef RPCBUSFACTORY_H_
 #define RPCBUSFACTORY_H_
 
+#include "AppMgr/RPCBusObject.h"
+
 class RPCBusFactory
 {
 public:
 	~RPCBusFactory( );
 
 	static RPCBusFactory& getInstance();
+	RPCBusObject* createNewRPCBusObject();
 
 private:
 	RPCBusFactory( );

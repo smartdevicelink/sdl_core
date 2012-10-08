@@ -39,3 +39,16 @@ bool RegistryItem::operator <(const RegistryItem& item2 ) const
 {
 	return this->getApplication().getName() < item2.getApplication().getName();
 }
+
+std::set< AppPolicy > RegistryItem::getApplicationPolicies(	const IApplication& app ) const
+{
+	std::set< AppPolicy > policySet;
+	return policySet;
+}
+
+std::set< AppPolicy > RegistryItem::getApplicationPolicies(
+		const std::string& app ) const
+{
+	std::set< AppPolicy > policySet;
+	return policySet;
+}

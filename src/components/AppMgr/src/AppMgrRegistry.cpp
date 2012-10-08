@@ -15,8 +15,20 @@ AppMgrRegistry& AppMgrRegistry::getInstance( )
 
 void AppMgrRegistry::unregisterApplication( RegistryItem& item )
 {
-	std::set<RegistryItem>::iterator registryItemIterator = mRegistryItems.find(item);
+	std::map<std::string, RegistryItem>::iterator registryItemIterator = mRegistryItems.find(item.getApplication().getName());
 	mRegistryItems.erase(registryItemIterator);
+}
+
+const RegistryItem& AppMgrRegistry::getItem( const IApplication& app ) const
+{
+	const RegistryItem& registryItem = mRegistryItems.find(app.getName())->second;
+	return registryItem;
+}
+
+const RegistryItem& AppMgrRegistry::getItem( const std::string& app ) const
+{
+	const RegistryItem& registryItem = mRegistryItems.find(app)->second;
+	return registryItem;
 }
 
 AppMgrRegistry::AppMgrRegistry( )
@@ -33,6 +45,7 @@ AppMgrRegistry::~AppMgrRegistry( )
 const RegistryItem& AppMgrRegistry::registerApplication( const IApplication& app )
 {
 	RegistryItem item(app);
-	mRegistryItems.insert(item);
-	return *mRegistryItems.find(item);
+
+	mRegistryItems.insert(std::pair<std::string, RegistryItem>(app.getName(), item));
+	return mRegistryItems.find(app.getName())->second;
 }

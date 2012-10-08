@@ -13,6 +13,11 @@ RPCBusFactory& RPCBusFactory::getInstance( )
 	return factory;
 }
 
+RPCBusObject* RPCBusFactory::createNewRPCBusObject( )
+{
+	return 0;
+}
+
 RPCBusFactory::RPCBusFactory( )
 {
 	// TODO Auto-generated constructor stub
