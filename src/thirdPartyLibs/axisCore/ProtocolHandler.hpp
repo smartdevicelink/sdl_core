@@ -47,7 +47,7 @@ public:
      * @param receivedDataSize - received data size (bytes)
      * @param data - data array
      */
-    ERROR_CODE receiveData(UInt8 sessionID, UInt32 messageID, UInt8 servType, UInt32 *receivedDataSize, UInt8* data);
+    ERROR_CODE receiveData(UInt8 sessionID, UInt32 messageID, UInt8 servType, UInt32 receivedDataSize, UInt8* data);
 
 private:
     enum State 
@@ -67,8 +67,8 @@ private:
     UInt8 mState;
     UInt8 mSessionID;
     UInt32 mMessageID;
-    std::queue<Message *> mOutQueue;
-    std::queue<Message *> mInQueue;
+    std::map<UInt32, Message *> mOutMessagesMap;
+    std::map<UInt32, Message *> mInMessagesMap;
     std::map<UInt32, Message *> mIncompleteMultiFrameMessages;
 };
 

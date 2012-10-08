@@ -1,7 +1,8 @@
+#include <memory.h>
+
 #include "ProtocolHandler.hpp"
 #include "ProtocolPacketHeader.hpp"
 #include "IProtocolObserver.hpp"
-
 
 ProtocolHandler::ProtocolHandler(IProtocolObserver *observer) : 
                 mProtocolObserver(observer),
@@ -39,9 +40,25 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
 ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
                                       , UInt32 messageID
                                       , UInt8 servType
-                                      , UInt32 *receivedDataSize
+                                      , UInt32 receivedDataSize
                                       , UInt8 *data)
 {
+    if (mOutMessagesMap.count(messageID) )
+    {
+        Message *currentMessage = mOutMessagesMap[messageID];
+        if (receivedDataSize == currentMessage->getTotalDataBytes() )
+        {
+            memcpy(data, currentMessage->getMessageData(), receivedDataSize);
+
+            mOutMessagesMap.erase(messageID);
+            delete currentMessage;
+        }
+        else
+            return ERR_FAIL;
+    }
+    else
+        return ERR_FAIL;
+
     return ERR_OK;
 }
 
@@ -172,10 +189,14 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
             {
                 if (header.frameData == FRAME_DATA_LAST_FRAME)
                 {
+                    mOutMessagesMap.insert(std::pair<UInt32, Message*>(header.messageID
+                                                                       , mIncompleteMultiFrameMessages[header.messageID] ) );
+                    mIncompleteMultiFrameMessages.erase(header.messageID);
+
                     if (mProtocolObserver)
                         mProtocolObserver->dataReceivedCallback(mSessionID
                                               , header.messageID
-                                              , mIncompleteMultiFrameMessages[header.messageID]->getTotalDataBytes() );
+                                              , mOutMessagesMap[header.messageID]->getTotalDataBytes() );
                 }                
             }
             else
