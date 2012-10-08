@@ -12,11 +12,7 @@ const UInt8 FRAME_TYPE_SINGLE = 0x01;
 const UInt8 FRAME_TYPE_FIRST = 0x02;
 const UInt8 FRAME_TYPE_CONSECUTIVE = 0x03;
 
-enum SERVICE_TYPE
-{
-    SERVICE_TYPE_RPC = 0x07
-};
-//const UInt8 SERVICE_TYPE_RPC = 0x07;
+const UInt8 SERVICE_TYPE_RPC = 0x07;
 
 /**
  * If FRAME_TYPE_CONTROL :
@@ -36,13 +32,31 @@ const UInt8 FRAME_DATA_LAST_FRAME = 0x00;
 struct ProtocolPacketHeader
 {
     ProtocolPacketHeader() : version(0),
-                             compress(false),
+                             compress(COMPRESS_OFF),
                              frameType(0),
                              serviceType(0),
                              frameData(0),
                              sessionID(0),
                              dataSize(0),
                              messageID(0)
+    { }
+
+    ProtocolPacketHeader(UInt8 _version,
+                         bool _compress,
+                         UInt8 _frameType,
+                         UInt8 _serviceType,
+                         UInt8 _frameData,
+                         UInt8 _sessionID,
+                         UInt32 _dataSize,
+                         UInt32 _messageID) : 
+                             version(_version),
+                             compress(_compress),
+                             frameType(_frameType),
+                             serviceType(_serviceType),
+                             frameData(_frameData),
+                             sessionID(_sessionID),
+                             dataSize(_dataSize),
+                             messageID(_messageID)
     { }
 
     UInt8 version;

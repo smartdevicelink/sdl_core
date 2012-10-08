@@ -44,4 +44,6 @@ ERROR_CODE Message::addConsecutiveMessage(const ProtocolPacketHeader &header, UI
         else
             return ERR_FAIL;
     }
+
+    return ERR_FAIL;
 }

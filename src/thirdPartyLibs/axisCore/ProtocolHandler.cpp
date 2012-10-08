@@ -17,37 +17,37 @@ ProtocolHandler::~ProtocolHandler()
 
 }
 
-ERROR_CODE ProtocolHandler::startSession(SERVICE_TYPE servType)
+ERROR_CODE ProtocolHandler::startSession(UInt8 servType)
 {
-
+    return ERR_OK;
 }
 
 ERROR_CODE ProtocolHandler::endSession(UInt8 sessionID)
 {
-
+    return ERR_OK;
 }
 
 ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
-                                   , SERVICE_TYPE servType
+                                   , UInt8 servType
                                    , UInt32 dataSize
                                    , UInt8 *data
                                    , bool compress)
 {
-
+    return ERR_OK;
 }
 
 ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
                                       , UInt32 messageID
-                                      , SERVICE_TYPE servType
+                                      , UInt8 servType
                                       , UInt32 *receivedDataSize
                                       , UInt8 *data)
 {
-
+    return ERR_OK;
 }
 
 ERROR_CODE ProtocolHandler::sendData()
 {
-
+    return ERR_OK;
 }
 
 ERROR_CODE ProtocolHandler::receiveData(const ProtocolPacketHeader &header, UInt8 *data)
@@ -64,10 +64,9 @@ ERROR_CODE ProtocolHandler::receiveData(const ProtocolPacketHeader &header, UInt
             if ( (header.frameType == FRAME_TYPE_CONTROL) 
                 && (header.frameData == FRAME_DATA_START_SESSION) )
             {
-                // send ACK
-
+                sendStartAck(header.sessionID);
                 mSessionID = header.sessionID;
-                mState == HANDSHAKE_DONE;
+                mState = HANDSHAKE_DONE;
                 if (mProtocolObserver)
                     mProtocolObserver->sessionStartedCallback(mSessionID);
             }
@@ -78,14 +77,38 @@ ERROR_CODE ProtocolHandler::receiveData(const ProtocolPacketHeader &header, UInt
             if ( (header.frameType == FRAME_TYPE_CONTROL) 
                 && (header.frameData == FRAME_DATA_START_SESSION_ACK) )
             {
-                //
-                mState == HANDSHAKE_DONE;
+                mSessionID = header.sessionID;
+                if (mProtocolObserver)
+                    mProtocolObserver->sessionStartedCallback(mSessionID);
+
+                mState = HANDSHAKE_DONE;
             }
             break;
         }
         default:
         {}
     }
+
+
+
+    return ERR_OK;
+}
+
+ERROR_CODE ProtocolHandler::sendStartAck(const UInt8 sessionID)
+{
+    ProtocolPacketHeader header(PROTOCOL_VERSION_1,
+                                COMPRESS_OFF,
+                                FRAME_TYPE_CONTROL,
+                                SERVICE_TYPE_RPC,
+                                FRAME_DATA_START_SESSION_ACK,
+                                sessionID,
+                                0,
+                                0);
+
+    //TODO send header
+
+
+    return ERR_OK;
 }
 
 ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UInt8 *data)
@@ -127,6 +150,10 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
     default:
     { }
     }
+
+
+
+    return ERR_OK;
 }
 
 ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &header
@@ -134,25 +161,27 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
 {
     if (header.frameType == FRAME_TYPE_FIRST)
     {
-        Message multiFrameMessage(header, data, true);
-        mIncompleteMultiFrameMessages.insert(std::pair<UInt32, Message>(header.messageID, multiFrameMessage) );
+        Message *multiFrameMessage = new Message(header, data, true);
+        mIncompleteMultiFrameMessages.insert(std::pair<UInt32, Message*>(header.messageID, multiFrameMessage) );
     }
     else
     {
         if (mIncompleteMultiFrameMessages.count(header.messageID) )
         {
-            if (mIncompleteMultiFrameMessages[header.messageID].addConsecutiveMessage(header, data) == ERR_OK)
+            if (mIncompleteMultiFrameMessages[header.messageID]->addConsecutiveMessage(header, data) == ERR_OK)
             {
                 if (header.frameData == FRAME_DATA_LAST_FRAME)
                 {
                     if (mProtocolObserver)
                         mProtocolObserver->dataReceivedCallback(mSessionID
                                               , header.messageID
-                                              , mIncompleteMultiFrameMessages[header.messageID].getTotalDataBytes() );
+                                              , mIncompleteMultiFrameMessages[header.messageID]->getTotalDataBytes() );
                 }                
             }
             else
                 return ERR_FAIL;
         }   
     }
+
+    return ERR_OK;
 }
