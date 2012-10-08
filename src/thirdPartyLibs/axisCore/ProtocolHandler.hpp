@@ -5,6 +5,8 @@
 #include <map>
 
 #include "Message.hpp"
+#include "BluetoothReader.hpp"
+#include "BluetoothWriter.hpp"
 
 class IProtocolObserver;
 
@@ -69,6 +71,8 @@ private:
     std::map<UInt32, Message *> mOutMessagesMap;
     //std::map<UInt32, Message *> mInMessagesMap;
     std::map<UInt32, Message *> mIncompleteMultiFrameMessages;
+    BluetoothReader mBTReader;
+    BluetoothWriter mBTWriter;
 };
 
 #endif //PROTOCOL_HANDLER_HPP
