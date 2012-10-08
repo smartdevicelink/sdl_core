@@ -8,6 +8,7 @@
 
 #include <cstring>
 #include <sstream>
+#include <netinet/in.h>
 
 #ifdef _WIN32
 #include <winsock2.h>

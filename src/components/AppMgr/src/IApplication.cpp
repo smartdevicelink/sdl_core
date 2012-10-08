@@ -14,6 +14,7 @@ IApplication::IApplication( const std::string& name )
 }
 
 IApplication::IApplication( const IApplication& app )
+: mPriority(NONE)
 {
 }
 

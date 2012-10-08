@@ -8,6 +8,7 @@
 #define MB_TCPSERVER_H
 
 #include <list>
+#include <map>
 
 #include "mb_server.hpp"
 #include "CMessageBroker.hpp"
