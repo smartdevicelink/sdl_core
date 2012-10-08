@@ -27,8 +27,8 @@ public:
 
     /**
       * Add consecutive message to multiframe message
-      * @param header is message header
-      * @param data is data array
+      * @param header Message header
+      * @param data Data array
       */
     ERROR_CODE addConsecutiveMessage(const ProtocolPacketHeader &header, UInt8 *data);
 

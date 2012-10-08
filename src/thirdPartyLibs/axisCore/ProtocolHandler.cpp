@@ -65,16 +65,104 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                    , UInt8 *data
                                    , bool compress)
 {
-    ProtocolPacketHeader header(PROTOCOL_VERSION_1,
-                                COMPRESS_OFF,
-                                FRAME_TYPE_SINGLE,
-                                SERVICE_TYPE_RPC,
-                                0,
-                                sessionID,
-                                dataSize,
-                                mMessageID);
 
-    //TODO send
+
+
+
+    //TODO maxsize
+    const int MAXIMUM_DATA_SIZE = 5000;
+
+
+
+
+
+    if (dataSize <= MAXIMUM_DATA_SIZE)
+    {
+        ProtocolPacketHeader header(PROTOCOL_VERSION_1,
+                                    COMPRESS_OFF,
+                                    FRAME_TYPE_SINGLE,
+                                    SERVICE_TYPE_RPC,
+                                    0,
+                                    sessionID,
+                                    dataSize,
+                                    mMessageID);
+
+        //TODO send
+
+
+    }
+    else
+    {
+        int numOfFrames = 0;
+        int subDataSize = dataSize / MAXIMUM_DATA_SIZE;
+        int lastDataSize = subDataSize;
+
+        if (dataSize % MAXIMUM_DATA_SIZE)
+        {
+            numOfFrames = (dataSize / MAXIMUM_DATA_SIZE) + 1;
+            lastDataSize = dataSize % MAXIMUM_DATA_SIZE;
+        }
+        else
+            numOfFrames = dataSize / MAXIMUM_DATA_SIZE;
+
+        ProtocolPacketHeader header(PROTOCOL_VERSION_1,
+                                    COMPRESS_OFF,
+                                    FRAME_TYPE_FIRST,
+                                    SERVICE_TYPE_RPC,
+                                    0,
+                                    sessionID,
+                                    FIRST_FRAME_DATA_SIZE,
+                                    mMessageID);
+
+        UInt8 *outDataFirstFrame = new UInt8(FIRST_FRAME_DATA_SIZE);
+        ( (UInt32*)outDataFirstFrame)[0] = dataSize;
+        ( (UInt32*)outDataFirstFrame)[1] = numOfFrames;
+
+        //TODO send
+
+        delete [] outDataFirstFrame;
+
+
+        int frameDataMaxValue = 0xFF;
+
+        UInt8 *outDataFrame = new UInt8(subDataSize);
+
+        for (UInt8 i = 0 ; i <= numOfFrames ; i++)
+        {
+            if (i != numOfFrames)
+            {
+                ProtocolPacketHeader header(PROTOCOL_VERSION_1,
+                                            COMPRESS_OFF,
+                                            FRAME_TYPE_CONSECUTIVE,
+                                            SERVICE_TYPE_RPC,
+                                            ( (i % frameDataMaxValue) + 1),
+                                            sessionID,
+                                            subDataSize,
+                                            mMessageID);
+
+                memcpy(outDataFrame, data + (subDataSize * i), subDataSize);
+
+                //TODO send data
+            }
+            else
+            {
+                ProtocolPacketHeader header(PROTOCOL_VERSION_1,
+                                            COMPRESS_OFF,
+                                            FRAME_TYPE_CONSECUTIVE,
+                                            SERVICE_TYPE_RPC,
+                                            0x0,
+                                            sessionID,
+                                            lastDataSize,
+                                            mMessageID);
+
+                memcpy(outDataFrame, data + (subDataSize * i), lastDataSize);
+
+                //TODO send data
+            }
+        }
+
+        delete [] outDataFrame;
+    }
 
     mMessageID++;
 

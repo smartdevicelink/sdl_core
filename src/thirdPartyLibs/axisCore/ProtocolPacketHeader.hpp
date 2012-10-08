@@ -28,6 +28,8 @@ const UInt8 FRAME_DATA_END_SESSION = 0x04;
  */
 const UInt8 FRAME_DATA_LAST_FRAME = 0x00;
 
+const UInt8 FIRST_FRAME_DATA_SIZE = 0x08;
+
 
 struct ProtocolPacketHeader
 {

@@ -19,8 +19,8 @@ public:
    /**
     * Callback for data receiving. Informs client about readable data and buffer size.
     * Client should implement this callback
-    * @param sessionID session with incoming data number
-    * @param dataSize data size available for read
+    * @param sessionID Session with incoming data number
+    * @param dataSize Data size available for read
     */
    virtual void dataReceivedCallback(const UInt8 sessionID, const UInt32 messageID, const UInt32 dataSize) = 0;
 
