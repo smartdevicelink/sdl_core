@@ -3,6 +3,15 @@
 
 #include "utils/misc/Types.hpp"
 
+
+
+//TODO TMP
+#include "MessageGenerator/CMessage.hpp"
+
+
+
+
+
 const UInt8 PROTOCOL_VERSION_1 = 0x01;
 
 const bool COMPRESS_OFF = false;

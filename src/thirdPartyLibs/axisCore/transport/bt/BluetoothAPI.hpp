@@ -2,13 +2,14 @@
 #define BLUETOOTHAPI_HPP_
 
 #include "Blob.hpp"
+#include "IBluetoothHandler.hpp"
 
 namespace Bluetooth
 {
 	void initBluetooth(IBluetoothHandler * pHandler);
 	void deinitBluetooth();
 
-	const Blob getBuffer();
+    //const Blob getBuffer();
 	void releaseBuffer(const Blob&);
 
 	void sendBuffer(UInt8 * pBuffer, size_t size);

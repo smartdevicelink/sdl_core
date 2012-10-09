@@ -2,9 +2,11 @@
 #include <IProtocolObserver.hpp>
 #include <ProtocolHandler.hpp>
 
+#include "MessageGenerator/CMessage.hpp"
+
 using namespace std;
 
-
+Blob CMessage::currentBlob(0);
 
 class ProtocolObserver : public IProtocolObserver
 {
@@ -17,7 +19,12 @@ public:
     {
         cout << "enter ProtocolObserver() \n";
         mSessionID = 0;
+
+        CMessage::generateInitialMessage();
         mHandler = new ProtocolHandler(this);
+        mHandler->dataReceived();
+        CMessage::generateFinalMessage();
+        mHandler->dataReceived();
     }
 
     virtual void sessionStartedCallback(const UInt8 sessionID)
@@ -37,7 +44,7 @@ public:
 
         UInt8 *data = new UInt8[dataSize];
 
-        mHandler->receiveData(sessionID, messageID, SERVICE_TYPE_RPC, dataSize, data);
+        mHandler->ReceiveData(sessionID, messageID, SERVICE_TYPE_RPC, dataSize, data);
         cout << data;
 
         delete [] data;
