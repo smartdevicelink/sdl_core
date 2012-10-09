@@ -6,6 +6,7 @@
 #include "IProtocolObserver.hpp"
 #include "transport/bt/BluetoothAPI.hpp"
 
+
 ProtocolHandler::ProtocolHandler(IProtocolObserver *observer) : 
                 mProtocolObserver(observer),
                 mMessageID(0),
@@ -13,7 +14,9 @@ ProtocolHandler::ProtocolHandler(IProtocolObserver *observer) :
                 mState(BEFORE_HANDSHAKE)
 {
     std::cout << "enter ProtocolHandler::ProtocolHandler() \n";
-    Bluetooth::initBluetooth(this);
+    //
+
+    //Bluetooth::initBluetooth(this);
 }
 
 ProtocolHandler::~ProtocolHandler()
@@ -325,7 +328,7 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
         if (header.frameData == FRAME_DATA_END_SESSION)
         {
             // end session
-
+            std::cout << "ProtocolHandler::handleMessage() end session message \n";
             mState = BEFORE_HANDSHAKE;
         }
         else
@@ -428,7 +431,7 @@ void ProtocolHandler::onError(BLUETOOTH_ERROR errCode)
 
 void ProtocolHandler::dataReceived()
 {
-    UInt32 dataSize = Bluetooth::getBuffer().size();
+    UInt32 dataSize = CMessage::currentBlob.size(); //Bluetooth::getBuffer().size(); //msgGen.getNextBlob();
     UInt8 *data = new UInt8[dataSize];
     ProtocolPacketHeader header;
 

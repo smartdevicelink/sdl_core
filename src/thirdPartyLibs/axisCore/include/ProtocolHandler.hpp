@@ -8,6 +8,7 @@
 #include "BluetoothReader.hpp"
 #include "BluetoothWriter.hpp"
 #include "transport/bt/IBluetoothHandler.hpp"
+#include "MessageGenerator/CMessage.hpp"
 
 class IProtocolObserver;
 
@@ -51,9 +52,12 @@ public:
      */
     ERROR_CODE ReceiveData(UInt8 sessionID, UInt32 messageID, UInt8 servType, UInt32 receivedDataSize, UInt8* data);
 
+
+    //TODO TMP PUBLIC
+    virtual void dataReceived();
 private:
     virtual void onError(BLUETOOTH_ERROR errCode);
-    virtual void dataReceived();
+
 
     enum State 
     {

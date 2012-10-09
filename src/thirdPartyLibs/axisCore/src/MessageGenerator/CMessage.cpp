@@ -75,6 +75,7 @@ void CMessage::generateInitialMessage()
    memcpy(sPacketData + 8, &sMessageID, 4);
 
    blobQueue.push(Blob((UInt8*)sPacketData, 12, blobQueue.size()));
+   currentBlob = Blob((UInt8*)sPacketData, 12, blobQueue.size());
 }
 
 void CMessage::generateSingleMessage()
@@ -107,6 +108,7 @@ void CMessage::generateFinalMessage()
   memcpy(sPacketData + 8, &sMessageID, 4);
 
   blobQueue.push(Blob((UInt8*)sPacketData, 12, blobQueue.size()));
+  currentBlob = Blob((UInt8*)sPacketData, 12, blobQueue.size());
 }
 
 /*void CMessage::write()

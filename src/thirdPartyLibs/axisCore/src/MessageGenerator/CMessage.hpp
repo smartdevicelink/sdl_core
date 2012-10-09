@@ -11,6 +11,13 @@ class CMessage
 {
 public:
    static Blob getNextBlob();
+   static void generateInitialMessage();
+   static void generateSingleMessage();
+   static void generateFinalMessage();
+
+   //static Blob getCurrentBlob() { return currentBlob; }
+
+   static Blob currentBlob;
 
 private:
 
@@ -19,9 +26,7 @@ private:
    //static void write();
    //static void generate();
 
-   static void generateInitialMessage();
-   static void generateSingleMessage();
-   static void generateFinalMessage();
+
 
    static void dispayField();
 
@@ -35,11 +40,13 @@ private:
    static UInt32 sMessageID;
 
    static void* sPacketData;
-};
 
+
+};
+/*
 const Blob getBuffer()
 {
    return CMessage::getNextBlob();
 }
-
+*/
 #endif /* MESSAGE_HPP_ */

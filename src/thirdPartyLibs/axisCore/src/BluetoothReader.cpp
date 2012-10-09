@@ -1,4 +1,5 @@
 #include <memory.h>
+#include <iostream>
 
 #include "BluetoothReader.hpp"
 #include "transport/bt/BluetoothAPI.hpp"
@@ -19,14 +20,14 @@ BluetoothReader::~BluetoothReader()
 
 ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt32 dataSize)
 {
-    UInt32 blobBufferSize = Bluetooth::getBuffer().size();
+    UInt32 blobBufferSize = CMessage::currentBlob.size();//Bluetooth::getBuffer().size();
     if (dataSize >= blobBufferSize )
     {
-        memcpy(mData, Bluetooth::getBuffer().buffer(), blobBufferSize);
+        memcpy(mData, CMessage::currentBlob.buffer() /*Bluetooth::getBuffer().buffer()*/, blobBufferSize);
     }
     else
     {
-        cout << "BluetoothReader::read buffer is too small for reading\n";
+        std::cout << "BluetoothReader::read buffer is too small for reading\n";
         return ERR_FAIL;
     }
 
