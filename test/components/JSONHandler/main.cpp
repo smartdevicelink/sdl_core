@@ -36,7 +36,17 @@ int main( int argc, char* argv[] ) {
             std::cout << "protocol version: " << message->getProtocolVersion() << std::endl;
             std::cout << "correation id: " << message -> getCorrelationID() << std::endl;
             std::cout << "function name: " << message -> getFunctionName() << std::endl;
-            std::cout << "original string: " << message -> getOriginalString() << std::endl;
+            std::cout << "original string: " << message -> getParametersString() << std::endl;
+
+            std::string serializedString = JSONHandler::serializeObjectToJSON( *message );
+            std::cout << serializedString << std::endl;
+
+            RegisterAppInterface requestMessage = JSONHandler::getFactory() -> createRegisterAppInterface( *message );
+            Json::Value params = JSONHandler::getFactory() -> serializeRegisterAppInterface( requestMessage );
+            Json::StyledWriter writer;
+            std::string params_to_print = writer.write( params );
+            std::cout << "serialized params for RegisterAppInterface: \n" << params_to_print << std::endl;
+
             delete message;
         }
 

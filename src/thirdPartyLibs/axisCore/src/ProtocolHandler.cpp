@@ -1,4 +1,5 @@
 #include <memory.h>
+#include <iostream>
 
 #include "ProtocolHandler.hpp"
 #include "ProtocolPacketHeader.hpp"
@@ -10,11 +11,13 @@ ProtocolHandler::ProtocolHandler(IProtocolObserver *observer) :
                 mSessionID(0),
                 mState(BEFORE_HANDSHAKE)
 {
-
+    std::cout << "enter ProtocolHandler::ProtocolHandler() \n";
 }
 
 ProtocolHandler::~ProtocolHandler()
 {
+    std::cout << "enter ProtocolHandler::~ProtocolHandler() \n";
+
     std::map<UInt32, Message *>::iterator it;
     for (it = mIncompleteMultiFrameMessages.begin() ; it != mIncompleteMultiFrameMessages.end() ; it++)
         delete (*it).second;
@@ -25,6 +28,8 @@ ProtocolHandler::~ProtocolHandler()
         delete (*it).second;
 
     mOutMessagesMap.clear();
+
+    std::cout << "exit ProtocolHandler::~ProtocolHandler() \n";
 }
 
 ERROR_CODE ProtocolHandler::startSession(UInt8 servType)
@@ -38,9 +43,16 @@ ERROR_CODE ProtocolHandler::startSession(UInt8 servType)
                                 0,
                                 0);
 
-    mBTWriter.write(header, 0);
-
-    return ERR_OK;
+    if (mBTWriter.write(header, 0) == ERR_OK)
+    {
+        std::cout << "ProtocolHandler::startSession return OK \n";
+        return ERR_OK;
+    }
+    else
+    {
+        std::cout << "ProtocolHandler::startSession return FAIL \n";
+        return ERR_FAIL;
+    }
 }
 
 ERROR_CODE ProtocolHandler::endSession(UInt8 sessionID)
@@ -54,9 +66,16 @@ ERROR_CODE ProtocolHandler::endSession(UInt8 sessionID)
                                 0,
                                 0);
 
-    mBTWriter.write(header, 0);
-
-    return ERR_OK;
+    if (mBTWriter.write(header, 0) == ERR_OK)
+    {
+        std::cout << "ProtocolHandler::endSession return OK \n";
+        return ERR_OK;
+    }
+    else
+    {
+        std::cout << "ProtocolHandler::endSession return FAIL \n";
+        return ERR_FAIL;
+    }
 }
 
 ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
@@ -65,7 +84,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                    , UInt8 *data
                                    , bool compress)
 {
-
+    std::cout << "enter ProtocolHandler::sendData() \n";
 
 
 
@@ -87,7 +106,13 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                     dataSize,
                                     mMessageID);
 
-        mBTWriter.write(header, data);
+        if (mBTWriter.write(header, data) == ERR_FAIL)
+        {
+            std::cout << "ProtocolHandler::sendData() write single frame FAIL \n";
+            return ERR_FAIL;
+        }
+        else
+            std::cout << "ProtocolHandler::sendData() write single frame OK \n";
     }
     else
     {
@@ -116,7 +141,13 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
         ( (UInt32*)outDataFirstFrame)[0] = dataSize;
         ( (UInt32*)outDataFirstFrame)[1] = numOfFrames;
 
-        mBTWriter.write(firstHeader, 0);
+        if (mBTWriter.write(firstHeader, 0) == ERR_FAIL)
+        {
+            std::cout << "ProtocolHandler::sendData() write first frame FAIL \n";
+            return ERR_FAIL;
+        }
+        else
+            std::cout << "ProtocolHandler::sendData() write first frame OK \n";
 
         delete [] outDataFirstFrame;
 
@@ -140,7 +171,13 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
 
                 memcpy(outDataFrame, data + (subDataSize * i), subDataSize);
 
-                mBTWriter.write(header, outDataFrame);
+                if ( mBTWriter.write(header, outDataFrame) == ERR_FAIL)
+                {
+                    std::cout << "ProtocolHandler::sendData() write consecutive frame FAIL \n";
+                    return ERR_FAIL;
+                }
+                else
+                    std::cout << "ProtocolHandler::sendData() write consecutive frame OK \n";
             }
             else
             {
@@ -155,7 +192,13 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
 
                 memcpy(outDataFrame, data + (subDataSize * i), lastDataSize);
 
-                mBTWriter.write(header, outDataFrame);
+                if (mBTWriter.write(header, outDataFrame) == ERR_FAIL)
+                {
+                    std::cout << "ProtocolHandler::sendData() write last frame FAIL \n";
+                    return ERR_FAIL;
+                }
+                else
+                    std::cout << "ProtocolHandler::sendData() write last frame OK \n";
             }
         }
 
@@ -173,6 +216,8 @@ ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
                                       , UInt32 receivedDataSize
                                       , UInt8 *data)
 {
+    std::cout << "enter public ProtocolHandler::receiveData() \n";
+
     if (mOutMessagesMap.count(messageID) )
     {
         Message *currentMessage = mOutMessagesMap[messageID];
@@ -194,15 +239,20 @@ ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
 
 ERROR_CODE ProtocolHandler::receiveData(const ProtocolPacketHeader &header, UInt8 *data)
 {
+    std::cout << "enter private ProtocolHandler::receiveData() \n";
+
     switch (mState)
     {
         case HANDSHAKE_DONE:
         {
+            std::cout << "ProtocolHandler::receiveData() case HANDSHAKE_DONE \n";
             handleMessage(header, data);
             break;
         }
         case BEFORE_HANDSHAKE:
         {
+            std::cout << "ProtocolHandler::receiveData() case BEFORE_HANDSHAKE \n";
+
             if ( (header.frameType == FRAME_TYPE_CONTROL) 
                 && (header.frameData == FRAME_DATA_START_SESSION) )
             {
@@ -216,6 +266,8 @@ ERROR_CODE ProtocolHandler::receiveData(const ProtocolPacketHeader &header, UInt
         }
         case HANDSHAKE_IN_PROGRESS:
         {
+            std::cout << "ProtocolHandler::receiveData() case HANDSHAKE_IN_PROGRESS \n";
+
             if ( (header.frameType == FRAME_TYPE_CONTROL) 
                 && (header.frameData == FRAME_DATA_START_SESSION_ACK) )
             {
@@ -231,13 +283,13 @@ ERROR_CODE ProtocolHandler::receiveData(const ProtocolPacketHeader &header, UInt
         {}
     }
 
-
-
     return ERR_OK;
 }
 
 ERROR_CODE ProtocolHandler::sendStartAck(const UInt8 sessionID)
 {
+    std::cout << "enter ProtocolHandler::sendStartAck \n";
+
     ProtocolPacketHeader header(PROTOCOL_VERSION_1,
                                 COMPRESS_OFF,
                                 FRAME_TYPE_CONTROL,
@@ -247,17 +299,27 @@ ERROR_CODE ProtocolHandler::sendStartAck(const UInt8 sessionID)
                                 0,
                                 0);
 
-    mBTWriter.write(header, 0);
-
-    return ERR_OK;
+    if (mBTWriter.write(header, 0) == ERR_OK)
+    {
+        std::cout << "ProtocolHandler::sendStartAck() write OK \n";
+        return ERR_OK;
+    }
+    else
+    {
+        std::cout << "enter ProtocolHandler::sendStartAck() write FAIL \n";
+        return ERR_FAIL;
+    }
 }
 
 ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UInt8 *data)
 {
+    std::cout << "enter ProtocolHandler::handleMessage() \n";
+
     switch (header.frameType)
     {
     case FRAME_TYPE_CONTROL:
     {        
+        std::cout << "ProtocolHandler::handleMessage() case FRAME_TYPE_CONTROL \n";
         if (header.frameData == FRAME_DATA_END_SESSION)
         {
             // end session
@@ -266,31 +328,40 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
         }
         else
         {
-            // incorrect message
+            std::cout << "ProtocolHandler::handleMessage() incorrect message \n";
+            return ERR_FAIL;
         }
         break;
     }
     case FRAME_TYPE_SINGLE:
     {
+        std::cout << "ProtocolHandler::handleMessage() case FRAME_TYPE_SINGLE \n";
         if (mProtocolObserver)
             mProtocolObserver->dataReceivedCallback(mSessionID, header.messageID, header.dataSize);
+        else
+        {
+            std::cout << "ProtocolHandler::handleMessage() invalid mProtocolObserver pointer \n";
+            return ERR_FAIL;
+        }
         break;
     }
     case FRAME_TYPE_FIRST:
     {
+        std::cout << "ProtocolHandler::handleMessage() case FRAME_TYPE_FIRST \n";
         handleMultiFrameMessage(header, data);
         break;
     }
     case FRAME_TYPE_CONSECUTIVE:
     {
+        std::cout << "ProtocolHandler::handleMessage() case FRAME_TYPE_CONSECUTIVE \n";
         handleMultiFrameMessage(header, data);
         break;
     }
     default:
-    { }
+    {
+        std::cout << "ProtocolHandler::handleMessage() case !!!default!!! \n";
     }
-
-
+    }
 
     return ERR_OK;
 }
@@ -298,13 +369,17 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
 ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &header
                                                   , UInt8 *data)
 {
+    std::cout << "enter ProtocolHandler::handleMultiFrameMessage(); \n";
+
     if (header.frameType == FRAME_TYPE_FIRST)
     {
+        std::cout << "ProtocolHandler::handleMultiFrameMessage() : FRAME_TYPE_FIRST\n";
         Message *multiFrameMessage = new Message(header, data, true);
         mIncompleteMultiFrameMessages.insert(std::pair<UInt32, Message*>(header.messageID, multiFrameMessage) );
     }
     else
     {
+        std::cout << "ProtocolHandler::handleMultiFrameMessage() : !FRAME_TYPE_FIRST\n";
         if (mIncompleteMultiFrameMessages.count(header.messageID) )
         {
             if (mIncompleteMultiFrameMessages[header.messageID]->addConsecutiveMessage(header, data) == ERR_OK)
@@ -319,10 +394,18 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
                         mProtocolObserver->dataReceivedCallback(mSessionID
                                               , header.messageID
                                               , mOutMessagesMap[header.messageID]->getTotalDataBytes() );
+                    else
+                    {
+                        std::cout << "ProtocolHandler::handleMultiFrameMessage() invalid mProtocolObserver pointer \n";
+                        return ERR_FAIL;
+                    }
                 }                
             }
             else
+            {
+                std::cout << "ProtocolHandler::handleMultiFrameMessage() : addConsecutiveMessage FAIL \n";
                 return ERR_FAIL;
+            }
         }   
     }
 
