@@ -8,7 +8,8 @@ SOURCES += src/main.cpp \
     src/BluetoothReader.cpp \
     src/BluetoothWriter.cpp \
     src/MessageGenerator/MessageGenerator.cpp \
-    src/MessageGenerator/CMessage.cpp
+    src/MessageGenerator/CMessage.cpp \
+    src/BluetoothHandler.cpp
 
 HEADERS += \
     include/ProtocolPacketHeader.hpp \
@@ -22,7 +23,8 @@ HEADERS += \
     transport/bt/BluetoothTypes.hpp \
     transport/bt/BluetoothAPI.hpp \
     transport/bt/Blob.hpp \
-    src/MessageGenerator/CMessage.hpp
+    src/MessageGenerator/CMessage.hpp \
+    src/BluetoothHandler.hpp
 
 INCLUDEPATH += \
     ./ \

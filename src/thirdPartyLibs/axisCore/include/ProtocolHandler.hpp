@@ -7,10 +7,11 @@
 #include "Message.hpp"
 #include "BluetoothReader.hpp"
 #include "BluetoothWriter.hpp"
+#include "transport/bt/IBluetoothHandler.hpp"
 
 class IProtocolObserver;
 
-class ProtocolHandler
+class ProtocolHandler : public Bluetooth::IBluetoothHandler
 {
 public:
 
@@ -48,9 +49,12 @@ public:
      * @param receivedDataSize Received data size (bytes)
      * @param data Data array
      */
-    ERROR_CODE receiveData(UInt8 sessionID, UInt32 messageID, UInt8 servType, UInt32 receivedDataSize, UInt8* data);
+    ERROR_CODE ReceiveData(UInt8 sessionID, UInt32 messageID, UInt8 servType, UInt32 receivedDataSize, UInt8* data);
 
 private:
+    virtual void onError(BLUETOOTH_ERROR errCode);
+    virtual void dataReceived();
+
     enum State 
     {
         BEFORE_HANDSHAKE,
@@ -58,7 +62,7 @@ private:
         HANDSHAKE_DONE
     };
 
-    ERROR_CODE receiveData(const ProtocolPacketHeader &header, UInt8 *data);
+    ERROR_CODE handleReceivedData(const ProtocolPacketHeader &header, UInt8 *data);
     ERROR_CODE sendStartAck(const UInt8 sessionID);
     ERROR_CODE handleMessage(const ProtocolPacketHeader &header, UInt8 *data);
     ERROR_CODE handleMultiFrameMessage(const ProtocolPacketHeader &header, UInt8 *data);
@@ -68,6 +72,7 @@ private:
     UInt8 mSessionID;
     UInt8 mState;
     std::map<UInt32, Message *> mOutMessagesMap;
+    std::map<UInt32, Message *> mInMessagesMap;
     std::map<UInt32, Message *> mIncompleteMultiFrameMessages;
     BluetoothReader mBTReader;
     BluetoothWriter mBTWriter;

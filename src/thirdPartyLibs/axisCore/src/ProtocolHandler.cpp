@@ -4,6 +4,7 @@
 #include "ProtocolHandler.hpp"
 #include "ProtocolPacketHeader.hpp"
 #include "IProtocolObserver.hpp"
+#include "transport/bt/BluetoothAPI.hpp"
 
 ProtocolHandler::ProtocolHandler(IProtocolObserver *observer) : 
                 mProtocolObserver(observer),
@@ -12,6 +13,7 @@ ProtocolHandler::ProtocolHandler(IProtocolObserver *observer) :
                 mState(BEFORE_HANDSHAKE)
 {
     std::cout << "enter ProtocolHandler::ProtocolHandler() \n";
+    Bluetooth::initBluetooth(this);
 }
 
 ProtocolHandler::~ProtocolHandler()
@@ -210,7 +212,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
     return ERR_OK;
 }
 
-ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
+ERROR_CODE ProtocolHandler::ReceiveData(UInt8 sessionID
                                       , UInt32 messageID
                                       , UInt8 servType
                                       , UInt32 receivedDataSize
@@ -237,7 +239,7 @@ ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
     return ERR_OK;
 }
 
-ERROR_CODE ProtocolHandler::receiveData(const ProtocolPacketHeader &header, UInt8 *data)
+ERROR_CODE ProtocolHandler::handleReceivedData(const ProtocolPacketHeader &header, UInt8 *data)
 {
     std::cout << "enter private ProtocolHandler::receiveData() \n";
 
@@ -336,6 +338,10 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
     case FRAME_TYPE_SINGLE:
     {
         std::cout << "ProtocolHandler::handleMessage() case FRAME_TYPE_SINGLE \n";
+        Message *message = new Message(header, data, false);
+        delete [] data;
+        mOutMessagesMap.insert(std::pair<UInt32, Message*>(header.messageID, message) );
+
         if (mProtocolObserver)
             mProtocolObserver->dataReceivedCallback(mSessionID, header.messageID, header.dataSize);
         else
@@ -349,12 +355,14 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
     {
         std::cout << "ProtocolHandler::handleMessage() case FRAME_TYPE_FIRST \n";
         handleMultiFrameMessage(header, data);
+        delete [] data;
         break;
     }
     case FRAME_TYPE_CONSECUTIVE:
     {
         std::cout << "ProtocolHandler::handleMessage() case FRAME_TYPE_CONSECUTIVE \n";
         handleMultiFrameMessage(header, data);
+        delete [] data;
         break;
     }
     default:
@@ -369,6 +377,7 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
 ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &header
                                                   , UInt8 *data)
 {
+    ERROR_CODE retVal = ERR_OK;
     std::cout << "enter ProtocolHandler::handleMultiFrameMessage(); \n";
 
     if (header.frameType == FRAME_TYPE_FIRST)
@@ -397,17 +406,34 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
                     else
                     {
                         std::cout << "ProtocolHandler::handleMultiFrameMessage() invalid mProtocolObserver pointer \n";
-                        return ERR_FAIL;
+                        retVal = ERR_FAIL;
                     }
                 }                
             }
             else
             {
                 std::cout << "ProtocolHandler::handleMultiFrameMessage() : addConsecutiveMessage FAIL \n";
-                return ERR_FAIL;
+                retVal = ERR_FAIL;
             }
         }   
     }
 
-    return ERR_OK;
+    return retVal;
+}
+
+void ProtocolHandler::onError(BLUETOOTH_ERROR errCode)
+{
+
+}
+
+void ProtocolHandler::dataReceived()
+{
+    UInt32 dataSize = Bluetooth::getBuffer().size();
+    UInt8 *data = new UInt8[dataSize];
+    ProtocolPacketHeader header;
+
+    if (mBTReader.read(header, data, dataSize) == ERR_OK)
+        handleReceivedData(header, data);
+    else
+        std::cout << "ProtocolHandler::dataReceived() error reading\n";
 }

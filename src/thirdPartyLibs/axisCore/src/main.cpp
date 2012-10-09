@@ -37,7 +37,7 @@ public:
 
         UInt8 *data = new UInt8[dataSize];
 
-        mHandler->receiveData(sessionID, messageID, SERVICE_TYPE_RPC, dataSize, data);
+        mHandler->ReceiveData(sessionID, messageID, SERVICE_TYPE_RPC, dataSize, data);
         cout << data;
 
         delete [] data;

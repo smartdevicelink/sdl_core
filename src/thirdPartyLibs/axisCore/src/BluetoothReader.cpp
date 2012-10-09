@@ -1,6 +1,7 @@
 #include <memory.h>
 
 #include "BluetoothReader.hpp"
+#include "transport/bt/BluetoothAPI.hpp"
 
 int maxsize = 5000;
 
@@ -16,9 +17,18 @@ BluetoothReader::~BluetoothReader()
     delete [] mData;
 }
 
-ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data)
+ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt32 dataSize)
 {
-    //TODO read
+    UInt32 blobBufferSize = Bluetooth::getBuffer().size();
+    if (dataSize >= blobBufferSize )
+    {
+        memcpy(mData, Bluetooth::getBuffer().buffer(), blobBufferSize);
+    }
+    else
+    {
+        cout << "BluetoothReader::read buffer is too small for reading\n";
+        return ERR_FAIL;
+    }
 
     UInt8 offset = 0;
     UInt8 firstByte = 0;

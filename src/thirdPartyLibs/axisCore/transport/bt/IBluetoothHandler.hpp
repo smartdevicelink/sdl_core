@@ -5,7 +5,7 @@
 
 namespace Bluetooth
 {
-   class IBlutoothHandler
+   class IBluetoothHandler
    {
    public:
       virtual void onError(BLUETOOTH_ERROR errCode) =0;
