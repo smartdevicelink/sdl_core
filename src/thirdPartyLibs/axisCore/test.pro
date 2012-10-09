@@ -7,7 +7,6 @@ SOURCES += src/main.cpp \
     src/Message.cpp \
     src/BluetoothReader.cpp \
     src/BluetoothWriter.cpp \
-    src/MessageGenerator/MessageGenerator.cpp \
     src/MessageGenerator/CMessage.cpp
 
 HEADERS += \
