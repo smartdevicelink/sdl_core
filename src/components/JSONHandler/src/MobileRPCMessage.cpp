@@ -91,12 +91,12 @@ void MobileRPCMessage::setCorrelationID( unsigned int correlationID )
 }
 
 
-void MobileRPCMessage::setOriginalString( std::string originalString )
+void MobileRPCMessage::setParametersString( std::string parametersString )
 {
-    mOriginalString = originalString;
+    mParametersString = parametersString;
 }
     
-std::string MobileRPCMessage::getOriginalString() const
+std::string MobileRPCMessage::getParametersString() const
 {
-    return mOriginalString;
+    return mParametersString;
 }

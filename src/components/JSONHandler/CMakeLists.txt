@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project (jsonHandler) 
 
 include_directories (./include/ ../../thirdPartyLibs/jsoncpp/include/) 
-add_library(jsonHandler ./src/JSONHandler.cpp ./src/MobileRPCMessage.cpp ./src/MobileRPCRequest.cpp ./src/MobileRPCResponse.cpp ./src/MobileRPCNotification.cpp)
+add_library(jsonHandler ./src/JSONHandler.cpp ./src/MobileRPCMessage.cpp ./src/MobileRPCRequest.cpp ./src/MobileRPCResponse.cpp ./src/MobileRPCNotification.cpp ./src/MobileRPCFactory.cpp)
 
 include(ExternalProject)
 ExternalProject_Add(

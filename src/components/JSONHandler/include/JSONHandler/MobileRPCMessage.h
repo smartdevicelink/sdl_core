@@ -31,10 +31,10 @@ public:
     virtual void setFunctionID( unsigned int functionID );
     virtual void setJSONMessageSize( unsigned int messageSize );
 
-    virtual void setOriginalString( std::string originalString );
-    virtual std::string getOriginalString() const;
+    virtual void setParametersString( std::string parametersString );
+    virtual std::string getParametersString() const;
 
-protected:
+private:
     /* data */
     unsigned int mProtocolVersion;
     MessageType mMessageType;
@@ -43,7 +43,7 @@ protected:
     unsigned int mFunctionID;
     unsigned int mJSONMessageSize;
 
-    std::string mOriginalString;
+    std::string mParametersString;
 };
 
 #endif
