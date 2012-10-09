@@ -1,16 +1,29 @@
 #ifndef MESSAGE_HPP_
 #define MESSAGE_HPP_
 
-typedef unsigned char   UInt8;
-typedef unsigned int    UInt32;
+
+#include <queue>
+
+#include "../../utils/misc/Types.hpp"
+#include "../../transport/bt/Blob.hpp"
 
 class CMessage
 {
 public:
-   static void write();
+   static Blob getNextBlob();
 
 private:
-   static void generate();
+
+   static std::queue<Blob> blobQueue;
+
+   //static void write();
+   //static void generate();
+
+   static void generateInitialMessage();
+   static void generateSingleMessage();
+   static void generateFinalMessage();
+
+   static void dispayField();
 
    static UInt8 sVersion;
    static UInt8 sCompressedFlag;
@@ -22,7 +35,11 @@ private:
    static UInt32 sMessageID;
 
    static void* sPacketData;
-
 };
+
+const Blob getBuffer()
+{
+   return CMessage::getNextBlob();
+}
 
 #endif /* MESSAGE_HPP_ */

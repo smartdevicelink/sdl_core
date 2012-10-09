@@ -12,7 +12,7 @@ public:
    	  , mId(id)
    { }
 
-   Blob(const UInt8 * pBuffer, size_t size, UInt32 id)
+   Blob(UInt8 * pBuffer, size_t size, UInt32 id)
    	   : mSize(size)
    	   , mpBuf(pBuffer)
    	   , mId(id)
@@ -28,7 +28,7 @@ public:
 	   return mSize;
    }
 
-   void setBuffer(const UInt8 * pBuffer, size_t size)
+   void setBuffer(UInt8 * pBuffer, size_t size)
    {
       mpBuf = pBuffer;
       mSize = size;

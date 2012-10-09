@@ -16,8 +16,9 @@ UInt8 CMessage::sSessionID = 0;
 UInt32 CMessage::sDataSize = 0;
 UInt32 CMessage::sMessageID = 0;
 void*  CMessage::sPacketData = 0;
+std::queue<Blob> CMessage::blobQueue = std::queue<Blob>();
 
-void CMessage::generate()
+/*void CMessage::generate()
 {
    sVersion        = 0x01; //rand() % (0x0F + 1); // 0x00 – 0x0F 4-Bits
    sCompressedFlag = 0; //rand() % (0x01 + 1); // 0x00 – 0x01 1-Bit
@@ -31,6 +32,11 @@ void CMessage::generate()
    sDataSize       = rand() % 0xFFFFFFFF + 1; //0x01-0xFFFFFFFF 32-Bits
    sMessageID      = rand() % 0xFFFFFFFF + 1; //0x01-0xFFFFFFFF 32-Bits
 
+   dispayField();
+}*/
+
+void CMessage::dispayField()
+{
    std::cout << std::hex << std::setw(4) << (int)sVersion
                          << std::setw(4) << (int)sCompressedFlag
                          << std::setw(4) << (int)sFrameType
@@ -42,7 +48,68 @@ void CMessage::generate()
                          << std::setw(18) << (int)sMessageID << std::endl;
 }
 
-void CMessage::write()
+void CMessage::generateInitialMessage()
+{
+   sVersion        = 0x01;
+   sCompressedFlag = 0;
+   sFrameType      = 0x00; //Control frame
+   sServiceType    = 0x07;
+   sFrameData      = 0x01; //Start session
+   sSessionID      = 0;
+   sDataSize       = 0x00;
+   sMessageID      = rand() % 0xFFFFFFFF + 1;
+
+   dispayField();
+
+   sPacketData = malloc(12);
+
+   UInt8 firstByte = ( (sVersion << 4) & 0xF0 )
+                   | ( (sCompressedFlag << 3) & 0x08)
+                   | (sFrameType & 0x07);
+
+   memcpy(sPacketData, &firstByte, 1);
+   memcpy(sPacketData + 1, &sServiceType, 1);
+   memcpy(sPacketData + 2, &sFrameData, 1);
+   memcpy(sPacketData + 3, &sSessionID, 1);
+   memcpy(sPacketData + 4, &sDataSize, 4);
+   memcpy(sPacketData + 8, &sMessageID, 4);
+
+   blobQueue.push(Blob((UInt8*)sPacketData, 12, blobQueue.size()));
+}
+
+void CMessage::generateSingleMessage()
+{}
+
+void CMessage::generateFinalMessage()
+{
+   sVersion        = 0x01;
+   sCompressedFlag = 0;
+   sFrameType      = 0x00; //Control frame
+   sServiceType    = 0x07;
+   sFrameData      = 0x04; //Start session
+   sSessionID      = 0;
+   sDataSize       = 0x00;
+   sMessageID      = rand() % 0xFFFFFFFF + 1;
+
+   dispayField();
+
+   sPacketData = malloc(12);
+
+   UInt8 firstByte = ( (sVersion << 4) & 0xF0 )
+                   | ( (sCompressedFlag << 3) & 0x08)
+                   | (sFrameType & 0x07);
+
+  memcpy(sPacketData, &firstByte, 1);
+  memcpy(sPacketData + 1, &sServiceType, 1);
+  memcpy(sPacketData + 2, &sFrameData, 1);
+  memcpy(sPacketData + 3, &sSessionID, 1);
+  memcpy(sPacketData + 4, &sDataSize, 4);
+  memcpy(sPacketData + 8, &sMessageID, 4);
+
+  blobQueue.push(Blob((UInt8*)sPacketData, 12, blobQueue.size()));
+}
+
+/*void CMessage::write()
 {
    generate();
 
@@ -58,4 +125,9 @@ void CMessage::write()
    memcpy(sPacketData + 3, &sSessionID, 1);
    memcpy(sPacketData + 4, &sDataSize, 4);
    memcpy(sPacketData + 8, &sMessageID, 4);
+}*/
+
+Blob CMessage::getNextBlob()
+{
+   blobQueue.pop();
 }

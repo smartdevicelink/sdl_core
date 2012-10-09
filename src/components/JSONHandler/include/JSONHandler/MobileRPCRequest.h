@@ -1,3 +1,5 @@
+#ifndef MOBILERPCREQUEST_CLASS
+#define MOBILERPCREQUEST_CLASS value
 
 class MobileRPCMessage;
 
@@ -11,3 +13,5 @@ public:
 
     /* data */
 };
+
+#endif

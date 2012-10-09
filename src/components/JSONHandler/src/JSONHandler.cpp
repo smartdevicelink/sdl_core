@@ -1,7 +1,10 @@
 
 #include "JSONHandler/JSONHandler.h"
 #include <algorithm>
+#include <json/reader.h>
+#include <json/writer.h>
 
+MobileRPCFactory * JSONHandler::mFactory = 0;
 
 MobileRPCMessage * JSONHandler::createObjectFromJSON( const std::string & jsonString )
 {
@@ -18,14 +21,56 @@ MobileRPCMessage * JSONHandler::createObjectFromJSON( const std::string & jsonSt
 
     result = checkMessageTypeForProtocol1( root );
     if ( result )
-    {
-        result -> setOriginalString( jsonString );
+    {        
         return result;
     } 
     else 
     {
         return 0; //version 2 or higher
     }
+}
+
+std::string JSONHandler::serializeObjectToJSON( const MobileRPCMessage & mobileRPCObject )
+{
+    if ( mobileRPCObject.getProtocolVersion() == 1 )
+    {
+        return serializeObjectToJSONProtocol1( mobileRPCObject );
+    }
+}
+
+std::string JSONHandler::serializeObjectToJSONProtocol1 ( const MobileRPCMessage & mobileRPCObject )
+{
+    Json::Value root;
+    std::string messageType;
+    switch( mobileRPCObject.getMessageType() ) {
+        case 0:
+            messageType = "request";
+            break;
+        case 1:
+            messageType = "response";
+            break;
+        case 2:
+            messageType = "notification";
+            break;
+        default:
+            messageType = "";
+    }
+    
+    Json::Value typeValue;
+    
+    if ( mobileRPCObject.getCorrelationID() != 0 )
+    {
+        typeValue["correlationID"] = mobileRPCObject.getCorrelationID();
+    }
+    if ( !mobileRPCObject.getFunctionName().empty() )
+    {
+        typeValue["name"] = mobileRPCObject.getFunctionName();
+    }
+    root[messageType] = typeValue;
+    
+    Json::StyledWriter writer;
+    std::string root_to_print = writer.write( root );
+    return root_to_print;
 }
 
 MobileRPCMessage * JSONHandler::checkMessageTypeForProtocol1 ( const Json::Value & root )
@@ -81,5 +126,37 @@ MobileRPCMessage * JSONHandler::fillMessageWithData ( const Json::Value & jsonMe
         message->setFunctionName( value.asString() );
     }
 
+    value = jsonMessage["parameters"];
+    if ( !value.isNull() )
+    {
+        Json::Value paramValue;
+        paramValue["parameters"] = value;
+        Json::FastWriter writer;
+        std::string paramsToString = writer.write( paramValue );
+        message -> setParametersString( paramsToString );
+    }
+
     return message;
+}
+
+Json::Value JSONHandler::getParametersFromJSON( const std::string & jsonString )
+{
+    Json::Value root;   
+    Json::Reader reader;
+    bool parsingSuccessful = reader.parse( jsonString, root );
+    if ( !parsingSuccessful ) 
+    {
+        return Json::Value::null;
+    }
+
+    return root["parameters"];
+}
+
+MobileRPCFactory * JSONHandler::getFactory()
+{
+    if ( mFactory == 0 )
+    {
+        mFactory = new MobileRPCFactory();
+    }
+    return mFactory;
 }
