@@ -112,7 +112,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                     FIRST_FRAME_DATA_SIZE,
                                     mMessageID);
 
-        UInt8 *outDataFirstFrame = new UInt8(FIRST_FRAME_DATA_SIZE);
+        UInt8 *outDataFirstFrame = new UInt8[FIRST_FRAME_DATA_SIZE];
         ( (UInt32*)outDataFirstFrame)[0] = dataSize;
         ( (UInt32*)outDataFirstFrame)[1] = numOfFrames;
 
@@ -123,7 +123,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
 
         int frameDataMaxValue = 0xFF;
 
-        UInt8 *outDataFrame = new UInt8(subDataSize);
+        UInt8 *outDataFrame = new UInt8[subDataSize];
 
         for (UInt8 i = 0 ; i <= numOfFrames ; i++)
         {

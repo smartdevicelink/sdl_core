@@ -58,7 +58,6 @@ private:
         HANDSHAKE_DONE
     };
 
-    ERROR_CODE sendData();
     ERROR_CODE receiveData(const ProtocolPacketHeader &header, UInt8 *data);
     ERROR_CODE sendStartAck(const UInt8 sessionID);
     ERROR_CODE handleMessage(const ProtocolPacketHeader &header, UInt8 *data);

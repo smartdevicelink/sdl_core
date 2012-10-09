@@ -20,7 +20,7 @@ Message::Message(const ProtocolPacketHeader &header
     else
         mTotalDataBytes = header.dataSize;
 
-    mData = new UInt8(mTotalDataBytes);
+    mData = new UInt8[mTotalDataBytes];
     if (!mIsMultiFrame)
         memcpy(mData, data, mTotalDataBytes);
 }

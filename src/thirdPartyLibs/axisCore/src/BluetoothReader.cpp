@@ -8,7 +8,7 @@ BluetoothReader::BluetoothReader()
 {
     //TODO maxsize
 
-    mData = new UInt8(maxsize);
+    mData = new UInt8[maxsize];
 }
 
 BluetoothReader::~BluetoothReader()

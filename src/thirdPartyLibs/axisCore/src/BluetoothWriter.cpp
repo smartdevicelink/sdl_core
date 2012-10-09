@@ -8,7 +8,7 @@ BluetoothWriter::BluetoothWriter()
 {
     //TODO maxsize
 
-    mData = new UInt8(_maxsize);
+    mData = new UInt8[_maxsize];
 }
 
 BluetoothWriter::~BluetoothWriter()
