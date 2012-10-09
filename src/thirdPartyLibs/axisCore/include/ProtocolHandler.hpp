@@ -65,11 +65,10 @@ private:
     ERROR_CODE handleMultiFrameMessage(const ProtocolPacketHeader &header, UInt8 *data);
 
     IProtocolObserver *mProtocolObserver;
-    UInt8 mState;
-    UInt8 mSessionID;
     UInt32 mMessageID;
+    UInt8 mSessionID;
+    UInt8 mState;
     std::map<UInt32, Message *> mOutMessagesMap;
-    //std::map<UInt32, Message *> mInMessagesMap;
     std::map<UInt32, Message *> mIncompleteMultiFrameMessages;
     BluetoothReader mBTReader;
     BluetoothWriter mBTWriter;

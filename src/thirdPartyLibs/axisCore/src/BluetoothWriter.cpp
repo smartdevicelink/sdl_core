@@ -38,10 +38,13 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
     memcpy(mData + offset, &header.messageID, sizeof(UInt32) );
     offset += sizeof(UInt32);
 
-    if ( (offset + header.dataSize) < _maxsize)
-        memcpy(mData + offset, data, header.dataSize);
-    else
-        return ERR_FAIL;
+    if (data)
+    {
+        if ( (offset + header.dataSize) < _maxsize)
+            memcpy(mData + offset, data, header.dataSize);
+        else
+            return ERR_FAIL;
+    }
 
     //TODO write
 

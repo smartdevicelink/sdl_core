@@ -32,13 +32,13 @@ ERROR_CODE ProtocolHandler::startSession(UInt8 servType)
     ProtocolPacketHeader header(PROTOCOL_VERSION_1,
                                 COMPRESS_OFF,
                                 FRAME_TYPE_CONTROL,
-                                SERVICE_TYPE_RPC,
+                                servType,
                                 FRAME_DATA_START_SESSION,
                                 0,
                                 0,
                                 0);
 
-    //TODO send
+    mBTWriter.write(header, 0);
 
     return ERR_OK;
 }
@@ -54,7 +54,7 @@ ERROR_CODE ProtocolHandler::endSession(UInt8 sessionID)
                                 0,
                                 0);
 
-    //TODO send
+    mBTWriter.write(header, 0);
 
     return ERR_OK;
 }
@@ -70,7 +70,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
 
 
     //TODO maxsize
-    const int MAXIMUM_DATA_SIZE = 5000;
+    const unsigned int MAXIMUM_DATA_SIZE = 5000;
 
 
 
@@ -79,17 +79,15 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
     if (dataSize <= MAXIMUM_DATA_SIZE)
     {
         ProtocolPacketHeader header(PROTOCOL_VERSION_1,
-                                    COMPRESS_OFF,
+                                    compress,
                                     FRAME_TYPE_SINGLE,
-                                    SERVICE_TYPE_RPC,
+                                    servType,
                                     0,
                                     sessionID,
                                     dataSize,
                                     mMessageID);
 
-        //TODO send
-
-
+        mBTWriter.write(header, data);
     }
     else
     {
@@ -105,10 +103,10 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
         else
             numOfFrames = dataSize / MAXIMUM_DATA_SIZE;
 
-        ProtocolPacketHeader header(PROTOCOL_VERSION_1,
-                                    COMPRESS_OFF,
+        ProtocolPacketHeader firstHeader(PROTOCOL_VERSION_1,
+                                    compress,
                                     FRAME_TYPE_FIRST,
-                                    SERVICE_TYPE_RPC,
+                                    servType,
                                     0,
                                     sessionID,
                                     FIRST_FRAME_DATA_SIZE,
@@ -118,7 +116,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
         ( (UInt32*)outDataFirstFrame)[0] = dataSize;
         ( (UInt32*)outDataFirstFrame)[1] = numOfFrames;
 
-        //TODO send
+        mBTWriter.write(firstHeader, 0);
 
         delete [] outDataFirstFrame;
 
@@ -132,9 +130,9 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
             if (i != numOfFrames)
             {
                 ProtocolPacketHeader header(PROTOCOL_VERSION_1,
-                                            COMPRESS_OFF,
+                                            compress,
                                             FRAME_TYPE_CONSECUTIVE,
-                                            SERVICE_TYPE_RPC,
+                                            servType,
                                             ( (i % frameDataMaxValue) + 1),
                                             sessionID,
                                             subDataSize,
@@ -142,14 +140,14 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
 
                 memcpy(outDataFrame, data + (subDataSize * i), subDataSize);
 
-                //TODO send data
+                mBTWriter.write(header, outDataFrame);
             }
             else
             {
                 ProtocolPacketHeader header(PROTOCOL_VERSION_1,
-                                            COMPRESS_OFF,
+                                            compress,
                                             FRAME_TYPE_CONSECUTIVE,
-                                            SERVICE_TYPE_RPC,
+                                            servType,
                                             0x0,
                                             sessionID,
                                             lastDataSize,
@@ -157,7 +155,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
 
                 memcpy(outDataFrame, data + (subDataSize * i), lastDataSize);
 
-                //TODO send data
+                mBTWriter.write(header, outDataFrame);
             }
         }
 
@@ -190,13 +188,6 @@ ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
     }
     else
         return ERR_FAIL;
-
-    return ERR_OK;
-}
-
-ERROR_CODE ProtocolHandler::sendData()
-{
-    //TODO send data to BT
 
     return ERR_OK;
 }
@@ -256,8 +247,7 @@ ERROR_CODE ProtocolHandler::sendStartAck(const UInt8 sessionID)
                                 0,
                                 0);
 
-    //TODO send header
-
+    mBTWriter.write(header, 0);
 
     return ERR_OK;
 }
@@ -294,10 +284,6 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
     case FRAME_TYPE_CONSECUTIVE:
     {
         handleMultiFrameMessage(header, data);
-        /*if (header.frameData == FRAME_DATA_LAST_FRAME)
-        {
-
-        }*/
         break;
     }
     default:

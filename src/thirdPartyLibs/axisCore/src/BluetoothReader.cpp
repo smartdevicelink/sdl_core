@@ -44,7 +44,8 @@ ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data)
     memcpy(&header.messageID, mData + offset, sizeof(UInt32) );
     offset += sizeof(UInt32);
 
-    memcpy(data, mData + offset, header.dataSize);
+    if (data)
+        memcpy(data, mData + offset, header.dataSize);
 
     return ERR_OK;
 }
