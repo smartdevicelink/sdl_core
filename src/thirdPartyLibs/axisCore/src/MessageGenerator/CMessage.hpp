@@ -12,6 +12,12 @@ public:
 private:
    static void generate();
 
+   static void generateInitialMessage();
+   static void generateSingleMessage();
+   static void generateFinalMessage();
+
+   static void dispayField();
+
    static UInt8 sVersion;
    static UInt8 sCompressedFlag;
    static UInt8 sFrameType;

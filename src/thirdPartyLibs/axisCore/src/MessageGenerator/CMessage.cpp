@@ -31,6 +31,11 @@ void CMessage::generate()
    sDataSize       = rand() % 0xFFFFFFFF + 1; //0x01-0xFFFFFFFF 32-Bits
    sMessageID      = rand() % 0xFFFFFFFF + 1; //0x01-0xFFFFFFFF 32-Bits
 
+   dispayField();
+}
+
+void CMessage::dispayField()
+{
    std::cout << std::hex << std::setw(4) << (int)sVersion
                          << std::setw(4) << (int)sCompressedFlag
                          << std::setw(4) << (int)sFrameType
@@ -41,6 +46,38 @@ void CMessage::generate()
    std::cout << std::hex /*<< std::setw(18)*/ << (int)sDataSize
                          << std::setw(18) << (int)sMessageID << std::endl;
 }
+
+void CMessage::generateInitialMessage()
+{
+   sVersion        = 0x01;
+   sCompressedFlag = 0;
+   sFrameType      = 0x00; //Control frame
+   sServiceType    = 0x07;
+   sFrameData      = 0x01; //Start session
+   sSessionID      = 0;
+   sDataSize       = 0x00;
+   sMessageID      = rand() % 0xFFFFFFFF + 1;
+
+   dispayField();
+}
+
+void CMessage::generateSingleMessage()
+{}
+
+void CMessage::generateFinalMessage()
+{
+   sVersion        = 0x01;
+   sCompressedFlag = 0;
+   sFrameType      = 0x00; //Control frame
+   sServiceType    = 0x07;
+   sFrameData      = 0x04; //Start session
+   sSessionID      = 0;
+   sDataSize       = 0x00;
+   sMessageID      = rand() % 0xFFFFFFFF + 1;
+
+   dispayField();
+}
+
 
 void CMessage::write()
 {
