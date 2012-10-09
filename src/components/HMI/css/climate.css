@@ -1,0 +1,1960 @@
+/**
+ * Climate module CSS
+ *
+ * @category	Style Sheets
+ * @filesource	css/climate.css
+ * @version		2.0
+ */
+
+#climate {
+	width: 800px;
+	height: 480px;
+	background: url(../images/climate/bg.png) no-repeat;
+}
+
+#climate_offLabel {
+	top: 133px;
+	left: 369px;
+	font-size: 30px;
+}
+
+/* Stored temperature popup */
+
+#climate_storeTemp {
+	display: none;
+	background: #000000;
+	border: 2px solid #2471b1;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	font-size: 23px;
+	font-weight: bold;
+	height: 112px;
+	left: 227px;
+	line-height:105px;
+	text-align: center;
+	top: 178px;
+	width: 344px;
+	z-index: 5001;
+}
+
+/* Climate module warp */
+
+#climate_wrap {
+	height: 425px;
+	top: 55px;
+	width: 800px;
+	z-index: 1000;
+	overflow:hidden;
+}
+
+
+/*  NORMAL VIEW MODE */
+
+/* Power button */
+
+#climate_powerButton  {
+	width: 80px;
+	height: 50px;
+	text-align: center;
+	cursor: pointer;
+	top:78px;
+	left:360px;
+}
+
+#climate_powerButton.notpressed  {
+	background: url(../images/climate/power_button/powerbg.png) no-repeat;
+}
+
+#climate_powerButton.pressed  {
+	background:url(../images/climate/power_button/powerbg_pressed.png) no-repeat;
+}
+
+#climate_powerButton .ico {
+	top: 14px;
+	position: relative;
+}
+
+#climate_powerButton .ind_inact {
+	position: absolute;
+	right: 4px;
+	top: 14px;
+	width:6px;
+	height:21px;
+	background:url(../images/climate/ind_vert_def.png) no-repeat;
+}
+
+#climate_powerButton .ind_act {
+	position: absolute;
+	right: -2px;
+	top: 9px;
+	background:url(../images/climate/ind_vert_active.png) no-repeat;
+	width:19px;
+	height:32px;
+}
+
+
+/* Automode labels & borders */
+#climate .automode  {
+	border: 2px solid #fff !important;
+}
+
+#climate_automode .label {
+	background: black;
+	width: 148px;
+	height: 20px;
+	text-align: center;
+	font-size: 25px;
+	font-weight: bold;
+}
+
+#climate_automode .auto_full {
+	top: 144px !important;
+	left: 325px !important;
+}
+
+#climate_automode .auto_fan {
+	top: 144px;
+	left: 423px;
+}
+
+#climate_automode .auto_airflow {
+	top: 144px;
+	left: 228px;
+}
+
+#climate_automode .border {
+	border-left: 2px solid #fff;
+	border-right: 2px solid #fff;
+	border-top: 2px solid #fff;
+	z-index: -1;
+	-webkit-border-top-right-radius: 3px;
+	-webkit-border-top-left-radius: 3px;
+	-moz-border-radius-topleft: 3px;
+	-moz-border-radius-topright: 3px;
+}
+
+#climate_automode .border_full {
+	width: 363px !important;
+	height: 16px !important;
+	left: 217px !important;
+	top: 160px !important;
+}
+
+#climate_automode .border_airflow {
+	width: 168px;
+	height: 16px;
+	left: 217px;
+	top: 160px;
+}
+
+#climate_automode .border_fan {
+	width: 168px;
+	height: 16px;
+	left: 412px;
+	top: 160px;
+}
+
+/* Temperature */
+
+#climate_driverTemp {
+	width: 170px;
+	height: 50px;
+	background-color: #000;
+	top: 100px;
+	left: 22px;
+}
+
+#climate_passangerTemp {
+	width: 170px;
+	height: 50px;
+	background-color: #000;
+	top: 100px;
+	left: 611px;
+}
+
+#climate .minus
+{
+	height: 50px;
+	width: 45px;
+	position: relative;
+	float: left;
+	cursor: pointer;
+}
+
+#climate .minus.notpressed {
+	background:url(../images/climate/fan/fan_minus.png) no-repeat;
+}
+
+#climate .minus.pressed {
+	background:url(../images/climate/fan/fan_minus_pressed.png) no-repeat;
+}
+
+#climate .plus {
+	height: 50px;
+	width: 45px;
+	position: relative;
+	float: left;
+	cursor: pointer;
+}
+
+#climate .plus.notpressed {
+	background:url(../images/climate/fan/fan_plus.png) no-repeat;
+}
+
+#climate .plus.pressed {
+	background:url(../images/climate/fan/fan_plus_pressed.png) no-repeat;
+}
+
+#climate .temp_num {
+	width: 80px;
+	height: 48px;
+	position: relative;
+	float: left;
+	text-align: center;
+	border-bottom: 1px solid #393939;
+	border-top: 1px solid #393939;
+	line-height: 48px;
+	z-index: 3001;
+}
+
+#climate .temp_num span {
+	font-size: 34px;
+}
+
+
+/* Driver controls */
+
+#climate_driverControls {
+	width: 168px;
+	height: 118px;
+	border: 1px solid #393939;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	top: 176px;
+	left: 22px;
+}
+
+
+/* Driver heated seat button */
+
+#climate_driverControls_heatedSeatButton {
+	z-index: 2001;
+	width: 84px;
+	height: 59px;
+	position: relative;
+	float: left;
+	border-right: 1px solid #393939;
+	cursor: pointer;
+}
+
+
+#climate_driverControls_heatedSeatButton.divider {
+	border-right: 1px solid #F3C800 !important;
+	box-shadow: inset -1px -1px 0px 0px #F3C800;
+}
+
+#climate_driverControls_heatedSeatButton .ico {
+	top: 9px;
+	left: 26px;
+	position: absolute;
+}
+
+#climate_driverControls_heatedSeatButton div {
+	width: 22px;
+	height: 17px;
+	top: 40px;
+	left: 25px;
+	position: relative;
+	float: left;
+	margin-left: -9px;
+}
+
+#climate_driverControls_heatedSeatButton div.small_ind_def {
+	background:url(../images/climate/small_ind_def.png) no-repeat;
+}
+
+#climate_driverControls_heatedSeatButton div.small_ind_active {
+	background:url(../images/climate/small_ind_active.png) no-repeat;
+}
+
+#climate_driverControls_heatedSeatButton.notpressed {
+	background:url(../images/climate/left_person_control/tl_bg.png) no-repeat;
+}
+
+#climate_driverControls_heatedSeatButton.pressed {
+	background:url(../images/climate/left_person_control/tl_bg_pressed.png) no-repeat;
+}
+
+
+/* My temperature button */
+
+#climate_driverControls_myTempButton {
+	z-index: 2001;
+	width: 83px;
+	height: 59px;
+	position: relative;
+	float: left;
+	cursor:pointer;
+}
+
+#climate_driverControls_myTempButton .ico {
+	top: 11px;
+	left: 18px;
+	position: absolute;
+}
+
+#climate_driverControls_myTempButton.active {
+	background:url(../images/climate/left_person_control/blue_grad.png) repeat !important;
+}
+
+
+#climate_driverControls_myTempButton.notpressed {
+	background: url(../images/climate/left_person_control/tr_bg.png) no-repeat;
+}
+
+#climate_driverControls_myTempButton.pressed {
+	background: url(../images/climate/left_person_control/tr_bg_pressed.png) no-repeat;
+}
+
+/* Driver cooled seat button */
+
+#climate_driverControls_cooledSeatButton {
+	z-index: 2001;
+	width: 84px;
+	height: 58px;
+	position: relative;
+	float: left;
+	border-top: 1px solid #393939;
+	border-right: 1px solid #393939; cursor:pointer;
+}
+
+#climate_driverControls_cooledSeatButton.divider {
+	border-top: 1px solid #F3C800 !important;
+}
+
+#climate_driverControls_cooledSeatButton .ico {
+	top: 9px;
+	left: 26px;
+	position: absolute;
+}
+
+#climate_driverControls_cooledSeatButton div {
+	width: 22px;
+	height: 17px;
+	top: 40px;
+	left: 25px;
+	position: relative;
+	float: left;
+	margin-left: -9px;
+}
+
+#climate_driverControls_cooledSeatButton div.small_ind_def {
+	background: url(../images/climate/small_ind_def.png) no-repeat;
+}
+
+#climate_driverControls_cooledSeatButton div.small_ind_active {
+	background:url(../images/climate/small_ind_blue.png) no-repeat;
+}
+
+#climate_driverControls_cooledSeatButton.notpressed {
+	background:url(../images/climate/left_person_control/lb_bg.png) no-repeat;
+}
+
+#climate_driverControls_cooledSeatButton.pressed {
+	background:url(../images/climate/left_person_control/lb_bg_pressed.png) no-repeat;
+}
+
+
+/* Driver heated steer button */
+
+#climate_driverControls_heatedSteerButton {
+	width: 83px;
+	height: 58px;
+	float: left;
+	position: relative;
+	border-top: 1px solid #393939;
+	cursor: pointer;
+}
+
+#climate_driverControls_heatedSteerButton .ico {
+	top: 8px;
+	left: 27px;
+	position: absolute;
+}
+
+#climate_driverControls_heatedSteerButton .ind_inact {
+	position: absolute;
+	right: 34px;
+	top: 47px;
+	width: 21px;
+	height: 6px;
+	background: url(../images/climate/ind_horiz_def.png) no-repeat;
+}
+
+#climate_driverControls_heatedSteerButton .ind_act {
+	position: absolute;
+	right: 27px;
+	top: 40px;
+	background: url(../images/climate/ind_horiz_active_wheel.png) no-repeat;
+	width:32px;
+	height:19px;
+}
+
+#climate_driverControls_heatedSteerButton.notpressed {
+	background: url(../images/climate/left_person_control/rb_bg.png) no-repeat;
+}
+
+#climate_driverControls_heatedSteerButton.pressed {
+	background: url(../images/climate/left_person_control/rb_bg_pressed.png) no-repeat;
+}
+
+
+/* Passenger controls */
+
+#climate_passengerControls {
+	z-index: 2001;
+	width:168px;
+	height:118px;
+	background-color: #000;
+	border:1px solid #393939;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	top: 176px;
+	left: 611px;
+}
+
+
+/* Passenger cooled seat button */
+
+#climate_passengerControls_cooledSeatButton {
+	width: 84px;
+	height: 58px;
+	position: relative;
+	float: right;
+	border-left: 1px solid #393939;
+	left: 1px;
+	cursor: pointer;
+	border-top: 1px solid #393939;
+}
+
+#climate_passengerControls_cooledSeatButton.divider {
+	border-left: 1px solid #F3C800;
+	border-top: 1px solid #F3C800;
+	box-shadow: inset 0px 1px 0px 0px #F3C800;
+	
+}
+
+#climate_passengerControls_cooledSeatButton .ico {
+	top: 9px;
+	left: 26px;
+	position: absolute;
+}
+
+#climate_passengerControls_cooledSeatButton div {
+	width: 22px;
+	height: 17px;
+	top: 40px;
+	left: 25px;
+	position: relative;
+	float: left;
+	margin-left: -9px;
+}
+
+#climate_passengerControls_cooledSeatButton div.small_ind_def {
+	background: url(../images/climate/small_ind_def.png) no-repeat;
+}
+
+#climate_passengerControls_cooledSeatButton div.small_ind_active {
+	background: url(../images/climate/small_ind_blue.png) no-repeat;
+}
+
+#climate_passengerControls_cooledSeatButton.notpressed { 
+	background: url(../images/climate/left_person_control/tr_bg.png) no-repeat;
+}
+
+#climate_passengerControls_cooledSeatButton.pressed {
+	background: url(../images/climate/left_person_control/tr_bg_pressed.png) no-repeat;
+}
+
+
+/* Passenger heated seat button */
+
+#climate_passengerControls_heatedSeatButton {
+	width: 84px;
+	height: 59px;
+	position: relative;
+	float: right;
+	border-left: 1px solid #393939;
+	left: 1px;
+	cursor: pointer;
+}
+
+#climate_passengerControls_heatedSeatButton.divider {
+	border-left: 1px solid #F3C800;
+}
+
+#climate_passengerControls_heatedSeatButton .ico {
+	top: 9px;
+	left: 26px;
+	position: absolute;
+}
+
+#climate_passengerControls_heatedSeatButton div {
+	width:22px;
+	height:17px;
+	top: 40px;
+	left: 25px;
+	position: relative;
+	float: left;
+	margin-left: -9px;
+}
+
+#climate_passengerControls_heatedSeatButton div.small_ind_def {
+	background: url(../images/climate/small_ind_def.png) no-repeat;
+}
+
+#climate_passengerControls_heatedSeatButton div.small_ind_active {
+	background:url(../images/climate/small_ind_active.png) no-repeat;
+}
+
+#climate_passengerControls_heatedSeatButton.notpressed {
+	background:url(../images/climate/left_person_control/rb_bg.png) no-repeat;
+}
+
+#climate_passengerControls_heatedSeatButton.pressed {
+	background:url(../images/climate/left_person_control/rb_bg_pressed.png) no-repeat;
+}
+
+
+/* Passenger dual mode button */
+
+#climate_passengerControls_dualModeButton {
+	width: 84px;
+	height: 117px;
+	cursor:pointer;
+}
+
+#climate_passengerControls_dualModeButton.divider {
+	box-shadow: inset -1px 0px 0px 0px #F3C800;
+}
+
+#climate_passengerControls_dualModeButton .ico {
+	top: 45px;
+	left: 24px;
+	position: absolute;
+}
+
+#climate_passengerControls_dualModeButton.notpressed {
+	background: url(../images/climate/right_person/big_but_bg.png) no-repeat;
+}
+
+#climate_passengerControls_dualModeButton.pressed {
+	background: url(../images/climate/right_person/big_but_bg_pressed.png) no-repeat;
+}
+
+#climate_passengerControls_dualModeButton .ind_inact {
+	position: absolute;
+	right: 31px;
+	top: 103px;
+	width: 21px;
+	height: 6px;
+	background: url(../images/climate/ind_horiz_def.png) no-repeat;
+}
+
+#climate_passengerControls_dualModeButton .ind_act {
+	position: absolute;
+	right: 25px;
+	top: 96px;
+	background: url(../images/climate/ind_horiz_active.png) no-repeat;
+	width: 32px;
+	height: 19px;
+}
+
+
+/* Airflow controls */
+
+#climate_airflowControls {
+	width: 168px;
+	height: 118px;
+	border: 1px solid #393939;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	top: 176px;
+	left: 218px;
+}
+
+#climate_airflowControls.automode {
+	top: 175px;
+	left: 217px;
+}
+
+/* Defrost button */
+
+#climate_airflowControls_defrostButton {
+	width: 84px;
+	height: 59px;
+	position: relative;
+	float: left;
+	border-right: 1px solid #393939;
+	cursor: pointer;
+}
+
+#climate_airflowControls_defrostButton .ico {
+	top: 15px;
+	left:23px;
+	position: absolute;
+}
+
+#climate_airflowControls_defrostButton.notpressed {
+	background: url(../images/climate/left_person_control/tl_bg.png) no-repeat;
+}
+
+#climate_airflowControls_defrostButton.pressed {
+	background: url(../images/climate/left_person_control/tl_bg_pressed.png) repeat;
+}
+
+#climate_airflowControls_defrostButton.active {
+	background: url(../images/climate/left_person_control/blue_grad.png) repeat !important;
+}
+
+
+
+/* Panel button */
+
+#climate_airflowControls_panelButton {
+	width: 83px;
+	height: 59px;
+	position: relative;
+	float: left;
+	cursor: pointer;
+}
+
+#climate_airflowControls_panelButton .ico {
+	top: 16px;
+	left: 27px;
+	position: absolute;
+}
+
+#climate_airflowControls_panelButton.notpressed {
+	background: url(../images/climate/left_person_control/tr_bg.png) no-repeat;
+}
+
+#climate_airflowControls_panelButton.pressed {
+	background: url(../images/climate/left_person_control/tr_bg_pressed.png) no-repeat;
+}
+
+#climate_airflowControls_panelButton.active {
+	background: url(../images/climate/left_person_control/blue_grad.png) repeat !important;
+}
+
+
+/* Feet button*/
+
+#climate_airflowControls_feetButton {
+	width: 84px;
+	height: 58px;
+	position: relative;
+	float: left;
+	border-top: 1px solid #393939;
+	border-right: 1px solid #393939;
+	cursor:pointer;
+}
+
+#climate_airflowControls_feetButton .ico {
+	top: 16px;
+	left: 23px;
+	position: absolute;
+}
+
+#climate_airflowControls_feetButton.notpressed {
+	background: url(../images/climate/left_person_control/lb_bg.png) no-repeat;
+}
+
+#climate_airflowControls_feetButton.pressed { 
+	background:url(../images/climate/left_person_control/lb_bg_pressed.png) no-repeat;
+}
+
+#climate_airflowControls_feetButton.active {
+	background: url(../images/climate/left_person_control/blue_grad.png) repeat !important;
+}
+
+/* Panel & Feet button */
+
+#climate_airflowControls_bothButton {
+	width: 83px;
+	height: 58px;
+	float: left;
+	position: relative; 
+	border-top: 1px solid #393939;
+	cursor:pointer;
+}
+
+
+#climate_airflowControls_bothButton .ico {
+	top: 16px;
+	left: 23px;
+	position: absolute;
+}
+
+#climate_airflowControls_bothButton.notpressed {
+	background: url(../images/climate/left_person_control/rb_bg.png) no-repeat;
+}
+
+
+#climate_airflowControls_bothButton.pressed {
+	background:url(../images/climate/left_person_control/rb_bg_pressed.png) no-repeat;
+}
+
+#climate_airflowControls_bothButton.active {
+	background:url(../images/climate/left_person_control/blue_grad.png) repeat !important;
+}
+
+
+/* Fan controls */
+
+#climate_fanControls {
+	width: 168px;
+	height: 118px;
+	border: 1px solid #393939;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	top: 176px;
+	left: 413px;
+}
+
+#climate_fanControls.automode {
+	top: 175px;
+	left: 412px;
+}
+
+/* Fan indicators */
+
+#climate_fanControls_fanIndicator {
+	width: 168px;
+	height: 59px;
+	left: 1px;
+	position: relative;
+	cursor: default;
+}
+
+#climate_fanControls_fanIndicator .ico{
+	top: 17px;
+	left: 72px;
+	position: absolute;
+}
+
+#climate_fanControls_fanIndicator .ind_def{
+	background: url(../images/climate/fan_control/fan_ind_active.png) no-repeat;
+	width: 21px;
+	height: 44px;
+	position: relative;
+	display: inline-block;
+	left: -1px;
+	top: 7px;
+}
+
+#climate_fanControls_fanIndicator .indf_inact {
+	background: url(../images/climate/fan_control/fan_ind_def.png) no-repeat;
+	width: 24px;
+	height: 44px;
+	position: relative;
+	display: inline-block;
+	background-position: 9px;
+	top: 7px;
+}
+
+#climate_fanControls_fanIndicator .indf_act {
+	background: url(../images/climate/fan_control/fan_ind_active.png) no-repeat;
+	width: 24px;
+	height: 44px;
+	position: relative;
+	display: inline-block;
+	left: 1px;
+	top: 7px;
+}
+
+
+/* Fan minus button */
+
+#climate_fanControls_fanMinusButton {
+	width: 84px;
+	height: 58px;
+	position: relative;
+	float: left;
+	border-top: 1px solid #393939;
+	border-right: 1px solid #393939;
+	cursor: pointer;
+}
+
+#climate_fanControls_fanMinusButton .ico {
+	top: 27px;
+	left: 30px;
+	position: absolute;
+}
+
+#climate_fanControls_fanMinusButton.notpressed {
+	background: url(../images/climate/left_person_control/lb_bg.png) no-repeat;
+}
+
+#climate_fanControls_fanMinusButton.pressed {
+	background: url(../images/climate/left_person_control/lb_bg_pressed.png) no-repeat;
+}
+
+
+/* Fan plus button */
+
+#climate_fanControls_fanPlusButton {
+	width: 83px;
+	height: 58px;
+	float: left;
+	position: relative; 
+	border-top: 1px solid #393939;
+	cursor: pointer;
+}
+
+#climate_fanControls_fanPlusButton .ico {
+	top: 17px;
+	left: 30px;
+	position: absolute;
+}
+#climate_fanControls_fanPlusButton.notpressed {
+	background:url(../images/climate/left_person_control/rb_bg.png) no-repeat;
+}
+
+#climate_fanControls_fanPlusButton.pressed {
+	background:url(../images/climate/left_person_control/rb_bg_pressed.png) no-repeat;
+}
+
+
+/* Front climate control buttons */
+
+#climate_frontControls {
+	width: 538px;
+	height: 58px;
+	border: 1px solid #393939;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	top: 338px;
+	left: 129px;
+}
+
+
+/* Windshield button */
+
+#climate_frontControls_windshieldButton {
+	width: 89px;
+	height: 58px;
+	position: relative;
+	display: inline-block;
+	border-right: 1px solid #393939;
+	cursor:pointer;
+}
+
+#climate_frontControls_windshieldButton .ico {
+	top: 20px;
+	left: 30px;
+	position: absolute;
+}
+
+#climate_frontControls_windshieldButton.notpressed {
+	background:url(../images/climate/gang_buttons/wide_bg_left.png) no-repeat;
+}
+
+#climate_frontControls_windshieldButton.pressed {
+	background:url(../images/climate/gang_buttons/wide_bg_left_pressed.png) no-repeat;
+}
+
+#climate_frontControls_windshieldButton .ind_inact {
+	position: absolute;
+	right: 10px;
+	top: 18px;
+	width: 6px;
+	height: 21px;
+	background: url(../images/climate/ind_vert_def.png) no-repeat;
+}
+
+#climate_frontControls_windshieldButton .ind_act {
+	position: absolute;
+	right: 4px;
+	top: 13px;
+	background: url(../images/climate/ind_vert_active.png) no-repeat;
+	width: 19px;
+	height: 32px;
+}
+
+
+/* Defrost button */
+
+#climate_frontControls_defrostButton {
+	width: 89px;
+	height: 58px;
+	position: relative;
+	display: inline-block;
+	border-right: 1px solid #393939;
+	cursor: pointer;
+}
+
+#climate_frontControls_defrostButton .ico {
+	top: 18px;
+	left: 27px;
+	position: absolute;
+}
+
+#climate_frontControls_defrostButton.notpressed {
+	background: url(../images/climate/gang_buttons/widebg_center.png) no-repeat;
+}
+
+#climate_frontControls_defrostButton.pressed {
+	background: url(../images/climate/gang_buttons/widebg_center_pressed.png) no-repeat;
+}
+
+#climate_frontControls_defrostButton .ind_inact {
+	position: absolute;
+	right: 10px;
+	top: 18px;
+	width: 6px;
+	height: 21px;
+	background: url(../images/climate/ind_vert_def.png) no-repeat;
+}
+
+#climate_frontControls_defrostButton .ind_act {
+	position: absolute;
+	right: 4px;
+	top: 13px;
+	background: url(../images/climate/ind_vert_active.png) no-repeat;
+	width: 19px;
+	height: 32px;
+}
+
+
+/* Automode button */
+
+#climate_frontControls_autoButton {
+	z-index: 2001;
+	width: 89px;
+	height: 58px;
+	position: relative;
+	display: inline-block;
+	border-right: 1px solid #393939;
+	cursor:pointer;
+}
+
+#climate_frontControls_autoButton .ico {
+	top: 22px;
+	left: 25px;
+	position: absolute;
+}
+
+#climate_frontControls_autoButton.notpressed {
+	background: url(../images/climate/gang_buttons/widebg_center.png) no-repeat;
+}
+
+#climate_frontControls_autoButton.active {
+	background: url(../images/climate/gang_buttons/auto_act_bg.png) repeat !important;
+}
+
+#climate_frontControls_autoButton.pressed {
+	background:url(../images/climate/gang_buttons/widebg_center_pressed.png) no-repeat;
+}
+
+
+/* AC button */
+
+#climate_frontControls_acButton {
+	width: 89px;
+	height: 58px;
+	position: relative;
+	display: inline-block;
+	border-right: 1px solid #393939;
+	cursor: pointer;
+}
+
+#climate_frontControls_acButton .ico {
+	top: 22px;
+	left: 28px;
+	position: absolute;
+}
+
+#climate_frontControls_acButton.notpressed {
+	background: url(../images/climate/gang_buttons/widebg_center.png) no-repeat;
+}
+
+#climate_frontControls_acButton.pressed {
+	background: url(../images/climate/gang_buttons/widebg_center_pressed.png)no-repeat;
+}
+
+#climate_frontControls_acButton .ind_inact {
+	position: absolute;
+	right: 10px;
+	top: 18px;
+	width: 6px;
+	height: 21px;
+	background: url(../images/climate/ind_vert_def.png) no-repeat;
+}
+
+#climate_frontControls_acButton .ind_act {
+	position: absolute;
+	right: 4px;
+	top: 13px;
+	background: url(../images/climate/ind_vert_active.png) no-repeat;
+	width:19px;
+	height:32px;
+}
+
+
+/* Max AC button */
+
+#climate_frontControls_maxAcButton {
+	z-index: 2001;
+	width: 89px;
+	height: 58px;
+	position: relative;
+	display: inline-block;
+	border-right: 1px solid #393939;
+	cursor:pointer;
+}
+
+#climate_frontControls_maxAcButton.divider {
+	border-right: 1px solid #F3C800;
+	box-shadow: inset -1px 0px 0px 0px #F3C800;
+}
+
+#climate_frontControls_maxAcButton .ico  {
+	top: 13px;
+	left:25px;
+	position: absolute;
+}
+
+#climate_frontControls_maxAcButton.notpressed {
+	background: url(../images/climate/gang_buttons/widebg_center.png) no-repeat;
+}
+
+#climate_frontControls_maxAcButton.pressed { 
+	background: url(../images/climate/gang_buttons/widebg_center_pressed.png) no-repeat;
+}
+
+#climate_frontControls_maxAcButton .ind_inact {
+	position: absolute;
+	right: 10px;
+	top: 18px;
+	width: 6px;
+	height: 21px;
+	background: url(../images/climate/ind_vert_def.png) no-repeat;
+}
+
+#climate_frontControls_maxAcButton .ind_act {
+	position: absolute;
+	right: 4px;
+	top: 13px;
+	background: url(../images/climate/ind_vert_active.png) no-repeat;
+	width: 19px;
+	height:32px;
+}
+
+
+/* Recirculation button */
+
+#climate_frontControls_recirculationButton {
+	z-index: 2001;
+	width: 88px;
+	height: 58px;
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+}
+
+#climate_frontControls_recirculationButton .ico {
+	top: 21px;
+	left: 25px;
+	position: absolute;
+}
+
+#climate_frontControls_recirculationButton.notpressed {
+	background: url(../images/climate/gang_buttons/widebg_last.png) no-repeat;
+}
+
+#climate_frontControls_recirculationButton.pressed {
+	background: url(../images/climate/gang_buttons/widebg_last_pressed.png) no-repeat;
+}
+
+#climate_frontControls_recirculationButton .ind_inact {
+	position: absolute;
+	right: 10px;
+	top: 18px;
+	width: 6px;
+	height: 21px;
+	background: url(../images/climate/ind_vert_def.png) no-repeat;
+}
+
+#climate_frontControls_recirculationButton .ind_act {
+	position: absolute;
+	right: 4px;
+	top: 13px;
+	background: url(../images/climate/ind_vert_active.png) no-repeat;
+	width:19px;
+	height:32px;
+}
+
+
+/*  REAR VIEW BLOCK */
+
+/* Rear switcher */
+
+#climate_rearSwitcher {
+	z-index: 4001;
+	width: 78px;
+	height: 48px;
+	cursor: pointer;
+	border: 1px solid #393939;
+	-webkit-border-radius:3px;
+	-moz-border-radius:3px;
+	top:425px;
+	left:716px;
+}
+
+#climate_rearSwitcher .ico {
+	top: 6px;
+	left: 18px;
+	position: absolute;
+}
+
+#climate_rearSwitcher .rear_arrow {
+	top: 32px;
+	left: 28px;
+	position: absolute;
+}
+
+#climate_rearSwitcher.notpressed {
+	background: url(../images/climate/rear_auto/rear_but_bg.png) no-repeat;
+}
+
+#climate_rearSwitcher.pressed{
+	background: url(../images/climate/rear_auto/rear_but_bg_pressed.png) no-repeat;
+}
+
+
+/* Rear controls */
+
+#climate_rearControls {
+	top: 315px;
+	width: 800px;
+}
+
+#climate_rearControls_tempControls_labels {
+	pointer-events:	none;
+}
+
+#climate_rearControls_topCaption {
+	width: 470px;
+	height: 1px;
+	left: 165px;
+	background: url(../images/climate/rear_auto/rear_lightning.png) no-repeat;
+}
+
+#climate_rearControls_topCaption .rear_ico {
+	position: relative;
+	left: 178px;
+	bottom: 8px;
+}
+
+#climate_rearControls .rear_controls {
+	position: relative;
+	top: 16px;
+	width: 800px;
+	height: 60px;
+}
+
+
+/* Rear control button */
+
+#climate_rearControls_controlButton {
+	z-index: 4001;
+	width: 98px;
+	height: 58px;
+	position: relative;
+	float: left;
+	cursor: pointer;
+	border: 1px solid #393939;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	margin-left: 97px;
+	margin-right:7px;
+	top: 16px;
+}
+
+#climate_rearControls_controlButton .ico {
+	top: 9px;
+	left:18px;
+	position: absolute;
+}
+
+#climate_rearControls_controlButton.notpressed {
+	background: url(../images/climate/rear_auto/rear_control_bg.png) no-repeat;
+}
+
+#climate_rearControls_controlButton.pressed {
+	background:url(../images/climate/rear_auto/rear_control_bg_pressed.png) no-repeat;
+}
+
+#climate_rearControls_controlButton .ind_inact {
+	position: absolute;
+	right: 6px;
+	top: 18px;
+	width: 6px;
+	height: 21px;
+	background: url(../images/climate/ind_vert_def.png) no-repeat;
+}
+
+#climate_rearControls_controlButton .ind_act {
+	position: absolute;
+	right: 0px;
+	top: 13px;
+	background: url(../images/climate/ind_vert_active.png) no-repeat;
+	width: 19px;
+	height: 32px;
+}
+
+
+/* Rear temperature control */
+
+#climate_rearControls_tempControls {
+	z-index: 4001;
+	width: 198px;
+	height: 58px;
+	background-color: #000;
+	position: relative;
+	float: left;
+	margin-right: 7px;
+	top: 16px;
+}
+
+
+/* Rear temperature minus button */
+
+#climate_rearControls_tempControls_minusButton {
+	height: 58px;
+	width: 43px;
+	position: relative;
+	float: left;
+	cursor: pointer;
+	border: 1px solid #393939;
+	-webkit-border-top-left-radius:3px;
+	-webkit-border-bottom-left-radius:3px;
+	-moz-border-radius-topleft:3px;
+	-moz-border-radius-bottomleft:3px;
+}
+
+#climate_rearControls_tempControls_minusButton .ico {
+	top: 27px;
+	left: 10px;
+	position: absolute;
+}
+
+#climate_rearControls_tempControls_minusButton.notpressed {
+	background:url(../images/climate/rear_auto/rear_fan_bg.png) no-repeat;
+}
+
+#climate_rearControls_tempControls_minusButton.pressed {
+	background:url(../images/climate/rear_auto/rear_fan_bg_pressed.png) no-repeat;
+}
+
+
+/* Rear temperature plus button */
+
+#climate_rearControls_tempControls_plusButton {
+	height:58px;
+	width:43px;
+	position:relative;
+	display: inline-block;
+	cursor:pointer; 
+	border:1px solid #393939;
+	-webkit-border-top-right-radius:3px;
+	-webkit-border-bottom-right-radius:3px;
+	-moz-border-radius-topright:3px;
+	-moz-border-radius-bottomright:3px;
+}
+
+#climate_rearControls_tempControls_plusButton .ico {
+	top: 17px;
+	left: 10px;
+	position: absolute;
+}
+
+#climate_rearControls_tempControls_plusButton.notpressed {
+	background: url(../images/climate/rear_auto/rear_fan_bg.png) no-repeat;
+}
+
+#climate_rearControls_tempControls_plusButton.pressed {
+	background: url(../images/climate/rear_auto/rear_fan_bg_pressed.png) no-repeat;
+}
+
+
+/* Rear temperature indicators */
+
+#climate_rearControls_tempControls_indicator {
+	background-color: #000;
+	width: 108px;
+	height: 58px;
+	position: relative;
+	display: inline-block;
+	top: 0px;
+	border-bottom: 1px solid #393939;
+	border-top: 1px solid #393939;
+	cursor: default;
+}
+
+#climate_rearControls_tempControls_indicator .indt_inact {
+	background: url(../images/climate/fan_control/fan_ind_def.png) no-repeat;
+	width: 5px;
+	height: 48px;
+	position: relative;
+	float: left;
+	margin-left: 3px;
+	margin-right: 4px;
+	margin-top: 15px
+}
+
+#climate_rearControls_tempControls_indicator .indt_inact_long {
+	background: url(../images/climate/rear_auto/indicator_long_def.png) no-repeat;
+	width: 5px;
+	height: 48px;
+	position: relative;
+	float: left;
+	margin-left: 3px;
+	margin-right: 4px;
+	margin-top: 5px
+}
+
+#climate_rearControls_tempControls_indicator .indt_dot {
+	width: 10px;
+	height: 10px;
+	position: relative;
+	float: left;
+	margin-right: 2px;
+	margin-top: 24px;
+}
+
+#climate_rearControls_tempControls_indicator .indt_act {
+	background: url(../images/climate/fan_control/fan_ind_active.png) no-repeat;
+	width: 21px;
+	height: 44px;
+	position: relative;
+	float: left;
+	margin-top: 7px;
+	margin-left: -5px;
+	margin-right: -4px;
+}
+
+#climate_rearControls_tempControls_indicator .indt_act_long {
+	background: url(../images/climate/rear_auto/indicator_long_act.png) no-repeat;
+	width: 21px;
+	height: 54px;
+	position: relative;
+	float: left;
+	margin-top: 2px;
+	margin-left: -3px;
+	margin-right: -6px;
+}
+
+
+#climate_rearControls_tempControls_indicator_dot {
+	background:url(../images/climate/rear_auto/center_dot_rear_fan.png) no-repeat;
+	width:10px;
+	height:10px;
+	position:absolute;
+	top: 24px;
+	left: 48px;
+	opacity: 0;
+}
+
+#climate_rearControls_tempControls .full_label {
+	z-index: 1;
+	top: 1px;
+	left: 89px;
+	font-size: 12px;
+	font-weight: 600;
+	position:absolute;
+	opacity: 0;
+}
+
+#climate_rearControls_tempControls .mode_label {
+	z-index: 1;
+	top: 44px;
+	left: 86px;
+	font-size: 12px;
+	font-weight: 600;
+	position: absolute;
+}
+
+#climate_rearOff {
+	z-index: 2;
+	font-size: 30px;
+	top: 1px;
+	left: 45px;
+	width: 108px;
+	height: 58px;
+	background-color: #000;
+	line-height: 58px;
+	text-align: center;
+}
+
+#climate_rearLabelOn {
+	font-size: 18px;
+	top: 442px;
+	left: 525px;
+	visibility: hidden;
+}
+
+
+/* Rear power button */
+#climate_rearControls_powerButton {
+	width: 78px;
+	height: 58px;
+	position: relative;
+	float: left;
+	cursor: pointer;
+	border: 1px solid #393939;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	margin-right: 7px;
+	top: 16px;
+}
+
+#climate_rearControls_powerButton .ico {
+	top: 19px;
+	left: 29px;
+	position: absolute;
+}
+
+#climate_rearControls_powerButton.notpressed {
+	background:url(../images/climate/rear_auto/power_but_bg.png) no-repeat;
+}
+
+#climate_rearControls_powerButton.pressed {
+	background:url(../images/climate/rear_auto/power_but_bg_pressed.png) no-repeat;
+}
+
+#climate_rearControls_powerButton .ind_inact {
+	position: absolute;
+	right: 6px;
+	top: 18px;
+	width: 6px;
+	height: 21px;
+	background: url(../images/climate/ind_vert_def.png) no-repeat;
+}
+
+#climate_rearControls_powerButton .ind_act {
+	position: absolute;
+	right: 0px;
+	top: 13px;
+	background: url(../images/climate/ind_vert_active.png) no-repeat;
+	width: 19px;
+	height: 32px;
+}
+
+
+/* Rear fan control */
+
+#climate_rearControls_fanControls {
+	width: 198px;
+	height: 58px;
+	background-color: #000;
+	float: left;
+	margin-right: 7px;
+	position: relative;
+	top: 16px;
+}
+
+#climate_rearControls_fanControls_minusButton {
+	height: 58px;
+	width: 43px;
+	position: relative;
+	float: left;
+	cursor:	pointer;
+	border:	1px solid #393939;
+	-webkit-border-top-left-radius: 3px;
+	-webkit-border-bottom-left-radius: 3px;
+	-moz-border-radius-topleft: 3px;
+	-moz-border-radius-bottomleft: 3px;
+}
+
+#climate_rearControls_fanControls_minusButton .ico {
+	top: 27px;
+	left: 10px;
+	position: absolute;
+}
+
+#climate_rearControls_fanControls_minusButton.notpressed {
+	background: url(../images/climate/rear_auto/rear_fan_bg.png) no-repeat;
+}
+
+#climate_rearControls_fanControls_minusButton.pressed {
+	background: url(../images/climate/rear_auto/rear_fan_bg_pressed.png) no-repeat;
+}
+
+#climate_rearControls_fanControls_plusButton {
+	height: 58px;
+	width: 43px;
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	border: 1px solid #393939;
+	-webkit-border-top-right-radius: 3px;
+	-webkit-border-bottom-right-radius: 3px;
+	-moz-border-radius-topright: 3px;
+	-moz-border-radius-bottomright: 3px;
+}
+
+#climate_rearControls_fanControls_plusButton .ico {
+	top: 17px;
+	left: 10px;
+	position: absolute;
+}
+
+#climate_rearControls_fanControls_plusButton.notpressed {
+	background:url(../images/climate/rear_auto/rear_fan_bg.png) no-repeat;
+}
+
+#climate_rearControls_fanControls_plusButton.pressed {
+	background:url(../images/climate/rear_auto/rear_fan_bg_pressed.png) no-repeat;
+}
+
+#climate_rearControls_fanControls_indicator {
+	width:108px;
+	height:58px;
+	position:relative;
+	float:left;
+	border-bottom:1px solid #393939;
+	border-top:1px solid #393939;
+	cursor: default;
+}
+
+#climate_rearControls_fanControls_indicator .ico {
+	top: 17px;
+	left:43px;
+	position: absolute;
+}
+
+#climate_rearControls_fanControls_indicator .indr_inact {
+	background: url(../images/climate/fan_control/fan_ind_def.png) no-repeat;
+	width: 21px;
+	height: 44px;
+	position: relative;
+	display: inline-block;
+	background-position: 9px; 
+	top: 7px;
+	margin-left: -7px;
+	left: 8px;
+}
+
+#climate_rearControls_fanControls_indicator .indr_act {
+	background: url(../images/climate/fan_control/fan_ind_active.png) no-repeat;
+	width: 21px;
+	height: 44px;
+	position: relative;
+	display: inline-block;
+	left: 8px;
+	top: 7px;
+	margin-left: -7px;
+}
+
+
+/*  HELP VIEW MODE */
+
+#climate_help_blur {
+	width: 800px;
+	height: 480px;
+	z-index: 1001;
+	background: url(../images/climate/climate_help_bg.png) no-repeat;
+	visibility: hidden;
+}
+
+#climate_rear_help_blur {
+	width: 800px;
+	height: 480px;
+	z-index: 3001;
+	background: url(../images/climate/climate_rear_help_bg.png) no-repeat;
+	visibility: hidden;
+}
+
+/* HOME WIDGET */
+
+
+/* Climate power home button */
+
+#home_widgetClimate_powerButton {
+	width: 208px;
+	height: 50px;
+	left: 96px;
+	top: 35px;
+	cursor: pointer;
+}
+
+#home_widgetClimate_powerButton.notpressed {
+	background:url(../images/climate/widget/home-power-but.png) no-repeat !important;
+}
+
+#home_widgetClimate_powerButton.pressed {
+	background:url(../images/climate/widget/home-power-but-pressed.png) no-repeat !important;
+}
+
+
+/* Driver temp home label */
+
+#home_widgetClimate_driverTemp {
+	font-size: 36px;
+	top: 44px;
+	left: 108px;
+	visibility: hidden;
+}
+
+/* Passenger temp home label */
+
+#home_widgetClimate_passengerTemp {
+	font-size: 36px;
+	top: 44px;
+	left: 249px;
+	visibility: hidden;
+}
+
+
+/* Driver home controls */
+
+#home_widgetClimate_driverControls {
+	z-index: 1;
+	
+	top: 100px;
+	left: 35px;
+	width: 131px;
+	height: 58px;
+	
+	border-left: 1px solid #393939;
+	border-top: 1px solid #393939;
+	border-bottom: 1px solid #393939;
+	
+	border-top-left-radius: 3px;
+	-moz-border-radius-topleft: 3px;
+	-webkit-border-top-left-radius: 3px;
+	
+	border-bottom-left-radius: 3px;
+	-moz-border-radius-bottomleft: 3px;
+	-webkit-border-bottom-left-radius: 3px;
+
+}
+
+/* Driver home heated seat button */
+
+#home_widgetClimate_driverControls_heatedSeatButton {
+	width: 65px;
+	height: 58px;
+	position: relative;
+	float: left;
+	cursor: pointer;
+}
+
+#home_widgetClimate_driverControls_heatedSeatButton .ico {
+	top: 9px;
+	left: 18px;
+	position: absolute;
+}
+
+#home_widgetClimate_driverControls_heatedSeatButton.notpressed {
+	background: url(../images/climate/widget/climate-home-but-bg.png) no-repeat;
+}
+
+#home_widgetClimate_driverControls_heatedSeatButton.pressed {
+	background: url(../images/climate/widget/climate-home-but-bg-pressed.png) no-repeat;
+}
+
+#home_widgetClimate_driverControls_heatedSeatButton div {
+	width: 22px;
+	height: 17px;
+	top: 40px;
+	left: 20px;
+	position: relative;
+	float: left;
+	margin-left: -10px;
+}
+
+#home_widgetClimate_driverControls_heatedSeatButton div.small_ind_def {
+	background:url(../images/climate/small_ind_def.png) no-repeat;
+}
+
+#home_widgetClimate_driverControls_heatedSeatButton div.small_ind_active {
+	background:url(../images/climate/small_ind_active.png) no-repeat;
+}
+
+
+/* Driver home cooled seat button */
+
+#home_widgetClimate_driverControls_cooledSeatButton { 
+	width: 65px;
+	height: 58px;
+	position: relative;
+	float: left;
+	cursor: pointer;
+	border-left: 1px solid #393939;
+}
+
+#home_widgetClimate_driverControls_cooledSeatButton.divider {
+	border-left: 1px solid #F3C800 !important;
+	box-shadow: inset 1px 0px 0px 0px #F3C800;
+}
+
+#home_widgetClimate_driverControls_cooledSeatButton .ico {
+	top: 9px;
+	left: 18px;
+	position: absolute;
+}
+
+#home_widgetClimate_driverControls_cooledSeatButton.notpressed { 
+	background: url(../images/climate/widget/climate-home-but-bg.png) no-repeat;
+}
+
+#home_widgetClimate_driverControls_cooledSeatButton.pressed {
+	background: url(../images/climate/widget/climate-home-but-bg-pressed.png) no-repeat;
+}
+
+#home_widgetClimate_driverControls_cooledSeatButton div {
+	width: 22px;
+	height: 17px;
+	top: 40px;
+	left: 20px;
+	position: relative;
+	float: left;
+	margin-left: -10px;
+}
+
+#home_widgetClimate_driverControls_cooledSeatButton div.small_ind_def {
+	background: url(../images/climate/small_ind_def.png) no-repeat;
+}
+
+#home_widgetClimate_driverControls_cooledSeatButton div.small_ind_active {
+	background:url(../images/climate/small_ind_blue.png) no-repeat;
+}
+
+
+/* Driver home heated steer button */
+
+#home_widgetClimate_driverControls_heatedSteerButton {
+	width: 64px;
+	height: 58px;
+	float: left;
+	position: absolute;
+	top: 100px;
+	left: 167px;
+	cursor: pointer;
+	
+	border: 1px solid #393939;
+	
+	border-top-right-radius: 3px;
+	-moz-border-radius-topright: 3px;
+	-webkit-border-top-right-radius: 3px;
+	
+	border-bottom-right-radius: 3px;
+	-moz-border-radius-bottomright: 3px;
+	-webkit-border-bottom-right-radius: 3px;
+	
+}
+
+#home_widgetClimate_driverControls_heatedSteerButton.helpmode_blur_cont { 
+	background:url(../images/climate/heated_stearbutton_blur.png) no-repeat !important; 
+	width:75px !important; 
+	height:70px !important;
+	border:none !important;
+	top: 95px !important;
+	left:163px !important;
+}
+
+#home_widgetClimate_driverControls_heatedSteerButton .ico {
+	top: 8px;
+	left: 17px;
+	position: absolute;
+}
+
+#home_widgetClimate_driverControls_heatedSteerButton.notpressed {
+	background: url(../images/climate/widget/climate-home-but-r-bg.png) no-repeat;
+}
+
+#home_widgetClimate_driverControls_heatedSteerButton.pressed {
+	background: url(../images/climate/widget/climate-home-but-r-bg-pressed.png) no-repeat;
+}
+
+#home_widgetClimate_driverControls_heatedSteerButton .ind_inact {
+	position: absolute;
+	right: 24px;
+	top: 47px;
+	width: 21px;
+	height: 6px;
+	background: url(../images/climate/ind_horiz_def.png) no-repeat;
+}
+
+#home_widgetClimate_driverControls_heatedSteerButton .ind_act {
+	position: absolute;
+	right: 17px;
+	top: 40px;
+	background: url(../images/climate/ind_horiz_active_wheel.png) no-repeat;
+	width: 32px;
+	height: 19px;
+}
+
+
+/* Passenger home controls */
+
+#home_widgetClimate_passengerControls {
+	top: 100px;
+	left: 242px;
+	width: 130px;
+	height: 58px;
+	border: 1px solid #393939;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+}
+
+/* Passenger home heated seat button */
+
+#home_widgetClimate_passengerControls_heatedSeatButton { 
+	width: 65px;
+	height: 58px;
+	position: relative;
+	float: left;
+	cursor: pointer;
+}
+
+#home_widgetClimate_passengerControls_heatedSeatButton .ico {
+	top: 9px;
+	left: 18px;
+	position: absolute;
+}
+
+#home_widgetClimate_passengerControls_heatedSeatButton.notpressed {
+	background: url(../images/climate/widget/climate-home-but-bg.png) no-repeat;
+}
+
+#home_widgetClimate_passengerControls_heatedSeatButton.pressed {
+	background: url(../images/climate/widget/climate-home-but-bg-pressed.png) no-repeat;
+}
+
+#home_widgetClimate_passengerControls_heatedSeatButton div {
+	width: 22px;
+	height: 17px;
+	top: 40px;
+	left: 20px;
+	position: relative;
+	float: left;
+	margin-left: -10px;
+}
+
+#home_widgetClimate_passengerControls_heatedSeatButton div.small_ind_def {
+	background:url(../images/climate/small_ind_def.png) no-repeat;
+}
+
+#home_widgetClimate_passengerControls_heatedSeatButton div.small_ind_active {
+	background:url(../images/climate/small_ind_active.png) no-repeat;
+}
+
+
+/* Passenger home cooled seat button */
+
+#home_widgetClimate_passengerControls_cooledSeatButton {
+	width: 64px;
+	height: 58px;
+	position: relative;
+	float: left;
+	cursor: pointer;
+	border-left: 1px solid #393939;
+}
+
+#home_widgetClimate_passengerControls_cooledSeatButton.divider {
+	border-left: 1px solid #F3C800 !important;
+	box-shadow: inset 1px 0px 0px 0px #F3C800;
+}
+
+#home_widgetClimate_passengerControls_cooledSeatButton .ico {
+	top: 9px;
+	left: 18px;
+	position: absolute;
+}
+
+#home_widgetClimate_passengerControls_cooledSeatButton.notpressed {
+	background: url(../images/climate/widget/climate-home-but-r-bg.png) no-repeat;
+}
+
+#home_widgetClimate_passengerControls_cooledSeatButton.pressed {
+	background: url(../images/climate/widget/climate-home-but-r-bg-pressed.png) no-repeat;
+}
+
+#home_widgetClimate_passengerControls_cooledSeatButton div {
+	width: 22px;
+	height: 17px;
+	top: 40px;
+	left: 20px;
+	position: relative;
+	float: left;
+	margin-left: -10px;
+}
+
+#home_widgetClimate_passengerControls_cooledSeatButton div.small_ind_def {
+	background: url(../images/climate/small_ind_def.png) no-repeat;
+}
+
+#home_widgetClimate_passengerControls_cooledSeatButton div.small_ind_active {
+	background:url(../images/climate/small_ind_blue.png) no-repeat;
+}
+
+
+/* Climate Status */
+
+#status_climate {
+	bottom:0px;
+	right:0px;
+	text-align:right;
+	font-size:21px;
+	width:324px;
+	height:48px;
+	cursor:pointer;
+	background:url(../images/common/climate-status-bg.png) no-repeat; 
+	z-index:1;
+}
+
+#status_climate_off {
+	position: absolute;
+	right: 15px;
+}
+
+#status_climate_label {
+	display: block;
+	width: 100%;
+	visibility: hidden;
+}
+#status_climate_label span {
+	padding-right: 11px;
+}
+
+#status_climate_off .key {
+	position: absolute;
+	right: 220px;
+	top: 10px;
+}
+
+#status_climate_driverTemp {
+	position: absolute;
+	left: 60px;
+}
+
+#status_climate_passangerTemp {
+	position: absolute;
+	left: 265px;
+}
+
+#status_climate_driverSeat {
+	position: absolute;
+	left: 105px;
+	top: 10px;
+}
+
+#status_climate_passangerSeat {
+	position: absolute;
+	left: 220px;
+	top: 10px;
+}
