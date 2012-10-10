@@ -12,15 +12,15 @@
 #include "AppMgrRegistry.h"
 #include "AppPolicy.h"
 
-class AppMgr
+class AppMgrCore
 {
 public:
-	~AppMgr();
+	~AppMgrCore();
 
-	static AppMgr& getInstance();
+	static AppMgrCore& getInstance();
 
 private:
-	AppMgr();
+	AppMgrCore();
 };
 
 
