@@ -16,7 +16,12 @@ ProtocolHandler::ProtocolHandler(IProtocolObserver *observer, NsTransportLayer::
                 mBTAdapter(btAdapter)
 {
     std::cout << "enter ProtocolHandler::ProtocolHandler() \n";
-    //btAdapter->initBluetooth(this);
+    if (btAdapter)
+    {
+        mBTReader.setBTAdapter(btAdapter);
+        mBTWriter.setBTAdapter(btAdapter);
+        btAdapter->initBluetooth(this);
+    }
 }
 
 ProtocolHandler::~ProtocolHandler()
@@ -470,7 +475,8 @@ void ProtocolHandler::dataReceived()
 {
     std::cout << "enter ProtocolHandler::dataReceived()\n";
 
-    UInt32 dataSize = Bluetooth::getBuffer().size(); //CMessage::currentBlob.size();
+    //UInt32 dataSize = Bluetooth::getBuffer().size();
+    UInt32 dataSize = mBTAdapter->getBuffer().size();
     UInt8 *data = new UInt8[dataSize];
     ProtocolPacketHeader header;
 

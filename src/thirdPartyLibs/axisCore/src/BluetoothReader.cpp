@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "BluetoothReader.hpp"
-//#include "transport/bt/BluetoothAPI.hpp"
+#include "../../../appMain/CBTAdapter.hpp"
 
 
 int maxsize = 5000;
@@ -19,13 +19,24 @@ BluetoothReader::~BluetoothReader()
     delete [] mData;
 }
 
+void BluetoothReader::setBTAdapter(NsTransportLayer::CBTAdapter *adapter)
+{
+    mBTAdapter = adapter;
+}
+
 ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt32 dataSize)
 {
-    UInt32 blobBufferSize = Bluetooth::getBuffer().size();
+    UInt32 blobBufferSize = 0;
+    if (mBTAdapter)
+        blobBufferSize = mBTAdapter->getBuffer().size();
+    // = Bluetooth::getBuffer().size();
     if (dataSize >= blobBufferSize )
     {
-        memcpy(mData, Bluetooth::getBuffer().buffer(), blobBufferSize);
-        Bluetooth::releaseBuffer(Bluetooth::getBuffer() );
+        //memcpy(mData, Bluetooth::getBuffer().buffer(), blobBufferSize);
+        //Bluetooth::releaseBuffer(Bluetooth::getBuffer() );
+
+        memcpy(mData, mBTAdapter->getBuffer().buffer(), blobBufferSize);
+        mBTAdapter->releaseBuffer(mBTAdapter->getBuffer() );
     }
     else
     {

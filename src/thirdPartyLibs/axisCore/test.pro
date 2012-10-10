@@ -7,7 +7,8 @@ SOURCES += src/main.cpp \
     src/Message.cpp \
     src/BluetoothReader.cpp \
     src/BluetoothWriter.cpp \
-    src/MessageGenerator/CMessage.cpp
+    src/MessageGenerator/CMessage.cpp \
+    ../../appMain/CBTAdapter.cpp
 
 HEADERS += \
     include/ProtocolPacketHeader.hpp \
@@ -26,4 +27,7 @@ HEADERS += \
 INCLUDEPATH += \
     ./ \
     ./include \
-    ./src
+    ./src \
+    ./utils/misc \
+    ./transport/bt \
+    ../../appMain
