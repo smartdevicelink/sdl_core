@@ -27,6 +27,11 @@ public:
         mHandler->dataReceived();
     }
 
+    ~ProtocolObserver()
+    {
+        delete mHandler;
+    }
+
     virtual void sessionStartedCallback(const UInt8 sessionID)
     {
         mSessionID = sessionID;
