@@ -2,11 +2,12 @@
 #include <IProtocolObserver.hpp>
 #include <ProtocolHandler.hpp>
 
-#include "MessageGenerator/CMessage.hpp"
+//#include "MessageGenerator/CMessage.hpp"
+//#include "MessageGenerator/CMessage.cpp"
+
+//CMessage msg;
 
 using namespace std;
-
-Blob CMessage::currentBlob(0);
 
 class ProtocolObserver : public IProtocolObserver
 {
@@ -23,8 +24,17 @@ public:
         CMessage::generateInitialMessage();
         mHandler = new ProtocolHandler(this);
         mHandler->dataReceived();
-        CMessage::generateFinalMessage();
+        Bluetooth::releaseBuffer(Bluetooth::getBuffer() );
+        CMessage::generateSingleMessage("Hello ?");
         mHandler->dataReceived();
+
+        //CMessage::generateFinalMessage();
+        //mHandler->dataReceived();
+    }
+
+    ~ProtocolObserver()
+    {
+        delete mHandler;
     }
 
     virtual void sessionStartedCallback(const UInt8 sessionID)

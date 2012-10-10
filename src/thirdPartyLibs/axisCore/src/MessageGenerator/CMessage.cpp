@@ -215,22 +215,11 @@ Blob CMessage::getNextBlob()
    return blobQueue.front();
 }
 
-void CMessage::releaseCurrentBlob(Blob& blob)
+void CMessage::releaseCurrentBlob(const Blob& blob)
 {
    free(blob.buffer());
 
    blobQueue.pop();
 }
 
-namespace Bluetooth
-{
-   const Blob getBuffer()
-   {
-      return CMessage::getNextBlob();
-   }
 
-   void releaseBuffer(Blob& blob)
-   {
-      CMessage::releaseCurrentBlob(blob);
-   }
-}

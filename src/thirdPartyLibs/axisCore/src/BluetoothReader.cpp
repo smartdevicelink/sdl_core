@@ -2,7 +2,8 @@
 #include <iostream>
 
 #include "BluetoothReader.hpp"
-#include "transport/bt/BluetoothAPI.hpp"
+//#include "transport/bt/BluetoothAPI.hpp"
+
 
 int maxsize = 5000;
 
@@ -20,10 +21,11 @@ BluetoothReader::~BluetoothReader()
 
 ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt32 dataSize)
 {
-    UInt32 blobBufferSize = CMessage::currentBlob.size();//Bluetooth::getBuffer().size();
+    std::cout << "BluetoothReader::read raw buffer : " << Bluetooth::getBuffer().buffer() << "\n";
+    UInt32 blobBufferSize = Bluetooth::getBuffer().size();
     if (dataSize >= blobBufferSize )
     {
-        memcpy(mData, CMessage::currentBlob.buffer() /*Bluetooth::getBuffer().buffer()*/, blobBufferSize);
+        memcpy(mData, Bluetooth::getBuffer().buffer(), blobBufferSize);
     }
     else
     {

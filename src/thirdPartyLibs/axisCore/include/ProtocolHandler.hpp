@@ -8,7 +8,7 @@
 #include "BluetoothReader.hpp"
 #include "BluetoothWriter.hpp"
 #include "transport/bt/IBluetoothHandler.hpp"
-#include "MessageGenerator/CMessage.hpp"
+//#include "MessageGenerator/CMessage.hpp"
 
 class IProtocolObserver;
 
@@ -75,8 +75,7 @@ private:
     UInt32 mMessageID;
     UInt8 mSessionID;
     UInt8 mState;
-    std::map<UInt32, Message *> mOutMessagesMap;
-    std::map<UInt32, Message *> mInMessagesMap;
+    std::map<UInt32, Message *> mToUpperLevelMessagesMap;
     std::map<UInt32, Message *> mIncompleteMultiFrameMessages;
     BluetoothReader mBTReader;
     BluetoothWriter mBTWriter;
