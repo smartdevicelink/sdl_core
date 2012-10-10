@@ -9,7 +9,7 @@
 //#include "MessageGenerator/CMessage.hpp"
 #include "MessageGenerator/CMessage.hpp"
 
-
+const UInt8 PROTOCOL_HEADER_SIZE = 12;
 
 const UInt8 PROTOCOL_VERSION_1 = 0x01;
 

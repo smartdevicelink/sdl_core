@@ -46,7 +46,7 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
             return ERR_FAIL;
     }
 
-    //TODO write
+    //btAdapter->sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_SIZE);
 
     return ERR_OK;
 }

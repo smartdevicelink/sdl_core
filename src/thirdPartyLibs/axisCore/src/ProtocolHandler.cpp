@@ -12,7 +12,8 @@ ProtocolHandler::ProtocolHandler(IProtocolObserver *observer, NsTransportLayer::
                 mProtocolObserver(observer),
                 mMessageID(0),
                 mSessionID(0),
-                mState(BEFORE_HANDSHAKE)
+                mState(BEFORE_HANDSHAKE),
+                mBTAdapter(btAdapter)
 {
     std::cout << "enter ProtocolHandler::ProtocolHandler() \n";
     //btAdapter->initBluetooth(this);
@@ -417,7 +418,7 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
     }
     else
     {
-        std::cout << "ProtocolHandler::handleMultiFrameMessage() : FRAME NUMBER : " << header.frameData << "\n";
+        std::cout << "ProtocolHandler::handleMultiFrameMessage() : Consecutive frame\n";
         if (mIncompleteMultiFrameMessages.count(header.messageID) )
         {
             // TODO check submessages order
@@ -445,7 +446,12 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
                 std::cout << "ProtocolHandler::handleMultiFrameMessage() : addConsecutiveMessage FAIL \n";
                 retVal = ERR_FAIL;
             }
-        }   
+        }
+        else
+        {
+            std::cout << "ProtocolHandler::handleMultiFrameMessage() : no messageID in mIncompleteMultiFrameMessages\n";
+            retVal = ERR_FAIL;
+        }
     }
 
     return retVal;
