@@ -200,7 +200,11 @@ void CMessage::generateMultipleMessages(std::string payload, int messagesQuantit
       memcpy(sPacketData + 3, &sSessionID, 1);
       memcpy(sPacketData + 4, &sDataSize, 4);
       memcpy(sPacketData + 8, &sMessageID, 4);
-      memcpy(sPacketData + 12, (void*)const_cast<char*>(payload.c_str()), sDataSize);
+
+      if(0 != i)
+      {
+         memcpy(sPacketData + 12, (void*)const_cast<char*>(payload.c_str()), sDataSize);
+      }
 
       blobQueue.push(Blob((UInt8*)sPacketData, 12 + sDataSize, blobQueue.size()));
    }
