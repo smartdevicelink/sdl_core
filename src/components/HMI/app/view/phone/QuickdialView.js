@@ -10,13 +10,13 @@
  * @author		Artem Petrosyan
  */
 
-MFT.QuickdialPhoneView = Em.ContainerView.create({
-	
+MFT.QuickdialPhoneView = Em.ContainerView.create( MFT.LoadableView, {
+		
 	elementId:	'phone_quickdial',
 	
-	classNameBindings: ['MFT.States.phone.quickdial.active:active_state'],
-	
 	classNames: ['hidden'],
+	
+	stateObj: MFT.States.phone.quickdial,
 	
 	childViews: [
 		'help',

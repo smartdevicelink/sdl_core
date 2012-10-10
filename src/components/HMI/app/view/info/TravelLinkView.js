@@ -10,13 +10,15 @@
  * @author		Maksym Gerashchenko
  */
 
-MFT.InfoTravelLinkView = Em.ContainerView.create({
+MFT.InfoTravelLinkView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	classNameBindings: ['MFT.States.info.travelLink.active:active_state','MFT.helpMode'],
 	
 	elementId:	'info_travelLink',
 		
 	classNames: 'hidden',
+	
+	stateObj: MFT.States.info.travelLink,
 	
 	childViews: [
 		'imageLogo',

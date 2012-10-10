@@ -10,10 +10,11 @@
  * @author		Maksym Gerashchenko
  */
  
-MFT.SettingsVehicleDoorKeypadCodeView = Em.View.create({
+MFT.SettingsVehicleDoorKeypadCodeView = Em.View.create(MFT.LoadableView,{
 	classNameBindings:	   ['MFT.States.settings.vehicle.doorKeypadCode.active:active_state','MFT.helpMode'],
 	classNames:			  'hidden',
 	elementId:			   'settings_vehicle_DoorKeypadCode',
+	stateObj: MFT.States.settings.vehicle.doorKeypadCode,
 	template: Ember.Handlebars.compile(
 		'{{view MFT.Button '+
 			'class="button backButton" '+

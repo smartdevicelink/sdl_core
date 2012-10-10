@@ -10,11 +10,11 @@
  * @author		Artem Petrosyan
  */
 
-MFT.DialpadPhoneView = Em.ContainerView.create({
-	
+MFT.DialpadPhoneView = Em.ContainerView.create(  MFT.LoadableView, {
+		
 	elementId:	'phone_dialpad',
 	
-	classNameBindings: ['MFT.States.phone.phone.active:active_state'],
+	stateObj: MFT.States.phone.dialpad,
 	
 	classNames: ['hidden'],
 	

@@ -1081,20 +1081,20 @@ f
 
 /******************* For Settings.Vehicle Menu*******************/
 #settings_vehicle {
-	left: 160px;
-	top: 86px;
 	width: 640px;
-	height: 300px;
+	height: 480px;
+	left: 160px;
 	z-index: 1001;
 }
 
 .help-mode #settings_vehicle {
 	background-image: url(../images/settings/settings_vehicle_help.png);
 	background-repeat: no-repeat;
+	background-position-y: 85px;
 }
 
 #settings_vehicle_list{
-	top: 5px;
+	top: 90px;
 	left: 5px;
 }
 
@@ -1150,8 +1150,21 @@ f
 	margin-top: 11px;
 }
 
+#settings_vehicle_HealthReport .backButton {
+	margin-top: 11px;
+}
+
+#settings_vehicle_HealthReport .block-header-title {
+	margin-top: 11px;
+}
+
 #settings_vehicle .block-header-title {
 	margin-top: 11px;
+}
+
+#settings_vehicle_HealthReport .inner-wrapper {
+	left: 100px;
+	top: 71px;
 }
 
 #settings_vehicle .inner-wrapper {
@@ -1162,7 +1175,7 @@ f
 /******************* For Settings.Vehicle.AmbientLighting Menu*******************/
 
 #settings_vehicle_ambientLighting {
-	top: -38px;
+	top: 48px;
 	left: -160px;
 	/*top: 48px;*/
 	width: 800px;
@@ -1179,7 +1192,7 @@ f
 /******************* For Settings.Vehicle.HealthReport Menu*******************/
 
 #settings_vehicle_HealthReport {
-	top: -38px;
+	top: 48px;
 	left: -160px;
 	width: 800px;
 	height: 384px;
@@ -1273,7 +1286,7 @@ f
 
 /******************* For Settings.Vehicle.Door Keypad Code Menu*******************/
 #settings_vehicle_DoorKeypadCode {
-	top: -38px;
+	top: 48px;
 	left: -160px;
 	width: 800px;
 	height: 384px;
@@ -1344,7 +1357,7 @@ f
 
 /******************* For Settings.Vehicle.Rear View Camera*******************/
 #settings_vehicle_RearCamera {
-	top: -38px;
+	top: 48px;
 	left: -160px;	
 	width: 800px;
 	height: 384px;
@@ -1435,6 +1448,7 @@ f
 }
 
 #settings_vehicle_enableValetMode_popUp .blackFilter{
+	left: -160px;
 	width: 800px;
 	height: 480px;
 	background-color: #000;
@@ -1443,7 +1457,7 @@ f
 
 #settings_vehicle_enableValetMode_popUp .wrapper{
 	top: 79px;
-	left: 233px;
+	left: 80px;
 	height: 320px;
 	width: 330px;
 	background-color: #000;
@@ -1513,7 +1527,7 @@ f
 
 /******* For Settings.Vehicle.EnableValetMode.EnterPin*******/
 #settings_vehicle_enableValetMode_enteringPin {
-	top: -38px;
+	top: 53px;
 	left: -160px;
 	width: 800px;
 	height: 384px;
@@ -2704,6 +2718,20 @@ position: relative;
 	left: 75px;
 }
 
+#settings_help_911Assist .backButton{
+	margin-top: 11px;
+}
+
+#settings_help_911Assist .inner-content{
+	top: 71px;
+}
+
+#settings_help_911Assist .block-header-title {
+	top: 21px;
+	left: 75px;
+}
+
+
 #settings_help_list_left, #settings_help_list_right {
 	width: 310px;
 	height: 251px;
@@ -3084,7 +3112,7 @@ position: relative;
 
 /******************* For Settings.Help.911Assist Menu*******************/
 #settings_help_911Assist {
-	top: -38px;
+	top: -40px;
 	left: -160px;
 	width: 800px;
 	height: 384px;

@@ -9,13 +9,16 @@
  *
  * @author		Igor Zhavoronkin
  */
-MFT.AvInView = Em.View.create({
+MFT.avinView = Em.View.create(MFT.LoadableView,{
 		/** Bind class for visual representation */
 		classNameBindings: 	['MFT.States.media.avin.active:active_state'],
 		/** Class Name */
 		classNames: 'hidden',
 		/** View ID*/
 		elementId:	'media_avin',
+		
+		stateObj: MFT.States.media.avin,
+		
 		/*Template*/
 		template: Ember.Handlebars.compile(
 				'<div class="avin-info">'+

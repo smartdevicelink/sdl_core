@@ -10,10 +10,11 @@
  * @author		Maksym Gerashchenko
  */
  
-MFT.SettingsVehicleAmbientLightingView = Em.View.create({
+MFT.SettingsVehicleAmbientLightingView = Em.View.create(MFT.LoadableView,{
 	classNameBindings:	   ['MFT.States.settings.vehicle.ambientLighting.active:active_state','MFT.helpMode'],
 	classNames:			  'hidden',
 	elementId:			   ['settings_vehicle_ambientLighting'],
+	stateObj: MFT.States.settings.vehicle.ambientLighting,
 	template: Ember.Handlebars.compile(
 		'{{view MFT.Button '+
 			'class="button backButton" '+

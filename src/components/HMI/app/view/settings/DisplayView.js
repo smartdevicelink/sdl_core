@@ -10,13 +10,15 @@
  * @author		Maksym Gerashchenko
  */
  
-MFT.SettingsDisplayView = Em.View.create({
+MFT.SettingsDisplayView = Em.View.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.settings.display.active:active_state','MFT.helpMode'],
+	classNameBindings: ['MFT.helpMode'],
 	
 	elementId:		'settings_display',
 	
 	classNames:	   'hidden',
+	
+	stateObj: MFT.States.settings.display,
 	
 	activeDisabled: function(){
 		if (!MFT.helpMode) {

@@ -10,13 +10,15 @@
  * @author		Maksym Gerashchenko
  */
  
-MFT.InfoCalendarView = Em.View.create({
+MFT.InfoCalendarView = Em.View.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
 	classNameBindings: ['MFT.States.info.calendar.active:active_state','MFT.helpMode'],
 	
 	elementId:		'info_calendar',
 	
 	classNames:	   'hidden',
+	
+	stateObj: MFT.States.info.calendar,
 	
 	activeDisabled: function(){
 		if (!MFT.helpMode) {

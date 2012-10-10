@@ -5,6 +5,8 @@
 		<meta name="viewport" content="width=800,user-scalable=no" />
 		<title>MFT Guide v2</title>
 		<!--Styles-->
+		<!--<link rel="stylesheet" type="text/css" href="css/ffw.css" />-->
+		<link rel="stylesheet" type="text/css" href="css/buttonControls.css" />
 		<link rel="stylesheet" type="text/css" href="css/general.css" />
 		<link rel="stylesheet" type="text/css" href="css/home.css" />
 		<link rel="stylesheet" type="text/css" href="css/climate.css" />
@@ -20,14 +22,14 @@
 		<script type="text/javascript" src="lib/handlebars-1.0.0.beta.6.js"></script>
 		
 		<!-- RELEASE's min versions -->
-		<!--
+		
 		<script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
 		<script type="text/javascript" src="lib/ember-1.0.pre.min.js"></script>
-		-->
+		
 		
 		<!-- DEBUG versions -->
-		<script type="text/javascript" src="lib/jquery-1.7.2.js"></script>
-		<script type="text/javascript" src="lib/ember-1.0.pre.js"></script>
+		<!--<script type="text/javascript" src="lib/jquery-1.7.2.js"></script>
+		<script type="text/javascript" src="lib/ember-1.0.pre.js"></script>-->
 	
 		
 	</head>
@@ -47,6 +49,7 @@
         
 		<!-- Framework -->
 		<script type="text/javascript" src="ffw/Framework.js"></script>
+        <script type="text/javascript" src="ffw/LoadBalancer/AppendScript.js"></script>
 
 		<script type="text/javascript" src="ffw/Size.js"></script>
 		<script type="text/javascript" src="ffw/WebSocketSimulator.js"></script>
@@ -57,8 +60,13 @@
 		<script type="text/javascript" src="ffw/BackendRPC.js"></script>	
 		<script type="text/javascript" src="ffw/VideoPlayerRPC.js"></script>
 		<script type="text/javascript" src="ffw/Scale.js"></script>
+		
+		<!-- FFW UI -->
+		<!--
+		<script type="text/javascript" src="ffw/ui/AbstractButton.js"></script>
+		-->
+		
         <script type="text/javascript" src="ffw/ImagePreloader.js"></script>
-        
 
 		<!-- APP -->
 		<script type="text/javascript" src="app/Flags.js"></script>
@@ -69,7 +77,7 @@
 		<script type="text/javascript" src="locale/rus.js"></script>
 		<script type="text/javascript" src="locale/locale.js"></script>
 		
-		<!-- UI controlls -->
+		<!-- UI controlls -->		
 		<script type="text/javascript" src="app/controlls/Button.js"></script>
         <script type="text/javascript" src="app/view/WarningOkButtonView.js"></script>
         <script type="text/javascript" src="app/view/WOSkipButtonView.js"></script>
@@ -86,11 +94,13 @@
 		<script type="text/javascript" src="app/controlls/ButtonsGroup.js"></script>
         <script type="text/javascript" src="app/controlls/LabelPlusToggleButton.js"></script>
         <script type="text/javascript" src="app/controlls/LabelPlusButton.js"></script>
-        
+        <!--
         <script type="text/javascript" src="app/controlls/MCS/Cushion.js"></script>
+        -->
 
-		<!-- CAN -->
-		<script type="text/javascript" src="app/util/CAN.js"></script>
+		<!-- utils -->
+		<script type="text/javascript" src="app/util/TransitionIterator.js"></script>
+		<script type="text/javascript" src="app/util/StateVisitor.js"></script>
 		
 		<!-- Models -->
 		<script type="text/javascript" src="app/model/abstract/RangedValue.js"></script>
@@ -118,6 +128,7 @@
         <script type="text/javascript" src="app/model/HTMLVideoPlayerModel.js"></script>
         <script type="text/javascript" src="app/model/FAQModel.js"></script>
 		
+		<!--
 		<script type="text/javascript" src="app/model/settings/MCS/SettingsData.js"></script>
 		<script type="text/javascript" src="app/model/settings/MCS/SettingsData1_1.js"></script>
 		<script type="text/javascript" src="app/model/settings/MCS/SettingsData1_2.js"></script>
@@ -134,6 +145,7 @@
 		<script type="text/javascript" src="app/model/settings/MCS/SettingsData7_1.js"></script>
 		<script type="text/javascript" src="app/model/settings/MCS/SettingsModel.js"></script>
 		<script type="text/javascript" src="app/model/settings/MCS/SettingsModelCAN.js"></script>
+		-->
 
 
 		<!-- Controllers -->                                    
@@ -145,12 +157,17 @@
         <script type="text/javascript" src="app/controller/FAQController.js"></script>
         <script type="text/javascript" src="app/controller/InfoController.js"></script>
         <script type="text/javascript" src="app/controller/VideoPlayerController.js"></script>
+        <!--
         <script type="text/javascript" src="app/controller/MCS/MCSController.js"></script>
+        -->
 		
 		<!-- mixins -->
+		<!--
 		<script type="text/javascript" src="app/mixins/MCS/SelectedIndex.js"></script>
 		<script type="text/javascript" src="app/mixins/MCS/Dragable.js"></script>
 		<script type="text/javascript" src="app/mixins/MCS/Dropable.js"></script>
+		-->
+        <script type="text/javascript" src="app/mixins/ScriptLoad.js"></script>
 
 		<!-- Views -->
         <!--Video Error Popup View-->
@@ -160,112 +177,51 @@
 		<!-- help views -->
 		<script type="text/javascript" src="app/view/help/Block.js"></script>
 		<script type="text/javascript" src="app/view/help/Divider.js"></script>
+		
 		<!-- climate views -->
-		<script type="text/javascript" src="app/view/climate/ClimateView.js"></script>
-		<script type="text/javascript" src="app/view/climate/StatusClimateView.js"></script>
-		<script type="text/javascript" src="app/view/climate/WidgetClimateView.js"></script>
+		<script type="text/javascript" src="app/view/climateView.js"></script>
+		
 		<!-- media views -->
 		<script type="text/javascript" src="app/view/media/common/HomePresetView.js"></script>
-        <script type="text/javascript" src="app/view/media/common/MoreInfoLabel.js"></script>
         <script type="text/javascript" src="app/view/media/common/PresetsView.js"></script>
-		<script type="text/javascript" src="app/view/media/common/MoreInfoView.js"></script>
-		<script type="text/javascript" src="app/view/media/common/BrowseView.js"></script>
-        <script type="text/javascript" src="app/view/media/common/BrowseAllView.js"></script>
-        <script type="text/javascript" src="app/view/media/common/MediaPlayerView.js"></script>
         <script type="text/javascript" src="app/view/media/common/DirectTune.js"></script>
-        <script type="text/javascript" src="app/view/media/USBBrowseView.js"></script>
-		<script type="text/javascript" src="app/view/media/StatusMediaView.js"></script>
-		<script type="text/javascript" src="app/view/media/WidgetMediaView.js"></script>	
 		<script type="text/javascript" src="app/view/media/common/LeftMenuView.js"></script>
         <script type="text/javascript" src="app/view/media/common/RightMenuView.js"></script>
-        <script type="text/javascript" src="app/view/media/AMFMInfoView.js"></script>
-        <script type="text/javascript" src="app/view/media/SiriusView.js"></script>
-        <script type="text/javascript" src="app/view/media/BlueToothView.js"></script>
-        <script type="text/javascript" src="app/view/media/AvInView.js"></script>
-        <script type="text/javascript" src="app/view/media/common/OptionsView.js"></script> 
-        <script type="text/javascript" src="app/view/media/MediaView.js"></script>
-       
-        <!-- navigation views -->
-        <script type="text/javascript" src="app/view/navigation/destination/MyHomeView.js"></script>
-        <script type="text/javascript" src="app/view/navigation/destination/FavoritesView.js"></script>
-        <script type="text/javascript" src="app/view/navigation/destination/PreviousDestinationsView.js"></script>
-		<script type="text/javascript" src="app/view/navigation/destination/POIView.js"></script>
-        <script type="text/javascript" src="app/view/navigation/destination/EmergencyView.js"></script>
-        <script type="text/javascript" src="app/view/navigation/destination/StreetAddressView.js"></script>
-        <script type="text/javascript" src="app/view/navigation/destination/IntersectionView.js"></script>
-        <script type="text/javascript" src="app/view/navigation/destination/CityCenterView.js"></script>
-		<script type="text/javascript" src="app/view/navigation/destination/MapView.js"></script>
-        <script type="text/javascript" src="app/view/navigation/destination/PreviousStartingsPointView.js"></script> 
-        <script type="text/javascript" src="app/view/navigation/destination/FreeWayView.js"></script>       
-		<script type="text/javascript" src="app/view/navigation/destination/LatitudeLongitudeView.js"></script> 
-		<script type="text/javascript" src="app/view/navigation/destination/DestinationView.js"></script>
-		<script type="text/javascript" src="app/view/navigation/NavigationView.js"></script>
-		<script type="text/javascript" src="app/view/navigation/StatusNavigationView.js"></script>
-		<script type="text/javascript" src="app/view/navigation/WidgetNavigationView.js"></script>	
+        
+        <script type="text/javascript" src="app/view/mediaView.js"></script>
+
+		<!-- Navigation view-->
+		<script type="text/javascript" src="app/view/navigationView.js"></script>
 
 		<!-- phone views -->
-		<script type="text/javascript" src="app/view/phone/DialpadView.js"></script>
-		<script type="text/javascript" src="app/view/phone/QuickdialView.js"></script>
-		<script type="text/javascript" src="app/view/phone/PhonebookView.js"></script>
-		<script type="text/javascript" src="app/view/phone/HistoryView.js"></script>
-		<script type="text/javascript" src="app/view/phone/MessagingView.js"></script>
-        <script type="text/javascript" src="app/view/phone/settings/BluetoothDevicesView.js"></script>
-        <script type="text/javascript" src="app/view/phone/settings/PhoneRingerView.js"></script>
-        <script type="text/javascript" src="app/view/phone/settings/TextMessageNotificationView.js"></script>
-        <script type="text/javascript" src="app/view/phone/settings/InternetDataConnectionView.js"></script>
-        <script type="text/javascript" src="app/view/phone/settings/ManagePhoneBookView.js"></script>
-		<script type="text/javascript" src="app/view/phone/SettingsView.js"></script>
-		<script type="text/javascript" src="app/view/phone/PhoneView.js"></script>
-		<script type="text/javascript" src="app/view/phone/StatusPhoneView.js"></script>
-		<script type="text/javascript" src="app/view/phone/WidgetPhoneView.js"></script>
+		<script type="text/javascript" src="app/view/phoneView.js"></script>
+		
+		<!-- settings views -->
+		<script type="text/javascript" src="app/view/settingsView.js"></script>
+		
+		<!-- info views -->
+		<script type="text/javascript" src="app/view/infoView.js"></script>
 
 		<!-- home views -->
-		<script type="text/javascript" src="app/view/HomeView.js"></script>
-		<script type="text/javascript" src="app/view/TopControls.js"></script>
-        <script type="text/javascript" src="app/view/BottomControls.js"></script>
-
-        <!--settings views-->
-        <script type="text/javascript" src="app/view/settings/ClockView.js"></script>
-        <script type="text/javascript" src="app/view/settings/DisplayView.js"></script>
-        <script type="text/javascript" src="app/view/settings/sound/SoundView.js"></script>
-        <script type="text/javascript" src="app/view/settings/sound/SetBalanceAndFadeView.js"></script>
+		<script type="text/javascript" src="app/view/home/controlButtons.js"></script>
+		
+		<script type="text/javascript" src="app/view/home/topControls.js"></script>
+        <script type="text/javascript" src="app/view/home/bottomControls.js"></script>
         
-        <script type="text/javascript" src="app/view/settings/vehicle/VehicleView.js"></script>
-        <script type="text/javascript" src="app/view/settings/vehicle/AmbientLightingView.js"></script>
-        <script type="text/javascript" src="app/view/settings/vehicle/HealthReportView.js"></script>    
-        <script type="text/javascript" src="app/view/settings/vehicle/DoorKeypadCodeView.js"></script>  
-        <script type="text/javascript" src="app/view/settings/vehicle/RearCameraView.js"></script>    
-        <script type="text/javascript" src="app/view/settings/vehicle/enableValetMode/EnterPinView.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/enableValetMode/EnableValetModePopUpView.js"></script>
-		<script type="text/javascript" src="app/view/settings/innersettings/SettingsView.js"></script>
-        <script type="text/javascript" src="app/view/settings/innersettings/VoiceControlView.js"></script>
-        <script type="text/javascript" src="app/view/settings/innersettings/media/MediaPlayerView.js"></script>
-        <script type="text/javascript" src="app/view/settings/innersettings/media/BluetoothDevicesVie.js"></script>
-        
-        <!--settings/navigation views-->
-        <script type="text/javascript" src="app/view/settings/innersettings/navigation/MapPreferences.js"></script>
-        <script type="text/javascript" src="app/view/settings/innersettings/navigation/RoutePreferences.js"></script>
-		<script type="text/javascript" src="app/view/settings/innersettings/navigation/NavigationPreferences.js"></script>
-        <script type="text/javascript" src="app/view/settings/innersettings/navigation/TrafficPreferences.js"></script>
-        <script type="text/javascript" src="app/view/settings/innersettings/navigation/AvoidAreasView.js"></script>
-        <script type="text/javascript" src="app/view/settings/innersettings/navigation/NavigationView.js"></script>
-        
-		<script type="text/javascript" src="app/view/settings/innersettings/system/KeyboardLayoutView.js"></script>
-        <script type="text/javascript" src="app/view/settings/innersettings/system/InstallApplicationsView.js"></script>
-        <script type="text/javascript" src="app/view/settings/innersettings/WirelessInternetView.js"></script>     
-        <script type="text/javascript" src="app/view/settings/innersettings/system/SystemView.js"></script>
-        
-		<script type="text/javascript" src="app/view/settings/help/HelpView.js"></script>    
-        <script type="text/javascript" src="app/view/settings/help/WhereAmIView.js"></script>     
-        <script type="text/javascript" src="app/view/settings/help/SystemInformationView.js"></script>
-        <script type="text/javascript" src="app/view/settings/help/SoftwareLicensesView.js"></script>
-        <script type="text/javascript" src="app/view/settings/help/911AssistView.js"></script> 
-        <script type="text/javascript" src="app/view/settings/help/DrivingRestrictionsView.js"></script>
-        <script type="text/javascript" src="app/view/settings/help/VoiceCommandListView.js"></script>
-     
-		<script type="text/javascript" src="app/view/settings/SettingsView.js"></script>
-
+        <script type="text/javascript" src="app/view/home/statusMediaView.js"></script>
+		<script type="text/javascript" src="app/view/home/widgetMediaView.js"></script>
+		<script type="text/javascript" src="app/view/home/statusPhoneView.js"></script>
+		<script type="text/javascript" src="app/view/home/widgetPhoneView.js"></script>
+		<script type="text/javascript" src="app/view/home/statusNavigationView.js"></script>
+		<script type="text/javascript" src="app/view/home/widgetNavigationView.js"></script>	
+		<script type="text/javascript" src="app/view/home/statusClimateView.js"></script>
+		<script type="text/javascript" src="app/view/home/widgetClimateView.js"></script>
+		
+		<script type="text/javascript" src="app/view/homeView.js"></script>
+		
+		
 		<!--MCS Views not needed for MFT Guide releases -->
+		<!--
 		<script type="text/javascript" src="app/view/settings/vehicle/MCS/IndicatorControl.js"></script>
 		<script type="text/javascript" src="app/view/settings/vehicle/MCS/AdjustView.js"></script>
 		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView.js"></script>
@@ -285,27 +241,15 @@
 		<script type="text/javascript" src="app/view/settings/vehicle/MCS/SeatsMassageDialogView.js"></script>
 		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView7_1_appendix.js"></script>
 		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MCSConcept7_1_VideoHandler.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MultiContourSeat.js"></script>
-                
-        <!--info views-->
-		<script type="text/javascript" src="app/view/info/ServicesView.js"></script>
-        <script type="text/javascript" src="app/view/info/TravelLinkView.js"></script>
-        <script type="text/javascript" src="app/view/info/AlertsView.js"></script>
-		<script type="text/javascript" src="app/view/info/CalendarView.js"></script>
-        <script type="text/javascript" src="app/view/info/AppsView.js"></script>
-        <script type="text/javascript" src="app/view/info/InfoView.js"></script>  
-            
+        -->
         
         <!--player view-->
         <script type="text/javascript" src="app/view/player/PlayerControllsView.js"></script>
-		
-        <!--faq view-->
-        <script type="text/javascript" src="app/view/help/FAQView.js"></script>
 				
         <!-- STATE MACHINE -->
         <script type="text/javascript" src="app/AppViews.js"></script>
 		<script type="text/javascript" src="app/StateManager.js"></script>	
-		
+
         <!-- Big Images Preloader block -->
         <div id="preloader">
         </div>

@@ -51,10 +51,10 @@ MFT.ClimateController = Em.Object.create({
 			if ( MFT.helpMode ) {
 				MFT.VideoPlayerController.start('climate_rear_Climate', 'climate.rear');
 			} else {
-				MFT.States.goToState('rear');
+				MFT.States.goToState('climate.rear');
 			}			
 		} else {
-			MFT.States.goToState('front');
+			MFT.States.goToState('climate.front');
 		}
 	},
 	

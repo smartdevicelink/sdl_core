@@ -128,7 +128,34 @@ MFT.Button = Em.View.extend(Ember.TargetActionSupport, {
 		this.set('touchleave', this.targetElement !== document.elementFromPoint(event.originalEvent.touches[0].pageX,event.originalEvent.touches[0].pageY));
 	},
 	
+	// component default template
+	defaultTemplate: Em.Handlebars.compile(
+		'<img class="ico" {{bindAttr src="view.icon"}} />'+
+		'<span>{{view.text}}</span>'
+	),
+	
+	templates: {
+		rightText: Em.Handlebars.compile(
+			'<img class="ico" {{bindAttr src="view.icon"}} />'+
+			'<span>{{view.text}}</span>'+
+			'<span class="right_text">{{view.rightText}}</span>'
+		),
+		
+		arrow: Em.Handlebars.compile(
+			'<img class="ico" {{bindAttr src="view.icon"}} />'+
+			'<span>{{view.text}}</span>'+
+			'<img class="arrow-ico" src="images/common/arrow_ico.png" />'
+		),
+		
+		rightIcon: Em.Handlebars.compile(
+			'<img class="ico" {{bindAttr src="view.icon"}} />'+
+			'<span>{{view.text}}</span>'+
+			'<img class="right_ico" {{bindAttr src="view.righticon"}} />'
+		)
+	}
+	
 	/** Define button template */
+	/*
 	template: Ember.Handlebars.compile(
 		'{{#with view}}'+
 			'{{#if icon}}<img class="ico" {{bindAttr src="icon"}} />{{/if}}'+
@@ -138,4 +165,5 @@ MFT.Button = Em.View.extend(Ember.TargetActionSupport, {
 			'{{#if arrow}}<img class="arrow-ico" src="images/common/arrow_ico.png" />{{/if}}'+
 		'{{/with}}'
 	)
+	*/
 });

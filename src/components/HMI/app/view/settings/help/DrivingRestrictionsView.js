@@ -10,11 +10,12 @@
  * @author		Maksym Gerashchenko
  */
  
-MFT.SettingsHelpDrivingRestrictionsView = Em.View.create({
+MFT.SettingsHelpDrivingRestrictionsView = Em.View.create(MFT.LoadableView,{
 	classNameBindings:	   ['MFT.States.settings.help.drivingRestrictions.active:active_state',],
 	controller:			  'MFT.SettingsController',
 	classNames:			  'hidden',
 	elementId:			   ['settings_help_driver_restrictions'],
+	stateObj: MFT.States.settings.help.drivingRestrictions,
 	template: Ember.Handlebars.compile(
 				
 		'{{view MFT.Button '+

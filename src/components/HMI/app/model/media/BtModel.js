@@ -9,7 +9,9 @@
  *
  * @author		Gerashchenko Maksym
  */
-MFT.BtModel = Em.Object.create( {
+MFT.BTModel = Em.Object.create( {
+	
+	active: false,
 	
 	optionsData: Em.Object.create({
 				

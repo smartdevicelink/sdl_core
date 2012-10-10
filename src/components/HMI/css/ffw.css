@@ -1,0 +1,11 @@
+.ffw-button {
+	cursor: pointer;
+}
+
+.ffw-button.pressed {
+	background-color: aqua;
+}
+
+.ffw-button.not-pressed {
+	background-color: red;
+}

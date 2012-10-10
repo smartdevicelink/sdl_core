@@ -14,12 +14,15 @@ MFT = Em.Application.create({
   	
 	/** Override for mouse/touch events */
   	customEvents: ('ontouchstart' in document.documentElement) 
-  					? { touchstart:	'actionDown', touchend:	'actionUp' , touchleave: 'touchLeave'}
-  					: { mousedown:	'actionDown', mouseup:	'actionUp' },
+  					? { touchstart:	'actionDown', touchend:	'actionUp' , touchmove: 'actionMove'}
+  					: { mousedown:	'actionDown', mouseup:	'actionUp', mousemove: 'actionMove' },
   					
   	
   	/** Help mode flag {boolean} */
-  	helpMode: 	false,
+  	helpMode: false,
+ 	
+ 	// determine home view {string}
+ 	homeView: 'home',
  	
 	init: function() {
 		Em.Logger.log('MFT: Application init!');

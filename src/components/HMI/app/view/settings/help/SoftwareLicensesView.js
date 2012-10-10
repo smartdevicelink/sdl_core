@@ -10,7 +10,7 @@
  * @author		Maksym Gerashchenko
  */
 
-MFT.SettingsHelpSoftwareLicensesView = Em.ContainerView.create({
+MFT.SettingsHelpSoftwareLicensesView = Em.ContainerView.create(MFT.LoadableView,{
 	classNameBindings:	['MFT.States.settings.help.softwareLicenses.active:active_state','MFT.helpMode'],
 	classNames:		   ['hidden'],
 	dataListBinding: 	  'MFT.SettingsData.clocklist',
@@ -22,7 +22,7 @@ MFT.SettingsHelpSoftwareLicensesView = Em.ContainerView.create({
 							  'installUpdatesButton',
 							  'list'
 						  ],	
-						  						  
+	stateObj: 	MFT.States.settings.help.softwareLicenses,				  						  
 	backButton: MFT.Button.extend({
 	classNames:		  ['backButton','button'],		
 	action:			  'back',
@@ -60,9 +60,10 @@ MFT.SettingsHelpSoftwareLicensesView = Em.ContainerView.create({
 		textBinding:	  'MFT.locale.label.view_settings_help_softwareLicenses_install',
 		classNames:		  [,'button'],
 		elementId:	       'installUpdatesButton',
-		goToState:	       'settings.settings.system.installApplications',
+		goToState:	       'settings.system.installApplications',
 		action:			  'onState',
 		target:			  'MFT.SettingsController',
+		onDown: false
 	}),
 					  
 	

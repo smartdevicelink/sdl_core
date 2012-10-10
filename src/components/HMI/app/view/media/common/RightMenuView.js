@@ -14,12 +14,12 @@ MFT.RightMenuView = Em.ContainerView.create({
 		elementId:	'media_rightmenu',
 		/** Class Names bindings for visual representation*/
 		classNameBindings: 	[
-			'MFT.States.media.cd.active:visible_display' ,
-			'MFT.States.media.usb.active:visible_display',
-			'MFT.States.media.sd.active:visible_display',
-			'MFT.States.media.Sirius.active:visible_display',
-			'MFT.States.media.Fm.active:visible_display',
-			'MFT.States.media.Am.active:visible_display',
+			'MFT.CDModel.active:visible_display' ,
+			'MFT.SDModel.active:visible_display',
+			'MFT.USBModel.active:visible_display',
+			'MFT.SiriusModel.active:visible_display',
+			'MFT.FmModel.active:visible_display',
+			'MFT.AmModel.active:visible_display',
 			'MFT.helpMode:help_mode'
 		],
 		/** Class Names */
@@ -41,39 +41,21 @@ MFT.RightMenuView = Em.ContainerView.create({
 		
 		/**  Help Mode Yellow Borders*/
 		help_yellow_borders:Em.View.extend({
-			
 			elementId: 'yellow_borders',
-			
-			currentTabBinding:  Ember.Binding.oneWay('MFT.MediaController.currentSelectedTab'),
-			
 			classNameBindings: 'MFT.helpMode:active_state',
-			
 			classNames: 'hidden',
-			
-			isAMFM: function(){
-				return (this.currentTab == 'AM' || this.currentTab == 'FM') && MFT.MediaController.currentMediaGroup == 'radio';
-			}.property('MFT.MediaController.currentSelectedTab','MFT.MediaController.currentMediaGroup'),
-			
-			isSirius: function(){
-				return this.currentTab == 'SIRIUS' && MFT.MediaController.currentMediaGroup == 'radio';
-			}.property('MFT.MediaController.currentSelectedTab','MFT.MediaController.currentMediaGroup'),
-			
-			isCDs: function(){
-				return MFT.MediaController.currentMediaGroup == 'CDs';
-			}.property('MFT.MediaController.currentMediaGroup'),
-			
 			/** Define button template */
 				template: Ember.Handlebars.compile(
 					'{{#with view}}'+
-						'<div id="media_rightmenu_yellow_amfm_borders" {{bindAttr class="isAMFM:visible_display"}}>'+
+						'<div id="media_rightmenu_yellow_amfm_borders" {{bindAttr class="MFT.AmModel.active:visible_display MFT.FmModel.active:visible_display"}}>'+
 							'<div id="amfmscan"></div>'+
 							'<div id="amfmdirect"></div>'+
 						'</div>'+
-						'<div id="media_rightmenu_yellow_sir_borders" {{bindAttr class="isSirius:visible_display"}}>'+
+						'<div id="media_rightmenu_yellow_sir_borders" {{bindAttr class="MFT.SiriusModel.active:visible_display"}}>'+
 							'<div id="uplist_borders"></div>'+
 							'<div id="bottomlist_borders"></div>'+
 						'</div>'+
-						'<div id="media_rightmenu_yellow_cd_borders" {{bindAttr class="isCDs:visible_display"}}>'+
+						'<div id="media_rightmenu_yellow_cd_borders" {{bindAttr class="MFT.CDModel.active:visible_display MFT.SDModel.active:visible_display MFT.USBModel.active:visible_display"}}>'+
 							'<div id="triple_borders"></div>'+
 							'<div id="single_border"></div>'+
 						'</div>'+
@@ -85,23 +67,13 @@ MFT.RightMenuView = Em.ContainerView.create({
 				elementId: 'yellow_dividers',
 				classNameBindings: 'MFT.helpMode:active_state',
 				classNames: 'hidden',
-
-				/** Define button template */
-				currentTabBinding:  Ember.Binding.oneWay('MFT.MediaController.currentSelectedTab'),
-				
-				isSirius: function(){
-					return this.currentTab == 'SIRIUS' && MFT.MediaController.currentMediaGroup == 'radio';
-				}.property('MFT.MediaController.currentSelectedTab','MFT.MediaController.currentMediaGroup'),
-				isCDs: function(){
-					return MFT.MediaController.currentMediaGroup == 'CDs';
-				}.property('MFT.MediaController.currentMediaGroup'),
 				template: Ember.Handlebars.compile(
 					'{{#with view}}'+
-						'<div id="media_rightmenu_yellow_sir_dividers" {{bindAttr class="isSirius:visible_display"}}>'+
+						'<div id="media_rightmenu_yellow_sir_dividers" {{bindAttr class="MFT.SiriusModel.active:visible_display"}}>'+
 							'<div class="yellow_divider top"></div>'+
 							'<div class="yellow_divider bottom"></div>'+
 						'</div>'+
-						'<div id="media_rightmenu_yellow_cd_dividers" {{bindAttr class="isCDs:visible_display"}}>'+
+						'<div id="media_rightmenu_yellow_cd_dividers" {{bindAttr class="MFT.States.media.player.active:visible_display"}}>'+
 							'<div class="yellow_divider cdtop"></div>'+
 							'<div class="yellow_divider cdbottom"></div>'+
 						'</div>'+
@@ -113,8 +85,8 @@ MFT.RightMenuView = Em.ContainerView.create({
 			elementId: 'media_am-fm_hdButton',
 			classNameBindings: 	[
 									'isHDActive:isHd',
-									'MFT.States.media.Fm.active:visible_display' , 
-									'MFT.States.media.Am.active:visible_display', 
+									'MFT.FmModel.active:visible_display' , 
+									'MFT.AmModel.active:visible_display', 
 									'MFT.helpMode:hd_blur helpmode_blur_cont',
 									'isHDhelpModeActive:hd_active_blur'],
 									
@@ -146,7 +118,9 @@ MFT.RightMenuView = Em.ContainerView.create({
 			)
 		}),
 		repeatButton:  MFT.Button.extend({
-			classNameBindings: 	['MFT.States.media.cd.active:visible_display' , 'MFT.States.media.usb.active:visible_display', 'MFT.States.media.sd.active:visible_display','MFT.helpMode:repeatButton_blur'],
+			classNameBindings: 	['MFT.CDModel.active:visible_display',
+									'MFT.SDModel.active:visible_display',
+									'MFT.USBModel.active:visible_display',,'MFT.helpMode:repeatButton_blur'],
 			elementId: 'media_rightmenu_repeatButton',
 			classNames:			['rs-item','hidden_display'],
 			icon:				'images/media/passiv_horiz_led.png',
@@ -163,7 +137,9 @@ MFT.RightMenuView = Em.ContainerView.create({
 			)
 		}),
 		shuffleButton:  MFT.Button.extend({
-			classNameBindings: 	['MFT.States.media.cd.active:visible_display' , 'MFT.States.media.usb.active:visible_display', 'MFT.States.media.sd.active:visible_display','MFT.helpMode:shuffleButton_help'],
+			classNameBindings: 	['MFT.CDModel.active:visible_display',
+									'MFT.SDModel.active:visible_display',
+									'MFT.USBModel.active:visible_display',,'MFT.helpMode:shuffleButton_help'],
 			elementId: 'media_rightmenu_shuffleButton',
 			classNames:			['rs-item','hidden_display'],
 			icon:				'images/media/passiv_horiz_led.png',
@@ -178,7 +154,7 @@ MFT.RightMenuView = Em.ContainerView.create({
 		}),
 		
 		replayButton:  MFT.Button.extend({
-			classNameBindings: 	['MFT.States.media.Sirius.active:visible_display','MFT.helpMode:replay_button_help'],
+			classNameBindings: 	['MFT.SiriusModel.active:visible_display','MFT.helpMode:replay_button_help'],
 			elementId:	'media_rightmenu_replayButton',
 			classNames:			['rs-item','hidden_display'],
 			icon:				'images/media/passiv_horiz_led.png',
@@ -204,7 +180,7 @@ MFT.RightMenuView = Em.ContainerView.create({
 			
 			text: function(){
 				if(MFT.States){
-					if(MFT.States.currentState.name == 'usb'){
+					if(MFT.USBModel.active){
 						this.set('action','turnSimilarHelpVideoOn')
 						return 'Similar Music'
 					}else{
@@ -220,7 +196,10 @@ MFT.RightMenuView = Em.ContainerView.create({
 			
 		}),
 		moreInfoButton: MFT.Button.extend({
-			classNameBindings: 	['MFT.States.media.cd.active:visible_display' , 'MFT.States.media.usb.active:visible_display', 'MFT.States.media.sd.active:visible_display','MFT.helpMode:scan_help','MFT.helpMode:moreinfoButton_help'],
+			classNameBindings: 	['MFT.CDModel.active:visible_display',
+									'MFT.SDModel.active:visible_display',
+									'MFT.USBModel.active:visible_display',
+									'MFT.helpMode:scan_help','MFT.helpMode:moreinfoButton_help'],
 			elementId: 'media_rightmenu_moreinfoButton',
 			action:			    'turnMoreInfo',
 			target:				'MFT.MediaController',
@@ -228,6 +207,7 @@ MFT.RightMenuView = Em.ContainerView.create({
 			icon:				'images/media/active_arrow.png',
 			text:				'More Info'
 		}),
+		
 		optionsButton: MFT.Button.extend({
 			elementId:	'media_rightmenu_optionButton',
 			classNameBindings: ['MFT.helpMode:option_blur'],
@@ -238,10 +218,10 @@ MFT.RightMenuView = Em.ContainerView.create({
 			target:    'MFT.MediaController',
 			
 			disabled: function(){
-				return ( MFT.States.media.sd.active || MFT.helpMode )
-			}.property('MFT.States.currentState','MFT.helpMode'),
+				return ( MFT.SDModel.active || MFT.helpMode )
+			}.property('MFT.SDModel.active','MFT.helpMode'),
 			
-			/** Define button template */
+			// Define button template
 			template: Ember.Handlebars.compile(
 				'{{#with view}}'+
 					'{{#unless MFT.helpMode}}'+
@@ -251,11 +231,12 @@ MFT.RightMenuView = Em.ContainerView.create({
 				'{{/with}}'
 			)
 		}),
+		
 		directTuneButton: MFT.Button.extend({
 			classNameBindings: 	[
-				'MFT.States.media.Sirius.active:visible_display',
-				'MFT.States.media.Fm.active:visible_display', 
-				'MFT.States.media.Am.active:visible_display',
+				'MFT.SiriusModel.active:visible_display',
+				'MFT.AmModel.active:visible_display', 
+				'MFT.FmModel.active:visible_display',
 				'MFT.helpMode:direct_button_help'
 			],
 						
@@ -278,7 +259,9 @@ MFT.RightMenuView = Em.ContainerView.create({
 		
 		
 		browseButton: MFT.Button.extend({
-			classNameBindings: 	['MFT.States.media.Sirius.active:visible_display', 'MFT.States.media.cd.active:visible_display','MFT.States.media.usb.active:visible_display','MFT.States.media.sd.active:visible_display','MFT.helpMode:browse_button_help'],
+			classNameBindings: 	['MFT.SiriusModel.active:visible_display', 'MFT.CDModel.active:visible_display',
+									'MFT.SDModel.active:visible_display',
+									'MFT.USBModel.active:visible_display',,'MFT.helpMode:browse_button_help'],
 			elementId:	'media_rightmenu_browseButton',
 			action:			   'turnBrowse',
 			target:			   'MFT.MediaController',

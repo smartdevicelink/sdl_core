@@ -112,7 +112,17 @@ MFT.IndButton = MFT.Button.extend({
 		}
 	},
 	
+	// component default template
+	defaultTemplate: Em.Handlebars.compile(
+		'<img class="ico" {{bindAttr src="view.icon"}} />'+
+		'<span>{{view.text}}</span>'+
+		'{{#each view.indicators}}'+
+			'<div id="{{unbound idName}}" {{bindAttr class="className view.enabled:show"}}></div>'+
+		'{{/each}}'
+	)
+	
 	/** Define button template */
+	/*
 	template: Ember.Handlebars.compile(
 		'{{#with view}}'+
 			'{{#if icon}}<img class="ico" {{bindAttr src="icon"}} />{{/if}}'+
@@ -122,5 +132,6 @@ MFT.IndButton = MFT.Button.extend({
 			'{{/each}}'+
 		'{{/with}}'
 	)
+	*/
 });
 

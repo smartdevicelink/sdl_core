@@ -26,7 +26,7 @@ MFT.AppViews = Em.ContainerView.extend({
 		MFT.BottomControls,
 		MFT.PlayerControllsView,
 		MFT.VideoErrorPopupView,
-		MFT.SettingsVehicleEnableValetModePopUpView,
+		MFT.ControlButtons,
 		'activeAview'
 	],
 	
@@ -39,7 +39,9 @@ MFT.AppViews = Em.ContainerView.extend({
 			MFT.ClimateView,
 			MFT.NavigationView,
 			MFT.PhoneView,
-			MFT.MediaView
+			MFT.MediaView,
+			MFT.SettingsView,
+			MFT.InfoView
 		]
 	}),
 	

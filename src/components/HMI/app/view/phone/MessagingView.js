@@ -10,12 +10,13 @@
  * @author		Artem Petrosyan
  */
 
-MFT.MessagingPhoneView = Em.ContainerView.create({
-	elementId:		'phone_messaging',
-	
-	classNameBindings: ['MFT.States.phone.messaging.active:active_state'],
-	
+MFT.MessagingPhoneView = Em.ContainerView.create( MFT.LoadableView, {
+		
+	elementId:	'phone_messaging',
+		
 	classNames: ['hidden'],
+	
+	stateObj: MFT.States.phone.messaging,
 	
 	childViews: [
 		'help',

@@ -13,6 +13,8 @@ MFT.FmModel = Em.Object.create({
 	
 	band:		MFT.RangedValue.create({value:-1, activeBand:0}),
 	
+	active: false,
+	
 	fm1: MFT.Playlist.create( {
 		selectedIndex: 					1,
 

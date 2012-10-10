@@ -10,19 +10,18 @@
  * @author		Artem Petrosyan
  */
 
-MFT.HistoryPhoneView = Em.ContainerView.create({
-	
+MFT.HistoryPhoneView = Em.ContainerView.create( MFT.LoadableView, {
+		
 	elementId:	'phone_history',
 	
-	classNameBindings: ['MFT.States.phone.history.active:active_state'],
-	
 	classNames: ['hidden'],
+	
+	stateObj: MFT.States.phone.history,
 	
 	childViews: [
 		'help',
 		'content'
 	],
-	
 	
 	help: Em.View.extend({
 		elementId:			'phone_history_help',
@@ -67,6 +66,7 @@ MFT.HistoryPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'rightText',
 						text:		'Micky Marmaremmy',
 						rightText:	'1:28 pm',
 						disabled:	true,
@@ -77,6 +77,7 @@ MFT.HistoryPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'rightText',
 						text:		'Billy McTuff',
 						rightText:	'12:03 pm',
 						disabled:	true,
@@ -87,6 +88,7 @@ MFT.HistoryPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'rightText',
 						text:		'Hope Doferson',
 						rightText:	'11:35 am',
 						disabled:	true,
@@ -97,6 +99,7 @@ MFT.HistoryPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'rightText',
 						text:		'Larry Pitterputz',
 						rightText:	'05/25/2011',
 						disabled:	true,
@@ -107,6 +110,7 @@ MFT.HistoryPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'rightText',
 						text:		'Suzie McCozo',
 						rightText:	'05/26/2011',
 						disabled:	true,
@@ -117,6 +121,7 @@ MFT.HistoryPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'rightText',
 						text:		'Suzie McCozo',
 						rightText:	'05/26/2011',
 						disabled:	true,
@@ -127,6 +132,7 @@ MFT.HistoryPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'rightText',
 						text:		'Larry Pitterputz',
 						rightText:	'05/25/2011',
 						disabled:	true,
@@ -137,6 +143,7 @@ MFT.HistoryPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'rightText',
 						text:		'Micky Marmaremmy',
 						rightText:	'1:28 pm',
 						disabled:	true,
@@ -147,6 +154,7 @@ MFT.HistoryPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'rightText',
 						text:		'Billy McTuff',
 						rightText:	'12:03 pm',
 						disabled:	true,
@@ -157,6 +165,7 @@ MFT.HistoryPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'rightText',
 						text:		'Hope Doferson',
 						rightText:	'11:35 am',
 						disabled:	true,

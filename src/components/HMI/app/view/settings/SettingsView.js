@@ -1,130 +1,125 @@
 /**
- * @name MFT.SettingsView
+ * @name MFT.SettingsSettingsView
  * 
- * @desc Settings module visual representation
+ * @desc Settings Settings module visual representation
  * 
- * @category	Settings
- * @filesource	app/view/SettingsView.js
+ * @category	View
+ * @filesource	app/view/settings/SettingsSettingsView.js
  * @version		2.0
  *
- * @author		Gerashchenko Maksym
+ * @author		Maksym Gerashchenko
  */
- 
- MFT.SettingsView = Em.ContainerView.create({
- 	
- 	elementId:	'settings_view',
- 	
- 	classNames:	'block hidden',
- 
-	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.settings.active:active_state','MFT.helpMode'],
-		
-	/** Settings components */
+
+MFT.SettingsSettingsView = Em.ContainerView.create(MFT.LoadableView,{
+	
+	elementId:	'settings_settings',
+	
+	classNameBindings: ['MFT.States.settings.settings.active:active_state','MFT.helpMode','MFT.helpMode'],
+	
+	classNames: 'hidden',
+	
+	stateObj: MFT.States.settings.settings,
+	
 	childViews: [
-		'menu',
+		'listSettingsSettings'
 	],
 	
-	
-	/** Left menu */
-	menu: Em.ContainerView.extend({
-		elementId:	'ctrl_settings_menu',
+	listSettingsSettings: MFT.List.extend({
+		elementId:		   'settings_settings_list',
 		
-		classNameBindings:	['MFT.SettingsController.hiddenLeftMenu:hidden'],
+		disableScrollbar:	true,
 		
-		childViews: [
-			'border',
-			'items'
+		/** Items */
+		items: [
+			{								
+				type:		MFT.Button,
+				
+				params:		{
+					goToState:   'system',
+					icon:		'images/settings/ico_settings_white.png',
+					textBinding: 'MFT.locale.label.view_settings_settings_system',
+					arrow:		true,
+					action:	  'onChildState',
+					target:	  'MFT.SettingsController',
+					disabledBinding: 'MFT.helpMode',
+					onDown: false
+
+				}			
+					
+			},
+			{
+				type:		MFT.Button,
+
+				params:		{
+					goToState:   'voiceControl',
+					icon:		'images/settings/ico_voice.png',
+					textBinding: 'MFT.locale.label.view_settings_settings_voiceControl',
+					arrow:		true,
+					action:	  'onChildState',
+					target:	  'MFT.SettingsController',
+					disabledBinding: 'MFT.helpMode',
+					onDown: false
+
+				}							
+			},
+			{
+				type:		MFT.Button,
+
+				params:		{
+					goToState:   'mediaPlayer',
+					icon:		'images/settings/ico_player.png',
+					textBinding: 'MFT.locale.label.view_settings_settings_mediaPlayer',
+					arrow:		true,
+					action:	  'onChildState',
+					target:	  'MFT.SettingsController',
+					disabledBinding: 'MFT.helpMode',
+					onDown: false
+				}
+			},
+			{
+				type:		MFT.Button,
+
+				params:		{
+					goToState:   'snavigation',
+					icon:		'images/settings/ico_navigation.png',
+					textBinding: 'MFT.locale.label.view_settings_settings_navigation',
+					arrow:		true,
+					action:	  'onChildState',
+					target:	  'MFT.SettingsController',
+					disabledBinding: 'MFT.helpMode',
+					onDown: false
+				}			
+			},
+			{
+				type:		MFT.Button,
+
+				params:		{
+					stateName:   'phoneSettings',
+					icon:		'images/settings/ico_phone.png',
+					textBinding: 'MFT.locale.label.view_settings_settings_phone',
+					arrow:		true,
+					action:		'subState',
+					target:		'MFT.PhoneController',
+					disabledBinding: 'MFT.helpMode',
+					onDown: false
+				}			
+			},
+			{
+				type:		MFT.Button,
+
+				params:		{
+					goToState:   'wirelessInternet',
+					icon:		'images/settings/ico_wireless.png',
+					textBinding: 'MFT.locale.label.view_settings_settings_wirelessInternet',
+					arrow:		true,
+					action:	  'onChildState',
+					target:	  'MFT.SettingsController',
+					disabledBinding: 'MFT.helpMode',
+					onDown: false
+				}			
+			}
 		],
 		
-		border: Em.View.extend({
-			classNames:	'ls_border',
-			
-			template: Ember.Handlebars.compile('<img class="bg" src="images/common/ls_border.png">')
-		}),
-		
-		items: Em.ContainerView.extend({
-			classNames:	'ls-items',
-			
-			childViews: [
-				'clockButton',
-				'displayButton',
-				'soundButton',
-				'vehicleButton',
-				'settingsButton',
-				'helpButton'
-			],
-			
-			clockButton: MFT.Button.extend({
-				elementId:			'settings_menu_clockButton',
-				
-				goToState:   			 'clock',	
-				classNames:			'ls-item lsp1_p',
-				classNameBindings:	['MFT.States.settings.clock.active:settings_active'],
-				text:				  'Clock',
-				icon:				  'images/settings/ico_clock.png',
-				action:				'onState',
-				target:				'MFT.SettingsController',
-			}),
-			
-			displayButton: MFT.Button.extend({
-				elementId:			'settings_menu_displayButton',
-				
-				goToState:   			 'display',	
-				classNames:			'ls-item lsp1_p',
-				classNameBindings:	['MFT.States.settings.display.active:settings_active'],
-				text:				  'Display',
-				icon:				  'images/settings/ico_display.png',
-				action:				'onState',
-				target:				'MFT.SettingsController',
-			}),
-			
-			soundButton: MFT.Button.extend({
-				elementId:			'settings_menu_soundButton',
-				
-				goToState:   			 'sound',	
-				classNames:			'ls-item lsp1_p',
-				classNameBindings:	['MFT.States.settings.sound.active:settings_active'],
-				text:				  'Sound',
-				icon:				  'images/settings/ico_sound.png',
-				action:				'onState',
-				target:				'MFT.SettingsController',
-			}),
-			
-			vehicleButton: MFT.Button.extend({
-				elementId:			'settings_menu_vehicleButton',
-				
-				goToState:   			 'vehicle',	
-				classNames:			'ls-item lsp1_p',
-				classNameBindings:	['MFT.States.settings.vehicle.active:settings_active'],
-				text:				  'Vehicle',
-				icon:				  'images/settings/ico_vehicle.png',
-				action:				'onState',
-				target:				'MFT.SettingsController',
-			}),
-			
-			settingsButton: MFT.Button.extend({
-				elementId:			'settings_menu_settingsButton',
-				
-				goToState:   			 'settings',	
-				classNames:			'ls-item lsp1_p',
-				classNameBindings:	 ['MFT.States.settings.settings.active:settings_active'],
-				text:				  'Settings',
-				icon:				  'images/settings/ico_settings.png',
-				action:				'onState',
-				target:				'MFT.SettingsController',
-			}),
-			
-			helpButton: MFT.Button.extend({
-				elementId:			'settings_menu_helpButton',
-				
-				goToState:   			 'help',	
-				classNames:			'ls-item lsp1_p',
-				classNameBindings:	 ['MFT.States.settings.help.active:settings_active'],
-				text:				  'Help',
-				icon:				  'images/settings/ico_help.png',
-				action:				'onState',
-				target:				'MFT.SettingsController',
-			})
-		})
+		itemsOnPage:	6
 	})
 });

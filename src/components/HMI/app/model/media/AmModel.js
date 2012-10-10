@@ -10,7 +10,10 @@
  * @author		Igor Zhavoronkin
  */
 MFT.AmModel = Em.Object.create( {
+	
 	band:		MFT.RangedValue.create({range:2, activeBand:0}),
+	
+	active: true,
 		
 	am1: MFT.Playlist.create( {
 		selectedIndex: 					3,

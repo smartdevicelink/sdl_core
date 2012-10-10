@@ -10,7 +10,7 @@
  * @author		Maksym Gerashchenko
  */
 
-MFT.SettingsHelpSoftwareLicensesView = Em.ContainerView.create({
+MFT.SettingsHelpSoftwareLicensesView = Em.ContainerView.create(MFT.LoadableView,{
 	classNameBindings:	['MFT.States.settings.help.softwareLicenses.active:active_state'],
 	classNames:		   ['hidden'],
 	dataListBinding: 	  'MFT.SettingsData.clocklist',
@@ -21,7 +21,9 @@ MFT.SettingsHelpSoftwareLicensesView = Em.ContainerView.create({
 							  'installUpdatesButton',
 							  'list'
 						  ],	
-						  						  
+						  			
+	stateObj: MFT.States.settings.help.softwareLicenses,
+										  
 	backButton: MFT.Button.extend({
 	classNames:		  ['backButton','button'],		
 	action:			  'back',

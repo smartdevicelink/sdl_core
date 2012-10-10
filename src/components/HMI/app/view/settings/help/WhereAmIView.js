@@ -10,11 +10,12 @@
  * @author		Maksym Gerashchenko
  */
  
-MFT.SettingsHelpWhereAmIView = Em.View.create({
+MFT.SettingsHelpWhereAmIView = Em.View.create(MFT.LoadableView,{
 	classNameBindings:	   ['MFT.States.settings.help.whereAmI.active:active_state','MFT.helpMode'],
 	controller:			  'MFT.SettingsController',
 	classNames:			  'hidden',
 	elementId:			   ['settings_help_whereAmI'],
+	stateObj: MFT.States.settings.help.whereAmI,
 	template: Ember.Handlebars.compile(
 		'{{view MFT.Button '+
 			'class="button backButton" '+

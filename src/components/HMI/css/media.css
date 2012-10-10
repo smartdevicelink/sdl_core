@@ -1759,10 +1759,8 @@
 
 .moreInfo_view {
 	position: absolute;
-	left:-152px;
 	width: 800px;
 	height: 480px;
-	top:-60px;
 	z-index: 501;
 	background-image: url(../images/media/bg.png);
 }
@@ -2160,7 +2158,7 @@
 	left:5px !important;
 }
 
-#media_usb_browse_browseall_button{
+.media_usb_browse_browseall_button{
 	top: 325px !important;
 }
 .browseAlllist{
@@ -2193,7 +2191,7 @@
 	background:url(../images/media/help/cd_bro_view_blur.png) no-repeat;
 }
 
-#media_usb_browse_view.help_blur{
+#media_browse_view.usbhelpblur{
 	background:url(../images/media/help/others_browse_blur.png) no-repeat;
 	width:800px;
 	height:480px;

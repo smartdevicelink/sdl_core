@@ -52,7 +52,7 @@ div {
 	/*position:relative;*/
 	width: 800px;
 	height: 480px;
-	overflow: hidden;
+	/*overflow: hidden;*/
 	/* Mac font smoothing */
 	-webkit-font-smoothing: antialiased;
 	/*margin: 25px auto;*/ 

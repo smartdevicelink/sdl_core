@@ -12,6 +12,8 @@
 MFT.SiriusModel = Em.Object.create( {
 	
 	band:	MFT.RangedValue.create({value:-1, activeBand:0}),
+	
+	active: false,
 			
 	sir1: MFT.Playlist.create( {
 		selectedIndex: 					3,
@@ -119,6 +121,8 @@ MFT.SiriusModel = Em.Object.create( {
 		title: 'SIRIUS Channel Guide',
 		
 		currentPage: 0,
+		
+		disableScrollbar: false,
 		
 		items: [
 				{

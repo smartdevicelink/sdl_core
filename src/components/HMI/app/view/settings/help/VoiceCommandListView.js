@@ -10,11 +10,12 @@
  * @author		Maksym Gerashchenko
  */
 
-MFT.SettingsHelpVoiceCommandListView = Em.ContainerView.create({
+MFT.SettingsHelpVoiceCommandListView = Em.ContainerView.create(MFT.LoadableView,{
 	classNameBindings:	['MFT.States.settings.help.voiceCommandList.active:active_state'],
 	classNames:		   ['hidden'],
 	dataListBinding: 	  'MFT.SettingsData.clocklist',
 	elementId:			'settings_help_voiceCommandList',
+	stateObj: MFT.States.settings.help.voiceCommandList,
 	childViews:		   [
 							  'backButton',
 							  'topTitile',

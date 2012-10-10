@@ -16,7 +16,7 @@ MFT.PhoneController = Em.Object.create({
 	modelBinding: "MFT.PhoneModel",
 	
 	/** Initial substate */
-	activeState: 'phone.phone',
+	activeState: 'phone.dialpad',
 	
 	subState: function(view) {		
 		/* Open help video */
@@ -110,16 +110,8 @@ MFT.PhoneController = Em.Object.create({
 			return 'Sarah 3:47&nbsp;&nbsp;&nbsp;' + this.model.get('phoneStatusNumber');
 		}
 	}.property('this.model.readyForCall', 'this.model.statusModeText', 'this.model.phoneStatusNumber'),
-
-	/** TODO: Need to be moved to separate method **/	
-	insertToParentView: function(view){
-		if (!MFT.PhoneView.get('childViews').contains(view) ) {				
-				MFT.PhoneView.get('childViews').pushObject(view);
-		}
-		
-	},
 	
 	onChildState: function(event){
 		MFT.States.goToState(MFT.States.currentState.get('path')+'.'+event.goToState);
-	},
+	}
 });

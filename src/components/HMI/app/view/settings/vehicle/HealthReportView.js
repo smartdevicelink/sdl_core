@@ -10,10 +10,11 @@
  * @author		Maksym Gerashchenko
  */
  
-MFT.SettingsVehicleHealthReportView = Em.View.create({
-	classNameBindings:	   ['MFT.States.settings.vehicle.vehicleHealthReport.active:active_state','MFT.helpMode'],
+MFT.SettingsVehicleHealthReportView = Em.View.create(MFT.LoadableView,{
+	classNameBindings:	   ['MFT.States.settings.vehicle.healthReport.active:active_state','MFT.helpMode'],
 	classNames:			  'hidden',
 	elementId:			   'settings_vehicle_HealthReport',
+	stateObj: MFT.States.settings.vehicle.healthReport,
 	template: Ember.Handlebars.compile(
 		'{{view MFT.Button '+
 			'class="button backButton" '+

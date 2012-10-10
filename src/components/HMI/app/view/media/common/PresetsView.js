@@ -14,7 +14,7 @@ MFT.PresetsView = Em.ContainerView.create({
 	
 	elementId: 'media_presetButtons',
 	
-	classNameBindings: 	['MFT.States.media.Fm.active:active_state' , 'MFT.States.media.Am.active:active_state','MFT.States.media.Sirius.active:active_state'],
+	classNameBindings: 	['MFT.AmModel.active:active_state' , 'MFT.FmModel.active:active_state','MFT.SiriusModel.active:active_state'],
 	
 	classNames: ['main-preset-buttons-wraper', 'hidden'],
 	

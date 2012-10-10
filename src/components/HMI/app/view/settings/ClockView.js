@@ -10,10 +10,13 @@
  * @author		Maksym Gerashchenko
  */
 
-MFT.SettingsClockView = Em.ContainerView.create({
-	classNameBindings:	['MFT.States.settings.clock.active:active_state','MFT.helpMode'],
+MFT.SettingsClockView = Em.ContainerView.create(MFT.LoadableView,{
+	classNameBindings:	['MFT.helpMode'],
 	classNames:		['hidden'],
 	elementId:		 'settings_clock',
+	
+	stateObj: MFT.States.settings.clock,
+		
 	childViews:		[
 					   		'clockPanel',
 							'listClockSettings'
@@ -177,6 +180,5 @@ MFT.SettingsClockView = Em.ContainerView.create({
 		
 		itemsOnPage:	4
 	})	
-
 		
 });

@@ -35,7 +35,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 		
 		/** AM Station Button*/
 		amButton:  MFT.ToggleIndicatorsButton.create({
-			classNameBindings:		['MFT.States.media.Am.active:active_state', 'MFT.MediaController.isTopListMenu:displayed'],
+			classNameBindings:		['MFT.AmModel.active:active_state', 'MFT.MediaController.isTopListMenu:displayed'],
 			elementId:				'media_amButton',
 			classNames:				['media-ls-item'],
 			action:				'toggleAmStation',
@@ -48,7 +48,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 		}),
 		/** FM Station Button*/
 		fmButton:  MFT.ToggleIndicatorsButton.extend({
-			classNameBindings: ['MFT.States.media.Fm.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
+			classNameBindings: ['MFT.FmModel.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
 			elementId:			'media_fmButton',
 			classNames:			['media-ls-item'],
 			action:				'toggleFmStation',
@@ -61,7 +61,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 		}),
 		/** SIRIUS Station Button*/
 		siriusButton:  MFT.ToggleIndicatorsButton.extend({
-			classNameBindings: ['MFT.States.media.Sirius.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
+			classNameBindings: ['MFT.SiriusModel.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
 			elementId:			'media_siriusButton',
 			classNames:			['media-ls-item'],
 			action:				'toggleSiriusStation',
@@ -74,7 +74,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 		}),
 		/** CD Station Button*/
 		cdButton:  MFT.Button.extend({
-			classNameBindings: ['MFT.States.media.cd.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
+			classNameBindings: ['MFT.CDModel.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
 			elementId:			'media_cdButton',
 			classNames:			['media-ls-item'],
 			action:				'turnOnCD',
@@ -84,7 +84,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 		}),
 		/** USB Station Button*/
 		usbButton:  MFT.Button.extend({
-			classNameBindings: ['MFT.States.media.usb.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
+			classNameBindings: ['MFT.USBModel.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
 			elementId: 			'media_usbButton',
 			classNames:			['media-ls-item'],
 			action:				'turnOnUSB',
@@ -112,7 +112,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 		}),
 		/** SD  Button*/
 		sdButton:  MFT.Button.extend({
-			classNameBindings: ['MFT.States.media.sd.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
+			classNameBindings: ['MFT.SDModel.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
 			elementId:			'media_sdButton',
 			classNames:			['media-ls-item'],
 			action:				'turnOnSD',
@@ -122,7 +122,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 		}),
 		/** BLUETOOTH Button*/
 		btButton:  MFT.Button.extend({
-			classNameBindings: ['MFT.States.media.bt.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
+			classNameBindings: ['MFT.States.media.bluetooth.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
 			elementId:			'media_btButton',
 			classNames:			['media-ls-item'],
 			action:				'turnOnBT',

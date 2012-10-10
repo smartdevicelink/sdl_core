@@ -21,5 +21,4 @@ MFT.Dragable = Ember.Mixin.create({
         var dataTransfer = event.originalEvent.dataTransfer;
         dataTransfer.setData('Text', this.get('elementId'));
     }
-	
 });

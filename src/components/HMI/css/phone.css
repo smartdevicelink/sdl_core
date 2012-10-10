@@ -18,7 +18,7 @@
 }
 
 /* LEFT MENU */
-#phone_menu{z-index:2001;position:absolute;top:90px;left:0px;width:150px;height:300px;}
+#phone_menu{position:absolute;top:90px;left:0px;width:150px;height:300px;}
 	.ls_border {z-index:201;position:absolute;top:-3px;left:0px;width:153px;height:306px;}
 	.ls-items{position:relative;width:150px;height:300px;}
 	.ls-item{z-index:201;position:relative;width:150px;height:50px;cursor:pointer;}
@@ -790,6 +790,9 @@
 }
 
 /* SETTINGS */
+#phone_settings {
+	z-index: 1000;
+}
 
 #phone_settings_content {
 	width: 627px;

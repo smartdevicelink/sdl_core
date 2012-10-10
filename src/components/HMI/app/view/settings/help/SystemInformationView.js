@@ -10,7 +10,7 @@
  * @author		Maksym Gerashchenko
  */
 
-MFT.SettingsHelpSystemInformationView = Em.ContainerView.create({
+MFT.SettingsHelpSystemInformationView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	classNameBindings:	['MFT.States.settings.help.systemInformation.active:active_state'],
 	classNames:		   ['hidden'],
@@ -21,7 +21,7 @@ MFT.SettingsHelpSystemInformationView = Em.ContainerView.create({
 							  'topTitile',
 							  'list'
 						  ],	
-						  						  
+	stateObj: 	MFT.States.settings.help.systemInformation,				  						  
 	backButton: MFT.Button.extend({
 	classNames:		  ['backButton','button'],		
 	action:			  'back',

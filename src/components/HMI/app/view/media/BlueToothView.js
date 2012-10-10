@@ -9,13 +9,17 @@
  *
  * @author		Igor Zhavoronkin
  */
-MFT.BlueToothView = Em.ContainerView.create({
+
+MFT.bluetoothView = Em.ContainerView.create(MFT.LoadableView,{
 		/** Bind class for visual representation */
-		classNameBindings: 	['MFT.States.media.bt.active:active_state'],
+		classNameBindings: 	['MFT.States.media.bluetooth.active:active_state'],
 		/** Class Name */
 		classNames: 'hidden',
 		/** View ID*/
 		elementId:	'media_bluetooth',
+		
+		stateObj: MFT.States.media.bluetooth,
+		
 		/** Template*/
 		childViews: [
 			'content'

@@ -10,90 +10,76 @@
  * @author		Artem Petrosyan
  */
 
-/** Override base Em.State object */
+// Extend base Em.State object
 Em.State.reopen({ 
+	
+	// used for determine display status
 	active: false,
 	
+	// used for determine loading status
+	viewLoaded: false,
+	
 	enter: function() {
-		this.set('active',true);
+		//Em.Logger.log('enter: ', this.get('path'));		
+		MFT.TransitionIterator.stateOnEnter.push(this);
+		
+		//
+		MFT.StateVisitor.visit(this);
+		
 		if (FLAGS.EXTENDED_LOG) {
 			MFT.startTime = Date.now();	
 		}
 		
-		/** Switch off video player if active */
+		// Switch off video player if active
 		MFT.VideoPlayerController.close();
-		
-		// Live rendering view
-		if ( this.view ) {
-			// Root views
-			if ( !this.parentState.view ) {
-				this.parentState.view = MFT.views.activeAview;
-			}
-			
-			
-						
-			// View first open
-			if ( !this.parentState.view.get('childViews').contains(this.view) ) {	
-				this.parentState.view.get('childViews').pushObject(this.view);
-				
-				/* Fade transitions for future releases
-				this.parentState.view.get('childViews').pushObject(
-					this.view.reopen({
-						didInsertElement: function() {
-							var self = this;
-							
-							setTimeout(function(){
-								document.getElementById(self.elementId).style.opacity = 1;
-							},100);
-						}					
-					})
-				);
-				*/
-			}
-			
-			/* Fade transitions for future releases
-			if( this.view.state == 'inDOM' ) {
-				document.getElementById(this.view.elementId).style.opacity = 1;
-			}
-			*/
-		}
 	},
 	
 	exit: function() {
-		this.set('active',false);
-		
-		/* Fade transitions for future releases
-		if ( this.view ) {			
-			document.getElementById(this.view.elementId).style.opacity = 0;
-		}
-		*/
-	}	
+		//Em.Logger.log('exit: ', this.get('path'));
+		MFT.TransitionIterator.stateOnExit.push(this);
+	}
 });
 
+
+// State Manager class
 var StateManager = Em.StateManager.extend({
-	
+	// used for logging state transitions
 	enableLogging: FLAGS.EXTENDED_LOG,
 	
-	/** default state */
-	initialState: 'home',
+	// default state
+	initialState: MFT.homeView,
+	
+	// add verification before state transition
+	goToState: function() {
+		// return if on current state
+		if( arguments[0] === this.currentState.get('path') ) {
+			return false;
+		}
+		// init transition if ready
+    	if( MFT.TransitionIterator.ready ) {
+    		MFT.TransitionIterator.init( arguments[0] );
+    		return this.transitionTo.apply( this, arguments );
+    	}
+  	},
 	
 	/** Go to parent state */
-	back: function() {
+	back: function() {		
 		if ( this.currentState.parentState.hasOwnProperty('name') ) {
-			this.goToState( this.currentState.parentState.name );
+			this.goToState( this.currentState.parentState.get('path') );
 		} else {
 			this.goToState('home');
 		}
+		
+		MFT.StateVisitor.visit(this.currentState);
 	},
 	
 	/** Home state */
 	home: Em.State.create({
-					
+		viewLoaded: true		
 	}),
 	
 	/** FAQ state */
 	faq: Em.State.create({
-		view:	MFT.FAQView,
 	
 		enter: function() {
 			this.from = MFT.States.currentState.get('path');
@@ -107,9 +93,15 @@ var StateManager = Em.StateManager.extend({
 	climate: Em.State.create({
 		view:	MFT.ClimateView,
 		
-		front:	Em.State.create(),
+		viewLoaded: true,
 		
-		rear:	Em.State.create()
+		front:	Em.State.create({
+			viewLoaded: true
+		}),
+		
+		rear:	Em.State.create({
+			viewLoaded: true
+		})
 	}),
 	
 	/** info state */
@@ -117,249 +109,185 @@ var StateManager = Em.StateManager.extend({
 		
 		view:	MFT.InfoView,
 		
-		enter: function() {
-			if ( !MFT.views.get('childViews').contains(MFT.InfoView) ) {
-				MFT.views.get('childViews').pushObject(MFT.InfoView);
-			}
-			
-			this._super();
-		},
+		viewLoaded: true,
 		
 		exit: function() {
 			MFT.InfoController.set('activeState', MFT.States.currentState.get('path'));
 			this._super();
 		},
 		
-		services:			  Em.State.create({
-			view: MFT.InfoServicesView,	
-		}),
-		
-		travelLink:	  		Em.State.create({
-		
-			view: MFT.InfoTravelLinkView
-		}),
-		
-		alerts:  	 			Em.State.create({
+		services: Em.State.create({
 			
-			view: MFT.InfoAlertsView
+		}),
+		
+		travelLink: Em.State.create({
+			
+		}),
+		
+		alerts: Em.State.create({
+			
 		}),
 
-		calendar:  	 	      Em.State.create({
+		calendar: Em.State.create({
 			
-			view: MFT.InfoCalendarView
 		}),
 		
-		apps:  	 			  Em.State.create({
+		apps: Em.State.create({
 			
-			view: MFT.InfoAppsView
 		})		
 	}),
 	
 	/** settings state */
 	settings: Em.State.create({
+
 		view:	MFT.SettingsView,
-		
+
+		viewLoaded: true,
+
 		exit: function() {
+			this._super();
+
 			var path = MFT.States.currentState.get('path');
-						
+			
 			if ( path.split('.').length > 2 ) {
-				MFT.SettingsController.set('activeState',
-					path.substring( 0, path.indexOf('.',9) )
-				);
+				MFT.SettingsController.set('activeState', path.substring( 0, path.indexOf('.',9) ));
 			} else {
 				MFT.SettingsController.set('activeState', path);
 			}
-			
-			this._super();
 		},
 		
 		clock: Em.State.create({
 			
-			view:	MFT.SettingsClockView,
-			
-			enter: function() {
-				this._super();
-				MFT.SettingsController.set('time','--:--');
-			},
-			
-			exit: function() {
-				this._super();
-				MFT.SettingsController.getTime(new Date);
-			}
-		
 		}),
+		
 		display: Em.State.create({	
 			
-			view:	MFT.SettingsDisplayView,
-
 		}),
+		
 		sound: Em.State.create({
-			
-			view:	MFT.SettingsSoundView,
 		
 			setSoundBalanceFader: Em.State.create({
-				view:	MFT.SettingsSoundSetBalanceAndFadeView,
-			}),			
+				
+			})	
 		}),
+
 		vehicle: Em.State.create({
 		
-			view:	MFT.SettingsVehicleView,
-			
-			ambientLighting:   	   Em.State.create({
-				view:	MFT.SettingsVehicleAmbientLightingView
+			ambientLighting: Em.State.create({
+				
 			}),
 			
-			vehicleHealthReport:   Em.State.create({
+			healthReport: Em.State.create({
 				
 				enter: function() {
-						if(MFT.States.currentState.get('path') != 'faq'){
-							MFT.SettingsController.set('previousState',MFT.States.currentState.get('path'));
-						}
-						this._super();
-				},
-				
-				view:	MFT.SettingsVehicleHealthReportView
-			}),
-				
-			doorKeypadCode:		Em.State.create({
-				view:	MFT.SettingsVehicleDoorKeypadCodeView
-			}),
-
-			rearViewCamera:		Em.State.create({
-				view:	MFT.SettingsVehicleRearCameraView,
-			}),
-
-			enterPIN:		Em.State.create({
-				
-				enter: function(){
-					MFT.SettingsVehicleEnableValetModeEnteringPINView.set('popUpHide',true);
+					if(MFT.States.currentState.get('path') != 'faq'){
+						MFT.SettingsController.set('previousState',MFT.States.currentState.get('path'));
+					}
 					this._super();
-				},
-				
-				view: MFT.SettingsVehicleEnableValetModeEnteringPINView
+				}
+			}),
+			
+			doorKeypadCode: Em.State.create({
 				
 			}),
 
-			mcs:	   Em.State.create({
-				/*enter: function(){
-					MFT.MultiContourSeat.appendTo('body');
-					this._super();
-				}*/
-				view:	MFT.MultiContourSeat
+			rearViewCamera: Em.State.create({
+				
+			}),
+
+			enterPIN: Em.State.create({
+				
+			}),
+
+			mcs: Em.State.create({
+				
 			})
-
 		}),
+		
 		settings: Em.State.create({
 			
-			view:	MFT.SettingsSettingsView,
-			
-			system:				Em.State.create({
+			system: Em.State.create({
 				
-				view:	MFT.SettingsSettingsSystemView,
+				keyboardLayout: Em.State.create({
 				
-				keyboardLayout:		Em.State.create({
-				
-					view:	MFT.SettingsSettingsSystemKeyboardLayoutView				
 				}),
 				
-				installApplications:   Em.State.create({
+				installApplications: Em.State.create({
 					
 					enter: function() {
 						if(MFT.States.currentState.get('path') != 'faq'){
 							MFT.SettingsController.set('previousState',MFT.States.currentState.get('path'));
 						}
 						this._super();
-					},
+					}
 					
-					view:	MFT.SettingsSettingsSystemInstallApplicationsView,
-					
-					beginSoftwareInstallation:   	Em.State.create({}),
-					
-					viewSoftwareLicenses:		 Em.State.create({})
-				}),
-			}),	
-			voiceControl:	  	  Em.State.create({
-			
-				view:	MFT.SettingsSettingsVoiceControlView
-			}),
-			mediaPlayer: 	   	   Em.State.create({
-				
-				view:	MFT.SettingsSettingsMediaPlayerView,
-				
-				bluetoothDevices:	  Em.State.create({
-					
-					view:    MFT.SettingsSettingsMediaPlayerBluetoothDevicesView
 				})
 			}),
-			snavigation: 		    Em.State.create({
+			
+			voiceControl: Em.State.create({
+			
+			}),
+			
+			mediaPlayer: Em.State.create({
 				
-				view:	MFT.SettingsSettingsNavigationView,
-				mapPreferences:    Em.State.create({
+				bluetoothDevices: Em.State.create({
 					
-					view: MFT.SettingsSettingsNavigationMapPreferencesView
-				}),
-				routePreferences:    Em.State.create({
-					view: MFT.SettingsSettingsNavigationRoutePreferencesView
-				}),
-				navigationPreferences:    Em.State.create({
+				})
+			}),
+			
+			snavigation: Em.State.create({
+				
+				mapPreferences: Em.State.create({
 					
-					view: MFT.SettingsSettingsNavigationNavigationPreferencesView	
 				}),
-				trafficPreferences:    Em.State.create({
-					
-					view: MFT.SettingsSettingsNavigationTrafficPreferencesView
+				routePreferences: Em.State.create({
+				
 				}),
-				avoidAreas:    Em.State.create({
+				navigationPreferences: Em.State.create({
 					
-					view: MFT.SettingsSettingsNavigationAreasView
+				}),
+				trafficPreferences: Em.State.create({
+					
+				}),
+				avoidAreas: Em.State.create({
+					
 				}),
 			}),
-			phone:			 	 Em.State.create({}),
-			wirelessInternet:  	  Em.State.create({
+			wirelessInternet: Em.State.create({
 			
-				view:	MFT.SettingsSettingsWirelessInternetView
 			})			
 		}),
 		
 		help: Em.State.create({
 			
-			view:	MFT.SettingsHelpView,
-			
-			whereAmI:				Em.State.create({
+			whereAmI: Em.State.create({
 							
-				view:	MFT.SettingsHelpWhereAmIView
 			}),
 			
-			systemInformation:	   Em.State.create({
+			systemInformation: Em.State.create({
 				
-				view:	MFT.SettingsHelpSystemInformationView
 			}),
 			
-			softwareLicenses:		Em.State.create({
+			softwareLicenses: Em.State.create({
 								
-				view:	MFT.SettingsHelpSoftwareLicensesView
 			}),
 			
-			drivingRestrictions:	 Em.State.create({
+			drivingRestrictions: Em.State.create({
 								
-				view:	MFT.SettingsHelpDrivingRestrictionsView
 			}),
 			
-			assist:			      Em.State.create({
+			helpAssist: Em.State.create({
 				enter: function() {
 						if(MFT.States.currentState.get('path') != 'faq'){
 							MFT.SettingsController.set('previousState',MFT.States.currentState.get('path'));
 						}
 						this._super();
-				},
-			
-				view:	MFT.SettingsHelp911AssistView
+				}
 			}),
 			
-			voiceCommandList:		Em.State.create({
+			voiceCommandList: Em.State.create({
 				
-				view:	MFT.SettingsHelpVoiceCommandListView
-			}),
+			})
 		})
 	}),
 		
@@ -367,6 +295,8 @@ var StateManager = Em.StateManager.extend({
 	media: Em.State.create({
 	
 		view:	MFT.MediaView,
+		
+		viewLoaded: true,
 		  
 		exit: function() {
 			MFT.MediaController.set('activeState', MFT.States.currentState.get('path'));
@@ -377,228 +307,38 @@ var StateManager = Em.StateManager.extend({
 			this._super();
 		},
 		
-		Am: Em.State.create({
-			
-			view:	MFT.AMFMInfoView,
 
-			enter: function(){
-				// Set last saved active view
-				MFT.AmModel.band.set('value',MFT.AmModel.band.activeBand);
-				// Set currentSelected TAB reference (for non class bindings)
-				MFT.MediaController.set('currentSelectedTab' , 'AM');
-				MFT.MediaController.set('currentMediaGroup', 'radio');
-				this._super();
-			},
-			exit: function() {
-				// save last band when exit from am
-				MFT.AmModel.band.set('activeBand',MFT.AmModel.band.value);
-				// Disable AM
-				MFT.AmModel.band.set('value',-1);
-				this._super();
-			},
-			
-			options: Em.State.create({
-				enter: function(){
-					MFT.MediaController.insertToParentView(MFT.MediaOptionsView);
-					this._super();
-			}
-			}),
-		}),
-		Fm: Em.State.create({
-			
-			enter: function(){
-				// Set last saved active view
-				MFT.FmModel.band.set('value',MFT.FmModel.band.activeBand);
-				// Set currentSelected TAB reference (for non class bindings)
-				MFT.MediaController.set('currentSelectedTab' , 'FM');
-				MFT.MediaController.set('currentMediaGroup', 'radio');
-				this._super();
-			},
-			
-			exit: function() {
-				// save last band when exit from fm
-				MFT.FmModel.band.set('activeBand',MFT.FmModel.band.value);
-				// Disable FM
-				MFT.FmModel.band.set('value',-1);
-				this._super();
-			},
-						
-			options: Em.State.create({
-				enter: function(){
-					MFT.MediaController.insertToParentView(MFT.MediaOptionsView);
-					this._super();
-			}
-			}),
-		}),
-		Sirius: Em.State.create({
-			
-			view:	MFT.SiriusView,
-			
-			enter: function(){
-				// Set last saved active view
-				MFT.SiriusModel.band.set('value',MFT.SiriusModel.band.activeBand);
-				// Set currentSelected TAB reference (for non class bindings)
-				MFT.MediaController.set('currentSelectedTab' , 'SIRIUS');
-				MFT.MediaController.set('currentMediaGroup', 'radio');
-				this._super();
-			},
-			exit: function() {
-			
-				// save last band when exit from sirius
-				MFT.SiriusModel.band.set('activeBand',MFT.SiriusModel.band.value);
-				MFT.SiriusModel.band.set('value',-1);
-				MFT.MediaController.currentBrowseData.set('currentPage', MFT.BrowseView.list.currentPage);
-				this._super();
-			},		
-					
-			options: Em.State.create({
-				enter: function(){
-					MFT.MediaController.insertToParentView(MFT.MediaOptionsView);
-					this._super();
-			}
-			}),
-			
-			browse: Em.State.create({
-				enter: function(){
-					MFT.MediaController.insertToParentView(MFT.BrowseView);
-					this._super();
-				},
-				browseAll: Em.State.create({
-					enter: function(){
-						MFT.MediaController.insertToParentView(MFT.BrowseAllView);
-						this._super();
-					}
-				})
-			})
-		}),
-		cd: Em.State.create({
-			view: MFT.MediaPlayerView,
-			
-			enter: function() {
-				MFT.MediaController.set('currentMediaGroup', 'CDs');
-				this._super();
-			},	
-			exit: function(){
-				MFT.MediaController.currentBrowseData.set('currentPage', MFT.BrowseView.list.currentPage);
-				this._super();
-			},
-			moreinfo:Em.State.create({
-				view: MFT.MoreInfoView
-			}),
-			
-			options: Em.State.create({
-				enter: function(){
-					MFT.MediaController.insertToParentView(MFT.MediaOptionsView);
-					this._super();
-			}
-			}),
-			
-			browse: Em.State.create({
-				enter: function(){
-					MFT.MediaController.insertToParentView(MFT.BrowseView);
-					this._super();
-				},
-				browseAll: Em.State.create({
-					enter: function(){
-						MFT.MediaController.insertToParentView(MFT.BrowseAllView);
-						this._super();
-					},
-					exit: function(){
-						MFT.MediaController.currentBrowseData.set('currentPage', MFT.BrowseView.list.currentPage);
-						this._super();
-					},
-				})
-			})
-		}),
-		usb: Em.State.create({
-			view: MFT.MediaPlayerView,
-			
-			enter: function() {
-				MFT.MediaController.set('currentMediaGroup', 'CDs');
-				this._super();
-			},	
-			
-			options: Em.State.create({
-				enter: function(){
-					MFT.MediaController.insertToParentView(MFT.MediaOptionsView);
-					this._super();
-				}
-			}),
-			
-			moreinfo:Em.State.create({
-				view: MFT.MoreInfoView
-			}),
-						
-			browse: Em.State.create({
-				enter: function(){
-					MFT.MediaController.insertToParentView(MFT.USBBrowseView);
-					this._super();
-				},
-				browseAll: Em.State.create({
-					enter: function(){
-						MFT.MediaController.insertToParentView(MFT.BrowseAllView);
-						this._super();
-					}
-				})
-			})
-		}),
-		sd: Em.State.create({
-			view: MFT.MediaPlayerView,
-			
-			enter: function() {
-				MFT.MediaController.set('currentMediaGroup', 'CDs');
-				this._super();
-			},	
-			
-			moreinfo:Em.State.create({
-				view: MFT.MoreInfoView
-			}),
-			
-			browse: Em.State.create({
-				enter: function(){
-					MFT.MediaController.insertToParentView(MFT.USBBrowseView);
-					this._super();
-				},
-				browseAll: Em.State.create({
-					enter: function(){
-						MFT.MediaController.insertToParentView(MFT.BrowseAllView);
-						this._super();
-					}
-				})
-			})
+		radio: Em.State.create({
 		}),
 		
-		bt: Em.State.create({
-	
-			view:	MFT.BlueToothView,
-			
-			exit: function() {
-				MFT.MediaController.set('currentMediaGroup', 'Bluetooth');
-				this._super();
-			},	
-			
-			options: Em.State.create({
-				enter: function(){
-					MFT.MediaController.insertToParentView(MFT.MediaOptionsView);
-					this._super();
-			}
-			}),
+		browse: Em.State.create({
 		}),
+		
+		browseall: Em.State.create({	
+		}),
+		
+		moreinfo:Em.State.create({		
+		}),
+
+		player: Em.State.create({
+		}),
+		
+		bluetooth: Em.State.create({
+		}),
+		
 		avin: Em.State.create({
-			
-			view:	MFT.AvInView,
-			
-			exit: function() {
-				MFT.MediaController.set('currentMediaGroup', 'AVIN');
-				this._super();
-			},		
+		}),
+
+		options: Em.State.create({
 		})
 	}),
 	
 	/** Navigation state */
 	navigation: Em.State.create({
 		
-		view:	MFT.NavigationView,
+		view: MFT.NavigationView,
+		
+		viewLoaded: true,
 		
 		exit: function() {
 			MFT.NavigationController.set('activeState', MFT.States.currentState.get('path'));
@@ -606,57 +346,54 @@ var StateManager = Em.StateManager.extend({
 		},
 		
 		dest: Em.State.create({
-			view:	MFT.NavigationDestinationView,
 			
 			myHome: Em.State.create({
-				view:	MFT.NavigationDestinationMyHomeView,
+				
 			}),
 			
 			favorites: Em.State.create({
-				view:	MFT.NavigationDestinationFavorites,
+				
 			}),
 			
 			previousDestinations: Em.State.create({
-				view:	MFT.NavigationDestinationPreviousDestinationsView,
+				
 			}),
 			
 			POI: Em.State.create({
-				view:	MFT.NavigationDestinationPOIView,
+				
 			}),
 			
 			emergency: Em.State.create({
-				view:	MFT.NavigationDestinationEmergencyView,
+				
 			}),
 						
 			streetAddress: Em.State.create({
-				view:	MFT.NavigationDestinationStreetAddress,
+				
 			}),
 			
 			intersection: Em.State.create({
-				view:	MFT.NavigationDestinationIntersectionView,
+				
 			}),
 			
 			cityCenter: Em.State.create({
-				view:	MFT.NavigationDestinationCityCenterView,
+				
 			}),
 			
 			map: Em.State.create({
-				view:	MFT.NavigationDestinationMapView,
+				
 			}),
 			
 			previousStartingsPoint: Em.State.create({
-				view:	MFT.NavigationDestinationPreviousStartingsPointView,
+				
 			}),
 			
 			freeWay: Em.State.create({
-				view:	MFT.NavigationDestinationFreeWayView,
+				
 			}),
 			
 			latitudeLongitude: Em.State.create({
-				view:	MFT.NavigationDestinationLatitudeLongitudeView,
-			}),
-			
-			
+				
+			})
 		})
 	}),
 	
@@ -665,61 +402,48 @@ var StateManager = Em.StateManager.extend({
 		
 		view:	MFT.PhoneView,
 		
+		viewLoaded: true,
+				
 		exit: function() {
 			MFT.PhoneController.set('activeState', MFT.States.currentState.get('path'));
 			this._super();
 		},
-		phone: Em.State.create({
-			view:	MFT.DialpadPhoneView
+		
+		dialpad: Em.State.create({
+			
 		}),
 		quickdial: Em.State.create({
-			view:	MFT.QuickdialPhoneView
+		
 		}),
 		phonebook: Em.State.create({
-			view:	MFT.PhonebookPhoneView
+		
 		}),
 		history: Em.State.create({
-			view:	MFT.HistoryPhoneView
+		
 		}),
 		messaging: Em.State.create({
-			view:	MFT.MessagingPhoneView
+		
 		}),
 		phoneSettings: Em.State.create({
-			view:	MFT.SettingsPhoneView,
 			
 			bluetoothDevices: Em.State.create({
-				enter: function(){
-					MFT.PhoneController.insertToParentView(MFT.PhoneSettingsBluetoothDevicesView);
-					this._super();
-				}
+
 			}),
 			
 			phoneRinger: Em.State.create({
-				enter: function(){
-					MFT.PhoneController.insertToParentView(MFT.PhoneSettingsPhoneRingerView);
-					this._super();
-				}
+
 			}),
 			
 			textMessage: Em.State.create({
-				enter: function(){
-					MFT.PhoneController.insertToParentView(MFT.PhoneSettingsTextMessageNotificationView);
-					this._super();
-				}
+
 			}),
 			
 			internetDataConnection: Em.State.create({
-				enter: function(){
-					MFT.PhoneController.insertToParentView(MFT.PhoneSettingsInternetDataConnectionView);
-					this._super();
-				}
+
 			}),
 			
 			managePhoneBook: Em.State.create({
-				enter: function(){
-					MFT.PhoneController.insertToParentView(MFT.PhoneSettingsManagePhoneBookView);
-					this._super();
-				}
+
 			})
 		})
 	})

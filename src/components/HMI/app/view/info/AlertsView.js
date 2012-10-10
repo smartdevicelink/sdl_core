@@ -10,13 +10,15 @@
  * @author		Maksym Gerashchenko
  */
  
-MFT.InfoAlertsView = Em.View.create({
+MFT.InfoAlertsView = Em.View.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
 	classNameBindings: ['MFT.States.info.alerts.active:active_state','MFT.helpMode'],
 	
 	elementId:		'info_alerts',
 	
 	classNames:	   'hidden',
+	
+	stateObj: MFT.States.info.alerts,
 	
 	activeDisabled: function(){
 		if (!MFT.helpMode) {

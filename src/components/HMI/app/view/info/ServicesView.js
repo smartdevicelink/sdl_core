@@ -10,12 +10,14 @@
  * @author		Gerashchenko Maksym
  */
  
-MFT.InfoServicesView= Em.View.create({
+MFT.InfoServicesView= Em.View.create(MFT.LoadableView,{
 	
 	elementId:	'info_services_view',
 	
-	classNameBindings: ['MFT.States.info.services.active:active_state','MFT.helpMode'],
+	stateObj: MFT.States.info.services,
 	
+	classNameBindings: ['MFT.helpMode'],
+		
 	classNames: 'hidden',
 
 	/** Define module template */

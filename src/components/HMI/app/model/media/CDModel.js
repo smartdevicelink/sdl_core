@@ -12,6 +12,14 @@
 
 MFT.CDModel= Em.Object.create({
 	
+	active: false,
+	
+	/** CD Player*/
+	init: function(){
+		this._super();
+		this.set('player',MFT.MediaCDPlayer.create({data: this.PlayList}));
+	},
+	
 	PlayList: MFT.Playlist.create({
 		
 		selectedIndex: 					0,
@@ -36,6 +44,8 @@ MFT.CDModel= Em.Object.create({
 	browseData : Em.Object.create({
 				
 		title: 'CD Track list',
+		
+		disableScrollbar: false,
 		
 		currentPage: 0,
 		

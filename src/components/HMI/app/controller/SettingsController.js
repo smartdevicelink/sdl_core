@@ -17,7 +17,7 @@ MFT.SettingsController = Em.Object.create({
 	hiddenLeftMenu: false,
 
 	onState: function(event){
-		MFT.States.goToState(event.goToState);
+		MFT.States.goToState('settings.'+event.goToState);
 	},
 
 	onChildState: function(event){
@@ -26,6 +26,7 @@ MFT.SettingsController = Em.Object.create({
 
 	onPreviousState: function(){
 		MFT.States.goToState(this.previousState);
+		MFT.StateVisitor.visit(MFT.States.currentState);
 	},
 
 	/** time string for top clock */
@@ -42,7 +43,7 @@ MFT.SettingsController = Em.Object.create({
 		if ( MFT.States.settings.clock.active ) {
 			return;
 		}
-		
+
 		var minutes = date.getMinutes();
 		var hours = date.getHours();
 		
@@ -53,19 +54,21 @@ MFT.SettingsController = Em.Object.create({
 				
 		this.set('time', hours + ':' + minutes +  this.get('temperature'));
 	},
+
+	// Valet mode popup
+	valetPopUp: false,
 	
-	/**
-	 *  Show pop up view befor EnteringPIN View
-	 */	
-	onPopUp: function(){
-		MFT.SettingsVehicleEnableValetModeEnteringPINView.set('popUpHide',false);
-		
+	showValetPopUp: function(){
+		this.set('valetPopUp',true);
 	},
 	
-	/**
-	 *  Hide pop up view befor EnteringPIN View
-	 */	
-	hidePopUp: function(){
-		MFT.SettingsVehicleEnableValetModeEnteringPINView.set('popUpHide',true);
+	hideValetPopUp: function(){
+		this.set('valetPopUp',false);
+	},
+	
+	// Enter pin
+	onEnterPin: function(){
+		this.hideValetPopUp();
+		MFT.States.goToState('settings.vehicle.enterPIN');
 	}
 });

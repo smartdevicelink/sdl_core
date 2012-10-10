@@ -12,7 +12,7 @@
 MFT.MediaController = Em.Object.create({
 	
 	/** Initial substate */
-	activeState: 'media.Am',
+	activeState: 'media.radio',
 	
 	/** text labels (dinamicaly could be changed)*/
 	amLabel :'AM 1', fmLabel :'FM', siriusLabel:'SIRIUS',
@@ -53,25 +53,88 @@ MFT.MediaController = Em.Object.create({
 	/** Current selected player object  reference*/
 	currentSelectedPlayer: null,
 	
-	/** CD Player*/
-	CDPlayer: MFT.MediaCDPlayer.create({data: MFT.CDModel.PlayList}),
-	/** SD Player*/
-	SDPlayer: MFT.MediaCDPlayer.create({data: MFT.SDModel.PlayList}),
-	/** USB Player*/
-	USBPlayer: MFT.MediaCDPlayer.create({data: MFT.USBModel.PlayList}),
-			
-	/*toggle between AM stations */
-	toggleAmStation: function(){
+	radioDataArray : [MFT.AmModel],
+	
+	playerDataArray : [MFT.CDModel],
+	
+	
+	
+	/**  On radio module exit event */
+	onRadioExit: function(){
+		if(this.radioDataArray.length >0){
+			this.radioDataArray[0].band.set('activeBand',this.radioDataArray[0].band.value);
+			this.radioDataArray[0].set('active',false);
+			this.radioDataArray.pop().band.set('value',-1);
+		}
+		if(MFT.BTModel.active){
+			MFT.BTModel.set('active',false);
+		}
+	},
+	/**  On radio module enter event */
+	onRadioEnter: function(data){
+		// Exit player
+		this.onPlayerExit();
+		
+		// Set Radio state 
+		if(!MFT.States.media.radio.active){
+			MFT.States.goToState('media.radio');
+		}
+		
 		// Hide direct tune
 		this.offDirectTune();
-		this.set('directTuneSelected', false);
 		
-		if(MFT.States.media.Am.active){
+		this.radioDataArray.push(data);
+		this.radioDataArray[0].band.set('value',this.radioDataArray[0].band.activeBand);
+		this.radioDataArray[0].set('active',true);
+	},
+	
+	/**  On player module exit event */
+	
+	onPlayerExit: function(){
+		if(this.playerDataArray.length >0){
+			if(this.playerDataArray[0].player.isPlaying){
+				this.playerDataArray[0].player.pause();
+			}
+			this.playerDataArray.pop().set('active',false);
+		}
+		if(MFT.BTModel.active){
+			MFT.BTModel.set('active',false);
+		}
+	},
+	
+	/**  On player module enter event */
+	
+	onPlayerEnter: function(data){
+		// Hide direct tune
+		this.offDirectTune();
+		
+		//Player
+		this.playerDataArray.push(data);	
+		this.set('currentBrowseData', this.playerDataArray[0].browseData);
+		this.set('currentModuleData',this.playerDataArray[0].PlayList);
+		if(this.playerDataArray[0].optionsData){
+			this.set('currentOptionsData', this.playerDataArray[0].optionsData);
+		}
+		this.set('currentSelectedPlayer',this.playerDataArray[0].player); 
+		// Exit Radio
+		this.onRadioExit();
+		this.playerDataArray[0].set('active',true);
+		
+		// Set player state
+		if(!MFT.States.media.player.active && !MFT.States.media.browseall.active){
+			MFT.States.goToState('media.player');
+		}	
+	},
+	
+	/****************** AM *******************/
+	
+	/*toggle between AM stations */
+	toggleAmStation: function(){
+		if(MFT.AmModel.active){
 			MFT.AmModel.band.toggleIndicators();
 		}else{
-			MFT.AmModel.band.set('value',MFT.AmModel.band.activeBand);
-			if(MFT.States)MFT.States.goToState('media.Am');
-			this.set('currentOptionsData', MFT.AmModel.optionsData);
+			this.onRadioExit();
+			this.onRadioEnter(MFT.AmModel);
 		}
 	},
 	/*Observes for model value changed - switch selected station view*/
@@ -93,21 +156,18 @@ MFT.MediaController = Em.Object.create({
 		}
 	}.observes('MFT.AmModel.band.value'),
 	
+	/****************** FM *******************/
+	
 	/*toggle between FM stations */
 	toggleFmStation: function(){
-		// Hide direct tune
-		this.offDirectTune();
-		this.set('directTuneSelected', false);
-		
-		if(MFT.States.media.Fm.active){
+		if(MFT.FmModel.active){
 			MFT.FmModel.band.toggleIndicators();
 		}else{
-			MFT.FmModel.band.set('value',MFT.FmModel.band.activeBand);
-			MFT.States.goToState('media.Fm');
-			this.set('currentOptionsData', MFT.FmModel.optionsData);
+			this.onRadioExit();
+			this.onRadioEnter(MFT.FmModel);
 		}	
 	},
-	
+
 	/*Observes for model value changed - switch selected station view*/
 	switchFmSubstate: function(){
 
@@ -133,20 +193,16 @@ MFT.MediaController = Em.Object.create({
 		}
 	}.observes('MFT.FmModel.band.value'),
 	
+	/****************** SIRIUS *******************/
+	
 	/*toggle between SIRIUS stations */
 	toggleSiriusStation: function(){
-	
-		// Hide direct tune
-		this.offDirectTune();
-		this.set('directTuneSelected', false);
-		
-		if(MFT.States.media.Sirius.active){
+		if(MFT.SiriusModel.active){
 			MFT.SiriusModel.band.toggleIndicators();
 		}else{
-			/** load last active state*/
-			MFT.SiriusModel.band.set('value',MFT.SiriusModel.band.activeBand);
-			/** switch sirius view*/
-			MFT.States.goToState('media.Sirius');
+			
+			this.onRadioExit();
+			this.onRadioEnter(MFT.SiriusModel);
 			/** load sirius browse data*/
 			this.set('currentBrowseData', MFT.SiriusModel.browseData);
 			/** load sirius options data*/
@@ -206,133 +262,174 @@ MFT.MediaController = Em.Object.create({
 		'MFT.MediaController.directTuneSelected'
 	),		
 	
+	/****************** CD *******************/
 	/*Turn on CD*/
 	turnOnCD: function(){
-		MFT.States.goToState('media.cd');
-		this.offDirectTune();
-		if(this.directTuneSelected){
-			this.set('directTuneSelected', false);
-		}
-		this.set('currentBrowseData', MFT.CDModel.browseData);
-		this.set('currentModuleData',MFT.CDModel.PlayList);
-		/** load cd options data*/
-		this.set('currentOptionsData', MFT.CDModel.optionsData);
-		this.set('currentSelectedPlayer',this.CDPlayer); 
-	},
-	/*Turn on More Info*/
-	turnMoreInfo: function(){
-		if ( MFT.helpMode ) {
-			MFT.VideoPlayerController.start('ent_More_info');
-			
-			return;
-		}
-		MFT.States.goToState('media.'+MFT.States.currentState.name+'.moreinfo');
-	},
-	/*Turn on Browse*/
-	turnBrowse: function(){
-		if ( MFT.helpMode ) {
-			MFT.VideoPlayerController.start('ent_Browse');
-			
-			return;
-		}
-		this.resetDirectTune();
-		MFT.States.goToState('media.'+MFT.States.currentState.name+'.browse');
-	},
-	/*Turn on Browse All*/
-	turnBrowseAll: function(){
-		MFT.States.goToState('media.'+MFT.States.currentState.parentState.name+'.browse.browseAll');
+		this.onPlayerExit();
+		this.onPlayerEnter(MFT.CDModel);
 	},
 	
+	/****************** USB *******************/
 	/*Turn on USB*/
 	turnOnUSB: function(){
-		MFT.States.goToState('media.usb');
-		this.offDirectTune();
-		if(this.directTuneSelected){
-			this.set('directTuneSelected', false);
-		}
-		/** load cd options data*/
-		this.set('currentOptionsData', MFT.USBModel.optionsData);
-		this.set('currentBrowseData', MFT.USBModel.browseData);
-		this.set('currentModuleData',MFT.USBModel.PlayList);
-		this.set('currentSelectedPlayer',this.USBPlayer);  
+		this.onPlayerExit();
+		this.onPlayerEnter(MFT.USBModel);
 	},
+	
+	/****************** SD *******************/
 	/*Turn on SD*/
 	turnOnSD: function(){
-		MFT.States.goToState('media.sd');
-		this.offDirectTune();
-		if(this.directTuneSelected){
-			this.set('directTuneSelected', false);
-		}
-		this.set('currentBrowseData', MFT.SDModel.browseData);
-		this.set('currentModuleData',MFT.SDModel.PlayList);
-		this.set('currentSelectedPlayer',this.SDPlayer); 
+		this.onPlayerExit();
+		this.onPlayerEnter(MFT.SDModel);
 	},
+	
+	/*Turn on More Info*/
+	turnMoreInfo: function(){
+		if (MFT.helpMode) {
+			MFT.VideoPlayerController.start('ent_More_info');
+			return;
+		}
+		MFT.States.goToState('media.moreinfo');
+	},
+	/** Back MoreInfo*/
+	backMoreInfo: function(){
+		MFT.States.goToState('media.player');
+	},
+	
+	/*Turn on Browse*/
+	turnBrowse: function(){
+		if (MFT.helpMode) {
+			MFT.VideoPlayerController.start('ent_Browse');
+			return;
+		}
+		
+		MFT.States.goToState('media.browse');
+		this.resetDirectTune();
+	},
+	
+	/*Turn on Browse All*/
+	turnBrowseAll: function(){
+		MFT.States.goToState('media.browseall');
+	},
+	
+	browseBack: function(){
+		if(MFT.SiriusModel.active){
+			MFT.States.goToState('media.radio');
+		}else {
+			MFT.States.goToState('media.player');
+		}
+	},
+	
 	/*Turn on SD*/
 	turnOnBT: function(){
-		MFT.States.goToState('media.bt');
-		/** load sirius options data*/
-		this.set('currentOptionsData', MFT.BtModel.optionsData);
+		// Exit form player or radio
+		this.onPlayerExit();
+		this.onRadioExit();
+		// Set Bluetooth Data active
+		MFT.BTModel.set('active',true);
+		// Set Bluetoth Options Data
+		this.set('currentOptionsData', MFT.BTModel.optionsData);
+		// Go to Bluetooth state
+		MFT.States.goToState('media.bluetooth');
+		// hide directTune
 		this.offDirectTune();
-		if(this.directTuneSelected){
-			this.set('directTuneSelected', false);
-		}
 	},
 	/*Turn on SD*/
 	turnOnAVin: function(){
+		// Exit form player or radio
+		this.onPlayerExit();
+		this.onRadioExit();
+		
 		MFT.States.goToState('media.avin');
+		// hide directTune
 		this.offDirectTune();
-		if(this.directTuneSelected){
-			this.set('directTuneSelected', false);
-		}
 	},
+	
+	/* Scroll left menu up*/
 	listDown: function(){
 		this.set('isTopListMenu',false);
 	},
+	/* Scroll left menu down*/
 	listUp: function(){
 		this.set('isTopListMenu',true);
 	},
 	
-	/** **/
+	/** Options */
 	turnOnOptions: function(){
 		this.resetDirectTune();
-		MFT.States.goToState(MFT.States.currentState.get('path')+'.options');
+		MFT.States.goToState('media.options');
 	},
 	
+	optionsBack: function(){
+		if(MFT.AmModel.active || MFT.FmModel.active || MFT.SiriusModel.active){
+			MFT.States.goToState('media.radio');
+		}else if(MFT.BTModel.active){
+			MFT.States.goToState('media.bluetooth');
+		}else{
+			MFT.States.goToState('media.player');
+		}
+	},
+	
+	//SIRIUS Browse
 	turnOnSiriusBrowse: function(){
-		MFT.BrowseView.list.set('cancelAnimation',true);
-		MFT.States.goToState('media.Sirius.browse');
+		// cancel scrollbar animation
+		MFT.browseView.list.set('cancelAnimation',true);
+		//enable scrollbar animation after 200 ms delay
 		Ember.run.later(function(){
-		 	MFT.BrowseView.list.set('cancelAnimation',false);
+		 	MFT.browseView.list.set('cancelAnimation',false);
 		}, 200);
+		// set browse data
 		this.set('currentBrowseData', MFT.SiriusModel.browseData);
-		/** load sirius options data*/
-		this.set('currentOptionsData', MFT.SiriusModel.optionsData);
+
+		//Turn Sirius Model Active
+		this.onRadioEnter(MFT.SiriusModel);
+		// Switch Browse state
+		MFT.States.goToState('media.browse');
+		/** TODO load sirius options data*/
+		//this.set('currentOptionsData', MFT.SiriusModel.optionsData);
+
 		this.listUp();
+		
 	},
+	//CD Browse
 	turnOnCDBrowse: function(){
-		this.turnOnCD();
-		this.listUp();
-		MFT.BrowseView.list.set('cancelAnimation',true);
-		MFT.States.goToState('media.cd.browse');
+		// cancel scrollbar animation
+		MFT.browseView.list.set('cancelAnimation',true);
+		//enable scrollbar animation after 200 ms delay
 		Ember.run.later(function(){
-		 	MFT.BrowseView.list.set('cancelAnimation',false);
+		 	MFT.browseView.list.set('cancelAnimation',false);
 		}, 200);
+		// Turn CD Model Active
+		this.turnOnCD();
+		
+		// Switch Browse state
+		MFT.States.goToState('media.browse');
+		
+		this.listUp();
+		
 	},
+	//USB Browse
 	turnOnUSBBrowse: function(){
 		this.turnOnUSB();
+		// Switch Browse state
+		MFT.States.goToState('media.browse');
+		
 		this.listUp();
-		MFT.States.goToState('media.usb.browse');
 	},
+	//SD Browse
 	turnOnSDBrowse: function(){
 		this.turnOnSD();
+
+		// Switch Browse state
+		MFT.States.goToState('media.browse');
+		
 		this.listDown();
-		MFT.States.goToState('media.sd.browse');
 	},
 	
 	/*Set Active current selected preset station*/
 	onPresetButtonActiveStateChange: function(index, playlist){
-			/** newly selected preset station */
-			playlist.set('selectedIndex', index);
+		/** newly selected preset station */
+		playlist.set('selectedIndex', index);
 	},
 	
 	/*Store preset station data*/
@@ -356,67 +453,15 @@ MFT.MediaController = Em.Object.create({
 	},
 	/** Player Next track event*/
 	nextTrack: function() {
-		switch(MFT.States.currentState.name){
-			case 'cd':{
-				this.CDPlayer.nextTrack();
-				break;
-			}
-			case 'usb':{
-				this.USBPlayer.nextTrack();
-				break;
-			}
-			case 'sd':{
-				this.SDPlayer.nextTrack();
-				break;
-			}
-		}
+		this.playerDataArray[0].player.nextTrack();
 	},
 	/** Player Prev track event*/
 	prevTrack: function() {
-		switch(MFT.States.currentState.name){
-			case 'cd':{
-				this.CDPlayer.prevTrack();
-				break;
-			}
-			case 'usb':{
-				this.USBPlayer.prevTrack();
-				break;
-			}
-			case 'sd':{
-				this.SDPlayer.prevTrack();
-				break;
-			}
-		}
+		this.playerDataArray[0].player.prevTrack();
 	},
 	/** Player Play track event*/
 	playTrack: function() {
-		switch(MFT.States.currentState.name){
-			case 'cd':{
-				this.USBPlayer.pause();
-				this.SDPlayer.pause();
-				this.CDPlayer.play();
-				break;
-			}
-			case 'usb':{
-				this.SDPlayer.pause();
-				this.CDPlayer.pause();
-				this.USBPlayer.play();
-				break;
-			}
-			case 'sd':{
-				this.CDPlayer.pause();
-				this.USBPlayer.pause();
-				this.SDPlayer.play();
-				break;
-			}
-		}
-	},
-	
-	insertToParentView: function(view){
-		if (!MFT.MediaView.get('childViews').contains(view) ) {				
-				MFT.MediaView.get('childViews').pushObject(view);
-		}
-		
+		this.playerDataArray[0].player.play();
 	},
 	
 	/**
@@ -433,8 +478,12 @@ MFT.MediaController = Em.Object.create({
 		this.set('directTuneSelected',false);
 	},
 	
+	  
 	offDirectTune: function() {
 		this.set('directTuneHide', true );
+		if(this.directTuneSelected){
+			this.set('directTuneSelected', false);
+		}
 	},
 	
 	onDirectTuneHide: function() {

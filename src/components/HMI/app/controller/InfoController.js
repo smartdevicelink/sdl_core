@@ -17,7 +17,7 @@ MFT.InfoController = Em.Object.create({
 	hiddenLeftMenu: false,
 
 	onState: function(event){
-		MFT.States.goToState(event.goToState);
+		MFT.States.goToState('info.'+event.goToState);
 	},
 	
 	onChildState: function(event){

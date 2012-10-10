@@ -10,13 +10,13 @@
  * @author		Artem Petrosyan
  */
 
-MFT.PhonebookPhoneView = Em.ContainerView.create({
-	
+MFT.PhonebookPhoneView = Em.ContainerView.create( MFT.LoadableView, {
+		
 	elementId:	'phone_phonebook',
-	
-	classNameBindings: ['MFT.States.phone.phonebook.active:active_state'],
-	
+		
 	classNames: ['hidden'],
+	
+	stateObj: MFT.States.phone.phonebook,
 	
 	childViews: [
 		'help',
@@ -66,6 +66,7 @@ MFT.PhonebookPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'arrow',
 						text:		'Micky Marmaremmy',
 						disabled:	true,
 						arrow:		true
@@ -76,6 +77,7 @@ MFT.PhonebookPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'arrow',
 						text:		'Billy McTuff',
 						disabled:	true,
 						arrow:		true
@@ -85,6 +87,7 @@ MFT.PhonebookPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'arrow',
 						text:		'Hope Doferson',
 						disabled:	true,
 						arrow:		true
@@ -94,6 +97,7 @@ MFT.PhonebookPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'arrow',
 						text:		'Larry Pitterputz',
 						disabled:	true,
 						arrow:		true
@@ -103,6 +107,7 @@ MFT.PhonebookPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'arrow',
 						text:		'Suzie McCozo',
 						disabled:	true,
 						arrow:		true
@@ -112,6 +117,7 @@ MFT.PhonebookPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'arrow',
 						text:		'Suzie McCozo',
 						disabled:	true,
 						arrow:		true
@@ -121,6 +127,7 @@ MFT.PhonebookPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'arrow',
 						text:		'Larry Pitterputz',
 						disabled:	true,
 						arrow:		true
@@ -130,6 +137,7 @@ MFT.PhonebookPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'arrow',
 						text:		'Micky Marmaremmy',
 						disabled:	true,
 						arrow:		true
@@ -139,6 +147,7 @@ MFT.PhonebookPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'arrow',
 						text:		'Billy McTuff',
 						disabled:	true,
 						arrow:		true
@@ -148,6 +157,7 @@ MFT.PhonebookPhoneView = Em.ContainerView.create({
 					type:		MFT.Button,
 					
 					params:		{
+						templateName:	'arrow',
 						text:		'Hope Doferson',
 						disabled:	true,
 						arrow:		true

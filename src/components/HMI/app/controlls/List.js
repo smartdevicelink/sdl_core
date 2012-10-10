@@ -114,14 +114,13 @@ MFT.List = Em.ContainerView.extend({
 								binding.connect(this);
 								//Set one way binding
 								binding.oneWay();
-								// synchronize bindings
-								Ember.run.sync();
 							}else{
 								this.set(key, items[i].params[key]);
 							}
 						}	
 						this._super();
-						
+						// synchronize bindings
+						Ember.run.sync();
 					}
 				})
 				

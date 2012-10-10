@@ -12,6 +12,14 @@
 
 MFT.SDModel= Em.Object.create({
 	
+	active: false,
+	
+	/** SD Player*/
+	init: function(){
+		this._super();
+		this.set('player',MFT.MediaCDPlayer.create({data: this.PlayList}));
+	},
+	
 PlayList: MFT.Playlist.create({
 	
 	selectedIndex: 					4,
@@ -30,7 +38,10 @@ PlayList: MFT.Playlist.create({
 }),
 
 browseData : Em.Object.create({
+		
 		title: 'USB SD Drive DSK4',
+		
+		disableScrollbar: true,
 		
 		items:	[
 			{

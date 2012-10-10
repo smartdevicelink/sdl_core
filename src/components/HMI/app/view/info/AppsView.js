@@ -10,13 +10,15 @@
  * @author		Maksym Gerashchenko
  */
 
-MFT.InfoAppsView = Em.ContainerView.create({
+MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	elementId:	'info_apps',
 	
 	classNameBindings: ['MFT.States.info.apps.active:active_state','MFT.helpMode'],
 	
 	classNames: ['hidden'],
+	
+	stateObj: MFT.States.info.apps,
 	
 	childViews: [
 		'list',
@@ -37,14 +39,15 @@ MFT.InfoAppsView = Em.ContainerView.create({
 				type:		MFT.Button,
 								
 				params:		{
-					goToState:   		  'settings.vehicle.vehicleHealthReport',
+					goToState:   		  'vehicle.healthReport',
 					classNames:         ['button','ember-view','notpressed','list-item'],
 					icon:			   'images/info/ico_vehicle.png',
 					textBinding: 	 	'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 					arrow:			  true,
 					action:	  		 'onState',
-					target:	  		 'MFT.InfoController',
+					target:	  		 'MFT.SettingsController',
 					disabledBinding: 	'MFT.helpMode',
+					onDown: false
 				}			
 					
 			},
@@ -53,14 +56,15 @@ MFT.InfoAppsView = Em.ContainerView.create({
 				type:		MFT.Button,
 				
 				params:		{
-					goToState:  		  'settings.help.assist',
+					goToState:  		  'help.helpAssist',
 					classNames:         ['button','ember-view','notpressed','list-item'],
 					icon:			   'images/info/ico_assist.png',
 					textBinding: 	    'MFT.locale.label.view_info_apps_911Assist',
 					arrow:			  true,
 					action:	  	  	 'onState',
-					target:	  		 'MFT.InfoController',
+					target:	  		 'MFT.SettingsController',
 					disabledBinding: 	'MFT.helpMode',
+					onDown: false
 				}			
 					
 			}
@@ -68,14 +72,15 @@ MFT.InfoAppsView = Em.ContainerView.create({
 	}),
 	
 	installButton:   MFT.Button.extend({
-					goToState:  		  'settings.settings.system.installApplications',
+					goToState:  		  'settings.system.installApplications',
 					icon:			   'images/info/ico_info_install.png',
 					textBinding: 		'MFT.locale.label.view_info_apps_vehicle_InstallApplicationsUp',
 					elementId: 	  	  'info_apps_install_Button',
 					classNames: 	 	 'button',
 					arrow:			  true,
 					action:	  	  	 'onState',
-					target:	  		 'MFT.InfoController',
-					disabledBinding: 	'MFT.helpMode'
+					target:	  		 'MFT.SettingsController',
+					disabledBinding: 	'MFT.helpMode',
+					onDown: false
 	})
 });
