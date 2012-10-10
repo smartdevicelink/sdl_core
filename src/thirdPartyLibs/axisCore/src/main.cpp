@@ -22,7 +22,7 @@ public:
         mSessionID = 0;
 
         CMessage::generateInitialMessage();
-        mHandler = new ProtocolHandler(this);
+        mHandler = new ProtocolHandler(this, 0);
         mHandler->dataReceived();        
         //CMessage::generateSingleMessage("Hello ?");
         CMessage::generateMultipleMessages("Hello ?", 5);

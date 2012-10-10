@@ -4,19 +4,18 @@
 #include "ProtocolHandler.hpp"
 #include "ProtocolPacketHeader.hpp"
 #include "IProtocolObserver.hpp"
+#include "../../../appMain/CBTAdapter.hpp"
 //#include "transport/bt/BluetoothAPI.hpp"
 //#include "MessageGenerator/CMessage.cpp"
 
-ProtocolHandler::ProtocolHandler(IProtocolObserver *observer) : 
+ProtocolHandler::ProtocolHandler(IProtocolObserver *observer, NsTransportLayer::CBTAdapter *btAdapter) :
                 mProtocolObserver(observer),
                 mMessageID(0),
                 mSessionID(0),
                 mState(BEFORE_HANDSHAKE)
 {
     std::cout << "enter ProtocolHandler::ProtocolHandler() \n";
-    //
-
-    //Bluetooth::initBluetooth(this);
+    //btAdapter->initBluetooth(this);
 }
 
 ProtocolHandler::~ProtocolHandler()

@@ -8,7 +8,11 @@
 #include "BluetoothReader.hpp"
 #include "BluetoothWriter.hpp"
 #include "transport/bt/IBluetoothHandler.hpp"
-//#include "MessageGenerator/CMessage.hpp"
+
+namespace NsTransportLayer
+{
+    class CBTAdapter;
+};
 
 class IProtocolObserver;
 
@@ -16,7 +20,7 @@ class ProtocolHandler : public Bluetooth::IBluetoothHandler
 {
 public:
 
-    ProtocolHandler(IProtocolObserver *observer);
+    ProtocolHandler(IProtocolObserver *observer, NsTransportLayer::CBTAdapter *btAdapter);
 
     ~ProtocolHandler();
 
