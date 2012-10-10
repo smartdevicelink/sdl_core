@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" ontouchmove="event.preventDefault();"><html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=800,user-scalable=no" />
+		<title>MFT Guide v2</title>
+		<!--Styles-->
+		<!--<link rel="stylesheet" type="text/css" href="css/ffw.css" />-->
+		<link rel="stylesheet" type="text/css" href="css/buttonControls.css" />
+		<link rel="stylesheet" type="text/css" href="css/general.css" />
+		<link rel="stylesheet" type="text/css" href="css/home.css" />
+		<link rel="stylesheet" type="text/css" href="css/climate.css" />
+		<link rel="stylesheet" type="text/css" href="css/phone.css" />
+        <link rel="stylesheet" type="text/css" href="css/navigation.css" />
+        <link rel="stylesheet" type="text/css" href="css/info.css" />
+        <link rel="stylesheet" type="text/css" href="css/settings.css" />
+        <link rel="stylesheet" type="text/css" href="css/media.css" />
+        <link rel="stylesheet" type="text/css" href="css/mcs.css" />
+		 
+		<!--Libs-->
+		
+		<script type="text/javascript" src="lib/handlebars-1.0.0.beta.6.js"></script>
+		
+		<!-- RELEASE's min versions -->
+		
+		<script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="lib/ember-1.0.pre.min.js"></script>
+		
+		
+		<!-- DEBUG versions -->
+		<!--<script type="text/javascript" src="lib/jquery-1.7.2.js"></script>
+		<script type="text/javascript" src="lib/ember-1.0.pre.js"></script>-->
+	
+		
+	</head>
+	<body ontouchmove="event.preventDefault();">
+		
+        <div id="warning_view">
+            <div class="message">
+                    <div class="warning_text">WARNING!</div>
+                        <div class="text">
+                    <br>
+                        <p>This application is intended to be used as a demonstrative aid only, while the vehicle is parked. Don&apos;t use it while driving.</p><br>
+                            <p>Use extreme caution when using any device that takes your attention off the road. Ford recommends against the use of any hand-held device while driving and that you comply with all applicable laws. Your primary responsibility is the safe operation of the vehicle.</p><br>
+                        </div>
+             </div>
+        </div>
+        <video id="html5Player" onTimeUpdate="MFT.HTMLVideoPlayer.timeupdate()" onError="MFT.HTMLVideoPlayer.onError()" webkit-playsinline></video>
+        
+		<!-- Framework -->
+		<script type="text/javascript" src="ffw/Framework.js"></script>
+        <script type="text/javascript" src="ffw/LoadBalancer/AppendScript.js"></script>
+
+		<script type="text/javascript" src="ffw/Size.js"></script>
+		<script type="text/javascript" src="ffw/WebSocketSimulator.js"></script>
+		<script type="text/javascript" src="ffw/WebSocket.js"></script>
+		<script type="text/javascript" src="ffw/RPCObserver.js"></script>	
+		<script type="text/javascript" src="ffw/RPCClient.js"></script>	
+		<script type="text/javascript" src="ffw/OSInfo.js"></script>	
+		<script type="text/javascript" src="ffw/BackendRPC.js"></script>	
+		<script type="text/javascript" src="ffw/VideoPlayerRPC.js"></script>
+		<script type="text/javascript" src="ffw/Scale.js"></script>
+		
+		<!-- FFW UI -->
+		<!--
+		<script type="text/javascript" src="ffw/ui/AbstractButton.js"></script>
+		-->
+		
+        <script type="text/javascript" src="ffw/ImagePreloader.js"></script>
+
+		<!-- APP -->
+		<script type="text/javascript" src="app/Flags.js"></script>
+		<script type="text/javascript" src="app/MFTApp.js"></script>
+        <script type="text/javascript" src="app/DataImages.js"></script>
+		<!-- locales -->
+		<script type="text/javascript" src="locale/eng.js"></script>
+		<script type="text/javascript" src="locale/rus.js"></script>
+		<script type="text/javascript" src="locale/locale.js"></script>
+		
+		<!-- UI controlls -->		
+		<script type="text/javascript" src="app/controlls/Button.js"></script>
+        <script type="text/javascript" src="app/view/WarningOkButtonView.js"></script>
+        <script type="text/javascript" src="app/view/WOSkipButtonView.js"></script>
+		<script type="text/javascript" src="app/controlls/Label.js"></script>
+        <script type="text/javascript" src="app/controlls/TableLabel.js"></script>        
+		<script type="text/javascript" src="app/controlls/IndButton.js"></script>
+		<script type="text/javascript" src="app/controlls/TogButton.js"></script>
+		<script type="text/javascript" src="app/controlls/ToggleIndicatorsButton.js"></script>
+		<script type="text/javascript" src="app/controlls/ScrollBar.js"></script>
+		<script type="text/javascript" src="app/controlls/List.js"></script>
+        <script type="text/javascript" src="app/controlls/ListItemButton.js"></script>
+        <script type="text/javascript" src="app/controlls/PresetButton.js"></script>
+		<script type="text/javascript" src="app/controlls/Indicator.js"></script>
+		<script type="text/javascript" src="app/controlls/ButtonsGroup.js"></script>
+        <script type="text/javascript" src="app/controlls/LabelPlusToggleButton.js"></script>
+        <script type="text/javascript" src="app/controlls/LabelPlusButton.js"></script>
+        <!--
+        <script type="text/javascript" src="app/controlls/MCS/Cushion.js"></script>
+        -->
+
+		<!-- utils -->
+		<script type="text/javascript" src="app/util/TransitionIterator.js"></script>
+		<script type="text/javascript" src="app/util/StateVisitor.js"></script>
+		
+		<!-- Models -->
+		<script type="text/javascript" src="app/model/abstract/RangedValue.js"></script>
+		<script type="text/javascript" src="app/model/abstract/ToggleValue.js"></script>
+        
+		<script type="text/javascript" src="app/model/climate/ClimateTemperature.js"></script>
+		<script type="text/javascript" src="app/model/climate/ClimateData.js"></script>
+		<script type="text/javascript" src="app/model/climate/ClimateModel.js"></script>
+		<script type="text/javascript" src="app/model/climate/ClimateModelCAN.js"></script>
+        <script type="text/javascript" src="app/model/media/PlaylistItem.js"></script>
+		
+		<script type="text/javascript" src="app/model/media/MediaCDPlayer.js"></script>
+       	<script type="text/javascript" src="app/model/media/Playlist.js"></script>
+       	<script type="text/javascript" src="app/model/media/CDModel.js"></script>
+        <script type="text/javascript" src="app/model/media/USBModel.js"></script>
+        <script type="text/javascript" src="app/model/media/SDModel.js"></script>
+        <script type="text/javascript" src="app/model/media/FmModel.js"></script>
+        <script type="text/javascript" src="app/model/media/SiriusModel.js"></script>
+		<script type="text/javascript" src="app/model/media/AmModel.js"></script>
+        <script type="text/javascript" src="app/model/media/BtModel.js"></script>
+		<script type="text/javascript" src="app/model/navigation/NavigationMapZoom.js"></script>
+		<script type="text/javascript" src="app/model/navigation/NavigationModel.js"></script>
+		<script type="text/javascript" src="app/model/PhoneModel.js"></script>
+		<script type="text/javascript" src="app/model/InformationModel.js"></script>
+        <script type="text/javascript" src="app/model/HTMLVideoPlayerModel.js"></script>
+        <script type="text/javascript" src="app/model/FAQModel.js"></script>
+		
+		<!--
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData1_1.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData1_2.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData1_3.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData1_4.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData1_5.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData2_1.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData2_2.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData4_1.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData5_1.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData5_2.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData6_1.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData6_2.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsData7_1.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsModel.js"></script>
+		<script type="text/javascript" src="app/model/settings/MCS/SettingsModelCAN.js"></script>
+		-->
+
+
+		<!-- Controllers -->                                    
+		<script type="text/javascript" src="app/controller/ClimateController.js"></script>
+		<script type="text/javascript" src="app/controller/MediaController.js"></script>
+		<script type="text/javascript" src="app/controller/NavigationController.js"></script>
+		<script type="text/javascript" src="app/controller/PhoneController.js"></script>
+        <script type="text/javascript" src="app/controller/SettingsController.js"></script>
+        <script type="text/javascript" src="app/controller/FAQController.js"></script>
+        <script type="text/javascript" src="app/controller/InfoController.js"></script>
+        <script type="text/javascript" src="app/controller/VideoPlayerController.js"></script>
+        <!--
+        <script type="text/javascript" src="app/controller/MCS/MCSController.js"></script>
+        -->
+		
+		<!-- mixins -->
+		<!--
+		<script type="text/javascript" src="app/mixins/MCS/SelectedIndex.js"></script>
+		<script type="text/javascript" src="app/mixins/MCS/Dragable.js"></script>
+		<script type="text/javascript" src="app/mixins/MCS/Dropable.js"></script>
+		-->
+        <script type="text/javascript" src="app/mixins/ScriptLoad.js"></script>
+
+		<!-- Views -->
+        <!--Video Error Popup View-->
+        <script type="text/javascript" src="app/view/VideoErrorPopupView.js"></script>
+        <!--Welcome Orientation View-->
+        <script type="text/javascript" src="app/view/WelcomeOrientationView.js"></script>
+		<!-- help views -->
+		<script type="text/javascript" src="app/view/help/Block.js"></script>
+		<script type="text/javascript" src="app/view/help/Divider.js"></script>
+		
+		<!-- climate views -->
+		<script type="text/javascript" src="app/view/climateView.js"></script>
+		
+		<!-- media views -->
+		<script type="text/javascript" src="app/view/media/common/HomePresetView.js"></script>
+        <script type="text/javascript" src="app/view/media/common/PresetsView.js"></script>
+        <script type="text/javascript" src="app/view/media/common/DirectTune.js"></script>
+		<script type="text/javascript" src="app/view/media/common/LeftMenuView.js"></script>
+        <script type="text/javascript" src="app/view/media/common/RightMenuView.js"></script>
+        
+        <script type="text/javascript" src="app/view/mediaView.js"></script>
+
+		<!-- Navigation view-->
+		<script type="text/javascript" src="app/view/navigationView.js"></script>
+
+		<!-- phone views -->
+		<script type="text/javascript" src="app/view/phoneView.js"></script>
+		
+		<!-- settings views -->
+		<script type="text/javascript" src="app/view/settingsView.js"></script>
+		
+		<!-- info views -->
+		<script type="text/javascript" src="app/view/infoView.js"></script>
+
+		<!-- home views -->
+		<script type="text/javascript" src="app/view/home/controlButtons.js"></script>
+		
+		<script type="text/javascript" src="app/view/home/topControls.js"></script>
+        <script type="text/javascript" src="app/view/home/bottomControls.js"></script>
+        
+        <script type="text/javascript" src="app/view/home/statusMediaView.js"></script>
+		<script type="text/javascript" src="app/view/home/widgetMediaView.js"></script>
+		<script type="text/javascript" src="app/view/home/statusPhoneView.js"></script>
+		<script type="text/javascript" src="app/view/home/widgetPhoneView.js"></script>
+		<script type="text/javascript" src="app/view/home/statusNavigationView.js"></script>
+		<script type="text/javascript" src="app/view/home/widgetNavigationView.js"></script>	
+		<script type="text/javascript" src="app/view/home/statusClimateView.js"></script>
+		<script type="text/javascript" src="app/view/home/widgetClimateView.js"></script>
+		
+		<script type="text/javascript" src="app/view/homeView.js"></script>
+		
+		
+		<!--MCS Views not needed for MFT Guide releases -->
+		<!--
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/IndicatorControl.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/AdjustView.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView1_1.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView1_2.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView1_3.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView1_4.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView1_5.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView2_1.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView2_2.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView4_1.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView5_1.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView5_2.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView6_1.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView6_2.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView7_1.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/SeatsMassageDialogView.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView7_1_appendix.js"></script>
+		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MCSConcept7_1_VideoHandler.js"></script>
+        -->
+        
+        <!--player view-->
+        <script type="text/javascript" src="app/view/player/PlayerControllsView.js"></script>
+				
+        <!-- STATE MACHINE -->
+        <script type="text/javascript" src="app/AppViews.js"></script>
+		<script type="text/javascript" src="app/StateManager.js"></script>	
+
+        <!-- Big Images Preloader block -->
+        <div id="preloader">
+        </div>
+
+	</body>
+</html>

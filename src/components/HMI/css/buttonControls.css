@@ -1,0 +1,93 @@
+/**
+ * buttonControls module CSS
+ *
+ * @category	Style Sheets
+ * @filesource	css/buttonControls.css
+ * @version		2.0
+ */
+
+#buttonControls.buttonControls {
+	width: 200px;
+	height: 200px;
+	top: 140px;
+	left: 850px;
+	background: url(../images/home/controlButtons/backGroundControllButtons.png) no-repeat;
+}
+#buttonControls .UpBtn{
+	background: url(../images/home/controlButtons/UpButton.png) no-repeat;
+	background-position: -32px 0;
+	width: 137px;
+	height: 64px;
+	left: 32px;
+}
+#app_controlButtonsUpBtn.pressed{
+	background: url(../images/home/controlButtons/UpButton_pressed.png) !important;
+	background-position: -32px 0 !important;
+	width: 137px !important;
+	height: 69px !important;
+	left: 32px !important;
+}
+#buttonControls .DownBtn{
+	background: url(../images/home/controlButtons/DownButton.png) no-repeat;
+	background-position: -32px -132px;
+	width: 137px;
+	height: 65px;
+	top: 132px;
+	left: 32px;
+}
+#app_controlButtonsDownBtn.pressed{
+	background: url(../images/home/controlButtons/DownButton_pressed.png) no-repeat;
+	background-position: -32px -132px !important;
+	width: 137px !important;
+	height: 65px !important;
+	top: 132px !important;
+	left: 32px !important;
+}
+#buttonControls .LeftBtn{
+	background: url(../images/home/controlButtons/LeftButton.png) no-repeat;
+	width: 63px;
+	height: 138px;
+	background-position: -3px -31px;
+	left: 3px;
+	top: 31px;
+}
+#app_controlButtonsLeftBtn.pressed{
+	background: url(../images/home/controlButtons/LeftButton_pressed.png) no-repeat;
+	width: 63px !important;
+	height: 138px !important;
+	background-position: -3px -31px !important;
+	left: 3px !important;
+	top: 31px !important;
+}
+#buttonControls .RightBtn{
+	background: url(../images/home/controlButtons/RightButton.png) no-repeat;
+	background-position: -131px -31px;
+	width: 68px;
+	height: 139px;
+	left: 131px;
+	top: 31px;
+}
+#app_controlButtonsRightBtn.pressed{
+	background: url(../images/home/controlButtons/RightButton_pressed.png) no-repeat;
+	background-position: -131px -31px !important;
+	width: 68px !important;
+	height: 139px !important;
+	left: 131px !important;
+	top: 31px !important;
+}
+#buttonControls .OkBtn{
+	background: url(../images/home/controlButtons/OkButton.png) no-repeat;
+	background-position: -55px -55px;
+	width: 89px;
+	height: 90px;
+	left: 55px;
+	top: 55px;
+}
+#app_controlButtonsOkBtn.pressed{
+	background: url(../images/home/controlButtons/OkButton_pressed.png) no-repeat;
+	background-position: -55px -55px !important;
+	width: 89px !important;
+	height: 90px !important;
+	left: 55px !important;
+	top: 55px !important;
+}
