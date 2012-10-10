@@ -7,11 +7,16 @@
  */
 
 #buttonControls.buttonControls {
+	width: 420px;
+	height: 200px;
+	top: 70px;
+	left: 835px;
+}
+#buttonControls .ContainerControlls{
+	left: 110px;
+	background: url(../images/home/controlButtons/backGroundControllButtons.png) no-repeat;
 	width: 200px;
 	height: 200px;
-	top: 140px;
-	left: 850px;
-	background: url(../images/home/controlButtons/backGroundControllButtons.png) no-repeat;
 }
 #buttonControls .UpBtn{
 	background: url(../images/home/controlButtons/UpButton.png) no-repeat;
@@ -19,6 +24,7 @@
 	width: 137px;
 	height: 64px;
 	left: 32px;
+	-webkit-transition: 0.2s ;
 }
 #app_controlButtonsUpBtn.pressed{
 	background: url(../images/home/controlButtons/UpButton_pressed.png) !important;
@@ -34,6 +40,7 @@
 	height: 65px;
 	top: 132px;
 	left: 32px;
+	-webkit-transition: 0.2s ;
 }
 #app_controlButtonsDownBtn.pressed{
 	background: url(../images/home/controlButtons/DownButton_pressed.png) no-repeat;
@@ -50,6 +57,7 @@
 	background-position: -3px -31px;
 	left: 3px;
 	top: 31px;
+	-webkit-transition: 0.2s ;
 }
 #app_controlButtonsLeftBtn.pressed{
 	background: url(../images/home/controlButtons/LeftButton_pressed.png) no-repeat;
@@ -66,6 +74,7 @@
 	height: 139px;
 	left: 131px;
 	top: 31px;
+	-webkit-transition: 0.2s ;
 }
 #app_controlButtonsRightBtn.pressed{
 	background: url(../images/home/controlButtons/RightButton_pressed.png) no-repeat;
@@ -82,6 +91,7 @@
 	height: 90px;
 	left: 55px;
 	top: 55px;
+	-webkit-transition: 0.2s ;
 }
 #app_controlButtonsOkBtn.pressed{
 	background: url(../images/home/controlButtons/OkButton_pressed.png) no-repeat;
@@ -90,4 +100,26 @@
 	height: 90px !important;
 	left: 55px !important;
 	top: 55px !important;
+}
+#buttonControls .btnNotPressed{
+	width: 70px;
+	height: 70px;
+	left: 0px;
+	top: 200px;
+	-webkit-transition: 0.2s;
+	border-radius: 8px;
+	background-color: #1D1D1D;
+	border: 1px solid #383737;
+	box-shadow: inset 5px 5px 10px #383737, inset -3px -3px 10px black;
+	-webkit-transition: 0.2s ;
+	font-size: 48px;
+	line-height: 72px;
+	text-align: center;
+	position: relative;
+	float: left;
+	margin-left: 10px;
+	margin-top: 10px;
+}
+#buttonControls .btnNotPressed.pressed{
+	box-shadow: inset 5px 5px 10px black, inset -3px -3px 10px #383737;
 }

@@ -12,53 +12,143 @@
 
 MFT.ControlButtons = Em.ContainerView.create({
 
-	elementId:			'app_controlButtons',
+	elementId:		'app_controlButtons',
 
 	childViews: [
 		'buttonControls'
 	],
 
 	buttonControls: Em.ContainerView.extend({
-		elementId:		'buttonControls',
+		elementId:	'buttonControls',
 		
 		classNames:	'buttonControls',
 
 		childViews: [
-			'UpBtn',
-			'DownBtn',
-			'LeftBtn',
-			'RightBtn',
-			'OkBtn'
+			'ContainerControlls',
+			'OneBtn',
+			'TwoBtn',
+			'ThreeBtn',
+			'FourBtn',
+			'FiveBtn',
+			'SixBtn',
+			'SevenBtn',
+			'EightBtn',
+			'NineBtn',
+			'ZiroBtn'
 		],
+		
+		ContainerControlls: Em.ContainerView.extend({
+			elementId:	'ContainerControlls',
+			
+			classNames:	'ContainerControlls',
 
-		/** Up button */
-		UpBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsUpBtn',
-			classNames:	'UpBtn'
+			childViews: [
+				'UpBtn',
+				'DownBtn',
+				'LeftBtn',
+				'RightBtn',
+				'OkBtn'
+			],
+
+			/** Up button */
+			UpBtn: MFT.Button.create({
+				elementId:	'app_controlButtonsUpBtn',
+				classNames:	'UpBtn'
+			}),
+			
+			/** Down button */
+			DownBtn: MFT.Button.create({
+				elementId:	'app_controlButtonsDownBtn',
+				classNames:	'DownBtn'
+			}),
+			
+			/** Left button */
+			LeftBtn: MFT.Button.create({
+				elementId:	'app_controlButtonsLeftBtn',
+				classNames:	'LeftBtn'
+			}),
+			
+			/** Right button */
+			RightBtn: MFT.Button.create({
+				elementId:	'app_controlButtonsRightBtn',
+				classNames:	'RightBtn'
+			}),
+			
+			/** Ok button */
+			OkBtn: MFT.Button.create({
+				elementId:	'app_controlButtonsOkBtn',
+				classNames:	'OkBtn'
+			})
 		}),
 		
-		/** Up button */
-		DownBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsDownBtn',
-			classNames:	'DownBtn'
+		/** One button */
+		OneBtn: MFT.Button.create({
+			elementId:	'app_controlButtonsOneBtn',
+			classNames:	'OneBtn btnNotPressed',
+			text:		'1'
 		}),
 		
-		/** Up button */
-		LeftBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsLeftBtn',
-			classNames:	'LeftBtn'
+		/** Two button */
+		TwoBtn: MFT.Button.create({
+			elementId:	'app_controlButtonsTwoBtn',
+			classNames:	'TwoBtn btnNotPressed',
+			text:		'2'
 		}),
 		
-		/** Up button */
-		RightBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsRightBtn',
-			classNames:	'RightBtn'
+		/** Three button */
+		ThreeBtn: MFT.Button.create({
+			elementId:	'app_controlButtonsThreeBtn',
+			classNames:	'ThreeBtn btnNotPressed',
+			text:		'3'
 		}),
 		
-		/** Up button */
-		OkBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsOkBtn',
-			classNames:	'OkBtn'
+		/** Four button */
+		FourBtn: MFT.Button.create({
+			elementId:	'app_controlButtonsFourBtn',
+			classNames:	'FourBtn btnNotPressed',
+			text:		'4'
+		}),
+		
+		/** Five button */
+		FiveBtn: MFT.Button.create({
+			elementId:	'app_controlButtonsFiveBtn',
+			classNames:	'FiveBtn btnNotPressed',
+			text:		'5'
+		}),
+		
+		/** One button */
+		SixBtn: MFT.Button.create({
+			elementId:	'app_controlButtonsSixBtn',
+			classNames:	'SixBtn btnNotPressed',
+			text:		'6'
+		}),
+		
+		/** One button */
+		SevenBtn: MFT.Button.create({
+			elementId:	'app_controlButtonsSevenBtn',
+			classNames:	'SevenBtn btnNotPressed',
+			text:		'7'
+		}),
+		
+		/** One button */
+		EightBtn: MFT.Button.create({
+			elementId:	'app_controlButtonsEightBtn',
+			classNames:	'EightBtn btnNotPressed',
+			text:		'8'
+		}),
+		
+		/** One button */
+		NineBtn: MFT.Button.create({
+			elementId:	'app_controlButtonsNineBtn',
+			classNames:	'NineBtn btnNotPressed',
+			text:		'9'
+		}),
+		
+		/** One button */
+		ZiroBtn: MFT.Button.create({
+			elementId:	'app_controlButtonsZiroBtn',
+			classNames:	'ZiroBtn btnNotPressed',
+			text:		'0'
 		})
 	})
 });
