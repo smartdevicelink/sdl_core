@@ -11,6 +11,10 @@
 #include <string>
 #include <vector>
 
+#include "Types.hpp"
+#include "Blob.hpp"
+#include "IBluetoothHandler.hpp"
+
 /**
  * \namespace NsTransportLayer
  * \brief AppLink transport layer related functions.
@@ -73,6 +77,14 @@ namespace NsTransportLayer
         int startSDPDiscoveryOnDevice(const char* targetDevice, std::vector<int>& portsRFCOMMFound);
         int startRFCOMMConnection(const char* targetDevice, int portRFCOMM);
         int processRFCOMM(int sockid);
+
+        void initBluetooth(Bluetooth::IBluetoothHandler * pHandler);
+        void deinitBluetooth();
+
+        const Blob getBuffer();
+        void releaseBuffer(Blob&);
+
+        void sendBuffer(UInt8 * pBuffer, size_t size);
 
 
    };

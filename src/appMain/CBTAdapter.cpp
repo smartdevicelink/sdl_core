@@ -5,10 +5,8 @@
  */
 
 #include "CBTAdapter.hpp"
-
 #include "btinclude.h"
-
-#include <alsa/asoundlib.h>
+#include <stdlib.h>
 
 namespace NsTransportLayer
 {
@@ -241,4 +239,30 @@ namespace NsTransportLayer
       }
    }
 
+  void CBTAdapter::initBluetooth(Bluetooth::IBluetoothHandler * pHandler)
+  {
+      printf("%s:%d CBTAdapter::initBluetooth()\n", __FILE__, __LINE__);
+  }
+
+  void CBTAdapter::deinitBluetooth()
+  {
+      printf("%s:%d CBTAdapter::deinitBluetooth()\n", __FILE__, __LINE__);
+  }
+
+  const Blob CBTAdapter::getBuffer()
+  {
+      printf("%s:%d CBTAdapter::getBuffer()\n", __FILE__, __LINE__);
+      Blob b = Blob(0);
+      return b;
+  }
+
+  void CBTAdapter::releaseBuffer(Blob&)
+  {
+      printf("%s:%d CBTAdapter::releaseBuffer()\n", __FILE__, __LINE__);
+  }
+
+  void CBTAdapter::sendBuffer(UInt8 * pBuffer, size_t size)
+  {
+      printf("%s:%d CBTAdapter::sendBuffer()\n", __FILE__, __LINE__);
+  }
 } /* namespace NsTransportLayer */
