@@ -138,16 +138,39 @@ void CMessage::generateFinalMessage()
 
 void CMessage::generateMultipleMessages(std::string payload, int messagesQuantity)
 {
+   sMessageID      = rand() % 0xFFFFFFFF + 1;
+
    for(int i = 0; i < messagesQuantity; i++)
    {
       sVersion        = 0x01;
       sCompressedFlag = 0;
-      sFrameType      = 0x01; //Single
+
+      if(0 == i)
+      {
+         sFrameType   = 0x02; //First frame
+      }
+      else
+      {
+         sFrameType   = 0x03; //Consecutive Frame
+      }
+
       sServiceType    = 0x07;
-      sFrameData      = 0x00; //Single Frame
+
+      if(0 == i)
+      {
+         sFrameData   = 0x00; //First Frame
+      }
+      else if(0xFF == i)
+      {
+         sFrameData   = 0xFF;
+      }
+      else
+      {
+         sFrameData = i % 0xFF;
+      }
+
       sSessionID      = 0;
       sDataSize       = payload.length() + 1; //
-      sMessageID      = rand() % 0xFFFFFFFF + 1;
 
       dispayField();
 
@@ -165,7 +188,7 @@ void CMessage::generateMultipleMessages(std::string payload, int messagesQuantit
       memcpy(sPacketData + 8, &sMessageID, 4);
       memcpy(sPacketData + 12, (void*)const_cast<char*>(payload.c_str()), sDataSize);
 
-      blobQueue.push(Blob((UInt8*)sPacketData, 12, blobQueue.size()));
+      blobQueue.push(Blob((UInt8*)sPacketData, 12 + sDataSize, blobQueue.size()));
    }
 }
 
