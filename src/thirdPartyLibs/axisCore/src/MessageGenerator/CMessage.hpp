@@ -14,10 +14,9 @@ public:
    static void releaseCurrentBlob(Blob& blob);
 
    static void generateInitialMessage();
-   static void generateSingleMessage(std::string payload);
    static void generateFinalMessage();
-
-   //static Blob getCurrentBlob() { return currentBlob; }
+   static void generateSingleMessage(std::string payload);
+   static void generateMultipleMessages(std::string payload, int messagesQuantity);
 
    static Blob currentBlob;
 
@@ -27,8 +26,6 @@ private:
 
    //static void write();
    //static void generate();
-
-
 
    static void dispayField();
 
