@@ -4,7 +4,8 @@
 #include "ProtocolHandler.hpp"
 #include "ProtocolPacketHeader.hpp"
 #include "IProtocolObserver.hpp"
-#include "transport/bt/BluetoothAPI.hpp"
+//#include "transport/bt/BluetoothAPI.hpp"
+#include "MessageGenerator/CMessage.cpp"
 
 ProtocolHandler::ProtocolHandler(IProtocolObserver *observer) : 
                 mProtocolObserver(observer),
@@ -462,7 +463,7 @@ void ProtocolHandler::dataReceived()
 {
     std::cout << "enter ProtocolHandler::dataReceived()\n";
 
-    UInt32 dataSize = CMessage::currentBlob.size(); //Bluetooth::getBuffer().size();
+    UInt32 dataSize = Bluetooth::getBuffer().size(); //CMessage::currentBlob.size();
     UInt8 *data = new UInt8[dataSize];
     ProtocolPacketHeader header;
 

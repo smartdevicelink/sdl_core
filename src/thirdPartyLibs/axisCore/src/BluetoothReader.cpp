@@ -20,6 +20,7 @@ BluetoothReader::~BluetoothReader()
 
 ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt32 dataSize)
 {
+    std::cout << "BluetoothReader::read raw buffer : " << CMessage::currentBlob.buffer() << "\n";
     UInt32 blobBufferSize = CMessage::currentBlob.size();//Bluetooth::getBuffer().size();
     if (dataSize >= blobBufferSize )
     {

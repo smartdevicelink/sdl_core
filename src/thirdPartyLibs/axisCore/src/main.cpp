@@ -3,6 +3,7 @@
 #include <ProtocolHandler.hpp>
 
 #include "MessageGenerator/CMessage.hpp"
+#include "MessageGenerator/CMessage.cpp"
 
 using namespace std;
 
@@ -23,8 +24,13 @@ public:
         CMessage::generateInitialMessage();
         mHandler = new ProtocolHandler(this);
         mHandler->dataReceived();
-        CMessage::generateFinalMessage();
+        CMessage::releaseCurrentBlob(CMessage::currentBlob );
+        Bluetooth::releaseBuffer(&Bluetooth::getBuffer() );
+        CMessage::generateSingleMessage("Hello ?");
         mHandler->dataReceived();
+
+        //CMessage::generateFinalMessage();
+        //mHandler->dataReceived();
     }
 
     ~ProtocolObserver()
