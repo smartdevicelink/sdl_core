@@ -69,14 +69,10 @@ namespace NsTransportLayer
         */
         ~CBTAdapter();
 
-        int setClass(unsigned int cls, int timeout);
-        int registerSDP(uint8_t channel);
-        int rfcommListen(uint8_t channel, char *targetDevID);
-        int scoListen();
-        int handleConnection(int rfcommsock, int scosock);
-        int processRFCOMM(int sockid);
-        int startSDPDiscoveryOnDevice(const char* targetDevice);
         int scanDevices(std::vector<CBTDevice>& devicesFound);
+        int startSDPDiscoveryOnDevice(const char* targetDevice, std::vector<int>& portsRFCOMMFound);
+        int startRFCOMMConnection(const char* targetDevice, int portRFCOMM);
+        int processRFCOMM(int sockid);
 
 
    };

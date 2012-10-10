@@ -35,19 +35,19 @@ namespace NsTransportLayer
       sock = hci_open_dev( dev_id );
       if (dev_id < 0 || sock < 0)
       {
-         perror("opening socket");
+         printf("Opening socket...\n");
          return -1;
       }
 
       len  = 8;
       max_rsp = 255;
       flags = IREQ_CACHE_FLUSH;
-      ii = (inquiry_info*)malloc(max_rsp * sizeof(inquiry_info));
+      ii = (inquiry_info*)malloc(max_rsp *sizeof(inquiry_info));
     
       num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
-      if( num_rsp < 0 )
+      if(num_rsp < 0)
       {
-         perror("hci_inquiry");
+         printf("hci_inquiry...\n");
       }
 
       for (i = 0; i < num_rsp; i++)
@@ -67,7 +67,7 @@ namespace NsTransportLayer
     close( sock );
    }
 
-   int CBTAdapter::startSDPDiscoveryOnDevice(const char* targetDevice)
+   int CBTAdapter::startSDPDiscoveryOnDevice(const char* targetDevice, std::vector<int>& portsRFCOMMFound)
    {
       printf("%s:%d CBTAdapter::startSDPDiscoveryOnDevice()\n", __FILE__, __LINE__);
       uint8_t svc_uuid_int[] = { 0x93, 0x6D, 0xA0, 0x1F, 0x9A, 0xBD, 0x4D, 0x9D,
@@ -98,48 +98,49 @@ namespace NsTransportLayer
       sdp_list_t *r = response_list;
 
       // go through each of the service records
-      for (; r; r = r->next )
+      for (; r; r = r->next)
       {
          sdp_record_t *rec = (sdp_record_t*) r->data;
          sdp_list_t *proto_list;
         
          // get a list of the protocol sequences
-         if( sdp_get_access_protos( rec, &proto_list ) == 0 )
+         if(sdp_get_access_protos( rec, &proto_list ) == 0)
          {
             sdp_list_t *p = proto_list;
 
             // go through each protocol sequence
-            for( ; p ; p = p->next )
+            for(; p ; p = p->next)
             {
                sdp_list_t *pds = (sdp_list_t*)p->data;
 
                // go through each protocol list of the protocol sequence
-               for( ; pds ; pds = pds->next )
+               for(; pds ; pds = pds->next)
                {
                   // check the protocol attributes
                   sdp_data_t *d = (sdp_data_t*)pds->data;
                   int proto = 0;
-                  for( ; d; d = d->next )
+                  for(; d; d = d->next)
                   {
-                     switch( d->dtd )
+                     switch(d->dtd)
                      {
                         case SDP_UUID16:
                         case SDP_UUID32:
                         case SDP_UUID128:
-                           proto = sdp_uuid_to_proto( &d->val.uuid );
+                           proto = sdp_uuid_to_proto(&d->val.uuid);
                            break;
                         case SDP_UINT8:
-                           if( proto == RFCOMM_UUID )
+                           if(proto == RFCOMM_UUID)
                            {
                               printf("rfcomm channel: %d\n",d->val.int8);
+                              portsRFCOMMFound.push_back(d->val.int8);
                            }
                            break;
                      }
                   }
                }
-               sdp_list_free( (sdp_list_t*)p->data, 0 );
+               sdp_list_free((sdp_list_t*)p->data, 0);
             }
-            sdp_list_free( proto_list, 0 );
+            sdp_list_free(proto_list, 0);
 
          }
 
@@ -147,6 +148,33 @@ namespace NsTransportLayer
          sdp_record_free( rec );
       }
       sdp_close(session);
+   }
+
+   int CBTAdapter::startRFCOMMConnection(const char* targetDevice, int portRFCOMM)
+   {
+      printf("%s:%d CBTAdapter::startRFCOMMConnection()device %s, port %d\n", __FILE__, __LINE__, targetDevice, portRFCOMM);
+      struct sockaddr_rc addr = { 0 };
+      int s, status;
+//      char dest[18] = "01:23:45:67:89:AB";
+
+      // allocate a socket
+      s = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+
+      // set the connection parameters (who to connect to)
+      addr.rc_family = AF_BLUETOOTH;
+      addr.rc_channel = (uint8_t) portRFCOMM;
+      str2ba(targetDevice, &addr.rc_bdaddr);
+
+      // connect to server
+      status = connect(s, (struct sockaddr *)&addr, sizeof(addr));
+
+      if(0 < status)
+      {
+         printf("Failed to open port!");
+         return -1;
+      }
+      printf("Connection successful. sockID=%d \n", s);
+      return s;
    }
 
    int CBTAdapter::processRFCOMM(int sockid)
@@ -167,7 +195,8 @@ namespace NsTransportLayer
          // this socket has blocking turned off so it will never block,
          // even if no data is available
          len = recv(sockid, rfcommbuffer, 8, 0);
-         if ((len >0) && (len == 8))
+         printf("len = %d\n", len);
+         if ((len > 0) && (len == 8))
          {
             printf("%s:%d CBTAdapter::processRFCOMM() buf[0] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[0]);
             printf("%s:%d CBTAdapter::processRFCOMM() buf[1] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[1]);
@@ -177,302 +206,39 @@ namespace NsTransportLayer
             printf("%s:%d CBTAdapter::processRFCOMM() buf[5] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[5]);
             printf("%s:%d CBTAdapter::processRFCOMM() buf[6] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[6]);
             printf("%s:%d CBTAdapter::processRFCOMM() buf[7] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[7]);
+            if ((rfcommbuffer[0] == 16) && (rfcommbuffer[1] == 7) && (rfcommbuffer[2] == 1))
+            {
+               printf("Start session (RPC Service)");
+               char sendBuff[8] = {16, 7, 2, 1, 0, 0, 0, 0};
+               int status = write(sockid, sendBuff, 8);
+               if (0 > status)
+               {
+                  printf("Socket write error!");
+                  break;
+               }
+            } else if ((rfcommbuffer[0] == 16) && (rfcommbuffer[1] == 15) && (rfcommbuffer[2] == 1))
+            {
+               printf("Start session (Bulk Service)");
+               char sendBuff[8] = {16, 15, 2, 2, 0, 0, 0, 0};
+               int status = write(sockid, sendBuff, 8);
+               if (0 > status)
+               {
+                  printf("Socket write error!");
+                  break;
+               }
+            }else if ((rfcommbuffer[0] == 17) && (rfcommbuffer[1] == 7))
+            {
+               printf("Single frame RPC message!");
+            } else if ((rfcommbuffer[0] == 18) && (rfcommbuffer[1] == 7))
+            {
+               printf("MultiPacket RPC frame");
+            } else
+            {
+               printf("Unknown packet type!");
+               return -1;
+            }
          }
-
       }
    }
 
-   int CBTAdapter::setClass(unsigned int cls, int timeout)
-   {
-      printf("%s:%d CBTAdapter::setClass()\n", __FILE__, __LINE__);
-      int id;
-      int fh;
-      bdaddr_t btaddr;
-      char pszaddr[18];
-
-      // get the device ID
-      // passing in NULL instead of a bdaddr_t will
-      // give the ID of the first bluetooth device
-      if ((id = hci_get_route(NULL)) < 0)
-         return -1;
-
-      // convert the device ID into a 6 byte bluetooth address
-      if (hci_devba(id, &btaddr) < 0)
-         return -1;
-
-      // convert the address into a zero terminated string
-      if (ba2str(&btaddr, pszaddr) < 0)
-         return -1;
-
-      // open a file handle to the HCI
-      if ((fh = hci_open_dev(id)) < 0)
-         return -1;
-
-      // set the class
-      if (hci_write_class_of_dev(fh, cls, timeout) != 0)
-      {
-         perror("hci_write_class ");
-         return -1;
-      }
-
-      // close the file handle
-      hci_close_dev(fh);
-
-      printf("set device %s to class: 0x%06x\n", pszaddr, cls);
-
-      return 0;
-   }
-
-   int CBTAdapter::registerSDP(uint8_t channel)
-   {
-      printf("%s:%d CBTAdapter::registerSDP()\n", __FILE__, __LINE__);
-      const char *service_name = "HSP service";
-      const char *service_dsc = "HSP";
-      const char *service_prov = "nebland software, LLC";
-
-      uuid_t hs_uuid, ga_uuid;
-
-      sdp_profile_desc_t desc;
-
-      uuid_t root_uuid, l2cap_uuid, rfcomm_uuid;
-      sdp_list_t *l2cap_list = 0,
-               *rfcomm_list = 0,
-               *root_list = 0,
-               *proto_list = 0,
-               *access_proto_list = 0;
-
-      sdp_data_t *channel_d = 0;
-
-      int err = 0;
-      sdp_session_t *session = 0;
-
-      sdp_record_t *record = sdp_record_alloc();
-
-      // set the name, provider, and description
-      sdp_set_info_attr(record, service_name, service_prov, service_dsc);
-
-      // service class ID (HEADSET)
-      sdp_uuid16_create(&hs_uuid, HEADSET_SVCLASS_ID);
-
-      if (!(root_list = sdp_list_append(0, &hs_uuid)))
-         return -1;
-
-      sdp_uuid16_create(&ga_uuid, GENERIC_AUDIO_SVCLASS_ID);
-
-      if (!(root_list = sdp_list_append(root_list, &ga_uuid)))
-         return -1;
-
-      if (sdp_set_service_classes(record, root_list) < 0)
-         return -1;
-
-      sdp_list_free(root_list, 0);
-      root_list = 0;
-
-      // make the service record publicly browsable
-      sdp_uuid16_create(&root_uuid, PUBLIC_BROWSE_GROUP);
-
-      root_list = sdp_list_append(0, &root_uuid);
-      sdp_set_browse_groups( record, root_list );
-
-      // set l2cap information
-      sdp_uuid16_create(&l2cap_uuid, L2CAP_UUID);
-      l2cap_list = sdp_list_append( 0, &l2cap_uuid );
-      proto_list = sdp_list_append( 0, l2cap_list );
-
-      // set rfcomm information
-      sdp_uuid16_create(&rfcomm_uuid, RFCOMM_UUID);
-      channel_d = sdp_data_alloc(SDP_UINT8, &channel);
-      rfcomm_list = sdp_list_append( 0, &rfcomm_uuid );
-
-      sdp_list_append( rfcomm_list, channel_d );
-      sdp_list_append( proto_list, rfcomm_list );
-
-      // attach protocol information to service record
-      access_proto_list = sdp_list_append( 0, proto_list );
-      sdp_set_access_protos( record, access_proto_list );
-
-      sdp_uuid16_create(&desc.uuid, HEADSET_PROFILE_ID);
-
-      // set the version to 1.0
-      desc.version = 0x0100;
-
-      if (!(root_list = sdp_list_append(NULL, &desc)))
-         return -1;
-
-      if (sdp_set_profile_descs(record, root_list) < 0)
-         return -1;
-
-      // connect to the local SDP server and register the service record
-      const bdaddr_t src = (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
-      const bdaddr_t dst = (bdaddr_t) {{0, 0, 0, 0xff, 0xff, 0xff}};
-      session = sdp_connect( &src, &dst, SDP_RETRY_IF_BUSY );
-      err = sdp_record_register(session, record, 0);
-
-      // cleanup
-      sdp_data_free( channel_d );
-      sdp_list_free( l2cap_list, 0 );
-      sdp_list_free( rfcomm_list, 0 );
-      sdp_list_free( root_list, 0 );
-      sdp_list_free( access_proto_list, 0 );
-
-       return err;
-   }
-
-   int CBTAdapter::rfcommListen(uint8_t channel, char *targetDevID)
-   {
-      printf("%s:%d CBTAdapter::rfcommListen()\n", __FILE__, __LINE__);
-      int sock;                  // socket descriptor for local listener
-      int client;                // socket descriptor for remote client
-      unsigned int len = sizeof(struct sockaddr_rc);
-
-      struct sockaddr_rc remote;    // local rfcomm socket address
-      struct sockaddr_rc local;     // remote rfcomm socket address
-      char pszremote[18];
-
-      // initialize a bluetooth socket
-      sock = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
-
-      local.rc_family = AF_BLUETOOTH;
-
-      // TODO: change this to a local address if you know what
-      // address to use
-      const bdaddr_t src = (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
-      local.rc_bdaddr = src;
-      local.rc_channel = channel;
-
-      // bind the socket to a bluetooth device
-      if (bind(sock, (struct sockaddr *)&local, sizeof(struct sockaddr_rc)) < 0)
-         return -1;
-
-      // set the listening queue length
-      if (listen(sock, 1) < 0)
-         return -1;
-
-      printf("accepting connections on channel: %d\n", channel);
-
-      // accept incoming connections; this is a blocking call
-      client = accept(sock, (struct sockaddr *)&remote, &len);
-
-      ba2str(&remote.rc_bdaddr, pszremote);
-
-      printf("received connection from: %s\n", pszremote);
-      //strcpy(targetDevID, pszremote);
-
-      // turn off blocking
-      if (fcntl(client, F_SETFL, O_NONBLOCK) < 0)
-         return -1;
-
-      // return the client socket descriptor
-      return client;
-   }
-
-   int CBTAdapter::scoListen()
-   {
-      printf("%s:%d CBTAdapter::scoListen()\n", __FILE__, __LINE__);
-      int sock;
-      int client;
-      unsigned int len = sizeof(struct sockaddr_sco);
-      char pszremote[18];
-
-      struct sockaddr_sco local;
-      struct sockaddr_sco remote;
-
-      sock = socket(PF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_SCO);
-
-      local.sco_family = AF_BLUETOOTH;
-
-      const bdaddr_t src = (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
-      local.sco_bdaddr = src;
-
-      if (bind(sock, (struct sockaddr*)&local, sizeof(struct sockaddr_sco)) < 0)
-         return -1;
-
-      if (listen(sock, 1) < 0)
-         return -1;
-
-      client = accept(sock, (struct sockaddr*)&remote, &len);
-
-      ba2str(&remote.sco_bdaddr, pszremote);
-
-      printf("sco received connection from: %s\n", pszremote);
-
-      // close the listener
-      close(sock);
-
-      return client;
-   }
-
-   int CBTAdapter::handleConnection(int rfcommsock, int scosock)
-   {
-      printf("%s:%d CBTAdapter::handleConnection()\n", __FILE__, __LINE__);
-      char scobuffer[255];
-      char rfcommbuffer[255];
-      int len;
-
-      snd_pcm_t *sndhandle;
-
-      // open the default sound device
-      if (snd_pcm_open((snd_pcm_t **)&sndhandle, "default", SND_PCM_STREAM_PLAYBACK, 0) < 0)
-      {
-         perror("snd_pcm_open ");
-         return -1;
-      }
-
-      // initialize the device to handle an 8khz, single channel,
-      // little endian audio data stream
-      if (snd_pcm_set_params((snd_pcm_t *)sndhandle, SND_PCM_FORMAT_S16_LE, SND_PCM_ACCESS_RW_INTERLEAVED, 1,
-            8000, 0, 0) < 0)
-      {
-         perror("set_params ");
-         return -1;
-      }
-
-      while (1)
-      {
-         // read from the SCO socket
-         // it should constantly stream data
-         if ((len = recv(scosock, scobuffer, 255, 0)) <= 0)
-            break;
-
-         // send the sound data to the sound device
-         // the sound device expects "frames".  since we have 16 bit, single
-         // channel data, each 2 bytes is one "frame"
-         snd_pcm_writei((snd_pcm_t *)sndhandle, scobuffer, len / 2);
-
-         // read from the RFCOMM socket
-         // this socket has blocking turned off so it will never block,
-         // even if no data is available
-         len = recv(rfcommsock, rfcommbuffer, 255, 0);
-
-         // EWOULDBLOCK indicates the socket would block if we had a
-         // blocking socket.  we'll safely continue if we receive that
-         // error.  treat all other errors as fatal
-         if (len < 0 && errno != EWOULDBLOCK)
-         {
-            perror("rfcomm recv ");
-            break;
-         }
-         else if (len > 0)
-         {
-            // received a message; print it to the screen and
-            // return ATOK to the remote device
-            rfcommbuffer[len] = '\0';
-
-            printf("rfcomm received: %s\n", rfcommbuffer);
-            send(rfcommsock, "ATOK\r\n", 6, 0);
-         }
-
-         // printf("loop\n");
-      }
-
-      // close the sound device
-      snd_pcm_close((snd_pcm_t *)sndhandle);
-
-      close(scosock);
-      close(rfcommsock);
-
-      printf("client disconnected\n");
-
-      return 0;
-   }
 } /* namespace NsTransportLayer */
