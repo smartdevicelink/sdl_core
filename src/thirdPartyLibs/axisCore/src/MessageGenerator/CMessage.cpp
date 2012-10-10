@@ -104,6 +104,8 @@ void CMessage::generateSingleMessage(std::string payload)
    memcpy(sPacketData + 8, &sMessageID, 4);
    memcpy(sPacketData + 12, (void*)const_cast<char*>(payload.c_str()), sDataSize);
 
+   std::cout << "********    " << std::string((char*)sPacketData, sDataSize + 12) <<  std:: endl;
+
    blobQueue.push(Blob((UInt8*)sPacketData, 12 + sDataSize, blobQueue.size()));
 }
 
@@ -170,7 +172,19 @@ void CMessage::generateMultipleMessages(std::string payload, int messagesQuantit
       }
 
       sSessionID      = 0;
-      sDataSize       = payload.length() + 1; //
+
+      if(0 == i)
+      {
+         UInt8 numberOfConsecutiveFrames = messagesQuantity - 1;
+         UInt8 totalConsecutivePayloadSize = (payload.length() + 1) * numberOfConsecutiveFrames;
+
+         sDataSize = ( (totalConsecutivePayloadSize << 4) & 0xF0 )
+                     | (numberOfConsecutiveFrames & 0x0F);
+      }
+      else
+      {
+         sDataSize       = payload.length() + 1;
+      }
 
       dispayField();
 
