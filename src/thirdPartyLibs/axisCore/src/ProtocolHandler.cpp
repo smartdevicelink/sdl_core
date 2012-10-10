@@ -219,7 +219,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
     return ERR_OK;
 }
 
-ERROR_CODE ProtocolHandler::ReceiveData(UInt8 sessionID
+ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
                                       , UInt32 messageID
                                       , UInt8 servType
                                       , UInt32 receivedDataSize
@@ -408,18 +408,20 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
 {
     ERROR_CODE retVal = ERR_OK;
     std::cout << "enter ProtocolHandler::handleMultiFrameMessage(); \n";
+    std::cout << "handleMultiFrameMessage() inc data: " << std::string((char*)data, header.dataSize) << "\n";
 
     if (header.frameType == FRAME_TYPE_FIRST)
     {
         std::cout << "ProtocolHandler::handleMultiFrameMessage() : FRAME_TYPE_FIRST\n";
-        Message *multiFrameMessage = new Message(header, data, true);
+        Message *multiFrameMessage = new Message(header, data, true);        
         mIncompleteMultiFrameMessages.insert(std::pair<UInt32, Message*>(header.messageID, multiFrameMessage) );
     }
     else
     {
-        std::cout << "ProtocolHandler::handleMultiFrameMessage() : !FRAME_TYPE_FIRST\n";
+        std::cout << "ProtocolHandler::handleMultiFrameMessage() : FRAME NUMBER : " << header.frameData << "\n";
         if (mIncompleteMultiFrameMessages.count(header.messageID) )
         {
+            // TODO check submessages order
             if (mIncompleteMultiFrameMessages[header.messageID]->addConsecutiveMessage(header, data) == ERR_OK)
             {
                 if (header.frameData == FRAME_DATA_LAST_FRAME)

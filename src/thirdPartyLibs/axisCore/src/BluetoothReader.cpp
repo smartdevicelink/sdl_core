@@ -21,11 +21,13 @@ BluetoothReader::~BluetoothReader()
 
 ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt32 dataSize)
 {
-    std::cout << "BluetoothReader::read raw buffer : " << Bluetooth::getBuffer().buffer() << "\n";
+    std::cout << "BluetoothReader::read raw buffer : " << std::string((char*)Bluetooth::getBuffer().buffer(), dataSize + 12) << "\n";
+    //std::cout << "********    " << std::string((char*)sPacketData, sDataSize + 12) <<  std:: endl;
     UInt32 blobBufferSize = Bluetooth::getBuffer().size();
     if (dataSize >= blobBufferSize )
     {
         memcpy(mData, Bluetooth::getBuffer().buffer(), blobBufferSize);
+        Bluetooth::releaseBuffer(Bluetooth::getBuffer() );
     }
     else
     {
@@ -52,8 +54,8 @@ ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt
     offset += sizeof(UInt8);
     memcpy(&header.sessionID, mData + offset, sizeof(UInt8) );
     offset += sizeof(UInt8);
-    memcpy(&header.dataSize, mData + offset, sizeof(UInt8) );
-    offset += sizeof(UInt8);
+    memcpy(&header.dataSize, mData + offset, sizeof(UInt32) );
+    offset += sizeof(UInt32);
     memcpy(&header.messageID, mData + offset, sizeof(UInt32) );
     offset += sizeof(UInt32);
 

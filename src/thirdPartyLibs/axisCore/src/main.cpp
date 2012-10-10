@@ -23,10 +23,11 @@ public:
 
         CMessage::generateInitialMessage();
         mHandler = new ProtocolHandler(this);
-        mHandler->dataReceived();
-        Bluetooth::releaseBuffer(Bluetooth::getBuffer() );
-        CMessage::generateSingleMessage("Hello ?");
-        mHandler->dataReceived();
+        mHandler->dataReceived();        
+        //CMessage::generateSingleMessage("Hello ?");
+        CMessage::generateMultipleMessages("Hello ?", 5);
+        for (int i = 0 ; i < 5 ; i++)
+            mHandler->dataReceived();
 
         //CMessage::generateFinalMessage();
         //mHandler->dataReceived();
@@ -50,12 +51,13 @@ public:
 
     virtual void dataReceivedCallback(const UInt8 sessionID, const UInt32 messageID, const UInt32 dataSize)
     {
-        cout << "dataReceivedCallback\n data : \n";
+        cout << "dataReceivedCallback size : " << dataSize << "\n";
 
         UInt8 *data = new UInt8[dataSize];
 
-        mHandler->ReceiveData(sessionID, messageID, SERVICE_TYPE_RPC, dataSize, data);
-        cout << data;
+        mHandler->receiveData(sessionID, messageID, SERVICE_TYPE_RPC, dataSize, data);
+
+        std::cout << "********  RESULT :  " << std::string((char*)data, dataSize) <<  " size : " << dataSize << std:: endl;
 
         delete [] data;
     }

@@ -164,6 +164,10 @@ void CMessage::generateMultipleMessages(std::string payload, int messagesQuantit
       {
          sFrameData   = 0xFF;
       }
+      else if (i == (messagesQuantity - 1) )
+      {
+         sFrameData = 0x00;
+      }
       else
       {
          sFrameData = i % 0xFF;

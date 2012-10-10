@@ -32,19 +32,18 @@ Message::~Message()
 
 ERROR_CODE Message::addConsecutiveMessage(const ProtocolPacketHeader &header, UInt8 *data)
 {
+    ERROR_CODE retVal = ERR_OK;
+
     if (mIsMultiFrame)
     {
         if ( (mDataOffset + header.dataSize) <= mTotalDataBytes)
         {
             memcpy(mData + mDataOffset, data, header.dataSize);
             mDataOffset += header.dataSize;
-
-            return ERR_OK;
         }
         else
-            return ERR_FAIL;
+            retVal = ERR_FAIL;
     }
 
-
-    return ERR_FAIL;
+    return retVal;
 }

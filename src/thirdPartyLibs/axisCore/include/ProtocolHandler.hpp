@@ -50,7 +50,7 @@ public:
      * @param receivedDataSize Received data size (bytes)
      * @param data Data array
      */
-    ERROR_CODE ReceiveData(UInt8 sessionID, UInt32 messageID, UInt8 servType, UInt32 receivedDataSize, UInt8* data);
+    ERROR_CODE receiveData(UInt8 sessionID, UInt32 messageID, UInt8 servType, UInt32 receivedDataSize, UInt8* data);
 
 
     //TODO TMP PUBLIC
