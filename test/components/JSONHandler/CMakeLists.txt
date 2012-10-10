@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 project (testJsonHandler) 
 
-link_directories(../../../src/thirdPartyLibs/jsoncpp ../../../src/components/JSONHandler)
+link_directories(../../../src/thirdPartyLibs/jsoncpp ../../../src/components/JSONHandler ../../../src/thirdPartyLibs/axisCore/bin)
 
-include_directories (../../../src/components/JSONHandler/include/ ../../../src/thirdPartyLibs/jsoncpp/include/) 
+include_directories (../../../src/components/JSONHandler/include/ ../../../src/thirdPartyLibs/jsoncpp/include/ ../../../src/thirdPartyLibs/axisCore/include ../../../src/thirdPartyLibs/axisCore/ ../../../src/thirdPartyLibs/axisCore/src) 
 add_executable(testJsonHandler main.cpp)
-target_link_libraries(testJsonHandler jsonCpp jsonHandler)
+target_link_libraries(testJsonHandler jsonCpp jsonHandler ProtocolHandler)
  
 
 include(ExternalProject)

@@ -20,8 +20,8 @@ public:
     MobileRPCNotification * createNotification ( const MobileRPCRequest & request );
     MobileRPCNotification * createNotification ( );
 
-    RegisterAppInterface createRegisterAppInterface ( const MobileRPCMessage & message );
-    Json::Value serializeRegisterAppInterface( const RegisterAppInterface & request );
+    RegisterAppInterface createRegisterAppInterface ( const MobileRPCMessage & message ) const;
+    Json::Value serializeRegisterAppInterface( const RegisterAppInterface & request ) const;
 
     RegisterAppInterface createRegisterAppInterface ( const Json::Value & jsonValue );
 

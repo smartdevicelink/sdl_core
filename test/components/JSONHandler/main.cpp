@@ -10,9 +10,10 @@
 #include <unistd.h>
 #include "JSONHandler/MobileRPCMessage.h"
 #include "JSONHandler/JSONHandler.h"
+#include "ProtocolHandler.hpp"
 
-char * readJsonContent ( const char * file_name );
-int parseJson ( const std::string & json_content );
+char * readJsonContent ( const char * fileName );
+int parseJson ( const std::string & jsonContent );
 
 int main( int argc, char* argv[] ) {
     char * fileName = "/home/dev/Projects/Ford/source/workspace/jsonSample/connection_log_json_only" ;    
@@ -21,28 +22,39 @@ int main( int argc, char* argv[] ) {
         fileName = argv[1];
     }
 
-    char * json_content = readJsonContent( fileName );
+    char * jsonContent = readJsonContent( fileName );
 
     int result = 0;
-    size_t next_message_pos = 0;
-    char *const json_content_beginning = json_content;
+    size_t nextMessagePos = 0;
+    char *const jsonContentBeginning = jsonContent;
 
-    while ( next_message_pos != std::string::npos ) {
+    JSONHandler * jsonHandler = new JSONHandler;
+    ProtocolHandler * protocolHandler = new ProtocolHandler( jsonHandler, 0 );
+    CMessage::generateInitialMessage();
+    protocolHandler->dataReceived();        
+    //CMessage::generateSingleMessage("Hello ?");
+    CMessage::generateMultipleMessages("Hello ?", 5);
+    for (int i = 0 ; i < 5 ; i++)
+        protocolHandler->dataReceived();
+    
+    while ( nextMessagePos != std::string::npos ) {
 
-        std::string json_string( json_content );
-        if ( !json_string.empty() ) {
-            MobileRPCMessage * message = JSONHandler::createObjectFromJSON( json_string );
+        std::string jsonString( jsonContent );
+        if ( !jsonString.empty() ) {
+            jsonHandler -> dataReceivedCallback(0, 1, jsonString.size());
+            /*MobileRPCMessage * message = JSONHandler::createObjectFromJSON( jsonString );*/
+            MobileRPCMessage * message = jsonHandler -> getRPCObject();
             std::cout << "type: " << message->getMessageType() << std::endl;
             std::cout << "protocol version: " << message->getProtocolVersion() << std::endl;
             std::cout << "correation id: " << message -> getCorrelationID() << std::endl;
             std::cout << "function name: " << message -> getFunctionName() << std::endl;
             std::cout << "original string: " << message -> getParametersString() << std::endl;
 
-            std::string serializedString = JSONHandler::serializeObjectToJSON( *message );
+            std::string serializedString = jsonHandler -> serializeObjectToJSON( *message );
             std::cout << serializedString << std::endl;
 
-            RegisterAppInterface requestMessage = JSONHandler::getFactory() -> createRegisterAppInterface( *message );
-            Json::Value params = JSONHandler::getFactory() -> serializeRegisterAppInterface( requestMessage );
+            RegisterAppInterface requestMessage = jsonHandler -> getFactory() -> createRegisterAppInterface( *message );
+            Json::Value params = jsonHandler -> getFactory() -> serializeRegisterAppInterface( requestMessage );
             Json::StyledWriter writer;
             std::string params_to_print = writer.write( params );
             std::cout << "serialized params for RegisterAppInterface: \n" << params_to_print << std::endl;
@@ -50,23 +62,25 @@ int main( int argc, char* argv[] ) {
             delete message;
         }
 
-        next_message_pos = json_string.find( "\n" );
-        json_content += next_message_pos + 1;
+        nextMessagePos = jsonString.find( "\n" );
+        jsonContent += nextMessagePos + 1;
 
         //sleep( 1 );
     }
 
-    delete [] json_content_beginning;
+    delete [] jsonContentBeginning;
+    delete jsonHandler;
+    delete protocolHandler;
 
     return result;
 }
 
 char *
-readJsonContent ( const char * file_name ) {
+readJsonContent ( const char * fileName ) {
     using namespace std;
 
     ifstream file_str;
-    file_str.open ( file_name );
+    file_str.open ( fileName );
 
     file_str.seekg( 0, ios::end );
     int length = file_str.tellg();
@@ -80,10 +94,10 @@ readJsonContent ( const char * file_name ) {
 }
 
 int
-parseJson ( const std::string & json_content ) {
+parseJson ( const std::string & jsonContent ) {
     Json::Value root;   // will contains the root value after parsing.
     Json::Reader reader;
-    bool parsingSuccessful = reader.parse( json_content, root );
+    bool parsingSuccessful = reader.parse( jsonContent, root );
     if ( !parsingSuccessful ) {
         std::cout  << "Failed to parse configuration\n"
                    << reader.getFormatedErrorMessages();
