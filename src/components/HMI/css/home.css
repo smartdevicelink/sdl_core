@@ -1,0 +1,56 @@
+/**
+ * Home screen CSS
+ *
+ * @category	Style Sheets
+ * @filesource	css/home.css
+ * @version		2.0
+ */
+
+
+#home {
+	background: url(../images/home/home_screen.png) no-repeat;
+	width: 800px;
+	height: 369px;
+	top: 56px;
+}
+
+#home.help {
+	background: url(../images/home/home_screen_blur.png) no-repeat !important;
+}
+
+
+#home_topControls_temperature {
+	position: absolute;
+	top: 10px;
+	left: 115px;
+	font-size: 28px;
+}
+
+/* Widgets wrapers */
+
+#home_widgetPhone {
+	position: absolute;
+	width: 400px;
+	height: 183px;
+}
+
+#widget_navigation {
+	position: absolute;
+	width: 400px;
+	height: 183px;
+	left: 400px;
+}
+
+#home_widgetMedia {
+	position: absolute; width: 400px;
+	height: 183px;
+	top: 183px;
+}
+
+#home_widgetClimate {
+	position: absolute;
+	width: 400px;
+	height: 183px;
+	left: 400px;
+	top: 183px
+}

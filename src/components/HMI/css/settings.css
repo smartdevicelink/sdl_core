@@ -1,0 +1,3321 @@
+/** Settings General*/
+#content {
+	top: 59px;
+	left: 5px;
+}
+
+.inner-content {
+	left: 100px;
+	top: 60px;
+}
+
+.inner-wrapper {
+	left: 100px;
+	top: 60px;
+}
+
+.label-20 {
+	font-size: 20px;
+	line-height: 22px;
+}
+
+.btn-28 {
+	background: url(../images/settings/btn-28h.png) repeat-x;
+	height: 28px;
+	line-height: 29px;
+}
+
+.btn-left-c {
+	background: url(../images/settings/center-button.png) no-repeat -1px 0;
+	-webkit-border-radius: 0;
+	-moz-border-radius: 0;
+	border-radius: 0;
+	-webkit-border-top-left-radius: 3px;
+	-webkit-border-bottom-left-radius: 3px;
+	-moz-border-radius-topleft: 3px;
+	-moz-border-radius-bottomleft: 3px;
+	border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+}
+
+.btn {
+	font-size: 20px;
+	line-height: 28px;
+	cursor: pointer;
+	border: 1px solid #393939;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+.disabled {
+	cursor: default !important;
+}
+
+#settings_view .disabled .right-icon{
+	opacity: 0.3;
+}
+
+.btn-28.active {
+	background: url(../images/settings/btn-48h-active.png) repeat-x !important;
+	cursor: default;
+}
+
+.btn-48 {
+	background: url(../images/settings/btn-48h.png) repeat-x;
+	height: 48px;
+	line-height: 49px;
+}
+
+.btn.disabled {
+	color: #6E6E6E;
+f
+}
+
+.btn-98 {
+	background: url(../images/settings/btn-98h.png) repeat-x;
+	height: 98px;
+}
+
+.scroll {
+	position: relative;
+	border: 1px solid #393939;
+	height: 300px;
+	width: 48px;
+	left: 580px;
+}
+
+.scroll_up {
+	width: 50px;
+	height: 51px;
+	background: url("../images/settings/scroll_up.png") no-repeat;
+	top: -1px;
+	left: -1px;
+	cursor: pointer;
+}
+
+.scroll_up_inactive {
+	background: url("../images/settings/scroll_up_inactive.png") no-repeat !important;
+}
+
+.scroll_down_inactive {
+	background: url("../images/settings/scroll_down_inactive.png") no-repeat !important;
+}
+
+.scroll_down {
+	width: 50px;
+	height: 51px;
+	background: url("../images/settings/scroll_down.png") no-repeat;
+	bottom: -1px;
+	left: -1px;
+	cursor: pointer;
+}
+
+.scroll_body {
+	width: 46px;
+	height: 200px;
+	background: #262626;
+	top: 50px;
+	left: 1px;
+}
+
+.scroll_knob {
+	width: 46px;
+	top: 50px;
+	left: 1px;
+	background: #464646;
+}
+
+.text-block {
+	border: 1px solid #393939;
+	font-size: 20px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+.text-block-500 {
+	width: 476px;
+	padding: 13px 11px;
+}
+
+.backButton {
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+	float: left;
+	margin-left: 5px;
+	z-index: 1;
+}
+
+.backButton .ico {
+	margin-top: 13px;
+	margin-left: 8px;
+	cursor: pointer;
+}
+
+.block-header-title {
+	font-size: 26px;
+	width: 400px;
+	top: 10px;
+	left: 75px;
+}
+
+/******************* ToggleLabelButton********************/
+
+.toogleButtonContainer {
+	position: relative;
+	width: 201px;
+	height: 28px;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	float: right;
+	margin-top: 10px;
+	margin-right: 10px;
+}
+
+.toogleButtonContainer .toggles{
+	position: relative;
+	float: left;
+	width: 98px;
+	height: 28px;
+}
+
+.toogleButtonContainer span{
+	position: relative;
+	float: left;
+	width: 100px;
+	margin-top: 1px;
+	text-align: center;
+	line-height: 28px;
+}
+
+#settings_view .toogleButtonContainer .active {
+	background: url(../images/settings/btn-28h-gray-active.png) repeat-x !important;
+}
+
+/******************* For Help Mode *******************/
+.help-mode .btn-28,
+.help-mode .button span,
+.help-mode .label-20,
+.btn .help-mode,
+.help-mode .title,
+.help-mode .text,
+.help-mode .text-block-500,
+.help-mode .list-item span,
+.help-mode .lableToggleButton .lableToggle,
+.help-mode .block-header-title,
+.help-mode .label {
+	color: transparent !important;
+	text-shadow: 0 0 9px #FFF; !important;
+}
+
+.help-mode .btn-28,
+.help-mode .button span,
+.help-mode .text-block-500,
+.help-mode .btn-98,
+.help-mode .btn-48,
+.help-mode .toggles,
+.help-mode .toogleButtonContainer,
+.help-mode .toogleButtonContainer .delim,
+.help-mode .lablePlusButton .button {
+	border: none !important;
+	background: none !important;
+}
+
+.help-mode .list-item,
+.help-mode .list, 
+.help-mode .list-content{
+	background: none !important;
+	float: left;
+	border: none !important;
+	color: transparent !important;
+	text-shadow: 0 0 9px #FFF !important;
+}
+
+.help-mode .list-item .ico{
+	border: 1px solid #000;
+}
+
+.help-mode .list-item {
+	height: 50px !important;
+}
+
+.help-mode #settings_settings_system_list .list-item,
+.help-mode #settings_settings_mediaPlayer .list-item,
+.help-mode #settings_help_systemInformation_list .list-item {
+	left: 1px !important;
+	top: 1px !important;
+}
+
+.help-mode #settings_vehicle_list .list-item,
+.help-mode #settings_settings_list .list-item,
+.help-mode #settings_help_list_left .list-item,
+.help-mode #settings_help_list_right .list-item {
+	top: 1px !important;
+	left: -1px !important;
+}
+
+.help-mode .lableToggle{
+	margin-top: 1px !important;
+	margin-left: 1px !important;
+} 
+
+.help-mode .toogleButtonContainer span{
+	margin-top: 3px !important;
+	margin-left: 1px !important;
+}
+
+.help-mode .button1 span{
+	margin-left: 2px !important;
+}
+
+.help-mode .button2 span{
+	margin-left: 3px !important;
+}
+
+.help-mode .lablePlusButton{
+	left: 1px !important;
+	top: 1px !important;
+}
+
+.help-mode .list-item img {
+	opacity: 0 !important;
+}
+
+#settings_view.help-mode .sb-content {
+	opacity: 0;
+}
+
+/******************* For Settings Menu *******************/
+#ctrl_settings_menu {
+	z-index: 1000;
+	position: absolute;
+	top: 90px;
+	left: 0px;
+	width: 150px;
+	height: 300px;
+}
+
+#ctrl_settings_menu .ls_border {
+	z-index: 201;
+	position: absolute;
+	top: -3px;
+	left: 0px;
+	width: 153px;
+	height: 306px;
+}
+
+#ctrl_settings_menu .ls-items {
+	position: relative;
+	width: 150px;
+	height: 300px;
+}
+
+#ctrl_settings_menu .ls-item {
+	z-index: 201;
+	position: relative;
+	width: 150px;
+	height: 50px;
+	cursor: pointer;
+}
+
+#ctrl_settings_menu .ls-item > .bg {
+	z-index: 201;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 150px;
+	height: 50px;
+}
+
+#ctrl_settings_menu .ls-item > .ico {
+	z-index: 299;
+	position: absolute;
+	width: 50px;
+	height: 50px;
+	left: 0px;
+	top: 0px;
+}
+
+#ctrl_settings_menu .lsp1_p {
+	background: url("../images/settings/ls-item_bg.png") repeat-x;
+}
+
+#ctrl_settings_menu .settings_active {
+	background: url("../images/settings/menu_active.png") repeat-x;
+}
+
+#ctrl_settings_menu .ls-item > .ico.more {
+	left: 50px;
+}
+
+#ctrl_settings_menu .ls-item p {
+	z-index: 298;
+	position: absolute;
+	left: 50px;
+	width: 100px;
+	height: 50px;
+	font-size: 20px;
+	line-height: 50px;
+	white-space: nowrap;
+	overflow: hidden;
+}
+;
+
+#ctrl_settings_menu .ls-item > .led {
+	z-index: 299;
+	position: absolute;
+	top: 0px;
+	right: 8px;
+	width: 24px;
+	height: 50px;
+}
+
+#ctrl_settings_menu .ls-item.empty {
+	background: #333333;
+}
+
+#ctrl_settings_menu .firts_item {
+	-webkit-border-top-right-radius: 3px;
+	border-top-right-radius: 3px;
+}
+
+#ctrl_settings_menu .last_item {
+	-webkit-border-bottom-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+}
+
+#ctrl_settings_menu .phone_active {
+	background: url("../images/phone/menu_active.png") repeat-x !important;
+}
+
+#ctrl_settings_menu .navigation {
+	width: 26px;
+	height: 25px;
+	background: url("../images/phone/ico_navigation.png") no-repeat;
+	left: 60px;
+	top: 10px;
+}
+
+#settings_view .toogleButtonContainer .delim{
+	position: relative;
+	float: left;
+	border: #393939 1px solid;
+	height: 26px;
+	width: 0px;
+	
+}
+
+/******************* For Settings.Clock *******************/
+#settings_clock {
+	position: absolute;
+	top: 90px;
+	left: 160px;
+	height: 305px;
+	width: 640px;
+	float: left;
+}
+
+#settings_clock .clockPanel {
+	position: relative;
+	margin-left: 5px;
+	top: 5px;
+	float: left;
+	width: 570px;
+}
+
+#settings_clock .leftPlusButton {
+	position: relative;
+	width: 98px;
+	height: 43px;
+	float: left;
+	border: 1px solid #393939;
+	border-top-left-radius: 3px;
+}
+
+#settings_clock .leftPlusButton .ico, #settings_clock .rightPlusButton .ico {
+	position: relative;
+	margin-left: 37px;
+	margin-top: 10px;
+	float: left;
+}
+
+#settings_clock .leftMinusButton {
+	position: relative;
+	margin-top: 45px;
+	margin-left: -100px;
+	width: 98px;
+	height: 44px;
+	border: 1px solid #393939;
+	border-top: none;
+	border-bottom-left-radius: 3px;
+	float: left;
+}
+
+#settings_clock .leftMinusButton .ico, #settings_clock .rightMinusButton .ico {
+	position: relative;
+	margin-left: 37px;
+	margin-top: 20px;
+	float: left;
+}
+
+#settings_clock .timeNum {
+	position: relative;
+	margin-left: 0px;
+	margin-top: 0px;
+	width: 265px;
+	height: 88px;
+	border-top: 1px solid #393939;
+	border-bottom: 1px solid #393939;
+	float: left;
+	color: #999;
+}
+
+#settings_clock .timeNum .time {
+	position: relative;
+	margin-left: 78px;
+	margin-top: 0px;
+	width: 112px;
+	height: 44px;
+	font-size: 59px;
+	float: left;
+}
+
+#settings_clock .timeNum .timeZone {
+	position: relative;
+	margin-left: 78px;
+	margin-top: 13px;
+	width: 180px;
+	height: 46px;
+	font-size: 18px;
+	font-weight: bold;
+	float: left;
+}
+
+#settings_clock .rightPlusButton {
+	position: relative;
+	width: 98px;
+	height: 43px;
+	float: left;
+	border: 1px solid #393939;
+	border-top-right-radius: 3px;
+}
+
+#settings_clock .rightMinusButton {
+	position: relative;
+	margin-top: 45px;
+	margin-left: -100px;
+	width: 98px;
+	height: 44px;
+	border: 1px solid #393939;
+	border-bottom-right-radius: 3px;
+	border-top: none;
+	float: left;
+}
+
+#settings_clock .am {
+	position: relative;
+	margin-left: 5px;
+	float: left;
+	width: 98px;
+	height: 43px;
+	border: 1px solid #333;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+#settings_clock .pm {
+	position: relative;
+	margin-left: 5px;
+	float: left;
+	width: 98px;
+	height: 44px;
+	border: 1px solid #333;
+	border-top: none;
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+#settings_clock .am span {
+	position: relative;
+	top: 10px;
+	margin-left: 33px;
+}
+
+#settings_clock .pm span {
+	position: relative;
+	top: 10px;
+	margin-left: 33px;
+}
+
+#settings_clock .am.pressed, #settings_clock .pm.pressed {
+	background: url(../images/settings/menu_active.png);
+}
+
+#settings_clock_list {
+	margin-top: 100px;
+	margin-left: 5px
+}
+
+/* Settings.clock lisr wraper */	
+#settings_clock .list {
+	position: absolute;
+	width: 629px;	
+	height: 201px;
+	border-radius: 2px;
+}
+
+/* Settings.clock list item */
+#settings_clock .list-item {
+	position: relative;
+	width: 568px;
+	float: left;
+	background: #000;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+}
+
+/* Settings.clock list */
+#settings_clock .list-content {
+	width: 568px;
+}
+
+/* Settings.clock list label */
+#settings_clock .list-item span {
+	margin-left: 15px;
+	width: 300px;
+	float: left;
+}
+
+#settings_clock .list-item .ico {
+	float: right;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	margin-top: 9px;
+	margin-right: 9px;
+	opacity: 0.3;
+}
+
+#settings_clock .toogleButtonContainer span{
+	width: 98px;
+	margin: 0;
+}
+
+#settings_view .toogleButtonContainer.doubletoggle{
+	width: 198px;
+}
+
+.help-mode #settings_clock {
+	background-image: url(../images/settings/settings_clock_bg_help.png)!important;
+	background-repeat: no-repeat;
+	background-position: 0px 0px;
+	
+}
+
+.help-mode #settings_clock .list-item {
+	height: 50px !important;
+}
+
+.help-mode #settings_clock .list {
+	margin-top: 101px;
+	margin-left: 6px;
+}
+
+.help-mode #settings_clock .ico {
+	opacity: 0;
+}
+
+.help-mode #settings_clock .time,
+.help-mode #settings_clock .timeZone,
+.help-mode #settings_clock .timeNum,
+.help-mode #settings_clock .am span,
+.help-mode #settings_clock .pm span{
+	color: transparent !important;
+	text-shadow: 0 0 9px #999 !important;
+	background-image: none !important;
+	border: none !important;
+}
+
+.help-mode #settings_clock .button, .help-mode #settings_clock .button {
+	background: none !important;
+	border: none !important;
+}
+
+#settings_clock.help-mode .leftPlusButton{
+	top: 1px !important;
+	left: 2px !important;
+}
+
+.help-mode #settings_clock .timeNum {
+	top: 1px !important;
+	left: 2px !important;
+}
+
+.help-mode #settings_clock .am {
+	top: 1px !important;
+	left: 5px !important;
+}
+
+#settings_clock.help-mode .pm {
+	top: 2px !important;
+	left: 7px !important;
+}
+
+
+
+/******************* For Settings.Display Menu *******************/
+#settings_display {
+	background: url(../images/settings/view_settings_display_bg.png) no-repeat;
+	height: 260px;
+	width: 640px;
+	left: 160px;
+	top: 81px;
+}
+
+#settings_display .inner-wrapper {
+	top: 65px;
+	left: 100px;	
+}
+
+#options_left_menu {
+	left: -46px;
+	top: -30px;
+}
+
+.settings_font {
+	font-size: 20px;
+}
+
+#gang_buttons div, #end p, .rs-item > p, .br-list-item > p, .br-list-item > p.numbers, .bcs-item > span, .bc-item2 > span, #home_usb .usb_time, #keypad .words, .channel, .equalizer.subsubtitle, .intive_btn, .info-text {
+	color: #999;
+}
+
+#options_left_clock {
+	top: 16px;
+}
+
+#options_left_display {
+	top: 66px;
+}
+
+#options_left_sound {
+	top: 116px;
+}
+
+#options_left_vehicle {
+	top: 166px;
+}
+
+#options_left_settings {
+	top: 216px;
+}
+
+#options_left_help {
+	top: 265px;
+}
+
+#settings_display .brightness {
+	left: -80px;
+	top: -45px;
+}
+
+#settings_display .auto-dim {
+	left: -80px;
+	top: 5px;
+	width: 100px;
+}
+
+#settings_display .mode {
+	left: -80px;
+	top: 55px;
+}
+
+#settings_display .edit-wallpaper {
+	left: -80px;
+	top: 105px;
+	width: 150px;
+}
+
+#settings_display .auto-dim-manual-offset {
+	left: -80px;
+	top: 156px;
+	width: 240px;
+}
+
+#settings_display .auto-dim-on {
+	width: 99px;
+	text-align: center;
+	left: 404px;
+	top: -3px;
+}
+
+#settings_display .auto-dim-off {
+	width: 99px;
+	text-align: center;
+	left: 504px;
+	top: -3px;
+}
+
+#settings_display .auto {
+	width: 99px;
+	text-align: center;
+	left: 304px;
+	top: -3px;
+}
+
+#settings_display .day {
+	width: 99px;
+	text-align: center;
+	left: 404px;
+	top: -3px;
+}
+
+#settings_display .night {
+	width: 99px;
+	text-align: center;
+	left: 504px;
+	top: -3px;
+}
+
+#settings_display .active {
+	background: url(../images/settings/btn-28h-gray-active.png) repeat-x !important;
+}
+
+.help-mode .auto-dim-on,
+.help-mode .auto-dim-off,
+.help-mode #settings_display .auto,
+.help-mode #settings_display .day,
+.help-mode #settings_display .night{
+	line-height: 30px;
+}
+
+.help-mode #settings_display {
+	background: url(../images/settings/view_settings_display_bg_help.png) no-repeat -1px 0px !important;
+}
+
+.help-mode #settings_display .label-20,
+.help-mode #settings_display .btn-28{
+	color: transparent !important;
+	text-shadow: 0 0 9px #999; !important;
+}
+
+/******************* For Settings.Sound Menu *******************/
+#settings_sound_view {
+	height: 384px;
+	width: 647px;
+	left: 153px;
+	top: 48px;
+	z-index: 1001;
+}
+
+#settings_sound_list{
+	top: 42px;
+	left: 12px;
+	height: 251px;
+	width: 630px;
+}
+
+#settings_sound_list .list-content{
+	height: 391px;
+	width: 570px;
+}
+
+#settings_sound_list .list-item span{
+	margin-left: 13px;
+}
+
+#settings_sound_list_item5 .toogleButtonContainer{
+	width: 242px;
+}
+
+#settings_sound_list_item5 .toggles,
+#settings_sound_list_item5 .toggles span{
+	width: 120px;
+}
+
+#settings_sound_list_item6 {
+	height: 90px;
+}
+
+#settings_sound_list_item6 .toogleButtonContainer{
+	width: 334px;
+	height: 100px;
+	border: none;
+}
+
+#settings_sound_list_item6 .lableToggle{
+	margin-top: 10px;
+	margin-left: 10px;
+	width: 199px;
+	height: 100px;
+	line-height: 20px;
+} 
+
+#settings_sound_list_item6 span{
+	margin-left: 0px !important;
+}
+
+#settings_sound_list_item6 .toggles span{
+	width: 80px;
+}
+
+#settings_sound_list_item6 .toggles{
+	border-top: 1px solid #393939;
+	border-bottom: 1px solid #393939;
+	margin-bottom: 10px;
+	width: 80px;
+}
+
+#settings_sound_list_item6  .toogleButtonContainer .delim{
+	height: 28px;
+}
+
+#settings_sound_list_item6 .delim-3{
+	display: none;
+}
+
+#settings_sound_list_item6 .button3,
+#settings_sound_list_item6 .button7{
+	border-right: 1px solid #393939;
+}
+
+#settings_sound_list_item6 .button0,
+#settings_sound_list_item6 .button4{
+	border-left: 1px solid #393939;
+}
+
+#settings_sound_list .toogleButtonContainer span {
+	margin-left: 0px;
+	margin-right: 10px;
+}
+
+#settings_sound_list .list-item .ico {
+	margin-right: 1px;
+	float: right;
+}
+
+#settings_sound_list .scrollbar .disabled .ico{
+	opacity: 0.3;
+}
+
+#settings_sound_list .disabled .ico{
+	opacity: 1;
+}
+
+.help-mode #settings_sound_view {
+	background: url(../images/settings/settings_sound_bg_help.png) no-repeat;
+}
+
+.help-mode #settings_sound_list {
+	display: none;
+}
+
+/*
+#setbalanceAndFade {
+	position: absolute;
+	width: 568px;
+	height: 49px;
+	top: 164px;
+	left: 13px;
+}*/
+/*
+#setbalanceAndFade span {
+	margin-left: 14px;
+	font-size: 20px;
+	position: relative;
+	top: 13px;
+}*/
+
+/*.help-mode #setbalanceAndFade .arrow-ico {
+	display: none;
+}*/
+
+/*
+.help-mode .block-header-title {
+	color: transparent !important;
+	text-shadow: 0 0 9px white !important;
+}
+
+.help-mode .scrollbar {
+	display: none;
+}
+
+#settings_sound .bass {
+	top: 28px;
+	left: 26px;
+}
+
+#settings_sound .midrange {
+	top: 77px;
+	left: 26px;
+}
+
+#settings_sound .treble {
+	top: 127px;
+	left: 26px;
+}
+
+#settings_sound .sound_balance {
+	top: 165px;
+	left: 13px;
+	white-space: nowrap;
+	cursor: pointer;
+	padding: 13px 0 15px 14px;
+	width: 554px;
+}
+
+#settings_sound .sound_balance.pressed {
+	background: url(../images/common/arr-r.png) no-repeat 542px 15px,  url(../images/common/btn-48h-pressed.png) repeat-x 0 2px;
+}
+*/
+/*#settings_sound .scroll_knob {
+	height: 200px;
+}
+
+#settings_sound .dsp {
+	top: 227px;
+	left: 26px;
+	white-space: nowrap;
+}
+
+#settings_sound .scroll {
+	left: 592px;
+	top: 13px;
+}
+
+#settings_sound .dsp_stereo {
+	left: 337px;
+	top: 0;
+}
+
+#settings_sound .dsp_surround {
+	left: 445px;
+	top: 0;
+}
+/*
+.help-mode #setbalanceAndFade {
+	height: 0px;
+	color: transparent !important;
+	text-shadow: 0 0 9px white !important;
+}
+
+.help-mode #setbalanceAndFade image {
+	display: none;
+}*/
+
+/******************* For Settings.Sound.SetBalanceAndFadeView *******************/
+#settings_sound_soundBalanceFade {
+	top: 0px;
+	left: -153px;
+	background-image: url(../images/settings/view_settings_Sound_BalanceFader.png);
+	background-repeat: no-repeat;
+	background-position: 158px -10px;
+	background-color: #000;
+	width: 800px;
+	height: 384px;
+	z-index: 1011;
+}
+
+#settings_sound_soundBalanceFade .backButton {
+	top: 11px;
+}
+
+#settings_sound_soundBalanceFade .block-header-title {
+	top: 21px;
+}
+
+#settings_sound_soundBalanceFade .inner-wrapper {
+	left: 100px;
+	top: 71px;
+}
+
+#settings_sound_soundBalanceFade .fade {
+	top: -2px;
+	left: 82px;
+}
+
+#settings_sound_soundBalanceFade .balance {
+	top: 261px;
+	left: 82px;
+}
+
+#settings_sound_soundBalanceFade .f {
+	top: -2px;
+	left: 190px;
+}
+
+#settings_sound_soundBalanceFade .z1 {
+	top: 100px;
+	left: 190px;
+}
+
+#settings_sound_soundBalanceFade .b {
+	top: 202px;
+	left: 190px;
+}
+
+#settings_sound_soundBalanceFade .l {
+	top: 259px;
+	left: 235px;
+}
+
+#settings_sound_soundBalanceFade .z2 {
+	top: 260px;
+	left: 336px;
+}
+
+#settings_sound_soundBalanceFade .r {
+	top: 260px;
+	left: 434px;
+}
+
+.help-mode #settings_sound_soundBalanceFade {
+	background-image: url(../images/settings/view_settings_Sound_BalanceFader-help.png);
+}
+
+/******************* For Settings.Vehicle Menu*******************/
+#settings_vehicle {
+	width: 640px;
+	height: 480px;
+	left: 160px;
+	z-index: 1001;
+}
+
+.help-mode #settings_vehicle {
+	background-image: url(../images/settings/settings_vehicle_help.png);
+	background-repeat: no-repeat;
+	background-position-y: 85px;
+}
+
+#settings_vehicle_list{
+	top: 90px;
+	left: 5px;
+}
+
+#settings_vehiclet {
+	height: 250px;
+	position: relative;
+	float: left;
+	margin-top: 5px;
+	width: 554px;
+}
+
+
+#settings_vehicle .list {
+	width: 630px;
+	height: 301px;
+}
+
+#settings_vehicle_list .list-item .ico{
+	width: 50px;
+	height: 50px;
+}
+
+#settings_vehicle_list .list-content {
+	width: 630px;
+	border-left: none;
+	border-right: none;
+}
+
+#settings_vehicle .list-item {
+	position: relative;
+	width: 628px;
+	height: 49px;
+	font-size: 20px;
+	line-height: 50px;
+	border-bottom: 1px solid #393939;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #393939;
+}
+
+#settings_vehicle .list-item .arrow-ico {
+	right: 8px;
+}
+
+#settings_vehicle .list-item .ico {
+	float: left;
+}
+
+#settings_vehicle .list-item span {
+	height: 23px;
+}
+
+#settings_vehicle .backButton {
+	margin-top: 11px;
+}
+
+#settings_vehicle_HealthReport .backButton {
+	margin-top: 11px;
+}
+
+#settings_vehicle_HealthReport .block-header-title {
+	margin-top: 11px;
+}
+
+#settings_vehicle .block-header-title {
+	margin-top: 11px;
+}
+
+#settings_vehicle_HealthReport .inner-wrapper {
+	left: 100px;
+	top: 71px;
+}
+
+#settings_vehicle .inner-wrapper {
+	left: 100px;
+	top: 71px;
+}
+
+/******************* For Settings.Vehicle.AmbientLighting Menu*******************/
+
+#settings_vehicle_ambientLighting {
+	top: 48px;
+	left: -160px;
+	/*top: 48px;*/
+	width: 800px;
+	height: 384px;
+	background-image: url(../images/settings/settings_vehicle_amberLight_bg.png);
+	background-color: #000;
+	z-index: 1001;
+}
+
+#settings_vehicle_ambientLighting.help-mode {
+	background-image: url(../images/settings/settings_vehicle_amberLight_bg-help.png) !important;
+}
+
+/******************* For Settings.Vehicle.HealthReport Menu*******************/
+
+#settings_vehicle_HealthReport {
+	top: 48px;
+	left: -160px;
+	width: 800px;
+	height: 384px;
+	background-image: url(../images/settings/view_settings_vehicle_VehicleHealthReport.png);
+	background-repeat: no-repeat;
+	background-position: 55px 82px;
+	background-color: #000;
+	z-index: 1001;
+}
+
+#settings_vehicle_HealthReport .ar {
+	white-space: nowrap;
+	top: 35px;
+	left: -20px;
+}
+
+#settings_vehicle_HealthReport .mi {
+	white-space: nowrap;
+	left: -20px;
+	top: 84px;
+}
+
+#settings_vehicle_HealthReport .ar_on {
+	white-space: nowrap;
+	left: 436px;
+	top: 36px;
+}
+
+#settings_vehicle_HealthReport .ar_off {
+	white-space: nowrap;
+	left: 536px;
+	top: 36px;
+}
+
+#settings_vehicle_HealthReport .ar_q {
+	white-space: nowrap;
+	left: 635px;
+	top: 36px;
+}
+
+#settings_vehicle_HealthReport .mi_5000 {
+	white-space: nowrap;
+	left: 329px;
+	top: 85px;
+}
+
+#settings_vehicle_HealthReport .mi_7500 {
+	white-space: nowrap;
+	left: 428px;
+	top: 85px;
+}
+
+#settings_vehicle_HealthReport .mi_10000 {
+	white-space: nowrap;
+	left: 523px;
+	top: 85px;
+}
+
+#settings_vehicle_HealthReport .mi_q {
+	white-space: nowrap;
+	left: 634px;
+	top: 85px;
+}
+
+#settings_vehicle_HealthReport .mi_rv {
+	white-space: nowrap;
+	left: 160px;
+	top: 139px;
+}
+
+#settings_vehicle_HealthReport .mi_rv {
+	white-space: nowrap;
+	left: 160px;
+	top: 139px;
+}
+
+#settings_vehicle_HealthReport .mi_tc {
+	white-space: nowrap;
+	left: 119px;
+	top: 185px;
+	font-size: 18px;
+}
+
+.help-mode #settings_vehicle_HealthReport {
+	background-image: url(../images/settings/view_settings_vehicle_VehicleHealthReport-help.png);
+}
+
+.help-mode #settings_vehicle_HealthReport .inner-wrapper div {
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Vehicle.Door Keypad Code Menu*******************/
+#settings_vehicle_DoorKeypadCode {
+	top: 48px;
+	left: -160px;
+	width: 800px;
+	height: 384px;
+	background-image: url(../images/settings/view_settings_vehicle_DoorKeypadCode.png);
+	background-repeat: no-repeat;
+	background-position: 110px 181px;
+	background-color: #000;
+	z-index: 1001;
+}
+
+.help-mode #settings_vehicle_DoorKeypadCode {
+	background-image: url(../images/settings/view_settings_vehicle_DoorKeypadCode-help.png);
+}
+
+#settings_vehicle_DoorKeypadCode .factory {
+	left: -27px;
+	top: 28px;
+	font-size: 26px;
+	width: 635px;
+	line-height: 32px;
+}
+
+#settings_vehicle_DoorKeypadCode .digit {
+	left: 50px;
+	top: 136px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_DoorKeypadCode .b1 {
+	left: 62px;
+	top: 199px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_DoorKeypadCode .b2 {
+	left: 162px;
+	top: 199px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_DoorKeypadCode .b3 {
+	left: 262px;
+	top: 199px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_DoorKeypadCode .b4 {
+	left: 362px;
+	top: 199px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_DoorKeypadCode .b5 {
+	left: 462px;
+	top: 199px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_DoorKeypadCode .enter {
+	left: 592px;
+	top: 199px;
+	white-space: nowrap;
+}
+
+.help-mode #settings_vehicle_DoorKeypadCode .inner-wrapper div {
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Vehicle.Rear View Camera*******************/
+#settings_vehicle_RearCamera {
+	top: 48px;
+	left: -160px;	
+	width: 800px;
+	height: 384px;
+	background-image: url(../images/settings/view_settings_vehicle_RearViewCamera.png);
+	background-repeat: no-repeat;
+	background-position: 66px 61px;
+	background-color: #000;
+	z-index: 1001;
+}
+
+#view_settings_vehicle_RearViewCamera .preview {
+	top: 147px;
+	left: 90px;
+}
+
+#settings_vehicle_RearCamera .rcd {
+	top: 12px;
+	left: -10px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_RearCamera .visualPark {
+	top: 60px;
+	left: -10px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_RearCamera .guidelines {
+	top: 108px;
+	left: -10px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_RearCamera .on1 {
+	top: 11px;
+	left: 351px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_RearCamera .off1 {
+	top: 11px;
+	left: 500px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_RearCamera .on2 {
+	top: 61px;
+	left: 351px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_RearCamera .off2 {
+	top: 61px;
+	left: 500px;
+	white-space: nowrap;
+}
+
+
+#settings_vehicle_RearCamera .on3 {
+	top: 109px;
+	left: 351px;
+	white-space: nowrap;
+}
+
+#settings_vehicle_RearCamera .off3 {
+	top: 109px;
+	left: 500px;
+	white-space: nowrap;
+}
+#settings_vehicle_RearCamera .preview {
+	top: 167px;
+	left: 90px;
+}
+
+.help-mode #settings_vehicle_RearCamera {
+	background-image: url(../images/settings/view_settings_vehicle_RearViewCamera-help.png);
+}
+
+.help-mode #settings_vehicle_RearCamera .inner-wrapper div {
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Vehicle. Enable Valet Mode*******************/
+#settings_vehicle_enableValetMode_popUp {
+	width: 800px;
+	height: 480px;
+	z-index: 100000;
+}
+
+#settings_vehicle_enableValetMode_popUp .blackFilter{
+	left: -160px;
+	width: 800px;
+	height: 480px;
+	background-color: #000;
+	opacity: 0.5;
+}
+
+#settings_vehicle_enableValetMode_popUp .wrapper{
+	top: 79px;
+	left: 80px;
+	height: 320px;
+	width: 330px;
+	background-color: #000;
+	z-index: 10001;
+	border: #a6a6a6 solid 2px;
+	border-radius: 6px;
+}
+
+#settings_vehicle_enableValetMode_popUp .wrapper .yesButton,
+#settings_vehicle_enableValetMode_popUp .wrapper .noButton {
+	bottom: 9px;
+	left: 10px;
+	width: 155px;
+	height: 48px;
+	border: 1px solid #393939;
+	font-size: 21px;
+	font-family: Arial;
+}
+
+#settings_vehicle_enableValetMode_textEnabling,
+#settings_vehicle_enableValetMode_textSamePIN,
+#settings_vehicle_enableValetMode_textContinue{
+	text-align: center;
+	font-size: 20px;
+	float: left;
+}
+
+#settings_vehicle_enableValetMode_textEnabling{
+	top: 11px;
+	left: 34px;
+	width: 261px;
+	line-height: 22px;
+}
+
+#settings_vehicle_enableValetMode_textSamePIN{
+	top: 99px;
+	left: 35px;
+	width: 261px;
+	line-height: 22px;
+}
+
+#settings_vehicle_enableValetMode_textContinue{
+	top: 208px;
+	left: 33px;
+	width: 267px;
+	line-height: 22px;
+}
+
+#settings_vehicle_enableValetMode_popUp .wrapper .yesButton{
+	border-top-left-radius: 2px;
+	border-bottom-left-radius: 2px;
+}
+
+#settings_vehicle_enableValetMode_popUp .wrapper .noButton {
+	left: 163px;
+	border-top-right-radius: 2px;
+	border-bottom-right-radius: 2px;
+}
+
+#settings_vehicle_enableValetMode_popUp .yesButton span,
+#settings_vehicle_enableValetMode_popUp .noButton span {
+	position: absolute;
+	top: 13px;
+	width: 155px;
+	text-align: center;
+}
+
+/******* For Settings.Vehicle.EnableValetMode.EnterPin*******/
+#settings_vehicle_enableValetMode_enteringPin {
+	top: 53px;
+	left: -160px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	z-index: 1001;
+	font-size: 26px;
+}
+
+#settings_vehicle_enableValetMode_enteringPin .backButton,
+#settings_vehicle_enableValetMode_enteringPin .block-header-title {
+	margin-top: 11px;
+}
+
+#settings_vehicle_enableValetMode_enteringPin_enterPadLabel{
+	position: absolute;
+	top: 87px;
+	left: 75px;
+}
+
+#settings_vehicle_enableValetMode_enteringPin_enterPad{
+	position: absolute;
+	top: 74px;
+	left: 285px;
+	width: 240px;
+	height: 289px;
+}
+
+#settings_vehicle_enableValetMode_enteringPin_PIN{
+	position: relative;
+	float: left;
+	width: 228px;
+	height: 48px;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	text-align: center;
+}
+
+#settings_vehicle_enableValetMode_enteringPin_enterPad .digitButton{
+position: relative;
+	float: left;
+	height: 48px;
+	width: 68px;
+	border: 1px solid #393939;
+	border-radius: 4px;
+	text-align: center;
+	line-height: 50px;
+	margin-right: 10px;
+	margin-top: 10px;
+}
+
+#settings_vehicle_enableValetMode_enteringPin_digit0 {
+	margin-left: 80px;
+}
+
+#settings_vehicle_enableValetMode_enteringPin_backspaceButton{
+	top: 74px;
+	right: 14px;
+	width: 63px;
+	height: 48px;
+	border: 1px solid #393939;
+	border-radius: 2px;
+}
+
+#settings_vehicle_enableValetMode_enteringPin_backspaceButton .ico {
+	margin-top: 15px;
+	margin-left: 19px;
+}
+
+#settings_vehicle_enableValetMode_enteringPin_enterButton {
+	bottom: 21px;
+	right: 14px;
+	height: 48px;
+	width: 138px;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	text-align: center;
+	line-height: 50px;
+	font-size: 24px;
+}
+
+.help-mode #settings_vehicle_enableValetMode_enteringPin_PIN,
+.help-mode #settings_vehicle_enableValetMode_enteringPin_enterPad .digitButton,
+.help-mode #settings_vehicle_enableValetMode_enteringPin_backspaceButton,
+.help-mode #settings_vehicle_enableValetMode_enteringPin_enterButton{
+	border: none !important;
+	background: none !important;	
+}
+
+.help-mode #settings_vehicle_enableValetMode_enteringPin_backspaceButton .ico {
+	opacity: 0;
+}
+
+.help-mode #settings_vehicle_enableValetMode_enteringPin_enterButton {
+	right: 15px;
+	bottom: 22px;
+}
+
+.help-mode #settings_vehicle_enableValetMode_enteringPin_enterPad {
+	top: 74px;
+	left: 285px;
+}
+
+.help-mode #settings_vehicle_enableValetMode_enteringPin_enterPad {
+	top: 75px;
+	left: 286px;
+}
+
+.help-mode #settings_vehicle_enableValetMode_enteringPin_enterPad .digitButton {
+	margin-right: 12px;
+	margin-top: 12px;
+}
+
+.help-mode #settings_vehicle_enableValetMode_enteringPin_enterPadLabel,
+.help-mode #settings_vehicle_enableValetMode_enteringPin_enterPad .digitButton span,
+.help-mode #settings_vehicle_enableValetMode_enteringPin_enterButton span{
+	text-shadow: 0 0 9px #999 !important;
+}
+
+.help-mode #settings_vehicle_enableValetMode_enteringPin{
+	background-image: url(../images/settings/settings_vehicle_enableValetMode_enterPIN_bg_help.png)
+}
+
+/******************* For Settings.Settings*******************/
+
+#settings_settings {
+	position: relative;
+	left: 160px;
+	top: 86px;
+	width: 642px;
+	height: 310px;
+	float: left;
+	z-index: 1001;
+}
+
+#settings_settings_list{
+	width: 630px;
+	height: 301px;
+	top: 5px;
+	left: 5px;
+}
+
+#settings_settings_list .list-item > .ico{
+	height: 50px;
+	width: 50px;	
+}
+
+#settings_settings_list .list-content {
+	width: 628px;
+}
+
+#settings_settings .list-item {
+	position: relative;
+	width: 100%;
+	height: 49px;
+	font-size: 20px;
+	line-height: 50px;
+	border-bottom: 1px solid #393939;
+}
+
+#settings_settings .list-item .ico {
+	float: left;
+	opacity: 1;
+}
+
+
+
+#settings_settings .backButton {
+	margin-top: 11px;
+}
+
+#settings_settings .block-header-title {
+	top: 22px;
+	left: 76px;
+}
+
+.help-mode #settings_settings {
+	background-image: url(../images/settings/settings_settings_bg_help.png)!important;
+	border: none;
+}
+
+/******************* For Settings.Settings.System Menu*******************/
+#settings_settings_system {
+	top: -38px;
+	left: -160px;
+	/*	top: 48px;*/
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	font-size: 20px;
+	z-index: 1001
+}
+
+#settings_settings_system_list {
+	position: relative;
+	margin-top: 84px;
+	margin-left: 65px;
+	width: 730px;
+	height: 251px;
+}
+
+#settings_settings_system_list .list {
+	position: relative;
+	width: 670px;
+	height: 251px;
+	border: 1px solid #393939;
+	border-radius: 2px;
+}
+
+#settings_settings_system_list .list-item {
+	position: relative;
+	width: 670px;
+	float: left;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	line-height: 50px;
+}
+
+#settings_settings_system_list .list-item span{
+	margin-left: 13px;
+}
+
+
+#settings_settings_system_list .list-content {
+	width: 670px;
+}
+
+#settings_settings_system_list .list-item .ico {
+	float: right;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	margin-top: 9px;
+	margin-right: 9px;/*	opacity: 0.3;*/
+}
+
+#settings_settings_system_list .list-item.big-ico img {
+	float: right;
+	border: none;
+	margin-top: 4px;
+	margin-right: 9px;/*	opacity: 0.3;*/
+}
+
+.help-mode #settings_settings_system {
+	background-image: url(../images/settings/settings_settings_system_bg_help.png);
+	background-repeat: no-repeat;
+	background-position: 60px 79px;
+}
+
+.help-mode #settings_settings_system .list-item span{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Settings.System.Keyboard Layout Menu*******************/
+#settings_settings_system_keyboardLayout {
+	top: 0px;
+	left: 0px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	font-size: 20px;
+	z-index: 1101
+}
+
+#settings_settings_system_keyboardLayout .backButton {
+	margin-top: 11px;
+}
+
+#settings_settings_system_keyboardLayout .block-header-title {
+	top: 22px;
+	left: 76px;
+}
+
+#settings_settings_system_keyboardLayout_list {
+	margin-top: 84px;
+	margin-left: 65px;
+	width: 731px;
+	height: 251px;
+}
+
+#settings_settings_system_keyboardLayout_list .list-item {
+	position: relative;
+	width: 657px;
+	float: left;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	padding-left: 13px;
+	line-height: 50px;
+}
+
+#settings_settings_system_keyboardLayout_list .list-content {
+	width: 670px;
+}
+
+#settings_settings_system_keyboardLayout_list .list-item .ico {
+	float: right;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	margin-top: 9px;
+	margin-right: 9px;
+}
+
+#settings_settings_system_keyboardLayout_list .list-item.pressed {
+	background: url(../images/settings/menu_active.png)
+}
+
+.help-mode #settings_settings_system_keyboardLayout{
+	background-image: url(../images/settings/settings_settings_system_keyboardLayout_bg_help.png) !important;
+	background-repeat: no-repeat;
+	background-position: 60px 79px;
+}
+
+.help-mode #settings_settings_system_keyboardLayout_list {
+	display: none;
+}
+
+.help-mode #settings_settings_system_keyboardLayout .list-item span{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Settings.System.Iinstall Applications Menu*******************/
+#settings_settings_system_installApplications {
+	left: 0px;
+	top: 0px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	font-size: 20px;
+	z-index: 1301
+}
+
+#settings_settings_system_installApplications .backButton {
+	margin-top: 11px;
+}
+
+#settings_settings_system_installApplications .block-header-title {
+	top: 22px;
+	left: 76px;
+}
+
+#settings_settings_system_installApplications_list {
+	position: relative;
+	margin-top: 84px;
+	margin-left: 65px;
+	width: 730px !important;
+	height: 200px;
+}
+#settings_settings_system_installApplications_list .list-content {
+	width: 728px;
+}
+
+#settings_settings_system_installApplications_list .list-item span {
+	padding-left: 10px;
+}
+
+#settings_settings_system_installApplications_list .list-item .ico {
+	float: right;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	margin-top: 9px;
+	margin-right: 9px;
+}
+
+.help-mode #settings_settings_system_installApplications{
+	background-image: url(../images/settings/settings_settings_system_settings_settings_system_installApplications_bg_help.png) !important;
+	background-repeat: no-repeat;
+	background-position: 60px 78px;
+}
+
+.help-mode #settings_settings_system_installApplications .list-item span{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.VoiceControl *******************/
+
+#settings_settings_VoiceControl {
+	top: -38px;	
+	left: -160px;
+	background-image: url(../images/settings/view_settings_settings_VoiceControl.png);
+	background-position: 55px 78px;
+	background-repeat: no-repeat;
+	background-color: #000;
+	width: 800px;
+	height: 384px;
+	z-index: 1001;
+}
+
+#settings_settings_VoiceControl .inner-content {
+	top: 71px;
+}
+
+#settings_settings_VoiceControl .on1 {
+	left: 388px;
+	top: 82px;
+}
+
+#settings_settings_VoiceControl .on2 {
+	left: 388px;
+	top: 132px;
+}
+
+#settings_settings_VoiceControl .on3 {
+	left: 388px;
+	top: 182px;
+}
+
+#settings_settings_VoiceControl .off1 {
+	left: 538px;
+	top: 82px;
+}
+
+#settings_settings_VoiceControl .off2 {
+	left: 538px;
+	top: 132px;
+}
+
+#settings_settings_VoiceControl .off3 {
+	left: 538px;
+	top: 182px;
+}
+
+#settings_settings_VoiceControl .vcv {
+	left: -23px;
+	top: 233px;
+	white-space: nowrap;
+}
+
+#settings_settings_VoiceControl .pcl {
+	left: -23px;
+	top: 183px;
+	white-space: nowrap;
+}
+
+#settings_settings_VoiceControl .mcl {
+	left: -23px;
+	top: 133px;
+	white-space: nowrap;
+}
+
+#settings_settings_VoiceControl .cp {
+	left: -23px;
+	top: 83px;
+	white-space: nowrap;
+}
+
+#settings_settings_VoiceControl .im {
+	left: -23px;
+	top: 33px;
+	white-space: nowrap;
+}
+
+#settings_settings_VoiceControl .novice {
+	left: 375px;
+	top: 32px;
+	white-space: nowrap;
+}
+
+#settings_settings_VoiceControl .advance {
+	left: 510px;
+	top: 32px;
+	white-space: nowrap;
+}
+
+.help-mode #settings_settings_VoiceControl {
+	background-image: url(../images/settings/view_settings_settings_VoiceControl-help.png);
+}
+
+.help-mode #settings_settings_VoiceControl .inner-content div{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Settings.Media Player Menu*******************/
+#settings_settings_mediaPlayer {
+	top: -38px;
+	left: -160px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	font-size: 20px;
+	z-index: 1001
+}
+
+#settings_settings_mediaPlayer .backButton {
+	margin-top: 11px;
+}
+
+#settings_settings_mediaPlayer .block-header-title {
+	top: 22px;
+	left: 76px;
+}
+
+#settings_settings_mediaPlayer_list {
+	margin-top: 84px;
+	margin-left: 65px;
+	width: 730px;
+	height: 251px;
+}
+
+#settings_settings_mediaPlayer_list .list-content {
+	width: 670px;
+}
+
+#settings_settings_mediaPlayer_list .list-item {
+	position: relative;
+	width: 670px;
+	float: left;
+	height: 49px;
+	line-height: 50px;
+}
+
+#settings_settings_mediaPlayer_list .list-item span{
+	margin-left: 13px;	
+}
+
+#settings_settings_mediaPlayer_list .list-item .ico {
+	float: right;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	margin-top: 9px;
+	margin-right: 9px;
+}
+
+#settings_settings_mediaPlayer_list .list-item.big-ico img {
+	float: right;
+	border: none;
+	margin-top: 4px;
+	margin-right: 9px;
+}
+
+#settings_settings_mediaPlayer_list_item5 .toogleButtonContainer {
+	width: 300px;
+	text-align: center;
+}
+
+#settings_settings_mediaPlayer_list .list-item .toogleButtonContainer span{
+	margin-left: 0px;
+	width: 149px;
+}
+
+#settings_settings_mediaPlayer_list_item5 .toogleButtonContainer  .toggles {
+	width: 149px;
+}
+
+.help-mode #settings_settings_mediaPlayer {
+	background-image: url(../images/settings/settings_settings_media_bg_help.png)!important;
+	background-position: 60px 79px;
+	background-repeat: no-repeat;
+	border: none;
+}
+
+.help-mode #settings_settings_mediaPlayer .list-item {
+	color: transparent !important;
+	text-shadow: 0 0 9px white !important;
+}
+
+.help-mode #settings_settings_mediaPlayer .list-item .ico {
+	margin-right: 8px!important;
+}
+
+.help-mode #settings_settings_mediaPlayer_list_item0 span,
+.help-mode #settings_settings_mediaPlayer_list_item2 span,
+.help-mode #settings_settings_mediaPlayer_list_item3 span,
+.help-mode #settings_settings_mediaPlayer_list_item4 span{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Settings.Media Player Bluetooth Devices Menu*******************/
+#settings_settings_mediaPlayer_bluetoothDevices {
+	left: 0px;
+	top: 0px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	font-size: 20px;
+	z-index: 1001
+}
+
+#settings_settings_mediaPlayer_bluetoothDevices .backButton {
+	margin-top: 11px;
+}
+
+#settings_settings_mediaPlayer_bluetoothDevices .block-header-title {
+	top: 22px;
+	left: 76px;
+}
+
+#settings_settings_mediaPlayer_bluetoothDevices_list {
+	position: relative;
+	margin-top: 84px;
+	margin-left: 65px;
+	width: 670px;
+}
+
+#settings_settings_mediaPlayer_bluetoothDevices_list {
+	width: 730px;
+	height: 251px;
+}
+
+#settings_settings_mediaPlayer_bluetoothDevices_list .list-content {
+	width: 670px;
+	height: 150px;
+}
+
+#settings_settings_mediaPlayer_bluetoothDevices_list .list-item {
+	position: relative;
+	width: 670px;
+	float: left;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+    line-height: 50px;
+}
+
+#settings_settings_mediaPlayer_bluetoothDevices_list .list-item span{
+	margin-left: 13px;	
+}
+
+#settings_settings_mediaPlayer_bluetoothDevices_list .list-item .ico {
+	float: right;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	margin-top: 9px;
+	margin-right: 9px;
+}
+
+#settings_settings_mediaPlayer_bluetoothDevices_list .list-item.big-ico img {
+	float: right;
+	border: none;
+	margin-top: 4px;
+	margin-right: 9px;
+}
+
+.help-mode #settings_settings_mediaPlayer_bluetoothDevices{
+	background-image: url(../images/settings/settings_settings_media_bluetoothDevices_bg_help.png) !important;
+	background-repeat: no-repeat;
+}
+
+.help-mode #settings_settings_mediaPlayer_bluetoothDevices .list-item .ico{
+	border: 1px solid #000;
+}
+
+.help-mode #settings_settings_mediaPlayer_bluetoothDevices_list .list-item span{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Settings. Navigation*******************/
+
+#settings_settings_navigation {
+	top: -38px;
+	left: -160px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	font-size: 20px;
+	z-index: 1001
+}
+
+#settings_settings_navigation .backButton {
+	margin-top: 11px;
+}
+
+#settings_settings_navigation .block-header-title {
+	top: 22px;
+	left: 76px;
+}
+
+#settings_settings_navigation_list {
+	margin-top: 84px;
+	margin-left: 65px;
+	width: 733px;
+	height: 251px;	
+}
+
+#settings_settings_navigation_list .list-content {
+	width: 728px;
+	height: 250px;
+}
+
+#settings_settings_navigation_list .list-item {
+	position: relative;
+	width: 728px;
+	float: left;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	line-height: 50px;
+}
+
+#settings_settings_navigation_list .list-item span{
+	margin-left: 13px;	
+}
+
+#settings_settings_navigation_list .list-item.big-ico img {
+	float: right;
+	border: none;
+	margin-top: 4px;
+	margin-right: 9px;
+}
+
+
+.help-mode #settings_settings_navigation {
+	background-image: url(../images/settings/settings_settings_navigation_bg_help.png) !important;
+	background-position: 60px 79px;
+	background-repeat: no-repeat;
+	border: none;
+}
+
+.help-mode #settings_settings_navigation .list-item, .help-mode #settings_settings_navigation .list-item span, {
+	color: transparent !important;
+	text-shadow: 0 0 9px white !important;
+}
+
+.help-mode #settings_settings_navigation_list{
+	margin-top: 85px;
+	margin-left: 66px;
+}
+
+/******************* For Settings.Settings.Navigation.MapPreferences *******************/
+#settings_settings_navigation_mapPreferences {
+	top: 0px;
+	left: 0px;
+	/*	top: 48px;*/
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	font-size: 20px;
+	z-index: 1001
+}
+
+#settings_settings_navigation_mapPreferences_list {
+	margin-top: 84px;
+	margin-left: 65px;
+	width: 672px;
+	height: 151px;;
+}
+
+#settings_settings_navigation_mapPreferences_list .list-content {
+	width: 670px;
+	height: 200px;
+}
+
+#settings_settings_navigation_mapPreferences_list .list-item {
+	position: relative;
+	width: 670px;
+	float: left;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	line-height: 50px;
+}
+
+#settings_settings_navigation_mapPreferences_list .list-item .lableToggle span {
+	margin-left: 13px;
+}
+
+#settings_settings_navigation_mapPreferences_list .list-item .ico {
+	float: right;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	margin-top: 9px;
+	margin-right: 9px;/*	opacity: 0.3;*/
+}
+
+#settings_settings_navigation_mapPreferences_list .list-item.big-ico img {
+	float: right;
+	border: none;
+	margin-top: 4px;
+	margin-right: 9px;/*	opacity: 0.3;*/
+}
+
+.help-mode #settings_settings_navigation_mapPreferences {
+	background-image: url(../images/settings/settings_settings_navigation_mapPreferences_bg_help.png);
+	background-repeat: no-repeat;
+	background-position: 60px 79px;
+}
+
+#settings_settings_navigation_mapPreferences_list .toogleButtonContainer{
+	width: 300px;
+}
+
+#settings_settings_navigation_mapPreferences_list .toggles, #settings_settings_navigation_mapPreferences_list .toggles span{
+	width: 149px;
+}
+
+.help-mode #settings_settings_navigation_mapPreferences .list-item span{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Settings.Navigation.RoutePreferences *******************/
+#settings_settings_navigation_routePreferences {
+	top: 0px;
+	left: 0px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	font-size: 20px;
+	z-index: 1001
+}
+
+#settings_settings_navigation_routePreferences_list {
+	margin-top: 84px;
+	margin-left: 65px;
+	width: 672px;
+	height: 251px
+}
+
+#settings_settings_navigation_routePreferences_list .list-item {
+	position: relative;
+	width: 670px;
+	float: left;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	line-height: 50px;
+}
+
+#settings_settings_navigation_routePreferences_list .list-item .lableToggle{
+	margin-left: 13px;
+}
+
+#settings_settings_navigation_routePreferences_list .list-item .lableToggle{
+	margin-left: 13px;
+}
+
+#settings_settings_navigation_routePreferences_list .list-content {
+	width: 670px;
+	height: 250px;
+}
+
+#settings_settings_navigation_routePreferences_list .list-item .ico {
+	float: left;
+	padding-right: 10px;
+}
+
+#settings_settings_navigation_routePreferences_list .list-item.big-ico img {
+	float: right;
+	border: none;
+	margin-top: 4px;
+	margin-right: 9px;
+}
+
+#settings_settings_navigation_routePreferences_list .toogleButtonContainer{
+	width: 300px;
+}
+
+#settings_settings_navigation_routePreferences_list .toggles, #settings_settings_navigation_routePreferences_list .toggles span{
+	width: 149px;
+}
+
+#settings_settings_navigation_routePreferences_list_item0 .toogleButtonContainer{
+	width: 451px
+}
+
+.help-mode #settings_settings_navigation_routePreferences {
+	background-image: url(../images/settings/settings_settings_navigation_routePreferences_bg_help.png);
+	background-repeat: no-repeat;
+	background-position: 59px 79px;
+}
+
+.help-mode #settings_settings_navigation_routePreferences .lableToggle{
+	left: 11px;
+}
+
+.help-mode #settings_settings_navigation_routePreferences_list_item0 .lableToggle{
+	left: 13px;
+}
+
+.help-mode #settings_settings_navigation_routePreferences .list-item span{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Settings.Navigation.NavigationPreferences *******************/
+#settings_settings_navigation_navigationPreferences {
+	top: 0px;
+	left: 0px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	font-size: 20px;
+	z-index: 1001
+}
+
+#settings_settings_navigation_navigationPreferences_list {
+	position: relative;
+	margin-top: 161px;
+	margin-left: 77px;
+	width: 672px;
+	height: 101px;
+}
+
+#settings_settings_navigation_navigationPreferences_list .list {
+	position: relative;
+	width: 668px;
+	height: 98px;
+	border: 1px solid #393939;
+	border-radius: 2px;
+}
+
+#settings_settings_navigation_navigationPreferences_list .list-content {
+	width: 670px;
+	height: 100px;
+}
+
+#settings_settings_navigation_navigationPreferences_list .list-item {
+	position: relative;
+	width: 670px;
+	float: left;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	line-height: 50px;
+}
+
+#settings_settings_navigation_navigationPreferences_list .list-item .lableToggle span {
+	margin-left: 13px;
+}
+
+#settings_settings_navigation_navigationPreferences_list .list-item .ico {
+	float: right;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	margin-top: 9px;
+	margin-right: 9px;
+}
+
+#settings_settings_navigation_navigationPreferences_list .list-item.big-ico img {
+	float: right;
+	border: none;
+	margin-top: 4px;
+	margin-right: 9px;
+}
+
+.help-mode #settings_settings_navigation_navigationPreferences {
+	background-image: url(../images/settings/settings_settings_navigation_navigationPreferences_bg_help.png);
+	background-repeat: no-repeat;
+	background-position: 72px 156px;
+}
+
+#settings_settings_navigation_navigationPreferences_list .toogleButtonContainer{
+	width: 300px;
+}
+
+#settings_settings_navigation_navigationPreferences_list .toggles, #settings_settings_navigation_navigationPreferences_list .toggles span{
+	width: 149px;
+}
+
+.help-mode #settings_settings_navigation_navigationPreferences .list-item span{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Settings.Navigation.TrafficPreferences *******************/
+#settings_settings_navigation_trafficPreferences {
+	top: 0px;
+	left: 0px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	font-size: 20px;
+	z-index: 1001
+}
+
+#settings_settings_navigation_trafficPreferences_list {
+	position: relative;
+	margin-top: 84px;
+	margin-left: 65px;
+	width: 730px;
+	height: 251px;
+}
+
+#settings_settings_navigation_trafficPreferences_list .list-content {
+	width: 670px;
+	height: 650px;
+}
+
+#settings_settings_navigation_trafficPreferences_list .list-item{
+	position: relative;
+	width: 670px;
+	float: left;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	line-height: 50px;
+}
+
+#settings_settings_navigation_trafficPreferences_list .list-item .lableToggle {
+	margin-left: 13px;
+}
+
+#settings_settings_navigation_trafficPreferences_list .list-item .lableToggle span {
+	margin-left: 13px;
+}
+
+#settings_settings_navigation_trafficPreferences_list .list-item .ico {
+	float: left;
+	padding-right: 10px;
+	margin-top: 9px;
+}
+
+#settings_settings_navigation_trafficPreferences_list .list-item.big-ico img {
+	float: right;
+	border: none;
+	margin-top: 4px;
+	margin-right: 9px;
+}
+
+#settings_settings_navigation_trafficPreferences_list .toogleButtonContainer{
+	width: 300px;
+}
+
+#settings_settings_navigation_trafficPreferences_list .toggles, #settings_settings_navigation_trafficPreferences_list .toggles span{
+	width: 149px;
+}
+
+.help-mode #settings_settings_navigation_trafficPreferences {
+	background-image: url(../images/settings/settings_settings_navigation_trafficPreferences_bg_help.png);
+	background-repeat: no-repeat;
+}
+
+.help-mode #settings_settings_navigation_trafficPreferences .lableToggle{
+	left: 11px;
+} 
+
+.help-mode #settings_settings_navigation_trafficPreferences_list_item0 .lableToggle,
+.help-mode #settings_settings_navigation_trafficPreferences_list_item1 .lableToggle {
+	margin-left: 1px;
+}
+
+.help-mode #settings_settings_navigation_trafficPreferences_list_item0 .lableToggle,
+.help-mode #settings_settings_navigation_trafficPreferences_list_item1 .lableToggle{
+	left: 13px;
+}
+
+.help-mode #settings_settings_navigation_trafficPreferences #settings_settings_navigation_trafficPreferences_list{
+	display: none;
+}
+
+.help-mode #settings_settings_navigation_trafficPreferences .list-item span{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Settings.Navigation.AvoidAreas*******************/
+
+#settings_settings_navigation_avoidAreas_view{
+	height: 48px;
+	width: 148px;
+	top: 0px;
+	left: 0px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	font-size: 20px;
+	z-index: 1001
+}
+
+#settings_settings_navigation_avoidAreas_backButton_addButton{
+	top: 112px;
+	left: 5px;
+	width: 148px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+	cursor: pointer;
+	z-index: 1;
+	line-height: 50px;
+}
+
+#settings_settings_navigation_avoidAreas_backButton_addButton span{
+	margin-left: 13px;
+}
+
+.help-mode #settings_settings_navigation_avoidAreas_view{
+	background-image: url(../images/settings/settings_settings_navigation_avoidAreas_bg_help.png);
+	background-repeat: no-repeat;
+	background-position: 0px 107px;
+}
+
+.help-mode #settings_settings_navigation_avoidAreas_backButton_addButton{
+	background: none;
+	border: #000;
+}
+
+.help-mode #settings_settings_navigation_avoidAreas_backButton_addButton .arrow-ico{
+	opacity:  0;
+}
+
+.help-mode #settings_settings_navigation_avoidAreas_backButton_addButton span{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Wireless Internet *******************/
+#settings_settings_wirelessInternet {
+	top: -38px;
+	left: -160px;
+	width: 800px;
+	height: 384px;
+	z-index: 1001;
+	background-color: #000;
+	background-image: url(../images/settings/view_settings_settings_WirelessInternet.png);
+	background-repeat: no-repeat;
+	background-position: 0px 48px;
+}
+
+.help-mode #settings_settings_wirelessInternet {
+	background-image: url(../images/settings/view_settings_settings_WirelessInternet-help.png);
+}
+
+#settings_settings_wirelessInternet .backButton {
+	margin-top: 11px;
+}
+
+#settings_settings_wirelessInternet .block-header-title {
+	top: 21px;
+}
+
+#settings_settings_wirelessInternet .inner-content {
+	top: 71px;
+}
+
+#settings_settings_wirelessInternet .wifi-network {
+	white-space: nowrap;
+	top: 7px;
+	left: 349px;
+}
+
+#settings_settings_wirelessInternet .usbmb {
+	white-space: nowrap;
+	top: 86px;
+	left: 349px;
+}
+
+#settings_settings_wirelessInternet .bluetooth_settings {
+	white-space: nowrap;
+	top: 168px;
+	left: 349px;
+}
+
+#settings_settings_wirelessInternet .bluetooth_pcm {
+	white-space: nowrap;
+	top: 250px;
+	left: 316px;
+}
+
+#settings_settings_wirelessInternet .i {
+	white-space: nowrap;
+	top: 172px;
+	left: -32px;
+	font-size: 12px;
+}
+
+#settings_settings_wirelessInternet .wifi {
+	white-space: nowrap;
+	top: 41px;
+	left: 118px;
+	font-size: 12px;
+}
+
+#settings_settings_wirelessInternet .wdp {
+	white-space: nowrap;
+	top: 127px;
+	left: 68px;
+	font-size: 12px;
+}
+
+#settings_settings_wirelessInternet .cn {
+	white-space: nowrap;
+	top: 212px;
+	left: 84px;
+	font-size: 12px;
+}
+
+.help-mode #settings_settings_wirelessInternet .inner-content div{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Help *******************/
+#settings_help {
+	position: absolute;
+	top: 86px;
+	left: 160px;
+	width: 640px;
+	height: 305px;
+	float: left;
+	z-index:1001
+}
+
+#settings_help .backButton {
+	margin-top: 11px;
+}
+
+#settings_help .inner-content{
+	top: 71px;	
+}
+
+#settings_help .block-header-title {
+	top: 21px;
+	left: 75px;
+}
+
+#settings_help_911Assist .backButton{
+	margin-top: 11px;
+}
+
+#settings_help_911Assist .inner-content{
+	top: 71px;
+}
+
+#settings_help_911Assist .block-header-title {
+	top: 21px;
+	left: 75px;
+}
+
+
+#settings_help_list_left, #settings_help_list_right {
+	width: 310px;
+	height: 251px;
+}
+
+#settings_help_list_right .list-item {
+	cursor: pointer;
+}
+
+#settings_help .list-content {
+	position: relative;
+	float: left;
+	width: 308px
+}
+
+#settings_help .list-item .ico {
+	height: 50px;
+	width: 50px;
+}
+
+#settings_help .list-item .ico {
+	float: left;
+}
+
+#settings_help_list_left{
+	float: left;
+	left: 5px;
+	top: 5px;
+}
+
+#settings_help_list_right {
+	position: relative;
+	float: left;
+	margin-top: 5px;
+	margin-left: 15px;
+	width: 310px;
+}
+
+#settings_help #settings_help_list_right .list {
+	max-height: 48px;
+}
+
+#settings_help_bottom_label {
+	font-size: 20px;
+	line-height: 50px;
+	color: #6E6E6E;
+	float: left;
+	width: 100%;
+	text-align: center;
+	bottom: 0px;
+}
+
+.help-mode #settings_help {
+	background-image: url(../images/settings/settings_help_help.png);
+	background-repeat: no-repeat;
+	border: none !important;
+}
+
+.help-mode #settings_help_bottom_label {
+	color: transparent !important;
+	text-shadow: 0 0 9px white !important;
+}
+
+#settings_help.help-mode .lat{
+	text-shadow: 0 0 9px lime !important;
+}
+
+/******************* For Settings.Help.Where Am I Report Menu*******************/
+#settings_help_whereAmI {
+	position: absolute;
+	top: -38px;
+	left: -160px;
+	width: 800px;
+	height: 384px;
+	background-image: url(../images/settings/settings_help_WhereAmI_bg.png);
+	background-repeat: no-repeat;
+	background-position: 14px 96px;
+	background-color: black;
+	z-index: 1001;
+}
+
+#settings_help_whereAmI .next_street {
+	white-space: nowrap;
+	left: -68px;
+	top: 17px;
+}
+
+#settings_help_whereAmI .villagerd {
+	white-space: nowrap;
+	left: -53px;
+	top: 50px;
+}
+
+#settings_help_whereAmI .current_street {
+	white-space: nowrap;
+	left: -68px;
+	top: 97px;
+}
+
+#settings_help_whereAmI .mi {
+	white-space: nowrap;
+	left: 615px;
+	top: 50px;
+}
+
+#settings_help_whereAmI .military_st {
+	white-space: nowrap;
+	left: -45px;
+	top: 124px;
+}
+
+#settings_help_whereAmI .dmi {
+	white-space: nowrap;
+	left: -45px;
+	top: 147px;
+}
+
+#settings_help_whereAmI .lat {
+	white-space: nowrap;
+	left: -45px;
+	top: 190px;
+	color: #00ff00;
+}
+
+#settings_help_whereAmI .previous_street {
+	white-space: nowrap;
+	left: -68px;
+	top: 229px;
+}
+
+#settings_help_whereAmI .rd {
+	white-space: nowrap;
+	left: -45px;
+	top: 262px;
+}
+
+#settings_help_whereAmI .ft {
+	white-space: nowrap;
+	left: 617px;
+	top: 262px;
+}
+
+.help-mode #settings_help_whereAmI {
+	position: absolute;
+	width: 800px;
+	height: 384px;
+	background-image: url(../images/settings/settings_help_WhereAmI_bg_help.png);
+}
+
+.help-mode #settings_help_whereAmI .inner-content div{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Help.SystemInformation Menu*******************/
+#settings_help_systemInformation {
+	top: -38px;
+	left: -160px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	z-index: 1001;
+	font-size: 20px;
+}
+
+#settings_help_systemInformation .backButton {
+	margin-top: 11px;
+}
+
+#settings_help_systemInformation .block-header-title {
+	top: 22px;
+	left: 76px;
+}
+
+#settings_help_systemInformation_list {
+	position: relative;
+	margin-top: 91px;
+	margin-left: 65px;
+	width: 730px;
+	height: 251px;
+}
+
+#settings_help_systemInformation_list .list-content {
+	width: 670px;
+}
+
+
+#settings_help_systemInformation_list .list-item span {
+	padding-left: 13px;
+}
+
+.help-mode #settings_help_systemInformation {
+	background-image: url(../images/settings/settings_help_systemInformation_bg_help.png);
+	background-repeat: no-repeat;
+	background-position: 60px 86px;
+}
+
+.help-mode #settings_help_systemInformation .list-item span{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Help.SoftwareLicenses Menu*******************/
+#settings_help_softwareLicenses {
+	top: -38px;
+	left: -160px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	z-index: 1001;
+	font-size: 20px;
+}
+
+#settings_help_softwareLicenses .backButton {
+	margin-top: 11px;
+}
+
+#settings_help_softwareLicenses .block-header-title {
+	top: 22px;
+	left: 76px;
+}
+
+#settings_help_softwareLicenses .list-titles {
+	position: relative;
+	margin-top: 57px;
+	margin-left: 274px;
+	float: left;
+	font-size: 18px;
+}
+
+#settings_help_softwareLicenses #title-name {
+	position: relative;
+	width: 152px;
+	float: left;
+}
+
+#settings_help_softwareLicenses #title-data {
+	position: relative;
+	width: 100px;
+	margin-left: 53px;
+	float: left;
+	text-align: center;
+}
+
+#settings_help_softwareLicenses #title-users {
+	position: relative;
+	width: 100px;
+	margin-left: 44px;
+	float: left;
+	text-align: center;
+}
+
+#settings_help_softwareLicenses_list .list-item .ico{
+	width: 12px;
+	height: 50px;
+}
+
+#settings_help_softwareLicenses_list_item0 .right-icon{
+	position: absolute;
+	top: 0px;
+	left: 299px;
+	width: 10px;
+	height: 50px;
+}
+
+#settings_help_softwareLicenses_list {
+	position: absolute;
+	margin-top: 101px;
+	margin-left: 135px;
+	width: 655px;
+	height: 251px;
+}
+
+#settings_help_softwareLicenses_list .list {
+	position: relative;
+	width: 595px;
+	height: 48px;
+	border: 1px solid #393939;
+	border-radius: 2px;
+}
+
+#settings_help_softwareLicenses_list .list-item {
+	position: relative;
+	width: 595px;
+	float: left;
+	background: black;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	line-height: 50px;
+	cursor: default;
+}
+
+#settings_help_softwareLicenses_list .list-item span {
+	position: absolute;
+	top: 0px;
+	left: 29px;
+}
+
+#settings_help_softwareLicenses_list .list-item span.content {
+	font-size: 23px;
+}
+
+#settings_help_softwareLicenses_list .list-content {
+	width: 595px;
+}
+
+#settings_help_softwareLicenses_list .list-item .ico {
+	margin-left: 12px;
+	margin-right: 5px;
+}
+
+#settings_help_softwareLicenses_list .list-item .content-second {
+	position: absolute;
+	top: 0px;
+	left: 370px;
+}
+
+#settings_help_softwareLicenses_list .list-item .content-third {
+	position: absolute;
+	top: 0px;
+	left: 499px
+}
+#installUpdatesButton {
+	position: relative;
+	margin-left: 5px;
+	width: 118px;
+	height: 58px;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	float: left;
+	background: url(../images/settings/btn-68h.png);
+	text-align: center;
+	padding-top: 10px;
+}
+
+#installUpdatesButton.pressed {
+	background: url(../images/settings/btn-68h-pressed.png);
+}
+
+.help-mode #settings_help_softwareLicenses .list-titles{
+	color: transparent !important;
+	text-shadow: 0 0 9px #FFF !important;
+}
+
+.help-mode #settings_help_softwareLicenses{
+	background-image: url(../images/settings/seetings_help_softwareLicenses_bg_help.png);
+	background-repeat: no-repeat;
+	background-position: 130px 96px;
+} 
+
+.help-mode #installUpdatesButton{
+	border: none;
+	background: none;
+	padding-top: 11px;
+	margin-left: 6px;
+}
+
+.help-mode #settings_help_systemInformation .list-titles span{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Help. Driver Restrictions Menu*******************/
+#settings_help_driver_restrictions {
+	top: -38px;
+	left: -160px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	z-index: 1001;
+}
+
+#view_settings_help_DrivingRestrictions .text {
+	font-size: 32px;
+	width: 497px;
+	text-align: center;
+	line-height: 42px;
+	top: 19px;
+	left: 50px;
+}
+
+/******************* For Settings.Help.911Assist Menu*******************/
+#settings_help_911Assist {
+	top: -40px;
+	left: -160px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	z-index: 1001;
+}
+
+#settings_help_911Assist .active {
+	background: url(../images/settings/btn-28h-gray-active.png) repeat-x !important;
+}
+
+#settings_help_911Assist .ico-911 {
+	width: 104px;
+	height: 100px;
+	background: url(../images/settings/911-ico.png) no-repeat;
+	top: 45px;
+	left: -12px;
+}
+
+#settings_help_911Assist .assist-911 {
+	width: 425px;
+	left: 134px;
+	top: 17px;
+}
+
+#settings_help_911Assist .a911 {
+	left: 135px;
+	top: 70px;
+	-webkit-border-radius: 0;
+	-moz-border-radius: 0;
+	border-radius: 0;
+	-webkit-border-top-left-radius: 3px;
+	-webkit-border-top-right-radius: 3px;
+	-moz-border-radius-topleft: 3px;
+	-moz-border-radius-topright: 3px;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+}
+
+#settings_help_911Assist .a911-on {
+	width: 99px;
+	text-align: center;
+	right: 109px;
+	top: 10px;
+}
+
+#settings_help_911Assist .a911-off {
+	width: 99px;
+	text-align: center;
+	right: 9px;
+	top: 10px;
+}
+
+#settings_help_911Assist .vri {
+	text-align: center;
+	line-height: 24px;
+	width: 148px;
+	top: 170px;
+	left: -35px;
+	height: 72px;
+	padding: 26px 0 0 0;
+}
+
+#settings_help_911Assist .a911r {
+	left: 135px;
+	top: 120px;
+	-webkit-border-radius: 0;
+	-moz-border-radius: 0;
+	border-radius: 0;
+	-webkit-border-bottom-left-radius: 3px;
+	-webkit-border-bottom-right-radius: 3px;
+	-moz-border-radius-bottomleft: 3px;
+	-moz-border-radius-bottomright: 3px;
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
+}
+
+#settings_help_911Assist .icofesd {
+	width: 400px;
+	top: 185px;
+	left: 135px;
+}
+
+#settings_help_911Assist .sarah {
+	top: 220px;
+	left: 135px;
+	line-height: 47px;
+	width: 158px;
+	text-indent: 12px;
+}
+
+#settings_help_911Assist .sarah > .ico, #settings_help_911Assist .john > .ico {
+	top: 11px;
+	right: 13px;
+	width: 19px;
+	height: 26px;
+	background: url(../images/settings/ico_phone_off.png) no-repeat;
+}
+
+#settings_help_911Assist .john {
+	top: 220px;
+	left: 305px;
+	line-height: 47px;
+	width: 158px;
+	text-indent: 12px;
+}
+
+#settings_help_911Assist .edit {
+	top: 220px;
+	left: 475px;
+	line-height: 47px;
+	width: 158px;
+	text-indent: 12px;
+}
+
+#settings_help_911Assist .edit > .ico {
+	top: 14px;
+	right: 13px;
+	width: 14px;
+	height: 26px;
+	background: url(../images/settings/arr-r-disable.png) no-repeat;
+}
+
+#settings_help_911Assist .disabled .ico {
+	opacity: 1
+}
+
+.help-mode #settings_help_911Assist {
+	background: url(../images/settings/view_info_apps_911Assist_help2.png) no-repeat 0px -11px !important;
+}
+
+.help-mode #settings_help_911Assist .disabled .ico {
+	opacity: 0;
+}
+
+.help-mode .ico-911 {
+	display: none !important;
+}
+
+.help-mode #settings_help_911Assist .btn{
+	padding: 1px;
+}
+
+.help-mode #viewSettingsDisplay_vri{
+	padding-top: 27px !important;
+	padding-left: 1px !important;
+}
+
+.help-mode #settings_help_911Assist .inner-content div{
+	text-shadow: 0 0 9px #999;
+}
+
+/******************* For Settings.Help.VoiceCommandList Menu*******************/
+#settings_help_voiceCommandList {
+	top: -38px;
+	left: -160px;
+	width: 800px;
+	height: 384px;
+	background-color: black;
+	font-size: 20px;
+	z-index: 1001
+}
+
+#settings_help_voiceCommandList .backButton {
+	margin-top: 11px;
+}
+
+#settings_help_voiceCommandList .block-header-title {
+	top: 22px;
+	left: 76px;
+}
+
+#settings_help_voiceCommandList_list {
+	position: relative;
+	margin-top: 85px;
+	margin-left: 65px;
+	width: 730px;
+	height: 251px;
+}
+
+#settings_help_voiceCommandList_list .list-content {
+	width: 670px;
+}
+
+#settings_help_voiceCommandList_list .list-item span {
+	padding-left: 13px;
+}
+
+#settings_help_voiceCommandList_list .list-item .ico {
+	float: right;
+	border: 1px solid #393939;
+	border-radius: 2px;
+	margin-top: 9px;
+	margin-right: 9px;
+	opacity: 0.3;
+}
+
+.help-mode #settings_help_voiceCommandList {
+	background-image: url(../images/settings/settings_help_VoiceCommandList_bg_help.png);
+	background-repeat: no-repeat;
+	background-position: 60px 80px;
+}
+
+.help-mode #settings_help_voiceCommandList .list-item span{
+	text-shadow: 0 0 9px #999;
+}

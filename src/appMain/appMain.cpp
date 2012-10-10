@@ -30,10 +30,20 @@ int main(int argc, char** argv)
     int rfcommsock;
     int scosock;
 
+    /*** Start BT Devices Discovery***/
+
     std::vector<NsTransportLayer::CBTDevice> devicesFound;
     btadapter.scanDevices(devicesFound);
-    printf("Found %d devices\n", devicesFound.size());
-    printf("Please make you choice:\n");
+    if (0 < devicesFound.size())
+    {
+        printf("Found %d devices\n", devicesFound.size());
+        printf("Please make your choice:\n");
+    } else
+    {
+        printf("No any devices found!\n");
+        return EXIT_SUCCESS;
+    }
+
     std::vector<NsTransportLayer::CBTDevice>::iterator it;
     int i = 0;
     for(it = devicesFound.begin(); it != devicesFound.end(); it++)
@@ -41,6 +51,7 @@ int main(int argc, char** argv)
         NsTransportLayer::CBTDevice device = *it;
         printf("%d: %s %s \n", i++, device.getDeviceAddr().c_str(), device.getDeviceName().c_str());
     }
+
     std::cin >> i;
     std::string discoveryDeviceAddr = "";
     if (i < devicesFound.size())
@@ -49,39 +60,49 @@ int main(int argc, char** argv)
     } else
     {
         printf("Bad choice!");
-        return 0;
-    }
-    btadapter.startSDPDiscoveryOnDevice(discoveryDeviceAddr.c_str());
-    return 0;
-
-    if (btadapter.setClass(cls, timeout) < 0)
-    {
-        perror("set_class ");
+        return EXIT_SUCCESS;
     }
 
-    if (btadapter.registerSDP(channel) < 0)
+    /*** Start SDP Discovery on device***/
+
+    std::vector<int> portsRFCOMMFound;
+    btadapter.startSDPDiscoveryOnDevice(discoveryDeviceAddr.c_str(), portsRFCOMMFound);
+    if (0 < portsRFCOMMFound.size())
     {
-        perror("register_sdp ");
-        return -1;
-    }
-    char targetDevID[18];
-    if ((rfcommsock = btadapter.rfcommListen(channel, targetDevID)) < 0)
-    {
-        perror("set_class ");
-        return -1;
+        printf("Found %d ports on %s device\n", portsRFCOMMFound.size(), discoveryDeviceAddr.c_str());
+        printf("Please make you choice:\n");
     } else
     {
-        //btadapter.processRFCOMM(rfcommsock);
-        //printf("Target device ID %s \n", targetDevID);
+        printf("No any ports discovered!\n");
+        return EXIT_SUCCESS;
     }
 
-    if ((scosock = btadapter.scoListen()) < 0)
+    std::vector<int>::iterator itr;
+    int j = 0;
+    for(itr = portsRFCOMMFound.begin(); itr != portsRFCOMMFound.end(); itr++)
     {
-        perror("sco_listen ");
-        return -1;
+        printf("%d: %d \n", j++, *itr);
     }
 
-    btadapter.handleConnection(rfcommsock, scosock);
+    std::cin >> j;
+    int portRFCOMM = 0;
+    if (j < portsRFCOMMFound.size())
+    {
+        portRFCOMM = portsRFCOMMFound[j];
+    } else
+    {
+        printf("Bad choice!");
+        return EXIT_SUCCESS;
+    }
+
+    /*** Start RFCOMM connection***/
+
+    int sockID = btadapter.startRFCOMMConnection(discoveryDeviceAddr.c_str(), portRFCOMM);
+
+    if (0 < sockID)
+    {
+        btadapter.processRFCOMM(sockID);
+    }
 
     return EXIT_SUCCESS;
 } 
