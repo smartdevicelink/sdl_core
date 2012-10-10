@@ -5,7 +5,7 @@
 #include "ProtocolPacketHeader.hpp"
 #include "IProtocolObserver.hpp"
 //#include "transport/bt/BluetoothAPI.hpp"
-#include "MessageGenerator/CMessage.cpp"
+//#include "MessageGenerator/CMessage.cpp"
 
 ProtocolHandler::ProtocolHandler(IProtocolObserver *observer) : 
                 mProtocolObserver(observer),

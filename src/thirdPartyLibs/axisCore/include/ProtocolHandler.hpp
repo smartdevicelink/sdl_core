@@ -8,7 +8,7 @@
 #include "BluetoothReader.hpp"
 #include "BluetoothWriter.hpp"
 #include "transport/bt/IBluetoothHandler.hpp"
-#include "MessageGenerator/CMessage.hpp"
+//#include "MessageGenerator/CMessage.hpp"
 
 class IProtocolObserver;
 

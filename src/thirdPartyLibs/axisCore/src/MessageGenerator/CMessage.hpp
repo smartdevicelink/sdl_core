@@ -11,14 +11,12 @@ class CMessage
 {
 public:
    static Blob getNextBlob();
-   static void releaseCurrentBlob(Blob& blob);
+   static void releaseCurrentBlob(const Blob &blob);
 
    static void generateInitialMessage();
    static void generateFinalMessage();
    static void generateSingleMessage(std::string payload);
    static void generateMultipleMessages(std::string payload, int messagesQuantity);
-
-   static Blob currentBlob;
 
 private:
 
@@ -42,6 +40,19 @@ private:
 
 
 };
+
+namespace Bluetooth
+{
+   static const Blob getBuffer()
+   {
+      return CMessage::getNextBlob();
+   }
+
+   static void releaseBuffer(const Blob& blob)
+   {
+      CMessage::releaseCurrentBlob(blob);
+   }
+}
 
 #endif /* СMESSAGE_HPP_ */
 
