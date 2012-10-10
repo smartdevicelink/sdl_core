@@ -9,7 +9,9 @@ set(LIBRARIES
         bluetooth
         asound)
 
-include_directories (./)
+include_directories (./
+                     ../thirdPartyLibs/axisCore/utils/misc
+                     ../thirdPartyLibs/axisCore/transport/bt)
 set (SOURCES
         appMain.cpp
         CBTAdapter.cpp)
