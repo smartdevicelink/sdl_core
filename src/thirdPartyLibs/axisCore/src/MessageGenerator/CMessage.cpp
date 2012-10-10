@@ -78,8 +78,36 @@ void CMessage::generateInitialMessage()
    currentBlob = Blob((UInt8*)sPacketData, 12, blobQueue.size());
 }
 
-void CMessage::generateSingleMessage()
-{}
+void CMessage::generateSingleMessage(std::string payload)
+{
+   sVersion        = 0x01;
+   sCompressedFlag = 0;
+   sFrameType      = 0x01; //Single
+   sServiceType    = 0x07;
+   sFrameData      = 0x00; //Single Frame
+   sSessionID      = 0;
+   sDataSize       = payload.length() + 1; //
+   sMessageID      = rand() % 0xFFFFFFFF + 1;
+
+   dispayField();
+
+   sPacketData = malloc(12 + sDataSize);
+
+   UInt8 firstByte = ( (sVersion << 4) & 0xF0 )
+                   | ( (sCompressedFlag << 3) & 0x08)
+                   | (sFrameType & 0x07);
+
+   memcpy(sPacketData, &firstByte, 1);
+   memcpy(sPacketData + 1, &sServiceType, 1);
+   memcpy(sPacketData + 2, &sFrameData, 1);
+   memcpy(sPacketData + 3, &sSessionID, 1);
+   memcpy(sPacketData + 4, &sDataSize, 4);
+   memcpy(sPacketData + 8, &sMessageID, 4);
+   memcpy(sPacketData + 12, (void*)const_cast<char*>(payload.c_str()), sDataSize);
+
+   blobQueue.push(Blob((UInt8*)sPacketData, 12, blobQueue.size()));
+   currentBlob = Blob((UInt8*)sPacketData, 12, blobQueue.size());
+}
 
 void CMessage::generateFinalMessage()
 {
@@ -131,5 +159,25 @@ void CMessage::generateFinalMessage()
 
 Blob CMessage::getNextBlob()
 {
+   return blobQueue.front();
+}
+
+void CMessage::releaseCurrentBlob(Blob& blob)
+{
+   free(blob.buffer());
+
    blobQueue.pop();
+}
+
+namespace Bluetooth
+{
+   const Blob getBuffer()
+   {
+      return CMessage::getNextBlob();
+   }
+
+   void releaseBuffer(Blob& blob)
+   {
+      CMessage::releaseCurrentBlob(blob);
+   }
 }

@@ -1,8 +1,8 @@
-#ifndef MESSAGE_HPP_
-#define MESSAGE_HPP_
-
+#ifndef CMESSAGE_HPP_
+#define CMESSAGE_HPP_
 
 #include <queue>
+#include <string>
 
 #include "../../utils/misc/Types.hpp"
 #include "../../transport/bt/Blob.hpp"
@@ -11,8 +11,10 @@ class CMessage
 {
 public:
    static Blob getNextBlob();
+   static void releaseCurrentBlob(Blob& blob);
+
    static void generateInitialMessage();
-   static void generateSingleMessage();
+   static void generateSingleMessage(std::string payload);
    static void generateFinalMessage();
 
    //static Blob getCurrentBlob() { return currentBlob; }
@@ -43,10 +45,7 @@ private:
 
 
 };
-/*
-const Blob getBuffer()
-{
-   return CMessage::getNextBlob();
-}
-*/
-#endif /* MESSAGE_HPP_ */
+
+#endif /* СMESSAGE_HPP_ */
+
+

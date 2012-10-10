@@ -9,8 +9,8 @@ namespace Bluetooth
 	void initBluetooth(IBluetoothHandler * pHandler);
 	void deinitBluetooth();
 
-    //const Blob getBuffer();
-	void releaseBuffer(const Blob&);
+    const Blob getBuffer();
+	void releaseBuffer(Blob&);
 
 	void sendBuffer(UInt8 * pBuffer, size_t size);
 }
