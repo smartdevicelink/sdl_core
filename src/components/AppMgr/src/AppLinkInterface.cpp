@@ -6,6 +6,20 @@
  */
 
 #include "AppMgr/AppLinkInterface.h"
+#include "CMessageBroker.hpp"
+#include "CMessageBrokerRegistry.hpp"
+#include "CSender.hpp"
+
+AppLinkInterface& AppLinkInterface::getInstance( )
+{
+	static AppLinkInterface instance;
+	return instance;
+}
+
+void AppLinkInterface::sendRPCBusObject( const RPCBusObject* rpcObject )
+{
+	//NsMessageBroker::CMessageBrokerRegistry::getInstance()->
+}
 
 AppLinkInterface::AppLinkInterface( )
 {

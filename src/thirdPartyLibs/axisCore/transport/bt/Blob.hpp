@@ -18,7 +18,7 @@ public:
    	   , mId(id)
    { }
 
-   const UInt8 * buffer() const
+   UInt8 * buffer() const
    {
 	   return mpBuf;
    }
