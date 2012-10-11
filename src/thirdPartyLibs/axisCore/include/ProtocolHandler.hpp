@@ -14,6 +14,9 @@ namespace NsTransportLayer
     class CBTAdapter;
 }
 
+namespace AxisCore
+{
+
 class IProtocolObserver;
 
 class ProtocolHandler : public Bluetooth::IBluetoothHandler
@@ -85,5 +88,7 @@ private:
     BluetoothWriter mBTWriter;
     NsTransportLayer::CBTAdapter *mBTAdapter;
 };
+
+} //namespace AxisCore
 
 #endif //PROTOCOL_HANDLER_HPP

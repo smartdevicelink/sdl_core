@@ -7,6 +7,9 @@
 #include "../../utils/misc/Types.hpp"
 #include "../../transport/bt/Blob.hpp"
 
+namespace AxisCore
+{
+
 class CMessage
 {
 public:
@@ -41,16 +44,18 @@ private:
 
 };
 
+} //namespace AxisCore
+
 namespace Bluetooth
 {
    static const Blob getBuffer()
    {
-      return CMessage::getNextBlob();
+      return AxisCore::CMessage::getNextBlob();
    }
 
    static void releaseBuffer(const Blob& blob)
    {
-      CMessage::releaseCurrentBlob(blob);
+      AxisCore::CMessage::releaseCurrentBlob(blob);
    }
 }
 

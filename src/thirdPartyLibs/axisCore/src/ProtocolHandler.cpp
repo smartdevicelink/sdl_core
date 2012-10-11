@@ -8,6 +8,9 @@
 //#include "transport/bt/BluetoothAPI.hpp"
 //#include "MessageGenerator/CMessage.cpp"
 
+namespace AxisCore
+{
+
 ProtocolHandler::ProtocolHandler(IProtocolObserver *observer, NsTransportLayer::CBTAdapter *btAdapter) :
                 mProtocolObserver(observer),
                 mMessageID(0),
@@ -486,3 +489,5 @@ void ProtocolHandler::dataReceived()
     else
         std::cout << "ProtocolHandler::dataReceived() error reading\n";
 }
+
+} //namespace AxisCore

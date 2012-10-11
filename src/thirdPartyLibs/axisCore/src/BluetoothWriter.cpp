@@ -3,6 +3,9 @@
 #include "BluetoothWriter.hpp"
 #include "../../../appMain/CBTAdapter.hpp"
 
+namespace AxisCore
+{
+
 int _maxsize = 5000;
 
 BluetoothWriter::BluetoothWriter()
@@ -57,3 +60,5 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
 
     return ERR_OK;
 }
+
+} //namespace AxisCore

@@ -8,6 +8,9 @@ namespace NsTransportLayer
     class CBTAdapter;
 }
 
+namespace AxisCore
+{
+
 class BluetoothReader
 {
 public:
@@ -23,5 +26,7 @@ private:
     UInt8 *mData;
     NsTransportLayer::CBTAdapter *mBTAdapter;
 };
+
+} //namespace AxisCore
 
 #endif // BLUETOOTHREADER_HPP

@@ -3,6 +3,9 @@
 
 #include "utils/misc/Types.hpp"
 
+namespace AxisCore
+{
+
 class IProtocolObserver
 {
 public:
@@ -28,5 +31,7 @@ protected:
 
    virtual ~IProtocolObserver() { }
 };
+
+} //namespace AxisCore
 
 #endif

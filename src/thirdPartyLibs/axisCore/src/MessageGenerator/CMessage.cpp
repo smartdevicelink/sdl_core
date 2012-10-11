@@ -7,6 +7,9 @@
 #include "CMessage.hpp"
 #include "../../transport/bt/Blob.hpp"
 
+namespace AxisCore
+{
+
 UInt8 CMessage::sVersion = 0;
 UInt8 CMessage::sCompressedFlag = 0;
 UInt8 CMessage::sFrameType = 0;
@@ -251,4 +254,5 @@ void CMessage::releaseCurrentBlob(const Blob& blob)
    blobQueue.pop();
 }
 
+} //namespace AxisCore
 

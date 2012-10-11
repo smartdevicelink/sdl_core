@@ -8,6 +8,9 @@ namespace NsTransportLayer
     class CBTAdapter;
 }
 
+namespace AxisCore
+{
+
 class BluetoothWriter
 {
 public:
@@ -24,5 +27,7 @@ private:
     NsTransportLayer::CBTAdapter *mBTAdapter;
 
 };
+
+} //namespace AxisCore
 
 #endif // BLUETOOTHWRITER_HPP

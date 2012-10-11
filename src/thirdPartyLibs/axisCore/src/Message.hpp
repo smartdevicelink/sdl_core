@@ -3,6 +3,9 @@
 
 #include "ProtocolPacketHeader.hpp"
 
+namespace AxisCore
+{
+
 class Message
 {
 public:
@@ -40,5 +43,7 @@ private:
     UInt32 mDataOffset;
     bool mIsMultiFrame;
 };
+
+} //namespace AxisCore
 
 #endif //MESSAGE_HPP

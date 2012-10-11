@@ -4,6 +4,8 @@
 #include "BluetoothReader.hpp"
 #include "../../../appMain/CBTAdapter.hpp"
 
+namespace AxisCore
+{
 
 int maxsize = 5000;
 
@@ -73,3 +75,5 @@ ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt
 
     return ERR_OK;
 }
+
+} //namespace AxisCore
