@@ -5,7 +5,7 @@ link_directories(../../../src/thirdPartyLibs/jsoncpp ../../../src/components/JSO
 
 include_directories (../../../src/components/JSONHandler/include/ ../../../src/thirdPartyLibs/jsoncpp/include/ ../../../src/thirdPartyLibs/axisCore/include ../../../src/thirdPartyLibs/axisCore/ ../../../src/thirdPartyLibs/axisCore/src) 
 add_executable(testJsonHandler main.cpp)
-target_link_libraries(testJsonHandler jsonCpp jsonHandler ProtocolHandler)
+target_link_libraries(testJsonHandler jsonCpp jsonHandler ProtocolHandler bluetooth)
  
 
 include(ExternalProject)

@@ -7,6 +7,9 @@
 
 #include "AppMgr/Application.h"
 
+namespace NsAppManager
+{
+	
 Application::Application( const std::string& name )
 : IApplication(name)
 {
@@ -21,3 +24,5 @@ void Application::setApplicationPriority( const AppPriority& priority )
 {
 	mPriority = priority;
 }
+
+};

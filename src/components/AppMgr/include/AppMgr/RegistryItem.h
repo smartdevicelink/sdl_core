@@ -13,6 +13,9 @@
 #include <set>
 #include <string>
 
+namespace NsAppManager
+{
+	
 class RegistryItem
 {
 public:
@@ -31,5 +34,7 @@ private:
 	std::set<AppPolicy> mAppPolicies;
 	const IApplication& mApplication;
 };
+
+}; // namespace NsAppManager
 
 #endif /* REGISTRYITEM_H_ */

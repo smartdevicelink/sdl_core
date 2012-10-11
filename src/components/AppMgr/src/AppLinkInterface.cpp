@@ -10,6 +10,9 @@
 #include "CMessageBrokerRegistry.hpp"
 #include "CSender.hpp"
 
+namespace NsAppManager
+{
+	
 AppLinkInterface& AppLinkInterface::getInstance( )
 {
 	static AppLinkInterface instance;
@@ -32,3 +35,4 @@ AppLinkInterface::~AppLinkInterface( )
 	// TODO Auto-generated destructor stub
 }
 
+};

@@ -1,27 +1,32 @@
-/*
- * AppMgr.h
- *
- *  Created on: Oct 4, 2012
- *      Author: vsalo
- */
+#ifndef APPMGR_H
+#define APPMGR_H
 
-#ifndef APPMGR_H_
-#define APPMGR_H_
+#include "AppMgr/AppFactory.h"
+#include "AppMgr/AppLinkInterface.h"
+#include "AppMgr/AppMgrCore.h"
+#include "AppMgr/RPCAppLinkFactory.h"
+#include "AppMgr/RPCBusFactory.h"
+#include "AppMgr/AppMgrRegistry.h"
 
-#include "IApplication.h"
-#include "AppMgrRegistry.h"
-#include "AppPolicy.h"
+namespace NsAppManager
+{
 
 class AppMgr
 {
 public:
+	AppMgr();
+	static AppMgr& getInstance();
+private:
 	~AppMgr();
 
-	static AppMgr& getInstance();
-
-private:
-	AppMgr();
+	AppLinkInterface& mAppLinkInterface;
+	AppMgrRegistry& mAppMgrRegistry;
+	AppMgrCore& mAppMgrCore;
+	RPCAppLinkFactory& mRPCAppLinkFactory;
+	RPCBusFactory& mRPCBusFactory;
+	AppFactory& mAppFactory;
 };
 
+}; // namespace NsAppManager
 
-#endif /* APPMGR_H_ */
+#endif // APPMGR_H

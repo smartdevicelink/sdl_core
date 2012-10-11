@@ -7,6 +7,9 @@
 
 #include "AppMgr/RPCAppLinkObject.h"
 
+namespace NsAppManager
+{
+	
 RPCAppLinkObject::RPCAppLinkObject( )
 {
 	// TODO Auto-generated constructor stub
@@ -18,3 +21,4 @@ RPCAppLinkObject::~RPCAppLinkObject( )
 	// TODO Auto-generated destructor stub
 }
 
+};

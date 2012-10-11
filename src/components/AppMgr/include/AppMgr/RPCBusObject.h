@@ -8,11 +8,16 @@
 #ifndef RPCBUSOBJECT_H_
 #define RPCBUSOBJECT_H_
 
+namespace NsAppManager
+{
+	
 class RPCBusObject
 {
 public:
 	RPCBusObject( );
 	~RPCBusObject( );
 };
+
+}; // namespace NsAppManager
 
 #endif /* RPCBUSOBJECT_H_ */

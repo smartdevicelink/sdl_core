@@ -7,6 +7,9 @@
 
 #include "AppMgr/RPCAppLinkFactory.h"
 
+namespace NsAppManager
+{
+	
 RPCAppLinkFactory& RPCAppLinkFactory::getInstance( )
 {
 	static RPCAppLinkFactory factory;
@@ -29,3 +32,4 @@ RPCAppLinkFactory::~RPCAppLinkFactory( )
 	// TODO Auto-generated destructor stub
 }
 
+};

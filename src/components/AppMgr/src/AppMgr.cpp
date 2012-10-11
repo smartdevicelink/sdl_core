@@ -1,12 +1,8 @@
-/*
- * AppMgr.cpp
- *
- *  Created on: Oct 4, 2012
- *      Author: vsalo
- */
-
 #include "AppMgr/AppMgr.h"
 
+namespace NsAppManager
+{
+	
 AppMgr& AppMgr::getInstance( )
 {
 	static AppMgr appMgr;
@@ -14,9 +10,17 @@ AppMgr& AppMgr::getInstance( )
 }
 
 AppMgr::AppMgr()
+	:mAppLinkInterface(AppLinkInterface::getInstance())
+	,mAppMgrRegistry(AppMgrRegistry::getInstance())
+	,mAppMgrCore(AppMgrCore::getInstance())
+	,mRPCAppLinkFactory(RPCAppLinkFactory::getInstance())
+	,mRPCBusFactory(RPCBusFactory::getInstance())
+	,mAppFactory(AppFactory::getInstance())
 {
 }
 
 AppMgr::~AppMgr()
 {
 }
+
+};

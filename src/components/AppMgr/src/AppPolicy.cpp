@@ -7,6 +7,9 @@
 
 #include "AppMgr/AppPolicy.h"
 
+namespace NsAppManager
+{
+	
 AppPolicy::AppPolicy( const std::string& policy )
 : mPolicy(policy)
 {
@@ -27,3 +30,5 @@ const std::string& AppPolicy::getPolicyHash( ) const
 {
 	return mPolicy;
 }
+
+};

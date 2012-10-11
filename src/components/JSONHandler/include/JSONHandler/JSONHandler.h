@@ -14,14 +14,14 @@
 
 class MobileRPCMessage;
 
-class JSONHandler : public IProtocolObserver
+class JSONHandler : public AxisCore::IProtocolObserver
 {
 public:
-    JSONHandler( ProtocolHandler * protocolHandler = 0 );
+    JSONHandler( AxisCore::ProtocolHandler * protocolHandler = 0 );
     virtual ~JSONHandler();
 
     /*Methods from IProtocolObserver*/
-    void setProtocolHandler( ProtocolHandler * protocolHandler );
+    void setProtocolHandler( AxisCore::ProtocolHandler * protocolHandler );
     void sessionStartedCallback(const UInt8 sessionID);
     void sessionEndedCallback(const UInt8 sessionID);
     void dataReceivedCallback(const UInt8 sessionID, const UInt32 messageID, const UInt32 dataSize);
@@ -31,6 +31,8 @@ public:
     std::string serializeObjectToJSON( const MobileRPCMessage & mobileRPCObject );
 
     static Json::Value getParametersFromJSON( const std::string & jsonString );
+    Json::Value createJSONFromObject ( const MobileRPCMessage & mobileRPCObject );
+    std::string jsonToString( const Json::Value & jsonObject );
     const MobileRPCFactory * getFactory() const;
 
     MobileRPCMessage * getRPCObject() const;
@@ -47,7 +49,7 @@ protected:
 private:
     /* data */
     MobileRPCFactory * mFactory;
-    ProtocolHandler *mProtocolHandler;
+    AxisCore::ProtocolHandler *mProtocolHandler;
     MobileRPCMessage * mCurrentMessage;
 
 };

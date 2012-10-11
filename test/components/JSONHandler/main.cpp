@@ -7,6 +7,7 @@
 #include <json/writer.h>
 #include <iostream>
 #include <fstream>
+#include <string.h>
 #include <unistd.h>
 #include "JSONHandler/MobileRPCMessage.h"
 #include "JSONHandler/JSONHandler.h"
@@ -28,22 +29,23 @@ int main( int argc, char* argv[] ) {
     size_t nextMessagePos = 0;
     char *const jsonContentBeginning = jsonContent;
 
+    AxisCore::CMessage::generateInitialMessage();
     JSONHandler * jsonHandler = new JSONHandler;
-    ProtocolHandler * protocolHandler = new ProtocolHandler( jsonHandler, 0 );
-    CMessage::generateInitialMessage();
-    protocolHandler->dataReceived();        
+    AxisCore::ProtocolHandler * protocolHandler = new AxisCore::ProtocolHandler( jsonHandler, 0 );
+    jsonHandler -> setProtocolHandler( protocolHandler );
+    
+   /* protocolHandler->dataReceived();        
     //CMessage::generateSingleMessage("Hello ?");
-    CMessage::generateMultipleMessages("Hello ?", 5);
+    AxisCore::CMessage::generateMultipleMessages("Hello ?", 5);
     for (int i = 0 ; i < 5 ; i++)
-        protocolHandler->dataReceived();
+        protocolHandler->dataReceived();*/
     
     while ( nextMessagePos != std::string::npos ) {
 
         std::string jsonString( jsonContent );
         if ( !jsonString.empty() ) {
-            jsonHandler -> dataReceivedCallback(0, 1, jsonString.size());
-            /*MobileRPCMessage * message = JSONHandler::createObjectFromJSON( jsonString );*/
-            MobileRPCMessage * message = jsonHandler -> getRPCObject();
+            MobileRPCMessage * message = jsonHandler -> createObjectFromJSON( jsonString );
+            //MobileRPCMessage * message = jsonHandler -> getRPCObject();
             std::cout << "type: " << message->getMessageType() << std::endl;
             std::cout << "protocol version: " << message->getProtocolVersion() << std::endl;
             std::cout << "correation id: " << message -> getCorrelationID() << std::endl;
@@ -58,6 +60,23 @@ int main( int argc, char* argv[] ) {
             Json::StyledWriter writer;
             std::string params_to_print = writer.write( params );
             std::cout << "serialized params for RegisterAppInterface: \n" << params_to_print << std::endl;
+
+            RegisterAppInterfaceResponse response = jsonHandler -> getFactory() -> createRegisterAppInterfaceResponse( *message );
+            Json::Value parameters = jsonHandler -> getFactory() -> serializeRegisterAppInterfaceResponse( response );
+
+            Json::Value root = jsonHandler -> createJSONFromObject( response );
+            if ( root.isNull() )
+            {
+                return -1;
+            }
+
+            root["response"]["parameters"] = parameters;
+            std::string responseString = jsonHandler -> jsonToString( root );
+            UInt8* pData;
+            pData = new UInt8[responseString.length() + 1];
+            memcpy (pData, responseString.c_str(), responseString.length() + 1);
+            std::cout << "Register response: " << responseString << std::endl;
+            std::cout << "UInt8: " << pData << std::endl;
 
             delete message;
         }

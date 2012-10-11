@@ -10,6 +10,9 @@
 
 #include "AppMgr/RPCBusObject.h"
 
+namespace NsAppManager
+{
+	
 class RPCBusFactory
 {
 public:
@@ -21,5 +24,7 @@ public:
 private:
 	RPCBusFactory( );
 };
+
+}; // namespace NsAppManager
 
 #endif /* RPCBUSFACTORY_H_ */

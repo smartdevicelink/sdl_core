@@ -51,3 +51,24 @@ Json::Value MobileRPCFactory::serializeRegisterAppInterface( const RegisterAppIn
     result["parameters"] = value;
     return result;
 }
+
+RegisterAppInterfaceResponse MobileRPCFactory::createRegisterAppInterfaceResponse ( const MobileRPCMessage & message ) const 
+{
+    RegisterAppInterfaceResponse object( message.getProtocolVersion() );
+    object.setCorrelationID( message.getCorrelationID() );
+    
+    object.setSuccess( true );
+    object.setResultCode( "SUCCESS" );
+    
+    return object;
+}
+
+Json::Value MobileRPCFactory::serializeRegisterAppInterfaceResponse( const RegisterAppInterfaceResponse & response ) const
+{
+    Json::Value value;
+    
+    value["success"] = response.getSuccess();
+    value["resultCode"] = response.getResultString();
+
+    return value;
+}

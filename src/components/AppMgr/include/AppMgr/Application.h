@@ -11,6 +11,9 @@
 #include "IApplication.h"
 #include <string>
 
+namespace NsAppManager
+{
+
 class Application : public IApplication
 {
 public:
@@ -18,5 +21,7 @@ public:
 	virtual ~Application( );
 	virtual void setApplicationPriority( const AppPriority& priority );
 };
+
+}; // namespace NsAppManager
 
 #endif /* APPLICATION_H_ */
