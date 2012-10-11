@@ -2,6 +2,7 @@
 #define MOBILERPCFACTORY_CLASS value
 
 #include "JSONHandler/RegisterAppInterface.h"
+#include "JSONHandler/RegisterAppInterfaceResponse.h"
 #include <json/value.h>
 
 class MobileRPCResponse;
@@ -22,6 +23,9 @@ public:
 
     RegisterAppInterface createRegisterAppInterface ( const MobileRPCMessage & message ) const;
     Json::Value serializeRegisterAppInterface( const RegisterAppInterface & request ) const;
+
+    RegisterAppInterfaceResponse createRegisterAppInterfaceResponse ( const MobileRPCMessage & message ) const;
+    Json::Value serializeRegisterAppInterfaceResponse( const RegisterAppInterfaceResponse & response ) const;
 
     RegisterAppInterface createRegisterAppInterface ( const Json::Value & jsonValue );
 
