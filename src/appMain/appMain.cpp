@@ -29,7 +29,7 @@ int main(int argc, char** argv)
     /*** Components instance section***/
     /**********************************/
     NsTransportLayer::CBTAdapter btadapter;
-    ProtocolHandler protocolHandler =  ProtocolHandler((IProtocolObserver*)NULL, &btadapter);
+    AxisCore::ProtocolHandler protocolHandler =  AxisCore::ProtocolHandler((AxisCore::IProtocolObserver*)NULL, &btadapter);
     /**********************************/
 
     int rfcommsock;

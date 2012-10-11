@@ -86,6 +86,9 @@ namespace NsTransportLayer
 
         void sendBuffer(UInt8 * pBuffer, size_t size);
 
+      private:
+        Bluetooth::IBluetoothHandler * mpHandler;
+
 
    };
 }/* namespace NsTransportLayer */
