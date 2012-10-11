@@ -7,6 +7,12 @@ AppMgr& AppMgr::getInstance( )
 }
 
 AppMgr::AppMgr()
+	:mAppLinkInterface(AppLinkInterface::getInstance())
+	,mAppMgrRegistry(AppMgrRegistry::getInstance())
+	,mAppMgrCore(AppMgrCore::getInstance())
+	,mRPCAppLinkFactory(RPCAppLinkFactory::getInstance())
+	,mRPCBusFactory(RPCBusFactory::getInstance())
+	,mAppFactory(AppFactory::getInstance())
 {
 }
 

@@ -12,6 +12,8 @@ class AppFactory
 {
 public:
 	AppFactory( );
+	static AppFactory& getInstance();
+private:
 	~AppFactory( );
 };
 
