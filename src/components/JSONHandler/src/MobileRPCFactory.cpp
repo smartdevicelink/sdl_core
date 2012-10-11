@@ -5,7 +5,7 @@
 MobileRPCFactory::MobileRPCFactory() {}
 MobileRPCFactory::~MobileRPCFactory() {}
 
-RegisterAppInterface MobileRPCFactory::createRegisterAppInterface ( const MobileRPCMessage & message ) // message with params string
+RegisterAppInterface MobileRPCFactory::createRegisterAppInterface ( const MobileRPCMessage & message ) const // message with params string
 {
     RegisterAppInterface object( message.getProtocolVersion() );
     
@@ -26,7 +26,7 @@ RegisterAppInterface MobileRPCFactory::createRegisterAppInterface ( const Mobile
     return object;
 }
 
-Json::Value MobileRPCFactory::serializeRegisterAppInterface( const RegisterAppInterface & request )
+Json::Value MobileRPCFactory::serializeRegisterAppInterface( const RegisterAppInterface & request ) const
 {
     Json::Value result;
     Json::Value value;

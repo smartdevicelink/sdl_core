@@ -4,7 +4,40 @@
 #include <json/reader.h>
 #include <json/writer.h>
 
-MobileRPCFactory * JSONHandler::mFactory = 0;
+
+JSONHandler::JSONHandler( ProtocolHandler * protocolHandler )
+:mProtocolHandler( protocolHandler )
+{
+    mFactory = new MobileRPCFactory();
+}
+    
+JSONHandler::~JSONHandler()
+{
+    mProtocolHandler = 0;
+    delete mFactory;
+    mFactory = 0;
+}
+
+/*Methods from IProtocolObserver*/
+void JSONHandler::setProtocolHandler( ProtocolHandler * protocolHandler )
+{
+    mProtocolHandler = protocolHandler;
+}
+void JSONHandler::sessionStartedCallback(const UInt8 sessionID)
+{}
+
+void JSONHandler::sessionEndedCallback(const UInt8 sessionID)
+{}
+
+void JSONHandler::dataReceivedCallback(const UInt8 sessionID, const UInt32 messageID, const UInt32 dataSize)
+{
+    UInt8 *data = new UInt8[dataSize];
+
+    mProtocolHandler -> receiveData(sessionID, messageID, SERVICE_TYPE_RPC, dataSize, data);
+
+    mCurrentMessage = createObjectFromJSON( std::string((char *)data, dataSize) );
+}
+/*end of methods from IProtocolObserver*/
 
 MobileRPCMessage * JSONHandler::createObjectFromJSON( const std::string & jsonString )
 {
@@ -152,11 +185,12 @@ Json::Value JSONHandler::getParametersFromJSON( const std::string & jsonString )
     return root["parameters"];
 }
 
-MobileRPCFactory * JSONHandler::getFactory()
+const MobileRPCFactory * JSONHandler::getFactory() const
 {
-    if ( mFactory == 0 )
-    {
-        mFactory = new MobileRPCFactory();
-    }
     return mFactory;
+}
+
+MobileRPCMessage * JSONHandler::getRPCObject() const
+{
+    return mCurrentMessage;
 }

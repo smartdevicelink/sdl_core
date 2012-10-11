@@ -3,8 +3,8 @@ project (ProtocolHandler)
 
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-include_directories (./include/ ./utils/misc ./src ./) 
+include_directories (./include/ ./utils/misc ./src ./ ./transport/bt) 
 
-add_library(ProtocolHandler ./src/BluetoothReader.cpp ./src/BluetoothWriter.cpp ./src/Message.cpp ./src/ProtocolHandler.cpp)
+add_library(ProtocolHandler ./src/BluetoothReader.cpp ./src/BluetoothWriter.cpp ./src/Message.cpp ./src/ProtocolHandler.cpp ./src/MessageGenerator/CMessage.cpp )
 
 install (TARGETS ProtocolHandler DESTINATION bin) 
