@@ -7,6 +7,9 @@
 
 #include "AppMgr/RPCBusFactory.h"
 
+namespace NsAppManager
+{
+	
 RPCBusFactory& RPCBusFactory::getInstance( )
 {
 	static RPCBusFactory factory;
@@ -29,3 +32,4 @@ RPCBusFactory::~RPCBusFactory( )
 	// TODO Auto-generated destructor stub
 }
 
+};

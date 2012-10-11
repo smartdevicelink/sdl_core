@@ -10,6 +10,9 @@
 
 #include "AppMgr/RPCAppLinkObject.h"
 
+namespace NsAppManager
+{
+	
 class RPCAppLinkFactory
 {
 public:
@@ -21,5 +24,7 @@ public:
 private:
 	RPCAppLinkFactory( );
 };
+
+}; // namespace NsAppManager
 
 #endif /* RPCAPPLINKFACTORY_H_ */

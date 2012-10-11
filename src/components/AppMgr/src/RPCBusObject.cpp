@@ -7,6 +7,9 @@
 
 #include "AppMgr/RPCBusObject.h"
 
+namespace NsAppManager
+{
+	
 RPCBusObject::RPCBusObject( )
 {
 	// TODO Auto-generated constructor stub
@@ -18,3 +21,4 @@ RPCBusObject::~RPCBusObject( )
 	// TODO Auto-generated destructor stub
 }
 
+};

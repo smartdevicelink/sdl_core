@@ -7,6 +7,9 @@
 
 #include "AppMgr/AppMgrRegistry.h"
 
+namespace NsAppManager
+{
+	
 AppMgrRegistry& AppMgrRegistry::getInstance( )
 {
 	static AppMgrRegistry registry;
@@ -49,3 +52,5 @@ const RegistryItem& AppMgrRegistry::registerApplication( const IApplication& app
 	mRegistryItems.insert(std::pair<std::string, RegistryItem>(app.getName(), item));
 	return mRegistryItems.find(app.getName())->second;
 }
+
+};

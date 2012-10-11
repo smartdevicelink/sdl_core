@@ -12,6 +12,9 @@
 #include "AppMgrRegistry.h"
 #include "AppPolicy.h"
 
+namespace NsAppManager
+{
+	
 class AppMgrCore
 {
 public:
@@ -23,5 +26,6 @@ private:
 	AppMgrCore();
 };
 
+}; // namespace NsAppManager
 
 #endif /* APPMGR_H_ */
