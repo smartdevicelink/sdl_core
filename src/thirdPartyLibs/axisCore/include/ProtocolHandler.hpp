@@ -12,7 +12,10 @@
 namespace NsTransportLayer
 {
     class CBTAdapter;
-};
+}
+
+namespace AxisCore
+{
 
 class IProtocolObserver;
 
@@ -83,6 +86,9 @@ private:
     std::map<UInt32, Message *> mIncompleteMultiFrameMessages;
     BluetoothReader mBTReader;
     BluetoothWriter mBTWriter;
+    NsTransportLayer::CBTAdapter *mBTAdapter;
 };
+
+} //namespace AxisCore
 
 #endif //PROTOCOL_HANDLER_HPP

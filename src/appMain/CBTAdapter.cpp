@@ -153,7 +153,6 @@ namespace NsTransportLayer
       printf("%s:%d CBTAdapter::startRFCOMMConnection()device %s, port %d\n", __FILE__, __LINE__, targetDevice, portRFCOMM);
       struct sockaddr_rc addr = { 0 };
       int s, status;
-//      char dest[18] = "01:23:45:67:89:AB";
 
       // allocate a socket
       s = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
@@ -242,6 +241,10 @@ namespace NsTransportLayer
   void CBTAdapter::initBluetooth(Bluetooth::IBluetoothHandler * pHandler)
   {
       printf("%s:%d CBTAdapter::initBluetooth()\n", __FILE__, __LINE__);
+      if (NULL != pHandler)
+      {
+         mpHandler = pHandler;
+      }
   }
 
   void CBTAdapter::deinitBluetooth()
@@ -256,7 +259,7 @@ namespace NsTransportLayer
       return b;
   }
 
-  void CBTAdapter::releaseBuffer(Blob&)
+  void CBTAdapter::releaseBuffer(const Blob& blob)
   {
       printf("%s:%d CBTAdapter::releaseBuffer()\n", __FILE__, __LINE__);
   }

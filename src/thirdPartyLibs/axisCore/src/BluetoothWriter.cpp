@@ -1,19 +1,28 @@
 #include <memory.h>
 
 #include "BluetoothWriter.hpp"
+#include "../../../appMain/CBTAdapter.hpp"
+
+namespace AxisCore
+{
 
 int _maxsize = 5000;
 
 BluetoothWriter::BluetoothWriter()
 {
     //TODO maxsize
-
+    mBTAdapter = NULL;
     mData = new UInt8[_maxsize];
 }
 
 BluetoothWriter::~BluetoothWriter()
 {
     delete [] mData;
+}
+
+void BluetoothWriter::setBTAdapter(NsTransportLayer::CBTAdapter *adapter)
+{
+    mBTAdapter = adapter;
 }
 
 ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *data)
@@ -46,7 +55,10 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
             return ERR_FAIL;
     }
 
-    //TODO write
+    if (mBTAdapter)
+        mBTAdapter->sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_SIZE);
 
     return ERR_OK;
 }
+
+} //namespace AxisCore

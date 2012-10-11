@@ -7,6 +7,9 @@
 #include "CMessage.hpp"
 #include "../../transport/bt/Blob.hpp"
 
+namespace AxisCore
+{
+
 UInt8 CMessage::sVersion = 0;
 UInt8 CMessage::sCompressedFlag = 0;
 UInt8 CMessage::sFrameType = 0;
@@ -177,13 +180,14 @@ void CMessage::generateMultipleMessages(std::string payload, int messagesQuantit
 
       sSessionID      = 0;
 
+      UInt32 numberOfConsecutiveFrames;
+      UInt32 totalConsecutivePayloadSize;
       if(0 == i)
       {
-         UInt8 numberOfConsecutiveFrames = messagesQuantity - 1;
-         UInt8 totalConsecutivePayloadSize = (payload.length() + 1) * numberOfConsecutiveFrames;
+         numberOfConsecutiveFrames = messagesQuantity - 1;
+         totalConsecutivePayloadSize = (payload.length() + 1) * numberOfConsecutiveFrames;
 
-         sDataSize = ( (totalConsecutivePayloadSize << 4) & 0xF0 )
-                     | (numberOfConsecutiveFrames & 0x0F);
+         sDataSize = 0x08;
       }
       else
       {
@@ -209,6 +213,12 @@ void CMessage::generateMultipleMessages(std::string payload, int messagesQuantit
       {
          memcpy(sPacketData + 12, (void*)const_cast<char*>(payload.c_str()), sDataSize);
       }
+      else
+      {
+         memcpy(sPacketData + 12, &totalConsecutivePayloadSize, sDataSize / 2);
+         memcpy(sPacketData + 16, &numberOfConsecutiveFrames, sDataSize / 2);
+      }
+
 
       blobQueue.push(Blob((UInt8*)sPacketData, 12 + sDataSize, blobQueue.size()));
    }
@@ -244,4 +254,5 @@ void CMessage::releaseCurrentBlob(const Blob& blob)
    blobQueue.pop();
 }
 
+} //namespace AxisCore
 

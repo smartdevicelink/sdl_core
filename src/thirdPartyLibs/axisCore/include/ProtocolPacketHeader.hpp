@@ -10,6 +10,10 @@
 #include "MessageGenerator/CMessage.hpp"
 
 
+namespace AxisCore
+{
+
+const UInt8 PROTOCOL_HEADER_SIZE = 12;
 
 const UInt8 PROTOCOL_VERSION_1 = 0x01;
 
@@ -78,5 +82,7 @@ struct ProtocolPacketHeader
     UInt32 dataSize;
     UInt32 messageID;
 };
+
+} //namespace AxisCore
 
 #endif //PROTOCOL_PACKET_HHEADER_HPP

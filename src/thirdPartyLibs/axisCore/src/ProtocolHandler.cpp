@@ -8,14 +8,23 @@
 //#include "transport/bt/BluetoothAPI.hpp"
 //#include "MessageGenerator/CMessage.cpp"
 
+namespace AxisCore
+{
+
 ProtocolHandler::ProtocolHandler(IProtocolObserver *observer, NsTransportLayer::CBTAdapter *btAdapter) :
                 mProtocolObserver(observer),
                 mMessageID(0),
                 mSessionID(0),
-                mState(BEFORE_HANDSHAKE)
+                mState(BEFORE_HANDSHAKE),
+                mBTAdapter(btAdapter)
 {
     std::cout << "enter ProtocolHandler::ProtocolHandler() \n";
-    //btAdapter->initBluetooth(this);
+    if (btAdapter)
+    {
+        mBTReader.setBTAdapter(btAdapter);
+        mBTWriter.setBTAdapter(btAdapter);
+        btAdapter->initBluetooth(this);
+    }
 }
 
 ProtocolHandler::~ProtocolHandler()
@@ -97,7 +106,8 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
 
 
     //TODO maxsize
-    const unsigned int MAXIMUM_DATA_SIZE = 5000;
+    const unsigned int MAXIMUM_FRAME_SIZE = 5000;
+    const unsigned int MAXIMUM_DATA_SIZE = MAXIMUM_FRAME_SIZE - PROTOCOL_HEADER_SIZE;
 
 
 
@@ -417,7 +427,7 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
     }
     else
     {
-        std::cout << "ProtocolHandler::handleMultiFrameMessage() : FRAME NUMBER : " << header.frameData << "\n";
+        std::cout << "ProtocolHandler::handleMultiFrameMessage() : Consecutive frame\n";
         if (mIncompleteMultiFrameMessages.count(header.messageID) )
         {
             // TODO check submessages order
@@ -445,7 +455,12 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
                 std::cout << "ProtocolHandler::handleMultiFrameMessage() : addConsecutiveMessage FAIL \n";
                 retVal = ERR_FAIL;
             }
-        }   
+        }
+        else
+        {
+            std::cout << "ProtocolHandler::handleMultiFrameMessage() : no messageID in mIncompleteMultiFrameMessages\n";
+            retVal = ERR_FAIL;
+        }
     }
 
     return retVal;
@@ -464,7 +479,8 @@ void ProtocolHandler::dataReceived()
 {
     std::cout << "enter ProtocolHandler::dataReceived()\n";
 
-    UInt32 dataSize = Bluetooth::getBuffer().size(); //CMessage::currentBlob.size();
+    //UInt32 dataSize = Bluetooth::getBuffer().size();
+    UInt32 dataSize = mBTAdapter->getBuffer().size();
     UInt8 *data = new UInt8[dataSize];
     ProtocolPacketHeader header;
 
@@ -473,3 +489,5 @@ void ProtocolHandler::dataReceived()
     else
         std::cout << "ProtocolHandler::dataReceived() error reading\n";
 }
+
+} //namespace AxisCore

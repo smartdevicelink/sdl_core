@@ -8,6 +8,7 @@
 //CMessage msg;
 
 using namespace std;
+using namespace AxisCore;
 
 class ProtocolObserver : public IProtocolObserver
 {

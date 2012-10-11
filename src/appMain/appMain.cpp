@@ -12,6 +12,7 @@
 
 #include "appMain.hpp"
 #include "CBTAdapter.hpp"
+#include "ProtocolHandler.hpp"
 
 /**
  * \brief Entry point of the program.
@@ -25,7 +26,11 @@ int main(int argc, char** argv)
     int timeout = 1000;
     uint8_t channel = 3;
 
+    /*** Components instance section***/
+    /**********************************/
     NsTransportLayer::CBTAdapter btadapter;
+    AxisCore::ProtocolHandler protocolHandler =  AxisCore::ProtocolHandler((AxisCore::IProtocolObserver*)NULL, &btadapter);
+    /**********************************/
 
     int rfcommsock;
     int scosock;

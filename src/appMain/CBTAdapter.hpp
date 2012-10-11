@@ -82,9 +82,12 @@ namespace NsTransportLayer
         void deinitBluetooth();
 
         const Blob getBuffer();
-        void releaseBuffer(Blob&);
+        void releaseBuffer(const Blob& blob);
 
         void sendBuffer(UInt8 * pBuffer, size_t size);
+
+      private:
+        Bluetooth::IBluetoothHandler * mpHandler;
 
 
    };

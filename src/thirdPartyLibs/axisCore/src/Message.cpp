@@ -2,6 +2,9 @@
 
 #include "Message.hpp"
 
+namespace AxisCore
+{
+
 Message::Message(const ProtocolPacketHeader &header
                                    , UInt8 *data
                                    , bool isMultiFrame) :
@@ -44,6 +47,10 @@ ERROR_CODE Message::addConsecutiveMessage(const ProtocolPacketHeader &header, UI
         else
             retVal = ERR_FAIL;
     }
+    else
+        retVal = ERR_FAIL;
 
     return retVal;
 }
+
+} //namespace AxisCore

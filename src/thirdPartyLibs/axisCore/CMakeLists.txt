@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 project (ProtocolHandler) 
 
+set(LIBRARIES
+        bluetooth)
+
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 include_directories (./include/ ./utils/misc ./src ./ ./transport/bt) 
