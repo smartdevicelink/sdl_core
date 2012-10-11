@@ -7,6 +7,12 @@
 
 #include "AppMgr/AppFactory.h"
 
+AppFactory& AppFactory::getInstance( )
+{
+	static AppFactory appFactory;
+	return appFactory;
+}
+
 AppFactory::AppFactory( )
 {
 	// TODO Auto-generated constructor stub
