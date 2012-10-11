@@ -1,5 +1,7 @@
 #include "JSONHandler/MobileRPCMessage.h"
-
+#include "JSONHandler/Constants.h"
+#include <json/reader.h>
+#include <json/writer.h>
 
 MobileRPCMessage::MobileRPCMessage( 
     unsigned int protocolVersion, MessageType messageType )
@@ -44,6 +46,88 @@ MobileRPCMessage::MobileRPCMessage( unsigned int protocolVersion, MessageType me
 
 MobileRPCMessage::~MobileRPCMessage() 
 {}
+
+std::string MobileRPCMessage::serialize() const
+{ 
+    Json::Value result;
+    Json::Value value;
+
+    if ( getProtocolVersion() == 1 )
+    {
+        std::string messageType;
+        switch( getMessageType() ) {
+            case 0:
+                messageType = Constants::REQUEST;
+                break;
+            case 1:
+                messageType = Constants::RESPONSE;
+                break;
+            case 2:
+                messageType = Constants::NOTIFICATION;
+                break;
+            default:
+                messageType = "";
+        }
+            
+        if ( getCorrelationID() != 0 )
+        {
+            value[Constants::CORRELATIONID] = getCorrelationID();
+        }
+        if ( !getFunctionName().empty() )
+        {
+            value[Constants::FUNCTIONNAME] = getFunctionName();
+        }
+        result[messageType] = value;
+    }
+
+    if ( !result.isNull() )
+    {
+        return jsonToString(result);
+    }
+    else 
+    {
+        return "";
+    }
+}
+    
+int MobileRPCMessage::deserialize( const std::string & jsonString )
+{
+    Json::Value root;   
+    Json::Reader reader;
+    bool parsingSuccessful = reader.parse( jsonString, root );
+    if ( !parsingSuccessful ) 
+    {
+        return -1;
+    }
+   
+    if ( getProtocolVersion() == 1 )
+    {
+        Json::Value value;
+        value = root["correlationID"];
+        if ( !value.isNull() ) {
+            setCorrelationID( value.asInt() );
+        }    
+
+        value = root["name"];
+        if ( !value.isNull() )
+        {
+            setFunctionName( value.asString() );
+        }
+    }
+    else
+    {
+        return 0; //version 2 or higher
+    }   
+
+    return 0; 
+}
+
+std::string MobileRPCMessage::jsonToString( const Json::Value & jsonObject ) const
+{
+    Json::FastWriter writer;
+    std::string root_to_print = writer.write( jsonObject );
+    return root_to_print;
+}
 
 unsigned int MobileRPCMessage::getProtocolVersion() const
 {

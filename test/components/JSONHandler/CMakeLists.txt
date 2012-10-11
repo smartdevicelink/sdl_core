@@ -3,10 +3,18 @@ project (testJsonHandler)
 
 link_directories(../../../src/thirdPartyLibs/jsoncpp ../../../src/components/JSONHandler ../../../src/thirdPartyLibs/axisCore/bin)
 
-include_directories (../../../src/components/JSONHandler/include/ ../../../src/thirdPartyLibs/jsoncpp/include/ ../../../src/thirdPartyLibs/axisCore/include ../../../src/thirdPartyLibs/axisCore/ ../../../src/thirdPartyLibs/axisCore/src) 
+include_directories (../../../src/components/JSONHandler/include/ 
+			../../../src/thirdPartyLibs/jsoncpp/include/ 
+			../../../src/thirdPartyLibs/axisCore/include 
+			../../../src/thirdPartyLibs/axisCore/ 
+			../../../src/thirdPartyLibs/axisCore/src
+			../../../src/appMain
+			../../../src/thirdPartyLibs/axisCore/utils/misc
+			../../../src/thirdPartyLibs/axisCore/transport/bt)
+ 
 add_executable(testJsonHandler main.cpp)
 target_link_libraries(testJsonHandler jsonCpp jsonHandler ProtocolHandler bluetooth)
- 
+#CBTAdapter.cpp 
 
 include(ExternalProject)
 ExternalProject_Add(

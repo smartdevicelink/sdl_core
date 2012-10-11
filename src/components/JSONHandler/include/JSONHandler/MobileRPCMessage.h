@@ -2,6 +2,7 @@
 #define MOBILERPCMESSAGE_CLASS 
 
 #include <string>
+#include <json/value.h>
 
 class MobileRPCMessage
 {
@@ -19,6 +20,9 @@ public:
         unsigned int functionID, unsigned int messageSize );
     virtual ~MobileRPCMessage();
 
+    virtual std::string serialize() const;
+    virtual int deserialize( const std::string & jsonString );
+
     virtual unsigned int getProtocolVersion() const;
     virtual MessageType getMessageType() const;
     virtual unsigned int getCorrelationID() const;
@@ -33,6 +37,9 @@ public:
 
     virtual void setParametersString( std::string parametersString );
     virtual std::string getParametersString() const;
+
+protected:
+    std::string jsonToString( const Json::Value & jsonObject ) const;
 
 private:
     /* data */

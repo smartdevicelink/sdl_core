@@ -27,6 +27,8 @@ public:
     void dataReceivedCallback(const UInt8 sessionID, const UInt32 messageID, const UInt32 dataSize);
     /*end of methods from IProtocolObserver*/
 
+    void sendRPCMessage( const MobileRPCMessage & message );
+
     MobileRPCMessage * createObjectFromJSON( const std::string & jsonString );
     std::string serializeObjectToJSON( const MobileRPCMessage & mobileRPCObject );
 

@@ -20,6 +20,10 @@ JSONHandler::~JSONHandler()
     mFactory = 0;
 }
 
+void sendRPCMessage( const MobileRPCMessage & message )
+{ 
+}
+
 /*Methods from IProtocolObserver*/
 void JSONHandler::setProtocolHandler( AxisCore::ProtocolHandler * protocolHandler )
 {
