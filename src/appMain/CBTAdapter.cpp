@@ -256,7 +256,7 @@ namespace NsTransportLayer
       return b;
   }
 
-  void CBTAdapter::releaseBuffer(Blob&)
+  void CBTAdapter::releaseBuffer(const Blob& blob)
   {
       printf("%s:%d CBTAdapter::releaseBuffer()\n", __FILE__, __LINE__);
   }
