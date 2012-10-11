@@ -7,6 +7,9 @@
 
 #include "AppMgr/AppMgrCore.h"
 
+namespace NsAppManager
+{
+	
 AppMgrCore& AppMgrCore::getInstance( )
 {
 	static AppMgrCore appMgr;
@@ -20,3 +23,5 @@ AppMgrCore::AppMgrCore()
 AppMgrCore::~AppMgrCore()
 {
 }
+
+};

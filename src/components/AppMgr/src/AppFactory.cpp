@@ -7,6 +7,9 @@
 
 #include "AppMgr/AppFactory.h"
 
+namespace NsAppManager
+{
+	
 AppFactory& AppFactory::getInstance( )
 {
 	static AppFactory appFactory;
@@ -24,3 +27,4 @@ AppFactory::~AppFactory( )
 	// TODO Auto-generated destructor stub
 }
 
+};

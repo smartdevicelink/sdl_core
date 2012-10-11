@@ -7,6 +7,9 @@
 
 #include "AppMgr/RegistryItem.h"
 
+namespace NsAppManager
+{
+	
 RegistryItem::RegistryItem( const IApplication& app )
 : mApplication(app)
 {
@@ -52,3 +55,5 @@ std::set< AppPolicy > RegistryItem::getApplicationPolicies(
 	std::set< AppPolicy > policySet;
 	return policySet;
 }
+
+};

@@ -10,6 +10,9 @@
 
 #include <string>
 
+namespace NsAppManager
+{
+	
 class AppPolicy
 {
 public:
@@ -21,5 +24,7 @@ public:
 private:
 	const std::string mPolicy;
 };
+
+}; // namespace NsAppManager
 
 #endif /* APPPOLICY_H_ */

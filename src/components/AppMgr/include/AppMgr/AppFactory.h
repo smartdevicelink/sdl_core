@@ -8,6 +8,9 @@
 #ifndef APPFACTORY_H_
 #define APPFACTORY_H_
 
+namespace NsAppManager
+{
+
 class AppFactory
 {
 public:
@@ -16,5 +19,7 @@ public:
 private:
 	~AppFactory( );
 };
+
+}; // namespace NsAppManager
 
 #endif /* APPFACTORY_H_ */

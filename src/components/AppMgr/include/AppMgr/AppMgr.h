@@ -8,6 +8,9 @@
 #include "AppMgr/RPCBusFactory.h"
 #include "AppMgr/AppMgrRegistry.h"
 
+namespace NsAppManager
+{
+
 class AppMgr
 {
 public:
@@ -23,5 +26,7 @@ private:
 	RPCBusFactory& mRPCBusFactory;
 	AppFactory& mAppFactory;
 };
+
+}; // namespace NsAppManager
 
 #endif // APPMGR_H

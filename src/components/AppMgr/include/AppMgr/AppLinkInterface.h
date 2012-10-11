@@ -10,6 +10,9 @@
 
 #include "RPCBusObject.h"
 
+namespace NsAppManager
+{
+	
 class AppLinkInterface
 {
 public:
@@ -23,5 +26,7 @@ private:
 
 	void sendMessage();
 };
+
+}; // namespace NsAppManager
 
 #endif /* APPLINKINTERFACE_H_ */

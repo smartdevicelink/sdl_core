@@ -1,5 +1,8 @@
 #include "AppMgr/AppMgr.h"
 
+namespace NsAppManager
+{
+	
 AppMgr& AppMgr::getInstance( )
 {
 	static AppMgr appMgr;
@@ -19,3 +22,5 @@ AppMgr::AppMgr()
 AppMgr::~AppMgr()
 {
 }
+
+};

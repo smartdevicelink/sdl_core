@@ -14,6 +14,9 @@
 #include <map>
 #include <string>
 
+namespace NsAppManager
+{
+	
 class AppMgrRegistry
 {
 public:
@@ -32,5 +35,7 @@ private:
 
 	std::map<std::string, RegistryItem> mRegistryItems;
 };
+
+}; // namespace NsAppManager
 
 #endif /* APPMGRREGISTRY_H_ */

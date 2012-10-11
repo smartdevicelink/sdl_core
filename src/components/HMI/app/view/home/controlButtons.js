@@ -53,31 +53,46 @@ MFT.ControlButtons = Em.ContainerView.create({
 			/** Up button */
 			UpBtn: MFT.Button.create({
 				elementId:	'app_controlButtonsUpBtn',
-				classNames:	'UpBtn'
+				classNames:	'UpBtn',
+				click:		function(){
+					FFW.ButtonsBackend.buttonPressed("up", "Click");
+				}
 			}),
 			
 			/** Down button */
 			DownBtn: MFT.Button.create({
 				elementId:	'app_controlButtonsDownBtn',
-				classNames:	'DownBtn'
+				classNames:	'DownBtn',
+				click:		function(){
+					FFW.ButtonsBackend.buttonPressed("down", "Click");
+				}
 			}),
 			
 			/** Left button */
 			LeftBtn: MFT.Button.create({
 				elementId:	'app_controlButtonsLeftBtn',
-				classNames:	'LeftBtn'
+				classNames:	'LeftBtn',
+				click:		function(){
+					FFW.ButtonsBackend.buttonPressed("left", "Click");
+				}
 			}),
 			
 			/** Right button */
 			RightBtn: MFT.Button.create({
 				elementId:	'app_controlButtonsRightBtn',
-				classNames:	'RightBtn'
+				classNames:	'RightBtn',
+				click:		function(){
+					FFW.ButtonsBackend.buttonPressed("right", "Click");
+				}
 			}),
 			
 			/** Ok button */
 			OkBtn: MFT.Button.create({
 				elementId:	'app_controlButtonsOkBtn',
-				classNames:	'OkBtn'
+				classNames:	'OkBtn',
+				click:		function(){
+					FFW.ButtonsBackend.buttonPressed("ok", "Click");
+				}
 			})
 		}),
 		
@@ -85,70 +100,100 @@ MFT.ControlButtons = Em.ContainerView.create({
 		OneBtn: MFT.Button.create({
 			elementId:	'app_controlButtonsOneBtn',
 			classNames:	'OneBtn btnNotPressed',
-			text:		'1'
+			text:		'1',
+			click:		function(){
+				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+			}
 		}),
 		
 		/** Two button */
 		TwoBtn: MFT.Button.create({
 			elementId:	'app_controlButtonsTwoBtn',
 			classNames:	'TwoBtn btnNotPressed',
-			text:		'2'
+			text:		'2',
+			click:		function(){
+				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+			}
 		}),
 		
 		/** Three button */
 		ThreeBtn: MFT.Button.create({
 			elementId:	'app_controlButtonsThreeBtn',
 			classNames:	'ThreeBtn btnNotPressed',
-			text:		'3'
+			text:		'3',
+			click:		function(){
+				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+			}
 		}),
 		
 		/** Four button */
 		FourBtn: MFT.Button.create({
 			elementId:	'app_controlButtonsFourBtn',
 			classNames:	'FourBtn btnNotPressed',
-			text:		'4'
+			text:		'4',
+			click:		function(){
+				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+			}
 		}),
 		
 		/** Five button */
 		FiveBtn: MFT.Button.create({
 			elementId:	'app_controlButtonsFiveBtn',
 			classNames:	'FiveBtn btnNotPressed',
-			text:		'5'
+			text:		'5',
+			click:		function(){
+				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+			}
 		}),
 		
 		/** One button */
 		SixBtn: MFT.Button.create({
 			elementId:	'app_controlButtonsSixBtn',
 			classNames:	'SixBtn btnNotPressed',
-			text:		'6'
+			text:		'6',
+			click:		function(){
+				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+			}
 		}),
 		
 		/** One button */
 		SevenBtn: MFT.Button.create({
 			elementId:	'app_controlButtonsSevenBtn',
 			classNames:	'SevenBtn btnNotPressed',
-			text:		'7'
+			text:		'7',
+			click:		function(){
+				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+			}
 		}),
 		
 		/** One button */
 		EightBtn: MFT.Button.create({
 			elementId:	'app_controlButtonsEightBtn',
 			classNames:	'EightBtn btnNotPressed',
-			text:		'8'
+			text:		'8',
+			click:		function(){
+				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+			}
 		}),
 		
 		/** One button */
 		NineBtn: MFT.Button.create({
 			elementId:	'app_controlButtonsNineBtn',
 			classNames:	'NineBtn btnNotPressed',
-			text:		'9'
+			text:		'9',
+			click:		function(){
+				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+			}
 		}),
 		
 		/** One button */
 		ZiroBtn: MFT.Button.create({
 			elementId:	'app_controlButtonsZiroBtn',
 			classNames:	'ZiroBtn btnNotPressed',
-			text:		'0'
+			text:		'0',
+			click:		function(){
+				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+			}
 		})
 	})
 });

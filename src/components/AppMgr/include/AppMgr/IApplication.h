@@ -10,6 +10,9 @@
 
 #include <string>
 
+namespace NsAppManager
+{
+	
 typedef enum Priority
 {
 	ACTIVE,
@@ -32,5 +35,7 @@ protected:
 	const std::string mName;
 	AppPriority mPriority;
 };
+
+}; // namespace NsAppManager
 
 #endif /* IAPPLICATION_H_ */

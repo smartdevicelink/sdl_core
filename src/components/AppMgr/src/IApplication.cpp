@@ -7,6 +7,9 @@
 
 #include "AppMgr/IApplication.h"
 
+namespace NsAppManager
+{
+	
 IApplication::IApplication( const std::string& name )
 : mName(name)
 , mPriority(NONE)
@@ -22,3 +25,5 @@ const std::string& IApplication::getName( ) const
 {
 	return mName;
 }
+
+};
