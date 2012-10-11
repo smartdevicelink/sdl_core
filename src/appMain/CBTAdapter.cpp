@@ -184,7 +184,7 @@ namespace NsTransportLayer
          return -1;
       }
 
-      char rfcommbuffer[255];
+      unsigned char rfcommbuffer[8];
       int len;
 
       while(true)
@@ -207,8 +207,8 @@ namespace NsTransportLayer
             {
                printf("Start session (RPC Service)\n");
 
-               void* sPacketData = malloc(12);
-               memset(sPacketData, 0, 12);
+               void* sPacketData = malloc(8);
+               memset(sPacketData, 0, 8);
                memcpy(sPacketData, rfcommbuffer, 8);
                blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
                if (NULL != mpProtocolHandler)
@@ -218,8 +218,8 @@ namespace NsTransportLayer
             } else if ((rfcommbuffer[0] == 16) && (rfcommbuffer[1] == 15) && (rfcommbuffer[2] == 1))
             {
                printf("Start session (Bulk Service)\n");
-               void* sPacketData = malloc(12);
-               memset(sPacketData, 0, 12);
+               void* sPacketData = malloc(8);
+               memset(sPacketData, 0, 8);
                memcpy(sPacketData, rfcommbuffer, 8);
                blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
                if (NULL != mpProtocolHandler)
@@ -229,6 +229,39 @@ namespace NsTransportLayer
             }else if ((rfcommbuffer[0] == 17) && (rfcommbuffer[1] == 7))
             {
                printf("Single frame RPC message!\n");
+               unsigned int frameSize = (rfcommbuffer[4]<<24);
+               frameSize |= (rfcommbuffer[5]<<16);
+               frameSize |= (rfcommbuffer[6]<<8);
+               frameSize |= rfcommbuffer[7];
+               printf("frameSize = 0x%X\n", frameSize);
+               unsigned char rfcommpayloadbuffer[1024];
+               if (672 > frameSize)
+               {// one L2CAP packet
+                  len = recv(sockid, rfcommpayloadbuffer, frameSize, 0);
+               } else
+               {
+                  //TODO: We need to read all L2CAP packets to get whole frame
+               }
+               if (len == frameSize)
+               {
+                  void* sPacketData = malloc(8 + frameSize+10);
+                  memset(sPacketData, 0, 8 + frameSize+10);
+                  memcpy(sPacketData, rfcommbuffer, 8);
+                  memcpy(sPacketData + 8, rfcommpayloadbuffer, frameSize);
+                  blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
+
+                  std::string str = std::string((const char*)sPacketData+8, frameSize);
+                  printf("%s\n", str.c_str());
+
+                  if (NULL != mpProtocolHandler)
+                  {
+                     mpProtocolHandler->dataReceived();
+                  }
+               } else
+               {
+                  printf("Not All frame received frameSize = 0x%X\n", frameSize);
+               }
+
             } else if ((rfcommbuffer[0] == 18) && (rfcommbuffer[1] == 7))
             {
                printf("MultiPacket RPC frame\n");
