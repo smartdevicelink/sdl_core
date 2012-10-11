@@ -10,7 +10,7 @@
 class RegisterAppInterface : public MobileRPCRequest
 {
 public:
-  RegisterAppInterface( unsigned int protocolVersion ):MobileRPCRequest( protocolVersion ){}
+  RegisterAppInterface( unsigned int protocolVersion ):MobileRPCRequest( protocolVersion, "RegisterAppInterface" ){}
   ~RegisterAppInterface() {}
 
   void setSyncMsgVersion ( SyncMsgVersion syncMsgVersion ) { mSyncMsgVersion = syncMsgVersion; }

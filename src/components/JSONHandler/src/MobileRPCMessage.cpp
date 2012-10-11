@@ -13,18 +13,23 @@ MobileRPCMessage::MobileRPCMessage(
 
 MobileRPCMessage::MobileRPCMessage( unsigned int protocolVersion, 
     MessageType messageType, std::string functionName )
-{
-    MobileRPCMessage(protocolVersion, messageType, 
-        0, functionName, 0, 0);
-}
+:mProtocolVersion( protocolVersion )
+,mMessageType( messageType )
+,mCorrelationID( 0 )
+,mFunctionName( functionName )
+,mFunctionID( 0 )
+,mJSONMessageSize( 0 )
+{}
 
 MobileRPCMessage::MobileRPCMessage( unsigned int protocolVersion, 
     MessageType messageType, unsigned int functionID )
-{
-    
-    MobileRPCMessage(protocolVersion, messageType, 
-        0, "", functionID, 0);
-}
+:mProtocolVersion( protocolVersion )
+,mMessageType( messageType )
+,mCorrelationID( 0 )
+,mFunctionName( "" )
+,mFunctionID( functionID )
+,mJSONMessageSize( 0 )
+{}
 
 MobileRPCMessage::MobileRPCMessage( unsigned int protocolVersion, MessageType messageType, 
         unsigned int correlationID, std::string functionName,
