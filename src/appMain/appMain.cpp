@@ -12,7 +12,10 @@
 
 #include "appMain.hpp"
 #include "CBTAdapter.hpp"
+
 #include "ProtocolHandler.hpp"
+
+#include "JSONHandler/JSONHandler.h"
 
 /**
  * \brief Entry point of the program.
@@ -29,7 +32,9 @@ int main(int argc, char** argv)
     /*** Components instance section***/
     /**********************************/
     NsTransportLayer::CBTAdapter btadapter;
-    AxisCore::ProtocolHandler protocolHandler =  AxisCore::ProtocolHandler((AxisCore::IProtocolObserver*)NULL, &btadapter);
+    JSONHandler jsonHandler;
+    AxisCore::ProtocolHandler protocolHandler =  AxisCore::ProtocolHandler(&jsonHandler, &btadapter);
+    jsonHandler.setProtocolHandler(&protocolHandler);
     /**********************************/
 
     int rfcommsock;
@@ -64,7 +69,7 @@ int main(int argc, char** argv)
         discoveryDeviceAddr = devicesFound[i].getDeviceAddr();
     } else
     {
-        printf("Bad choice!");
+        printf("Bad choice!\n");
         return EXIT_SUCCESS;
     }
 
@@ -96,7 +101,7 @@ int main(int argc, char** argv)
         portRFCOMM = portsRFCOMMFound[j];
     } else
     {
-        printf("Bad choice!");
+        printf("Bad choice!\n");
         return EXIT_SUCCESS;
     }
 

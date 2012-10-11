@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <queue>
 
 #include "Types.hpp"
 #include "Blob.hpp"
@@ -87,7 +88,11 @@ namespace NsTransportLayer
         void sendBuffer(UInt8 * pBuffer, size_t size);
 
       private:
-        Bluetooth::IBluetoothHandler * mpHandler;
+        Bluetooth::IBluetoothHandler * mpProtocolHandler;
+
+        std::queue<Blob> blobQueue;
+
+        int sockID;
 
 
    };

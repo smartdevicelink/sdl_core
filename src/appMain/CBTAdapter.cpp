@@ -11,7 +11,8 @@
 namespace NsTransportLayer
 {
 
-   CBTAdapter::CBTAdapter()
+   CBTAdapter::CBTAdapter():
+   sockID(0)
    {
    }
 
@@ -152,10 +153,10 @@ namespace NsTransportLayer
    {
       printf("%s:%d CBTAdapter::startRFCOMMConnection()device %s, port %d\n", __FILE__, __LINE__, targetDevice, portRFCOMM);
       struct sockaddr_rc addr = { 0 };
-      int s, status;
+      int status;
 
       // allocate a socket
-      s = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+      sockID = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
 
       // set the connection parameters (who to connect to)
       addr.rc_family = AF_BLUETOOTH;
@@ -163,15 +164,15 @@ namespace NsTransportLayer
       str2ba(targetDevice, &addr.rc_bdaddr);
 
       // connect to server
-      status = connect(s, (struct sockaddr *)&addr, sizeof(addr));
+      status = connect(sockID, (struct sockaddr *)&addr, sizeof(addr));
 
       if(0 < status)
       {
          printf("Failed to open port!");
          return -1;
       }
-      printf("Connection successful. sockID=%d \n", s);
-      return s;
+      printf("Connection successful. sockID=%d \n", sockID);
+      return sockID;
    }
 
    int CBTAdapter::processRFCOMM(int sockid)
@@ -192,7 +193,6 @@ namespace NsTransportLayer
          // this socket has blocking turned off so it will never block,
          // even if no data is available
          len = recv(sockid, rfcommbuffer, 8, 0);
-         printf("len = %d\n", len);
          if ((len > 0) && (len == 8))
          {
             printf("%s:%d CBTAdapter::processRFCOMM() buf[0] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[0]);
@@ -205,35 +205,41 @@ namespace NsTransportLayer
             printf("%s:%d CBTAdapter::processRFCOMM() buf[7] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[7]);
             if ((rfcommbuffer[0] == 16) && (rfcommbuffer[1] == 7) && (rfcommbuffer[2] == 1))
             {
-               printf("Start session (RPC Service)");
-               char sendBuff[8] = {16, 7, 2, 1, 0, 0, 0, 0};
-               int status = write(sockid, sendBuff, 8);
-               if (0 > status)
+               printf("Start session (RPC Service)\n");
+
+               void* sPacketData = malloc(12);
+               memset(sPacketData, 0, 12);
+               memcpy(sPacketData, rfcommbuffer, 8);
+               blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
+               if (NULL != mpProtocolHandler)
                {
-                  printf("Socket write error!");
-                  break;
+                  mpProtocolHandler->dataReceived();
                }
             } else if ((rfcommbuffer[0] == 16) && (rfcommbuffer[1] == 15) && (rfcommbuffer[2] == 1))
             {
-               printf("Start session (Bulk Service)");
-               char sendBuff[8] = {16, 15, 2, 2, 0, 0, 0, 0};
-               int status = write(sockid, sendBuff, 8);
-               if (0 > status)
+               printf("Start session (Bulk Service)\n");
+               void* sPacketData = malloc(12);
+               memset(sPacketData, 0, 12);
+               memcpy(sPacketData, rfcommbuffer, 8);
+               blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
+               if (NULL != mpProtocolHandler)
                {
-                  printf("Socket write error!");
-                  break;
+                  mpProtocolHandler->dataReceived();
                }
             }else if ((rfcommbuffer[0] == 17) && (rfcommbuffer[1] == 7))
             {
-               printf("Single frame RPC message!");
+               printf("Single frame RPC message!\n");
             } else if ((rfcommbuffer[0] == 18) && (rfcommbuffer[1] == 7))
             {
-               printf("MultiPacket RPC frame");
+               printf("MultiPacket RPC frame\n");
             } else
             {
-               printf("Unknown packet type!");
+               printf("Unknown packet type!\n");
                return -1;
             }
+         } else
+         {
+            printf("len = %d\n", len);
          }
       }
    }
@@ -243,7 +249,7 @@ namespace NsTransportLayer
       printf("%s:%d CBTAdapter::initBluetooth()\n", __FILE__, __LINE__);
       if (NULL != pHandler)
       {
-         mpHandler = pHandler;
+         mpProtocolHandler = pHandler;
       }
   }
 
@@ -255,17 +261,29 @@ namespace NsTransportLayer
   const Blob CBTAdapter::getBuffer()
   {
       printf("%s:%d CBTAdapter::getBuffer()\n", __FILE__, __LINE__);
-      Blob b = Blob(0);
-      return b;
+      return blobQueue.front();
   }
 
   void CBTAdapter::releaseBuffer(const Blob& blob)
   {
       printf("%s:%d CBTAdapter::releaseBuffer()\n", __FILE__, __LINE__);
+      blobQueue.pop();
   }
 
   void CBTAdapter::sendBuffer(UInt8 * pBuffer, size_t size)
   {
       printf("%s:%d CBTAdapter::sendBuffer()\n", __FILE__, __LINE__);
+
+      if (0!= sockID)
+      {
+         int status = write(sockID, pBuffer, size);
+         if (0 > status)
+         {
+            printf("Socket write error!");
+         }
+      } else
+      {
+         printf("No socket opened!");
+      }
   }
 } /* namespace NsTransportLayer */
