@@ -2,6 +2,8 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= qt
 
+LIBS += -lbluetooth
+
 SOURCES += src/main.cpp \
     src/ProtocolHandler.cpp \
     src/Message.cpp \

@@ -103,7 +103,8 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
 
 
     //TODO maxsize
-    const unsigned int MAXIMUM_DATA_SIZE = 5000;
+    const unsigned int MAXIMUM_FRAME_SIZE = 5000;
+    const unsigned int MAXIMUM_DATA_SIZE = MAXIMUM_FRAME_SIZE - PROTOCOL_HEADER_SIZE;
 
 
 
