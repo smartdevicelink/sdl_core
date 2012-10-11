@@ -13,7 +13,9 @@ Message::Message(const ProtocolPacketHeader &header
             mNumberOfConsFrames(0),
             mData(0),
             mDataOffset(0),
-            mIsMultiFrame(isMultiFrame)
+            mIsMultiFrame(isMultiFrame),
+            mLastSubMessageNumber(0),
+            mSubMessagesConnected(0)
 {
     if (mIsMultiFrame)
     {
@@ -39,16 +41,60 @@ ERROR_CODE Message::addConsecutiveMessage(const ProtocolPacketHeader &header, UI
 
     if (mIsMultiFrame)
     {
-        if ( (mDataOffset + header.dataSize) <= mTotalDataBytes)
+        // TODO TMP OFF
+        if (true /*checkMultiFrameSubMessageOrder(header)*/ )
         {
-            memcpy(mData + mDataOffset, data, header.dataSize);
-            mDataOffset += header.dataSize;
+            if ( (mDataOffset + header.dataSize) <= mTotalDataBytes)
+            {
+                memcpy(mData + mDataOffset, data, header.dataSize);
+                mDataOffset += header.dataSize;
+            }
+            else
+                retVal = ERR_FAIL;
         }
         else
-            retVal = ERR_FAIL;
+           retVal = ERR_FAIL;
     }
     else
         retVal = ERR_FAIL;
+
+    return retVal;
+}
+
+bool Message::checkMultiFrameSubMessageOrder(const ProtocolPacketHeader &header)
+{
+    bool retVal = true;
+
+    if (mSubMessagesConnected == (mNumberOfConsFrames - 1) )
+    {
+        if (header.frameData != FRAME_DATA_LAST_FRAME)
+            retVal = false;
+    }
+    else
+    {
+        if (mLastSubMessageNumber < FRAME_DATA_MAX_VALUE)
+        {
+            if ( (mLastSubMessageNumber + 1) != header.frameData)
+                retVal = false;
+            else
+            {
+                mLastSubMessageNumber++;
+                mSubMessagesConnected++;
+            }
+        }
+        else if (mLastSubMessageNumber == FRAME_DATA_MAX_VALUE)
+        {
+            if (header.frameData != 0x01)
+                retVal = false;
+            else
+            {
+                mLastSubMessageNumber = 0x01;
+                mSubMessagesConnected++;
+            }
+        }
+        else
+            retVal = false;
+    }
 
     return retVal;
 }

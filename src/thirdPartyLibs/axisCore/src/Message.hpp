@@ -36,12 +36,19 @@ public:
     ERROR_CODE addConsecutiveMessage(const ProtocolPacketHeader &header, UInt8 *data);
 
 private:
+    bool checkMultiFrameSubMessageOrder(const ProtocolPacketHeader &header);
+
     UInt32 mMessageID;
-    UInt32 mTotalDataBytes;
-    UInt32 mNumberOfConsFrames;
-    UInt8 *mData;
-    UInt32 mDataOffset;
+    UInt32 mTotalDataBytes;    
+    UInt8 *mData;    
     bool mIsMultiFrame;
+    /**
+      * For multiframe messages
+      */
+    UInt32 mNumberOfConsFrames;
+    UInt32 mDataOffset;
+    UInt8 mLastSubMessageNumber;
+    UInt32 mSubMessagesConnected;
 };
 
 } //namespace AxisCore

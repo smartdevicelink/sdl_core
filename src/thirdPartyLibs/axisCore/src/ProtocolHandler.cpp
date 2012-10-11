@@ -170,8 +170,6 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
         delete [] outDataFirstFrame;
 
 
-        int frameDataMaxValue = 0xFF;
-
         UInt8 *outDataFrame = new UInt8[subDataSize];
 
         for (UInt8 i = 0 ; i <= numOfFrames ; i++)
@@ -182,7 +180,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                             compress,
                                             FRAME_TYPE_CONSECUTIVE,
                                             servType,
-                                            ( (i % frameDataMaxValue) + 1),
+                                            ( (i % FRAME_DATA_MAX_VALUE) + 1),
                                             sessionID,
                                             subDataSize,
                                             mMessageID);
@@ -406,6 +404,8 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
     default:
     {
         std::cout << "ProtocolHandler::handleMessage() case !!!default!!! \n";
+        if (data)
+            delete [] data;
     }
     }
 
@@ -430,7 +430,6 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
         std::cout << "ProtocolHandler::handleMultiFrameMessage() : Consecutive frame\n";
         if (mIncompleteMultiFrameMessages.count(header.messageID) )
         {
-            // TODO check submessages order
             if (mIncompleteMultiFrameMessages[header.messageID]->addConsecutiveMessage(header, data) == ERR_OK)
             {
                 if (header.frameData == FRAME_DATA_LAST_FRAME)

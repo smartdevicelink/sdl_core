@@ -45,54 +45,54 @@ typedef long long Int64;
 /**
  * Number of data source priorities in AXIS
  */
-const UInt8    PRIO_NUM                   = 3;
+//const UInt8    PRIO_NUM                   = 3;
 
 /**
  * Maximum buffer size
  */
-const UInt32   MAX_SIZE                   = 4096;
+//const UInt32   MAX_SIZE                   = 4096;
 
 /**
  * Number of service channel
  */
-const UInt32   SERVICE_CHANNEL_NUMBER     = 0;
+//const UInt32   SERVICE_CHANNEL_NUMBER     = 0;
 
 /**
  * Channel supervisor reserved channel
  */
-const UInt32   CS_SERVICE_CHANNEL         = 256;
+//const UInt32   CS_SERVICE_CHANNEL         = 256;
 /**
  * Default port for TCP connection
  */
 //const char AXIS_PORT[] = "40000";
-const char AXIS_PORT[] = "45000";
+//const char AXIS_PORT[] = "45000";
 
 /**
  * Default port for CTCPAutoConnectionFinder
  */
 //const int AXIS_TCP_AUTO_CONNECTION_FINDER_BRD_PORT = 49789;
-const int AXIS_TCP_AUTO_CONNECTION_FINDER_BRD_PORT = 45789;
+//const int AXIS_TCP_AUTO_CONNECTION_FINDER_BRD_PORT = 45789;
 
 
 /**
  * Default size of buffer queues for transmission and receiving
  */
-  const UInt32   QUEUE_SIZE     = 200;
+//  const UInt32   QUEUE_SIZE     = 200;
 
 /**
 * Time before frame must be retransmitted
 */
-const UInt64 RETRANSMIT_TIME_NSEC = 5LLU * 1000 * 1000 * 1000;
+//const UInt64 RETRANSMIT_TIME_NSEC = 5LLU * 1000 * 1000 * 1000;
 
 /**
  * Data source priorities
  */
-enum TChannelPriority
+/*enum TChannelPriority
 {
    eSafetyCritical = 0,
    eRealTime = 1,
    ePlainData = 2
-};
+};*/
 
 enum ERROR_CODE
 {
@@ -116,7 +116,7 @@ enum ERROR_CODE
 /**
  * List of available types of carriers
  */
-enum ECarrierType
+/*enum ECarrierType
 {
    eDummyTcpCarrier,    //!< eDummyTcpCarrier - TCP carrier for testing purposes
    eTcpAutoCarrier,     //!< eTcpAutoCarrier - TCP carrier, detected by CTcpAutoConnectionFinder
@@ -129,6 +129,6 @@ enum CALLBACKTYPE
    BUFF_OVERFLOW,
    CHANN_DELETED,
    CONNECTI_LOST
-};
+};*/
 
 #endif // TYPES_HPP
