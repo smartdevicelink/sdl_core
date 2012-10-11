@@ -28,12 +28,14 @@ int main( int argc, char* argv[] ) {
     size_t nextMessagePos = 0;
     char *const jsonContentBeginning = jsonContent;
 
+    AxisCore::CMessage::generateInitialMessage();
     JSONHandler * jsonHandler = new JSONHandler;
-    ProtocolHandler * protocolHandler = new ProtocolHandler( jsonHandler, 0 );
-    CMessage::generateInitialMessage();
+    AxisCore::ProtocolHandler * protocolHandler = new AxisCore::ProtocolHandler( jsonHandler, 0 );
+    jsonHandler -> setProtocolHandler( protocolHandler );
+    
     protocolHandler->dataReceived();        
     //CMessage::generateSingleMessage("Hello ?");
-    CMessage::generateMultipleMessages("Hello ?", 5);
+    AxisCore::CMessage::generateMultipleMessages("Hello ?", 5);
     for (int i = 0 ; i < 5 ; i++)
         protocolHandler->dataReceived();
     
@@ -41,7 +43,6 @@ int main( int argc, char* argv[] ) {
 
         std::string jsonString( jsonContent );
         if ( !jsonString.empty() ) {
-            jsonHandler -> dataReceivedCallback(0, 1, jsonString.size());
             /*MobileRPCMessage * message = JSONHandler::createObjectFromJSON( jsonString );*/
             MobileRPCMessage * message = jsonHandler -> getRPCObject();
             std::cout << "type: " << message->getMessageType() << std::endl;

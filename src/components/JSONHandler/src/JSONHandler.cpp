@@ -1,11 +1,13 @@
 
 #include "JSONHandler/JSONHandler.h"
 #include <algorithm>
+#include <string.h>
 #include <json/reader.h>
 #include <json/writer.h>
+#include "JSONHandler/RegisterAppInterfaceResponse.h"
 
 
-JSONHandler::JSONHandler( ProtocolHandler * protocolHandler )
+JSONHandler::JSONHandler( AxisCore::ProtocolHandler * protocolHandler )
 :mProtocolHandler( protocolHandler )
 {
     mFactory = new MobileRPCFactory();
@@ -19,7 +21,7 @@ JSONHandler::~JSONHandler()
 }
 
 /*Methods from IProtocolObserver*/
-void JSONHandler::setProtocolHandler( ProtocolHandler * protocolHandler )
+void JSONHandler::setProtocolHandler( AxisCore::ProtocolHandler * protocolHandler )
 {
     mProtocolHandler = protocolHandler;
 }
@@ -33,9 +35,26 @@ void JSONHandler::dataReceivedCallback(const UInt8 sessionID, const UInt32 messa
 {
     UInt8 *data = new UInt8[dataSize];
 
-    mProtocolHandler -> receiveData(sessionID, messageID, SERVICE_TYPE_RPC, dataSize, data);
+    mProtocolHandler -> receiveData(sessionID, messageID, AxisCore::SERVICE_TYPE_RPC, dataSize, data);
 
     mCurrentMessage = createObjectFromJSON( std::string((char *)data, dataSize) );
+
+    RegisterAppInterfaceResponse response = mFactory -> createRegisterAppInterfaceResponse( *mCurrentMessage );
+    Json::Value parameters = mFactory -> serializeRegisterAppInterfaceResponse( response );
+
+    Json::Value root = createJSONFromObject( response );
+    if ( root.isNull() )
+    {
+        return;
+    }
+
+    root["parameters"] = parameters;
+    std::string responseString = jsonToString( root );
+    UInt8* pData;
+    pData = new UInt8[responseString.length() + 1];
+    memcpy (pData, responseString.c_str(), responseString.length() + 1);
+    mProtocolHandler -> sendData(sessionID,  AxisCore::SERVICE_TYPE_RPC, 
+        responseString.size() + 1, pData, false);
 }
 /*end of methods from IProtocolObserver*/
 
@@ -73,6 +92,12 @@ std::string JSONHandler::serializeObjectToJSON( const MobileRPCMessage & mobileR
 
 std::string JSONHandler::serializeObjectToJSONProtocol1 ( const MobileRPCMessage & mobileRPCObject )
 {
+    Json::Value root = createJSONFromObject( mobileRPCObject );
+    return jsonToString( root );
+}
+
+Json::Value JSONHandler::createJSONFromObject ( const MobileRPCMessage & mobileRPCObject )
+{
     Json::Value root;
     std::string messageType;
     switch( mobileRPCObject.getMessageType() ) {
@@ -100,9 +125,13 @@ std::string JSONHandler::serializeObjectToJSONProtocol1 ( const MobileRPCMessage
         typeValue["name"] = mobileRPCObject.getFunctionName();
     }
     root[messageType] = typeValue;
-    
-    Json::StyledWriter writer;
-    std::string root_to_print = writer.write( root );
+    return root;
+}
+
+std::string JSONHandler::jsonToString( const Json::Value & jsonObject )
+{
+    Json::FastWriter writer;
+    std::string root_to_print = writer.write( jsonObject );
     return root_to_print;
 }
 
