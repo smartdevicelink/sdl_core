@@ -66,12 +66,16 @@ ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt
     memcpy(&header.sessionID, mData + offset, sizeof(UInt8) );
     offset += sizeof(UInt8);
     memcpy(&header.dataSize, mData + offset, sizeof(UInt32) );
-    offset += sizeof(UInt32);
-    memcpy(&header.messageID, mData + offset, sizeof(UInt32) );
-    offset += sizeof(UInt32);
 
-    if (data)
-        memcpy(data, mData + offset, header.dataSize);
+    if ( (offset + sizeof(UInt32) ) <= blobBufferSize)
+    {
+        offset += sizeof(UInt32);
+        memcpy(&header.messageID, mData + offset, sizeof(UInt32) );
+        offset += sizeof(UInt32);
+
+        if (data)
+            memcpy(data, mData + offset, header.dataSize);
+    }
 
     return ERR_OK;
 }
