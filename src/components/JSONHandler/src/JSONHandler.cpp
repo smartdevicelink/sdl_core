@@ -64,6 +64,25 @@ void JSONHandler::dataReceivedCallback(const UInt8 sessionID, const UInt32 messa
     memcpy (pData, responseString.c_str(), responseString.length() + 1);
     mProtocolHandler -> sendData(sessionID,  AxisCore::SERVICE_TYPE_RPC, 
         responseString.size() + 1, pData, false);
+
+    // OnHMIStatus
+    OnHMIStatus notification 	= mFactory->createOnHMIStatus();
+    Json::Value parameters1 	= mFactory->serializeOnHMIStatus( notification );
+
+    Json::Value root1 = createJSONFromObject( notification );
+    if ( root1.isNull() )       	
+    {
+        return;
+    }
+
+    root1["parameters"] = parameters1;
+    std::string notificationString = jsonToString( root1 );
+    UInt8* pData;
+    pData = new UInt8[notificationString.length() + 1];
+    memcpy (pData, notificationString.c_str(), notificationString.length() + 1);
+    mProtocolHandler -> sendData(sessionID,  AxisCore::SERVICE_TYPE_RPC, 
+        notificationString.size() + 1, pData, false);
+
 }
 /*end of methods from IProtocolObserver*/
 
