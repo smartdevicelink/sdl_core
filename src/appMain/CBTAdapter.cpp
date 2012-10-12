@@ -12,6 +12,7 @@ namespace NsTransportLayer
 {
 
    CBTAdapter::CBTAdapter():
+   mpProtocolHandler(NULL),
    sockID(0)
    {
    }
@@ -34,7 +35,7 @@ namespace NsTransportLayer
       sock = hci_open_dev( dev_id );
       if (dev_id < 0 || sock < 0)
       {
-         printf("Opening socket...\n");
+         printf("Not possible to open socket!\n");
          return -1;
       }
 
@@ -46,7 +47,7 @@ namespace NsTransportLayer
       num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
       if(num_rsp < 0)
       {
-         printf("hci_inquiry...\n");
+         printf("hci_inquiry failed!\n");
       }
 
       for (i = 0; i < num_rsp; i++)
@@ -168,7 +169,7 @@ namespace NsTransportLayer
 
       if(0 < status)
       {
-         printf("Failed to open port!");
+         printf("Failed to open port!\n");
          return -1;
       }
       printf("Connection successful. sockID=%d \n", sockID);
@@ -195,14 +196,11 @@ namespace NsTransportLayer
          len = recv(sockid, rfcommbuffer, 8, 0);
          if ((len > 0) && (len == 8))
          {
-            printf("%s:%d CBTAdapter::processRFCOMM() buf[0] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[0]);
-            printf("%s:%d CBTAdapter::processRFCOMM() buf[1] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[1]);
-            printf("%s:%d CBTAdapter::processRFCOMM() buf[2] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[2]);
-            printf("%s:%d CBTAdapter::processRFCOMM() buf[3] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[3]);
-            printf("%s:%d CBTAdapter::processRFCOMM() buf[4] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[4]);
-            printf("%s:%d CBTAdapter::processRFCOMM() buf[5] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[5]);
-            printf("%s:%d CBTAdapter::processRFCOMM() buf[6] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[6]);
-            printf("%s:%d CBTAdapter::processRFCOMM() buf[7] = 0x%2X\n", __FILE__, __LINE__, rfcommbuffer[7]);
+            for (int k=0; k<8; k++)
+            {
+               printf("CBTAdapter::processRFCOMM() buf[%d] = 0x%2X\n", k, rfcommbuffer[k]);
+            }
+
             if ((rfcommbuffer[0] == 16) && (rfcommbuffer[1] == 7) && (rfcommbuffer[2] == 1))
             {
                printf("Start session (RPC Service)\n");
@@ -244,11 +242,11 @@ namespace NsTransportLayer
                }
                if (len == frameSize)
                {
-                  void* sPacketData = malloc(8 + frameSize+10);
-                  memset(sPacketData, 0, 8 + frameSize+10);
+                  void* sPacketData = malloc(8 + frameSize+1);
+                  memset(sPacketData, 0, 8 + frameSize+1);
                   memcpy(sPacketData, rfcommbuffer, 8);
-                  memcpy(sPacketData + 8, rfcommpayloadbuffer, frameSize);
-                  blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
+                  memcpy((UInt8*)sPacketData + 8, rfcommpayloadbuffer, frameSize);
+                  blobQueue.push(Blob((UInt8*)sPacketData, frameSize+8, blobQueue.size()));
 
                   std::string str = std::string((const char*)sPacketData+8, frameSize);
                   printf("%s\n", str.c_str());
@@ -300,6 +298,7 @@ namespace NsTransportLayer
   void CBTAdapter::releaseBuffer(const Blob& blob)
   {
       printf("%s:%d CBTAdapter::releaseBuffer()\n", __FILE__, __LINE__);
+      free(blob.buffer());
       blobQueue.pop();
   }
 
@@ -312,11 +311,11 @@ namespace NsTransportLayer
          int status = write(sockID, pBuffer, size);
          if (0 > status)
          {
-            printf("Socket write error!");
+            printf("Socket write error!\n");
          }
       } else
       {
-         printf("No socket opened!");
+         printf("No socket opened!\n");
       }
   }
 } /* namespace NsTransportLayer */
