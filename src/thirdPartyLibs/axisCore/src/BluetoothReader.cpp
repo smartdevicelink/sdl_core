@@ -31,7 +31,7 @@ ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt
     UInt32 blobBufferSize = 0;
     if (mBTAdapter)
         blobBufferSize = mBTAdapter->getBuffer().size();
-    // = Bluetooth::getBuffer().size();
+    //blobBufferSize = Bluetooth::getBuffer().size();
     if (dataSize >= blobBufferSize )
     {
         //memcpy(mData, Bluetooth::getBuffer().buffer(), blobBufferSize);
@@ -66,17 +66,10 @@ ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt
     memcpy(&header.sessionID, mData + offset, sizeof(UInt8) );
     offset += sizeof(UInt8);
     memcpy(&header.dataSize, mData + offset, sizeof(UInt32) );
-    header.dataSize -= sizeof(UInt32);
+    offset += sizeof(UInt32);
 
-    if ( (offset + sizeof(UInt32) ) <= blobBufferSize)
-    {
-        offset += sizeof(UInt32);
-        memcpy(&header.messageID, mData + offset, sizeof(UInt32) );
-        offset += sizeof(UInt32);
-
-        if (data)
-            memcpy(data, mData + offset, header.dataSize);
-    }
+    if (data)
+        memcpy(data, mData + offset, header.dataSize);
 
     return ERR_OK;
 }

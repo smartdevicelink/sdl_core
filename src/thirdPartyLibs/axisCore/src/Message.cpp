@@ -8,7 +8,6 @@ namespace AxisCore
 Message::Message(const ProtocolPacketHeader &header
                                    , UInt8 *data
                                    , bool isMultiFrame) :
-            mMessageID(header.messageID),
             mTotalDataBytes(0),
             mNumberOfConsFrames(0),
             mData(0),
