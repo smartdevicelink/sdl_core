@@ -72,3 +72,26 @@ Json::Value MobileRPCFactory::serializeRegisterAppInterfaceResponse( const Regis
 
     return value;
 }
+
+OnHMIStatus createOnHMIStatus() const
+{
+    OnHMIStatus object(1);
+    
+    object.setHMILevel("NONE");
+    object.setAudioStreaming("NOT_AUDIBLE");
+    object.setSystemContext("MAIN");
+    
+    return object;
+}
+
+Json::Value serializeOnHMIStatus( const OnHMIStatus & notification ) const
+{
+
+    Json::Value value;
+    
+    value["hmiLevel"] 			= notification.getHMILevel().toString();
+    value["audioStreamingState"] 	= notification.getAudioStreamingState().toString();
+    value["SystemContext"] 		= notification.getSystemContext().toString();
+
+    return value;
+}

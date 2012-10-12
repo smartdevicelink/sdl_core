@@ -3,6 +3,7 @@
 
 #include "JSONHandler/RegisterAppInterface.h"
 #include "JSONHandler/RegisterAppInterfaceResponse.h"
+#include "JSONHandler/OnHMIStatus.h"
 #include <json/value.h>
 
 class MobileRPCResponse;
@@ -26,6 +27,9 @@ public:
 
     RegisterAppInterfaceResponse createRegisterAppInterfaceResponse ( const MobileRPCMessage & message ) const;
     Json::Value serializeRegisterAppInterfaceResponse( const RegisterAppInterfaceResponse & response ) const;
+
+    OnHMIStatus createOnHMIStatus () const;
+    Json::Value serializeOnHMIStatus( const OnHMIStatus & notification ) const;
 
     RegisterAppInterface createRegisterAppInterface ( const Json::Value & jsonValue );
 
