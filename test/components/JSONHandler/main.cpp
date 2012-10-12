@@ -9,6 +9,9 @@
 #include <fstream>
 #include <string.h>
 #include <unistd.h>
+#include <algorithm>
+//#include <cctype>
+
 #include "JSONHandler/MobileRPCMessage.h"
 #include "JSONHandler/JSONHandler.h"
 #include "ProtocolHandler.hpp"
@@ -17,6 +20,8 @@ char * readJsonContent ( const char * fileName );
 int parseJson ( const std::string & jsonContent );
 
 int main( int argc, char* argv[] ) {
+    
+    std::cout.flush();
     char * fileName = "/home/dev/Projects/Ford/source/workspace/jsonSample/connection_log_json_only" ;    
     if ( argc > 1 )
     {
@@ -44,6 +49,9 @@ int main( int argc, char* argv[] ) {
 
         std::string jsonString( jsonContent );
         if ( !jsonString.empty() ) {
+
+
+
             MobileRPCMessage * message = jsonHandler -> createObjectFromJSON( jsonString );
             //MobileRPCMessage * message = jsonHandler -> getRPCObject();
             std::cout << "type: " << message->getMessageType() << std::endl;
@@ -108,6 +116,22 @@ readJsonContent ( const char * fileName ) {
     char * raw_data = new char[length];
     file_str.read( raw_data, length );
     file_str.close();
+
+char * input = new char[length];
+    for ( int i = 0; i < length; ++i )
+    {
+        if ( !isspace(raw_data[i]) ) 
+        {
+            input[i] = raw_data[i];
+        }
+    }
+    /*//char* newEnd = std::remove_if( raw_data, raw_data + length, std::isspace );*/
+    /*std::string result ( raw_data, length - 1 );
+    std::string::iterator it = std::remove_if( result.begin(), result.end(), std::isspace );*/
+    
+    //std::string result ( raw_data, newEnd - 1 );
+
+
 
     return raw_data;
 }

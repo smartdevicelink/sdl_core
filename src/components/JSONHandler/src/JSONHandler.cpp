@@ -37,7 +37,16 @@ void JSONHandler::dataReceivedCallback(const UInt8 sessionID, const UInt32 messa
 
     mProtocolHandler -> receiveData(sessionID, messageID, AxisCore::SERVICE_TYPE_RPC, dataSize, data);
 
-    mCurrentMessage = createObjectFromJSON( std::string((char *)data, dataSize) );
+    char * input = new char[dataSize];
+    for ( int i = 0; i < dataSize; ++i )
+    {
+        if ( !isspace(data[i]) ) 
+        {
+            input[i] = data[i];
+        }
+    }
+    
+    mCurrentMessage = createObjectFromJSON( std::string( input, dataSize - 1 ) );
 
     RegisterAppInterfaceResponse response = mFactory -> createRegisterAppInterfaceResponse( *mCurrentMessage );
     Json::Value parameters = mFactory -> serializeRegisterAppInterfaceResponse( response );
