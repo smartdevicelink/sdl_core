@@ -225,17 +225,36 @@ ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
     std::cout << "enter ProtocolHandler::receiveData() \n";
     ERROR_CODE retVal = ERR_OK;
 
-    Message *currentMessage = mToUpperLevelMessagesQueue.front();
-    if (receivedDataSize == currentMessage->getTotalDataBytes() )
+    if (!mToUpperLevelMessagesQueue.empty() )
     {
-        memcpy(data, currentMessage->getMessageData(), receivedDataSize);
+        Message *currentMessage = mToUpperLevelMessagesQueue.front();
+        if (currentMessage)
+        {
+            if (receivedDataSize == currentMessage->getTotalDataBytes() )
+            {
+                memcpy(data, currentMessage->getMessageData(), receivedDataSize);
 
-        delete currentMessage;
-        currentMessage = NULL;
-        mToUpperLevelMessagesQueue.pop();
+                delete currentMessage;
+                currentMessage = NULL;
+                mToUpperLevelMessagesQueue.pop();
+            }
+            else
+            {
+                std::cout << "ProtocolHandler::receiveData() requested msg size != real Msg size \n";
+                retVal = ERR_FAIL;
+            }
+        }
+        else
+        {
+            std::cout << "ProtocolHandler::receiveData() !currentMessage ptr \n";
+            retVal = ERR_FAIL;
+        }
     }
+
+    if (retVal)
+        std::cout << "ProtocolHandler::receiveData() returns OK \n";
     else
-        retVal = ERR_FAIL;
+        std::cout << "ProtocolHandler::receiveData() returns FAIL \n";
 
     return retVal;
 }
@@ -458,7 +477,7 @@ void ProtocolHandler::dataReceived()
     std::cout << "enter ProtocolHandler::dataReceived()\n";
     UInt32 dataSize = 0;
 
-    //UInt32 dataSize = Bluetooth::getBuffer().size();
+    //dataSize = Bluetooth::getBuffer().size();
 
     if (mBTAdapter)
         dataSize = mBTAdapter->getBuffer().size();
