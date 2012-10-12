@@ -246,7 +246,7 @@ namespace NsTransportLayer
                   memset(sPacketData, 0, 8 + frameSize+1);
                   memcpy(sPacketData, rfcommbuffer, 8);
                   memcpy((UInt8*)sPacketData + 8, rfcommpayloadbuffer, frameSize);
-                  blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
+                  blobQueue.push(Blob((UInt8*)sPacketData, frameSize+8, blobQueue.size()));
 
                   std::string str = std::string((const char*)sPacketData+8, frameSize);
                   printf("%s\n", str.c_str());
@@ -298,6 +298,7 @@ namespace NsTransportLayer
   void CBTAdapter::releaseBuffer(const Blob& blob)
   {
       printf("%s:%d CBTAdapter::releaseBuffer()\n", __FILE__, __LINE__);
+      free(blob.buffer());
       blobQueue.pop();
   }
 

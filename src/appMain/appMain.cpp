@@ -48,6 +48,7 @@ int main(int argc, char** argv)
     {
         printf("Found %d devices\n", devicesFound.size());
         printf("Please make your choice:\n");
+        printf("\n");
     } else
     {
         printf("No any devices found!\n");
