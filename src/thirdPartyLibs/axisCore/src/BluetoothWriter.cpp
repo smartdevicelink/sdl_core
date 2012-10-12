@@ -2,6 +2,7 @@
 
 #include "BluetoothWriter.hpp"
 #include "../../../appMain/CBTAdapter.hpp"
+#include <stdio.h>
 
 namespace AxisCore
 {
@@ -42,8 +43,18 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
     offset += sizeof(UInt8);
     memcpy(mData + offset, &header.sessionID, sizeof(UInt8) );
     offset += sizeof(UInt8);
-    memcpy(mData + offset, &header.dataSize, sizeof(UInt32) );
-    offset += sizeof(UInt32);
+
+    //memcpy(mData + offset, &header.dataSize, sizeof(UInt32) );
+    //offset += sizeof(UInt32);
+
+    UInt8 tmp = header.dataSize >> 24;
+    memcpy(mData + offset++, &tmp, sizeof(UInt8) );
+    tmp = header.dataSize >> 16;
+    memcpy(mData + offset++, &tmp, sizeof(UInt8) );
+    tmp = header.dataSize >> 8;
+    memcpy(mData + offset++, &tmp, sizeof(UInt8) );
+    tmp = header.dataSize;
+    memcpy(mData + offset++, &tmp, sizeof(UInt8) );
 
     if (data)
     {
