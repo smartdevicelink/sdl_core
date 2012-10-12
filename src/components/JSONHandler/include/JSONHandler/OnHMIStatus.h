@@ -15,7 +15,7 @@ public:
   ~OnHMIStatus() {}
 
   void setHMILevel( HMILevel _HMILevel ) { mHMILevel = _HMILevel; }
-  bool getHMILevel() const { return mHMILevel; }
+  HMILevel getHMILevel() const { return mHMILevel; }
 
   void setAudioStreamingState( AudioStreamingState _AudioStreamingState ) { mAudioStreamingState = _AudioStreamingState; }
   AudioStreamingState getAudioStreamingState() const { return mAudioStreamingState; }
