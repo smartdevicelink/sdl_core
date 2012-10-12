@@ -58,7 +58,7 @@ namespace NsTransportLayer
          {
             strcpy(name, "[unknown]");
          }
-         printf("%s  %s\n", addr, name);
+//         printf("%s  %s\n", addr, name);
          CBTDevice device = CBTDevice(name, addr);
          devicesFound.push_back(device);
       }
@@ -131,7 +131,7 @@ namespace NsTransportLayer
                         case SDP_UINT8:
                            if(proto == RFCOMM_UUID)
                            {
-                              printf("rfcomm channel: %d\n",d->val.int8);
+//                              printf("rfcomm channel: %d\n",d->val.int8);
                               portsRFCOMMFound.push_back(d->val.int8);
                            }
                            break;
@@ -144,7 +144,7 @@ namespace NsTransportLayer
 
          }
 
-         printf("found service record 0x%x\n", rec->handle);
+//         printf("found service record 0x%x\n", rec->handle);
          sdp_record_free( rec );
       }
       sdp_close(session);
@@ -196,10 +196,10 @@ namespace NsTransportLayer
          len = recv(sockid, rfcommbuffer, 8, 0);
          if ((len > 0) && (len == 8))
          {
-            for (int k=0; k<8; k++)
-            {
-               printf("CBTAdapter::processRFCOMM() buf[%d] = 0x%2X\n", k, rfcommbuffer[k]);
-            }
+//            for (int k=0; k<8; k++)
+//            {
+//               printf("CBTAdapter::processRFCOMM() buf[%d] = 0x%2X\n", k, rfcommbuffer[k]);
+//            }
 
             if ((rfcommbuffer[0] == 16) && (rfcommbuffer[1] == 7) && (rfcommbuffer[2] == 1))
             {
@@ -248,8 +248,8 @@ namespace NsTransportLayer
                   memcpy((UInt8*)sPacketData + 8, rfcommpayloadbuffer, frameSize);
                   blobQueue.push(Blob((UInt8*)sPacketData, frameSize+8, blobQueue.size()));
 
-                  std::string str = std::string((const char*)sPacketData+8, frameSize);
-                  printf("%s\n", str.c_str());
+//                  std::string str = std::string((const char*)sPacketData+8, frameSize);
+//                  printf("%s\n", str.c_str());
 
                   if (NULL != mpProtocolHandler)
                   {

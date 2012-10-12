@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     if (0 < devicesFound.size())
     {
         printf("Found %d devices\n", devicesFound.size());
-        printf("Please make your choice:\n");
+        printf("Please make your choice, 0 for exit:\n");
         printf("\n");
     } else
     {
@@ -56,7 +56,7 @@ int main(int argc, char** argv)
     }
 
     std::vector<NsTransportLayer::CBTDevice>::iterator it;
-    int i = 0;
+    int i = 1;
     for(it = devicesFound.begin(); it != devicesFound.end(); it++)
     {
         NsTransportLayer::CBTDevice device = *it;
@@ -65,12 +65,12 @@ int main(int argc, char** argv)
 
     std::cin >> i;
     std::string discoveryDeviceAddr = "";
-    if (i < devicesFound.size())
+    if ((0 < i) && (i <= devicesFound.size()))
     {
-        discoveryDeviceAddr = devicesFound[i].getDeviceAddr();
+        discoveryDeviceAddr = devicesFound[i-1].getDeviceAddr();
     } else
     {
-        printf("Bad choice!\n");
+        printf("Exit!\n");
         return EXIT_SUCCESS;
     }
 
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
     if (0 < portsRFCOMMFound.size())
     {
         printf("Found %d ports on %s device\n", portsRFCOMMFound.size(), discoveryDeviceAddr.c_str());
-        printf("Please make your choice:\n");
+        printf("Please make your choice, 0 for exit:\n");
     } else
     {
         printf("No any ports discovered!\n");
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
     }
 
     std::vector<int>::iterator itr;
-    int j = 0;
+    int j = 1;
     for(itr = portsRFCOMMFound.begin(); itr != portsRFCOMMFound.end(); itr++)
     {
         printf("%d: %d \n", j++, *itr);
@@ -97,12 +97,12 @@ int main(int argc, char** argv)
 
     std::cin >> j;
     int portRFCOMM = 0;
-    if (j < portsRFCOMMFound.size())
+    if ((0 < j) && (j <= portsRFCOMMFound.size()))
     {
-        portRFCOMM = portsRFCOMMFound[j];
+        portRFCOMM = portsRFCOMMFound[j-1];
     } else
     {
-        printf("Bad choice!\n");
+        printf("Exit!\n");
         return EXIT_SUCCESS;
     }
 
