@@ -77,11 +77,11 @@ void JSONHandler::dataReceivedCallback(const UInt8 sessionID, const UInt32 messa
 
     root1["parameters"] = parameters1;
     std::string notificationString = jsonToString( root1 );
-    UInt8* pData;
-    pData = new UInt8[notificationString.length() + 1];
-    memcpy (pData, notificationString.c_str(), notificationString.length() + 1);
+    UInt8* pData1;
+    pData1 = new UInt8[notificationString.length() + 1];
+    memcpy (pData1, notificationString.c_str(), notificationString.length() + 1);
     mProtocolHandler -> sendData(sessionID,  AxisCore::SERVICE_TYPE_RPC, 
-        notificationString.size() + 1, pData, false);
+        notificationString.size() + 1, pData1, false);
 
 }
 /*end of methods from IProtocolObserver*/

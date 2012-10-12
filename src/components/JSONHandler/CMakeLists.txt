@@ -1,8 +1,21 @@
 cmake_minimum_required(VERSION 2.8)
 project (jsonHandler) 
 
-include_directories (./include/ ../../thirdPartyLibs/jsoncpp/include/ ../../thirdPartyLibs/axisCore/include ../../thirdPartyLibs/axisCore/ ../../thirdPartyLibs/axisCore/src) 
-add_library(jsonHandler ./src/JSONHandler.cpp ./src/MobileRPCMessage.cpp ./src/MobileRPCRequest.cpp ./src/MobileRPCResponse.cpp ./src/MobileRPCNotification.cpp ./src/MobileRPCFactory.cpp)
+include_directories (./include/
+                     ../../thirdPartyLibs/jsoncpp/include/
+                     ../../thirdPartyLibs/axisCore/include
+                     ../../thirdPartyLibs/axisCore/
+                     ../../thirdPartyLibs/axisCore/src
+                    ) 
+
+add_library(jsonHandler 
+                  ./src/JSONHandler.cpp
+                  ./src/MobileRPCMessage.cpp
+                  ./src/MobileRPCRequest.cpp
+                  ./src/MobileRPCResponse.cpp
+                  ./src/MobileRPCNotification.cpp
+                  ./src/MobileRPCFactory.cpp
+           )
 
 include(ExternalProject)
 ExternalProject_Add(
