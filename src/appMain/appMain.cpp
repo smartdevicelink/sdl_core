@@ -80,7 +80,7 @@ int main(int argc, char** argv)
     if (0 < portsRFCOMMFound.size())
     {
         printf("Found %d ports on %s device\n", portsRFCOMMFound.size(), discoveryDeviceAddr.c_str());
-        printf("Please make you choice:\n");
+        printf("Please make your choice:\n");
     } else
     {
         printf("No any ports discovered!\n");
