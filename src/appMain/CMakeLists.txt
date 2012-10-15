@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-set (PROJECT appMain)
+set (PROJECT appLinkCore)
 project (${PROJECT}) 
 
 set(CMAKE_INSTALL_PREFIX .)

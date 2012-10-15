@@ -2,9 +2,11 @@
 #include "JSONHandler/JSONHandler.h"
 #include <algorithm>
 #include <string.h>
+#include <stdio.h>
 #include <json/reader.h>
 #include <json/writer.h>
 #include "JSONHandler/RegisterAppInterfaceResponse.h"
+#include <algorithm>
 
 
 JSONHandler::JSONHandler( AxisCore::ProtocolHandler * protocolHandler )
@@ -37,28 +39,61 @@ void JSONHandler::sessionEndedCallback(const UInt8 sessionID)
 
 void JSONHandler::dataReceivedCallback(const UInt8 sessionID, const UInt32 messageID, const UInt32 dataSize)
 {
-    UInt8 *data = new UInt8[dataSize];
+    UInt8 *data = new UInt8[dataSize+1];
+    memset(data, 0, dataSize+1);
 
     mProtocolHandler -> receiveData(sessionID, messageID, AxisCore::SERVICE_TYPE_RPC, dataSize, data);
 
-    mCurrentMessage = createObjectFromJSON( std::string((char *)data, dataSize) );
+    std::string str = std::string( (const char*)data, dataSize);
+
+    std::string str1 = "";
+    for (int i=0; i<str.size(); i++)
+    {
+        if ((str[i] != 0x09) && (str[i] != 0x20) && (str[i] != 0x0A))
+        {
+            str1 += str[i];
+        }
+    }
+    printf("Request string:\n%s\n", str1.c_str());
+    mCurrentMessage = createObjectFromJSON(str1);
 
     RegisterAppInterfaceResponse response = mFactory -> createRegisterAppInterfaceResponse( *mCurrentMessage );
-    Json::Value parameters = mFactory -> serializeRegisterAppInterfaceResponse( response );
 
+    Json::Value parameters = mFactory -> serializeRegisterAppInterfaceResponse( response );
     Json::Value root = createJSONFromObject( response );
     if ( root.isNull() )
     {
         return;
     }
-
     root["parameters"] = parameters;
     std::string responseString = jsonToString( root );
+    printf("Response string:\n%s\n", responseString.c_str());
     UInt8* pData;
     pData = new UInt8[responseString.length() + 1];
     memcpy (pData, responseString.c_str(), responseString.length() + 1);
     mProtocolHandler -> sendData(sessionID,  AxisCore::SERVICE_TYPE_RPC, 
         responseString.size() + 1, pData, false);
+
+
+    // OnHMIStatus
+    OnHMIStatus notification 	= mFactory->createOnHMIStatus();
+    Json::Value parameters1 	= mFactory->serializeOnHMIStatus( notification );
+
+    Json::Value root1 = createJSONFromObject( notification );
+    if ( root1.isNull() )       	
+    {
+        return;
+    }
+
+    root1["parameters"] = parameters1;
+    std::string notificationString = jsonToString( root1 );
+    printf("Notification string:\n%s\n", notificationString.c_str());
+    UInt8* pData1;
+    pData1 = new UInt8[notificationString.length() + 1];
+    memcpy (pData1, notificationString.c_str(), notificationString.length() + 1);
+    mProtocolHandler -> sendData(sessionID,  AxisCore::SERVICE_TYPE_RPC, 
+        notificationString.size() + 1, pData1, false);
+
 }
 /*end of methods from IProtocolObserver*/
 

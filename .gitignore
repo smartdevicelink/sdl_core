@@ -1,0 +1,8 @@
+*.a
+*.cmake
+bin
+CMakeFiles
+*-prefix
+Makefile
+CMakeCache.txt
+install_manifest.txt

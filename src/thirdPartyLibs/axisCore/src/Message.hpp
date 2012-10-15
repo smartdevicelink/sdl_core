@@ -24,11 +24,6 @@ public:
     UInt32 getTotalDataBytes()  { return mTotalDataBytes; }
 
     /**
-      * Get message ID
-      */
-    UInt32 getMessageID()       { return mMessageID; }
-
-    /**
       * Add consecutive message to multiframe message
       * @param header Message header
       * @param data Data array
@@ -38,7 +33,6 @@ public:
 private:
     bool checkMultiFrameSubMessageOrder(const ProtocolPacketHeader &header);
 
-    UInt32 mMessageID;
     UInt32 mTotalDataBytes;    
     UInt8 *mData;    
     bool mIsMultiFrame;

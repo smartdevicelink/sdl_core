@@ -25,9 +25,9 @@ public:
         CMessage::generateInitialMessage();
         mHandler = new ProtocolHandler(this, 0);
         mHandler->dataReceived();        
-        //CMessage::generateSingleMessage("Hello ?");
-        CMessage::generateMultipleMessages("Hello ?", 5);
-        for (int i = 0 ; i < 5 ; i++)
+        CMessage::generateSingleMessage("Hello ?");
+        //CMessage::generateMultipleMessages("Hello ?", 5);
+        //for (int i = 0 ; i < 5 ; i++)
             mHandler->dataReceived();
 
         //CMessage::generateFinalMessage();

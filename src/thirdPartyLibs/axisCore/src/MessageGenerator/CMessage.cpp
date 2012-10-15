@@ -60,7 +60,7 @@ void CMessage::generateInitialMessage()
    sFrameData      = 0x01; //Start session
    sSessionID      = 0;
    sDataSize       = 0x00;
-   sMessageID      = rand() % 0xFFFFFFFF + 1;
+   //sMessageID      = rand() % 0xFFFFFFFF + 1;
 
    dispayField();
 
@@ -75,9 +75,9 @@ void CMessage::generateInitialMessage()
    memcpy(sPacketData + 2, &sFrameData, 1);
    memcpy(sPacketData + 3, &sSessionID, 1);
    memcpy(sPacketData + 4, &sDataSize, 4);
-   memcpy(sPacketData + 8, &sMessageID, 4);
+   //memcpy(sPacketData + 8, &sMessageID, 4);
 
-   blobQueue.push(Blob((UInt8*)sPacketData, 12, blobQueue.size()));
+   blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
 }
 
 void CMessage::generateSingleMessage(std::string payload)
@@ -89,11 +89,11 @@ void CMessage::generateSingleMessage(std::string payload)
    sFrameData      = 0x00; //Single Frame
    sSessionID      = 0;
    sDataSize       = payload.length() + 1; //
-   sMessageID      = rand() % 0xFFFFFFFF + 1;
+   //sMessageID      = rand() % 0xFFFFFFFF + 1;
 
    dispayField();
 
-   sPacketData = malloc(12 + sDataSize);
+   sPacketData = malloc(8 + sDataSize);
 
    UInt8 firstByte = ( (sVersion << 4) & 0xF0 )
                    | ( (sCompressedFlag << 3) & 0x08)
@@ -104,12 +104,12 @@ void CMessage::generateSingleMessage(std::string payload)
    memcpy(sPacketData + 2, &sFrameData, 1);
    memcpy(sPacketData + 3, &sSessionID, 1);
    memcpy(sPacketData + 4, &sDataSize, 4);
-   memcpy(sPacketData + 8, &sMessageID, 4);
-   memcpy(sPacketData + 12, (void*)const_cast<char*>(payload.c_str()), sDataSize);
+   //memcpy(sPacketData + 8, &sMessageID, 4);
+   memcpy(sPacketData + 8, (void*)const_cast<char*>(payload.c_str()), sDataSize);
 
    std::cout << "********    " << std::string((char*)sPacketData, sDataSize + 12) <<  std:: endl;
 
-   blobQueue.push(Blob((UInt8*)sPacketData, 12 + sDataSize, blobQueue.size()));
+   blobQueue.push(Blob((UInt8*)sPacketData, 8 + sDataSize, blobQueue.size()));
 }
 
 void CMessage::generateFinalMessage()
@@ -121,11 +121,11 @@ void CMessage::generateFinalMessage()
    sFrameData      = 0x04; //Start session
    sSessionID      = 0;
    sDataSize       = 0x00;
-   sMessageID      = rand() % 0xFFFFFFFF + 1;
+  //sMessageID      = rand() % 0xFFFFFFFF + 1;
 
    dispayField();
 
-   sPacketData = malloc(12);
+   sPacketData = malloc(8);
 
    UInt8 firstByte = ( (sVersion << 4) & 0xF0 )
                    | ( (sCompressedFlag << 3) & 0x08)
@@ -136,14 +136,14 @@ void CMessage::generateFinalMessage()
   memcpy(sPacketData + 2, &sFrameData, 1);
   memcpy(sPacketData + 3, &sSessionID, 1);
   memcpy(sPacketData + 4, &sDataSize, 4);
-  memcpy(sPacketData + 8, &sMessageID, 4);
+  //memcpy(sPacketData + 8, &sMessageID, 4);
 
-  blobQueue.push(Blob((UInt8*)sPacketData, 12, blobQueue.size()));
+  blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
 }
 
 void CMessage::generateMultipleMessages(std::string payload, int messagesQuantity)
 {
-   sMessageID      = rand() % 0xFFFFFFFF + 1;
+   //sMessageID      = rand() % 0xFFFFFFFF + 1;
 
    for(int i = 0; i < messagesQuantity; i++)
    {
@@ -196,7 +196,7 @@ void CMessage::generateMultipleMessages(std::string payload, int messagesQuantit
 
       dispayField();
 
-      sPacketData = malloc(12 + sDataSize);
+      sPacketData = malloc(8 + sDataSize);
 
       UInt8 firstByte = ( (sVersion << 4) & 0xF0 )
                         | ( (sCompressedFlag << 3) & 0x08)
@@ -207,20 +207,20 @@ void CMessage::generateMultipleMessages(std::string payload, int messagesQuantit
       memcpy(sPacketData + 2, &sFrameData, 1);
       memcpy(sPacketData + 3, &sSessionID, 1);
       memcpy(sPacketData + 4, &sDataSize, 4);
-      memcpy(sPacketData + 8, &sMessageID, 4);
+      //memcpy(sPacketData + 8, &sMessageID, 4);
 
       if(0 != i)
       {
-         memcpy(sPacketData + 12, (void*)const_cast<char*>(payload.c_str()), sDataSize);
+         memcpy(sPacketData + 8, (void*)const_cast<char*>(payload.c_str()), sDataSize);
       }
       else
       {
-         memcpy(sPacketData + 12, &totalConsecutivePayloadSize, sDataSize / 2);
-         memcpy(sPacketData + 16, &numberOfConsecutiveFrames, sDataSize / 2);
+         memcpy(sPacketData + 8, &totalConsecutivePayloadSize, 4);
+         memcpy(sPacketData + 12, &numberOfConsecutiveFrames, 4);
       }
 
 
-      blobQueue.push(Blob((UInt8*)sPacketData, 12 + sDataSize, blobQueue.size()));
+      blobQueue.push(Blob((UInt8*)sPacketData, 8 + sDataSize, blobQueue.size()));
    }
 }
 

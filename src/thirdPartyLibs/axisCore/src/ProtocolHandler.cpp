@@ -13,10 +13,10 @@ namespace AxisCore
 
 ProtocolHandler::ProtocolHandler(IProtocolObserver *observer, NsTransportLayer::CBTAdapter *btAdapter) :
                 mProtocolObserver(observer),
-                mMessageID(0),
                 mSessionID(0),
                 mState(BEFORE_HANDSHAKE),
-                mBTAdapter(btAdapter)
+                mBTAdapter(btAdapter),
+                mIncompleteMultiFrameMessage(0)
 {
     std::cout << "enter ProtocolHandler::ProtocolHandler() \n";
     if (btAdapter)
@@ -31,16 +31,14 @@ ProtocolHandler::~ProtocolHandler()
 {
     std::cout << "enter ProtocolHandler::~ProtocolHandler() \n";
 
-    std::map<UInt32, Message *>::iterator it;
-    for (it = mIncompleteMultiFrameMessages.begin() ; it != mIncompleteMultiFrameMessages.end() ; it++)
-        delete (*it).second;
+    delete mIncompleteMultiFrameMessage;
 
-    mIncompleteMultiFrameMessages.clear();
-
-    for (it = mToUpperLevelMessagesMap.begin() ; it != mToUpperLevelMessagesMap.end() ; it++)
-        delete (*it).second;
-
-    mToUpperLevelMessagesMap.clear();
+    for (int i = 0 ; i < mToUpperLevelMessagesQueue.size() ; i++)
+    {
+        delete mToUpperLevelMessagesQueue.front();
+        mToUpperLevelMessagesQueue.front() = NULL;
+        mToUpperLevelMessagesQueue.pop();
+    }
 
     std::cout << "exit ProtocolHandler::~ProtocolHandler() \n";
 }
@@ -54,7 +52,6 @@ ERROR_CODE ProtocolHandler::startSession(UInt8 servType)
                                 FRAME_TYPE_CONTROL,
                                 servType,
                                 FRAME_DATA_START_SESSION,
-                                0,
                                 0,
                                 0);
 
@@ -79,7 +76,6 @@ ERROR_CODE ProtocolHandler::endSession(UInt8 sessionID)
                                 SERVICE_TYPE_RPC,
                                 FRAME_DATA_END_SESSION,
                                 sessionID,
-                                0,
                                 0);
 
     if (mBTWriter.write(header, 0) == ERR_OK)
@@ -121,8 +117,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                     servType,
                                     0,
                                     sessionID,
-                                    dataSize,
-                                    mMessageID);
+                                    dataSize);
 
         if (!(mBTWriter.write(header, data) == ERR_OK) )
         {
@@ -152,8 +147,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                     servType,
                                     0,
                                     sessionID,
-                                    FIRST_FRAME_DATA_SIZE,
-                                    mMessageID);
+                                    FIRST_FRAME_DATA_SIZE);
 
         UInt8 *outDataFirstFrame = new UInt8[FIRST_FRAME_DATA_SIZE];
         ( (UInt32*)outDataFirstFrame)[0] = dataSize;
@@ -182,8 +176,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                             servType,
                                             ( (i % FRAME_DATA_MAX_VALUE) + 1),
                                             sessionID,
-                                            subDataSize,
-                                            mMessageID);
+                                            subDataSize);
 
                 memcpy(outDataFrame, data + (subDataSize * i), subDataSize);
 
@@ -203,8 +196,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                             servType,
                                             0x0,
                                             sessionID,
-                                            lastDataSize,
-                                            mMessageID);
+                                            lastDataSize);
 
                 memcpy(outDataFrame, data + (subDataSize * i), lastDataSize);
 
@@ -221,8 +213,6 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
         delete [] outDataFrame;
     }
 
-    mMessageID++;
-
     return ERR_OK;
 }
 
@@ -235,21 +225,36 @@ ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
     std::cout << "enter ProtocolHandler::receiveData() \n";
     ERROR_CODE retVal = ERR_OK;
 
-    if (mToUpperLevelMessagesMap.count(messageID) )
+    if (!mToUpperLevelMessagesQueue.empty() )
     {
-        Message *currentMessage = mToUpperLevelMessagesMap[messageID];
-        if (receivedDataSize == currentMessage->getTotalDataBytes() )
+        Message *currentMessage = mToUpperLevelMessagesQueue.front();
+        if (currentMessage)
         {
-            memcpy(data, currentMessage->getMessageData(), receivedDataSize);
+            if (receivedDataSize == currentMessage->getTotalDataBytes() )
+            {
+                memcpy(data, currentMessage->getMessageData(), receivedDataSize);
 
-            delete currentMessage;
-            mToUpperLevelMessagesMap.erase(messageID);
+                delete currentMessage;
+                currentMessage = NULL;
+                mToUpperLevelMessagesQueue.pop();
+            }
+            else
+            {
+                std::cout << "ProtocolHandler::receiveData() requested msg size != real Msg size \n";
+                retVal = ERR_FAIL;
+            }
         }
         else
+        {
+            std::cout << "ProtocolHandler::receiveData() !currentMessage ptr \n";
             retVal = ERR_FAIL;
+        }
     }
+
+    if (retVal)
+        std::cout << "ProtocolHandler::receiveData() returns OK \n";
     else
-        retVal = ERR_FAIL;
+        std::cout << "ProtocolHandler::receiveData() returns FAIL \n";
 
     return retVal;
 }
@@ -333,7 +338,6 @@ ERROR_CODE ProtocolHandler::sendStartAck(const UInt8 sessionID)
                                 SERVICE_TYPE_RPC,
                                 FRAME_DATA_START_SESSION_ACK,
                                 sessionID,
-                                0,
                                 0);
 
     if (mBTWriter.write(header, 0) == ERR_OK)
@@ -376,10 +380,10 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
         std::cout << "ProtocolHandler::handleMessage() case FRAME_TYPE_SINGLE \n";
         Message *message = new Message(header, data, false);
         delete [] data;
-        mToUpperLevelMessagesMap.insert(std::pair<UInt32, Message*>(header.messageID, message) );
+        mToUpperLevelMessagesQueue.push(message);
 
         if (mProtocolObserver)
-            mProtocolObserver->dataReceivedCallback(mSessionID, header.messageID, header.dataSize);
+            mProtocolObserver->dataReceivedCallback(mSessionID, 0, header.dataSize);
         else
         {
             std::cout << "ProtocolHandler::handleMessage() invalid mProtocolObserver pointer \n";
@@ -422,44 +426,38 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
     if (header.frameType == FRAME_TYPE_FIRST)
     {
         std::cout << "ProtocolHandler::handleMultiFrameMessage() : FRAME_TYPE_FIRST\n";
-        Message *multiFrameMessage = new Message(header, data, true);        
-        mIncompleteMultiFrameMessages.insert(std::pair<UInt32, Message*>(header.messageID, multiFrameMessage) );
+        delete mIncompleteMultiFrameMessage;
+        mIncompleteMultiFrameMessage = NULL;
+
+        mIncompleteMultiFrameMessage = new Message(header, data, true);
     }
     else
     {
         std::cout << "ProtocolHandler::handleMultiFrameMessage() : Consecutive frame\n";
-        if (mIncompleteMultiFrameMessages.count(header.messageID) )
-        {
-            if (mIncompleteMultiFrameMessages[header.messageID]->addConsecutiveMessage(header, data) == ERR_OK)
-            {
-                if (header.frameData == FRAME_DATA_LAST_FRAME)
-                {
-                    mToUpperLevelMessagesMap.insert(std::pair<UInt32, Message*>(header.messageID
-                                                         , mIncompleteMultiFrameMessages[header.messageID] ) );
-                    mIncompleteMultiFrameMessages.erase(header.messageID);
 
-                    if (mProtocolObserver)
-                        mProtocolObserver->dataReceivedCallback(mSessionID
-                                              , header.messageID
-                                              , mToUpperLevelMessagesMap[header.messageID]->getTotalDataBytes() );
-                    else
-                    {
-                        std::cout << "ProtocolHandler::handleMultiFrameMessage() invalid mProtocolObserver pointer \n";
-                        retVal = ERR_FAIL;
-                    }
-                }                
-            }
-            else
+        if (mIncompleteMultiFrameMessage->addConsecutiveMessage(header, data) == ERR_OK)
+        {
+            if (header.frameData == FRAME_DATA_LAST_FRAME)
             {
-                std::cout << "ProtocolHandler::handleMultiFrameMessage() : addConsecutiveMessage FAIL \n";
-                retVal = ERR_FAIL;
+                mToUpperLevelMessagesQueue.push(mIncompleteMultiFrameMessage);
+
+                if (mProtocolObserver)
+                    mProtocolObserver->dataReceivedCallback(mSessionID
+                                          , 0
+                                          , mToUpperLevelMessagesQueue.front()->getTotalDataBytes() );
+                else
+                {
+                    std::cout << "ProtocolHandler::handleMultiFrameMessage() invalid mProtocolObserver pointer \n";
+                    retVal = ERR_FAIL;
+                }
             }
         }
         else
         {
-            std::cout << "ProtocolHandler::handleMultiFrameMessage() : no messageID in mIncompleteMultiFrameMessages\n";
+            std::cout << "ProtocolHandler::handleMultiFrameMessage() : addConsecutiveMessage FAIL \n";
             retVal = ERR_FAIL;
         }
+
     }
 
     return retVal;
@@ -477,9 +475,17 @@ void ProtocolHandler::onError(BLUETOOTH_ERROR errCode)
 void ProtocolHandler::dataReceived()
 {
     std::cout << "enter ProtocolHandler::dataReceived()\n";
+    UInt32 dataSize = 0;
 
-    //UInt32 dataSize = Bluetooth::getBuffer().size();
-    UInt32 dataSize = mBTAdapter->getBuffer().size();
+    //dataSize = Bluetooth::getBuffer().size();
+
+    if (mBTAdapter)
+        dataSize = mBTAdapter->getBuffer().size();
+    else
+    {
+        std::cout << "ProtocolHandler::dataReceived() null ptr mBTAdapter\n";
+        return;
+    }
     UInt8 *data = new UInt8[dataSize];
     ProtocolPacketHeader header;
 

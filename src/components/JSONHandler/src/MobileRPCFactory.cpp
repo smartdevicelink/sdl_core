@@ -1,6 +1,7 @@
 #include "JSONHandler/MobileRPCMessage.h"
 #include "JSONHandler/MobileRPCFactory.h"
 #include "JSONHandler/JSONHandler.h"
+#include "JSONHandler/OnHMIStatus.h"
 
 MobileRPCFactory::MobileRPCFactory() {}
 MobileRPCFactory::~MobileRPCFactory() {}
@@ -69,6 +70,39 @@ Json::Value MobileRPCFactory::serializeRegisterAppInterfaceResponse( const Regis
     
     value["success"] = response.getSuccess();
     value["resultCode"] = response.getResultString();
+
+    return value;
+}
+
+OnHMIStatus MobileRPCFactory::createOnHMIStatus() const
+{
+    OnHMIStatus object(1);
+    HMILevel hmiLevel = HMILevel();
+    std::string str = std::string("NONE");
+    hmiLevel.setHMILevel(str);
+    object.setHMILevel(hmiLevel);
+
+    AudioStreamingState audioStreamingState = AudioStreamingState();
+    str = std::string("NOT_AUDIBLE");
+    audioStreamingState.setAudioStreamingState(str);
+    object.setAudioStreamingState(audioStreamingState);
+
+    SystemContext systemContext = SystemContext();
+    str = std::string("MAIN");
+    systemContext.setSystemContext(str);
+    object.setSystemContext(systemContext);
+    
+    return object;
+}
+
+Json::Value MobileRPCFactory::serializeOnHMIStatus( const OnHMIStatus & notification ) const
+{
+
+    Json::Value value;
+    
+    value["hmiLevel"] 			= notification.getHMILevel().toString();
+    value["audioStreamingState"] 	= notification.getAudioStreamingState().toString();
+    value["SystemContext"] 		= notification.getSystemContext().toString();
 
     return value;
 }

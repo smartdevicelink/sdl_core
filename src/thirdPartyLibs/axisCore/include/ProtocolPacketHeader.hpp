@@ -13,7 +13,7 @@
 namespace AxisCore
 {
 
-const UInt8 PROTOCOL_HEADER_SIZE = 12;
+const UInt8 PROTOCOL_HEADER_SIZE = 8;
 
 const UInt8 PROTOCOL_VERSION_1 = 0x01;
 
@@ -53,8 +53,7 @@ struct ProtocolPacketHeader
                              serviceType(0),
                              frameData(0),
                              sessionID(0),
-                             dataSize(0),
-                             messageID(0)
+                             dataSize(0)
     { }
 
     ProtocolPacketHeader(UInt8 _version,
@@ -63,16 +62,14 @@ struct ProtocolPacketHeader
                          UInt8 _serviceType,
                          UInt8 _frameData,
                          UInt8 _sessionID,
-                         UInt32 _dataSize,
-                         UInt32 _messageID) : 
+                         UInt32 _dataSize) :
                              version(_version),
                              compress(_compress),
                              frameType(_frameType),
                              serviceType(_serviceType),
                              frameData(_frameData),
                              sessionID(_sessionID),
-                             dataSize(_dataSize),
-                             messageID(_messageID)
+                             dataSize(_dataSize)
     { }
 
     UInt8 version;
@@ -82,7 +79,6 @@ struct ProtocolPacketHeader
     UInt8 frameData;
     UInt8 sessionID;
     UInt32 dataSize;
-    UInt32 messageID;
 };
 
 } //namespace AxisCore
