@@ -32,10 +32,10 @@ public:
 private:
 	AppMgrCore();
 
-	std::queue< RPCAppLinkObject > mQueueRPCAppLinkObjectsIncoming;
-	std::queue< RPCAppLinkObject > mQueueRPCAppLinkObjectsOutgoing;
-	std::queue< RPCBusObject > mQueueRPCBusObjectsIncoming;
-	std::queue< RPCBusObject > mQueueRPCBusObjectsOutgoing;
+	std::queue< RPCAppLinkObject* > mQueueRPCAppLinkObjectsIncoming;
+	std::queue< RPCAppLinkObject* > mQueueRPCAppLinkObjectsOutgoing;
+	std::queue< RPCBusObject* > mQueueRPCBusObjectsIncoming;
+	std::queue< RPCBusObject* > mQueueRPCBusObjectsOutgoing;
 };
 
 }; // namespace NsAppManager
