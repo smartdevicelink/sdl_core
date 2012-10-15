@@ -24,4 +24,24 @@ AppMgrCore::~AppMgrCore()
 {
 }
 
+void AppMgrCore::onMessageReceivedCallback( MobileRPCMessage * message )
+{
+}
+
+void AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
+{
+}
+
+void AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
+{
+}
+
+void AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing( void* )
+{
+}
+
+void AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
+{
+}
+
 };
