@@ -1,20 +1,17 @@
 #include <memory.h>
 #include <iostream>
+#include <stdio.h>
 
 #include "BluetoothReader.hpp"
 #include "../../../appMain/CBTAdapter.hpp"
-#include <stdio.h>
 
 namespace AxisCore
 {
 
-int maxsize = 5000;
-
 BluetoothReader::BluetoothReader()
 {
-    //TODO maxsize
-
-    mData = new UInt8[maxsize];
+    mBTAdapter = NULL;
+    mData = new UInt8[MAXIMUM_FRAME_SIZE];
 }
 
 BluetoothReader::~BluetoothReader()
@@ -36,14 +33,15 @@ ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt
     if (dataSize >= blobBufferSize )
     {
         //memcpy(mData, Bluetooth::getBuffer().buffer(), blobBufferSize);
-        //Bluetooth::releaseBuffer(Bluetooth::getBuffer() );
+       // Bluetooth::releaseBuffer(Bluetooth::getBuffer() );
 
         memcpy(mData, mBTAdapter->getBuffer().buffer(), blobBufferSize);
         mBTAdapter->releaseBuffer(mBTAdapter->getBuffer() );
     }
     else
     {
-        std::cout << "BluetoothReader::read buffer is too small for reading\n";
+        printf("%s:%d BluetoothReader::read() buffer is too small for reading\n"
+               , __FILE__, __LINE__);
         return ERR_FAIL;
     }
 
@@ -66,15 +64,10 @@ ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt
     offset += sizeof(UInt8);
     memcpy(&header.sessionID, mData + offset, sizeof(UInt8) );
     offset += sizeof(UInt8);
-    //memcpy(&header.dataSize, mData + offset, sizeof(UInt32) );
-    //offset += sizeof(UInt32);
-    //printf("offset = %d; dataSize = %d\n", offset, header.dataSize);
     header.dataSize = (mData[offset++]<<24);
     header.dataSize |= (mData[offset++]<<16);
     header.dataSize |= (mData[offset++]<<8);
     header.dataSize |= mData[offset++];
-    printf("offset = %d; dataSize = %d\n", offset, header.dataSize);
-
 
     if (data)
         memcpy(data, mData + offset, header.dataSize);

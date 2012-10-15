@@ -4,9 +4,7 @@
 #include "utils/misc/Types.hpp"
 
 
-
 //TODO TMP
-//#include "MessageGenerator/CMessage.hpp"
 #include "MessageGenerator/CMessage.hpp"
 
 
@@ -37,6 +35,8 @@ const UInt8 FRAME_DATA_END_SESSION = 0x04;
 
 const UInt8 FRAME_DATA_MAX_VALUE = 0xFF;
 
+const UInt32 MAXIMUM_FRAME_SIZE = 5000;
+
 /**
  * If FRAME_TYPE_CONSECUTIVE :
  */
@@ -44,7 +44,11 @@ const UInt8 FRAME_DATA_LAST_FRAME = 0x00;
 
 const UInt8 FIRST_FRAME_DATA_SIZE = 0x08;
 
-
+/**
+ * \struct ProtocolPacketHeader
+ * \brief Header for the Protocol level messages
+ * \author amarkosov
+ */
 struct ProtocolPacketHeader
 {
     ProtocolPacketHeader() : version(0),

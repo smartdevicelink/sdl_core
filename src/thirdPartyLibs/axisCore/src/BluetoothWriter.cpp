@@ -1,19 +1,17 @@
 #include <memory.h>
+#include <stdio.h>
+#include <iostream>
 
 #include "BluetoothWriter.hpp"
 #include "../../../appMain/CBTAdapter.hpp"
-#include <stdio.h>
 
 namespace AxisCore
 {
 
-int _maxsize = 5000;
-
 BluetoothWriter::BluetoothWriter()
 {
-    //TODO maxsize
     mBTAdapter = NULL;
-    mData = new UInt8[_maxsize];
+    mData = new UInt8[MAXIMUM_FRAME_SIZE];
 }
 
 BluetoothWriter::~BluetoothWriter()
@@ -44,9 +42,6 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
     memcpy(mData + offset, &header.sessionID, sizeof(UInt8) );
     offset += sizeof(UInt8);
 
-    //memcpy(mData + offset, &header.dataSize, sizeof(UInt32) );
-    //offset += sizeof(UInt32);
-
     UInt8 tmp = header.dataSize >> 24;
     memcpy(mData + offset++, &tmp, sizeof(UInt8) );
     tmp = header.dataSize >> 16;
@@ -58,14 +53,19 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
 
     if (data)
     {
-        if ( (offset + header.dataSize) < _maxsize)
+        if ( (offset + header.dataSize) < MAXIMUM_FRAME_SIZE)
             memcpy(mData + offset, data, header.dataSize);
         else
+        {
+            printf("%s:%d BluetoothWriter::write() buffer is too small for writing\n", __FILE__, __LINE__);
             return ERR_FAIL;
+        }
     }
 
     if (mBTAdapter)
         mBTAdapter->sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_SIZE);
+    else
+        return ERR_FAIL;
 
     return ERR_OK;
 }
