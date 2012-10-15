@@ -6,6 +6,11 @@
 namespace AxisCore
 {
 
+/**
+ * \class Message
+ * \brief Single or multiframe message (protocol level)
+ * \author amarkosov
+ */
 class Message
 {
 public:

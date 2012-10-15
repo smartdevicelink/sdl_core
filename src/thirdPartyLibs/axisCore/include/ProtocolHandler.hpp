@@ -19,6 +19,11 @@ namespace AxisCore
 
 class IProtocolObserver;
 
+/**
+ * \class ProtocolHandler
+ * \brief Protocol level of data exchange control
+ * \author amarkosov
+ */
 class ProtocolHandler : public Bluetooth::IBluetoothHandler
 {
 public:
@@ -52,7 +57,7 @@ public:
     /**
      * Receive Data
      * @param sessionID Id of session
-     * @param messageID Id of message
+     * @param messageID Id of message (currently unused!)
      * @param servType Service type (always RPC (0x07) )
      * @param receivedDataSize Received data size (bytes)
      * @param data Data array
@@ -68,21 +73,20 @@ private:
 
     enum State 
     {
-        BEFORE_HANDSHAKE,
-        HANDSHAKE_IN_PROGRESS,
+        HANDSHAKE_NOT_DONE,
         HANDSHAKE_DONE
     };
 
     ERROR_CODE handleReceivedData(const ProtocolPacketHeader &header, UInt8 *data);
     ERROR_CODE sendStartAck(const UInt8 sessionID);
     ERROR_CODE handleMessage(const ProtocolPacketHeader &header, UInt8 *data);
+    ERROR_CODE handleControlMessage(const ProtocolPacketHeader &header, UInt8 *data);
     ERROR_CODE handleMultiFrameMessage(const ProtocolPacketHeader &header, UInt8 *data);
 
     IProtocolObserver *mProtocolObserver;
-    UInt8 mSessionID;
-    UInt8 mState;
-    std::queue<Message *> mToUpperLevelMessagesQueue;
-    Message *mIncompleteMultiFrameMessage;
+    std::map<UInt8, UInt8> mSessionStates;
+    std::map<UInt8, std::queue<Message *> > mToUpperLevelMessagesQueues;
+    std::map<UInt8, Message *> mIncompleteMultiFrameMessages;
     BluetoothReader mBTReader;
     BluetoothWriter mBTWriter;
     NsTransportLayer::CBTAdapter *mBTAdapter;

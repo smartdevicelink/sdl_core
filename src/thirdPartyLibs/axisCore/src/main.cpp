@@ -5,8 +5,6 @@
 //#include "MessageGenerator/CMessage.hpp"
 //#include "MessageGenerator/CMessage.cpp"
 
-//CMessage msg;
-
 using namespace std;
 using namespace AxisCore;
 
@@ -22,13 +20,19 @@ public:
         cout << "enter ProtocolObserver() \n";
         mSessionID = 0;
 
-        CMessage::generateInitialMessage();
+        CMessage::generateInitialMessage(0x07, 0);
         mHandler = new ProtocolHandler(this, 0);
-        mHandler->dataReceived();        
-        CMessage::generateSingleMessage("Hello ?");
+        mHandler->dataReceived();
+        CMessage::generateInitialMessage(0x07, 0);
+        mHandler->dataReceived();
+        std::string str;
+        for (int i = 0 ; i < 278 ; i++)
+            str.append("1");
+        CMessage::generateSingleMessage(0x07, 0, str);
         //CMessage::generateMultipleMessages("Hello ?", 5);
         //for (int i = 0 ; i < 5 ; i++)
             mHandler->dataReceived();
+            mHandler->sendData(0, 7, 278, (UInt8*)const_cast<char*>(str.c_str()), false);
 
         //CMessage::generateFinalMessage();
         //mHandler->dataReceived();
@@ -69,16 +73,9 @@ public:
 int main()
 {
     cout << "enter main() \n";
-
     ProtocolObserver *observer = new ProtocolObserver();
-    //ProtocolHandler hand(observer);
-    //hand.startSession(0x07);
-    //hand.endSession(0);
-
-
 
     delete observer;
-
     cout << "exit main() \n";
     return 0;
 }

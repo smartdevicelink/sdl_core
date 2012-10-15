@@ -6,6 +6,11 @@
 namespace AxisCore
 {
 
+/**
+ * \class IProtocolObserver
+ * \brief Callbacks for ProtocolHandler class
+ * \author amarkosov
+ */
 class IProtocolObserver
 {
 public:
