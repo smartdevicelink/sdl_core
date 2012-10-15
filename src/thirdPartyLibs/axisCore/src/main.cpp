@@ -20,15 +20,15 @@ public:
         cout << "enter ProtocolObserver() \n";
         mSessionID = 0;
 
-        CMessage::generateInitialMessage();
+        CMessage::generateInitialMessage(0x07, 0);
         mHandler = new ProtocolHandler(this, 0);
         mHandler->dataReceived();
-        CMessage::generateInitialMessage();
+        CMessage::generateInitialMessage(0x07, 0);
         mHandler->dataReceived();
         std::string str;
         for (int i = 0 ; i < 278 ; i++)
             str.append("1");
-        CMessage::generateSingleMessage(str);
+        CMessage::generateSingleMessage(0x07, 0, str);
         //CMessage::generateMultipleMessages("Hello ?", 5);
         //for (int i = 0 ; i < 5 ; i++)
             mHandler->dataReceived();

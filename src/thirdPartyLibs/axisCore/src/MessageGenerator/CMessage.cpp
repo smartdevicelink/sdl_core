@@ -63,14 +63,14 @@ void CMessage::saveSentHeader()
    sentHeader.dataSize = sDataSize;
 }
 
-void CMessage::generateInitialMessage()
+void CMessage::generateInitialMessage(UInt8 serviceType, UInt8 sessionID)
 {
    sVersion        = 0x01;
    sCompressedFlag = 0;
    sFrameType      = 0x00; //Control frame
-   sServiceType    = 0x07;
+   sServiceType    = serviceType;
    sFrameData      = 0x01; //Start session
-   sSessionID      = 0;
+   sSessionID      = sessionID;
    sDataSize       = 0x00;
    //sMessageID      = rand() % 0xFFFFFFFF + 1;
 
@@ -92,14 +92,14 @@ void CMessage::generateInitialMessage()
    blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
 }
 
-void CMessage::generateSingleMessage(std::string payload)
+void CMessage::generateSingleMessage(UInt8 serviceType, UInt8 sessionID, std::string payload)
 {
    sVersion        = 0x01;
    sCompressedFlag = 0;
    sFrameType      = 0x01; //Single
-   sServiceType    = 0x07;
+   sServiceType    = serviceType;
    sFrameData      = 0x00; //Single Frame
-   sSessionID      = 0;
+   sSessionID      = sessionID;
    sDataSize       = payload.length() + 1; //
    //sMessageID      = rand() % 0xFFFFFFFF + 1;
 
@@ -124,14 +124,14 @@ void CMessage::generateSingleMessage(std::string payload)
    blobQueue.push(Blob((UInt8*)sPacketData, 8 + sDataSize, blobQueue.size()));
 }
 
-void CMessage::generateFinalMessage()
+void CMessage::generateFinalMessage(UInt8 serviceType, UInt8 sessionID)
 {
    sVersion        = 0x01;
    sCompressedFlag = 0;
    sFrameType      = 0x00; //Control frame
-   sServiceType    = 0x07;
+   sServiceType    = serviceType;
    sFrameData      = 0x04; //Start session
-   sSessionID      = 0;
+   sSessionID      = sessionID;
    sDataSize       = 0x00;
   //sMessageID      = rand() % 0xFFFFFFFF + 1;
 
@@ -153,7 +153,7 @@ void CMessage::generateFinalMessage()
   blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
 }
 
-void CMessage::generateMultipleMessages(std::string payload, int messagesQuantity)
+void CMessage::generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std::string payload, int messagesQuantity)
 {
    //sMessageID      = rand() % 0xFFFFFFFF + 1;
 
@@ -171,7 +171,7 @@ void CMessage::generateMultipleMessages(std::string payload, int messagesQuantit
          sFrameType   = 0x03; //Consecutive Frame
       }
 
-      sServiceType    = 0x07;
+      sServiceType    = serviceType;
 
       if(0 == i)
       {
@@ -190,7 +190,7 @@ void CMessage::generateMultipleMessages(std::string payload, int messagesQuantit
          sFrameData = i % 0xFF;
       }
 
-      sSessionID      = 0;
+      sSessionID      = sessionID;
 
       UInt32 numberOfConsecutiveFrames;
       UInt32 totalConsecutivePayloadSize;
@@ -236,12 +236,12 @@ void CMessage::generateMultipleMessages(std::string payload, int messagesQuantit
    }
 }
 
-UInt32 CMessage::verify(ProtocolPacketHeader& header)
+UInt32 CMessage::verify(ProtocolPacketHeader& header, UInt32 fieldsToValidate)
 {
    UInt32 returnValue;
 
    //Get zero bit. Corresponds to version field
-   if(getBit(header.fieldsToValidate, 0))
+   if(getBit(fieldsToValidate, 0))
    {
       if(header.version == sentHeader.version)
       {
@@ -258,7 +258,7 @@ UInt32 CMessage::verify(ProtocolPacketHeader& header)
    }
 
    //Get first bit. Corresponds to compress field
-   if(getBit(header.fieldsToValidate, 1))
+   if(getBit(fieldsToValidate, 1))
    {
       if(header.compress == sentHeader.compress)
       {
@@ -275,7 +275,7 @@ UInt32 CMessage::verify(ProtocolPacketHeader& header)
    }
 
    //Get second bit. Corresponds to frameType field
-   if(getBit(header.fieldsToValidate, 2))
+   if(getBit(fieldsToValidate, 2))
    {
       if(header.frameType == sentHeader.frameType)
       {
@@ -292,7 +292,7 @@ UInt32 CMessage::verify(ProtocolPacketHeader& header)
    }
 
    //Get third bit. Corresponds to serviceType field
-   if(getBit(header.fieldsToValidate, 3))
+   if(getBit(fieldsToValidate, 3))
    {
       if(header.serviceType == sentHeader.serviceType)
       {
@@ -309,7 +309,7 @@ UInt32 CMessage::verify(ProtocolPacketHeader& header)
    }
 
    //Get fourth bit. Corresponds to frameData field
-   if(getBit(header.fieldsToValidate, 4))
+   if(getBit(fieldsToValidate, 4))
    {
       if(header.frameData == sentHeader.frameData)
       {
@@ -326,7 +326,7 @@ UInt32 CMessage::verify(ProtocolPacketHeader& header)
    }
 
    //Get fifth bit. Corresponds to sessionID field
-   if(getBit(header.fieldsToValidate, 5))
+   if(getBit(fieldsToValidate, 5))
    {
       if(header.sessionID == sentHeader.sessionID)
       {
@@ -343,7 +343,7 @@ UInt32 CMessage::verify(ProtocolPacketHeader& header)
    }
 
    //Get sixth bit. Corresponds to dataSize field
-   if(getBit(header.fieldsToValidate, 6))
+   if(getBit(fieldsToValidate, 6))
    {
       if(header.dataSize == sentHeader.dataSize)
       {

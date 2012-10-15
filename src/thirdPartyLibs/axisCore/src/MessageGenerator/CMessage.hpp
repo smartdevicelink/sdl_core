@@ -20,12 +20,12 @@ public:
    static Blob getNextBlob();
    static void releaseCurrentBlob(const Blob &blob);
 
-   static void generateInitialMessage();
-   static void generateFinalMessage();
-   static void generateSingleMessage(std::string payload);
-   static void generateMultipleMessages(std::string payload, int messagesQuantity);
+   static void generateInitialMessage(UInt8 serviceType, UInt8 sessionID);
+   static void generateFinalMessage(UInt8 serviceType, UInt8 sessionID);
+   static void generateSingleMessage(UInt8 serviceType, UInt8 sessionID, std::string payload);
+   static void generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std::string payload, int messagesQuantity);
 
-   static UInt32 verify(ProtocolPacketHeader& header);
+   static UInt32 verify(ProtocolPacketHeader& header, UInt32 fieldsToValidate);
 
 private:
 
