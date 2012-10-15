@@ -1,0 +1,30 @@
+* Introduction
+  ================
+  appLinkCore is an application which manages the transport, connection and communication between a head unit and mobile device.
+
+* OS and Hardware
+  =========
+  Ubuntu 12.04 LTE OS on the PC with USB-dongle
+  Application has been tested using 2 types of USB-dongle:
+  D-Link DBT-122
+  STLab B-121mini
+
+* External components
+  ===================
+  For build application we need:
+  libbluetooth3, the BlueZ library
+  libbluetooth-dev, the development files to link to the BluetZ library.
+  Install libraries:
+  sudo apt-get install libbluetooth3
+  sudo apt-get install libbluetooth-dev
+  We are using cmake to create build configurations.
+  Install cmake:
+  sudo apt-get install cmake
+
+* Build application
+  =================
+  enter src/appMain directory.
+  Create build configuration using cmake:
+  cmake CMakeLists.txt
+  Make project:
+  make
