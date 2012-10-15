@@ -42,6 +42,11 @@ private:
 	std::queue< RPCAppLinkObject* > mQueueRPCAppLinkObjectsOutgoing;
 	std::queue< RPCBusObject* > mQueueRPCBusObjectsIncoming;
 	std::queue< RPCBusObject* > mQueueRPCBusObjectsOutgoing;
+
+	System::Mutex mMtxRPCAppLinkObjectsIncoming;
+	System::Mutex mMtxRPCAppLinkObjectsOutgoing;
+	System::Mutex mMtxRPCBusObjectsIncoming;
+	System::Mutex mMtxRPCBusObjectsOutgoing;
 };
 
 }; // namespace NsAppManager

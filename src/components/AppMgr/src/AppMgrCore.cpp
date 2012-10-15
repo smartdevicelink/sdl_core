@@ -26,6 +26,11 @@ AppMgrCore::~AppMgrCore()
 
 void AppMgrCore::onMessageReceivedCallback( MobileRPCMessage * message )
 {
+	mMtxRPCAppLinkObjectsIncoming.Lock();
+
+	mQueueRPCAppLinkObjectsIncoming.push((RPCAppLinkObject *)message);
+	
+	mMtxRPCAppLinkObjectsIncoming.Unlock();
 }
 
 void AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
