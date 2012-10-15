@@ -9,11 +9,12 @@
 #define RPCAPPLINKFACTORY_H_
 
 #include "AppMgr/RPCAppLinkObject.h"
+#include "JSONHandler/MobileRPCFactory.h"
 
 namespace NsAppManager
 {
 	
-class RPCAppLinkFactory
+class RPCAppLinkFactory: public MobileRPCFactory
 {
 public:
 	~RPCAppLinkFactory( );

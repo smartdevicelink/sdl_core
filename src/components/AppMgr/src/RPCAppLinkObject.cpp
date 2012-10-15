@@ -9,16 +9,33 @@
 
 namespace NsAppManager
 {
-	
-RPCAppLinkObject::RPCAppLinkObject( )
-{
-	// TODO Auto-generated constructor stub
 
+RPCAppLinkObject::RPCAppLinkObject( unsigned int protocolVersion, MessageType messageType )
+	:MobileRPCMessage(protocolVersion, messageType)
+{
 }
 
+RPCAppLinkObject::RPCAppLinkObject( unsigned int protocolVersion, MessageType messageType,
+									std::string functionName )
+	:MobileRPCMessage(protocolVersion, messageType, functionName)
+{
+}
+									
+RPCAppLinkObject::RPCAppLinkObject( unsigned int protocolVersion, MessageType messageType,
+									unsigned int functionID )
+	:MobileRPCMessage(protocolVersion, messageType, functionID)
+{
+}
+									
+RPCAppLinkObject::RPCAppLinkObject( unsigned int protocolVersion, MessageType messageType,
+				  unsigned int correlationID, std::string functionName,
+				  unsigned int functionID, unsigned int messageSize )
+	:MobileRPCMessage(protocolVersion, messageType, correlationID, functionName, functionID, messageSize)
+{
+}
+				  
 RPCAppLinkObject::~RPCAppLinkObject( )
 {
-	// TODO Auto-generated destructor stub
 }
 
 };

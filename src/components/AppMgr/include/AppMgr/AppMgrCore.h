@@ -11,6 +11,13 @@
 #include "IApplication.h"
 #include "AppMgrRegistry.h"
 #include "AppPolicy.h"
+#include "RPCAppLinkObject.h"
+#include "RPCBusObject.h"
+#include "JSONHandler/IRPCMessagesObserver.h"
+#include "JSONHandler/MobileRPCMessage.h"
+#include "system.h"
+
+#include <queue>
 
 namespace NsAppManager
 {
@@ -24,6 +31,11 @@ public:
 
 private:
 	AppMgrCore();
+
+	std::queue< RPCAppLinkObject > mQueueRPCAppLinkObjectsIncoming;
+	std::queue< RPCAppLinkObject > mQueueRPCAppLinkObjectsOutgoing;
+	std::queue< RPCBusObject > mQueueRPCBusObjectsIncoming;
+	std::queue< RPCBusObject > mQueueRPCBusObjectsOutgoing;
 };
 
 }; // namespace NsAppManager
