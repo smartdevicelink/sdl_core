@@ -2,5 +2,6 @@
 
 int main()
 {
-    return 0;
+	NsAppManager::AppMgr& appManager = NsAppManager::AppMgr::getInstance();
+	return 0;
 }

@@ -17,7 +17,7 @@ namespace NsAppManager
 class RPCAppLinkFactory: public MobileRPCFactory
 {
 public:
-	~RPCAppLinkFactory( );
+	virtual ~RPCAppLinkFactory( );
 	static RPCAppLinkFactory& getInstance();
 
 	RPCAppLinkObject* createNewRPCAppLinkObject();

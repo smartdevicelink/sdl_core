@@ -9,6 +9,7 @@ class MobileRPCMessage
 public:
     enum MessageType { REQUEST = 0x0, RESPONSE = 0x1, NOTIFICATION = 0x2, UNDEFINED };
 
+	
 public:
     MobileRPCMessage( unsigned int protocolVersion, MessageType messageType );
     MobileRPCMessage( unsigned int protocolVersion, MessageType messageType, 
