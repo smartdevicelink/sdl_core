@@ -4,10 +4,17 @@
 
 * OS and Hardware
   =========
-  Ubuntu 12.04 LTE OS on the PC with USB-dongle
+  Ubuntu 12.04.1 LTS OS on the PC with USB-dongle
   Application has been tested using 2 types of USB-dongle:
   D-Link DBT-122
   STLab B-121mini
+
+  * External components
+  ===================
+  For start application we need:
+  libbluetooth3, the BlueZ library
+  Install library:
+  sudo apt-get install libbluetooth3
 
 * Running application
   ====================
