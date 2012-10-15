@@ -19,6 +19,7 @@ UInt8 CMessage::sSessionID = 0;
 UInt32 CMessage::sDataSize = 0;
 UInt32 CMessage::sMessageID = 0;
 void*  CMessage::sPacketData = 0;
+ProtocolPacketHeader CMessage::sentHeader = ProtocolPacketHeader();
 std::queue<Blob> CMessage::blobQueue = std::queue<Blob>();
 
 /*void CMessage::generate()
@@ -49,6 +50,17 @@ void CMessage::dispayField()
 
    std::cout << std::hex /*<< std::setw(18)*/ << (int)sDataSize
                          << std::setw(18) << (int)sMessageID << std::endl;
+}
+
+void CMessage::saveSentHeader()
+{
+   sentHeader.version = sVersion;
+   sentHeader.compress = sCompressedFlag;
+   sentHeader.frameType = sFrameType;
+   sentHeader.serviceType = sServiceType;
+   sentHeader.frameData = sFrameData;
+   sentHeader.sessionID = sSessionID;
+   sentHeader.dataSize = sDataSize;
 }
 
 void CMessage::generateInitialMessage()
@@ -222,6 +234,147 @@ void CMessage::generateMultipleMessages(std::string payload, int messagesQuantit
 
       blobQueue.push(Blob((UInt8*)sPacketData, 8 + sDataSize, blobQueue.size()));
    }
+}
+
+UInt32 CMessage::verify(ProtocolPacketHeader& header)
+{
+   UInt32 returnValue;
+
+   //Get zero bit. Corresponds to version field
+   if(getBit(header.fieldsToValidate, 0))
+   {
+      if(header.version == sentHeader.version)
+      {
+         clearBit(returnValue, 0);
+      }
+      else
+      {
+         setBit(returnValue, 0);
+      }
+   }
+   else
+   {
+      clearBit(returnValue, 0);
+   }
+
+   //Get first bit. Corresponds to compress field
+   if(getBit(header.fieldsToValidate, 1))
+   {
+      if(header.compress == sentHeader.compress)
+      {
+         clearBit(returnValue, 1);
+      }
+      else
+      {
+         setBit(returnValue, 1);
+      }
+   }
+   else
+   {
+      clearBit(returnValue, 1);
+   }
+
+   //Get second bit. Corresponds to frameType field
+   if(getBit(header.fieldsToValidate, 2))
+   {
+      if(header.frameType == sentHeader.frameType)
+      {
+         clearBit(returnValue, 2);
+      }
+      else
+      {
+         setBit(returnValue, 2);
+      }
+   }
+   else
+   {
+      clearBit(returnValue, 2);
+   }
+
+   //Get third bit. Corresponds to serviceType field
+   if(getBit(header.fieldsToValidate, 3))
+   {
+      if(header.serviceType == sentHeader.serviceType)
+      {
+         clearBit(returnValue, 3);
+      }
+      else
+      {
+         setBit(returnValue, 3);
+      }
+   }
+   else
+   {
+      clearBit(returnValue, 3);
+   }
+
+   //Get fourth bit. Corresponds to frameData field
+   if(getBit(header.fieldsToValidate, 4))
+   {
+      if(header.frameData == sentHeader.frameData)
+      {
+         clearBit(returnValue, 4);
+      }
+      else
+      {
+         setBit(returnValue, 4);
+      }
+   }
+   else
+   {
+      clearBit(returnValue, 4);
+   }
+
+   //Get fifth bit. Corresponds to sessionID field
+   if(getBit(header.fieldsToValidate, 5))
+   {
+      if(header.sessionID == sentHeader.sessionID)
+      {
+         clearBit(returnValue, 5);
+      }
+      else
+      {
+         setBit(returnValue, 5);
+      }
+   }
+   else
+   {
+      clearBit(returnValue, 5);
+   }
+
+   //Get sixth bit. Corresponds to dataSize field
+   if(getBit(header.fieldsToValidate, 6))
+   {
+      if(header.dataSize == sentHeader.dataSize)
+      {
+         clearBit(returnValue, 6);
+      }
+      else
+      {
+         setBit(returnValue, 6);
+      }
+   }
+   else
+   {
+      clearBit(returnValue, 6);
+   }
+
+   return returnValue;
+}
+
+int CMessage::getBit(const UInt32 value, const UInt32 position)
+{
+   return (value & ( 1 << position )) >> position;
+}
+
+void CMessage::setBit(UInt32 value, const UInt32 position)
+{
+   value |= 1 << position;
+}
+
+void CMessage::clearBit(UInt32 value, const UInt32 position)
+{
+   value &= ~(1 << position);
 }
 
 /*void CMessage::write()

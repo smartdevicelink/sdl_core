@@ -72,6 +72,7 @@ struct ProtocolPacketHeader
                              dataSize(_dataSize)
     { }
 
+    UInt32 fieldsToValidate;
     UInt8 version;
     bool compress;
     UInt8 frameType;

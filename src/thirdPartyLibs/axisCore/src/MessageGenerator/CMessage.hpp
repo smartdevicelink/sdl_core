@@ -7,8 +7,12 @@
 #include "../../utils/misc/Types.hpp"
 #include "../../transport/bt/Blob.hpp"
 
+#include "../../include/ProtocolPacketHeader.hpp"
+
 namespace AxisCore
 {
+
+struct ProtocolPacketHeader;
 
 class CMessage
 {
@@ -21,6 +25,8 @@ public:
    static void generateSingleMessage(std::string payload);
    static void generateMultipleMessages(std::string payload, int messagesQuantity);
 
+   static UInt32 verify(ProtocolPacketHeader& header);
+
 private:
 
    static std::queue<Blob> blobQueue;
@@ -28,7 +34,11 @@ private:
    //static void write();
    //static void generate();
 
+   static void saveSentHeader();
    static void dispayField();
+
+
+   static ProtocolPacketHeader sentHeader;
 
    static UInt8 sVersion;
    static UInt8 sCompressedFlag;
@@ -41,7 +51,9 @@ private:
 
    static void* sPacketData;
 
-
+   static int getBit(const UInt32 value, const UInt32 position);
+   static void setBit(UInt32 value, const UInt32 position);
+   static void clearBit(UInt32 value, const UInt32 position);
 };
 
 } //namespace AxisCore
