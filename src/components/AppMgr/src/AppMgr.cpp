@@ -23,4 +23,9 @@ AppMgr::~AppMgr()
 {
 }
 
+void AppMgr::onMessageReceivedCallback( MobileRPCMessage * message )
+{
+	mAppMgrCore.pushMobileRPCMessage( message );
+}
+
 };

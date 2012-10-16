@@ -7,17 +7,20 @@
 #include "AppMgr/RPCAppLinkFactory.h"
 #include "AppMgr/RPCBusFactory.h"
 #include "AppMgr/AppMgrRegistry.h"
+#include "JSONHandler/IRPCMessagesObserver.h"
 
 namespace NsAppManager
 {
 
-class AppMgr
+class AppMgr: public IRPCMessagesObserver
 {
 public:
 	AppMgr();
 	static AppMgr& getInstance();
+	virtual void onMessageReceivedCallback( MobileRPCMessage * message );
+	
 private:
-	~AppMgr();
+	virtual ~AppMgr();
 
 	AppLinkInterface& mAppLinkInterface;
 	AppMgrRegistry& mAppMgrRegistry;

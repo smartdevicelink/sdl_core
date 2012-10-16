@@ -29,6 +29,7 @@ public:
 
 	static AppMgrCore& getInstance();
 	virtual void onMessageReceivedCallback( MobileRPCMessage * message );
+	void pushMobileRPCMessage( MobileRPCMessage * message );
 
 	void executeThreads();
 	void terminateThreads();
