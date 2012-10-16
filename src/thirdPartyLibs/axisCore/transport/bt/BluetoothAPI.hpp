@@ -8,6 +8,7 @@ namespace Bluetooth
 {
     class IBluetoothAPI
     {
+    public:
         virtual void initBluetooth(IBluetoothHandler * pHandler) = 0;
         virtual void deinitBluetooth() = 0;
 
