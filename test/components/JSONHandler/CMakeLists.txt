@@ -12,8 +12,8 @@ include_directories (../../../src/components/JSONHandler/include/
 			../../../src/thirdPartyLibs/axisCore/utils/misc
 			../../../src/thirdPartyLibs/axisCore/transport/bt)
  
-add_executable(testJsonHandler main.cpp)
-target_link_libraries(testJsonHandler jsonCpp jsonHandler ProtocolHandler bluetooth)
+add_executable(testJsonHandler main.cpp TestJSONHandler.cpp)
+target_link_libraries(testJsonHandler jsonCpp jsonHandler ProtocolHandler bluetooth pthread)
 #CBTAdapter.cpp 
 
 include(ExternalProject)

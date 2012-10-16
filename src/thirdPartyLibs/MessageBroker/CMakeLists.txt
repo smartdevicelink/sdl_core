@@ -7,9 +7,6 @@ set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
 include_directories (./include/
                      ../jsoncpp/include
-                     ./src/server
-                     ./src/example
-                     ./src/client
                     ) 
 
 include(ExternalProject)
