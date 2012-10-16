@@ -35,6 +35,9 @@ public:
 private:
 	AppMgrCore();
 
+	void handleMessage( MobileRPCMessage* msg );
+	void registerApplication( MobileRPCMessage* msg );
+
 	void* handleQueueRPCAppLinkObjectsIncoming( void* );
 	void* handleQueueRPCBusObjectsIncoming( void* );
 	void* handleQueueRPCAppLinkObjectsOutgoing( void* );

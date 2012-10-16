@@ -68,6 +68,39 @@ void AppMgrCore::terminateThreads()
 
 void* AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
 {
+	while(true)
+	{
+		std::size_t size = mQueueRPCAppLinkObjectsIncoming.size();
+		if( size > 0 )
+		{
+			mMtxRPCAppLinkObjectsIncoming.Lock();
+			MobileRPCMessage* msg = mQueueRPCAppLinkObjectsIncoming.front();
+			mQueueRPCAppLinkObjectsIncoming.pop();
+			mMtxRPCAppLinkObjectsIncoming.Unlock();
+			if(!msg)
+			{
+				//to log an error: invalid object
+				continue;
+			}
+
+			handleMessage( msg );
+		}
+	}
+}
+
+void AppMgrCore::handleMessage( MobileRPCMessage* msg )
+{
+	if(msg->getMessageType() == MobileRPCMessage::REQUEST)
+	{
+		if(0 == msg->getFunctionName().compare("RegisterAppInterface"))
+		{
+			registerApplication( msg );
+		}
+	}
+}
+
+void AppMgrCore::registerApplication( MobileRPCMessage* msg )
+{
 	
 }
 
