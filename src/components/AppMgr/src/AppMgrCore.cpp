@@ -6,8 +6,15 @@
  */
 
 #include "AppMgr/AppMgrCore.h"
+#include "JSONHandler/MobileRPCMessage.h"
+#include "JSONHandler/MobileRPCRequest.h"
 #include "JSONHandler/RegisterAppInterface.h"
 #include "JSONHandler/RegisterAppInterfaceResponse.h"
+#include "AppMgr/IApplication.h"
+#include "AppMgr/AppMgrRegistry.h"
+#include "AppMgr/AppPolicy.h"
+#include "AppMgr/RPCAppLinkObject.h"
+#include "AppMgr/RPCBusObject.h"
 
 namespace NsAppManager
 {
@@ -112,6 +119,8 @@ void AppMgrCore::registerApplication( RegisterAppInterface* object )
 	const Language& languageDesired = object->getLanguageDesired();
 	const std::string& autoActivateID = object->getAutoActivateID();
 	const SyncMsgVersion& syncMsgVersion = object->getSyncMsgVersion();
+
+	
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
