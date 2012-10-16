@@ -31,6 +31,7 @@ public:
 	virtual void onMessageReceivedCallback( MobileRPCMessage * message );
 
 	void executeThreads();
+	void terminateThreads();
 
 private:
 	AppMgrCore();
@@ -54,6 +55,8 @@ private:
 	System::Thread mThreadRPCAppLinkObjectsOutgoing;
 	System::Thread mThreadRPCBusObjectsIncoming;
 	System::Thread mThreadRPCBusObjectsOutgoing;
+
+	bool m_bTerminate;
 };
 
 }; // namespace NsAppManager
