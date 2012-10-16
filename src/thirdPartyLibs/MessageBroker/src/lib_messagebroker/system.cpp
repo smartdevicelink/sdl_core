@@ -131,6 +131,64 @@ namespace System
     return !pthread_mutex_unlock(&m_mutex);
   }
 
+
+  // Based on Binary Semaphores example at
+  // http://www.mathcs.emory.edu/~cheung/Courses/455/Syllabus/5c-pthreads/sync.html
+  BinarySemaphore::BinarySemaphore() :
+     m_mutex(PTHREAD_MUTEX_INITIALIZER),
+     m_cond(PTHREAD_COND_INITIALIZER),
+     m_isUp(false)
+     {
+        pthread_mutex_init(&m_mutex, NULL);
+        pthread_cond_init(&m_cond, NULL);
+     }
+
+  BinarySemaphore::~BinarySemaphore() {
+     pthread_cond_destroy(&m_cond);
+     pthread_mutex_destroy(&m_mutex);
+  }
+
+  void BinarySemaphore::Wait() {
+     // try to get exclusive access to the flag
+     pthread_mutex_lock(&m_mutex);
+     // success: no other thread can get here unless
+     // the current thread unlocks the mutex
+
+     // wait until the flag is up
+     while (!m_isUp) {
+        pthread_cond_wait(&m_cond, &m_mutex);
+        // when the current thread executes this, it will be
+        // blocked on m_cond, and automatically unlocks the
+        // mutex! Unlocking the mutex will let other threads
+        // in to test the flag.
+     }
+
+     // here we know that flag is upand this thread has now
+     // successfully passed the semaphore
+
+     // this will cause all other threads that execute the Wait()
+     // call to wait in the above loop
+     m_isUp = false;
+
+     // release the exclusive access to the flag
+     pthread_mutex_unlock(&m_mutex);
+  }
+
+  void BinarySemaphore::Notify() {
+     // try to get exclusive access to the flag
+     pthread_mutex_lock(&m_mutex);
+
+     // this call may resume a thread that is blocked on m_cond
+     // (in the Wait() call). if there was none, this does nothing
+     pthread_cond_signal(&m_cond);
+
+     // up the flag
+     m_isUp = true;
+
+     // release the exclusive access to the flag
+     pthread_mutex_unlock(&m_mutex);
+  }
+
 #else
 
   /* Windows specific part for thread and mutex */

@@ -258,6 +258,53 @@ namespace System
 #endif
   };
 
+#ifdef _WIN32
+#warning "BinarySemaphore is implemented for POSIX systems only"
+#else
+  /**
+   * \class BinarySemaphore
+   * \brief Binary semaphore implementation.
+   */
+  class BinarySemaphore {
+  public:
+    /**
+      * \brief Constructor.
+      */
+    BinarySemaphore();
+
+    /**
+      * \brief Destructor.
+      */
+    ~BinarySemaphore();
+
+    /**
+      * \brief Wait until the semaphore is unlocked.
+      */
+    void Wait();
+
+    /**
+      * \brief Notify the semaphore.
+      */
+    void Notify();
+
+  private:
+    /**
+      * \brief Mutex to prevent concurrent access to the flag.
+      */
+    pthread_mutex_t m_mutex;
+
+    /**
+      * \brief Conditional variable to block threads.
+      */
+    pthread_cond_t m_cond;
+
+    /**
+      * \brief Semaphore state: false = down, true = up.
+      */
+    bool m_isUp;
+  };
+#endif /* _WIN32 */
+
 } /* namespace System */
 
 #endif /* SYSTEM_H */

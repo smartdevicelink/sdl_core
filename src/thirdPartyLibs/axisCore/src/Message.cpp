@@ -18,8 +18,15 @@ Message::Message(const ProtocolPacketHeader &header
 {
     if (mIsMultiFrame)
     {
-        mTotalDataBytes = ( (UInt32 *)data)[0];
-        mNumberOfConsFrames = ( (UInt32 *)data)[1];
+        mTotalDataBytes  = data[0] << 24;
+        mTotalDataBytes |= data[1] << 16;
+        mTotalDataBytes |= data[2] << 8;
+        mTotalDataBytes |= data[3];
+
+        mNumberOfConsFrames  = data[4] << 24;
+        mNumberOfConsFrames |= data[5] << 16;
+        mNumberOfConsFrames |= data[6] << 8;
+        mNumberOfConsFrames |= data[7];
     }
     else
         mTotalDataBytes = header.dataSize;
