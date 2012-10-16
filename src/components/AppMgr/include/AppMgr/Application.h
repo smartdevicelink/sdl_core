@@ -27,6 +27,22 @@ public:
 	virtual ~Application( );
 	virtual void setApplicationPriority( const AppPriority& priority );
 
+	void setNgnMediaScreenAppName(const std::string& value);
+	void setVrSynonyms(const std::vector<std::string>& value);
+	void setUsesVehicleData(bool value);
+	void setIsMediaApplication(bool value);
+	void setLanguageDesired(Language value);
+	void setAutoActivateID(const std::string& value);
+	void setSyncMsgVersion(SyncMsgVersion value);
+
+	std::string getNgnMediaScreenAppName( );
+	std::vector<std::string> getVrSynonyms( );
+	bool getUsesVehicleData( );
+	bool getIsMediaApplication( );
+	Language getLanguageDesired( );
+	std::string getAutoActivateID( );
+	SyncMsgVersion getSyncMsgVersion( );
+
 private:
 	std::string mNgnMediaScreenAppName;
 	std::vector<std::string> mVrSynonyms;
