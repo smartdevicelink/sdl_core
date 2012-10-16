@@ -18,6 +18,8 @@
 
 #include <queue>
 
+class RegisterAppInterface;
+
 namespace NsAppManager
 {
 	
@@ -36,7 +38,7 @@ private:
 	AppMgrCore();
 
 	void handleMessage( MobileRPCMessage* msg );
-	void registerApplication( MobileRPCMessage* msg );
+	void registerApplication( RegisterAppInterface* msg );
 
 	void* handleQueueRPCAppLinkObjectsIncoming( void* );
 	void* handleQueueRPCBusObjectsIncoming( void* );

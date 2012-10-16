@@ -9,7 +9,7 @@ public:
     virtual void onMessageReceivedCallback( MobileRPCMessage * message ) = 0;
 
 protected:
-    ~IRPCMessagesObserver();
+    virtual ~IRPCMessagesObserver() {};
 
     /* data */
 };

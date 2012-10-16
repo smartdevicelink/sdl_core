@@ -6,6 +6,8 @@
  */
 
 #include "AppMgr/AppMgrCore.h"
+#include "JSONHandler/RegisterAppInterface.h"
+#include "JSONHandler/RegisterAppInterfaceResponse.h"
 
 namespace NsAppManager
 {
@@ -94,14 +96,22 @@ void AppMgrCore::handleMessage( MobileRPCMessage* msg )
 	{
 		if(0 == msg->getFunctionName().compare("RegisterAppInterface"))
 		{
-			registerApplication( msg );
+			RegisterAppInterface * object = (RegisterAppInterface*)msg;
+			registerApplication( object );
 		}
 	}
 }
 
-void AppMgrCore::registerApplication( MobileRPCMessage* msg )
+void AppMgrCore::registerApplication( RegisterAppInterface* object )
 {
-	
+	const std::string& appName = object->getAppName();
+	const std::string& ngnMediaScreenAppName = object->getNgnMediaScreenAppName();
+	const std::vector<std::string>& vrSynonyms = object->getVrSynonyms();
+	bool usesVehicleData = object->getUsesVehicleData();
+	bool isMediaApplication = object->getIsMediaApplication();
+	const Language& languageDesired = object->getLanguageDesired();
+	const std::string& autoActivateID = object->getAutoActivateID();
+	const SyncMsgVersion& syncMsgVersion = object->getSyncMsgVersion();
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
