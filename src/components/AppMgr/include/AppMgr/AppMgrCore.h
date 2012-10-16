@@ -13,7 +13,6 @@
 #include "AppPolicy.h"
 #include "RPCAppLinkObject.h"
 #include "RPCBusObject.h"
-#include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/MobileRPCMessage.h"
 #include "system.h"
 
@@ -22,13 +21,12 @@
 namespace NsAppManager
 {
 	
-class AppMgrCore: public IRPCMessagesObserver
+class AppMgrCore
 {
 public:
 	virtual ~AppMgrCore();
 
 	static AppMgrCore& getInstance();
-	virtual void onMessageReceivedCallback( MobileRPCMessage * message );
 	void pushMobileRPCMessage( MobileRPCMessage * message );
 
 	void executeThreads();

@@ -40,11 +40,6 @@ AppMgrCore::~AppMgrCore()
 		mThreadRPCBusObjectsOutgoing.Stop();
 }
 
-void AppMgrCore::onMessageReceivedCallback( MobileRPCMessage * message )
-{
-	pushMobileRPCMessage( message );
-}
-
 void AppMgrCore::pushMobileRPCMessage( MobileRPCMessage * message )
 {
 	mMtxRPCAppLinkObjectsIncoming.Lock();
