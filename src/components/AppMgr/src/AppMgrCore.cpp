@@ -121,7 +121,14 @@ void AppMgrCore::registerApplication( RegisterAppInterface* object )
 	const std::string& autoActivateID = object->getAutoActivateID();
 	const SyncMsgVersion& syncMsgVersion = object->getSyncMsgVersion();
 
-	IApplication* application = new Application( appName );
+	Application* application = new Application( appName );
+	application->setAutoActivateID(autoActivateID);
+	application->setIsMediaApplication(isMediaApplication);
+	application->setLanguageDesired(languageDesired);
+	application->setNgnMediaScreenAppName(ngnMediaScreenAppName);
+	application->setSyncMsgVersion(syncMsgVersion);
+	application->setUsesVehicleData(usesVehicleData);
+	application->setVrSynonyms(vrSynonyms);
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
