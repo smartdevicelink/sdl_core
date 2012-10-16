@@ -15,7 +15,7 @@ AppMgr& AppMgr::getInstance( )
 		static AppMgr appMgr(mAddress, mPort, mName);
 		return appMgr;
 	}
-	
+	//here to log error
 }
 
 void AppMgr::setParams(const std::string& address, uint16_t port, std::string name)

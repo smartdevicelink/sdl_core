@@ -11,7 +11,11 @@ namespace NsAppManager
 {
 	
 Application::Application( const std::string& name )
-: IApplication(name)
+	:IApplication(name)
+	,mNgnMediaScreenAppName("")
+	,m_bUsesVehicleData(false)
+	,m_bIsMediaApplication(false)
+	,mAutoActivateID("")
 {
 }
 
