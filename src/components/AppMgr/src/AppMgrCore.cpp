@@ -11,6 +11,7 @@
 #include "JSONHandler/RegisterAppInterface.h"
 #include "JSONHandler/RegisterAppInterfaceResponse.h"
 #include "AppMgr/IApplication.h"
+#include "AppMgr/Application.h"
 #include "AppMgr/AppMgrRegistry.h"
 #include "AppMgr/AppPolicy.h"
 #include "AppMgr/RPCAppLinkObject.h"
@@ -120,7 +121,7 @@ void AppMgrCore::registerApplication( RegisterAppInterface* object )
 	const std::string& autoActivateID = object->getAutoActivateID();
 	const SyncMsgVersion& syncMsgVersion = object->getSyncMsgVersion();
 
-	
+	IApplication* application = new Application( appName );
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )

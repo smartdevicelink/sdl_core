@@ -26,7 +26,7 @@ public:
 	IApplication( const std::string& name );
 	virtual ~IApplication( )=0;
 
-	virtual void setApplicationPriority()=0;
+	virtual void setApplicationPriority( const AppPriority& priority )=0;
 	virtual const std::string& getName() const;
 
 protected:
