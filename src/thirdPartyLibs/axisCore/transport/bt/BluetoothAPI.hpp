@@ -6,13 +6,18 @@
 
 namespace Bluetooth
 {
-	void initBluetooth(IBluetoothHandler * pHandler);
-	void deinitBluetooth();
+    class IBluetoothAPI
+    {
+        virtual void initBluetooth(IBluetoothHandler * pHandler) = 0;
+        virtual void deinitBluetooth() = 0;
 
-    const Blob getBuffer();
-    void releaseBuffer(const Blob&);
+        virtual const Blob getBuffer() = 0;
+        virtual void releaseBuffer(const Blob&) = 0;
 
-	void sendBuffer(UInt8 * pBuffer, size_t size);
+        virtual void sendBuffer(UInt8 * pBuffer, size_t size) = 0;
+
+        virtual ~IBluetoothAPI() {}
+    };
 }
 
 #endif /* BLUETOOTHAPI_HPP_ */
