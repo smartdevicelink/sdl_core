@@ -86,7 +86,16 @@ void CMessage::generateInitialMessage(UInt8 serviceType, UInt8 sessionID)
    memcpy(sPacketData + 1, &sServiceType, 1);
    memcpy(sPacketData + 2, &sFrameData, 1);
    memcpy(sPacketData + 3, &sSessionID, 1);
-   memcpy(sPacketData + 4, &sDataSize, 4);
+
+   UInt8 tmp1 = sDataSize >> 24;
+   memcpy(sPacketData + 4, &tmp1, 1);
+   UInt8 tmp2 = sDataSize >> 16;
+   memcpy(sPacketData + 5, &tmp2, 1);
+   UInt8 tmp3 = sDataSize >> 8;
+   memcpy(sPacketData + 6, &tmp3, 1);
+   UInt8 tmp4 = sDataSize;
+   memcpy(sPacketData + 7, &tmp4, 1);
+
    //memcpy(sPacketData + 8, &sMessageID, 4);
 
    blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
@@ -115,7 +124,16 @@ void CMessage::generateSingleMessage(UInt8 serviceType, UInt8 sessionID, std::st
    memcpy(sPacketData + 1, &sServiceType, 1);
    memcpy(sPacketData + 2, &sFrameData, 1);
    memcpy(sPacketData + 3, &sSessionID, 1);
-   memcpy(sPacketData + 4, &sDataSize, 4);
+
+   UInt8 tmp1 = sDataSize >> 24;
+   memcpy(sPacketData + 4, &tmp1, 1);
+   UInt8 tmp2 = sDataSize >> 16;
+   memcpy(sPacketData + 5, &tmp2, 1);
+   UInt8 tmp3 = sDataSize >> 8;
+   memcpy(sPacketData + 6, &tmp3, 1);
+   UInt8 tmp4 = sDataSize;
+   memcpy(sPacketData + 7, &tmp4, 1);
+
    //memcpy(sPacketData + 8, &sMessageID, 4);
    memcpy(sPacketData + 8, (void*)const_cast<char*>(payload.c_str()), sDataSize);
 
@@ -143,11 +161,20 @@ void CMessage::generateFinalMessage(UInt8 serviceType, UInt8 sessionID)
                    | ( (sCompressedFlag << 3) & 0x08)
                    | (sFrameType & 0x07);
 
-  memcpy(sPacketData, &firstByte, 1);
-  memcpy(sPacketData + 1, &sServiceType, 1);
-  memcpy(sPacketData + 2, &sFrameData, 1);
-  memcpy(sPacketData + 3, &sSessionID, 1);
-  memcpy(sPacketData + 4, &sDataSize, 4);
+   memcpy(sPacketData, &firstByte, 1);
+   memcpy(sPacketData + 1, &sServiceType, 1);
+   memcpy(sPacketData + 2, &sFrameData, 1);
+   memcpy(sPacketData + 3, &sSessionID, 1);
+
+   UInt8 tmp1 = sDataSize >> 24;
+   memcpy(sPacketData + 4, &tmp1, 1);
+   UInt8 tmp2 = sDataSize >> 16;
+   memcpy(sPacketData + 5, &tmp2, 1);
+   UInt8 tmp3 = sDataSize >> 8;
+   memcpy(sPacketData + 6, &tmp3, 1);
+   UInt8 tmp4 = sDataSize;
+   memcpy(sPacketData + 7, &tmp4, 1);
+
   //memcpy(sPacketData + 8, &sMessageID, 4);
 
   blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
@@ -200,6 +227,17 @@ void CMessage::generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std:
          totalConsecutivePayloadSize = (payload.length() + 1) * numberOfConsecutiveFrames;
 
          sDataSize = 0x08;
+         UInt8 *outDataFirstFrame = new UInt8[sDataSize];
+
+         outDataFirstFrame[0] = totalConsecutivePayloadSize >> 24;
+         outDataFirstFrame[1] = totalConsecutivePayloadSize >> 16;
+         outDataFirstFrame[2] = totalConsecutivePayloadSize >> 8;
+         outDataFirstFrame[3] = totalConsecutivePayloadSize;
+
+         outDataFirstFrame[4] = numberOfConsecutiveFrames >> 24;
+         outDataFirstFrame[5] = numberOfConsecutiveFrames >> 16;
+         outDataFirstFrame[6] = numberOfConsecutiveFrames >> 8;
+         outDataFirstFrame[7] = numberOfConsecutiveFrames;
       }
       else
       {
@@ -218,7 +256,16 @@ void CMessage::generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std:
       memcpy(sPacketData + 1, &sServiceType, 1);
       memcpy(sPacketData + 2, &sFrameData, 1);
       memcpy(sPacketData + 3, &sSessionID, 1);
-      memcpy(sPacketData + 4, &sDataSize, 4);
+
+      UInt8 tmp1 = sDataSize >> 24;
+      memcpy(sPacketData + 4, &tmp1, 1);
+      UInt8 tmp2 = sDataSize >> 16;
+      memcpy(sPacketData + 5, &tmp2, 1);
+      UInt8 tmp3 = sDataSize >> 8;
+      memcpy(sPacketData + 6, &tmp3, 1);
+      UInt8 tmp4 = sDataSize;
+      memcpy(sPacketData + 7, &tmp4, 1);
+
       //memcpy(sPacketData + 8, &sMessageID, 4);
 
       if(0 != i)
