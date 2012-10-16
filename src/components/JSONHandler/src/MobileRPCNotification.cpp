@@ -12,6 +12,10 @@ MobileRPCNotification::MobileRPCNotification( unsigned int protocolVersion, std:
 MobileRPCNotification::MobileRPCNotification( unsigned int protocolVersion, unsigned int functionID )
 :MobileRPCMessage( protocolVersion, NOTIFICATION, functionID )
 {}
+
+MobileRPCNotification::MobileRPCNotification( const MobileRPCMessage& message )
+:MobileRPCMessage( message )
+{}
  
 MobileRPCNotification::~MobileRPCNotification()
 {}
