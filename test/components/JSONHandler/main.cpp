@@ -1,7 +1,3 @@
-
-
-
-
 #include <json/value.h>
 #include <json/reader.h>
 #include <json/writer.h>
@@ -13,12 +9,11 @@
 //#include <cctype>
 
 #include "JSONHandler/MobileRPCMessage.h"
-#include "JSONHandler/JSONHandler.h"
 #include "ProtocolHandler.hpp"
 #include "CBTAdapter.hpp"
 #include <vector>
-#include <cstdio>
-#include <cstdlib>
+
+#include "TestJSONHandler.h"
 
 char * readJsonContent ( const char * fileName );
 int parseJson ( const std::string & jsonContent );
@@ -35,76 +30,35 @@ int main( int argc, char* argv[] ) {
 
     char * jsonContent = readJsonContent( fileName );
 
-    withBluetooth();
+    //withBluetooth();
 
     int result = 0;
     size_t nextMessagePos = 0;
     char *const jsonContentBeginning = jsonContent;
 
-    AxisCore::CMessage::generateInitialMessage();
+    /*AxisCore::CMessage::generateInitialMessage();*/
     JSONHandler * jsonHandler = new JSONHandler;
-    AxisCore::ProtocolHandler * protocolHandler = new AxisCore::ProtocolHandler( jsonHandler, 0 );
-    jsonHandler -> setProtocolHandler( protocolHandler );
-    
-   /* protocolHandler->dataReceived();        
-    //CMessage::generateSingleMessage("Hello ?");
-    AxisCore::CMessage::generateMultipleMessages("Hello ?", 5);
-    for (int i = 0 ; i < 5 ; i++)
-        protocolHandler->dataReceived();*/
+    TestJSONHandler testJSONHandler;
+    testJSONHandler.jsonHandler = jsonHandler;
+    /*AxisCore::ProtocolHandler * protocolHandler = new AxisCore::ProtocolHandler( jsonHandler, 0 );
+    jsonHandler -> setProtocolHandler( protocolHandler );*/
     
     while ( nextMessagePos != std::string::npos ) {
 
         std::string jsonString( jsonContent );
         if ( !jsonString.empty() ) {
-
-
-
-            MobileRPCMessage * message = jsonHandler -> createObjectFromJSON( jsonString );
-            //MobileRPCMessage * message = jsonHandler -> getRPCObject();
-            std::cout << "type: " << message->getMessageType() << std::endl;
-            std::cout << "protocol version: " << message->getProtocolVersion() << std::endl;
-            std::cout << "correation id: " << message -> getCorrelationID() << std::endl;
-            std::cout << "function name: " << message -> getFunctionName() << std::endl;
-            std::cout << "original string: " << message -> getParametersString() << std::endl;
-
-            std::string serializedString = jsonHandler -> serializeObjectToJSON( *message );
-            std::cout << serializedString << std::endl;
-
-            RegisterAppInterface requestMessage = jsonHandler -> getFactory() -> createRegisterAppInterface( *message );
-            Json::Value params = jsonHandler -> getFactory() -> serializeRegisterAppInterface( requestMessage );
-            Json::StyledWriter writer;
-            std::string params_to_print = writer.write( params );
-            std::cout << "serialized params for RegisterAppInterface: \n" << params_to_print << std::endl;
-
-            RegisterAppInterfaceResponse response = jsonHandler -> getFactory() -> createRegisterAppInterfaceResponse( *message );
-            Json::Value parameters = jsonHandler -> getFactory() -> serializeRegisterAppInterfaceResponse( response );
-
-            Json::Value root = jsonHandler -> createJSONFromObject( response );
-            if ( root.isNull() )
-            {
-                return -1;
-            }
-
-            root["response"]["parameters"] = parameters;
-            std::string responseString = jsonHandler -> jsonToString( root );
-            UInt8* pData;
-            pData = new UInt8[responseString.length() + 1];
-            memcpy (pData, responseString.c_str(), responseString.length() + 1);
-            std::cout << "Register response: " << responseString << std::endl;
-            std::cout << "UInt8: " << pData << std::endl;
-
-            delete message;
+            testJSONHandler.secondRelease( jsonString );
         }
 
         nextMessagePos = jsonString.find( "\n" );
         jsonContent += nextMessagePos + 1;
 
-        //sleep( 1 );
+        sleep( 10 );
     }
 
     delete [] jsonContentBeginning;
     delete jsonHandler;
-    delete protocolHandler;
+    //delete protocolHandler;
 
     return result;
 }
@@ -124,7 +78,7 @@ readJsonContent ( const char * fileName ) {
     file_str.read( raw_data, length );
     file_str.close();
 
-char * input = new char[length];
+    char * input = new char[length];
     for ( int i = 0; i < length; ++i )
     {
         if ( !isspace(raw_data[i]) ) 
@@ -280,3 +234,6 @@ int withBluetooth()
     }
 
 }
+
+
+
