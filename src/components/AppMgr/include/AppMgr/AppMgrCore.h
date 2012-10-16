@@ -11,19 +11,42 @@
 #include "IApplication.h"
 #include "AppMgrRegistry.h"
 #include "AppPolicy.h"
+#include "RPCAppLinkObject.h"
+#include "RPCBusObject.h"
+#include "JSONHandler/IRPCMessagesObserver.h"
+#include "JSONHandler/MobileRPCMessage.h"
+#include "system.h"
+
+#include <queue>
 
 namespace NsAppManager
 {
 	
-class AppMgrCore
+class AppMgrCore: public IRPCMessagesObserver
 {
 public:
-	~AppMgrCore();
+	virtual ~AppMgrCore();
 
 	static AppMgrCore& getInstance();
+	virtual void onMessageReceivedCallback( MobileRPCMessage * message );
 
 private:
 	AppMgrCore();
+
+	void handleQueueRPCAppLinkObjectsIncoming( void* );
+	void handleQueueRPCBusObjectsIncoming( void* );
+	void handleQueueRPCAppLinkObjectsOutgoing( void* );
+	void handleQueueRPCBusObjectsOutgoing( void* );
+	
+	std::queue< RPCAppLinkObject* > mQueueRPCAppLinkObjectsIncoming;
+	std::queue< RPCAppLinkObject* > mQueueRPCAppLinkObjectsOutgoing;
+	std::queue< RPCBusObject* > mQueueRPCBusObjectsIncoming;
+	std::queue< RPCBusObject* > mQueueRPCBusObjectsOutgoing;
+
+	System::Mutex mMtxRPCAppLinkObjectsIncoming;
+	System::Mutex mMtxRPCAppLinkObjectsOutgoing;
+	System::Mutex mMtxRPCBusObjectsIncoming;
+	System::Mutex mMtxRPCBusObjectsOutgoing;
 };
 
 }; // namespace NsAppManager

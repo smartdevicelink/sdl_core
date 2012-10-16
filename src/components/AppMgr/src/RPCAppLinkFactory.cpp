@@ -22,6 +22,7 @@ RPCAppLinkObject* RPCAppLinkFactory::createNewRPCAppLinkObject( )
 }
 
 RPCAppLinkFactory::RPCAppLinkFactory( )
+	:MobileRPCFactory()
 {
 	// TODO Auto-generated constructor stub
 

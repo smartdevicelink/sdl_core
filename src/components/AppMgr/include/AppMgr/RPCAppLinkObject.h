@@ -8,14 +8,23 @@
 #ifndef RPCAPPLINKOBJECT_H_
 #define RPCAPPLINKOBJECT_H_
 
+#include "JSONHandler/MobileRPCMessage.h"
+
 namespace NsAppManager
 {
 	
-class RPCAppLinkObject
+class RPCAppLinkObject: public MobileRPCMessage
 {
 public:
-	RPCAppLinkObject( );
-	~RPCAppLinkObject( );
+	RPCAppLinkObject( unsigned int protocolVersion, MessageType messageType );
+	RPCAppLinkObject( unsigned int protocolVersion, MessageType messageType,
+					  std::string functionName );
+	RPCAppLinkObject( unsigned int protocolVersion, MessageType messageType,
+					  unsigned int functionID );
+	RPCAppLinkObject( unsigned int protocolVersion, MessageType messageType,
+					  unsigned int correlationID, std::string functionName,
+				   unsigned int functionID, unsigned int messageSize );
+	virtual ~RPCAppLinkObject( );
 };
 
 }; // namespace NsAppManager

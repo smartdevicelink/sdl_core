@@ -148,8 +148,15 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                     FIRST_FRAME_DATA_SIZE);
 
         UInt8 *outDataFirstFrame = new UInt8[FIRST_FRAME_DATA_SIZE];
-        ( (UInt32*)outDataFirstFrame)[0] = dataSize;
-        ( (UInt32*)outDataFirstFrame)[1] = numOfFrames;
+        outDataFirstFrame[0] = dataSize >> 24;
+        outDataFirstFrame[1] = dataSize >> 16;
+        outDataFirstFrame[2] = dataSize >> 8;
+        outDataFirstFrame[3] = dataSize;
+
+        outDataFirstFrame[4] = numOfFrames >> 24;
+        outDataFirstFrame[5] = numOfFrames >> 16;
+        outDataFirstFrame[6] = numOfFrames >> 8;
+        outDataFirstFrame[7] = numOfFrames;
 
         if (!(mBTWriter.write(firstHeader, 0) == ERR_OK) )
         {

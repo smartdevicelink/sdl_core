@@ -3,7 +3,7 @@ project (testAppManager)
 
 link_directories(../../../src/components/AppMgr)
 
-include_directories (../../../src/components/AppMgr/include/)
+include_directories (../../../src/components/AppMgr/include/ ../../../src/components/JSONHandler/include/ ../../../src/thirdPartyLibs/MessageBroker/include/  ../../../src/thirdPartyLibs/jsoncpp/include/)
 add_executable(testAppManager main.cpp)
 target_link_libraries(testAppManager appManager)
 
