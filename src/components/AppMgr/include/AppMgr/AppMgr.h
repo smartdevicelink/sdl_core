@@ -8,11 +8,12 @@
 #include "AppMgr/RPCBusFactory.h"
 #include "AppMgr/AppMgrRegistry.h"
 #include "JSONHandler/IRPCMessagesObserver.h"
+#include "mb_controller.hpp"
 
 namespace NsAppManager
 {
 
-class AppMgr: public IRPCMessagesObserver
+class AppMgr: public IRPCMessagesObserver, public CMessageBrokerController
 {
 public:
 	AppMgr();
