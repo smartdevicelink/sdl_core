@@ -42,14 +42,10 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
     memcpy(mData + offset, &header.sessionID, sizeof(UInt8) );
     offset += sizeof(UInt8);
 
-    UInt8 tmp = header.dataSize >> 24;
-    memcpy(mData + offset++, &tmp, sizeof(UInt8) );
-    tmp = header.dataSize >> 16;
-    memcpy(mData + offset++, &tmp, sizeof(UInt8) );
-    tmp = header.dataSize >> 8;
-    memcpy(mData + offset++, &tmp, sizeof(UInt8) );
-    tmp = header.dataSize;
-    memcpy(mData + offset++, &tmp, sizeof(UInt8) );
+    mData[offset++] = header.dataSize >> 24;
+    mData[offset++] = header.dataSize >> 16;
+    mData[offset++] = header.dataSize >> 8;
+    mData[offset++] = header.dataSize;
 
     if (data)
     {
@@ -66,6 +62,8 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
         mBTAdapter->sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_SIZE);
     else
         return ERR_FAIL;
+
+    //Bluetooth::sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_SIZE);
 
     return ERR_OK;
 }
