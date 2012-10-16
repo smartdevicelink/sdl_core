@@ -30,13 +30,15 @@ public:
 	static AppMgrCore& getInstance();
 	virtual void onMessageReceivedCallback( MobileRPCMessage * message );
 
+	void executeThreads();
+
 private:
 	AppMgrCore();
 
-	void handleQueueRPCAppLinkObjectsIncoming( void* );
-	void handleQueueRPCBusObjectsIncoming( void* );
-	void handleQueueRPCAppLinkObjectsOutgoing( void* );
-	void handleQueueRPCBusObjectsOutgoing( void* );
+	void* handleQueueRPCAppLinkObjectsIncoming( void* );
+	void* handleQueueRPCBusObjectsIncoming( void* );
+	void* handleQueueRPCAppLinkObjectsOutgoing( void* );
+	void* handleQueueRPCBusObjectsOutgoing( void* );
 	
 	std::queue< RPCAppLinkObject* > mQueueRPCAppLinkObjectsIncoming;
 	std::queue< RPCAppLinkObject* > mQueueRPCAppLinkObjectsOutgoing;
@@ -47,6 +49,11 @@ private:
 	System::Mutex mMtxRPCAppLinkObjectsOutgoing;
 	System::Mutex mMtxRPCBusObjectsIncoming;
 	System::Mutex mMtxRPCBusObjectsOutgoing;
+
+	System::Thread mThreadRPCAppLinkObjectsIncoming;
+	System::Thread mThreadRPCAppLinkObjectsOutgoing;
+	System::Thread mThreadRPCBusObjectsIncoming;
+	System::Thread mThreadRPCBusObjectsOutgoing;
 };
 
 }; // namespace NsAppManager

@@ -17,11 +17,24 @@ AppMgrCore& AppMgrCore::getInstance( )
 }
 
 AppMgrCore::AppMgrCore()
+	:mThreadRPCAppLinkObjectsIncoming(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCAppLinkObjectsIncoming, NULL))
+	,mThreadRPCAppLinkObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing, NULL))
+	,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsIncoming, NULL))
+	,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsOutgoing, NULL))
 {
 }
 
 AppMgrCore::~AppMgrCore()
 {
+	mThreadRPCAppLinkObjectsIncoming.Join();
+	mThreadRPCAppLinkObjectsOutgoing.Join();
+	mThreadRPCBusObjectsIncoming.Join();
+	mThreadRPCBusObjectsOutgoing.Join();
+	
+	mThreadRPCAppLinkObjectsIncoming.Stop();
+	mThreadRPCAppLinkObjectsOutgoing.Stop();
+	mThreadRPCBusObjectsIncoming.Stop();
+	mThreadRPCBusObjectsOutgoing.Stop();
 }
 
 void AppMgrCore::onMessageReceivedCallback( MobileRPCMessage * message )
@@ -33,19 +46,32 @@ void AppMgrCore::onMessageReceivedCallback( MobileRPCMessage * message )
 	mMtxRPCAppLinkObjectsIncoming.Unlock();
 }
 
-void AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
+void AppMgrCore::executeThreads()
+{
+	mThreadRPCAppLinkObjectsIncoming.Start(false);
+	mThreadRPCAppLinkObjectsOutgoing.Start(false);
+	mThreadRPCBusObjectsIncoming.Start(false);
+	mThreadRPCBusObjectsOutgoing.Start(false);
+	
+	while(true)
+	{
+	}
+}
+
+void* AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
+{
+	
+}
+
+void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
 {
 }
 
-void AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
+void* AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing( void* )
 {
 }
 
-void AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing( void* )
-{
-}
-
-void AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
+void* AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
 {
 }
 
