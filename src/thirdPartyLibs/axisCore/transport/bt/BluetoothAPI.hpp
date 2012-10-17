@@ -8,6 +8,7 @@ namespace Bluetooth
 {
     class IBluetoothAPI
     {
+    public:
         virtual void initBluetooth(IBluetoothHandler * pHandler) = 0;
         virtual void deinitBluetooth() = 0;
 
@@ -16,7 +17,7 @@ namespace Bluetooth
 
         virtual void sendBuffer(UInt8 * pBuffer, size_t size) = 0;
 
-        virtual ~IBluetoothAPI() {}
+        virtual ~IBluetoothAPI(){}
     };
 }
 
