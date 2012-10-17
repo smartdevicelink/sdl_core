@@ -121,14 +121,12 @@ void AppMgrCore::handleMessage( MobileRPCMessage* msg )
 			break;
 		}
 		case MobileRPCMessage::RESPONSE:
+		case MobileRPCMessage::NOTIFICATION:
 		{
 			mJSONHandler->sendRPCMessage(msg);
 			break;
 		}
-		case MobileRPCMessage::NOTIFICATION:
-			break;
 		case MobileRPCMessage::UNDEFINED:
-			break;
 		default:
 			//unknown RPC message - notifying about an error
 			break;
