@@ -17,7 +17,7 @@ namespace Bluetooth
 
         virtual void sendBuffer(UInt8 * pBuffer, size_t size) = 0;
 
-        virtual ~IBluetoothAPI() {}
+        virtual ~IBluetoothAPI(){}
     };
 }
 
