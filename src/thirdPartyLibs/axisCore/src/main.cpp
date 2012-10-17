@@ -1,4 +1,6 @@
 #include <iostream>
+#include <memory.h>
+#include <stdio.h>
 #include <IProtocolObserver.hpp>
 #include <ProtocolHandler.hpp>
 

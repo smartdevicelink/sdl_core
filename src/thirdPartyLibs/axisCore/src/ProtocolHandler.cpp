@@ -6,13 +6,13 @@
 #include "ProtocolPacketHeader.hpp"
 #include "IProtocolObserver.hpp"
 #include "../../../appMain/CBTAdapter.hpp"
-//#include "transport/bt/BluetoothAPI.hpp"
+#include "transport/bt/BluetoothAPI.hpp"
 //#include "MessageGenerator/CMessage.cpp"
 
 namespace AxisCore
 {
 
-ProtocolHandler::ProtocolHandler(IProtocolObserver *observer, NsTransportLayer::CBTAdapter *btAdapter) :
+ProtocolHandler::ProtocolHandler(IProtocolObserver *observer, Bluetooth::IBluetoothAPI *btAdapter) :
                 mProtocolObserver(observer),
                 mBTAdapter(btAdapter)
 {    
@@ -32,7 +32,7 @@ ProtocolHandler::~ProtocolHandler()
     std::map<UInt8, std::queue<Message *> >::iterator it;
     for (it = mToUpperLevelMessagesQueues.begin() ; it != mToUpperLevelMessagesQueues.end() ; it++)
     {
-        for (int j = 0 ; j < it->second.size() ; j++)
+        for (unsigned int j = 0 ; j < it->second.size() ; j++)
         {
             delete it->second.front();
             it->second.front() = NULL;
@@ -268,74 +268,6 @@ ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
     else
         printf("%s:%d ProtocolHandler::receiveData() returns FAIL\n", __FILE__, __LINE__);
 
-    return retVal;
-}
-
-ERROR_CODE ProtocolHandler::handleReceivedData(const ProtocolPacketHeader &header, UInt8 *data)
-{
-    std::cout << "enter ProtocolHandler::handleReceivedData() \n";
-    ERROR_CODE retVal = ERR_OK;
-/*
-    switch (mState)
-    {
-        case HANDSHAKE_DONE:
-        {
-            std::cout << "ProtocolHandler::handleReceivedData() case HANDSHAKE_DONE \n";
-            if (!(handleMessage(header, data) == ERR_OK) )
-            {
-                std::cout << "ProtocolHandler::handleReceivedData() case HANDSHAKE_DONE handleMessage FAIL\n";
-                retVal = ERR_FAIL;
-            }
-            break;
-        }
-        case BEFORE_HANDSHAKE:
-        {
-            std::cout << "ProtocolHandler::handleReceivedData() case BEFORE_HANDSHAKE \n";
-
-            if ( (header.frameType == FRAME_TYPE_CONTROL) 
-                && (header.frameData == FRAME_DATA_START_SESSION) )
-            {
-                sendStartAck(header.sessionID);
-                mSessionID = header.sessionID;
-                mState = HANDSHAKE_DONE;
-                if (mProtocolObserver)
-                    mProtocolObserver->sessionStartedCallback(mSessionID);
-                else
-                {
-                    std::cout << "ProtocolHandler::handleReceivedData() invalid mProtocolObserver ptr\n";
-                    retVal = ERR_FAIL;
-                }
-            }
-            else
-                std::cout << "ProtocolHandler::handleReceivedData() case BEFORE_HANDSHAKE. \
-                             Incorrect message for this case\n";
-
-            break;
-        }
-        case HANDSHAKE_IN_PROGRESS:
-        {
-            std::cout << "ProtocolHandler::handleReceivedData() case HANDSHAKE_IN_PROGRESS \n";
-
-            if ( (header.frameType == FRAME_TYPE_CONTROL) 
-                && (header.frameData == FRAME_DATA_START_SESSION_ACK) )
-            {
-                mSessionID = header.sessionID;
-                if (mProtocolObserver)
-                    mProtocolObserver->sessionStartedCallback(mSessionID);
-                else
-                {
-                    std::cout << "ProtocolHandler::handleReceivedData() invalid mProtocolObserver ptr\n";
-                    retVal = ERR_FAIL;
-                }
-
-                mState = HANDSHAKE_DONE;
-            }
-            break;
-        }
-        default:
-        {}
-    }
-*/
     return retVal;
 }
 
@@ -623,7 +555,7 @@ void ProtocolHandler::dataReceived()
     ProtocolPacketHeader header;
 
     if (mBTReader.read(header, data, dataSize) == ERR_OK)
-        handleMessage(header, data); /*handleReceivedData(header, data);*/
+        handleMessage(header, data);
     else
         printf("%s:%d ProtocolHandler::dataReceived() error reading\n", __FILE__, __LINE__);
 }
