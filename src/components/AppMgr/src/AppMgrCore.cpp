@@ -16,6 +16,9 @@
 #include "AppMgr/AppPolicy.h"
 #include "AppMgr/RPCAppLinkObject.h"
 #include "AppMgr/RPCBusObject.h"
+#include "AppMgr/AppPolicy.h"
+#include "AppMgr/RegistryItem.h"
+#include "AppMgr/AppMgrRegistry.h"
 
 namespace NsAppManager
 {
@@ -129,6 +132,8 @@ void AppMgrCore::registerApplication( RegisterAppInterface* object )
 	application->setSyncMsgVersion(syncMsgVersion);
 	application->setUsesVehicleData(usesVehicleData);
 	application->setVrSynonyms(vrSynonyms);
+
+	AppMgrRegistry::getInstance().registerApplication( *application );
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
