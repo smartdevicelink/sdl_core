@@ -108,14 +108,30 @@ void* AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
 
 void AppMgrCore::handleMessage( MobileRPCMessage* msg )
 {
-	if(msg->getMessageType() == MobileRPCMessage::REQUEST)
+	switch(msg->getMessageType())
 	{
-		if(0 == msg->getFunctionName().compare("RegisterAppInterface"))
+		case MobileRPCMessage::REQUEST:
 		{
-			RegisterAppInterface * object = (RegisterAppInterface*)msg;
-			registerApplication( object );
-			sendResponse( msg );
+			if(0 == msg->getFunctionName().compare("RegisterAppInterface"))
+			{
+				RegisterAppInterface * object = (RegisterAppInterface*)msg;
+				registerApplication( object );
+				sendResponse( msg );
+			}
+			break;
 		}
+		case MobileRPCMessage::RESPONSE:
+		{
+			mJSONHandler->sendRPCMessage(msg);
+			break;
+		}
+		case MobileRPCMessage::NOTIFICATION:
+			break;
+		case MobileRPCMessage::UNDEFINED:
+			break;
+		default:
+			//unknown RPC message - notifying about an error
+			break;
 	}
 }
 
@@ -164,6 +180,24 @@ void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
 
 void* AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing( void* )
 {
+	while(true)
+	{
+		std::size_t size = mQueueRPCAppLinkObjectsOutgoing.size();
+		if( size > 0 )
+		{
+			mMtxRPCAppLinkObjectsOutgoing.Lock();
+			MobileRPCMessage* msg = mQueueRPCAppLinkObjectsOutgoing.front();
+			mQueueRPCAppLinkObjectsOutgoing.pop();
+			mMtxRPCAppLinkObjectsOutgoing.Unlock();
+			if(!msg)
+			{
+				//to log an error: invalid object
+				continue;
+			}
+			
+			handleMessage( msg );
+		}
+	}
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
