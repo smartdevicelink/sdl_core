@@ -15,6 +15,7 @@
 #include "Types.hpp"
 #include "Blob.hpp"
 #include "IBluetoothHandler.hpp"
+#include "BluetoothAPI.hpp"
 
 /**
  * \namespace NsTransportLayer
@@ -61,7 +62,7 @@ namespace NsTransportLayer
     * \class CBTAdapter
     * \brief Bluetooth adapter for AppLink
     */
-   class CBTAdapter
+   class CBTAdapter: public Bluetooth::IBluetoothAPI
    {
       public:
         /**

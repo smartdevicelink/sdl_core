@@ -268,6 +268,12 @@ namespace NsMessageBroker
           * \brief Messages que mutex.
           */
          System::Mutex mMessagesQueueMutex;
+
+         /**
+          * \brief Binary semaphore that is used to notify the
+          * messaging thread that a new message is available.
+          */
+         System::BinarySemaphore m_messageQueueSemaphore;
    };
 
    CMessageBroker_Private::CMessageBroker_Private() :
@@ -391,6 +397,8 @@ namespace NsMessageBroker
          DBG_MSG_ERROR(("NULL pointer!\n"));
       }
       mMessagesQueueMutex.Unlock();
+
+      m_messageQueueSemaphore.Notify();
    }
 
    bool CMessageBroker_Private::isEventQueueEmpty()
@@ -795,7 +803,7 @@ namespace NsMessageBroker
                delete message;// delete message object
             }
          }
-         System::msleep(50);
+         p->m_messageQueueSemaphore.Wait();
       }
       
       return NULL;

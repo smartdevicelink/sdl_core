@@ -1,13 +1,45 @@
 cmake_minimum_required(VERSION 2.8)
-project (testAppManager)
+set (PROJECT testAppManager)
+project (${PROJECT})
 
-link_directories(../../../src/components/AppMgr)
+set(CMAKE_INSTALL_PREFIX .)
+set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
-include_directories (../../../src/components/AppMgr/include/ ../../../src/components/JSONHandler/include/ ../../../src/thirdPartyLibs/MessageBroker/include/  ../../../src/thirdPartyLibs/jsoncpp/include/)
-add_executable(testAppManager main.cpp)
-target_link_libraries(testAppManager appManager)
+link_directories(../../../src/components/AppMgr
+				 ../../../src/thirdPartyLibs/jsoncpp
+				 ../../../src/components/JSONHandler
+				 ../../../src/thirdPartyLibs/axisCore/bin
+				 ../../../src/thirdPartyLibs/MessageBroker
+				)
+
+include_directories (../../../src/components/AppMgr/include/
+					 ../../../src/components/JSONHandler/include/
+					 ../../../src/thirdPartyLibs/MessageBroker/include/
+					 ../../../src/thirdPartyLibs/jsoncpp/include/
+					)
+
+set (SOURCES
+		main.cpp
+	)
+
+set(LIBRARIES
+		appManager
+		jsonHandler
+		ProtocolHandler
+		messagebroker
+		messagebrokerclient
+		messagebrokerserver
+		jsonCpp
+		bluetooth
+		pthread
+	)
+
+add_executable(${PROJECT} ${SOURCES})
+
+target_link_libraries(${PROJECT} ${LIBRARIES})
 
 include(ExternalProject)
+
 ExternalProject_Add(
    appManager
    SOURCE_DIR ../../../src/components/AppMgr
@@ -19,7 +51,20 @@ ExternalProject_Add(
    INSTALL_COMMAND make install
 )
 
-ADD_DEPENDENCIES(testAppManager appManager)
+ExternalProject_Add(
+	jsonHandler
+	SOURCE_DIR  ../JSONHandler/
+	DOWNLOAD_COMMAND ""
+	CMAKE_COMMAND cmake
+	BUILD_IN_SOURCE 1
+	BUILD_COMMAND make
+	INSTALL_DIR ../JSONHandler/bin
+	INSTALL_COMMAND make install
+)
 
-set(CMAKE_INSTALL_PREFIX .)
-install (TARGETS testAppManager DESTINATION bin)
+ADD_DEPENDENCIES(${PROJECT}
+					appManager
+					jsonHandler
+				)
+
+install (TARGETS ${PROJECT} DESTINATION bin)
