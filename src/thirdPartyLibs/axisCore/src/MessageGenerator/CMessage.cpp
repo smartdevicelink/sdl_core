@@ -17,6 +17,8 @@ CMessage::CMessage()
 
 void CMessage::dispayField()
 {
+   std::cout << "HEADER:" << std::endl;
+
    std::cout << std::hex << std::setw(4) << (int)sVersion
                          << std::setw(4) << (int)sCompressedFlag
                          << std::setw(4) << (int)sFrameType
@@ -24,8 +26,7 @@ void CMessage::dispayField()
                          << std::setw(4) << (int)sFrameData
                          << std::setw(4) << (int)sSessionID << std::endl;
 
-   std::cout << std::hex << (int)sDataSize
-                         << std::setw(18) << (int)sMessageID << std::endl;
+   std::cout << "Data size : " << std::dec << (int)sDataSize << std::endl;
 }
 
 void CMessage::saveSentHeader()
@@ -72,8 +73,6 @@ void CMessage::generateInitialMessage(UInt8 serviceType, UInt8 sessionID)
    UInt8 tmp4 = sDataSize;
    memcpy(sPacketData + 7, &tmp4, 1);
 
-   //memcpy(sPacketData + 8, &sMessageID, 4);
-
    blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
 }
 
@@ -85,7 +84,7 @@ void CMessage::generateSingleMessage(UInt8 serviceType, UInt8 sessionID, std::st
    sServiceType    = serviceType;
    sFrameData      = 0x00; //Single Frame
    sSessionID      = sessionID;
-   sDataSize       = payload.length() + 1; //
+   sDataSize       = payload.length();//' + 1; //
    //sMessageID      = rand() % 0xFFFFFFFF + 1;
 
    dispayField();
@@ -110,10 +109,9 @@ void CMessage::generateSingleMessage(UInt8 serviceType, UInt8 sessionID, std::st
    UInt8 tmp4 = sDataSize;
    memcpy(sPacketData + 7, &tmp4, 1);
 
-   //memcpy(sPacketData + 8, &sMessageID, 4);
    memcpy(sPacketData + 8, (void*)const_cast<char*>(payload.c_str()), sDataSize);
 
-   std::cout << "********    " << std::string((char*)sPacketData, sDataSize + 12) <<  std:: endl;
+   std::cout << "SINGLE MESSAGE GENERATED: " << std::string((char*)sPacketData, sDataSize + 12) <<  std:: endl;
 
    blobQueue.push(Blob((UInt8*)sPacketData, 8 + sDataSize, blobQueue.size()));
 }
@@ -124,7 +122,7 @@ void CMessage::generateFinalMessage(UInt8 serviceType, UInt8 sessionID)
    sCompressedFlag = 0;
    sFrameType      = 0x00; //Control frame
    sServiceType    = serviceType;
-   sFrameData      = 0x04; //Start session
+   sFrameData      = 0x04; //End session
    sSessionID      = sessionID;
    sDataSize       = 0x00;
   //sMessageID      = rand() % 0xFFFFFFFF + 1;
@@ -200,9 +198,9 @@ void CMessage::generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std:
       if(0 == i)
       {
          numberOfConsecutiveFrames = messagesQuantity - 1;
-         totalConsecutivePayloadSize = (payload.length() + 1) * numberOfConsecutiveFrames;
+         totalConsecutivePayloadSize = (payload.length()/* + 1*/) * numberOfConsecutiveFrames;
 
-         sDataSize = 0x08;
+         sDataSize = 0x08;/*
          UInt8 *outDataFirstFrame = new UInt8[sDataSize];
 
          outDataFirstFrame[0] = totalConsecutivePayloadSize >> 24;
@@ -213,11 +211,11 @@ void CMessage::generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std:
          outDataFirstFrame[4] = numberOfConsecutiveFrames >> 24;
          outDataFirstFrame[5] = numberOfConsecutiveFrames >> 16;
          outDataFirstFrame[6] = numberOfConsecutiveFrames >> 8;
-         outDataFirstFrame[7] = numberOfConsecutiveFrames;
+         outDataFirstFrame[7] = numberOfConsecutiveFrames;*/
       }
       else
       {
-         sDataSize       = payload.length() + 1;
+         sDataSize       = payload.length()/* + 1*/;
       }
 
       dispayField();
@@ -250,8 +248,25 @@ void CMessage::generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std:
       }
       else
       {
-         memcpy(sPacketData + 8, &totalConsecutivePayloadSize, 4);
-         memcpy(sPacketData + 12, &numberOfConsecutiveFrames, 4);
+         UInt8 tmp = totalConsecutivePayloadSize >> 24;
+         memcpy(sPacketData + 8, &tmp, 1);
+         tmp = totalConsecutivePayloadSize >> 16;
+         memcpy(sPacketData + 9, &tmp, 1);
+         tmp = totalConsecutivePayloadSize >> 8;
+         memcpy(sPacketData + 10, &tmp, 1);
+         tmp = totalConsecutivePayloadSize;
+         memcpy(sPacketData + 11, &tmp, 1);
+
+         tmp = numberOfConsecutiveFrames >> 24;
+         memcpy(sPacketData + 12, &tmp, 1);
+         tmp = numberOfConsecutiveFrames >> 16;
+         memcpy(sPacketData + 13, &tmp, 1);
+         tmp = numberOfConsecutiveFrames >> 8;
+         memcpy(sPacketData + 14, &tmp, 1);
+         tmp = numberOfConsecutiveFrames;
+         memcpy(sPacketData + 15, &tmp, 1);
+
+         //memcpy(sPacketData + 12, &numberOfConsecutiveFrames, 4);
       }
 
 
@@ -432,7 +447,12 @@ void CMessage::releaseBuffer(const Blob& blob)
 }
 
 void CMessage::sendBuffer(UInt8 * pBuffer, size_t size)
-{}
+{
+    UInt8 *pay = new UInt8[size - 8];
+    memcpy(pay, pBuffer + 8, size - 8);
+    std::cout << "CMessage::sendBuffer() SEND DATA PAYLOAD: " << std::string( ( (char*)pay), size - 8) <<  "\n SIZE : "
+              << std::dec << (size - 8) << std::endl;
+}
 
 
 } //namespace AxisCore

@@ -117,7 +117,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                     sessionID,
                                     dataSize);
 
-        if (!(mBTWriter.write(header, data) == ERR_OK) )
+        if (mBTWriter.write(header, data) != ERR_OK)
         {
             printf("%s:%d ProtocolHandler::sendData() write single frame FAIL\n", __FILE__, __LINE__);
             return ERR_FAIL;
@@ -128,8 +128,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
     else
     {
         int numOfFrames = 0;
-        int subDataSize = dataSize / MAXIMUM_DATA_SIZE;
-        int lastDataSize = subDataSize;
+        int lastDataSize = 0;
 
         if (dataSize % MAXIMUM_DATA_SIZE)
         {
@@ -158,7 +157,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
         outDataFirstFrame[6] = numOfFrames >> 8;
         outDataFirstFrame[7] = numOfFrames;
 
-        if (!(mBTWriter.write(firstHeader, 0) == ERR_OK) )
+        if (mBTWriter.write(firstHeader, outDataFirstFrame) != ERR_OK)
         {
             printf("%s:%d ProtocolHandler::sendData() write first frame FAIL\n", __FILE__, __LINE__);
             return ERR_FAIL;
@@ -169,11 +168,11 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
         delete [] outDataFirstFrame;
 
 
-        UInt8 *outDataFrame = new UInt8[subDataSize];
+        UInt8 *outDataFrame = new UInt8[MAXIMUM_DATA_SIZE];
 
-        for (UInt8 i = 0 ; i <= numOfFrames ; i++)
+        for (UInt8 i = 0 ; i < numOfFrames ; i++)
         {
-            if (i != numOfFrames)
+            if (i != (numOfFrames - 1) )
             {
                 ProtocolPacketHeader header(PROTOCOL_VERSION_1,
                                             compress,
@@ -181,11 +180,11 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                             servType,
                                             ( (i % FRAME_DATA_MAX_VALUE) + 1),
                                             sessionID,
-                                            subDataSize);
+                                            MAXIMUM_DATA_SIZE);
 
-                memcpy(outDataFrame, data + (subDataSize * i), subDataSize);
+                memcpy(outDataFrame, data + (MAXIMUM_DATA_SIZE * i), MAXIMUM_DATA_SIZE);
 
-                if ( mBTWriter.write(header, outDataFrame) == ERR_FAIL)
+                if (mBTWriter.write(header, outDataFrame) != ERR_OK)
                 {
                     printf("%s:%d ProtocolHandler::sendData() write consecutive frame FAIL\n"
                            , __FILE__, __LINE__);
@@ -204,9 +203,9 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                             sessionID,
                                             lastDataSize);
 
-                memcpy(outDataFrame, data + (subDataSize * i), lastDataSize);
+                memcpy(outDataFrame, data + (MAXIMUM_DATA_SIZE * i), lastDataSize);
 
-                if (mBTWriter.write(header, outDataFrame) == ERR_FAIL)
+                if (mBTWriter.write(header, outDataFrame) != ERR_OK)
                 {
                     printf("%s:%d ProtocolHandler::sendData() write last frame FAIL\n"
                            , __FILE__, __LINE__);
@@ -499,6 +498,8 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
         {
             if (mIncompleteMultiFrameMessages[header.sessionID]->addConsecutiveMessage(header, data) == ERR_OK)
             {
+                printf("%s:%d ProtocolHandler::handleMultiFrameMessage() addConsecutiveMessage OK\n"
+                       , __FILE__, __LINE__);
                 if (header.frameData == FRAME_DATA_LAST_FRAME)
                 {
                     mToUpperLevelMessagesQueues[header.sessionID].push(mIncompleteMultiFrameMessages[header.sessionID] );
@@ -543,8 +544,6 @@ void ProtocolHandler::dataReceived()
 {
     printf("%s:%d enter ProtocolHandler::dataReceived()\n", __FILE__, __LINE__);
     UInt32 dataSize = 0;
-
-    //dataSize = Bluetooth::getBuffer().size();
 
     if (mBTAdapter)
         dataSize = mBTAdapter->getBuffer().size();
