@@ -17,6 +17,8 @@
 
 #include "JSONHandler/JSONHandler.h"
 
+#include "AppMgr/AppMgr.h"
+
 /**
  * \brief Entry point of the program.
  * \param argc number of argument
@@ -25,16 +27,22 @@
  */
 int main(int argc, char** argv)
 {
-    unsigned int cls = 0x280404;
-    int timeout = 1000;
-    uint8_t channel = 3;
-
     /*** Components instance section***/
     /**********************************/
     NsTransportLayer::CBTAdapter btadapter;
+
     JSONHandler jsonHandler;
+
     AxisCore::ProtocolHandler protocolHandler =  AxisCore::ProtocolHandler(&jsonHandler, &btadapter);
+
     jsonHandler.setProtocolHandler(&protocolHandler);
+
+    NsAppManager::AppMgr::setParams(std::string("127.0.0.1"), 8087, std::string("AppMgr"));
+
+    NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
+
+    jsonHandler.setRPCMessagesObserver(&appMgr);
+
     /**********************************/
 
     int rfcommsock;
