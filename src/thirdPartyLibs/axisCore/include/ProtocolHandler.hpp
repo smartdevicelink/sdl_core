@@ -9,9 +9,9 @@
 #include "BluetoothWriter.hpp"
 #include "transport/bt/IBluetoothHandler.hpp"
 
-namespace NsTransportLayer
+namespace Bluetooth
 {
-    class CBTAdapter;
+    class IBluetoothAPI;
 }
 
 namespace AxisCore
@@ -28,7 +28,7 @@ class ProtocolHandler : public Bluetooth::IBluetoothHandler
 {
 public:
 
-    ProtocolHandler(IProtocolObserver *observer, NsTransportLayer::CBTAdapter *btAdapter);
+    ProtocolHandler(IProtocolObserver *observer, /*NsTransportLayer::CBTAdapter*/Bluetooth::IBluetoothAPI *btAdapter);
 
     ~ProtocolHandler();
 
@@ -77,7 +77,6 @@ private:
         HANDSHAKE_DONE
     };
 
-    ERROR_CODE handleReceivedData(const ProtocolPacketHeader &header, UInt8 *data);
     ERROR_CODE sendStartAck(const UInt8 sessionID);
     ERROR_CODE handleMessage(const ProtocolPacketHeader &header, UInt8 *data);
     ERROR_CODE handleControlMessage(const ProtocolPacketHeader &header, UInt8 *data);
@@ -89,7 +88,7 @@ private:
     std::map<UInt8, Message *> mIncompleteMultiFrameMessages;
     BluetoothReader mBTReader;
     BluetoothWriter mBTWriter;
-    NsTransportLayer::CBTAdapter *mBTAdapter;
+    Bluetooth::IBluetoothAPI *mBTAdapter;
 };
 
 } //namespace AxisCore

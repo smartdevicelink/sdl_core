@@ -19,7 +19,7 @@ BluetoothWriter::~BluetoothWriter()
     delete [] mData;
 }
 
-void BluetoothWriter::setBTAdapter(NsTransportLayer::CBTAdapter *adapter)
+void BluetoothWriter::setBTAdapter(Bluetooth::IBluetoothAPI *adapter)
 {
     mBTAdapter = adapter;
 }
@@ -62,8 +62,6 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
         mBTAdapter->sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_SIZE);
     else
         return ERR_FAIL;
-
-    //Bluetooth::sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_SIZE);
 
     return ERR_OK;
 }

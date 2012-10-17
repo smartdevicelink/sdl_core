@@ -3,9 +3,9 @@
 
 #include "ProtocolPacketHeader.hpp"
 
-namespace NsTransportLayer
+namespace Bluetooth
 {
-    class CBTAdapter;
+    class IBluetoothAPI;
 }
 
 namespace AxisCore
@@ -34,12 +34,11 @@ public:
       * Set BTAdapter pointer for writing
       * @param adapter Pointer to NsTransportLayer::CBTAdapter
       */
-    void setBTAdapter(NsTransportLayer::CBTAdapter *adapter);
+    void setBTAdapter(Bluetooth::IBluetoothAPI *adapter);
 
 private:
     UInt8 *mData;
-    NsTransportLayer::CBTAdapter *mBTAdapter;
-
+    Bluetooth::IBluetoothAPI *mBTAdapter;
 };
 
 } //namespace AxisCore

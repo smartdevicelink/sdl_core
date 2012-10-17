@@ -44,6 +44,15 @@ MobileRPCMessage::MobileRPCMessage( unsigned int protocolVersion, MessageType me
 ,mJSONMessageSize( messageSize )
 { }
 
+MobileRPCMessage::MobileRPCMessage( const MobileRPCMessage& message )
+:mProtocolVersion( message.getProtocolVersion() )
+,mMessageType( message.getMessageType() )
+,mCorrelationID( message.getCorrelationID() )
+,mFunctionName( message.getFunctionName() )
+,mFunctionID( message.getFunctionID() )
+,mJSONMessageSize( message.getJSONMessageSize() )
+{}
+
 MobileRPCMessage::~MobileRPCMessage() 
 {}
 

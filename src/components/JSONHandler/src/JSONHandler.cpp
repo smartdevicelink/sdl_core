@@ -1,3 +1,4 @@
+
 #include "JSONHandler/JSONHandler.h"
 #include <algorithm>
 #include <string.h>
@@ -265,14 +266,9 @@ void * JSONHandler::waitForIncomingMessages( void * params )
         {
             std::string jsonMessage = handler -> mIncomingMessages.pop();
 
+            MobileRPCMessage * currentMessage = handler -> createObjectFromJSON( jsonMessage );
 
-            MobileRPCMessage * mCurrentMessage = handler -> createObjectFromJSON( jsonMessage );
-
-            RegisterAppInterfaceResponse* response = handler -> mFactory -> createRegisterAppInterfaceResponse( *mCurrentMessage );
-
-            Json::Value parameters = handler -> mFactory -> serializeRegisterAppInterfaceResponse( *response );
-            Json::Value root = handler -> createJSONFromObject( *response );
-            if ( root.isNull() )
+            if ( !handler -> mMessagesObserver )
             {
                 pthread_exit( 0 );
             }

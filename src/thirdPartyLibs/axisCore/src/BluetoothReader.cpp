@@ -19,7 +19,7 @@ BluetoothReader::~BluetoothReader()
     delete [] mData;
 }
 
-void BluetoothReader::setBTAdapter(NsTransportLayer::CBTAdapter *adapter)
+void BluetoothReader::setBTAdapter(Bluetooth::IBluetoothAPI *adapter)
 {
     mBTAdapter = adapter;
 }

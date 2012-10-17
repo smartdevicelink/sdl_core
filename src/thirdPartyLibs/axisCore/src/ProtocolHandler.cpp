@@ -6,13 +6,13 @@
 #include "ProtocolPacketHeader.hpp"
 #include "IProtocolObserver.hpp"
 #include "../../../appMain/CBTAdapter.hpp"
-//#include "transport/bt/BluetoothAPI.hpp"
+#include "transport/bt/BluetoothAPI.hpp"
 //#include "MessageGenerator/CMessage.cpp"
 
 namespace AxisCore
 {
 
-ProtocolHandler::ProtocolHandler(IProtocolObserver *observer, NsTransportLayer::CBTAdapter *btAdapter) :
+ProtocolHandler::ProtocolHandler(IProtocolObserver *observer, Bluetooth::IBluetoothAPI *btAdapter) :
                 mProtocolObserver(observer),
                 mBTAdapter(btAdapter)
 {    
@@ -32,7 +32,7 @@ ProtocolHandler::~ProtocolHandler()
     std::map<UInt8, std::queue<Message *> >::iterator it;
     for (it = mToUpperLevelMessagesQueues.begin() ; it != mToUpperLevelMessagesQueues.end() ; it++)
     {
-        for (int j = 0 ; j < it->second.size() ; j++)
+        for (unsigned int j = 0 ; j < it->second.size() ; j++)
         {
             delete it->second.front();
             it->second.front() = NULL;
@@ -117,7 +117,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                     sessionID,
                                     dataSize);
 
-        if (!(mBTWriter.write(header, data) == ERR_OK) )
+        if (mBTWriter.write(header, data) != ERR_OK)
         {
             printf("%s:%d ProtocolHandler::sendData() write single frame FAIL\n", __FILE__, __LINE__);
             return ERR_FAIL;
@@ -128,8 +128,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
     else
     {
         int numOfFrames = 0;
-        int subDataSize = dataSize / MAXIMUM_DATA_SIZE;
-        int lastDataSize = subDataSize;
+        int lastDataSize = 0;
 
         if (dataSize % MAXIMUM_DATA_SIZE)
         {
@@ -158,7 +157,7 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
         outDataFirstFrame[6] = numOfFrames >> 8;
         outDataFirstFrame[7] = numOfFrames;
 
-        if (!(mBTWriter.write(firstHeader, 0) == ERR_OK) )
+        if (mBTWriter.write(firstHeader, outDataFirstFrame) != ERR_OK)
         {
             printf("%s:%d ProtocolHandler::sendData() write first frame FAIL\n", __FILE__, __LINE__);
             return ERR_FAIL;
@@ -169,11 +168,11 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
         delete [] outDataFirstFrame;
 
 
-        UInt8 *outDataFrame = new UInt8[subDataSize];
+        UInt8 *outDataFrame = new UInt8[MAXIMUM_DATA_SIZE];
 
-        for (UInt8 i = 0 ; i <= numOfFrames ; i++)
+        for (UInt8 i = 0 ; i < numOfFrames ; i++)
         {
-            if (i != numOfFrames)
+            if (i != (numOfFrames - 1) )
             {
                 ProtocolPacketHeader header(PROTOCOL_VERSION_1,
                                             compress,
@@ -181,11 +180,11 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                             servType,
                                             ( (i % FRAME_DATA_MAX_VALUE) + 1),
                                             sessionID,
-                                            subDataSize);
+                                            MAXIMUM_DATA_SIZE);
 
-                memcpy(outDataFrame, data + (subDataSize * i), subDataSize);
+                memcpy(outDataFrame, data + (MAXIMUM_DATA_SIZE * i), MAXIMUM_DATA_SIZE);
 
-                if ( mBTWriter.write(header, outDataFrame) == ERR_FAIL)
+                if (mBTWriter.write(header, outDataFrame) != ERR_OK)
                 {
                     printf("%s:%d ProtocolHandler::sendData() write consecutive frame FAIL\n"
                            , __FILE__, __LINE__);
@@ -204,9 +203,9 @@ ERROR_CODE ProtocolHandler::sendData(UInt8 sessionID
                                             sessionID,
                                             lastDataSize);
 
-                memcpy(outDataFrame, data + (subDataSize * i), lastDataSize);
+                memcpy(outDataFrame, data + (MAXIMUM_DATA_SIZE * i), lastDataSize);
 
-                if (mBTWriter.write(header, outDataFrame) == ERR_FAIL)
+                if (mBTWriter.write(header, outDataFrame) != ERR_OK)
                 {
                     printf("%s:%d ProtocolHandler::sendData() write last frame FAIL\n"
                            , __FILE__, __LINE__);
@@ -268,74 +267,6 @@ ERROR_CODE ProtocolHandler::receiveData(UInt8 sessionID
     else
         printf("%s:%d ProtocolHandler::receiveData() returns FAIL\n", __FILE__, __LINE__);
 
-    return retVal;
-}
-
-ERROR_CODE ProtocolHandler::handleReceivedData(const ProtocolPacketHeader &header, UInt8 *data)
-{
-    std::cout << "enter ProtocolHandler::handleReceivedData() \n";
-    ERROR_CODE retVal = ERR_OK;
-/*
-    switch (mState)
-    {
-        case HANDSHAKE_DONE:
-        {
-            std::cout << "ProtocolHandler::handleReceivedData() case HANDSHAKE_DONE \n";
-            if (!(handleMessage(header, data) == ERR_OK) )
-            {
-                std::cout << "ProtocolHandler::handleReceivedData() case HANDSHAKE_DONE handleMessage FAIL\n";
-                retVal = ERR_FAIL;
-            }
-            break;
-        }
-        case BEFORE_HANDSHAKE:
-        {
-            std::cout << "ProtocolHandler::handleReceivedData() case BEFORE_HANDSHAKE \n";
-
-            if ( (header.frameType == FRAME_TYPE_CONTROL) 
-                && (header.frameData == FRAME_DATA_START_SESSION) )
-            {
-                sendStartAck(header.sessionID);
-                mSessionID = header.sessionID;
-                mState = HANDSHAKE_DONE;
-                if (mProtocolObserver)
-                    mProtocolObserver->sessionStartedCallback(mSessionID);
-                else
-                {
-                    std::cout << "ProtocolHandler::handleReceivedData() invalid mProtocolObserver ptr\n";
-                    retVal = ERR_FAIL;
-                }
-            }
-            else
-                std::cout << "ProtocolHandler::handleReceivedData() case BEFORE_HANDSHAKE. \
-                             Incorrect message for this case\n";
-
-            break;
-        }
-        case HANDSHAKE_IN_PROGRESS:
-        {
-            std::cout << "ProtocolHandler::handleReceivedData() case HANDSHAKE_IN_PROGRESS \n";
-
-            if ( (header.frameType == FRAME_TYPE_CONTROL) 
-                && (header.frameData == FRAME_DATA_START_SESSION_ACK) )
-            {
-                mSessionID = header.sessionID;
-                if (mProtocolObserver)
-                    mProtocolObserver->sessionStartedCallback(mSessionID);
-                else
-                {
-                    std::cout << "ProtocolHandler::handleReceivedData() invalid mProtocolObserver ptr\n";
-                    retVal = ERR_FAIL;
-                }
-
-                mState = HANDSHAKE_DONE;
-            }
-            break;
-        }
-        default:
-        {}
-    }
-*/
     return retVal;
 }
 
@@ -567,6 +498,8 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
         {
             if (mIncompleteMultiFrameMessages[header.sessionID]->addConsecutiveMessage(header, data) == ERR_OK)
             {
+                printf("%s:%d ProtocolHandler::handleMultiFrameMessage() addConsecutiveMessage OK\n"
+                       , __FILE__, __LINE__);
                 if (header.frameData == FRAME_DATA_LAST_FRAME)
                 {
                     mToUpperLevelMessagesQueues[header.sessionID].push(mIncompleteMultiFrameMessages[header.sessionID] );
@@ -612,8 +545,6 @@ void ProtocolHandler::dataReceived()
     printf("%s:%d enter ProtocolHandler::dataReceived()\n", __FILE__, __LINE__);
     UInt32 dataSize = 0;
 
-    //dataSize = Bluetooth::getBuffer().size();
-
     if (mBTAdapter)
         dataSize = mBTAdapter->getBuffer().size();
     else
@@ -623,7 +554,7 @@ void ProtocolHandler::dataReceived()
     ProtocolPacketHeader header;
 
     if (mBTReader.read(header, data, dataSize) == ERR_OK)
-        handleMessage(header, data); /*handleReceivedData(header, data);*/
+        handleMessage(header, data);
     else
         printf("%s:%d ProtocolHandler::dataReceived() error reading\n", __FILE__, __LINE__);
 }

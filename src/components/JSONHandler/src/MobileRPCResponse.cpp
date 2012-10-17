@@ -13,5 +13,9 @@ MobileRPCResponse::MobileRPCResponse( unsigned int protocolVersion, unsigned int
 :MobileRPCMessage( protocolVersion, RESPONSE, functionID )
 {}
 
+MobileRPCResponse::MobileRPCResponse( const MobileRPCMessage& message )
+:MobileRPCMessage( message )
+{}
+
 MobileRPCResponse::~MobileRPCResponse()
 {}

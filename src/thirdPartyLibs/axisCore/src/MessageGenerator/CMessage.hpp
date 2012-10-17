@@ -6,70 +6,67 @@
 
 #include "../../utils/misc/Types.hpp"
 #include "../../transport/bt/Blob.hpp"
-
-#include "../../include/ProtocolPacketHeader.hpp"
+#include "../../transport/bt/BluetoothAPI.hpp"
+#include "../../transport/bt/IBluetoothHandler.hpp"
 
 namespace AxisCore
 {
 
+using namespace Bluetooth;
+
 struct ProtocolPacketHeader;
 
-class CMessage
+class CMessage : public Bluetooth::IBluetoothAPI
 {
 public:
-   static Blob getNextBlob();
-   static void releaseCurrentBlob(const Blob &blob);
+   CMessage();
 
-   static void generateInitialMessage(UInt8 serviceType, UInt8 sessionID);
-   static void generateFinalMessage(UInt8 serviceType, UInt8 sessionID);
-   static void generateSingleMessage(UInt8 serviceType, UInt8 sessionID, std::string payload);
-   static void generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std::string payload, int messagesQuantity);
+   virtual void initBluetooth(IBluetoothHandler * pHandler);
+   virtual void deinitBluetooth();
 
-   static UInt32 verify(ProtocolPacketHeader& header, UInt32 fieldsToValidate);
+   virtual const Blob getBuffer();
+   virtual void releaseBuffer(const Blob&);
+
+   virtual void sendBuffer(UInt8 * pBuffer, size_t size);
+
+   virtual ~CMessage();
+
+public:
+   void generateInitialMessage(UInt8 serviceType, UInt8 sessionID);
+   void generateFinalMessage(UInt8 serviceType, UInt8 sessionID);
+   void generateSingleMessage(UInt8 serviceType, UInt8 sessionID, std::string payload);
+   void generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std::string payload, int messagesQuantity);
+
+   UInt32 verify(ProtocolPacketHeader& header, UInt32 fieldsToValidate);
 
 private:
 
-   static std::queue<Blob> blobQueue;
+   std::queue<Blob> blobQueue;
+   Blob getNextBlob();
+   void releaseCurrentBlob(const Blob &blob);
 
-   //static void write();
-   //static void generate();
+   void saveSentHeader();
+   void dispayField();
 
-   static void saveSentHeader();
-   static void dispayField();
+   ProtocolPacketHeader* sentHeader;
 
+   UInt8 sVersion;
+   UInt8 sCompressedFlag;
+   UInt8 sFrameType;
+   UInt8 sServiceType;
+   UInt8 sFrameData;
+   UInt8 sSessionID;
+   UInt32 sDataSize;
+   UInt32 sMessageID;
 
-   static ProtocolPacketHeader sentHeader;
+   void* sPacketData;
 
-   static UInt8 sVersion;
-   static UInt8 sCompressedFlag;
-   static UInt8 sFrameType;
-   static UInt8 sServiceType;
-   static UInt8 sFrameData;
-   static UInt8 sSessionID;
-   static UInt32 sDataSize;
-   static UInt32 sMessageID;
-
-   static void* sPacketData;
-
-   static int getBit(const UInt32 value, const UInt32 position);
-   static void setBit(UInt32 value, const UInt32 position);
-   static void clearBit(UInt32 value, const UInt32 position);
+   int getBit(const UInt32 value, const UInt32 position);
+   void setBit(UInt32 value, const UInt32 position);
+   void clearBit(UInt32 value, const UInt32 position);
 };
 
 } //namespace AxisCore
-
-namespace Bluetooth
-{
-   static const Blob getBuffer()
-   {
-      return AxisCore::CMessage::getNextBlob();
-   }
-
-   static void releaseBuffer(const Blob& blob)
-   {
-      AxisCore::CMessage::releaseCurrentBlob(blob);
-   }
-}
 
 #endif /* СMESSAGE_HPP_ */
 

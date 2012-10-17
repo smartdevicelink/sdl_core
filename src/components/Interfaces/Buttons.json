@@ -1,0 +1,59 @@
+/*
+ * 
+ * @name Buttons
+ * 
+ * @desc Component provides notifications from HMI regarding button events 
+ * 
+ * @category	HMI
+ * @version	1.0
+ *
+ * @author	Sergey Solovey
+ *
+ */
+{
+    "envelope": 	"JSON-RPC 2.0",
+    "serviceUrl": 	"/localhost:6543",
+    
+    "methods": {
+	/*
+	 * @descr 
+	 *      method should be invoked at system startup
+	 *	provides information about all supported hardware buttons and their capabilites
+	 * 	
+	 * @returns
+	 * 		button capabilites
+ 	 * 		array of supported buttons
+	 */ 
+        "Buttons.getCapabilities": {
+	     returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"capabilities"	: "ButtonCapabilities", // data type from AppLink protocol specification
+	    			"button"	: "string"
+			}
+        },
+
+	/*
+	 * @descr Notifies application of UP/DOWN events for buttons
+	 */
+	"Buttons.onButtonEvent": {
+		"parameters": {
+			"name"	: "string",        
+			"mode"	: "ButtonEventMode"  // data type from AppLink protocol specification
+		}
+	},
+
+
+	/*
+	 * @descr Notifies application of LONG/SHORT press events for buttons
+	 */
+	"Buttons.onButtonPress": {
+		"parameters": {
+			"name"	: "string",        
+			"mode"	: "ButtonPressMode" // data type from AppLink protocol specification
+		}
+	}
+
+    }, //methods end
+    
+    "id": "integer" //REQUIRED for request methods. NOT to be used for notifications
+}

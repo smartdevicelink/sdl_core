@@ -13,6 +13,10 @@ MobileRPCRequest::MobileRPCRequest( unsigned int protocolVersion, std::string fu
 MobileRPCRequest::MobileRPCRequest( unsigned int protocolVersion, unsigned int functionID )
 :MobileRPCMessage( protocolVersion, REQUEST, functionID )
 {}
+
+MobileRPCRequest::MobileRPCRequest( const MobileRPCMessage& message )
+:MobileRPCMessage( message )
+{}
  
 MobileRPCRequest::~MobileRPCRequest() 
 {}
