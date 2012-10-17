@@ -8,15 +8,22 @@ set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
 link_directories(../thirdPartyLibs/jsoncpp
                  ../components/JSONHandler/bin
+                 ../components/AppMgr/bin
                  ../thirdPartyLibs/axisCore/bin
                  ../thirdPartyLibs/jsoncpp/bin
+                 ../thirdPartyLibs/MessageBroker/bin
                  )
 
 set(LIBRARIES
         bluetooth
+        pthread
         ProtocolHandler
         jsonHandler
         jsonCpp
+        appManager
+        messagebroker
+        messagebrokerclient
+        messagebrokerserver
     )
 
 include_directories (./
@@ -25,8 +32,10 @@ include_directories (./
                      ../thirdPartyLibs/axisCore/src
                      ../thirdPartyLibs/axisCore/
                      ../thirdPartyLibs/axisCore/transport/bt
-                     ../components/JSONHandler/include
                      ../thirdPartyLibs/jsoncpp/include/
+                     ../components/JSONHandler/include
+                     ../components/AppMgr/include
+                     ../thirdPartyLibs/MessageBroker/include
                      )
 
 set (SOURCES
@@ -61,10 +70,35 @@ ExternalProject_Add(
    INSTALL_DIR ../components/JSONHandler/bin
    INSTALL_COMMAND make install
 )
+
+ExternalProject_Add(
+   appManager
+   SOURCE_DIR ../components/AppMgr
+   DOWNLOAD_COMMAND ""
+   CMAKE_COMMAND cmake
+   BUILD_IN_SOURCE 1 
+   BUILD_COMMAND make
+   INSTALL_DIR ../components/AppMgr/bin
+   INSTALL_COMMAND make install
+)
+
+ExternalProject_Add(
+   messageBroker
+   SOURCE_DIR ../thirdPartyLibs/MessageBroker
+   DOWNLOAD_COMMAND ""
+   CMAKE_COMMAND cmake
+   BUILD_IN_SOURCE 1 
+   BUILD_COMMAND make
+   INSTALL_DIR ../thirdPartyLibs/MessageBroker/bin
+   INSTALL_COMMAND make install
+)
+
 ADD_DEPENDENCIES(${PROJECT}
                         jsonCpp
                         ProtocolHandler
                         jsonHandler
+                        messageBroker
+                        appManager
                         )
 
 install (TARGETS ${PROJECT} DESTINATION bin)
