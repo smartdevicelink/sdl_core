@@ -6,6 +6,16 @@
  */
 
 #include "AppMgr/AppMgrCore.h"
+#include "JSONHandler/MobileRPCMessage.h"
+#include "JSONHandler/MobileRPCRequest.h"
+#include "JSONHandler/RegisterAppInterface.h"
+#include "JSONHandler/RegisterAppInterfaceResponse.h"
+#include "AppMgr/IApplication.h"
+#include "AppMgr/Application.h"
+#include "AppMgr/AppMgrRegistry.h"
+#include "AppMgr/AppPolicy.h"
+#include "AppMgr/RPCAppLinkObject.h"
+#include "AppMgr/RPCBusObject.h"
 
 namespace NsAppManager
 {
@@ -94,14 +104,31 @@ void AppMgrCore::handleMessage( MobileRPCMessage* msg )
 	{
 		if(0 == msg->getFunctionName().compare("RegisterAppInterface"))
 		{
-			registerApplication( msg );
+			RegisterAppInterface * object = (RegisterAppInterface*)msg;
+			registerApplication( object );
 		}
 	}
 }
 
-void AppMgrCore::registerApplication( MobileRPCMessage* msg )
+void AppMgrCore::registerApplication( RegisterAppInterface* object )
 {
-	
+	const std::string& appName = object->getAppName();
+	const std::string& ngnMediaScreenAppName = object->getNgnMediaScreenAppName();
+	const std::vector<std::string>& vrSynonyms = object->getVrSynonyms();
+	bool usesVehicleData = object->getUsesVehicleData();
+	bool isMediaApplication = object->getIsMediaApplication();
+	const Language& languageDesired = object->getLanguageDesired();
+	const std::string& autoActivateID = object->getAutoActivateID();
+	const SyncMsgVersion& syncMsgVersion = object->getSyncMsgVersion();
+
+	Application* application = new Application( appName );
+	application->setAutoActivateID(autoActivateID);
+	application->setIsMediaApplication(isMediaApplication);
+	application->setLanguageDesired(languageDesired);
+	application->setNgnMediaScreenAppName(ngnMediaScreenAppName);
+	application->setSyncMsgVersion(syncMsgVersion);
+	application->setUsesVehicleData(usesVehicleData);
+	application->setVrSynonyms(vrSynonyms);
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )

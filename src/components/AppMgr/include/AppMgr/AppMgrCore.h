@@ -8,15 +8,12 @@
 #ifndef APPMGR_H_
 #define APPMGR_H_
 
-#include "IApplication.h"
-#include "AppMgrRegistry.h"
-#include "AppPolicy.h"
-#include "RPCAppLinkObject.h"
-#include "RPCBusObject.h"
-#include "JSONHandler/MobileRPCMessage.h"
 #include "system.h"
-
 #include <queue>
+
+class RegisterAppInterface;
+class MobileRPCMessage;
+class RPCBusObject;
 
 namespace NsAppManager
 {
@@ -36,15 +33,15 @@ private:
 	AppMgrCore();
 
 	void handleMessage( MobileRPCMessage* msg );
-	void registerApplication( MobileRPCMessage* msg );
+	void registerApplication( RegisterAppInterface* msg );
 
 	void* handleQueueRPCAppLinkObjectsIncoming( void* );
 	void* handleQueueRPCBusObjectsIncoming( void* );
 	void* handleQueueRPCAppLinkObjectsOutgoing( void* );
 	void* handleQueueRPCBusObjectsOutgoing( void* );
 	
-	std::queue< RPCAppLinkObject* > mQueueRPCAppLinkObjectsIncoming;
-	std::queue< RPCAppLinkObject* > mQueueRPCAppLinkObjectsOutgoing;
+	std::queue< MobileRPCMessage* > mQueueRPCAppLinkObjectsIncoming;
+	std::queue< MobileRPCMessage* > mQueueRPCAppLinkObjectsOutgoing;
 	std::queue< RPCBusObject* > mQueueRPCBusObjectsIncoming;
 	std::queue< RPCBusObject* > mQueueRPCBusObjectsOutgoing;
 

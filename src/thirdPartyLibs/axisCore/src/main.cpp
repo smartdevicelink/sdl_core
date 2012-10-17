@@ -4,9 +4,11 @@
 
 //#include "MessageGenerator/CMessage.hpp"
 //#include "MessageGenerator/CMessage.cpp"
+#include "../../transport/bt/BluetoothAPI.hpp"
 
 using namespace std;
 using namespace AxisCore;
+using namespace Bluetooth;
 
 class ProtocolObserver : public IProtocolObserver
 {
@@ -20,15 +22,15 @@ public:
         cout << "enter ProtocolObserver() \n";
         mSessionID = 0;
 
-        CMessage::generateInitialMessage(0x07, 0);
+        //CMessage::generateInitialMessage(0x07, 0);
         mHandler = new ProtocolHandler(this, 0);
         mHandler->dataReceived();
-        CMessage::generateInitialMessage(0x07, 0);
+        //CMessage::generateInitialMessage(0x07, 0);
         mHandler->dataReceived();
         std::string str;
         for (int i = 0 ; i < 278 ; i++)
             str.append("1");
-        CMessage::generateSingleMessage(0x07, 0, str);
+        //CMessage::generateSingleMessage(0x07, 0, str);
         //CMessage::generateMultipleMessages("Hello ?", 5);
         //for (int i = 0 ; i < 5 ; i++)
             mHandler->dataReceived();
@@ -74,6 +76,8 @@ int main()
 {
     cout << "enter main() \n";
     ProtocolObserver *observer = new ProtocolObserver();
+
+    Bluetooth::IBluetoothAPI *object = new CMessage();
 
     delete observer;
     cout << "exit main() \n";

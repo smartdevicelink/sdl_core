@@ -21,6 +21,10 @@ IApplication::IApplication( const IApplication& app )
 {
 }
 
+IApplication::~IApplication( )
+{
+}
+
 const std::string& IApplication::getName( ) const
 {
 	return mName;
