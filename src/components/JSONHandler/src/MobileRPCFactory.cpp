@@ -53,13 +53,13 @@ Json::Value MobileRPCFactory::serializeRegisterAppInterface( const RegisterAppIn
     return result;
 }
 
-RegisterAppInterfaceResponse MobileRPCFactory::createRegisterAppInterfaceResponse ( const MobileRPCMessage & message ) const 
+RegisterAppInterfaceResponse* MobileRPCFactory::createRegisterAppInterfaceResponse ( const MobileRPCMessage & message ) const 
 {
-    RegisterAppInterfaceResponse object( message.getProtocolVersion() );
-    object.setCorrelationID( message.getCorrelationID() );
+    RegisterAppInterfaceResponse* object = new RegisterAppInterfaceResponse( message.getProtocolVersion() );
+    object->setCorrelationID( message.getCorrelationID() );
     
-    object.setSuccess( true );
-    object.setResultCode( "SUCCESS" );
+    object->setSuccess( true );
+    object->setResultCode( "SUCCESS" );
     
     return object;
 }

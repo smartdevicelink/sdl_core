@@ -25,7 +25,7 @@ public:
     RegisterAppInterface createRegisterAppInterface ( const MobileRPCMessage & message ) const;
     Json::Value serializeRegisterAppInterface( const RegisterAppInterface & request ) const;
 
-    RegisterAppInterfaceResponse createRegisterAppInterfaceResponse ( const MobileRPCMessage & message ) const;
+    RegisterAppInterfaceResponse* createRegisterAppInterfaceResponse ( const MobileRPCMessage & message ) const;
     Json::Value serializeRegisterAppInterfaceResponse( const RegisterAppInterfaceResponse & response ) const;
 
     OnHMIStatus createOnHMIStatus () const;
