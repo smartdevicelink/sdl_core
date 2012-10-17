@@ -8,6 +8,9 @@
 #include "AppMgr/AppMgrCore.h"
 #include "JSONHandler/MobileRPCMessage.h"
 #include "JSONHandler/MobileRPCRequest.h"
+#include "JSONHandler/MobileRPCResponse.h"
+#include "JSONHandler/MobileRPCNotification.h"
+#include "JSONHandler/MobileRPCFactory.h"
 #include "JSONHandler/RegisterAppInterface.h"
 #include "JSONHandler/RegisterAppInterfaceResponse.h"
 #include "AppMgr/IApplication.h"
@@ -18,6 +21,7 @@
 #include "AppMgr/RPCBusObject.h"
 #include "AppMgr/AppPolicy.h"
 #include "AppMgr/RegistryItem.h"
+#include <sys/socket.h>
 #include "AppMgr/AppMgrRegistry.h"
 
 namespace NsAppManager
@@ -109,8 +113,18 @@ void AppMgrCore::handleMessage( MobileRPCMessage* msg )
 		{
 			RegisterAppInterface * object = (RegisterAppInterface*)msg;
 			registerApplication( object );
+			sendResponse( msg );
 		}
 	}
+}
+
+void AppMgrCore::enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message )
+{
+	mMtxRPCAppLinkObjectsOutgoing.Lock();
+	
+	mQueueRPCAppLinkObjectsOutgoing.push((RPCAppLinkObject *)message);
+	
+	mMtxRPCAppLinkObjectsOutgoing.Unlock();
 }
 
 void AppMgrCore::registerApplication( RegisterAppInterface* object )
@@ -134,6 +148,13 @@ void AppMgrCore::registerApplication( RegisterAppInterface* object )
 	application->setVrSynonyms(vrSynonyms);
 
 	AppMgrRegistry::getInstance().registerApplication( *application );
+}
+
+void AppMgrCore::sendResponse( MobileRPCMessage* msg )
+{
+	MobileRPCFactory factory;
+	RegisterAppInterfaceResponse* response = factory.createRegisterAppInterfaceResponse( *msg );
+	enqueueOutgoingMobileRPCMessage( response );
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
