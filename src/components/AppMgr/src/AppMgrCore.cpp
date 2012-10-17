@@ -22,6 +22,7 @@
 #include "AppMgr/RPCBusObject.h"
 #include "AppMgr/AppPolicy.h"
 #include "AppMgr/RegistryItem.h"
+#include "AppMgr/AppLinkInterface.h"
 #include <sys/socket.h>
 #include "AppMgr/AppMgrRegistry.h"
 
@@ -101,12 +102,12 @@ void* AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
 				continue;
 			}
 
-			handleMessage( msg );
+			handleMobileRPCMessage( msg );
 		}
 	}
 }
 
-void AppMgrCore::handleMessage( MobileRPCMessage* msg )
+void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 {
 	switch(msg->getMessageType())
 	{
@@ -116,7 +117,7 @@ void AppMgrCore::handleMessage( MobileRPCMessage* msg )
 			{
 				RegisterAppInterface * object = (RegisterAppInterface*)msg;
 				registerApplication( object );
-				sendResponse( msg );
+				sendMobileRPCResponse( msg );
 			}
 			break;
 		}
@@ -131,6 +132,13 @@ void AppMgrCore::handleMessage( MobileRPCMessage* msg )
 			//unknown RPC message - notifying about an error
 			break;
 	}
+}
+
+void AppMgrCore::handleBusRPCMessage( RPCBusObject* msg )
+{
+	//right now handles only outgoing messages
+	//assumes that the message in param is outgoing
+	AppLinkInterface::getInstance().sendRPCBusObject( msg );
 }
 
 void AppMgrCore::enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message )
@@ -165,7 +173,7 @@ void AppMgrCore::registerApplication( RegisterAppInterface* object )
 	AppMgrRegistry::getInstance().registerApplication( *application );
 }
 
-void AppMgrCore::sendResponse( MobileRPCMessage* msg )
+void AppMgrCore::sendMobileRPCResponse( MobileRPCMessage* msg )
 {
 	MobileRPCFactory factory;
 	RegisterAppInterfaceResponse* response = factory.createRegisterAppInterfaceResponse( *msg );
@@ -193,13 +201,31 @@ void* AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing( void* )
 				continue;
 			}
 			
-			handleMessage( msg );
+			handleMobileRPCMessage( msg );
 		}
 	}
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
 {
+	while(true)
+	{
+		std::size_t size = mQueueRPCBusObjectsOutgoing.size();
+		if( size > 0 )
+		{
+			mMtxRPCBusObjectsOutgoing.Lock();
+			RPCBusObject* msg = mQueueRPCBusObjectsOutgoing.front();
+			mQueueRPCBusObjectsOutgoing.pop();
+			mMtxRPCBusObjectsOutgoing.Unlock();
+			if(!msg)
+			{
+				//to log an error: invalid object
+				continue;
+			}
+			
+			handleBusRPCMessage( msg );
+		}
+	}
 }
 
 void AppMgrCore::setJsonHandler(JSONHandler* handler)
