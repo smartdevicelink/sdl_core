@@ -1,4 +1,3 @@
-
 #include "JSONHandler/JSONHandler.h"
 #include <algorithm>
 #include <string.h>
