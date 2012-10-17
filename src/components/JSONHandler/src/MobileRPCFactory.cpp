@@ -74,23 +74,23 @@ Json::Value MobileRPCFactory::serializeRegisterAppInterfaceResponse( const Regis
     return value;
 }
 
-OnHMIStatus MobileRPCFactory::createOnHMIStatus() const
+OnHMIStatus * MobileRPCFactory::createOnHMIStatus() const
 {
-    OnHMIStatus object(1);
+    OnHMIStatus * object = new OnHMIStatus(1);
     HMILevel hmiLevel = HMILevel();
     std::string str = std::string("NONE");
     hmiLevel.setHMILevel(str);
-    object.setHMILevel(hmiLevel);
+    object->setHMILevel(hmiLevel);
 
     AudioStreamingState audioStreamingState = AudioStreamingState();
     str = std::string("NOT_AUDIBLE");
     audioStreamingState.setAudioStreamingState(str);
-    object.setAudioStreamingState(audioStreamingState);
+    object->setAudioStreamingState(audioStreamingState);
 
     SystemContext systemContext = SystemContext();
     str = std::string("MAIN");
     systemContext.setSystemContext(str);
-    object.setSystemContext(systemContext);
+    object->setSystemContext(systemContext);
     
     return object;
 }

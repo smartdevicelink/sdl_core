@@ -10,17 +10,18 @@
 #include <pthread.h>
 
 
-
 JSONHandler::JSONHandler( AxisCore::ProtocolHandler * protocolHandler )
 :mProtocolHandler( protocolHandler )
 {
     mFactory = new MobileRPCFactory();
     pthread_create( &mWaitForIncomingMessagesThread, NULL, &JSONHandler::waitForIncomingMessages, (void *)this );
+    pthread_create( &mWaitForOutgoingMessagesThread, NULL, &JSONHandler::waitForOutgoingMessages, (void *)this );
 }
     
 JSONHandler::~JSONHandler()
 {
     pthread_join( mWaitForIncomingMessagesThread, NULL );
+    pthread_join( mWaitForOutgoingMessagesThread, NULL );
     mProtocolHandler = 0;
     mMessagesObserver = 0;
     delete mFactory;
@@ -39,15 +40,9 @@ void JSONHandler::setRPCMessagesObserver( IRPCMessagesObserver * messagesObserve
 
 void JSONHandler::sendRPCMessage( const MobileRPCMessage * message )
 {
-    if ( mProtocolHandler && message )
+    if ( message )
     {
-        std::string messageString = message -> serialize();
-        UInt8* pData;
-        pData = new UInt8[messageString.length() + 1];
-        memcpy (pData, messageString.c_str(), messageString.length() + 1);
-        mProtocolHandler -> sendData( mSessionID,  AxisCore::SERVICE_TYPE_RPC, 
-                messageString.size() + 1, pData, false );
-        //mProtocolHandler -> sendData( mSessionID, AxisCore::SERVICE_TYPE_RPC, UInt32 dataSize, UInt8 *data, bool compress);
+        mOutgoingMessages.push( message );
     } 
 }
 /*End of methods for IRPCMessagesObserver*/
@@ -282,5 +277,37 @@ void * JSONHandler::waitForIncomingMessages( void * params )
         }
         sleep(10);
     }
-    pthread_exit( 0 );
+}
+
+void * JSONHandler::waitForOutgoingMessages( void * params )
+{
+    JSONHandler * handler = static_cast<JSONHandler*>( params );
+    if ( !handler )
+    {
+        pthread_exit( 0 );
+    }
+
+    while( 1 )
+    {
+        while ( ! handler -> mOutgoingMessages.empty() )
+        {
+            const MobileRPCMessage * message = handler -> mOutgoingMessages.pop();
+
+            std::string messageString = message -> serialize();
+
+            UInt8* pData;
+            pData = new UInt8[messageString.length() + 1];
+            memcpy (pData, messageString.c_str(), messageString.length() + 1);
+
+            if ( !handler -> mProtocolHandler )
+            {
+                pthread_exit( 0 );
+            }
+            handler -> mProtocolHandler -> sendData( handler -> mSessionID,  AxisCore::SERVICE_TYPE_RPC, 
+                    messageString.size() + 1, pData, false );
+
+            delete message;
+        }
+        sleep( 10 );
+    }
 }

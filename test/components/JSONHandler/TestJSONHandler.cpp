@@ -4,10 +4,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string.h>
+#include "JSONHandler/OnHMIStatus.h"
 
 void TestJSONHandler::secondRelease( const std::string & jsonString )
 {    
     jsonHandler -> mIncomingMessages.push( jsonString );
+    OnHMIStatus * message = jsonHandler->getFactory() -> createOnHMIStatus();
+    jsonHandler -> sendRPCMessage( message );
 }
 
 void TestJSONHandler::firstRelease( const std::string & jsonString )
