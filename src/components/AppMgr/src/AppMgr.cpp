@@ -1,4 +1,11 @@
 #include "AppMgr/AppMgr.h"
+#include "JSONHandler/JSONHandler.h"
+#include "AppMgr/AppFactory.h"
+#include "AppMgr/AppLinkInterface.h"
+#include "AppMgr/AppMgrCore.h"
+#include "AppMgr/RPCAppLinkFactory.h"
+#include "AppMgr/RPCBusFactory.h"
+#include "AppMgr/AppMgrRegistry.h"
 
 namespace NsAppManager
 {
@@ -34,11 +41,17 @@ AppMgr::AppMgr(const std::string& address, uint16_t port, std::string name)
 	,mRPCAppLinkFactory(RPCAppLinkFactory::getInstance())
 	,mRPCBusFactory(RPCBusFactory::getInstance())
 	,mAppFactory(AppFactory::getInstance())
+	,mJSONHandler(0)
 {
 }
 
 AppMgr::~AppMgr()
 {
+}
+
+void AppMgr::setJsonHandler(JSONHandler* handler)
+{
+	mAppMgrCore.setJsonHandler( handler );
 }
 
 void AppMgr::onMessageReceivedCallback( MobileRPCMessage * message )

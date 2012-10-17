@@ -9,6 +9,9 @@ include_directories (./include/
 					 ../JSONHandler/include/
 					 ../../thirdPartyLibs/MessageBroker/include/
 					 ../../thirdPartyLibs/jsoncpp/include/
+					 ../../thirdPartyLibs/axisCore/
+					 ../../thirdPartyLibs/axisCore/include/
+					 ../../thirdPartyLibs/axisCore/src/
 					)
 
 set (SOURCES

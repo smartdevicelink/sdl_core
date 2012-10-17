@@ -14,6 +14,7 @@
 class RegisterAppInterface;
 class MobileRPCMessage;
 class RPCBusObject;
+class JSONHandler;
 
 namespace NsAppManager
 {
@@ -28,6 +29,9 @@ public:
 
 	void executeThreads();
 	void terminateThreads();
+
+	void setJsonHandler(JSONHandler* handler);
+	JSONHandler* getJsonHandler( ) const;
 
 private:
 	AppMgrCore();
@@ -58,6 +62,7 @@ private:
 	System::Thread mThreadRPCBusObjectsOutgoing;
 
 	bool m_bTerminate;
+	JSONHandler* mJSONHandler;
 };
 
 }; // namespace NsAppManager

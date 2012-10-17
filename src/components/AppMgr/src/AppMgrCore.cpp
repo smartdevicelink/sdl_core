@@ -13,6 +13,7 @@
 #include "JSONHandler/MobileRPCFactory.h"
 #include "JSONHandler/RegisterAppInterface.h"
 #include "JSONHandler/RegisterAppInterfaceResponse.h"
+#include "JSONHandler/JSONHandler.h"
 #include "AppMgr/IApplication.h"
 #include "AppMgr/Application.h"
 #include "AppMgr/AppMgrRegistry.h"
@@ -167,6 +168,16 @@ void* AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing( void* )
 
 void* AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
 {
+}
+
+void AppMgrCore::setJsonHandler(JSONHandler* handler)
+{
+	mJSONHandler = handler;
+}
+
+JSONHandler* AppMgrCore::getJsonHandler( ) const
+{
+	return mJSONHandler;
 }
 
 };
