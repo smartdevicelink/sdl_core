@@ -29,6 +29,26 @@ void Application::setApplicationPriority( const AppPriority& priority )
 	mPriority = priority;
 }
 
+const HMIStatusLevel& Application::getApplicationHMIStatusLevel( ) const
+{
+	return mHMIStatusLevel;
+}
+
+void Application::setApplicationHMIStatusLevel( const HMIStatusLevel& hmiLevel )
+{
+	mHMIStatusLevel = hmiLevel;
+}
+
+const AudioStreamingState& Application::getApplicationAudioStreamingState( ) const
+{
+	return mAudioStreamingState;
+}
+
+void Application::setApplicationAudioStreamingState( const AudioStreamingState& streamingState )
+{
+	mAudioStreamingState = streamingState;
+}
+
 void Application::setNgnMediaScreenAppName(const std::string& value)
 {
 	mNgnMediaScreenAppName = value;
