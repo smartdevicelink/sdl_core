@@ -266,9 +266,14 @@ void * JSONHandler::waitForIncomingMessages( void * params )
         {
             std::string jsonMessage = handler -> mIncomingMessages.pop();
 
-            MobileRPCMessage * currentMessage = handler -> createObjectFromJSON( jsonMessage );
-
-            if ( !handler -> mMessagesObserver )
+			
+			MobileRPCMessage * mCurrentMessage = handler -> createObjectFromJSON( jsonMessage );
+			
+			RegisterAppInterfaceResponse* response = handler -> mFactory -> createRegisterAppInterfaceResponse( *mCurrentMessage );
+			
+			Json::Value parameters = handler -> mFactory -> serializeRegisterAppInterfaceResponse( *response );
+			Json::Value root = handler -> createJSONFromObject( *response );
+			if ( root.isNull() )
             {
                 pthread_exit( 0 );
             }
@@ -282,10 +287,10 @@ void * JSONHandler::waitForIncomingMessages( void * params )
                 responseString.size() + 1, pData, false );
 
             // OnHMIStatus
-            OnHMIStatus notification    = handler -> mFactory -> createOnHMIStatus();
-            Json::Value parameters1     = handler -> mFactory -> serializeOnHMIStatus( notification );
+            OnHMIStatus* notification    = handler -> mFactory -> createOnHMIStatus();
+            Json::Value parameters1     = handler -> mFactory -> serializeOnHMIStatus( *notification );
 
-            Json::Value root1 = handler -> createJSONFromObject( notification );
+            Json::Value root1 = handler -> createJSONFromObject( *notification );
             if ( root1.isNull() )           
             {
                 pthread_exit( 0 );;
