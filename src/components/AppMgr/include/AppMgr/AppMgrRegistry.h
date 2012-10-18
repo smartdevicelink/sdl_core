@@ -8,7 +8,7 @@
 #ifndef APPMGRREGISTRY_H_
 #define APPMGRREGISTRY_H_
 
-#include "IApplication.h"
+#include "Application.h"
 #include "RegistryItem.h"
 
 #include <map>
@@ -24,10 +24,10 @@ public:
 
 	static AppMgrRegistry& getInstance( );
 
-	const RegistryItem& registerApplication( const IApplication& app );
+	const RegistryItem& registerApplication( const Application& app );
 	void unregisterApplication( RegistryItem& item  );
 
-	const RegistryItem& getItem( const IApplication& app ) const;
+	const RegistryItem& getItem( const Application& app ) const;
 	const RegistryItem& getItem( const std::string& app ) const;
 
 private:

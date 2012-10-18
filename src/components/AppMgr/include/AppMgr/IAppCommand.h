@@ -1,7 +1,7 @@
 #ifndef IAPPCOMMAND_H
 #define IAPPCOMMAND_H
 
-#include "Application.h"
+#include "RegistryItem.h"
 
 namespace NsAppManager
 {
@@ -9,15 +9,14 @@ namespace NsAppManager
 class IAppCommand
 {
 public:
-	IAppCommand(Application* receiver);
+	IAppCommand(const RegistryItem& receiver);
 	virtual ~IAppCommand();
 
 	virtual void execute()=0;
 	
 protected:
-	IAppCommand();
 	
-	Application* mReceiver;
+	const RegistryItem& mReceiver;
 };
 
 }

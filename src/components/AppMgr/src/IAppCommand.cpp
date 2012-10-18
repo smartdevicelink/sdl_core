@@ -3,18 +3,13 @@
 namespace NsAppManager
 {
 	
-IAppCommand::IAppCommand(Application* receiver)
+IAppCommand::IAppCommand(const RegistryItem& receiver)
+	:mReceiver(receiver)
 {
-	mReceiver = receiver;
 }
 
 IAppCommand::~IAppCommand()
 {	
-}
-
-IAppCommand::IAppCommand()
-	:mReceiver(0)
-{
 }
 
 }

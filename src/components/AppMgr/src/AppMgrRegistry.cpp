@@ -22,7 +22,7 @@ void AppMgrRegistry::unregisterApplication( RegistryItem& item )
 	mRegistryItems.erase(registryItemIterator);
 }
 
-const RegistryItem& AppMgrRegistry::getItem( const IApplication& app ) const
+const RegistryItem& AppMgrRegistry::getItem( const Application& app ) const
 {
 	const RegistryItem& registryItem = mRegistryItems.find(app.getName())->second;
 	return registryItem;
@@ -45,7 +45,7 @@ AppMgrRegistry::~AppMgrRegistry( )
 	// TODO Auto-generated destructor stub
 }
 
-const RegistryItem& AppMgrRegistry::registerApplication( const IApplication& app )
+const RegistryItem& AppMgrRegistry::registerApplication( const Application& app )
 {
 	RegistryItem item(app);
 
