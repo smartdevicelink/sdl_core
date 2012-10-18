@@ -74,6 +74,8 @@ void CMessage::generateInitialMessage(UInt8 serviceType, UInt8 sessionID)
    memcpy(sPacketData + 7, &tmp4, 1);
 
    blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
+
+   mBluetoothHandler->dataReceived();
 }
 
 void CMessage::generateSingleMessage(UInt8 serviceType, UInt8 sessionID, std::string payload)
@@ -114,6 +116,8 @@ void CMessage::generateSingleMessage(UInt8 serviceType, UInt8 sessionID, std::st
    std::cout << "SINGLE MESSAGE GENERATED: " << std::string((char*)sPacketData, sDataSize + 12) <<  std:: endl;
 
    blobQueue.push(Blob((UInt8*)sPacketData, 8 + sDataSize, blobQueue.size()));
+
+   mBluetoothHandler->dataReceived();
 }
 
 void CMessage::generateFinalMessage(UInt8 serviceType, UInt8 sessionID)
@@ -152,6 +156,8 @@ void CMessage::generateFinalMessage(UInt8 serviceType, UInt8 sessionID)
   //memcpy(sPacketData + 8, &sMessageID, 4);
 
   blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
+
+  mBluetoothHandler->dataReceived();
 }
 
 void CMessage::generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std::string payload, int messagesQuantity)
@@ -271,6 +277,8 @@ void CMessage::generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std:
 
 
       blobQueue.push(Blob((UInt8*)sPacketData, 8 + sDataSize, blobQueue.size()));
+
+      mBluetoothHandler->dataReceived();
    }
 }
 
@@ -431,7 +439,9 @@ CMessage::~CMessage()
 {}
 
 void CMessage::initBluetooth(IBluetoothHandler * pHandler)
-{}
+{
+    mBluetoothHandler = pHandler;
+}
 
 void CMessage::deinitBluetooth()
 {}

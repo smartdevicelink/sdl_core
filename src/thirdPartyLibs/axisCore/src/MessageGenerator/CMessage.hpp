@@ -61,6 +61,8 @@ private:
 
    void* sPacketData;
 
+   IBluetoothHandler *mBluetoothHandler;
+
    int getBit(const UInt32 value, const UInt32 position);
    void setBit(UInt32 value, const UInt32 position);
    void clearBit(UInt32 value, const UInt32 position);
