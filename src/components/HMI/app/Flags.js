@@ -34,7 +34,7 @@ FLAGS = Em.Object.create({
 	 *  Emulate WebSocket connection
 	 *  false for MFT Guide production build
 	 */
-	EMULATE_WS: 			true,
+	EMULATE_WS: 			false,
 
   	/** 
 	 *  Emulate Android environment

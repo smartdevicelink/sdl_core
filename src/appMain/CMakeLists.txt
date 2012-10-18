@@ -18,9 +18,9 @@ set(LIBRARIES
         appManager
         jsonHandler
         ProtocolHandler
-        messagebroker
         messagebrokerclient
         messagebrokerserver
+        messagebroker
         jsonCpp
         bluetooth
         pthread
