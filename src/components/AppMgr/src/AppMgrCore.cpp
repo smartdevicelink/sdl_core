@@ -14,6 +14,7 @@
 #include "JSONHandler/RegisterAppInterface.h"
 #include "JSONHandler/RegisterAppInterfaceResponse.h"
 #include "JSONHandler/JSONHandler.h"
+#include "JSONHandler/HMILevel.h"
 #include "AppMgr/IApplication.h"
 #include "AppMgr/Application.h"
 #include "AppMgr/AppMgrRegistry.h"
@@ -169,6 +170,8 @@ void AppMgrCore::registerApplication( RegisterAppInterface* object )
 	application->setSyncMsgVersion(syncMsgVersion);
 	application->setUsesVehicleData(usesVehicleData);
 	application->setVrSynonyms(vrSynonyms);
+
+	application->setApplicationHMIStatusLevel(HMILevel::NONE);
 
 	AppMgrRegistry::getInstance().registerApplication( *application );
 }

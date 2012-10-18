@@ -29,12 +29,12 @@ void Application::setApplicationPriority( const AppPriority& priority )
 	mPriority = priority;
 }
 
-const HMIStatusLevel& Application::getApplicationHMIStatusLevel( ) const
+const HMILevel::HMILevelEnum& Application::getApplicationHMIStatusLevel( ) const
 {
 	return mHMIStatusLevel;
 }
 
-void Application::setApplicationHMIStatusLevel( const HMIStatusLevel& hmiLevel )
+void Application::setApplicationHMIStatusLevel( const HMILevel::HMILevelEnum& hmiLevel )
 {
 	mHMIStatusLevel = hmiLevel;
 }

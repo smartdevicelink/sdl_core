@@ -11,6 +11,7 @@
 #include "IApplication.h"
 #include "JSONHandler/Language.h"
 #include "JSONHandler/SyncMsgVersion.h"
+#include "JSONHandler/HMILevel.h"
 #include <string>
 #include <vector>
 
@@ -19,14 +20,6 @@ class SyncMsgVersion;
 
 namespace NsAppManager
 {
-
-typedef enum
-{
-	HMI_FULL,
-	HMI_LIMITED,
-	HMI_BACKDROUND,
-	HMI_NONE
-} HMIStatusLevel;
 
 typedef enum
 {
@@ -40,8 +33,8 @@ public:
 	Application( const std::string& name );
 	virtual ~Application( );
 	virtual void setApplicationPriority( const AppPriority& priority );
-	void setApplicationHMIStatusLevel( const HMIStatusLevel& hmiLevel );
-	const HMIStatusLevel& getApplicationHMIStatusLevel( ) const;
+	void setApplicationHMIStatusLevel( const HMILevel::HMILevelEnum& hmiLevel );
+	const HMILevel::HMILevelEnum& getApplicationHMIStatusLevel( ) const;
 	void setApplicationAudioStreamingState( const AudioStreamingState& hmiLevel );
 	const AudioStreamingState& getApplicationAudioStreamingState( ) const;
 
@@ -69,7 +62,7 @@ private:
 	Language mLanguageDesired;
 	std::string mAutoActivateID;
 	SyncMsgVersion mSyncMsgVersion;
-	HMIStatusLevel mHMIStatusLevel;
+	HMILevel::HMILevelEnum mHMIStatusLevel;
 	AudioStreamingState mAudioStreamingState;
 };
 
