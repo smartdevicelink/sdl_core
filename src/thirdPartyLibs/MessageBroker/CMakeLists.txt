@@ -5,9 +5,18 @@ project (${PROJECT})
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
-include_directories (./include/
+include_directories (
+                     ./include/
                      ../jsoncpp/include
                     ) 
+
+link_directories(
+                 ../thirdPartyLibs/jsoncpp/bin
+                )
+
+set(LIBRARIES
+        jsonCpp
+    )
 
 include(ExternalProject)
 ExternalProject_Add(
