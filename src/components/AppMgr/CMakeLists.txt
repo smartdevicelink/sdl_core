@@ -14,7 +14,8 @@ include_directories (./include/
 					 ../../thirdPartyLibs/axisCore/src/
 					)
 
-set (SOURCES
+set (SOURCES ./src/SubscribeButton.cpp
+		./src/IAppCommand.cpp
 		./src/AppMgr.cpp
 		./src/AppFactory.cpp
 		./src/AppLinkInterface.cpp
