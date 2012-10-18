@@ -19,6 +19,9 @@
 
 #include "AppMgr/AppMgr.h"
 
+#include "CMessageBroker.hpp"
+
+//#include "mb_tcpserver.hpp"
 /**
  * \brief Entry point of the program.
  * \param argc number of argument
@@ -43,10 +46,23 @@ int main(int argc, char** argv)
 
     jsonHandler.setRPCMessagesObserver(&appMgr);
 
+    NsMessageBroker::CMessageBroker *pMessageBroker = NsMessageBroker::CMessageBroker::getInstance();
+    if (!pMessageBroker)
+    {
+        printf("Wrong pMessageBroker pointer!\n");
+        return EXIT_SUCCESS;
+    }
+
+//    NsMessageBroker::TcpServer *pJSONRPC20Server = new NsMessageBroker::TcpServer(std::string("127.0.0.1"), 8087, pMessageBroker);
+//    if (!pJSONRPC20Server)
+//    {
+//        printf("Wrong pJSONRPC20Server pointer!\n");
+//        delete pMessageBroker;
+//        return EXIT_SUCCESS;
+//    }
+
     /**********************************/
 
-    int rfcommsock;
-    int scosock;
 
     /*** Start BT Devices Discovery***/
 
