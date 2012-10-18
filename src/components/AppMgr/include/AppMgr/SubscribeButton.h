@@ -3,15 +3,22 @@
 
 #include "AppMgr/IAppCommand.h"
 
+#include <string>
+
 namespace NsAppManager
 {
-	
-class SubscribeButton : public IAppCommand
+
+struct ButtonParams
+{
+	std::string mName;
+};
+
+class SubscribeButtonCmd : public IAppCommand
 {
 public:
 	virtual void execute();
 };
 
-}
+};
 
 #endif // SUBSCRIBEBUTTON_H

@@ -120,6 +120,12 @@ void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 				registerApplication( object );
 				sendMobileRPCResponse( msg );
 			}
+			else if(0 == msg->getFunctionName().compare("SubscribeButton"))
+			{
+			//	SubscribeButton * object = (SubscribeButton*)msg;
+			//	registerApplication( object );
+				sendMobileRPCResponse( msg );
+			}
 			break;
 		}
 		case MobileRPCMessage::RESPONSE:

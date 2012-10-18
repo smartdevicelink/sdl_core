@@ -3,7 +3,7 @@
 namespace NsAppManager
 {
 
-void SubscribeButton::execute()
+void SubscribeButtonCmd::execute()
 {
 	
 }

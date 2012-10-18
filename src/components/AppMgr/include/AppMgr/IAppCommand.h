@@ -10,6 +10,7 @@ class IAppCommand
 {
 public:
 	IAppCommand(const RegistryItem& receiver);
+	IAppCommand(const RegistryItem& receiver, const void* params);
 	virtual ~IAppCommand();
 
 	virtual void execute()=0;
@@ -17,6 +18,7 @@ public:
 protected:
 	
 	const RegistryItem& mReceiver;
+	const void* mParams;
 };
 
 }
