@@ -19,6 +19,7 @@ public:
     MobileRPCMessage( unsigned int protocolVersion, MessageType messageType, 
         unsigned int correlationID, std::string functionName,
         unsigned int functionID, unsigned int messageSize );
+    MobileRPCMessage( const MobileRPCMessage& message );
     virtual ~MobileRPCMessage();
 
     virtual std::string serialize() const;

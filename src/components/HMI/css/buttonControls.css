@@ -122,4 +122,5 @@
 }
 #buttonControls .btnNotPressed.pressed{
 	box-shadow: inset 5px 5px 10px black, inset -3px -3px 10px #383737;
+	line-height: 76px;
 }

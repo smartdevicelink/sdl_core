@@ -48,6 +48,7 @@ protected:
                 MobileRPCMessage * message );
     std::string serializeObjectToJSONProtocol1 ( const MobileRPCMessage & mobileRPCObject );
     static void * waitForIncomingMessages( void * params );
+    static void * waitForOutgoingMessages( void * params );
     std::string clearEmptySpaces( const std::string & input );
     MobileRPCMessage * createObjectFromJSON( const std::string & jsonString );
     //////////////////////////////////////////
@@ -67,6 +68,8 @@ private:
 
     MessageQueue<std::string>          mIncomingMessages;
     pthread_t             mWaitForIncomingMessagesThread;
+    MessageQueue<const MobileRPCMessage*>    mOutgoingMessages;
+    pthread_t             mWaitForOutgoingMessagesThread;
 
 };
 

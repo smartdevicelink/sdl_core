@@ -25,7 +25,8 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 			'scrollupButton',
 			'sdButton',
 			'btButton',
-			'avinButton'
+			'avinButton',
+			'appButton'
 		],
 		/** Border decoration*/
 		border: Em.View.extend({
@@ -139,6 +140,16 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 			icon:				'images/media/ico_li.png',
 			target:				'MFT.MediaController',
 			text:				'AV In'
+		}),
+		/** APP Button*/
+		appButton:  MFT.Button.extend({
+			classNameBindings: ['MFT.States.media.app.active:active_state' , 'MFT.MediaController.isTopListMenu:displayed'],
+			elementId:			'media_appButton',
+			classNames:			['media-ls-item'],
+			action:				'turnOnApp',
+			icon:				'images/media/ico_li.png',
+			target:				'MFT.MediaController',
+			text:				'{Application}'
 		})
 			
 	});

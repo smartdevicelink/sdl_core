@@ -11,5 +11,8 @@ namespace Constants
     const char * PARAMETERS = "parameters";
     const char * FUNCTIONNAME = "name";
 
+
+    const char * REGISTERAPPINTERFACE = "RegisterAppInterface";
+
 }
 #endif

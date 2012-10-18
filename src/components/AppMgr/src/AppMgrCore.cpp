@@ -8,14 +8,23 @@
 #include "AppMgr/AppMgrCore.h"
 #include "JSONHandler/MobileRPCMessage.h"
 #include "JSONHandler/MobileRPCRequest.h"
+#include "JSONHandler/MobileRPCResponse.h"
+#include "JSONHandler/MobileRPCNotification.h"
+#include "JSONHandler/MobileRPCFactory.h"
 #include "JSONHandler/RegisterAppInterface.h"
 #include "JSONHandler/RegisterAppInterfaceResponse.h"
+#include "JSONHandler/JSONHandler.h"
 #include "AppMgr/IApplication.h"
 #include "AppMgr/Application.h"
 #include "AppMgr/AppMgrRegistry.h"
 #include "AppMgr/AppPolicy.h"
 #include "AppMgr/RPCAppLinkObject.h"
 #include "AppMgr/RPCBusObject.h"
+#include "AppMgr/AppPolicy.h"
+#include "AppMgr/RegistryItem.h"
+#include "AppMgr/AppLinkInterface.h"
+#include <sys/socket.h>
+#include "AppMgr/AppMgrRegistry.h"
 
 namespace NsAppManager
 {
@@ -93,21 +102,52 @@ void* AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
 				continue;
 			}
 
-			handleMessage( msg );
+			handleMobileRPCMessage( msg );
 		}
 	}
 }
 
-void AppMgrCore::handleMessage( MobileRPCMessage* msg )
+void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 {
-	if(msg->getMessageType() == MobileRPCMessage::REQUEST)
+	switch(msg->getMessageType())
 	{
-		if(0 == msg->getFunctionName().compare("RegisterAppInterface"))
+		case MobileRPCMessage::REQUEST:
 		{
-			RegisterAppInterface * object = (RegisterAppInterface*)msg;
-			registerApplication( object );
+			if(0 == msg->getFunctionName().compare("RegisterAppInterface"))
+			{
+				RegisterAppInterface * object = (RegisterAppInterface*)msg;
+				registerApplication( object );
+				sendMobileRPCResponse( msg );
+			}
+			break;
 		}
+		case MobileRPCMessage::RESPONSE:
+		case MobileRPCMessage::NOTIFICATION:
+		{
+			mJSONHandler->sendRPCMessage(msg);
+			break;
+		}
+		case MobileRPCMessage::UNDEFINED:
+		default:
+			//unknown RPC message - notifying about an error
+			break;
 	}
+}
+
+void AppMgrCore::handleBusRPCMessage( RPCBusObject* msg )
+{
+	//right now handles only outgoing messages
+	//assumes that the message in param is outgoing
+	AppLinkInterface::getInstance().sendRPCBusObject( msg );
+}
+
+void AppMgrCore::enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message )
+{
+	mMtxRPCAppLinkObjectsOutgoing.Lock();
+	
+	mQueueRPCAppLinkObjectsOutgoing.push((RPCAppLinkObject *)message);
+	
+	mMtxRPCAppLinkObjectsOutgoing.Unlock();
 }
 
 void AppMgrCore::registerApplication( RegisterAppInterface* object )
@@ -129,6 +169,15 @@ void AppMgrCore::registerApplication( RegisterAppInterface* object )
 	application->setSyncMsgVersion(syncMsgVersion);
 	application->setUsesVehicleData(usesVehicleData);
 	application->setVrSynonyms(vrSynonyms);
+
+	AppMgrRegistry::getInstance().registerApplication( *application );
+}
+
+void AppMgrCore::sendMobileRPCResponse( MobileRPCMessage* msg )
+{
+	MobileRPCFactory factory;
+	RegisterAppInterfaceResponse* response = factory.createRegisterAppInterfaceResponse( *msg );
+	enqueueOutgoingMobileRPCMessage( response );
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
@@ -137,10 +186,56 @@ void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
 
 void* AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing( void* )
 {
+	while(true)
+	{
+		std::size_t size = mQueueRPCAppLinkObjectsOutgoing.size();
+		if( size > 0 )
+		{
+			mMtxRPCAppLinkObjectsOutgoing.Lock();
+			MobileRPCMessage* msg = mQueueRPCAppLinkObjectsOutgoing.front();
+			mQueueRPCAppLinkObjectsOutgoing.pop();
+			mMtxRPCAppLinkObjectsOutgoing.Unlock();
+			if(!msg)
+			{
+				//to log an error: invalid object
+				continue;
+			}
+			
+			handleMobileRPCMessage( msg );
+		}
+	}
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
 {
+	while(true)
+	{
+		std::size_t size = mQueueRPCBusObjectsOutgoing.size();
+		if( size > 0 )
+		{
+			mMtxRPCBusObjectsOutgoing.Lock();
+			RPCBusObject* msg = mQueueRPCBusObjectsOutgoing.front();
+			mQueueRPCBusObjectsOutgoing.pop();
+			mMtxRPCBusObjectsOutgoing.Unlock();
+			if(!msg)
+			{
+				//to log an error: invalid object
+				continue;
+			}
+			
+			handleBusRPCMessage( msg );
+		}
+	}
+}
+
+void AppMgrCore::setJsonHandler(JSONHandler* handler)
+{
+	mJSONHandler = handler;
+}
+
+JSONHandler* AppMgrCore::getJsonHandler( ) const
+{
+	return mJSONHandler;
 }
 
 };

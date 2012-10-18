@@ -9,6 +9,7 @@ public:
     MobileRPCNotification( unsigned int protocolVersion );
     MobileRPCNotification( unsigned int protocolVersion, std::string functionName );
     MobileRPCNotification( unsigned int protocolVersion, unsigned int functionID );
+    MobileRPCNotification( const MobileRPCMessage& message );
     virtual ~MobileRPCNotification();
 
     /* data */

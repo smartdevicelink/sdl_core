@@ -203,6 +203,17 @@
 	display: none !important;
 }
 
+#media_appButton {
+	font-size: 18px;
+	padding-left: 48px;
+	line-height: 48px;
+	display: block;
+}
+
+#media_appButton.displayed {
+	display: none !important;
+}
+
 /*SCROLL DOWN*/
 
 #media_scrolldownButton {
@@ -980,6 +991,16 @@
 	color: #999999;
 }
 
+.track-info > .device {
+	position: absolute;
+	top: 30px;
+	left: 10px;
+	width: 300px;
+	text-align: left;
+	font-size: 20px;
+	color: #999999;
+}
+
 .track-info > .title {
 	top: 110px;
 	font-size: 38px;
@@ -1000,6 +1021,25 @@
 
 .track-info > .divider_o {
 	top: 65px;
+}
+
+
+#app_view_container .title{
+	top: 79px;
+	font-size: 38px;
+	left: 7px;
+}
+
+#app_view_container .album{
+	top: 123px;
+	font-size: 26px;
+	left: 10px;
+}
+
+#app_view_container .artist{
+	top: 155px;
+	font-size: 26px;
+	left: 10px;
 }
 
 
@@ -2570,6 +2610,12 @@
 .avIco { background:url(../images/media/ico_li.png) no-repeat !important}
 
 #media_player_view_container{
+	left:152px;
+	top:55px;
+	z-index:501;
+}
+
+#app_view_container{
 	left:152px;
 	top:55px;
 	z-index:501;

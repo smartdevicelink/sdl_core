@@ -9,6 +9,7 @@ public:
     MobileRPCResponse( unsigned int protocolVersion );
     MobileRPCResponse( unsigned int protocolVersion, std::string functionName );
     MobileRPCResponse( unsigned int protocolVersion, unsigned int functionID );
+    MobileRPCResponse( const MobileRPCMessage& message );
     virtual ~MobileRPCResponse();
 
     /* data */

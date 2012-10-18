@@ -328,6 +328,9 @@ var StateManager = Em.StateManager.extend({
 		
 		avin: Em.State.create({
 		}),
+		
+		app: Em.State.create({
+		}),
 
 		options: Em.State.create({
 		})

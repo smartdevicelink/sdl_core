@@ -53,13 +53,13 @@ Json::Value MobileRPCFactory::serializeRegisterAppInterface( const RegisterAppIn
     return result;
 }
 
-RegisterAppInterfaceResponse MobileRPCFactory::createRegisterAppInterfaceResponse ( const MobileRPCMessage & message ) const 
+RegisterAppInterfaceResponse* MobileRPCFactory::createRegisterAppInterfaceResponse ( const MobileRPCMessage & message ) const 
 {
-    RegisterAppInterfaceResponse object( message.getProtocolVersion() );
-    object.setCorrelationID( message.getCorrelationID() );
+    RegisterAppInterfaceResponse* object = new RegisterAppInterfaceResponse( message.getProtocolVersion() );
+    object->setCorrelationID( message.getCorrelationID() );
     
-    object.setSuccess( true );
-    object.setResultCode( "SUCCESS" );
+    object->setSuccess( true );
+    object->setResultCode( "SUCCESS" );
     
     return object;
 }
@@ -74,23 +74,23 @@ Json::Value MobileRPCFactory::serializeRegisterAppInterfaceResponse( const Regis
     return value;
 }
 
-OnHMIStatus MobileRPCFactory::createOnHMIStatus() const
+OnHMIStatus * MobileRPCFactory::createOnHMIStatus() const
 {
-    OnHMIStatus object(1);
+    OnHMIStatus * object = new OnHMIStatus(1);
     HMILevel hmiLevel = HMILevel();
     std::string str = std::string("NONE");
     hmiLevel.setHMILevel(str);
-    object.setHMILevel(hmiLevel);
+    object->setHMILevel(hmiLevel);
 
     AudioStreamingState audioStreamingState = AudioStreamingState();
     str = std::string("NOT_AUDIBLE");
     audioStreamingState.setAudioStreamingState(str);
-    object.setAudioStreamingState(audioStreamingState);
+    object->setAudioStreamingState(audioStreamingState);
 
     SystemContext systemContext = SystemContext();
     str = std::string("MAIN");
     systemContext.setSystemContext(str);
-    object.setSystemContext(systemContext);
+    object->setSystemContext(systemContext);
     
     return object;
 }
