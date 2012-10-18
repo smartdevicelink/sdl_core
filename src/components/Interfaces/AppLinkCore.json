@@ -36,7 +36,8 @@
 	/*
 	 * @descr Notifies application of LONG/SHORT press events for buttons
 	 */
-	"AppLinkCore.??": {
+	"AppLinkCore.OnAppRegister": {
+	 // TODO
 		"parameters": {
 			"name"	: "string",        
 			"mode"	: "ButtonPressMode" // data type from AppLink protocol specification
