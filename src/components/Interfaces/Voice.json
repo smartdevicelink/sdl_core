@@ -18,40 +18,48 @@
 	/*
 	 * @descr 
 	 *      method should be invoked at system startup
-	 *	provides information about all supported hardware buttons and their capabilites
+	 *	provides information about voice recognition capabilities
 	 * 	
 	 * @returns
-	 * 		button capabilites
- 	 * 		array of supported buttons
+	 * 		VR capabilites
 	 */ 
-        "Voice.??": {
+        "Voice.getCapabilities": {
 	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
-			[
-				"capabilities"	: "ButtonCapabilities", // data type from AppLink protocol specification
-	    			"button"	: "string"
-			]
+			{
+				"capabilities"	: "VrCapabilities" // data type from AppLink protocol specification
+			}
         },
 
 	/*
-	 * @descr Notifies application of UP/DOWN events for buttons
-	 */
-	"Buttons.onButtonEvent": {
+	 * @descr 
+	 *      add new command to VR
+	 * 	
+	 * @returns
+	 * 	result code
+	 */ 
+        "Voice.addCommand": {
 		"parameters": {
-			"name"	: "string",        
-			"mode"	: "ButtonEventMode"  // data type from AppLink protocol specification
+			"commandId"	: "integer",        // choiceID from Choice data type in AppLink protocol
+			[
+				"vrCommand" : "String" // vrCommand from Choice data type in AppLink protocol
+			]
 		}
-	},
-
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				// result code
+			}
+        },
+	
 
 	/*
-	 * @descr Notifies application of LONG/SHORT press events for buttons
+	 * @descr Notifies AppLink core about command trigerred by VR
 	 */
-	"Buttons.onButtonPress": {
+	"Buttons.onCommandTriggered": {
 		"parameters": {
-			"name"	: "string",        
-			"mode"	: "ButtonPressMode" // data type from AppLink protocol specification
+			"commandId" : "Integer" // id of triggered command
 		}
 	}
+
 
     }, //methods end
     
