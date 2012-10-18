@@ -19,13 +19,31 @@ class SyncMsgVersion;
 
 namespace NsAppManager
 {
-	
+
+typedef enum
+{
+	HMI_FULL,
+	HMI_LIMITED,
+	HMI_BACKDROUND,
+	HMI_NONE
+} HMIStatusLevel;
+
+typedef enum
+{
+	SS_AUDIBLE,
+	SS_NOT_AUDIBLE
+} AudioStreamingState;
+
 class Application : public IApplication
 {
 public:
 	Application( const std::string& name );
 	virtual ~Application( );
 	virtual void setApplicationPriority( const AppPriority& priority );
+	void setApplicationHMIStatusLevel( const HMIStatusLevel& hmiLevel );
+	const HMIStatusLevel& getApplicationHMIStatusLevel( ) const;
+	void setApplicationAudioStreamingState( const AudioStreamingState& hmiLevel );
+	const AudioStreamingState& getApplicationAudioStreamingState( ) const;
 
 	void setNgnMediaScreenAppName(const std::string& value);
 	void setVrSynonyms(const std::vector<std::string>& value);
@@ -51,6 +69,8 @@ private:
 	Language mLanguageDesired;
 	std::string mAutoActivateID;
 	SyncMsgVersion mSyncMsgVersion;
+	HMIStatusLevel mHMIStatusLevel;
+	AudioStreamingState mAudioStreamingState;
 };
 
 }; // namespace NsAppManager

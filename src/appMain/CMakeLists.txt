@@ -15,15 +15,15 @@ link_directories(../thirdPartyLibs/jsoncpp
                  )
 
 set(LIBRARIES
-        bluetooth
-        pthread
-        ProtocolHandler
-        jsonHandler
-        jsonCpp
         appManager
-        messagebroker
+        jsonHandler
+        ProtocolHandler
         messagebrokerclient
         messagebrokerserver
+        messagebroker
+        jsonCpp
+        bluetooth
+        pthread
     )
 
 include_directories (./
@@ -61,6 +61,17 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
+   jsonCpp
+   SOURCE_DIR ../thirdPartyLibs/jsoncpp
+   DOWNLOAD_COMMAND ""
+   CMAKE_COMMAND cmake
+   BUILD_IN_SOURCE 1 
+   BUILD_COMMAND make
+   INSTALL_DIR ../thirdPartyLibs/jsoncpp/bin
+   INSTALL_COMMAND make install
+)
+
+ExternalProject_Add(
    jsonHandler
    SOURCE_DIR ../components/JSONHandler
    DOWNLOAD_COMMAND ""
@@ -68,6 +79,19 @@ ExternalProject_Add(
    BUILD_IN_SOURCE 1 
    BUILD_COMMAND make
    INSTALL_DIR ../components/JSONHandler/bin
+   INSTALL_COMMAND make install
+)
+
+ExternalProject_Add(
+   messagebroker
+   messagebrokerclient
+   messagebrokerserver
+   SOURCE_DIR ../thirdPartyLibs/MessageBroker
+   DOWNLOAD_COMMAND ""
+   CMAKE_COMMAND cmake
+   BUILD_IN_SOURCE 1 
+   BUILD_COMMAND make
+   INSTALL_DIR ../thirdPartyLibs/MessageBroker/bin
    INSTALL_COMMAND make install
 )
 
@@ -82,22 +106,13 @@ ExternalProject_Add(
    INSTALL_COMMAND make install
 )
 
-ExternalProject_Add(
-   messageBroker
-   SOURCE_DIR ../thirdPartyLibs/MessageBroker
-   DOWNLOAD_COMMAND ""
-   CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1 
-   BUILD_COMMAND make
-   INSTALL_DIR ../thirdPartyLibs/MessageBroker/bin
-   INSTALL_COMMAND make install
-)
-
 ADD_DEPENDENCIES(${PROJECT}
                         jsonCpp
+                        messagebroker
+                        messagebrokerserver
+                        messagebrokerclient
                         ProtocolHandler
                         jsonHandler
-                        messageBroker
                         appManager
                         )
 

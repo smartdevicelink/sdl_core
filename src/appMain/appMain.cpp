@@ -19,6 +19,14 @@
 
 #include "AppMgr/AppMgr.h"
 
+#include "CMessageBroker.hpp"
+
+#include "mb_tcpserver.hpp"
+
+#include "networking.h"
+
+#include "system.h"
+
 /**
  * \brief Entry point of the program.
  * \param argc number of argument
@@ -43,10 +51,54 @@ int main(int argc, char** argv)
 
     jsonHandler.setRPCMessagesObserver(&appMgr);
 
+    NsMessageBroker::CMessageBroker *pMessageBroker = NsMessageBroker::CMessageBroker::getInstance();
+    if (!pMessageBroker)
+    {
+        printf("Wrong pMessageBroker pointer!\n");
+        return EXIT_SUCCESS;
+    }
+
+    NsMessageBroker::TcpServer *pJSONRPC20Server = new NsMessageBroker::TcpServer(std::string("127.0.0.1"), 8087, pMessageBroker);
+    if (!pJSONRPC20Server)
+    {
+        printf("Wrong pJSONRPC20Server pointer!\n");
+        return EXIT_SUCCESS;
+    }
+    pMessageBroker->startMessageBroker(pJSONRPC20Server);
+    if(!networking::init())
+    {
+      printf("Networking initialization failed!\n");
+    }
+
+    if(!pJSONRPC20Server->Bind())
+    {
+      printf("Bind failed!\n");
+      exit(EXIT_FAILURE);
+    } else
+    {
+      printf("Bind successful!\n");
+    }
+
+    if(!pJSONRPC20Server->Listen())
+    {
+      printf("Listen failed!\n");
+      exit(EXIT_FAILURE);
+    } else
+    {
+      printf("Listen successful!\n");
+    }
+    printf("Start CMessageBroker thread!\n");
+    System::Thread th1(new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(*pMessageBroker, &NsMessageBroker::CMessageBroker::MethodForThread, NULL));
+    th1.Start(false);
+
+    printf("Start MessageBroker TCP server thread!\n");
+    System::Thread th2(new System::ThreadArgImpl<NsMessageBroker::TcpServer>(*pJSONRPC20Server, &NsMessageBroker::TcpServer::MethodForThread, NULL));
+    th2.Start(false);
+
+
+
     /**********************************/
 
-    int rfcommsock;
-    int scosock;
 
     /*** Start BT Devices Discovery***/
 

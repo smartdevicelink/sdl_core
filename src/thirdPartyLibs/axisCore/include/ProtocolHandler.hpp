@@ -28,7 +28,7 @@ class ProtocolHandler : public Bluetooth::IBluetoothHandler
 {
 public:
 
-    ProtocolHandler(IProtocolObserver *observer, /*NsTransportLayer::CBTAdapter*/Bluetooth::IBluetoothAPI *btAdapter);
+    ProtocolHandler(IProtocolObserver *observer, Bluetooth::IBluetoothAPI *btAdapter);
 
     ~ProtocolHandler();
 
@@ -64,12 +64,10 @@ public:
      */
     ERROR_CODE receiveData(UInt8 sessionID, UInt32 messageID, UInt8 servType, UInt32 receivedDataSize, UInt8* data);
 
-
-    //TODO TMP PUBLIC
-    virtual void dataReceived();
 private:
-    virtual void onError(BLUETOOTH_ERROR errCode);
+    virtual void dataReceived();
 
+    virtual void onError(BLUETOOTH_ERROR errCode);
 
     enum State 
     {
