@@ -31,6 +31,8 @@ MFT = Em.Application.create({
 		if ( !FLAGS.MCS_ENABLED) {
 			FFW.Backend.connect();
 		}
+		
+		FFW.ButtonsBackend.connect();
 
 		this._super();
 	},
