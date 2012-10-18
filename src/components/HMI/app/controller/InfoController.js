@@ -24,4 +24,133 @@ MFT.InfoController = Em.Object.create({
 		
 		MFT.States.goToState(MFT.States.currentState.get('path')+'.'+event.goToState);
 	},
+	
+	appsScroll: null,
+	/*
+	*
+	*	Refactor
+	*	Modify state name!
+	*
+	*
+	*/
+
+	appsParams:{
+		0:	{
+				classNames:			'scrollButtons button notpressed',
+				icon:				'images/info/ico_vehicle.png',
+				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
+				arrow:				true,
+				action:				'turnOnApp',
+				target:				'MFT.MediaController',
+				click:				function(){
+					MFT.SettingsController.onState();
+				},
+				disabledBinding:	'MFT.helpMode',
+				onDown:				false
+			},
+		1:	{
+				classNames:			'scrollButtons button notpressed',
+				icon:				'images/info/ico_vehicle.png',
+				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
+				arrow:				true,
+				action:				'turnOnApp',
+				target:				'MFT.MediaController',
+				click:				function(){
+					MFT.SettingsController.onState();
+				},
+				disabledBinding:	'MFT.helpMode',
+				onDown:				false
+			},
+		2:	{
+				classNames:			'scrollButtons button notpressed',
+				icon:				'images/info/ico_vehicle.png',
+				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
+				arrow:				true,
+				action:				'turnOnApp',
+				target:				'MFT.MediaController',
+				click:				function(){
+					MFT.SettingsController.onState();
+				},
+				disabledBinding:	'MFT.helpMode',
+				onDown:				false
+			},
+		3:	{
+				classNames:			'scrollButtons button notpressed',
+				icon:				'images/info/ico_vehicle.png',
+				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
+				arrow:				true,
+				action:				'turnOnApp',
+				target:				'MFT.MediaController',
+				click:				function(){
+					MFT.SettingsController.onState();
+				},
+				disabledBinding:	'MFT.helpMode',
+				onDown:				false
+			},
+		4:	{
+				classNames:			'scrollButtons button notpressed',
+				icon:				'images/info/ico_vehicle.png',
+				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
+				arrow:				true,
+				action:				'turnOnApp',
+				target:				'MFT.MediaController',
+				click:				function(){
+					MFT.SettingsController.onState();
+				},
+				disabledBinding:	'MFT.helpMode',
+				onDown:				false
+			},
+		5:	{
+				classNames:			'scrollButtons button notpressed',
+				icon:				'images/info/ico_vehicle.png',
+				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
+				arrow:				true,
+				action:				'turnOnApp',
+				target:				'MFT.MediaController',
+				click:				function(){
+					MFT.SettingsController.onState();
+				},
+				disabledBinding:	'MFT.helpMode',
+				onDown:				false
+			},
+		6:	{
+				classNames:			'scrollButtons button notpressed',
+				icon:				'images/info/ico_vehicle.png',
+				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
+				arrow:				true,
+				action:				'turnOnApp',
+				target:				'MFT.MediaController',
+				click:				function(){
+					MFT.SettingsController.onState();
+				},
+				disabledBinding:	'MFT.helpMode',
+				onDown:				false
+			},
+		7:	{
+				classNames:			'scrollButtons button notpressed',
+				icon:				'images/info/ico_vehicle.png',
+				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
+				arrow:				true,
+				action:				'turnOnApp',
+				target:				'MFT.MediaController',
+				click:				function(){
+					MFT.SettingsController.onState();
+				},
+				disabledBinding:	'MFT.helpMode',
+				onDown:				false
+			},
+		8:	{
+				classNames:			'scrollButtons button notpressed',
+				icon:				'images/info/ico_vehicle.png',
+				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
+				arrow:				true,
+				action:				'turnOnApp',
+				target:				'MFT.MediaController',
+				click:				function(){
+					MFT.SettingsController.onState();
+				},
+				disabledBinding:	'MFT.helpMode',
+				onDown:				false
+			}
+	}
 });

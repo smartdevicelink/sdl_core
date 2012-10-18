@@ -677,6 +677,9 @@
 	width: 554px;
 }
 
+#info_apps .button span{
+	padding-left: 10px;
+}
 
 #info_apps .list {
 	width: 629px;
@@ -691,17 +694,114 @@
 #info_apps_list .list-content {
 	width: 278px;
 }
+#info_apps .button img{
+	float: left;
+}
 
-#info_apps_install_Button {
+#info_apps .vehicleHealthReport {
 	width: 278px;
 	float: left;
 	margin-right: 10px;
-	height: 49px;
+	height: 51px;
 	font-size: 20px;
 	line-height: 50px;
 	border: 1px solid #393939;
 	border-bottom: none;
 	cursor: pointer;
+	top: 70px;
+	left: 10px;
+}
+
+#info_apps .Asist911 {
+	width: 278px;
+	float: left;
+	margin-right: 10px;
+	height: 51px;
+	font-size: 20px;
+	line-height: 50px;
+	border: 1px solid #393939;
+	border-bottom: none;
+	cursor: pointer;
+	top: 122px;
+	left: 10px;
+}
+
+#info_apps .installButton {
+	width: 278px;
+	float: left;
+	margin-right: 10px;
+	height: 51px;
+	font-size: 20px;
+	line-height: 50px;
+	border: 1px solid #393939;
+	border-bottom: none;
+	cursor: pointer;
+	top: 174px;
+	left: 10px;
+}
+
+#info_apps .findNewApps {
+	width: 278px;
+	float: left;
+	margin-right: 10px;
+	height: 51px;
+	font-size: 20px;
+	line-height: 50px;
+	border: 1px solid #393939;
+	border-bottom: none;
+	cursor: pointer;
+	top: 226px;
+	left: 10px;
+}
+#info_apps .buttonsWrapper {
+	top: 70px;
+	left: 289px;
+	width: 328px;
+	height: 260px;
+	overflow: hidden;
+}
+
+#info_apps .scrollButtons{
+	width: 278px;
+	float: left;
+	margin-right: 10px;
+	height: 51px;
+	font-size: 20px;
+	line-height: 50px;
+	border: 1px solid #393939;
+	border-bottom: none;
+	cursor: pointer;
+	background-image: url(../images/list/list_item_bg.png);
+	position: relative;
+}
+
+#info_apps .scrollArrows{
+	height: 47px;
+	width: 47px;
+	border: #393939 1px solid;
+	border-radius: 2px;
+}
+
+#info_apps .scrollArrowUp {
+	position: relative;
+}
+
+#info_apps .scrollArrowDown {
+	bottom: 0;
+	right: 0;
+}
+
+#info_apps .scrollBar {
+	float: right;
+	position: relative;
+	height: 260px;
+}
+
+#info_apps .scroller {
+	position: relative;
+	height: 20px;
+	background: #555;
+	-webkit-transition: 0.4s ;
 }
 
 #info_apps .list-item .ico {

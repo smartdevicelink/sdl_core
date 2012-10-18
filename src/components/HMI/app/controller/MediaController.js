@@ -126,6 +126,30 @@ MFT.MediaController = Em.Object.create({
 		}	
 	},
 	
+	/**  On applications module enter event */
+	
+	onApplicationsEnter: function(data){
+		// Hide direct tune
+		this.offDirectTune();
+		
+		//Player
+		this.playerDataArray.push(data);	
+		//this.set('currentBrowseData', this.playerDataArray[0].browseData);
+		//this.set('currentModuleData',this.playerDataArray[0].PlayList);
+		if(this.playerDataArray[0].optionsData){
+			this.set('currentOptionsData', this.playerDataArray[0].optionsData);
+		}
+		this.set('currentSelectedPlayer',this.playerDataArray[0].player); 
+		// Exit Radio
+		this.onRadioExit();
+		this.playerDataArray[0].set('active',true);
+		
+		// Set player state
+		if(!MFT.States.media.app.active){
+			MFT.States.goToState('media.app');
+		}	
+	},
+	
 	/****************** AM *******************/
 	
 	/*toggle between AM stations */
@@ -281,6 +305,13 @@ MFT.MediaController = Em.Object.create({
 	turnOnSD: function(){
 		this.onPlayerExit();
 		this.onPlayerEnter(MFT.SDModel);
+	},
+	
+		/*Turn on Application*/
+	turnOnApp: function(){
+		// Exit form player or radio
+		this.onPlayerExit();
+		this.onApplicationsEnter(MFT.AppModel);
 	},
 	
 	/*Turn on More Info*/

@@ -15,7 +15,7 @@ FFW.ButtonsBackend = FFW.RPCObserver.create({
 	/*
      *	access to basic RPC functionality
  	 */		
-	 client:		FFW.RPCClient.create({ componentName: "ButtonsBackendClient" }),
+	 client:		FFW.RPCClient.create({ componentName: "Buttons" }),
 	
 	
 	/*
@@ -107,23 +107,21 @@ FFW.ButtonsBackend = FFW.RPCObserver.create({
 	 * and all the views are rendered.
 	 */
 	buttonPressed: function(id, type) {
-		
-		console.log('id ' + id);
-		console.log('type ' + type);
-		
-		/* refactoring
-		if (this.appLoadedEventsNumber >= 2) {
-			if (!FFW.isAndroid) {
-				if (this.client.socket.readyState == this.client.socket.OPEN) {
-					var JSONMessage = {
-						"jsonrpc":	"2.0",
-						"method":	"ButtonsBackend.onAppLoaded"
-					};
-					this.client.send(JSONMessage);
+
+		if (this.client.socket.readyState == this.client.socket.OPEN) {
+			var JSONMessage = {
+				"jsonrpc" :	"2.0",
+				"method"  :	"Buttons.onButtonEvent",
+				"params"  :	{
+				"name"	  : id,
+				"mode"    : type
 				}
-			}
-			WarningOkButtonView.appLoaded();
+			};
+
+			//this.client.send(JSONMessage);
+			console.log(JSONMessage);
+
 		}
-		*/
+		
 	}
 })
