@@ -1,0 +1,99 @@
+/*
+ * 
+ * @name UI
+ * 
+ * @desc UI functionality
+ * 
+ * @category	HMI
+ * @version	1.0
+ *
+ * @author	Sergey Solovey
+ *
+ */
+{
+    "envelope": 	"JSON-RPC 2.0",
+    "serviceUrl": 	"/localhost:6087",
+    
+    "methods": {
+	/*
+	 * @descr 
+	 *      
+	 *	
+	 * 	
+	 * @returns
+	 * 	
+ 	 * 	
+	 */ 
+        "UI.Show": {
+		// TODO
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result": "Result" // data type from AppLink protocol specification
+			}
+        },
+
+	/*
+	 * @descr 
+	 *      
+	 *	
+	 * 	
+	 * @returns
+	 * 	
+ 	 * 	
+	 */ 
+        "UI.Alert": {
+		// TODO
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result": "Result" // data type from AppLink protocol specification
+			}
+        },
+
+	/*
+	 * @descr 
+	 *      add new command to VR
+	 * 	
+	 * @returns
+	 * 	result code
+	 */ 
+        "UI.addCommand": {
+		"parameters": {
+			"cmdId" 	: "integer",        	// cmdID from addCommand request in AppLink protocol
+			"menuParams" 	: "MenuParams" 		// data type from AppLink protocol specification
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result": "Result" // data type from AppLink protocol specification
+			}
+        },
+	
+	/*
+	 * @descr 
+	 *      add new command to VR
+	 * 	
+	 * @returns
+	 * 	result code
+	 */ 
+        "UI.deleteCommand": {
+		"parameters": {
+			"cmdId" 	: "integer"       	// cmdID from addCommand request in AppLink protocol
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result": "Result" // data type from AppLink protocol specification
+			}
+        },
+
+	/*
+	 * @descr Notifies AppLink core about command trigerred by VR
+	 */
+	"UI.onCommand": {
+		"parameters": {
+			"commandId" : "Integer" // id of triggered command
+		}
+	}
+
+    }, //methods end
+    
+    "id": "integer" //REQUIRED for request methods. NOT to be used for notifications
+}

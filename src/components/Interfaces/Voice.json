@@ -12,7 +12,7 @@
  */
 {
     "envelope": 	"JSON-RPC 2.0",
-    "serviceUrl": 	"/localhost:6543",
+    "serviceUrl": 	"/localhost:6087",
     
     "methods": {
 	/*
@@ -39,7 +39,7 @@
 	 */ 
         "Voice.addCommand": {
 		"parameters": {
-			"commandId"	: "integer",        // choiceID from Choice data type in AppLink protocol
+			"cmdId" 	: "integer",        	// cmdID from addCommand request in AppLink protocol
 			[
 				"vrCommand" : "String" // vrCommand from Choice data type in AppLink protocol
 			]
@@ -54,7 +54,7 @@
 	/*
 	 * @descr Notifies AppLink core about command trigerred by VR
 	 */
-	"Buttons.onCommandTriggered": {
+	"Buttons.onCommand": {
 		"parameters": {
 			"commandId" : "Integer" // id of triggered command
 		}

@@ -12,7 +12,7 @@
  */
 {
     "envelope": 	"JSON-RPC 2.0",
-    "serviceUrl": 	"/localhost:6543",
+    "serviceUrl": 	"/localhost:6087",
     
     "methods": {
 	/*
