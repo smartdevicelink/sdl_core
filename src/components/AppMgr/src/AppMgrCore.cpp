@@ -117,8 +117,9 @@ void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 			if(0 == msg->getFunctionName().compare("RegisterAppInterface"))
 			{
 				RegisterAppInterface * object = (RegisterAppInterface*)msg;
-				registerApplication( object );
-				sendMobileRPCResponse( msg );
+				const RegistryItem& registeredApp =  registerApplication( object );
+				MobileRPCMessage* response = queryInfoForRegistration( registeredApp );
+				sendMobileRPCResponse( response );
 			}
 			else if(0 == msg->getFunctionName().compare("SubscribeButton"))
 			{
@@ -166,7 +167,7 @@ void AppMgrCore::enqueueOutgoingBusRPCMessage( RPCBusObject * message )
 	mMtxRPCBusObjectsOutgoing.Unlock();
 }
 
-void AppMgrCore::registerApplication( RegisterAppInterface* object )
+const RegistryItem& AppMgrCore::registerApplication( RegisterAppInterface* object )
 {
 	const std::string& appName = object->getAppName();
 	const std::string& ngnMediaScreenAppName = object->getNgnMediaScreenAppName();
@@ -188,7 +189,17 @@ void AppMgrCore::registerApplication( RegisterAppInterface* object )
 
 	application->setApplicationHMIStatusLevel(HMILevel::NONE);
 
-	AppMgrRegistry::getInstance().registerApplication( application );
+	return AppMgrRegistry::getInstance().registerApplication( application );
+}
+
+MobileRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem& registryItem )
+{
+	
+}
+
+void AppMgrCore::registerApplicationOnHMI( const std::string& name )
+{
+	
 }
 
 void AppMgrCore::sendMobileRPCResponse( MobileRPCMessage* msg )

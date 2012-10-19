@@ -10,6 +10,7 @@
 
 #include "system.h"
 #include <queue>
+#include <string>
 
 class RegisterAppInterface;
 class MobileRPCMessage;
@@ -19,6 +20,7 @@ namespace NsAppManager
 {
 
 class RPCBusObject;
+class RegistryItem;
 	
 class AppMgrCore
 {
@@ -39,10 +41,13 @@ private:
 
 	void handleMobileRPCMessage( MobileRPCMessage* msg );
 	void handleBusRPCMessage( RPCBusObject* msg );
-	void registerApplication( RegisterAppInterface* msg );
+	const RegistryItem& registerApplication( RegisterAppInterface* msg );
 	void sendMobileRPCResponse( MobileRPCMessage* msg );
 	void enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message );
+	MobileRPCMessage* queryInfoForRegistration( const RegistryItem& registryItem );
 	void enqueueOutgoingBusRPCMessage( RPCBusObject * message );
+
+	void registerApplicationOnHMI( const std::string& name );
 
 	void* handleQueueRPCAppLinkObjectsIncoming( void* );
 	void* handleQueueRPCBusObjectsIncoming( void* );
