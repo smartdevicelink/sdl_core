@@ -199,7 +199,8 @@ MobileRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem& regi
 
 void AppMgrCore::registerApplicationOnHMI( const std::string& name )
 {
-	
+//	RPCBusObject* object = new RPCBusObject( 1, RPCBusObject::REQUEST, "AppLinkCore.OnAppRegister" );
+//	object->setParameter("name", name);
 }
 
 void AppMgrCore::sendMobileRPCResponse( MobileRPCMessage* msg )

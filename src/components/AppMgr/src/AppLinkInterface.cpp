@@ -10,6 +10,7 @@
 #include "CMessageBroker.hpp"
 #include "CMessageBrokerRegistry.hpp"
 #include "CSender.hpp"
+#include <map>
 
 namespace NsAppManager
 {
@@ -39,20 +40,58 @@ void AppLinkInterface::setParams(const std::string& address, uint16_t port, std:
 
 void AppLinkInterface::sendRPCBusObject( const RPCBusObject* rpcObject )
 {
-	//processRequest();
+	Json::Value request, params;
+	prepareMessage(request);
+	request["method"] = rpcObject->getMethodName();
+
+	for(std::map<std::string, std::string>::const_iterator it = rpcObject->getParameters().begin(); it != rpcObject->getParameters().end(); it++)
+	{
+		params[it->first] = it->second;
+	}
+	request["params"] = params;
+
+	sendJsonMessage(request);
+}
+
+void AppLinkInterface::sendMessage()
+{
+	
+}
+
+void AppLinkInterface::getButtonCapabilities()
+{
+	Json::Value request;
+	prepareMessage(request);
+	request["method"] = "Buttons.getCapabilities";
+	sendJsonMessage(request);
+}
+
+void AppLinkInterface::getVoiceCapabilities()
+{
+	Json::Value request;
+	prepareMessage(request);
+	request["method"] = "Voice.getCapabilities";
+	sendJsonMessage(request);
+}
+
+void AppLinkInterface::getVRCapabilities()
+{
+	Json::Value request;
+	prepareMessage(request);
+	request["method"] = "VR.getCapabilities";
+	sendJsonMessage(request);
 }
 
 AppLinkInterface::AppLinkInterface( const std::string& address, uint16_t port, const std::string& name )
 	:NsMessageBroker::CMessageBrokerController::CMessageBrokerController(address, port, name)
 {
-	// TODO Auto-generated constructor stub
-
 }
 
 AppLinkInterface::~AppLinkInterface( )
 {
-	// TODO Auto-generated destructor stub
 }
+
+/** Callbacks - upon message receiving */
 
 /**
  * \brief pure virtual method to process response.

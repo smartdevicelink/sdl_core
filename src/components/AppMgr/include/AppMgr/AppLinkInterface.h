@@ -58,6 +58,10 @@ private:
 	AppLinkInterface( const std::string& address, uint16_t port, const std::string& name );
 
 	void sendMessage();
+	
+	void getButtonCapabilities();
+	void getVoiceCapabilities();
+	void getVRCapabilities();
 
 	static std::string mAddress;
 	static uint16_t mPort;

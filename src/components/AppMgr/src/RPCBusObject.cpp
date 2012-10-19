@@ -10,11 +10,11 @@
 namespace NsAppManager
 {
 	
-RPCBusObject::RPCBusObject( unsigned int protocolVersion, MessageType messageType, const std::string& functionName )
+RPCBusObject::RPCBusObject( unsigned int protocolVersion, MessageType messageType, const std::string& method )
 	:mProtocolVersion( protocolVersion )
 	,mMessageType( messageType )
 	,mCorrelationID( 0 )
-	,mFunctionName( functionName )
+	,mFunctionName( method )
 	,mFunctionID( 0 )
 {
 	// TODO Auto-generated constructor stub
@@ -25,7 +25,7 @@ RPCBusObject::RPCBusObject( const RPCBusObject& message )
 	:mProtocolVersion( message.getProtocolVersion() )
 	,mMessageType( message.getMessageType() )
 	,mCorrelationID( message.getCorrelationID() )
-	,mFunctionName( message.getFunctionName() )
+	,mFunctionName( message.getMethodName() )
 	,mFunctionID( message.getFunctionID() )
 {}
 
@@ -49,7 +49,7 @@ unsigned int RPCBusObject::getCorrelationID() const
 	return mCorrelationID;
 }
 
-const std::string & RPCBusObject::getFunctionName() const
+const std::string & RPCBusObject::getMethodName() const
 {
 	return mFunctionName;
 }
@@ -74,15 +74,19 @@ void RPCBusObject::setCorrelationID( unsigned int correlationID )
 	mCorrelationID = correlationID;
 }
 
-
-void RPCBusObject::setParametersString( const std::string& parametersString )
+void RPCBusObject::setParameter( const std::string& param, const std::string& value )
 {
-	mParametersString = parametersString;
+	mParameters.insert(std::pair<std::string, std::string>( param, value ));
 }
 
-std::string RPCBusObject::getParametersString() const
+std::string RPCBusObject::getParameter( const std::string& param )
 {
-	return mParametersString;
+	return mParameters.find(param)->second;
+}
+
+const std::map<std::string, std::string>& RPCBusObject::getParameters() const
+{
+	return mParameters;
 }
 
 };
