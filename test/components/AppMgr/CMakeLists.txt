@@ -10,6 +10,7 @@ link_directories(../../../src/components/AppMgr
 				 ../../../src/components/JSONHandler
 				 ../../../src/thirdPartyLibs/axisCore/bin
 				 ../../../src/thirdPartyLibs/MessageBroker
+				 ../../../src/thirdPartyLibs/logger/bin
 				)
 
 include_directories (../../../src/components/AppMgr/include/
@@ -32,6 +33,8 @@ set(LIBRARIES
 		jsonCpp
 		bluetooth
 		pthread
+		log4cplus
+		rt
 	)
 
 add_executable(${PROJECT} ${SOURCES})
