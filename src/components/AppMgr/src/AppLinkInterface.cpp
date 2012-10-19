@@ -11,6 +11,7 @@
 #include "CMessageBrokerRegistry.hpp"
 #include "CSender.hpp"
 #include <map>
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
@@ -40,6 +41,7 @@ void AppLinkInterface::setParams(const std::string& address, uint16_t port, std:
 
 void AppLinkInterface::sendRPCBusObject( const RPCBusObject* rpcObject )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Sending RPC Bus object "<< rpcObject->getMethodName() <<" to HMI...");
 	Json::Value request, params;
 	prepareMessage(request);
 	request["method"] = rpcObject->getMethodName();
@@ -51,6 +53,7 @@ void AppLinkInterface::sendRPCBusObject( const RPCBusObject* rpcObject )
 	request["params"] = params;
 
 	sendJsonMessage(request);
+	LOG4CPLUS_INFO_EXT(mLogger, " Sent RPC Bus object "<< rpcObject->getMethodName() <<" to HMI");
 }
 
 void AppLinkInterface::sendMessage()
@@ -60,35 +63,44 @@ void AppLinkInterface::sendMessage()
 
 void AppLinkInterface::getButtonCapabilities()
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Getting button capabilities...");
 	Json::Value request;
 	prepareMessage(request);
 	request["method"] = "Buttons.getCapabilities";
 	sendJsonMessage(request);
+	LOG4CPLUS_INFO_EXT(mLogger, " Getting button capabilities sent to HMI");
 }
 
 void AppLinkInterface::getVoiceCapabilities()
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Getting voice capabilities...");
 	Json::Value request;
 	prepareMessage(request);
 	request["method"] = "Voice.getCapabilities";
 	sendJsonMessage(request);
+	LOG4CPLUS_INFO_EXT(mLogger, " Getting voice capabilities sent to HMI");
 }
 
 void AppLinkInterface::getVRCapabilities()
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Getting VR capabilities...");
 	Json::Value request;
 	prepareMessage(request);
 	request["method"] = "VR.getCapabilities";
 	sendJsonMessage(request);
+	LOG4CPLUS_INFO_EXT(mLogger, " Getting VR capabilities sent to HMI");
 }
 
 AppLinkInterface::AppLinkInterface( const std::string& address, uint16_t port, const std::string& name )
 	:NsMessageBroker::CMessageBrokerController::CMessageBrokerController(address, port, name)
+	,mLogger( log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppLinkInterface")) )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " AppLinkInterface constructed!");
 }
 
 AppLinkInterface::~AppLinkInterface( )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " AppLinkInterface constructed!");
 }
 
 /** Callbacks - upon message receiving */
@@ -100,6 +112,22 @@ AppLinkInterface::~AppLinkInterface( )
  */
 void AppLinkInterface::processResponse(std::string method, Json::Value& root)
 {
+	if(method == "Buttons.getCapabilities")
+	{
+		LOG4CPLUS_INFO_EXT(mLogger, " Buttons.getCapabilities response has been received!");
+	}
+	else if(method == "Voice.getCapabilities")
+	{
+		LOG4CPLUS_INFO_EXT(mLogger, " Voice.getCapabilities response has been received!");
+	}
+	else if(method == "VR.getCapabilities")
+	{
+		LOG4CPLUS_INFO_EXT(mLogger, " VR.getCapabilities response has been received!");
+	}
+	else
+	{
+		LOG4CPLUS_ERROR_EXT(mLogger, " An unknown method "<< method <<" response has been received!");
+	}
 }
 
 /**

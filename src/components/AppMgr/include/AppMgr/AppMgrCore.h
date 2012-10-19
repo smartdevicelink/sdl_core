@@ -16,6 +16,11 @@ class RegisterAppInterface;
 class MobileRPCMessage;
 class JSONHandler;
 
+namespace log4cplus
+{
+	class Logger;
+};
+
 namespace NsAppManager
 {
 
@@ -71,6 +76,7 @@ private:
 
 	bool m_bTerminate;
 	JSONHandler* mJSONHandler;
+	const log4cplus::Logger& mLogger;
 };
 
 }; // namespace NsAppManager

@@ -6,6 +6,7 @@
 #include "AppMgr/RPCAppLinkFactory.h"
 #include "AppMgr/RPCBusFactory.h"
 #include "AppMgr/AppMgrRegistry.h"
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
@@ -29,11 +30,15 @@ AppMgr::AppMgr()
 	,mRPCBusFactory(RPCBusFactory::getInstance())
 	,mAppFactory(AppFactory::getInstance())
 	,mJSONHandler(0)
+	,mLogger( log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgr")) )
 {
+	mAppLinkInterface.registerController();
+	LOG4CPLUS_INFO_EXT(mLogger, " AppMgr constructed!");
 }
 
 AppMgr::~AppMgr()
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " AppMgr destructed!");
 }
 
 void AppMgr::setJsonHandler(JSONHandler* handler)
@@ -43,6 +48,7 @@ void AppMgr::setJsonHandler(JSONHandler* handler)
 
 void AppMgr::onMessageReceivedCallback( MobileRPCMessage * message )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Message "<<message->getFunctionName()<<" received");
 	mAppMgrCore.pushMobileRPCMessage( message );
 }
 
@@ -53,6 +59,7 @@ void AppMgr::onMessageReceivedCallback( MobileRPCMessage * message )
  */
 void AppMgr::processResponse(std::string method, Json::Value& root)
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Processing a response to "<<method);
 	mAppLinkInterface.processResponse(method, root);
 }
 
@@ -62,6 +69,7 @@ void AppMgr::processResponse(std::string method, Json::Value& root)
  */
 void AppMgr::processRequest(Json::Value& root)
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Processing a request");
 	mAppLinkInterface.processRequest(root);
 }
 
@@ -76,6 +84,7 @@ void AppMgr::processRequest(Json::Value& root)
  */
 void AppMgr::processNotification(Json::Value& root)
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Processing a notification");
 	mAppLinkInterface.processNotification(root);
 }
 

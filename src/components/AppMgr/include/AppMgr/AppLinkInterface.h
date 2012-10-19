@@ -11,6 +11,11 @@
 #include "RPCBusObject.h"
 #include "mb_controller.hpp"
 
+namespace log4cplus
+{
+	class Logger;
+};
+
 namespace NsAppManager
 {
 	
@@ -67,6 +72,8 @@ private:
 	static uint16_t mPort;
 	static std::string mName;
 	static bool m_bInitialized;
+
+	const log4cplus::Logger& mLogger;
 };
 
 }; // namespace NsAppManager
