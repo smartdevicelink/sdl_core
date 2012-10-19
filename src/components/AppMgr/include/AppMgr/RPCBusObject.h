@@ -20,7 +20,6 @@ public:
 	enum MessageType { REQUEST = 0x0, RESPONSE = 0x1, NOTIFICATION = 0x2, UNDEFINED };
 	
 	RPCBusObject( unsigned int protocolVersion, MessageType messageType, const std::string& method );
-	RPCBusObject( const RPCBusObject& message );
 	
 	virtual ~RPCBusObject( );
 
@@ -38,6 +37,8 @@ public:
 	virtual const std::map<std::string, std::string>& getParameters() const;
 
 private:
+	RPCBusObject( const RPCBusObject& message );
+	
 	unsigned int mProtocolVersion;
 	MessageType mMessageType;
 	unsigned int mCorrelationID;

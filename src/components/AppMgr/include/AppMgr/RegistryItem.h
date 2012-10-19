@@ -19,19 +19,24 @@ namespace NsAppManager
 class RegistryItem
 {
 public:
+	typedef std::set<AppPolicy*> Policies;
+	
 	RegistryItem( const Application* app );
-	~RegistryItem( );
+	virtual ~RegistryItem( );
 
-	const AppPolicy& registerPolicy( const std::string& hash );
-	void unregisterPolicy( AppPolicy& policy );
+	void setApplication( const Application* app );
+	const AppPolicy* registerPolicy( const std::string& hash );
+	void unregisterPolicy( AppPolicy* policy );
 	const Application* getApplication() const;
 	bool operator<(const RegistryItem& item2) const;
 
-	std::set<AppPolicy> getApplicationPolicies(const Application* app) const;
-	std::set<AppPolicy> getApplicationPolicies(const std::string& app) const;
+	Policies getApplicationPolicies(const Application* app) const;
+	Policies getApplicationPolicies(const std::string& app) const;
 
 private:
-	std::set<AppPolicy> mAppPolicies;
+	RegistryItem( const RegistryItem& );
+	
+	Policies mAppPolicies;
 	const Application* mApplication;
 };
 

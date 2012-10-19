@@ -117,7 +117,7 @@ void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 			if(0 == msg->getFunctionName().compare("RegisterAppInterface"))
 			{
 				RegisterAppInterface * object = (RegisterAppInterface*)msg;
-				const RegistryItem& registeredApp =  registerApplication( object );
+				const RegistryItem* registeredApp =  registerApplication( object );
 				MobileRPCMessage* response = queryInfoForRegistration( registeredApp );
 				sendMobileRPCResponse( response );
 			}
@@ -167,7 +167,7 @@ void AppMgrCore::enqueueOutgoingBusRPCMessage( RPCBusObject * message )
 	mMtxRPCBusObjectsOutgoing.Unlock();
 }
 
-const RegistryItem& AppMgrCore::registerApplication( RegisterAppInterface* object )
+const RegistryItem* AppMgrCore::registerApplication( RegisterAppInterface* object )
 {
 	const std::string& appName = object->getAppName();
 	const std::string& ngnMediaScreenAppName = object->getNgnMediaScreenAppName();
@@ -192,7 +192,7 @@ const RegistryItem& AppMgrCore::registerApplication( RegisterAppInterface* objec
 	return AppMgrRegistry::getInstance().registerApplication( application );
 }
 
-MobileRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem& registryItem )
+MobileRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem* registryItem )
 {
 	
 }
