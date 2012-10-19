@@ -42,6 +42,7 @@ private:
 	void registerApplication( RegisterAppInterface* msg );
 	void sendMobileRPCResponse( MobileRPCMessage* msg );
 	void enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message );
+	void enqueueOutgoingBusRPCMessage( RPCBusObject * message );
 
 	void* handleQueueRPCAppLinkObjectsIncoming( void* );
 	void* handleQueueRPCBusObjectsIncoming( void* );

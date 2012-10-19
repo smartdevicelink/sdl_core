@@ -157,6 +157,15 @@ void AppMgrCore::enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message )
 	mMtxRPCAppLinkObjectsOutgoing.Unlock();
 }
 
+void AppMgrCore::enqueueOutgoingBusRPCMessage( RPCBusObject * message )
+{
+	mMtxRPCBusObjectsOutgoing.Lock();
+	
+	mQueueRPCBusObjectsOutgoing.push(message);
+	
+	mMtxRPCBusObjectsOutgoing.Unlock();
+}
+
 void AppMgrCore::registerApplication( RegisterAppInterface* object )
 {
 	const std::string& appName = object->getAppName();
