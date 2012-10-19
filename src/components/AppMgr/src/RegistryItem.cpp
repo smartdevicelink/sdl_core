@@ -10,7 +10,7 @@
 namespace NsAppManager
 {
 	
-RegistryItem::RegistryItem( const Application& app )
+RegistryItem::RegistryItem( const Application* app )
 : mApplication(app)
 {
 }
@@ -33,17 +33,17 @@ void RegistryItem::unregisterPolicy( AppPolicy& policy )
 	mAppPolicies.erase(policyIterator);
 }
 
-const Application& RegistryItem::getApplication( ) const
+const Application* RegistryItem::getApplication( ) const
 {
 	return mApplication;
 }
 
 bool RegistryItem::operator <(const RegistryItem& item2 ) const
 {
-	return this->getApplication().getName() < item2.getApplication().getName();
+	return this->getApplication()->getName() < item2.getApplication()->getName();
 }
 
-std::set< AppPolicy > RegistryItem::getApplicationPolicies(	const Application& app ) const
+std::set< AppPolicy > RegistryItem::getApplicationPolicies( const Application* app ) const
 {
 	std::set< AppPolicy > policySet;
 	return policySet;

@@ -179,7 +179,7 @@ void AppMgrCore::registerApplication( RegisterAppInterface* object )
 
 	application->setApplicationHMIStatusLevel(HMILevel::NONE);
 
-	AppMgrRegistry::getInstance().registerApplication( *application );
+	AppMgrRegistry::getInstance().registerApplication( application );
 }
 
 void AppMgrCore::sendMobileRPCResponse( MobileRPCMessage* msg )
