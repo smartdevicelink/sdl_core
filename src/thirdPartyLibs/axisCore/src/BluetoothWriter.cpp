@@ -19,12 +19,12 @@ BluetoothWriter::~BluetoothWriter()
     delete [] mData;
 }
 
-void BluetoothWriter::setBTAdapter(Bluetooth::IBluetoothAPI *adapter)
+void BluetoothWriter::setBTAdapter(IBluetoothAPI *adapter)
 {
     mBTAdapter = adapter;
 }
 
-ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *data)
+ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, const UInt8 *data)
 {
     UInt8 offset = 0;
     UInt8 compress = 0x0;
@@ -47,6 +47,14 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
     mData[offset++] = header.dataSize >> 8;
     mData[offset++] = header.dataSize;
 
+    if (header.version == PROTOCOL_VERSION_2)
+    {
+        mData[offset++] = header.messageID >> 24;
+        mData[offset++] = header.messageID >> 16;
+        mData[offset++] = header.messageID >> 8;
+        mData[offset++] = header.messageID;
+    }
+
     if (data)
     {
         if ( (offset + header.dataSize) < MAXIMUM_FRAME_SIZE)
@@ -59,14 +67,7 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
     }
 
     if (mBTAdapter)
-    {
-        if (header.version == PROTOCOL_VERSION_1)
-            mBTAdapter->sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_V1_SIZE);
-        else if (header.version == PROTOCOL_VERSION_2)
-            mBTAdapter->sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_V2_SIZE);
-        else
-            return ERR_FAIL;
-    }
+        mBTAdapter->sendBuffer(mData, header.dataSize + offset);
     else
         return ERR_FAIL;
 

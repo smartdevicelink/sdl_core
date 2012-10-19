@@ -26,9 +26,9 @@ public:
         mHandler = new ProtocolHandler(this, msgGen, 2);
         msgGen->initBluetooth(mHandler);
 
-        msgGen->generateInitialMessage(0x07, 0);
+        msgGen->generateInitialMessage(0x07);
 
-        msgGen->generateInitialMessage(0x0F, 1);
+        msgGen->generateInitialMessage(0x0F);
 
         std::string str;
 
@@ -40,7 +40,10 @@ public:
             str.append("_");
         }
 
-        msgGen->generateMultipleMessages(0x07, 0, str, 5);
+        //msgGen->generateMultipleMessages(2, 0x07, 0, str, 5);
+        msgGen->generateSingleMessage(2, 0x07, 1, str);
+
+        delete msgGen;
     }
 
     ~ProtocolObserver()

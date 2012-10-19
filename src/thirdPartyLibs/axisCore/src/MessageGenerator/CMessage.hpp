@@ -32,10 +32,17 @@ public:
    virtual ~CMessage();
 
 public:
-   void generateInitialMessage(UInt8 serviceType, UInt8 sessionID);
-   void generateFinalMessage(UInt8 serviceType, UInt8 sessionID);
-   void generateSingleMessage(UInt8 serviceType, UInt8 sessionID, std::string payload);
-   void generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std::string payload, int messagesQuantity);
+   void generateInitialMessage(UInt8 serviceType);
+   void generateFinalMessage(UInt8 protocolVersion, UInt8 serviceType, UInt8 sessionID, UInt32 hashCode);
+   void generateSingleMessage(UInt8 protocolVersion,
+                              UInt8 serviceType,
+                              UInt8 sessionID,
+                              std::string payload);
+   void generateMultipleMessages(UInt8 protocolVersion,
+                                 UInt8 serviceType,
+                                 UInt8 sessionID,
+                                 std::string payload,
+                                 int messagesQuantity);
 
    UInt32 verify(ProtocolPacketHeader& header, UInt32 fieldsToValidate);
 

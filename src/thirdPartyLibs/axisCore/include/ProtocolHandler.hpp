@@ -35,7 +35,7 @@ public:
      */
     ProtocolHandler(IProtocolObserver *observer,
                     Bluetooth::IBluetoothAPI *btAdapter,
-                    UInt8 protocolVersion);
+                    const UInt8 protocolVersion);
 
     /**
       * Destructor
@@ -46,14 +46,14 @@ public:
      * Start Session
      * @param servType Service type
      */
-    ERROR_CODE startSession(UInt8 servType);
+    ERROR_CODE startSession(const UInt8 servType);
 
     /**
      * End Session
      * @param sessionID Id of session
      * @param hashCode Hash code received in the Start Session ACK message
      */
-    ERROR_CODE endSession(UInt8 sessionID, UInt32 hashCode);
+    ERROR_CODE endSession(const UInt8 sessionID, const UInt32 hashCode);
 
     /**
      * Send Data
@@ -63,7 +63,11 @@ public:
      * @param data Data array
      * @param compress Compressing
      */
-    ERROR_CODE sendData(UInt8 sessionID, UInt8 servType, UInt32 dataSize, UInt8 *data, bool compress);
+    ERROR_CODE sendData(const UInt8 sessionID,
+                        const UInt8 servType,
+                        const UInt32 dataSize,
+                        const UInt8 *data,
+                        const bool compress);
 
     /**
      * Receive Data
@@ -73,7 +77,11 @@ public:
      * @param receivedDataSize Received data size (bytes)
      * @param data Data array
      */
-    ERROR_CODE receiveData(UInt8 sessionID, UInt32 messageID, UInt8 servType, UInt32 receivedDataSize, UInt8* data);
+    ERROR_CODE receiveData(const UInt8 sessionID,
+                           const UInt32 messageID,
+                           const UInt8 servType,
+                           const UInt32 receivedDataSize,
+                           UInt8* data);
 
 private:
     virtual void dataReceived();
@@ -86,20 +94,21 @@ private:
         HANDSHAKE_DONE
     };
 
-    ERROR_CODE sendStartAck(const UInt8 sessionID);
+    ERROR_CODE sendStartSessionAck(const UInt8 sessionID);
+    ERROR_CODE sendEndSessionNAck(const UInt8 sessionID);
     ERROR_CODE handleMessage(const ProtocolPacketHeader &header, UInt8 *data);
     ERROR_CODE handleControlMessage(const ProtocolPacketHeader &header, UInt8 *data);
     ERROR_CODE handleMultiFrameMessage(const ProtocolPacketHeader &header, UInt8 *data);
-    ERROR_CODE sendSingleFrameMessage(UInt8 sessionID,
-                                      UInt8 servType,
-                                      UInt32 dataSize,
-                                      UInt8 *data,
-                                      bool compress);
-    ERROR_CODE sendMultiFrameMessage(UInt8 sessionID,
-                                     UInt8 servType,
-                                     UInt32 dataSize,
-                                     UInt8 *data,
-                                     bool compress,
+    ERROR_CODE sendSingleFrameMessage(const UInt8 sessionID,
+                                      const UInt8 servType,
+                                      const UInt32 dataSize,
+                                      const UInt8 *data,
+                                      const bool compress);
+    ERROR_CODE sendMultiFrameMessage(const UInt8 sessionID,
+                                     const UInt8 servType,
+                                     const UInt32 dataSize,
+                                     const UInt8 *data,
+                                     const bool compress,
                                      const UInt32 maxDataSize);
 
 
@@ -113,6 +122,7 @@ private:
     BluetoothWriter mBTWriter;
     Bluetooth::IBluetoothAPI *mBTAdapter;
     UInt8 mProtocolVersion;
+    UInt8 mSessionIdCounter;
 };
 
 } //namespace AxisCore

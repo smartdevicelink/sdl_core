@@ -5,16 +5,17 @@
 namespace AxisCore
 {
 
-Message::Message(const ProtocolPacketHeader &header
-                                   , UInt8 *data
-                                   , bool isMultiFrame) :
+Message::Message(const ProtocolPacketHeader &header,
+                 UInt8 *data,
+                 bool isMultiFrame) :
             mTotalDataBytes(0),            
             mData(0),
             mIsMultiFrame(isMultiFrame),
             mNumberOfConsFrames(0),
             mDataOffset(0),
             mLastSubMessageNumber(0),
-            mSubMessagesConnected(0)
+            mSubMessagesConnected(0),
+            mMessageID(header.messageID)
 {
     if (mIsMultiFrame)
     {

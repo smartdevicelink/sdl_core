@@ -35,7 +35,7 @@ public:
       * Set BTAdapter pointer for reading
       * @param adapter Pointer to NsTransportLayer::CBTAdapter
       */
-    void setBTAdapter(Bluetooth::IBluetoothAPI *adapter);
+    void setBTAdapter(IBluetoothAPI *adapter);
 
 private:
     UInt8 *mData;

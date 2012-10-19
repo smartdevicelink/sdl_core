@@ -19,6 +19,11 @@ public:
     ~Message();
 
     /**
+      * Get message ID
+      */
+    UInt32 getMessageID()       { return mMessageID; }
+
+    /**
       * Get pointer to the data array
       */
     UInt8 *getMessageData()     { return mData; }
@@ -48,6 +53,7 @@ private:
     UInt32 mDataOffset;
     UInt8 mLastSubMessageNumber;
     UInt32 mSubMessagesConnected;
+    UInt32 mMessageID;
 };
 
 } //namespace AxisCore

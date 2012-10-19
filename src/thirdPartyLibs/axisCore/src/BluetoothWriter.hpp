@@ -28,7 +28,7 @@ public:
       * @param header Message header
       * @param data Data array
       */
-    ERROR_CODE write(const ProtocolPacketHeader &header, UInt8 *data);
+    ERROR_CODE write(const ProtocolPacketHeader &header, const UInt8 *data);
 
     /**
       * Set BTAdapter pointer for writing
