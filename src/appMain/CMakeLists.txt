@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 set (PROJECT appLinkCore)
-project (${PROJECT}) 
+project (${PROJECT})
 
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
@@ -51,10 +51,10 @@ include(ExternalProject)
 
 ExternalProject_Add(
    ProtocolHandler
-   SOURCE_DIR ../thirdPartyLibs/axisCore/
+   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../thirdPartyLibs/axisCore/
    DOWNLOAD_COMMAND ""
    CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1   
+   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../thirdPartyLibs/axisCore/
    BUILD_COMMAND make
    INSTALL_DIR ../thirdPartyLibs/axisCore/bin
    INSTALL_COMMAND make install
@@ -62,10 +62,10 @@ ExternalProject_Add(
 
 ExternalProject_Add(
    jsonCpp
-   SOURCE_DIR ../thirdPartyLibs/jsoncpp
+   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../thirdPartyLibs/jsoncpp
    DOWNLOAD_COMMAND ""
    CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1 
+   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../thirdPartyLibs/jsoncpp
    BUILD_COMMAND make
    INSTALL_DIR ../thirdPartyLibs/jsoncpp/bin
    INSTALL_COMMAND make install
@@ -73,10 +73,10 @@ ExternalProject_Add(
 
 ExternalProject_Add(
    jsonHandler
-   SOURCE_DIR ../components/JSONHandler
+   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../components/JSONHandler
    DOWNLOAD_COMMAND ""
    CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1 
+   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../components/JSONHandler
    BUILD_COMMAND make
    INSTALL_DIR ../components/JSONHandler/bin
    INSTALL_COMMAND make install
@@ -86,10 +86,10 @@ ExternalProject_Add(
    messagebroker
    messagebrokerclient
    messagebrokerserver
-   SOURCE_DIR ../thirdPartyLibs/MessageBroker
+   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../thirdPartyLibs/MessageBroker
    DOWNLOAD_COMMAND ""
    CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1 
+   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../thirdPartyLibs/MessageBroker
    BUILD_COMMAND make
    INSTALL_DIR ../thirdPartyLibs/MessageBroker/bin
    INSTALL_COMMAND make install
@@ -97,10 +97,10 @@ ExternalProject_Add(
 
 ExternalProject_Add(
    appManager
-   SOURCE_DIR ../components/AppMgr
+   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../components/AppMgr
    DOWNLOAD_COMMAND ""
    CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1 
+   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../components/AppMgr
    BUILD_COMMAND make
    INSTALL_DIR ../components/AppMgr/bin
    INSTALL_COMMAND make install

@@ -42,10 +42,10 @@ include(ExternalProject)
 
 ExternalProject_Add(
    appManager
-   SOURCE_DIR ../../../src/components/AppMgr
+   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/components/AppMgr
    DOWNLOAD_COMMAND ""
    CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1 
+   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../../../src/components/AppMgr
    BUILD_COMMAND make
    INSTALL_DIR ../../../src/components/AppMgr/bin
    INSTALL_COMMAND make install
@@ -53,10 +53,10 @@ ExternalProject_Add(
 
 ExternalProject_Add(
 	jsonHandler
-	SOURCE_DIR  ../JSONHandler/
+	SOURCE_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/../JSONHandler/
 	DOWNLOAD_COMMAND ""
 	CMAKE_COMMAND cmake
-	BUILD_IN_SOURCE 1
+	BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../JSONHandler/
 	BUILD_COMMAND make
 	INSTALL_DIR ../JSONHandler/bin
 	INSTALL_COMMAND make install

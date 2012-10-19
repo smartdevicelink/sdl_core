@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 set (PROJECT messageBroker)
-project (${PROJECT}) 
+project (${PROJECT})
 
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
@@ -8,7 +8,7 @@ set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 include_directories (
                      ./include/
                      ../jsoncpp/include
-                    ) 
+                    )
 
 link_directories(
                  ../thirdPartyLibs/jsoncpp/bin
@@ -21,10 +21,10 @@ set(LIBRARIES
 include(ExternalProject)
 ExternalProject_Add(
    jsonCpp
-   SOURCE_DIR  ../jsoncpp/
+   SOURCE_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/../jsoncpp/
    DOWNLOAD_COMMAND ""
    CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1   
+   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../jsoncpp/
    BUILD_COMMAND make
    INSTALL_DIR ../jsoncpp/bin
    INSTALL_COMMAND make install
@@ -51,5 +51,5 @@ add_library(messagebrokerserver
                 ./src/server/networking.cpp
             )
 
-install (TARGETS messagebroker messagebrokerclient messagebrokerserver DESTINATION bin) 
+install (TARGETS messagebroker messagebrokerclient messagebrokerserver DESTINATION bin)
 
