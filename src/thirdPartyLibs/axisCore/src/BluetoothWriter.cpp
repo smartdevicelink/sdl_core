@@ -59,7 +59,14 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
     }
 
     if (mBTAdapter)
-        mBTAdapter->sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_SIZE);
+    {
+        if (header.version == PROTOCOL_VERSION_1)
+            mBTAdapter->sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_V1_SIZE);
+        else if (header.version == PROTOCOL_VERSION_2)
+            mBTAdapter->sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_V2_SIZE);
+        else
+            return ERR_FAIL;
+    }
     else
         return ERR_FAIL;
 

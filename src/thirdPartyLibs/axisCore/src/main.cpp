@@ -23,7 +23,7 @@ public:
         cout << "enter ProtocolObserver() \n";
 
         CMessage *msgGen = new CMessage();
-        mHandler = new ProtocolHandler(this, msgGen);
+        mHandler = new ProtocolHandler(this, msgGen, 2);
         msgGen->initBluetooth(mHandler);
 
         msgGen->generateInitialMessage(0x07, 0);
@@ -48,7 +48,7 @@ public:
         delete mHandler;
     }
 
-    virtual void sessionStartedCallback(const UInt8 sessionID)
+    virtual void sessionStartedCallback(const UInt8 sessionID, const UInt32 hashCode)
     {
         cout << "sessionStartedCallback : Session ID : 0x" << std::hex << (int)sessionID << "\n";
     }
