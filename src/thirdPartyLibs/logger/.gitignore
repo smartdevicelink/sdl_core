@@ -1,0 +1,4 @@
+*.tar.bz2
+*.md5
+build
+install
