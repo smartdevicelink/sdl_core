@@ -6,3 +6,5 @@ CMakeFiles
 Makefile
 CMakeCache.txt
 install_manifest.txt
+*.kdev4
+
