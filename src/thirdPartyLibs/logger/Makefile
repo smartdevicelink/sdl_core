@@ -3,7 +3,7 @@ PKGNAME     :=log4cplus
 PKGVER      :=1.0.4
 
 SOURCE_DIR  :=$(PKGNAME)-$(PKGVER)
-INSTALL_DIR :=./bin
+INSTALL_DIR :=  $(PWD)/bin
 
 LIB_NAME := liblog4cplus.a
 
@@ -21,7 +21,7 @@ release: all
 all: install
 
 $(SOURCE_DIR)/Makefile:
-	cd $(SOURCE_DIR); ./configure --prefix=$(INSTALL_DIR) --enable-static
+	cd $(SOURCE_DIR); automake --add-missing; ./configure --prefix=$(INSTALL_DIR) --enable-static
 
 # Target will build package and create file 'build' to remember the time of build -
 # this prevents the build of package every time we run make
@@ -30,8 +30,8 @@ build: $(SOURCE_DIR)/Makefile
 	touch build
 
 $(INSTALL_DIR)/liblog4cplus.a: build
-	mkdir -p ./bin
-	cp $(SOURCE_DIR)/src/.libs/liblog4cplus.a ./bin/
+	mkdir -p $(INSTALL_DIR)
+	cp $(SOURCE_DIR)/src/.libs/liblog4cplus.a $(INSTALL_DIR)/
 #	$(MAKE) -C $(SOURCE_DIR) install
 
 # Target will install package and create file 'install' to remember the time of install -
