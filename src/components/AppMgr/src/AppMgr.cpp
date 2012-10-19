@@ -10,32 +10,19 @@
 namespace NsAppManager
 {
 	
-std::string AppMgr::mAddress = "";
-uint16_t AppMgr::mPort = 0;
-std::string AppMgr::mName = "";
-bool AppMgr::m_bInitialized = false;
-	
 AppMgr& AppMgr::getInstance( )
 {
-	if(m_bInitialized)
-	{
-		static AppMgr appMgr(mAddress, mPort, mName);
-		return appMgr;
-	}
-	//here to log error
+	static AppMgr appMgr;
+	return appMgr;
 }
 
 void AppMgr::setParams(const std::string& address, uint16_t port, std::string name)
 {
-	mAddress = address;
-	mPort = port;
-	mName = name;
-	m_bInitialized = true;
+	AppLinkInterface::setParams(address, port, name);
 }
 
-AppMgr::AppMgr(const std::string& address, uint16_t port, std::string name)
-	:NsMessageBroker::CMessageBrokerController::CMessageBrokerController(address, port, name)
-	,mAppLinkInterface(AppLinkInterface::getInstance())
+AppMgr::AppMgr()
+	:mAppLinkInterface(AppLinkInterface::getInstance())
 	,mAppMgrRegistry(AppMgrRegistry::getInstance())
 	,mAppMgrCore(AppMgrCore::getInstance())
 	,mRPCAppLinkFactory(RPCAppLinkFactory::getInstance())
@@ -66,6 +53,7 @@ void AppMgr::onMessageReceivedCallback( MobileRPCMessage * message )
  */
 void AppMgr::processResponse(std::string method, Json::Value& root)
 {
+	mAppLinkInterface.processResponse(method, root);
 }
 
 /**
@@ -74,6 +62,7 @@ void AppMgr::processResponse(std::string method, Json::Value& root)
  */
 void AppMgr::processRequest(Json::Value& root)
 {
+	mAppLinkInterface.processRequest(root);
 }
 
 /**
@@ -87,6 +76,7 @@ void AppMgr::processRequest(Json::Value& root)
  */
 void AppMgr::processNotification(Json::Value& root)
 {
+	mAppLinkInterface.processNotification(root);
 }
 
 };
