@@ -27,6 +27,8 @@
 
 #include "system.h"
 
+#include "Logger.hpp"
+
 /**
  * \brief Entry point of the program.
  * \param argc number of argument
@@ -37,6 +39,8 @@ int main(int argc, char** argv)
 {
     /*** Components instance section***/
     /**********************************/
+    Logger logger = Logger::getInstance(LOG4CPLUS_TEXT("appMain"));
+
     NsTransportLayer::CBTAdapter btadapter;
 
     JSONHandler jsonHandler;
