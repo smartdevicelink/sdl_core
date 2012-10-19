@@ -39,6 +39,7 @@ include_directories (./
                      ../components/AppMgr/include
                      ../thirdPartyLibs/MessageBroker/include
                      ../thirdPartyLibs/logger/include
+                     ../thirdPartyLibs/logger/log4cplus-1.0.4/include
                      )
 
 set (SOURCES
@@ -106,16 +107,6 @@ ExternalProject_Add(
    BUILD_IN_SOURCE 1 
    BUILD_COMMAND make
    INSTALL_DIR ../components/AppMgr/bin
-   INSTALL_COMMAND make install
-)
-
-ExternalProject_Add(
-   log4cplus
-   SOURCE_DIR ../thirdPartyLibs/logger
-   DOWNLOAD_COMMAND ""
-   BUILD_IN_SOURCE 1 
-   BUILD_COMMAND make
-   INSTALL_DIR ../thirdPartyLibs/logger/bin
    INSTALL_COMMAND make install
 )
 
