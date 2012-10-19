@@ -13,4 +13,6 @@
   using namespace log4cplus;
   using namespace log4cplus::helpers;
 
+  #include "LoggerHelper.hpp"
+
 #endif /* LOGGER_HPP_ */
