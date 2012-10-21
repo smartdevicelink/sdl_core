@@ -1,17 +1,33 @@
 #include "JSONHandler/RPC2Command.h"
 
-RPC2Command::RPC2Command( std::string methodName )
-:mMethodName( methodName )
+using namespace RPC2Communication;
+
+RPC2Command::RPC2Command( )
 {}
 
-RPC2Command::~RPC2Command() {}
+RPC2Command::RPC2Command( int method )
+:mMethod( method )
+{}
 
-void RPC2Command::setMethodName( std::string methodName )
+RPC2Command::~RPC2Command()
+{}
+
+void RPC2Command::setMethod( int method )
 {
-    mMethodName = methodName;
+    mMethod = method;
 }
 
-std::string RPC2Command::getMethodName() const
+int RPC2Command::getMethod() const
 {
-    return mMethodName;
+    return mMethod;
+}
+
+void RPC2Command::setCommandType( RPC2Command::CommandType commandType )
+{
+    mCommandType = commandType;
+}
+
+RPC2Command::CommandType RPC2Command::getCommandType( ) const
+{
+    return mCommandType;
 }
