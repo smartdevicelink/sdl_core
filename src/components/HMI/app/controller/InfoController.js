@@ -40,8 +40,7 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				action:				'turnOnApp',
-				target:				'MFT.MediaController',
+				/*action:				'turnOnApp',*/
 				click:				function(){
 					MFT.SettingsController.onState();
 				},
@@ -53,8 +52,7 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				action:				'turnOnApp',
-				target:				'MFT.MediaController',
+				/*action:				'turnOnApp',*/
 				click:				function(){
 					MFT.SettingsController.onState();
 				},
@@ -66,8 +64,7 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				action:				'turnOnApp',
-				target:				'MFT.MediaController',
+				/*action:				'turnOnApp',*/
 				click:				function(){
 					MFT.SettingsController.onState();
 				},
@@ -79,8 +76,7 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				action:				'turnOnApp',
-				target:				'MFT.MediaController',
+				/*action:				'turnOnApp',*/
 				click:				function(){
 					MFT.SettingsController.onState();
 				},
@@ -92,8 +88,7 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				action:				'turnOnApp',
-				target:				'MFT.MediaController',
+				/*action:				'turnOnApp',*/
 				click:				function(){
 					MFT.SettingsController.onState();
 				},
@@ -105,8 +100,7 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				action:				'turnOnApp',
-				target:				'MFT.MediaController',
+				/*action:				'turnOnApp',*/
 				click:				function(){
 					MFT.SettingsController.onState();
 				},
@@ -118,8 +112,7 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				action:				'turnOnApp',
-				target:				'MFT.MediaController',
+				/*action:				'turnOnApp',*/
 				click:				function(){
 					MFT.SettingsController.onState();
 				},
@@ -131,8 +124,7 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				action:				'turnOnApp',
-				target:				'MFT.MediaController',
+				/*action:				'turnOnApp',*/
 				click:				function(){
 					MFT.SettingsController.onState();
 				},
@@ -144,8 +136,7 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				action:				'turnOnApp',
-				target:				'MFT.MediaController',
+				/*action:				'turnOnApp',*/
 				click:				function(){
 					MFT.SettingsController.onState();
 				},

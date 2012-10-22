@@ -88,10 +88,12 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 			'scrollBar'
 		],
 		
-		valueBinding:		'MFT.InfoController.appsScroll',
-		
+		scroll:				null,
+
 		pos:				0,
-		
+
+		scrollPos: 			0,
+
 		coeficient:			0,
 		
 		scrollBarH:			0,
@@ -100,8 +102,7 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 			classNames:	'buttonsScroll',
 			elementId:	'buttonsScroll',
 			actionUp:	function(){
-				this._parentView.pos = this._parentView.value.y - this._parentView.value.startY;
-				this._parentView.scrollBar.moveScrollBar();
+				this._parentView.pos = this._parentView.scroll.y - this._parentView.scroll.startY;
 			}
 		}),
 
@@ -117,13 +118,11 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 			scrollArrowUp:   MFT.Button.extend({
 				classNames:	'scrollArrows scrollArrowUp button',
 				click:		function(){
-					if( this._parentView._parentView.value.y < 0 ){
-						this._parentView._parentView.pos += 52;
-						this._parentView.moveScrollBar();
-						this._parentView._parentView.value.scrollTo(0, this._parentView._parentView.value.y + 52, 200);
-					}else if(this._parentView._parentView.value.y){
-						this._parentView._parentView.pos = 0;
-						this._parentView.moveScrollBar();
+					MFT.InfoAppsView.buttonsWrapper.scroll.scrollTo(0, MFT.InfoAppsView.buttonsWrapper.scroll.y + 52, 200);
+					if( MFT.InfoAppsView.buttonsWrapper.scroll.y < -52){
+						MFT.InfoAppsView.buttonsWrapper.set('scrollPos', MFT.InfoAppsView.buttonsWrapper.scroll.y + 52);
+					}else{
+						MFT.InfoAppsView.buttonsWrapper.set('scrollPos', 0);
 					}
 				}
 			}),
@@ -137,29 +136,36 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 			scrollArrowDown:   MFT.Button.extend({
 				classNames:	'scrollArrows scrollArrowDown button',
 				click:		function(){
-					if( this._parentView._parentView.value.scrollerH + this._parentView._parentView.value.y > this._parentView._parentView.value.wrapperH ){
-						this._parentView._parentView.pos -= 52;
-						this._parentView.moveScrollBar();
-						this._parentView._parentView.value.scrollTo(0, this._parentView._parentView.value.y - 52, 200);
+					MFT.InfoAppsView.buttonsWrapper.scroll.scrollTo(0, MFT.InfoAppsView.buttonsWrapper.scroll.y - 52, 200);
+					if( Math.abs(MFT.InfoAppsView.buttonsWrapper.scroll.y) < ((MFT.InfoAppsView.buttonsWrapper.scroll.scrollerH - MFT.InfoAppsView.buttonsWrapper.scroll.wrapperH) - 52) ){
+						MFT.InfoAppsView.buttonsWrapper.set('scrollPos', MFT.InfoAppsView.buttonsWrapper.scroll.y - 52);
+					}else{
+						MFT.InfoAppsView.buttonsWrapper.set('scrollPos',  (MFT.InfoAppsView.buttonsWrapper.scroll.scrollerH - MFT.InfoAppsView.buttonsWrapper.scroll.wrapperH));
 					}
 				}
 			}),
 			
 			moveScrollBar:	function(){
-				this.scroller.set( 'style', 'height:' + this._parentView.scrollBarH + 'px; margin-top:' + Math.abs(this._parentView.pos) * this._parentView.coeficient + 'px;' );
-			}
+				
+				this.scroller.set( 'style', 'height:' + this._parentView.scrollBarH + 'px; margin-top:' + Math.abs(this._parentView.scrollPos) * this._parentView.coeficient + 'px;' );
+			}.observes('this.parentView.scrollPos'),
 		}),
 		
-		scrollObs:	function(){
-			console.log(this.get('value.y'));
-		}.observes('this.value.y'),
+		scrollEnd:	function(){
+			if( MFT.InfoAppsView.buttonsWrapper.scroll.y > 0){
+				this.set('scrollPos', 0);
+			}else if( Math.abs(MFT.InfoAppsView.buttonsWrapper.scroll.y) > (MFT.InfoAppsView.buttonsWrapper.scroll.scrollerH - MFT.InfoAppsView.buttonsWrapper.scroll.wrapperH) ){
+				this.set('scrollPos', MFT.InfoAppsView.buttonsWrapper.scroll.scrollerH - MFT.InfoAppsView.buttonsWrapper.scroll.wrapperH);
+			}else{
+				this.set('scrollPos', MFT.InfoAppsView.buttonsWrapper.scroll.y);
+			}
+		},
 		
 		loaded: function() {
-			this.set('value', new iScroll('buttonsWrapper',{scrollbarClass: 'display:none'}));
-			this.coeficient = this.value.wrapperH / this.value.scrollerH;
-			this.scrollBarH = (this.value.wrapperH - 98) * this.coeficient;
+			this.set('scroll', new iScroll('buttonsWrapper',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.InfoAppsView.buttonsWrapper.scrollEnd();}}));
+			this.coeficient = this.scroll.wrapperH / this.scroll.scrollerH;
+			this.scrollBarH = (this.scroll.wrapperH - 98) * this.coeficient - 49;
 			this.scrollBar.scroller.set( 'style', 'height:' + this.scrollBarH + 'px;' );
-			this.scrollBar.moveScrollBar();
 		}
 	}),
 
