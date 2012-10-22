@@ -2,6 +2,7 @@
 #define APPMGR_H
 
 #include "JSONHandler/IRPCMessagesObserver.h"
+#include "AppMgr/AppLinkInterface.h"
 #include "mb_controller.hpp"
 
 class JSONHandler;
@@ -14,7 +15,6 @@ namespace log4cplus
 namespace NsAppManager
 {
 
-class AppLinkInterface;
 class AppMgrRegistry;
 class AppMgrCore;
 class RPCAppLinkFactory;
@@ -62,6 +62,10 @@ public:
 	void processNotification(Json::Value& root);
 
 	void setJsonHandler(JSONHandler* handler);
+
+	const AppLinkInterface& getAppLinkInterface() const;
+
+	void startAppMgr();
 	
 private:
 	virtual ~AppMgr();
