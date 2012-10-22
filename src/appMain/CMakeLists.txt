@@ -50,6 +50,7 @@ set (SOURCES
 add_executable(${PROJECT} ${SOURCES})
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 include(ExternalProject)
 
