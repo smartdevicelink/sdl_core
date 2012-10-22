@@ -6,6 +6,8 @@ include_directories (./include/
                      ../../thirdPartyLibs/axisCore/include
                      ../../thirdPartyLibs/axisCore/
                      ../../thirdPartyLibs/axisCore/src
+                     ../../thirdPartyLibs/logger/include
+                     ../../thirdPartyLibs/logger/log4cplus-1.1.0/include
                     ) 
 
 add_library(jsonHandler 
