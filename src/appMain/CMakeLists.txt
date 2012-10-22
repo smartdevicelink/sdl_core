@@ -111,6 +111,17 @@ ExternalProject_Add(
    INSTALL_COMMAND make install
 )
 
+ExternalProject_Add(
+   TransportManager
+   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../components/TransportManager
+   DOWNLOAD_COMMAND ""
+   CMAKE_COMMAND cmake
+   BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../components/TransportManager
+   BUILD_COMMAND make
+   INSTALL_DIR ../components/TransportManager/bin
+   INSTALL_COMMAND make install
+)
+
 ADD_DEPENDENCIES(${PROJECT}
                         log4cplus
                         jsonCpp
@@ -120,6 +131,7 @@ ADD_DEPENDENCIES(${PROJECT}
                         ProtocolHandler
                         jsonHandler
                         appManager
+                        TransportManager
                         )
 
 install (TARGETS ${PROJECT} DESTINATION bin)
