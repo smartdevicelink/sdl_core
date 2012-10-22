@@ -2,6 +2,7 @@
 #define BLUETOOTHWRITER_HPP
 
 #include "ProtocolPacketHeader.hpp"
+#include "Logger.hpp"
 
 namespace Bluetooth
 {
@@ -39,6 +40,7 @@ public:
 private:
     UInt8 *mData;
     Bluetooth::IBluetoothAPI *mBTAdapter;
+    static Logger mLogger;
 };
 
 } //namespace AxisCore

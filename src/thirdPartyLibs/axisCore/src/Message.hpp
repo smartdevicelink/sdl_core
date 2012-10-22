@@ -2,6 +2,7 @@
 #define MESSAGE_HPP
 
 #include "ProtocolPacketHeader.hpp"
+#include "Logger.hpp"
 
 namespace AxisCore
 {
@@ -54,6 +55,7 @@ private:
     UInt8 mLastSubMessageNumber;
     UInt32 mSubMessagesConnected;
     UInt32 mMessageID;
+    static Logger mLogger;
 };
 
 } //namespace AxisCore

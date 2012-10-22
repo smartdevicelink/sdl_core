@@ -8,6 +8,8 @@
 namespace AxisCore
 {
 
+Logger BluetoothWriter::mLogger = Logger::getInstance(LOG4CPLUS_TEXT("AxisCore.ProtocolHandler") );
+
 BluetoothWriter::BluetoothWriter()
 {
     mBTAdapter = NULL;
@@ -61,7 +63,7 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, const UInt
             memcpy(mData + offset, data, header.dataSize);
         else
         {
-            printf("%s:%d BluetoothWriter::write() buffer is too small for writing\n", __FILE__, __LINE__);
+            LOG4CPLUS_WARN(mLogger, "write() - buffer is too small for writing");
             return ERR_FAIL;
         }
     }

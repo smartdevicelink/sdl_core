@@ -8,8 +8,10 @@
 namespace AxisCore
 {
 
+Logger BluetoothReader::mLogger = Logger::getInstance(LOG4CPLUS_TEXT("AxisCore.ProtocolHandler") );
+
 BluetoothReader::BluetoothReader()
-{
+{    
     mBTAdapter = NULL;
     mData = new UInt8[MAXIMUM_FRAME_SIZE];
 }
@@ -37,8 +39,7 @@ ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt
     }
     else
     {
-        printf("%s:%d BluetoothReader::read() buffer is too small for reading\n"
-               , __FILE__, __LINE__);
+        LOG4CPLUS_WARN(mLogger, "read() - buffer is too small for reading");
         return ERR_FAIL;
     }
 

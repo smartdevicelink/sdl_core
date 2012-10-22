@@ -12,6 +12,8 @@
 namespace AxisCore
 {
 
+Logger ProtocolHandler::mLogger = Logger::getInstance(LOG4CPLUS_TEXT("AxisCore.ProtocolHandler") );
+
 ProtocolHandler::ProtocolHandler(IProtocolObserver *observer,
                                  Bluetooth::IBluetoothAPI *btAdapter,
                                  const UInt8 protocolVersion) :
@@ -20,7 +22,9 @@ ProtocolHandler::ProtocolHandler(IProtocolObserver *observer,
                 mProtocolVersion(protocolVersion),
                 mSessionIdCounter(1)
 {    
-    printf("%s:%d enter ProtocolHandler::ProtocolHandler()\n", __FILE__, __LINE__);
+    PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties") );
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
+
     srand(time(0) );
     if (btAdapter)
     {
@@ -32,7 +36,7 @@ ProtocolHandler::ProtocolHandler(IProtocolObserver *observer,
 
 ProtocolHandler::~ProtocolHandler()
 {
-    printf("%s:%d enter ProtocolHandler::~ProtocolHandler()\n", __FILE__, __LINE__);
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
     std::map<UInt8, std::queue<Message *> >::iterator it;
     for (it = mToUpperLevelMessagesQueues.begin() ; it != mToUpperLevelMessagesQueues.end() ; it++)
@@ -58,6 +62,7 @@ ProtocolHandler::~ProtocolHandler()
 
 ERROR_CODE ProtocolHandler::startSession(const UInt8 servType)
 {
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     ERROR_CODE retVal = ERR_OK;
 
     /**
@@ -73,10 +78,10 @@ ERROR_CODE ProtocolHandler::startSession(const UInt8 servType)
                                 0);
 
     if (mBTWriter.write(header, 0) == ERR_OK)
-        printf("%s:%d PH::startSession() return OK\n", __FILE__, __LINE__);
+        LOG4CPLUS_INFO(mLogger, "startSession() - OK");
     else
     {
-        printf("%s:%d PH::startSession() return FAIL\n", __FILE__, __LINE__);
+        LOG4CPLUS_WARN(mLogger, "startSession() - FAIL");
         retVal = ERR_FAIL;
     }
 
@@ -85,6 +90,7 @@ ERROR_CODE ProtocolHandler::startSession(const UInt8 servType)
 
 ERROR_CODE ProtocolHandler::endSession(const UInt8 sessionID, const UInt32 hashCode)
 {
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     ERROR_CODE retVal = ERR_OK;
 
     bool correctEndSession = false;
@@ -99,7 +105,7 @@ ERROR_CODE ProtocolHandler::endSession(const UInt8 sessionID, const UInt32 hashC
                 correctEndSession = true;
             }
             else
-                printf("%s:%d PH::endSession() incorrect hashCode\n", __FILE__, __LINE__);
+                LOG4CPLUS_WARN(mLogger, "endSession() - incorrect hashCode");
         }
     }
     else if (mProtocolVersion == PROTOCOL_VERSION_1)
@@ -118,12 +124,12 @@ ERROR_CODE ProtocolHandler::endSession(const UInt8 sessionID, const UInt32 hashC
 
         if (mBTWriter.write(header, 0) == ERR_OK)
         {
-            printf("%s:%d PH::endSession() return OK\n", __FILE__, __LINE__);
+            LOG4CPLUS_INFO(mLogger, "endSession() - OK\n");
             mHashCodes.erase(sessionID);
         }
         else
         {
-            printf("%s:%d PH::endSession() return FAIL\n", __FILE__, __LINE__);
+            LOG4CPLUS_WARN(mLogger, "endSession() - FAIL");
             retVal = ERR_FAIL;
         }
     }
@@ -139,6 +145,7 @@ ERROR_CODE ProtocolHandler::sendSingleFrameMessage(const UInt8 sessionID,
                                                    const UInt8 *data,
                                                    const bool compress)
 {
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     ERROR_CODE retVal = ERR_OK;
 
     ProtocolPacketHeader header(mProtocolVersion,
@@ -152,11 +159,11 @@ ERROR_CODE ProtocolHandler::sendSingleFrameMessage(const UInt8 sessionID,
 
     if (mBTWriter.write(header, data) != ERR_OK)
     {
-        printf("%s:%d PH::sendSingleFrame() write single frame FAIL\n", __FILE__, __LINE__);
+        LOG4CPLUS_WARN(mLogger, "sendSingleFrame() - write failed");
         retVal = ERR_FAIL;
     }
     else
-        printf("%s:%d PH::sendSingleFrame() write single frame OK\n", __FILE__, __LINE__);
+        LOG4CPLUS_INFO(mLogger, "sendSingleFrame() - write OK");
 
     return retVal;
 }
@@ -168,6 +175,7 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
                                                   const bool compress,
                                                   const UInt32 maxDataSize)
 {
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     ERROR_CODE retVal = ERR_OK;
 
     int numOfFrames = 0;
@@ -203,12 +211,12 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
 
     if (mBTWriter.write(firstHeader, outDataFirstFrame) != ERR_OK)
     {
-        printf("%s:%d PH::sendData() write first frame FAIL\n", __FILE__, __LINE__);
+        LOG4CPLUS_WARN(mLogger, "sendData() - write first frame FAIL");
         delete [] outDataFirstFrame;
         return ERR_FAIL;
     }
     else
-        printf("%s:%d PH::sendData() write first frame OK\n", __FILE__, __LINE__);
+        LOG4CPLUS_INFO(mLogger, "sendData() - write first frame OK");
 
     delete [] outDataFirstFrame;
 
@@ -232,12 +240,12 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
 
             if (mBTWriter.write(header, outDataFrame) != ERR_OK)
             {
-                printf("%s:%d PH::sendData() write consecutive frame FAIL\n", __FILE__, __LINE__);
+                LOG4CPLUS_WARN(mLogger, "sendData() - write consecutive frame FAIL");
                 retVal = ERR_FAIL;
                 break;
             }
             else
-                printf("%s:%d PH::sendData() write consecutive frame OK\n", __FILE__, __LINE__);
+                LOG4CPLUS_INFO(mLogger, "sendData() - write consecutive frame OK");
         }
         else
         {
@@ -254,12 +262,12 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
 
             if (mBTWriter.write(header, outDataFrame) != ERR_OK)
             {
-                printf("%s:%d PH::sendData() write last frame FAIL\n", __FILE__, __LINE__);
+                LOG4CPLUS_WARN(mLogger, "sendData() - write last frame FAIL");
                 retVal = ERR_FAIL;
                 break;
             }
             else
-                printf("%s:%d PH::sendData() write last frame OK\n", __FILE__, __LINE__);
+                LOG4CPLUS_INFO(mLogger, "sendData() - write last frame OK");
         }
     }
 
@@ -274,7 +282,7 @@ ERROR_CODE ProtocolHandler::sendData(const UInt8 sessionID,
                                      const UInt8 *data,
                                      const bool compress)
 {
-    printf("%s:%d enter PH::sendData()\n", __FILE__, __LINE__);
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     ERROR_CODE retVal = ERR_OK;
 
     if (mSessionStates.count(sessionID) )
@@ -317,7 +325,7 @@ ERROR_CODE ProtocolHandler::receiveData(const UInt8 sessionID,
                                         const UInt32 receivedDataSize,
                                         UInt8 *data)
 {
-    printf("%s:%d enter PH::receiveData()\n", __FILE__, __LINE__);
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     ERROR_CODE retVal = ERR_OK;
 
     if (mToUpperLevelMessagesQueues.count(sessionID) )
@@ -344,30 +352,21 @@ ERROR_CODE ProtocolHandler::receiveData(const UInt8 sessionID,
                 }
                 else
                 {
-                    printf("%s:%d PH::receiveData() requested msg size != real Msg size\n"
-                           , __FILE__, __LINE__);
+                    LOG4CPLUS_WARN(mLogger, "receiveData() - requested msg size != real Msg size");
                     retVal = ERR_FAIL;
                 }
             }
             else
-            {
-                printf("%s:%d PH::receiveData() !currentMessage ptr\n", __FILE__, __LINE__);
                 retVal = ERR_FAIL;
-            }
         }
     }
-
-    if (retVal == ERR_OK)
-        printf("%s:%d PH::receiveData() returns OK\n", __FILE__, __LINE__);
-    else
-        printf("%s:%d PH::receiveData() returns FAIL\n", __FILE__, __LINE__);
 
     return retVal;
 }
 
 ERROR_CODE ProtocolHandler::sendStartSessionAck(const UInt8 sessionID)
 {
-    printf("%s:%d enter PH::sendStartSessionAck()\n", __FILE__, __LINE__);
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     ERROR_CODE retVal = ERR_OK;
 
     UInt32 hashCode = 0;
@@ -386,10 +385,10 @@ ERROR_CODE ProtocolHandler::sendStartSessionAck(const UInt8 sessionID)
                                 hashCode);
 
     if (mBTWriter.write(header, 0) == ERR_OK)
-        printf("%s:%d PH::sendStartSessionAck() BT write OK\n", __FILE__, __LINE__);
+        LOG4CPLUS_INFO(mLogger, "sendStartSessionAck() - BT write OK");
     else
     {
-        printf("%s:%d PH::sendStartSessionAck() BT write FAIL\n", __FILE__, __LINE__);
+        LOG4CPLUS_ERROR(mLogger, "sendStartSessionAck() - BT write FAIL");
         retVal = ERR_FAIL;
     }
 
@@ -398,7 +397,7 @@ ERROR_CODE ProtocolHandler::sendStartSessionAck(const UInt8 sessionID)
 
 ERROR_CODE ProtocolHandler::sendEndSessionNAck(const UInt8 sessionID)
 {
-    printf("%s:%d enter PH::sendEndSessionNAck()\n", __FILE__, __LINE__);
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     ERROR_CODE retVal = ERR_OK;
 
     ProtocolPacketHeader header(PROTOCOL_VERSION_2,
@@ -411,10 +410,10 @@ ERROR_CODE ProtocolHandler::sendEndSessionNAck(const UInt8 sessionID)
                                 0);
 
     if (mBTWriter.write(header, 0) == ERR_OK)
-        printf("%s:%d PH::sendEndSessionNAck() BT write OK\n", __FILE__, __LINE__);
+        LOG4CPLUS_INFO(mLogger, "sendEndSessionNAck() - BT write OK");
     else
     {
-        printf("%s:%d PH::sendEndSessionNAck() BT write FAIL\n", __FILE__, __LINE__);
+        LOG4CPLUS_ERROR(mLogger, "sendEndSessionNAck() - BT write FAIL");
         retVal = ERR_FAIL;
     }
 
@@ -423,25 +422,25 @@ ERROR_CODE ProtocolHandler::sendEndSessionNAck(const UInt8 sessionID)
 
 ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UInt8 *data)
 {
-    printf("%s:%d enter PH::handleMessage()\n", __FILE__, __LINE__);
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     ERROR_CODE retVal = ERR_OK;
 
     switch (header.frameType)
     {
     case FRAME_TYPE_CONTROL:
     {
-        printf("%s:%d PH::handleMessage() case FRAME_TYPE_CONTROL\n"
-               , __FILE__, __LINE__);
+        LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_CONTROL");
+
         if (handleControlMessage(header, data) != ERR_OK)
         {
-            printf("%s:%d PH::handleMessage() handleControlMessage FAIL\n", __FILE__, __LINE__);
+            LOG4CPLUS_WARN(mLogger, "handleMessage() - handleControlMessage FAIL");
             retVal = ERR_FAIL;
         }
         break;
     }
     case FRAME_TYPE_SINGLE:
     {
-        printf("%s:%d PH::handleMessage() case FRAME_TYPE_SINGLE\n", __FILE__, __LINE__);
+        LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_SINGLE");
         if (mSessionStates.count(header.sessionID) )
         {
             if (mSessionStates[header.sessionID] == HANDSHAKE_DONE)
@@ -458,15 +457,14 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
             }
             else
             {
-                printf("%s:%d PH::handleMessage() case FRAME_TYPE_SINGLE but HANDSHAKE_NOT_DONE\n"
-                       , __FILE__, __LINE__);
+                LOG4CPLUS_WARN(mLogger
+                         , "handleMessage() - case FRAME_TYPE_SINGLE but HANDSHAKE_NOT_DONE");
                 retVal = ERR_FAIL;
             }
         }
         else
         {
-            printf("%s:%d PH::handleMessage() case FRAME_TYPE_SINGLE. unknown sessionID\n"
-                   , __FILE__, __LINE__);
+            LOG4CPLUS_WARN(mLogger, "handleMessage() - case FRAME_TYPE_SINGLE. unknown sessionID");
             retVal = ERR_FAIL;
         }
 
@@ -474,24 +472,21 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
     }
     case FRAME_TYPE_FIRST:
     {
-        printf("%s:%d PH::handleMessage() case FRAME_TYPE_FIRST\n"
-               , __FILE__, __LINE__);
-
+        LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_FIRST");
         if (mSessionStates.count(header.sessionID) )
         {
             if (mSessionStates[header.sessionID] == HANDSHAKE_DONE)
                 handleMultiFrameMessage(header, data);
             else
             {
-                printf("%s:%d PH::handleMessage() case FRAME_TYPE_FIRST but HANDSHAKE_NOT_DONE\n"
-                       , __FILE__, __LINE__);
+                LOG4CPLUS_WARN(mLogger
+                      , "handleMessage() - case FRAME_TYPE_FIRST but HANDSHAKE_NOT_DONE");
                 retVal = ERR_FAIL;
             }
         }
         else
         {
-            printf("%s:%d PH::handleMessage() case FRAME_TYPE_FIRST. unknown sessionID\n"
-                   , __FILE__, __LINE__);
+            LOG4CPLUS_WARN(mLogger, "handleMessage() - case FRAME_TYPE_FIRST. unknown sessionID");
             retVal = ERR_FAIL;
         }
 
@@ -499,23 +494,21 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
     }
     case FRAME_TYPE_CONSECUTIVE:
     {
-        printf("%s:%d PH::handleMessage() case FRAME_TYPE_CONSECUTIVE\n", __FILE__, __LINE__);
-
+        LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_CONSECUTIVE");
         if (mSessionStates.count(header.sessionID) )
         {
             if (mSessionStates[header.sessionID] == HANDSHAKE_DONE)
                 handleMultiFrameMessage(header, data);
             else
             {
-                printf("%s:%d PH::handleMessage() case FRAME_TYPE_CONSECUTIVE but HANDSHAKE_NOT_DONE\n"
-                       , __FILE__, __LINE__);
+                LOG4CPLUS_WARN(mLogger
+                      , "handleMessage() - case FRAME_TYPE_CONSECUTIVE but HANDSHAKE_NOT_DONE");
                 retVal = ERR_FAIL;
             }
         }
         else
         {
-            printf("%s:%d PH::handleMessage() case FRAME_TYPE_CONSECUTIVE. unknown sessionID\n"
-                   , __FILE__, __LINE__);
+            LOG4CPLUS_WARN(mLogger, "handleMessage() - case FRAME_TYPE_CONSECUTIVE. unknown sessionID");
             retVal = ERR_FAIL;
         }
 
@@ -523,7 +516,7 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
     }
     default:
     {
-        printf("%s:%d PH::handleMessage() case default!!!\n", __FILE__, __LINE__);
+        LOG4CPLUS_WARN(mLogger, "handleMessage() - case default!!!");
     }
     }
 
@@ -535,6 +528,7 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
 
 ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &header, UInt8 *data)
 {
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     ERROR_CODE retVal = ERR_OK;
 
     UInt8 currentSessionID = header.sessionID;
@@ -545,11 +539,10 @@ ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &hea
         {
         case HANDSHAKE_NOT_DONE:
         {
-            printf("%s:%d PH::handleControlMessage() case HANDSHAKE_NOT_DONE\n", __FILE__, __LINE__);
+            LOG4CPLUS_INFO(mLogger, "handleControlMessage() - case HANDSHAKE_NOT_DONE");
             if (header.frameData == FRAME_DATA_START_SESSION_ACK)
             {
-                printf("%s:%d PH::handleControlMessage() frameData == FRAME_DATA_START_SESSION_ACK\n"
-                       , __FILE__, __LINE__);
+                LOG4CPLUS_INFO(mLogger, "handleControlMessage() - case FRAME_DATA_START_SESSION_ACK");
                 mSessionStates[currentSessionID] = HANDSHAKE_DONE;
                 if (header.version == PROTOCOL_VERSION_2)
                     mHashCodes[currentSessionID] = header.messageID;
@@ -559,24 +552,21 @@ ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &hea
                     retVal = ERR_FAIL;
             }
             else if (header.frameData == FRAME_DATA_START_SESSION_NACK)
-            {
-                printf("%s:%d PH::handleControlMessage() session rejected\n", __FILE__, __LINE__);
-            }
+                LOG4CPLUS_INFO(mLogger, "handleControlMessage() - session rejected");
             else
             {
-                printf("%s:%d PH::handleControlMessage() case HANDSHAKE_NOT_DONE invalid frameData\n"
-                       , __FILE__, __LINE__);
+                LOG4CPLUS_WARN(mLogger
+                        , "handleControlMessage() - case HANDSHAKE_NOT_DONE invalid frameData");
             }
 
             break;
         }
         case HANDSHAKE_DONE:
         {
-            printf("%s:%d PH::handleControlMessage() case HANDSHAKE_DONE\n", __FILE__, __LINE__);
+            LOG4CPLUS_INFO(mLogger, "handleControlMessage() - case HANDSHAKE_DONE");
             if (header.frameData == FRAME_DATA_END_SESSION)
             {
-                printf("%s:%d PH::handleControlMessage() end session message\n"
-                       , __FILE__, __LINE__);
+                LOG4CPLUS_INFO(mLogger, "handleControlMessage() - FRAME_DATA_END_SESSION");
                 bool correctEndSession = false;
                 if (header.version == PROTOCOL_VERSION_2)
                 {
@@ -584,8 +574,7 @@ ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &hea
                         correctEndSession = true;
                     else
                     {
-                        printf("%s:%d PH::handleControlMessage() end session: incorrect hashCode\n"
-                               , __FILE__, __LINE__);
+                        LOG4CPLUS_WARN(mLogger, "handleControlMessage() - incorrect hashCode");
                         if (sendEndSessionNAck(header.sessionID) != ERR_OK)
                             retVal = ERR_FAIL;
                     }
@@ -608,8 +597,8 @@ ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &hea
             }
             else
             {
-                printf("%s:%d PH::handleControlMessage() case HANDSHAKE_DONE invalid frameData\n"
-                       , __FILE__, __LINE__);
+                LOG4CPLUS_WARN(mLogger
+                         , "handleControlMessage() - case HANDSHAKE_DONE invalid frameData");
             }
 
             break;
@@ -620,12 +609,10 @@ ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &hea
     }
     else
     {
-        printf("%s:%d PH::handleControlMessage() new sessionID\n", __FILE__, __LINE__);
+        LOG4CPLUS_INFO(mLogger, "handleControlMessage() - new sessionID");
         if (header.frameData == FRAME_DATA_START_SESSION)
         {
-            printf("%s:%d PH::handleControlMessage() frameData == FRAME_DATA_START_SESSION\n"
-                   , __FILE__, __LINE__);
-
+            LOG4CPLUS_INFO(mLogger, "handleControlMessage() - FRAME_DATA_START_SESSION");
             if (sendStartSessionAck(mSessionIdCounter) == ERR_OK)
             {
                 mSessionStates.insert(std::pair<UInt8, UInt8>(mSessionIdCounter, HANDSHAKE_DONE) );
@@ -649,27 +636,25 @@ ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &hea
 ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &header
                                                   , UInt8 *data)
 {
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     ERROR_CODE retVal = ERR_OK;
-    printf("%s:%d enter PH::handleMultiFrameMessage()\n", __FILE__, __LINE__);
 
     if (header.frameType == FRAME_TYPE_FIRST)
     {
-        printf("%s:%d PH::handleMultiFrameMessage() : FRAME_TYPE_FIRST\n", __FILE__, __LINE__);
+        LOG4CPLUS_INFO(mLogger, "handleMultiFrameMessage() - FRAME_TYPE_FIRST");
         Message *multiFrameMessage = new Message(header, data, true);
         mIncompleteMultiFrameMessages[header.sessionID] = multiFrameMessage;
     }
     else
     {
-        printf("%s:%d PH::handleMultiFrameMessage() : Consecutive frame\n"
-               , __FILE__, __LINE__);
+        LOG4CPLUS_INFO(mLogger, "handleMultiFrameMessage() - Consecutive frame");
 
         if (mIncompleteMultiFrameMessages.count(header.sessionID) )
         {
             if (mIncompleteMultiFrameMessages[header.sessionID]->addConsecutiveMessage(header, data)
                     == ERR_OK)
             {
-                printf("%s:%d PH::handleMultiFrameMessage() addConsecutiveMessage OK\n"
-                       , __FILE__, __LINE__);
+                LOG4CPLUS_INFO(mLogger, "handleMultiFrameMessage() - addConsecutiveMessage OK");
                 if (header.frameData == FRAME_DATA_LAST_FRAME)
                 {
                     mToUpperLevelMessagesQueues[header.sessionID]
@@ -687,15 +672,13 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
             }
             else
             {
-                printf("%s:%d PH::handleMultiFrameMessage() addConsecutiveMessage FAIL\n"
-                       , __FILE__, __LINE__);
+                LOG4CPLUS_WARN(mLogger, "handleMultiFrameMessage() - addConsecutiveMessage FAIL");
                 retVal = ERR_FAIL;
             }
         }
         else
         {
-            printf("%s:%d PH::handleMultiFrameMessage() no sessionID in mIncompleteMultiFrameMessages\n"
-                   , __FILE__, __LINE__);
+            LOG4CPLUS_WARN(mLogger, "handleMultiFrameMessage() - no sessionID in incomplete messages");
             retVal = ERR_FAIL;
         }
     }
@@ -709,12 +692,12 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
 
 void ProtocolHandler::onError(BLUETOOTH_ERROR errCode)
 {
-    printf("%s:%d PH::onError() bluetooth error %d \n", __FILE__, __LINE__, errCode);
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 }
 
 void ProtocolHandler::dataReceived()
 {
-    printf("%s:%d enter PH::dataReceived()\n", __FILE__, __LINE__);
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     UInt32 dataSize = 0;
 
     if (mBTAdapter)
@@ -728,7 +711,7 @@ void ProtocolHandler::dataReceived()
     if (mBTReader.read(header, data, dataSize) == ERR_OK)
         handleMessage(header, data);
     else
-        printf("%s:%d PH::dataReceived() error reading\n", __FILE__, __LINE__);
+        LOG4CPLUS_WARN(mLogger, "dataReceived() - error reading");
 }
 
 } //namespace AxisCore

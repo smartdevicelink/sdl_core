@@ -1,9 +1,12 @@
 #include <memory.h>
 
 #include "Message.hpp"
+#include "Logger.hpp"
 
 namespace AxisCore
 {
+
+Logger Message::mLogger = Logger::getInstance(LOG4CPLUS_TEXT("AxisCore.ProtocolHandler") );
 
 Message::Message(const ProtocolPacketHeader &header,
                  UInt8 *data,

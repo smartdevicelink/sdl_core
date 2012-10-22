@@ -8,6 +8,7 @@
 #include "BluetoothReader.hpp"
 #include "BluetoothWriter.hpp"
 #include "transport/bt/IBluetoothHandler.hpp"
+#include "Logger.hpp"
 
 namespace Bluetooth
 {
@@ -123,6 +124,7 @@ private:
     Bluetooth::IBluetoothAPI *mBTAdapter;
     UInt8 mProtocolVersion;
     UInt8 mSessionIdCounter;
+    static Logger mLogger;
 };
 
 } //namespace AxisCore
