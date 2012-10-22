@@ -10,6 +10,7 @@ include_directories(./include
 
 set (SOURCES ./src/IDeviceAdapter.cpp
              ./src/ITransportManager.cpp
+             ./src/ITransportManagerListener.cpp
              ./src/CTransportManager.cpp)
 
 add_library(${PROJECT} ${SOURCES})
