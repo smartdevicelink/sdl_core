@@ -277,23 +277,34 @@ ERROR_CODE ProtocolHandler::sendData(const UInt8 sessionID,
     printf("%s:%d enter PH::sendData()\n", __FILE__, __LINE__);
     ERROR_CODE retVal = ERR_OK;
 
-    UInt32 maxDataSize = 0;
-    if (mProtocolVersion == PROTOCOL_VERSION_1)
-        maxDataSize = MAXIMUM_FRAME_SIZE - PROTOCOL_HEADER_V1_SIZE;
-    else if (mProtocolVersion == PROTOCOL_VERSION_2)
-        maxDataSize = MAXIMUM_FRAME_SIZE - PROTOCOL_HEADER_V2_SIZE;
-
-    if (dataSize <= maxDataSize)
+    if (mSessionStates.count(sessionID) )
     {
-        if (sendSingleFrameMessage(sessionID, servType, dataSize, data, compress) != ERR_OK)
+        if (mSessionStates[sessionID] != HANDSHAKE_DONE)
             retVal = ERR_FAIL;
     }
     else
+        retVal = ERR_FAIL;
+
+    if (retVal != ERR_FAIL)
     {
-        if (sendMultiFrameMessage(sessionID, servType, dataSize, data, compress, maxDataSize)
-                != ERR_OK)
+        UInt32 maxDataSize = 0;
+        if (mProtocolVersion == PROTOCOL_VERSION_1)
+            maxDataSize = MAXIMUM_FRAME_SIZE - PROTOCOL_HEADER_V1_SIZE;
+        else if (mProtocolVersion == PROTOCOL_VERSION_2)
+            maxDataSize = MAXIMUM_FRAME_SIZE - PROTOCOL_HEADER_V2_SIZE;
+
+        if (dataSize <= maxDataSize)
         {
-            retVal = ERR_FAIL;
+            if (sendSingleFrameMessage(sessionID, servType, dataSize, data, compress) != ERR_OK)
+                retVal = ERR_FAIL;
+        }
+        else
+        {
+            if (sendMultiFrameMessage(sessionID, servType, dataSize, data, compress, maxDataSize)
+                    != ERR_OK)
+            {
+                retVal = ERR_FAIL;
+            }
         }
     }
 
@@ -346,7 +357,7 @@ ERROR_CODE ProtocolHandler::receiveData(const UInt8 sessionID,
         }
     }
 
-    if (retVal)
+    if (retVal == ERR_OK)
         printf("%s:%d PH::receiveData() returns OK\n", __FILE__, __LINE__);
     else
         printf("%s:%d PH::receiveData() returns FAIL\n", __FILE__, __LINE__);
@@ -439,7 +450,9 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
                 mToUpperLevelMessagesQueues[header.sessionID].push(message);
 
                 if (mProtocolObserver)
-                    mProtocolObserver->dataReceivedCallback(header.sessionID, 0, header.dataSize);
+                    mProtocolObserver->dataReceivedCallback(header.sessionID,
+                                                            header.messageID,
+                                                            header.dataSize);
                 else
                     retVal = ERR_FAIL;
             }
@@ -665,7 +678,7 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
 
                     if (mProtocolObserver)
                         mProtocolObserver->dataReceivedCallback(header.sessionID
-                                  , 0
+                                  , header.messageID
                                   , mToUpperLevelMessagesQueues[header.sessionID].front()
                                                                 ->getTotalDataBytes() );
                     else

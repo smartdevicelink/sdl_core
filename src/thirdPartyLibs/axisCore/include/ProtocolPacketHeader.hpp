@@ -38,7 +38,7 @@ const UInt8 FRAME_DATA_END_SESSION_NACK = 0x05;
 
 const UInt8 FRAME_DATA_MAX_VALUE = 0xFF;
 
-const UInt32 MAXIMUM_FRAME_SIZE = 500;
+const UInt32 MAXIMUM_FRAME_SIZE = 200;
 
 /**
  * If FRAME_TYPE_CONSECUTIVE :
@@ -82,7 +82,6 @@ struct ProtocolPacketHeader
                              messageID(_messageID)
     { }
 
-    UInt32 fieldsToValidate;
     UInt8 version;
     bool compress;
     UInt8 frameType;

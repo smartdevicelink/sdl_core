@@ -40,8 +40,8 @@ public:
             str.append("_");
         }
 
-        //msgGen->generateMultipleMessages(2, 0x07, 0, str, 5);
-        msgGen->generateSingleMessage(2, 0x07, 1, str);
+        msgGen->generateMultipleMessages(2, 0x07, 1, str, 5);
+        //msgGen->generateSingleMessage(2, 0x07, 1, str);
 
         delete msgGen;
     }
@@ -73,7 +73,7 @@ public:
         std::cout << "RECEIVED DATA PAYLOAD: " << std::string((char*)data, dataSize) <<  "\n SIZE : "
                   << std::dec << dataSize << std::endl;
 
-        mHandler->sendData(0, 0x07, dataSize, data, false);
+        mHandler->sendData(1, 0x07, dataSize, data, false);
 
         delete [] data;
     }

@@ -134,7 +134,8 @@ void CMessage::generateSingleMessage(UInt8 protocolVersion,
 
    memcpy(sPacketData + offset, (void*)const_cast<char*>(payload.c_str()), sDataSize);
 
-   std::cout << "SINGLE MESSAGE GENERATED: " << std::string((char*)sPacketData, sDataSize + offset) <<  std:: endl;
+   std::cout << "SINGLE MESSAGE GENERATED: "
+             << std::string((char*)(sPacketData + offset), sDataSize) <<  std:: endl;
 
    blobQueue.push(Blob((UInt8*)sPacketData, offset + sDataSize, blobQueue.size()));
 

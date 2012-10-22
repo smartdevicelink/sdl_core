@@ -57,7 +57,7 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, const UInt
 
     if (data)
     {
-        if ( (offset + header.dataSize) < MAXIMUM_FRAME_SIZE)
+        if ( (offset + header.dataSize) <= MAXIMUM_FRAME_SIZE)
             memcpy(mData + offset, data, header.dataSize);
         else
         {
