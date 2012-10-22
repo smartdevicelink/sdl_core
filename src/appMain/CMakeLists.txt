@@ -9,6 +9,7 @@ set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 link_directories(../thirdPartyLibs/jsoncpp
                  ../components/JSONHandler/bin
                  ../components/AppMgr/bin
+                 ../components/TransportManager/bin
                  ../thirdPartyLibs/axisCore/bin
                  ../thirdPartyLibs/jsoncpp/bin
                  ../thirdPartyLibs/MessageBroker/bin
@@ -18,6 +19,7 @@ link_directories(../thirdPartyLibs/jsoncpp
 set(LIBRARIES
         appManager
         jsonHandler
+        TransportManager
         ProtocolHandler
         messagebrokerclient
         messagebrokerserver
@@ -37,6 +39,7 @@ include_directories (./
                      ../thirdPartyLibs/jsoncpp/include/
                      ../components/JSONHandler/include
                      ../components/AppMgr/include
+                     ../components/TransportManager/include
                      ../thirdPartyLibs/MessageBroker/include
                      ../thirdPartyLibs/logger/include
                      ../thirdPartyLibs/logger/log4cplus-1.0.4/include
