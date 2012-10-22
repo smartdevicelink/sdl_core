@@ -1,6 +1,6 @@
 
 PKGNAME     :=log4cplus
-PKGVER      :=1.0.4
+PKGVER      :=1.1.0
 
 SOURCE_DIR  :=$(PKGNAME)-$(PKGVER)
 INSTALL_DIR :=  $(PWD)/bin
@@ -21,7 +21,7 @@ release: all
 all: install
 
 $(SOURCE_DIR)/Makefile:
-	cd $(SOURCE_DIR); automake --add-missing; ./configure --prefix=$(INSTALL_DIR) --enable-static
+	cd $(SOURCE_DIR); automake --add-missing; ./configure --prefix=$(INSTALL_DIR) --enable-static --enable-shared
 
 # Target will build package and create file 'build' to remember the time of build -
 # this prevents the build of package every time we run make
