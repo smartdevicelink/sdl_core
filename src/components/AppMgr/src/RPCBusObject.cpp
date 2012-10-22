@@ -10,15 +10,22 @@
 namespace NsAppManager
 {
 	
-RPCBusObject::RPCBusObject( unsigned int protocolVersion, MessageType messageType, const std::string& method )
+RPCBusObject::RPCBusObject( unsigned int protocolVersion, RPCBusObject::MessageType messageType, const std::string& method )
 	:mProtocolVersion( protocolVersion )
 	,mMessageType( messageType )
 	,mCorrelationID( 0 )
 	,mFunctionName( method )
 	,mFunctionID( 0 )
 {
-	// TODO Auto-generated constructor stub
+}
 
+RPCBusObject::RPCBusObject( )
+:mProtocolVersion( 0 )
+,mMessageType( RPCBusObject::UNDEFINED )
+,mCorrelationID( 0 )
+,mFunctionName( "" )
+,mFunctionID( 0 )
+{
 }
 
 RPCBusObject::RPCBusObject( const RPCBusObject& message )
@@ -59,7 +66,17 @@ unsigned int RPCBusObject::getFunctionID() const
 	return mFunctionID;
 }
 
-void RPCBusObject::setFunctionName( const std::string & functionName )
+void RPCBusObject::setProtocolVersion( unsigned int version )
+{
+	mProtocolVersion = version;
+}
+
+void RPCBusObject::setMessageType( MessageType msgType )
+{
+	mMessageType = msgType;
+}
+
+void RPCBusObject::setMethodName( const std::string & functionName )
 {
 	mFunctionName = functionName;
 }

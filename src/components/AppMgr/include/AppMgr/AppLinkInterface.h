@@ -29,6 +29,7 @@ public:
 	~AppLinkInterface( );
 
 	void sendRPCBusObject(const RPCBusObject* rpcObject);
+	void receiveRPCBusObject(const RPCBusObject* rpcObject);
 
 	void executeThreads();
 	void terminateThreads();
@@ -68,6 +69,9 @@ public:
 private:
 	AppLinkInterface( const std::string& address, uint16_t port, const std::string& name );
 
+	RPCBusObject* createObjectFromJson(const std::string& method, const Json::Value& root);
+
+	void enqueueRPCBusObject( RPCBusObject * object );
 	void sendMessage();
 	
 	void getButtonCapabilities();
