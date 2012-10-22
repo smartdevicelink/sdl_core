@@ -10,7 +10,7 @@ namespace AppLink
         /**
          * @brief Handle to device.
          **/
-        typedef int DeviceHandle;
+        typedef int tDeviceHandle;
 
         /**
          * @brief Enumeration for device type.
@@ -41,7 +41,7 @@ namespace AppLink
             /**
              * @brief Device handle.
              **/
-            DeviceHandle mDeviceHandle;
+            tDeviceHandle mDeviceHandle;
 
             /**
              * @brief Device type.

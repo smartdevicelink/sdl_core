@@ -15,7 +15,7 @@ namespace AppLink
         /**
          * @brief Connection handle.
          **/
-        typedef int ConnectionHandle;
+        typedef int tConnectionHandle;
 
         /**
          * @brief Interface of transport manager.
@@ -23,6 +23,11 @@ namespace AppLink
         class ITransportManager
         {
         public:
+            /**
+             * @brief Destructor.
+             **/
+            virtual ~ITransportManager(void);
+
             /**
              * @brief Create trasport manager.
              *
@@ -63,13 +68,13 @@ namespace AppLink
             /**
              * @brief Send frame.
              *
-             * @param Handle Connection handle.
+             * @param ConnectionHandle Connection handle.
              * @param Data Frame payload data.
              *
              * @return Frame sequence number. May be used to identify
              *         this frame when send result callback is received.
              **/
-            virtual int sendFrame(ConnectionHandle Handle, const Blob & Data) = 0;
+            virtual int sendFrame(tConnectionHandle ConnectionHandle, const Blob & Data) = 0;
         };
     }
 }
