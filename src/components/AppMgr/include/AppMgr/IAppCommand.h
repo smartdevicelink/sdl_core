@@ -9,14 +9,13 @@ namespace NsAppManager
 class IAppCommand
 {
 public:
-	IAppCommand(const RegistryItem& receiver);
 	IAppCommand(const RegistryItem& receiver, const void* params);
 	virtual ~IAppCommand();
 
 	virtual void execute()=0;
 	
 protected:
-	
+	IAppCommand(const RegistryItem& receiver);
 	const RegistryItem& mReceiver;
 	const void* mParams;
 };

@@ -21,7 +21,6 @@ int withBluetooth();
 
 int main( int argc, char* argv[] ) {
     
-    std::cout.flush();
     char * fileName = "/home/dev/Projects/Ford/source/workspace/jsonSample/connection_log_json_only" ;    
     if ( argc > 1 )
     {
@@ -42,6 +41,9 @@ int main( int argc, char* argv[] ) {
     testJSONHandler.jsonHandler = jsonHandler;
     /*AxisCore::ProtocolHandler * protocolHandler = new AxisCore::ProtocolHandler( jsonHandler, 0 );
     jsonHandler -> setProtocolHandler( protocolHandler );*/
+    char * secondname = "/home/dev/Projects/Ford/source/workspace/jsonSample/jsonrpc2_sample";
+    char * rpc2Content = readJsonContent( secondname );
+    testJSONHandler.RPC2( rpc2Content );
     
     while ( nextMessagePos != std::string::npos ) {
 
@@ -138,102 +140,4 @@ parseJson ( const std::string & jsonContent ) {
     std::cout << root_to_print;
     return 0;
 }
-
-
-int withBluetooth()
-{
-    unsigned int cls = 0x280404;
-    int timeout = 1000;
-    uint8_t channel = 3;
-
-    /*** Components instance section***/
-    /**********************************/
-    NsTransportLayer::CBTAdapter btadapter;
-    JSONHandler jsonHandler;
-    AxisCore::ProtocolHandler protocolHandler =  AxisCore::ProtocolHandler(&jsonHandler, &btadapter);
-    jsonHandler.setProtocolHandler(&protocolHandler);
-    /**********************************/
-
-    protocolHandler.dataReceived();
-
-    int rfcommsock;
-    int scosock;
-
-    /*** Start BT Devices Discovery***/
-
-    std::vector<NsTransportLayer::CBTDevice> devicesFound;
-    btadapter.scanDevices(devicesFound);
-    if (0 < devicesFound.size())
-    {
-        printf("Found %d devices\n", devicesFound.size());
-        printf("Please make your choice:\n");
-    } else
-    {
-        printf("No any devices found!\n");
-        //return EXIT_SUCCESS;
-    }
-
-    std::vector<NsTransportLayer::CBTDevice>::iterator it;
-    int i = 0;
-    for(it = devicesFound.begin(); it != devicesFound.end(); it++)
-    {
-        NsTransportLayer::CBTDevice device = *it;
-        printf("%d: %s %s \n", i++, device.getDeviceAddr().c_str(), device.getDeviceName().c_str());
-    }
-
-    std::cin >> i;
-    std::string discoveryDeviceAddr = "";
-    if (i < devicesFound.size())
-    {
-        discoveryDeviceAddr = devicesFound[i].getDeviceAddr();
-    } else
-    {
-        printf("Bad choice!\n");
-        return EXIT_SUCCESS;
-    }
-
-    /*** Start SDP Discovery on device***/
-
-    std::vector<int> portsRFCOMMFound;
-    btadapter.startSDPDiscoveryOnDevice(discoveryDeviceAddr.c_str(), portsRFCOMMFound);
-    if (0 < portsRFCOMMFound.size())
-    {
-        printf("Found %d ports on %s device\n", portsRFCOMMFound.size(), discoveryDeviceAddr.c_str());
-        printf("Please make you choice:\n");
-    } else
-    {
-        printf("No any ports discovered!\n");
-        return EXIT_SUCCESS;
-    }
-
-    std::vector<int>::iterator itr;
-    int j = 0;
-    for(itr = portsRFCOMMFound.begin(); itr != portsRFCOMMFound.end(); itr++)
-    {
-        printf("%d: %d \n", j++, *itr);
-    }
-
-    std::cin >> j;
-    int portRFCOMM = 0;
-    if (j < portsRFCOMMFound.size())
-    {
-        portRFCOMM = portsRFCOMMFound[j];
-    } else
-    {
-        printf("Bad choice!\n");
-        return EXIT_SUCCESS;
-    }
-
-    /*** Start RFCOMM connection***/
-
-    int sockID = btadapter.startRFCOMMConnection(discoveryDeviceAddr.c_str(), portRFCOMM);
-
-    if (0 < sockID)
-    {
-        btadapter.processRFCOMM(sockID);
-    }
-
-}
-
-
 

@@ -12,6 +12,8 @@ include_directories (./include/
 					 ../../thirdPartyLibs/axisCore/
 					 ../../thirdPartyLibs/axisCore/include/
 					 ../../thirdPartyLibs/axisCore/src/
+					 ../../thirdPartyLibs/logger/include/
+					 ../../thirdPartyLibs/logger/log4cplus-1.0.4/include/
 					)
 
 set (SOURCES

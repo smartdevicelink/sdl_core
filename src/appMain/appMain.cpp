@@ -27,6 +27,8 @@
 
 #include "system.h"
 
+#include "Logger.hpp"
+
 /**
  * \brief Entry point of the program.
  * \param argc number of argument
@@ -37,6 +39,10 @@ int main(int argc, char** argv)
 {
     /*** Components instance section***/
     /**********************************/
+    Logger logger = Logger::getInstance(LOG4CPLUS_TEXT("appMain"));
+    PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
+    LOG4CPLUS_INFO(logger, " Application started!");
+
     NsTransportLayer::CBTAdapter btadapter;
 
     JSONHandler jsonHandler;
@@ -54,20 +60,20 @@ int main(int argc, char** argv)
     NsMessageBroker::CMessageBroker *pMessageBroker = NsMessageBroker::CMessageBroker::getInstance();
     if (!pMessageBroker)
     {
-        printf("Wrong pMessageBroker pointer!\n");
+        LOG4CPLUS_INFO(logger, " Wrong pMessageBroker pointer!");
         return EXIT_SUCCESS;
     }
 
     NsMessageBroker::TcpServer *pJSONRPC20Server = new NsMessageBroker::TcpServer(std::string("127.0.0.1"), 8087, pMessageBroker);
     if (!pJSONRPC20Server)
     {
-        printf("Wrong pJSONRPC20Server pointer!\n");
+        LOG4CPLUS_INFO(logger, " Wrong pJSONRPC20Server pointer!");
         return EXIT_SUCCESS;
     }
     pMessageBroker->startMessageBroker(pJSONRPC20Server);
     if(!networking::init())
     {
-      printf("Networking initialization failed!\n");
+      LOG4CPLUS_INFO(logger, " Networking initialization failed!");
     }
 
     if(!pJSONRPC20Server->Bind())
@@ -85,7 +91,7 @@ int main(int argc, char** argv)
       exit(EXIT_FAILURE);
     } else
     {
-      printf("Listen successful!\n");
+      LOG4CPLUS_INFO(logger, " Listen successful!");
     }
     printf("Start CMessageBroker thread!\n");
     System::Thread th1(new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(*pMessageBroker, &NsMessageBroker::CMessageBroker::MethodForThread, NULL));

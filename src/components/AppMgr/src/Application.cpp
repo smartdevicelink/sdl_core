@@ -19,6 +19,19 @@ Application::Application( const std::string& name )
 {
 }
 
+Application::Application( const Application& app )
+	:IApplication(app.getName())
+	,mNgnMediaScreenAppName(app.getNgnMediaScreenAppName())
+	,m_bUsesVehicleData(app.getUsesVehicleData())
+	,m_bIsMediaApplication(app.getIsMediaApplication())
+	,mAutoActivateID(app.getAutoActivateID())
+	,mLanguageDesired(app.getLanguageDesired())
+	,mHMIStatusLevel(app.getApplicationHMIStatusLevel())
+	,mSyncMsgVersion(app.getSyncMsgVersion())
+{
+	mVrSynonyms = app.getVrSynonyms();
+}
+
 Application::~Application( )
 {
 	// TODO Auto-generated destructor stub
@@ -84,37 +97,37 @@ void Application::setSyncMsgVersion(SyncMsgVersion value)
 	mSyncMsgVersion = value;
 }
 
-std::string Application::getNgnMediaScreenAppName( )
+const std::string& Application::getNgnMediaScreenAppName( ) const
 {
 	return mNgnMediaScreenAppName;
 }
 
-std::vector<std::string> Application::getVrSynonyms( )
+const std::vector<std::string>& Application::getVrSynonyms( ) const
 {
 	return mVrSynonyms;
 }
 
-bool Application::getUsesVehicleData( )
+bool Application::getUsesVehicleData( ) const
 {
 	return m_bUsesVehicleData;
 }
 
-bool Application::getIsMediaApplication( )
+bool Application::getIsMediaApplication( ) const
 {
 	return m_bIsMediaApplication;
 }
 
-Language Application::getLanguageDesired( )
+const Language& Application::getLanguageDesired( ) const
 {
 	return mLanguageDesired;
 }
 
-std::string Application::getAutoActivateID( )
+const std::string& Application::getAutoActivateID( ) const
 {
 	return mAutoActivateID;
 }
 
-SyncMsgVersion Application::getSyncMsgVersion( )
+const SyncMsgVersion& Application::getSyncMsgVersion( ) const
 {
 	return mSyncMsgVersion;
 }

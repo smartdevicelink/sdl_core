@@ -6,5 +6,9 @@ CMakeFiles
 Makefile
 CMakeCache.txt
 install_manifest.txt
+*.o
+*.lo
+.libs
+*.la
 *.kdev4
 

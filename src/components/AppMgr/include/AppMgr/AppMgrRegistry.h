@@ -20,20 +20,23 @@ namespace NsAppManager
 class AppMgrRegistry
 {
 public:
+	typedef std::map<std::string, RegistryItem*> Items;
+	typedef std::pair<std::string, RegistryItem*> Item;
+	
 	~AppMgrRegistry( );
 
 	static AppMgrRegistry& getInstance( );
 
-	const RegistryItem& registerApplication( const Application* app );
-	void unregisterApplication( RegistryItem& item  );
+	const RegistryItem* registerApplication( const Application* app );
+	void unregisterApplication( RegistryItem* item  );
 
-	const RegistryItem& getItem( const Application* app ) const;
-	const RegistryItem& getItem( const std::string& app ) const;
+	const RegistryItem* getItem( const Application* app ) const;
+	const RegistryItem* getItem( const std::string& app ) const;
 
 private:
 	AppMgrRegistry( );
 
-	std::map<std::string, RegistryItem> mRegistryItems;
+	Items mRegistryItems;
 };
 
 }; // namespace NsAppManager

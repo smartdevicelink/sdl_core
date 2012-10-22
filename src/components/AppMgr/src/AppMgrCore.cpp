@@ -26,6 +26,7 @@
 #include "AppMgr/AppLinkInterface.h"
 #include <sys/socket.h>
 #include "AppMgr/AppMgrRegistry.h"
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
@@ -42,7 +43,9 @@ AppMgrCore::AppMgrCore()
 	,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsIncoming, NULL))
 	,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsOutgoing, NULL))
 	,m_bTerminate(false)
+	,mLogger( log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore")) )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
 }
 
 AppMgrCore::~AppMgrCore()
@@ -58,27 +61,36 @@ AppMgrCore::~AppMgrCore()
 	
 	if(!mThreadRPCBusObjectsOutgoing.Join())
 		mThreadRPCBusObjectsOutgoing.Stop();
+
+	LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore destructed!");
 }
 
 void AppMgrCore::pushMobileRPCMessage( MobileRPCMessage * message )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Pushing mobile RPC message...");
 	mMtxRPCAppLinkObjectsIncoming.Lock();
 	
 	mQueueRPCAppLinkObjectsIncoming.push((RPCAppLinkObject *)message);
 	
 	mMtxRPCAppLinkObjectsIncoming.Unlock();
+	LOG4CPLUS_INFO_EXT(mLogger, " Pushed mobile RPC message");
 }
 
 void AppMgrCore::executeThreads()
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Threads are being started!");
 	mThreadRPCAppLinkObjectsIncoming.Start(false);
 	mThreadRPCAppLinkObjectsOutgoing.Start(false);
 	mThreadRPCBusObjectsIncoming.Start(false);
 	mThreadRPCBusObjectsOutgoing.Start(false);
+
+	LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
 	
 	while(!m_bTerminate)
 	{
 	}
+
+	LOG4CPLUS_INFO_EXT(mLogger, " Threads are being stopped!");
 }
 
 void AppMgrCore::terminateThreads()
@@ -99,7 +111,7 @@ void* AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
 			mMtxRPCAppLinkObjectsIncoming.Unlock();
 			if(!msg)
 			{
-				//to log an error: invalid object
+				LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
 				continue;
 			}
 
@@ -110,19 +122,22 @@ void* AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
 
 void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message "<< msg->getFunctionName() <<" has been received!");
 	switch(msg->getMessageType())
 	{
 		case MobileRPCMessage::REQUEST:
 		{
 			if(0 == msg->getFunctionName().compare("RegisterAppInterface"))
 			{
+				LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
 				RegisterAppInterface * object = (RegisterAppInterface*)msg;
-				const RegistryItem& registeredApp =  registerApplication( object );
+				const RegistryItem* registeredApp =  registerApplication( object );
 				MobileRPCMessage* response = queryInfoForRegistration( registeredApp );
 				sendMobileRPCResponse( response );
 			}
 			else if(0 == msg->getFunctionName().compare("SubscribeButton"))
 			{
+				LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
 			//	SubscribeButton * object = (SubscribeButton*)msg;
 			//	registerApplication( object );
 				sendMobileRPCResponse( msg );
@@ -132,12 +147,13 @@ void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 		case MobileRPCMessage::RESPONSE:
 		case MobileRPCMessage::NOTIFICATION:
 		{
+			LOG4CPLUS_INFO_EXT(mLogger, " A "<< msg->getFunctionName() << " response or notification has been invoked");
 			mJSONHandler->sendRPCMessage(msg);
 			break;
 		}
 		case MobileRPCMessage::UNDEFINED:
 		default:
-			//unknown RPC message - notifying about an error
+			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getFunctionName() <<" has been received!");
 			break;
 	}
 }
@@ -146,29 +162,39 @@ void AppMgrCore::handleBusRPCMessage( RPCBusObject* msg )
 {
 	//right now handles only outgoing messages
 	//assumes that the message in param is outgoing
+	LOG4CPLUS_INFO_EXT(mLogger, " A " << msg->getMethodName() << " bus message request has been invoked");
 	AppLinkInterface::getInstance().sendRPCBusObject( msg );
 }
 
 void AppMgrCore::enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getFunctionName() << " outgoing mobile RPC message send has been invoked");
+	
 	mMtxRPCAppLinkObjectsOutgoing.Lock();
 	
 	mQueueRPCAppLinkObjectsOutgoing.push((RPCAppLinkObject *)message);
 	
 	mMtxRPCAppLinkObjectsOutgoing.Unlock();
+	
+	LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getFunctionName() << " outgoing mobile RPC message has been sent");
 }
 
 void AppMgrCore::enqueueOutgoingBusRPCMessage( RPCBusObject * message )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getMethodName() << " outgoing mobile RPC message send has been invoked");
+	
 	mMtxRPCBusObjectsOutgoing.Lock();
 	
 	mQueueRPCBusObjectsOutgoing.push(message);
 	
 	mMtxRPCBusObjectsOutgoing.Unlock();
+
+	LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getMethodName() << " outgoing mobile RPC message has been sent");
 }
 
-const RegistryItem& AppMgrCore::registerApplication( RegisterAppInterface* object )
+const RegistryItem* AppMgrCore::registerApplication( RegisterAppInterface* object )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << object->getAppName() << "!");
 	const std::string& appName = object->getAppName();
 	const std::string& ngnMediaScreenAppName = object->getNgnMediaScreenAppName();
 	const std::vector<std::string>& vrSynonyms = object->getVrSynonyms();
@@ -192,18 +218,20 @@ const RegistryItem& AppMgrCore::registerApplication( RegisterAppInterface* objec
 	return AppMgrRegistry::getInstance().registerApplication( application );
 }
 
-MobileRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem& registryItem )
+MobileRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem* registryItem )
 {
-	
+	LOG4CPLUS_INFO_EXT(mLogger, " Querying info for registration of an application " << registryItem->getApplication()->getName() << "!");
 }
 
 void AppMgrCore::registerApplicationOnHMI( const std::string& name )
 {
-	
+//	RPCBusObject* object = new RPCBusObject( 1, RPCBusObject::REQUEST, "AppLinkCore.OnAppRegister" );
+//	object->setParameter("name", name);
 }
 
 void AppMgrCore::sendMobileRPCResponse( MobileRPCMessage* msg )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Sending mobile RPC response to "<< msg->getFunctionName() <<"!");
 	MobileRPCFactory factory;
 	RegisterAppInterfaceResponse* response = factory.createRegisterAppInterfaceResponse( *msg );
 	enqueueOutgoingMobileRPCMessage( response );
@@ -226,7 +254,7 @@ void* AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing( void* )
 			mMtxRPCAppLinkObjectsOutgoing.Unlock();
 			if(!msg)
 			{
-				//to log an error: invalid object
+				LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
 				continue;
 			}
 			
@@ -248,7 +276,7 @@ void* AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
 			mMtxRPCBusObjectsOutgoing.Unlock();
 			if(!msg)
 			{
-				//to log an error: invalid object
+				LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
 				continue;
 			}
 			

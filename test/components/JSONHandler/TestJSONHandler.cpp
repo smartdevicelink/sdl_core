@@ -5,12 +5,24 @@
 #include <cstdlib>
 #include <string.h>
 #include "JSONHandler/OnHMIStatus.h"
+#include "JSONHandler/RPC2Command.h"
+#include "JSONHandler/OnButtonEvent.h"
+#include "JSONHandler/OnButtonEventMarshaller.h"
+#include "JSONHandler/RPC2Marshaller.h"
 
 void TestJSONHandler::secondRelease( const std::string & jsonString )
 {    
     jsonHandler -> mIncomingMessages.push( jsonString );
     OnHMIStatus * message = jsonHandler->getFactory() -> createOnHMIStatus();
     jsonHandler -> sendRPCMessage( message );
+}
+
+void TestJSONHandler::RPC2( const std::string & jsonString )
+{    
+    using namespace RPC2Communication;
+    RPC2Command * command = RPC2Marshaller::fromString(jsonString);
+    std::cout << "parsed " << command << command -> getMethod() << std::endl;
+    std::cout << "back " << RPC2Marshaller::toString( command );
 }
 
 void TestJSONHandler::firstRelease( const std::string & jsonString )
@@ -31,7 +43,7 @@ void TestJSONHandler::firstRelease( const std::string & jsonString )
     std::string params_to_print = writer.write( params );
     std::cout << "serialized params for RegisterAppInterface: \n" << params_to_print << std::endl;
 
-    RegisterAppInterfaceResponse response = jsonHandler -> getFactory() -> createRegisterAppInterfaceResponse( *message );
+    /*RegisterAppInterfaceResponse response = jsonHandler -> getFactory() -> createRegisterAppInterfaceResponse( *message );
     Json::Value parameters = jsonHandler -> getFactory() -> serializeRegisterAppInterfaceResponse( response );
 
     Json::Value root = jsonHandler -> createJSONFromObject( response );
@@ -46,7 +58,7 @@ void TestJSONHandler::firstRelease( const std::string & jsonString )
     pData = new UInt8[responseString.length() + 1];
     memcpy (pData, responseString.c_str(), responseString.length() + 1);
     std::cout << "Register response: " << responseString << std::endl;
-    std::cout << "UInt8: " << pData << std::endl;
+    std::cout << "UInt8: " << pData << std::endl;*/
 
     delete message;
 }

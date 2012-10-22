@@ -1,13 +1,20 @@
 #ifndef RPCS2_NOTIFICATION_CLASS
 #define RPCS2_NOTIFICATION_CLASS value
 
-class RPC2Notification
-{
-public:
-    RPC2Notification( const std::string & methodName );
-    ~RPC2Notification();
+#include "JSONHandler/RPC2Command.h"
 
-    /* data */
-};
+namespace RPC2Communication
+{    
+    class RPC2Notification : public RPC2Command
+    {
+    public:
+        RPC2Notification( );
+        RPC2Notification( int method );
+        ~RPC2Notification();
+
+        /* data */
+    };
+
+}
 
 #endif

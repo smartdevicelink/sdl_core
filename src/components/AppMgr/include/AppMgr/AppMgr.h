@@ -6,6 +6,11 @@
 
 class JSONHandler;
 
+namespace log4cplus
+{
+	class Logger;
+};
+
 namespace NsAppManager
 {
 
@@ -70,6 +75,7 @@ private:
 	AppFactory& mAppFactory;
 
 	JSONHandler* mJSONHandler;
+	const log4cplus::Logger& mLogger;
 };
 
 }; // namespace NsAppManager

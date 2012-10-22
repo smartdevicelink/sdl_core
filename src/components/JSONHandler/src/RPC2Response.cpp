@@ -1,8 +1,14 @@
 #include "JSONHandler/RPC2Response.h"
 #include <sstream>
 
-RPC2Response::RPC2Response( const std::string & methodName )
-:RPC2Command( methodName )
+using namespace RPC2Communication;
+
+RPC2Response::RPC2Response( )
+:RPC2Command( )
+{}
+
+RPC2Response::RPC2Response( int method )
+:RPC2Command( method )
 {}
 
 RPC2Response::~RPC2Response()

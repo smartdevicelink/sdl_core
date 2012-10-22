@@ -15,21 +15,40 @@ RegistryItem::RegistryItem( const Application* app )
 {
 }
 
-RegistryItem::~RegistryItem( )
+RegistryItem::RegistryItem( const RegistryItem& item )
+: mApplication(item.getApplication())
 {
-	// TODO Auto-generated destructor stub
 }
 
-const AppPolicy& RegistryItem::registerPolicy( const std::string& hash )
+RegistryItem::~RegistryItem( )
 {
-	AppPolicy policy(hash);
+	if(mApplication)
+	{
+		delete mApplication;
+		mApplication = 0;
+	}
+
+	for(Policies::iterator it = mAppPolicies.begin(); it != mAppPolicies.end(); it++)
+	{
+		if( *it )
+		{
+			delete *it;
+		}
+	}
+	
+	mAppPolicies.clear();
+}
+
+const AppPolicy* RegistryItem::registerPolicy( const std::string& hash )
+{
+	AppPolicy* policy = new AppPolicy(hash);
 	mAppPolicies.insert(policy);
 	return *mAppPolicies.find(policy);
 }
 
-void RegistryItem::unregisterPolicy( AppPolicy& policy )
+void RegistryItem::unregisterPolicy( AppPolicy* policy )
 {
-	std::set<AppPolicy>::iterator policyIterator = mAppPolicies.find(policy);
+	Policies::iterator policyIterator = mAppPolicies.find(policy);
 	mAppPolicies.erase(policyIterator);
 }
 
@@ -43,16 +62,16 @@ bool RegistryItem::operator <(const RegistryItem& item2 ) const
 	return this->getApplication()->getName() < item2.getApplication()->getName();
 }
 
-std::set< AppPolicy > RegistryItem::getApplicationPolicies( const Application* app ) const
+RegistryItem::Policies RegistryItem::getApplicationPolicies( const Application* app ) const
 {
-	std::set< AppPolicy > policySet;
+	Policies policySet;
 	return policySet;
 }
 
-std::set< AppPolicy > RegistryItem::getApplicationPolicies(
+RegistryItem::Policies RegistryItem::getApplicationPolicies(
 		const std::string& app ) const
 {
-	std::set< AppPolicy > policySet;
+	Policies policySet;
 	return policySet;
 }
 
