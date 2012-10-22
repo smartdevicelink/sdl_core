@@ -8,7 +8,8 @@ set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 include_directories(./include
                     ../../thirdPartyLibs/logger/include/)
 
-set (SOURCES ./src/ITransportManager.cpp
+set (SOURCES ./src/IDeviceAdapter.cpp
+             ./src/ITransportManager.cpp
              ./src/CTransportManager.cpp)
 
 add_library(${PROJECT} ${SOURCES})
