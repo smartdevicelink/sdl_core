@@ -18,7 +18,7 @@ void AppLink::TransportManager::CTransportManager::run(void)
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }
 
-void AppLink::TransportManager::CTransportManager::getDeviceList(std::vector<AppLink::TransportManager::SDeviceInfo> & DeviceList)
+void AppLink::TransportManager::CTransportManager::getDeviceList(std::vector<AppLink::TransportManager::SDeviceInfo> & DeviceList) const
 {
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }

@@ -54,7 +54,7 @@ namespace AppLink
              * @param DeviceList Reference to a variable that will
              *                   receive device list.
              **/
-            virtual void getDeviceList(std::vector<SDeviceInfo> & DeviceList) = 0;
+            virtual void getDeviceList(std::vector<SDeviceInfo> & DeviceList) const = 0;
 
             /**
              * @brief Add listener.
