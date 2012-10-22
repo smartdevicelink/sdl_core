@@ -32,7 +32,6 @@ AppMgr::AppMgr()
 	,mJSONHandler(0)
 	,mLogger( log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgr")) )
 {
-	mAppLinkInterface.registerController();
 	LOG4CPLUS_INFO_EXT(mLogger, " AppMgr constructed!");
 }
 
@@ -92,5 +91,11 @@ const AppLinkInterface& AppMgr::getAppLinkInterface() const
 {
 	return mAppLinkInterface;
 }	
+
+void AppMgr::startAppMgr()
+{
+	LOG4CPLUS_INFO_EXT(mLogger, " Starting AppMgr");
+	mAppLinkInterface.registerController();
+}
 
 };

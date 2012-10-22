@@ -64,6 +64,8 @@ public:
 	void setJsonHandler(JSONHandler* handler);
 
 	const AppLinkInterface& getAppLinkInterface() const;
+
+	void startAppMgr();
 	
 private:
 	virtual ~AppMgr();
