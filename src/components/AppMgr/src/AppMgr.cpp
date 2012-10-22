@@ -88,4 +88,9 @@ void AppMgr::processNotification(Json::Value& root)
 	mAppLinkInterface.processNotification(root);
 }
 
+const AppLinkInterface& AppMgr::getAppLinkInterface() const
+{
+	return mAppLinkInterface;
+}	
+
 };
