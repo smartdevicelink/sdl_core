@@ -9,6 +9,7 @@ include_directories(./include
                     ../../thirdPartyLibs/logger/include/)
 
 set (SOURCES ./src/IDeviceAdapter.cpp
+             ./src/IDeviceAdapterListener.cpp
              ./src/ITransportManager.cpp
              ./src/ITransportManagerListener.cpp
              ./src/CTransportManager.cpp)
