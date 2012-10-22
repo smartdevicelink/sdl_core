@@ -26,6 +26,7 @@ set(LIBRARIES
         bluetooth
         pthread
         log4cplus
+		rt
     )
 
 include_directories (./
