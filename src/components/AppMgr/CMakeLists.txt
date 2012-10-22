@@ -12,9 +12,13 @@ include_directories (./include/
 					 ../../thirdPartyLibs/axisCore/
 					 ../../thirdPartyLibs/axisCore/include/
 					 ../../thirdPartyLibs/axisCore/src/
+					 ../../thirdPartyLibs/logger/include/
+					 ../../thirdPartyLibs/logger/log4cplus-1.0.4/include/
 					)
 
 set (SOURCES
+		./src/SubscribeButton.cpp
+		./src/IAppCommand.cpp
 		./src/AppMgr.cpp
 		./src/AppFactory.cpp
 		./src/AppLinkInterface.cpp

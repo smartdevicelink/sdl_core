@@ -6,47 +6,39 @@
 #include "AppMgr/RPCAppLinkFactory.h"
 #include "AppMgr/RPCBusFactory.h"
 #include "AppMgr/AppMgrRegistry.h"
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
 	
-std::string AppMgr::mAddress = "";
-uint16_t AppMgr::mPort = 0;
-std::string AppMgr::mName = "";
-bool AppMgr::m_bInitialized = false;
-	
 AppMgr& AppMgr::getInstance( )
 {
-	if(m_bInitialized)
-	{
-		static AppMgr appMgr(mAddress, mPort, mName);
-		return appMgr;
-	}
-	//here to log error
+	static AppMgr appMgr;
+	return appMgr;
 }
 
 void AppMgr::setParams(const std::string& address, uint16_t port, std::string name)
 {
-	mAddress = address;
-	mPort = port;
-	mName = name;
-	m_bInitialized = true;
+	AppLinkInterface::setParams(address, port, name);
 }
 
-AppMgr::AppMgr(const std::string& address, uint16_t port, std::string name)
-	:NsMessageBroker::CMessageBrokerController::CMessageBrokerController(address, port, name)
-	,mAppLinkInterface(AppLinkInterface::getInstance())
+AppMgr::AppMgr()
+	:mAppLinkInterface(AppLinkInterface::getInstance())
 	,mAppMgrRegistry(AppMgrRegistry::getInstance())
 	,mAppMgrCore(AppMgrCore::getInstance())
 	,mRPCAppLinkFactory(RPCAppLinkFactory::getInstance())
 	,mRPCBusFactory(RPCBusFactory::getInstance())
 	,mAppFactory(AppFactory::getInstance())
 	,mJSONHandler(0)
+	,mLogger( log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgr")) )
 {
+	mAppLinkInterface.registerController();
+	LOG4CPLUS_INFO_EXT(mLogger, " AppMgr constructed!");
 }
 
 AppMgr::~AppMgr()
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " AppMgr destructed!");
 }
 
 void AppMgr::setJsonHandler(JSONHandler* handler)
@@ -56,6 +48,7 @@ void AppMgr::setJsonHandler(JSONHandler* handler)
 
 void AppMgr::onMessageReceivedCallback( MobileRPCMessage * message )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Message "<<message->getFunctionName()<<" received");
 	mAppMgrCore.pushMobileRPCMessage( message );
 }
 
@@ -66,6 +59,8 @@ void AppMgr::onMessageReceivedCallback( MobileRPCMessage * message )
  */
 void AppMgr::processResponse(std::string method, Json::Value& root)
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Processing a response to "<<method);
+	mAppLinkInterface.processResponse(method, root);
 }
 
 /**
@@ -74,6 +69,8 @@ void AppMgr::processResponse(std::string method, Json::Value& root)
  */
 void AppMgr::processRequest(Json::Value& root)
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Processing a request");
+	mAppLinkInterface.processRequest(root);
 }
 
 /**
@@ -87,6 +84,8 @@ void AppMgr::processRequest(Json::Value& root)
  */
 void AppMgr::processNotification(Json::Value& root)
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Processing a notification");
+	mAppLinkInterface.processNotification(root);
 }
 
 };

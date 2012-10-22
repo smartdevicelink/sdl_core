@@ -14,5 +14,15 @@ namespace Constants
 
     const char * REGISTERAPPINTERFACE = "RegisterAppInterface";
 
+    const char * JSONRPC = "jsonrpc";
+    const char * RPCMETHOD = "method";
+    const char * RPCPARAMS = "params";
+    const char * RPCID = "id";
+    const char * RPCRESULT = "result";
+    const char * RPCERROR = "error";
+    const char * RPCCODE = "code";
+    const char * RPCMESSAGE = "message";
+    const char * RPCDATA = "data";
+
 }
 #endif

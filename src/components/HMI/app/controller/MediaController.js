@@ -307,10 +307,13 @@ MFT.MediaController = Em.Object.create({
 		this.onPlayerEnter(MFT.SDModel);
 	},
 	
-		/*Turn on Application*/
+	
+	/****************** APP *******************/
+	/*Turn on Applications*/
 	turnOnApp: function(){
 		// Exit form player or radio
 		this.onPlayerExit();
+		MFT.AppModel.set('active',true);
 		this.onApplicationsEnter(MFT.AppModel);
 	},
 	

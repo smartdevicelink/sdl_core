@@ -28,13 +28,16 @@ MFT.MediaView = Em.ContainerView.create({
 		'leftMenu',
 		'presets',
 		'rightMenu',
+		'appRightMenu',
 		'SavePresetPopup',
 		'directTune'
 	],
 	/** Left Menu view component */
 	leftMenu: MFT.LeftMenuView,
 	
-	rightMenu: MFT.RightMenuView,
+	rightMenu:  MFT.RightMenuView,
+	
+	appRightMenu:  MFT.AppRightMenuView,
 	
 	presets: MFT.PresetsView,
 	

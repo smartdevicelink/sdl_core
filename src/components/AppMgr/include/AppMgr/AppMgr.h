@@ -6,6 +6,11 @@
 
 class JSONHandler;
 
+namespace log4cplus
+{
+	class Logger;
+};
+
 namespace NsAppManager
 {
 
@@ -16,7 +21,7 @@ class RPCAppLinkFactory;
 class RPCBusFactory;
 class AppFactory;
 	
-class AppMgr: public IRPCMessagesObserver, public NsMessageBroker::CMessageBrokerController
+class AppMgr: public IRPCMessagesObserver
 {
 public:
 
@@ -37,13 +42,13 @@ public:
 	 * \param method method name which has been called.
 	 * \param root JSON message.
 	 */
-	virtual void processResponse(std::string method, Json::Value& root);
+	void processResponse(std::string method, Json::Value& root);
 	
 	/**
 	 * \brief pure virtual method to process request.
 	 * \param root JSON message.
 	 */
-	virtual void processRequest(Json::Value& root);
+	void processRequest(Json::Value& root);
 	
 	/**
 	 * \brief Process notification message.
@@ -54,13 +59,13 @@ public:
 	 * \endcode
 	 * \param root JSON message.
 	 */
-	virtual void processNotification(Json::Value& root);
+	void processNotification(Json::Value& root);
 
 	void setJsonHandler(JSONHandler* handler);
 	
 private:
 	virtual ~AppMgr();
-	AppMgr(const std::string& address, uint16_t port, std::string name);
+	AppMgr();
 
 	AppLinkInterface& mAppLinkInterface;
 	AppMgrRegistry& mAppMgrRegistry;
@@ -70,11 +75,7 @@ private:
 	AppFactory& mAppFactory;
 
 	JSONHandler* mJSONHandler;
-
-	static std::string mAddress;
-	static uint16_t mPort;
-	static std::string mName;
-	static bool m_bInitialized;
+	const log4cplus::Logger& mLogger;
 };
 
 }; // namespace NsAppManager

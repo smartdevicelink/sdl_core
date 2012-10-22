@@ -10,6 +10,7 @@ public:
     ~TestJSONHandler() {}
     void secondRelease( const std::string & jsonString );
     void firstRelease( const std::string & jsonString );
+    void RPC2( const std::string & jsonString );
 
     /* data */
     JSONHandler * jsonHandler;

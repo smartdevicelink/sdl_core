@@ -5,6 +5,10 @@ RPC2Request::RPC2Request( const std::string & methodName )
 :RPC2Command( methodName )
 {}
 
+RPC2Request::RPC2Request( int method )
+:RPC2Command( method )
+{}
+
 RPC2Request::~RPC2Request()
 {}
 

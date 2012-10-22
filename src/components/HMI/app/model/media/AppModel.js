@@ -10,7 +10,7 @@
  * @author		Igor Zhavoronkin
  */
 
-MFT.AppModel= Em.Object.create({
+MFT.AppModel = Em.Object.create({
 	
 	active: false,
 	

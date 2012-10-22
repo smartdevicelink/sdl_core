@@ -12,18 +12,20 @@ link_directories(../thirdPartyLibs/jsoncpp
                  ../thirdPartyLibs/axisCore/bin
                  ../thirdPartyLibs/jsoncpp/bin
                  ../thirdPartyLibs/MessageBroker/bin
+                 ../thirdPartyLibs/logger/bin
                  )
 
 set(LIBRARIES
         appManager
         jsonHandler
         ProtocolHandler
-        messagebroker
         messagebrokerclient
         messagebrokerserver
+        messagebroker
         jsonCpp
         bluetooth
         pthread
+        log4cplus
     )
 
 include_directories (./
@@ -36,6 +38,8 @@ include_directories (./
                      ../components/JSONHandler/include
                      ../components/AppMgr/include
                      ../thirdPartyLibs/MessageBroker/include
+                     ../thirdPartyLibs/logger/include
+                     ../thirdPartyLibs/logger/log4cplus-1.0.4/include
                      )
 
 set (SOURCES
@@ -107,6 +111,7 @@ ExternalProject_Add(
 )
 
 ADD_DEPENDENCIES(${PROJECT}
+                        log4cplus
                         jsonCpp
                         messagebroker
                         messagebrokerserver

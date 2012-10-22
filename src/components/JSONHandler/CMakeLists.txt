@@ -15,6 +15,12 @@ add_library(jsonHandler
                   ./src/MobileRPCResponse.cpp
                   ./src/MobileRPCNotification.cpp
                   ./src/MobileRPCFactory.cpp
+                  ./src/RPC2Command.cpp
+                  ./src/RPC2Marshaller.cpp
+                  ./src/RPC2Notification.cpp
+                  ./src/OnButtonEventMarshaller.cpp
+                  ./src/OnButtonEvent.cpp
+                  ./src/ButtonEventModeMarshaller.cpp
            )
 
 include(ExternalProject)

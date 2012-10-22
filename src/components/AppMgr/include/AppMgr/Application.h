@@ -11,22 +11,12 @@
 #include "IApplication.h"
 #include "JSONHandler/Language.h"
 #include "JSONHandler/SyncMsgVersion.h"
+#include "JSONHandler/HMILevel.h"
 #include <string>
 #include <vector>
 
-class Language;
-class SyncMsgVersion;
-
 namespace NsAppManager
 {
-
-typedef enum
-{
-	HMI_FULL,
-	HMI_LIMITED,
-	HMI_BACKDROUND,
-	HMI_NONE
-} HMIStatusLevel;
 
 typedef enum
 {
@@ -40,8 +30,8 @@ public:
 	Application( const std::string& name );
 	virtual ~Application( );
 	virtual void setApplicationPriority( const AppPriority& priority );
-	void setApplicationHMIStatusLevel( const HMIStatusLevel& hmiLevel );
-	const HMIStatusLevel& getApplicationHMIStatusLevel( ) const;
+	void setApplicationHMIStatusLevel( const HMILevel::HMILevelEnum& hmiLevel );
+	const HMILevel::HMILevelEnum& getApplicationHMIStatusLevel( ) const;
 	void setApplicationAudioStreamingState( const AudioStreamingState& hmiLevel );
 	const AudioStreamingState& getApplicationAudioStreamingState( ) const;
 
@@ -53,15 +43,17 @@ public:
 	void setAutoActivateID(const std::string& value);
 	void setSyncMsgVersion(SyncMsgVersion value);
 
-	std::string getNgnMediaScreenAppName( );
-	std::vector<std::string> getVrSynonyms( );
-	bool getUsesVehicleData( );
-	bool getIsMediaApplication( );
-	Language getLanguageDesired( );
-	std::string getAutoActivateID( );
-	SyncMsgVersion getSyncMsgVersion( );
+	const std::string& getNgnMediaScreenAppName( ) const;
+	const std::vector<std::string>& getVrSynonyms( ) const;
+	bool getUsesVehicleData( ) const;
+	bool getIsMediaApplication( ) const;
+	const Language& getLanguageDesired( ) const;
+	const std::string& getAutoActivateID( ) const;
+	const SyncMsgVersion& getSyncMsgVersion( ) const;
 
 private:
+	Application(const Application& );
+	
 	std::string mNgnMediaScreenAppName;
 	std::vector<std::string> mVrSynonyms;
 	bool m_bUsesVehicleData;
@@ -69,7 +61,7 @@ private:
 	Language mLanguageDesired;
 	std::string mAutoActivateID;
 	SyncMsgVersion mSyncMsgVersion;
-	HMIStatusLevel mHMIStatusLevel;
+	HMILevel::HMILevelEnum mHMIStatusLevel;
 	AudioStreamingState mAudioStreamingState;
 };
 

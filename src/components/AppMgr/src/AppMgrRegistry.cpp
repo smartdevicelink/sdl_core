@@ -16,41 +16,44 @@ AppMgrRegistry& AppMgrRegistry::getInstance( )
 	return registry;
 }
 
-void AppMgrRegistry::unregisterApplication( RegistryItem& item )
+void AppMgrRegistry::unregisterApplication( RegistryItem* item )
 {
-	std::map<std::string, RegistryItem>::iterator registryItemIterator = mRegistryItems.find(item.getApplication().getName());
+	Items::iterator registryItemIterator = mRegistryItems.find(item->getApplication()->getName());
 	mRegistryItems.erase(registryItemIterator);
 }
 
-const RegistryItem& AppMgrRegistry::getItem( const IApplication& app ) const
+const RegistryItem* AppMgrRegistry::getItem( const Application* app ) const
 {
-	const RegistryItem& registryItem = mRegistryItems.find(app.getName())->second;
-	return registryItem;
+	return mRegistryItems.find(app->getName())->second;
 }
 
-const RegistryItem& AppMgrRegistry::getItem( const std::string& app ) const
+const RegistryItem* AppMgrRegistry::getItem( const std::string& app ) const
 {
-	const RegistryItem& registryItem = mRegistryItems.find(app)->second;
-	return registryItem;
+	return mRegistryItems.find(app)->second;
 }
 
 AppMgrRegistry::AppMgrRegistry( )
 {
-	// TODO Auto-generated constructor stub
-
 }
 
 AppMgrRegistry::~AppMgrRegistry( )
 {
-	// TODO Auto-generated destructor stub
+	for(Items::iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
+	{
+		if( it->second )
+		{
+			delete it->second;
+			it->second = 0;
+		}
+	}
+
+	mRegistryItems.clear();
 }
 
-const RegistryItem& AppMgrRegistry::registerApplication( const IApplication& app )
+const RegistryItem* AppMgrRegistry::registerApplication( const Application* app )
 {
-	RegistryItem item(app);
-
-	mRegistryItems.insert(std::pair<std::string, RegistryItem>(app.getName(), item));
-	return mRegistryItems.find(app.getName())->second;
+	mRegistryItems.insert(Item(app->getName(), new RegistryItem(app)));
+	return mRegistryItems.find(app->getName())->second;
 }
 
 };
