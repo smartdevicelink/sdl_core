@@ -16,6 +16,11 @@ class RegisterAppInterface;
 class MobileRPCMessage;
 class JSONHandler;
 
+namespace RPC2Communication
+{
+	class RPC2Command;
+};
+
 namespace log4cplus
 {
 	class Logger;
@@ -24,7 +29,6 @@ namespace log4cplus
 namespace NsAppManager
 {
 
-class RPCBusObject;
 class RegistryItem;
 	
 class AppMgrCore
@@ -45,12 +49,12 @@ private:
 	AppMgrCore();
 
 	void handleMobileRPCMessage( MobileRPCMessage* msg );
-	void handleBusRPCMessage( RPCBusObject* msg );
+	void handleBusRPCMessage( RPC2Communication::RPC2Command* msg );
 	const RegistryItem* registerApplication( RegisterAppInterface* msg );
 	void sendMobileRPCResponse( MobileRPCMessage* msg );
 	void enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message );
 	MobileRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
-	void enqueueOutgoingBusRPCMessage( RPCBusObject * message );
+	void enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message );
 
 	void registerApplicationOnHMI( const std::string& name );
 
@@ -61,8 +65,8 @@ private:
 	
 	std::queue< MobileRPCMessage* > mQueueRPCAppLinkObjectsIncoming;
 	std::queue< MobileRPCMessage* > mQueueRPCAppLinkObjectsOutgoing;
-	std::queue< RPCBusObject* > mQueueRPCBusObjectsIncoming;
-	std::queue< RPCBusObject* > mQueueRPCBusObjectsOutgoing;
+	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsIncoming;
+	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsOutgoing;
 
 	System::Mutex mMtxRPCAppLinkObjectsIncoming;
 	System::Mutex mMtxRPCAppLinkObjectsOutgoing;

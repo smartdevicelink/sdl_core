@@ -9,6 +9,8 @@
 #define APPLINKINTERFACE_H_
 
 #include "RPCBusObject.h"
+#include "JSONHandler/RPC2Marshaller.h"
+#include "JSONHandler/RPC2Command.h"
 #include "mb_controller.hpp"
 
 #include "system.h"
@@ -28,8 +30,8 @@ public:
 	static AppLinkInterface& getInstance( );
 	~AppLinkInterface( );
 
-	void sendRPCBusObject(const RPCBusObject* rpcObject);
-	void receiveRPCBusObject(const RPCBusObject* rpcObject);
+	void sendRPCCommand(const RPC2Communication::RPC2Command* rpcObject);
+	void receiveRPCCommand(const RPC2Communication::RPC2Command* rpcObject);
 
 	void executeThreads();
 	void terminateThreads();
@@ -69,9 +71,7 @@ public:
 private:
 	AppLinkInterface( const std::string& address, uint16_t port, const std::string& name );
 
-	RPCBusObject* createObjectFromJson(const std::string& method, const Json::Value& root);
-
-	void enqueueRPCBusObject( RPCBusObject * object );
+	void enqueueRPCCommand( RPC2Communication::RPC2Command * object );
 	void sendMessage();
 	
 	void getButtonCapabilities();
@@ -91,8 +91,8 @@ private:
 
 	const log4cplus::Logger& mLogger;
 
-	std::queue< RPCBusObject* > mQueueRPCBusObjectsIncoming;
-	std::queue< RPCBusObject* > mQueueRPCBusObjectsOutgoing;
+	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsIncoming;
+	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsOutgoing;
 	
 	System::Mutex mMtxRPCBusObjectsIncoming;
 	System::Mutex mMtxRPCBusObjectsOutgoing;
