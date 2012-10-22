@@ -17,6 +17,9 @@ namespace NsAppManager
 class RPCBusObject
 {
 public:
+	typedef std::map<std::string, std::string> Parameters;
+	typedef std::pair<std::string, std::string> Parameter;
+	
 	enum MessageType { REQUEST = 0x0, RESPONSE = 0x1, NOTIFICATION = 0x2, UNDEFINED };
 	
 	RPCBusObject( unsigned int protocolVersion, MessageType messageType, const std::string& method );
@@ -34,7 +37,7 @@ public:
 	virtual void setFunctionID( unsigned int functionID );
 	virtual void setParameter( const std::string& param, const std::string& value );
 	virtual std::string getParameter( const std::string& param );
-	virtual const std::map<std::string, std::string>& getParameters() const;
+	virtual const Parameters& getParameters() const;
 
 private:
 	RPCBusObject( const RPCBusObject& message );
@@ -44,7 +47,7 @@ private:
 	unsigned int mCorrelationID;
 	std::string mFunctionName;
 	unsigned int mFunctionID;
-	std::map<std::string, std::string> mParameters;
+	Parameters mParameters;
 };
 
 }; // namespace NsAppManager

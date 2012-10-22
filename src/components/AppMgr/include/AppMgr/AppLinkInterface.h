@@ -11,6 +11,9 @@
 #include "RPCBusObject.h"
 #include "mb_controller.hpp"
 
+#include "system.h"
+#include <queue>
+
 namespace log4cplus
 {
 	class Logger;
@@ -26,6 +29,9 @@ public:
 	~AppLinkInterface( );
 
 	void sendRPCBusObject(const RPCBusObject* rpcObject);
+
+	void executeThreads();
+	void terminateThreads();
 
 	/**
 	 * \brief needs to be called before getInstance.
@@ -68,12 +74,27 @@ private:
 	void getVoiceCapabilities();
 	void getVRCapabilities();
 
+	void* handleQueueRPCBusObjectsIncoming( void* );
+	void* handleQueueRPCBusObjectsOutgoing( void* );
+
+	void getAllCapabilities();
+	
 	static std::string mAddress;
 	static uint16_t mPort;
 	static std::string mName;
 	static bool m_bInitialized;
+	bool m_bTerminate;
 
 	const log4cplus::Logger& mLogger;
+
+	std::queue< RPCBusObject* > mQueueRPCBusObjectsIncoming;
+	std::queue< RPCBusObject* > mQueueRPCBusObjectsOutgoing;
+	
+	System::Mutex mMtxRPCBusObjectsIncoming;
+	System::Mutex mMtxRPCBusObjectsOutgoing;
+	
+	System::Thread mThreadRPCBusObjectsIncoming;
+	System::Thread mThreadRPCBusObjectsOutgoing;
 };
 
 }; // namespace NsAppManager

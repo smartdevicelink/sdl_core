@@ -76,7 +76,7 @@ void RPCBusObject::setCorrelationID( unsigned int correlationID )
 
 void RPCBusObject::setParameter( const std::string& param, const std::string& value )
 {
-	mParameters.insert(std::pair<std::string, std::string>( param, value ));
+	mParameters.insert(Parameter( param, value ));
 }
 
 std::string RPCBusObject::getParameter( const std::string& param )
@@ -84,7 +84,7 @@ std::string RPCBusObject::getParameter( const std::string& param )
 	return mParameters.find(param)->second;
 }
 
-const std::map<std::string, std::string>& RPCBusObject::getParameters() const
+const RPCBusObject::Parameters& RPCBusObject::getParameters() const
 {
 	return mParameters;
 }
