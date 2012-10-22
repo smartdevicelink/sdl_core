@@ -93,6 +93,18 @@ int main(int argc, char** argv)
     {
       LOG4CPLUS_INFO(logger, " Listen successful!");
     }
+
+    NsAppManager::AppLinkInterface appLinkInterface = appMgr.getAppLinkInterface();
+
+    if(!appLinkInterface.Connect())
+    {
+      printf("Cannot connect to remote peer!\n");
+      exit(EXIT_FAILURE);
+    } else
+    {
+      printf("AppMgr JSONRPC 2.0 controller connected to the server! SocketID = %d\n", appLinkInterface.GetSocket());
+    }
+
     printf("Start CMessageBroker thread!\n");
     System::Thread th1(new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(*pMessageBroker, &NsMessageBroker::CMessageBroker::MethodForThread, NULL));
     th1.Start(false);
@@ -101,7 +113,13 @@ int main(int argc, char** argv)
     System::Thread th2(new System::ThreadArgImpl<NsMessageBroker::TcpServer>(*pJSONRPC20Server, &NsMessageBroker::TcpServer::MethodForThread, NULL));
     th2.Start(false);
 
+    printf("StartAppMgr JSONRPC 2.0 controller receiver thread!\n");
+    System::Thread th3(new System::ThreadArgImpl<NsAppManager::AppLinkInterface>(appLinkInterface, &NsAppManager::AppLinkInterface::MethodForReceiverThread, NULL));
+    th3.Start(false);
 
+    printf("Start AppMgr!\n");
+    appMgr.startAppMgr();
+    printf("After Start AppMgr!\n");
 
     /**********************************/
 
@@ -183,3 +201,4 @@ int main(int argc, char** argv)
 
     return EXIT_SUCCESS;
 } 
+

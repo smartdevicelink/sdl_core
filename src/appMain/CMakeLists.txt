@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 set (PROJECT appLinkCore)
 project (${PROJECT}) 
 
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
@@ -26,7 +27,7 @@ set(LIBRARIES
         bluetooth
         pthread
         log4cplus
-		rt
+        rt
     )
 
 include_directories (./
@@ -40,7 +41,7 @@ include_directories (./
                      ../components/AppMgr/include
                      ../thirdPartyLibs/MessageBroker/include
                      ../thirdPartyLibs/logger/include
-                     ../thirdPartyLibs/logger/log4cplus-1.0.4/include
+                     ../thirdPartyLibs/logger/log4cplus-1.1.0/include
                      )
 
 set (SOURCES
@@ -51,6 +52,11 @@ set (SOURCES
 add_executable(${PROJECT} ${SOURCES})
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
+## Compiler flags
+if(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3")        ## DON'T Optimize
+    set(CMAKE_EXE_LINKER_FLAGS "-m")  ## Strip binary
+endif()
 
 include(ExternalProject)
 
