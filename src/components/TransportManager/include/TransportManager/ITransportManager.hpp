@@ -18,6 +18,11 @@ namespace AppLink
         typedef int tConnectionHandle;
 
         /**
+         * @brief Special value of connection handle for indicating invalid connection handle.
+         **/
+        const tConnectionHandle InvalidConnectionHandle = static_cast<tConnectionHandle>(-1);
+
+        /**
          * @brief Interface of transport manager.
          **/
         class ITransportManager

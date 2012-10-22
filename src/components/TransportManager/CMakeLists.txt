@@ -5,9 +5,11 @@ project (${PROJECT})
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
-include_directories(./include)
+include_directories(./include
+                    ../../thirdPartyLibs/logger/include/)
 
-set (SOURCES ./src/CTransportManager.cpp)
+set (SOURCES ./src/ITransportManager.cpp
+             ./src/CTransportManager.cpp)
 
 add_library(${PROJECT} ${SOURCES})
 

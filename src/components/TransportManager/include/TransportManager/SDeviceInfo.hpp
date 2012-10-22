@@ -13,6 +13,11 @@ namespace AppLink
         typedef int tDeviceHandle;
 
         /**
+         * @brief Special value of device handle for indicating invalid device handle.
+         **/
+        const tDeviceHandle InvalidDeviceHandle = static_cast<tDeviceHandle>(-1);
+
+        /**
          * @brief Enumeration for device type.
          **/
         enum EDeviceType
