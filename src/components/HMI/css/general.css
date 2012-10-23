@@ -58,6 +58,39 @@ div {
 	/*margin: 25px auto;*/ 
 }
 
+/* TTS popUp*/
+
+#TTSPopUp.TTSPopUp{
+	opacity: 0;
+	left: 500px;
+	width: 295px;
+	height: 100px;
+	background-color: rgba(165, 165, 165, 0.95);
+	z-index: 1;
+	border-radius: 10PX;
+	box-shadow: 0px 0px 7px 5px rgba(165, 165, 165, 0.95);
+	top: 8px;
+	-webkit-transition: opacity 1s ease-in-out;
+}
+
+#TTSPopUp .popUp{
+	width: 294px;
+	height: 98px;
+	border: 1px solid black;
+	border-radius: 10px;
+}
+
+#TTSPopUp .message{
+	top: 10px;
+	left: 10px;
+	width: 278px;
+	height: 81px;
+}
+
+#TTSPopUp.received{
+	opacity: 1;
+}
+
 /*WRAPER FOR CONTENT VIEW*/
 
 #app_active_view {
