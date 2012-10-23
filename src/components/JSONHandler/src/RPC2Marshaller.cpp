@@ -27,7 +27,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_GET_CAPABILITIES_REQUEST;
     }
-    
+    if ( s.compare("Buttons.OnButtonPress") == 0 )
+    {
+        return METHOD_ONBUTTONPRESS;
+    }
     return METHOD_INVALID;
 }
 
@@ -90,6 +93,14 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json)
         delete rv;
         return NULL;
     }
+    case METHOD_ONBUTTONPRESS:
+    {
+        OnButtonPress * rv = new OnButtonPress;
+        if (OnButtonPressMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
   }
 
   return NULL;
@@ -125,6 +136,8 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return GetCapabilitiesMarshaller::toJSON(* static_cast<const GetCapabilities*>(msg));
     case METHOD_GET_CAPABILITIES_RESPONSE:
       return GetCapabilitiesResponseMarshaller::toJSON(* static_cast<const GetCapabilitiesResponse*>(msg));
+    case METHOD_ONBUTTONPRESS:
+      return OnButtonPressMarshaller::toJSON(* static_cast<const OnButtonPress*>(msg));
   }
 
   return j;
@@ -167,3 +180,4 @@ ShowMarshaller RPC2Marshaller::mShowMarshaller;
 ShowResponseMarshaller RPC2Marshaller::mShowResponseMarshaller;
 GetCapabilitiesMarshaller RPC2Marshaller::mGetCapabilitiesMarshaller;
 GetCapabilitiesResponseMarshaller RPC2Marshaller::mGetCapabilitiesResponseMarshaller;
+OnButtonPressMarshaller RPC2Marshaller::mOnButtonPressMarshaller;

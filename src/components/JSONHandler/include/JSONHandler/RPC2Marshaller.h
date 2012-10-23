@@ -12,6 +12,7 @@
 #include "JSONHandler/ShowResponseMarshaller.h"
 #include "JSONHandler/GetCapabilitiesMarshaller.h"
 #include "JSONHandler/GetCapabilitiesResponseMarshaller.h"
+#include "JSONHandler/OnButtonPressMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -30,7 +31,8 @@ namespace RPC2Communication
         METHOD_SHOW_REQUEST=5,
         METHOD_SHOW_RESPONSE=6,
         METHOD_GET_CAPABILITIES_REQUEST=7,
-        METHOD_GET_CAPABILITIES_RESPONSE=8
+        METHOD_GET_CAPABILITIES_RESPONSE=8,
+        METHOD_ONBUTTONPRESS=9
         };
 
         RPC2Marshaller();
@@ -117,6 +119,16 @@ namespace RPC2Communication
             return mGetCapabilitiesResponseMarshaller.toString(res);
         }
 
+        static bool fromString(const std::string &str, OnButtonPress&res)
+        {
+            return mOnButtonPressMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const OnButtonPress& res)
+        {
+            return mOnButtonPressMarshaller.toString(res);
+        }
+
 
     private:
         struct localHash
@@ -147,6 +159,7 @@ namespace RPC2Communication
         static ShowResponseMarshaller mShowResponseMarshaller;
         static GetCapabilitiesMarshaller mGetCapabilitiesMarshaller;
         static GetCapabilitiesResponseMarshaller mGetCapabilitiesResponseMarshaller;
+        static OnButtonPressMarshaller mOnButtonPressMarshaller;
 
     };
 
