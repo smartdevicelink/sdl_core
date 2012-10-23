@@ -34,7 +34,7 @@ Json::Value AlertMarshaller::toJSON(const Alert& e)
   Json::Value json(Json::objectValue);
   
   json["jsonrpc"]=Json::Value("2.0");
-  json["method"]=Json::Value("Alert");
+  json["method"]=Json::Value("UI.Alert");
   
   Json::Value j=Json::Value(Json::objectValue);
   j["AlertText1"]=e.mAlertText1;
@@ -61,7 +61,7 @@ bool AlertMarshaller::fromJSON(const Json::Value& json,Alert& c)
     if(!json.isMember("method") 
         || !json["method"].isString() )
         return false;
-    if (json["method"].asString().compare("Alert"))  
+    if (json["method"].asString().compare("UI.Alert"))  
         return false;
 
     if(!json.isMember("params"))  return false;

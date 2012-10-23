@@ -35,7 +35,7 @@ Json::Value SpeakMarshaller::toJSON(const Speak& e)
   Json::Value json(Json::objectValue);
   
   json["jsonrpc"]=Json::Value("2.0");
-  json["method"]=Json::Value("Speak");
+  json["method"]=Json::Value("TTS.Speak");
   
   Json::Value j=Json::Value(Json::arrayValue);
   for ( int i = 0; i < e.mTTSChunks.size(); ++i )
@@ -63,7 +63,7 @@ bool SpeakMarshaller::fromJSON(const Json::Value& json,Speak& c)
     if(!json.isMember("method") 
         || !json["method"].isString() )
         return false;
-    if (json["method"].asString().compare("Speak"))  
+    if (json["method"].asString().compare("TTS.Speak"))  
         return false;
 
     if(!json.isMember("params"))  return false;

@@ -35,7 +35,7 @@ Json::Value ShowMarshaller::toJSON(const Show& e)
   Json::Value json(Json::objectValue);
   
   json["jsonrpc"]=Json::Value("2.0");
-  json["method"]=Json::Value("Show");
+  json["method"]=Json::Value("UI.Show");
   
   Json::Value j=Json::Value(Json::objectValue);
   j["mainField1"] = e.mMainField1;
@@ -64,7 +64,7 @@ bool ShowMarshaller::fromJSON(const Json::Value& json,Show& c)
     if(!json.isMember("method") 
         || !json["method"].isString() )
         return false;
-    if (json["method"].asString().compare("Show"))  
+    if (json["method"].asString().compare("UI.Show"))  
         return false;
 
     if(!json.isMember("params"))  return false;
