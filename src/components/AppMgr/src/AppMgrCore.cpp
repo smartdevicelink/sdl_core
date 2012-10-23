@@ -28,6 +28,13 @@
 #include "AppMgr/AppMgrRegistry.h"
 #include "LoggerHelper.hpp"
 #include "JSONHandler/OnButtonEvent.h"
+#include "JSONHandler/RPC2Marshaller.h"
+#include "JSONHandler/RPC2Command.h"
+#include "JSONHandler/RPC2Request.h"
+#include "JSONHandler/RPC2Response.h"
+#include "JSONHandler/RPC2Notification.h"
+#include "JSONHandler/ButtonCapabilities.h"
+#include "JSONHandler/GetCapabilitiesResponse.h"
 
 namespace NsAppManager
 {
@@ -171,7 +178,7 @@ void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 	}
 }
 
-void AppMgrCore::handleBusRPCMessage( RPC2Communication::RPC2Command* msg )
+void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been invoking...");
 
@@ -179,22 +186,20 @@ void AppMgrCore::handleBusRPCMessage( RPC2Communication::RPC2Command* msg )
 	{
 		case MobileRPCMessage::REQUEST:
 		{
-/*			if(0 == msg->getMethod())
+			if(RPC2Communication::RPC2Marshaller::METHOD_GET_CAPABILITIES_REQUEST == msg->getMethod())
 			{
-				LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
-				RegisterAppInterface * object = (RegisterAppInterface*)msg;
-				const RegistryItem* registeredApp =  registerApplication( object );
-				MobileRPCMessage* response = queryInfoForRegistration( registeredApp );
-				sendMobileRPCResponse( response );
+				LOG4CPLUS_INFO_EXT(mLogger, " A GetCapabilitiesResponse request has been invoked");
+				RPC2Communication::GetCapabilitiesResponse * object = (RPC2Communication::GetCapabilitiesResponse*)msg;
+				setButtonCapabilities( object );
 			}
-			else if(0 == msg->getMethod().compare("SubscribeButton"))
+	/*		else if(RPC2Communication::RPC2Marshaller:: == msg->getMethod().compare("SubscribeButton"))
 			{
 				LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
 				//	SubscribeButton * object = (SubscribeButton*)msg;
 				//	registerApplication( object );
 				sendMobileRPCResponse( msg );
-			}
-*/			break;
+			} */
+			break;
 		}
 		case MobileRPCMessage::RESPONSE:
 		case MobileRPCMessage::NOTIFICATION:
@@ -279,6 +284,16 @@ void AppMgrCore::registerApplicationOnHMI( const std::string& name )
 //	object->setParameter("name", name);
 }
 
+void AppMgrCore::setButtonCapabilities( RPC2Communication::GetCapabilitiesResponse* msg )
+{
+	mButtonCapabilities = msg->getCapabilities();
+}
+
+Capabilities AppMgrCore::getButtonCapabilities() const
+{
+	return mButtonCapabilities;
+}
+
 void AppMgrCore::sendMobileRPCResponse( MobileRPCMessage* msg )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Sending mobile RPC response to "<< msg->getFunctionName() <<"!");
@@ -304,7 +319,7 @@ void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
 				continue;
 			}
 			
-			handleBusRPCMessage( msg );
+			handleBusRPCMessageIncoming( msg );
 		}
 	}
 }
@@ -348,7 +363,7 @@ void* AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
 				continue;
 			}
 			
-			handleBusRPCMessage( msg );
+			handleBusRPCMessageIncoming( msg );
 		}
 	}
 }
