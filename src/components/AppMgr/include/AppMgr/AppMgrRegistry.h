@@ -14,6 +14,11 @@
 #include <map>
 #include <string>
 
+namespace log4cplus
+{
+	class Logger;
+};
+
 namespace NsAppManager
 {
 	
@@ -37,6 +42,7 @@ private:
 	AppMgrRegistry( );
 
 	Items mRegistryItems;
+	static log4cplus::Logger mLogger;
 };
 
 }; // namespace NsAppManager

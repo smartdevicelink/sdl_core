@@ -6,9 +6,12 @@
  */
 
 #include "AppMgr/AppMgrRegistry.h"
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
+
+log4cplus::Logger AppMgrRegistry::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrRegistry"));
 	
 AppMgrRegistry& AppMgrRegistry::getInstance( )
 {

@@ -6,9 +6,11 @@
  */
 
 #include "AppMgr/AppPolicy.h"
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
+log4cplus::Logger AppPolicy::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppPolicy"));
 	
 AppPolicy::AppPolicy( const std::string& policy )
 : mPolicy(policy)
