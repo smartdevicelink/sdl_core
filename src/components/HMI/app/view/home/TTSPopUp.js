@@ -48,6 +48,6 @@ MFT.TTSPopUp = Em.ContainerView.create({
 
 		this.set('content', msg);
 		this.set('received', true);
-		setTimeout(function(){self.set('received', false);}, 2000);
+		setTimeout(function(){self.set('received', false);}, 10000);
 	}
 });

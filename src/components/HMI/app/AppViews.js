@@ -92,10 +92,11 @@ MFT.AppViews = Em.ContainerView.extend({
 	 */
 	afterRender: function() {
 		Em.Logger.log('MFT Rendered!');
+		WarningOkButtonView.appLoaded();
 		if ( FLAGS.MCS_ENABLED ) {
 			WarningOkButtonView.appLoaded();
 		} else {
-			FFW.Backend.notifyAppLoaded();
+//			FFW.Backend.notifyAppLoaded();
 		}
 		
 		FFW.PreloadImages.preload();

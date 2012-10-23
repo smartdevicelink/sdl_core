@@ -56,7 +56,7 @@ FLAGS = Em.Object.create({
 	 *  show MCS screen in settings -> vehicle menu 
 	 *  to be disabled until v2.1, in version v2.1 this feature will be released to end user
 	 */
-	MCS_ENABLED:			false,
+	MCS_ENABLED:			true,
 
   	/** 
 	 *  Emulate CAN network for Multi Contour Seat
