@@ -3,9 +3,9 @@
 
 #include "TransportManager/ITransportManager.hpp"
 
-namespace AppLink
+namespace NsAppLink
 {
-    namespace TransportManager
+    namespace NsTransportManager
     {
         /**
          * @brief Interface for handle generator.

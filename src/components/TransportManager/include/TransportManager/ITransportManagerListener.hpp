@@ -6,9 +6,9 @@
 #include "TransportManager/ITransportManager.hpp"
 #include "TransportManager/SDeviceInfo.hpp"
 
-namespace AppLink
+namespace NsAppLink
 {
-    namespace TransportManager
+    namespace NsTransportManager
     {
         /**
          * @brief Enumeration of send status.

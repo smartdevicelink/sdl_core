@@ -5,9 +5,9 @@
 
 #include "TransportManager/SDeviceInfo.hpp"
 
-namespace AppLink
+namespace NsAppLink
 {
-    namespace TransportManager
+    namespace NsTransportManager
     {
         class ITransportManagerListener;
         class Blob;

@@ -3,7 +3,7 @@
 #include "CTransportManager.hpp"
 #include "CBluetoothAdapter.hpp"
 
-AppLink::TransportManager::CTransportManager::CTransportManager(void):
+NsAppLink::NsTransportManager::CTransportManager::CTransportManager(void):
 mDeviceAdapters(),
 mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager")))
 {
@@ -12,7 +12,7 @@ mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager")))
     LOG4CPLUS_INFO_EXT(mLogger, "TransportManager constructed");
 }
 
-AppLink::TransportManager::CTransportManager::~CTransportManager(void)
+NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
 {
     LOG4CPLUS_INFO_EXT(mLogger, "TransportManager destructor");
 
@@ -22,7 +22,7 @@ AppLink::TransportManager::CTransportManager::~CTransportManager(void)
     }
 }
 
-void AppLink::TransportManager::CTransportManager::run(void)
+void NsAppLink::NsTransportManager::CTransportManager::run(void)
 {
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
@@ -30,36 +30,36 @@ void AppLink::TransportManager::CTransportManager::run(void)
     }
 }
 
-void AppLink::TransportManager::CTransportManager::getDeviceList(std::vector<AppLink::TransportManager::SDeviceInfo> & DeviceList) const
+void NsAppLink::NsTransportManager::CTransportManager::getDeviceList(std::vector<NsAppLink::NsTransportManager::SDeviceInfo> & DeviceList) const
 {
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }
 
-void AppLink::TransportManager::CTransportManager::addListener(AppLink::TransportManager::ITransportManagerListener * Listener)
+void NsAppLink::NsTransportManager::CTransportManager::addListener(NsAppLink::NsTransportManager::ITransportManagerListener * Listener)
 {
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }
 
-void AppLink::TransportManager::CTransportManager::removeListener(AppLink::TransportManager::ITransportManagerListener * Listener)
+void NsAppLink::NsTransportManager::CTransportManager::removeListener(NsAppLink::NsTransportManager::ITransportManagerListener * Listener)
 {
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }
 
-int AppLink::TransportManager::CTransportManager::sendFrame(AppLink::TransportManager::tConnectionHandle ConnectionHandle, const AppLink::TransportManager::Blob & Data)
+int NsAppLink::NsTransportManager::CTransportManager::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const NsAppLink::NsTransportManager::Blob & Data)
 {
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 
     return -1;
 }
 
-AppLink::TransportManager::tDeviceHandle AppLink::TransportManager::CTransportManager::generateNewDeviceHandle(void)
+NsAppLink::NsTransportManager::tDeviceHandle NsAppLink::NsTransportManager::CTransportManager::generateNewDeviceHandle(void)
 {
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 
     return InvalidDeviceHandle;
 }
 
-AppLink::TransportManager::tConnectionHandle AppLink::TransportManager::CTransportManager::generateNewConnectionHandle(void)
+NsAppLink::NsTransportManager::tConnectionHandle NsAppLink::NsTransportManager::CTransportManager::generateNewConnectionHandle(void)
 {
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 

@@ -3,9 +3,9 @@
 
 #include <string>
 
-namespace AppLink
+namespace NsAppLink
 {
-    namespace TransportManager
+    namespace NsTransportManager
     {
         /**
          * @brief Handle to device.

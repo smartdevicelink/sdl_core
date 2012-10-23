@@ -6,9 +6,9 @@
 #include "TransportManager/ITransportManager.hpp"
 #include "SInternalDeviceInfo.hpp"
 
-namespace AppLink
+namespace NsAppLink
 {
-    namespace TransportManager
+    namespace NsTransportManager
     {
         /**
          * @brief Interface for device adapter.

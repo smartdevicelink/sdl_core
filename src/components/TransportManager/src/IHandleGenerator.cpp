@@ -1,5 +1,5 @@
 #include "IHandleGenerator.hpp"
 
-AppLink::TransportManager::IHandleGenerator::~IHandleGenerator(void)
+NsAppLink::NsTransportManager::IHandleGenerator::~IHandleGenerator(void)
 {
 }

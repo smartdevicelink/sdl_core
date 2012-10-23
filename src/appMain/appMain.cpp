@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
     LOG4CPLUS_INFO(logger, " Application started!");
 
-    AppLink::TransportManager::ITransportManager * transportManager = AppLink::TransportManager::ITransportManager::create();
+    NsAppLink::NsTransportManager::ITransportManager * transportManager = NsAppLink::NsTransportManager::ITransportManager::create();
     transportManager->run();
 
     NsTransportLayer::CBTAdapter btadapter;
