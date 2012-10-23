@@ -22,7 +22,7 @@
 	 * @returns
 	 *      result code of execution
 	 */ 
-        "Voice.Speak": {
+        "TTS.Speak": {
             "parameters": {
 		[
 			"ttsChunks"	: "TTSChunk" // data type from AppLink protocol specification

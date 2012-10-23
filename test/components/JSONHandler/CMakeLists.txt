@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
 project (testJsonHandler) 
 
-link_directories(../../../src/thirdPartyLibs/jsoncpp ../../../src/components/JSONHandler ../../../src/thirdPartyLibs/axisCore/bin)
+link_directories(
+			../../../src/thirdPartyLibs/jsoncpp 
+			../../../src/components/JSONHandler 
+			../../../src/thirdPartyLibs/axisCore/bin
+			../../../src/thirdPartyLibs/logger/bin
+		)
 
 include_directories (../../../src/components/JSONHandler/include/ 
 			../../../src/thirdPartyLibs/jsoncpp/include/ 
@@ -10,10 +15,13 @@ include_directories (../../../src/components/JSONHandler/include/
 			../../../src/thirdPartyLibs/axisCore/src
 			../../../src/appMain
 			../../../src/thirdPartyLibs/axisCore/utils/misc
-			../../../src/thirdPartyLibs/axisCore/transport/bt)
+			../../../src/thirdPartyLibs/axisCore/transport/bt
+			../../../src/thirdPartyLibs/logger/include
+	                ../../../src/thirdPartyLibs/logger/log4cplus-1.1.0/include
+		    )
  
 add_executable(testJsonHandler main.cpp TestJSONHandler.cpp)
-target_link_libraries(testJsonHandler jsonCpp jsonHandler ProtocolHandler bluetooth pthread)
+target_link_libraries(testJsonHandler jsonCpp jsonHandler ProtocolHandler bluetooth pthread log4cplus rt)
 #CBTAdapter.cpp 
 
 include(ExternalProject)

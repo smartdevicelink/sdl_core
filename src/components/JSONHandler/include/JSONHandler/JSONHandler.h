@@ -26,7 +26,7 @@ public:
 
     /*Methods from IProtocolObserver*/
     void setProtocolHandler( AxisCore::ProtocolHandler * protocolHandler );
-    void sessionStartedCallback(const UInt8 sessionID);
+    void sessionStartedCallback(const UInt8 sessionID, const UInt32 hashCode);
     void sessionEndedCallback(const UInt8 sessionID);
     void dataReceivedCallback(const UInt8 sessionID, const UInt32 messageID, const UInt32 dataSize);
     /*end of methods from IProtocolObserver*/

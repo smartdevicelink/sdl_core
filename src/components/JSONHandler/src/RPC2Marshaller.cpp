@@ -5,13 +5,26 @@
 
 using namespace RPC2Communication;
 
-const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const char* s)
+const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
 {
-  if(!s)
+  if ( s.compare("OnButtonEvent") == 0 )
+    {
+        return METHOD_ONBUTTONEVENT;
+    }
+    if ( s.compare("Speak") == 0 )
+    {
+        return METHOD_SPEAK_REQUEST;
+    }
+    if ( s.compare("Alert") == 0 )
+    {
+        return METHOD_ALERT_REQUEST;
+    }
+    if ( s.compare("Show") == 0 )
+    {
+        return METHOD_SHOW_REQUEST;
+    }
+    
     return METHOD_INVALID;
-  //const struct localHash* p=RPC2Marshaller_intHash::getPointer(s,strlen(s));
-    const struct localHash* p = &mHashTable[0];
-  return p ? static_cast<Methods>(p->idx) : METHOD_INVALID;
 }
 
 
@@ -41,6 +54,30 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json)
          delete rv;
          return NULL;
       }
+    case METHOD_SPEAK_REQUEST:
+    {
+        Speak * rv = new Speak;
+        if ( SpeakMarshaller::fromJSON(json, *rv) )
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ALERT_REQUEST:
+    {
+        Alert * rv = new Alert;
+        if ( AlertMarshaller::fromJSON(json, *rv) )
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_SHOW_REQUEST:
+    {
+        Show * rv = new Show; 
+        if ( ShowMarshaller::fromJSON(json, *rv) )
+          return rv;
+        delete rv;
+        return NULL;
+    }
   }
 
   return NULL;
@@ -59,7 +96,19 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return j;
 
     case METHOD_ONBUTTONEVENT:
-         return OnButtonEventMarshaller::toJSON(* static_cast<const OnButtonEvent*>(msg));
+      return OnButtonEventMarshaller::toJSON(* static_cast<const OnButtonEvent*>(msg));
+    case METHOD_SPEAK_REQUEST:
+      return SpeakMarshaller::toJSON(* static_cast<const Speak*>(msg));
+    case METHOD_SPEAK_RESPONSE:
+      return SpeakResponseMarshaller::toJSON(* static_cast<const SpeakResponse*>(msg));
+    case METHOD_ALERT_REQUEST:
+      return AlertMarshaller::toJSON(* static_cast<const Alert*>(msg)) ;
+    case METHOD_ALERT_RESPONSE:
+      return AlertResponseMarshaller::toJSON(* static_cast<const AlertResponse*>(msg));
+    case METHOD_SHOW_REQUEST:
+      return ShowMarshaller::toJSON(* static_cast<const Show*> (msg));
+    case METHOD_SHOW_RESPONSE:
+      return ShowResponseMarshaller::toJSON(* static_cast<const ShowResponse*>(msg));
   }
 
   return j;
@@ -94,4 +143,9 @@ std::string RPC2Marshaller::toString(const RPC2Command* msg)
 }
 
 OnButtonEventMarshaller RPC2Marshaller::mOnButtonEventMarshaller;
-
+SpeakMarshaller RPC2Marshaller::mSpeakMarshaller;
+SpeakResponseMarshaller RPC2Marshaller::mSpeakResponseMarshaller;
+AlertMarshaller RPC2Marshaller::mAlertMarshaller;
+AlertResponseMarshaller RPC2Marshaller::mAlertResponseMarshaller;
+ShowMarshaller RPC2Marshaller::mShowMarshaller;
+ShowResponseMarshaller RPC2Marshaller::mShowResponseMarshaller;

@@ -8,7 +8,7 @@
 #include "JSONHandler/RegisterAppInterfaceResponse.h"
 #include <algorithm>
 #include <pthread.h>
-
+#include <signal.h>
 
 JSONHandler::JSONHandler( AxisCore::ProtocolHandler * protocolHandler )
 :mProtocolHandler( protocolHandler )
@@ -20,8 +20,8 @@ JSONHandler::JSONHandler( AxisCore::ProtocolHandler * protocolHandler )
     
 JSONHandler::~JSONHandler()
 {
-    pthread_join( mWaitForIncomingMessagesThread, NULL );
-    pthread_join( mWaitForOutgoingMessagesThread, NULL );
+    pthread_kill( mWaitForIncomingMessagesThread, 1 );
+    pthread_kill( mWaitForOutgoingMessagesThread, 1 );
     mProtocolHandler = 0;
     mMessagesObserver = 0;
     delete mFactory;
@@ -53,7 +53,7 @@ void JSONHandler::setProtocolHandler( AxisCore::ProtocolHandler * protocolHandle
     mProtocolHandler = protocolHandler;
 }
 
-void JSONHandler::sessionStartedCallback(const UInt8 sessionID)
+void JSONHandler::sessionStartedCallback(const UInt8 sessionID, const UInt32 hashCode)
 {
     mSessionID = sessionID;
 }
@@ -275,7 +275,7 @@ void * JSONHandler::waitForIncomingMessages( void * params )
             }
             handler -> mMessagesObserver -> onMessageReceivedCallback( currentMessage );
         }
-        sleep(10);
+        sleep(1);
     }
 }
 
@@ -308,6 +308,6 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
 
             delete message;
         }
-        sleep( 10 );
+        sleep( 1 );
     }
 }

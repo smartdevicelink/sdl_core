@@ -6,6 +6,8 @@ include_directories (./include/
                      ../../thirdPartyLibs/axisCore/include
                      ../../thirdPartyLibs/axisCore/
                      ../../thirdPartyLibs/axisCore/src
+                     ../../thirdPartyLibs/logger/include
+                     ../../thirdPartyLibs/logger/log4cplus-1.1.0/include
                     ) 
 
 add_library(jsonHandler 
@@ -21,6 +23,25 @@ add_library(jsonHandler
                   ./src/OnButtonEventMarshaller.cpp
                   ./src/OnButtonEvent.cpp
                   ./src/ButtonEventModeMarshaller.cpp
+                  ./src/Speak.cpp
+                  ./src/SpeakMarshaller.cpp
+                  ./src/TTSChunkMarshaller.cpp
+                  ./src/SpeechCapabilitiesMarshaller.cpp
+                  ./src/RPC2Request.cpp
+                  ./src/RPC2Response.cpp
+                  ./src/RPC2Error.cpp
+                  ./src/SpeakResponseMarshaller.cpp
+                  ./src/SpeakResponse.cpp
+                  ./src/ResultMarshaller.cpp
+                  ./src/Alert.cpp
+                  ./src/AlertResponse.cpp
+                  ./src/AlertMarshaller.cpp
+                  ./src/AlertResponseMarshaller.cpp
+                  ./src/Show.cpp
+                  ./src/ShowResponse.cpp
+                  ./src/ShowMarshaller.cpp
+                  ./src/ShowResponseMarshaller.cpp
+                  ./src/TextAlignmentMarshaller.cpp
            )
 
 include(ExternalProject)

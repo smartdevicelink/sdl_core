@@ -14,7 +14,10 @@ include_directories (./include/
                      ./ 
                      ./transport/bt 
                      ../logger/include
-                     ../logger/log4cplus-1.0.4/include) 
+                     ../logger/log4cplus-1.0.4/include
+		     ../logger/include
+                     ../logger/log4cplus-1.1.0/include
+		) 
 
 add_library(ProtocolHandler 
             ./src/BluetoothReader.cpp 
