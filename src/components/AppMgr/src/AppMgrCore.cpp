@@ -27,6 +27,7 @@
 #include <sys/socket.h>
 #include "AppMgr/AppMgrRegistry.h"
 #include "LoggerHelper.hpp"
+#include "JSONHandler/OnButtonEvent.h"
 
 namespace NsAppManager
 {
@@ -158,12 +159,12 @@ void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 	}
 }
 
-void AppMgrCore::handleBusRPCMessage( RPCBusObject* msg )
+void AppMgrCore::handleBusRPCMessage( RPC2Communication::RPC2Command* msg )
 {
 	//right now handles only outgoing messages
 	//assumes that the message in param is outgoing
-	LOG4CPLUS_INFO_EXT(mLogger, " A " << msg->getMethodName() << " bus message request has been invoked");
-	AppLinkInterface::getInstance().sendRPCBusObject( msg );
+	LOG4CPLUS_INFO_EXT(mLogger, " A " << msg->getMethod() << " bus message request has been invoked");
+	AppLinkInterface::getInstance().sendRPCCommand( msg );
 }
 
 void AppMgrCore::enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message )
@@ -179,9 +180,9 @@ void AppMgrCore::enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message )
 	LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getFunctionName() << " outgoing mobile RPC message has been sent");
 }
 
-void AppMgrCore::enqueueOutgoingBusRPCMessage( RPCBusObject * message )
+void AppMgrCore::enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message )
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getMethodName() << " outgoing mobile RPC message send has been invoked");
+	LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getMethod() << " outgoing mobile RPC message send has been invoked");
 	
 	mMtxRPCBusObjectsOutgoing.Lock();
 	
@@ -189,7 +190,7 @@ void AppMgrCore::enqueueOutgoingBusRPCMessage( RPCBusObject * message )
 	
 	mMtxRPCBusObjectsOutgoing.Unlock();
 
-	LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getMethodName() << " outgoing mobile RPC message has been sent");
+	LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getMethod() << " outgoing mobile RPC message has been sent");
 }
 
 const RegistryItem* AppMgrCore::registerApplication( RegisterAppInterface* object )
@@ -271,7 +272,7 @@ void* AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
 		if( size > 0 )
 		{
 			mMtxRPCBusObjectsOutgoing.Lock();
-			RPCBusObject* msg = mQueueRPCBusObjectsOutgoing.front();
+			RPC2Communication::RPC2Command* msg = mQueueRPCBusObjectsOutgoing.front();
 			mQueueRPCBusObjectsOutgoing.pop();
 			mMtxRPCBusObjectsOutgoing.Unlock();
 			if(!msg)
