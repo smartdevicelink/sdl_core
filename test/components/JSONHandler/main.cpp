@@ -19,6 +19,7 @@
 #include "JSONHandler/SpeakResponse.h"
 #include "JSONHandler/AlertResponse.h"
 #include "JSONHandler/ShowResponse.h"
+#include "JSONHandler/GetCapabilitiesResponse.h"
 
 char * readJsonContent ( const char * fileName );
 int parseJson ( const std::string & jsonContent );
@@ -169,9 +170,22 @@ int handleMessage( char * jsonContent )
     r->setResult(Result("SUCCESS"));
     r->setID(8);
     std::cout<<"result: " << RPC2Communication::RPC2Marshaller::toString( r ) << std::endl;
+
+    RPC2Communication::GetCapabilitiesResponse * bcr = new RPC2Communication::GetCapabilitiesResponse;
+    std::vector<RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal> capabilities;
+    ButtonCapabilities b;
+    b.setName(ButtonName::PRESET_1);
+    b.setShortPressAvailable(true);
+    RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal item;
+    item.capability = b;
+    item.button = "button";
+    capabilities.push_back(item);
+    bcr -> setCapabilities(capabilities);
+    std::cout<<"get capabilities result: " << RPC2Communication::RPC2Marshaller::toString(bcr);
     delete r;
     delete alertResponse;
     delete showResponse;
+    delete bcr;
 
     delete [] jsonContentBeginning;
 }

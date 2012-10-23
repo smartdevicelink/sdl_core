@@ -42,7 +42,20 @@ add_library(jsonHandler
                   ./src/ShowMarshaller.cpp
                   ./src/ShowResponseMarshaller.cpp
                   ./src/TextAlignmentMarshaller.cpp
+                  ./src/GetCapabilities.cpp
+                  ./src/GetCapabilitiesResponseMarshaller.cpp
+                  ./src/GetCapabilitiesResponse.cpp
+                  ./src/GetCapabilitiesMarshaller.cpp
+                  ./src/GetCapabilities.cpp
+                  ./src/ButtonNameMarshaller.cc
+                  ./src/ButtonCapabilitiesMarshaller.cpp
            )
+
+## Compiler flags
+if(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3")        ## DON'T Optimize
+    set(CMAKE_EXE_LINKER_FLAGS "-m")  ## Strip binary
+endif()
 
 include(ExternalProject)
 ExternalProject_Add(
@@ -68,6 +81,7 @@ ExternalProject_Add(
 )
 
 
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_INSTALL_PREFIX .)
 install (TARGETS jsonHandler DESTINATION bin)
 

@@ -4,8 +4,13 @@
 #include "JSONHandler/RPC2Request.h"
 #include <string>
 
-namespace RPC2Communication {     class Alert : public RPC2Request     {
-public:         Alert();         ~Alert();
+namespace RPC2Communication {     
+
+    class Alert : public RPC2Request     
+    {
+    public:         
+        Alert();         
+        ~Alert();
 
         std::string getAlertText1() const;
         std::string getAlertText2() const;
