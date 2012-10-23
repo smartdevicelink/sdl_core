@@ -15,6 +15,7 @@
 
 #include "system.h"
 #include <queue>
+#include <set>
 
 namespace log4cplus
 {
@@ -29,9 +30,6 @@ class AppLinkInterface : public NsMessageBroker::CMessageBrokerController
 public:
 	static AppLinkInterface& getInstance( );
 	~AppLinkInterface( );
-
-	void sendRPCCommand(const RPC2Communication::RPC2Command* rpcObject);
-	void receiveRPCCommand(const RPC2Communication::RPC2Command* rpcObject);
 
 	void executeThreads();
 	void terminateThreads();
@@ -71,17 +69,28 @@ public:
 private:
 	AppLinkInterface( const std::string& address, uint16_t port, const std::string& name );
 
-	void enqueueRPCCommand( RPC2Communication::RPC2Command * object );
-	void sendMessage();
+	void sendRPCCommand(const RPC2Communication::RPC2Command* rpcObject);
+	void receiveRPCCommand(const RPC2Communication::RPC2Command* rpcObject);
 	
+	void enqueueRPCCommandIncoming( RPC2Communication::RPC2Command * object );
+	void enqueueRPCCommandOutgoing( RPC2Communication::RPC2Command * object );
+	void sendMessageAwaitingExecution( RPC2Communication::RPC2Command* rpcObject, bool repeat );
+
+	void addAwaitedResponseMethod( int method );
+	void addRespondedMethod( int method );
+	void removeAwaitedResponseMethod( int method );
+	void removeRespondedMethod( int method );
+
+	bool findAwaitedResponseMethod( int method ) const;
+	bool findRespondedMethod( int method ) const;
+	
+	void getAllCapabilities();
 	void getButtonCapabilities();
 	void getVoiceCapabilities();
 	void getVRCapabilities();
 
 	void* handleQueueRPCBusObjectsIncoming( void* );
 	void* handleQueueRPCBusObjectsOutgoing( void* );
-
-	void getAllCapabilities();
 	
 	static std::string mAddress;
 	static uint16_t mPort;
@@ -89,10 +98,20 @@ private:
 	static bool m_bInitialized;
 	bool m_bTerminate;
 
+	bool m_bButtonCapsRetrieved;
+	bool m_bVRCapsRetrieved;
+	bool m_bVoiceCapsRetrieved;
+	
 	const log4cplus::Logger& mLogger;
 
 	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsIncoming;
 	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsOutgoing;
+
+	std::set<int> mAwaitedResponseMethods;
+	std::set<int> mRespondedMethods;
+
+	System::Mutex mMtxAwaitedResponseMethods;
+	System::Mutex mMtxRespondedMethods;
 	
 	System::Mutex mMtxRPCBusObjectsIncoming;
 	System::Mutex mMtxRPCBusObjectsOutgoing;
