@@ -31,6 +31,8 @@
 
 namespace NsAppManager
 {
+
+log4cplus::Logger AppMgrCore::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
 	
 AppMgrCore& AppMgrCore::getInstance( )
 {
@@ -44,7 +46,6 @@ AppMgrCore::AppMgrCore()
 	,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsIncoming, NULL))
 	,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsOutgoing, NULL))
 	,m_bTerminate(false)
-	,mLogger( log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore")) )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
 }
@@ -172,10 +173,43 @@ void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 
 void AppMgrCore::handleBusRPCMessage( RPC2Communication::RPC2Command* msg )
 {
-	//right now handles only outgoing messages
-	//assumes that the message in param is outgoing
-	LOG4CPLUS_INFO_EXT(mLogger, " A " << msg->getMethod() << " bus message request has been invoked");
+	LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been invoking...");
+
+	switch(msg->getCommandType())
+	{
+		case MobileRPCMessage::REQUEST:
+		{
+/*			if(0 == msg->getMethod())
+			{
+				LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
+				RegisterAppInterface * object = (RegisterAppInterface*)msg;
+				const RegistryItem* registeredApp =  registerApplication( object );
+				MobileRPCMessage* response = queryInfoForRegistration( registeredApp );
+				sendMobileRPCResponse( response );
+			}
+			else if(0 == msg->getMethod().compare("SubscribeButton"))
+			{
+				LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
+				//	SubscribeButton * object = (SubscribeButton*)msg;
+				//	registerApplication( object );
+				sendMobileRPCResponse( msg );
+			}
+*/			break;
+		}
+		case MobileRPCMessage::RESPONSE:
+		case MobileRPCMessage::NOTIFICATION:
+		{
+			LOG4CPLUS_INFO_EXT(mLogger, " A "<< msg->getMethod() << " response or notification has been invoked");
+		//	mJSONHandler->sendRPCMessage(msg);
+			break;
+		}
+		case MobileRPCMessage::UNDEFINED:
+		default:
+			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethod() <<" has been received!");
+			break;
+	}
 //	AppLinkInterface::getInstance().sendRPCCommand( msg );
+	LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been invoked!");
 }
 
 void AppMgrCore::enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message )
@@ -255,6 +289,24 @@ void AppMgrCore::sendMobileRPCResponse( MobileRPCMessage* msg )
 
 void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
 {
+	while(true)
+	{
+		std::size_t size = mQueueRPCBusObjectsIncoming.size();
+		if( size > 0 )
+		{
+			mMtxRPCBusObjectsIncoming.Lock();
+			RPC2Communication::RPC2Command* msg = mQueueRPCBusObjectsIncoming.front();
+			mQueueRPCBusObjectsIncoming.pop();
+			mMtxRPCBusObjectsIncoming.Unlock();
+			if(!msg)
+			{
+				LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
+				continue;
+			}
+			
+			handleBusRPCMessage( msg );
+		}
+	}
 }
 
 void* AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing( void* )

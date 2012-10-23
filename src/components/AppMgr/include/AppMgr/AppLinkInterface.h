@@ -102,7 +102,7 @@ private:
 	bool m_bVRCapsRetrieved;
 	bool m_bVoiceCapsRetrieved;
 	
-	const log4cplus::Logger& mLogger;
+	static log4cplus::Logger mLogger;
 
 	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsIncoming;
 	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsOutgoing;

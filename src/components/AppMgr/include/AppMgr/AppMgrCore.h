@@ -81,7 +81,7 @@ private:
 
 	bool m_bTerminate;
 	JSONHandler* mJSONHandler;
-	const log4cplus::Logger& mLogger;
+	static log4cplus::Logger mLogger;
 };
 
 }; // namespace NsAppManager

@@ -18,6 +18,7 @@
 namespace NsAppManager
 {
 
+log4cplus::Logger AppLinkInterface::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppLinkInterface"));
 std::string AppLinkInterface::mAddress = "";
 uint16_t AppLinkInterface::mPort = 0;
 std::string AppLinkInterface::mName = "";
@@ -25,7 +26,6 @@ bool AppLinkInterface::m_bInitialized = false;
 
 AppLinkInterface::AppLinkInterface( const std::string& address, uint16_t port, const std::string& name )
 	:NsMessageBroker::CMessageBrokerController::CMessageBrokerController(address, port, name)
-	,mLogger( log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppLinkInterface")) )
 	,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppLinkInterface>(*this, &AppLinkInterface::handleQueueRPCBusObjectsIncoming, NULL))
 	,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppLinkInterface>(*this, &AppLinkInterface::handleQueueRPCBusObjectsOutgoing, NULL))
 	,m_bTerminate(false)
