@@ -1,7 +1,8 @@
 #include "CBluetoothAdapter.hpp"
 
-AppLink::TransportManager::CBluetoothAdapter::CBluetoothAdapter(AppLink::TransportManager::IDeviceAdapterListener & Listener):
+AppLink::TransportManager::CBluetoothAdapter::CBluetoothAdapter(AppLink::TransportManager::IDeviceAdapterListener & Listener, IHandleGenerator & HandleGenerator):
 mListener(Listener),
+mHandleGenerator(HandleGenerator),
 mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("BluetoothAdapter")))
 {
     LOG4CPLUS_INFO_EXT(mLogger, "BluetoothAdapter constructed");

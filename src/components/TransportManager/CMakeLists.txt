@@ -10,6 +10,7 @@ include_directories(./include
 
 set (SOURCES ./src/IDeviceAdapter.cpp
              ./src/IDeviceAdapterListener.cpp
+             ./src/IHandleGenerator.cpp
              ./src/ITransportManager.cpp
              ./src/ITransportManagerListener.cpp
              ./src/CBluetoothAdapter.cpp

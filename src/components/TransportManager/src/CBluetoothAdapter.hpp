@@ -4,6 +4,7 @@
 #include "Logger.hpp"
 
 #include "IDeviceAdapter.hpp"
+#include "IHandleGenerator.hpp"
 
 namespace AppLink
 {
@@ -21,8 +22,9 @@ namespace AppLink
              * @brief Constructor.
              *
              * @param Listener Listener for device adapter notifications.
+             * @param HandleGenerator Handle generator implementation.
              **/
-            CBluetoothAdapter(IDeviceAdapterListener & Listener);
+            CBluetoothAdapter(IDeviceAdapterListener & Listener, IHandleGenerator & HandleGenerator);
 
             /**
              * @brief Destructor.
@@ -67,6 +69,11 @@ namespace AppLink
              * @brief Listener for device adapter notifications.
              **/
             IDeviceAdapterListener & mListener;
+
+            /**
+             * @brief Handle generator implementation.
+             **/
+            IHandleGenerator & mHandleGenerator;
 
             /**
              * @brief Logger.

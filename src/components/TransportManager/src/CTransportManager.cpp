@@ -7,7 +7,7 @@ AppLink::TransportManager::CTransportManager::CTransportManager(void):
 mDeviceAdapters(),
 mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager")))
 {
-    mDeviceAdapters.push_back(new CBluetoothAdapter(*this));
+    mDeviceAdapters.push_back(new CBluetoothAdapter(*this, *this));
 
     LOG4CPLUS_INFO_EXT(mLogger, "TransportManager constructed");
 }

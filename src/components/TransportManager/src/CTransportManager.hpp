@@ -3,6 +3,7 @@
 
 #include "TransportManager/ITransportManager.hpp"
 #include "IDeviceAdapterListener.hpp"
+#include "IHandleGenerator.hpp"
 #include "Logger.hpp"
 
 namespace AppLink
@@ -14,7 +15,9 @@ namespace AppLink
         /**
          * @brief Transport manager implementation.
          **/
-        class CTransportManager: public ITransportManager, public IDeviceAdapterListener
+        class CTransportManager: public ITransportManager,
+                                 public IDeviceAdapterListener,
+                                 public IHandleGenerator
         {
         public:
             /**
@@ -76,7 +79,7 @@ namespace AppLink
              *
              * @return New device handle.
              **/
-            tDeviceHandle generateNewDeviceHandle(void);
+            virtual tDeviceHandle generateNewDeviceHandle(void);
 
             /**
              * @brief Generate new connection handle.
@@ -86,7 +89,7 @@ namespace AppLink
              *
              * @return New connection handle.
              **/
-            tConnectionHandle generateNewConnectionHandle(void);
+            virtual tConnectionHandle generateNewConnectionHandle(void);
 
         private:
             /**
