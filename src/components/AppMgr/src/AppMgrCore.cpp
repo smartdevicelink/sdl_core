@@ -164,7 +164,7 @@ void AppMgrCore::handleBusRPCMessage( RPC2Communication::RPC2Command* msg )
 	//right now handles only outgoing messages
 	//assumes that the message in param is outgoing
 	LOG4CPLUS_INFO_EXT(mLogger, " A " << msg->getMethod() << " bus message request has been invoked");
-	AppLinkInterface::getInstance().sendRPCCommand( msg );
+//	AppLinkInterface::getInstance().sendRPCCommand( msg );
 }
 
 void AppMgrCore::enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message )
@@ -222,6 +222,10 @@ const RegistryItem* AppMgrCore::registerApplication( RegisterAppInterface* objec
 MobileRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem* registryItem )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Querying info for registration of an application " << registryItem->getApplication()->getName() << "!");
+
+	
+
+	LOG4CPLUS_INFO_EXT(mLogger, " Queried info for registration of an application " << registryItem->getApplication()->getName() << "!");
 }
 
 void AppMgrCore::registerApplicationOnHMI( const std::string& name )
