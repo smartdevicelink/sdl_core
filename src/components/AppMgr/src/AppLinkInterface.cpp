@@ -176,8 +176,8 @@ void AppLinkInterface::sendMessageAwaitingExecution( RPC2Communication::RPC2Comm
 void AppLinkInterface::getButtonCapabilities()
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting button capabilities...");
-//	RPC2Communication::RPC2Command* rpcObject = RPC2Communication::RPC2Marshaller:: new RPCBusObject( 1, RPCBusObject::REQUEST, "Buttons.getCapabilities" );
-//	enqueueRPCCommandOutgoing( rpcObject );
+	RPC2Communication::RPC2Command* rpcObject; //= RPC2Communication::RPC2Marshaller:: new RPCBusObject( 1, RPCBusObject::REQUEST, "Buttons.getCapabilities" );
+	sendMessageAwaitingExecution( rpcObject, true );
 
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting button capabilities sent to HMI");
 }
@@ -185,8 +185,8 @@ void AppLinkInterface::getButtonCapabilities()
 void AppLinkInterface::getVoiceCapabilities()
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting voice capabilities...");
-//	RPC2Communication::RPC2Command* rpcObject = new RPCBusObject( 1, RPCBusObject::REQUEST, "Voice.getCapabilities" );
-//	enqueueRPCCommandOutgoing( rpcObject );
+	RPC2Communication::RPC2Command* rpcObject; //= new RPCBusObject( 1, RPCBusObject::REQUEST, "Voice.getCapabilities" );
+	sendMessageAwaitingExecution( rpcObject, true );
 	
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting voice capabilities sent to HMI");
 }
@@ -194,17 +194,25 @@ void AppLinkInterface::getVoiceCapabilities()
 void AppLinkInterface::getVRCapabilities()
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting VR capabilities...");
-//	RPC2Communication::RPC2Command* rpcObject = new RPCBusObject( 1, RPCBusObject::REQUEST, "VR.getCapabilities" );
-//	enqueueRPCCommandOutgoing( rpcObject );
+	RPC2Communication::RPC2Command* rpcObject; //= new RPCBusObject( 1, RPCBusObject::REQUEST, "VR.getCapabilities" );
+	sendMessageAwaitingExecution( rpcObject, true );
 	
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting VR capabilities sent to HMI");
 }
 
 void AppLinkInterface::getAllCapabilities()
 {
-	std::async(std::launch::async, &AppLinkInterface::getButtonCapabilities, this);
-	std::async(std::launch::async, &AppLinkInterface::getVoiceCapabilities, this);
-	std::async(std::launch::async, &AppLinkInterface::getVRCapabilities, this);
+	LOG4CPLUS_INFO_EXT(mLogger, " Getting all capabilities");
+	
+	auto op1 = std::async(std::launch::async, &AppLinkInterface::getButtonCapabilities, this);
+	auto op2 = std::async(std::launch::async, &AppLinkInterface::getVoiceCapabilities, this);
+	auto op3 = std::async(std::launch::async, &AppLinkInterface::getVRCapabilities, this);
+
+	while( !op1.valid() || !op2.valid() || !op3.valid() )
+	{
+	}
+
+	LOG4CPLUS_INFO_EXT(mLogger, " Got all capabilities");
 }
 
 /** Thread manipulation */
