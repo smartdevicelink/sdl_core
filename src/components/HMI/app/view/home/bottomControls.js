@@ -4,10 +4,10 @@
  * @desc BottomControlls module visual representation
  * 
  * @category	View
- * @filesource	app/view/BottomControls.js
+ * @filesource	app/view/home/BottomControls.js
  * @version		2.0
  *
- * @author		Igor Zhavoronkin
+ * @author		Andriy Melnik
  */
  
 MFT.BottomControls = Em.ContainerView.extend({

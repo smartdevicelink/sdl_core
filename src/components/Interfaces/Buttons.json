@@ -24,18 +24,20 @@
 	 * 		button capabilites
  	 * 		array of supported buttons
 	 */ 
-        "Buttons.getCapabilities": {
+        "Buttons.GetCapabilities": {
 	     returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
-				"capabilities"	: "ButtonCapabilities", // data type from AppLink protocol specification
-	    			"button"	: "string"
+				[
+					"capabilities"	: "ButtonCapabilities", // data type from AppLink protocol specification
+		    			"button"	: "string"
+				]
 			}
         },
 
 	/*
 	 * @descr Notifies application of UP/DOWN events for buttons
 	 */
-	"Buttons.onButtonEvent": {
+	"Buttons.OnButtonEvent": {
 		"parameters": {
 			"name"	: "string",        
 			"mode"	: "ButtonEventMode"  // data type from AppLink protocol specification
@@ -46,7 +48,7 @@
 	/*
 	 * @descr Notifies application of LONG/SHORT press events for buttons
 	 */
-	"Buttons.onButtonPress": {
+	"Buttons.OnButtonPress": {
 		"parameters": {
 			"name"	: "string",        
 			"mode"	: "ButtonPressMode" // data type from AppLink protocol specification
