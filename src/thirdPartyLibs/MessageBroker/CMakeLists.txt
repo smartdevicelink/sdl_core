@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 set (PROJECT messageBroker)
 project (${PROJECT}) 
 
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
@@ -50,6 +51,12 @@ add_library(messagebrokerserver
                 ./src/server/mb_tcpserver.cpp
                 ./src/server/networking.cpp
             )
+
+## Compiler flags
+if(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3")        ## DON'T Optimize
+    set(CMAKE_EXE_LINKER_FLAGS "-m")  ## Strip binary
+endif()
 
 install (TARGETS messagebroker messagebrokerclient messagebrokerserver DESTINATION bin) 
 
