@@ -228,11 +228,11 @@ void AppLinkInterface::executeThreads()
 	
 	LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
 	
-	while(!m_bTerminate)
+	/*while(!m_bTerminate)
 	{
-	}
+	}*/
 	
-	LOG4CPLUS_INFO_EXT(mLogger, " Threads are being stopped!");
+	//LOG4CPLUS_INFO_EXT(mLogger, " Threads are being stopped!");
 }
 
 void AppLinkInterface::terminateThreads()
