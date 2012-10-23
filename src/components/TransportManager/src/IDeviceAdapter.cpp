@@ -1,5 +1,5 @@
 #include "IDeviceAdapter.hpp"
 
-AppLink::TransportManager::IDeviceAdapter::~IDeviceAdapter(void)
+NsAppLink::NsTransportManager::IDeviceAdapter::~IDeviceAdapter(void)
 {
 }

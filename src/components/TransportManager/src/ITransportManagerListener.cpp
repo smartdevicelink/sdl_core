@@ -1,25 +1,25 @@
 #include "TransportManager/ITransportManagerListener.hpp"
 
-AppLink::TransportManager::ITransportManagerListener::~ITransportManagerListener(void)
+NsAppLink::NsTransportManager::ITransportManagerListener::~ITransportManagerListener(void)
 {
 }
 
-void AppLink::TransportManager::ITransportManagerListener::onDeviceListUpdated(const std::vector<SDeviceInfo> & DeviceList)
+void NsAppLink::NsTransportManager::ITransportManagerListener::onDeviceListUpdated(const std::vector<SDeviceInfo> & DeviceList)
 {
 }
 
-void AppLink::TransportManager::ITransportManagerListener::onDeviceConnected(const SDeviceInfo & ConnectedDevice)
+void NsAppLink::NsTransportManager::ITransportManagerListener::onDeviceConnected(const SDeviceInfo & ConnectedDevice)
 {
 }
 
-void AppLink::TransportManager::ITransportManagerListener::onDeviceDisconnected(const SDeviceInfo & DisconnectedDevice)
+void NsAppLink::NsTransportManager::ITransportManagerListener::onDeviceDisconnected(const SDeviceInfo & DisconnectedDevice)
 {
 }
 
-void AppLink::TransportManager::ITransportManagerListener::onFrameReceived(tConnectionHandle ConnectionHandle, const Blob & Data)
+void NsAppLink::NsTransportManager::ITransportManagerListener::onFrameReceived(tConnectionHandle ConnectionHandle, const Blob & Data)
 {
 }
 
-void AppLink::TransportManager::ITransportManagerListener::onFrameSendCompleted(tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
+void NsAppLink::NsTransportManager::ITransportManagerListener::onFrameSendCompleted(tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
 {
 }

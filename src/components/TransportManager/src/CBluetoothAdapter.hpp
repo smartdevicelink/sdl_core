@@ -6,9 +6,9 @@
 #include "IDeviceAdapter.hpp"
 #include "IHandleGenerator.hpp"
 
-namespace AppLink
+namespace NsAppLink
 {
-    namespace TransportManager
+    namespace NsTransportManager
     {
         class IDeviceAdapterListener;
 

@@ -1,10 +1,10 @@
 #include "CTransportManager.hpp"
 
-AppLink::TransportManager::ITransportManager * AppLink::TransportManager::ITransportManager::create(void)
+NsAppLink::NsTransportManager::ITransportManager * NsAppLink::NsTransportManager::ITransportManager::create(void)
 {
     return new CTransportManager();
 }
 
-AppLink::TransportManager::ITransportManager::~ITransportManager(void)
+NsAppLink::NsTransportManager::ITransportManager::~ITransportManager(void)
 {
 }
