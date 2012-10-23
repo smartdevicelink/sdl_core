@@ -7,6 +7,7 @@
 
 #include "AppMgr/AppMgr.h"
 #include "AppMgr/AppLinkInterface.h"
+#include "AppMgr/AppMgrCore.h"
 #include "CMessageBroker.hpp"
 #include "CMessageBrokerRegistry.hpp"
 #include "CSender.hpp"
@@ -138,7 +139,7 @@ bool AppLinkInterface::findRespondedMethod( int method ) const
 	return mRespondedMethods.find(method) != mRespondedMethods.end();
 }
 
-void AppLinkInterface::receiveRPCCommand( const RPC2Communication::RPC2Command* rpcObject )
+void AppLinkInterface::receiveRPCCommand( RPC2Communication::RPC2Command* rpcObject )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Receiving RPC Bus object "<< rpcObject->getMethod() <<" from HMI...");
 
@@ -149,6 +150,8 @@ void AppLinkInterface::receiveRPCCommand( const RPC2Communication::RPC2Command* 
 		addRespondedMethod(method);
 	}
 
+	AppMgrCore::getInstance().pushRPC2CommunicationMessage(rpcObject);
+	
 	LOG4CPLUS_INFO_EXT(mLogger, " Received RPC Bus object "<< rpcObject->getMethod() <<" from HMI");
 }
 

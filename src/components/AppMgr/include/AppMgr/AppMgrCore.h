@@ -38,6 +38,7 @@ public:
 
 	static AppMgrCore& getInstance();
 	void pushMobileRPCMessage( MobileRPCMessage * message );
+	void pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message );
 
 	void executeThreads();
 	void terminateThreads();

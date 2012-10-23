@@ -77,6 +77,17 @@ void AppMgrCore::pushMobileRPCMessage( MobileRPCMessage * message )
 	LOG4CPLUS_INFO_EXT(mLogger, " Pushed mobile RPC message");
 }
 
+void AppMgrCore::pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message )
+{
+	LOG4CPLUS_INFO_EXT(mLogger, " Returning a message from HMI...");
+	mMtxRPCBusObjectsIncoming.Lock();
+	
+	mQueueRPCBusObjectsIncoming.push(message);
+	
+	mMtxRPCBusObjectsIncoming.Unlock();
+	LOG4CPLUS_INFO_EXT(mLogger, " Returned a message from HMI");
+}
+
 void AppMgrCore::executeThreads()
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Threads are being started!");
