@@ -1,8 +1,8 @@
-/*
+/*                                           
  * 
- * @name Voice
+ * @name AppLink Core 
  * 
- * @desc Voice Recognition functionality
+ * @desc AppLink Core functionality
  * 
  * @category	HMI
  * @version	1.0
@@ -17,32 +17,72 @@
     "methods": {
 	/*
 	 * @descr 
-	 *      
+	 *     this methos is usually invoked by HMI to get list of registered apps 
 	 *	
 	 * 	
 	 * @returns
-	 * 	
+	 *  	the array of rehgistered apps
  	 * 	
 	 */ 
-        "AppLinkCore.??": {
+        "AppLinkCore.getAppList": {
 	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
-			[
-				"capabilities"	: "ButtonCapabilities", // data type from AppLink protocol specification
-	    			"button"	: "string"
-			]
+			"parameters": {
+				[
+					"appName"		: "string",
+					"ngnMediaScreenAppName" : "string",
+					"icon"			: "string",
+				]
+			}
         },
 
 
 	/*
-	 * @descr Notifies application of LONG/SHORT press events for buttons
-	 */
-	"AppLinkCore.OnAppRegister": {
-	 // TODO
+	 * @descr 
+	 *      Activate app 
+	 * 	Usually invoked by UI component when user click on app in the list of registered apps
+	 * 	
+	 * @returns
+	 *  	result
+ 	 * 	
+	 */ 
+        "AppLinkCore.activateApp": {
 		"parameters": {
-			"name"	: "string",        
-			"mode"	: "ButtonPressMode" // data type from AppLink protocol specification
+			[
+				"appName"		: "string"
+			]
 		}
-	}
+
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result" : "???" // TODO: data type to be defined
+			}
+        },
+
+	/*
+	 * @descr Notifies if new application is registered
+	 */
+	"AppLinkCore.OnAppRegistered": {
+		"parameters": {
+			"appName"	: "string",        
+			"appIcon"	: "string",
+			[
+				"vrSynonym" : "String" // sysnonyms assossiated with app to start it
+			],
+			"isMediaApplication" : "boolean",
+			"languageDesired"    : "Language" // data type from AppLink protocol specification
+		}
+	},
+
+	/*
+	 * @descr Notifies if application is unregistered
+	 */
+	"AppLinkCore.OnAppUnregistered": {
+		"parameters": {
+			"appName"	: "string",
+			"reason"        : "AppInterfaceUnregisteredReason" // data type from AppLink protocol specification
+		}
+	},
+
 
     }, //methods end
     

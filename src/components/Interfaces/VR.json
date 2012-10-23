@@ -11,10 +11,10 @@
  *
  */
 {
-    "envelope": 	"JSON-RPC 2.0",
-    "serviceUrl": 	"/localhost:6087",
+    "envelope"		: "JSON-RPC 2.0",
+    "serviceUrl"	: "/localhost:6087",
     
-    "methods": {
+    "methods"		: {
 	/*
 	 * @descr 
 	 *      method should be invoked at system startup
