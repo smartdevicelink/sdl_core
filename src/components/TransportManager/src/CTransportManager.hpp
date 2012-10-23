@@ -2,16 +2,19 @@
 #define __TRANSPORTMANAGER_CTRANSPORTMANAGER_HPP__
 
 #include "TransportManager/ITransportManager.hpp"
+#include "IDeviceAdapterListener.hpp"
 #include "Logger.hpp"
 
 namespace AppLink
 {
     namespace TransportManager
     {
+        class IDeviceAdapter;
+
         /**
          * @brief Transport manager implementation.
          **/
-        class CTransportManager: public ITransportManager
+        class CTransportManager: public ITransportManager, public IDeviceAdapterListener
         {
         public:
             /**
@@ -86,6 +89,11 @@ namespace AppLink
             tConnectionHandle generateNewConnectionHandle(void);
 
         private:
+            /**
+             * @brief Device adapters.
+             **/
+            std::vector<IDeviceAdapter*> mDeviceAdapters;
+
             /**
              * @brief Logger.
              **/

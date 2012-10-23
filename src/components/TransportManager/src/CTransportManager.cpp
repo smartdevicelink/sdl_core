@@ -1,21 +1,33 @@
 #include "LoggerHelper.hpp"
 
 #include "CTransportManager.hpp"
+#include "CBluetoothAdapter.hpp"
 
 AppLink::TransportManager::CTransportManager::CTransportManager(void):
+mDeviceAdapters(),
 mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager")))
 {
+    mDeviceAdapters.push_back(new CBluetoothAdapter(*this));
+
     LOG4CPLUS_INFO_EXT(mLogger, "TransportManager constructed");
 }
 
 AppLink::TransportManager::CTransportManager::~CTransportManager(void)
 {
     LOG4CPLUS_INFO_EXT(mLogger, "TransportManager destructor");
+
+    for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
+    {
+        delete *di;
+    }
 }
 
 void AppLink::TransportManager::CTransportManager::run(void)
 {
-    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+    for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
+    {
+        (*di)->run();
+    }
 }
 
 void AppLink::TransportManager::CTransportManager::getDeviceList(std::vector<AppLink::TransportManager::SDeviceInfo> & DeviceList) const

@@ -22,6 +22,13 @@ namespace AppLink
             virtual ~IDeviceAdapter(void);
 
             /**
+             * @brief Run device adapter.
+             *
+             * Called from transport manager to start device adapter.
+             **/
+            virtual void run(void) = 0;
+
+            /**
              * @brief Get list of available devices.
              *
              * @param DeviceList Reference to a variable that will
