@@ -10,6 +10,8 @@
 #include "JSONHandler/AlertResponseMarshaller.h"
 #include "JSONHandler/ShowMarshaller.h"
 #include "JSONHandler/ShowResponseMarshaller.h"
+#include "JSONHandler/GetCapabilitiesMarshaller.h"
+#include "JSONHandler/GetCapabilitiesResponseMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -26,7 +28,9 @@ namespace RPC2Communication
         METHOD_ALERT_REQUEST=3,
         METHOD_ALERT_RESPONSE=4,
         METHOD_SHOW_REQUEST=5,
-        METHOD_SHOW_RESPONSE=6
+        METHOD_SHOW_RESPONSE=6,
+        METHOD_GET_CAPABILITIES_REQUEST=7,
+        METHOD_GET_CAPABILITIES_RESPONSE=8
         };
 
         RPC2Marshaller();
@@ -98,6 +102,21 @@ namespace RPC2Communication
             return mShowResponseMarshaller.toString(res);
         }
 
+        static bool fromString(const std::string& str, GetCapabilities&res)
+        {
+            return mGetCapabilitiesMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const GetCapabilities& res)
+        {
+            return mGetCapabilitiesMarshaller.toString(res);
+        }
+
+        static std::string toString(const GetCapabilitiesResponse& res)
+        {
+            return mGetCapabilitiesResponseMarshaller.toString(res);
+        }
+
 
     private:
         struct localHash
@@ -126,6 +145,8 @@ namespace RPC2Communication
         static AlertResponseMarshaller mAlertResponseMarshaller;
         static ShowMarshaller mShowMarshaller;
         static ShowResponseMarshaller mShowResponseMarshaller;
+        static GetCapabilitiesMarshaller mGetCapabilitiesMarshaller;
+        static GetCapabilitiesResponseMarshaller mGetCapabilitiesResponseMarshaller;
 
     };
 

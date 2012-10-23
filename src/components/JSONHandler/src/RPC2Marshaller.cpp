@@ -7,21 +7,25 @@ using namespace RPC2Communication;
 
 const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
 {
-  if ( s.compare("OnButtonEvent") == 0 )
+  if ( s.compare("Buttons.OnButtonEvent") == 0 )
     {
         return METHOD_ONBUTTONEVENT;
     }
-    if ( s.compare("Speak") == 0 )
+    if ( s.compare("TTS.Speak") == 0 )
     {
         return METHOD_SPEAK_REQUEST;
     }
-    if ( s.compare("Alert") == 0 )
+    if ( s.compare("UI.Alert") == 0 )
     {
         return METHOD_ALERT_REQUEST;
     }
-    if ( s.compare("Show") == 0 )
+    if ( s.compare("UI.Show") == 0 )
     {
         return METHOD_SHOW_REQUEST;
+    }
+    if ( s.compare("Buttons.GetCapabilities") == 0 )
+    {
+        return METHOD_GET_CAPABILITIES_REQUEST;
     }
     
     return METHOD_INVALID;
@@ -78,6 +82,14 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json)
         delete rv;
         return NULL;
     }
+    case METHOD_GET_CAPABILITIES_REQUEST:
+    {
+        GetCapabilities * rv = new GetCapabilities;
+        if ( GetCapabilitiesMarshaller::fromJSON(json, *rv) )
+          return rv;
+        delete rv;
+        return NULL;
+    }
   }
 
   return NULL;
@@ -109,6 +121,10 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return ShowMarshaller::toJSON(* static_cast<const Show*> (msg));
     case METHOD_SHOW_RESPONSE:
       return ShowResponseMarshaller::toJSON(* static_cast<const ShowResponse*>(msg));
+    case METHOD_GET_CAPABILITIES_REQUEST:
+      return GetCapabilitiesMarshaller::toJSON(* static_cast<const GetCapabilities*>(msg));
+    case METHOD_GET_CAPABILITIES_RESPONSE:
+      return GetCapabilitiesResponseMarshaller::toJSON(* static_cast<const GetCapabilitiesResponse*>(msg));
   }
 
   return j;
@@ -149,3 +165,5 @@ AlertMarshaller RPC2Marshaller::mAlertMarshaller;
 AlertResponseMarshaller RPC2Marshaller::mAlertResponseMarshaller;
 ShowMarshaller RPC2Marshaller::mShowMarshaller;
 ShowResponseMarshaller RPC2Marshaller::mShowResponseMarshaller;
+GetCapabilitiesMarshaller RPC2Marshaller::mGetCapabilitiesMarshaller;
+GetCapabilitiesResponseMarshaller RPC2Marshaller::mGetCapabilitiesResponseMarshaller;

@@ -42,6 +42,13 @@ add_library(jsonHandler
                   ./src/ShowMarshaller.cpp
                   ./src/ShowResponseMarshaller.cpp
                   ./src/TextAlignmentMarshaller.cpp
+                  ./src/GetCapabilities.cpp
+                  ./src/GetCapabilitiesResponseMarshaller.cpp
+                  ./src/GetCapabilitiesResponse.cpp
+                  ./src/GetCapabilitiesMarshaller.cpp
+                  ./src/GetCapabilities.cpp
+                  ./src/ButtonNameMarshaller.cc
+                  ./src/ButtonCapabilitiesMarshaller.cpp
            )
 
 include(ExternalProject)
