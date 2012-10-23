@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 set (PROJECT appManager)
 project (${PROJECT})
 
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
@@ -35,5 +36,11 @@ set (SOURCES
 	)
 
 add_library(${PROJECT} ${SOURCES})
+
+## Compiler flags
+if(CMAKE_COMPILER_IS_GNUCXX)
+	set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3 -std=c++0x")	## DON'T Optimize
+	set(CMAKE_EXE_LINKER_FLAGS "-m")  			  		## DON'T Strip binary
+endif()
 
 install (TARGETS ${PROJECT} DESTINATION bin)

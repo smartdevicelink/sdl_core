@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 
     JSONHandler jsonHandler;
 
-    AxisCore::ProtocolHandler protocolHandler =  AxisCore::ProtocolHandler(&jsonHandler, &btadapter);
+    AxisCore::ProtocolHandler protocolHandler =  AxisCore::ProtocolHandler(&jsonHandler, &btadapter, 1);
 
     jsonHandler.setProtocolHandler(&protocolHandler);
 

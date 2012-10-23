@@ -11,6 +11,7 @@
 #include "CMessageBrokerRegistry.hpp"
 #include "CSender.hpp"
 #include <map>
+#include <future>
 #include "LoggerHelper.hpp"
 
 namespace NsAppManager
@@ -22,11 +23,14 @@ std::string AppLinkInterface::mName = "";
 bool AppLinkInterface::m_bInitialized = false;
 
 AppLinkInterface::AppLinkInterface( const std::string& address, uint16_t port, const std::string& name )
-:NsMessageBroker::CMessageBrokerController::CMessageBrokerController(address, port, name)
-,mLogger( log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppLinkInterface")) )
-,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppLinkInterface>(*this, &AppLinkInterface::handleQueueRPCBusObjectsIncoming, NULL))
-,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppLinkInterface>(*this, &AppLinkInterface::handleQueueRPCBusObjectsOutgoing, NULL))
-,m_bTerminate(false)
+	:NsMessageBroker::CMessageBrokerController::CMessageBrokerController(address, port, name)
+	,mLogger( log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppLinkInterface")) )
+	,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppLinkInterface>(*this, &AppLinkInterface::handleQueueRPCBusObjectsIncoming, NULL))
+	,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppLinkInterface>(*this, &AppLinkInterface::handleQueueRPCBusObjectsOutgoing, NULL))
+	,m_bTerminate(false)
+	,m_bButtonCapsRetrieved(false)
+	,m_bVRCapsRetrieved(false)
+	,m_bVoiceCapsRetrieved(false)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " AppLinkInterface constructed!");
 }
@@ -64,35 +68,116 @@ void AppLinkInterface::sendRPCCommand( const RPC2Communication::RPC2Command* rpc
 	LOG4CPLUS_INFO_EXT(mLogger, " Sent RPC Bus object "<< rpcObject->getMethod() <<" to HMI");
 }
 
-void AppLinkInterface::enqueueRPCCommand( RPC2Communication::RPC2Command * object )
+void AppLinkInterface::enqueueRPCCommandIncoming( RPC2Communication::RPC2Command * object )
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " Pushing RPC bus message...");
+	LOG4CPLUS_INFO_EXT(mLogger, " Pushing RPC incoming bus message...");
 	mMtxRPCBusObjectsIncoming.Lock();
 	
 	mQueueRPCBusObjectsIncoming.push(object);
 	
 	mMtxRPCBusObjectsIncoming.Unlock();
-	LOG4CPLUS_INFO_EXT(mLogger, " Pushed RPC bus message");
+	LOG4CPLUS_INFO_EXT(mLogger, " Pushed RPC incoming bus message");
+}
+
+void AppLinkInterface::enqueueRPCCommandOutgoing( RPC2Communication::RPC2Command * object )
+{
+	LOG4CPLUS_INFO_EXT(mLogger, " Pushing RPC outgoing bus message...");
+	mMtxRPCBusObjectsOutgoing.Lock();
+	
+	mQueueRPCBusObjectsOutgoing.push(object);
+	
+	mMtxRPCBusObjectsOutgoing.Unlock();
+	LOG4CPLUS_INFO_EXT(mLogger, " Pushed RPC outgoing bus message");
+}
+
+void AppLinkInterface::addAwaitedResponseMethod( int method )
+{
+	LOG4CPLUS_INFO_EXT(mLogger, " Adding awaited response method "<<method);
+	mMtxAwaitedResponseMethods.Lock();
+	mAwaitedResponseMethods.insert(method);
+	mMtxAwaitedResponseMethods.Unlock();
+	LOG4CPLUS_INFO_EXT(mLogger, " Added awaited response method "<<method);
+}
+
+void AppLinkInterface::addRespondedMethod( int method )
+{
+	LOG4CPLUS_INFO_EXT(mLogger, " Adding responded method "<<method);
+	mMtxRespondedMethods.Lock();
+	mRespondedMethods.insert(method);
+	mMtxRespondedMethods.Unlock();
+	LOG4CPLUS_INFO_EXT(mLogger, " Added responded method "<<method);
+}
+
+void AppLinkInterface::removeAwaitedResponseMethod( int method )
+{
+	LOG4CPLUS_INFO_EXT(mLogger, " Adding awaited response method "<<method);
+	mMtxAwaitedResponseMethods.Lock();
+	std::set<int>::iterator it = mAwaitedResponseMethods.find(method);
+	mAwaitedResponseMethods.erase(it);
+	mMtxAwaitedResponseMethods.Unlock();
+	LOG4CPLUS_INFO_EXT(mLogger, " Added awaited response method "<<method);
+}
+
+void AppLinkInterface::removeRespondedMethod( int method )
+{
+	LOG4CPLUS_INFO_EXT(mLogger, " Adding responded method "<<method);
+	mMtxRespondedMethods.Lock();
+	std::set<int>::iterator it = mRespondedMethods.find(method);
+	mRespondedMethods.erase(method);
+	mMtxRespondedMethods.Unlock();
+	LOG4CPLUS_INFO_EXT(mLogger, " Added responded method "<<method);
+}
+
+bool AppLinkInterface::findAwaitedResponseMethod( int method ) const
+{
+	return mAwaitedResponseMethods.find(method) != mAwaitedResponseMethods.end();
+}
+
+bool AppLinkInterface::findRespondedMethod( int method ) const
+{
+	return mRespondedMethods.find(method) != mRespondedMethods.end();
 }
 
 void AppLinkInterface::receiveRPCCommand( const RPC2Communication::RPC2Command* rpcObject )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Receiving RPC Bus object "<< rpcObject->getMethod() <<" from HMI...");
 
-	
-	
+	int method = rpcObject->getMethod();
+	if( findAwaitedResponseMethod(method) )
+	{
+		removeAwaitedResponseMethod(method);
+		addRespondedMethod(method);
+	}
+
 	LOG4CPLUS_INFO_EXT(mLogger, " Received RPC Bus object "<< rpcObject->getMethod() <<" from HMI");
 }
 
-void AppLinkInterface::sendMessage()
+void AppLinkInterface::sendMessageAwaitingExecution( RPC2Communication::RPC2Command* rpcObject, bool repeat )
 {
+	LOG4CPLUS_INFO_EXT(mLogger, " Sending a message awaiting result "<< rpcObject->getMethod() <<" to HMI...");
 	
+	enqueueRPCCommandOutgoing( rpcObject );
+	int method = rpcObject->getMethod();
+	addAwaitedResponseMethod(method);
+
+	while( !findRespondedMethod(method) )
+	{
+		if( repeat )
+		{
+			enqueueRPCCommandOutgoing( rpcObject );
+		}
+	}
+
+	removeRespondedMethod(method);
+
+	LOG4CPLUS_INFO_EXT(mLogger, " Sent a message awaiting result "<< rpcObject->getMethod() <<" to HMI...");
 }
 
 void AppLinkInterface::getButtonCapabilities()
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting button capabilities...");
-	RPCBusObject* rpcObject = new RPCBusObject( 1, RPCBusObject::REQUEST, "Buttons.getCapabilities" );
+//	RPC2Communication::RPC2Command* rpcObject = RPC2Communication::RPC2Marshaller:: new RPCBusObject( 1, RPCBusObject::REQUEST, "Buttons.getCapabilities" );
+//	enqueueRPCCommandOutgoing( rpcObject );
 
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting button capabilities sent to HMI");
 }
@@ -100,7 +185,8 @@ void AppLinkInterface::getButtonCapabilities()
 void AppLinkInterface::getVoiceCapabilities()
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting voice capabilities...");
-	RPCBusObject* rpcObject = new RPCBusObject( 1, RPCBusObject::REQUEST, "Voice.getCapabilities" );
+//	RPC2Communication::RPC2Command* rpcObject = new RPCBusObject( 1, RPCBusObject::REQUEST, "Voice.getCapabilities" );
+//	enqueueRPCCommandOutgoing( rpcObject );
 	
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting voice capabilities sent to HMI");
 }
@@ -108,14 +194,17 @@ void AppLinkInterface::getVoiceCapabilities()
 void AppLinkInterface::getVRCapabilities()
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting VR capabilities...");
-	RPCBusObject* rpcObject = new RPCBusObject( 1, RPCBusObject::REQUEST, "VR.getCapabilities" );
+//	RPC2Communication::RPC2Command* rpcObject = new RPCBusObject( 1, RPCBusObject::REQUEST, "VR.getCapabilities" );
+//	enqueueRPCCommandOutgoing( rpcObject );
 	
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting VR capabilities sent to HMI");
 }
 
 void AppLinkInterface::getAllCapabilities()
 {
-	
+	std::async(std::launch::async, &AppLinkInterface::getButtonCapabilities, this);
+	std::async(std::launch::async, &AppLinkInterface::getVoiceCapabilities, this);
+	std::async(std::launch::async, &AppLinkInterface::getVRCapabilities, this);
 }
 
 /** Thread manipulation */
@@ -215,7 +304,7 @@ void AppLinkInterface::processResponse(std::string method, Json::Value& root)
 	}
 
 	RPC2Communication::RPC2Command* object = RPC2Communication::RPC2Marshaller::fromJSON(root);
-	enqueueRPCCommand(object);
+	enqueueRPCCommandIncoming(object);
 }
 
 /**
@@ -226,7 +315,7 @@ void AppLinkInterface::processRequest(Json::Value& root)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " A request has arrived");
 	RPC2Communication::RPC2Command* object = RPC2Communication::RPC2Marshaller::fromJSON(root);
-	enqueueRPCCommand(object);
+	enqueueRPCCommandIncoming(object);
 }
 
 /**
@@ -242,7 +331,7 @@ void AppLinkInterface::processNotification(Json::Value& root)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " A notification has arrived");
 	RPC2Communication::RPC2Command* object = RPC2Communication::RPC2Marshaller::fromJSON(root);
-	enqueueRPCCommand(object);
+	enqueueRPCCommandIncoming(object);
 }
 
 };
