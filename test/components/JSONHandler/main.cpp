@@ -14,10 +14,18 @@
 #include <vector>
 
 #include "TestJSONHandler.h"
+#include "JSONHandler/RPC2Marshaller.h"
+#include "JSONHandler/Result.h"
+#include "JSONHandler/SpeakResponse.h"
+#include "JSONHandler/AlertResponse.h"
+#include "JSONHandler/ShowResponse.h"
 
 char * readJsonContent ( const char * fileName );
 int parseJson ( const std::string & jsonContent );
 int withBluetooth();
+int handleMessage( char * jsonContent );
+
+TestJSONHandler testJSONHandler;
 
 int main( int argc, char* argv[] ) {
     
@@ -31,34 +39,21 @@ int main( int argc, char* argv[] ) {
 
     //withBluetooth();
 
-    int result = 0;
-    size_t nextMessagePos = 0;
-    char *const jsonContentBeginning = jsonContent;
+    int result = 0;    
 
     /*AxisCore::CMessage::generateInitialMessage();*/
     JSONHandler * jsonHandler = new JSONHandler;
-    TestJSONHandler testJSONHandler;
+    
     testJSONHandler.jsonHandler = jsonHandler;
     /*AxisCore::ProtocolHandler * protocolHandler = new AxisCore::ProtocolHandler( jsonHandler, 0 );
     jsonHandler -> setProtocolHandler( protocolHandler );*/
     char * secondname = "/home/dev/Projects/Ford/source/workspace/jsonSample/jsonrpc2_sample";
     char * rpc2Content = readJsonContent( secondname );
-    testJSONHandler.RPC2( rpc2Content );
     
-    while ( nextMessagePos != std::string::npos ) {
+          
+    handleMessage( rpc2Content );
+    //handleMessage( jsonContent );
 
-        std::string jsonString( jsonContent );
-        if ( !jsonString.empty() ) {
-            testJSONHandler.secondRelease( jsonString );
-        }
-
-        nextMessagePos = jsonString.find( "\n" );
-        jsonContent += nextMessagePos + 1;
-
-        sleep( 10 );
-    }
-
-    delete [] jsonContentBeginning;
     delete jsonHandler;
     //delete protocolHandler;
 
@@ -141,3 +136,42 @@ parseJson ( const std::string & jsonContent ) {
     return 0;
 }
 
+int handleMessage( char * jsonContent )
+{
+    size_t nextMessagePos = 0;
+    char *const jsonContentBeginning = jsonContent;
+
+    while ( nextMessagePos != std::string::npos ) {
+
+        std::string jsonString( jsonContent );
+        if ( !jsonString.empty() ) {
+            //testJSONHandler.secondRelease( jsonString );
+            testJSONHandler.RPC2( jsonString );            
+        }
+
+        nextMessagePos = jsonString.find( "\n" );
+        jsonContent += nextMessagePos + 1;
+
+        sleep( 1 );
+    }
+    RPC2Communication::AlertResponse * alertResponse = new RPC2Communication::AlertResponse;
+    alertResponse->setResult(Result("SUCCESS"));
+    alertResponse->setID(6);
+    std::cout<<"alert result: " << RPC2Communication::RPC2Marshaller::toString( alertResponse ) << std::endl;
+
+    RPC2Communication::ShowResponse * showResponse = new RPC2Communication::ShowResponse;
+    showResponse->setResult(Result("SUCCESS"));
+    showResponse->setID(8);
+    std::cout<<"show result: " << RPC2Communication::RPC2Marshaller::toString( showResponse ) << std::endl;
+
+
+    RPC2Communication::SpeakResponse * r = new RPC2Communication::SpeakResponse;
+    r->setResult(Result("SUCCESS"));
+    r->setID(8);
+    std::cout<<"result: " << RPC2Communication::RPC2Marshaller::toString( r ) << std::endl;
+    delete r;
+    delete alertResponse;
+    delete showResponse;
+
+    delete [] jsonContentBeginning;
+}

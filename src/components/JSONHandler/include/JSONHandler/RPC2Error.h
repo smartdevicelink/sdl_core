@@ -1,6 +1,8 @@
 #ifndef RPC2ERROR_CLASS
 #define RPC2ERROR_CLASS value
 
+#include <string>
+
 namespace RPC2Communication
 {    
     class RPC2Error

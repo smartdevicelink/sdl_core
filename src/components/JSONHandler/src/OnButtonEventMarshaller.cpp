@@ -35,8 +35,8 @@ Json::Value OnButtonEventMarshaller::toJSON(const OnButtonEvent& e)
 {  
   Json::Value json(Json::objectValue);
   
-  json["jsonrpc"]=Json::Value(Json::objectValue);
-  json["method"]=Json::Value("OnButtonEvent");
+  json["jsonrpc"]=Json::Value("2.0");
+  json["method"]=Json::Value("Buttons.OnButtonEvent");
   
   Json::Value j=Json::Value(Json::objectValue);
   
@@ -60,7 +60,7 @@ bool OnButtonEventMarshaller::fromJSON(const Json::Value& json,OnButtonEvent& c)
     if(!json.isMember("method") 
         || !json["method"].isString() )
         return false;
-    if (json["method"].asString().compare("OnButtonEvent"))  
+    if (json["method"].asString().compare("Buttons.OnButtonEvent"))  
         return false;
 
     if(!json.isMember("params"))  return false;

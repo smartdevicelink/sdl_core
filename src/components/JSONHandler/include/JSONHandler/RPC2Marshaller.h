@@ -4,6 +4,12 @@
 #include <json/value.h>
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/OnButtonEventMarshaller.h"
+#include "JSONHandler/SpeakMarshaller.h"
+#include "JSONHandler/SpeakResponseMarshaller.h"
+#include "JSONHandler/AlertMarshaller.h"
+#include "JSONHandler/AlertResponseMarshaller.h"
+#include "JSONHandler/ShowMarshaller.h"
+#include "JSONHandler/ShowResponseMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -15,8 +21,12 @@ namespace RPC2Communication
         {
         METHOD_INVALID=-1,
         METHOD_ONBUTTONEVENT=0,
-        METHOD_REQUEST1_REQUEST=1,
-        METHOD_REQUEST1_RESPONSE=2
+        METHOD_SPEAK_REQUEST=1,
+        METHOD_SPEAK_RESPONSE=2,
+        METHOD_ALERT_REQUEST=3,
+        METHOD_ALERT_RESPONSE=4,
+        METHOD_SHOW_REQUEST=5,
+        METHOD_SHOW_RESPONSE=6
         };
 
         RPC2Marshaller();
@@ -28,13 +38,66 @@ namespace RPC2Communication
         static RPC2Command* fromString(const std::string&);
         static std::string toString(const RPC2Command* msg);
 
-        static bool fromString(const std::string& str, OnButtonEvent& res) {
-        return mOnButtonEventMarshaller.fromString(str, res);
-      }
+        static std::string toString(const OnButtonEvent& res)  
+        {
+            return mOnButtonEventMarshaller.toString(res);
+        }
 
-      static std::string toString(const OnButtonEvent& res)  {
-        return mOnButtonEventMarshaller.toString(res);
-      }
+        static bool fromString(const std::string& str, OnButtonEvent& res) 
+        {
+            return mOnButtonEventMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const Speak& res) 
+        {
+            return mSpeakMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, Speak& res) 
+        {
+            return mSpeakMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const SpeakResponse & res)
+        {
+            return mSpeakResponseMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string&str, SpeakResponse& res)
+        {
+            return mSpeakResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const Alert & res)
+        {
+            return mAlertMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string&str, Alert& res)
+        {
+            return mAlertMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const AlertResponse& res)
+        {
+            return mAlertResponseMarshaller.toString(res);
+        }
+
+        static std::string toString(const Show & res)
+        {
+            return mShowMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, Show &res)
+        {
+            return mShowMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const ShowResponse& res)
+        {
+            return mShowResponseMarshaller.toString(res);
+        }
+
 
     private:
         struct localHash
@@ -49,11 +112,20 @@ namespace RPC2Communication
             return (e>=0 && e<4) ? mHashTable[e].name : NULL;
         }
 
-        static const Methods getIndex(const char* s);
+        static const Methods getIndex(const std::string & s);
 
         static const localHash mHashTable[3];
 
         static OnButtonEventMarshaller mOnButtonEventMarshaller;
+
+        static SpeakMarshaller mSpeakMarshaller;
+
+        static SpeakResponseMarshaller mSpeakResponseMarshaller;
+
+        static AlertMarshaller mAlertMarshaller;
+        static AlertResponseMarshaller mAlertResponseMarshaller;
+        static ShowMarshaller mShowMarshaller;
+        static ShowResponseMarshaller mShowResponseMarshaller;
 
     };
 

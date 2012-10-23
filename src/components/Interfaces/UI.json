@@ -27,7 +27,7 @@
 		"parameters": {
 			"mainField1" 	: "string",      
 			"mainField2" 	: "string",      
-			"aligment" 	: "textAlignment",    // data type from AppLink protocol specification  
+			"alignment" 	: "textAlignment",    // data type from AppLink protocol specification  
 			"statusBar" 	: "string",      
 			"mediaClock" 	: "string",      
 			"mediaTrack" 	: "string"

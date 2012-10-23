@@ -54,27 +54,17 @@ void AppLinkInterface::setParams(const std::string& address, uint16_t port, std:
 	m_bInitialized = true;
 }
 
-void AppLinkInterface::sendRPCBusObject( const RPCBusObject* rpcObject )
+void AppLinkInterface::sendRPCCommand( const RPC2Communication::RPC2Command* rpcObject )
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " Sending RPC Bus object "<< rpcObject->getMethodName() <<" to HMI...");
-	Json::Value request, params;
-	prepareMessage(request);
-	request["method"] = rpcObject->getMethodName();
+	LOG4CPLUS_INFO_EXT(mLogger, " Sending RPC Bus object "<< rpcObject->getMethod() <<" to HMI...");
 
-	if(!rpcObject->getParameters().empty())
-	{
-		for(RPCBusObject::Parameters::const_iterator it = rpcObject->getParameters().begin(); it != rpcObject->getParameters().end(); it++)
-		{
-			params[it->first] = it->second;
-		}
-		request["params"] = params;
-	}
+	Json::Value value = RPC2Communication::RPC2Marshaller::toJSON(rpcObject);
+	sendJsonMessage(value);
 	
-	sendJsonMessage(request);
-	LOG4CPLUS_INFO_EXT(mLogger, " Sent RPC Bus object "<< rpcObject->getMethodName() <<" to HMI");
+	LOG4CPLUS_INFO_EXT(mLogger, " Sent RPC Bus object "<< rpcObject->getMethod() <<" to HMI");
 }
 
-void AppLinkInterface::enqueueRPCBusObject( RPCBusObject * object )
+void AppLinkInterface::enqueueRPCCommand( RPC2Communication::RPC2Command * object )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Pushing RPC bus message...");
 	mMtxRPCBusObjectsIncoming.Lock();
@@ -85,13 +75,13 @@ void AppLinkInterface::enqueueRPCBusObject( RPCBusObject * object )
 	LOG4CPLUS_INFO_EXT(mLogger, " Pushed RPC bus message");
 }
 
-void AppLinkInterface::receiveRPCBusObject( const RPCBusObject* rpcObject )
+void AppLinkInterface::receiveRPCCommand( const RPC2Communication::RPC2Command* rpcObject )
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " Receiving RPC Bus object "<< rpcObject->getMethodName() <<" from HMI...");
+	LOG4CPLUS_INFO_EXT(mLogger, " Receiving RPC Bus object "<< rpcObject->getMethod() <<" from HMI...");
 
 	
 	
-	LOG4CPLUS_INFO_EXT(mLogger, " Received RPC Bus object "<< rpcObject->getMethodName() <<" from HMI");
+	LOG4CPLUS_INFO_EXT(mLogger, " Received RPC Bus object "<< rpcObject->getMethod() <<" from HMI");
 }
 
 void AppLinkInterface::sendMessage()
@@ -128,47 +118,6 @@ void AppLinkInterface::getAllCapabilities()
 	
 }
 
-RPCBusObject* AppLinkInterface::createObjectFromJson(const std::string& method, const Json::Value& root)
-{
-	RPCBusObject* rpcObject = new RPCBusObject();
-	Json::Value value, params;
-	value = root["correlationID"];
-	if ( !value.isNull() )
-	{
-		rpcObject->setCorrelationID( value.asInt() );
-	}
-
-	if(method.length())
-	{
-		rpcObject->setMethodName(method);
-	}
-	else
-	{
-		value = root["name"];
-		if ( !value.isNull() )
-		{
-			rpcObject->setMethodName( value.asString() );
-		}
-	}
-
-	rpcObject->setProtocolVersion(1);
-
-	params = root["params"];
-
-	if(params.type() == Json::objectValue)
-	{
-		if(!params.empty())
-		{
-			for(Json::ValueIterator it = params.begin(); it != params.end(); it++)
-			{
-				rpcObject->setParameter(it.memberName(), (*it).asString());
-			}
-		}
-	}
-
-	return rpcObject;
-}
-
 /** Thread manipulation */
 
 void AppLinkInterface::executeThreads()
@@ -201,7 +150,7 @@ void* AppLinkInterface::handleQueueRPCBusObjectsIncoming( void* )
 		if( size > 0 )
 		{
 			mMtxRPCBusObjectsIncoming.Lock();
-			RPCBusObject* msg = mQueueRPCBusObjectsIncoming.front();
+			RPC2Communication::RPC2Command* msg = mQueueRPCBusObjectsIncoming.front();
 			mQueueRPCBusObjectsIncoming.pop();
 			mMtxRPCBusObjectsIncoming.Unlock();
 			if(!msg)
@@ -210,7 +159,7 @@ void* AppLinkInterface::handleQueueRPCBusObjectsIncoming( void* )
 				continue;
 			}
 			
-			receiveRPCBusObject( msg );
+			receiveRPCCommand( msg );
 		}
 	}
 }
@@ -223,7 +172,7 @@ void* AppLinkInterface::handleQueueRPCBusObjectsOutgoing( void* )
 		if( size > 0 )
 		{
 			mMtxRPCBusObjectsOutgoing.Lock();
-			RPCBusObject* msg = mQueueRPCBusObjectsOutgoing.front();
+			RPC2Communication::RPC2Command* msg = mQueueRPCBusObjectsOutgoing.front();
 			mQueueRPCBusObjectsOutgoing.pop();
 			mMtxRPCBusObjectsOutgoing.Unlock();
 			if(!msg)
@@ -232,7 +181,7 @@ void* AppLinkInterface::handleQueueRPCBusObjectsOutgoing( void* )
 				continue;
 			}
 			
-			sendRPCBusObject( msg );
+			sendRPCCommand( msg );
 		}
 	}
 }
@@ -265,8 +214,8 @@ void AppLinkInterface::processResponse(std::string method, Json::Value& root)
 		return;
 	}
 
-	RPCBusObject* object = createObjectFromJson(method, root);
-	enqueueRPCBusObject(object);
+	RPC2Communication::RPC2Command* object = RPC2Communication::RPC2Marshaller::fromJSON(root);
+	enqueueRPCCommand(object);
 }
 
 /**
@@ -276,8 +225,8 @@ void AppLinkInterface::processResponse(std::string method, Json::Value& root)
 void AppLinkInterface::processRequest(Json::Value& root)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " A request has arrived");
-	RPCBusObject* object = createObjectFromJson("", root);
-	enqueueRPCBusObject(object);
+	RPC2Communication::RPC2Command* object = RPC2Communication::RPC2Marshaller::fromJSON(root);
+	enqueueRPCCommand(object);
 }
 
 /**
@@ -292,8 +241,8 @@ void AppLinkInterface::processRequest(Json::Value& root)
 void AppLinkInterface::processNotification(Json::Value& root)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " A notification has arrived");
-	RPCBusObject* object = createObjectFromJson("", root);
-	enqueueRPCBusObject(object);
+	RPC2Communication::RPC2Command* object = RPC2Communication::RPC2Marshaller::fromJSON(root);
+	enqueueRPCCommand(object);
 }
 
 };

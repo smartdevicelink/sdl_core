@@ -104,11 +104,14 @@ struct Result
       }
     }
 
+    Result(const std::string & str = "GENERIC_ERROR") : mInternalResult(str) {}
     std::string toString() const { return mInternalResult; }
-    void setResult( std::string & result ) { mInternalResult = result; }
+    void setResult( const std::string & result ) { mInternalResult = result; }
+    ResultEnum getResult() const { return valueFromString(mInternalResult); }
 
 private:
     std::string mInternalResult;
+    friend class ResultMarshaller;
 };
 
 #endif
