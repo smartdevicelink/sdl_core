@@ -27,8 +27,10 @@
         "Buttons.GetCapabilities": {
 	     returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
-				"capabilities"	: "ButtonCapabilities", // data type from AppLink protocol specification
-	    			"button"	: "string"
+				[
+					"capabilities"	: "ButtonCapabilities", // data type from AppLink protocol specification
+		    			"button"	: "string"
+				]
 			}
         },
 
