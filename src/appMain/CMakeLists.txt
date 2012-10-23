@@ -47,6 +47,7 @@ include_directories (./
 set (SOURCES
         appMain.cpp
         CBTAdapter.cpp
+        CAppTester.cpp
     )
 
 add_executable(${PROJECT} ${SOURCES})
