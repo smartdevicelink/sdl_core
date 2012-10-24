@@ -74,7 +74,8 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
   if(!json.isObject())  return NULL;
   
   Methods m;
-  if(!json.isMember("method") || !json["method"].isString()) 
+
+  if(!json.isMember("method") || !json["method"].isString())
   {
     if ( methodName.empty() )
     {
