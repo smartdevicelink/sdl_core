@@ -48,9 +48,9 @@ int main(int argc, char** argv)
 
     JSONHandler jsonHandler;
 
-    AxisCore::ProtocolHandler protocolHandler =  AxisCore::ProtocolHandler(&jsonHandler, &btadapter, 1);
+    AxisCore::ProtocolHandler* pProtocolHandler = new AxisCore::ProtocolHandler(&jsonHandler, &btadapter, 1);
 
-    jsonHandler.setProtocolHandler(&protocolHandler);
+    jsonHandler.setProtocolHandler(pProtocolHandler);
 
     NsAppManager::AppMgr::setParams(std::string("127.0.0.1"), 8087, std::string("AppMgr"));
 
@@ -124,7 +124,7 @@ int main(int argc, char** argv)
 
     /**********************************/
     /*** Check main function parameters***/
-    if (4 > argc)
+    if (4 < argc)
     {
       printf("too many arguments\n");
       return EXIT_SUCCESS;
@@ -141,8 +141,12 @@ int main(int argc, char** argv)
         }
       }
       NsApplicationTester::CAppTester apptester;
+      delete pProtocolHandler;
+      pProtocolHandler = new AxisCore::ProtocolHandler(&jsonHandler, &apptester, 1);
+      jsonHandler.setProtocolHandler(pProtocolHandler);
       apptester.startSession(sessioncount);
       apptester.sendDataFromFile(argv[1]);
+      while(true);
     }
     /**********************************/
 
