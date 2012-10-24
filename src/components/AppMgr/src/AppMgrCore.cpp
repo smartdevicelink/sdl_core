@@ -118,31 +118,10 @@ void AppMgrCore::terminateThreads()
 	m_bTerminate = true;
 }
 
-void* AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
-{
-	while(true)
-	{
-		std::size_t size = mQueueRPCAppLinkObjectsIncoming.size();
-		if( size > 0 )
-		{
-			mMtxRPCAppLinkObjectsIncoming.Lock();
-			MobileRPCMessage* msg = mQueueRPCAppLinkObjectsIncoming.front();
-			mQueueRPCAppLinkObjectsIncoming.pop();
-			mMtxRPCAppLinkObjectsIncoming.Unlock();
-			if(!msg)
-			{
-				LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
-				continue;
-			}
-
-			handleMobileRPCMessage( msg );
-		}
-	}
-}
-
 void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message "<< msg->getFunctionName() <<" has been received!");
+	MobileRPCFactory factory;
 	switch(msg->getMessageType())
 	{
 		case MobileRPCMessage::REQUEST:
@@ -153,7 +132,8 @@ void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 				RegisterAppInterface * object = (RegisterAppInterface*)msg;
 				const RegistryItem* registeredApp =  registerApplication( object );
 				MobileRPCMessage* response = queryInfoForRegistration( registeredApp );
-				sendMobileRPCResponse( response );
+				RegisterAppInterfaceResponse* msg = factory.createRegisterAppInterfaceResponse(*msg);
+				sendMobileRPCResponse( msg );
 			}
 			else if(0 == msg->getFunctionName().compare("SubscribeButton"))
 			{
@@ -335,6 +315,28 @@ void* AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing( void* )
 			MobileRPCMessage* msg = mQueueRPCAppLinkObjectsOutgoing.front();
 			mQueueRPCAppLinkObjectsOutgoing.pop();
 			mMtxRPCAppLinkObjectsOutgoing.Unlock();
+			if(!msg)
+			{
+				LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
+				continue;
+			}
+			
+			handleMobileRPCMessage( msg );
+		}
+	}
+}
+
+void* AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
+{
+	while(true)
+	{
+		std::size_t size = mQueueRPCAppLinkObjectsIncoming.size();
+		if( size > 0 )
+		{
+			mMtxRPCAppLinkObjectsIncoming.Lock();
+			MobileRPCMessage* msg = mQueueRPCAppLinkObjectsIncoming.front();
+			mQueueRPCAppLinkObjectsIncoming.pop();
+			mMtxRPCAppLinkObjectsIncoming.Unlock();
 			if(!msg)
 			{
 				LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
