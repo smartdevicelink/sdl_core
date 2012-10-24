@@ -13,6 +13,8 @@
 #include "JSONHandler/MobileRPCFactory.h"
 #include "JSONHandler/RegisterAppInterface.h"
 #include "JSONHandler/RegisterAppInterfaceResponse.h"
+#include "JSONHandler/SubscribeButton.h"
+#include "JSONHandler/SubscribeButtonResponse.h"
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/HMILevel.h"
 #include "AppMgr/IApplication.h"
@@ -133,12 +135,13 @@ void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 				const RegistryItem* registeredApp =  registerApplication( object );
 				MobileRPCMessage* response = queryInfoForRegistration( registeredApp );
 				RegisterAppInterfaceResponse* msg = factory.createRegisterAppInterfaceResponse(*msg);
+				
 				sendMobileRPCResponse( msg );
 			}
 			else if(0 == msg->getFunctionName().compare("SubscribeButton"))
 			{
 				LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
-			//	SubscribeButton * object = (SubscribeButton*)msg;
+                SubscribeButton * object = (SubscribeButton*)msg;
 			//	registerApplication( object );
 				sendMobileRPCResponse( msg );
 			}
@@ -245,6 +248,8 @@ const RegistryItem* AppMgrCore::registerApplication( RegisterAppInterface* objec
 	application->setVrSynonyms(vrSynonyms);
 
 	application->setApplicationHMIStatusLevel(HMILevel::NONE);
+
+//    RPC2Communication::
 
 	return AppMgrRegistry::getInstance().registerApplication( application );
 }
