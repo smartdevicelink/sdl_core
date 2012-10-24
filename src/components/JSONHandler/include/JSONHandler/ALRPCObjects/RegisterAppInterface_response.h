@@ -15,7 +15,7 @@
 #include "SyncMsgVersion.h"
 #include "VehicleType.h"
 #include "VrCapabilities.h"
-#include "../../../JSONHandler/ALRPCResponse.hh"
+#include "JSONHandler/ALRPCResponse.hh"
 
 
 /*

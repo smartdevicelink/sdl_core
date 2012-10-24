@@ -6,7 +6,7 @@
 
 #include "Language.h"
 #include "SyncMsgVersion.h"
-#include "../../../JSONHandler/ALRPCRequest.hh"
+#include "JSONHandler/ALRPCRequest.hh"
 
 
 /*
