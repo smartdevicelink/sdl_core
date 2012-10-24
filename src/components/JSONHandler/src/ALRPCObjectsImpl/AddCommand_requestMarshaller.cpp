@@ -1,5 +1,4 @@
 #include "../../include/JSONHandler/ALRPCObjects/AddCommand_request.h"
-#include "ImageMarshaller.h"
 #include "MenuParamsMarshaller.h"
 
 #include "AddCommand_requestMarshaller.h"
@@ -7,10 +6,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -58,7 +57,6 @@ bool AddCommand_requestMarshaller::checkIntegrityConst(const AddCommand_request&
       if(s.vrCommands[0][i].length()>99)  return false;
     }
   }
-  if(s.cmdIcon && !ImageMarshaller::checkIntegrityConst(*s.cmdIcon))  return false;
   return true;
 }
 
@@ -88,9 +86,6 @@ Json::Value AddCommand_requestMarshaller::toJSON(const AddCommand_request& e)
       j["vrCommands"][i]=Json::Value(e.vrCommands[0][i]);
   }
 
-  if(e.cmdIcon)
-    j["cmdIcon"]=ImageMarshaller::toJSON(*e.cmdIcon);
-
   json["request"]["parameters"]=j;
   return json;
 }
@@ -103,9 +98,6 @@ bool AddCommand_requestMarshaller::fromJSON(const Json::Value& js,AddCommand_req
 
   if(c.vrCommands)  delete c.vrCommands;
   c.vrCommands=0;
-
-  if(c.cmdIcon)  delete c.cmdIcon;
-  c.cmdIcon=0;
 
   try
   {
@@ -147,13 +139,6 @@ bool AddCommand_requestMarshaller::fromJSON(const Json::Value& js,AddCommand_req
           return false;
         else
           c.vrCommands[0][i]=j[i].asString();
-    }
-    if(json.isMember("cmdIcon"))
-    {
-      const Json::Value& j=json["cmdIcon"];
-      c.cmdIcon=new Image();
-      if(!ImageMarshaller::fromJSON(j,c.cmdIcon[0]))
-        return false;
     }
 
   }

@@ -6,10 +6,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -68,26 +68,9 @@ const std::string LanguageMarshaller::toString(const Language& e)
 
 }
 
-const PerfectHashTable LanguageMarshaller::mHashTable[20]=
+const PerfectHashTable LanguageMarshaller::mHashTable[3]=
 {
   {"EN-US",0},
   {"ES-MX",1},
-  {"FR-CA",2},
-  {"DE-EU",3},
-  {"ES-EU",4},
-  {"EN-EU",5},
-  {"RU-RU",6},
-  {"TR-TR",7},
-  {"PL-EU",8},
-  {"FR-EU",9},
-  {"IT-EU",10},
-  {"SV-EU",11},
-  {"PT-EU",12},
-  {"NL-EU",13},
-  {"EN-AU",14},
-  {"ZH-CN",15},
-  {"ZH-TW",16},
-  {"JA-JP",17},
-  {"AR",18},
-  {"KO-KR",19}
+  {"FR-CA",2}
 };

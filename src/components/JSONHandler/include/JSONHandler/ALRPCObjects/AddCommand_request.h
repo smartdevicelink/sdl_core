@@ -4,17 +4,16 @@
 #include <vector>
 #include <string>
 
-#include "Image.h"
 #include "MenuParams.h"
-#include "../../../JSONHandler/ALRPCRequest.hh"
+#include "JSONHandler/ALRPCRequest.h"
 
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -40,15 +39,12 @@ public:
   unsigned int get_cmdID(void) const;
   const MenuParams* get_menuParams(void) const;
   const std::vector<std::string>* get_vrCommands(void) const;
-  const Image* get_cmdIcon(void) const;
 
   bool set_cmdID(unsigned int cmdID_);
   void reset_menuParams(void);
   bool set_menuParams(const MenuParams& menuParams_);
   void reset_vrCommands(void);
   bool set_vrCommands(const std::vector<std::string>& vrCommands_);
-  void reset_cmdIcon(void);
-  bool set_cmdIcon(const Image& cmdIcon_);
 
 private:
 
@@ -57,7 +53,6 @@ private:
   unsigned int cmdID;	//!<  (0,2000000000)
   MenuParams* menuParams;
   std::vector<std::string>* vrCommands;	//!<   [%s..%s] (99)
-  Image* cmdIcon;
 };
 
 #endif

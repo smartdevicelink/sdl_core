@@ -1,8 +1,6 @@
 #include "../../include/JSONHandler/ALRPCObjects/Show_request.h"
 #include "Show_requestMarshaller.h"
 #include "../../include/JSONHandler/ALRPCObjects/Marshaller.h"
-#include "ImageMarshaller.h"
-#include "SoftButtonMarshaller.h"
 #include "TextAlignmentMarshaller.h"
 
 #define PROTOCOL_VERSION	1
@@ -10,10 +8,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -21,15 +19,10 @@ Show_request& Show_request::operator =(const Show_request& c)
 {
   mainField1= c.mainField1 ? new std::string(c.mainField1[0]) : 0;
   mainField2= c.mainField2 ? new std::string(c.mainField2[0]) : 0;
-  mainField3= c.mainField3 ? new std::string(c.mainField3[0]) : 0;
-  mainField4= c.mainField4 ? new std::string(c.mainField4[0]) : 0;
   alignment= c.alignment ? new TextAlignment(c.alignment[0]) : 0;
   statusBar= c.statusBar ? new std::string(c.statusBar[0]) : 0;
   mediaClock= c.mediaClock ? new std::string(c.mediaClock[0]) : 0;
   mediaTrack= c.mediaTrack ? new std::string(c.mediaTrack[0]) : 0;
-  graphic= c.graphic ? new Image(c.graphic[0]) : 0;
-  softButtons= c.softButtons ? new std::vector<SoftButton>(c.softButtons[0]) : 0;
-  customPresets= c.customPresets ? new std::vector<std::string>(c.customPresets[0]) : 0;
 
   return *this;}
 
@@ -40,10 +33,6 @@ Show_request::~Show_request(void)
     delete mainField1;
   if(mainField2)
     delete mainField2;
-  if(mainField3)
-    delete mainField3;
-  if(mainField4)
-    delete mainField4;
   if(alignment)
     delete alignment;
   if(statusBar)
@@ -52,12 +41,6 @@ Show_request::~Show_request(void)
     delete mediaClock;
   if(mediaTrack)
     delete mediaTrack;
-  if(graphic)
-    delete graphic;
-  if(softButtons)
-    delete softButtons;
-  if(customPresets)
-    delete customPresets;
 }
 
 
@@ -76,15 +59,10 @@ bool Show_request::checkIntegrity(void)
 Show_request::Show_request(void) : ALRPCRequest(PROTOCOL_VERSION,Marshaller::METHOD_SHOW_REQUEST),
       mainField1(0),
     mainField2(0),
-    mainField3(0),
-    mainField4(0),
     alignment(0),
     statusBar(0),
     mediaClock(0),
-    mediaTrack(0),
-    graphic(0),
-    softButtons(0),
-    customPresets(0)
+    mediaTrack(0)
 {
 }
 
@@ -122,40 +100,6 @@ void Show_request::reset_mainField2(void)
   if(mainField2)
     delete mainField2;
   mainField2=0;
-}
-
-bool Show_request::set_mainField3(const std::string& mainField3_)
-{
-  if(mainField3_.length()>500)  return false;
-  delete mainField3;
-  mainField3=0;
-
-  mainField3=new std::string(mainField3_);
-  return true;
-}
-
-void Show_request::reset_mainField3(void)
-{
-  if(mainField3)
-    delete mainField3;
-  mainField3=0;
-}
-
-bool Show_request::set_mainField4(const std::string& mainField4_)
-{
-  if(mainField4_.length()>500)  return false;
-  delete mainField4;
-  mainField4=0;
-
-  mainField4=new std::string(mainField4_);
-  return true;
-}
-
-void Show_request::reset_mainField4(void)
-{
-  if(mainField4)
-    delete mainField4;
-  mainField4=0;
 }
 
 bool Show_request::set_alignment(const TextAlignment& alignment_)
@@ -226,67 +170,6 @@ void Show_request::reset_mediaTrack(void)
   mediaTrack=0;
 }
 
-bool Show_request::set_graphic(const Image& graphic_)
-{
-  if(!ImageMarshaller::checkIntegrityConst(graphic_))   return false;
-  delete graphic;
-  graphic=0;
-
-  graphic=new Image(graphic_);
-  return true;
-}
-
-void Show_request::reset_graphic(void)
-{
-  if(graphic)
-    delete graphic;
-  graphic=0;
-}
-
-bool Show_request::set_softButtons(const std::vector<SoftButton>& softButtons_)
-{
-  unsigned int i=softButtons_.size();
-  if(i>8 || i<0)  return false;
-  while(i--)
-  {
-    if(!SoftButtonMarshaller::checkIntegrityConst(softButtons_[i]))   return false;
-  }
-  delete softButtons;
-  softButtons=0;
-
-  softButtons=new std::vector<SoftButton>(softButtons_);
-  return true;
-}
-
-void Show_request::reset_softButtons(void)
-{
-  if(softButtons)
-    delete softButtons;
-  softButtons=0;
-}
-
-bool Show_request::set_customPresets(const std::vector<std::string>& customPresets_)
-{
-  unsigned int i=customPresets_.size();
-  if(i>6 || i<0)  return false;
-  while(i--)
-  {
-    if(customPresets_[i].length()>500)  return false;
-  }
-  delete customPresets;
-  customPresets=0;
-
-  customPresets=new std::vector<std::string>(customPresets_);
-  return true;
-}
-
-void Show_request::reset_customPresets(void)
-{
-  if(customPresets)
-    delete customPresets;
-  customPresets=0;
-}
-
 
 
 
@@ -298,16 +181,6 @@ const std::string* Show_request::get_mainField1(void) const
 const std::string* Show_request::get_mainField2(void) const 
 {
   return mainField2;
-}
-
-const std::string* Show_request::get_mainField3(void) const 
-{
-  return mainField3;
-}
-
-const std::string* Show_request::get_mainField4(void) const 
-{
-  return mainField4;
 }
 
 const TextAlignment* Show_request::get_alignment(void) const 
@@ -328,20 +201,5 @@ const std::string* Show_request::get_mediaClock(void) const
 const std::string* Show_request::get_mediaTrack(void) const 
 {
   return mediaTrack;
-}
-
-const Image* Show_request::get_graphic(void) const 
-{
-  return graphic;
-}
-
-const std::vector<SoftButton>* Show_request::get_softButtons(void) const 
-{
-  return softButtons;
-}
-
-const std::vector<std::string>* Show_request::get_customPresets(void) const 
-{
-  return customPresets;
 }
 

@@ -3,12 +3,9 @@
 #include "DisplayCapabilitiesMarshaller.h"
 #include "HmiZoneCapabilitiesMarshaller.h"
 #include "LanguageMarshaller.h"
-#include "PresetBankCapabilitiesMarshaller.h"
 #include "ResultMarshaller.h"
-#include "SoftButtonCapabilitiesMarshaller.h"
 #include "SpeechCapabilitiesMarshaller.h"
 #include "SyncMsgVersionMarshaller.h"
-#include "VehicleTypeMarshaller.h"
 #include "VrCapabilitiesMarshaller.h"
 
 #include "RegisterAppInterface_responseMarshaller.h"
@@ -16,10 +13,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -61,7 +58,6 @@ bool RegisterAppInterface_responseMarshaller::checkIntegrityConst(const Register
   if(s.syncMsgVersion && !SyncMsgVersionMarshaller::checkIntegrityConst(*s.syncMsgVersion))  return false;
   if(s.autoActivateID && s.autoActivateID->length()>16)  return false;
   if(s.language && !LanguageMarshaller::checkIntegrityConst(*s.language))  return false;
-  if(s.hmiDisplayLanguage && !LanguageMarshaller::checkIntegrityConst(*s.hmiDisplayLanguage))  return false;
   if(s.displayCapabilities && !DisplayCapabilitiesMarshaller::checkIntegrityConst(*s.displayCapabilities))  return false;
   if(s.buttonCapabilities)
   {
@@ -72,16 +68,6 @@ bool RegisterAppInterface_responseMarshaller::checkIntegrityConst(const Register
     if(!ButtonCapabilitiesMarshaller::checkIntegrityConst(s.buttonCapabilities[0][i]))   return false;
     }
   }
-  if(s.softButtonCapabilities)
-  {
-    unsigned int i=s.softButtonCapabilities[0].size();
-    if(i>100 || i<1)  return false;
-    while(i--)
-    {
-    if(!SoftButtonCapabilitiesMarshaller::checkIntegrityConst(s.softButtonCapabilities[0][i]))   return false;
-    }
-  }
-  if(s.presetBankCapabilities && !PresetBankCapabilitiesMarshaller::checkIntegrityConst(*s.presetBankCapabilities))  return false;
   if(s.hmiZoneCapabilities)
   {
     unsigned int i=s.hmiZoneCapabilities[0].size();
@@ -109,7 +95,6 @@ bool RegisterAppInterface_responseMarshaller::checkIntegrityConst(const Register
     if(!VrCapabilitiesMarshaller::checkIntegrityConst(s.vrCapabilities[0][i]))   return false;
     }
   }
-  if(s.vehicleType && !VehicleTypeMarshaller::checkIntegrityConst(*s.vehicleType))  return false;
   return true;
 }
 
@@ -141,9 +126,6 @@ Json::Value RegisterAppInterface_responseMarshaller::toJSON(const RegisterAppInt
   if(e.language)
     j["language"]=LanguageMarshaller::toJSON(*e.language);
 
-  if(e.hmiDisplayLanguage)
-    j["hmiDisplayLanguage"]=LanguageMarshaller::toJSON(*e.hmiDisplayLanguage);
-
   if(e.displayCapabilities)
     j["displayCapabilities"]=DisplayCapabilitiesMarshaller::toJSON(*e.displayCapabilities);
 
@@ -155,18 +137,6 @@ Json::Value RegisterAppInterface_responseMarshaller::toJSON(const RegisterAppInt
     for(unsigned int i=0;i<sz;i++)
       j["buttonCapabilities"][i]=ButtonCapabilitiesMarshaller::toJSON(e.buttonCapabilities[0][i]);
   }
-
-  if(e.softButtonCapabilities)
-  {
-    unsigned int sz=e.softButtonCapabilities->size();
-    j["softButtonCapabilities"]=Json::Value(Json::arrayValue);
-    j["softButtonCapabilities"].resize(sz);
-    for(unsigned int i=0;i<sz;i++)
-      j["softButtonCapabilities"][i]=SoftButtonCapabilitiesMarshaller::toJSON(e.softButtonCapabilities[0][i]);
-  }
-
-  if(e.presetBankCapabilities)
-    j["presetBankCapabilities"]=PresetBankCapabilitiesMarshaller::toJSON(*e.presetBankCapabilities);
 
   if(e.hmiZoneCapabilities)
   {
@@ -195,9 +165,6 @@ Json::Value RegisterAppInterface_responseMarshaller::toJSON(const RegisterAppInt
       j["vrCapabilities"][i]=VrCapabilitiesMarshaller::toJSON(e.vrCapabilities[0][i]);
   }
 
-  if(e.vehicleType)
-    j["vehicleType"]=VehicleTypeMarshaller::toJSON(*e.vehicleType);
-
   json["response"]["parameters"]=j;
   return json;
 }
@@ -217,20 +184,11 @@ bool RegisterAppInterface_responseMarshaller::fromJSON(const Json::Value& js,Reg
   if(c.language)  delete c.language;
   c.language=0;
 
-  if(c.hmiDisplayLanguage)  delete c.hmiDisplayLanguage;
-  c.hmiDisplayLanguage=0;
-
   if(c.displayCapabilities)  delete c.displayCapabilities;
   c.displayCapabilities=0;
 
   if(c.buttonCapabilities)  delete c.buttonCapabilities;
   c.buttonCapabilities=0;
-
-  if(c.softButtonCapabilities)  delete c.softButtonCapabilities;
-  c.softButtonCapabilities=0;
-
-  if(c.presetBankCapabilities)  delete c.presetBankCapabilities;
-  c.presetBankCapabilities=0;
 
   if(c.hmiZoneCapabilities)  delete c.hmiZoneCapabilities;
   c.hmiZoneCapabilities=0;
@@ -240,9 +198,6 @@ bool RegisterAppInterface_responseMarshaller::fromJSON(const Json::Value& js,Reg
 
   if(c.vrCapabilities)  delete c.vrCapabilities;
   c.vrCapabilities=0;
-
-  if(c.vehicleType)  delete c.vehicleType;
-  c.vehicleType=0;
 
   try
   {
@@ -298,13 +253,6 @@ bool RegisterAppInterface_responseMarshaller::fromJSON(const Json::Value& js,Reg
       if(!LanguageMarshaller::fromJSON(j,c.language[0]))
         return false;
     }
-    if(json.isMember("hmiDisplayLanguage"))
-    {
-      const Json::Value& j=json["hmiDisplayLanguage"];
-      c.hmiDisplayLanguage=new Language();
-      if(!LanguageMarshaller::fromJSON(j,c.hmiDisplayLanguage[0]))
-        return false;
-    }
     if(json.isMember("displayCapabilities"))
     {
       const Json::Value& j=json["displayCapabilities"];
@@ -326,28 +274,6 @@ bool RegisterAppInterface_responseMarshaller::fromJSON(const Json::Value& js,Reg
         c.buttonCapabilities[0][i]=t;
       }
 
-    }
-    if(json.isMember("softButtonCapabilities"))
-    {
-      const Json::Value& j=json["softButtonCapabilities"];
-      if(!j.isArray())  return false;
-      c.softButtonCapabilities=new std::vector<SoftButtonCapabilities>();
-      c.softButtonCapabilities->resize(j.size());
-      for(unsigned int i=0;i<j.size();i++)
-      {
-        SoftButtonCapabilities t;
-        if(!SoftButtonCapabilitiesMarshaller::fromJSON(j[i],t))
-          return false;
-        c.softButtonCapabilities[0][i]=t;
-      }
-
-    }
-    if(json.isMember("presetBankCapabilities"))
-    {
-      const Json::Value& j=json["presetBankCapabilities"];
-      c.presetBankCapabilities=new PresetBankCapabilities();
-      if(!PresetBankCapabilitiesMarshaller::fromJSON(j,c.presetBankCapabilities[0]))
-        return false;
     }
     if(json.isMember("hmiZoneCapabilities"))
     {
@@ -393,13 +319,6 @@ bool RegisterAppInterface_responseMarshaller::fromJSON(const Json::Value& js,Reg
         c.vrCapabilities[0][i]=t;
       }
 
-    }
-    if(json.isMember("vehicleType"))
-    {
-      const Json::Value& j=json["vehicleType"];
-      c.vehicleType=new VehicleType();
-      if(!VehicleTypeMarshaller::fromJSON(j,c.vehicleType[0]))
-        return false;
     }
 
   }

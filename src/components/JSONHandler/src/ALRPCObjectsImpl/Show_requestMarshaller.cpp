@@ -1,6 +1,4 @@
 #include "../../include/JSONHandler/ALRPCObjects/Show_request.h"
-#include "ImageMarshaller.h"
-#include "SoftButtonMarshaller.h"
 #include "TextAlignmentMarshaller.h"
 
 #include "Show_requestMarshaller.h"
@@ -8,10 +6,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -50,31 +48,10 @@ bool Show_requestMarshaller::checkIntegrityConst(const Show_request& s)
 {
   if(s.mainField1 && s.mainField1->length()>500)  return false;
   if(s.mainField2 && s.mainField2->length()>500)  return false;
-  if(s.mainField3 && s.mainField3->length()>500)  return false;
-  if(s.mainField4 && s.mainField4->length()>500)  return false;
   if(s.alignment && !TextAlignmentMarshaller::checkIntegrityConst(*s.alignment))  return false;
   if(s.statusBar && s.statusBar->length()>500)  return false;
   if(s.mediaClock && s.mediaClock->length()>500)  return false;
   if(s.mediaTrack && s.mediaTrack->length()>500)  return false;
-  if(s.graphic && !ImageMarshaller::checkIntegrityConst(*s.graphic))  return false;
-  if(s.softButtons)
-  {
-    unsigned int i=s.softButtons[0].size();
-    if(i>8 || i<0)  return false;
-    while(i--)
-    {
-    if(!SoftButtonMarshaller::checkIntegrityConst(s.softButtons[0][i]))   return false;
-    }
-  }
-  if(s.customPresets)
-  {
-    unsigned int i=s.customPresets[0].size();
-    if(i>6 || i<0)  return false;
-    while(i--)
-    {
-      if(s.customPresets[0][i].length()>500)  return false;
-    }
-  }
   return true;
 }
 
@@ -96,12 +73,6 @@ Json::Value Show_requestMarshaller::toJSON(const Show_request& e)
   if(e.mainField2)
     j["mainField2"]=Json::Value(*e.mainField2);
 
-  if(e.mainField3)
-    j["mainField3"]=Json::Value(*e.mainField3);
-
-  if(e.mainField4)
-    j["mainField4"]=Json::Value(*e.mainField4);
-
   if(e.alignment)
     j["alignment"]=TextAlignmentMarshaller::toJSON(*e.alignment);
 
@@ -113,27 +84,6 @@ Json::Value Show_requestMarshaller::toJSON(const Show_request& e)
 
   if(e.mediaTrack)
     j["mediaTrack"]=Json::Value(*e.mediaTrack);
-
-  if(e.graphic)
-    j["graphic"]=ImageMarshaller::toJSON(*e.graphic);
-
-  if(e.softButtons)
-  {
-    unsigned int sz=e.softButtons->size();
-    j["softButtons"]=Json::Value(Json::arrayValue);
-    j["softButtons"].resize(sz);
-    for(unsigned int i=0;i<sz;i++)
-      j["softButtons"][i]=SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
-  }
-
-  if(e.customPresets)
-  {
-    unsigned int sz=e.customPresets->size();
-    j["customPresets"]=Json::Value(Json::arrayValue);
-    j["customPresets"].resize(sz);
-    for(unsigned int i=0;i<sz;i++)
-      j["customPresets"][i]=Json::Value(e.customPresets[0][i]);
-  }
 
   json["request"]["parameters"]=j;
   return json;
@@ -148,12 +98,6 @@ bool Show_requestMarshaller::fromJSON(const Json::Value& js,Show_request& c)
   if(c.mainField2)  delete c.mainField2;
   c.mainField2=0;
 
-  if(c.mainField3)  delete c.mainField3;
-  c.mainField3=0;
-
-  if(c.mainField4)  delete c.mainField4;
-  c.mainField4=0;
-
   if(c.alignment)  delete c.alignment;
   c.alignment=0;
 
@@ -165,15 +109,6 @@ bool Show_requestMarshaller::fromJSON(const Json::Value& js,Show_request& c)
 
   if(c.mediaTrack)  delete c.mediaTrack;
   c.mediaTrack=0;
-
-  if(c.graphic)  delete c.graphic;
-  c.graphic=0;
-
-  if(c.softButtons)  delete c.softButtons;
-  c.softButtons=0;
-
-  if(c.customPresets)  delete c.customPresets;
-  c.customPresets=0;
 
   try
   {
@@ -203,18 +138,6 @@ bool Show_requestMarshaller::fromJSON(const Json::Value& js,Show_request& c)
       if(!j.isString())  return false;
       c.mainField2=new std::string(j.asString());
     }
-    if(json.isMember("mainField3"))
-    {
-      const Json::Value& j=json["mainField3"];
-      if(!j.isString())  return false;
-      c.mainField3=new std::string(j.asString());
-    }
-    if(json.isMember("mainField4"))
-    {
-      const Json::Value& j=json["mainField4"];
-      if(!j.isString())  return false;
-      c.mainField4=new std::string(j.asString());
-    }
     if(json.isMember("alignment"))
     {
       const Json::Value& j=json["alignment"];
@@ -239,40 +162,6 @@ bool Show_requestMarshaller::fromJSON(const Json::Value& js,Show_request& c)
       const Json::Value& j=json["mediaTrack"];
       if(!j.isString())  return false;
       c.mediaTrack=new std::string(j.asString());
-    }
-    if(json.isMember("graphic"))
-    {
-      const Json::Value& j=json["graphic"];
-      c.graphic=new Image();
-      if(!ImageMarshaller::fromJSON(j,c.graphic[0]))
-        return false;
-    }
-    if(json.isMember("softButtons"))
-    {
-      const Json::Value& j=json["softButtons"];
-      if(!j.isArray())  return false;
-      c.softButtons=new std::vector<SoftButton>();
-      c.softButtons->resize(j.size());
-      for(unsigned int i=0;i<j.size();i++)
-      {
-        SoftButton t;
-        if(!SoftButtonMarshaller::fromJSON(j[i],t))
-          return false;
-        c.softButtons[0][i]=t;
-      }
-
-    }
-    if(json.isMember("customPresets"))
-    {
-      const Json::Value& j=json["customPresets"];
-      if(!j.isArray())  return false;
-      c.customPresets=new std::vector<std::string>();
-      c.customPresets->resize(j.size());
-      for(unsigned int i=0;i<j.size();i++)
-        if(!j[i].isString())
-          return false;
-        else
-          c.customPresets[0][i]=j[i].asString();
     }
 
   }

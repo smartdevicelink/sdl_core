@@ -6,10 +6,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -68,26 +68,13 @@ const std::string TextFieldNameMarshaller::toString(const TextFieldName& e)
 
 }
 
-const PerfectHashTable TextFieldNameMarshaller::mHashTable[20]=
+const PerfectHashTable TextFieldNameMarshaller::mHashTable[7]=
 {
   {"mainField1",0},
   {"mainField2",1},
-  {"mainField3",2},
-  {"mainField4",3},
-  {"statusBar",4},
-  {"mediaClock",5},
-  {"mediaTrack",6},
-  {"alertText1",7},
-  {"alertText2",8},
-  {"alertText3",9},
-  {"scrollableMessageBody",10},
-  {"initialInteractionText",11},
-  {"navigationText1",12},
-  {"navigationText2",13},
-  {"ETA",14},
-  {"totalDistance",15},
-  {"audioPassThruDisplayText1",16},
-  {"audioPassThruDisplayText2",17},
-  {"sliderHeader",18},
-  {"sliderFooter",19}
+  {"statusBar",2},
+  {"mediaClock",3},
+  {"mediaTrack",4},
+  {"alertText1",5},
+  {"alertText2",6}
 };

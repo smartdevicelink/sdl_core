@@ -1,0 +1,54 @@
+#ifndef JSONRPC2HANDLER_CLASS
+#define JSONRPC2HANDLER_CLASS
+
+#include "mb_controller.hpp"
+#include "JSONHandler/IRPC2CommandsObserver.h"
+#include "JSONHandler/RPC2Marshaller.h"
+#include <json/value.h>
+#include "JSONHandler/RPC2Command.h"
+#include "JSONHandler/MessageQueue.h"
+
+using namespace RPC2Communication;
+
+class JSONRPC2Handler : public NsMessageBroker::CMessageBrokerController
+{
+public:
+    JSONRPC2Handler( const std::string& address, uint16_t port );
+    ~JSONRPC2Handler();
+
+    /*Methods from CMessageBrokerController*/
+    void processResponse(std::string method, Json::Value& root);
+    void processRequest(Json::Value& root);
+    void processNotification(Json::Value& root);
+    /*End of ethods from CMessageBrokerController*/
+
+    /*Methods for IRPC2CommandsObserver*/
+    void setRPC2CommandsObserver( IRPC2CommandsObserver * commandsObserver );
+    /*void sendResponse( const RPC2Response * response );
+    void sendRequest( const RPC2Request * request );
+    void sendNotification( const RPC2Notification * notification );*/
+    void sendCommand( const RPC2Command * command );
+    /*End of methods for IRPC2CommandsObserver*/
+
+private:
+    static void * waitForCommandsFromHMI( void * params );
+    static void * waitForResponsesFromHMI( void * params );
+    static void * waitForCommandsToHMI( void * params );
+
+private:
+    struct ResponseContainer
+    {
+        std::string methodName;
+        Json::Value response;
+    };
+    IRPC2CommandsObserver *                     mCommandsObserver;
+    RPC2Marshaller *                          mCommandsMarshaller;
+    MessageQueue<Json::Value>                    mCommandsFromHMI;
+    pthread_t                             mWaitForCommandsFromHMI;
+    pthread_t                            mWaitForResponsesFromHMI;
+    MessageQueue<ResponseContainer>             mResponsesFromHMI;
+    MessageQueue<const RPC2Command*>               mCommandsToHMI;
+    pthread_t                               mWaitForCommandsToHMI;
+};
+
+#endif

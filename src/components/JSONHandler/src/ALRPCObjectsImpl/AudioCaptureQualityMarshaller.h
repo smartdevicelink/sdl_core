@@ -2,7 +2,7 @@
 #define AUDIOCAPTUREQUALITYMARSHALLER_INCLUDE
 
 #include <string>
-#include <jsoncpp/json.h>
+#include <json/value.h>
 
 #include "PerfectHashTable.h"
 
@@ -11,10 +11,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 

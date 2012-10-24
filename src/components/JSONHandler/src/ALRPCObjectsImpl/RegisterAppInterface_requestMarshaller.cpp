@@ -7,10 +7,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -59,10 +59,8 @@ bool RegisterAppInterface_requestMarshaller::checkIntegrityConst(const RegisterA
       if(s.vrSynonyms[0][i].length()>40)  return false;
     }
   }
-  if(s.languageDesired && !LanguageMarshaller::checkIntegrityConst(*s.languageDesired))  return false;
-  if(s.hmiDisplayLanguageDesired && !LanguageMarshaller::checkIntegrityConst(*s.hmiDisplayLanguageDesired))  return false;
+  if(!LanguageMarshaller::checkIntegrityConst(s.languageDesired))  return false;
   if(s.autoActivateID && s.autoActivateID->length()>16)  return false;
-  if(s.appID && s.appID->length()>100)  return false;
   return true;
 }
 
@@ -99,17 +97,10 @@ Json::Value RegisterAppInterface_requestMarshaller::toJSON(const RegisterAppInte
 
   j["isMediaApplication"]=Json::Value(e.isMediaApplication);
 
-  if(e.languageDesired)
-    j["languageDesired"]=LanguageMarshaller::toJSON(*e.languageDesired);
-
-  if(e.hmiDisplayLanguageDesired)
-    j["hmiDisplayLanguageDesired"]=LanguageMarshaller::toJSON(*e.hmiDisplayLanguageDesired);
+  j["languageDesired"]=LanguageMarshaller::toJSON(e.languageDesired);
 
   if(e.autoActivateID)
     j["autoActivateID"]=Json::Value(*e.autoActivateID);
-
-  if(e.appID)
-    j["appID"]=Json::Value(*e.appID);
 
   json["request"]["parameters"]=j;
   return json;
@@ -127,17 +118,8 @@ bool RegisterAppInterface_requestMarshaller::fromJSON(const Json::Value& js,Regi
   if(c.usesVehicleData)  delete c.usesVehicleData;
   c.usesVehicleData=0;
 
-  if(c.languageDesired)  delete c.languageDesired;
-  c.languageDesired=0;
-
-  if(c.hmiDisplayLanguageDesired)  delete c.hmiDisplayLanguageDesired;
-  c.hmiDisplayLanguageDesired=0;
-
   if(c.autoActivateID)  delete c.autoActivateID;
   c.autoActivateID=0;
-
-  if(c.appID)  delete c.appID;
-  c.appID=0;
 
   try
   {
@@ -197,18 +179,10 @@ bool RegisterAppInterface_requestMarshaller::fromJSON(const Json::Value& js,Regi
       if(!j.isBool())  return false;
       c.isMediaApplication=j.asBool();
     }
-    if(json.isMember("languageDesired"))
+    if(!json.isMember("languageDesired"))  return false;
     {
       const Json::Value& j=json["languageDesired"];
-      c.languageDesired=new Language();
-      if(!LanguageMarshaller::fromJSON(j,c.languageDesired[0]))
-        return false;
-    }
-    if(json.isMember("hmiDisplayLanguageDesired"))
-    {
-      const Json::Value& j=json["hmiDisplayLanguageDesired"];
-      c.hmiDisplayLanguageDesired=new Language();
-      if(!LanguageMarshaller::fromJSON(j,c.hmiDisplayLanguageDesired[0]))
+      if(!LanguageMarshaller::fromJSON(j,c.languageDesired))
         return false;
     }
     if(json.isMember("autoActivateID"))
@@ -216,12 +190,6 @@ bool RegisterAppInterface_requestMarshaller::fromJSON(const Json::Value& js,Regi
       const Json::Value& j=json["autoActivateID"];
       if(!j.isString())  return false;
       c.autoActivateID=new std::string(j.asString());
-    }
-    if(json.isMember("appID"))
-    {
-      const Json::Value& j=json["appID"];
-      if(!j.isString())  return false;
-      c.appID=new std::string(j.asString());
     }
 
   }

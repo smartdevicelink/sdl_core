@@ -15,5 +15,4 @@ struct PerfectHashTable
 
 %%
 AUDIBLE,0
-ATTENUATED,1
-NOT_AUDIBLE,2
+NOT_AUDIBLE,1

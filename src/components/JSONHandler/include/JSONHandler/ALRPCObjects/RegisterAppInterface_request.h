@@ -6,15 +6,15 @@
 
 #include "Language.h"
 #include "SyncMsgVersion.h"
-#include "../../../JSONHandler/ALRPCRequest.hh"
+#include "JSONHandler/ALRPCRequest.h"
 
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -43,10 +43,8 @@ public:
   const std::vector<std::string>* get_vrSynonyms(void) const;
   const bool* get_usesVehicleData(void) const;
   bool get_isMediaApplication(void) const;
-  const Language* get_languageDesired(void) const;
-  const Language* get_hmiDisplayLanguageDesired(void) const;
+  const Language& get_languageDesired(void) const;
   const std::string* get_autoActivateID(void) const;
-  const std::string* get_appID(void) const;
 
   bool set_syncMsgVersion(const SyncMsgVersion& syncMsgVersion_);
   bool set_appName(const std::string& appName_);
@@ -57,14 +55,9 @@ public:
   void reset_usesVehicleData(void);
   bool set_usesVehicleData(bool usesVehicleData_);
   bool set_isMediaApplication(bool isMediaApplication_);
-  void reset_languageDesired(void);
   bool set_languageDesired(const Language& languageDesired_);
-  void reset_hmiDisplayLanguageDesired(void);
-  bool set_hmiDisplayLanguageDesired(const Language& hmiDisplayLanguageDesired_);
   void reset_autoActivateID(void);
   bool set_autoActivateID(const std::string& autoActivateID_);
-  void reset_appID(void);
-  bool set_appID(const std::string& appID_);
 
 private:
 
@@ -76,10 +69,8 @@ private:
   std::vector<std::string>* vrSynonyms;	//!<   [%s..%s] (40)
   bool* usesVehicleData;
   bool isMediaApplication;
-  Language* languageDesired;
-  Language* hmiDisplayLanguageDesired;
+  Language languageDesired;
   std::string* autoActivateID;	//!< (16)
-  std::string* appID;	//!< (100)
 };
 
 #endif

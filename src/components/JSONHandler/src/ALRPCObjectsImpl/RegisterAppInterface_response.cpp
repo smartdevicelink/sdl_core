@@ -5,12 +5,9 @@
 #include "DisplayCapabilitiesMarshaller.h"
 #include "HmiZoneCapabilitiesMarshaller.h"
 #include "LanguageMarshaller.h"
-#include "PresetBankCapabilitiesMarshaller.h"
 #include "ResultMarshaller.h"
-#include "SoftButtonCapabilitiesMarshaller.h"
 #include "SpeechCapabilitiesMarshaller.h"
 #include "SyncMsgVersionMarshaller.h"
-#include "VehicleTypeMarshaller.h"
 #include "VrCapabilitiesMarshaller.h"
 
 #define PROTOCOL_VERSION	1
@@ -18,10 +15,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -33,15 +30,11 @@ RegisterAppInterface_response& RegisterAppInterface_response::operator =(const R
   syncMsgVersion= c.syncMsgVersion ? new SyncMsgVersion(c.syncMsgVersion[0]) : 0;
   autoActivateID= c.autoActivateID ? new std::string(c.autoActivateID[0]) : 0;
   language= c.language ? new Language(c.language[0]) : 0;
-  hmiDisplayLanguage= c.hmiDisplayLanguage ? new Language(c.hmiDisplayLanguage[0]) : 0;
   displayCapabilities= c.displayCapabilities ? new DisplayCapabilities(c.displayCapabilities[0]) : 0;
   buttonCapabilities= c.buttonCapabilities ? new std::vector<ButtonCapabilities>(c.buttonCapabilities[0]) : 0;
-  softButtonCapabilities= c.softButtonCapabilities ? new std::vector<SoftButtonCapabilities>(c.softButtonCapabilities[0]) : 0;
-  presetBankCapabilities= c.presetBankCapabilities ? new PresetBankCapabilities(c.presetBankCapabilities[0]) : 0;
   hmiZoneCapabilities= c.hmiZoneCapabilities ? new std::vector<HmiZoneCapabilities>(c.hmiZoneCapabilities[0]) : 0;
   speechCapabilities= c.speechCapabilities ? new std::vector<SpeechCapabilities>(c.speechCapabilities[0]) : 0;
   vrCapabilities= c.vrCapabilities ? new std::vector<VrCapabilities>(c.vrCapabilities[0]) : 0;
-  vehicleType= c.vehicleType ? new VehicleType(c.vehicleType[0]) : 0;
 
   return *this;}
 
@@ -56,24 +49,16 @@ RegisterAppInterface_response::~RegisterAppInterface_response(void)
     delete autoActivateID;
   if(language)
     delete language;
-  if(hmiDisplayLanguage)
-    delete hmiDisplayLanguage;
   if(displayCapabilities)
     delete displayCapabilities;
   if(buttonCapabilities)
     delete buttonCapabilities;
-  if(softButtonCapabilities)
-    delete softButtonCapabilities;
-  if(presetBankCapabilities)
-    delete presetBankCapabilities;
   if(hmiZoneCapabilities)
     delete hmiZoneCapabilities;
   if(speechCapabilities)
     delete speechCapabilities;
   if(vrCapabilities)
     delete vrCapabilities;
-  if(vehicleType)
-    delete vehicleType;
 }
 
 
@@ -94,15 +79,11 @@ RegisterAppInterface_response::RegisterAppInterface_response(void) : ALRPCRespon
     syncMsgVersion(0),
     autoActivateID(0),
     language(0),
-    hmiDisplayLanguage(0),
     displayCapabilities(0),
     buttonCapabilities(0),
-    softButtonCapabilities(0),
-    presetBankCapabilities(0),
     hmiZoneCapabilities(0),
     speechCapabilities(0),
-    vrCapabilities(0),
-    vehicleType(0)
+    vrCapabilities(0)
 {
 }
 
@@ -189,23 +170,6 @@ void RegisterAppInterface_response::reset_language(void)
   language=0;
 }
 
-bool RegisterAppInterface_response::set_hmiDisplayLanguage(const Language& hmiDisplayLanguage_)
-{
-  if(!LanguageMarshaller::checkIntegrityConst(hmiDisplayLanguage_))   return false;
-  delete hmiDisplayLanguage;
-  hmiDisplayLanguage=0;
-
-  hmiDisplayLanguage=new Language(hmiDisplayLanguage_);
-  return true;
-}
-
-void RegisterAppInterface_response::reset_hmiDisplayLanguage(void)
-{
-  if(hmiDisplayLanguage)
-    delete hmiDisplayLanguage;
-  hmiDisplayLanguage=0;
-}
-
 bool RegisterAppInterface_response::set_displayCapabilities(const DisplayCapabilities& displayCapabilities_)
 {
   if(!DisplayCapabilitiesMarshaller::checkIntegrityConst(displayCapabilities_))   return false;
@@ -243,45 +207,6 @@ void RegisterAppInterface_response::reset_buttonCapabilities(void)
   if(buttonCapabilities)
     delete buttonCapabilities;
   buttonCapabilities=0;
-}
-
-bool RegisterAppInterface_response::set_softButtonCapabilities(const std::vector<SoftButtonCapabilities>& softButtonCapabilities_)
-{
-  unsigned int i=softButtonCapabilities_.size();
-  if(i>100 || i<1)  return false;
-  while(i--)
-  {
-    if(!SoftButtonCapabilitiesMarshaller::checkIntegrityConst(softButtonCapabilities_[i]))   return false;
-  }
-  delete softButtonCapabilities;
-  softButtonCapabilities=0;
-
-  softButtonCapabilities=new std::vector<SoftButtonCapabilities>(softButtonCapabilities_);
-  return true;
-}
-
-void RegisterAppInterface_response::reset_softButtonCapabilities(void)
-{
-  if(softButtonCapabilities)
-    delete softButtonCapabilities;
-  softButtonCapabilities=0;
-}
-
-bool RegisterAppInterface_response::set_presetBankCapabilities(const PresetBankCapabilities& presetBankCapabilities_)
-{
-  if(!PresetBankCapabilitiesMarshaller::checkIntegrityConst(presetBankCapabilities_))   return false;
-  delete presetBankCapabilities;
-  presetBankCapabilities=0;
-
-  presetBankCapabilities=new PresetBankCapabilities(presetBankCapabilities_);
-  return true;
-}
-
-void RegisterAppInterface_response::reset_presetBankCapabilities(void)
-{
-  if(presetBankCapabilities)
-    delete presetBankCapabilities;
-  presetBankCapabilities=0;
 }
 
 bool RegisterAppInterface_response::set_hmiZoneCapabilities(const std::vector<HmiZoneCapabilities>& hmiZoneCapabilities_)
@@ -350,23 +275,6 @@ void RegisterAppInterface_response::reset_vrCapabilities(void)
   vrCapabilities=0;
 }
 
-bool RegisterAppInterface_response::set_vehicleType(const VehicleType& vehicleType_)
-{
-  if(!VehicleTypeMarshaller::checkIntegrityConst(vehicleType_))   return false;
-  delete vehicleType;
-  vehicleType=0;
-
-  vehicleType=new VehicleType(vehicleType_);
-  return true;
-}
-
-void RegisterAppInterface_response::reset_vehicleType(void)
-{
-  if(vehicleType)
-    delete vehicleType;
-  vehicleType=0;
-}
-
 
 
 
@@ -400,11 +308,6 @@ const Language* RegisterAppInterface_response::get_language(void) const
   return language;
 }
 
-const Language* RegisterAppInterface_response::get_hmiDisplayLanguage(void) const 
-{
-  return hmiDisplayLanguage;
-}
-
 const DisplayCapabilities* RegisterAppInterface_response::get_displayCapabilities(void) const 
 {
   return displayCapabilities;
@@ -413,16 +316,6 @@ const DisplayCapabilities* RegisterAppInterface_response::get_displayCapabilitie
 const std::vector<ButtonCapabilities>* RegisterAppInterface_response::get_buttonCapabilities(void) const 
 {
   return buttonCapabilities;
-}
-
-const std::vector<SoftButtonCapabilities>* RegisterAppInterface_response::get_softButtonCapabilities(void) const 
-{
-  return softButtonCapabilities;
-}
-
-const PresetBankCapabilities* RegisterAppInterface_response::get_presetBankCapabilities(void) const 
-{
-  return presetBankCapabilities;
 }
 
 const std::vector<HmiZoneCapabilities>* RegisterAppInterface_response::get_hmiZoneCapabilities(void) const 
@@ -438,10 +331,5 @@ const std::vector<SpeechCapabilities>* RegisterAppInterface_response::get_speech
 const std::vector<VrCapabilities>* RegisterAppInterface_response::get_vrCapabilities(void) const 
 {
   return vrCapabilities;
-}
-
-const VehicleType* RegisterAppInterface_response::get_vehicleType(void) const 
-{
-  return vehicleType;
 }
 

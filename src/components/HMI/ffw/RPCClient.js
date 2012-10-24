@@ -21,7 +21,7 @@ FFW.RPCClient = Em.Object.extend({
 	/*
      * url for message broker
  	 */		
-	url: 					"ws://localhost:8086", 	
+	url: 					"ws://localhost:8087", 	
 //	url: 					"ws://echo.websocket.org/", 	
 
 	/*

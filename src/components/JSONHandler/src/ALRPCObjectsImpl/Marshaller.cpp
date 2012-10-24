@@ -33,67 +33,29 @@
 #include "../../include/JSONHandler/ALRPCObjects/SetMediaClockTimer_response.h"
 #include "../../include/JSONHandler/ALRPCObjects/EncodedSyncPData_request.h"
 #include "../../include/JSONHandler/ALRPCObjects/EncodedSyncPData_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/DialNumber_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/DialNumber_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/PerformAudioPassThru_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/PerformAudioPassThru_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/EndAudioPassThru_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/EndAudioPassThru_response.h"
 #include "../../include/JSONHandler/ALRPCObjects/SubscribeButton_request.h"
 #include "../../include/JSONHandler/ALRPCObjects/SubscribeButton_response.h"
 #include "../../include/JSONHandler/ALRPCObjects/UnsubscribeButton_request.h"
 #include "../../include/JSONHandler/ALRPCObjects/UnsubscribeButton_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/SubscribeVehicleData_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/SubscribeVehicleData_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/UnsubscribeVehicleData_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/UnsubscribeVehicleData_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/GetVehicleData_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/GetVehicleData_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/ReadDID_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/ReadDID_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/GetDTCs_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/GetDTCs_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/ScrollableMessage_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/ScrollableMessage_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/Slider_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/Slider_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/ShowConstantTBT_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/ShowConstantTBT_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/AlertManeuver_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/AlertManeuver_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/UpdateTurnList_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/UpdateTurnList_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/ChangeLanguageRegistration_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/ChangeLanguageRegistration_response.h"
 #include "../../include/JSONHandler/ALRPCObjects/GenericResponse_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/DeleteFile_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/DeleteFile_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/ListFiles_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/ListFiles_response.h"
-#include "../../include/JSONHandler/ALRPCObjects/SetAppIcon_request.h"
-#include "../../include/JSONHandler/ALRPCObjects/SetAppIcon_response.h"
 #include "../../include/JSONHandler/ALRPCObjects/OnHMIStatus.h"
 #include "../../include/JSONHandler/ALRPCObjects/OnAppInterfaceUnregistered.h"
 #include "../../include/JSONHandler/ALRPCObjects/OnButtonEvent.h"
 #include "../../include/JSONHandler/ALRPCObjects/OnButtonPress.h"
-#include "../../include/JSONHandler/ALRPCObjects/OnVehicleData.h"
 #include "../../include/JSONHandler/ALRPCObjects/OnCommand.h"
 #include "../../include/JSONHandler/ALRPCObjects/OnEncodedSyncPData.h"
 #include "../../include/JSONHandler/ALRPCObjects/OnTBTClientState.h"
 #include "../../include/JSONHandler/ALRPCObjects/OnDriverDistraction.h"
-#include "../../include/JSONHandler/ALRPCObjects/OnPermissionsChange.h"
-#include "../../include/JSONHandler/ALRPCObjects/OnAudioPassThru.h"
-#include "../../include/JSONHandler/ALRPCObjects/OnLanguageChange.h"
 
 #include "Marshaller.inc"
 
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -449,60 +411,6 @@ ALRPCMessage* Marshaller::fromJSON(const Json::Value& json)
       return NULL;
     }
 
-    case METHOD_DIALNUMBER_REQUEST:
-    {
-      DialNumber_request* rv=new DialNumber_request;
-      if(DialNumber_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_DIALNUMBER_RESPONSE:
-    {
-      DialNumber_response* rv=new DialNumber_response;
-      if(DialNumber_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_PERFORMAUDIOPASSTHRU_REQUEST:
-    {
-      PerformAudioPassThru_request* rv=new PerformAudioPassThru_request;
-      if(PerformAudioPassThru_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_PERFORMAUDIOPASSTHRU_RESPONSE:
-    {
-      PerformAudioPassThru_response* rv=new PerformAudioPassThru_response;
-      if(PerformAudioPassThru_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_ENDAUDIOPASSTHRU_REQUEST:
-    {
-      EndAudioPassThru_request* rv=new EndAudioPassThru_request;
-      if(EndAudioPassThru_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_ENDAUDIOPASSTHRU_RESPONSE:
-    {
-      EndAudioPassThru_response* rv=new EndAudioPassThru_response;
-      if(EndAudioPassThru_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
     case METHOD_SUBSCRIBEBUTTON_REQUEST:
     {
       SubscribeButton_request* rv=new SubscribeButton_request;
@@ -539,262 +447,10 @@ ALRPCMessage* Marshaller::fromJSON(const Json::Value& json)
       return NULL;
     }
 
-    case METHOD_SUBSCRIBEVEHICLEDATA_REQUEST:
-    {
-      SubscribeVehicleData_request* rv=new SubscribeVehicleData_request;
-      if(SubscribeVehicleData_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_SUBSCRIBEVEHICLEDATA_RESPONSE:
-    {
-      SubscribeVehicleData_response* rv=new SubscribeVehicleData_response;
-      if(SubscribeVehicleData_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_UNSUBSCRIBEVEHICLEDATA_REQUEST:
-    {
-      UnsubscribeVehicleData_request* rv=new UnsubscribeVehicleData_request;
-      if(UnsubscribeVehicleData_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_UNSUBSCRIBEVEHICLEDATA_RESPONSE:
-    {
-      UnsubscribeVehicleData_response* rv=new UnsubscribeVehicleData_response;
-      if(UnsubscribeVehicleData_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_GETVEHICLEDATA_REQUEST:
-    {
-      GetVehicleData_request* rv=new GetVehicleData_request;
-      if(GetVehicleData_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_GETVEHICLEDATA_RESPONSE:
-    {
-      GetVehicleData_response* rv=new GetVehicleData_response;
-      if(GetVehicleData_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_READDID_REQUEST:
-    {
-      ReadDID_request* rv=new ReadDID_request;
-      if(ReadDID_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_READDID_RESPONSE:
-    {
-      ReadDID_response* rv=new ReadDID_response;
-      if(ReadDID_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_GETDTCS_REQUEST:
-    {
-      GetDTCs_request* rv=new GetDTCs_request;
-      if(GetDTCs_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_GETDTCS_RESPONSE:
-    {
-      GetDTCs_response* rv=new GetDTCs_response;
-      if(GetDTCs_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_SCROLLABLEMESSAGE_REQUEST:
-    {
-      ScrollableMessage_request* rv=new ScrollableMessage_request;
-      if(ScrollableMessage_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_SCROLLABLEMESSAGE_RESPONSE:
-    {
-      ScrollableMessage_response* rv=new ScrollableMessage_response;
-      if(ScrollableMessage_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_SLIDER_REQUEST:
-    {
-      Slider_request* rv=new Slider_request;
-      if(Slider_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_SLIDER_RESPONSE:
-    {
-      Slider_response* rv=new Slider_response;
-      if(Slider_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_SHOWCONSTANTTBT_REQUEST:
-    {
-      ShowConstantTBT_request* rv=new ShowConstantTBT_request;
-      if(ShowConstantTBT_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_SHOWCONSTANTTBT_RESPONSE:
-    {
-      ShowConstantTBT_response* rv=new ShowConstantTBT_response;
-      if(ShowConstantTBT_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_ALERTMANEUVER_REQUEST:
-    {
-      AlertManeuver_request* rv=new AlertManeuver_request;
-      if(AlertManeuver_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_ALERTMANEUVER_RESPONSE:
-    {
-      AlertManeuver_response* rv=new AlertManeuver_response;
-      if(AlertManeuver_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_UPDATETURNLIST_REQUEST:
-    {
-      UpdateTurnList_request* rv=new UpdateTurnList_request;
-      if(UpdateTurnList_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_UPDATETURNLIST_RESPONSE:
-    {
-      UpdateTurnList_response* rv=new UpdateTurnList_response;
-      if(UpdateTurnList_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_CHANGELANGUAGEREGISTRATION_REQUEST:
-    {
-      ChangeLanguageRegistration_request* rv=new ChangeLanguageRegistration_request;
-      if(ChangeLanguageRegistration_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_CHANGELANGUAGEREGISTRATION_RESPONSE:
-    {
-      ChangeLanguageRegistration_response* rv=new ChangeLanguageRegistration_response;
-      if(ChangeLanguageRegistration_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
     case METHOD_GENERICRESPONSE_RESPONSE:
     {
       GenericResponse_response* rv=new GenericResponse_response;
       if(GenericResponse_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_DELETEFILE_REQUEST:
-    {
-      DeleteFile_request* rv=new DeleteFile_request;
-      if(DeleteFile_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_DELETEFILE_RESPONSE:
-    {
-      DeleteFile_response* rv=new DeleteFile_response;
-      if(DeleteFile_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_LISTFILES_REQUEST:
-    {
-      ListFiles_request* rv=new ListFiles_request;
-      if(ListFiles_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_LISTFILES_RESPONSE:
-    {
-      ListFiles_response* rv=new ListFiles_response;
-      if(ListFiles_responseMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_SETAPPICON_REQUEST:
-    {
-      SetAppIcon_request* rv=new SetAppIcon_request;
-      if(SetAppIcon_requestMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_SETAPPICON_RESPONSE:
-    {
-      SetAppIcon_response* rv=new SetAppIcon_response;
-      if(SetAppIcon_responseMarshaller::fromJSON(json,*rv))
         return rv;
       delete rv;
       return NULL;
@@ -836,15 +492,6 @@ ALRPCMessage* Marshaller::fromJSON(const Json::Value& json)
       return NULL;
     }
 
-    case METHOD_ONVEHICLEDATA:
-    {
-      OnVehicleData* rv=new OnVehicleData;
-      if(OnVehicleDataMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
     case METHOD_ONCOMMAND:
     {
       OnCommand* rv=new OnCommand;
@@ -876,33 +523,6 @@ ALRPCMessage* Marshaller::fromJSON(const Json::Value& json)
     {
       OnDriverDistraction* rv=new OnDriverDistraction;
       if(OnDriverDistractionMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_ONPERMISSIONSCHANGE:
-    {
-      OnPermissionsChange* rv=new OnPermissionsChange;
-      if(OnPermissionsChangeMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_ONAUDIOPASSTHRU:
-    {
-      OnAudioPassThru* rv=new OnAudioPassThru;
-      if(OnAudioPassThruMarshaller::fromJSON(json,*rv))
-        return rv;
-      delete rv;
-      return NULL;
-    }
-
-    case METHOD_ONLANGUAGECHANGE:
-    {
-      OnLanguageChange* rv=new OnLanguageChange;
-      if(OnLanguageChangeMarshaller::fromJSON(json,*rv))
         return rv;
       delete rv;
       return NULL;
@@ -1017,24 +637,6 @@ Json::Value Marshaller::toJSON(const ALRPCMessage* msg)
     case METHOD_ENCODEDSYNCPDATA_RESPONSE:
          return EncodedSyncPData_responseMarshaller::toJSON(* static_cast<const EncodedSyncPData_response*>(msg));
 
-    case METHOD_DIALNUMBER_REQUEST:
-         return DialNumber_requestMarshaller::toJSON(* static_cast<const DialNumber_request*>(msg));
-
-    case METHOD_DIALNUMBER_RESPONSE:
-         return DialNumber_responseMarshaller::toJSON(* static_cast<const DialNumber_response*>(msg));
-
-    case METHOD_PERFORMAUDIOPASSTHRU_REQUEST:
-         return PerformAudioPassThru_requestMarshaller::toJSON(* static_cast<const PerformAudioPassThru_request*>(msg));
-
-    case METHOD_PERFORMAUDIOPASSTHRU_RESPONSE:
-         return PerformAudioPassThru_responseMarshaller::toJSON(* static_cast<const PerformAudioPassThru_response*>(msg));
-
-    case METHOD_ENDAUDIOPASSTHRU_REQUEST:
-         return EndAudioPassThru_requestMarshaller::toJSON(* static_cast<const EndAudioPassThru_request*>(msg));
-
-    case METHOD_ENDAUDIOPASSTHRU_RESPONSE:
-         return EndAudioPassThru_responseMarshaller::toJSON(* static_cast<const EndAudioPassThru_response*>(msg));
-
     case METHOD_SUBSCRIBEBUTTON_REQUEST:
          return SubscribeButton_requestMarshaller::toJSON(* static_cast<const SubscribeButton_request*>(msg));
 
@@ -1047,92 +649,8 @@ Json::Value Marshaller::toJSON(const ALRPCMessage* msg)
     case METHOD_UNSUBSCRIBEBUTTON_RESPONSE:
          return UnsubscribeButton_responseMarshaller::toJSON(* static_cast<const UnsubscribeButton_response*>(msg));
 
-    case METHOD_SUBSCRIBEVEHICLEDATA_REQUEST:
-         return SubscribeVehicleData_requestMarshaller::toJSON(* static_cast<const SubscribeVehicleData_request*>(msg));
-
-    case METHOD_SUBSCRIBEVEHICLEDATA_RESPONSE:
-         return SubscribeVehicleData_responseMarshaller::toJSON(* static_cast<const SubscribeVehicleData_response*>(msg));
-
-    case METHOD_UNSUBSCRIBEVEHICLEDATA_REQUEST:
-         return UnsubscribeVehicleData_requestMarshaller::toJSON(* static_cast<const UnsubscribeVehicleData_request*>(msg));
-
-    case METHOD_UNSUBSCRIBEVEHICLEDATA_RESPONSE:
-         return UnsubscribeVehicleData_responseMarshaller::toJSON(* static_cast<const UnsubscribeVehicleData_response*>(msg));
-
-    case METHOD_GETVEHICLEDATA_REQUEST:
-         return GetVehicleData_requestMarshaller::toJSON(* static_cast<const GetVehicleData_request*>(msg));
-
-    case METHOD_GETVEHICLEDATA_RESPONSE:
-         return GetVehicleData_responseMarshaller::toJSON(* static_cast<const GetVehicleData_response*>(msg));
-
-    case METHOD_READDID_REQUEST:
-         return ReadDID_requestMarshaller::toJSON(* static_cast<const ReadDID_request*>(msg));
-
-    case METHOD_READDID_RESPONSE:
-         return ReadDID_responseMarshaller::toJSON(* static_cast<const ReadDID_response*>(msg));
-
-    case METHOD_GETDTCS_REQUEST:
-         return GetDTCs_requestMarshaller::toJSON(* static_cast<const GetDTCs_request*>(msg));
-
-    case METHOD_GETDTCS_RESPONSE:
-         return GetDTCs_responseMarshaller::toJSON(* static_cast<const GetDTCs_response*>(msg));
-
-    case METHOD_SCROLLABLEMESSAGE_REQUEST:
-         return ScrollableMessage_requestMarshaller::toJSON(* static_cast<const ScrollableMessage_request*>(msg));
-
-    case METHOD_SCROLLABLEMESSAGE_RESPONSE:
-         return ScrollableMessage_responseMarshaller::toJSON(* static_cast<const ScrollableMessage_response*>(msg));
-
-    case METHOD_SLIDER_REQUEST:
-         return Slider_requestMarshaller::toJSON(* static_cast<const Slider_request*>(msg));
-
-    case METHOD_SLIDER_RESPONSE:
-         return Slider_responseMarshaller::toJSON(* static_cast<const Slider_response*>(msg));
-
-    case METHOD_SHOWCONSTANTTBT_REQUEST:
-         return ShowConstantTBT_requestMarshaller::toJSON(* static_cast<const ShowConstantTBT_request*>(msg));
-
-    case METHOD_SHOWCONSTANTTBT_RESPONSE:
-         return ShowConstantTBT_responseMarshaller::toJSON(* static_cast<const ShowConstantTBT_response*>(msg));
-
-    case METHOD_ALERTMANEUVER_REQUEST:
-         return AlertManeuver_requestMarshaller::toJSON(* static_cast<const AlertManeuver_request*>(msg));
-
-    case METHOD_ALERTMANEUVER_RESPONSE:
-         return AlertManeuver_responseMarshaller::toJSON(* static_cast<const AlertManeuver_response*>(msg));
-
-    case METHOD_UPDATETURNLIST_REQUEST:
-         return UpdateTurnList_requestMarshaller::toJSON(* static_cast<const UpdateTurnList_request*>(msg));
-
-    case METHOD_UPDATETURNLIST_RESPONSE:
-         return UpdateTurnList_responseMarshaller::toJSON(* static_cast<const UpdateTurnList_response*>(msg));
-
-    case METHOD_CHANGELANGUAGEREGISTRATION_REQUEST:
-         return ChangeLanguageRegistration_requestMarshaller::toJSON(* static_cast<const ChangeLanguageRegistration_request*>(msg));
-
-    case METHOD_CHANGELANGUAGEREGISTRATION_RESPONSE:
-         return ChangeLanguageRegistration_responseMarshaller::toJSON(* static_cast<const ChangeLanguageRegistration_response*>(msg));
-
     case METHOD_GENERICRESPONSE_RESPONSE:
          return GenericResponse_responseMarshaller::toJSON(* static_cast<const GenericResponse_response*>(msg));
-
-    case METHOD_DELETEFILE_REQUEST:
-         return DeleteFile_requestMarshaller::toJSON(* static_cast<const DeleteFile_request*>(msg));
-
-    case METHOD_DELETEFILE_RESPONSE:
-         return DeleteFile_responseMarshaller::toJSON(* static_cast<const DeleteFile_response*>(msg));
-
-    case METHOD_LISTFILES_REQUEST:
-         return ListFiles_requestMarshaller::toJSON(* static_cast<const ListFiles_request*>(msg));
-
-    case METHOD_LISTFILES_RESPONSE:
-         return ListFiles_responseMarshaller::toJSON(* static_cast<const ListFiles_response*>(msg));
-
-    case METHOD_SETAPPICON_REQUEST:
-         return SetAppIcon_requestMarshaller::toJSON(* static_cast<const SetAppIcon_request*>(msg));
-
-    case METHOD_SETAPPICON_RESPONSE:
-         return SetAppIcon_responseMarshaller::toJSON(* static_cast<const SetAppIcon_response*>(msg));
 
     case METHOD_ONHMISTATUS:
          return OnHMIStatusMarshaller::toJSON(* static_cast<const OnHMIStatus*>(msg));
@@ -1146,9 +664,6 @@ Json::Value Marshaller::toJSON(const ALRPCMessage* msg)
     case METHOD_ONBUTTONPRESS:
          return OnButtonPressMarshaller::toJSON(* static_cast<const OnButtonPress*>(msg));
 
-    case METHOD_ONVEHICLEDATA:
-         return OnVehicleDataMarshaller::toJSON(* static_cast<const OnVehicleData*>(msg));
-
     case METHOD_ONCOMMAND:
          return OnCommandMarshaller::toJSON(* static_cast<const OnCommand*>(msg));
 
@@ -1160,15 +675,6 @@ Json::Value Marshaller::toJSON(const ALRPCMessage* msg)
 
     case METHOD_ONDRIVERDISTRACTION:
          return OnDriverDistractionMarshaller::toJSON(* static_cast<const OnDriverDistraction*>(msg));
-
-    case METHOD_ONPERMISSIONSCHANGE:
-         return OnPermissionsChangeMarshaller::toJSON(* static_cast<const OnPermissionsChange*>(msg));
-
-    case METHOD_ONAUDIOPASSTHRU:
-         return OnAudioPassThruMarshaller::toJSON(* static_cast<const OnAudioPassThru*>(msg));
-
-    case METHOD_ONLANGUAGECHANGE:
-         return OnLanguageChangeMarshaller::toJSON(* static_cast<const OnLanguageChange*>(msg));
 
     case METHOD_INVALID:
     default:
@@ -1210,59 +716,21 @@ SetMediaClockTimer_requestMarshaller Marshaller::mSetMediaClockTimer_request;
 SetMediaClockTimer_responseMarshaller Marshaller::mSetMediaClockTimer_response;
 EncodedSyncPData_requestMarshaller Marshaller::mEncodedSyncPData_request;
 EncodedSyncPData_responseMarshaller Marshaller::mEncodedSyncPData_response;
-DialNumber_requestMarshaller Marshaller::mDialNumber_request;
-DialNumber_responseMarshaller Marshaller::mDialNumber_response;
-PerformAudioPassThru_requestMarshaller Marshaller::mPerformAudioPassThru_request;
-PerformAudioPassThru_responseMarshaller Marshaller::mPerformAudioPassThru_response;
-EndAudioPassThru_requestMarshaller Marshaller::mEndAudioPassThru_request;
-EndAudioPassThru_responseMarshaller Marshaller::mEndAudioPassThru_response;
 SubscribeButton_requestMarshaller Marshaller::mSubscribeButton_request;
 SubscribeButton_responseMarshaller Marshaller::mSubscribeButton_response;
 UnsubscribeButton_requestMarshaller Marshaller::mUnsubscribeButton_request;
 UnsubscribeButton_responseMarshaller Marshaller::mUnsubscribeButton_response;
-SubscribeVehicleData_requestMarshaller Marshaller::mSubscribeVehicleData_request;
-SubscribeVehicleData_responseMarshaller Marshaller::mSubscribeVehicleData_response;
-UnsubscribeVehicleData_requestMarshaller Marshaller::mUnsubscribeVehicleData_request;
-UnsubscribeVehicleData_responseMarshaller Marshaller::mUnsubscribeVehicleData_response;
-GetVehicleData_requestMarshaller Marshaller::mGetVehicleData_request;
-GetVehicleData_responseMarshaller Marshaller::mGetVehicleData_response;
-ReadDID_requestMarshaller Marshaller::mReadDID_request;
-ReadDID_responseMarshaller Marshaller::mReadDID_response;
-GetDTCs_requestMarshaller Marshaller::mGetDTCs_request;
-GetDTCs_responseMarshaller Marshaller::mGetDTCs_response;
-ScrollableMessage_requestMarshaller Marshaller::mScrollableMessage_request;
-ScrollableMessage_responseMarshaller Marshaller::mScrollableMessage_response;
-Slider_requestMarshaller Marshaller::mSlider_request;
-Slider_responseMarshaller Marshaller::mSlider_response;
-ShowConstantTBT_requestMarshaller Marshaller::mShowConstantTBT_request;
-ShowConstantTBT_responseMarshaller Marshaller::mShowConstantTBT_response;
-AlertManeuver_requestMarshaller Marshaller::mAlertManeuver_request;
-AlertManeuver_responseMarshaller Marshaller::mAlertManeuver_response;
-UpdateTurnList_requestMarshaller Marshaller::mUpdateTurnList_request;
-UpdateTurnList_responseMarshaller Marshaller::mUpdateTurnList_response;
-ChangeLanguageRegistration_requestMarshaller Marshaller::mChangeLanguageRegistration_request;
-ChangeLanguageRegistration_responseMarshaller Marshaller::mChangeLanguageRegistration_response;
 GenericResponse_responseMarshaller Marshaller::mGenericResponse_response;
-DeleteFile_requestMarshaller Marshaller::mDeleteFile_request;
-DeleteFile_responseMarshaller Marshaller::mDeleteFile_response;
-ListFiles_requestMarshaller Marshaller::mListFiles_request;
-ListFiles_responseMarshaller Marshaller::mListFiles_response;
-SetAppIcon_requestMarshaller Marshaller::mSetAppIcon_request;
-SetAppIcon_responseMarshaller Marshaller::mSetAppIcon_response;
 OnHMIStatusMarshaller Marshaller::mOnHMIStatus;
 OnAppInterfaceUnregisteredMarshaller Marshaller::mOnAppInterfaceUnregistered;
 OnButtonEventMarshaller Marshaller::mOnButtonEvent;
 OnButtonPressMarshaller Marshaller::mOnButtonPress;
-OnVehicleDataMarshaller Marshaller::mOnVehicleData;
 OnCommandMarshaller Marshaller::mOnCommand;
 OnEncodedSyncPDataMarshaller Marshaller::mOnEncodedSyncPData;
 OnTBTClientStateMarshaller Marshaller::mOnTBTClientState;
 OnDriverDistractionMarshaller Marshaller::mOnDriverDistraction;
-OnPermissionsChangeMarshaller Marshaller::mOnPermissionsChange;
-OnAudioPassThruMarshaller Marshaller::mOnAudioPassThru;
-OnLanguageChangeMarshaller Marshaller::mOnLanguageChange;
 
-const Marshaller::localHash Marshaller::mHashTable[83]=
+const Marshaller::localHash Marshaller::mHashTable[45]=
 {
   {"RegisterAppInterface_request",METHOD_REGISTERAPPINTERFACE_REQUEST,&Marshaller::mRegisterAppInterface_request},
   {"RegisterAppInterface_response",METHOD_REGISTERAPPINTERFACE_RESPONSE,&Marshaller::mRegisterAppInterface_response},
@@ -1296,55 +764,17 @@ const Marshaller::localHash Marshaller::mHashTable[83]=
   {"SetMediaClockTimer_response",METHOD_SETMEDIACLOCKTIMER_RESPONSE,&Marshaller::mSetMediaClockTimer_response},
   {"EncodedSyncPData_request",METHOD_ENCODEDSYNCPDATA_REQUEST,&Marshaller::mEncodedSyncPData_request},
   {"EncodedSyncPData_response",METHOD_ENCODEDSYNCPDATA_RESPONSE,&Marshaller::mEncodedSyncPData_response},
-  {"DialNumber_request",METHOD_DIALNUMBER_REQUEST,&Marshaller::mDialNumber_request},
-  {"DialNumber_response",METHOD_DIALNUMBER_RESPONSE,&Marshaller::mDialNumber_response},
-  {"PerformAudioPassThru_request",METHOD_PERFORMAUDIOPASSTHRU_REQUEST,&Marshaller::mPerformAudioPassThru_request},
-  {"PerformAudioPassThru_response",METHOD_PERFORMAUDIOPASSTHRU_RESPONSE,&Marshaller::mPerformAudioPassThru_response},
-  {"EndAudioPassThru_request",METHOD_ENDAUDIOPASSTHRU_REQUEST,&Marshaller::mEndAudioPassThru_request},
-  {"EndAudioPassThru_response",METHOD_ENDAUDIOPASSTHRU_RESPONSE,&Marshaller::mEndAudioPassThru_response},
   {"SubscribeButton_request",METHOD_SUBSCRIBEBUTTON_REQUEST,&Marshaller::mSubscribeButton_request},
   {"SubscribeButton_response",METHOD_SUBSCRIBEBUTTON_RESPONSE,&Marshaller::mSubscribeButton_response},
   {"UnsubscribeButton_request",METHOD_UNSUBSCRIBEBUTTON_REQUEST,&Marshaller::mUnsubscribeButton_request},
   {"UnsubscribeButton_response",METHOD_UNSUBSCRIBEBUTTON_RESPONSE,&Marshaller::mUnsubscribeButton_response},
-  {"SubscribeVehicleData_request",METHOD_SUBSCRIBEVEHICLEDATA_REQUEST,&Marshaller::mSubscribeVehicleData_request},
-  {"SubscribeVehicleData_response",METHOD_SUBSCRIBEVEHICLEDATA_RESPONSE,&Marshaller::mSubscribeVehicleData_response},
-  {"UnsubscribeVehicleData_request",METHOD_UNSUBSCRIBEVEHICLEDATA_REQUEST,&Marshaller::mUnsubscribeVehicleData_request},
-  {"UnsubscribeVehicleData_response",METHOD_UNSUBSCRIBEVEHICLEDATA_RESPONSE,&Marshaller::mUnsubscribeVehicleData_response},
-  {"GetVehicleData_request",METHOD_GETVEHICLEDATA_REQUEST,&Marshaller::mGetVehicleData_request},
-  {"GetVehicleData_response",METHOD_GETVEHICLEDATA_RESPONSE,&Marshaller::mGetVehicleData_response},
-  {"ReadDID_request",METHOD_READDID_REQUEST,&Marshaller::mReadDID_request},
-  {"ReadDID_response",METHOD_READDID_RESPONSE,&Marshaller::mReadDID_response},
-  {"GetDTCs_request",METHOD_GETDTCS_REQUEST,&Marshaller::mGetDTCs_request},
-  {"GetDTCs_response",METHOD_GETDTCS_RESPONSE,&Marshaller::mGetDTCs_response},
-  {"ScrollableMessage_request",METHOD_SCROLLABLEMESSAGE_REQUEST,&Marshaller::mScrollableMessage_request},
-  {"ScrollableMessage_response",METHOD_SCROLLABLEMESSAGE_RESPONSE,&Marshaller::mScrollableMessage_response},
-  {"Slider_request",METHOD_SLIDER_REQUEST,&Marshaller::mSlider_request},
-  {"Slider_response",METHOD_SLIDER_RESPONSE,&Marshaller::mSlider_response},
-  {"ShowConstantTBT_request",METHOD_SHOWCONSTANTTBT_REQUEST,&Marshaller::mShowConstantTBT_request},
-  {"ShowConstantTBT_response",METHOD_SHOWCONSTANTTBT_RESPONSE,&Marshaller::mShowConstantTBT_response},
-  {"AlertManeuver_request",METHOD_ALERTMANEUVER_REQUEST,&Marshaller::mAlertManeuver_request},
-  {"AlertManeuver_response",METHOD_ALERTMANEUVER_RESPONSE,&Marshaller::mAlertManeuver_response},
-  {"UpdateTurnList_request",METHOD_UPDATETURNLIST_REQUEST,&Marshaller::mUpdateTurnList_request},
-  {"UpdateTurnList_response",METHOD_UPDATETURNLIST_RESPONSE,&Marshaller::mUpdateTurnList_response},
-  {"ChangeLanguageRegistration_request",METHOD_CHANGELANGUAGEREGISTRATION_REQUEST,&Marshaller::mChangeLanguageRegistration_request},
-  {"ChangeLanguageRegistration_response",METHOD_CHANGELANGUAGEREGISTRATION_RESPONSE,&Marshaller::mChangeLanguageRegistration_response},
   {"GenericResponse_response",METHOD_GENERICRESPONSE_RESPONSE,&Marshaller::mGenericResponse_response},
-  {"DeleteFile_request",METHOD_DELETEFILE_REQUEST,&Marshaller::mDeleteFile_request},
-  {"DeleteFile_response",METHOD_DELETEFILE_RESPONSE,&Marshaller::mDeleteFile_response},
-  {"ListFiles_request",METHOD_LISTFILES_REQUEST,&Marshaller::mListFiles_request},
-  {"ListFiles_response",METHOD_LISTFILES_RESPONSE,&Marshaller::mListFiles_response},
-  {"SetAppIcon_request",METHOD_SETAPPICON_REQUEST,&Marshaller::mSetAppIcon_request},
-  {"SetAppIcon_response",METHOD_SETAPPICON_RESPONSE,&Marshaller::mSetAppIcon_response},
   {"OnHMIStatus_notification",METHOD_ONHMISTATUS,&Marshaller::mOnHMIStatus},
   {"OnAppInterfaceUnregistered_notification",METHOD_ONAPPINTERFACEUNREGISTERED,&Marshaller::mOnAppInterfaceUnregistered},
   {"OnButtonEvent_notification",METHOD_ONBUTTONEVENT,&Marshaller::mOnButtonEvent},
   {"OnButtonPress_notification",METHOD_ONBUTTONPRESS,&Marshaller::mOnButtonPress},
-  {"OnVehicleData_notification",METHOD_ONVEHICLEDATA,&Marshaller::mOnVehicleData},
   {"OnCommand_notification",METHOD_ONCOMMAND,&Marshaller::mOnCommand},
   {"OnEncodedSyncPData_notification",METHOD_ONENCODEDSYNCPDATA,&Marshaller::mOnEncodedSyncPData},
   {"OnTBTClientState_notification",METHOD_ONTBTCLIENTSTATE,&Marshaller::mOnTBTClientState},
-  {"OnDriverDistraction_notification",METHOD_ONDRIVERDISTRACTION,&Marshaller::mOnDriverDistraction},
-  {"OnPermissionsChange_notification",METHOD_ONPERMISSIONSCHANGE,&Marshaller::mOnPermissionsChange},
-  {"OnAudioPassThru_notification",METHOD_ONAUDIOPASSTHRU,&Marshaller::mOnAudioPassThru},
-  {"OnLanguageChange_notification",METHOD_ONLANGUAGECHANGE,&Marshaller::mOnLanguageChange}
+  {"OnDriverDistraction_notification",METHOD_ONDRIVERDISTRACTION,&Marshaller::mOnDriverDistraction}
 };

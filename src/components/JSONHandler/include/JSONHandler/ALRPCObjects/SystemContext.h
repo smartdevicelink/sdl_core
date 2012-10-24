@@ -4,18 +4,15 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
 
-/**
-     Enumeration that describes possible contexts an app's HMI might be in.
-     Communicated to whichever app is in HMI FULL, except Alert.
-*/
+///  Enumeraction that describes possible contexts and app's HMI might be in.
 
 class SystemContext
 {
@@ -23,21 +20,9 @@ public:
   enum SystemContextInternal
   {
     INVALID_ENUM=-1,
-
-///  The app's persistent display (whether media/non-media/navigation) is fully visible onscreen.
     SYSCTXT_MAIN=0,
-
-///  The system is currently in a VR session (with whatever dedicated VR screen being overlaid onscreen).
     SYSCTXT_VRSESSION=1,
-
-///  The system is currently displaying a system or in-App menu onscreen.
-    SYSCTXT_MENU=2,
-
-///  The app's display HMI is currently being obscured by either a system or other app's overlay.
-    SYSCTXT_HMI_OBSCURED=3,
-
-///  Broadcast only to whichever app has an alert currently being displayed.
-    SYSCTXT_ALERT=4
+    SYSCTXT_MENU=2
   };
 
   SystemContext() : mInternal(INVALID_ENUM)				{}

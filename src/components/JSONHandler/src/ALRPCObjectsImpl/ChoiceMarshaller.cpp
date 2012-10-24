@@ -1,15 +1,15 @@
 #include "../../include/JSONHandler/ALRPCObjects/Choice.h"
-#include "ImageMarshaller.h"
+
 
 #include "ChoiceMarshaller.h"
 
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -47,7 +47,6 @@ const std::string ChoiceMarshaller::toString(const Choice& e)
 bool ChoiceMarshaller::checkIntegrityConst(const Choice& s)
 {
   if(s.choiceID>65535)  return false;
-  if(!ImageMarshaller::checkIntegrityConst(s.image))  return false;
   if(s.menuName.length()>500)  return false;
   {
     unsigned int i=s.vrCommands.size();
@@ -67,8 +66,6 @@ Json::Value ChoiceMarshaller::toJSON(const Choice& e)
     return Json::Value(Json::nullValue);
 
   json["choiceID"]=Json::Value(e.choiceID);
-
-  json["image"]=ImageMarshaller::toJSON(e.image);
 
   json["menuName"]=Json::Value(e.menuName);
 
@@ -93,12 +90,6 @@ bool ChoiceMarshaller::fromJSON(const Json::Value& json,Choice& c)
       const Json::Value& j=json["choiceID"];
       if(!j.isInt())  return false;
       c.choiceID=j.asInt();
-    }
-    if(!json.isMember("image"))  return false;
-    {
-      const Json::Value& j=json["image"];
-      if(!ImageMarshaller::fromJSON(j,c.image))
-        return false;
     }
     if(!json.isMember("menuName"))  return false;
     {

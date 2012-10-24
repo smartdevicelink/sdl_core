@@ -6,10 +6,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -48,7 +48,6 @@ bool Alert_responseMarshaller::checkIntegrityConst(const Alert_response& s)
 {
   if(!ResultMarshaller::checkIntegrityConst(s.resultCode))  return false;
   if(s.info && s.info->length()>1000)  return false;
-  if(s.tryAgainTime>2000000000)  return false;
   return true;
 }
 
@@ -70,8 +69,6 @@ Json::Value Alert_responseMarshaller::toJSON(const Alert_response& e)
 
   if(e.info)
     j["info"]=Json::Value(*e.info);
-
-  j["tryAgainTime"]=Json::Value(e.tryAgainTime);
 
   json["response"]["parameters"]=j;
   return json;
@@ -116,12 +113,6 @@ bool Alert_responseMarshaller::fromJSON(const Json::Value& js,Alert_response& c)
       const Json::Value& j=json["info"];
       if(!j.isString())  return false;
       c.info=new std::string(j.asString());
-    }
-    if(!json.isMember("tryAgainTime"))  return false;
-    {
-      const Json::Value& j=json["tryAgainTime"];
-      if(!j.isInt())  return false;
-      c.tryAgainTime=j.asInt();
     }
 
   }
