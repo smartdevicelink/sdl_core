@@ -15,6 +15,8 @@
 #include "JSONHandler/RegisterAppInterfaceResponse.h"
 #include "JSONHandler/SubscribeButton.h"
 #include "JSONHandler/SubscribeButtonResponse.h"
+#include "JSONHandler/UnsubscribeButton.h"
+#include "JSONHandler/UnsubscribeButtonResponse.h"
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/HMILevel.h"
 #include "AppMgr/IApplication.h"
@@ -145,6 +147,13 @@ void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 			//	registerApplication( object );
 				sendMobileRPCResponse( msg );
 			}
+            else if(0 == msg->getFunctionName().compare("UnsubscribeButton"))
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeButton request has been invoked");
+                UnsubscribeButton * object = (UnsubscribeButton*)msg;
+            //	registerApplication( object );
+                sendMobileRPCResponse( msg );
+            }
 			break;
 		}
 		case MobileRPCMessage::RESPONSE:
