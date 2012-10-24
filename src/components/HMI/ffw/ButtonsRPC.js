@@ -92,103 +92,97 @@ FFW.Buttons = FFW.RPCObserver.create({
 		this._super();
 
 		if (request.method == "Buttons.GetCapabilities") {
-			var cap = {
-				"name"					: "1btn",
-				"shortPressAvailable"	: true,
-				"longPressAvailable"	: true,
-				"upDownAvailable"		: true,
-			};
 
 			// send repsonse
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
 				"result"	:	{
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "1btn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "2btn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "3btn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "4btn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "5btn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "6btn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "7btn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "8btn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "9btn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "0btn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "Okbtn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "Upbtn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "Downbtn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "Leftbtn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
 						"upDownAvailable"		: true,
 					},
-					"ButtonCapabilities":{
+					"capabilities":{
 						"name"					: "Rightbtn",
 						"shortPressAvailable"	: true,
 						"longPressAvailable"	: true,
@@ -212,10 +206,10 @@ FFW.Buttons = FFW.RPCObserver.create({
 		if (this.client.socket.readyState == this.client.socket.OPEN) {
 			var JSONMessage = {
 				"jsonrpc" :	"2.0",
-				"method"  :	"Buttons.onButtonPressed",
+				"method"  :	"Buttons.onButtonPress",
 				"params"  :	{
-				"name"	  : id,
-				"mode"    : type
+					"name"	  : id,
+					"mode"    : type
 				}
 			};
 
@@ -236,8 +230,8 @@ FFW.Buttons = FFW.RPCObserver.create({
 				"jsonrpc" :	"2.0",
 				"method"  :	"Buttons.onButtonEvent",
 				"params"  :	{
-				"name"	  : id,
-				"mode"    : type
+					"name"	  : id,
+					"mode"    : type
 				}
 			};
 
