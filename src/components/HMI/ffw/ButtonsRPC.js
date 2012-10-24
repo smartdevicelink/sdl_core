@@ -93,18 +93,107 @@ FFW.Buttons = FFW.RPCObserver.create({
 
 		if (request.method == "Buttons.GetCapabilities") {
 			var cap = {
-				"name" 		      :  "", // some name
-				"shortPressAvailable" : true,
+				"name"					: "1btn",
+				"shortPressAvailable"	: true,
+				"longPressAvailable"	: true,
+				"upDownAvailable"		: true,
 			};
 
 			// send repsonse
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	{
-
-					// for i to N buttons
-					// fill prams
+				"result"	:	{
+					"ButtonCapabilities":{
+						"name"					: "1btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "2btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "3btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "4btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "5btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "6btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "7btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "8btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "9btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "0btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "Okbtn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "Upbtn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "Downbtn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "Leftbtn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"ButtonCapabilities":{
+						"name"					: "Rightbtn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
 
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}
@@ -114,11 +203,33 @@ FFW.Buttons = FFW.RPCObserver.create({
 	},
 
 	/*
-	 * Notifies the ButtonsBackend that the web is all set.
+	 * Notifies the ButtonsRPC that the web is all set.
 	 * Should be called twice: when the RPC link is up or failed to connect
 	 * and all the views are rendered.
 	 */
 	buttonPressed: function(id, type) {
+
+		if (this.client.socket.readyState == this.client.socket.OPEN) {
+			var JSONMessage = {
+				"jsonrpc" :	"2.0",
+				"method"  :	"Buttons.onButtonPressed",
+				"params"  :	{
+				"name"	  : id,
+				"mode"    : type
+				}
+			};
+
+			this.client.send(JSONMessage);
+		}
+		
+	},
+
+	/*
+	 * Notifies the ButtonsRPC that the web is all set.
+	 * Should be called twice: when the RPC link is up or failed to connect
+	 * and all the views are rendered.
+	 */
+	buttonEvent: function(id, type) {
 
 		if (this.client.socket.readyState == this.client.socket.OPEN) {
 			var JSONMessage = {
