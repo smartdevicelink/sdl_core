@@ -4,10 +4,10 @@
 #include "DimensionMarshaller.h"
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -58,37 +58,38 @@ bool GPSData::set_dimension(const Dimension& dimension_)
   return true;
 }
 
-bool GPSData::set_hdop(unsigned int hdop_)
+bool GPSData::set_hdop(float hdop_)
 {
   if(hdop_>31)  return false;
+  if(hdop_<0)  return false;
   hdop=hdop_;
   return true;
 }
 
-bool GPSData::set_heading(unsigned int heading_)
+bool GPSData::set_heading(float heading_)
 {
   if(heading_>360)  return false;
+  if(heading_<0)  return false;
   heading=heading_;
   return true;
 }
 
-bool GPSData::set_latitudeDegrees(int latitudeDegrees_)
+bool GPSData::set_latitudeDegrees(float latitudeDegrees_)
 {
-  if(latitudeDegrees_>1000000000)  return false;
   latitudeDegrees=latitudeDegrees_;
   return true;
 }
 
-bool GPSData::set_longitudeDegrees(int longitudeDegrees_)
+bool GPSData::set_longitudeDegrees(float longitudeDegrees_)
 {
-  if(longitudeDegrees_>1000000000)  return false;
   longitudeDegrees=longitudeDegrees_;
   return true;
 }
 
-bool GPSData::set_pdop(unsigned int pdop_)
+bool GPSData::set_pdop(float pdop_)
 {
   if(pdop_>31)  return false;
+  if(pdop_<0)  return false;
   pdop=pdop_;
   return true;
 }
@@ -152,9 +153,10 @@ bool GPSData::set_utcYear(unsigned int utcYear_)
   return true;
 }
 
-bool GPSData::set_vdop(unsigned int vdop_)
+bool GPSData::set_vdop(float vdop_)
 {
   if(vdop_>31)  return false;
+  if(vdop_<0)  return false;
   vdop=vdop_;
   return true;
 }
@@ -186,31 +188,31 @@ const Dimension& GPSData::get_dimension(void) const
 }
 
 
-unsigned int GPSData::get_hdop(void) const
+float GPSData::get_hdop(void) const
 {
   return hdop;
 }
 
 
-unsigned int GPSData::get_heading(void) const
+float GPSData::get_heading(void) const
 {
   return heading;
 }
 
 
-int GPSData::get_latitudeDegrees(void) const
+float GPSData::get_latitudeDegrees(void) const
 {
   return latitudeDegrees;
 }
 
 
-int GPSData::get_longitudeDegrees(void) const
+float GPSData::get_longitudeDegrees(void) const
 {
   return longitudeDegrees;
 }
 
 
-unsigned int GPSData::get_pdop(void) const
+float GPSData::get_pdop(void) const
 {
   return pdop;
 }
@@ -264,7 +266,7 @@ unsigned int GPSData::get_utcYear(void) const
 }
 
 
-unsigned int GPSData::get_vdop(void) const
+float GPSData::get_vdop(void) const
 {
   return vdop;
 }

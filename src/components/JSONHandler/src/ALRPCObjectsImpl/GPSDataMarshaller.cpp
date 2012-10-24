@@ -7,10 +7,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -52,12 +52,11 @@ bool GPSDataMarshaller::checkIntegrityConst(const GPSData& s)
   if(!CompassDirectionMarshaller::checkIntegrityConst(s.compassDirection))  return false;
   if(!DimensionMarshaller::checkIntegrityConst(s.dimension))  return false;
   if(s.hdop>31)  return false;
+  if(s.hdop<0)  return false;
   if(s.heading>360)  return false;
-  if(s.latitudeDegrees>1000000000)  return false;
-  if(s.latitudeDegrees<-1000000000)  return false;
-  if(s.longitudeDegrees>1000000000)  return false;
-  if(s.longitudeDegrees<-1000000000)  return false;
+  if(s.heading<0)  return false;
   if(s.pdop>31)  return false;
+  if(s.pdop<0)  return false;
   if(s.satellites>31)  return false;
   if(s.speed>400)  return false;
   if(s.utcDay>31)  return false;
@@ -70,6 +69,7 @@ bool GPSDataMarshaller::checkIntegrityConst(const GPSData& s)
   if(s.utcYear>2100)  return false;
   if(s.utcYear<2010)  return false;
   if(s.vdop>31)  return false;
+  if(s.vdop<0)  return false;
   return true;
 }
 
@@ -153,32 +153,32 @@ bool GPSDataMarshaller::fromJSON(const Json::Value& json,GPSData& c)
     if(!json.isMember("hdop"))  return false;
     {
       const Json::Value& j=json["hdop"];
-      if(!j.isInt())  return false;
-      c.hdop=j.asInt();
+      if(!j.isDouble())  return false;
+      c.hdop=j.asDouble();
     }
     if(!json.isMember("heading"))  return false;
     {
       const Json::Value& j=json["heading"];
-      if(!j.isInt())  return false;
-      c.heading=j.asInt();
+      if(!j.isDouble())  return false;
+      c.heading=j.asDouble();
     }
     if(!json.isMember("latitudeDegrees"))  return false;
     {
       const Json::Value& j=json["latitudeDegrees"];
-      if(!j.isInt())  return false;
-      c.latitudeDegrees=j.asInt();
+      if(!j.isDouble())  return false;
+      c.latitudeDegrees=j.asDouble();
     }
     if(!json.isMember("longitudeDegrees"))  return false;
     {
       const Json::Value& j=json["longitudeDegrees"];
-      if(!j.isInt())  return false;
-      c.longitudeDegrees=j.asInt();
+      if(!j.isDouble())  return false;
+      c.longitudeDegrees=j.asDouble();
     }
     if(!json.isMember("pdop"))  return false;
     {
       const Json::Value& j=json["pdop"];
-      if(!j.isInt())  return false;
-      c.pdop=j.asInt();
+      if(!j.isDouble())  return false;
+      c.pdop=j.asDouble();
     }
     if(!json.isMember("satellites"))  return false;
     {
@@ -231,8 +231,8 @@ bool GPSDataMarshaller::fromJSON(const Json::Value& json,GPSData& c)
     if(!json.isMember("vdop"))  return false;
     {
       const Json::Value& j=json["vdop"];
-      if(!j.isInt())  return false;
-      c.vdop=j.asInt();
+      if(!j.isDouble())  return false;
+      c.vdop=j.asDouble();
     }
 
   }

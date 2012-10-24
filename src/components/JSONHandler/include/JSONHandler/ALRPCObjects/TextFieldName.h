@@ -4,10 +4,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -20,98 +20,47 @@ public:
     INVALID_ENUM=-1,
 
 /**
-     The first line of first set of main fields of the persistent display
+     The first line of the main field of persistent display
      Applies to "Show"
 */
     mainField1=0,
 
 /**
-     The second line of first set of main fields of the persistent display
+     The second line of the main field of persistent display
      Applies to "Show"
 */
     mainField2=1,
 
 /**
-     The first line of second set of main fields of persistent display
-     Applies to "Show"
-*/
-    mainField3=2,
-
-/**
-     The second line of second set of main fields of the persistent display
-     Applies to "Show"
-*/
-    mainField4=3,
-
-/**
      The status bar on Nav
      Applies to "Show"
 */
-    statusBar=4,
+    statusBar=2,
 
 /**
-     Text value for MediaClock field.
+     Text value for MediaClock field. Has to be properly formatted by Mobile App according to Sync capabilities.
      Applies to "Show"
 */
-    mediaClock=5,
+    mediaClock=3,
 
 /**
      The track field of NGN type ACMs.
      This field is only available for media applications.
      Applies to "Show"
 */
-    mediaTrack=6,
+    mediaTrack=4,
 
 /**
      The first line of the alert text field
      Applies to "Alert"
 */
-    alertText1=7,
+    alertText1=5,
 
 /**
      The second line of the alert text field
      Applies to "Alert"
 */
-    alertText2=8,
-
-/**
-     The third line of the alert text field
-     Applies to "Alert"
-*/
-    alertText3=9,
-
-/**
-      Long form body of text that can include newlines and tabs.
-     Applies to "ScrollableMessage"
-*/
-    scrollableMessageBody=10,
-
-///   First line suggestion for a user response (in the case of VR enabled interaction
-    initialInteractionText=11,
-
-///   First line of navigation text
-    navigationText1=12,
-
-///   Second line of navigation text
-    navigationText2=13,
-
-///   Estimated Time of Arrival time for navigation
-    ETA=14,
-
-///   Total distance to destination for navigation
-    totalDistance=15,
-
-///   First line of text for audio pass thru
-    audioPassThruDisplayText1=16,
-
-///   Second line of text for audio pass thru
-    audioPassThruDisplayText2=17,
-
-///   Header text for slider
-    sliderHeader=18,
-
-///   Footer text for slider
-    sliderFooter=19
+    alertText2=6
   };
 
   TextFieldName() : mInternal(INVALID_ENUM)				{}

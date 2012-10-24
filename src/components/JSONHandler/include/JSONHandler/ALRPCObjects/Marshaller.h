@@ -2,7 +2,7 @@
 #define MARSHALLER_INCLUDE
 
 #include <string>
-#include <jsoncpp/json.h>
+#include <json/value.h>
 
 #include "../../../src/ALRPCObjectsImpl/RegisterAppInterface_requestMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/RegisterAppInterface_responseMarshaller.h"
@@ -36,65 +36,27 @@
 #include "../../../src/ALRPCObjectsImpl/SetMediaClockTimer_responseMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/EncodedSyncPData_requestMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/EncodedSyncPData_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/DialNumber_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/DialNumber_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/PerformAudioPassThru_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/PerformAudioPassThru_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/EndAudioPassThru_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/EndAudioPassThru_responseMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/SubscribeButton_requestMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/SubscribeButton_responseMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/UnsubscribeButton_requestMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/UnsubscribeButton_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/SubscribeVehicleData_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/SubscribeVehicleData_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/UnsubscribeVehicleData_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/UnsubscribeVehicleData_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/GetVehicleData_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/GetVehicleData_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/ReadDID_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/ReadDID_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/GetDTCs_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/GetDTCs_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/ScrollableMessage_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/ScrollableMessage_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/Slider_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/Slider_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/ShowConstantTBT_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/ShowConstantTBT_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/AlertManeuver_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/AlertManeuver_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/UpdateTurnList_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/UpdateTurnList_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/ChangeLanguageRegistration_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/ChangeLanguageRegistration_responseMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/GenericResponse_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/DeleteFile_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/DeleteFile_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/ListFiles_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/ListFiles_responseMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/SetAppIcon_requestMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/SetAppIcon_responseMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/OnHMIStatusMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/OnAppInterfaceUnregisteredMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/OnButtonEventMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/OnButtonPressMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/OnVehicleDataMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/OnCommandMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/OnEncodedSyncPDataMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/OnTBTClientStateMarshaller.h"
 #include "../../../src/ALRPCObjectsImpl/OnDriverDistractionMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/OnPermissionsChangeMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/OnAudioPassThruMarshaller.h"
-#include "../../../src/ALRPCObjectsImpl/OnLanguageChangeMarshaller.h"
 
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -137,57 +99,19 @@ public:
     METHOD_SETMEDIACLOCKTIMER_RESPONSE=29,
     METHOD_ENCODEDSYNCPDATA_REQUEST=30,
     METHOD_ENCODEDSYNCPDATA_RESPONSE=31,
-    METHOD_DIALNUMBER_REQUEST=32,
-    METHOD_DIALNUMBER_RESPONSE=33,
-    METHOD_PERFORMAUDIOPASSTHRU_REQUEST=34,
-    METHOD_PERFORMAUDIOPASSTHRU_RESPONSE=35,
-    METHOD_ENDAUDIOPASSTHRU_REQUEST=36,
-    METHOD_ENDAUDIOPASSTHRU_RESPONSE=37,
-    METHOD_SUBSCRIBEBUTTON_REQUEST=38,
-    METHOD_SUBSCRIBEBUTTON_RESPONSE=39,
-    METHOD_UNSUBSCRIBEBUTTON_REQUEST=40,
-    METHOD_UNSUBSCRIBEBUTTON_RESPONSE=41,
-    METHOD_SUBSCRIBEVEHICLEDATA_REQUEST=42,
-    METHOD_SUBSCRIBEVEHICLEDATA_RESPONSE=43,
-    METHOD_UNSUBSCRIBEVEHICLEDATA_REQUEST=44,
-    METHOD_UNSUBSCRIBEVEHICLEDATA_RESPONSE=45,
-    METHOD_GETVEHICLEDATA_REQUEST=46,
-    METHOD_GETVEHICLEDATA_RESPONSE=47,
-    METHOD_READDID_REQUEST=48,
-    METHOD_READDID_RESPONSE=49,
-    METHOD_GETDTCS_REQUEST=50,
-    METHOD_GETDTCS_RESPONSE=51,
-    METHOD_SCROLLABLEMESSAGE_REQUEST=52,
-    METHOD_SCROLLABLEMESSAGE_RESPONSE=53,
-    METHOD_SLIDER_REQUEST=54,
-    METHOD_SLIDER_RESPONSE=55,
-    METHOD_SHOWCONSTANTTBT_REQUEST=56,
-    METHOD_SHOWCONSTANTTBT_RESPONSE=57,
-    METHOD_ALERTMANEUVER_REQUEST=58,
-    METHOD_ALERTMANEUVER_RESPONSE=59,
-    METHOD_UPDATETURNLIST_REQUEST=60,
-    METHOD_UPDATETURNLIST_RESPONSE=61,
-    METHOD_CHANGELANGUAGEREGISTRATION_REQUEST=62,
-    METHOD_CHANGELANGUAGEREGISTRATION_RESPONSE=63,
-    METHOD_GENERICRESPONSE_RESPONSE=64,
-    METHOD_DELETEFILE_REQUEST=65,
-    METHOD_DELETEFILE_RESPONSE=66,
-    METHOD_LISTFILES_REQUEST=67,
-    METHOD_LISTFILES_RESPONSE=68,
-    METHOD_SETAPPICON_REQUEST=69,
-    METHOD_SETAPPICON_RESPONSE=70,
-    METHOD_ONHMISTATUS=71,
-    METHOD_ONAPPINTERFACEUNREGISTERED=72,
-    METHOD_ONBUTTONEVENT=73,
-    METHOD_ONBUTTONPRESS=74,
-    METHOD_ONVEHICLEDATA=75,
-    METHOD_ONCOMMAND=76,
-    METHOD_ONENCODEDSYNCPDATA=77,
-    METHOD_ONTBTCLIENTSTATE=78,
-    METHOD_ONDRIVERDISTRACTION=79,
-    METHOD_ONPERMISSIONSCHANGE=80,
-    METHOD_ONAUDIOPASSTHRU=81,
-    METHOD_ONLANGUAGECHANGE=82
+    METHOD_SUBSCRIBEBUTTON_REQUEST=32,
+    METHOD_SUBSCRIBEBUTTON_RESPONSE=33,
+    METHOD_UNSUBSCRIBEBUTTON_REQUEST=34,
+    METHOD_UNSUBSCRIBEBUTTON_RESPONSE=35,
+    METHOD_GENERICRESPONSE_RESPONSE=36,
+    METHOD_ONHMISTATUS=37,
+    METHOD_ONAPPINTERFACEUNREGISTERED=38,
+    METHOD_ONBUTTONEVENT=39,
+    METHOD_ONBUTTONPRESS=40,
+    METHOD_ONCOMMAND=41,
+    METHOD_ONENCODEDSYNCPDATA=42,
+    METHOD_ONTBTCLIENTSTATE=43,
+    METHOD_ONDRIVERDISTRACTION=44
   };
 
   Marshaller()					{}
@@ -553,72 +477,6 @@ protected:
     return mEncodedSyncPData_response.toString(res);
   }
 
-// DialNumber_request
-  static bool fromString(const std::string& str, DialNumber_request& res)
-  {
-    return mDialNumber_request.fromString(str, res);
-  }
-
-  static std::string toString(const DialNumber_request& res)
-  {
-    return mDialNumber_request.toString(res);
-  }
-
-// DialNumber_response
-  static bool fromString(const std::string& str, DialNumber_response& res)
-  {
-    return mDialNumber_response.fromString(str, res);
-  }
-
-  static std::string toString(const DialNumber_response& res)
-  {
-    return mDialNumber_response.toString(res);
-  }
-
-// PerformAudioPassThru_request
-  static bool fromString(const std::string& str, PerformAudioPassThru_request& res)
-  {
-    return mPerformAudioPassThru_request.fromString(str, res);
-  }
-
-  static std::string toString(const PerformAudioPassThru_request& res)
-  {
-    return mPerformAudioPassThru_request.toString(res);
-  }
-
-// PerformAudioPassThru_response
-  static bool fromString(const std::string& str, PerformAudioPassThru_response& res)
-  {
-    return mPerformAudioPassThru_response.fromString(str, res);
-  }
-
-  static std::string toString(const PerformAudioPassThru_response& res)
-  {
-    return mPerformAudioPassThru_response.toString(res);
-  }
-
-// EndAudioPassThru_request
-  static bool fromString(const std::string& str, EndAudioPassThru_request& res)
-  {
-    return mEndAudioPassThru_request.fromString(str, res);
-  }
-
-  static std::string toString(const EndAudioPassThru_request& res)
-  {
-    return mEndAudioPassThru_request.toString(res);
-  }
-
-// EndAudioPassThru_response
-  static bool fromString(const std::string& str, EndAudioPassThru_response& res)
-  {
-    return mEndAudioPassThru_response.fromString(str, res);
-  }
-
-  static std::string toString(const EndAudioPassThru_response& res)
-  {
-    return mEndAudioPassThru_response.toString(res);
-  }
-
 // SubscribeButton_request
   static bool fromString(const std::string& str, SubscribeButton_request& res)
   {
@@ -663,248 +521,6 @@ protected:
     return mUnsubscribeButton_response.toString(res);
   }
 
-// SubscribeVehicleData_request
-  static bool fromString(const std::string& str, SubscribeVehicleData_request& res)
-  {
-    return mSubscribeVehicleData_request.fromString(str, res);
-  }
-
-  static std::string toString(const SubscribeVehicleData_request& res)
-  {
-    return mSubscribeVehicleData_request.toString(res);
-  }
-
-// SubscribeVehicleData_response
-  static bool fromString(const std::string& str, SubscribeVehicleData_response& res)
-  {
-    return mSubscribeVehicleData_response.fromString(str, res);
-  }
-
-  static std::string toString(const SubscribeVehicleData_response& res)
-  {
-    return mSubscribeVehicleData_response.toString(res);
-  }
-
-// UnsubscribeVehicleData_request
-  static bool fromString(const std::string& str, UnsubscribeVehicleData_request& res)
-  {
-    return mUnsubscribeVehicleData_request.fromString(str, res);
-  }
-
-  static std::string toString(const UnsubscribeVehicleData_request& res)
-  {
-    return mUnsubscribeVehicleData_request.toString(res);
-  }
-
-// UnsubscribeVehicleData_response
-  static bool fromString(const std::string& str, UnsubscribeVehicleData_response& res)
-  {
-    return mUnsubscribeVehicleData_response.fromString(str, res);
-  }
-
-  static std::string toString(const UnsubscribeVehicleData_response& res)
-  {
-    return mUnsubscribeVehicleData_response.toString(res);
-  }
-
-// GetVehicleData_request
-  static bool fromString(const std::string& str, GetVehicleData_request& res)
-  {
-    return mGetVehicleData_request.fromString(str, res);
-  }
-
-  static std::string toString(const GetVehicleData_request& res)
-  {
-    return mGetVehicleData_request.toString(res);
-  }
-
-// GetVehicleData_response
-  static bool fromString(const std::string& str, GetVehicleData_response& res)
-  {
-    return mGetVehicleData_response.fromString(str, res);
-  }
-
-  static std::string toString(const GetVehicleData_response& res)
-  {
-    return mGetVehicleData_response.toString(res);
-  }
-
-// ReadDID_request
-  static bool fromString(const std::string& str, ReadDID_request& res)
-  {
-    return mReadDID_request.fromString(str, res);
-  }
-
-  static std::string toString(const ReadDID_request& res)
-  {
-    return mReadDID_request.toString(res);
-  }
-
-// ReadDID_response
-  static bool fromString(const std::string& str, ReadDID_response& res)
-  {
-    return mReadDID_response.fromString(str, res);
-  }
-
-  static std::string toString(const ReadDID_response& res)
-  {
-    return mReadDID_response.toString(res);
-  }
-
-// GetDTCs_request
-  static bool fromString(const std::string& str, GetDTCs_request& res)
-  {
-    return mGetDTCs_request.fromString(str, res);
-  }
-
-  static std::string toString(const GetDTCs_request& res)
-  {
-    return mGetDTCs_request.toString(res);
-  }
-
-// GetDTCs_response
-  static bool fromString(const std::string& str, GetDTCs_response& res)
-  {
-    return mGetDTCs_response.fromString(str, res);
-  }
-
-  static std::string toString(const GetDTCs_response& res)
-  {
-    return mGetDTCs_response.toString(res);
-  }
-
-// ScrollableMessage_request
-  static bool fromString(const std::string& str, ScrollableMessage_request& res)
-  {
-    return mScrollableMessage_request.fromString(str, res);
-  }
-
-  static std::string toString(const ScrollableMessage_request& res)
-  {
-    return mScrollableMessage_request.toString(res);
-  }
-
-// ScrollableMessage_response
-  static bool fromString(const std::string& str, ScrollableMessage_response& res)
-  {
-    return mScrollableMessage_response.fromString(str, res);
-  }
-
-  static std::string toString(const ScrollableMessage_response& res)
-  {
-    return mScrollableMessage_response.toString(res);
-  }
-
-// Slider_request
-  static bool fromString(const std::string& str, Slider_request& res)
-  {
-    return mSlider_request.fromString(str, res);
-  }
-
-  static std::string toString(const Slider_request& res)
-  {
-    return mSlider_request.toString(res);
-  }
-
-// Slider_response
-  static bool fromString(const std::string& str, Slider_response& res)
-  {
-    return mSlider_response.fromString(str, res);
-  }
-
-  static std::string toString(const Slider_response& res)
-  {
-    return mSlider_response.toString(res);
-  }
-
-// ShowConstantTBT_request
-  static bool fromString(const std::string& str, ShowConstantTBT_request& res)
-  {
-    return mShowConstantTBT_request.fromString(str, res);
-  }
-
-  static std::string toString(const ShowConstantTBT_request& res)
-  {
-    return mShowConstantTBT_request.toString(res);
-  }
-
-// ShowConstantTBT_response
-  static bool fromString(const std::string& str, ShowConstantTBT_response& res)
-  {
-    return mShowConstantTBT_response.fromString(str, res);
-  }
-
-  static std::string toString(const ShowConstantTBT_response& res)
-  {
-    return mShowConstantTBT_response.toString(res);
-  }
-
-// AlertManeuver_request
-  static bool fromString(const std::string& str, AlertManeuver_request& res)
-  {
-    return mAlertManeuver_request.fromString(str, res);
-  }
-
-  static std::string toString(const AlertManeuver_request& res)
-  {
-    return mAlertManeuver_request.toString(res);
-  }
-
-// AlertManeuver_response
-  static bool fromString(const std::string& str, AlertManeuver_response& res)
-  {
-    return mAlertManeuver_response.fromString(str, res);
-  }
-
-  static std::string toString(const AlertManeuver_response& res)
-  {
-    return mAlertManeuver_response.toString(res);
-  }
-
-// UpdateTurnList_request
-  static bool fromString(const std::string& str, UpdateTurnList_request& res)
-  {
-    return mUpdateTurnList_request.fromString(str, res);
-  }
-
-  static std::string toString(const UpdateTurnList_request& res)
-  {
-    return mUpdateTurnList_request.toString(res);
-  }
-
-// UpdateTurnList_response
-  static bool fromString(const std::string& str, UpdateTurnList_response& res)
-  {
-    return mUpdateTurnList_response.fromString(str, res);
-  }
-
-  static std::string toString(const UpdateTurnList_response& res)
-  {
-    return mUpdateTurnList_response.toString(res);
-  }
-
-// ChangeLanguageRegistration_request
-  static bool fromString(const std::string& str, ChangeLanguageRegistration_request& res)
-  {
-    return mChangeLanguageRegistration_request.fromString(str, res);
-  }
-
-  static std::string toString(const ChangeLanguageRegistration_request& res)
-  {
-    return mChangeLanguageRegistration_request.toString(res);
-  }
-
-// ChangeLanguageRegistration_response
-  static bool fromString(const std::string& str, ChangeLanguageRegistration_response& res)
-  {
-    return mChangeLanguageRegistration_response.fromString(str, res);
-  }
-
-  static std::string toString(const ChangeLanguageRegistration_response& res)
-  {
-    return mChangeLanguageRegistration_response.toString(res);
-  }
-
 // GenericResponse_response
   static bool fromString(const std::string& str, GenericResponse_response& res)
   {
@@ -914,72 +530,6 @@ protected:
   static std::string toString(const GenericResponse_response& res)
   {
     return mGenericResponse_response.toString(res);
-  }
-
-// DeleteFile_request
-  static bool fromString(const std::string& str, DeleteFile_request& res)
-  {
-    return mDeleteFile_request.fromString(str, res);
-  }
-
-  static std::string toString(const DeleteFile_request& res)
-  {
-    return mDeleteFile_request.toString(res);
-  }
-
-// DeleteFile_response
-  static bool fromString(const std::string& str, DeleteFile_response& res)
-  {
-    return mDeleteFile_response.fromString(str, res);
-  }
-
-  static std::string toString(const DeleteFile_response& res)
-  {
-    return mDeleteFile_response.toString(res);
-  }
-
-// ListFiles_request
-  static bool fromString(const std::string& str, ListFiles_request& res)
-  {
-    return mListFiles_request.fromString(str, res);
-  }
-
-  static std::string toString(const ListFiles_request& res)
-  {
-    return mListFiles_request.toString(res);
-  }
-
-// ListFiles_response
-  static bool fromString(const std::string& str, ListFiles_response& res)
-  {
-    return mListFiles_response.fromString(str, res);
-  }
-
-  static std::string toString(const ListFiles_response& res)
-  {
-    return mListFiles_response.toString(res);
-  }
-
-// SetAppIcon_request
-  static bool fromString(const std::string& str, SetAppIcon_request& res)
-  {
-    return mSetAppIcon_request.fromString(str, res);
-  }
-
-  static std::string toString(const SetAppIcon_request& res)
-  {
-    return mSetAppIcon_request.toString(res);
-  }
-
-// SetAppIcon_response
-  static bool fromString(const std::string& str, SetAppIcon_response& res)
-  {
-    return mSetAppIcon_response.fromString(str, res);
-  }
-
-  static std::string toString(const SetAppIcon_response& res)
-  {
-    return mSetAppIcon_response.toString(res);
   }
 
 // OnHMIStatus
@@ -1026,17 +576,6 @@ protected:
     return mOnButtonPress.toString(res);
   }
 
-// OnVehicleData
-  static bool fromString(const std::string& str, OnVehicleData& res)
-  {
-    return mOnVehicleData.fromString(str, res);
-  }
-
-  static std::string toString(const OnVehicleData& res)
-  {
-    return mOnVehicleData.toString(res);
-  }
-
 // OnCommand
   static bool fromString(const std::string& str, OnCommand& res)
   {
@@ -1081,39 +620,6 @@ protected:
     return mOnDriverDistraction.toString(res);
   }
 
-// OnPermissionsChange
-  static bool fromString(const std::string& str, OnPermissionsChange& res)
-  {
-    return mOnPermissionsChange.fromString(str, res);
-  }
-
-  static std::string toString(const OnPermissionsChange& res)
-  {
-    return mOnPermissionsChange.toString(res);
-  }
-
-// OnAudioPassThru
-  static bool fromString(const std::string& str, OnAudioPassThru& res)
-  {
-    return mOnAudioPassThru.fromString(str, res);
-  }
-
-  static std::string toString(const OnAudioPassThru& res)
-  {
-    return mOnAudioPassThru.toString(res);
-  }
-
-// OnLanguageChange
-  static bool fromString(const std::string& str, OnLanguageChange& res)
-  {
-    return mOnLanguageChange.fromString(str, res);
-  }
-
-  static std::string toString(const OnLanguageChange& res)
-  {
-    return mOnLanguageChange.toString(res);
-  }
-
   struct localHash
   {
     const char *name;
@@ -1155,66 +661,28 @@ private:
   static SetMediaClockTimer_responseMarshaller mSetMediaClockTimer_response;
   static EncodedSyncPData_requestMarshaller mEncodedSyncPData_request;
   static EncodedSyncPData_responseMarshaller mEncodedSyncPData_response;
-  static DialNumber_requestMarshaller mDialNumber_request;
-  static DialNumber_responseMarshaller mDialNumber_response;
-  static PerformAudioPassThru_requestMarshaller mPerformAudioPassThru_request;
-  static PerformAudioPassThru_responseMarshaller mPerformAudioPassThru_response;
-  static EndAudioPassThru_requestMarshaller mEndAudioPassThru_request;
-  static EndAudioPassThru_responseMarshaller mEndAudioPassThru_response;
   static SubscribeButton_requestMarshaller mSubscribeButton_request;
   static SubscribeButton_responseMarshaller mSubscribeButton_response;
   static UnsubscribeButton_requestMarshaller mUnsubscribeButton_request;
   static UnsubscribeButton_responseMarshaller mUnsubscribeButton_response;
-  static SubscribeVehicleData_requestMarshaller mSubscribeVehicleData_request;
-  static SubscribeVehicleData_responseMarshaller mSubscribeVehicleData_response;
-  static UnsubscribeVehicleData_requestMarshaller mUnsubscribeVehicleData_request;
-  static UnsubscribeVehicleData_responseMarshaller mUnsubscribeVehicleData_response;
-  static GetVehicleData_requestMarshaller mGetVehicleData_request;
-  static GetVehicleData_responseMarshaller mGetVehicleData_response;
-  static ReadDID_requestMarshaller mReadDID_request;
-  static ReadDID_responseMarshaller mReadDID_response;
-  static GetDTCs_requestMarshaller mGetDTCs_request;
-  static GetDTCs_responseMarshaller mGetDTCs_response;
-  static ScrollableMessage_requestMarshaller mScrollableMessage_request;
-  static ScrollableMessage_responseMarshaller mScrollableMessage_response;
-  static Slider_requestMarshaller mSlider_request;
-  static Slider_responseMarshaller mSlider_response;
-  static ShowConstantTBT_requestMarshaller mShowConstantTBT_request;
-  static ShowConstantTBT_responseMarshaller mShowConstantTBT_response;
-  static AlertManeuver_requestMarshaller mAlertManeuver_request;
-  static AlertManeuver_responseMarshaller mAlertManeuver_response;
-  static UpdateTurnList_requestMarshaller mUpdateTurnList_request;
-  static UpdateTurnList_responseMarshaller mUpdateTurnList_response;
-  static ChangeLanguageRegistration_requestMarshaller mChangeLanguageRegistration_request;
-  static ChangeLanguageRegistration_responseMarshaller mChangeLanguageRegistration_response;
   static GenericResponse_responseMarshaller mGenericResponse_response;
-  static DeleteFile_requestMarshaller mDeleteFile_request;
-  static DeleteFile_responseMarshaller mDeleteFile_response;
-  static ListFiles_requestMarshaller mListFiles_request;
-  static ListFiles_responseMarshaller mListFiles_response;
-  static SetAppIcon_requestMarshaller mSetAppIcon_request;
-  static SetAppIcon_responseMarshaller mSetAppIcon_response;
   static OnHMIStatusMarshaller mOnHMIStatus;
   static OnAppInterfaceUnregisteredMarshaller mOnAppInterfaceUnregistered;
   static OnButtonEventMarshaller mOnButtonEvent;
   static OnButtonPressMarshaller mOnButtonPress;
-  static OnVehicleDataMarshaller mOnVehicleData;
   static OnCommandMarshaller mOnCommand;
   static OnEncodedSyncPDataMarshaller mOnEncodedSyncPData;
   static OnTBTClientStateMarshaller mOnTBTClientState;
   static OnDriverDistractionMarshaller mOnDriverDistraction;
-  static OnPermissionsChangeMarshaller mOnPermissionsChange;
-  static OnAudioPassThruMarshaller mOnAudioPassThru;
-  static OnLanguageChangeMarshaller mOnLanguageChange;
 
   static const char* getName(Methods e)
   {
-     return (e>=0 && e<83) ? mHashTable[e].name : NULL;
+     return (e>=0 && e<45) ? mHashTable[e].name : NULL;
   }
    
   static const Methods getIndex(const char* s);
 
-  static const localHash mHashTable[83];
+  static const localHash mHashTable[45];
   
   friend class Marshaller_intHash;
 };

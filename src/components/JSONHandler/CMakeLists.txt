@@ -14,11 +14,10 @@ include_directories (./include/
 add_library(jsonHandler 
                   ./src/JSONHandler.cpp
                   ./src/JSONRPC2Handler.cpp
-                  ./src/MobileRPCMessage.cpp
-                  ./src/MobileRPCRequest.cpp
-                  ./src/MobileRPCResponse.cpp
-                  ./src/MobileRPCNotification.cpp
-                  ./src/MobileRPCFactory.cpp
+                  ./src/ALRPCMessage.cpp
+                  ./src/ALRPCNotification.cpp
+                  ./src/ALRPCRequest.cpp
+                  ./src/ALRPCResponse.cpp
                   ./src/RPC2Command.cpp
                   ./src/RPC2Marshaller.cpp
                   ./src/RPC2Notification.cpp

@@ -1,7 +1,6 @@
 #include "../../include/JSONHandler/ALRPCObjects/AddCommand_request.h"
 #include "AddCommand_requestMarshaller.h"
 #include "../../include/JSONHandler/ALRPCObjects/Marshaller.h"
-#include "ImageMarshaller.h"
 #include "MenuParamsMarshaller.h"
 
 #define PROTOCOL_VERSION	1
@@ -9,10 +8,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -21,7 +20,6 @@ AddCommand_request& AddCommand_request::operator =(const AddCommand_request& c)
   cmdID= c.cmdID;
   menuParams= c.menuParams ? new MenuParams(c.menuParams[0]) : 0;
   vrCommands= c.vrCommands ? new std::vector<std::string>(c.vrCommands[0]) : 0;
-  cmdIcon= c.cmdIcon ? new Image(c.cmdIcon[0]) : 0;
 
   return *this;}
 
@@ -32,8 +30,6 @@ AddCommand_request::~AddCommand_request(void)
     delete menuParams;
   if(vrCommands)
     delete vrCommands;
-  if(cmdIcon)
-    delete cmdIcon;
 }
 
 
@@ -51,8 +47,7 @@ bool AddCommand_request::checkIntegrity(void)
 
 AddCommand_request::AddCommand_request(void) : ALRPCRequest(PROTOCOL_VERSION,Marshaller::METHOD_ADDCOMMAND_REQUEST),
       menuParams(0),
-    vrCommands(0),
-    cmdIcon(0)
+    vrCommands(0)
 {
 }
 
@@ -104,23 +99,6 @@ void AddCommand_request::reset_vrCommands(void)
   vrCommands=0;
 }
 
-bool AddCommand_request::set_cmdIcon(const Image& cmdIcon_)
-{
-  if(!ImageMarshaller::checkIntegrityConst(cmdIcon_))   return false;
-  delete cmdIcon;
-  cmdIcon=0;
-
-  cmdIcon=new Image(cmdIcon_);
-  return true;
-}
-
-void AddCommand_request::reset_cmdIcon(void)
-{
-  if(cmdIcon)
-    delete cmdIcon;
-  cmdIcon=0;
-}
-
 
 
 
@@ -137,10 +115,5 @@ const MenuParams* AddCommand_request::get_menuParams(void) const
 const std::vector<std::string>* AddCommand_request::get_vrCommands(void) const 
 {
   return vrCommands;
-}
-
-const Image* AddCommand_request::get_cmdIcon(void) const 
-{
-  return cmdIcon;
 }
 

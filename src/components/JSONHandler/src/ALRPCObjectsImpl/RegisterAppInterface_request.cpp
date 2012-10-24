@@ -9,10 +9,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -24,10 +24,8 @@ RegisterAppInterface_request& RegisterAppInterface_request::operator =(const Reg
   vrSynonyms= c.vrSynonyms ? new std::vector<std::string>(c.vrSynonyms[0]) : 0;
   usesVehicleData= c.usesVehicleData ? new bool(c.usesVehicleData[0]) : 0;
   isMediaApplication= c.isMediaApplication;
-  languageDesired= c.languageDesired ? new Language(c.languageDesired[0]) : 0;
-  hmiDisplayLanguageDesired= c.hmiDisplayLanguageDesired ? new Language(c.hmiDisplayLanguageDesired[0]) : 0;
+  languageDesired= c.languageDesired;
   autoActivateID= c.autoActivateID ? new std::string(c.autoActivateID[0]) : 0;
-  appID= c.appID ? new std::string(c.appID[0]) : 0;
 
   return *this;}
 
@@ -40,14 +38,8 @@ RegisterAppInterface_request::~RegisterAppInterface_request(void)
     delete vrSynonyms;
   if(usesVehicleData)
     delete usesVehicleData;
-  if(languageDesired)
-    delete languageDesired;
-  if(hmiDisplayLanguageDesired)
-    delete hmiDisplayLanguageDesired;
   if(autoActivateID)
     delete autoActivateID;
-  if(appID)
-    delete appID;
 }
 
 
@@ -67,10 +59,7 @@ RegisterAppInterface_request::RegisterAppInterface_request(void) : ALRPCRequest(
       ngnMediaScreenAppName(0),
     vrSynonyms(0),
     usesVehicleData(0),
-    languageDesired(0),
-    hmiDisplayLanguageDesired(0),
-    autoActivateID(0),
-    appID(0)
+    autoActivateID(0)
 {
 }
 
@@ -154,35 +143,8 @@ bool RegisterAppInterface_request::set_isMediaApplication(bool isMediaApplicatio
 bool RegisterAppInterface_request::set_languageDesired(const Language& languageDesired_)
 {
   if(!LanguageMarshaller::checkIntegrityConst(languageDesired_))   return false;
-  delete languageDesired;
-  languageDesired=0;
-
-  languageDesired=new Language(languageDesired_);
+  languageDesired=languageDesired_;
   return true;
-}
-
-void RegisterAppInterface_request::reset_languageDesired(void)
-{
-  if(languageDesired)
-    delete languageDesired;
-  languageDesired=0;
-}
-
-bool RegisterAppInterface_request::set_hmiDisplayLanguageDesired(const Language& hmiDisplayLanguageDesired_)
-{
-  if(!LanguageMarshaller::checkIntegrityConst(hmiDisplayLanguageDesired_))   return false;
-  delete hmiDisplayLanguageDesired;
-  hmiDisplayLanguageDesired=0;
-
-  hmiDisplayLanguageDesired=new Language(hmiDisplayLanguageDesired_);
-  return true;
-}
-
-void RegisterAppInterface_request::reset_hmiDisplayLanguageDesired(void)
-{
-  if(hmiDisplayLanguageDesired)
-    delete hmiDisplayLanguageDesired;
-  hmiDisplayLanguageDesired=0;
 }
 
 bool RegisterAppInterface_request::set_autoActivateID(const std::string& autoActivateID_)
@@ -200,23 +162,6 @@ void RegisterAppInterface_request::reset_autoActivateID(void)
   if(autoActivateID)
     delete autoActivateID;
   autoActivateID=0;
-}
-
-bool RegisterAppInterface_request::set_appID(const std::string& appID_)
-{
-  if(appID_.length()>100)  return false;
-  delete appID;
-  appID=0;
-
-  appID=new std::string(appID_);
-  return true;
-}
-
-void RegisterAppInterface_request::reset_appID(void)
-{
-  if(appID)
-    delete appID;
-  appID=0;
 }
 
 
@@ -252,23 +197,13 @@ bool RegisterAppInterface_request::get_isMediaApplication(void) const
   return isMediaApplication;
 }
 
-const Language* RegisterAppInterface_request::get_languageDesired(void) const 
+const Language& RegisterAppInterface_request::get_languageDesired(void) const 
 {
   return languageDesired;
-}
-
-const Language* RegisterAppInterface_request::get_hmiDisplayLanguageDesired(void) const 
-{
-  return hmiDisplayLanguageDesired;
 }
 
 const std::string* RegisterAppInterface_request::get_autoActivateID(void) const 
 {
   return autoActivateID;
-}
-
-const std::string* RegisterAppInterface_request::get_appID(void) const 
-{
-  return appID;
 }
 

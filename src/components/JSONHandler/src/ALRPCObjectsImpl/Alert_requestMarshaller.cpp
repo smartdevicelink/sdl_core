@@ -1,5 +1,4 @@
 #include "../../include/JSONHandler/ALRPCObjects/Alert_request.h"
-#include "SoftButtonMarshaller.h"
 #include "TTSChunkMarshaller.h"
 
 #include "Alert_requestMarshaller.h"
@@ -7,10 +6,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -49,7 +48,6 @@ bool Alert_requestMarshaller::checkIntegrityConst(const Alert_request& s)
 {
   if(s.alertText1 && s.alertText1->length()>500)  return false;
   if(s.alertText2 && s.alertText2->length()>500)  return false;
-  if(s.alertText3 && s.alertText3->length()>500)  return false;
   if(s.ttsChunks)
   {
     unsigned int i=s.ttsChunks[0].size();
@@ -61,15 +59,6 @@ bool Alert_requestMarshaller::checkIntegrityConst(const Alert_request& s)
   }
   if(s.duration && *s.duration>10000)  return false;
   if(s.duration && *s.duration<3000)  return false;
-  if(s.softButtons)
-  {
-    unsigned int i=s.softButtons[0].size();
-    if(i>4 || i<0)  return false;
-    while(i--)
-    {
-    if(!SoftButtonMarshaller::checkIntegrityConst(s.softButtons[0][i]))   return false;
-    }
-  }
   return true;
 }
 
@@ -91,9 +80,6 @@ Json::Value Alert_requestMarshaller::toJSON(const Alert_request& e)
   if(e.alertText2)
     j["alertText2"]=Json::Value(*e.alertText2);
 
-  if(e.alertText3)
-    j["alertText3"]=Json::Value(*e.alertText3);
-
   if(e.ttsChunks)
   {
     unsigned int sz=e.ttsChunks->size();
@@ -109,15 +95,6 @@ Json::Value Alert_requestMarshaller::toJSON(const Alert_request& e)
   if(e.playTone)
     j["playTone"]=Json::Value(*e.playTone);
 
-  if(e.softButtons)
-  {
-    unsigned int sz=e.softButtons->size();
-    j["softButtons"]=Json::Value(Json::arrayValue);
-    j["softButtons"].resize(sz);
-    for(unsigned int i=0;i<sz;i++)
-      j["softButtons"][i]=SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
-  }
-
   json["request"]["parameters"]=j;
   return json;
 }
@@ -131,9 +108,6 @@ bool Alert_requestMarshaller::fromJSON(const Json::Value& js,Alert_request& c)
   if(c.alertText2)  delete c.alertText2;
   c.alertText2=0;
 
-  if(c.alertText3)  delete c.alertText3;
-  c.alertText3=0;
-
   if(c.ttsChunks)  delete c.ttsChunks;
   c.ttsChunks=0;
 
@@ -142,9 +116,6 @@ bool Alert_requestMarshaller::fromJSON(const Json::Value& js,Alert_request& c)
 
   if(c.playTone)  delete c.playTone;
   c.playTone=0;
-
-  if(c.softButtons)  delete c.softButtons;
-  c.softButtons=0;
 
   try
   {
@@ -174,12 +145,6 @@ bool Alert_requestMarshaller::fromJSON(const Json::Value& js,Alert_request& c)
       if(!j.isString())  return false;
       c.alertText2=new std::string(j.asString());
     }
-    if(json.isMember("alertText3"))
-    {
-      const Json::Value& j=json["alertText3"];
-      if(!j.isString())  return false;
-      c.alertText3=new std::string(j.asString());
-    }
     if(json.isMember("ttsChunks"))
     {
       const Json::Value& j=json["ttsChunks"];
@@ -206,21 +171,6 @@ bool Alert_requestMarshaller::fromJSON(const Json::Value& js,Alert_request& c)
       const Json::Value& j=json["playTone"];
       if(!j.isBool())  return false;
       c.playTone=new bool(j.asBool());
-    }
-    if(json.isMember("softButtons"))
-    {
-      const Json::Value& j=json["softButtons"];
-      if(!j.isArray())  return false;
-      c.softButtons=new std::vector<SoftButton>();
-      c.softButtons->resize(j.size());
-      for(unsigned int i=0;i<j.size();i++)
-      {
-        SoftButton t;
-        if(!SoftButtonMarshaller::fromJSON(j[i],t))
-          return false;
-        c.softButtons[0][i]=t;
-      }
-
     }
 
   }

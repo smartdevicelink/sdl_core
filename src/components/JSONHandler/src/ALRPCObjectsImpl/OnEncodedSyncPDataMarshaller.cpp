@@ -6,10 +6,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -55,9 +55,6 @@ bool OnEncodedSyncPDataMarshaller::checkIntegrityConst(const OnEncodedSyncPData&
       if(s.data[0][i].length()>10000)  return false;
     }
   }
-  if(s.URL && s.URL->length()>1000)  return false;
-  if(s.Timeout && *s.Timeout>2000000000)  return false;
-  if(s.Timeout && *s.Timeout<-2000000000)  return false;
   return true;
 }
 
@@ -81,12 +78,6 @@ Json::Value OnEncodedSyncPDataMarshaller::toJSON(const OnEncodedSyncPData& e)
       j["data"][i]=Json::Value(e.data[0][i]);
   }
 
-  if(e.URL)
-    j["URL"]=Json::Value(*e.URL);
-
-  if(e.Timeout)
-    j["Timeout"]=Json::Value(*e.Timeout);
-
   json["notification"]["parameters"]=j;
   return json;
 }
@@ -96,12 +87,6 @@ bool OnEncodedSyncPDataMarshaller::fromJSON(const Json::Value& js,OnEncodedSyncP
 {
   if(c.data)  delete c.data;
   c.data=0;
-
-  if(c.URL)  delete c.URL;
-  c.URL=0;
-
-  if(c.Timeout)  delete c.Timeout;
-  c.Timeout=0;
 
   try
   {
@@ -128,18 +113,6 @@ bool OnEncodedSyncPDataMarshaller::fromJSON(const Json::Value& js,OnEncodedSyncP
           return false;
         else
           c.data[0][i]=j[i].asString();
-    }
-    if(json.isMember("URL"))
-    {
-      const Json::Value& j=json["URL"];
-      if(!j.isString())  return false;
-      c.URL=new std::string(j.asString());
-    }
-    if(json.isMember("Timeout"))
-    {
-      const Json::Value& j=json["Timeout"];
-      if(!j.isInt())  return false;
-      c.Timeout=new int(j.asInt());
     }
 
   }

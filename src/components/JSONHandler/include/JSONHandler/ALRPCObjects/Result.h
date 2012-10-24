@@ -4,10 +4,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -113,28 +113,7 @@ public:
     FILE_NOT_FOUND=20,
 
 ///  Provided data is valid but something went wrong in the lower layers.
-    GENERIC_ERROR=21,
-
-///  RPC is not authorized in local policy table.
-    DISALLOWED=22,
-
-///  RPC is included in a functional group explicitly blocked by the user.
-    USER_DISALLOWED=23,
-
-///  Overlay reached the maximum timeout and closed.
-    TIMED_OUT=24,
-
-///  User selected to Cancel Route.
-    CANCEL_ROUTE=25,
-
-///  User chose a Close command for the overlay.
-    CLOSED=26,
-
-/**
-     The data is being returned through an OnEncodedSYNCPData notification.
-     The data is intended to be passed by the proxy to the designated server URL.
-*/
-    ENCRYPTED=27
+    GENERIC_ERROR=21
   };
 
   Result() : mInternal(INVALID_ENUM)				{}

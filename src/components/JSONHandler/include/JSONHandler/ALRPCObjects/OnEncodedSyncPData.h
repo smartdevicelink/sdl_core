@@ -4,15 +4,15 @@
 #include <vector>
 #include <string>
 
-#include "../../../JSONHandler/ALRPCNotification.hh"
+#include "JSONHandler/ALRPCNotification.h"
 
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -33,23 +33,15 @@ public:
   bool checkIntegrity(void);
 
   const std::vector<std::string>* get_data(void) const;
-  const std::string* get_URL(void) const;
-  const int* get_Timeout(void) const;
 
   void reset_data(void);
   bool set_data(const std::vector<std::string>& data_);
-  void reset_URL(void);
-  bool set_URL(const std::string& URL_);
-  void reset_Timeout(void);
-  bool set_Timeout(int Timeout_);
 
 private:
 
   friend class OnEncodedSyncPDataMarshaller;
 
   std::vector<std::string>* data;	//!<   [%s..%s] (10000)
-  std::string* URL;	//!< (1000)
-  int* Timeout;	//!<  (-2000000000,2000000000)
 };
 
 #endif

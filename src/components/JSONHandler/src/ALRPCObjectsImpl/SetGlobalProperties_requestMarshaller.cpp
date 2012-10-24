@@ -1,16 +1,15 @@
 #include "../../include/JSONHandler/ALRPCObjects/SetGlobalProperties_request.h"
 #include "TTSChunkMarshaller.h"
-#include "VrHelpItemMarshaller.h"
 
 #include "SetGlobalProperties_requestMarshaller.h"
 
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -65,16 +64,6 @@ bool SetGlobalProperties_requestMarshaller::checkIntegrityConst(const SetGlobalP
     if(!TTSChunkMarshaller::checkIntegrityConst(s.timeoutPrompt[0][i]))   return false;
     }
   }
-  if(s.vrHelpTitle && s.vrHelpTitle->length()>500)  return false;
-  if(s.vrHelp)
-  {
-    unsigned int i=s.vrHelp[0].size();
-    if(i>100 || i<1)  return false;
-    while(i--)
-    {
-    if(!VrHelpItemMarshaller::checkIntegrityConst(s.vrHelp[0][i]))   return false;
-    }
-  }
   return true;
 }
 
@@ -108,18 +97,6 @@ Json::Value SetGlobalProperties_requestMarshaller::toJSON(const SetGlobalPropert
       j["timeoutPrompt"][i]=TTSChunkMarshaller::toJSON(e.timeoutPrompt[0][i]);
   }
 
-  if(e.vrHelpTitle)
-    j["vrHelpTitle"]=Json::Value(*e.vrHelpTitle);
-
-  if(e.vrHelp)
-  {
-    unsigned int sz=e.vrHelp->size();
-    j["vrHelp"]=Json::Value(Json::arrayValue);
-    j["vrHelp"].resize(sz);
-    for(unsigned int i=0;i<sz;i++)
-      j["vrHelp"][i]=VrHelpItemMarshaller::toJSON(e.vrHelp[0][i]);
-  }
-
   json["request"]["parameters"]=j;
   return json;
 }
@@ -132,12 +109,6 @@ bool SetGlobalProperties_requestMarshaller::fromJSON(const Json::Value& js,SetGl
 
   if(c.timeoutPrompt)  delete c.timeoutPrompt;
   c.timeoutPrompt=0;
-
-  if(c.vrHelpTitle)  delete c.vrHelpTitle;
-  c.vrHelpTitle=0;
-
-  if(c.vrHelp)  delete c.vrHelp;
-  c.vrHelp=0;
 
   try
   {
@@ -182,27 +153,6 @@ bool SetGlobalProperties_requestMarshaller::fromJSON(const Json::Value& js,SetGl
         if(!TTSChunkMarshaller::fromJSON(j[i],t))
           return false;
         c.timeoutPrompt[0][i]=t;
-      }
-
-    }
-    if(json.isMember("vrHelpTitle"))
-    {
-      const Json::Value& j=json["vrHelpTitle"];
-      if(!j.isString())  return false;
-      c.vrHelpTitle=new std::string(j.asString());
-    }
-    if(json.isMember("vrHelp"))
-    {
-      const Json::Value& j=json["vrHelp"];
-      if(!j.isArray())  return false;
-      c.vrHelp=new std::vector<VrHelpItem>();
-      c.vrHelp->resize(j.size());
-      for(unsigned int i=0;i<j.size();i++)
-      {
-        VrHelpItem t;
-        if(!VrHelpItemMarshaller::fromJSON(j[i],t))
-          return false;
-        c.vrHelp[0][i]=t;
       }
 
     }

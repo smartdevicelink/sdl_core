@@ -6,10 +6,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -68,7 +68,7 @@ const std::string ResultMarshaller::toString(const Result& e)
 
 }
 
-const PerfectHashTable ResultMarshaller::mHashTable[28]=
+const PerfectHashTable ResultMarshaller::mHashTable[22]=
 {
   {"SUCCESS",0},
   {"INVALID_DATA",1},
@@ -91,11 +91,5 @@ const PerfectHashTable ResultMarshaller::mHashTable[28]=
   {"IGNORED",18},
   {"UNSUPPORTED_BUTTON",19},
   {"FILE_NOT_FOUND",20},
-  {"GENERIC_ERROR",21},
-  {"DISALLOWED",22},
-  {"USER_DISALLOWED",23},
-  {"TIMED_OUT",24},
-  {"CANCEL_ROUTE",25},
-  {"CLOSED",26},
-  {"ENCRYPTED",27}
+  {"GENERIC_ERROR",21}
 };

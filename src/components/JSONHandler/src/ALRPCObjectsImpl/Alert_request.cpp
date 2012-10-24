@@ -1,7 +1,6 @@
 #include "../../include/JSONHandler/ALRPCObjects/Alert_request.h"
 #include "Alert_requestMarshaller.h"
 #include "../../include/JSONHandler/ALRPCObjects/Marshaller.h"
-#include "SoftButtonMarshaller.h"
 #include "TTSChunkMarshaller.h"
 
 #define PROTOCOL_VERSION	1
@@ -9,10 +8,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -20,11 +19,9 @@ Alert_request& Alert_request::operator =(const Alert_request& c)
 {
   alertText1= c.alertText1 ? new std::string(c.alertText1[0]) : 0;
   alertText2= c.alertText2 ? new std::string(c.alertText2[0]) : 0;
-  alertText3= c.alertText3 ? new std::string(c.alertText3[0]) : 0;
   ttsChunks= c.ttsChunks ? new std::vector<TTSChunk>(c.ttsChunks[0]) : 0;
   duration= c.duration ? new unsigned int(c.duration[0]) : 0;
   playTone= c.playTone ? new bool(c.playTone[0]) : 0;
-  softButtons= c.softButtons ? new std::vector<SoftButton>(c.softButtons[0]) : 0;
 
   return *this;}
 
@@ -35,16 +32,12 @@ Alert_request::~Alert_request(void)
     delete alertText1;
   if(alertText2)
     delete alertText2;
-  if(alertText3)
-    delete alertText3;
   if(ttsChunks)
     delete ttsChunks;
   if(duration)
     delete duration;
   if(playTone)
     delete playTone;
-  if(softButtons)
-    delete softButtons;
 }
 
 
@@ -63,11 +56,9 @@ bool Alert_request::checkIntegrity(void)
 Alert_request::Alert_request(void) : ALRPCRequest(PROTOCOL_VERSION,Marshaller::METHOD_ALERT_REQUEST),
       alertText1(0),
     alertText2(0),
-    alertText3(0),
     ttsChunks(0),
     duration(0),
-    playTone(0),
-    softButtons(0)
+    playTone(0)
 {
 }
 
@@ -105,23 +96,6 @@ void Alert_request::reset_alertText2(void)
   if(alertText2)
     delete alertText2;
   alertText2=0;
-}
-
-bool Alert_request::set_alertText3(const std::string& alertText3_)
-{
-  if(alertText3_.length()>500)  return false;
-  delete alertText3;
-  alertText3=0;
-
-  alertText3=new std::string(alertText3_);
-  return true;
-}
-
-void Alert_request::reset_alertText3(void)
-{
-  if(alertText3)
-    delete alertText3;
-  alertText3=0;
 }
 
 bool Alert_request::set_ttsChunks(const std::vector<TTSChunk>& ttsChunks_)
@@ -180,28 +154,6 @@ void Alert_request::reset_playTone(void)
   playTone=0;
 }
 
-bool Alert_request::set_softButtons(const std::vector<SoftButton>& softButtons_)
-{
-  unsigned int i=softButtons_.size();
-  if(i>4 || i<0)  return false;
-  while(i--)
-  {
-    if(!SoftButtonMarshaller::checkIntegrityConst(softButtons_[i]))   return false;
-  }
-  delete softButtons;
-  softButtons=0;
-
-  softButtons=new std::vector<SoftButton>(softButtons_);
-  return true;
-}
-
-void Alert_request::reset_softButtons(void)
-{
-  if(softButtons)
-    delete softButtons;
-  softButtons=0;
-}
-
 
 
 
@@ -213,11 +165,6 @@ const std::string* Alert_request::get_alertText1(void) const
 const std::string* Alert_request::get_alertText2(void) const 
 {
   return alertText2;
-}
-
-const std::string* Alert_request::get_alertText3(void) const 
-{
-  return alertText3;
 }
 
 const std::vector<TTSChunk>* Alert_request::get_ttsChunks(void) const 
@@ -233,10 +180,5 @@ const unsigned int* Alert_request::get_duration(void) const
 const bool* Alert_request::get_playTone(void) const 
 {
   return playTone;
-}
-
-const std::vector<SoftButton>* Alert_request::get_softButtons(void) const 
-{
-  return softButtons;
 }
 

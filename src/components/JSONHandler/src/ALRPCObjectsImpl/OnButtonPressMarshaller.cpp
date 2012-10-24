@@ -7,10 +7,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -49,7 +49,6 @@ bool OnButtonPressMarshaller::checkIntegrityConst(const OnButtonPress& s)
 {
   if(!ButtonNameMarshaller::checkIntegrityConst(s.buttonName))  return false;
   if(!ButtonPressModeMarshaller::checkIntegrityConst(s.buttonPressMode))  return false;
-  if(s.customButtonName.length()>500)  return false;
   return true;
 }
 
@@ -67,8 +66,6 @@ Json::Value OnButtonPressMarshaller::toJSON(const OnButtonPress& e)
   j["buttonName"]=ButtonNameMarshaller::toJSON(e.buttonName);
 
   j["buttonPressMode"]=ButtonPressModeMarshaller::toJSON(e.buttonPressMode);
-
-  j["customButtonName"]=Json::Value(e.customButtonName);
 
   json["notification"]["parameters"]=j;
   return json;
@@ -102,12 +99,6 @@ bool OnButtonPressMarshaller::fromJSON(const Json::Value& js,OnButtonPress& c)
       const Json::Value& j=json["buttonPressMode"];
       if(!ButtonPressModeMarshaller::fromJSON(j,c.buttonPressMode))
         return false;
-    }
-    if(!json.isMember("customButtonName"))  return false;
-    {
-      const Json::Value& j=json["customButtonName"];
-      if(!j.isString())  return false;
-      c.customButtonName=j.asString();
     }
 
   }

@@ -7,18 +7,16 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
 OnEncodedSyncPData& OnEncodedSyncPData::operator =(const OnEncodedSyncPData& c)
 {
   data= c.data ? new std::vector<std::string>(c.data[0]) : 0;
-  URL= c.URL ? new std::string(c.URL[0]) : 0;
-  Timeout= c.Timeout ? new int(c.Timeout[0]) : 0;
 
   return *this;}
 
@@ -27,10 +25,6 @@ OnEncodedSyncPData::~OnEncodedSyncPData(void)
 {
   if(data)
     delete data;
-  if(URL)
-    delete URL;
-  if(Timeout)
-    delete Timeout;
 }
 
 
@@ -47,9 +41,7 @@ bool OnEncodedSyncPData::checkIntegrity(void)
 
 
 OnEncodedSyncPData::OnEncodedSyncPData(void) : ALRPCNotification(PROTOCOL_VERSION,Marshaller::METHOD_ONENCODEDSYNCPDATA),
-      data(0),
-    URL(0),
-    Timeout(0)
+      data(0)
 {
 }
 
@@ -77,55 +69,11 @@ void OnEncodedSyncPData::reset_data(void)
   data=0;
 }
 
-bool OnEncodedSyncPData::set_URL(const std::string& URL_)
-{
-  if(URL_.length()>1000)  return false;
-  delete URL;
-  URL=0;
-
-  URL=new std::string(URL_);
-  return true;
-}
-
-void OnEncodedSyncPData::reset_URL(void)
-{
-  if(URL)
-    delete URL;
-  URL=0;
-}
-
-bool OnEncodedSyncPData::set_Timeout(int Timeout_)
-{
-  if(Timeout_>2000000000)  return false;
-  delete Timeout;
-  Timeout=0;
-
-  Timeout=new int(Timeout_);
-  return true;
-}
-
-void OnEncodedSyncPData::reset_Timeout(void)
-{
-  if(Timeout)
-    delete Timeout;
-  Timeout=0;
-}
-
 
 
 
 const std::vector<std::string>* OnEncodedSyncPData::get_data(void) const 
 {
   return data;
-}
-
-const std::string* OnEncodedSyncPData::get_URL(void) const 
-{
-  return URL;
-}
-
-const int* OnEncodedSyncPData::get_Timeout(void) const 
-{
-  return Timeout;
 }
 

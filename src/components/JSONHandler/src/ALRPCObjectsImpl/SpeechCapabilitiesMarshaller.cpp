@@ -6,10 +6,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -68,10 +68,11 @@ const std::string SpeechCapabilitiesMarshaller::toString(const SpeechCapabilitie
 
 }
 
-const PerfectHashTable SpeechCapabilitiesMarshaller::mHashTable[4]=
+const PerfectHashTable SpeechCapabilitiesMarshaller::mHashTable[5]=
 {
   {"TEXT",0},
   {"SAPI_PHONEMES",1},
-  {"PRE_RECORDED",2},
-  {"SILENCE",3}
+  {"LHPLUS_PHONEMES",2},
+  {"PRE_RECORDED",3},
+  {"SILENCE",4}
 };

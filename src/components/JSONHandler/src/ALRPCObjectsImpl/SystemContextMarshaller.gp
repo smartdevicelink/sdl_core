@@ -17,5 +17,3 @@ struct PerfectHashTable
 MAIN,0
 VRSESSION,1
 MENU,2
-HMI_OBSCURED,3
-ALERT,4

@@ -8,10 +8,10 @@
 
 /*
   interface	Ford Sync RAPI
-  version	2.0L
-  date		2012-09-13
-  generated at	Wed Oct 24 13:40:36 2012
-  source stamp	Wed Oct 24 13:40:27 2012
+  version	1.2
+  date		2011-05-17
+  generated at	Wed Oct 24 15:41:28 2012
+  source stamp	Wed Oct 24 14:57:16 2012
   author	robok0der
 */
 
@@ -20,7 +20,6 @@ Alert_response& Alert_response::operator =(const Alert_response& c)
   success= c.success;
   resultCode= c.resultCode;
   info= c.info ? new std::string(c.info[0]) : 0;
-  tryAgainTime= c.tryAgainTime;
 
   return *this;}
 
@@ -81,13 +80,6 @@ void Alert_response::reset_info(void)
   info=0;
 }
 
-bool Alert_response::set_tryAgainTime(unsigned int tryAgainTime_)
-{
-  if(tryAgainTime_>2000000000)  return false;
-  tryAgainTime=tryAgainTime_;
-  return true;
-}
-
 
 
 
@@ -104,10 +96,5 @@ const Result& Alert_response::get_resultCode(void) const
 const std::string* Alert_response::get_info(void) const 
 {
   return info;
-}
-
-unsigned int Alert_response::get_tryAgainTime(void) const
-{
-  return tryAgainTime;
 }
 
