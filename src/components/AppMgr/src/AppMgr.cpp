@@ -10,7 +10,8 @@
 
 namespace NsAppManager
 {
-	
+log4cplus::Logger AppMgr::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgr"));
+
 AppMgr& AppMgr::getInstance( )
 {
 	static AppMgr appMgr;
@@ -30,7 +31,6 @@ AppMgr::AppMgr()
 	,mRPCBusFactory(RPCBusFactory::getInstance())
 	,mAppFactory(AppFactory::getInstance())
 	,mJSONHandler(0)
-	,mLogger( log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgr")) )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " AppMgr constructed!");
 }

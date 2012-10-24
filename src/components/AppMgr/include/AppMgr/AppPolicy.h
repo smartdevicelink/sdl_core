@@ -10,6 +10,11 @@
 
 #include <string>
 
+namespace log4cplus
+{
+	class Logger;
+};
+
 namespace NsAppManager
 {
 	
@@ -23,6 +28,7 @@ public:
 
 private:
 	const std::string mPolicy;
+	static log4cplus::Logger mLogger;
 };
 
 }; // namespace NsAppManager

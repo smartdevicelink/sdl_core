@@ -11,6 +11,7 @@
 #include "system.h"
 #include <queue>
 #include <string>
+#include "JSONHandler/GetCapabilitiesResponse.h"
 
 class RegisterAppInterface;
 class MobileRPCMessage;
@@ -30,7 +31,9 @@ namespace NsAppManager
 {
 
 class RegistryItem;
-	
+
+typedef std::vector<RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal> Capabilities;
+
 class AppMgrCore
 {
 public:
@@ -38,6 +41,7 @@ public:
 
 	static AppMgrCore& getInstance();
 	void pushMobileRPCMessage( MobileRPCMessage * message );
+	void pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message );
 
 	void executeThreads();
 	void terminateThreads();
@@ -49,7 +53,7 @@ private:
 	AppMgrCore();
 
 	void handleMobileRPCMessage( MobileRPCMessage* msg );
-	void handleBusRPCMessage( RPC2Communication::RPC2Command* msg );
+	void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg );
 	const RegistryItem* registerApplication( RegisterAppInterface* msg );
 	void sendMobileRPCResponse( MobileRPCMessage* msg );
 	void enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message );
@@ -57,6 +61,9 @@ private:
 	void enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message );
 
 	void registerApplicationOnHMI( const std::string& name );
+
+	void setButtonCapabilities( RPC2Communication::GetCapabilitiesResponse* msg );
+	Capabilities getButtonCapabilities() const;
 
 	void* handleQueueRPCAppLinkObjectsIncoming( void* );
 	void* handleQueueRPCBusObjectsIncoming( void* );
@@ -78,9 +85,11 @@ private:
 	System::Thread mThreadRPCBusObjectsIncoming;
 	System::Thread mThreadRPCBusObjectsOutgoing;
 
+	Capabilities mButtonCapabilities;
+	
 	bool m_bTerminate;
 	JSONHandler* mJSONHandler;
-	const log4cplus::Logger& mLogger;
+	static log4cplus::Logger mLogger;
 };
 
 }; // namespace NsAppManager

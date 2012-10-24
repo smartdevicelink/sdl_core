@@ -29,6 +29,7 @@
 
 #include "Logger.hpp"
 
+#include "CAppTester.hpp"
 /**
  * \brief Entry point of the program.
  * \param argc number of argument
@@ -122,7 +123,28 @@ int main(int argc, char** argv)
     printf("After Start AppMgr!\n");
 
     /**********************************/
-
+    /*** Check main function parameters***/
+    if (4 > argc)
+    {
+      printf("too many arguments\n");
+      return EXIT_SUCCESS;
+    } else if(1 < argc)
+    {
+      printf("perform test\n");
+      int sessioncount = 1;
+      if (argc == 3)
+      {
+        sessioncount = atoi(argv[2]);
+        if (0 >= sessioncount)
+        {
+           sessioncount = 1;
+        }
+      }
+      NsApplicationTester::CAppTester apptester;
+      apptester.startSession(sessioncount);
+      apptester.sendDataFromFile(argv[1]);
+    }
+    /**********************************/
 
     /*** Start BT Devices Discovery***/
 

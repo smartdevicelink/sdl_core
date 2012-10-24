@@ -7,6 +7,7 @@
 
 #include "AppMgr/AppMgr.h"
 #include "AppMgr/AppLinkInterface.h"
+#include "AppMgr/AppMgrCore.h"
 #include "CMessageBroker.hpp"
 #include "CMessageBrokerRegistry.hpp"
 #include "CSender.hpp"
@@ -17,6 +18,7 @@
 namespace NsAppManager
 {
 
+log4cplus::Logger AppLinkInterface::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppLinkInterface"));
 std::string AppLinkInterface::mAddress = "";
 uint16_t AppLinkInterface::mPort = 0;
 std::string AppLinkInterface::mName = "";
@@ -24,7 +26,6 @@ bool AppLinkInterface::m_bInitialized = false;
 
 AppLinkInterface::AppLinkInterface( const std::string& address, uint16_t port, const std::string& name )
 	:NsMessageBroker::CMessageBrokerController::CMessageBrokerController(address, port, name)
-	,mLogger( log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppLinkInterface")) )
 	,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppLinkInterface>(*this, &AppLinkInterface::handleQueueRPCBusObjectsIncoming, NULL))
 	,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppLinkInterface>(*this, &AppLinkInterface::handleQueueRPCBusObjectsOutgoing, NULL))
 	,m_bTerminate(false)
@@ -138,7 +139,7 @@ bool AppLinkInterface::findRespondedMethod( int method ) const
 	return mRespondedMethods.find(method) != mRespondedMethods.end();
 }
 
-void AppLinkInterface::receiveRPCCommand( const RPC2Communication::RPC2Command* rpcObject )
+void AppLinkInterface::receiveRPCCommand( RPC2Communication::RPC2Command* rpcObject )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Receiving RPC Bus object "<< rpcObject->getMethod() <<" from HMI...");
 
@@ -149,6 +150,8 @@ void AppLinkInterface::receiveRPCCommand( const RPC2Communication::RPC2Command* 
 		addRespondedMethod(method);
 	}
 
+	AppMgrCore::getInstance().pushRPC2CommunicationMessage(rpcObject);
+	
 	LOG4CPLUS_INFO_EXT(mLogger, " Received RPC Bus object "<< rpcObject->getMethod() <<" from HMI");
 }
 
@@ -176,8 +179,8 @@ void AppLinkInterface::sendMessageAwaitingExecution( RPC2Communication::RPC2Comm
 void AppLinkInterface::getButtonCapabilities()
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting button capabilities...");
-//	RPC2Communication::RPC2Command* rpcObject = RPC2Communication::RPC2Marshaller:: new RPCBusObject( 1, RPCBusObject::REQUEST, "Buttons.getCapabilities" );
-//	enqueueRPCCommandOutgoing( rpcObject );
+	RPC2Communication::RPC2Command* rpcObject; //= RPC2Communication::RPC2Marshaller:: new RPCBusObject( 1, RPCBusObject::REQUEST, "Buttons.getCapabilities" );
+	sendMessageAwaitingExecution( rpcObject, true );
 
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting button capabilities sent to HMI");
 }
@@ -185,8 +188,8 @@ void AppLinkInterface::getButtonCapabilities()
 void AppLinkInterface::getVoiceCapabilities()
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting voice capabilities...");
-//	RPC2Communication::RPC2Command* rpcObject = new RPCBusObject( 1, RPCBusObject::REQUEST, "Voice.getCapabilities" );
-//	enqueueRPCCommandOutgoing( rpcObject );
+	RPC2Communication::RPC2Command* rpcObject; //= new RPCBusObject( 1, RPCBusObject::REQUEST, "Voice.getCapabilities" );
+	sendMessageAwaitingExecution( rpcObject, true );
 	
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting voice capabilities sent to HMI");
 }
@@ -194,17 +197,25 @@ void AppLinkInterface::getVoiceCapabilities()
 void AppLinkInterface::getVRCapabilities()
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting VR capabilities...");
-//	RPC2Communication::RPC2Command* rpcObject = new RPCBusObject( 1, RPCBusObject::REQUEST, "VR.getCapabilities" );
-//	enqueueRPCCommandOutgoing( rpcObject );
+	RPC2Communication::RPC2Command* rpcObject; //= new RPCBusObject( 1, RPCBusObject::REQUEST, "VR.getCapabilities" );
+	sendMessageAwaitingExecution( rpcObject, true );
 	
 	LOG4CPLUS_INFO_EXT(mLogger, " Getting VR capabilities sent to HMI");
 }
 
 void AppLinkInterface::getAllCapabilities()
 {
-	std::async(std::launch::async, &AppLinkInterface::getButtonCapabilities, this);
-	std::async(std::launch::async, &AppLinkInterface::getVoiceCapabilities, this);
-	std::async(std::launch::async, &AppLinkInterface::getVRCapabilities, this);
+	LOG4CPLUS_INFO_EXT(mLogger, " Getting all capabilities");
+	
+	auto op1 = std::async(std::launch::async, &AppLinkInterface::getButtonCapabilities, this);
+	auto op2 = std::async(std::launch::async, &AppLinkInterface::getVoiceCapabilities, this);
+	auto op3 = std::async(std::launch::async, &AppLinkInterface::getVRCapabilities, this);
+
+	while( !op1.valid() || !op2.valid() || !op3.valid() )
+	{
+	}
+
+	LOG4CPLUS_INFO_EXT(mLogger, " Got all capabilities");
 }
 
 /** Thread manipulation */
@@ -217,11 +228,11 @@ void AppLinkInterface::executeThreads()
 	
 	LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
 	
-	while(!m_bTerminate)
+	/*while(!m_bTerminate)
 	{
-	}
+	}*/
 	
-	LOG4CPLUS_INFO_EXT(mLogger, " Threads are being stopped!");
+	//LOG4CPLUS_INFO_EXT(mLogger, " Threads are being stopped!");
 }
 
 void AppLinkInterface::terminateThreads()

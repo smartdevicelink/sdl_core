@@ -6,9 +6,12 @@
  */
 
 #include "AppMgr/RegistryItem.h"
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
+
+log4cplus::Logger RegistryItem::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("RegistryItem"));
 	
 RegistryItem::RegistryItem( const Application* app )
 : mApplication(app)

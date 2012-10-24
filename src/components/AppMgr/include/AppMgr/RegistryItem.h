@@ -13,6 +13,11 @@
 #include <set>
 #include <string>
 
+namespace log4cplus
+{
+	class Logger;
+};
+
 namespace NsAppManager
 {
 	
@@ -38,6 +43,7 @@ private:
 	
 	Policies mAppPolicies;
 	const Application* mApplication;
+	static log4cplus::Logger mLogger;
 };
 
 }; // namespace NsAppManager

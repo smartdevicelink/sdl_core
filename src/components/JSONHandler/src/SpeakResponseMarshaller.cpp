@@ -33,7 +33,7 @@ Json::Value SpeakResponseMarshaller::toJSON(const SpeakResponse& e)
 {  
   Json::Value json(Json::objectValue);
   
-  json["jsonrpc"]=Json::Value(Json::objectValue);
+  json["jsonrpc"]=Json::Value("2.0");
   
   json["result"] = ResultMarshaller::toJSON(e.getResult());
 
