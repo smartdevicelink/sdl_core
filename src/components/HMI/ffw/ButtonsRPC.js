@@ -92,19 +92,102 @@ FFW.Buttons = FFW.RPCObserver.create({
 		this._super();
 
 		if (request.method == "Buttons.GetCapabilities") {
-			var cap = {
-				"name" 		      :  "", // some name
-				"shortPressAvailable" : true,
-			};
 
 			// send repsonse
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	{
-
-					// for i to N buttons
-					// fill prams
+				"result"	:	{
+					"capabilities":{
+						"name"					: "1btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "2btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "3btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "4btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "5btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "6btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "7btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "8btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "9btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "0btn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "Okbtn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "Upbtn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "Downbtn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "Leftbtn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "Rightbtn",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
 
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}
@@ -114,7 +197,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 	},
 
 	/*
-	 * Notifies the ButtonsBackend that the web is all set.
+	 * Notifies the ButtonsRPC that the web is all set.
 	 * Should be called twice: when the RPC link is up or failed to connect
 	 * and all the views are rendered.
 	 */
@@ -123,10 +206,32 @@ FFW.Buttons = FFW.RPCObserver.create({
 		if (this.client.socket.readyState == this.client.socket.OPEN) {
 			var JSONMessage = {
 				"jsonrpc" :	"2.0",
+				"method"  :	"Buttons.onButtonPress",
+				"params"  :	{
+					"name"	  : id,
+					"mode"    : type
+				}
+			};
+
+			this.client.send(JSONMessage);
+		}
+		
+	},
+
+	/*
+	 * Notifies the ButtonsRPC that the web is all set.
+	 * Should be called twice: when the RPC link is up or failed to connect
+	 * and all the views are rendered.
+	 */
+	buttonEvent: function(id, type) {
+
+		if (this.client.socket.readyState == this.client.socket.OPEN) {
+			var JSONMessage = {
+				"jsonrpc" :	"2.0",
 				"method"  :	"Buttons.onButtonEvent",
 				"params"  :	{
-				"name"	  : id,
-				"mode"    : type
+					"name"	  : id,
+					"mode"    : type
 				}
 			};
 
