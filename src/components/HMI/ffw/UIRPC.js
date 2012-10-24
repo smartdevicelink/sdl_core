@@ -90,14 +90,13 @@ FFW.UI = FFW.RPCObserver.create({
 	onRPCRequest: function(request) {
 		Em.Logger.log("FFW.UIBackend.onRPCRequest");
 		this._super();
-/*
-		if (request.method == "UIBackendClient.onFullScreenChanged") {
-			this.resizeVideo = true;
-			this.FullScreenRequestId = request.id;
-			Em.Logger.log("resizeVideo = " + this.resizeVideo);
-			Em.Logger.log("FullScreenRequestId = " + this.FullScreenRequestId);
-			this.set("isFullScreen", request.params.isFullScreen);
+
+		if (request.method == "UI.Show") {
+			// get params, text fields
+
+			// show in View (use some properties in Model)
+
+			// send response
 		}
-*/
 	}
 })

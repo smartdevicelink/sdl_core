@@ -16,7 +16,7 @@ MFT.TTSPopUp = Em.ContainerView.create({
 
 	classNames:			'TTSPopUp',
 
-	classNameBindings:	['received'],
+	classNameBindings:		['received'],
 
 	childViews: [
 		'popUp',

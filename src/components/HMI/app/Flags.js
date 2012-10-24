@@ -52,11 +52,14 @@ FLAGS = Em.Object.create({
 	/** hide mouse cursor from screen */
 	APP_HIDE_MOUSE_CURSOR:	false,
 
+
+	HELP_MODE:			false,
+
   	/** 
 	 *  show MCS screen in settings -> vehicle menu 
 	 *  to be disabled until v2.1, in version v2.1 this feature will be released to end user
 	 */
-	MCS_ENABLED:			true,
+	MCS_ENABLED:			false,
 
   	/** 
 	 *  Emulate CAN network for Multi Contour Seat

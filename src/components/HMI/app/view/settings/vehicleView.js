@@ -153,7 +153,7 @@ MFT.SettingsVehicleView = Em.ContainerView.create(MFT.LoadableView,{
 					target:		  'MFT.SettingsController',
 					disabledBinding: 'MFT.helpMode'
 				}			
-			},
+			}/*,
 			{
 				type:		MFT.Button,
 				
@@ -166,7 +166,7 @@ MFT.SettingsVehicleView = Em.ContainerView.create(MFT.LoadableView,{
 					target:	  'MFT.SettingsController',
 					hidden:	  FLAGS.MCS_ENABLED ? false : true
 				}			
-			}
+			}*/
 		],
 		
 		itemsOnPage:	6

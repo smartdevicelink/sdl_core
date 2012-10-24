@@ -90,16 +90,21 @@ FFW.TTS = FFW.RPCObserver.create({
 	onRPCRequest: function(request) {
 		Em.Logger.log("FFW.TTSBackend.onRPCRequest");
 		this._super();
-		MFT.TTSPopUp.receiveMessage('Hello');
 		
-/*
-		if (FFW.TTSBackend.onRPCNotification == "TTSBackendClient.onFullScreenChanged") {
-			this.resizeVideo = true;
-			this.FullScreenRequestId = request.id;
-			Em.Logger.log("resizeVideo = " + this.resizeVideo);
-			Em.Logger.log("FullScreenRequestId = " + this.FullScreenRequestId);
-			this.set("isFullScreen", request.params.isFullScreen);
+		if (request.method == "TTS.Speak") {
+			// get params, array
+			// request.params
+			MFT.TTSPopUp.receiveMessage('Hello');
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc":	"2.0",
+				"id": 		request.id,
+				"result":	{
+					//"result" :  type (enum) from AppLink protocol
+				}
+			};
+			this.client.send(JSONMessage);
 		}
-*/
 	}
 })

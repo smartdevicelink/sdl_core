@@ -71,6 +71,7 @@ div {
 	box-shadow: 0px 0px 7px 5px rgba(165, 165, 165, 0.95);
 	top: 8px;
 	-webkit-transition: opacity 1s ease-in-out;
+	pointer-events: none;
 }
 
 #TTSPopUp .popUp{
