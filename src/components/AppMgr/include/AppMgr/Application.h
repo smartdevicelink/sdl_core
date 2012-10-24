@@ -11,7 +11,7 @@
 #include "IApplication.h"
 #include "JSONHandler/Language.h"
 #include "JSONHandler/SyncMsgVersion.h"
-#include "JSONHandler/HMILevel.h"
+#include "JSONHandler/ALRPCObjects/HMILevel.h"
 #include <string>
 #include <vector>
 
@@ -30,8 +30,8 @@ public:
 	Application( const std::string& name );
 	virtual ~Application( );
 	virtual void setApplicationPriority( const AppPriority& priority );
-	void setApplicationHMIStatusLevel( const HMILevel::HMILevelEnum& hmiLevel );
-	const HMILevel::HMILevelEnum& getApplicationHMIStatusLevel( ) const;
+    void setApplicationHMIStatusLevel(const HMILevel::HMILevelInternal &hmiLevel );
+    const HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
 	void setApplicationAudioStreamingState( const AudioStreamingState& hmiLevel );
 	const AudioStreamingState& getApplicationAudioStreamingState( ) const;
 
@@ -65,7 +65,7 @@ private:
 	Language mLanguageDesired;
 	std::string mAutoActivateID;
 	SyncMsgVersion mSyncMsgVersion;
-	HMILevel::HMILevelEnum mHMIStatusLevel;
+    HMILevel::HMILevelInternal mHMIStatusLevel;
 	AudioStreamingState mAudioStreamingState;
     std::string mAppID;
     Language mHMIDisplayLanguageDesired;

@@ -33,7 +33,18 @@ AppLinkInterface::AppLinkInterface( const std::string& address, uint16_t port, c
 	,m_bVRCapsRetrieved(false)
 	,m_bVoiceCapsRetrieved(false)
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " AppLinkInterface constructed!");
+    LOG4CPLUS_INFO_EXT(mLogger, " AppLinkInterface constructed!");
+}
+
+AppLinkInterface::AppLinkInterface(const AppLinkInterface &iface)
+    :NsMessageBroker::CMessageBrokerController::CMessageBrokerController(iface.GetAddress(), iface.GetPort(), "")
+    ,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppLinkInterface>(*this, &AppLinkInterface::handleQueueRPCBusObjectsIncoming, NULL))
+    ,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppLinkInterface>(*this, &AppLinkInterface::handleQueueRPCBusObjectsOutgoing, NULL))
+    ,m_bTerminate(false)
+    ,m_bButtonCapsRetrieved(false)
+    ,m_bVRCapsRetrieved(false)
+    ,m_bVoiceCapsRetrieved(false)
+{
 }
 
 AppLinkInterface::~AppLinkInterface( )

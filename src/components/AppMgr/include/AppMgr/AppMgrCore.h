@@ -13,11 +13,12 @@
 #include <string>
 #include "JSONHandler/GetCapabilitiesResponse.h"
 
-class RegisterAppInterface;
-class SubscribeButton;
-class MobileRPCMessage;
+class RegisterAppInterface_request;
+class RegisterAppInterface_response;
+class SubscribeButton_request;
+class ALRPCMessage;
 class JSONHandler;
-class UnsubscribeButton;
+class UnsubscribeButton_request;
 
 namespace RPC2Communication
 {
@@ -42,7 +43,7 @@ public:
 	virtual ~AppMgrCore();
 
 	static AppMgrCore& getInstance();
-	void pushMobileRPCMessage( MobileRPCMessage * message );
+    void pushMobileRPCMessage(ALRPCMessage *message );
 	void pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message );
 
 	void executeThreads();
@@ -53,15 +54,16 @@ public:
 
 private:
 	AppMgrCore();
+    AppMgrCore(const AppMgrCore&);
 
-	void handleMobileRPCMessage( MobileRPCMessage* msg );
+    void handleMobileRPCMessage(ALRPCMessage *msg );
 	void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg );
-	const RegistryItem* registerApplication( RegisterAppInterface* msg );
-    void subscribeButton( SubscribeButton *msg );
-    void unsubscribeButton( UnsubscribeButton* msg );
-	void sendMobileRPCResponse( MobileRPCMessage* msg );
-	void enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message );
-	MobileRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
+    const RegistryItem* registerApplication(RegisterAppInterface_request *msg );
+    void subscribeButton(SubscribeButton_request *msg );
+    void unsubscribeButton( UnsubscribeButton_request* msg );
+    void sendMobileRPCResponse( ALRPCMessage* msg );
+    void enqueueOutgoingMobileRPCMessage(ALRPCMessage *message );
+    ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
 	void enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message );
 
 	void registerApplicationOnHMI( const std::string& name );
@@ -74,8 +76,8 @@ private:
 	void* handleQueueRPCAppLinkObjectsOutgoing( void* );
 	void* handleQueueRPCBusObjectsOutgoing( void* );
 	
-	std::queue< MobileRPCMessage* > mQueueRPCAppLinkObjectsIncoming;
-	std::queue< MobileRPCMessage* > mQueueRPCAppLinkObjectsOutgoing;
+    std::queue< ALRPCMessage* > mQueueRPCAppLinkObjectsIncoming;
+    std::queue< ALRPCMessage* > mQueueRPCAppLinkObjectsOutgoing;
 	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsIncoming;
 	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsOutgoing;
 

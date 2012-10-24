@@ -25,8 +25,8 @@ set (SOURCES
 		./src/AppLinkInterface.cpp
 		./src/AppMgrRegistry.cpp
 		./src/IApplication.cpp
-		./src/RPCAppLinkFactory.cpp
-		./src/RPCBusFactory.cpp
+	#	./src/RPCAppLinkFactory.cpp
+	#	./src/RPCBusFactory.cpp
 		./src/Application.cpp
 		./src/AppMgrCore.cpp
 		./src/AppPolicy.cpp

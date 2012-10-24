@@ -6,6 +6,7 @@
 #include "mb_controller.hpp"
 
 class JSONHandler;
+class ALRPCMessage;
 
 namespace log4cplus
 {
@@ -17,8 +18,6 @@ namespace NsAppManager
 
 class AppMgrRegistry;
 class AppMgrCore;
-class RPCAppLinkFactory;
-class RPCBusFactory;
 class AppFactory;
 	
 class AppMgr: public IRPCMessagesObserver
@@ -35,7 +34,7 @@ public:
 	
 	static AppMgr& getInstance();
 	
-	virtual void onMessageReceivedCallback( MobileRPCMessage * message );
+    virtual void onMessageReceivedCallback(ALRPCMessage *message );
 
 	/**
 	 * \brief pure virtual method to process response.
@@ -69,13 +68,14 @@ public:
 	
 private:
 	virtual ~AppMgr();
+    AppMgr(const AppMgr&);
 	AppMgr();
 
 	AppLinkInterface& mAppLinkInterface;
 	AppMgrRegistry& mAppMgrRegistry;
 	AppMgrCore& mAppMgrCore;
-	RPCAppLinkFactory& mRPCAppLinkFactory;
-	RPCBusFactory& mRPCBusFactory;
+//	RPCAppLinkFactory& mRPCAppLinkFactory;
+//	RPCBusFactory& mRPCBusFactory;
 	AppFactory& mAppFactory;
 
 	JSONHandler* mJSONHandler;
