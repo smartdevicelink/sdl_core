@@ -14,8 +14,10 @@
 #include "JSONHandler/GetCapabilitiesResponse.h"
 
 class RegisterAppInterface;
+class SubscribeButton;
 class MobileRPCMessage;
 class JSONHandler;
+class UnsubscribeButton;
 
 namespace RPC2Communication
 {
@@ -55,6 +57,8 @@ private:
 	void handleMobileRPCMessage( MobileRPCMessage* msg );
 	void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg );
 	const RegistryItem* registerApplication( RegisterAppInterface* msg );
+    void subscribeButton( SubscribeButton *msg );
+    void unsubscribeButton( UnsubscribeButton* msg );
 	void sendMobileRPCResponse( MobileRPCMessage* msg );
 	void enqueueOutgoingMobileRPCMessage( MobileRPCMessage * message );
 	MobileRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );

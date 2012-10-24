@@ -144,14 +144,14 @@ void AppMgrCore::handleMobileRPCMessage( MobileRPCMessage* msg )
 			{
 				LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
                 SubscribeButton * object = (SubscribeButton*)msg;
-			//	registerApplication( object );
+                subscribeButton( object );
 				sendMobileRPCResponse( msg );
 			}
             else if(0 == msg->getFunctionName().compare("UnsubscribeButton"))
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeButton request has been invoked");
                 UnsubscribeButton * object = (UnsubscribeButton*)msg;
-            //	registerApplication( object );
+                unsubscribeButton( object );
                 sendMobileRPCResponse( msg );
             }
 			break;
@@ -261,6 +261,16 @@ const RegistryItem* AppMgrCore::registerApplication( RegisterAppInterface* objec
 //    RPC2Communication::
 
 	return AppMgrRegistry::getInstance().registerApplication( application );
+}
+
+void AppMgrCore::subscribeButton( SubscribeButton* msg )
+{
+
+}
+
+void AppMgrCore::unsubscribeButton( UnsubscribeButton* msg )
+{
+
 }
 
 MobileRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem* registryItem )
