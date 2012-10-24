@@ -49,6 +49,7 @@
 		"parameters": {
 			[
 				"appName"		: "string"
+				// TODO: same apps registered, name not unique in the future
 			]
 		}
 
