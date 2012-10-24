@@ -74,6 +74,48 @@ Json::Value MobileRPCFactory::serializeRegisterAppInterfaceResponse( const Regis
     return value;
 }
 
+SubscribeButton MobileRPCFactory::createSubscribeButton(const MobileRPCMessage &message) const
+{
+    SubscribeButton object( message.getProtocolVersion() );
+
+    Json::Value params = JSONHandler::getParametersFromJSON( message.getParametersString() );
+    object.setButtonName( params["buttonName"].asString() );
+
+    return object;
+}
+
+Json::Value MobileRPCFactory::serializeSubscribeButton(const SubscribeButton &request) const
+{
+    Json::Value result;
+    Json::Value value;
+
+    value["buttonName"] = request.getButtonName();
+
+    result["parameters"] = value;
+    return result;
+}
+
+SubscribeButtonResponse *MobileRPCFactory::createSubscribeButtonResponse(const MobileRPCMessage &message) const
+{
+    SubscribeButtonResponse* object = new SubscribeButtonResponse( message.getProtocolVersion() );
+    object->setCorrelationID( message.getCorrelationID() );
+
+    object->setSuccess( true );
+    object->setResultCode( "SUCCESS" );
+
+    return object;
+}
+
+Json::Value MobileRPCFactory::serializeSubscribeButtonResponse(const SubscribeButtonResponse &response) const
+{
+    Json::Value value;
+
+    value["success"] = response.getSuccess();
+    value["resultCode"] = response.getResultString();
+
+    return value;
+}
+
 OnHMIStatus * MobileRPCFactory::createOnHMIStatus() const
 {
     OnHMIStatus * object = new OnHMIStatus(1);

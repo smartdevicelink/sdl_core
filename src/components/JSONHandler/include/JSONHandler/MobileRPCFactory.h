@@ -4,6 +4,10 @@
 #include "JSONHandler/RegisterAppInterface.h"
 #include "JSONHandler/RegisterAppInterfaceResponse.h"
 #include "JSONHandler/OnHMIStatus.h"
+#include "JSONHandler/SubscribeButton.h"
+#include "JSONHandler/SubscribeButtonResponse.h"
+#include "JSONHandler/UnsubscribeButton.h"
+#include "JSONHandler/UnsubscribeButtonResponse.h"
 #include <json/value.h>
 
 class MobileRPCResponse;
@@ -27,6 +31,12 @@ public:
 
     RegisterAppInterfaceResponse* createRegisterAppInterfaceResponse ( const MobileRPCMessage & message ) const;
     Json::Value serializeRegisterAppInterfaceResponse( const RegisterAppInterfaceResponse & response ) const;
+
+    SubscribeButton createSubscribeButton ( const MobileRPCMessage & message ) const;
+    Json::Value serializeSubscribeButton( const SubscribeButton & request ) const;
+
+    SubscribeButtonResponse* createSubscribeButtonResponse ( const MobileRPCMessage & message ) const;
+    Json::Value serializeSubscribeButtonResponse( const SubscribeButtonResponse & response ) const;
 
     OnHMIStatus * createOnHMIStatus () const;
     Json::Value serializeOnHMIStatus( const OnHMIStatus & notification ) const;
