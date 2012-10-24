@@ -52,6 +52,10 @@ add_library(jsonHandler
                   ./src/OnButtonPress.cpp
                   ./src/OnButtonPressMarshaller.cpp
                   ./src/ButtonPressModeMarshaller.cc
+                  ./src/SetGlobalPropertiesResponse.cpp
+                  ./src/SetGlobalPropertiesResponseMarshaller.cpp
+                  ./src/SetGlobalProperties.cpp
+                  ./src/SetGlobalPropertiesMarshaller.cpp
            )
 
 ## Compiler flags

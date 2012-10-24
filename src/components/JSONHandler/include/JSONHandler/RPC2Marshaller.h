@@ -13,6 +13,8 @@
 #include "JSONHandler/GetCapabilitiesMarshaller.h"
 #include "JSONHandler/GetCapabilitiesResponseMarshaller.h"
 #include "JSONHandler/OnButtonPressMarshaller.h"
+#include "JSONHandler/SetGlobalPropertiesMarshaller.h"
+#include "JSONHandler/SetGlobalPropertiesResponseMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -32,7 +34,9 @@ namespace RPC2Communication
         METHOD_SHOW_RESPONSE=6,
         METHOD_GET_CAPABILITIES_REQUEST=7,
         METHOD_GET_CAPABILITIES_RESPONSE=8,
-        METHOD_ONBUTTONPRESS=9
+        METHOD_ONBUTTONPRESS=9,
+        METHOD_SET_GLOBAL_PROPERTIES_REQUEST=10,
+        METHOD_SET_GLOBAL_PROPERTIES_RESPONSE=11
         };
 
         RPC2Marshaller();
@@ -129,6 +133,21 @@ namespace RPC2Communication
             return mOnButtonPressMarshaller.toString(res);
         }
 
+        static bool fromString(const std::string &str, SetGlobalProperties&res)
+        {
+            return mSetGlobalPropertiesMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const SetGlobalProperties& res)
+        {
+            return mSetGlobalPropertiesMarshaller.toString(res);
+        }
+
+        static std::string toString(const SetGlobalPropertiesResponse& res)
+        {
+            return mSetGlobalPropertiesResponseMarshaller.toString(res);
+        }
+
 
     private:
         struct localHash
@@ -160,6 +179,8 @@ namespace RPC2Communication
         static GetCapabilitiesMarshaller mGetCapabilitiesMarshaller;
         static GetCapabilitiesResponseMarshaller mGetCapabilitiesResponseMarshaller;
         static OnButtonPressMarshaller mOnButtonPressMarshaller;
+        static SetGlobalPropertiesMarshaller mSetGlobalPropertiesMarshaller;
+        static SetGlobalPropertiesResponseMarshaller mSetGlobalPropertiesResponseMarshaller;
 
     };
 
