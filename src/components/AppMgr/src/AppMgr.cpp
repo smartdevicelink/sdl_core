@@ -94,8 +94,10 @@ const AppLinkInterface& AppMgr::getAppLinkInterface() const
 
 void AppMgr::startAppMgr()
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " Starting AppMgr");
+    LOG4CPLUS_INFO_EXT(mLogger, " Starting AppMgr...");
 	mAppLinkInterface.registerController();
+    mAppLinkInterface.prepareComponent();
+    LOG4CPLUS_INFO_EXT(mLogger, " Started AppMgr!");
 }
 
 };

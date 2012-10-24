@@ -88,6 +88,11 @@ namespace RPC2Communication
             return mAlertMarshaller.fromString(str, res);
         }
 
+        static bool fromString(const std::string&str, AlertResponse& res)
+        {
+            return mAlertResponseMarshaller.fromString(str, res);
+        }
+
         static std::string toString(const AlertResponse& res)
         {
             return mAlertResponseMarshaller.toString(res);
@@ -103,6 +108,11 @@ namespace RPC2Communication
             return mShowMarshaller.fromString(str, res);
         }
 
+        static bool fromString(const std::string& str, ShowResponse& res)
+        {
+            return mShowResponseMarshaller.fromString(str, res);
+        }
+
         static std::string toString(const ShowResponse& res)
         {
             return mShowResponseMarshaller.toString(res);
@@ -116,6 +126,11 @@ namespace RPC2Communication
         static std::string toString(const GetCapabilities& res)
         {
             return mGetCapabilitiesMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, GetCapabilitiesResponse& res)
+        {
+            return mGetCapabilitiesResponseMarshaller.fromString(str, res);
         }
 
         static std::string toString(const GetCapabilitiesResponse& res)
@@ -141,6 +156,11 @@ namespace RPC2Communication
         static std::string toString(const SetGlobalProperties& res)
         {
             return mSetGlobalPropertiesMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string &str, SetGlobalPropertiesResponse& res)
+        {
+            return mSetGlobalPropertiesResponseMarshaller.fromString(str, res);
         }
 
         static std::string toString(const SetGlobalPropertiesResponse& res)

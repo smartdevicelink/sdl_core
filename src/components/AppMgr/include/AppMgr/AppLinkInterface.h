@@ -34,6 +34,8 @@ public:
 	void executeThreads();
 	void terminateThreads();
 
+    void prepareComponent();
+
 	/**
 	 * \brief needs to be called before getInstance.
 	 * \param address address to bind to.
