@@ -6,12 +6,14 @@ include_directories (./include/
                      ../../thirdPartyLibs/axisCore/include
                      ../../thirdPartyLibs/axisCore/
                      ../../thirdPartyLibs/axisCore/src
+                     ../../thirdPartyLibs/MessageBroker/include   
                      ../../thirdPartyLibs/logger/include
                      ../../thirdPartyLibs/logger/log4cplus-1.1.0/include
                     ) 
 
 add_library(jsonHandler 
                   ./src/JSONHandler.cpp
+                  ./src/JSONRPC2Handler.cpp
                   ./src/MobileRPCMessage.cpp
                   ./src/MobileRPCRequest.cpp
                   ./src/MobileRPCResponse.cpp
@@ -87,6 +89,18 @@ ExternalProject_Add(
    INSTALL_COMMAND make install
 )
 
+ExternalProject_Add(
+   messagebroker
+   messagebrokerclient
+   messagebrokerserver
+   SOURCE_DIR ../../thirdPartyLibs/MessageBroker
+   DOWNLOAD_COMMAND ""
+   CMAKE_COMMAND cmake
+   BUILD_IN_SOURCE 1 
+   BUILD_COMMAND make
+   INSTALL_DIR ../../thirdPartyLibs/MessageBroker/bin
+   INSTALL_COMMAND make install
+)
 
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_INSTALL_PREFIX .)
