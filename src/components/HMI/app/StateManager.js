@@ -202,6 +202,7 @@ var StateManager = Em.StateManager.extend({
 			mcs: Em.State.create({
 				
 			})
+
 		}),
 		
 		settings: Em.State.create({

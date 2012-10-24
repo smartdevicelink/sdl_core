@@ -55,7 +55,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				elementId:	'app_controlButtonsUpBtn',
 				classNames:	'UpBtn',
 				click:		function(){
-					FFW.ButtonsBackend.buttonPressed("up", "Click");
+					FFW.Buttons.buttonPressed("up", "Click");
 				}
 			}),
 			
@@ -64,7 +64,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				elementId:	'app_controlButtonsDownBtn',
 				classNames:	'DownBtn',
 				click:		function(){
-					FFW.ButtonsBackend.buttonPressed("down", "Click");
+					FFW.Buttons.buttonPressed("down", "Click");
 				}
 			}),
 			
@@ -73,7 +73,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				elementId:	'app_controlButtonsLeftBtn',
 				classNames:	'LeftBtn',
 				click:		function(){
-					FFW.ButtonsBackend.buttonPressed("left", "Click");
+					FFW.Buttons.buttonPressed("left", "Click");
 				}
 			}),
 			
@@ -82,7 +82,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				elementId:	'app_controlButtonsRightBtn',
 				classNames:	'RightBtn',
 				click:		function(){
-					FFW.ButtonsBackend.buttonPressed("right", "Click");
+					FFW.Buttons.buttonPressed("right", "Click");
 				}
 			}),
 			
@@ -91,7 +91,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				elementId:	'app_controlButtonsOkBtn',
 				classNames:	'OkBtn',
 				click:		function(){
-					FFW.ButtonsBackend.buttonPressed("ok", "Click");
+					FFW.Buttons.buttonPressed("ok", "Click");
 				}
 			})
 		}),
@@ -102,7 +102,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'OneBtn btnNotPressed',
 			text:		'1',
 			click:		function(){
-				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.text, "Click");
 			}
 		}),
 		
@@ -112,7 +112,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'TwoBtn btnNotPressed',
 			text:		'2',
 			click:		function(){
-				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.text, "Click");
 			}
 		}),
 		
@@ -122,7 +122,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'ThreeBtn btnNotPressed',
 			text:		'3',
 			click:		function(){
-				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.text, "Click");
 			}
 		}),
 		
@@ -132,7 +132,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'FourBtn btnNotPressed',
 			text:		'4',
 			click:		function(){
-				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.text, "Click");
 			}
 		}),
 		
@@ -142,7 +142,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'FiveBtn btnNotPressed',
 			text:		'5',
 			click:		function(){
-				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.text, "Click");
 			}
 		}),
 		
@@ -152,7 +152,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'SixBtn btnNotPressed',
 			text:		'6',
 			click:		function(){
-				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.text, "Click");
 			}
 		}),
 		
@@ -162,7 +162,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'SevenBtn btnNotPressed',
 			text:		'7',
 			click:		function(){
-				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.text, "Click");
 			}
 		}),
 		
@@ -172,7 +172,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'EightBtn btnNotPressed',
 			text:		'8',
 			click:		function(){
-				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.text, "Click");
 			}
 		}),
 		
@@ -182,7 +182,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'NineBtn btnNotPressed',
 			text:		'9',
 			click:		function(){
-				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.text, "Click");
 			}
 		}),
 		
@@ -192,7 +192,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'ZiroBtn btnNotPressed',
 			text:		'0',
 			click:		function(){
-				FFW.ButtonsBackend.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.text, "Click");
 			}
 		})
 	})

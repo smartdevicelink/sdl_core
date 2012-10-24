@@ -1,5 +1,5 @@
 /*
- * Reference implementation of TTSBackend component.
+ * Reference implementation of ButtonsBackend component.
  * 
  * Interface to get or set some essential information from OS.
  * Since web application is not able to access some OS feature through WebKit
@@ -10,12 +10,12 @@
  * @author Andriy Melnik
  */
 
-FFW.TTSBackend = FFW.RPCObserver.create({
+FFW.Buttons = FFW.RPCObserver.create({
 		
 	/*
      *	access to basic RPC functionality
  	 */		
-	 client:		FFW.RPCClient.create({ componentName: "TTS" }),
+	 client:		FFW.RPCClient.create({ componentName: "Buttons" }),
 	
 	
 	/*
@@ -39,7 +39,7 @@ FFW.TTSBackend = FFW.RPCObserver.create({
      * Client is registered - we can send request starting from this point of time
  	 */	
 	onRPCRegistered: function () {
-		Em.Logger.log("FFW.TTSBackend.onRPCRegistered");
+		Em.Logger.log("FFW.ButtonsBackend.onRPCRegistered");
 		this._super();
 	},
 	
@@ -47,7 +47,7 @@ FFW.TTSBackend = FFW.RPCObserver.create({
      * Client is unregistered - no more requests
  	 */	
 	onRPCUnregistered: function () {
-		Em.Logger.log("FFW.TTSBackend.onRPCUnregistered");
+		Em.Logger.log("FFW.ButtonsBackend.onRPCUnregistered");
 		this._super();
 	},
 
@@ -64,7 +64,7 @@ FFW.TTSBackend = FFW.RPCObserver.create({
 	 * Please use previously store reuqestID to determine to which request repsonse belongs to
  	 */	
 	onRPCResult: function(response) {
-		Em.Logger.log("FFW.TTSBackend.onRPCResult");
+		Em.Logger.log("FFW.ButtonsBackend.onRPCResult");
 		this._super();
 	 },
 	
@@ -72,7 +72,7 @@ FFW.TTSBackend = FFW.RPCObserver.create({
 	 * handle RPC erros here
  	 */	
 	onRPCError: function(error) {
-		Em.Logger.log("FFW.TTSBackend.onRPCError");
+		Em.Logger.log("FFW.ButtonsBackend.onRPCError");
 		this._super();
 	},
 
@@ -80,7 +80,7 @@ FFW.TTSBackend = FFW.RPCObserver.create({
 	 * handle RPC notifications here 
  	 */	
 	onRPCNotification: function(notification) {
-		Em.Logger.log("FFW.TTSBackend.onRPCNotification");
+		Em.Logger.log("FFW.ButtonsBackend.onRPCNotification");
 		this._super();
 	},
 	
@@ -88,12 +88,10 @@ FFW.TTSBackend = FFW.RPCObserver.create({
 	 * handle RPC requests here
  	 */	
 	onRPCRequest: function(request) {
-		Em.Logger.log("FFW.TTSBackend.onRPCRequest");
+		Em.Logger.log("FFW.ButtonsBackend.onRPCRequest");
 		this._super();
-		MFT.TTSPopUp.receiveMessage('Hello');
-		
 /*
-		if (FFW.TTSBackend.onRPCNotification == "TTSBackendClient.onFullScreenChanged") {
+		if (request.method == "ButtonsBackendClient.onFullScreenChanged") {
 			this.resizeVideo = true;
 			this.FullScreenRequestId = request.id;
 			Em.Logger.log("resizeVideo = " + this.resizeVideo);
@@ -101,5 +99,29 @@ FFW.TTSBackend = FFW.RPCObserver.create({
 			this.set("isFullScreen", request.params.isFullScreen);
 		}
 */
+	},
+
+	/*
+	 * Notifies the ButtonsBackend that the web is all set.
+	 * Should be called twice: when the RPC link is up or failed to connect
+	 * and all the views are rendered.
+	 */
+	buttonPressed: function(id, type) {
+
+		if (this.client.socket.readyState == this.client.socket.OPEN) {
+			var JSONMessage = {
+				"jsonrpc" :	"2.0",
+				"method"  :	"Buttons.onButtonEvent",
+				"params"  :	{
+				"name"	  : id,
+				"mode"    : type
+				}
+			};
+
+			//this.client.send(JSONMessage);
+			console.log(JSONMessage);
+
+		}
+		
 	}
 })

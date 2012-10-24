@@ -1,11 +1,11 @@
-#include "JSONHandler/ShowResponseMarshaller.h"
+#include "JSONHandler/SetGlobalPropertiesResponseMarshaller.h"
 #include <json/reader.h>
 #include <json/writer.h>
 #include "JSONHandler/ResultMarshaller.h"
 
 using namespace RPC2Communication;
 
-bool ShowResponseMarshaller::fromString(const std::string& s,ShowResponse& e)
+bool SetGlobalPropertiesResponseMarshaller::fromString(const std::string& s,SetGlobalPropertiesResponse& e)
 {
   try
   {
@@ -22,14 +22,14 @@ bool ShowResponseMarshaller::fromString(const std::string& s,ShowResponse& e)
 }
 
 
-const std::string ShowResponseMarshaller::toString(const ShowResponse& e)
+const std::string SetGlobalPropertiesResponseMarshaller::toString(const SetGlobalPropertiesResponse& e)
 {
   Json::FastWriter writer;
   return writer.write(toJSON(e));
 }
 
 
-Json::Value ShowResponseMarshaller::toJSON(const ShowResponse& e)
+Json::Value SetGlobalPropertiesResponseMarshaller::toJSON(const SetGlobalPropertiesResponse& e)
 {  
   Json::Value json(Json::objectValue);
   
@@ -44,7 +44,7 @@ Json::Value ShowResponseMarshaller::toJSON(const ShowResponse& e)
 }
 
 
-bool ShowResponseMarshaller::fromJSON(const Json::Value& json,ShowResponse& c)
+bool SetGlobalPropertiesResponseMarshaller::fromJSON(const Json::Value& json,SetGlobalPropertiesResponse& c)
 {
   try
   {

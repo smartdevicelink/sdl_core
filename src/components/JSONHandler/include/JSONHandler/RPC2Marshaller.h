@@ -13,6 +13,8 @@
 #include "JSONHandler/GetCapabilitiesMarshaller.h"
 #include "JSONHandler/GetCapabilitiesResponseMarshaller.h"
 #include "JSONHandler/OnButtonPressMarshaller.h"
+#include "JSONHandler/SetGlobalPropertiesMarshaller.h"
+#include "JSONHandler/SetGlobalPropertiesResponseMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -32,7 +34,9 @@ namespace RPC2Communication
         METHOD_SHOW_RESPONSE=6,
         METHOD_GET_CAPABILITIES_REQUEST=7,
         METHOD_GET_CAPABILITIES_RESPONSE=8,
-        METHOD_ONBUTTONPRESS=9
+        METHOD_ONBUTTONPRESS=9,
+        METHOD_SET_GLOBAL_PROPERTIES_REQUEST=10,
+        METHOD_SET_GLOBAL_PROPERTIES_RESPONSE=11
         };
 
         RPC2Marshaller();
@@ -84,6 +88,11 @@ namespace RPC2Communication
             return mAlertMarshaller.fromString(str, res);
         }
 
+        static bool fromString(const std::string&str, AlertResponse& res)
+        {
+            return mAlertResponseMarshaller.fromString(str, res);
+        }
+
         static std::string toString(const AlertResponse& res)
         {
             return mAlertResponseMarshaller.toString(res);
@@ -97,6 +106,11 @@ namespace RPC2Communication
         static bool fromString(const std::string& str, Show &res)
         {
             return mShowMarshaller.fromString(str, res);
+        }
+
+        static bool fromString(const std::string& str, ShowResponse& res)
+        {
+            return mShowResponseMarshaller.fromString(str, res);
         }
 
         static std::string toString(const ShowResponse& res)
@@ -114,6 +128,11 @@ namespace RPC2Communication
             return mGetCapabilitiesMarshaller.toString(res);
         }
 
+        static bool fromString(const std::string& str, GetCapabilitiesResponse& res)
+        {
+            return mGetCapabilitiesResponseMarshaller.fromString(str, res);
+        }
+
         static std::string toString(const GetCapabilitiesResponse& res)
         {
             return mGetCapabilitiesResponseMarshaller.toString(res);
@@ -127,6 +146,26 @@ namespace RPC2Communication
         static std::string toString(const OnButtonPress& res)
         {
             return mOnButtonPressMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string &str, SetGlobalProperties&res)
+        {
+            return mSetGlobalPropertiesMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const SetGlobalProperties& res)
+        {
+            return mSetGlobalPropertiesMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string &str, SetGlobalPropertiesResponse& res)
+        {
+            return mSetGlobalPropertiesResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const SetGlobalPropertiesResponse& res)
+        {
+            return mSetGlobalPropertiesResponseMarshaller.toString(res);
         }
 
 
@@ -160,6 +199,8 @@ namespace RPC2Communication
         static GetCapabilitiesMarshaller mGetCapabilitiesMarshaller;
         static GetCapabilitiesResponseMarshaller mGetCapabilitiesResponseMarshaller;
         static OnButtonPressMarshaller mOnButtonPressMarshaller;
+        static SetGlobalPropertiesMarshaller mSetGlobalPropertiesMarshaller;
+        static SetGlobalPropertiesResponseMarshaller mSetGlobalPropertiesResponseMarshaller;
 
     };
 

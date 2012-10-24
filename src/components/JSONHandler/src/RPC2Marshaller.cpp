@@ -31,6 +31,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_ONBUTTONPRESS;
     }
+    if ( s.compare("UI.SetGlobalProperties") == 0 )
+    {
+        return METHOD_SET_GLOBAL_PROPERTIES_REQUEST;
+    }
     return METHOD_INVALID;
 }
 
@@ -101,6 +105,14 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json)
         delete rv;
         return NULL;
     }
+    case METHOD_SET_GLOBAL_PROPERTIES_REQUEST:
+    {
+        SetGlobalProperties * rv = new SetGlobalProperties;
+        if (SetGlobalPropertiesMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
   }
 
   return NULL;
@@ -138,6 +150,10 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return GetCapabilitiesResponseMarshaller::toJSON(* static_cast<const GetCapabilitiesResponse*>(msg));
     case METHOD_ONBUTTONPRESS:
       return OnButtonPressMarshaller::toJSON(* static_cast<const OnButtonPress*>(msg));
+    case METHOD_SET_GLOBAL_PROPERTIES_REQUEST:
+      return SetGlobalPropertiesMarshaller::toJSON(* static_cast<const SetGlobalProperties*>(msg));
+    case METHOD_SET_GLOBAL_PROPERTIES_RESPONSE:
+      return SetGlobalPropertiesResponseMarshaller::toJSON(* static_cast<const SetGlobalPropertiesResponse*>(msg));
   }
 
   return j;
@@ -181,3 +197,5 @@ ShowResponseMarshaller RPC2Marshaller::mShowResponseMarshaller;
 GetCapabilitiesMarshaller RPC2Marshaller::mGetCapabilitiesMarshaller;
 GetCapabilitiesResponseMarshaller RPC2Marshaller::mGetCapabilitiesResponseMarshaller;
 OnButtonPressMarshaller RPC2Marshaller::mOnButtonPressMarshaller;
+SetGlobalPropertiesMarshaller RPC2Marshaller::mSetGlobalPropertiesMarshaller;
+SetGlobalPropertiesResponseMarshaller RPC2Marshaller::mSetGlobalPropertiesResponseMarshaller;

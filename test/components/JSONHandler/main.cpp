@@ -20,6 +20,7 @@
 #include "JSONHandler/AlertResponse.h"
 #include "JSONHandler/ShowResponse.h"
 #include "JSONHandler/GetCapabilitiesResponse.h"
+#include "JSONHandler/SetGlobalPropertiesResponse.h"
 
 char * readJsonContent ( const char * fileName );
 int parseJson ( const std::string & jsonContent );
@@ -175,17 +176,24 @@ int handleMessage( char * jsonContent )
     std::vector<RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal> capabilities;
     ButtonCapabilities b;
     b.setName(ButtonName::PRESET_1);
-    b.setShortPressAvailable(true);
+    b.setShortPressAvailable(true);    
     RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal item;
     item.capability = b;
     item.button = "button";
     capabilities.push_back(item);
     bcr -> setCapabilities(capabilities);
     std::cout<<"get capabilities result: " << RPC2Communication::RPC2Marshaller::toString(bcr);
+
+    RPC2Communication::SetGlobalPropertiesResponse * gpr = new RPC2Communication::SetGlobalPropertiesResponse;
+    gpr->setResult(Result("SUCCESS"));
+    gpr->setID(5);
+    std::cout<<"SetGlobalProperties Response: " << RPC2Communication::RPC2Marshaller::toString( gpr ) << std::endl;
+
     delete r;
     delete alertResponse;
     delete showResponse;
     delete bcr;
+    delete gpr;
 
     delete [] jsonContentBeginning;
 }

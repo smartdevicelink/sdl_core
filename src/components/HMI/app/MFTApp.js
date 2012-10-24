@@ -27,12 +27,10 @@ MFT = Em.Application.create({
 	init: function() {
 		Em.Logger.log('MFT: Application init!');
 		
-		/* connect to backend*/
-		if ( !FLAGS.MCS_ENABLED) {
-			FFW.Backend.connect();
-		}
-		
-		FFW.ButtonsBackend.connect();
+		FFW.Buttons.connect();
+		FFW.TTS.connect();
+		FFW.VR.connect();
+		FFW.UI.connect();
 
 		this._super();
 	},

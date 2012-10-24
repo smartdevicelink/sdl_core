@@ -32,7 +32,7 @@ MFT.TopControls = Em.ContainerView.extend({
 		clock: Em.View.extend({
 			elementId:			'clock',
 			
-			classNameBindings: ['FLAGS.MCS_ENABLED:mcs'],
+			classNameBindings: ['FLAGS.HELP_MODE::mcs'],
 					
 			afterRender: function() {
 				MFT.SettingsController.getTime(new Date);
@@ -64,7 +64,7 @@ MFT.TopControls = Em.ContainerView.extend({
 		vSeparator: Em.View.extend({
 			elementId:	'top_controls_separator',
 			
-			classNameBindings: ['FLAGS.MCS_ENABLED:hidden'],
+			classNameBindings: ['FLAGS.HELP_MODE::hidden'],
 			
 			classNames: 'help_dev'
 		}),
@@ -74,7 +74,7 @@ MFT.TopControls = Em.ContainerView.extend({
 			
 			indClassBinding:	Em.Binding.oneWay('MFT.helpMode'),
 			
-			hidden:				FLAGS.MCS_ENABLED,
+			hidden:			!FLAGS.HELP_MODE,
 					
 			template: Em.Handlebars.compile(
 				'<div class="inact" {{bindAttr class="view.indClass:act"}}></div>'+
@@ -84,7 +84,7 @@ MFT.TopControls = Em.ContainerView.extend({
 			
 			/** Toggle Help mode */
 			actionDown: function(event) {
-				if ( FLAGS.MCS_ENABLED ) {
+				if ( FLAGS.HELP_MODE ) {
 					return;
 				}
 			

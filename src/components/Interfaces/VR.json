@@ -37,7 +37,7 @@
 	 * @returns
 	 * 	result code
 	 */ 
-        "Voice.addCommand": {
+        "VR.addCommand": {
 		"parameters": {
 			"cmdId" 	: "integer",        	// cmdID from addCommand request in AppLink protocol
 			[

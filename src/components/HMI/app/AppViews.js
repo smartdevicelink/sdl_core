@@ -16,8 +16,8 @@ MFT.AppViews = Em.ContainerView.extend({
 	elementId:	'app',
 	
 	childViews: [
-		MFT.WelcomeOrientationView,
-		MFT.WOSkippButtonView,
+//		MFT.WelcomeOrientationView,
+//		MFT.WOSkippButtonView,
 		MFT.StatusClimateView,
 		MFT.StatusMediaView,
 		MFT.StatusNavigationView,
@@ -25,8 +25,8 @@ MFT.AppViews = Em.ContainerView.extend({
 		MFT.TopControls,
 		MFT.BottomControls,
 		MFT.TTSPopUp,
-		MFT.PlayerControllsView,
-		MFT.VideoErrorPopupView,
+//		MFT.PlayerControllsView,
+//		MFT.VideoErrorPopupView,
 		MFT.ControlButtons,
 		'activeAview'
 	],
@@ -92,11 +92,8 @@ MFT.AppViews = Em.ContainerView.extend({
 	 */
 	afterRender: function() {
 		Em.Logger.log('MFT Rendered!');
-		if ( FLAGS.MCS_ENABLED ) {
-			WarningOkButtonView.appLoaded();
-		} else {
-			FFW.Backend.notifyAppLoaded();
-		}
+		WarningOkButtonView.appLoaded();
+//		FFW.Backend.notifyAppLoaded();
 		
 		FFW.PreloadImages.preload();
 		

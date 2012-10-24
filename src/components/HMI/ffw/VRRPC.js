@@ -1,5 +1,5 @@
 /*
- * Reference implementation of UIBackend component.
+ * Reference implementation of VR component.
  * 
  * Interface to get or set some essential information from OS.
  * Since web application is not able to access some OS feature through WebKit
@@ -10,12 +10,12 @@
  * @author Andriy Melnik
  */
 
-FFW.UIBackend = FFW.RPCObserver.create({
+FFW.VR = FFW.RPCObserver.create({
 		
 	/*
      *	access to basic RPC functionality
  	 */		
-	 client:		FFW.RPCClient.create({ componentName: "UI" }),
+	 client:		FFW.RPCClient.create({ componentName: "VR" }),
 	
 	
 	/*
@@ -39,7 +39,7 @@ FFW.UIBackend = FFW.RPCObserver.create({
      * Client is registered - we can send request starting from this point of time
  	 */	
 	onRPCRegistered: function () {
-		Em.Logger.log("FFW.UIBackend.onRPCRegistered");
+		Em.Logger.log("FFW.VR.onRPCRegistered");
 		this._super();
 	},
 	
@@ -47,7 +47,7 @@ FFW.UIBackend = FFW.RPCObserver.create({
      * Client is unregistered - no more requests
  	 */	
 	onRPCUnregistered: function () {
-		Em.Logger.log("FFW.UIBackend.onRPCUnregistered");
+		Em.Logger.log("FFW.VR.onRPCUnregistered");
 		this._super();
 	},
 
@@ -64,7 +64,7 @@ FFW.UIBackend = FFW.RPCObserver.create({
 	 * Please use previously store reuqestID to determine to which request repsonse belongs to
  	 */	
 	onRPCResult: function(response) {
-		Em.Logger.log("FFW.UIBackend.onRPCResult");
+		Em.Logger.log("FFW.VR.onRPCResult");
 		this._super();
 	 },
 	
@@ -72,7 +72,7 @@ FFW.UIBackend = FFW.RPCObserver.create({
 	 * handle RPC erros here
  	 */	
 	onRPCError: function(error) {
-		Em.Logger.log("FFW.UIBackend.onRPCError");
+		Em.Logger.log("FFW.VR.onRPCError");
 		this._super();
 	},
 
@@ -80,7 +80,7 @@ FFW.UIBackend = FFW.RPCObserver.create({
 	 * handle RPC notifications here 
  	 */	
 	onRPCNotification: function(notification) {
-		Em.Logger.log("FFW.UIBackend.onRPCNotification");
+		Em.Logger.log("FFW.VR.onRPCNotification");
 		this._super();
 	},
 	
@@ -88,10 +88,11 @@ FFW.UIBackend = FFW.RPCObserver.create({
 	 * handle RPC requests here
  	 */	
 	onRPCRequest: function(request) {
-		Em.Logger.log("FFW.UIBackend.onRPCRequest");
+		Em.Logger.log("FFW.VR.onRPCRequest");
 		this._super();
+		
 /*
-		if (request.method == "UIBackendClient.onFullScreenChanged") {
+		if (FFW.VR.onRPCNotification == "VRClient.onFullScreenChanged") {
 			this.resizeVideo = true;
 			this.FullScreenRequestId = request.id;
 			Em.Logger.log("resizeVideo = " + this.resizeVideo);
