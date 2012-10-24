@@ -11,7 +11,6 @@ public:
 protected:
     virtual ~IRPCMessagesObserver() {};
 
-    /* data */
 };
 
 #endif

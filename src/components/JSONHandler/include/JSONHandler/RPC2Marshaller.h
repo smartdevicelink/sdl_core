@@ -42,7 +42,7 @@ namespace RPC2Communication
         RPC2Marshaller();
         ~RPC2Marshaller();
 
-        static RPC2Command* fromJSON(const Json::Value&);
+        static RPC2Command* fromJSON(const Json::Value&, const std::string & methodName = "");
         static Json::Value toJSON(const RPC2Command* msg);
 
         static RPC2Command* fromString(const std::string&);
@@ -183,6 +183,7 @@ namespace RPC2Communication
         }
 
         static const Methods getIndex(const std::string & s);
+        static const Methods getResponseIndex(const std::string & s);
 
         static const localHash mHashTable[3];
 

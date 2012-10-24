@@ -38,6 +38,30 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     return METHOD_INVALID;
 }
 
+const RPC2Marshaller::Methods RPC2Marshaller::getResponseIndex(const std::string & s)
+{
+  if ( s.compare("TTS.Speak") == 0 )
+  {
+      return METHOD_SPEAK_RESPONSE;
+  }
+  if ( s.compare("UI.Alert") == 0 )
+  {
+      return METHOD_ALERT_RESPONSE;
+  }
+  if ( s.compare("UI.Show") == 0 )
+  {
+      return METHOD_SHOW_RESPONSE;
+  }
+  if ( s.compare("Buttons.GetCapabilities") == 0 )
+  {
+      return METHOD_GET_CAPABILITIES_RESPONSE;
+  }
+  if ( s.compare("UI.SetGlobalProperties") == 0 )
+  {
+      return METHOD_SET_GLOBAL_PROPERTIES_RESPONSE;
+  }
+}
+
 
 const RPC2Marshaller::localHash RPC2Marshaller::mHashTable[3]=
 {
@@ -45,12 +69,26 @@ const RPC2Marshaller::localHash RPC2Marshaller::mHashTable[3]=
 };
 
 
-RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json)
+RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string & methodName)
 {
   if(!json.isObject())  return NULL;
   
-  if(!json.isMember("method") || !json["method"].isString()) return NULL;
-  Methods m=getIndex(json["method"].asString().c_str());
+  Methods m;
+  if((!json.isMember("method") || !json["method"].isString()) 
+  {
+    if ( methodName.empty() )
+    {
+        return NULL;
+    }
+    else 
+    {
+        m = getResponseIndex( methodName );     //For Responses
+    }
+  } 
+  else
+  {
+    m = getIndex(json["method"].asString().c_str());
+  }  
   
   switch(m)                         
   {
@@ -73,10 +111,26 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json)
         delete rv;
         return NULL;
     }
+    case METHOD_SPEAK_RESPONSE:
+    {
+        SpeakResponse * rv = new SpeakResponse;
+        if ( SpeakResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
     case METHOD_ALERT_REQUEST:
     {
         Alert * rv = new Alert;
         if ( AlertMarshaller::fromJSON(json, *rv) )
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ALERT_RESPONSE:
+    {
+        AlertResponse * rv = new AlertResponse;
+        if ( AlertResponseMarshaller::fromJSON(json, *rv) )
           return rv;
         delete rv;
         return NULL;
@@ -89,10 +143,26 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json)
         delete rv;
         return NULL;
     }
+    case METHOD_SHOW_RESPONSE:
+    {
+        ShowResponse * rv = new ShowResponse;
+        if ( ShowResponseMarshaller::fromJSON(json, *rv) )
+          return rv;
+        delete rv;
+        return NULL;
+    }
     case METHOD_GET_CAPABILITIES_REQUEST:
     {
         GetCapabilities * rv = new GetCapabilities;
         if ( GetCapabilitiesMarshaller::fromJSON(json, *rv) )
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_GET_CAPABILITIES_RESPONSE:
+    {
+        GetCapabilitiesResponse * rv = new GetCapabilitiesResponse;
+        if ( GetCapabilitiesResponseMarshaller::fromJSON(json, *rv) )
           return rv;
         delete rv;
         return NULL;
@@ -109,6 +179,14 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json)
     {
         SetGlobalProperties * rv = new SetGlobalProperties;
         if (SetGlobalPropertiesMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_SET_GLOBAL_PROPERTIES_RESPONSE:
+    {
+        SetGlobalPropertiesResponse * rv = new SetGlobalPropertiesResponse;
+        if ( SetGlobalPropertiesResponseMarshaller::fromJSON(json, *rv) )
           return rv;
         delete rv;
         return NULL;
