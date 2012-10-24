@@ -90,15 +90,27 @@ FFW.Buttons = FFW.RPCObserver.create({
 	onRPCRequest: function(request) {
 		Em.Logger.log("FFW.ButtonsBackend.onRPCRequest");
 		this._super();
-/*
-		if (request.method == "ButtonsBackendClient.onFullScreenChanged") {
-			this.resizeVideo = true;
-			this.FullScreenRequestId = request.id;
-			Em.Logger.log("resizeVideo = " + this.resizeVideo);
-			Em.Logger.log("FullScreenRequestId = " + this.FullScreenRequestId);
-			this.set("isFullScreen", request.params.isFullScreen);
+
+		if (request.method == "Buttons.GetCapabilities") {
+			var cap = {
+				"name" 		      :  "", // some name
+				"shortPressAvailable" : true,
+			};
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	{
+
+					// for i to N buttons
+					// fill prams
+
+					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+				}
+			};
+			this.client.send(JSONMessage);
 		}
-*/
 	},
 
 	/*
@@ -118,9 +130,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 				}
 			};
 
-			//this.client.send(JSONMessage);
-			console.log(JSONMessage);
-
+			this.client.send(JSONMessage);
 		}
 		
 	}

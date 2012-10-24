@@ -98,10 +98,10 @@ FFW.TTS = FFW.RPCObserver.create({
 
 			// send repsonse
 			var JSONMessage = {
-				"jsonrpc":	"2.0",
-				"id": 		request.id,
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
 				"result":	{
-					//"result" :  type (enum) from AppLink protocol
+					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}
 			};
 			this.client.send(JSONMessage);
