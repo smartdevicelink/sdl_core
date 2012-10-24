@@ -38,6 +38,12 @@ public:
     SubscribeButtonResponse* createSubscribeButtonResponse ( const MobileRPCMessage & message ) const;
     Json::Value serializeSubscribeButtonResponse( const SubscribeButtonResponse & response ) const;
 
+    UnsubscribeButton createUnsubscribeButton ( const MobileRPCMessage & message ) const;
+    Json::Value serializeUnsubscribeButton( const UnsubscribeButton & request ) const;
+
+    UnsubscribeButtonResponse* createUnsubscribeButtonResponse ( const MobileRPCMessage & message ) const;
+    Json::Value serializeUnsubscribeButtonResponse( const UnsubscribeButtonResponse & response ) const;
+
     OnHMIStatus * createOnHMIStatus () const;
     Json::Value serializeOnHMIStatus( const OnHMIStatus & notification ) const;
 

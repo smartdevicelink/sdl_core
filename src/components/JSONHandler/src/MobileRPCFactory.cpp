@@ -116,6 +116,48 @@ Json::Value MobileRPCFactory::serializeSubscribeButtonResponse(const SubscribeBu
     return value;
 }
 
+UnsubscribeButton MobileRPCFactory::createUnsubscribeButton(const MobileRPCMessage &message) const
+{
+    UnsubscribeButton object( message.getProtocolVersion() );
+
+    Json::Value params = JSONHandler::getParametersFromJSON( message.getParametersString() );
+    object.setButtonName( params["buttonName"].asString() );
+
+    return object;
+}
+
+Json::Value MobileRPCFactory::serializeUnsubscribeButton(const UnsubscribeButton &request) const
+{
+    Json::Value result;
+    Json::Value value;
+
+    value["buttonName"] = request.getButtonName();
+
+    result["parameters"] = value;
+    return result;
+}
+
+UnsubscribeButtonResponse *MobileRPCFactory::createUnsubscribeButtonResponse(const MobileRPCMessage &message) const
+{
+    UnsubscribeButtonResponse* object = new UnsubscribeButtonResponse( message.getProtocolVersion() );
+    object->setCorrelationID( message.getCorrelationID() );
+
+    object->setSuccess( true );
+    object->setResultCode( "SUCCESS" );
+
+    return object;
+}
+
+Json::Value MobileRPCFactory::serializeUnsubscribeButtonResponse(const UnsubscribeButtonResponse &response) const
+{
+    Json::Value value;
+
+    value["success"] = response.getSuccess();
+    value["resultCode"] = response.getResultString();
+
+    return value;
+}
+
 OnHMIStatus * MobileRPCFactory::createOnHMIStatus() const
 {
     OnHMIStatus * object = new OnHMIStatus(1);
