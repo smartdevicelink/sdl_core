@@ -59,54 +59,93 @@ namespace NsApplicationTester
       printf("%s:%d CAppTester::sendDataFromFile()\n", __FILE__, __LINE__);
 
       ifstream file_str;
-      file_str.open ( fileName );
+      file_str.open (fileName);
 
-      file_str.seekg( 0, ios::end );
-      int length = file_str.tellg();
-      file_str.seekg( 0, ios::beg );
-
-      char * raw_data = new char[length];
-      file_str.read( raw_data, length );
-      file_str.close();
-
-/*}else if ((rfcommbuffer[0] == 17) && (rfcommbuffer[1] == 7))
-{
-   printf("Single frame RPC message!\n");
-   unsigned int frameSize = (rfcommbuffer[4]<<24);
-   frameSize |= (rfcommbuffer[5]<<16);
-   frameSize |= (rfcommbuffer[6]<<8);
-   frameSize |= rfcommbuffer[7];
-   printf("frameSize = 0x%X\n", frameSize);
-   unsigned char rfcommpayloadbuffer[1024];
-   if (672 > frameSize)
-   {// one L2CAP packet
-      len = recv(sockid, rfcommpayloadbuffer, frameSize, 0);
-   } else
-   {
-      //TODO: We need to read all L2CAP packets to get whole frame
-   }
-   if (len == frameSize)
-   {
-      void* sPacketData = malloc(8 + frameSize+1);
-      memset(sPacketData, 0, 8 + frameSize+1);
-      memcpy(sPacketData, rfcommbuffer, 8);
-      memcpy((UInt8*)sPacketData + 8, rfcommpayloadbuffer, frameSize);
-      blobQueue.push(Blob((UInt8*)sPacketData, frameSize+8, blobQueue.size()));
-
-//                  std::string str = std::string((const char*)sPacketData+8, frameSize);
-//                  printf("%s\n", str.c_str());
-
-      if (NULL != mpProtocolHandler)
+      if (!file_str.is_open())
       {
-         mpProtocolHandler->dataReceived();
+        printf("File wasn't opened!\n");
+        return -1;
       }
-   } else
-   {
-      printf("Not All frame received frameSize = 0x%X\n", frameSize);
-   }
-*/
+
+      int startpos = 1;
+      file_str.seekg(0, ios::end);
+      int length = file_str.tellg();
+      file_str.seekg(0, ios::beg);
+      while (startpos < length)
+      {
+        char * raw_data = new char[length];
+        file_str.getline(raw_data, length);
+        startpos += strlen(raw_data);
+        std::string instr = std::string(raw_data, strlen(raw_data));
+        delete[] raw_data;
+        printf("Input string:\n %s\n", instr.c_str());
+        // create a Blob and send
+        generateSingleMessage(1, 7, 0, instr);
+      }
+      file_str.close();
       return 0;
    }
+
+  void CAppTester::generateSingleMessage(UInt8 protocolVersion,
+                                       UInt8 serviceType,
+                                       UInt8 sessionID,
+                                       std::string payload)
+  {
+     UInt32 headerSize = 8;
+     if (protocolVersion == 0x02)
+        headerSize = 12;
+
+     UInt8 sVersion        = protocolVersion;
+     UInt8 sCompressedFlag = 0;
+     UInt8 sFrameType      = 0x01; //Single
+     UInt8 sServiceType    = serviceType;
+     UInt8 sFrameData      = 0x00; //Single Frame
+     UInt8 sSessionID      = sessionID;
+     UInt32 sDataSize       = payload.length();//' + 1; //
+     UInt32 sMessageID      = 12345;
+
+     void* sPacketData = malloc(headerSize + sDataSize);
+
+     UInt8 firstByte = ( (sVersion << 4) & 0xF0 )
+                     | ( (sCompressedFlag << 3) & 0x08)
+                     | (sFrameType & 0x07);
+
+     UInt32 offset = 0;
+     memcpy(sPacketData + offset++, &firstByte, 1);
+     memcpy(sPacketData + offset++, &sServiceType, 1);
+     memcpy(sPacketData + offset++, &sFrameData, 1);
+     memcpy(sPacketData + offset++, &sSessionID, 1);
+
+     UInt8 tmp = sDataSize >> 24;
+     memcpy(sPacketData + offset++, &tmp, 1);
+     tmp = sDataSize >> 16;
+     memcpy(sPacketData + offset++, &tmp, 1);
+     tmp = sDataSize >> 8;
+     memcpy(sPacketData + offset++, &tmp, 1);
+     tmp = sDataSize;
+     memcpy(sPacketData + offset++, &tmp, 1);
+
+
+     if (protocolVersion == 0x02)
+     {
+         UInt8 tmp1 = sMessageID >> 24;
+         memcpy(sPacketData + offset++, &tmp1, 1);
+         tmp1 = sMessageID >> 16;
+         memcpy(sPacketData + offset++, &tmp1, 1);
+         tmp1 = sMessageID >> 8;
+         memcpy(sPacketData + offset++, &tmp1, 1);
+         tmp1 = sMessageID;
+         memcpy(sPacketData + offset++, &tmp1, 1);
+     }
+
+     memcpy(sPacketData + offset, (void*)const_cast<char*>(payload.c_str()), sDataSize);
+
+     printf("SINGLE MESSAGE GENERATED!\n");
+
+     blobQueue.push(Blob((UInt8*)sPacketData, offset + sDataSize, blobQueue.size()));
+
+     mpProtocolHandler->dataReceived();
+  }
 
   void CAppTester::initBluetooth(Bluetooth::IBluetoothHandler * pHandler)
   {

@@ -92,16 +92,19 @@ FFW.TTS = FFW.RPCObserver.create({
 		this._super();
 		
 		if (request.method == "TTS.Speak") {
-			// get params, array
-			// request.params
-			MFT.TTSPopUp.receiveMessage('Hello');
+
+			var message = '';
+			for(var val in request.params){
+				message += '\n' + request.params[val].ttsChunks;
+			}
+			MFT.TTSPopUp.receiveMessage(message);
 
 			// send repsonse
 			var JSONMessage = {
-				"jsonrpc":	"2.0",
-				"id": 		request.id,
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
 				"result":	{
-					//"result" :  type (enum) from AppLink protocol
+					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}
 			};
 			this.client.send(JSONMessage);

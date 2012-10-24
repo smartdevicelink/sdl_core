@@ -90,19 +90,114 @@ FFW.Buttons = FFW.RPCObserver.create({
 	onRPCRequest: function(request) {
 		Em.Logger.log("FFW.ButtonsBackend.onRPCRequest");
 		this._super();
-/*
-		if (request.method == "ButtonsBackendClient.onFullScreenChanged") {
-			this.resizeVideo = true;
-			this.FullScreenRequestId = request.id;
-			Em.Logger.log("resizeVideo = " + this.resizeVideo);
-			Em.Logger.log("FullScreenRequestId = " + this.FullScreenRequestId);
-			this.set("isFullScreen", request.params.isFullScreen);
+
+		if (request.method == "Buttons.GetCapabilities") {
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result"	:	{
+					"capabilities":{
+						"name"					: "PRESET_0",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "PRESET_1",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "PRESET_2",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "PRESET_3",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "PRESET_4",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "PRESET_5",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "PRESET_6",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "PRESET_7",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "PRESET_8",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "PRESET_9",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "OK",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "SEEKLEFT",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "SEEKRIGHT",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "TUNEUP",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+					"capabilities":{
+						"name"					: "TUNEDOWN",
+						"shortPressAvailable"	: true,
+						"longPressAvailable"	: true,
+						"upDownAvailable"		: true,
+					},
+
+					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+				}
+			};
+			this.client.send(JSONMessage);
 		}
-*/
 	},
 
 	/*
-	 * Notifies the ButtonsBackend that the web is all set.
+	 * Notifies the ButtonsRPC that the web is all set.
 	 * Should be called twice: when the RPC link is up or failed to connect
 	 * and all the views are rendered.
 	 */
@@ -111,16 +206,36 @@ FFW.Buttons = FFW.RPCObserver.create({
 		if (this.client.socket.readyState == this.client.socket.OPEN) {
 			var JSONMessage = {
 				"jsonrpc" :	"2.0",
-				"method"  :	"Buttons.onButtonEvent",
+				"method"  :	"Buttons.onButtonPress",
 				"params"  :	{
-				"name"	  : id,
-				"mode"    : type
+					"name"	  : id,
+					"mode"    : type
 				}
 			};
 
-			//this.client.send(JSONMessage);
-			console.log(JSONMessage);
+			this.client.send(JSONMessage);
+		}
+		
+	},
 
+	/*
+	 * Notifies the ButtonsRPC that the web is all set.
+	 * Should be called twice: when the RPC link is up or failed to connect
+	 * and all the views are rendered.
+	 */
+	buttonEvent: function(id, type) {
+
+		if (this.client.socket.readyState == this.client.socket.OPEN) {
+			var JSONMessage = {
+				"jsonrpc" :	"2.0",
+				"method"  :	"Buttons.onButtonEvent",
+				"params"  :	{
+					"name"	  : id,
+					"mode"    : type
+				}
+			};
+
+			this.client.send(JSONMessage);
 		}
 		
 	}

@@ -237,7 +237,22 @@ void AppLinkInterface::executeThreads()
 
 void AppLinkInterface::terminateThreads()
 {
-	m_bTerminate = true;
+    m_bTerminate = true;
+}
+
+void AppLinkInterface::prepareComponent()
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " Preparing component...");
+    getAllCapabilities();
+
+    subscribeTo("Buttons.OnButtonEvent");
+    subscribeTo("Buttons.OnButtonPress");
+    subscribeTo("UI.OnCommand");
+    subscribeTo("UI.OnAppActivated");
+    subscribeTo("UI.OnAppDeactivated");
+    subscribeTo("UI.OnSystemContext");
+    subscribeTo("VR.onCommand");
+    LOG4CPLUS_INFO_EXT(mLogger, " Prepared component!");
 }
 
 /** Thread functions */

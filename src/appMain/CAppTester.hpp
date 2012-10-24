@@ -15,6 +15,7 @@
 #include "Types.hpp"
 #include "Blob.hpp"
 #include "IBluetoothHandler.hpp"
+#include "BluetoothAPI.hpp"
 
 /**
  * \namespace NsApplicationTester
@@ -26,7 +27,7 @@ namespace NsApplicationTester
     * \class CBTAdapter
     * \brief Bluetooth adapter for AppLink
     */
-   class CAppTester
+   class CAppTester: public Bluetooth::IBluetoothAPI
    {
       public:
         /**
@@ -51,6 +52,10 @@ namespace NsApplicationTester
         void sendBuffer(UInt8 * pBuffer, size_t size);
 
       private:
+        void generateSingleMessage(UInt8 protocolVersion,
+                                       UInt8 serviceType,
+                                       UInt8 sessionID,
+                                       std::string payload);
         Bluetooth::IBluetoothHandler * mpProtocolHandler;
 
         std::queue<Blob> blobQueue;
