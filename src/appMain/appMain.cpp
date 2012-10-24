@@ -18,6 +18,7 @@
 #include "JSONHandler/JSONHandler.h"
 
 #include "AppMgr/AppMgr.h"
+#include "AppMgr/AppMgrCore.h"
 
 #include "CMessageBroker.hpp"
 
@@ -118,9 +119,13 @@ int main(int argc, char** argv)
     System::Thread th3(new System::ThreadArgImpl<NsAppManager::AppLinkInterface>(appLinkInterface, &NsAppManager::AppLinkInterface::MethodForReceiverThread, NULL));
     th3.Start(false);
 
+    printf("Start AppMgr threads!\n");
+    NsAppManager::AppMgrCore appMgrCore = NsAppManager::AppMgrCore::getInstance();
+    appMgrCore.executeThreads();
+    appLinkInterface.executeThreads();
+
     printf("Start AppMgr!\n");
     appMgr.startAppMgr();
-    printf("After Start AppMgr!\n");
 
     /**********************************/
     /*** Check main function parameters***/
