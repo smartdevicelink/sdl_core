@@ -16,7 +16,14 @@ FFW.UI = FFW.RPCObserver.create({
      *	access to basic RPC functionality
  	 */		
 	 client:		FFW.RPCClient.create({ componentName: "UI" }),
-	
+
+	/*
+   	 * Global properties
+ 	 */
+	globalProperties:{
+		helpPrompt		: null,
+		timeoutPrompt	: null
+	},
 	
 	/*
    	 * connect to RPC bus
@@ -97,6 +104,38 @@ FFW.UI = FFW.RPCObserver.create({
 			MFT.AppModel.PlayList.items[0].set('album', request.parameters.mainField2);
 			MFT.AppModel.PlayList.items[0].set('duration', request.parameters.mediaClock);
 			MFT.AppModel.PlayList.items[0].set('artist', request.parameters.mediaTrack);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	{
+					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+				}
+			};
+			this.client.send(JSONMessage);
+		}
+		
+		if (request.method == "UI.SetGlobalProperties") {
+
+			this.globalProperties.set('helpPrompt', request.parameters.helpPrompt);
+			this.globalProperties.set('helpPrompt', request.parameters.timeoutPrompt);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	{
+					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+				}
+			};
+			this.client.send(JSONMessage);
+		}
+		
+		if (request.method == "UI.ResetGlobalProperties") {
+
+			this.globalProperties.set('helpPrompt', null);
+			this.globalProperties.set('helpPrompt', null);
 
 			// send repsonse
 			var JSONMessage = {

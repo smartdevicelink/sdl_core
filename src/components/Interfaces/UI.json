@@ -24,15 +24,15 @@
  	 * 	
 	 */ 
         "UI.Show": {
-			"parameters": {
-				"mainField1" 	: "string",      
-				"mainField2" 	: "string",      
-				"alignment" 	: "textAlignment",    // data type from AppLink protocol specification  
-				"statusBar" 	: "string",      
-				"mediaClock" 	: "string",      
-				"mediaTrack" 	: "string"
-			},
-			returns: // return value is provided in corresponding response object, id of request and response should be equal
+		"parameters": {
+			"mainField1" 	: "string",      
+			"mainField2" 	: "string",      
+			"alignment" 	: "textAlignment",    // data type from AppLink protocol specification  
+			"statusBar" 	: "string",      
+			"mediaClock" 	: "string",      
+			"mediaTrack" 	: "string"
+		},
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
 				"result": "Result" // data type from AppLink protocol specification
 			}
@@ -47,13 +47,13 @@
  	 * 	
 	 */ 
         "UI.Alert": {
-			"parameters": {
-				"AlertText1": "string",      
-				"AlertText2": "string",      
-				"duration"	: "Integer",
-				"playTone"	: "bool"
-			},
-			returns: // return value is provided in corresponding response object, id of request and response should be equal
+		"parameters": {
+			"AlertText1" 	: "string",      
+			"AlertText2" 	: "string",      
+			"duration" 	: "Integer",
+			"playTone" 	: "bool"
+		},
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
 				"result": "Result" // data type from AppLink protocol specification
 			}
@@ -67,11 +67,11 @@
 	 * 	result code
 	 */ 
         "UI.AddCommand": {
-			"parameters": {
-				"cmdId"		: "integer",        	// cmdID from addCommand request in AppLink protocol
-				"menuParams": "MenuParams" 		// data type from AppLink protocol specification
-			},
-			returns: // return value is provided in corresponding response object, id of request and response should be equal
+		"parameters": {
+			"cmdId" 	: "integer",        	// cmdID from addCommand request in AppLink protocol
+			"menuParams" 	: "MenuParams" 		// data type from AppLink protocol specification
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
 				"result": "Result" // data type from AppLink protocol specification
 			}
@@ -85,10 +85,10 @@
 	 * 	result code
 	 */ 
         "UI.DeleteCommand": {
-			"parameters": {
-				"cmdId" : "integer"       	// cmdID from addCommand request in AppLink protocol
-			},
-			returns: // return value is provided in corresponding response object, id of request and response should be equal
+		"parameters": {
+			"cmdId" 	: "integer"       	// cmdID from addCommand request in AppLink protocol
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
 				"result": "Result" // data type from AppLink protocol specification
 			}
@@ -103,12 +103,12 @@
 	 * 	result code
 	 */ 
         "UI.AddSubMenu": {
-			"parameters": {
-				"menuId" 	: "integer",
-				"position" 	: "integer",
-				"menuName" 	: "string"
-			},
-			returns: // return value is provided in corresponding response object, id of request and response should be equal
+		"parameters": {
+			"menuId" 	: "integer",
+			"position" 	: "integer",
+			"menuName" 	: "string"
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
 				"result": "Result" // data type from AppLink protocol specification
 			}
