@@ -45,7 +45,7 @@ void JSONRPC2Handler::setRPC2CommandsObserver(
     mCommandsObserver = commandsObserver;
 }
 
-void JSONRPC2Handler::sendCommand( const RPC2Command * command )
+void JSONRPC2Handler::sendCommand( const RPC2Communication::RPC2Command * command )
 {
     mCommandsToHMI.push( command );
 }
@@ -64,7 +64,7 @@ void * JSONRPC2Handler::waitForCommandsFromHMI( void * params )
         {
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI: received command");
             Json::Value jsonMessage = handler -> mCommandsFromHMI.pop();
-            RPC2Command * currentCommand = RPC2Marshaller::fromJSON( jsonMessage );
+            RPC2Communication::RPC2Command * currentCommand = RPC2Communication::RPC2Marshaller::fromJSON( jsonMessage );
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI: handle command" );
             if ( !currentCommand )
             {
@@ -98,7 +98,7 @@ void * JSONRPC2Handler::waitForResponsesFromHMI( void * params )
         {
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI: received response");
             ResponseContainer response = handler -> mResponsesFromHMI.pop();
-            RPC2Command * currentCommand = RPC2Marshaller::fromJSON( response.response, response.methodName );
+            RPC2Communication::RPC2Command * currentCommand = RPC2Communication::RPC2Marshaller::fromJSON( response.response, response.methodName );
 
             if ( !currentCommand )
             {
@@ -131,8 +131,8 @@ void * JSONRPC2Handler::waitForCommandsToHMI( void * params )
         while ( !handler -> mCommandsToHMI.empty() )
         {
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: received command.");
-            const RPC2Command * command = handler -> mCommandsToHMI.pop();
-            Json::Value commandJson = RPC2Marshaller::toJSON( command );
+            const RPC2Communication::RPC2Command * command = handler -> mCommandsToHMI.pop();
+            Json::Value commandJson = RPC2Communication::RPC2Marshaller::toJSON( command );
 
             if ( commandJson.isNull() )
             {

@@ -8,8 +8,6 @@
 #include "JSONHandler/MessageQueue.h"
 #include "Logger.hpp"
 
-using namespace RPC2Communication;
-
 class JSONRPC2Handler : public NsMessageBroker::CMessageBrokerController
 {
 public:
@@ -27,7 +25,7 @@ public:
     /*void sendResponse( const RPC2Response * response );
     void sendRequest( const RPC2Request * request );
     void sendNotification( const RPC2Notification * notification );*/
-    void sendCommand( const RPC2Command * command );
+    void sendCommand( const RPC2Communication::RPC2Command * command );
     /*End of methods for IRPC2CommandsObserver*/
 
 private:
@@ -47,7 +45,7 @@ private:
     pthread_t                             mWaitForCommandsFromHMI;
     pthread_t                            mWaitForResponsesFromHMI;
     MessageQueue<ResponseContainer>             mResponsesFromHMI;
-    MessageQueue<const RPC2Command*>               mCommandsToHMI;
+    MessageQueue<const RPC2Communication::RPC2Command*>               mCommandsToHMI;
     pthread_t                               mWaitForCommandsToHMI;
 };
 
