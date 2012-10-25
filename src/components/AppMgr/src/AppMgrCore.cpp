@@ -210,8 +210,9 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
             event->set_buttonEventMode(object->getMode());
             const ButtonName & name = object->getName();
             event->set_buttonName(name);
-        //    object->
-            sendMobileRPCResponse( event );
+            unsigned char sessionID = mButtonsMapping.find(name)->second->getApplication()->getSessionID();
+            Message message = Message(event, sessionID);
+            sendMobileRPCResponse( message );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_ONBUTTONPRESS:
@@ -219,9 +220,12 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
             LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonPress request has been invoked");
             RPC2Communication::OnButtonPress * object = (RPC2Communication::OnButtonPress*)msg;
             OnButtonPress* event = new OnButtonPress();
-            event->set_buttonName(object->getName());
+            const ButtonName & name = object->getName();
+            event->set_buttonName(name);
             event->set_buttonPressMode(object->getMode());
-            sendMobileRPCResponse( event );
+            unsigned char sessionID = mButtonsMapping.find(name)->second->getApplication()->getSessionID();
+            Message message = Message(event, sessionID);
+            sendMobileRPCResponse( message );
             break;
         }
 		case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
@@ -306,6 +310,7 @@ void AppMgrCore::unsubscribeButton(const Message& msg )
     unsigned char sessionID = msg.second;
     UnsubscribeButton_request * object = (UnsubscribeButton_request*)message;
     const ButtonName& name = object->get_buttonName();
+    mButtonsMapping.erase(name);
 }
 
 const ALRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem* registryItem )
