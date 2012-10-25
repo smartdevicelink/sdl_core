@@ -175,17 +175,13 @@ add_library(jsonHandler
                   ./src/RPC2Notification.cpp
                   ./src/OnButtonEventMarshaller.cpp
                   ./src/OnButtonEvent.cpp
-                  ./src/ButtonEventModeMarshaller.cpp
                   ./src/Speak.cpp
                   ./src/SpeakMarshaller.cpp
-                  ./src/TTSChunkMarshaller.cpp
-                  ./src/SpeechCapabilitiesMarshaller.cpp
                   ./src/RPC2Request.cpp
                   ./src/RPC2Response.cpp
                   ./src/RPC2Error.cpp
                   ./src/SpeakResponseMarshaller.cpp
                   ./src/SpeakResponse.cpp
-                  ./src/ResultMarshaller.cpp
                   ./src/Alert.cpp
                   ./src/AlertResponse.cpp
                   ./src/AlertMarshaller.cpp
@@ -194,17 +190,13 @@ add_library(jsonHandler
                   ./src/ShowResponse.cpp
                   ./src/ShowMarshaller.cpp
                   ./src/ShowResponseMarshaller.cpp
-                  ./src/TextAlignmentMarshaller.cpp
                   ./src/GetCapabilities.cpp
                   ./src/GetCapabilitiesResponseMarshaller.cpp
                   ./src/GetCapabilitiesResponse.cpp
                   ./src/GetCapabilitiesMarshaller.cpp
                   ./src/GetCapabilities.cpp
-                  ./src/ButtonNameMarshaller.cc
-                  ./src/ButtonCapabilitiesMarshaller.cpp
                   ./src/OnButtonPress.cpp
                   ./src/OnButtonPressMarshaller.cpp
-                  ./src/ButtonPressModeMarshaller.cc
                   ./src/SetGlobalPropertiesResponse.cpp
                   ./src/SetGlobalPropertiesResponseMarshaller.cpp
                   ./src/SetGlobalProperties.cpp

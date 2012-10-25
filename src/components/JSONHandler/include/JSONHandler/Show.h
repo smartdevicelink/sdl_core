@@ -2,7 +2,7 @@
 #define SHOW_RPC2_CLASS
 
 #include "JSONHandler/RPC2Request.h"
-#include "JSONHandler/TextAlignment.h"
+#include "JSONHandler/ALRPCObjects/TextAlignment.h"
 #include <string>
 
 namespace RPC2Communication

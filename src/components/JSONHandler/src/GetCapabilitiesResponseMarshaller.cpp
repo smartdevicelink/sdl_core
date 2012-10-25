@@ -1,5 +1,5 @@
 #include "JSONHandler/GetCapabilitiesResponseMarshaller.h"
-#include "JSONHandler/ButtonCapabilitiesMarshaller.h"
+#include "ALRPCObjectsImpl/ButtonCapabilitiesMarshaller.h"
 #include <json/value.h>
 #include <json/reader.h>
 #include <json/writer.h>

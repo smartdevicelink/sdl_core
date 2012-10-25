@@ -35,7 +35,7 @@ public:
 	
 	static AppMgr& getInstance();
 	
-	virtual void onMessageReceivedCallback( MobileRPCMessage * message );
+	virtual void onMessageReceivedCallback( ALRPCMessage * message );
 
 	/**
 	 * \brief pure virtual method to process response.
@@ -74,8 +74,6 @@ private:
 	AppLinkInterface& mAppLinkInterface;
 	AppMgrRegistry& mAppMgrRegistry;
 	AppMgrCore& mAppMgrCore;
-	RPCAppLinkFactory& mRPCAppLinkFactory;
-	RPCBusFactory& mRPCBusFactory;
 	AppFactory& mAppFactory;
 
 	JSONHandler* mJSONHandler;

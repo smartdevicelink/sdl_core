@@ -2,7 +2,7 @@
 #define ONBUTTON_PRESS_CLASS
 
 #include "JSONHandler/RPC2Notification.h"
-#include "JSONHandler/ButtonPressMode.hh"
+#include "JSONHandler/ALRPCObjects/ButtonPressMode.h"
 
 namespace RPC2Communication
 {

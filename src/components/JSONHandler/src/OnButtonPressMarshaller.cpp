@@ -1,5 +1,5 @@
 #include "JSONHandler/OnButtonPressMarshaller.h"
-#include "JSONHandler/ButtonPressModeMarshaller.hh"
+#include "ALRPCObjectsImpl/ButtonPressModeMarshaller.h"
 #include <json/reader.h>
 #include <json/writer.h>
 

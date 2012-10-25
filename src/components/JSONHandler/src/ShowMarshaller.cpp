@@ -2,7 +2,7 @@
 #include <json/value.h>
 #include <json/reader.h>
 #include <json/writer.h>
-#include "JSONHandler/TextAlignmentMarshaller.h"
+#include "ALRPCObjectsImpl/TextAlignmentMarshaller.h"
 
 using namespace RPC2Communication;
 

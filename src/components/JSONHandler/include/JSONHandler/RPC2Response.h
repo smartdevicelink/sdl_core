@@ -2,7 +2,7 @@
 #define RPC2_RESPONSE_CLASS value
 
 #include "JSONHandler/RPC2Command.h"
-#include "JSONHandler/Result.h"
+#include "JSONHandler/ALRPCObjects/Result.h"
 #include "JSONHandler/RPC2Error.h"
 
 namespace RPC2Communication

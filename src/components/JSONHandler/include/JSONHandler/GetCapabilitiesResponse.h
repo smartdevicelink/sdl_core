@@ -2,7 +2,7 @@
 #define GETCAPABILITIES_RESPONSE_CLASS
 
 #include "JSONHandler/RPC2Response.h"
-#include "JSONHandler/ButtonCapabilities.h"
+#include "JSONHandler/ALRPCObjects/ButtonCapabilities.h"
 #include <vector>
 
 namespace RPC2Communication

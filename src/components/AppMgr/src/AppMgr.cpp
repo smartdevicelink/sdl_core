@@ -3,8 +3,8 @@
 #include "AppMgr/AppFactory.h"
 #include "AppMgr/AppLinkInterface.h"
 #include "AppMgr/AppMgrCore.h"
-#include "AppMgr/RPCAppLinkFactory.h"
-#include "AppMgr/RPCBusFactory.h"
+//#include "AppMgr/RPCAppLinkFactory.h"
+//#include "AppMgr/RPCBusFactory.h"
 #include "AppMgr/AppMgrRegistry.h"
 #include "LoggerHelper.hpp"
 
@@ -27,8 +27,6 @@ AppMgr::AppMgr()
 	:mAppLinkInterface(AppLinkInterface::getInstance())
 	,mAppMgrRegistry(AppMgrRegistry::getInstance())
 	,mAppMgrCore(AppMgrCore::getInstance())
-	,mRPCAppLinkFactory(RPCAppLinkFactory::getInstance())
-	,mRPCBusFactory(RPCBusFactory::getInstance())
 	,mAppFactory(AppFactory::getInstance())
 	,mJSONHandler(0)
 {
@@ -45,9 +43,9 @@ void AppMgr::setJsonHandler(JSONHandler* handler)
 	mAppMgrCore.setJsonHandler( handler );
 }
 
-void AppMgr::onMessageReceivedCallback( MobileRPCMessage * message )
+void AppMgr::onMessageReceivedCallback( ALRPCMessage * message )
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " Message "<<message->getFunctionName()<<" received");
+	LOG4CPLUS_INFO_EXT(mLogger, " Message "<<message->getMethodId()<<" received");
 	mAppMgrCore.pushMobileRPCMessage( message );
 }
 

@@ -1,5 +1,5 @@
 #include "JSONHandler/SetGlobalPropertiesMarshaller.h"
-#include "JSONHandler/TTSChunkMarshaller.h"
+#include "ALRPCObjectsImpl/TTSChunkMarshaller.h"
 #include <json/reader.h>
 #include <json/writer.h>
 

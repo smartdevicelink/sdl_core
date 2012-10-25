@@ -1,7 +1,7 @@
 #include "JSONHandler/AlertResponseMarshaller.h"
 #include <json/reader.h>
 #include <json/writer.h>
-#include "JSONHandler/ResultMarshaller.h"
+#include "ALRPCObjectsImpl/ResultMarshaller.h"
 
 using namespace RPC2Communication;
 

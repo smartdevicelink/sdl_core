@@ -2,7 +2,7 @@
 #define TTS_SPEAK_CLASS
 
 #include "JSONHandler/RPC2Request.h"
-#include "JSONHandler/TTSChunk.h"
+#include "JSONHandler/ALRPCObjects/TTSChunk.h"
 #include <vector>
 
 namespace RPC2Communication
