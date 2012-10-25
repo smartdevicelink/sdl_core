@@ -44,7 +44,7 @@ namespace NsAppLink
              * @param DeviceList Reference to a variable that will
              *                   receive device list.
              **/
-            virtual void getDeviceList(std::vector<SInternalDeviceInfo> & DeviceList) const;
+            virtual void getDeviceList(tInternalDeviceList & DeviceList) const;
 
             /**
              * @brief Get type of devices handled by this device adapter.

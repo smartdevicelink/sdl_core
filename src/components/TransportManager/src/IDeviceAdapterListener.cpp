@@ -4,7 +4,7 @@ NsAppLink::NsTransportManager::IDeviceAdapterListener::~IDeviceAdapterListener(v
 {
 }
 
-void NsAppLink::NsTransportManager::IDeviceAdapterListener::onDeviceListUpdated(NsAppLink::NsTransportManager::IDeviceAdapter * DeviceAdapter, const std::vector<NsAppLink::NsTransportManager::SInternalDeviceInfo> & DeviceList)
+void NsAppLink::NsTransportManager::IDeviceAdapterListener::onDeviceListUpdated(NsAppLink::NsTransportManager::IDeviceAdapter * DeviceAdapter, const NsAppLink::NsTransportManager::tInternalDeviceList & DeviceList)
 {
 }
 

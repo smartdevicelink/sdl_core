@@ -34,7 +34,7 @@ namespace NsAppLink
              * @param DeviceAdapter Calling device adapter.
              * @param DeviceList New list of available devices.
              **/
-            virtual void onDeviceListUpdated(IDeviceAdapter * DeviceAdapter, const std::vector<SInternalDeviceInfo> & DeviceList);
+            virtual void onDeviceListUpdated(IDeviceAdapter * DeviceAdapter, const tInternalDeviceList & DeviceList);
 
             /**
              * @brief Device connected callback.

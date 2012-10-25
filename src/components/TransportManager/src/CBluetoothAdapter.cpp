@@ -18,7 +18,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::run(void)
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }
 
-void NsAppLink::NsTransportManager::CBluetoothAdapter::getDeviceList(std::vector<NsAppLink::NsTransportManager::SInternalDeviceInfo> & DeviceList) const
+void NsAppLink::NsTransportManager::CBluetoothAdapter::getDeviceList(NsAppLink::NsTransportManager::tInternalDeviceList & DeviceList) const
 {
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }

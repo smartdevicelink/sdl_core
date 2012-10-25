@@ -1,6 +1,8 @@
 #ifndef __TRANSPORTMANAGER_SINTERNALDEVICEINFO_HPP__
 #define __TRANSPORTMANAGER_SINTERNALDEVICEINFO_HPP__
 
+#include <vector>
+
 #include "TransportManager/SDeviceInfo.hpp"
 
 namespace NsAppLink
@@ -22,6 +24,11 @@ namespace NsAppLink
              **/
             std::string mUserFriendlyName;
         };
+
+        /**
+         * @brief List of internal devices.
+         **/
+        typedef std::vector<SInternalDeviceInfo> tInternalDeviceList;
     }
 }
 
