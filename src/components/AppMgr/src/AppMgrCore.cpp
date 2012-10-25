@@ -197,6 +197,7 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
         case Marshaller::METHOD_REGISTERAPPINTERFACE_RESPONSE:
         case Marshaller::METHOD_SUBSCRIBEBUTTON_RESPONSE:
         case Marshaller::METHOD_UNSUBSCRIBEBUTTON_RESPONSE:
+        case Marshaller::METHOD_ONAPPINTERFACEUNREGISTERED:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A "<< message.first->getMethodId() << " response or notification has been invoked");
             mJSONHandler->sendRPCMessage(message.first, sessionID);
