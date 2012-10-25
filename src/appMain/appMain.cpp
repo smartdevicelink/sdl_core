@@ -16,6 +16,7 @@
 #include "ProtocolHandler.hpp"
 
 #include "JSONHandler/JSONHandler.h"
+#include "JSONHandler/JSONRPC2Handler.h"
 
 #include "AppMgr/AppMgr.h"
 #include "AppMgr/AppMgrCore.h"
@@ -96,7 +97,13 @@ int main(int argc, char** argv)
       LOG4CPLUS_INFO(logger, " Listen successful!");
     }
 
-    NsAppManager::AppLinkInterface appLinkInterface = appMgr.getAppLinkInterface();
+    JSONRPC2Handler jsonRPC2Handler( std::string("127.0.0.1"), 8087 );
+    if (!jsonRPC2Handler.Connect())
+    {
+        LOG4CPLUS_INFO(logger, "Cannot connect to remote peer!");
+    }
+
+    /*NsAppManager::AppLinkInterface appLinkInterface = appMgr.getAppLinkInterface();
 
     if(!appLinkInterface.Connect())
     {
@@ -105,7 +112,7 @@ int main(int argc, char** argv)
     } else
     {
       printf("AppMgr JSONRPC 2.0 controller connected to the server! SocketID = %d\n", appLinkInterface.GetSocket());
-    }
+    }*/
 
     printf("Start CMessageBroker thread!\n");
     System::Thread th1(new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(*pMessageBroker, &NsMessageBroker::CMessageBroker::MethodForThread, NULL));
@@ -116,13 +123,16 @@ int main(int argc, char** argv)
     th2.Start(false);
 
     printf("StartAppMgr JSONRPC 2.0 controller receiver thread!\n");
-    System::Thread th3(new System::ThreadArgImpl<NsAppManager::AppLinkInterface>(appLinkInterface, &NsAppManager::AppLinkInterface::MethodForReceiverThread, NULL));
+    //System::Thread th3(new System::ThreadArgImpl<NsAppManager::AppLinkInterface>(appLinkInterface, &NsAppManager::AppLinkInterface::MethodForReceiverThread, NULL));
+    System::Thread th3(new System::ThreadArgImpl<JSONRPC2Handler>(jsonRPC2Handler, &JSONRPC2Handler::MethodForReceiverThread, NULL));
     th3.Start(false);
+
+    jsonRPC2Handler.registerController();
 
     printf("Start AppMgr threads!\n");
     NsAppManager::AppMgrCore appMgrCore = NsAppManager::AppMgrCore::getInstance();
     appMgrCore.executeThreads();
-    appLinkInterface.executeThreads();
+    //appLinkInterface.executeThreads();
 
     printf("Start AppMgr!\n");
     appMgr.startAppMgr();
