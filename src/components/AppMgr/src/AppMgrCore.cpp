@@ -283,22 +283,22 @@ const RegistryItem* AppMgrCore::registerApplication( const Message& object )
     RegisterAppInterface_request * request = (RegisterAppInterface_request*)msg;
     LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() << "!");
     const std::string& appName = request->get_appName();
-    //const std::string& ngnMediaScreenAppName = request->get_ngnMediaScreenAppName();
-    //const std::vector<std::string>& vrSynonyms = request->get_vrSynonyms();
+    const std::string& ngnMediaScreenAppName = *request->get_ngnMediaScreenAppName();
+    const std::vector<std::string>& vrSynonyms = *request->get_vrSynonyms();
     bool usesVehicleData = request->get_usesVehicleData();
     bool isMediaApplication = request->get_isMediaApplication();
     const Language& languageDesired = request->get_languageDesired();
-    //const std::string& autoActivateID = request->get_autoActivateID();
+    const std::string& autoActivateID = *request->get_autoActivateID();
     const SyncMsgVersion& syncMsgVersion = request->get_syncMsgVersion();
 
     Application* application = new Application( appName, sessionID );
-	//application->setAutoActivateID(autoActivateID);
+    application->setAutoActivateID(autoActivateID);
 	application->setIsMediaApplication(isMediaApplication);
 	application->setLanguageDesired(languageDesired);
-	//application->setNgnMediaScreenAppName(ngnMediaScreenAppName);
+    application->setNgnMediaScreenAppName(ngnMediaScreenAppName);
 	application->setSyncMsgVersion(syncMsgVersion);
 	application->setUsesVehicleData(usesVehicleData);
-	//application->setVrSynonyms(vrSynonyms);
+    application->setVrSynonyms(vrSynonyms);
 
 	application->setApplicationHMIStatusLevel(HMILevel::HMI_NONE);
 
