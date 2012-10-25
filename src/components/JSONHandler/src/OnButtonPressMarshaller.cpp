@@ -1,5 +1,6 @@
 #include "JSONHandler/OnButtonPressMarshaller.h"
 #include "ALRPCObjectsImpl/ButtonPressModeMarshaller.h"
+#include "ALRPCObjectsImpl/ButtonNameMarshaller.h"
 #include <json/reader.h>
 #include <json/writer.h>
 
@@ -39,7 +40,7 @@ Json::Value OnButtonPressMarshaller::toJSON(const OnButtonPress& e)
   
   Json::Value j=Json::Value(Json::objectValue);
   
-  j["name"]=Json::Value(e.mName);
+  j["name"]=ButtonNameMarshaller::toJSON(e.mName);
   j["mode"]=ButtonPressModeMarshaller::toJSON(e.mMode);
   
   json["params"]=j;
@@ -70,8 +71,7 @@ bool OnButtonPressMarshaller::fromJSON(const Json::Value& json,OnButtonPress& c)
     if(!j.isMember("mode"))  return false;
 
     if(!ButtonPressModeMarshaller::fromJSON(j["mode"],c.mMode))  return false;
-    if(!j["name"].isString())  return false;
-    c.mName=j["name"].asString();
+    if(!ButtonNameMarshaller::fromJSON(j["name"], c.mName))  return false;
   } 
   catch(...)
   {

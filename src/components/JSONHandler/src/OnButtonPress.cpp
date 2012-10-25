@@ -10,7 +10,7 @@ OnButtonPress::OnButtonPress()
 OnButtonPress::~OnButtonPress()
 {}
 
-std::string OnButtonPress::getName(void) const
+ButtonName OnButtonPress::getName(void) const
 {
     return mName;
 }
@@ -20,7 +20,7 @@ ButtonPressMode OnButtonPress::getMode(void) const
     return mMode;
 }
 
-bool OnButtonPress::setName(const std::string & s)
+bool OnButtonPress::setName(const ButtonName & s)
 {
     mName = s;
 }
