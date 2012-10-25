@@ -60,8 +60,14 @@ void AppMgr::setJsonRPC2Handler(JSONRPC2Handler *handler)
 
 void AppMgr::onMessageReceivedCallback(ALRPCMessage * message , unsigned char sessionID)
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " Message "<<message->getMethodId()<<" received");
+    LOG4CPLUS_INFO_EXT(mLogger, " Message "<<message->getMethodId()<<" received from mobile side");
     mAppMgrCore.pushMobileRPCMessage( message, sessionID );
+}
+
+void AppMgr::onCommandReceivedCallback(RPC2Communication::RPC2Command *command)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " Message "<<command->getMethod()<<" received from HMI side");
+    mAppMgrCore.pushRPC2CommunicationMessage(command);
 }
 
 /**

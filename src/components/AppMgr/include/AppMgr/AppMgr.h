@@ -2,6 +2,7 @@
 #define APPMGR_H
 
 #include "JSONHandler/IRPCMessagesObserver.h"
+#include "JSONHandler/IRPC2CommandsObserver.h"
 #include "AppMgr/AppLinkInterface.h"
 #include "mb_controller.hpp"
 
@@ -26,7 +27,7 @@ class AppMgrRegistry;
 class AppMgrCore;
 class AppFactory;
 	
-class AppMgr: public IRPCMessagesObserver
+class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver
 {
 public:
 
@@ -41,6 +42,8 @@ public:
 	static AppMgr& getInstance();
 	
     virtual void onMessageReceivedCallback( ALRPCMessage * message, unsigned char sessionID );
+
+    virtual void onCommandReceivedCallback( RPC2Communication::RPC2Command * command );
 
 	/**
 	 * \brief pure virtual method to process response.
