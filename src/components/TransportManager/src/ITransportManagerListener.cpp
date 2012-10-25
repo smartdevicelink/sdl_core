@@ -4,7 +4,7 @@ NsAppLink::NsTransportManager::ITransportManagerListener::~ITransportManagerList
 {
 }
 
-void NsAppLink::NsTransportManager::ITransportManagerListener::onDeviceListUpdated(const std::vector<SDeviceInfo> & DeviceList)
+void NsAppLink::NsTransportManager::ITransportManagerListener::onDeviceListUpdated(const tDeviceList & DeviceList)
 {
 }
 

@@ -2,6 +2,7 @@
 #define __TRANSPORTMANAGER_SDEVICEINFO_HPP__
 
 #include <string>
+#include <vector>
 
 namespace NsAppLink
 {
@@ -58,6 +59,11 @@ namespace NsAppLink
              **/
             std::string mUserFriendlyName;
         };
+
+        /**
+         * @brief Device list.
+         **/
+        typedef std::vector<SDeviceInfo> tDeviceList;
     }
 }
 

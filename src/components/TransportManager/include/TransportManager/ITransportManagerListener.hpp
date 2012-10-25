@@ -49,7 +49,7 @@ namespace NsAppLink
              *
              * @param DeviceList New list of available devices.
              **/
-            virtual void onDeviceListUpdated(const std::vector<SDeviceInfo> & DeviceList);
+            virtual void onDeviceListUpdated(const tDeviceList & DeviceList);
 
             /**
              * @brief Device connected.
