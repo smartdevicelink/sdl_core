@@ -20,8 +20,6 @@
 #include "DisplayCapabilities.h"
 #include "DisplayType.h"
 #include "DriverDistractionState.h"
-#include "GPSData.h"
-#include "GPSPublishedData.h"
 #include "GlobalProperty.h"
 #include "HMILevel.h"
 #include "HmiZoneCapabilities.h"
@@ -29,12 +27,7 @@
 #include "Language.h"
 #include "MediaClockFormat.h"
 #include "MenuParams.h"
-#include "PRNDL.h"
-#include "PubSubData.h"
-#include "PublishedData.h"
 #include "Result.h"
-#include "SingleTirePressureStatus.h"
-#include "SingleTireStatus.h"
 #include "SpeechCapabilities.h"
 #include "StartTime.h"
 #include "SyncMsgVersion.h"
@@ -45,8 +38,6 @@
 #include "TextField.h"
 #include "TextFieldName.h"
 #include "TimerMode.h"
-#include "TirePressureTellTale.h"
-#include "TireStatus.h"
 #include "TriggerSource.h"
 #include "UpdateMode.h"
 #include "VrCapabilities.h"
@@ -101,8 +92,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 04:31:05 2012
-  source stamp	Wed Oct 24 14:57:16 2012
+  generated at	Thu Oct 25 06:32:04 2012
+  source stamp	Thu Oct 25 06:28:28 2012
   author	robok0der
 */
 
