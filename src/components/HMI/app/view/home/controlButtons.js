@@ -73,7 +73,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				elementId:	'SEEKLEFT',
 				classNames:	'LeftBtn',
 				click:		function(){
-					FFW.Buttons.buttonPressed(this.elementId, "Click");
+					FFW.Buttons.buttonPressed(this.elementId, "SHORT");
 				}
 			}),
 			
@@ -82,7 +82,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				elementId:	'SEEKRIGHT',
 				classNames:	'RightBtn',
 				click:		function(){
-					FFW.Buttons.buttonPressed(this.elementId, "Click");
+					FFW.Buttons.buttonPressed(this.elementId, "SHORT");
 				}
 			}),
 			
@@ -91,7 +91,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				elementId:	'OK',
 				classNames:	'OkBtn',
 				click:		function(){
-					FFW.Buttons.buttonPressed(this.elementId, "Click");
+					FFW.Buttons.buttonPressed(this.elementId, "SHORT");
 				}
 			})
 		}),
@@ -102,7 +102,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'OneBtn btnNotPressed',
 			text:		'1',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 			}
 		}),
 		
@@ -112,7 +112,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'TwoBtn btnNotPressed',
 			text:		'2',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 			}
 		}),
 		
@@ -122,7 +122,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'ThreeBtn btnNotPressed',
 			text:		'3',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 			}
 		}),
 		
@@ -132,7 +132,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'FourBtn btnNotPressed',
 			text:		'4',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 			}
 		}),
 		
@@ -142,7 +142,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'FiveBtn btnNotPressed',
 			text:		'5',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 			}
 		}),
 		
@@ -152,7 +152,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'SixBtn btnNotPressed',
 			text:		'6',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 			}
 		}),
 		
@@ -162,7 +162,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'SevenBtn btnNotPressed',
 			text:		'7',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 			}
 		}),
 		
@@ -172,7 +172,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'EightBtn btnNotPressed',
 			text:		'8',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 			}
 		}),
 		
@@ -182,7 +182,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'NineBtn btnNotPressed',
 			text:		'9',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 			}
 		}),
 		
@@ -192,7 +192,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'ZiroBtn btnNotPressed',
 			text:		'0',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 			}
 		})
 	})
