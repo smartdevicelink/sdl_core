@@ -64,10 +64,6 @@ set(GENERATED_SOURCE
          ./src/ALRPCObjectsImpl/GenericResponse_response.cpp
          ./src/ALRPCObjectsImpl/GenericResponse_responseMarshaller.cpp
          ./src/ALRPCObjectsImpl/GlobalPropertyMarshaller.cpp
-         ./src/ALRPCObjectsImpl/GPSData.cpp
-         ./src/ALRPCObjectsImpl/GPSDataMarshaller.cpp
-         ./src/ALRPCObjectsImpl/GPSPublishedData.cpp
-         ./src/ALRPCObjectsImpl/GPSPublishedDataMarshaller.cpp
          ./src/ALRPCObjectsImpl/HMILevelMarshaller.cpp
          ./src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.cpp
          ./src/ALRPCObjectsImpl/InteractionModeMarshaller.cpp
@@ -96,11 +92,6 @@ set(GENERATED_SOURCE
          ./src/ALRPCObjectsImpl/PerformInteraction_requestMarshaller.cpp
          ./src/ALRPCObjectsImpl/PerformInteraction_response.cpp
          ./src/ALRPCObjectsImpl/PerformInteraction_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/PRNDLMarshaller.cpp
-         ./src/ALRPCObjectsImpl/PublishedData.cpp
-         ./src/ALRPCObjectsImpl/PublishedDataMarshaller.cpp
-         ./src/ALRPCObjectsImpl/PubSubData.cpp
-         ./src/ALRPCObjectsImpl/PubSubDataMarshaller.cpp
          ./src/ALRPCObjectsImpl/RegisterAppInterface_request.cpp
          ./src/ALRPCObjectsImpl/RegisterAppInterface_requestMarshaller.cpp
          ./src/ALRPCObjectsImpl/RegisterAppInterface_response.cpp
@@ -122,9 +113,6 @@ set(GENERATED_SOURCE
          ./src/ALRPCObjectsImpl/Show_requestMarshaller.cpp
          ./src/ALRPCObjectsImpl/Show_response.cpp
          ./src/ALRPCObjectsImpl/Show_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/SingleTirePressureStatusMarshaller.cpp
-         ./src/ALRPCObjectsImpl/SingleTireStatus.cpp
-         ./src/ALRPCObjectsImpl/SingleTireStatusMarshaller.cpp
          ./src/ALRPCObjectsImpl/Speak_request.cpp
          ./src/ALRPCObjectsImpl/Speak_requestMarshaller.cpp
          ./src/ALRPCObjectsImpl/Speak_response.cpp
@@ -145,9 +133,6 @@ set(GENERATED_SOURCE
          ./src/ALRPCObjectsImpl/TextFieldMarshaller.cpp
          ./src/ALRPCObjectsImpl/TextFieldNameMarshaller.cpp
          ./src/ALRPCObjectsImpl/TimerModeMarshaller.cpp
-         ./src/ALRPCObjectsImpl/TirePressureTellTaleMarshaller.cpp
-         ./src/ALRPCObjectsImpl/TireStatus.cpp
-         ./src/ALRPCObjectsImpl/TireStatusMarshaller.cpp
          ./src/ALRPCObjectsImpl/TriggerSourceMarshaller.cpp
          ./src/ALRPCObjectsImpl/TTSChunk.cpp
          ./src/ALRPCObjectsImpl/TTSChunkMarshaller.cpp
