@@ -94,7 +94,17 @@ void Application::setAutoActivateID(const std::string& value)
 
 void Application::setSyncMsgVersion(SyncMsgVersion value)
 {
-	mSyncMsgVersion = value;
+    mSyncMsgVersion = value;
+}
+
+void Application::setAppID(const std::string &value)
+{
+    mAppID = value;
+}
+
+void Application::setHMIDisplayLanguageDesired(Language value)
+{
+    mHMIDisplayLanguageDesired = value;
 }
 
 const std::string& Application::getNgnMediaScreenAppName( ) const
@@ -129,7 +139,17 @@ const std::string& Application::getAutoActivateID( ) const
 
 const SyncMsgVersion& Application::getSyncMsgVersion( ) const
 {
-	return mSyncMsgVersion;
+    return mSyncMsgVersion;
+}
+
+const std::string &Application::getAppID() const
+{
+    return mAppID;
+}
+
+const Language &Application::getHMIDisplayLanguageDesired() const
+{
+    return mHMIDisplayLanguageDesired;
 }
 
 };

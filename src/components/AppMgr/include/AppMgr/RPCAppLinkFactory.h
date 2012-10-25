@@ -20,7 +20,7 @@ public:
 	virtual ~RPCAppLinkFactory( );
 	static RPCAppLinkFactory& getInstance();
 
-	RPCAppLinkObject* createNewRPCAppLinkObject();
+//	RPCAppLinkObject* createNewRPCAppLinkObject();
 
 private:
 	RPCAppLinkFactory( );

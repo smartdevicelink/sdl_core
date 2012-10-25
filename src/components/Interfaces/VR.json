@@ -23,7 +23,7 @@
 	 * @returns
 	 * 		VR capabilites
 	 */ 
-        "VR.getCapabilities": {
+        "VR.GetCapabilities": {
 	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
 				"capabilities"	: "VrCapabilities" // data type from AppLink protocol specification
@@ -37,7 +37,7 @@
 	 * @returns
 	 * 	result code
 	 */ 
-        "VR.addCommand": {
+        "VR.AddCommand": {
 		"parameters": {
 			"cmdId" 	: "integer",        	// cmdID from addCommand request in AppLink protocol
 			[
@@ -50,11 +50,30 @@
 			}
         },
 	
+	/*
+	 * @descr 
+	 *      delete commands from VR
+	 * 	
+	 * @returns
+	 * 	result code
+	 */ 
+        "VR.DeleteCommand": {
+		"parameters": {
+			"cmdId" 	: "integer",        	// cmdID from addCommand request in AppLink protocol
+			[
+				"vrCommand" : "String" // vrCommand from Choice data type in AppLink protocol
+			]
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				// result code
+			}
+        },
 
 	/*
 	 * @descr Notifies AppLink core about command trigerred by VR
 	 */
-	"VR.onCommand": {
+	"VR.OnCommand": {
 		"parameters": {
 			"commandId" : "Integer" // id of triggered command
 		}

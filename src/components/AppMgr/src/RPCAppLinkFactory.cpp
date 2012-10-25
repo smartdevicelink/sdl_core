@@ -15,12 +15,12 @@ RPCAppLinkFactory& RPCAppLinkFactory::getInstance( )
 	static RPCAppLinkFactory factory;
 	return factory;
 }
-
+/*
 RPCAppLinkObject* RPCAppLinkFactory::createNewRPCAppLinkObject( )
 {
 	return 0;
 }
-
+*/
 RPCAppLinkFactory::RPCAppLinkFactory( )
 	:MobileRPCFactory()
 {

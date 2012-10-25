@@ -25,7 +25,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 		// to be removed
 		//this.stubGetValues();
 		
-		this.client.connect(this);
+		this.client.connect(this, 200);
 	},
 
 	/*

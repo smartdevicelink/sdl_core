@@ -6,26 +6,26 @@
  */
 
 #include "AppMgr/AppMgrCore.h"
-#include "JSONHandler/ALRPCObjects/Marshaller.h"
 #include "JSONHandler/ALRPCMessage.h"
+#include "JSONHandler/ALRPCRequest.h"
+#include "JSONHandler/ALRPCResponse.h"
+#include "JSONHandler/ALRPCNotification.h"
+#include "JSONHandler/ALRPCObjects/Marshaller.h"
+#include "JSONHandler/ALRPCObjects/RegisterAppInterface_request.h"
 #include "JSONHandler/ALRPCObjects/RegisterAppInterface_response.h"
-/*#include "JSONHandler/RegisterAppInterface.h"
-#include "JSONHandler/RegisterAppInterfaceResponse.h"
-#include "JSONHandler/SubscribeButton.h"
-#include "JSONHandler/SubscribeButtonResponse.h"
-#include "JSONHandler/UnsubscribeButton.h"
-#include "JSONHandler/UnsubscribeButtonResponse.h"*/
+#include "JSONHandler/ALRPCObjects/SubscribeButton_request.h"
+#include "JSONHandler/ALRPCObjects/SubscribeButton_response.h"
+#include "JSONHandler/ALRPCObjects/UnsubscribeButton_request.h"
+#include "JSONHandler/ALRPCObjects/UnsubscribeButton_response.h"
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/ALRPCObjects/HMILevel.h"
 #include "AppMgr/IApplication.h"
 #include "AppMgr/Application.h"
 #include "AppMgr/AppMgrRegistry.h"
 #include "AppMgr/AppPolicy.h"
-#include "AppMgr/AppPolicy.h"
 #include "AppMgr/RegistryItem.h"
 #include "AppMgr/AppLinkInterface.h"
 #include <sys/socket.h>
-#include "AppMgr/AppMgrRegistry.h"
 #include "LoggerHelper.hpp"
 #include "JSONHandler/OnButtonEvent.h"
 #include "JSONHandler/RPC2Marshaller.h"
@@ -35,6 +35,9 @@
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/ALRPCObjects/ButtonCapabilities.h"
 #include "JSONHandler/GetCapabilitiesResponse.h"
+#include "JSONHandler/ALRPCObjects/AppInterfaceUnregisteredReason.h"
+#include "JSONHandler/ALRPCObjects/OnButtonEvent.h"
+#include "JSONHandler/ALRPCObjects/OnButtonPress.h"
 
 namespace NsAppManager
 {
@@ -54,7 +57,16 @@ AppMgrCore::AppMgrCore()
 	,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsOutgoing, NULL))
 	,m_bTerminate(false)
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
+    LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
+}
+
+AppMgrCore::AppMgrCore(const AppMgrCore &)
+    :mThreadRPCAppLinkObjectsIncoming(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCAppLinkObjectsIncoming, NULL))
+    ,mThreadRPCAppLinkObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing, NULL))
+    ,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsIncoming, NULL))
+    ,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsOutgoing, NULL))
+    ,m_bTerminate(false)
+{
 }
 
 AppMgrCore::~AppMgrCore()
@@ -141,7 +153,7 @@ void AppMgrCore::handleMobileRPCMessage( ALRPCMessage* msg )
 			else if(0 == msg->getFunctionName().compare("SubscribeButton"))
 			{
 				LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
-                SubscribeButton * object = (SubscribeButton*)msg;
+                SubscribeButton_request * object = (SubscribeButton_request*)msg;
                 subscribeButton( object );
 				sendMobileRPCResponse( msg );
 			}
@@ -251,12 +263,12 @@ const RegistryItem* AppMgrCore::registerApplication( RegisterAppInterface_reques
 	return AppMgrRegistry::getInstance().registerApplication( application );
 }
 
-void AppMgrCore::subscribeButton( SubscribeButton* msg )
+void AppMgrCore::subscribeButton( SubscribeButton_request* msg )
 {
 
 }
 
-void AppMgrCore::unsubscribeButton( UnsubscribeButton* msg )
+void AppMgrCore::unsubscribeButton(UnsubscribeButton_request *msg )
 {
 
 }
@@ -288,10 +300,9 @@ Capabilities AppMgrCore::getButtonCapabilities() const
 
 void AppMgrCore::sendMobileRPCResponse( ALRPCMessage* msg )
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " Sending mobile RPC response to "<< msg->getMethodId() <<"!");
-	
-	RegisterAppInterface_response* response = new RegisterAppInterface_response;
-	enqueueOutgoingMobileRPCMessage( response );
+    LOG4CPLUS_INFO_EXT(mLogger, " Sending mobile RPC response to "<< msg->getMethodId() <<"!");
+
+    enqueueOutgoingMobileRPCMessage( msg );
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )

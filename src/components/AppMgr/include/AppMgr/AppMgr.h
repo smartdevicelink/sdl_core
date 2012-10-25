@@ -6,6 +6,7 @@
 #include "mb_controller.hpp"
 
 class JSONHandler;
+class ALRPCMessage;
 
 namespace log4cplus
 {
@@ -17,8 +18,6 @@ namespace NsAppManager
 
 class AppMgrRegistry;
 class AppMgrCore;
-class RPCAppLinkFactory;
-class RPCBusFactory;
 class AppFactory;
 	
 class AppMgr: public IRPCMessagesObserver
@@ -69,6 +68,7 @@ public:
 	
 private:
 	virtual ~AppMgr();
+    AppMgr(const AppMgr&);
 	AppMgr();
 
 	AppLinkInterface& mAppLinkInterface;

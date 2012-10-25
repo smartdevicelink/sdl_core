@@ -7,6 +7,7 @@
 //#include "AppMgr/RPCBusFactory.h"
 #include "AppMgr/AppMgrRegistry.h"
 #include "LoggerHelper.hpp"
+#include "JSONHandler/ALRPCMessage.h"
 
 namespace NsAppManager
 {
@@ -35,7 +36,16 @@ AppMgr::AppMgr()
 
 AppMgr::~AppMgr()
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " AppMgr destructed!");
+    LOG4CPLUS_INFO_EXT(mLogger, " AppMgr destructed!");
+}
+
+AppMgr::AppMgr(const AppMgr &)
+    :mAppLinkInterface(AppLinkInterface::getInstance())
+    ,mAppMgrRegistry(AppMgrRegistry::getInstance())
+    ,mAppMgrCore(AppMgrCore::getInstance())
+    ,mAppFactory(AppFactory::getInstance())
+    ,mJSONHandler(0)
+{
 }
 
 void AppMgr::setJsonHandler(JSONHandler* handler)

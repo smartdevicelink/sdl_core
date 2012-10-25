@@ -13,26 +13,63 @@
 FFW.UI = FFW.RPCObserver.create({
 		
 	/*
-     *	access to basic RPC functionality
+	 *	access to basic RPC functionality
  	 */		
 	 client:		FFW.RPCClient.create({ componentName: "UI" }),
 
 	/*
+   	 * Default values for global properties
+ 	 */
+	globalPropertiesDefault : {
+		helpPrompt	: [ 
+			{
+				"text" 	: "Some text for help prompt",
+				"type"	: "TEXT"
+			}
+		],
+		
+		timeoutPrompt	: [
+			{
+				"text" 	: "Some text for timeout prompt",
+				"type"	: "TEXT"
+			}
+		]
+	},
+
+	/*
    	 * Global properties
  	 */
-	globalProperties:{
-		helpPrompt		: null,
+	globalProperties	: {
+		helpPrompt	: null ,
 		timeoutPrompt	: null
 	},
 	
+	
+	/*
+   	 * init object
+ 	 */
+	init: function() {
+		// init global properties
+		this.resetGlobalProperties();
+	},
+
+	/*
+   	 * resetGlobalProperties
+ 	 */
+	resetProperties: function(propertyName) {
+		if (propertyName == "HELPPROMPT" or propertyName == "")
+			this.globalProperties.helpPrompt 	= this.globalPropertiesDefault.helpPrompt;
+	
+		if (propertyName == "TIMEOUTPROMPT" or propertyName == "")
+			this.globalProperties.timeoutPrompt 	= this.globalPropertiesDefault.timoutPrompt;
+	},
+
 	/*
    	 * connect to RPC bus
  	 */
 	connect: function() {
-		// to be removed
-		//this.stubGetValues();
 		
-		this.client.connect(this);
+		this.client.connect(this, 400);
 	},
 
 	/*
@@ -100,10 +137,10 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.Show") {
 
-			MFT.AppModel.PlayList.items[0].set('title', request.parameters.mainField1);
-			MFT.AppModel.PlayList.items[0].set('album', request.parameters.mainField2);
-			MFT.AppModel.PlayList.items[0].set('duration', request.parameters.mediaClock);
-			MFT.AppModel.PlayList.items[0].set('artist', request.parameters.mediaTrack);
+			MFT.AppModel.PlayList.items[0].set('title', request.params.mainField1);
+			MFT.AppModel.PlayList.items[0].set('album', request.params.mainField2);
+			MFT.AppModel.PlayList.items[0].set('duration', request.params.mediaClock);
+			MFT.AppModel.PlayList.items[0].set('artist', request.params.mediaTrack);
 
 			// send repsonse
 			var JSONMessage = {
@@ -118,8 +155,10 @@ FFW.UI = FFW.RPCObserver.create({
 		
 		if (request.method == "UI.SetGlobalProperties") {
 
-			this.globalProperties.set('helpPrompt', request.parameters.helpPrompt);
-			this.globalProperties.set('helpPrompt', request.parameters.timeoutPrompt);
+			// TODO: please process as array 
+			this.globalProperties.set('helpPrompt', request.params.helpPrompt);
+			// TODO: please process as array 
+			this.globalProperties.set('timeoutPrompt', request.params.timeoutPrompt);
 
 			// send repsonse
 			var JSONMessage = {
@@ -133,9 +172,10 @@ FFW.UI = FFW.RPCObserver.create({
 		}
 		
 		if (request.method == "UI.ResetGlobalProperties") {
-
-			this.globalProperties.set('helpPrompt', null);
-			this.globalProperties.set('helpPrompt', null);
+			
+			// reset all requested properties
+			for (var i=0;i<request.params.length;i++)
+			        this.resetProperties(reuqest.params[i]);
 
 			// send repsonse
 			var JSONMessage = {

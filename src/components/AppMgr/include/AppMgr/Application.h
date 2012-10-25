@@ -42,6 +42,8 @@ public:
 	void setLanguageDesired(Language value);
 	void setAutoActivateID(const std::string& value);
 	void setSyncMsgVersion(SyncMsgVersion value);
+    void setAppID( const std::string& value );
+    void setHMIDisplayLanguageDesired( Language value );
 
 	const std::string& getNgnMediaScreenAppName( ) const;
 	const std::vector<std::string>& getVrSynonyms( ) const;
@@ -50,6 +52,8 @@ public:
 	const Language& getLanguageDesired( ) const;
 	const std::string& getAutoActivateID( ) const;
 	const SyncMsgVersion& getSyncMsgVersion( ) const;
+    const std::string& getAppID( ) const;
+    const Language& getHMIDisplayLanguageDesired( ) const;
 
 private:
 	Application(const Application& );
@@ -63,6 +67,8 @@ private:
 	SyncMsgVersion mSyncMsgVersion;
 	HMILevel::HMILevelInternal mHMIStatusLevel;
 	AudioStreamingState mAudioStreamingState;
+    std::string mAppID;
+    Language mHMIDisplayLanguageDesired;
 };
 
 }; // namespace NsAppManager

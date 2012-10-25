@@ -70,6 +70,7 @@ public:
 
 private:
 	AppLinkInterface( const std::string& address, uint16_t port, const std::string& name );
+    AppLinkInterface(const AppLinkInterface&);
 
 	void sendRPCCommand(const RPC2Communication::RPC2Command* rpcObject);
 	void receiveRPCCommand(RPC2Communication::RPC2Command* rpcObject);

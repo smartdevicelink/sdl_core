@@ -14,24 +14,24 @@
 FFW.RPCClient = Em.Object.extend({
 		
 	/*
-     * transport layer for messages exchange
+	 * transport layer for messages exchange
  	 */		
 	socket: 				null, 			// instance of websocket
 
 	/*
-     * url for message broker
+	 * url for message broker
  	 */		
 	url: 					"ws://localhost:8087", 	
 //	url: 					"ws://echo.websocket.org/", 	
 
 	/*
-     * Component name in RPC system
+         * Component name in RPC system
 	 * It is unique.
  	 */		
 	componentName:			null,
 	
 	/*
-     * observer of RPC states
+         * observer of RPC states
  	 */		
 	observer: 				null,
 
@@ -50,8 +50,9 @@ FFW.RPCClient = Em.Object.extend({
 	/*
      * Open WebSocket and initialize handlers
  	 */
-	connect: function(observer) {
+	connect: function(observer, startId) {
 		this.observer			= observer;
+		this.idStart			= startId;
 
 		this.socket 			= (FFW.isAndroid || (FLAGS.EMULATE_ANDROID && FLAGS.EMULATE_WS)) ?  FFW.WebSocket.create({clientName: this.componentName}) : new WebSocket(this.url, 'sample');
       
@@ -145,7 +146,7 @@ FFW.RPCClient = Em.Object.extend({
      * register component is RPC bus
 	 */
 	registerRPCComponent: function() {
-		this.registerRequestId = 200;
+		this.registerRequestId = this.idStart;
 
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
