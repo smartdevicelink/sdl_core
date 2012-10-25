@@ -35,7 +35,7 @@ namespace NsAppManager
 
 class RegistryItem;
 
-typedef std::vector<RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal> Capabilities;
+typedef std::vector<ButtonCapabilities> Capabilities;
 
 class AppMgrCore
 {

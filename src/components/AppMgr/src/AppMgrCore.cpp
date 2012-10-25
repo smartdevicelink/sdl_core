@@ -117,12 +117,6 @@ void AppMgrCore::executeThreads()
 	mThreadRPCBusObjectsOutgoing.Start(false);
 
 	LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
-	
-/*	while(!m_bTerminate)
-	{
-	}*/
-
-//	LOG4CPLUS_INFO_EXT(mLogger, " Threads are being stopped!");
 }
 
 void AppMgrCore::terminateThreads()
@@ -140,39 +134,52 @@ void AppMgrCore::handleMobileRPCMessage( ALRPCMessage* msg )
 			LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
 			RegisterAppInterface_request * object = (RegisterAppInterface_request*)msg;
 			const RegistryItem* registeredApp =  registerApplication( object );
-			ALRPCMessage* response = queryInfoForRegistration( registeredApp );
-			sendMobileRPCResponse( msg );
+            ALRPCMessage* info = queryInfoForRegistration( registeredApp );
+            RegisterAppInterface_response* response = new RegisterAppInterface_response();
+            response->setCorrelationID(object->getCorrelationID());
+            response->setMessageType(ALRPCMessage::RESPONSE);
+            response->set_autoActivateID(*object->get_autoActivateID());
+            response->set_buttonCapabilities(getButtonCapabilities());
+            response->set_success(true);
+            response->set_resultCode(Result::SUCCESS);
+            sendMobileRPCResponse( response );
+            break;
 		}
-			/*if(0 == msg->getFunctionName().compare("RegisterAppInterface"))
-			{
-				
-				RegisterAppInterfaceResponse* msg = factory.createRegisterAppInterfaceResponse(*msg);
-				
-				
-			}
-			else if(0 == msg->getFunctionName().compare("SubscribeButton"))
-			{
-				LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
-                SubscribeButton_request * object = (SubscribeButton_request*)msg;
-                subscribeButton( object );
-				sendMobileRPCResponse( msg );
-			}
-            else if(0 == msg->getFunctionName().compare("UnsubscribeButton"))
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeButton request has been invoked");
-                UnsubscribeButton * object = (UnsubscribeButton*)msg;
-                unsubscribeButton( object );
-                sendMobileRPCResponse( msg );
-            }
-			break;
-		}
-		case MobileRPCMessage::RESPONSE:
-		case MobileRPCMessage::NOTIFICATION:
-		{
-			LOG4CPLUS_INFO_EXT(mLogger, " A "<< msg->getFunctionName() << " response or notification has been invoked");
-			mJSONHandler->sendRPCMessage(msg);
-			break;
-		}*/
+        case Marshaller::METHOD_SUBSCRIBEBUTTON_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
+            SubscribeButton_request * object = (SubscribeButton_request*)msg;
+            subscribeButton( object );
+            SubscribeButton_response* response = new SubscribeButton_response();
+            response->setCorrelationID(object->getCorrelationID());
+            response->setMessageType(ALRPCMessage::RESPONSE);
+            response->set_success(true);
+            response->set_resultCode(Result::SUCCESS);
+            sendMobileRPCResponse( response );
+            break;
+        }
+        case Marshaller::METHOD_UNSUBSCRIBEBUTTON_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeButton request has been invoked");
+            UnsubscribeButton_request * object = (UnsubscribeButton_request*)msg;
+            unsubscribeButton( object );
+            UnsubscribeButton_response* response = new UnsubscribeButton_response();
+            response->setCorrelationID(object->getCorrelationID());
+            response->setMessageType(ALRPCMessage::RESPONSE);
+            response->set_success(true);
+            response->set_resultCode(Result::SUCCESS);
+            sendMobileRPCResponse( response );
+            break;
+        }
+        case Marshaller::METHOD_REGISTERAPPINTERFACE_RESPONSE:
+        case Marshaller::METHOD_SUBSCRIBEBUTTON_RESPONSE:
+        case Marshaller::METHOD_UNSUBSCRIBEBUTTON_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A "<< msg->getMethodId() << " response or notification has been invoked");
+            mJSONHandler->sendRPCMessage(msg);
+            break;
+        }
+
 		default:
 			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethodId() <<" has been received!");
 			break;
@@ -191,15 +198,28 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
 			RPC2Communication::GetCapabilitiesResponse * object = (RPC2Communication::GetCapabilitiesResponse*)msg;
 			setButtonCapabilities( object );
 			
-	/*		else if(RPC2Communication::RPC2Marshaller:: == msg->getMethod().compare("SubscribeButton"))
-			{
-				LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
-				//	SubscribeButton * object = (SubscribeButton*)msg;
-				//	registerApplication( object );
-				sendMobileRPCResponse( msg );
-			} */
 			break;
 		}
+        case RPC2Communication::RPC2Marshaller::METHOD_ONBUTTONEVENT:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonEvent request has been invoked");
+            RPC2Communication::OnButtonEvent * object = (RPC2Communication::OnButtonEvent*)msg;
+            OnButtonEvent* event = new OnButtonEvent();
+            event->set_buttonEventMode(object->getMode());
+            event->set_buttonName(object->getName());
+            sendMobileRPCResponse( event );
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_ONBUTTONPRESS:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonPress request has been invoked");
+            RPC2Communication::OnButtonPress * object = (RPC2Communication::OnButtonPress*)msg;
+            OnButtonPress* event = new OnButtonPress();
+            event->set_buttonName(object->getName());
+            event->set_buttonPressMode(object->getMode());
+            sendMobileRPCResponse( event );
+            break;
+        }
 		case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
 		default:
 			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethod() <<" has been received!");
@@ -290,7 +310,12 @@ void AppMgrCore::registerApplicationOnHMI( const std::string& name )
 
 void AppMgrCore::setButtonCapabilities( RPC2Communication::GetCapabilitiesResponse* msg )
 {
-	mButtonCapabilities = msg->getCapabilities();
+    std::vector<RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal> result = msg->getCapabilities();
+    Capabilities caps;
+    for( std::vector<RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal>::iterator it = result.begin(); it != result.end(); it++ )
+    {
+        mButtonCapabilities.push_back(it->capability);
+    }
 }
 
 Capabilities AppMgrCore::getButtonCapabilities() const
