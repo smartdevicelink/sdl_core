@@ -15,6 +15,19 @@ namespace NsAppLink
         struct SInternalDeviceInfo
         {
             /**
+             * @brief Default constructor.
+             **/
+            SInternalDeviceInfo(void);
+
+            /**
+             * @brief Constructor.
+             *
+             * @param DeviceHandle Device handle.
+             * @param UserFriendlyName User-friendly device name.
+             **/
+            SInternalDeviceInfo(tDeviceHandle DeviceHandle, const std::string & UserFriendlyName);
+
+            /**
              * @brief Device handle.
              **/
             tDeviceHandle mDeviceHandle;
