@@ -42,7 +42,7 @@ void Application::setApplicationPriority( const AppPriority& priority )
 	mPriority = priority;
 }
 
-const HMILevel::HMILevelInternal &Application::getApplicationHMIStatusLevel( ) const
+const HMILevel::HMILevelInternal& Application::getApplicationHMIStatusLevel( ) const
 {
 	return mHMIStatusLevel;
 }

@@ -1,7 +1,7 @@
 #ifndef ON_BUTTON_EVENT_CLASS
 #define ON_BUTTON_EVENT_CLASS
 
-#include "JSONHandler/ButtonEventMode.h"
+#include "JSONHandler/ALRPCObjects/ButtonEventMode.h"
 #include "JSONHandler/RPC2Notification.h"
 
 namespace RPC2Communication

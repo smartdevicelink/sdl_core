@@ -43,7 +43,7 @@ public:
 	virtual ~AppMgrCore();
 
 	static AppMgrCore& getInstance();
-    void pushMobileRPCMessage(ALRPCMessage *message );
+	void pushMobileRPCMessage( ALRPCMessage * message );
 	void pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message );
 
 	void executeThreads();
@@ -56,14 +56,14 @@ private:
 	AppMgrCore();
     AppMgrCore(const AppMgrCore&);
 
-    void handleMobileRPCMessage(ALRPCMessage *msg );
+	void handleMobileRPCMessage( ALRPCMessage* msg );
 	void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg );
-    const RegistryItem* registerApplication(RegisterAppInterface_request *msg );
+	const RegistryItem* registerApplication( RegisterAppInterface_request* msg );
     void subscribeButton(SubscribeButton_request *msg );
     void unsubscribeButton( UnsubscribeButton_request* msg );
-    void sendMobileRPCResponse( ALRPCMessage* msg );
-    void enqueueOutgoingMobileRPCMessage(ALRPCMessage *message );
-    ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
+	void sendMobileRPCResponse( ALRPCMessage* msg );
+	void enqueueOutgoingMobileRPCMessage( ALRPCMessage * message );
+	ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
 	void enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message );
 
 	void registerApplicationOnHMI( const std::string& name );
@@ -76,8 +76,8 @@ private:
 	void* handleQueueRPCAppLinkObjectsOutgoing( void* );
 	void* handleQueueRPCBusObjectsOutgoing( void* );
 	
-    std::queue< ALRPCMessage* > mQueueRPCAppLinkObjectsIncoming;
-    std::queue< ALRPCMessage* > mQueueRPCAppLinkObjectsOutgoing;
+	std::queue< ALRPCMessage* > mQueueRPCAppLinkObjectsIncoming;
+	std::queue< ALRPCMessage* > mQueueRPCAppLinkObjectsOutgoing;
 	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsIncoming;
 	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsOutgoing;
 

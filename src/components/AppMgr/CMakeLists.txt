@@ -25,14 +25,10 @@ set (SOURCES
 		./src/AppLinkInterface.cpp
 		./src/AppMgrRegistry.cpp
 		./src/IApplication.cpp
-	#	./src/RPCAppLinkFactory.cpp
-	#	./src/RPCBusFactory.cpp
 		./src/Application.cpp
 		./src/AppMgrCore.cpp
 		./src/AppPolicy.cpp
 		./src/RegistryItem.cpp
-		./src/RPCAppLinkObject.cpp
-		./src/RPCBusObject.cpp
 	)
 
 add_library(${PROJECT} ${SOURCES})

@@ -91,7 +91,7 @@ void AppMgrCore::pushMobileRPCMessage( ALRPCMessage * message )
 	LOG4CPLUS_INFO_EXT(mLogger, " Pushing mobile RPC message...");
 	mMtxRPCAppLinkObjectsIncoming.Lock();
 	
-    mQueueRPCAppLinkObjectsIncoming.push(message);
+	mQueueRPCAppLinkObjectsIncoming.push(message);
 	
 	mMtxRPCAppLinkObjectsIncoming.Unlock();
 	LOG4CPLUS_INFO_EXT(mLogger, " Pushed mobile RPC message");
@@ -132,63 +132,49 @@ void AppMgrCore::terminateThreads()
 
 void AppMgrCore::handleMobileRPCMessage( ALRPCMessage* msg )
 {
-    LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message "<< msg->getMethodId() <<" has been received!");
-
-    switch(msg->getMessageType())
+	LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message "<< msg->getMethodId() <<" has been received!");
+	switch(msg->getMethodId())
 	{
-        case ALRPCMessage::REQUEST:
+		case Marshaller::METHOD_REGISTERAPPINTERFACE_REQUEST:
 		{
-            if(Marshaller::METHOD_REGISTERAPPINTERFACE_REQUEST == msg->getMethodId())
+			LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
+			RegisterAppInterface_request * object = (RegisterAppInterface_request*)msg;
+			const RegistryItem* registeredApp =  registerApplication( object );
+			ALRPCMessage* response = queryInfoForRegistration( registeredApp );
+			sendMobileRPCResponse( msg );
+		}
+			/*if(0 == msg->getFunctionName().compare("RegisterAppInterface"))
 			{
-				LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
-                RegisterAppInterface_request * object = (RegisterAppInterface_request*)msg;
-				const RegistryItem* registeredApp =  registerApplication( object );
-                ALRPCMessage* info = queryInfoForRegistration( registeredApp );
-                RegisterAppInterface_response* response = new RegisterAppInterface_response();
-                response->setCorrelationID(object->getCorrelationID());
-                response->setMessageType(ALRPCMessage::RESPONSE);
-                response->set_autoActivateID(*object->get_autoActivateID());
-                response->set_buttonCapabilities(getButtonCapabilities());
-                response->set_success(true);
-                response->set_resultCode(Result::SUCCESS);
-                sendMobileRPCResponse( response );
+				
+				RegisterAppInterfaceResponse* msg = factory.createRegisterAppInterfaceResponse(*msg);
+				
+				
 			}
-            else if(Marshaller::METHOD_SUBSCRIBEBUTTON_REQUEST == msg->getMethodId())
+			else if(0 == msg->getFunctionName().compare("SubscribeButton"))
 			{
 				LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
                 SubscribeButton_request * object = (SubscribeButton_request*)msg;
                 subscribeButton( object );
-                SubscribeButton_response* response = new SubscribeButton_response();
-                response->setCorrelationID(object->getCorrelationID());
-                response->setMessageType(ALRPCMessage::RESPONSE);
-                response->set_success(true);
-                response->set_resultCode(Result::SUCCESS);
-                sendMobileRPCResponse( response );
+				sendMobileRPCResponse( msg );
 			}
-            else if(Marshaller::METHOD_UNSUBSCRIBEBUTTON_REQUEST == msg->getMethodId())
+            else if(0 == msg->getFunctionName().compare("UnsubscribeButton"))
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeButton request has been invoked");
-                UnsubscribeButton_request * object = (UnsubscribeButton_request*)msg;
+                UnsubscribeButton * object = (UnsubscribeButton*)msg;
                 unsubscribeButton( object );
-                UnsubscribeButton_response* response = new UnsubscribeButton_response();
-                response->setCorrelationID(object->getCorrelationID());
-                response->setMessageType(ALRPCMessage::RESPONSE);
-                response->set_success(true);
-                response->set_resultCode(Result::SUCCESS);
-                sendMobileRPCResponse( response );
+                sendMobileRPCResponse( msg );
             }
 			break;
 		}
-        case ALRPCMessage::RESPONSE:
-        case ALRPCMessage::NOTIFICATION:
+		case MobileRPCMessage::RESPONSE:
+		case MobileRPCMessage::NOTIFICATION:
 		{
-            LOG4CPLUS_INFO_EXT(mLogger, " A "<< msg->getMethodId() << " response or notification has been invoked");
-            mJSONHandler->sendRPCMessage(msg);
+			LOG4CPLUS_INFO_EXT(mLogger, " A "<< msg->getFunctionName() << " response or notification has been invoked");
+			mJSONHandler->sendRPCMessage(msg);
 			break;
-		}
-        case ALRPCMessage::UNDEFINED:
+		}*/
 		default:
-            LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethodId() <<" has been received!");
+			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethodId() <<" has been received!");
 			break;
 	}
 }
@@ -197,49 +183,24 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been invoking...");
 
-	switch(msg->getCommandType())
+	switch(msg->getMethod())
 	{
-        case RPC2Communication::RPC2Command::REQUEST:
-		{
-			if(RPC2Communication::RPC2Marshaller::METHOD_GET_CAPABILITIES_REQUEST == msg->getMethod())
+		case RPC2Communication::RPC2Marshaller::METHOD_GET_CAPABILITIES_REQUEST:
+		{			
+			LOG4CPLUS_INFO_EXT(mLogger, " A GetCapabilitiesResponse request has been invoked");
+			RPC2Communication::GetCapabilitiesResponse * object = (RPC2Communication::GetCapabilitiesResponse*)msg;
+			setButtonCapabilities( object );
+			
+	/*		else if(RPC2Communication::RPC2Marshaller:: == msg->getMethod().compare("SubscribeButton"))
 			{
-                LOG4CPLUS_INFO_EXT(mLogger, " A GetCapabilities request has been invoked");
-				RPC2Communication::GetCapabilitiesResponse * object = (RPC2Communication::GetCapabilitiesResponse*)msg;
-				setButtonCapabilities( object );
-			}
-
+				LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
+				//	SubscribeButton * object = (SubscribeButton*)msg;
+				//	registerApplication( object );
+				sendMobileRPCResponse( msg );
+			} */
 			break;
 		}
-        case RPC2Communication::RPC2Command::RESPONSE:
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, " An "<<msg->getMethod()<<" response has been invoked");
-
-            break;
-        }
-        case RPC2Communication::RPC2Command::NOTIFICATION:
-		{
-            if(RPC2Communication::RPC2Marshaller::METHOD_ONBUTTONEVENT == msg->getMethod())
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonEvent request has been invoked");
-                RPC2Communication::OnButtonEvent * object = (RPC2Communication::OnButtonEvent*)msg;
-                OnButtonEvent* event = new OnButtonEvent();
-                event->set_buttonEventMode(object->getMode());
-                event->set_buttonName(object->getName());
-                sendMobileRPCResponse( event );
-            }
-            else if(RPC2Communication::RPC2Marshaller::METHOD_ONBUTTONPRESS == msg->getMethod())
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonPress request has been invoked");
-                RPC2Communication::OnButtonPress * object = (RPC2Communication::OnButtonPress*)msg;
-                OnButtonPress* event = new OnButtonPress();
-                event->set_buttonName(object->getName());
-                event->set_buttonPressMode(object->getMode());
-                sendMobileRPCResponse( event );
-            }
-
-			break;
-		}
-        case RPC2Communication::RPC2Command::UNDEFINED:
+		case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
 		default:
 			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethod() <<" has been received!");
 			break;
@@ -250,15 +211,15 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
 
 void AppMgrCore::enqueueOutgoingMobileRPCMessage( ALRPCMessage * message )
 {
-    LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getMethodId() << " outgoing mobile RPC message send has been invoked");
+	LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getMethodId() << " outgoing mobile RPC message send has been invoked");
 	
 	mMtxRPCAppLinkObjectsOutgoing.Lock();
 	
-    mQueueRPCAppLinkObjectsOutgoing.push(message);
+	mQueueRPCAppLinkObjectsOutgoing.push(message);
 	
 	mMtxRPCAppLinkObjectsOutgoing.Unlock();
 	
-    LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getMethodId() << " outgoing mobile RPC message has been sent");
+	LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getMethodId() << " outgoing mobile RPC message has been sent");
 }
 
 void AppMgrCore::enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message )
@@ -276,28 +237,26 @@ void AppMgrCore::enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * 
 
 const RegistryItem* AppMgrCore::registerApplication( RegisterAppInterface_request* object )
 {
-    LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << object->get_appName() << "!");
-    const std::string& appName = object->get_appName();
-    const std::string& ngnMediaScreenAppName = *object->get_ngnMediaScreenAppName();
-    const std::vector<std::string>& vrSynonyms = *object->get_vrSynonyms();
-    bool usesVehicleData = object->get_usesVehicleData();
-    bool isMediaApplication = object->get_isMediaApplication();
-    const Language& languageDesired = object->get_languageDesired();
-    const std::string& autoActivateID = *object->get_autoActivateID();
-    const SyncMsgVersion& syncMsgVersion = object->get_syncMsgVersion();
+	LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << object->get_appName() << "!");
+	const std::string& appName = object->get_appName();
+	//const std::string& ngnMediaScreenAppName = object->get_ngnMediaScreenAppName();
+	//const std::vector<std::string>& vrSynonyms = object->get_vrSynonyms();
+	bool usesVehicleData = object->get_usesVehicleData();
+	bool isMediaApplication = object->get_isMediaApplication();
+	const Language& languageDesired = object->get_languageDesired();
+	//const std::string& autoActivateID = object->get_autoActivateID();
+	const SyncMsgVersion& syncMsgVersion = object->get_syncMsgVersion();
 
- //   const Language& hmiDisplayLanguageDesired = object->get_hmiDisplayLanguageDesired();
 	Application* application = new Application( appName );
-	application->setAutoActivateID(autoActivateID);
+	//application->setAutoActivateID(autoActivateID);
 	application->setIsMediaApplication(isMediaApplication);
 	application->setLanguageDesired(languageDesired);
-	application->setNgnMediaScreenAppName(ngnMediaScreenAppName);
+	//application->setNgnMediaScreenAppName(ngnMediaScreenAppName);
 	application->setSyncMsgVersion(syncMsgVersion);
 	application->setUsesVehicleData(usesVehicleData);
-	application->setVrSynonyms(vrSynonyms);
-//    application->setHMIDisplayLanguageDesired(hmiDisplayLanguageDesired);
+	//application->setVrSynonyms(vrSynonyms);
 
-    application->setApplicationHMIStatusLevel(HMILevel::HMI_NONE);
+	application->setApplicationHMIStatusLevel(HMILevel::HMI_NONE);
 
 //    RPC2Communication::
 
@@ -314,7 +273,7 @@ void AppMgrCore::unsubscribeButton(UnsubscribeButton_request *msg )
 
 }
 
-ALRPCMessage *AppMgrCore::queryInfoForRegistration( const RegistryItem* registryItem )
+ALRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem* registryItem )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Querying info for registration of an application " << registryItem->getApplication()->getName() << "!");
 
@@ -339,7 +298,7 @@ Capabilities AppMgrCore::getButtonCapabilities() const
 	return mButtonCapabilities;
 }
 
-void AppMgrCore::sendMobileRPCResponse(ALRPCMessage *msg )
+void AppMgrCore::sendMobileRPCResponse( ALRPCMessage* msg )
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Sending mobile RPC response to "<< msg->getMethodId() <<"!");
 
@@ -376,7 +335,7 @@ void* AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing( void* )
 		if( size > 0 )
 		{
 			mMtxRPCAppLinkObjectsOutgoing.Lock();
-            ALRPCMessage* msg = mQueueRPCAppLinkObjectsOutgoing.front();
+			ALRPCMessage* msg = mQueueRPCAppLinkObjectsOutgoing.front();
 			mQueueRPCAppLinkObjectsOutgoing.pop();
 			mMtxRPCAppLinkObjectsOutgoing.Unlock();
 			if(!msg)
@@ -398,7 +357,7 @@ void* AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
 		if( size > 0 )
 		{
 			mMtxRPCAppLinkObjectsIncoming.Lock();
-            ALRPCMessage* msg = mQueueRPCAppLinkObjectsIncoming.front();
+			ALRPCMessage* msg = mQueueRPCAppLinkObjectsIncoming.front();
 			mQueueRPCAppLinkObjectsIncoming.pop();
 			mMtxRPCAppLinkObjectsIncoming.Unlock();
 			if(!msg)

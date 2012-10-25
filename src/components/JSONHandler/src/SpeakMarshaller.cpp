@@ -2,7 +2,7 @@
 #include <json/value.h>
 #include <json/reader.h>
 #include <json/writer.h>
-#include "JSONHandler/TTSChunkMarshaller.h"
+#include "ALRPCObjectsImpl/TTSChunkMarshaller.h"
 
 using namespace RPC2Communication;
 
