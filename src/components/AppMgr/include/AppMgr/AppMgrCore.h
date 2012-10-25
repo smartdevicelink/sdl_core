@@ -72,8 +72,10 @@ private:
 	void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg );
     void handleBusRPCMessageOutgoing( RPC2Communication::RPC2Command* msg );
     const RegistryItem* registerApplication(const Message &msg );
+    void unregisterApplication(const Message &msg );
     void subscribeButton(const Message &msg );
     void unsubscribeButton(const Message &msg );
+    void clearButtonSubscribtion(unsigned char sessionID);
     void sendMobileRPCResponse(const Message &msg );
     void enqueueOutgoingMobileRPCMessage(const Message &message );
     const ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );

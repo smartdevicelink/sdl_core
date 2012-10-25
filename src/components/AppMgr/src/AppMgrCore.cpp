@@ -25,6 +25,8 @@
 #include "JSONHandler/ALRPCObjects/AppInterfaceUnregisteredReason.h"
 #include "JSONHandler/ALRPCObjects/OnButtonEvent.h"
 #include "JSONHandler/ALRPCObjects/OnButtonPress.h"
+#include "JSONHandler/ALRPCObjects/OnAppInterfaceUnregistered.h"
+#include "JSONHandler/ALRPCObjects/OnHMIStatus.h"
 #include "JSONHandler/ALRPCObjects/HMILevel.h"
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"
@@ -129,15 +131,14 @@ void AppMgrCore::terminateThreads()
 
 void AppMgrCore::handleMobileRPCMessage( const Message& message )
 {
-    ALRPCMessage* msg = message.first;
     unsigned char sessionID = message.second;
-	LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message "<< msg->getMethodId() <<" has been received!");
-	switch(msg->getMethodId())
+    LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message "<< message.first->getMethodId() <<" has been received!");
+    switch(message.first->getMethodId())
 	{
 		case Marshaller::METHOD_REGISTERAPPINTERFACE_REQUEST:
 		{
 			LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
-			RegisterAppInterface_request * object = (RegisterAppInterface_request*)msg;
+            RegisterAppInterface_request * object = (RegisterAppInterface_request*)message.first;
             const RegistryItem* registeredApp =  registerApplication( message );
             const ALRPCMessage* info = queryInfoForRegistration( registeredApp );
             RegisterAppInterface_response* response = new RegisterAppInterface_response();
@@ -150,10 +151,27 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             sendMobileRPCResponse( message );
             break;
 		}
+        case Marshaller::METHOD_UNREGISTERAPPINTERFACE_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
+
+            UnregisterAppInterface_request * object = (UnregisterAppInterface_request*)message.first;
+            unregisterApplication( message );
+            UnregisterAppInterface_response* response = new UnregisterAppInterface_response();
+            response->setCorrelationID(object->getCorrelationID());
+            response->setMessageType(ALRPCMessage::RESPONSE);
+            response->set_success(true);
+            response->set_resultCode(Result::SUCCESS);
+            sendMobileRPCResponse( message );
+            OnAppInterfaceUnregistered* msgUnregistered = new OnAppInterfaceUnregistered();
+            msgUnregistered->set_reason(AppInterfaceUnregisteredReason(AppInterfaceUnregisteredReason::USER_EXIT));
+            sendMobileRPCResponse( Message(msgUnregistered, message.second) );
+            break;
+        }
         case Marshaller::METHOD_SUBSCRIBEBUTTON_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
-            SubscribeButton_request * object = (SubscribeButton_request*)msg;
+            SubscribeButton_request * object = (SubscribeButton_request*)message.first;
             subscribeButton( message );
             SubscribeButton_response* response = new SubscribeButton_response();
             response->setCorrelationID(object->getCorrelationID());
@@ -166,7 +184,7 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
         case Marshaller::METHOD_UNSUBSCRIBEBUTTON_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeButton request has been invoked");
-            UnsubscribeButton_request * object = (UnsubscribeButton_request*)msg;
+            UnsubscribeButton_request * object = (UnsubscribeButton_request*)message.first;
             unsubscribeButton( message );
             UnsubscribeButton_response* response = new UnsubscribeButton_response();
             response->setCorrelationID(object->getCorrelationID());
@@ -180,13 +198,13 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
         case Marshaller::METHOD_SUBSCRIBEBUTTON_RESPONSE:
         case Marshaller::METHOD_UNSUBSCRIBEBUTTON_RESPONSE:
         {
-            LOG4CPLUS_INFO_EXT(mLogger, " A "<< msg->getMethodId() << " response or notification has been invoked");
-            mJSONHandler->sendRPCMessage(msg, sessionID);
+            LOG4CPLUS_INFO_EXT(mLogger, " A "<< message.first->getMethodId() << " response or notification has been invoked");
+            mJSONHandler->sendRPCMessage(message.first, sessionID);
             break;
         }
 
 		default:
-			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethodId() <<" has been received!");
+            LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< message.first->getMethodId() <<" has been received!");
 			break;
 	}
 }
@@ -304,7 +322,21 @@ const RegistryItem* AppMgrCore::registerApplication( const Message& object )
 
 //    RPC2Communication::
 
-	return AppMgrRegistry::getInstance().registerApplication( application );
+    return AppMgrRegistry::getInstance().registerApplication( application );
+}
+
+void AppMgrCore::unregisterApplication(const Message &msg)
+{
+    ALRPCMessage* message = msg.first;
+    unsigned char sessionID = msg.second;
+    UnregisterAppInterface_request* request = (UnregisterAppInterface_request*)message;
+    RegistryItem* app = AppMgrRegistry::getInstance().getItem(sessionID);
+    const std::string& appName = app->getApplication()->getName();
+    LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName << "!");
+    clearButtonSubscribtion(sessionID);
+    AppMgrRegistry::getInstance().unregisterApplication(app);
+
+    LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName << "!");
 }
 
 void AppMgrCore::subscribeButton( const Message& msg )
@@ -326,11 +358,22 @@ void AppMgrCore::unsubscribeButton(const Message& msg )
     mButtonsMapping.erase(name);
 }
 
+void AppMgrCore::clearButtonSubscribtion(unsigned char sessionID)
+{
+    for(ButtonMap::iterator it = mButtonsMapping.begin(); it != mButtonsMapping.end(); it++)
+    {
+        if(it->second->getApplication()->getSessionID() == sessionID)
+        {
+            mButtonsMapping.erase(it->first);
+        }
+    }
+}
+
 const ALRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem* registryItem )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Querying info for registration of an application " << registryItem->getApplication()->getName() << "!");
 
-	
+ //   RPC2Communication::OnButton
 
 	LOG4CPLUS_INFO_EXT(mLogger, " Queried info for registration of an application " << registryItem->getApplication()->getName() << "!");
 }
