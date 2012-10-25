@@ -109,7 +109,7 @@ void * JSONHandler::waitForIncomingMessages( void * params )
             {
                 pthread_exit( 0 );
             }
-            handler -> mMessagesObserver -> onMessageReceivedCallback( currentMessage );
+            handler -> mMessagesObserver -> onMessageReceivedCallback( currentMessage, handler -> mSessionID );
         }
         sleep(1);
     }

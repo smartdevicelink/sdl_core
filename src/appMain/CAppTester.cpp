@@ -80,7 +80,7 @@ namespace NsApplicationTester
         delete[] raw_data;
         printf("Input string:\n %s\n", instr.c_str());
         // create a Blob and send
-        generateSingleMessage(1, 7, 0, instr);
+        generateSingleMessage(1, 7, 1, instr);
       }
       file_str.close();
       return 0;
