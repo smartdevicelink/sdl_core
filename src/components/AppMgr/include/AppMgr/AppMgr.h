@@ -7,10 +7,16 @@
 
 class JSONHandler;
 class ALRPCMessage;
+class JSONRPC2Handler;
 
 namespace log4cplus
 {
 	class Logger;
+};
+
+namespace RPC2Communication
+{
+    class RPC2Command;
 };
 
 namespace NsAppManager
@@ -61,6 +67,8 @@ public:
 	void processNotification(Json::Value& root);
 
 	void setJsonHandler(JSONHandler* handler);
+
+    void setJsonRPC2Handler(JSONRPC2Handler* handler);
 
 	const AppLinkInterface& getAppLinkInterface() const;
 

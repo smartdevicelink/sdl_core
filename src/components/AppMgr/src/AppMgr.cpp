@@ -50,7 +50,12 @@ AppMgr::AppMgr(const AppMgr &)
 
 void AppMgr::setJsonHandler(JSONHandler* handler)
 {
-	mAppMgrCore.setJsonHandler( handler );
+    mAppMgrCore.setJsonHandler( handler );
+}
+
+void AppMgr::setJsonRPC2Handler(JSONRPC2Handler *handler)
+{
+    mAppMgrCore.setJsonRPC2Handler( handler );
 }
 
 void AppMgr::onMessageReceivedCallback(ALRPCMessage * message , unsigned char sessionID)

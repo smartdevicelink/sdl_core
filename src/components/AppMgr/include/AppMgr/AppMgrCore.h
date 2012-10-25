@@ -19,17 +19,18 @@ class RegisterAppInterface_response;
 class SubscribeButton_request;
 class ALRPCMessage;
 class JSONHandler;
+class JSONRPC2Handler;
 class UnsubscribeButton_request;
 
 namespace RPC2Communication
 {
 	class RPC2Command;
-};
+}
 
 namespace log4cplus
 {
 	class Logger;
-};
+}
 
 namespace NsAppManager
 {
@@ -60,12 +61,16 @@ public:
 	void setJsonHandler(JSONHandler* handler);
 	JSONHandler* getJsonHandler( ) const;
 
+    void setJsonRPC2Handler(JSONRPC2Handler* handler);
+    JSONRPC2Handler* getJsonRPC2Handler( ) const;
+
 private:
 	AppMgrCore();
     AppMgrCore(const AppMgrCore&);
 
     void handleMobileRPCMessage(const Message &message );
 	void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg );
+    void handleBusRPCMessageOutgoing( RPC2Communication::RPC2Command* msg );
     const RegistryItem* registerApplication(const Message &msg );
     void subscribeButton(const Message &msg );
     void unsubscribeButton(const Message &msg );
@@ -104,6 +109,7 @@ private:
 	
 	bool m_bTerminate;
 	JSONHandler* mJSONHandler;
+    JSONRPC2Handler* mJSONRPC2Handler;
 	static log4cplus::Logger mLogger;
 };
 

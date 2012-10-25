@@ -6,6 +6,10 @@
  */
 
 #include "AppMgr/AppMgrCore.h"
+#include "AppMgr/Application.h"
+#include "AppMgr/AppMgrRegistry.h"
+#include "AppMgr/AppPolicy.h"
+#include "AppMgr/RegistryItem.h"
 #include "JSONHandler/ALRPCMessage.h"
 #include "JSONHandler/ALRPCRequest.h"
 #include "JSONHandler/ALRPCResponse.h"
@@ -17,27 +21,22 @@
 #include "JSONHandler/ALRPCObjects/SubscribeButton_response.h"
 #include "JSONHandler/ALRPCObjects/UnsubscribeButton_request.h"
 #include "JSONHandler/ALRPCObjects/UnsubscribeButton_response.h"
-#include "JSONHandler/JSONHandler.h"
+#include "JSONHandler/ALRPCObjects/ButtonCapabilities.h"
+#include "JSONHandler/ALRPCObjects/AppInterfaceUnregisteredReason.h"
+#include "JSONHandler/ALRPCObjects/OnButtonEvent.h"
+#include "JSONHandler/ALRPCObjects/OnButtonPress.h"
 #include "JSONHandler/ALRPCObjects/HMILevel.h"
-#include "AppMgr/IApplication.h"
-#include "AppMgr/Application.h"
-#include "AppMgr/AppMgrRegistry.h"
-#include "AppMgr/AppPolicy.h"
-#include "AppMgr/RegistryItem.h"
-#include "AppMgr/AppLinkInterface.h"
-#include <sys/socket.h>
-#include "LoggerHelper.hpp"
+#include "JSONHandler/JSONHandler.h"
+#include "JSONHandler/JSONRPC2Handler.h"
 #include "JSONHandler/OnButtonEvent.h"
 #include "JSONHandler/RPC2Marshaller.h"
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/RPC2Request.h"
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
-#include "JSONHandler/ALRPCObjects/ButtonCapabilities.h"
 #include "JSONHandler/GetCapabilitiesResponse.h"
-#include "JSONHandler/ALRPCObjects/AppInterfaceUnregisteredReason.h"
-#include "JSONHandler/ALRPCObjects/OnButtonEvent.h"
-#include "JSONHandler/ALRPCObjects/OnButtonPress.h"
+#include <sys/socket.h>
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
@@ -56,6 +55,8 @@ AppMgrCore::AppMgrCore()
 	,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsIncoming, NULL))
 	,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsOutgoing, NULL))
 	,m_bTerminate(false)
+    ,mJSONHandler(0)
+    ,mJSONRPC2Handler(0)
 {
     LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
 }
@@ -66,6 +67,8 @@ AppMgrCore::AppMgrCore(const AppMgrCore &)
     ,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsIncoming, NULL))
     ,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsOutgoing, NULL))
     ,m_bTerminate(false)
+    ,mJSONHandler(0)
+    ,mJSONRPC2Handler(0)
 {
 }
 
@@ -190,13 +193,13 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
 
 void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg )
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been invoking...");
+    LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been incoming...");
 
 	switch(msg->getMethod())
 	{
 		case RPC2Communication::RPC2Marshaller::METHOD_GET_CAPABILITIES_REQUEST:
 		{			
-			LOG4CPLUS_INFO_EXT(mLogger, " A GetCapabilitiesResponse request has been invoked");
+            LOG4CPLUS_INFO_EXT(mLogger, " A GetCapabilitiesResponse request has been income");
 			RPC2Communication::GetCapabilitiesResponse * object = (RPC2Communication::GetCapabilitiesResponse*)msg;
 			setButtonCapabilities( object );
 			
@@ -231,10 +234,20 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
 		case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
 		default:
 			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethod() <<" has been received!");
+
 			break;
 	}
-//	AppLinkInterface::getInstance().sendRPCCommand( msg );
-	LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been invoked!");
+
+    LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been invoked!");
+}
+
+void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been outcoming...");
+
+    mJSONRPC2Handler->sendCommand( msg );
+
+    LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been outcomed");
 }
 
 void AppMgrCore::enqueueOutgoingMobileRPCMessage( const Message& message )
@@ -324,8 +337,7 @@ const ALRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem* re
 
 void AppMgrCore::registerApplicationOnHMI( const std::string& name )
 {
-//	RPCBusObject* object = new RPCBusObject( 1, RPCBusObject::REQUEST, "AppLinkCore.OnAppRegister" );
-//	object->setParameter("name", name);
+
 }
 
 void AppMgrCore::setButtonCapabilities( RPC2Communication::GetCapabilitiesResponse* msg )
@@ -434,7 +446,7 @@ void* AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
 				continue;
 			}
 			
-			handleBusRPCMessageIncoming( msg );
+            handleBusRPCMessageOutgoing( msg );
 		}
 	}
 }
@@ -447,6 +459,16 @@ void AppMgrCore::setJsonHandler(JSONHandler* handler)
 JSONHandler* AppMgrCore::getJsonHandler( ) const
 {
     return mJSONHandler;
+}
+
+void AppMgrCore::setJsonRPC2Handler(JSONRPC2Handler *handler)
+{
+    mJSONRPC2Handler = handler;
+}
+
+JSONRPC2Handler *AppMgrCore::getJsonRPC2Handler() const
+{
+    return mJSONRPC2Handler;
 }
 
 bool Comparer::operator ()(const ButtonName &b1, const ButtonName &b2) const
