@@ -30,7 +30,12 @@ bool AppPolicy::operator <( const AppPolicy& item2 ) const
 
 const std::string& AppPolicy::getPolicyHash( ) const
 {
-	return mPolicy;
+    return mPolicy;
+}
+
+AppPolicy::AppPolicy(const AppPolicy &policy)
+    : mPolicy(policy.getPolicyHash())
+{
 }
 
 };

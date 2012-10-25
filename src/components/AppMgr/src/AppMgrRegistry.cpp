@@ -39,6 +39,10 @@ AppMgrRegistry::AppMgrRegistry( )
 {
 }
 
+AppMgrRegistry::AppMgrRegistry(const AppMgrRegistry &)
+{
+}
+
 AppMgrRegistry::~AppMgrRegistry( )
 {
 	for(Items::iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)

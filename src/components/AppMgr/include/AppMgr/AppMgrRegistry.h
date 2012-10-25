@@ -40,7 +40,7 @@ public:
 
 private:
 	AppMgrRegistry( );
-
+    AppMgrRegistry( const AppMgrRegistry& );
 	Items mRegistryItems;
 	static log4cplus::Logger mLogger;
 };

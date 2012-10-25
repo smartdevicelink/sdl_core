@@ -27,6 +27,7 @@ public:
 	const std::string& getPolicyHash() const;
 
 private:
+    AppPolicy( const AppPolicy& );
 	const std::string mPolicy;
 	static log4cplus::Logger mLogger;
 };
