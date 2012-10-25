@@ -35,7 +35,7 @@ void JSONHandler::setRPCMessagesObserver( IRPCMessagesObserver * messagesObserve
     mMessagesObserver = messagesObserver;
 }
 
-void JSONHandler::sendRPCMessage( const ALRPCMessage * message )
+void JSONHandler::sendRPCMessage( const ALRPCMessage * message, unsigned char sessionId )
 {
     if ( message )
     {

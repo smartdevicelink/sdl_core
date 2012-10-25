@@ -23,7 +23,7 @@ public:
 
     /*Methods for IRPCMessagesObserver*/
     void setRPCMessagesObserver( IRPCMessagesObserver * messagesObserver );
-    void sendRPCMessage( const ALRPCMessage * message );   
+    void sendRPCMessage( const ALRPCMessage * message, unsigned char sessionId );   
     /*End of methods for IRPCMessagesObserver*/
        
     //static Json::Value getParametersFromJSON( const std::string & jsonString );
