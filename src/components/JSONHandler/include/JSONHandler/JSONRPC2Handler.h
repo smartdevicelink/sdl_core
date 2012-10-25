@@ -6,6 +6,7 @@
 #include <json/value.h>
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/MessageQueue.h"
+#include "Logger.hpp"
 
 using namespace RPC2Communication;
 
@@ -35,6 +36,7 @@ private:
     static void * waitForCommandsToHMI( void * params );
 
 private:
+    static log4cplus::Logger                              mLogger;
     struct ResponseContainer
     {
         std::string methodName;
