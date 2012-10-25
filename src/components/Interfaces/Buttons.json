@@ -40,7 +40,7 @@
 	 */
 	"Buttons.OnButtonEvent": {
 		"parameters": {
-			"name"	: "string",        
+			"name"	: "ButtonName",      // data type from AppLink protocol specification  
 			"mode"	: "ButtonEventMode"  // data type from AppLink protocol specification
 		}
 	},
@@ -51,7 +51,7 @@
 	 */
 	"Buttons.OnButtonPress": {
 		"parameters": {
-			"name"	: "string",        
+			"name"	: "ButtonName",     // data type from AppLink protocol specification 
 			"mode"	: "ButtonPressMode" // data type from AppLink protocol specification
 		}
 	}
