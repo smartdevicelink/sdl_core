@@ -21,6 +21,7 @@ AppMgrRegistry& AppMgrRegistry::getInstance( )
 
 void AppMgrRegistry::unregisterApplication( RegistryItem* item )
 {
+    LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application "<< item->getApplication()->getName());
 	Items::iterator registryItemIterator = mRegistryItems.find(item->getApplication()->getName());
 	mRegistryItems.erase(registryItemIterator);
 }
@@ -37,6 +38,7 @@ const RegistryItem* AppMgrRegistry::getItem( const std::string& app ) const
 
 AppMgrRegistry::AppMgrRegistry( )
 {
+    LOG4CPLUS_INFO_EXT(mLogger, " Created a registry!");
 }
 
 AppMgrRegistry::AppMgrRegistry(const AppMgrRegistry &)
@@ -45,6 +47,7 @@ AppMgrRegistry::AppMgrRegistry(const AppMgrRegistry &)
 
 AppMgrRegistry::~AppMgrRegistry( )
 {
+    LOG4CPLUS_INFO_EXT(mLogger, " Destructing a registry item!");
 	for(Items::iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
 	{
 		if( it->second )
@@ -55,10 +58,12 @@ AppMgrRegistry::~AppMgrRegistry( )
 	}
 
 	mRegistryItems.clear();
+    LOG4CPLUS_INFO_EXT(mLogger, " Destructed a registry!");
 }
 
 const RegistryItem* AppMgrRegistry::registerApplication( const Application* app )
 {
+    LOG4CPLUS_INFO_EXT(mLogger, " Registering an application "<<app->getName());
 	mRegistryItems.insert(Item(app->getName(), new RegistryItem(app)));
 	return mRegistryItems.find(app->getName())->second;
 }
