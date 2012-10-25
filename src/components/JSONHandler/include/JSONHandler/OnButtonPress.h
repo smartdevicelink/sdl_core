@@ -3,6 +3,7 @@
 
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/ALRPCObjects/ButtonPressMode.h"
+#include "JSONHandler/ALRPCObjects/ButtonName.h"
 
 namespace RPC2Communication
 {
@@ -12,14 +13,14 @@ namespace RPC2Communication
         OnButtonPress();
         ~OnButtonPress();
 
-        std::string getName(void) const;
+        ButtonName getName(void) const;
         ButtonPressMode getMode(void) const;
 
-        bool setName(const std::string & s);
+        bool setName(const ButtonName & s);
         bool setMode(const ButtonPressMode& mode);
 
     private:
-        std::string mName;
+        ButtonName mName;
         ButtonPressMode mMode;
     
         friend class OnButtonPressMarshaller;
