@@ -191,7 +191,7 @@ add_library(jsonHandler
 
 ## Compiler flags
 if(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3")        ## DON'T Optimize
+	set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3 -std=c++0x")        ## DON'T Optimize
     set(CMAKE_EXE_LINKER_FLAGS "-m")  ## Strip binary
 endif()
 
