@@ -1,6 +1,7 @@
 #include "JSONHandler/JSONRPC2Handler.h"
 #include "JSONHandler/RPC2Marshaller.h"
-#include <cstdio>
+
+log4cplus::Logger JSONRPC2Handler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONRPC2Handler"));
 
 JSONRPC2Handler::JSONRPC2Handler( const std::string& address, uint16_t port )
 :NsMessageBroker::CMessageBrokerController( address, port, "AppLinkCore" )
@@ -19,6 +20,7 @@ JSONRPC2Handler::~JSONRPC2Handler()
 
 void JSONRPC2Handler::processResponse(std::string method, Json::Value& root)
 {
+    LOG4CPLUS_INFO( mLogger, "Received response from RPCBus" );
     ResponseContainer response;
     response.methodName = method;
     response.response = root;
@@ -27,11 +29,13 @@ void JSONRPC2Handler::processResponse(std::string method, Json::Value& root)
     
 void JSONRPC2Handler::processRequest(Json::Value& root)
 {
+    LOG4CPLUS_INFO(mLogger, "Received request from RPCBus");
     mCommandsFromHMI.push( root );
 }
     
 void JSONRPC2Handler::processNotification(Json::Value& root)
 {
+    LOG4CPLUS_INFO( mLogger, "Received notification from RPCBus." );
     mCommandsFromHMI.push( root );
 }
 
@@ -53,15 +57,15 @@ void * JSONRPC2Handler::waitForCommandsFromHMI( void * params )
     {
         pthread_exit( 0 );
     }
-    printf("JSONRPC2Handler::waitForCommandsFromHMI\n");
+    LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI");
     while ( 1 )
     {
         while ( !handler -> mCommandsFromHMI.empty() )
         {
-            printf("JSONRPC2Handler::waitForCommandsFromHMI: received command\n");
+            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI: received command");
             Json::Value jsonMessage = handler -> mCommandsFromHMI.pop();
             RPC2Command * currentCommand = RPC2Marshaller::fromJSON( jsonMessage );
-            printf("JSONRPC2Handler::waitForCommandsFromHMI: handle command \n" );
+            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI: handle command" );
             if ( !currentCommand )
             {
                 //TODO: log
@@ -87,12 +91,12 @@ void * JSONRPC2Handler::waitForResponsesFromHMI( void * params )
     {
         pthread_exit( 0 );
     }
-    printf("JSONRPC2Handler::waitForResponsesFromHMI\n");
+    LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI\n");
     while ( 1 )
     {
         while ( !handler -> mResponsesFromHMI.empty() )
         {
-            printf("JSONRPC2Handler::waitForResponsesFromHMI: received response\n");
+            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI: received response");
             ResponseContainer response = handler -> mResponsesFromHMI.pop();
             RPC2Command * currentCommand = RPC2Marshaller::fromJSON( response.response, response.methodName );
 
@@ -100,7 +104,7 @@ void * JSONRPC2Handler::waitForResponsesFromHMI( void * params )
             {
                 //TODO: log
             }
-            printf("JSONRPC2Handler::waitForResponsesFromHMI: handle response\n");
+            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI: handle response");
             if ( !handler -> mCommandsObserver )
             {
                 //TODO: log
@@ -121,12 +125,12 @@ void * JSONRPC2Handler::waitForCommandsToHMI( void * params )
     {
         pthread_exit( 0 );
     }
-    printf("JSONRPC2Handler::waitForCommandsToHMI\n");
+    LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI");
     while ( 1 )
     {
         while ( !handler -> mCommandsToHMI.empty() )
         {
-            printf("JSONRPC2Handler::waitForCommandsToHMI: received command.\n");
+            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: received command.");
             const RPC2Command * command = handler -> mCommandsToHMI.pop();
             Json::Value commandJson = RPC2Marshaller::toJSON( command );
 
@@ -134,7 +138,7 @@ void * JSONRPC2Handler::waitForCommandsToHMI( void * params )
             {
                 //TODO: log
             }
-            printf("JSONRPC2Handler::waitForCommandsToHMI: processed command\n" );
+            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: processed command" );
 
             handler -> sendJsonMessage( commandJson );
         }
