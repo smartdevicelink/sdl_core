@@ -9,7 +9,7 @@ public:
     virtual void onCommandReceivedCallback( RPC2Communication::RPC2Command * command ) = 0;
 
 protected:
-    virtual ~IRPC2CommandsObserver();
+    virtual ~IRPC2CommandsObserver(){};
 
 };
 
