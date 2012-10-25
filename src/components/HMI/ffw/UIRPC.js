@@ -50,18 +50,18 @@ FFW.UI = FFW.RPCObserver.create({
  	 */
 	init: function() {
 		// init global properties
-		this.resetGlobalProperties();
+		this.resetProperties();
 	},
 
 	/*
    	 * resetGlobalProperties
  	 */
 	resetProperties: function(propertyName) {
-		if (propertyName == "HELPPROMPT" or propertyName == "")
+		if (propertyName == "HELPPROMPT" || propertyName == "")
 			this.globalProperties.helpPrompt 	= this.globalPropertiesDefault.helpPrompt;
 	
-		if (propertyName == "TIMEOUTPROMPT" or propertyName == "")
-			this.globalProperties.timeoutPrompt 	= this.globalPropertiesDefault.timoutPrompt;
+		if (propertyName == "TIMEOUTPROMPT" || propertyName == "")
+			this.globalProperties.timeoutPrompt = this.globalPropertiesDefault.timoutPrompt;
 	},
 
 	/*

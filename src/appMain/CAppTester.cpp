@@ -111,34 +111,34 @@ namespace NsApplicationTester
                      | (sFrameType & 0x07);
 
      UInt32 offset = 0;
-     memcpy(sPacketData + offset++, &firstByte, 1);
-     memcpy(sPacketData + offset++, &sServiceType, 1);
-     memcpy(sPacketData + offset++, &sFrameData, 1);
-     memcpy(sPacketData + offset++, &sSessionID, 1);
+     memcpy((UInt8*)sPacketData + offset++, &firstByte, 1);
+     memcpy((UInt8*)sPacketData + offset++, &sServiceType, 1);
+     memcpy((UInt8*)sPacketData + offset++, &sFrameData, 1);
+     memcpy((UInt8*)sPacketData + offset++, &sSessionID, 1);
 
      UInt8 tmp = sDataSize >> 24;
-     memcpy(sPacketData + offset++, &tmp, 1);
+     memcpy((UInt8*)sPacketData + offset++, &tmp, 1);
      tmp = sDataSize >> 16;
-     memcpy(sPacketData + offset++, &tmp, 1);
+     memcpy((UInt8*)sPacketData + offset++, &tmp, 1);
      tmp = sDataSize >> 8;
-     memcpy(sPacketData + offset++, &tmp, 1);
+     memcpy((UInt8*)sPacketData + offset++, &tmp, 1);
      tmp = sDataSize;
-     memcpy(sPacketData + offset++, &tmp, 1);
+     memcpy((UInt8*)sPacketData + offset++, &tmp, 1);
 
 
      if (protocolVersion == 0x02)
      {
          UInt8 tmp1 = sMessageID >> 24;
-         memcpy(sPacketData + offset++, &tmp1, 1);
+         memcpy((UInt8*)sPacketData + offset++, &tmp1, 1);
          tmp1 = sMessageID >> 16;
-         memcpy(sPacketData + offset++, &tmp1, 1);
+         memcpy((UInt8*)sPacketData + offset++, &tmp1, 1);
          tmp1 = sMessageID >> 8;
-         memcpy(sPacketData + offset++, &tmp1, 1);
+         memcpy((UInt8*)sPacketData + offset++, &tmp1, 1);
          tmp1 = sMessageID;
-         memcpy(sPacketData + offset++, &tmp1, 1);
+         memcpy((UInt8*)sPacketData + offset++, &tmp1, 1);
      }
 
-     memcpy(sPacketData + offset, (void*)const_cast<char*>(payload.c_str()), sDataSize);
+     memcpy((UInt8*)sPacketData + offset, (void*)const_cast<char*>(payload.c_str()), sDataSize);
 
      printf("SINGLE MESSAGE GENERATED!\n");
 

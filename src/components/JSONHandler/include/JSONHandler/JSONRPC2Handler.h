@@ -3,7 +3,6 @@
 
 #include "mb_controller.hpp"
 #include "JSONHandler/IRPC2CommandsObserver.h"
-#include "JSONHandler/RPC2Marshaller.h"
 #include <json/value.h>
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/MessageQueue.h"
@@ -42,7 +41,6 @@ private:
         Json::Value response;
     };
     IRPC2CommandsObserver *                     mCommandsObserver;
-    RPC2Marshaller *                          mCommandsMarshaller;
     MessageQueue<Json::Value>                    mCommandsFromHMI;
     pthread_t                             mWaitForCommandsFromHMI;
     pthread_t                            mWaitForResponsesFromHMI;

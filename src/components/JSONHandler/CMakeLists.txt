@@ -165,6 +165,7 @@ add_library(jsonHandler
                   ./src/RPC2Request.cpp
                   ./src/RPC2Response.cpp
                   ./src/RPC2Error.cpp
+                  ./src/RPC2Marshaller.cpp
                   ./src/SpeakResponseMarshaller.cpp
                   ./src/SpeakResponse.cpp
                   ./src/Alert.cpp
