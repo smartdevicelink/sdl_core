@@ -47,7 +47,7 @@ AppMgrRegistry::AppMgrRegistry(const AppMgrRegistry &)
 
 AppMgrRegistry::~AppMgrRegistry( )
 {
-    LOG4CPLUS_INFO_EXT(mLogger, " Destructing a registry item!");
+    LOG4CPLUS_INFO_EXT(mLogger, " Destructing a registry!");
 	for(Items::iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
 	{
 		if( it->second )

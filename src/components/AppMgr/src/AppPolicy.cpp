@@ -15,12 +15,12 @@ log4cplus::Logger AppPolicy::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_
 AppPolicy::AppPolicy( const std::string& policy )
 : mPolicy(policy)
 {
-
+    LOG4CPLUS_INFO_EXT(mLogger, " Created an app policy "<<policy);
 }
 
 AppPolicy::~AppPolicy( )
 {
-	// TODO Auto-generated destructor stub
+    LOG4CPLUS_INFO_EXT(mLogger, " Destroyed an app policy "<<mPolicy);
 }
 
 bool AppPolicy::operator <( const AppPolicy& item2 ) const
