@@ -130,7 +130,7 @@ int main(int argc, char** argv)
     jsonRPC2Handler.registerController();
 
     printf("Start AppMgr threads!\n");
-    NsAppManager::AppMgrCore appMgrCore = NsAppManager::AppMgrCore::getInstance();
+    NsAppManager::AppMgrCore& appMgrCore = NsAppManager::AppMgrCore::getInstance();
     appMgrCore.executeThreads();
     //appLinkInterface.executeThreads();
 
