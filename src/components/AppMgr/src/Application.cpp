@@ -10,12 +10,13 @@
 namespace NsAppManager
 {
 	
-Application::Application( const std::string& name )
+Application::Application(const std::string& name , unsigned char sessionId)
 	:IApplication(name)
 	,mNgnMediaScreenAppName("")
 	,m_bUsesVehicleData(false)
 	,m_bIsMediaApplication(false)
 	,mAutoActivateID("")
+    ,mSessionID(sessionId)
 {
 }
 
@@ -28,6 +29,7 @@ Application::Application( const Application& app )
 	,mLanguageDesired(app.getLanguageDesired())
 	,mHMIStatusLevel(app.getApplicationHMIStatusLevel())
 	,mSyncMsgVersion(app.getSyncMsgVersion())
+    ,mSessionID(app.getSessionID())
 {
 	mVrSynonyms = app.getVrSynonyms();
 }
@@ -150,6 +152,11 @@ const std::string &Application::getAppID() const
 const Language &Application::getHMIDisplayLanguageDesired() const
 {
     return mHMIDisplayLanguageDesired;
+}
+
+unsigned char Application::getSessionID() const
+{
+    return mSessionID;
 }
 
 };

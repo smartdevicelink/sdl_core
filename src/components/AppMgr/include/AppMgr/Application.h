@@ -27,7 +27,7 @@ typedef enum
 class Application : public IApplication
 {
 public:
-	Application( const std::string& name );
+    Application( const std::string& name, unsigned char sessionId );
 	virtual ~Application( );
 	virtual void setApplicationPriority( const AppPriority& priority );
 	void setApplicationHMIStatusLevel( const HMILevel::HMILevelInternal& hmiLevel );
@@ -54,10 +54,12 @@ public:
 	const SyncMsgVersion& getSyncMsgVersion( ) const;
     const std::string& getAppID( ) const;
     const Language& getHMIDisplayLanguageDesired( ) const;
+    unsigned char getSessionID() const;
 
 private:
 	Application(const Application& );
 	
+    const unsigned char mSessionID;
 	std::string mNgnMediaScreenAppName;
 	std::vector<std::string> mVrSynonyms;
 	bool m_bUsesVehicleData;

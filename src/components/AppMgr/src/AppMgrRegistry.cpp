@@ -26,14 +26,29 @@ void AppMgrRegistry::unregisterApplication( RegistryItem* item )
 	mRegistryItems.erase(registryItemIterator);
 }
 
-const RegistryItem* AppMgrRegistry::getItem( const Application* app ) const
+RegistryItem *AppMgrRegistry::getItem( const Application* app ) const
 {
 	return mRegistryItems.find(app->getName())->second;
 }
 
-const RegistryItem* AppMgrRegistry::getItem( const std::string& app ) const
+RegistryItem *AppMgrRegistry::getItem( const std::string& app ) const
 {
-	return mRegistryItems.find(app)->second;
+    return mRegistryItems.find(app)->second;
+}
+
+RegistryItem *AppMgrRegistry::getItem(unsigned char sessionID) const
+{
+    for(Items::const_iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
+    {
+        RegistryItem* item =  it->second;
+        const Application* app = item->getApplication();
+        if(app->getSessionID() == sessionID)
+        {
+            return item;
+        }
+    }
+    LOG4CPLUS_ERROR_EXT(mLogger, " No application found with the session id "<<sessionID);
+    return 0;
 }
 
 AppMgrRegistry::AppMgrRegistry( )

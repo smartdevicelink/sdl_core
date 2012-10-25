@@ -53,10 +53,10 @@ void AppMgr::setJsonHandler(JSONHandler* handler)
 	mAppMgrCore.setJsonHandler( handler );
 }
 
-void AppMgr::onMessageReceivedCallback( ALRPCMessage * message )
+void AppMgr::onMessageReceivedCallback(ALRPCMessage * message , unsigned char sessionID)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Message "<<message->getMethodId()<<" received");
-	mAppMgrCore.pushMobileRPCMessage( message );
+    mAppMgrCore.pushMobileRPCMessage( message, sessionID );
 }
 
 /**

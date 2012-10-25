@@ -35,8 +35,9 @@ public:
 	const RegistryItem* registerApplication( const Application* app );
 	void unregisterApplication( RegistryItem* item  );
 
-	const RegistryItem* getItem( const Application* app ) const;
-	const RegistryItem* getItem( const std::string& app ) const;
+    RegistryItem *getItem( const Application* app ) const;
+    RegistryItem* getItem( const std::string& app ) const;
+    RegistryItem *getItem( unsigned char sessionID ) const;
 
 private:
 	AppMgrRegistry( );

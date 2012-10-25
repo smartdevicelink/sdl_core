@@ -34,7 +34,7 @@ public:
 	
 	static AppMgr& getInstance();
 	
-	virtual void onMessageReceivedCallback( ALRPCMessage * message );
+    virtual void onMessageReceivedCallback( ALRPCMessage * message, unsigned char sessionID );
 
 	/**
 	 * \brief pure virtual method to process response.

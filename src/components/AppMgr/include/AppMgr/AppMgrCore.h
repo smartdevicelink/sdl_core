@@ -11,6 +11,7 @@
 #include "system.h"
 #include <queue>
 #include <string>
+#include <map>
 #include "JSONHandler/GetCapabilitiesResponse.h"
 
 class RegisterAppInterface_request;
@@ -35,7 +36,14 @@ namespace NsAppManager
 
 class RegistryItem;
 
+struct Comparer {
+    bool operator() (const ButtonName &b1, const ButtonName &b2) const;
+};
+
 typedef std::vector<ButtonCapabilities> Capabilities;
+typedef std::map<ButtonName, RegistryItem*, Comparer> ButtonMap;
+typedef std::pair<ButtonName, RegistryItem*> ButtonMapItem;
+typedef std::pair<ALRPCMessage*, unsigned char> Message;
 
 class AppMgrCore
 {
@@ -43,7 +51,7 @@ public:
 	virtual ~AppMgrCore();
 
 	static AppMgrCore& getInstance();
-	void pushMobileRPCMessage( ALRPCMessage * message );
+    void pushMobileRPCMessage(ALRPCMessage * message , unsigned char sessionID);
 	void pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message );
 
 	void executeThreads();
@@ -56,13 +64,13 @@ private:
 	AppMgrCore();
     AppMgrCore(const AppMgrCore&);
 
-	void handleMobileRPCMessage( ALRPCMessage* msg );
+    void handleMobileRPCMessage(const Message &message );
 	void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg );
-	const RegistryItem* registerApplication( RegisterAppInterface_request* msg );
-    void subscribeButton(SubscribeButton_request *msg );
-    void unsubscribeButton( UnsubscribeButton_request* msg );
-	void sendMobileRPCResponse( ALRPCMessage* msg );
-	void enqueueOutgoingMobileRPCMessage( ALRPCMessage * message );
+    const RegistryItem* registerApplication(const Message &msg );
+    void subscribeButton(const Message &msg );
+    void unsubscribeButton(const Message &msg );
+    void sendMobileRPCResponse(const Message &msg );
+    void enqueueOutgoingMobileRPCMessage(const Message &message );
     const ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
 	void enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message );
 
@@ -76,8 +84,8 @@ private:
 	void* handleQueueRPCAppLinkObjectsOutgoing( void* );
 	void* handleQueueRPCBusObjectsOutgoing( void* );
 	
-	std::queue< ALRPCMessage* > mQueueRPCAppLinkObjectsIncoming;
-	std::queue< ALRPCMessage* > mQueueRPCAppLinkObjectsOutgoing;
+    std::queue< Message > mQueueRPCAppLinkObjectsIncoming;
+    std::queue< Message > mQueueRPCAppLinkObjectsOutgoing;
 	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsIncoming;
 	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsOutgoing;
 
@@ -92,6 +100,7 @@ private:
 	System::Thread mThreadRPCBusObjectsOutgoing;
 
 	Capabilities mButtonCapabilities;
+    ButtonMap    mButtonsMapping;
 	
 	bool m_bTerminate;
 	JSONHandler* mJSONHandler;
