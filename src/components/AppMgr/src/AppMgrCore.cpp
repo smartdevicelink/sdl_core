@@ -134,7 +134,7 @@ void AppMgrCore::handleMobileRPCMessage( ALRPCMessage* msg )
 			LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
 			RegisterAppInterface_request * object = (RegisterAppInterface_request*)msg;
 			const RegistryItem* registeredApp =  registerApplication( object );
-            ALRPCMessage* info = queryInfoForRegistration( registeredApp );
+            const ALRPCMessage* info = queryInfoForRegistration( registeredApp );
             RegisterAppInterface_response* response = new RegisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(ALRPCMessage::RESPONSE);
@@ -293,7 +293,7 @@ void AppMgrCore::unsubscribeButton(UnsubscribeButton_request *msg )
 
 }
 
-ALRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem* registryItem )
+const ALRPCMessage* AppMgrCore::queryInfoForRegistration( const RegistryItem* registryItem )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Querying info for registration of an application " << registryItem->getApplication()->getName() << "!");
 
@@ -318,7 +318,7 @@ void AppMgrCore::setButtonCapabilities( RPC2Communication::GetCapabilitiesRespon
     }
 }
 
-Capabilities AppMgrCore::getButtonCapabilities() const
+const Capabilities& AppMgrCore::getButtonCapabilities() const
 {
 	return mButtonCapabilities;
 }

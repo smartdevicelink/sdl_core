@@ -63,13 +63,13 @@ private:
     void unsubscribeButton( UnsubscribeButton_request* msg );
 	void sendMobileRPCResponse( ALRPCMessage* msg );
 	void enqueueOutgoingMobileRPCMessage( ALRPCMessage * message );
-	ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
+    const ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
 	void enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message );
 
 	void registerApplicationOnHMI( const std::string& name );
 
 	void setButtonCapabilities( RPC2Communication::GetCapabilitiesResponse* msg );
-	Capabilities getButtonCapabilities() const;
+    const Capabilities& getButtonCapabilities() const;
 
 	void* handleQueueRPCAppLinkObjectsIncoming( void* );
 	void* handleQueueRPCBusObjectsIncoming( void* );
