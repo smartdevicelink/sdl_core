@@ -52,147 +52,147 @@ MFT.ControlButtons = Em.ContainerView.create({
 
 			/** Up button */
 			UpBtn: MFT.Button.create({
-				elementId:	'app_controlButtonsUpBtn',
+				elementId:	'TUNEUP',
 				classNames:	'UpBtn',
 				click:		function(){
-					FFW.Buttons.buttonPressed("up", "Click");
+					FFW.Buttons.buttonPressed(this.elementId, "SHORT");
 				}
 			}),
 			
 			/** Down button */
 			DownBtn: MFT.Button.create({
-				elementId:	'app_controlButtonsDownBtn',
+				elementId:	'TUNEDOWN',
 				classNames:	'DownBtn',
 				click:		function(){
-					FFW.Buttons.buttonPressed("down", "Click");
+					FFW.Buttons.buttonPressed(this.elementId, "SHORT");
 				}
 			}),
 			
 			/** Left button */
 			LeftBtn: MFT.Button.create({
-				elementId:	'app_controlButtonsLeftBtn',
+				elementId:	'SEEKLEFT',
 				classNames:	'LeftBtn',
 				click:		function(){
-					FFW.Buttons.buttonPressed("left", "Click");
+					FFW.Buttons.buttonPressed(this.elementId, "Click");
 				}
 			}),
 			
 			/** Right button */
 			RightBtn: MFT.Button.create({
-				elementId:	'app_controlButtonsRightBtn',
+				elementId:	'SEEKRIGHT',
 				classNames:	'RightBtn',
 				click:		function(){
-					FFW.Buttons.buttonPressed("right", "Click");
+					FFW.Buttons.buttonPressed(this.elementId, "Click");
 				}
 			}),
 			
 			/** Ok button */
 			OkBtn: MFT.Button.create({
-				elementId:	'app_controlButtonsOkBtn',
+				elementId:	'OK',
 				classNames:	'OkBtn',
 				click:		function(){
-					FFW.Buttons.buttonPressed("ok", "Click");
+					FFW.Buttons.buttonPressed(this.elementId, "Click");
 				}
 			})
 		}),
 		
 		/** One button */
 		OneBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsOneBtn',
+			elementId:	'PRESET_1',
 			classNames:	'OneBtn btnNotPressed',
 			text:		'1',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "Click");
 			}
 		}),
 		
 		/** Two button */
 		TwoBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsTwoBtn',
+			elementId:	'PRESET_2',
 			classNames:	'TwoBtn btnNotPressed',
 			text:		'2',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "Click");
 			}
 		}),
 		
 		/** Three button */
 		ThreeBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsThreeBtn',
+			elementId:	'PRESET_3',
 			classNames:	'ThreeBtn btnNotPressed',
 			text:		'3',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "Click");
 			}
 		}),
 		
 		/** Four button */
 		FourBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsFourBtn',
+			elementId:	'PRESET_4',
 			classNames:	'FourBtn btnNotPressed',
 			text:		'4',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "Click");
 			}
 		}),
 		
 		/** Five button */
 		FiveBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsFiveBtn',
+			elementId:	'PRESET_5',
 			classNames:	'FiveBtn btnNotPressed',
 			text:		'5',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "Click");
 			}
 		}),
 		
 		/** One button */
 		SixBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsSixBtn',
+			elementId:	'PRESET_6',
 			classNames:	'SixBtn btnNotPressed',
 			text:		'6',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "Click");
 			}
 		}),
 		
 		/** One button */
 		SevenBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsSevenBtn',
+			elementId:	'PRESET_7',
 			classNames:	'SevenBtn btnNotPressed',
 			text:		'7',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "Click");
 			}
 		}),
 		
 		/** One button */
 		EightBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsEightBtn',
+			elementId:	'PRESET_8',
 			classNames:	'EightBtn btnNotPressed',
 			text:		'8',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "Click");
 			}
 		}),
 		
 		/** One button */
 		NineBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsNineBtn',
+			elementId:	'PRESET_9',
 			classNames:	'NineBtn btnNotPressed',
 			text:		'9',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "Click");
 			}
 		}),
 		
 		/** One button */
 		ZiroBtn: MFT.Button.create({
-			elementId:	'app_controlButtonsZiroBtn',
+			elementId:	'PRESET_0',
 			classNames:	'ZiroBtn btnNotPressed',
 			text:		'0',
 			click:		function(){
-				FFW.Buttons.buttonPressed( this.text, "Click");
+				FFW.Buttons.buttonPressed( this.elementId, "Click");
 			}
 		})
 	})
