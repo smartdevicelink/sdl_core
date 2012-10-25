@@ -56,10 +56,12 @@ FFW.UI = FFW.RPCObserver.create({
 	/*
    	 * resetGlobalProperties
  	 */
-	resetProperties: function() {
-		// init global properties
-		this.globalProperties.helpPrompt 	= this.globalPropertiesDefault.helpPrompt;
-		this.globalProperties.timeoutPrompt 	= this.globalPropertiesDefault.timoutPrompt;
+	resetProperties: function(propertyName) {
+		if (propertyName == "HELPPROMPT" or propertyName == "")
+			this.globalProperties.helpPrompt 	= this.globalPropertiesDefault.helpPrompt;
+	
+		if (propertyName == "TIMEOUTPROMPT" or propertyName == "")
+			this.globalProperties.timeoutPrompt 	= this.globalPropertiesDefault.timoutPrompt;
 	},
 
 	/*
@@ -171,8 +173,9 @@ FFW.UI = FFW.RPCObserver.create({
 		
 		if (request.method == "UI.ResetGlobalProperties") {
 			
-			//request.params.
-		        this.resetProperties();
+			// reset all requested properties
+			for (var i=0;i<request.params.length;i++)
+			        this.resetProperties(reuqest.params[i]);
 
 			// send repsonse
 			var JSONMessage = {
