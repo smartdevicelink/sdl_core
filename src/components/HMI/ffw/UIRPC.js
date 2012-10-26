@@ -137,10 +137,10 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.Show") {
 
-			MFT.AppModel.PlayList.items[0].set('title', request.params.mainField1);
-			MFT.AppModel.PlayList.items[0].set('album', request.params.mainField2);
-			MFT.AppModel.PlayList.items[0].set('duration', request.params.mediaClock);
-			MFT.AppModel.PlayList.items[0].set('artist', request.params.mediaTrack);
+			MFT.AppModel.PlayList.items[0].set('field1', request.params.mainField1);
+			MFT.AppModel.PlayList.items[0].set('field2', request.params.mainField2);
+			MFT.AppModel.PlayList.items[0].set('mediaClock', request.params.mediaClock);
+			MFT.AppModel.PlayList.items[0].set('mediaTrack', request.params.mediaTrack);
 
 			// send repsonse
 			var JSONMessage = {

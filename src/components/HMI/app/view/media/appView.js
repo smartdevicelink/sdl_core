@@ -36,12 +36,12 @@ MFT.appView = Em.ContainerView.create(MFT.LoadableView,{
 			'<div class="track-info">'+
 				'<div class="device">Device name</div>'+
             	'<div class="divider_o"></div>'+
-				'<div class="title">{{MFT.MediaController.currentSelectedPlayer.data.selectedItem.title}}</div>'+
-				'<div class="album">{{MFT.MediaController.currentSelectedPlayer.data.selectedItem.album}}</div>'+
-				'<div class="artist" >{{MFT.MediaController.currentSelectedPlayer.data.selectedItem.artist}}</div>'+
-				'<div class="time">{{MFT.MediaController.currentSelectedPlayer.formateTimeToString}}</div>'+
-				'<div id="cd_logo" {{bindAttr class="MFT.CDModel.active:visible_display MFT.AppModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
-				'<div id="usb_logo" {{bindAttr class="MFT.USBModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
+				'<div class="title">{{MFT.MediaController.currentSelectedPlayer.data.selectedItem.field1}}</div>'+
+				'<div class="album">{{MFT.MediaController.currentSelectedPlayer.data.selectedItem.field2}}</div>'+
+				'<div class="artist" >{{MFT.MediaController.currentSelectedPlayer.data.selectedItem.mediaTrack}}</div>'+
+				'<div class="time">{{MFT.MediaController.currentSelectedPlayer.data.selectedItem.mediaClock}}</div>'+
+//				'<div id="cd_logo" {{bindAttr class="MFT.CDModel.active:visible_display MFT.AppModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
+//				'<div id="usb_logo" {{bindAttr class="MFT.USBModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
 			'</div>'+
 			'{{/with}}'
 		)

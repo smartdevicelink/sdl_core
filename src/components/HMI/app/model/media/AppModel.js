@@ -25,7 +25,7 @@ MFT.AppModel = Em.Object.create({
 		selectedIndex: 	0,
 		
 		items: {
-			0:MFT.PlaylistItem.create({title: 'title',album:'album',artist:'artist',genre:'genre',disk:'disk',duration:123})
+			0:MFT.PlaylistItem.create({field1: 'title', field2:'album', mediaTrack:'artist', mediaClock: "0:00", appName: "<App name>"})
 		},
 		
 		homeWidgetIcon: 'images/media/sd-h-ico.png',

@@ -120,12 +120,14 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		{	
 			// add new app to the list
 			MFT.TTSPopUp.receiveMessage(notification.params.appName + " connected!");
+			MFT.AppModel.PlayList.items[0].set('appName', request.params.mediaTrack);
 		}
 
 		if (notification.method == this.onAppUnregisteredNotification)
 		{	
 			//  remove app from list
 			MFT.TTSPopUp.receiveMessage(notification.params.appName + " disconnected!");
+			MFT.AppModel.PlayList.items[0].set('appName', "<No app>");
 		}
 	},
 
