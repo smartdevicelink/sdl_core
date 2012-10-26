@@ -155,7 +155,10 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             RegisterAppInterface_response* response = new RegisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(ALRPCMessage::RESPONSE);
-            response->set_autoActivateID(*object->get_autoActivateID());
+            if(object->get_autoActivateID())
+            {
+                response->set_autoActivateID(*object->get_autoActivateID());
+            }
             response->set_buttonCapabilities(getButtonCapabilities());
             if(registeredApp)
             {
@@ -243,12 +246,27 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             Show_request* object = (Show_request*)message.first;
             RPC2Communication::Show* showRPC2Request = new RPC2Communication::Show();
             LOG4CPLUS_INFO_EXT(mLogger, "showrpc2request created");
-            showRPC2Request->setMainField1(*object->get_mainField1());
+            if(object->get_mainField1())
+            {
+                showRPC2Request->setMainField1(*object->get_mainField1());
+            }
             LOG4CPLUS_INFO_EXT(mLogger, "setMainField1 was called");
-            showRPC2Request->setMainField2(*object->get_mainField2());
-            showRPC2Request->setMediaClock(*object->get_mediaClock());
-            showRPC2Request->setStatusBar(*object->get_statusBar());
-            showRPC2Request->setTextAlignment(*object->get_alignment());
+            if(object->get_mediaClock())
+            {
+                showRPC2Request->setMainField2(*object->get_mainField2());
+            }
+            if(object->get_mediaClock())
+            {
+                showRPC2Request->setMediaClock(*object->get_mediaClock());
+            }
+            if(object->get_statusBar())
+            {
+                showRPC2Request->setStatusBar(*object->get_statusBar());
+            }
+            if(object->get_alignment())
+            {
+                showRPC2Request->setTextAlignment(*object->get_alignment());
+            }
             LOG4CPLUS_INFO_EXT(mLogger, "Show request almost handled" );
             mapMessageToSession(showRPC2Request->getID(), sessionID);
             sendHMIRPC2Response(showRPC2Request);
@@ -270,16 +288,14 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             SetGlobalProperties_request* object = (SetGlobalProperties_request*)message.first;
             RPC2Communication::SetGlobalProperties* setGPRPC2Request = new RPC2Communication::SetGlobalProperties();
             mapMessageToSession(setGPRPC2Request->getID(), sessionID);
-            std::vector<TTSChunk> helpPrompts = *object->get_helpPrompt();
-            for(std::vector<TTSChunk>::iterator it = helpPrompts.begin(); it != helpPrompts.end(); it++)
+            if(object->get_helpPrompt())
             {
-                setGPRPC2Request->setHelpPrompt(*it);
+                setGPRPC2Request->setHelpPrompt(*object->get_helpPrompt());
             }
 
-            std::vector<TTSChunk> timeoutPrompt = *object->get_timeoutPrompt();
-            for(std::vector<TTSChunk>::iterator it = timeoutPrompt.begin(); it != timeoutPrompt.end(); it++)
+            if(object->get_timeoutPrompt())
             {
-                setGPRPC2Request->setTimeoutPrompt(*it);
+                setGPRPC2Request->setTimeoutPrompt(*object->get_timeoutPrompt());
             }
             sendHMIRPC2Response(setGPRPC2Request);
             break;
@@ -290,11 +306,7 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             ResetGlobalProperties_request* object = (ResetGlobalProperties_request*)message.first;
             RPC2Communication::ResetGlobalProperties* resetGPRPC2Request = new RPC2Communication::ResetGlobalProperties();
             mapMessageToSession(resetGPRPC2Request->getID(), sessionID);
-            std::vector<GlobalProperty> gp = object->get_properties();
-            for(std::vector<GlobalProperty>::iterator it = gp.begin(); it != gp.end(); it++)
-            {
-                resetGPRPC2Request->setProperty(*it);
-            }
+            resetGPRPC2Request->setProperty(object->get_properties());
 
             sendHMIRPC2Response(resetGPRPC2Request);
             break;
