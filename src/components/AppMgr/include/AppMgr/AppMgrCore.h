@@ -45,6 +45,8 @@ typedef std::vector<ButtonCapabilities> Capabilities;
 typedef std::map<ButtonName, RegistryItem*, Comparer> ButtonMap;
 typedef std::pair<ButtonName, RegistryItem*> ButtonMapItem;
 typedef std::pair<ALRPCMessage*, unsigned char> Message;
+typedef std::map<int, unsigned char> MessagesToSessions;
+typedef std::pair<int, unsigned char> MessageToSession;
 
 class AppMgrCore
 {
@@ -76,11 +78,15 @@ private:
     void unregisterApplication(const Message &msg );
     void subscribeButton(const Message &msg );
     void unsubscribeButton(const Message &msg );
+    unsigned char findSessionIdSubscribedToButton(ButtonName appName) const;
+    unsigned char findSessionIdByMessage(int messageId) const;
     void clearButtonSubscribtion(unsigned char sessionID);
     void sendMobileRPCResponse( const Message &msg );
     void sendHMIRPC2Response( RPC2Communication::RPC2Command * msg );
     void enqueueOutgoingMobileRPCMessage( const Message &message );
 	void enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message );
+
+    void mapMessageToSession( int messageId, unsigned char sessionId );
 
 	void registerApplicationOnHMI( const std::string& name );
 
@@ -109,6 +115,7 @@ private:
 
 	Capabilities mButtonCapabilities;
     ButtonMap    mButtonsMapping;
+    MessagesToSessions mMessagesToSessionsMap;
 	
 	bool m_bTerminate;
 	JSONHandler* mJSONHandler;

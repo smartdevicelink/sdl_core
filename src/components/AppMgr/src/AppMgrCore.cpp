@@ -208,14 +208,8 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             showRPC2Request->setMediaClock(*object->get_mediaClock());
             showRPC2Request->setStatusBar(*object->get_statusBar());
             showRPC2Request->setTextAlignment(*object->get_alignment());
+            mapMessageToSession(showRPC2Request->getID(), sessionID);
             sendHMIRPC2Response(showRPC2Request);
-            Show_response* response = new Show_response();
-            response->setCorrelationID(object->getCorrelationID());
-            response->setMessageType(ALRPCMessage::RESPONSE);
-            response->set_success(true);
-            response->set_resultCode(Result::SUCCESS);
-            Message responseMessage = Message(response, sessionID);
-            sendMobileRPCResponse( responseMessage );
             break;
         }
         case Marshaller::METHOD_SPEAK_REQUEST:
@@ -224,20 +218,16 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             Speak_request* object = (Speak_request*)message.first;
             RPC2Communication::Speak* speakRPC2Request = new RPC2Communication::Speak();
             speakRPC2Request->setTTSChunks(object->get_ttsChunks());
+            mapMessageToSession(speakRPC2Request->getID(), sessionID);
             sendHMIRPC2Response(speakRPC2Request);
-            Speak_response* response = new Speak_response();
-            response->setCorrelationID(object->getCorrelationID());
-            response->setMessageType(ALRPCMessage::RESPONSE);
-            response->set_success(true);
-            response->set_resultCode(Result::SUCCESS);
-            Message responseMessage = Message(response, sessionID);
-            sendMobileRPCResponse( responseMessage );
             break;
         }
         case Marshaller::METHOD_SETGLOBALPROPERTIES_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties request has been invoked");
             SetGlobalProperties_request* object = (SetGlobalProperties_request*)message.first;
+        //    RPC2Communication::
+        //    mapMessageToSession(speakRPC2Request->getID(), sessionID);
             SetGlobalProperties_response* response = new SetGlobalProperties_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(ALRPCMessage::RESPONSE);
@@ -251,6 +241,7 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A ResetGlobalProperties request has been invoked");
             ResetGlobalProperties_request* object = (ResetGlobalProperties_request*)message.first;
+            //mapMessageToSession(speakRPC2Request->getID(), sessionID);
             ResetGlobalProperties_response* response = new ResetGlobalProperties_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(ALRPCMessage::RESPONSE);
@@ -286,38 +277,64 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
 
 	switch(msg->getMethod())
 	{
-		case RPC2Communication::RPC2Marshaller::METHOD_GET_CAPABILITIES_REQUEST:
-		{			
-            LOG4CPLUS_INFO_EXT(mLogger, " A GetCapabilitiesResponse request has been income");
-			RPC2Communication::GetCapabilitiesResponse * object = (RPC2Communication::GetCapabilitiesResponse*)msg;
-			setButtonCapabilities( object );
-			
-			break;
-		}
         case RPC2Communication::RPC2Marshaller::METHOD_ONBUTTONEVENT:
         {
-            LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonEvent request has been invoked");
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonEvent notification has been invoked");
             RPC2Communication::OnButtonEvent * object = (RPC2Communication::OnButtonEvent*)msg;
             OnButtonEvent* event = new OnButtonEvent();
             event->set_buttonEventMode(object->getMode());
             const ButtonName & name = object->getName();
             event->set_buttonName(name);
-            unsigned char sessionID = mButtonsMapping.find(name)->second->getApplication()->getSessionID();
+            unsigned char sessionID = findSessionIdSubscribedToButton(name);
             Message message = Message(event, sessionID);
             sendMobileRPCResponse( message );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_ONBUTTONPRESS:
         {
-            LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonPress request has been invoked");
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonPress notification has been invoked");
             RPC2Communication::OnButtonPress * object = (RPC2Communication::OnButtonPress*)msg;
             OnButtonPress* event = new OnButtonPress();
             const ButtonName & name = object->getName();
             event->set_buttonName(name);
             event->set_buttonPressMode(object->getMode());
-            unsigned char sessionID = mButtonsMapping.find(name)->second->getApplication()->getSessionID();
+            unsigned char sessionID = findSessionIdSubscribedToButton(name);
             Message message = Message(event, sessionID);
             sendMobileRPCResponse( message );
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_GET_CAPABILITIES_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A GetButtonCapabilities response has been income");
+            RPC2Communication::GetCapabilitiesResponse * object = (RPC2Communication::GetCapabilitiesResponse*)msg;
+            setButtonCapabilities( object );
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_SHOW_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A Show response has been income");
+            RPC2Communication::ShowResponse* object = (RPC2Communication::ShowResponse*)msg;
+            Show_response* response = new Show_response();
+            response->setMessageType(ALRPCMessage::RESPONSE);
+            response->set_resultCode(object->getResult());
+            response->set_success(true);
+            unsigned char sessionID = findSessionIdByMessage(object->getID());
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_SPEAK_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A Speak response has been income");
+            RPC2Communication::SpeakResponse* object = (RPC2Communication::SpeakResponse*)msg;
+            Speak_response* response = new Speak_response();
+            response->setMessageType(ALRPCMessage::RESPONSE);
+            response->set_resultCode(object->getResult());
+            response->set_success(true);
+            response->set_resultCode(Result::SUCCESS);
+            unsigned char sessionID = findSessionIdByMessage(object->getID());
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
             break;
         }
 		case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
@@ -333,7 +350,30 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
 void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg)
 {
     LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been outcoming...");
+    switch(msg->getMethod())
+    {
+        case RPC2Communication::RPC2Marshaller::METHOD_GET_CAPABILITIES_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A GetCapabilities request has been outcoming");
+            //RPC2Communication::GetCapabilities * object = (RPC2Communication::GetCapabilities*)msg;
 
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_SHOW_REQUEST:
+        {
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_SPEAK_REQUEST:
+        {
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
+        default:
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethod() <<" has been received!");
+            break;
+        }
+    }
     mJSONRPC2Handler->sendCommand( msg );
 
     LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been outcomed");
@@ -362,7 +402,22 @@ void AppMgrCore::enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * 
 	
 	mMtxRPCBusObjectsOutgoing.Unlock();
 
-	LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getMethod() << " outgoing mobile RPC message has been sent");
+    LOG4CPLUS_INFO_EXT(mLogger, " A " << message->getMethod() << " outgoing mobile RPC message has been sent");
+}
+
+void AppMgrCore::mapMessageToSession(int messageId, unsigned char sessionId)
+{
+    mMessagesToSessionsMap.insert(MessageToSession(messageId, sessionId));
+}
+
+unsigned char AppMgrCore::findSessionIdSubscribedToButton( ButtonName appName ) const
+{
+    return mButtonsMapping.find(appName)->second->getApplication()->getSessionID();
+}
+
+unsigned char AppMgrCore::findSessionIdByMessage(int messageId) const
+{
+    return mMessagesToSessionsMap.find(messageId)->second;
 }
 
 const RegistryItem* AppMgrCore::registerApplication( const Message& object )
