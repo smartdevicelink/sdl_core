@@ -26,7 +26,6 @@ namespace RPC2Communication
         virtual RPC2Error getError() const;
         virtual void setError(const RPC2Error& error);
 
-        /* data */
     private:
         std::string mID;
         Result mResultCode;

@@ -19,9 +19,7 @@ public:
     void wait();
 
 private:
-    /* data */
     std::queue<T> mQueue;
-    //mutable sem_t mMutex;
     mutable pthread_mutex_t mMutex;
     pthread_cond_t mCond;
     bool mIsUp;
@@ -32,7 +30,6 @@ template <typename T> MessageQueue<T>::MessageQueue()
 ,mCond( PTHREAD_COND_INITIALIZER )
 ,mIsUp( false )
 {
-    //sem_init( &mMutex, 0, 1 );
     pthread_mutex_init( &mMutex, NULL );
     pthread_cond_init( &mCond, NULL );
 }
@@ -48,14 +45,6 @@ template <typename T> MessageQueue<T>::MessageQueue( std::queue<T> queue )
 
 template <typename T> MessageQueue<T>::~MessageQueue()
 {
-   /* sem_wait( &mMutex );
-    while ( !mQueue.empty() ) 
-    {
-        mQueue.pop();
-    }
-    sem_post( &mMutex );*/
-
-    //sem_destroy( &mMutex );
     pthread_cond_destroy( &mCond );
     pthread_mutex_destroy( &mMutex );
 }
@@ -91,31 +80,26 @@ template <typename T> bool MessageQueue<T>::empty() const
 
 template <typename T> void MessageQueue<T>::push( const T & element )
 {
-    //sem_wait( &mMutex );
     pthread_mutex_lock( &mMutex );
     mQueue.push( element );
 
     pthread_cond_signal( &mCond );
     mIsUp = true;
 
-    //sem_post( &mMutex );
     pthread_mutex_unlock( &mMutex );
 }
 
 template <typename T> T MessageQueue<T>::pop( )
 {
-    //sem_wait( &mMutex );
     pthread_mutex_lock( &mMutex );
     if ( mQueue.empty() )
     {
         //error, TRACE
-        //sem_post( &mMutex );
     }
     
     T result = mQueue.front();
     mQueue.pop();
        
-    //sem_post( &mMutex );
     pthread_mutex_unlock( &mMutex );
     return result; 
 }

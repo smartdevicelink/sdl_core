@@ -98,6 +98,7 @@ int main(int argc, char** argv)
     }
 
     JSONRPC2Handler jsonRPC2Handler( std::string("127.0.0.1"), 8087 );
+    jsonRPC2Handler.setRPC2CommandsObserver( &appMgr );
     if (!jsonRPC2Handler.Connect())
     {
         LOG4CPLUS_INFO(logger, "Cannot connect to remote peer!");
@@ -128,11 +129,17 @@ int main(int argc, char** argv)
     th3.Start(false);
 
     jsonRPC2Handler.registerController();
+    jsonRPC2Handler.subscribeToNotifications();
 
     printf("Start AppMgr threads!\n");
     NsAppManager::AppMgrCore& appMgrCore = NsAppManager::AppMgrCore::getInstance();
     appMgrCore.executeThreads();
     //appLinkInterface.executeThreads();
+
+    while( true )
+    {
+        sleep( 1 );
+    }
 
     printf("Start AppMgr!\n");
     appMgr.startAppMgr();

@@ -12,7 +12,6 @@ namespace RPC2Communication
         RPC2Notification( int method );
         ~RPC2Notification();
 
-        /* data */
     };
 
 }

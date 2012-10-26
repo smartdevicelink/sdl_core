@@ -21,7 +21,6 @@
 
 namespace RPC2Communication
 {
-
     class RPC2Marshaller
     {
     public:
