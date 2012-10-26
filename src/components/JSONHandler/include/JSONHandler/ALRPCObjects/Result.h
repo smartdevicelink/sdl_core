@@ -6,8 +6,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Fri Oct 26 06:31:48 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -78,42 +78,36 @@ public:
 ///  The item to subscribe to is already subscribed to.
     SUBSCRIBED_ALREADY=13,
 
-///  The user has turned off access to vehicle data, and it is globally unavailable to mobile applications.
-    VEHICLE_DATA_NOT_ALLOWED=14,
-
-///  The requested vehicle data is not available on this vehicle or is not published.
-    VEHICLE_DATA_NOT_AVAILABLE=15,
-
 /**
      The requested command was rejected, e.g. because mobile app is in background and cannot perform any HMI commands.
      Or an HMI command (e.g. Speak) is rejected because a higher priority HMI command (e.g. Alert) is playing.
 */
-    REJECTED=16,
+    REJECTED=14,
 
 /**
      A command was aborted, for example due to user interaction (e.g. user pressed button).
      Or an HMI command (e.g. Speak) is aborted because a higher priority HMI command (e.g. Alert) was requested.
 */
-    ABORTED=17,
+    ABORTED=15,
 
 /**
      A command was ignored, because the intended result is already in effect.
      For example, SetMediaClockTimer was used to pause the media clock although the clock is paused already.
      NOTE: potentially replaces SUBSCRIBED_ALREADY
 */
-    IGNORED=18,
+    IGNORED=16,
 
 /**
      A button that was requested for subscription is not supported under the current system.
      NOTE: could become a more generic UNSUPPORTED_RESOURCE by merging with VEHIVLE_DATA_NOT_AVAILABLE.
 */
-    UNSUPPORTED_BUTTON=19,
+    UNSUPPORTED_BUTTON=17,
 
 ///  A specified file could not be found on Sync.
-    FILE_NOT_FOUND=20,
+    FILE_NOT_FOUND=18,
 
 ///  Provided data is valid but something went wrong in the lower layers.
-    GENERIC_ERROR=21
+    GENERIC_ERROR=19
   };
 
   Result() : mInternal(INVALID_ENUM)				{}

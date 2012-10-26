@@ -35,7 +35,6 @@ set(GENERATED_SOURCE
          ./src/ALRPCObjectsImpl/CharacterSetMarshaller.cpp
          ./src/ALRPCObjectsImpl/Choice.cpp
          ./src/ALRPCObjectsImpl/ChoiceMarshaller.cpp
-         ./src/ALRPCObjectsImpl/CompassDirectionMarshaller.cpp
          ./src/ALRPCObjectsImpl/CreateInteractionChoiceSet_request.cpp
          ./src/ALRPCObjectsImpl/CreateInteractionChoiceSet_requestMarshaller.cpp
          ./src/ALRPCObjectsImpl/CreateInteractionChoiceSet_response.cpp
@@ -52,7 +51,6 @@ set(GENERATED_SOURCE
          ./src/ALRPCObjectsImpl/DeleteSubMenu_requestMarshaller.cpp
          ./src/ALRPCObjectsImpl/DeleteSubMenu_response.cpp
          ./src/ALRPCObjectsImpl/DeleteSubMenu_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/DimensionMarshaller.cpp
          ./src/ALRPCObjectsImpl/DisplayCapabilities.cpp
          ./src/ALRPCObjectsImpl/DisplayCapabilitiesMarshaller.cpp
          ./src/ALRPCObjectsImpl/DisplayTypeMarshaller.cpp
@@ -132,7 +130,6 @@ set(GENERATED_SOURCE
          ./src/ALRPCObjectsImpl/TextField.cpp
          ./src/ALRPCObjectsImpl/TextFieldMarshaller.cpp
          ./src/ALRPCObjectsImpl/TextFieldNameMarshaller.cpp
-         ./src/ALRPCObjectsImpl/TimerModeMarshaller.cpp
          ./src/ALRPCObjectsImpl/TriggerSourceMarshaller.cpp
          ./src/ALRPCObjectsImpl/TTSChunk.cpp
          ./src/ALRPCObjectsImpl/TTSChunkMarshaller.cpp
@@ -187,6 +184,10 @@ add_library(jsonHandler
                   ./src/SetGlobalPropertiesResponseMarshaller.cpp
                   ./src/SetGlobalProperties.cpp
                   ./src/SetGlobalPropertiesMarshaller.cpp
+                  ./src/ResetGlobalProperties.cpp
+                  ./src/ResetGlobalPropertiesMarshaller.cpp
+                  ./src/ResetGlobalPropertiesResponse.cpp
+                  ./src/ResetGlobalPropertiesResponseMarshaller.cpp
                   ${GENERATED_SOURCE}
            )
 

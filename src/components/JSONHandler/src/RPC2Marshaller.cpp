@@ -35,6 +35,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_SET_GLOBAL_PROPERTIES_REQUEST;
     }
+    if ( s.compare("UI.ResetGlobalProperties") == 0 )
+    {
+        return METHOD_RESET_GLOBAL_PROPERTIES_REQUEST;
+    }
     return METHOD_INVALID;
 }
 
@@ -59,6 +63,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getResponseIndex(const std::string
   if ( s.compare("UI.SetGlobalProperties") == 0 )
   {
       return METHOD_SET_GLOBAL_PROPERTIES_RESPONSE;
+  }
+  if ( s.compare("UI.ResetGlobalProperties") == 0 )
+  {
+      return METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE;
   }
 }
 
@@ -192,6 +200,22 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_RESET_GLOBAL_PROPERTIES_REQUEST:
+    {
+        ResetGlobalProperties * rv = new ResetGlobalProperties;
+        if ( ResetGlobalPropertiesMarshaller::fromJSON(json, *rv) )
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE:
+    {
+        ResetGlobalPropertiesResponse * rv = new ResetGlobalPropertiesResponse;
+        if (ResetGlobalPropertiesResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
   }
 
   return NULL;
@@ -233,6 +257,10 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return SetGlobalPropertiesMarshaller::toJSON(* static_cast<const SetGlobalProperties*>(msg));
     case METHOD_SET_GLOBAL_PROPERTIES_RESPONSE:
       return SetGlobalPropertiesResponseMarshaller::toJSON(* static_cast<const SetGlobalPropertiesResponse*>(msg));
+    case METHOD_RESET_GLOBAL_PROPERTIES_REQUEST:
+      return ResetGlobalPropertiesMarshaller::toJSON(* static_cast<const ResetGlobalProperties*>(msg));
+    case METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE:
+      return ResetGlobalPropertiesResponseMarshaller::toJSON(* static_cast<const ResetGlobalPropertiesResponse*>(msg));
   }
 
   return j;
@@ -278,3 +306,5 @@ GetCapabilitiesResponseMarshaller RPC2Marshaller::mGetCapabilitiesResponseMarsha
 OnButtonPressMarshaller RPC2Marshaller::mOnButtonPressMarshaller;
 SetGlobalPropertiesMarshaller RPC2Marshaller::mSetGlobalPropertiesMarshaller;
 SetGlobalPropertiesResponseMarshaller RPC2Marshaller::mSetGlobalPropertiesResponseMarshaller;
+ResetGlobalPropertiesMarshaller RPC2Marshaller::mResetGlobalPropertiesMarshaller;
+ResetGlobalPropertiesResponseMarshaller RPC2Marshaller::mResetGlobalPropertiesResponseMarshaller;
