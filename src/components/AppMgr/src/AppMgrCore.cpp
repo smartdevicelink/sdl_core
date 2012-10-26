@@ -222,6 +222,9 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Speak request has been invoked");
             Speak_request* object = (Speak_request*)message.first;
+            RPC2Communication::Speak* speakRPC2Request = new RPC2Communication::Speak();
+            speakRPC2Request->setTTSChunks(object->get_ttsChunks());
+            sendHMIRPC2Response(speakRPC2Request);
             Speak_response* response = new Speak_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(ALRPCMessage::RESPONSE);
