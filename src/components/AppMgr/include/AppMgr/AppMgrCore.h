@@ -87,6 +87,7 @@ private:
 	void enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message );
 
     void mapMessageToSession( int messageId, unsigned char sessionId );
+    void removeMessageToSessionMapping( int messageId );
 
 	void registerApplicationOnHMI( const std::string& name );
 

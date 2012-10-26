@@ -319,6 +319,7 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
             response->set_resultCode(object->getResult());
             response->set_success(true);
             unsigned char sessionID = findSessionIdByMessage(object->getID());
+            removeMessageToSessionMapping(object->getID());
             Message responseMessage = Message(response, sessionID);
             sendMobileRPCResponse( responseMessage );
             break;
@@ -333,6 +334,7 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
             response->set_success(true);
             response->set_resultCode(Result::SUCCESS);
             unsigned char sessionID = findSessionIdByMessage(object->getID());
+            removeMessageToSessionMapping(object->getID());
             Message responseMessage = Message(response, sessionID);
             sendMobileRPCResponse( responseMessage );
             break;
@@ -408,6 +410,11 @@ void AppMgrCore::enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * 
 void AppMgrCore::mapMessageToSession(int messageId, unsigned char sessionId)
 {
     mMessagesToSessionsMap.insert(MessageToSession(messageId, sessionId));
+}
+
+void AppMgrCore::removeMessageToSessionMapping(int messageId)
+{
+    mMessagesToSessionsMap.erase(messageId);
 }
 
 unsigned char AppMgrCore::findSessionIdSubscribedToButton( ButtonName appName ) const
