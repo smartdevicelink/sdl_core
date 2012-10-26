@@ -119,11 +119,13 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		if (notification.method == this.onAppRegisteredNotification)
 		{	
 			// add new app to the list
+			MFT.TTSPopUp.receiveMessage(notification.params.appName + " connected!");
 		}
 
 		if (notification.method == this.onAppUnregisteredNotification)
 		{	
 			//  remove app from list
+			MFT.TTSPopUp.receiveMessage(notification.params.appName + " disconnected!");
 		}
 	},
 
