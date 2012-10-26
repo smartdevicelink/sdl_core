@@ -14,8 +14,8 @@ namespace RPC2Communication {
 
         const std::string * getAlertText1() const;
         const std::string * getAlertText2() const;
-        int getDuration() const;
-        bool getPlayTone() const;
+        int * getDuration() const;
+        bool * getPlayTone() const;
 
         void setAlertText1( const std::string & str );
         void setAlertText2( const std::string & str );
