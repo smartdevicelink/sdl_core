@@ -6,6 +6,7 @@
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "IProtocolObserver.hpp"
 #include "ProtocolHandler.hpp"
+#include "Logger.hpp"
 
 class JSONHandler : public AxisCore::IProtocolObserver
 {
@@ -34,6 +35,7 @@ protected:
     std::string clearEmptySpaces( const std::string & input );
     
 private:
+    static log4cplus::Logger                     mLogger;
     IRPCMessagesObserver *             mMessagesObserver;
 
     /* Data for IProtocolObserver */

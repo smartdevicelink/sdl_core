@@ -13,9 +13,6 @@ JSONRPC2Handler::JSONRPC2Handler( const std::string& address, uint16_t port )
 
 JSONRPC2Handler::~JSONRPC2Handler()
 {
-    /*pthread_kill( mWaitForCommandsFromHMI, 1 );
-    pthread_kill( mWaitForCommandsToHMI, 1 );
-    pthread_kill( mWaitForResponsesFromHMI, 1 );*/
 }
 
 void JSONRPC2Handler::processResponse(std::string method, Json::Value& root)
@@ -37,6 +34,12 @@ void JSONRPC2Handler::processNotification(Json::Value& root)
 {
     LOG4CPLUS_INFO( mLogger, "Received notification from RPCBus." );
     mCommandsFromHMI.push( root );
+}
+
+void JSONRPC2Handler::subscribeToNotifications()
+{
+    subscribeTo( "Buttons.OnButtonEvent" );
+    subscribeTo( "Buttons.OnButtonPress" );
 }
 
 void JSONRPC2Handler::setRPC2CommandsObserver( 
@@ -140,6 +143,7 @@ void * JSONRPC2Handler::waitForCommandsToHMI( void * params )
             }
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: processed command" );
 
+            handler -> prepareMessage( commandJson );
             handler -> sendJsonMessage( commandJson );
         }
         handler -> mCommandsToHMI.wait();

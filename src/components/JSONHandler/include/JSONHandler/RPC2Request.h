@@ -17,7 +17,7 @@ namespace RPC2Communication
 
         virtual std::string getIDString() const;
         virtual int getID() const;
-        /* data */
+        
     private:
         std::string mID;
     };

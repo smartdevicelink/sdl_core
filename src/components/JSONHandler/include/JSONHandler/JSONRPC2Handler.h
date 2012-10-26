@@ -18,13 +18,11 @@ public:
     void processResponse(std::string method, Json::Value& root);
     void processRequest(Json::Value& root);
     void processNotification(Json::Value& root);
+    void subscribeToNotifications( );
     /*End of ethods from CMessageBrokerController*/
 
     /*Methods for IRPC2CommandsObserver*/
     void setRPC2CommandsObserver( IRPC2CommandsObserver * commandsObserver );
-    /*void sendResponse( const RPC2Response * response );
-    void sendRequest( const RPC2Request * request );
-    void sendNotification( const RPC2Notification * notification );*/
     void sendCommand( const RPC2Communication::RPC2Command * command );
     /*End of methods for IRPC2CommandsObserver*/
 
