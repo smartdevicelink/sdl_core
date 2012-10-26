@@ -22,7 +22,6 @@ set (SOURCES
 		./src/IAppCommand.cpp
 		./src/AppMgr.cpp
 		./src/AppFactory.cpp
-		./src/AppLinkInterface.cpp
 		./src/AppMgrRegistry.cpp
 		./src/IApplication.cpp
 		./src/Application.cpp

@@ -19,14 +19,8 @@ AppMgr& AppMgr::getInstance( )
 	return appMgr;
 }
 
-void AppMgr::setParams(const std::string& address, uint16_t port, std::string name)
-{
-	AppLinkInterface::setParams(address, port, name);
-}
-
 AppMgr::AppMgr()
-	:mAppLinkInterface(AppLinkInterface::getInstance())
-	,mAppMgrRegistry(AppMgrRegistry::getInstance())
+    :mAppMgrRegistry(AppMgrRegistry::getInstance())
 	,mAppMgrCore(AppMgrCore::getInstance())
 	,mAppFactory(AppFactory::getInstance())
 	,mJSONHandler(0)
@@ -40,8 +34,7 @@ AppMgr::~AppMgr()
 }
 
 AppMgr::AppMgr(const AppMgr &)
-    :mAppLinkInterface(AppLinkInterface::getInstance())
-    ,mAppMgrRegistry(AppMgrRegistry::getInstance())
+    :mAppMgrRegistry(AppMgrRegistry::getInstance())
     ,mAppMgrCore(AppMgrCore::getInstance())
     ,mAppFactory(AppFactory::getInstance())
     ,mJSONHandler(0)
@@ -78,7 +71,7 @@ void AppMgr::onCommandReceivedCallback(RPC2Communication::RPC2Command *command)
 void AppMgr::processResponse(std::string method, Json::Value& root)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Processing a response to "<<method);
-	mAppLinkInterface.processResponse(method, root);
+    //mAppLinkInterface.processResponse(method, root);
 }
 
 /**
@@ -88,7 +81,7 @@ void AppMgr::processResponse(std::string method, Json::Value& root)
 void AppMgr::processRequest(Json::Value& root)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Processing a request");
-	mAppLinkInterface.processRequest(root);
+    //mAppLinkInterface.processRequest(root);
 }
 
 /**
@@ -103,19 +96,14 @@ void AppMgr::processRequest(Json::Value& root)
 void AppMgr::processNotification(Json::Value& root)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Processing a notification");
-	mAppLinkInterface.processNotification(root);
+    //mAppLinkInterface.processNotification(root);
 }
-
-const AppLinkInterface& AppMgr::getAppLinkInterface() const
-{
-	return mAppLinkInterface;
-}	
 
 void AppMgr::startAppMgr()
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Starting AppMgr...");
-	mAppLinkInterface.registerController();
-    mAppLinkInterface.prepareComponent();
+    //mAppLinkInterface.registerController();
+    //mAppLinkInterface.prepareComponent();
     LOG4CPLUS_INFO_EXT(mLogger, " Started AppMgr!");
 }
 

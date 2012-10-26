@@ -54,8 +54,6 @@ int main(int argc, char** argv)
 
     jsonHandler.setProtocolHandler(pProtocolHandler);
 
-    NsAppManager::AppMgr::setParams(std::string("127.0.0.1"), 8087, std::string("AppMgr"));
-
     NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
 
     jsonHandler.setRPCMessagesObserver(&appMgr);
@@ -135,11 +133,6 @@ int main(int argc, char** argv)
     NsAppManager::AppMgrCore& appMgrCore = NsAppManager::AppMgrCore::getInstance();
     appMgrCore.executeThreads();
     //appLinkInterface.executeThreads();
-
-    while( true )
-    {
-        sleep( 1 );
-    }
 
     printf("Start AppMgr!\n");
     appMgr.startAppMgr();

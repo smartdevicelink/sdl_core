@@ -30,14 +30,6 @@ class AppFactory;
 class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver
 {
 public:
-
-	/**
-	 * \brief needs to be called before getInstance.
-	 * \param address address to bind to.
-	 * \param port port to bind to.
-	 * \param name name to bind to.
-	 */
-	static void setParams(const std::string& address, uint16_t port, std::string name);
 	
 	static AppMgr& getInstance();
 	
@@ -73,8 +65,6 @@ public:
 
     void setJsonRPC2Handler(JSONRPC2Handler* handler);
 
-	const AppLinkInterface& getAppLinkInterface() const;
-
 	void startAppMgr();
 	
 private:
@@ -82,7 +72,6 @@ private:
     AppMgr(const AppMgr&);
 	AppMgr();
 
-	AppLinkInterface& mAppLinkInterface;
 	AppMgrRegistry& mAppMgrRegistry;
 	AppMgrCore& mAppMgrCore;
 	AppFactory& mAppFactory;
