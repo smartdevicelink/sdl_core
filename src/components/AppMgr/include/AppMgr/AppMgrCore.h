@@ -71,14 +71,15 @@ private:
     void handleMobileRPCMessage(const Message &message );
 	void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg );
     void handleBusRPCMessageOutgoing( RPC2Communication::RPC2Command* msg );
+    const ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
     const RegistryItem* registerApplication(const Message &msg );
     void unregisterApplication(const Message &msg );
     void subscribeButton(const Message &msg );
     void unsubscribeButton(const Message &msg );
     void clearButtonSubscribtion(unsigned char sessionID);
-    void sendMobileRPCResponse(const Message &msg );
-    void enqueueOutgoingMobileRPCMessage(const Message &message );
-    const ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
+    void sendMobileRPCResponse( const Message &msg );
+    void sendHMIRPC2Response( RPC2Communication::RPC2Command * msg );
+    void enqueueOutgoingMobileRPCMessage( const Message &message );
 	void enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message );
 
 	void registerApplicationOnHMI( const std::string& name );

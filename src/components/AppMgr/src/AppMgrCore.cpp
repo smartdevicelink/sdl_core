@@ -148,7 +148,8 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             response->set_buttonCapabilities(getButtonCapabilities());
             response->set_success(true);
             response->set_resultCode(Result::SUCCESS);
-            sendMobileRPCResponse( message );
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
             break;
 		}
         case Marshaller::METHOD_UNREGISTERAPPINTERFACE_REQUEST:
@@ -162,7 +163,8 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_success(true);
             response->set_resultCode(Result::SUCCESS);
-            sendMobileRPCResponse( message );
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
             OnAppInterfaceUnregistered* msgUnregistered = new OnAppInterfaceUnregistered();
             msgUnregistered->set_reason(AppInterfaceUnregisteredReason(AppInterfaceUnregisteredReason::USER_EXIT));
             sendMobileRPCResponse( Message(msgUnregistered, message.second) );
@@ -178,7 +180,8 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_success(true);
             response->set_resultCode(Result::SUCCESS);
-            sendMobileRPCResponse( message );
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
             break;
         }
         case Marshaller::METHOD_UNSUBSCRIBEBUTTON_REQUEST:
@@ -191,9 +194,73 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_success(true);
             response->set_resultCode(Result::SUCCESS);
-            sendMobileRPCResponse( message );
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
             break;
         }
+        case Marshaller::METHOD_SHOW_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A Show request has been invoked");
+            Show_request* object = (Show_request*)message.first;
+            RPC2Communication::Show* showRPC2Request = new RPC2Communication::Show();
+            showRPC2Request->setMainField1(*object->get_mainField1());
+            showRPC2Request->setMainField2(*object->get_mainField2());
+            showRPC2Request->setMediaClock(*object->get_mediaClock());
+            showRPC2Request->setStatusBar(*object->get_statusBar());
+            showRPC2Request->setTextAlignment(*object->get_alignment());
+            sendHMIRPC2Response(showRPC2Request);
+            Show_response* response = new Show_response();
+            response->setCorrelationID(object->getCorrelationID());
+            response->setMessageType(ALRPCMessage::RESPONSE);
+            response->set_success(true);
+            response->set_resultCode(Result::SUCCESS);
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
+            break;
+        }
+        case Marshaller::METHOD_SPEAK_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A Speak request has been invoked");
+            Speak_request* object = (Speak_request*)message.first;
+            Speak_response* response = new Speak_response();
+            response->setCorrelationID(object->getCorrelationID());
+            response->setMessageType(ALRPCMessage::RESPONSE);
+            response->set_success(true);
+            response->set_resultCode(Result::SUCCESS);
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
+            break;
+        }
+        case Marshaller::METHOD_SETGLOBALPROPERTIES_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties request has been invoked");
+            SetGlobalProperties_request* object = (SetGlobalProperties_request*)message.first;
+            SetGlobalProperties_response* response = new SetGlobalProperties_response();
+            response->setCorrelationID(object->getCorrelationID());
+            response->setMessageType(ALRPCMessage::RESPONSE);
+            response->set_success(true);
+            response->set_resultCode(Result::SUCCESS);
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
+            break;
+        }
+        case Marshaller::METHOD_RESETGLOBALPROPERTIES_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A ResetGlobalProperties request has been invoked");
+            ResetGlobalProperties_request* object = (ResetGlobalProperties_request*)message.first;
+            ResetGlobalProperties_response* response = new ResetGlobalProperties_response();
+            response->setCorrelationID(object->getCorrelationID());
+            response->setMessageType(ALRPCMessage::RESPONSE);
+            response->set_success(true);
+            response->set_resultCode(Result::SUCCESS);
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
+            break;
+        }
+        case Marshaller::METHOD_SHOW_RESPONSE:
+        case Marshaller::METHOD_SPEAK_RESPONSE:
+        case Marshaller::METHOD_SETGLOBALPROPERTIES_RESPONSE:
+        case Marshaller::METHOD_RESETGLOBALPROPERTIES_RESPONSE:
         case Marshaller::METHOD_REGISTERAPPINTERFACE_RESPONSE:
         case Marshaller::METHOD_SUBSCRIBEBUTTON_RESPONSE:
         case Marshaller::METHOD_UNSUBSCRIBEBUTTON_RESPONSE:
@@ -321,8 +388,6 @@ const RegistryItem* AppMgrCore::registerApplication( const Message& object )
 
 	application->setApplicationHMIStatusLevel(HMILevel::HMI_NONE);
 
-//    RPC2Communication::
-
     return AppMgrRegistry::getInstance().registerApplication( application );
 }
 
@@ -404,6 +469,13 @@ void AppMgrCore::sendMobileRPCResponse( const Message& msg )
     LOG4CPLUS_INFO_EXT(mLogger, " Sending mobile RPC response to "<< msg.first->getMethodId() <<"!");
 
     enqueueOutgoingMobileRPCMessage( msg );
+}
+
+void AppMgrCore::sendHMIRPC2Response(RPC2Communication::RPC2Command *msg)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " Sending HMI RPC2 response to "<< msg->getMethod() <<"!");
+
+    enqueueOutgoingBusRPCMessage(msg);
 }
 
 void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
