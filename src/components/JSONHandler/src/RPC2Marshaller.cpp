@@ -39,6 +39,14 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_RESET_GLOBAL_PROPERTIES_REQUEST;
     }
+    if ( s.compare("AppLinkCore.OnAppRegistered") == 0 )
+    {
+        return METHOD_ONAPPREGISTERED;
+    }
+    if ( s.compare("AppLinkCore.OnAppUnregistered") == 0 )
+    {
+        return METHOD_ONAPPUNREDISTERED;
+    }
     return METHOD_INVALID;
 }
 
@@ -216,6 +224,22 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_ONAPPREGISTERED:
+    {
+        OnAppRegistered * rv = new OnAppRegistered;
+        if ( OnAppRegisteredMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ONAPPUNREDISTERED:
+    {
+        OnAppUnregistered * rv = new OnAppUnregistered;
+        if ( OnAppUnregisteredMarshaller::fromJSON(json, *rv) )
+          return rv;
+        delete rv;
+        return NULL;
+    }
   }
 
   return NULL;
@@ -261,6 +285,10 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return ResetGlobalPropertiesMarshaller::toJSON(* static_cast<const ResetGlobalProperties*>(msg));
     case METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE:
       return ResetGlobalPropertiesResponseMarshaller::toJSON(* static_cast<const ResetGlobalPropertiesResponse*>(msg));
+    case METHOD_ONAPPREGISTERED:
+      return OnAppRegisteredMarshaller::toJSON(* static_cast<const OnAppRegistered*>(msg));
+    case METHOD_ONAPPUNREDISTERED:
+      return OnAppUnregisteredMarshaller::toJSON(* static_cast<const OnAppUnregistered*>(msg));
   }
 
   return j;
@@ -308,3 +336,5 @@ SetGlobalPropertiesMarshaller RPC2Marshaller::mSetGlobalPropertiesMarshaller;
 SetGlobalPropertiesResponseMarshaller RPC2Marshaller::mSetGlobalPropertiesResponseMarshaller;
 ResetGlobalPropertiesMarshaller RPC2Marshaller::mResetGlobalPropertiesMarshaller;
 ResetGlobalPropertiesResponseMarshaller RPC2Marshaller::mResetGlobalPropertiesResponseMarshaller;
+OnAppRegisteredMarshaller RPC2Marshaller::mOnAppRegisteredMarshaller;
+OnAppUnregisteredMarshaller RPC2Marshaller::mOnAppUnregisteredMarshaller;

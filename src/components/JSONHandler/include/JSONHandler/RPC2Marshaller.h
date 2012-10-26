@@ -18,6 +18,8 @@
 #include "JSONHandler/ResetGlobalPropertiesMarshaller.h"
 #include "JSONHandler/ResetGlobalPropertiesResponseMarshaller.h"
 #include "JSONHandler/ResetGlobalPropertiesResponse.h"
+#include "JSONHandler/OnAppRegisteredMarshaller.h"
+#include "JSONHandler/OnAppUnregisteredMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -40,7 +42,9 @@ namespace RPC2Communication
         METHOD_SET_GLOBAL_PROPERTIES_REQUEST=10,
         METHOD_SET_GLOBAL_PROPERTIES_RESPONSE=11,
         METHOD_RESET_GLOBAL_PROPERTIES_REQUEST=12,
-        METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE=13
+        METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE=13,
+        METHOD_ONAPPREGISTERED=14,
+        METHOD_ONAPPUNREDISTERED=15
         };
 
         RPC2Marshaller();
@@ -192,6 +196,25 @@ namespace RPC2Communication
             return mResetGlobalPropertiesResponseMarshaller.toString(res);
         }
 
+        static bool fromString( const std::string & str, OnAppRegistered& res )
+        {
+            return mOnAppRegisteredMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const OnAppRegistered& res)
+        {
+            return mOnAppRegisteredMarshaller.toString(res);
+        }
+
+        static bool fromString( const std::string& str, OnAppUnregistered& res )
+        {
+            return mOnAppUnregisteredMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const OnAppUnregistered& res)
+        {
+            return mOnAppUnregisteredMarshaller.toString(res);
+        }
 
     private:
         struct localHash
@@ -228,7 +251,8 @@ namespace RPC2Communication
         static SetGlobalPropertiesResponseMarshaller mSetGlobalPropertiesResponseMarshaller;
         static ResetGlobalPropertiesMarshaller mResetGlobalPropertiesMarshaller;
         static ResetGlobalPropertiesResponseMarshaller mResetGlobalPropertiesResponseMarshaller;
-
+        static OnAppRegisteredMarshaller mOnAppRegisteredMarshaller;
+        static OnAppUnregisteredMarshaller mOnAppUnregisteredMarshaller;
     };
 
 }

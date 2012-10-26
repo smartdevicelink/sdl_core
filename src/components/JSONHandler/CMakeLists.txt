@@ -188,6 +188,10 @@ add_library(jsonHandler
                   ./src/ResetGlobalPropertiesMarshaller.cpp
                   ./src/ResetGlobalPropertiesResponse.cpp
                   ./src/ResetGlobalPropertiesResponseMarshaller.cpp
+                  ./src/OnAppRegistered.cpp
+                  ./src/OnAppRegisteredMarshaller.cpp
+                  ./src/OnAppUnregisteredMarshaller.cpp
+                  ./src/OnAppUnregistered.cpp
                   ${GENERATED_SOURCE}
            )
 
