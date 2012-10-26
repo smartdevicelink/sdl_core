@@ -43,6 +43,8 @@
 #include "JSONHandler/GetCapabilitiesResponse.h"
 #include "JSONHandler/SetGlobalProperties.h"
 #include "JSONHandler/ResetGlobalProperties.h"
+#include "JSONHandler/OnAppRegistered.h"
+#include "JSONHandler/OnAppUnregistered.h"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 
@@ -166,10 +168,18 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             sendMobileRPCResponse( responseMessage );
             if(registeredApp)
             {
+                const Application* app = registeredApp->getApplication();
                 OnHMIStatus* status = new OnHMIStatus();
-                status->set_hmiLevel(registeredApp->getApplication()->getApplicationHMIStatusLevel());
+                status->set_hmiLevel(app->getApplicationHMIStatusLevel());
                 sendMobileRPCResponse(Message(status, sessionID));
+                RPC2Communication::OnAppRegistered* appRegistered = new RPC2Communication::OnAppRegistered();
+                appRegistered->setAppName(app->getName());
+                appRegistered->setIsMediaApplication(app->getIsMediaApplication());
+                appRegistered->setLanguageDesired(app->getLanguageDesired());
+                appRegistered->setVrSynonyms(app->getVrSynonyms());
+                sendHMIRPC2Response(appRegistered);
             }
+
             break;
 		}
         case Marshaller::METHOD_UNREGISTERAPPINTERFACE_REQUEST:
@@ -177,6 +187,7 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
 
             UnregisterAppInterface_request * object = (UnregisterAppInterface_request*)message.first;
+            std::string appName = AppMgrRegistry::getInstance().getItem(message.second)->getApplication()->getName();
             unregisterApplication( message );
             UnregisterAppInterface_response* response = new UnregisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
@@ -188,6 +199,10 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             OnAppInterfaceUnregistered* msgUnregistered = new OnAppInterfaceUnregistered();
             msgUnregistered->set_reason(AppInterfaceUnregisteredReason(AppInterfaceUnregisteredReason::USER_EXIT));
             sendMobileRPCResponse( Message(msgUnregistered, message.second) );
+            RPC2Communication::OnAppUnregistered* appUnregistered = new RPC2Communication::OnAppUnregistered();
+            appUnregistered->setAppName(appName);
+            appUnregistered->setReason(AppInterfaceUnregisteredReason(AppInterfaceUnregisteredReason::USER_EXIT));
+            sendHMIRPC2Response(appUnregistered);
             break;
         }
         case Marshaller::METHOD_SUBSCRIBEBUTTON_REQUEST:
