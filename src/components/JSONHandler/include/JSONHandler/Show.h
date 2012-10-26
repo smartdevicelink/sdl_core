@@ -20,20 +20,20 @@ namespace RPC2Communication
         void setMediaClock(const std::string& s);
         void setMediaTrack(const std::string& str);
 
-        std::string getMainField1() const;
-        std::string getMainField2() const;
+        const std::string * getMainField1() const;
+        const std::string * getMainField2() const;
         const TextAlignment * getTextAlignment() const;
-        std::string getStatusBar() const;
-        std::string getMediaClock() const;
-        std::string getMediaTrack() const;
+        const std::string * getStatusBar() const;
+        const std::string * getMediaClock() const;
+        const std::string * getMediaTrack() const;
 
     private:
-        std::string mMainField1;
-        std::string mMainField2;
+        std::string * mMainField1;
+        std::string * mMainField2;
         TextAlignment * mAlignment;
-        std::string mStatusBar;
-        std::string mMediaClock;
-        std::string mMediaTrack;
+        std::string * mStatusBar;
+        std::string * mMediaClock;
+        std::string * mMediaTrack;
 
         friend class ShowMarshaller;
     };
