@@ -28,6 +28,10 @@
 #include "JSONHandler/ALRPCObjects/OnAppInterfaceUnregistered.h"
 #include "JSONHandler/ALRPCObjects/OnHMIStatus.h"
 #include "JSONHandler/ALRPCObjects/HMILevel.h"
+#include "JSONHandler/ALRPCObjects/SetGlobalProperties_request.h"
+#include "JSONHandler/ALRPCObjects/SetGlobalProperties_response.h"
+#include "JSONHandler/ALRPCObjects/ResetGlobalProperties_request.h"
+#include "JSONHandler/ALRPCObjects/ResetGlobalProperties_response.h"
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"
 #include "JSONHandler/OnButtonEvent.h"
@@ -37,6 +41,8 @@
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/GetCapabilitiesResponse.h"
+#include "JSONHandler/SetGlobalProperties.h"
+#include "JSONHandler/ResetGlobalProperties.h"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 
@@ -226,29 +232,35 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties request has been invoked");
             SetGlobalProperties_request* object = (SetGlobalProperties_request*)message.first;
-        //    RPC2Communication::
-        //    mapMessageToSession(speakRPC2Request->getID(), sessionID);
-            SetGlobalProperties_response* response = new SetGlobalProperties_response();
-            response->setCorrelationID(object->getCorrelationID());
-            response->setMessageType(ALRPCMessage::RESPONSE);
-            response->set_success(true);
-            response->set_resultCode(Result::SUCCESS);
-            Message responseMessage = Message(response, sessionID);
-            sendMobileRPCResponse( responseMessage );
+            RPC2Communication::SetGlobalProperties* setGPRPC2Request = new RPC2Communication::SetGlobalProperties();
+            mapMessageToSession(setGPRPC2Request->getID(), sessionID);
+            std::vector<TTSChunk> helpPrompts = *object->get_helpPrompt();
+            for(std::vector<TTSChunk>::iterator it = helpPrompts.begin(); it != helpPrompts.end(); it++)
+            {
+                setGPRPC2Request->setHelpPrompt(*it);
+            }
+
+            std::vector<TTSChunk> timeoutPrompt = *object->get_timeoutPrompt();
+            for(std::vector<TTSChunk>::iterator it = timeoutPrompt.begin(); it != timeoutPrompt.end(); it++)
+            {
+                setGPRPC2Request->setTimeoutPrompt(*it);
+            }
+            sendHMIRPC2Response(setGPRPC2Request);
             break;
         }
         case Marshaller::METHOD_RESETGLOBALPROPERTIES_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A ResetGlobalProperties request has been invoked");
             ResetGlobalProperties_request* object = (ResetGlobalProperties_request*)message.first;
-            //mapMessageToSession(speakRPC2Request->getID(), sessionID);
-            ResetGlobalProperties_response* response = new ResetGlobalProperties_response();
-            response->setCorrelationID(object->getCorrelationID());
-            response->setMessageType(ALRPCMessage::RESPONSE);
-            response->set_success(true);
-            response->set_resultCode(Result::SUCCESS);
-            Message responseMessage = Message(response, sessionID);
-            sendMobileRPCResponse( responseMessage );
+            RPC2Communication::ResetGlobalProperties* resetGPRPC2Request = new RPC2Communication::ResetGlobalProperties();
+            mapMessageToSession(resetGPRPC2Request->getID(), sessionID);
+            std::vector<GlobalProperty> gp = object->get_properties();
+            for(std::vector<GlobalProperty>::iterator it = gp.begin(); it != gp.end(); it++)
+            {
+                resetGPRPC2Request->setProperty(*it);
+            }
+
+            sendHMIRPC2Response(resetGPRPC2Request);
             break;
         }
         case Marshaller::METHOD_SHOW_RESPONSE:
@@ -332,7 +344,34 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_resultCode(object->getResult());
             response->set_success(true);
-            response->set_resultCode(Result::SUCCESS);
+            unsigned char sessionID = findSessionIdByMessage(object->getID());
+            removeMessageToSessionMapping(object->getID());
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_SET_GLOBAL_PROPERTIES_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties response has been income");
+            SetGlobalProperties_response* response = new SetGlobalProperties_response();
+            RPC2Communication::SetGlobalPropertiesResponse* object = (RPC2Communication::SetGlobalPropertiesResponse*)msg;
+            response->setMessageType(ALRPCMessage::RESPONSE);
+            response->set_resultCode(object->getResult());
+            response->set_success(true);
+            unsigned char sessionID = findSessionIdByMessage(object->getID());
+            removeMessageToSessionMapping(object->getID());
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A ResetGlobalProperties response has been income");
+            ResetGlobalProperties_response* response = new ResetGlobalProperties_response();
+            RPC2Communication::ResetGlobalPropertiesResponse* object = (RPC2Communication::ResetGlobalPropertiesResponse*)msg;
+            response->setMessageType(ALRPCMessage::RESPONSE);
+            response->set_success(true);
+            response->set_resultCode(object->getResult());
             unsigned char sessionID = findSessionIdByMessage(object->getID());
             removeMessageToSessionMapping(object->getID());
             Message responseMessage = Message(response, sessionID);
@@ -366,6 +405,14 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_SPEAK_REQUEST:
+        {
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_SET_GLOBAL_PROPERTIES_REQUEST:
+        {
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_RESET_GLOBAL_PROPERTIES_REQUEST:
         {
             break;
         }
