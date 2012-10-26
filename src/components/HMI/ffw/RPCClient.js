@@ -160,7 +160,7 @@ FFW.RPCClient = Em.Object.extend({
 	},
 
 	/*
-     * unregister component is RPC bus
+	 * unregister component is RPC bus
 	 */
 	unregisterRPCComponent: function() {
 		this.unregisterRequestId = this.generateId();
@@ -176,6 +176,40 @@ FFW.RPCClient = Em.Object.extend({
 		this.send(JSONMessage);
 	},
 	
+	/*
+	 * Subscribes to notification. Returns the request's id.
+	 */
+	subscribeToNotification: function(notification) {
+		var msgId = this.generateId();
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"id": 		msgId,
+			"method":	"MB.subscribeTo",
+			"params":	{
+				"propertyName": notification
+			}
+		};
+		this.send(JSONMessage);
+		return msgId;
+	},
+
+	/*
+	 * Unsubscribes from notification. Returns the request's id.
+	 */
+	unsubscribeFromNotification: function(notification) {
+		var msgId = this.client.generateId();
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"id": 		msgId,
+			"method":	"MB.unsubscribeFrom",
+			"params":	{
+				"propertyName":notification
+			}
+		};
+		this.send(JSONMessage);
+		return msgId;
+	},
+
 	/*
      * stringify object and send via socket connection
  	 */	
