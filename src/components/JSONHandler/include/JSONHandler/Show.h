@@ -22,7 +22,7 @@ namespace RPC2Communication
 
         std::string getMainField1() const;
         std::string getMainField2() const;
-        TextAlignment getTextAlignment() const;
+        const TextAlignment * getTextAlignment() const;
         std::string getStatusBar() const;
         std::string getMediaClock() const;
         std::string getMediaTrack() const;
@@ -30,7 +30,7 @@ namespace RPC2Communication
     private:
         std::string mMainField1;
         std::string mMainField2;
-        TextAlignment mAlignment;
+        TextAlignment * mAlignment;
         std::string mStatusBar;
         std::string mMediaClock;
         std::string mMediaTrack;

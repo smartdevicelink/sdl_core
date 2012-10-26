@@ -37,8 +37,22 @@ Json::Value SetGlobalPropertiesMarshaller::toJSON(const SetGlobalProperties& e)
   json["method"]=Json::Value("UI.SetGlobalProperties");
   
   Json::Value j=Json::Value(Json::objectValue);
-  j["helpPrompt"]=TTSChunkMarshaller::toJSON(e.mHelpPrompt);
-  j["timeoutPrompt"] = TTSChunkMarshaller::toJSON(e.mTimeoutPrompt);
+  if (e.mHelpPrompt)
+  {
+    unsigned int sz=e.mHelpPrompt->size();
+    j["helpPrompt"]=Json::Value(Json::arrayValue);
+    j["helpPrompt"].resize(sz);
+    for(unsigned int i=0;i<sz;i++)
+      j["helpPrompt"][i]=TTSChunkMarshaller::toJSON(e.mHelpPrompt[0][i]);
+  }
+  if (e.mTimeoutPrompt)
+  {
+    unsigned int sz=e.mTimeoutPrompt->size();
+    j["timeoutPrompt"]=Json::Value(Json::arrayValue);
+    j["timeoutPrompt"].resize(sz);
+    for(unsigned int i=0;i<sz;i++)
+      j["timeoutPrompt"][i]=TTSChunkMarshaller::toJSON(e.mTimeoutPrompt[0][i]);  
+  }  
     
   json["params"]=j;
 
@@ -49,7 +63,10 @@ Json::Value SetGlobalPropertiesMarshaller::toJSON(const SetGlobalProperties& e)
 
 
 bool SetGlobalPropertiesMarshaller::fromJSON(const Json::Value& json,SetGlobalProperties& c)
-{
+{      
+  delete c.mHelpPrompt;
+  delete c.mTimeoutPrompt;
+
   try
   {
     if(!json.isObject())  return false;
@@ -66,11 +83,34 @@ bool SetGlobalPropertiesMarshaller::fromJSON(const Json::Value& json,SetGlobalPr
     Json::Value j=json["params"];
     if(!j.isObject())  return false;
 
-    if(!j.isMember("helpPrompt"))  return false;
-    if(!TTSChunkMarshaller::fromJSON(j["helpPrompt"], c.mHelpPrompt)) return false;
+    if(j.isMember("helpPrompt"))
+    {
+      const Json::Value& hp=j["helpPrompt"];
+      if(!hp.isArray())  return false;
+      c.mHelpPrompt=new std::vector<TTSChunk>(hp.size());
+      for (int i = 0; i < hp.size(); i++ )
+      {
+        TTSChunk t;
+        if(!TTSChunkMarshaller::fromJSON(hp[i],t))
+          return false;
+        c.mHelpPrompt[0][i]=t;
+      }      
+    }    
 
-    if(!j.isMember("timeoutPrompt")) return false;
-    if(!TTSChunkMarshaller::fromJSON(j["timeoutPrompt"], c.mTimeoutPrompt)) return false;
+    if(j.isMember("timeoutPrompt")) 
+    {
+      const Json::Value& tp=j["timeoutPrompt"];
+      if(!tp.isArray())  return false;
+      c.mTimeoutPrompt=new std::vector<TTSChunk>(tp.size());
+      for(unsigned int i=0;i<tp.size();i++)
+      {
+        TTSChunk t;
+        if(!TTSChunkMarshaller::fromJSON(tp[i],t))
+          return false;
+        c.mTimeoutPrompt[0][i]=t;
+      }
+      
+    }    
 
     if(!json.isMember("id")) return false;
 

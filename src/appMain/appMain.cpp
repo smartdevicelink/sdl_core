@@ -58,6 +58,8 @@ int main(int argc, char** argv)
 
     jsonHandler.setRPCMessagesObserver(&appMgr);
 
+    appMgr.setJsonHandler(&jsonHandler);
+
     NsMessageBroker::CMessageBroker *pMessageBroker = NsMessageBroker::CMessageBroker::getInstance();
     if (!pMessageBroker)
     {
@@ -97,6 +99,7 @@ int main(int argc, char** argv)
 
     JSONRPC2Handler jsonRPC2Handler( std::string("127.0.0.1"), 8087 );
     jsonRPC2Handler.setRPC2CommandsObserver( &appMgr );
+    appMgr.setJsonRPC2Handler( &jsonRPC2Handler );
     if (!jsonRPC2Handler.Connect())
     {
         LOG4CPLUS_INFO(logger, "Cannot connect to remote peer!");
@@ -133,7 +136,10 @@ int main(int argc, char** argv)
     NsAppManager::AppMgrCore& appMgrCore = NsAppManager::AppMgrCore::getInstance();
     appMgrCore.executeThreads();
     //appLinkInterface.executeThreads();
-
+while(1)
+{
+    sleep(1);
+}
     printf("Start AppMgr!\n");
     appMgr.startAppMgr();
 

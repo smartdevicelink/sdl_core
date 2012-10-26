@@ -5,7 +5,9 @@ using namespace RPC2Communication;
 
 OnAppRegistered::OnAppRegistered()
 :RPC2Notification( RPC2Marshaller::METHOD_ONAPPREGISTERED )
-{}
+{
+    mVrSynonyms = 0;
+}
  
 OnAppRegistered::~OnAppRegistered()
 {
