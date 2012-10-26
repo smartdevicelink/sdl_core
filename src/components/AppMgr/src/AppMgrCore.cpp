@@ -478,31 +478,37 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetCapabilities request has been outcoming");
             //RPC2Communication::GetCapabilities * object = (RPC2Communication::GetCapabilities*)msg;
-
+            mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_SHOW_REQUEST:
         {
+            mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_SPEAK_REQUEST:
         {
+            mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_SET_GLOBAL_PROPERTIES_REQUEST:
         {
+            mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_RESET_GLOBAL_PROPERTIES_REQUEST:
         {
+            mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_ONAPPREGISTERED:
         {
+            mJSONRPC2Handler -> sendNotification( static_cast<RPC2Communication::RPC2Notification*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_ONAPPUNREDISTERED:
         {
+            mJSONRPC2Handler -> sendNotification( static_cast<RPC2Communication::RPC2Notification*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
@@ -512,7 +518,6 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
             break;
         }
     }
-    mJSONRPC2Handler->sendCommand( msg );
 
     LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been outcomed");
 }
@@ -581,6 +586,7 @@ unsigned char AppMgrCore::findSessionIdSubscribedToButton( ButtonName appName ) 
             return it->second->getApplication()->getSessionID();
         }
     }
+    LOG4CPLUS_INFO_EXT(mLogger, "Button " << appName.get() << " not found in subscribed." );
     return '0';
 }
 
@@ -595,25 +601,44 @@ const RegistryItem* AppMgrCore::registerApplication( const Message& object )
     unsigned char sessionID = object.second;
     RegisterAppInterface_request * request = (RegisterAppInterface_request*)msg;
     LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() << "!");
+
     const std::string& appName = request->get_appName();
-    const std::string& ngnMediaScreenAppName = *request->get_ngnMediaScreenAppName();
-    const std::vector<std::string>& vrSynonyms = *request->get_vrSynonyms();
-    bool usesVehicleData = request->get_usesVehicleData();
+    Application* application = new Application( appName, sessionID );
+
     bool isMediaApplication = request->get_isMediaApplication();
     const Language& languageDesired = request->get_languageDesired();
-    const std::string& autoActivateID = *request->get_autoActivateID();
     const SyncMsgVersion& syncMsgVersion = request->get_syncMsgVersion();
 
-    Application* application = new Application( appName, sessionID );
-    application->setAutoActivateID(autoActivateID);
+    if ( request -> get_ngnMediaScreenAppName() )
+    {
+        const std::string& ngnMediaScreenAppName = *request->get_ngnMediaScreenAppName();
+        application->setNgnMediaScreenAppName(ngnMediaScreenAppName);            
+    }
+    
+    if ( request -> get_vrSynonyms() )
+    {
+        const std::vector<std::string>& vrSynonyms = *request->get_vrSynonyms();
+        application->setVrSynonyms(vrSynonyms);            
+    }
+
+    if ( request -> get_usesVehicleData() )
+    {
+        bool usesVehicleData = request->get_usesVehicleData();
+        application->setUsesVehicleData(usesVehicleData);            
+    }
+    
+    if ( request-> get_autoActivateID() )
+    {
+        const std::string& autoActivateID = *request->get_autoActivateID();
+        application->setAutoActivateID(autoActivateID);
+    }    
+
 	application->setIsMediaApplication(isMediaApplication);
 	application->setLanguageDesired(languageDesired);
-    application->setNgnMediaScreenAppName(ngnMediaScreenAppName);
 	application->setSyncMsgVersion(syncMsgVersion);
-	application->setUsesVehicleData(usesVehicleData);
-    application->setVrSynonyms(vrSynonyms);
 
 	application->setApplicationHMIStatusLevel(HMILevel::HMI_NONE);
+    LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
 
     return AppMgrRegistry::getInstance().registerApplication( application );
 }
@@ -639,6 +664,7 @@ void AppMgrCore::subscribeButton( const Message& msg )
     SubscribeButton_request * object = (SubscribeButton_request*)message;
     const ButtonName& name = object->get_buttonName();
     RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
+    LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to button " << name.get() << " in session " << sessionID );
     mButtonsMapping.insert(ButtonMapItem(name, item));
 }
 

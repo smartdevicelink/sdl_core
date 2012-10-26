@@ -120,7 +120,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		{	
 			// add new app to the list
 			MFT.TTSPopUp.receiveMessage(notification.params.appName + " connected!");
-			MFT.AppModel.PlayList.items[0].set('appName', request.params.mediaTrack);
+			MFT.AppModel.PlayList.items[0].set('appName', notification.params.appName);
 		}
 
 		if (notification.method == this.onAppUnregisteredNotification)

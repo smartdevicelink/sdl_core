@@ -94,8 +94,8 @@ FFW.TTS = FFW.RPCObserver.create({
 		if (request.method == "TTS.Speak") {
 
 			var message = '';
-			for(var val in request.params){
-				message += '\n' + request.params[val].ttsChunks.text;
+			for(var i = 0; i < request.params.ttsChunks.length; i++){
+				message += request.params.ttsChunks[i].text + '\n';
 			}
 			MFT.TTSPopUp.receiveMessage(message);
 
