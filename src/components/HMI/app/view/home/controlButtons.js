@@ -54,45 +54,95 @@ MFT.ControlButtons = Em.ContainerView.create({
 			UpBtn: MFT.Button.create({
 				elementId:	'TUNEUP',
 				classNames:	'UpBtn',
-				click:		function(){
-					FFW.Buttons.buttonPressed(this.elementId, "SHORT");
+				time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				this.time = 0;
+			}
 			}),
 			
 			/** Down button */
 			DownBtn: MFT.Button.create({
 				elementId:	'TUNEDOWN',
 				classNames:	'DownBtn',
-				click:		function(){
-					FFW.Buttons.buttonPressed(this.elementId, "SHORT");
+				time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				this.time = 0;
+			}
 			}),
 			
 			/** Left button */
 			LeftBtn: MFT.Button.create({
 				elementId:	'SEEKLEFT',
 				classNames:	'LeftBtn',
-				click:		function(){
-					FFW.Buttons.buttonPressed(this.elementId, "SHORT");
+				time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				this.time = 0;
+			}
 			}),
 			
 			/** Right button */
 			RightBtn: MFT.Button.create({
 				elementId:	'SEEKRIGHT',
 				classNames:	'RightBtn',
-				click:		function(){
-					FFW.Buttons.buttonPressed(this.elementId, "SHORT");
+				time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				this.time = 0;
+			}
 			}),
 			
 			/** Ok button */
 			OkBtn: MFT.Button.create({
 				elementId:	'OK',
 				classNames:	'OkBtn',
-				click:		function(){
-					FFW.Buttons.buttonPressed(this.elementId, "SHORT");
+				time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				this.time = 0;
+			}
 			})
 		}),
 		
@@ -101,8 +151,18 @@ MFT.ControlButtons = Em.ContainerView.create({
 			elementId:	'PRESET_1',
 			classNames:	'OneBtn btnNotPressed',
 			text:		'1',
-			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+			time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+				}
+				this.time = 0;
 			}
 		}),
 		
@@ -111,8 +171,18 @@ MFT.ControlButtons = Em.ContainerView.create({
 			elementId:	'PRESET_2',
 			classNames:	'TwoBtn btnNotPressed',
 			text:		'2',
-			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+			time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+				}
+				this.time = 0;
 			}
 		}),
 		
@@ -121,8 +191,18 @@ MFT.ControlButtons = Em.ContainerView.create({
 			elementId:	'PRESET_3',
 			classNames:	'ThreeBtn btnNotPressed',
 			text:		'3',
-			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+			time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+				}
+				this.time = 0;
 			}
 		}),
 		
@@ -131,8 +211,18 @@ MFT.ControlButtons = Em.ContainerView.create({
 			elementId:	'PRESET_4',
 			classNames:	'FourBtn btnNotPressed',
 			text:		'4',
-			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+			time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+				}
+				this.time = 0;
 			}
 		}),
 		
@@ -141,8 +231,18 @@ MFT.ControlButtons = Em.ContainerView.create({
 			elementId:	'PRESET_5',
 			classNames:	'FiveBtn btnNotPressed',
 			text:		'5',
-			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+			time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+				}
+				this.time = 0;
 			}
 		}),
 		
@@ -151,8 +251,18 @@ MFT.ControlButtons = Em.ContainerView.create({
 			elementId:	'PRESET_6',
 			classNames:	'SixBtn btnNotPressed',
 			text:		'6',
-			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+			time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+				}
+				this.time = 0;
 			}
 		}),
 		
@@ -161,8 +271,18 @@ MFT.ControlButtons = Em.ContainerView.create({
 			elementId:	'PRESET_7',
 			classNames:	'SevenBtn btnNotPressed',
 			text:		'7',
-			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+			time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+				}
+				this.time = 0;
 			}
 		}),
 		
@@ -171,8 +291,18 @@ MFT.ControlButtons = Em.ContainerView.create({
 			elementId:	'PRESET_8',
 			classNames:	'EightBtn btnNotPressed',
 			text:		'8',
-			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+			time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+				}
+				this.time = 0;
 			}
 		}),
 		
@@ -181,8 +311,18 @@ MFT.ControlButtons = Em.ContainerView.create({
 			elementId:	'PRESET_9',
 			classNames:	'NineBtn btnNotPressed',
 			text:		'9',
-			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+			time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+				}
+				this.time = 0;
 			}
 		}),
 		
@@ -191,8 +331,18 @@ MFT.ControlButtons = Em.ContainerView.create({
 			elementId:	'PRESET_0',
 			classNames:	'ZiroBtn btnNotPressed',
 			text:		'0',
-			click:		function(){
-				FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+			time:		0,
+			actionDown:		function(){
+				var self = this;
+				setTimeout(function(){ self.time ++; }, 1000);
+			},
+			actionUp:		function(){
+				if(this.time > 0){
+					FFW.Buttons.buttonPressed( this.elementId, "LONG");
+				}else{
+					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
+				}
+				this.time = 0;
 			}
 		})
 	})

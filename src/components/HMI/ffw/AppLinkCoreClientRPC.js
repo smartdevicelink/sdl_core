@@ -118,12 +118,12 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 
 		if (notification.method == this.onAppRegisteredNotification)
 		{	
-			// add new app to the list
+			MFT.TTSPopUp.receiveMessage("Application Registered successfull");
 		}
 
 		if (notification.method == this.onAppUnregisteredNotification)
 		{	
-			//  remove app from list
+			MFT.TTSPopUp.receiveMessage("Application Unregistered successfull");
 		}
 	},
 
