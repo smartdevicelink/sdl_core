@@ -155,6 +155,8 @@ FFW.UI = FFW.RPCObserver.create({
 		
 		if (request.method == "UI.SetGlobalProperties") {
 
+			MFT.TTSPopUp.receiveMessage("Set global properties");
+
 			// TODO: please process as array 
 			this.globalProperties.set('helpPrompt', request.params.helpPrompt);
 			// TODO: please process as array 
@@ -175,7 +177,10 @@ FFW.UI = FFW.RPCObserver.create({
 			
 			// reset all requested properties
 			for (var i=0;i<request.params.length;i++)
+			{
 			        this.resetProperties(reuqest.params[i]);
+				MFT.TTSPopUp.receiveMessage("Reset property: " + reuqest.params[i]);
+			}
 
 			// send repsonse
 			var JSONMessage = {

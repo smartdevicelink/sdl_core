@@ -95,7 +95,7 @@ FFW.TTS = FFW.RPCObserver.create({
 
 			var message = '';
 			for(var val in request.params){
-				message += '\n' + request.params[val].ttsChunks;
+				message += '\n' + request.params[val].ttsChunks.text;
 			}
 			MFT.TTSPopUp.receiveMessage(message);
 
