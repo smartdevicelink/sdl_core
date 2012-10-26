@@ -30,12 +30,12 @@
 #endif
 
 
-#define TOTAL_KEYWORDS 22
+#define TOTAL_KEYWORDS 20
 #define MIN_WORD_LENGTH 6
 #define MAX_WORD_LENGTH 30
 #define MIN_HASH_VALUE 6
-#define MAX_HASH_VALUE 45
-/* maximum key range = 40, duplicates = 0 */
+#define MAX_HASH_VALUE 40
+/* maximum key range = 35, duplicates = 0 */
 
 class Result_intHash
 {
@@ -50,32 +50,32 @@ Result_intHash::hash (register const char *str, register unsigned int len)
 {
   static const unsigned char asso_values[] =
     {
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 10,  0, 46,  0, 46,
-      25,  0, 46,  0, 46, 46,  0,  5,  0,  5,
-      46, 46,  5, 15,  0, 10,  0,  0, 46,  5,
-      46, 46, 46, 46, 46,  0, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46, 46, 46, 46, 46,
-      46, 46, 46, 46, 46, 46
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 10,  5, 41,  0, 41,
+      20,  0, 41,  0, 41, 41,  0, 15,  0,  5,
+      41, 41,  0, 15,  0,  0,  5,  0, 41,  0,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41, 41, 41, 41, 41,
+      41, 41, 41, 41, 41, 41
     };
   register int hval = len;
 
@@ -107,65 +107,59 @@ Result_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
-       0,  0,  0,  0,  0,  0,  6,  7,  0,  0, 10,  0, 12,  8,
-      14,  0,  0,  7, 13, 14,  0, 21,  7, 13, 24, 25, 26,  0,
-      18, 19,  0,  0,  0, 18, 19,  0, 26,  0,  0, 14,  0,  0,
-       0,  0,  0, 30
+       0,  0,  0,  0,  0,  0,  6,  7,  8,  0, 10,  0, 12, 13,
+      14,  0,  0,  7, 13, 19,  0, 21,  7, 18, 19, 25,  0,  0,
+       0, 14,  0,  0,  0, 18, 14,  0, 26,  0,  0,  0, 30
     };
   static const struct PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""},
 #line 29 "gen/deep/pimpl/next/ResultMarshaller.gp"
       {"IN_USE",12},
-#line 35 "gen/deep/pimpl/next/ResultMarshaller.gp"
-      {"IGNORED",18},
-      {""}, {""},
+#line 33 "gen/deep/pimpl/next/ResultMarshaller.gp"
+      {"IGNORED",16},
+#line 31 "gen/deep/pimpl/next/ResultMarshaller.gp"
+      {"REJECTED",14},
+      {""},
 #line 22 "gen/deep/pimpl/next/ResultMarshaller.gp"
       {"INVALID_ID",5},
       {""},
 #line 18 "gen/deep/pimpl/next/ResultMarshaller.gp"
       {"INVALID_DATA",1},
-#line 33 "gen/deep/pimpl/next/ResultMarshaller.gp"
-      {"REJECTED",16},
+#line 36 "gen/deep/pimpl/next/ResultMarshaller.gp"
+      {"GENERIC_ERROR",19},
 #line 27 "gen/deep/pimpl/next/ResultMarshaller.gp"
       {"WRONG_LANGUAGE",10},
       {""}, {""},
-#line 34 "gen/deep/pimpl/next/ResultMarshaller.gp"
-      {"ABORTED",17},
-#line 38 "gen/deep/pimpl/next/ResultMarshaller.gp"
-      {"GENERIC_ERROR",21},
-#line 23 "gen/deep/pimpl/next/ResultMarshaller.gp"
-      {"DUPLICATE_NAME",6},
+#line 32 "gen/deep/pimpl/next/ResultMarshaller.gp"
+      {"ABORTED",15},
+#line 20 "gen/deep/pimpl/next/ResultMarshaller.gp"
+      {"OUT_OF_MEMORY",3},
+#line 19 "gen/deep/pimpl/next/ResultMarshaller.gp"
+      {"UNSUPPORTED_REQUEST",2},
       {""},
 #line 24 "gen/deep/pimpl/next/ResultMarshaller.gp"
       {"TOO_MANY_APPLICATIONS",7},
 #line 17 "gen/deep/pimpl/next/ResultMarshaller.gp"
       {"SUCCESS",0},
-#line 20 "gen/deep/pimpl/next/ResultMarshaller.gp"
-      {"OUT_OF_MEMORY",3},
-#line 31 "gen/deep/pimpl/next/ResultMarshaller.gp"
-      {"VEHICLE_DATA_NOT_ALLOWED",14},
-#line 21 "gen/deep/pimpl/next/ResultMarshaller.gp"
-      {"TOO_MANY_PENDING_REQUESTS",4},
-#line 32 "gen/deep/pimpl/next/ResultMarshaller.gp"
-      {"VEHICLE_DATA_NOT_AVAILABLE",15},
-      {""},
-#line 36 "gen/deep/pimpl/next/ResultMarshaller.gp"
-      {"UNSUPPORTED_BUTTON",19},
+#line 34 "gen/deep/pimpl/next/ResultMarshaller.gp"
+      {"UNSUPPORTED_BUTTON",17},
 #line 26 "gen/deep/pimpl/next/ResultMarshaller.gp"
       {"UNSUPPORTED_VERSION",9},
+#line 21 "gen/deep/pimpl/next/ResultMarshaller.gp"
+      {"TOO_MANY_PENDING_REQUESTS",4},
+      {""}, {""}, {""},
+#line 23 "gen/deep/pimpl/next/ResultMarshaller.gp"
+      {"DUPLICATE_NAME",6},
       {""}, {""}, {""},
 #line 30 "gen/deep/pimpl/next/ResultMarshaller.gp"
       {"SUBSCRIBED_ALREADY",13},
-#line 19 "gen/deep/pimpl/next/ResultMarshaller.gp"
-      {"UNSUPPORTED_REQUEST",2},
+#line 35 "gen/deep/pimpl/next/ResultMarshaller.gp"
+      {"FILE_NOT_FOUND",18},
       {""},
 #line 28 "gen/deep/pimpl/next/ResultMarshaller.gp"
       {"APPLICATION_NOT_REGISTERED",11},
-      {""}, {""},
-#line 37 "gen/deep/pimpl/next/ResultMarshaller.gp"
-      {"FILE_NOT_FOUND",20},
-      {""}, {""}, {""}, {""}, {""},
+      {""}, {""}, {""},
 #line 25 "gen/deep/pimpl/next/ResultMarshaller.gp"
       {"APPLICATION_REGISTERED_ALREADY",8}
     };
