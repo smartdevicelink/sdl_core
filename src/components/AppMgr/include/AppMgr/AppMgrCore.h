@@ -71,6 +71,7 @@ private:
     AppMgrCore(const AppMgrCore&);
 
     void handleMobileRPCMessage(const Message &message );
+    void handleMobileRPCNotification(ALRPCMessage* message );
 	void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg );
     void handleBusRPCMessageOutgoing( RPC2Communication::RPC2Command* msg );
     const ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
@@ -82,8 +83,10 @@ private:
     unsigned char findSessionIdByMessage(int messageId) const;
     void clearButtonSubscribtion(unsigned char sessionID);
     void sendMobileRPCResponse( const Message &msg );
+    void sendMobileRPCNotification( ALRPCMessage* msg );
     void sendHMIRPC2Response( RPC2Communication::RPC2Command * msg );
     void enqueueOutgoingMobileRPCMessage( const Message &message );
+    void enqueueOutgoingMobileRPCNotification( ALRPCMessage* msg );
 	void enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message );
 
     void mapMessageToSession( int messageId, unsigned char sessionId );
@@ -98,21 +101,25 @@ private:
 	void* handleQueueRPCBusObjectsIncoming( void* );
 	void* handleQueueRPCAppLinkObjectsOutgoing( void* );
 	void* handleQueueRPCBusObjectsOutgoing( void* );
+    void* handleQueueMobileRPCNotificationsOutgoing( void* );
 	
     std::queue< Message > mQueueRPCAppLinkObjectsIncoming;
     std::queue< Message > mQueueRPCAppLinkObjectsOutgoing;
 	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsIncoming;
 	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsOutgoing;
+    std::queue< ALRPCMessage* > mQueueMobileRPCNotificationsOutgoing;
 
 	System::Mutex mMtxRPCAppLinkObjectsIncoming;
 	System::Mutex mMtxRPCAppLinkObjectsOutgoing;
 	System::Mutex mMtxRPCBusObjectsIncoming;
 	System::Mutex mMtxRPCBusObjectsOutgoing;
+    System::Mutex mMtxMobileRPCNotificationsOutgoing;
 
 	System::Thread mThreadRPCAppLinkObjectsIncoming;
 	System::Thread mThreadRPCAppLinkObjectsOutgoing;
 	System::Thread mThreadRPCBusObjectsIncoming;
 	System::Thread mThreadRPCBusObjectsOutgoing;
+    System::Thread mThreadMobileRPCNotificationsOutgoing;
 
 	Capabilities mButtonCapabilities;
     ButtonMap    mButtonsMapping;

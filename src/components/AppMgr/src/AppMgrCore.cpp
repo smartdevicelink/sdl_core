@@ -64,6 +64,7 @@ AppMgrCore::AppMgrCore()
 	,mThreadRPCAppLinkObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing, NULL))
 	,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsIncoming, NULL))
 	,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsOutgoing, NULL))
+    ,mThreadMobileRPCNotificationsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueMobileRPCNotificationsOutgoing, NULL))
 	,m_bTerminate(false)
     ,mJSONHandler(0)
     ,mJSONRPC2Handler(0)
@@ -76,6 +77,7 @@ AppMgrCore::AppMgrCore(const AppMgrCore &)
     ,mThreadRPCAppLinkObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing, NULL))
     ,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsIncoming, NULL))
     ,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsOutgoing, NULL))
+    ,mThreadMobileRPCNotificationsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueMobileRPCNotificationsOutgoing, NULL))
     ,m_bTerminate(false)
     ,mJSONHandler(0)
     ,mJSONRPC2Handler(0)
@@ -128,6 +130,7 @@ void AppMgrCore::executeThreads()
 	mThreadRPCAppLinkObjectsOutgoing.Start(false);
 	mThreadRPCBusObjectsIncoming.Start(false);
 	mThreadRPCBusObjectsOutgoing.Start(false);
+    mThreadMobileRPCNotificationsOutgoing.Start(false);
 
 	LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
 }
@@ -309,7 +312,28 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
 		default:
             LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< message.first->getMethodId() <<" has been received!");
 			break;
-	}
+    }
+}
+
+void AppMgrCore::handleMobileRPCNotification(ALRPCMessage *message)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC notification "<< message->getMethodId() <<" has been received!");
+    switch(message->getMethodId())
+    {
+        case Marshaller::METHOD_ONAPPINTERFACEUNREGISTERED:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnAppInterfaceUnregistered notification has been invoked");
+
+            OnAppInterfaceUnregistered* object = (OnAppInterfaceUnregistered*)message;
+            mJSONHandler->sendRPCMessage(message, 1);//just temporarily!!!
+            break;
+        }
+        default:
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC notification "<< message->getMethodId() <<" has been received!");
+            break;
+        }
+    }
 }
 
 void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg )
@@ -407,6 +431,15 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
             sendMobileRPCResponse( responseMessage );
             break;
         }
+        case RPC2Communication::RPC2Marshaller::METHOD_ONAPPUNREDISTERED:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnAppUnregistered notification has been income");
+            RPC2Communication::OnAppUnregistered * object = (RPC2Communication::OnAppUnregistered*)msg;
+            OnAppInterfaceUnregistered* event = new OnAppInterfaceUnregistered();
+            event->set_reason(object->getReason());
+            enqueueOutgoingMobileRPCNotification(event);
+            break;
+        }
 		case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
 		default:
 			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethod() <<" has been received!");
@@ -445,6 +478,14 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
         {
             break;
         }
+        case RPC2Communication::RPC2Marshaller::METHOD_ONAPPREGISTERED:
+        {
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_ONAPPUNREDISTERED:
+        {
+            break;
+        }
         case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
         default:
         {
@@ -468,6 +509,19 @@ void AppMgrCore::enqueueOutgoingMobileRPCMessage( const Message& message )
 	mMtxRPCAppLinkObjectsOutgoing.Unlock();
 	
     LOG4CPLUS_INFO_EXT(mLogger, " A " << message.first->getMethodId() << " outgoing mobile RPC message has been sent");
+}
+
+void AppMgrCore::enqueueOutgoingMobileRPCNotification(ALRPCMessage *msg)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " A " << msg->getMethodId() << " outgoing mobile RPC notification send has been invoked");
+
+    mMtxMobileRPCNotificationsOutgoing.Lock();
+
+    mQueueMobileRPCNotificationsOutgoing.push(msg);
+
+    mMtxMobileRPCNotificationsOutgoing.Unlock();
+
+    LOG4CPLUS_INFO_EXT(mLogger, " A " << msg->getMethodId() << " outgoing mobile RPC notification has been sent");
 }
 
 void AppMgrCore::enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message )
@@ -612,6 +666,12 @@ void AppMgrCore::sendMobileRPCResponse( const Message& msg )
     enqueueOutgoingMobileRPCMessage( msg );
 }
 
+void AppMgrCore::sendMobileRPCNotification(ALRPCMessage *msg)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " Sending mobile RPC notification to "<< msg->getMethodId() <<"!");
+
+}
+
 void AppMgrCore::sendHMIRPC2Response(RPC2Communication::RPC2Command *msg)
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Sending HMI RPC2 response to "<< msg->getMethod() <<"!");
@@ -705,7 +765,29 @@ void* AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
 			
             handleBusRPCMessageOutgoing( msg );
 		}
-	}
+    }
+}
+
+void *AppMgrCore::handleQueueMobileRPCNotificationsOutgoing(void *)
+{
+    while(true)
+    {
+        std::size_t size = mQueueMobileRPCNotificationsOutgoing.size();
+        if( size > 0 )
+        {
+            mMtxMobileRPCNotificationsOutgoing.Lock();
+            ALRPCMessage* msg = mQueueMobileRPCNotificationsOutgoing.front();
+            mQueueMobileRPCNotificationsOutgoing.pop();
+            mMtxMobileRPCNotificationsOutgoing.Unlock();
+            if(!msg)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
+                continue;
+            }
+
+            handleMobileRPCNotification( msg );
+        }
+    }
 }
 
 void AppMgrCore::setJsonHandler(JSONHandler* handler)
