@@ -15,6 +15,9 @@
 #include "JSONHandler/OnButtonPressMarshaller.h"
 #include "JSONHandler/SetGlobalPropertiesMarshaller.h"
 #include "JSONHandler/SetGlobalPropertiesResponseMarshaller.h"
+#include "JSONHandler/ResetGlobalPropertiesMarshaller.h"
+#include "JSONHandler/ResetGlobalPropertiesResponseMarshaller.h"
+#include "JSONHandler/ResetGlobalPropertiesResponse.h"
 
 namespace RPC2Communication
 {
@@ -36,7 +39,9 @@ namespace RPC2Communication
         METHOD_GET_CAPABILITIES_RESPONSE=8,
         METHOD_ONBUTTONPRESS=9,
         METHOD_SET_GLOBAL_PROPERTIES_REQUEST=10,
-        METHOD_SET_GLOBAL_PROPERTIES_RESPONSE=11
+        METHOD_SET_GLOBAL_PROPERTIES_RESPONSE=11,
+        METHOD_RESET_GLOBAL_PROPERTIES_REQUEST=12,
+        METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE=13
         };
 
         RPC2Marshaller();
@@ -168,6 +173,26 @@ namespace RPC2Communication
             return mSetGlobalPropertiesResponseMarshaller.toString(res);
         }
 
+        static bool fromString( const std::string& str, ResetGlobalProperties& res )
+        {
+            return mResetGlobalPropertiesMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const ResetGlobalProperties& res)
+        {
+            return mResetGlobalPropertiesMarshaller.toString(res);
+        }
+
+        static bool fromString( const std::string & str, ResetGlobalPropertiesResponse& res )
+        {
+            return mResetGlobalPropertiesResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const ResetGlobalPropertiesResponse& res)
+        {
+            return mResetGlobalPropertiesResponseMarshaller.toString(res);
+        }
+
 
     private:
         struct localHash
@@ -202,6 +227,8 @@ namespace RPC2Communication
         static OnButtonPressMarshaller mOnButtonPressMarshaller;
         static SetGlobalPropertiesMarshaller mSetGlobalPropertiesMarshaller;
         static SetGlobalPropertiesResponseMarshaller mSetGlobalPropertiesResponseMarshaller;
+        static ResetGlobalPropertiesMarshaller mResetGlobalPropertiesMarshaller;
+        static ResetGlobalPropertiesResponseMarshaller mResetGlobalPropertiesResponseMarshaller;
 
     };
 

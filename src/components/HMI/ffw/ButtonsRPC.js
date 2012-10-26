@@ -206,7 +206,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 		if (this.client.socket.readyState == this.client.socket.OPEN) {
 			var JSONMessage = {
 				"jsonrpc" :	"2.0",
-				"method"  :	"Buttons.onButtonPress",
+				"method"  :	"Buttons.OnButtonPress",
 				"params"  :	{
 					"name"	  : id,
 					"mode"    : type
@@ -228,7 +228,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 		if (this.client.socket.readyState == this.client.socket.OPEN) {
 			var JSONMessage = {
 				"jsonrpc" :	"2.0",
-				"method"  :	"Buttons.onButtonEvent",
+				"method"  :	"Buttons.OnButtonEvent",
 				"params"  :	{
 					"name"	  : id,
 					"mode"    : type
