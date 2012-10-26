@@ -152,10 +152,24 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_autoActivateID(*object->get_autoActivateID());
             response->set_buttonCapabilities(getButtonCapabilities());
-            response->set_success(true);
-            response->set_resultCode(Result::SUCCESS);
+            if(registeredApp)
+            {
+                response->set_success(true);
+                response->set_resultCode(Result::SUCCESS);
+            }
+            else
+            {
+                response->set_success(false);
+                response->set_resultCode(Result::APPLICATION_NOT_REGISTERED);
+            }
             Message responseMessage = Message(response, sessionID);
             sendMobileRPCResponse( responseMessage );
+            if(registeredApp)
+            {
+                OnHMIStatus* status = new OnHMIStatus();
+                status->set_hmiLevel(registeredApp->getApplication()->getApplicationHMIStatusLevel());
+                sendMobileRPCResponse(Message(status, sessionID));
+            }
             break;
 		}
         case Marshaller::METHOD_UNREGISTERAPPINTERFACE_REQUEST:
