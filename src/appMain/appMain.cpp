@@ -136,10 +136,7 @@ int main(int argc, char** argv)
     NsAppManager::AppMgrCore& appMgrCore = NsAppManager::AppMgrCore::getInstance();
     appMgrCore.executeThreads();
     //appLinkInterface.executeThreads();
-while(1)
-{
-    sleep(1);
-}
+
     printf("Start AppMgr!\n");
     appMgr.startAppMgr();
 

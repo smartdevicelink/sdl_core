@@ -568,7 +568,20 @@ void AppMgrCore::removeMessageToSessionMapping(int messageId)
 
 unsigned char AppMgrCore::findSessionIdSubscribedToButton( ButtonName appName ) const
 {
-    return mButtonsMapping.find(appName)->second->getApplication()->getSessionID();
+    ButtonMap::const_iterator it = mButtonsMapping.find( appName );
+    if ( it != mButtonsMapping.end() )
+    {
+        if ( !it-> second )
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found" );
+            return '0';
+        }
+        if ( it->second->getApplication() )
+        {
+            return it->second->getApplication()->getSessionID();
+        }
+    }
+    return '0';
 }
 
 unsigned char AppMgrCore::findSessionIdByMessage(int messageId) const
