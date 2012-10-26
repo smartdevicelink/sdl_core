@@ -30,13 +30,13 @@ const std::string * Alert::getAlertText2() const
     return mAlertText2;
 }
         
-int Alert::getDuration() const
+int * Alert::getDuration() const
 {
     return mDuration;
 }
         
 
-bool Alert::getPlayTone() const
+bool * Alert::getPlayTone() const
 {
     return mPlayTone;
 }
