@@ -37,7 +37,11 @@ Json::Value ResetGlobalPropertiesMarshaller::toJSON(const ResetGlobalProperties&
   json["method"]=Json::Value("UI.ResetGlobalProperties");
   
   Json::Value j=Json::Value(Json::objectValue);
-  j["property"]=GlobalPropertyMarshaller::toJSON(e.mProperty);
+
+  j["property"]=Json::Value(Json::arrayValue);
+  j["property"].resize(e.mProperty.size());
+  for(unsigned int i=0;i<e.mProperty.size();i++)
+    j["property"][i]=GlobalPropertyMarshaller::toJSON(e.mProperty[i]);
     
   json["params"]=j;
 
@@ -66,8 +70,19 @@ bool ResetGlobalPropertiesMarshaller::fromJSON(const Json::Value& json,ResetGlob
     if(!j.isObject())  return false;
 
     if(!j.isMember("property"))  return false;
-    if(!GlobalPropertyMarshaller::fromJSON(j["property"], c.mProperty)) return false;
+    {
+      const Json::Value& p=json["property"];
+      if(!p.isArray())  return false;
+      c.mProperty.resize(p.size());
+      for(unsigned int i=0;i<p.size();i++)
+        {
+          GlobalProperty t;
+          if(!GlobalPropertyMarshaller::fromJSON(p[i],t))
+            return false;
+          c.mProperty[i]=t;
+        }
 
+    }
     if(!json.isMember("id")) return false;
 
     c.setID( json["id"].asInt() );

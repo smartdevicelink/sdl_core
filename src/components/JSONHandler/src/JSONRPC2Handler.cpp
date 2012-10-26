@@ -71,12 +71,13 @@ void * JSONRPC2Handler::waitForCommandsFromHMI( void * params )
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI: handle command" );
             if ( !currentCommand )
             {
-                //TODO: log
+                LOG4CPLUS_ERROR( mLogger, "Invalid message received." );
+                continue;
             }
 
             if ( !handler -> mCommandsObserver )
             {
-                //TODO: log
+                LOG4CPLUS_ERROR( mLogger, "Cannot handle message: CommandsObserver doesn't exist." );
                 pthread_exit( 0 );
             }
             handler -> mCommandsObserver -> onCommandReceivedCallback( currentCommand );
@@ -105,12 +106,13 @@ void * JSONRPC2Handler::waitForResponsesFromHMI( void * params )
 
             if ( !currentCommand )
             {
-                //TODO: log
+                LOG4CPLUS_ERROR( mLogger, "Invalid message received." );
+                continue;
             }
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI: handle response");
             if ( !handler -> mCommandsObserver )
             {
-                //TODO: log
+                LOG4CPLUS_ERROR( mLogger, "Cannot handle message: CommandsObserver doesn't exist." );
                 pthread_exit( 0 );
             }
             handler -> mCommandsObserver -> onCommandReceivedCallback( currentCommand );
@@ -139,7 +141,7 @@ void * JSONRPC2Handler::waitForCommandsToHMI( void * params )
 
             if ( commandJson.isNull() )
             {
-                //TODO: log
+                LOG4CPLUS_ERROR( mLogger, "Invalid message received." );
             }
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: processed command" );
 

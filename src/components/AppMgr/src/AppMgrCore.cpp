@@ -221,13 +221,17 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
         case Marshaller::METHOD_SHOW_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Show request has been invoked");
+            LOG4CPLUS_INFO_EXT(mLogger, "message " << message.first );
             Show_request* object = (Show_request*)message.first;
             RPC2Communication::Show* showRPC2Request = new RPC2Communication::Show();
+            LOG4CPLUS_INFO_EXT(mLogger, "showrpc2request created");
             showRPC2Request->setMainField1(*object->get_mainField1());
+            LOG4CPLUS_INFO_EXT(mLogger, "setMainField1 was called");
             showRPC2Request->setMainField2(*object->get_mainField2());
             showRPC2Request->setMediaClock(*object->get_mediaClock());
             showRPC2Request->setStatusBar(*object->get_statusBar());
             showRPC2Request->setTextAlignment(*object->get_alignment());
+            LOG4CPLUS_INFO_EXT(mLogger, "Show request almost handled" );
             mapMessageToSession(showRPC2Request->getID(), sessionID);
             sendHMIRPC2Response(showRPC2Request);
             break;
@@ -287,6 +291,7 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
         case Marshaller::METHOD_ONAPPINTERFACEUNREGISTERED:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A "<< message.first->getMethodId() << " response or notification has been invoked");
+            LOG4CPLUS_INFO_EXT(mLogger, "sendRPCMessage called for " << mJSONHandler << " message "<< message.first);
             mJSONHandler->sendRPCMessage(message.first, sessionID);
             break;
         }
@@ -324,7 +329,9 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
             const ButtonName & name = object->getName();
             event->set_buttonName(name);
             event->set_buttonPressMode(object->getMode());
+            LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
             unsigned char sessionID = findSessionIdSubscribedToButton(name);
+            LOG4CPLUS_INFO_EXT(mLogger, "sessionID found " << sessionID);
             Message message = Message(event, sessionID);
             sendMobileRPCResponse( message );
             break;

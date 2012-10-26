@@ -39,6 +39,7 @@ void JSONHandler::setRPCMessagesObserver( IRPCMessagesObserver * messagesObserve
 
 void JSONHandler::sendRPCMessage( const ALRPCMessage * message, unsigned char sessionId )
 {
+    LOG4CPLUS_INFO(mLogger, "An outgoing message has been received" );
     if ( message )
     {
         mOutgoingMessages.push( message );
@@ -108,6 +109,12 @@ void * JSONHandler::waitForIncomingMessages( void * params )
             std::string jsonMessage = handler -> mIncomingMessages.pop();
 
             ALRPCMessage * currentMessage = Marshaller::fromString( jsonMessage );
+
+            if ( !currentMessage )
+            {
+                LOG4CPLUS_ERROR( mLogger, "Invalid message received." );
+                continue;
+            }
 
             if ( !handler -> mMessagesObserver )
             {

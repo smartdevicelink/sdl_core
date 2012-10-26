@@ -4,6 +4,7 @@
 #include "JSONHandler/RPC2Request.h"
 #include "JSONHandler/ALRPCObjects/TTSChunk.h"
 #include <string>
+#include <vector>
 
 namespace RPC2Communication 
 {
@@ -13,15 +14,15 @@ namespace RPC2Communication
         SetGlobalProperties();
         ~SetGlobalProperties();
     
-        void setHelpPrompt( const TTSChunk& helpPrompt );
-        void setTimeoutPrompt( const TTSChunk& timeoutPrompt );
+        void setHelpPrompt( const std::vector<TTSChunk>& helpPrompt );
+        void setTimeoutPrompt( const std::vector<TTSChunk>& timeoutPrompt );
 
-        TTSChunk getHelpPrompt() const;
-        TTSChunk getTimeoutPrompt() const;
+        const std::vector<TTSChunk>* getHelpPrompt() const;
+        const std::vector<TTSChunk>* getTimeoutPrompt() const;
 
     private:
-        TTSChunk mHelpPrompt;
-        TTSChunk mTimeoutPrompt;
+        std::vector<TTSChunk>* mHelpPrompt;
+        std::vector<TTSChunk>* mTimeoutPrompt;
         friend class SetGlobalPropertiesMarshaller;
     };
 }

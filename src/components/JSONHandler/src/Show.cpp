@@ -5,10 +5,16 @@ using namespace RPC2Communication;
 
 Show::Show()
 :RPC2Request( RPC2Marshaller::METHOD_SHOW_REQUEST )
-{}
+{
+    mAlignment = 0;
+}
 
 Show::~Show()
-{}
+{
+    if (mAlignment)
+        delete mAlignment;
+    mAlignment = 0;
+}
 
 void Show::setMainField1(const std::string & str)
 {
@@ -22,7 +28,8 @@ void Show::setMainField2(const std::string & str)
         
 void Show::setTextAlignment(const TextAlignment& s)
 {
-    mAlignment = s;
+    delete mAlignment;
+    mAlignment = new TextAlignment(s);
 }
         
 void Show::setStatusBar(const std::string& s)
@@ -50,7 +57,7 @@ std::string Show::getMainField2() const
     return mMainField2;
 }
         
-TextAlignment Show::getTextAlignment() const
+const TextAlignment * Show::getTextAlignment() const
 {
     return mAlignment;
 }
