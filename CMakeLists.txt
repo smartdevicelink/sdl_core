@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 2.8)
+
+set (PROJECT appLinkCore)
+project (${PROJECT})
+
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_INSTALL_PREFIX .)
+set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
+
+# Building application
+
+# --- ThirdPartyLibs
+add_subdirectory(./src/thirdPartyLibs)
+
+# --- Components
+add_subdirectory(./src/components)
+
+# --- Main application
+add_subdirectory(./src/appMain)
+
+# Building tests
+
+# Building documentation
