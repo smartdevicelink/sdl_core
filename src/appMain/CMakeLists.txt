@@ -36,18 +36,6 @@ set (SOURCES
   CAppTester.cpp
 )
 
-## Compiler flags
-if(CMAKE_COMPILER_IS_GNUCXX)
-  SET_SOURCE_FILES_PROPERTIES(
-    appMain.cpp
-    CBTAdapter.cpp
-    CAppTester.cpp
-    PROPERTIES
-    CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3"
-    CMAKE_EXE_LINKER_FLAGS "-m"
-  )
-endif()
-
 add_executable(${PROJECT} ${SOURCES})
 target_link_libraries(${PROJECT} ${LIBRARIES})
 

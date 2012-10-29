@@ -6,6 +6,8 @@ project (${PROJECT})
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
+set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3")
+set(CMAKE_EXE_LINKER_FLAGS "-m")
 
 # Building application
 

@@ -23,25 +23,6 @@ set (MESSAGE_BROKER_SERVER_SOURCES
   ./src/server/networking.cpp
 )
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-  SET_SOURCE_FILES_PROPERTIES(
-    ./src/lib_messagebroker/CMessageBroker.cpp
-    ./src/lib_messagebroker/CMessageBrokerRegistry.cpp
-    ./src/lib_messagebroker/md5.cpp
-    ./src/lib_messagebroker/system.cpp
-    ./src/lib_messagebroker/websocket_handler.cpp
-    ./src/client/mb_client.cpp
-    ./src/client/mb_tcpclient.cpp
-    ./src/client/mb_controller.cpp
-    ./src/server/mb_server.cpp
-    ./src/server/mb_tcpserver.cpp
-    ./src/server/networking.cpp
-    PROPERTIES
-    CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3"
-    CMAKE_EXE_LINKER_FLAGS "-m"
-  )
-endif()
-
 add_library("MessageBroker" ${MESSAGE_BROKER_SOURCES})
 
 add_library("MessageBrokerClient" ${MESSAGE_BROKER_CLIENT_SOURCES})
