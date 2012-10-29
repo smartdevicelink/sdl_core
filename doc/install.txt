@@ -23,7 +23,11 @@
 
 * Build application
   =================
-  enter src/appMain directory.
+  Temporary build of application requires two steps.
+  1. Enter src/thirdPartyLibs/logger
+  build logger:
+  make
+  2. Enter src/appMain directory.
   Create build configuration using cmake:
   cmake CMakeLists.txt
   Make project:

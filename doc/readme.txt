@@ -25,6 +25,7 @@
   Start application with command:
   ./appLinkCore
   Application starts to search devices.
+  Start web-based HMI in browser which supports web-socket protocol version 13(src/components/HMI/index.html).
   Select the device from a list.
   Application starts SDP request.
   Select port.
