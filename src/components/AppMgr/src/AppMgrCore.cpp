@@ -311,6 +311,31 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             sendHMIRPC2Response(resetGPRPC2Request);
             break;
         }
+        case Marshaller::METHOD_ALERT_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An Alert request has been invoked");
+            Alert_request* object = (Alert_request*)message.first;
+            RPC2Communication::Alert* alert = new RPC2Communication::Alert();
+            mapMessageToSession(alert->getID(), sessionID);
+            if(object->get_alertText1())
+            {
+                alert->setAlertText1(*object->get_alertText1());
+            }
+            if(object->get_alertText2())
+            {
+                alert->setAlertText2(*object->get_alertText2());
+            }
+            if(object->get_duration())
+            {
+                alert->setDuration(*object->get_duration());
+            }
+            if(object->get_playTone())
+            {
+                alert->setPlayTone(*object->get_playTone());
+            }
+            sendHMIRPC2Response(alert);
+            break;
+        }
         case Marshaller::METHOD_SHOW_RESPONSE:
         case Marshaller::METHOD_SPEAK_RESPONSE:
         case Marshaller::METHOD_SETGLOBALPROPERTIES_RESPONSE:
@@ -319,6 +344,7 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
         case Marshaller::METHOD_SUBSCRIBEBUTTON_RESPONSE:
         case Marshaller::METHOD_UNSUBSCRIBEBUTTON_RESPONSE:
         case Marshaller::METHOD_ONAPPINTERFACEUNREGISTERED:
+        case Marshaller::METHOD_ALERT_RESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A "<< message.first->getMethodId() << " response or notification has been invoked");
             LOG4CPLUS_INFO_EXT(mLogger, "sendRPCMessage called for " << mJSONHandler << " message "<< message.first);
@@ -456,7 +482,20 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
             RPC2Communication::OnAppUnregistered * object = (RPC2Communication::OnAppUnregistered*)msg;
             OnAppInterfaceUnregistered* event = new OnAppInterfaceUnregistered();
             event->set_reason(object->getReason());
-            enqueueOutgoingMobileRPCNotification(event);
+            sendMobileRPCNotification(event);
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_ALERT_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An Alert response has been income");
+            RPC2Communication::AlertResponse* object = (RPC2Communication::AlertResponse*)msg;
+            Alert_response* response = new Alert_response();
+            response->set_success(true);
+            response->set_resultCode(object->getResult());
+            unsigned char sessionID = findSessionIdByMessage(object->getID());
+            removeMessageToSessionMapping(object->getID());
+            Message responseMessage = Message(response, sessionID);
+            sendMobileRPCResponse( responseMessage );
             break;
         }
 		case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
@@ -509,6 +548,12 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
         case RPC2Communication::RPC2Marshaller::METHOD_ONAPPUNREDISTERED:
         {
             mJSONRPC2Handler -> sendNotification( static_cast<RPC2Communication::RPC2Notification*>(msg) );
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_ALERT_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An Alert request has been income");
+            mJSONRPC2Handler->sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
@@ -728,6 +773,7 @@ void AppMgrCore::sendMobileRPCNotification(ALRPCMessage *msg)
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Sending mobile RPC notification to "<< msg->getMethodId() <<"!");
 
+    enqueueOutgoingMobileRPCNotification(msg);
 }
 
 void AppMgrCore::sendHMIRPC2Response(RPC2Communication::RPC2Command *msg)
