@@ -3,7 +3,6 @@
 
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/IRPC2CommandsObserver.h"
-#include "AppMgr/AppLinkInterface.h"
 #include "mb_controller.hpp"
 
 class JSONHandler;
