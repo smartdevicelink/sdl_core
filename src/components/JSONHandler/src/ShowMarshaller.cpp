@@ -38,12 +38,34 @@ Json::Value ShowMarshaller::toJSON(const Show& e)
   json["method"]=Json::Value("UI.Show");
   
   Json::Value j=Json::Value(Json::objectValue);
-  j["mainField1"] = e.mMainField1;
-  j["mainField2"] = e.mMainField2;
-  j["aligment"] = TextAlignmentMarshaller::toJSON(e.mAlignment);
-  j["statusBar"] = e.mStatusBar;
-  j["mediaClock"] = e.mMediaClock;
-  j["mediaTrack"] = e.mMediaTrack;
+  if (e.mMainField1)
+  {
+    j["mainField1"] = Json::Value(*e.mMainField1);  
+  }
+  if (e.mMainField2)
+  {
+    j["mainField2"] = Json::Value(*e.mMainField2);  
+  }
+
+  if ( e.mAlignment )
+  {
+    j["aligment"] = TextAlignmentMarshaller::toJSON(*e.mAlignment);    
+  }
+
+  if (e.mStatusBar)  
+  {
+    j["statusBar"] = Json::Value(*e.mStatusBar);  
+  }
+  
+  if (e.mMediaClock)
+  {
+    j["mediaClock"] = Json::Value(*e.mMediaClock);   
+  }
+  
+  if (e.mMediaTrack)
+  {
+    j["mediaTrack"] = Json::Value(*e.mMediaTrack);  
+  } 
   
   json["params"]=j;
 
@@ -55,6 +77,13 @@ Json::Value ShowMarshaller::toJSON(const Show& e)
 
 bool ShowMarshaller::fromJSON(const Json::Value& json,Show& c)
 {
+  delete c.mMainField2;
+  delete c.mMainField1;
+  delete c.mAlignment;
+  delete c.mMediaTrack;
+  delete c.mMediaClock;
+  delete c.mStatusBar;
+
   try
   {
     if(!json.isObject())  return false;
@@ -71,23 +100,45 @@ bool ShowMarshaller::fromJSON(const Json::Value& json,Show& c)
     Json::Value j=json["params"];
     if(!j.isObject())  return false;
 
-    if(!j.isMember("mainField1") || !j["mainField1"].isString())  return false;
-    c.mMainField1 = j["mainField1"].asString();
+    if(j.isMember("mainField1")){
+      if (!j["mainField1"].isString())
+        return false;
+      c.mMainField1 = new std::string(j["mainField1"].asString());
+    }     
 
-    if(!j.isMember("mainField2") || !j["mainField2"].isString())  return false;
-    c.mMainField2 = j["mainField2"].asString();
+    if(j.isMember("mainField2"))
+    {
+      if (!j["mainField2"].isString())
+        return false;
+      c.mMainField2 = new std::string(j["mainField2"].asString());
+    }     
 
-    if (!j.isMember("alignment")) return false;
-    if (!TextAlignmentMarshaller::fromJSON(j["alignment"], c.mAlignment)) return false;
+    if (j.isMember("alignment")) 
+    {
+      c.mAlignment=new TextAlignment();
+      if (!TextAlignmentMarshaller::fromJSON(j["alignment"], c.mAlignment[0])) return false;  
+    }
+    
+    if(j.isMember("statusBar"))
+    {
+      if (!j["statusBar"].isString())
+        return false;
+      c.mStatusBar = new std::string(j["statusBar"].asString());
+    }     
 
-    if(!j.isMember("statusBar") || !j["statusBar"].isString())  return false;
-    c.mStatusBar = j["statusBar"].asString();
+    if(j.isMember("mediaClock"))
+    {
+      if (!j["mediaClock"].isString())
+        return false;
+      c.mMediaClock = new std::string(j["mediaClock"].asString());
+    }      
 
-    if(!j.isMember("mediaClock") || !j["mediaClock"].isString())  return false;
-    c.mMediaClock = j["mediaClock"].asString();
-
-    if(!j.isMember("mediaTrack") || !j["mediaTrack"].isString())  return false;
-    c.mMediaTrack = j["mediaTrack"].asString();
+    if(j.isMember("mediaTrack"))
+    {
+      if (!j["mediaTrack"].isString())
+        return false;
+      c.mMediaTrack = new std::string(j["mediaTrack"].asString());
+    }   
 
     if(!json.isMember("id")) return false;
 

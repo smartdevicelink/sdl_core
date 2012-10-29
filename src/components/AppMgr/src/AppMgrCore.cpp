@@ -43,6 +43,8 @@
 #include "JSONHandler/GetCapabilitiesResponse.h"
 #include "JSONHandler/SetGlobalProperties.h"
 #include "JSONHandler/ResetGlobalProperties.h"
+#include "JSONHandler/OnAppRegistered.h"
+#include "JSONHandler/OnAppUnregistered.h"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 
@@ -62,6 +64,7 @@ AppMgrCore::AppMgrCore()
 	,mThreadRPCAppLinkObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing, NULL))
 	,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsIncoming, NULL))
 	,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsOutgoing, NULL))
+    ,mThreadMobileRPCNotificationsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueMobileRPCNotificationsOutgoing, NULL))
 	,m_bTerminate(false)
     ,mJSONHandler(0)
     ,mJSONRPC2Handler(0)
@@ -74,6 +77,7 @@ AppMgrCore::AppMgrCore(const AppMgrCore &)
     ,mThreadRPCAppLinkObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing, NULL))
     ,mThreadRPCBusObjectsIncoming(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsIncoming, NULL))
     ,mThreadRPCBusObjectsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueRPCBusObjectsOutgoing, NULL))
+    ,mThreadMobileRPCNotificationsOutgoing(new System::ThreadArgImpl<AppMgrCore>(*this, &AppMgrCore::handleQueueMobileRPCNotificationsOutgoing, NULL))
     ,m_bTerminate(false)
     ,mJSONHandler(0)
     ,mJSONRPC2Handler(0)
@@ -126,6 +130,7 @@ void AppMgrCore::executeThreads()
 	mThreadRPCAppLinkObjectsOutgoing.Start(false);
 	mThreadRPCBusObjectsIncoming.Start(false);
 	mThreadRPCBusObjectsOutgoing.Start(false);
+    mThreadMobileRPCNotificationsOutgoing.Start(false);
 
 	LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
 }
@@ -150,7 +155,10 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             RegisterAppInterface_response* response = new RegisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(ALRPCMessage::RESPONSE);
-            response->set_autoActivateID(*object->get_autoActivateID());
+            if(object->get_autoActivateID())
+            {
+                response->set_autoActivateID(*object->get_autoActivateID());
+            }
             response->set_buttonCapabilities(getButtonCapabilities());
             if(registeredApp)
             {
@@ -166,10 +174,18 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             sendMobileRPCResponse( responseMessage );
             if(registeredApp)
             {
+                const Application* app = registeredApp->getApplication();
                 OnHMIStatus* status = new OnHMIStatus();
-                status->set_hmiLevel(registeredApp->getApplication()->getApplicationHMIStatusLevel());
+                status->set_hmiLevel(app->getApplicationHMIStatusLevel());
                 sendMobileRPCResponse(Message(status, sessionID));
+                RPC2Communication::OnAppRegistered* appRegistered = new RPC2Communication::OnAppRegistered();
+                appRegistered->setAppName(app->getName());
+                appRegistered->setIsMediaApplication(app->getIsMediaApplication());
+                appRegistered->setLanguageDesired(app->getLanguageDesired());
+                appRegistered->setVrSynonyms(app->getVrSynonyms());
+                sendHMIRPC2Response(appRegistered);
             }
+
             break;
 		}
         case Marshaller::METHOD_UNREGISTERAPPINTERFACE_REQUEST:
@@ -177,6 +193,7 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
 
             UnregisterAppInterface_request * object = (UnregisterAppInterface_request*)message.first;
+            std::string appName = AppMgrRegistry::getInstance().getItem(message.second)->getApplication()->getName();
             unregisterApplication( message );
             UnregisterAppInterface_response* response = new UnregisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
@@ -188,6 +205,10 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             OnAppInterfaceUnregistered* msgUnregistered = new OnAppInterfaceUnregistered();
             msgUnregistered->set_reason(AppInterfaceUnregisteredReason(AppInterfaceUnregisteredReason::USER_EXIT));
             sendMobileRPCResponse( Message(msgUnregistered, message.second) );
+            RPC2Communication::OnAppUnregistered* appUnregistered = new RPC2Communication::OnAppUnregistered();
+            appUnregistered->setAppName(appName);
+            appUnregistered->setReason(AppInterfaceUnregisteredReason(AppInterfaceUnregisteredReason::USER_EXIT));
+            sendHMIRPC2Response(appUnregistered);
             break;
         }
         case Marshaller::METHOD_SUBSCRIBEBUTTON_REQUEST:
@@ -221,13 +242,32 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
         case Marshaller::METHOD_SHOW_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Show request has been invoked");
+            LOG4CPLUS_INFO_EXT(mLogger, "message " << message.first );
             Show_request* object = (Show_request*)message.first;
             RPC2Communication::Show* showRPC2Request = new RPC2Communication::Show();
-            showRPC2Request->setMainField1(*object->get_mainField1());
-            showRPC2Request->setMainField2(*object->get_mainField2());
-            showRPC2Request->setMediaClock(*object->get_mediaClock());
-            showRPC2Request->setStatusBar(*object->get_statusBar());
-            showRPC2Request->setTextAlignment(*object->get_alignment());
+            LOG4CPLUS_INFO_EXT(mLogger, "showrpc2request created");
+            if(object->get_mainField1())
+            {
+                showRPC2Request->setMainField1(*object->get_mainField1());
+            }
+            LOG4CPLUS_INFO_EXT(mLogger, "setMainField1 was called");
+            if(object->get_mediaClock())
+            {
+                showRPC2Request->setMainField2(*object->get_mainField2());
+            }
+            if(object->get_mediaClock())
+            {
+                showRPC2Request->setMediaClock(*object->get_mediaClock());
+            }
+            if(object->get_statusBar())
+            {
+                showRPC2Request->setStatusBar(*object->get_statusBar());
+            }
+            if(object->get_alignment())
+            {
+                showRPC2Request->setTextAlignment(*object->get_alignment());
+            }
+            LOG4CPLUS_INFO_EXT(mLogger, "Show request almost handled" );
             mapMessageToSession(showRPC2Request->getID(), sessionID);
             sendHMIRPC2Response(showRPC2Request);
             break;
@@ -248,16 +288,14 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             SetGlobalProperties_request* object = (SetGlobalProperties_request*)message.first;
             RPC2Communication::SetGlobalProperties* setGPRPC2Request = new RPC2Communication::SetGlobalProperties();
             mapMessageToSession(setGPRPC2Request->getID(), sessionID);
-            std::vector<TTSChunk> helpPrompts = *object->get_helpPrompt();
-            for(std::vector<TTSChunk>::iterator it = helpPrompts.begin(); it != helpPrompts.end(); it++)
+            if(object->get_helpPrompt())
             {
-                setGPRPC2Request->setHelpPrompt(*it);
+                setGPRPC2Request->setHelpPrompt(*object->get_helpPrompt());
             }
 
-            std::vector<TTSChunk> timeoutPrompt = *object->get_timeoutPrompt();
-            for(std::vector<TTSChunk>::iterator it = timeoutPrompt.begin(); it != timeoutPrompt.end(); it++)
+            if(object->get_timeoutPrompt())
             {
-                setGPRPC2Request->setTimeoutPrompt(*it);
+                setGPRPC2Request->setTimeoutPrompt(*object->get_timeoutPrompt());
             }
             sendHMIRPC2Response(setGPRPC2Request);
             break;
@@ -268,11 +306,7 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
             ResetGlobalProperties_request* object = (ResetGlobalProperties_request*)message.first;
             RPC2Communication::ResetGlobalProperties* resetGPRPC2Request = new RPC2Communication::ResetGlobalProperties();
             mapMessageToSession(resetGPRPC2Request->getID(), sessionID);
-            std::vector<GlobalProperty> gp = object->get_properties();
-            for(std::vector<GlobalProperty>::iterator it = gp.begin(); it != gp.end(); it++)
-            {
-                resetGPRPC2Request->setProperty(*it);
-            }
+            resetGPRPC2Request->setProperty(object->get_properties());
 
             sendHMIRPC2Response(resetGPRPC2Request);
             break;
@@ -287,6 +321,7 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
         case Marshaller::METHOD_ONAPPINTERFACEUNREGISTERED:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A "<< message.first->getMethodId() << " response or notification has been invoked");
+            LOG4CPLUS_INFO_EXT(mLogger, "sendRPCMessage called for " << mJSONHandler << " message "<< message.first);
             mJSONHandler->sendRPCMessage(message.first, sessionID);
             break;
         }
@@ -294,7 +329,28 @@ void AppMgrCore::handleMobileRPCMessage( const Message& message )
 		default:
             LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< message.first->getMethodId() <<" has been received!");
 			break;
-	}
+    }
+}
+
+void AppMgrCore::handleMobileRPCNotification(ALRPCMessage *message)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC notification "<< message->getMethodId() <<" has been received!");
+    switch(message->getMethodId())
+    {
+        case Marshaller::METHOD_ONAPPINTERFACEUNREGISTERED:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnAppInterfaceUnregistered notification has been invoked");
+
+            OnAppInterfaceUnregistered* object = (OnAppInterfaceUnregistered*)message;
+            mJSONHandler->sendRPCMessage(message, 1);//just temporarily!!!
+            break;
+        }
+        default:
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC notification "<< message->getMethodId() <<" has been received!");
+            break;
+        }
+    }
 }
 
 void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg )
@@ -324,7 +380,9 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
             const ButtonName & name = object->getName();
             event->set_buttonName(name);
             event->set_buttonPressMode(object->getMode());
+            LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
             unsigned char sessionID = findSessionIdSubscribedToButton(name);
+            LOG4CPLUS_INFO_EXT(mLogger, "sessionID found " << sessionID);
             Message message = Message(event, sessionID);
             sendMobileRPCResponse( message );
             break;
@@ -392,6 +450,15 @@ void AppMgrCore::handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* ms
             sendMobileRPCResponse( responseMessage );
             break;
         }
+        case RPC2Communication::RPC2Marshaller::METHOD_ONAPPUNREDISTERED:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnAppUnregistered notification has been income");
+            RPC2Communication::OnAppUnregistered * object = (RPC2Communication::OnAppUnregistered*)msg;
+            OnAppInterfaceUnregistered* event = new OnAppInterfaceUnregistered();
+            event->set_reason(object->getReason());
+            enqueueOutgoingMobileRPCNotification(event);
+            break;
+        }
 		case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
 		default:
 			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethod() <<" has been received!");
@@ -411,23 +478,37 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetCapabilities request has been outcoming");
             //RPC2Communication::GetCapabilities * object = (RPC2Communication::GetCapabilities*)msg;
-
+            mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_SHOW_REQUEST:
         {
+            mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_SPEAK_REQUEST:
         {
+            mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_SET_GLOBAL_PROPERTIES_REQUEST:
         {
+            mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_RESET_GLOBAL_PROPERTIES_REQUEST:
         {
+            mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_ONAPPREGISTERED:
+        {
+            mJSONRPC2Handler -> sendNotification( static_cast<RPC2Communication::RPC2Notification*>(msg) );
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_ONAPPUNREDISTERED:
+        {
+            mJSONRPC2Handler -> sendNotification( static_cast<RPC2Communication::RPC2Notification*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
@@ -437,7 +518,6 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
             break;
         }
     }
-    mJSONRPC2Handler->sendCommand( msg );
 
     LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been outcomed");
 }
@@ -453,6 +533,19 @@ void AppMgrCore::enqueueOutgoingMobileRPCMessage( const Message& message )
 	mMtxRPCAppLinkObjectsOutgoing.Unlock();
 	
     LOG4CPLUS_INFO_EXT(mLogger, " A " << message.first->getMethodId() << " outgoing mobile RPC message has been sent");
+}
+
+void AppMgrCore::enqueueOutgoingMobileRPCNotification(ALRPCMessage *msg)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " A " << msg->getMethodId() << " outgoing mobile RPC notification send has been invoked");
+
+    mMtxMobileRPCNotificationsOutgoing.Lock();
+
+    mQueueMobileRPCNotificationsOutgoing.push(msg);
+
+    mMtxMobileRPCNotificationsOutgoing.Unlock();
+
+    LOG4CPLUS_INFO_EXT(mLogger, " A " << msg->getMethodId() << " outgoing mobile RPC notification has been sent");
 }
 
 void AppMgrCore::enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message )
@@ -480,7 +573,21 @@ void AppMgrCore::removeMessageToSessionMapping(int messageId)
 
 unsigned char AppMgrCore::findSessionIdSubscribedToButton( ButtonName appName ) const
 {
-    return mButtonsMapping.find(appName)->second->getApplication()->getSessionID();
+    ButtonMap::const_iterator it = mButtonsMapping.find( appName );
+    if ( it != mButtonsMapping.end() )
+    {
+        if ( !it-> second )
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found" );
+            return '0';
+        }
+        if ( it->second->getApplication() )
+        {
+            return it->second->getApplication()->getSessionID();
+        }
+    }
+    LOG4CPLUS_INFO_EXT(mLogger, "Button " << appName.get() << " not found in subscribed." );
+    return '0';
 }
 
 unsigned char AppMgrCore::findSessionIdByMessage(int messageId) const
@@ -494,25 +601,44 @@ const RegistryItem* AppMgrCore::registerApplication( const Message& object )
     unsigned char sessionID = object.second;
     RegisterAppInterface_request * request = (RegisterAppInterface_request*)msg;
     LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() << "!");
+
     const std::string& appName = request->get_appName();
-    const std::string& ngnMediaScreenAppName = *request->get_ngnMediaScreenAppName();
-    const std::vector<std::string>& vrSynonyms = *request->get_vrSynonyms();
-    bool usesVehicleData = request->get_usesVehicleData();
+    Application* application = new Application( appName, sessionID );
+
     bool isMediaApplication = request->get_isMediaApplication();
     const Language& languageDesired = request->get_languageDesired();
-    const std::string& autoActivateID = *request->get_autoActivateID();
     const SyncMsgVersion& syncMsgVersion = request->get_syncMsgVersion();
 
-    Application* application = new Application( appName, sessionID );
-    application->setAutoActivateID(autoActivateID);
+    if ( request -> get_ngnMediaScreenAppName() )
+    {
+        const std::string& ngnMediaScreenAppName = *request->get_ngnMediaScreenAppName();
+        application->setNgnMediaScreenAppName(ngnMediaScreenAppName);            
+    }
+    
+    if ( request -> get_vrSynonyms() )
+    {
+        const std::vector<std::string>& vrSynonyms = *request->get_vrSynonyms();
+        application->setVrSynonyms(vrSynonyms);            
+    }
+
+    if ( request -> get_usesVehicleData() )
+    {
+        bool usesVehicleData = request->get_usesVehicleData();
+        application->setUsesVehicleData(usesVehicleData);            
+    }
+    
+    if ( request-> get_autoActivateID() )
+    {
+        const std::string& autoActivateID = *request->get_autoActivateID();
+        application->setAutoActivateID(autoActivateID);
+    }    
+
 	application->setIsMediaApplication(isMediaApplication);
 	application->setLanguageDesired(languageDesired);
-    application->setNgnMediaScreenAppName(ngnMediaScreenAppName);
 	application->setSyncMsgVersion(syncMsgVersion);
-	application->setUsesVehicleData(usesVehicleData);
-    application->setVrSynonyms(vrSynonyms);
 
 	application->setApplicationHMIStatusLevel(HMILevel::HMI_NONE);
+    LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
 
     return AppMgrRegistry::getInstance().registerApplication( application );
 }
@@ -538,6 +664,7 @@ void AppMgrCore::subscribeButton( const Message& msg )
     SubscribeButton_request * object = (SubscribeButton_request*)message;
     const ButtonName& name = object->get_buttonName();
     RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
+    LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to button " << name.get() << " in session " << sessionID );
     mButtonsMapping.insert(ButtonMapItem(name, item));
 }
 
@@ -595,6 +722,12 @@ void AppMgrCore::sendMobileRPCResponse( const Message& msg )
     LOG4CPLUS_INFO_EXT(mLogger, " Sending mobile RPC response to "<< msg.first->getMethodId() <<"!");
 
     enqueueOutgoingMobileRPCMessage( msg );
+}
+
+void AppMgrCore::sendMobileRPCNotification(ALRPCMessage *msg)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " Sending mobile RPC notification to "<< msg->getMethodId() <<"!");
+
 }
 
 void AppMgrCore::sendHMIRPC2Response(RPC2Communication::RPC2Command *msg)
@@ -690,7 +823,29 @@ void* AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
 			
             handleBusRPCMessageOutgoing( msg );
 		}
-	}
+    }
+}
+
+void *AppMgrCore::handleQueueMobileRPCNotificationsOutgoing(void *)
+{
+    while(true)
+    {
+        std::size_t size = mQueueMobileRPCNotificationsOutgoing.size();
+        if( size > 0 )
+        {
+            mMtxMobileRPCNotificationsOutgoing.Lock();
+            ALRPCMessage* msg = mQueueMobileRPCNotificationsOutgoing.front();
+            mQueueMobileRPCNotificationsOutgoing.pop();
+            mMtxMobileRPCNotificationsOutgoing.Unlock();
+            if(!msg)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
+                continue;
+            }
+
+            handleMobileRPCNotification( msg );
+        }
+    }
 }
 
 void AppMgrCore::setJsonHandler(JSONHandler* handler)

@@ -137,10 +137,10 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.Show") {
 
-			MFT.AppModel.PlayList.items[0].set('title', request.params.mainField1);
-			MFT.AppModel.PlayList.items[0].set('album', request.params.mainField2);
-			MFT.AppModel.PlayList.items[0].set('duration', request.params.mediaClock);
-			MFT.AppModel.PlayList.items[0].set('artist', request.params.mediaTrack);
+			MFT.AppModel.PlayList.items[0].set('field1', request.params.mainField1);
+			MFT.AppModel.PlayList.items[0].set('field2', request.params.mainField2);
+			MFT.AppModel.PlayList.items[0].set('mediaClock', request.params.mediaClock);
+			MFT.AppModel.PlayList.items[0].set('mediaTrack', request.params.mediaTrack);
 
 			// send repsonse
 			var JSONMessage = {
@@ -154,6 +154,8 @@ FFW.UI = FFW.RPCObserver.create({
 		}
 		
 		if (request.method == "UI.SetGlobalProperties") {
+
+			MFT.TTSPopUp.receiveMessage("Set global properties");
 
 			// TODO: please process as array 
 			this.globalProperties.set('helpPrompt', request.params.helpPrompt);
@@ -175,7 +177,10 @@ FFW.UI = FFW.RPCObserver.create({
 			
 			// reset all requested properties
 			for (var i=0;i<request.params.length;i++)
+			{
 			        this.resetProperties(reuqest.params[i]);
+				MFT.TTSPopUp.receiveMessage("Reset property: " + reuqest.params[i]);
+			}
 
 			// send repsonse
 			var JSONMessage = {

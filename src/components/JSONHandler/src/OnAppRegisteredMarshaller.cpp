@@ -36,7 +36,7 @@ Json::Value OnAppRegisteredMarshaller::toJSON(const OnAppRegistered& e)
   Json::Value json(Json::objectValue);
   
   json["jsonrpc"]=Json::Value("2.0");
-  json["method"]=Json::Value("Buttons.OnAppRegistered");
+  json["method"]=Json::Value("AppLinkCore.OnAppRegistered");
   
   Json::Value j=Json::Value(Json::objectValue);
   
@@ -72,7 +72,7 @@ bool OnAppRegisteredMarshaller::fromJSON(const Json::Value& json,OnAppRegistered
     if(!json.isMember("method") 
         || !json["method"].isString() )
         return false;
-    if (json["method"].asString().compare("Buttons.OnAppRegistered"))  
+    if (json["method"].asString().compare("AppLinkCore.OnAppRegistered"))  
         return false;
 
     if(!json.isMember("params"))  return false;

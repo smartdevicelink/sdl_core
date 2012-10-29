@@ -10,12 +10,12 @@ ResetGlobalProperties::ResetGlobalProperties()
 ResetGlobalProperties::~ResetGlobalProperties()
 {}
 
-void ResetGlobalProperties::setProperty(const GlobalProperty& property)
+void ResetGlobalProperties::setProperty(const std::vector<GlobalProperty>& property)
 {
     mProperty = property;
 }
         
-const GlobalProperty& ResetGlobalProperties::getProperty() const
+const std::vector<GlobalProperty>& ResetGlobalProperties::getProperty() const
 {
     return mProperty;
 }

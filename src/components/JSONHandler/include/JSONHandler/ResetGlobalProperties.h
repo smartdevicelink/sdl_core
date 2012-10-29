@@ -3,6 +3,7 @@
 
 #include "JSONHandler/RPC2Request.h"
 #include "JSONHandler/ALRPCObjects/GlobalProperty.h"
+#include <vector>
 
 namespace RPC2Communication 
 {
@@ -12,11 +13,11 @@ namespace RPC2Communication
         ResetGlobalProperties();
         ~ResetGlobalProperties();
 
-        void setProperty(const GlobalProperty& property);
-        const GlobalProperty& getProperty() const;
+        void setProperty(const std::vector<GlobalProperty>& property);
+        const std::vector<GlobalProperty>& getProperty() const;
     
     private:
-        GlobalProperty mProperty;
+        std::vector<GlobalProperty> mProperty;
         friend class ResetGlobalPropertiesMarshaller;
     };
 }

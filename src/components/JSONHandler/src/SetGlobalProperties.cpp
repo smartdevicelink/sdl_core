@@ -5,27 +5,43 @@ using namespace RPC2Communication;
 
 SetGlobalProperties::SetGlobalProperties()
 :RPC2Request( RPC2Marshaller::METHOD_SET_GLOBAL_PROPERTIES_REQUEST )
-{}
+{
+    mHelpPrompt = 0;
+    mTimeoutPrompt = 0;
+}
  
 SetGlobalProperties::~SetGlobalProperties()
-{}
+{
+    if (mHelpPrompt)
+    {
+        delete mHelpPrompt;
+        mHelpPrompt = 0;
+    }
+    if (mTimeoutPrompt)
+    {
+        delete mTimeoutPrompt;
+        mTimeoutPrompt = 0;
+    }        
+}
     
-void SetGlobalProperties::setHelpPrompt( const TTSChunk& helpPrompt )
+void SetGlobalProperties::setHelpPrompt( const std::vector<TTSChunk>& helpPrompt )
 {
-    mHelpPrompt = helpPrompt;
+    delete mHelpPrompt;
+    mHelpPrompt = new std::vector<TTSChunk>(helpPrompt);
 }
 
-void SetGlobalProperties::setTimeoutPrompt( const TTSChunk& timeoutPrompt )
+void SetGlobalProperties::setTimeoutPrompt( const std::vector<TTSChunk>& timeoutPrompt )
 {
-    mTimeoutPrompt = timeoutPrompt;
+    delete mTimeoutPrompt;
+    mTimeoutPrompt = new std::vector<TTSChunk>(timeoutPrompt);
 }
 
-TTSChunk SetGlobalProperties::getHelpPrompt() const
+const std::vector<TTSChunk>* SetGlobalProperties::getHelpPrompt() const
 {
     return mHelpPrompt;
 }
 
-TTSChunk SetGlobalProperties::getTimeoutPrompt() const
+const std::vector<TTSChunk>* SetGlobalProperties::getTimeoutPrompt() const
 {
     return mTimeoutPrompt;
 }

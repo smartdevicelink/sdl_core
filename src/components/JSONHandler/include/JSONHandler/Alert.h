@@ -12,10 +12,10 @@ namespace RPC2Communication {
         Alert();         
         ~Alert();
 
-        std::string getAlertText1() const;
-        std::string getAlertText2() const;
-        int getDuration() const;
-        bool getPlayTone() const;
+        const std::string * getAlertText1() const;
+        const std::string * getAlertText2() const;
+        int * getDuration() const;
+        bool * getPlayTone() const;
 
         void setAlertText1( const std::string & str );
         void setAlertText2( const std::string & str );
@@ -23,10 +23,10 @@ namespace RPC2Communication {
         void setPlayTone( bool playTone );
 
     private:
-        std::string mAlertText1;
-        std::string mAlertText2;
-        int mDuration;
-        bool mPlayTone;
+        std::string * mAlertText1;
+        std::string * mAlertText2;
+        int  * mDuration;
+        bool * mPlayTone;
        friend class AlertMarshaller;
     
     };
