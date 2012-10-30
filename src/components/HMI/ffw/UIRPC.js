@@ -155,7 +155,7 @@ FFW.UI = FFW.RPCObserver.create({
 		
 		if (request.method == "UI.Alert") {
 
-			MFT.UIPopUp.receiveMessage(request.parameters.AlertText1 + ' ' + request.parameters.AlertText1, request.parameters.duration);
+			MFT.UIPopUp.receiveMessage(request.params.AlertText1, request.paras.AlertText2, request.params.duration, request.params.playTone);
 
 			// send repsonse
 			var JSONMessage = {

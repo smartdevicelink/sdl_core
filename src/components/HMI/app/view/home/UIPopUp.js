@@ -43,10 +43,10 @@ MFT.UIPopUp = Em.ContainerView.create({
 		contentBinding:		'parentView.content'
 	}),
 
-	receiveMessage: function(msg, duration){
+	receiveMessage: function(msg1, msg2, duration, playTone){
 		var self = this;
 
-		this.set('content', msg);
+		this.set('content', msg1);
 		this.set('received', true);
 		setTimeout(function(){self.set('received', false);}, duration);
 	}
