@@ -13,7 +13,7 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Fri Oct 26 06:31:48 2012
+  generated at	Tue Oct 30 08:29:32 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
@@ -57,13 +57,42 @@ private:
 
   friend class PerformInteraction_requestMarshaller;
 
-  std::string initialText;	//!< (500)
-  std::vector<TTSChunk> initialPrompt;	//!<   [%s..%s] 
-  InteractionMode interactionMode;
-  std::vector<unsigned int> interactionChoiceSetIDList;	//!<   [%s..%s]  (0,2000000000)
-  std::vector<TTSChunk>* helpPrompt;	//!<   [%s..%s] 
-  std::vector<TTSChunk>* timeoutPrompt;	//!<   [%s..%s] 
-  unsigned int* timeout;	//!<  (5000,100000)
+
+///  Text to be displayed first.
+    std::string initialText;	//!< (500)
+
+/**
+     This is the intial prompt spoken to the user at the start of an interaction
+     An array of text chunks of type TTSChunk. See TTSChunk
+     The array must have at least one item
+*/
+    std::vector<TTSChunk> initialPrompt;	//!<   [%s..%s] 
+
+///  See InteractionMode.
+    InteractionMode interactionMode;
+
+///  List of interaction choice set IDs to use with an interaction.
+    std::vector<unsigned int> interactionChoiceSetIDList;	//!<   [%s..%s]  (0,2000000000)
+
+/**
+     Help text. This is the spoken string when a user speaks "help" when the interaction is occuring.
+     An array of text chunks of type TTSChunk. See TTSChunk
+     The array must have at least one item
+*/
+    std::vector<TTSChunk>* helpPrompt;	//!<   [%s..%s] 
+
+/**
+     Timeout text. This text is spoken when a VR interaction times out.
+     An array of text chunks of type TTSChunk. See TTSChunk
+     The array must have at least one item
+*/
+    std::vector<TTSChunk>* timeoutPrompt;	//!<   [%s..%s] 
+
+/**
+     Timeout in milliseconds.
+     If omitted a standard value of 10000 milliseconds is used.
+*/
+    unsigned int* timeout;	//!<  (5000,100000)
 };
 
 #endif

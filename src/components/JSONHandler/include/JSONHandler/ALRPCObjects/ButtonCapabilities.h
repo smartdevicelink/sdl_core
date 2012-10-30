@@ -9,7 +9,7 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Fri Oct 26 06:31:48 2012
+  generated at	Tue Oct 30 08:29:32 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
@@ -44,10 +44,28 @@ private:
 
   friend class ButtonCapabilitiesMarshaller;
 
-  bool longPressAvailable;
-  ButtonName name;
-  bool shortPressAvailable;
-  bool upDownAvailable;
+
+/**
+     The button supports a LONG press.
+     Whenever the button is pressed long, onButtonPressed( LONG) will be invoked.
+*/
+    bool longPressAvailable;
+
+///  The name of the button. See ButtonName.
+    ButtonName name;
+
+/**
+     The button supports a short press.
+     Whenever the button is pressed short, onButtonPressed( SHORT) will be invoked.
+*/
+    bool shortPressAvailable;
+
+/**
+     The button supports "button down" and "button up".
+     Whenever the button is pressed, onButtonEvent( DOWN) will be invoked.
+     Whenever the button is released, onButtonEvent( UP) will be invoked.
+*/
+    bool upDownAvailable;
 };
 
 #endif
