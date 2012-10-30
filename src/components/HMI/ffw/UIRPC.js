@@ -155,7 +155,7 @@ FFW.UI = FFW.RPCObserver.create({
 		
 		if (request.method == "UI.Alert") {
 
-			MFT.UIPopUp.receiveMessage(request.params.AlertText1, request.paras.AlertText2, request.params.duration, request.params.playTone);
+			MFT.UIPopUp.receiveMessage(request.params.AlertText1, request.params.AlertText2, request.params.duration, request.params.playTone);
 
 			// send repsonse
 			var JSONMessage = {
@@ -215,14 +215,13 @@ FFW.UI = FFW.RPCObserver.create({
 	onRPCActivateApp: function() {
 		Em.Logger.log("FFW.UI.onRPCActivateApp");
 
-		// send repsonse
+		// send request
+
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.activateApp",
-			"params"	:	[
-				{"appName"	:	MFT.AppModel.PlayList.items[0].appName}
-			]
+			"params"	:	{"appName":[MFT.AppModel.PlayList.items[0].appName]}
 		};
 		this.client.send(JSONMessage);
 	}
