@@ -220,11 +220,9 @@ FFW.UI = FFW.RPCObserver.create({
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.activateApp",
-			"params"	:	{
-				[
-					"appName"	:	MFT.AppModel.PlayList.items[0].appName
-				]
-			}
+			"params"	:	[
+				{"appName"	:	MFT.AppModel.PlayList.items[0].appName}
+			]
 		};
 		this.client.send(JSONMessage);
 	}
