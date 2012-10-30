@@ -24,14 +24,14 @@
  	 * 	
 	 */ 
         "UI.Show": {
-		"parameters": {
-			"mainField1" 	: "string",      
-			"mainField2" 	: "string",      
-			"alignment" 	: "textAlignment",    // data type from AppLink protocol specification  
-			"statusBar" 	: "string",      
-			"mediaClock" 	: "string",      
-			"mediaTrack" 	: "string"
-		},
+			"parameters": {
+				"mainField1" 	: "string",      
+				"mainField2" 	: "string",      
+				"alignment" 	: "textAlignment",    // data type from AppLink protocol specification  
+				"statusBar" 	: "string",      
+				"mediaClock" 	: "string",      
+				"mediaTrack" 	: "string"
+			},
 	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
 				"result": "Result" // data type from AppLink protocol specification
@@ -47,12 +47,12 @@
  	 * 	
 	 */ 
         "UI.Alert": {
-		"parameters": {
-			"AlertText1" 	: "string",      
-			"AlertText2" 	: "string",      
-			"duration" 	: "Integer",
-			"playTone" 	: "bool"
-		},
+			"parameters": {
+				"AlertText1" 	: "string",      
+				"AlertText2" 	: "string",      
+				"duration" 		: "Integer",
+				"playTone" 		: "bool"
+			},
 	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
 				"result": "Result" // data type from AppLink protocol specification
