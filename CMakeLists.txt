@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 2.8)
 set (PROJECT appLinkCore)
 project (${PROJECT})
 
-set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3")

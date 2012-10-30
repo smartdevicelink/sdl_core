@@ -36,6 +36,10 @@ set (SOURCES
   CAppTester.cpp
 )
 
+if( NOT CMAKE_BUILD_TYPE )
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
+endif()
+
 add_executable(${PROJECT} ${SOURCES})
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
