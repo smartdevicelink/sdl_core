@@ -153,6 +153,24 @@ FFW.UI = FFW.RPCObserver.create({
 			this.client.send(JSONMessage);
 		}
 		
+		if (request.method == "UI.Alert") {
+
+			MFT.AppModel.PlayList.items[0].set('field1', request.params.mainField1);
+			MFT.AppModel.PlayList.items[0].set('field2', request.params.mainField2);
+			MFT.AppModel.PlayList.items[0].set('mediaClock', request.params.mediaClock);
+			MFT.AppModel.PlayList.items[0].set('mediaTrack', request.params.mediaTrack);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	{
+					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+				}
+			};
+			this.client.send(JSONMessage);
+		}
+
 		if (request.method == "UI.SetGlobalProperties") {
 
 			MFT.TTSPopUp.receiveMessage("Set global properties");
