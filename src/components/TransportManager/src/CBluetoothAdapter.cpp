@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <iomanip>
+#include <set>
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
@@ -13,21 +14,52 @@
 NsAppLink::NsTransportManager::CBluetoothAdapter::SBluetoothDevice::SBluetoothDevice(void):
 mAddress(),
 mName(),
-mAppLinkRFCOMMPorts()
+mAppLinkRFCOMMChannels()
 {
 }
 
 NsAppLink::NsTransportManager::CBluetoothAdapter::SBluetoothDevice::SBluetoothDevice(const NsAppLink::NsTransportManager::CBluetoothAdapter::SBluetoothDevice & Other):
 mAddress(Other.mAddress),
 mName(Other.mName),
-mAppLinkRFCOMMPorts(Other.mAppLinkRFCOMMPorts)
+mAppLinkRFCOMMChannels(Other.mAppLinkRFCOMMChannels)
 {
 }
 
-NsAppLink::NsTransportManager::CBluetoothAdapter::SBluetoothDevice::SBluetoothDevice(const bdaddr_t & Address, const char * Name, const std::vector<uint8_t> & AppLinkRFCOMMPorts):
+NsAppLink::NsTransportManager::CBluetoothAdapter::SBluetoothDevice::SBluetoothDevice(const bdaddr_t & Address, const char * Name, const std::vector<uint8_t> & AppLinkRFCOMMChannels):
 mAddress(Address),
 mName(Name),
-mAppLinkRFCOMMPorts(AppLinkRFCOMMPorts)
+mAppLinkRFCOMMChannels(AppLinkRFCOMMChannels)
+{
+}
+
+NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::SRFCOMMConnection(void):
+mDeviceHandle(InvalidDeviceHandle),
+mDeviceAddress(),
+mRFCOMMChannel(0u),
+mConnectionThread()
+{
+}
+
+NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::SRFCOMMConnection(const NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection & Other):
+mDeviceHandle(Other.mDeviceHandle),
+mDeviceAddress(Other.mDeviceAddress),
+mRFCOMMChannel(Other.mRFCOMMChannel),
+mConnectionThread(Other.mConnectionThread)
+{
+}
+
+NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::SRFCOMMConnection(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, const bdaddr_t & DeviceAddress, const uint8_t RFCOMMChannel):
+mDeviceHandle(DeviceHandle),
+mDeviceAddress(DeviceAddress),
+mRFCOMMChannel(RFCOMMChannel),
+mConnectionThread()
+{
+}
+
+NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnectionParameters::SRFCOMMConnectionParameters(NsAppLink::NsTransportManager::CBluetoothAdapter & BluetoothAdapter, NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, uint8_t RFCOMMChannel):
+mBluetoothAdapter(BluetoothAdapter),
+mDeviceHandle(DeviceHandle),
+mRFCOMMChannel(RFCOMMChannel)
 {
 }
 
@@ -103,6 +135,16 @@ int NsAppLink::NsTransportManager::CBluetoothAdapter::sendFrame(NsAppLink::NsTra
     return -1;
 }
 
+void NsAppLink::NsTransportManager::CBluetoothAdapter::startRFCOMMConnection(const NsAppLink::NsTransportManager::tDeviceHandle& DeviceHandle, const uint8_t RFCOMMChannel)
+{
+    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+}
+
+void NsAppLink::NsTransportManager::CBluetoothAdapter::stopRFCOMMConnection(const NsAppLink::NsTransportManager::tConnectionHandle& ConnectionHandle)
+{
+    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+}
+
 void * NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThreadStartRoutine(void * Data)
 {
     if (0 != Data)
@@ -156,7 +198,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
                         for (int i = 0; i < numberOfDevices; ++i)
                         {
                             bdaddr_t anyAddress = {{0, 0, 0, 0, 0, 0}};
-                            std::vector<uint8_t> appLinkRFCOMMPorts;
+                            std::vector<uint8_t> appLinkRFCOMMChannels;
                             sdp_session_t * sdpSession = sdp_connect(&anyAddress, &inquiryInfoList[i].bdaddr, SDP_RETRY_IF_BUSY);
 
                             if (0 != sdpSession)
@@ -197,7 +239,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
                                                             case SDP_UINT8:
                                                                 if (RFCOMM_UUID == proto)
                                                                 {
-                                                                    appLinkRFCOMMPorts.push_back(d->val.uint8);
+                                                                    appLinkRFCOMMChannels.push_back(d->val.uint8);
                                                                 }
                                                                 break;
                                                         }
@@ -211,21 +253,21 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
                                         }
                                     }
 
-                                    if (false == appLinkRFCOMMPorts.empty())
+                                    if (false == appLinkRFCOMMChannels.empty())
                                     {
                                         char deviceAddressString[16];
                                         char deviceName[256];
                                         ba2str(&inquiryInfoList[i].bdaddr, deviceAddressString);
-                                        std::stringstream rfcommPortsString;
+                                        std::stringstream rfcommChannelsString;
 
-                                        for (std::vector<uint8_t>::const_iterator pi = appLinkRFCOMMPorts.begin(); pi != appLinkRFCOMMPorts.end(); ++pi)
+                                        for (std::vector<uint8_t>::const_iterator pi = appLinkRFCOMMChannels.begin(); pi != appLinkRFCOMMChannels.end(); ++pi)
                                         {
-                                            if (pi != appLinkRFCOMMPorts.begin())
+                                            if (pi != appLinkRFCOMMChannels.begin())
                                             {
-                                                rfcommPortsString << ", ";
+                                                rfcommChannelsString << ", ";
                                             }
 
-                                            rfcommPortsString << static_cast<int>(*pi);
+                                            rfcommChannelsString << static_cast<int>(*pi);
                                         }
 
                                         if (0 != hci_read_remote_name(deviceHandle, &inquiryInfoList[i].bdaddr, sizeof(deviceName) / sizeof(deviceName[0]), deviceName, 0))
@@ -234,9 +276,9 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
                                             strncpy(deviceName, deviceAddressString, sizeof(deviceName) / sizeof(deviceName[0]));
                                         }
 
-                                        LOG4CPLUS_INFO_EXT(mLogger, "hci_inquiry: device " << i << ": " << deviceAddressString << " (\"" << deviceName << "\") service found at port(s): " << rfcommPortsString.str().c_str());
+                                        LOG4CPLUS_INFO_EXT(mLogger, "hci_inquiry: device " << i << ": " << deviceAddressString << " (\"" << deviceName << "\") service found at channel(s): " << rfcommChannelsString.str().c_str());
 
-                                        discoveredDevices.push_back(SBluetoothDevice(inquiryInfoList[i].bdaddr, deviceName, appLinkRFCOMMPorts));
+                                        discoveredDevices.push_back(SBluetoothDevice(inquiryInfoList[i].bdaddr, deviceName, appLinkRFCOMMChannels));
                                     }
                                 }
 
@@ -325,6 +367,66 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
                         getDeviceList(clientDeviceList);
                         mListener.onDeviceListUpdated(this, clientDeviceList);
                     }
+
+                    std::vector<tConnectionHandle> connectionsToTerminate;
+                    std::set<std::pair<tDeviceHandle, uint8_t> > connectionsToEstablish;
+
+                    for (tBluetoothDevicesMap::const_iterator newDeviceIterator = newDevices.begin(); newDeviceIterator != newDevices.end(); ++newDeviceIterator)
+                    {
+                        const SBluetoothDevice & device = newDeviceIterator->second;
+
+                        for (std::vector<uint8_t>::const_iterator channelIterator = device.mAppLinkRFCOMMChannels.begin(); channelIterator != device.mAppLinkRFCOMMChannels.end(); ++channelIterator)
+                        {
+                            connectionsToEstablish.insert(std::make_pair(newDeviceIterator->first, *channelIterator));
+                        }
+                    }
+
+                    pthread_mutex_lock(&mRFCOMMConnectionsMutex);
+
+                    for (tRFCOMMConnectionMap::const_iterator connectionIterator = mRFCOMMConnections.begin(); connectionIterator != mRFCOMMConnections.end(); ++connectionIterator)
+                    {
+                        const SRFCOMMConnection connection = connectionIterator->second;
+                        tBluetoothDevicesMap::const_iterator newDeviceIterator = newDevices.find(connection.mDeviceHandle);
+
+                        if (newDevices.end() == newDeviceIterator)
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (device " << connectionIterator->second.mDeviceHandle << " is lost)");
+
+                            connectionsToTerminate.push_back(connectionIterator->first);
+                        }
+                        else
+                        {
+                            const std::vector<uint8_t> & appLinkRFCOMMChannels = newDeviceIterator->second.mAppLinkRFCOMMChannels;
+
+                            if (appLinkRFCOMMChannels.end() == std::find(appLinkRFCOMMChannels.begin(), appLinkRFCOMMChannels.end(), connectionIterator->second.mRFCOMMChannel))
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (no AppLink service found on channel " << connectionIterator->second.mRFCOMMChannel << ")");
+
+                                connectionsToTerminate.push_back(connectionIterator->first);
+                            }
+                            else
+                            {
+                                const std::pair<tDeviceHandle, uint8_t> newConnection(connection.mDeviceHandle, connection.mRFCOMMChannel);
+
+                                if (connectionsToEstablish.find(newConnection) != connectionsToEstablish.end())
+                                {
+                                    connectionsToEstablish.erase(newConnection);
+                                }
+                            }
+                        }
+                    }
+
+                    pthread_mutex_unlock(&mRFCOMMConnectionsMutex);
+
+                    for (std::vector<tConnectionHandle>::const_iterator terminatingConnectionsIterator = connectionsToTerminate.begin(); terminatingConnectionsIterator != connectionsToTerminate.end(); ++terminatingConnectionsIterator)
+                    {
+                        stopRFCOMMConnection(*terminatingConnectionsIterator);
+                    }
+
+                    for (std::set<std::pair<tDeviceHandle, uint8_t> >::const_iterator newConnectionsIterator = connectionsToEstablish.begin(); newConnectionsIterator != connectionsToEstablish.end(); ++newConnectionsIterator)
+                    {
+                        startRFCOMMConnection(newConnectionsIterator->first, newConnectionsIterator->second);
+                    }
                 }
                 else
                 {
@@ -341,4 +443,14 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
     delete [] inquiryInfoList;
 
     LOG4CPLUS_INFO_EXT(mLogger, "Device discovery thread finished");
+}
+
+void * NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThreadStartRoutine(void * Data)
+{
+    //LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+}
+
+void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const NsAppLink::NsTransportManager::tConnectionHandle & ConnectionHandle)
+{
+    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }

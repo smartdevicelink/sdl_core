@@ -92,9 +92,9 @@ namespace NsAppLink
                  *
                  * @param Address Bluetooth address.
                  * @param Name User-friendly device name.
-                 * @param AppLinkRFCOMMPorts List of RFCOMM ports where AppLink service has been discovered.
+                 * @param AppLinkRFCOMMChannels List of RFCOMM channels where AppLink service has been discovered.
                  **/
-                SBluetoothDevice(const bdaddr_t & Address, const char * Name, const std::vector<uint8_t> & AppLinkRFCOMMPorts);
+                SBluetoothDevice(const bdaddr_t & Address, const char * Name, const std::vector<uint8_t> & AppLinkRFCOMMChannels);
 
                 /**
                  * @brief Device bluetooth address.
@@ -107,15 +107,120 @@ namespace NsAppLink
                 std::string mName;
 
                 /**
-                 * @brief List of RFCOMM ports where AppLink service has been discovered.
+                 * @brief List of RFCOMM channels where AppLink service has been discovered.
                  **/
-                std::vector<uint8_t> mAppLinkRFCOMMPorts;
+                std::vector<uint8_t> mAppLinkRFCOMMChannels;
+            };
+
+            /**
+             * @brief RFCOMM connection.
+             **/
+            struct SRFCOMMConnection
+            {
+                /**
+                 * @brief Default constructor.
+                 **/
+                SRFCOMMConnection(void);
+
+                /**
+                 * @brief Copy constructor.
+                 *
+                 * @param Other RFCOMM connection that must be copied.
+                 **/
+                SRFCOMMConnection(const SRFCOMMConnection & Other);
+
+                /**
+                 * @brief Constructor.
+                 *
+                 * @param DeviceHandle Device handle.
+                 * @param DeviceAddress Device bluetooth address.
+                 * @param RFCOMMChannel RFCOMM channel of AppLink service on remote device.
+                 **/
+                SRFCOMMConnection(const tDeviceHandle DeviceHandle, const bdaddr_t & DeviceAddress, const uint8_t RFCOMMChannel);
+
+                /**
+                 * @brief Device handle.
+                 **/
+                tDeviceHandle mDeviceHandle;
+
+                /**
+                 * @brief Device bluetooth address.
+                 **/
+                bdaddr_t mDeviceAddress;
+
+                /**
+                 * @brief RFCOMM channel of remote device.
+                 **/
+                uint8_t mRFCOMMChannel;
+
+                /**
+                 * @brief Thread that handles connection.
+                 **/
+                pthread_t mConnectionThread;
+            };
+
+            /**
+             * @brief Parameters for establishing RFCOMM connection.
+             *
+             * Used to pass connection parameters to connection thread.
+             **/
+            struct SRFCOMMConnectionParameters
+            {
+                /**
+                 * @brief Constructor.
+                 *
+                 * @param BluetoothAdapter Reference to bluetooth adapter.
+                 * @param DeviceHandle Handle of remote device.
+                 * @param RFCOMMChannel RFCOMM channel of AppLink service on remote device.
+                 **/
+                SRFCOMMConnectionParameters(CBluetoothAdapter & BluetoothAdapter, tDeviceHandle DeviceHandle, uint8_t RFCOMMChannel);
+
+                /**
+                 * @brief Reference to bluetooth adapter.
+                 **/
+                CBluetoothAdapter & mBluetoothAdapter;
+
+                /**
+                 * @brief Handle of remote device.
+                 **/
+                tDeviceHandle mDeviceHandle;
+
+                /**
+                 * @brief RFCOMM channel of AppLink service on remote device.
+                 **/
+                uint8_t mRFCOMMChannel;
             };
 
             /**
              * @brief Bluetooth devices map.
              **/
             typedef std::map<tDeviceHandle, SBluetoothDevice> tBluetoothDevicesMap;
+
+            /**
+             * @brief RFCOMM connection map.
+             **/
+            typedef std::map<tConnectionHandle, SRFCOMMConnection> tRFCOMMConnectionMap;
+
+            /**
+             * @brief Start RFCOMM connection.
+             *
+             * Initialize connection structure in RFCOMM connections map
+             * and start connection thread for handling communication.
+             *
+             * @param DeviceHandle Handle of device to connect to.
+             * @param RFCOMMChannel RFCOMM channel of AppLink service on remote device.
+             **/
+            void startRFCOMMConnection(const tDeviceHandle & DeviceHandle, const uint8_t RFCOMMChannel);
+
+            /**
+             * @brief Stop RFCOMM connection.
+             *
+             * This method only initiates connection termination. It returns immediately
+             * without waiting for actual termination of the connection.
+             *
+             * @param ConnectionHandle Handle of connection to stop.
+             **/
+            void stopRFCOMMConnection(const tConnectionHandle & ConnectionHandle);
 
             /**
              * @brief Start routine for device discovery thread.
@@ -130,6 +235,28 @@ namespace NsAppLink
              * @brief Device discovery thread.
              **/
             void deviceDiscoveryThread(void);
+
+            /**
+             * @brief Connection thread start routine.
+             *
+             * @param Data Must be pointer to SRFCOMMConnectionParameters. Ownership
+             *             of connection parameters is passed to connection thread, i.e.
+             *             connection thread is responsible for freeing this object.
+             *
+             * @return Thread return value.
+             **/
+            static void * connectionThreadStartRoutine(void * Data);
+
+            /**
+             * @brief Connection thread.
+             *
+             * This method is responsible for establishing connection and communicating
+             * with remote device via specified connection. It must remove itself from
+             * connection map when connection is terminated before terminating connection thread.
+             *
+             * @param ConnectionHandle Connection handle.
+             **/
+            void connectionThread(const tConnectionHandle & ConnectionHandle);
 
             /**
              * @brief Listener for device adapter notifications.
@@ -176,6 +303,16 @@ namespace NsAppLink
              * @brief Mutex restricting access to device map.
              **/
             mutable pthread_mutex_t mDevicesMutex;
+
+            /**
+             * @brief Map of RFCOMM connections.
+             **/
+            tRFCOMMConnectionMap mRFCOMMConnections;
+
+            /**
+             * @brief Mutex restricting access to RFCOMM connections map.
+             **/
+            mutable pthread_mutex_t mRFCOMMConnectionsMutex;
         };
     }
 }
