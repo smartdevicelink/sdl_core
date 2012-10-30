@@ -25,6 +25,7 @@ MFT.AppViews = Em.ContainerView.extend({
 		MFT.TopControls,
 		MFT.BottomControls,
 		MFT.TTSPopUp,
+		MFT.UIPopUp,
 //		MFT.PlayerControllsView,
 //		MFT.VideoErrorPopupView,
 		MFT.ControlButtons,

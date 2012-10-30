@@ -155,10 +155,7 @@ FFW.UI = FFW.RPCObserver.create({
 		
 		if (request.method == "UI.Alert") {
 
-			MFT.AppModel.PlayList.items[0].set('field1', request.params.mainField1);
-			MFT.AppModel.PlayList.items[0].set('field2', request.params.mainField2);
-			MFT.AppModel.PlayList.items[0].set('mediaClock', request.params.mediaClock);
-			MFT.AppModel.PlayList.items[0].set('mediaTrack', request.params.mediaTrack);
+			MFT.UIPopUp.receiveMessage(request.parameters.AlertText1 + ' ' + request.parameters.AlertText1, request.parameters.duration);
 
 			// send repsonse
 			var JSONMessage = {

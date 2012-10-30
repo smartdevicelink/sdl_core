@@ -1,20 +1,20 @@
 /**
- * @name MFT.TTSPopUp
+ * @name MFT.UIPopUp
  * 
- * @desc TTSPopUp module visual representation
+ * @desc UIPopUp module visual representation
  * 
  * @category	View
- * @filesource	app/view/home/TTSPopUp.js
+ * @filesource	app/view/home/UIPopUp.js
  * @version		2.0
  *
  * @author		Andriy Melnik
  */
 
-MFT.TTSPopUp = Em.ContainerView.create({
+MFT.UIPopUp = Em.ContainerView.create({
 
-	elementId:			'TTSPopUp',
+	elementId:			'UIPopUp',
 
-	classNames:			'TTSPopUp',
+	classNames:			'UIPopUp',
 
 	classNameBindings:		['received'],
 
@@ -43,11 +43,11 @@ MFT.TTSPopUp = Em.ContainerView.create({
 		contentBinding:		'parentView.content'
 	}),
 
-	receiveMessage: function(msg){
+	receiveMessage: function(msg, duration){
 		var self = this;
 
 		this.set('content', msg);
 		this.set('received', true);
-		setTimeout(function(){self.set('received', false);}, 10000);
+		setTimeout(function(){self.set('received', false);}, duration);
 	}
 });
