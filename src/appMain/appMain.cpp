@@ -81,16 +81,16 @@ int main(int argc, char** argv)
 
     if(!pJSONRPC20Server->Bind())
     {
-      printf("Bind failed!\n");
+      LOG4CPLUS_FATAL(logger, "Bind failed!");
       exit(EXIT_FAILURE);
     } else
     {
-      printf("Bind successful!\n");
+      LOG4CPLUS_INFO(logger, "Bind successful!");
     }
 
     if(!pJSONRPC20Server->Listen())
     {
-      printf("Listen failed!\n");
+      LOG4CPLUS_FATAL(logger, "Listen failed!");
       exit(EXIT_FAILURE);
     } else
     {
@@ -105,26 +105,15 @@ int main(int argc, char** argv)
         LOG4CPLUS_INFO(logger, "Cannot connect to remote peer!");
     }
 
-    /*NsAppManager::AppLinkInterface appLinkInterface = appMgr.getAppLinkInterface();
-
-    if(!appLinkInterface.Connect())
-    {
-      printf("Cannot connect to remote peer!\n");
-      exit(EXIT_FAILURE);
-    } else
-    {
-      printf("AppMgr JSONRPC 2.0 controller connected to the server! SocketID = %d\n", appLinkInterface.GetSocket());
-    }*/
-
-    printf("Start CMessageBroker thread!\n");
+    LOG4CPLUS_INFO(logger, "Start CMessageBroker thread!");
     System::Thread th1(new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(*pMessageBroker, &NsMessageBroker::CMessageBroker::MethodForThread, NULL));
     th1.Start(false);
 
-    printf("Start MessageBroker TCP server thread!\n");
+    LOG4CPLUS_INFO(logger, "Start MessageBroker TCP server thread!");
     System::Thread th2(new System::ThreadArgImpl<NsMessageBroker::TcpServer>(*pJSONRPC20Server, &NsMessageBroker::TcpServer::MethodForThread, NULL));
     th2.Start(false);
 
-    printf("StartAppMgr JSONRPC 2.0 controller receiver thread!\n");
+    LOG4CPLUS_INFO(logger, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
     //System::Thread th3(new System::ThreadArgImpl<NsAppManager::AppLinkInterface>(appLinkInterface, &NsAppManager::AppLinkInterface::MethodForReceiverThread, NULL));
     System::Thread th3(new System::ThreadArgImpl<JSONRPC2Handler>(jsonRPC2Handler, &JSONRPC2Handler::MethodForReceiverThread, NULL));
     th3.Start(false);
@@ -132,23 +121,19 @@ int main(int argc, char** argv)
     jsonRPC2Handler.registerController();
     jsonRPC2Handler.subscribeToNotifications();
 
-    printf("Start AppMgr threads!\n");
+    LOG4CPLUS_INFO(logger, "Start AppMgr threads!");
     NsAppManager::AppMgrCore& appMgrCore = NsAppManager::AppMgrCore::getInstance();
     appMgrCore.executeThreads();
-    //appLinkInterface.executeThreads();
-
-    printf("Start AppMgr!\n");
-    appMgr.startAppMgr();
 
     /**********************************/
     /*** Check main function parameters***/
     if (4 < argc)
     {
-      printf("too many arguments\n");
+      LOG4CPLUS_ERROR(logger, "too many arguments");
       return EXIT_SUCCESS;
     } else if(1 < argc)
     {
-      printf("perform test\n");
+      LOG4CPLUS_INFO(logger, "perform test");
       int sessioncount = 1;
       if (argc == 3)
       {
@@ -174,12 +159,12 @@ int main(int argc, char** argv)
     btadapter.scanDevices(devicesFound);
     if (0 < devicesFound.size())
     {
-        printf("Found %d devices\n", devicesFound.size());
+        LOG4CPLUS_INFO(logger, "Found " << devicesFound.size() << " devices.");
         printf("Please make your choice, 0 for exit:\n");
         printf("\n");
     } else
     {
-        printf("No any devices found!\n");
+        LOG4CPLUS_FATAL(logger, "No any devices found!");
         return EXIT_SUCCESS;
     }
 
@@ -188,7 +173,7 @@ int main(int argc, char** argv)
     for(it = devicesFound.begin(); it != devicesFound.end(); it++)
     {
         NsTransportLayer::CBTDevice device = *it;
-        printf("%d: %s %s \n", i++, device.getDeviceAddr().c_str(), device.getDeviceName().c_str());
+        LOG4CPLUS_INFO(logger, "" << i++ << ": " << device.getDeviceAddr().c_str() << " " << device.getDeviceName().c_str());
     }
 
     std::cin >> i;
@@ -198,7 +183,7 @@ int main(int argc, char** argv)
         discoveryDeviceAddr = devicesFound[i-1].getDeviceAddr();
     } else
     {
-        printf("Exit!\n");
+        LOG4CPLUS_INFO(logger, "Exit!");
         return EXIT_SUCCESS;
     }
 
@@ -212,7 +197,7 @@ int main(int argc, char** argv)
         printf("Please make your choice, 0 for exit:\n");
     } else
     {
-        printf("No any ports discovered!\n");
+        LOG4CPLUS_FATAL(logger, "No any ports discovered!");
         return EXIT_SUCCESS;
     }
 
@@ -230,7 +215,7 @@ int main(int argc, char** argv)
         portRFCOMM = portsRFCOMMFound[j-1];
     } else
     {
-        printf("Exit!\n");
+        LOG4CPLUS_INFO(logger, "Exit!");
         return EXIT_SUCCESS;
     }
 

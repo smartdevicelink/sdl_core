@@ -11,7 +11,7 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Fri Oct 26 06:31:48 2012
+  generated at	Tue Oct 30 08:29:32 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
@@ -43,9 +43,18 @@ private:
 
   friend class AddSubMenu_responseMarshaller;
 
-  bool success;
-  Result resultCode;
-  std::string* info;	//!< (1000)
+
+/**
+     true, if successful
+     false, if failed
+*/
+    bool success;
+
+///  See Result
+    Result resultCode;
+
+///  Provides additional human readable info regarding the result.
+    std::string* info;	//!< (1000)
 };
 
 #endif

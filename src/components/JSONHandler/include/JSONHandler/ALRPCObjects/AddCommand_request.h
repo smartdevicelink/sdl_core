@@ -12,7 +12,7 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Fri Oct 26 06:31:48 2012
+  generated at	Tue Oct 30 08:29:32 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
@@ -50,9 +50,18 @@ private:
 
   friend class AddCommand_requestMarshaller;
 
-  unsigned int cmdID;	//!<  (0,2000000000)
-  MenuParams* menuParams;
-  std::vector<std::string>* vrCommands;	//!<   [%s..%s] (99)
+
+///  unique ID of the command to add.
+    unsigned int cmdID;	//!<  (0,2000000000)
+
+///  Optional sub value containing menu parameters
+    MenuParams* menuParams;
+
+/**
+     An array of strings to be used as VR sysnonyms for this command.
+     If this array is provided, it may not be empty.
+*/
+    std::vector<std::string>* vrCommands;	//!<   [%s..%s] (99)
 };
 
 #endif
