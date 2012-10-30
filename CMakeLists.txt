@@ -22,3 +22,19 @@ add_subdirectory(./src/appMain)
 # Building tests
 
 # Building documentation
+
+# At first creating directory for generated documentation. Unfortunately doxygen
+# cannot generate it byself
+FIND_PACKAGE(Doxygen)
+  IF(DOXYGEN_FOUND)
+    configure_file("${PROJECT_SOURCE_DIR}/Doxyfile" "${PROJECT_BINARY_DIR}/Doxyfile")
+    file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/doc/doxygen")
+    ADD_CUSTOM_TARGET(doxygen COMMAND ${DOXYGEN_EXECUTABLE} "${PROJECT_BINARY_DIR}/Doxyfile")
+  ELSE(DOXYGEN_FOUND)
+    MESSAGE(STATUS "Doxygen not found. Documentation will not be generated")
+    MESSAGE(STATUS "To enable documentation generation please install doxygen and graphviz packages")
+    MESSAGE(STATUS "sudo apt-get install doxygen graphviz")
+    MESSAGE(STATUS "To enable processing of MscGen comments please install mscgen")
+    MESSAGE(STATUS "sudo apt-get install mscgen")
+ENDIF(DOXYGEN_FOUND)
+ 
