@@ -27,6 +27,13 @@ add_subdirectory(./src/appMain)
 # cannot generate it byself
 FIND_PACKAGE(Doxygen)
   IF(DOXYGEN_FOUND)
+    option(DOXYGEN_ENABLE_DIAGRAMS "Enable graphical diagram generation" ON)
+        
+    if(DOXYGEN_ENABLE_DIAGRAMS)
+      set(DOXYGEN_ENABLE_DIAGRAMS_PARAM "YES")
+    else(DOXYGEN_ENABLE_DIAGRAMS)
+      set(DOXYGEN_ENABLE_DIAGRAMS_PARAM "NO")
+    endif()
     configure_file("${PROJECT_SOURCE_DIR}/Doxyfile" "${PROJECT_BINARY_DIR}/Doxyfile")
     file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/doc/doxygen")
     ADD_CUSTOM_TARGET(doxygen COMMAND ${DOXYGEN_EXECUTABLE} "${PROJECT_BINARY_DIR}/Doxyfile")
