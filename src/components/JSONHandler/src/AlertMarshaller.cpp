@@ -39,22 +39,22 @@ Json::Value AlertMarshaller::toJSON(const Alert& e)
   Json::Value j=Json::Value(Json::objectValue);
   if (e.mAlertText1)
   {
-    j["AlertText1"]=e.mAlertText1;  
+    j["AlertText1"]=*e.mAlertText1;  
   }
 
   if (e.mAlertText2)
   {
-    j["AlertText2"] = e.mAlertText2;
+    j["AlertText2"] = *e.mAlertText2;
   }
   
   if (e.mDuration)
   {
-    j["duration"] = e.mDuration;
+    j["duration"] = *e.mDuration;
   }
 
   if (e.mPlayTone)
   {
-    j["playTone"] = e.mPlayTone;
+    j["playTone"] = *e.mPlayTone;
   } 
     
   json["params"]=j;
