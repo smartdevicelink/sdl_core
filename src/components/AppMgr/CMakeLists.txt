@@ -20,6 +20,7 @@ set (SOURCES
     ./src/IApplication.cpp
     ./src/Application.cpp
     ./src/AppMgrCore.cpp
+	./src/AppMgrCoreQueues.cpp
     ./src/AppPolicy.cpp
     ./src/RegistryItem.cpp
 )
