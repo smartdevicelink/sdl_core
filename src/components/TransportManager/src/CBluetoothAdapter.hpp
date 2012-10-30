@@ -133,20 +133,14 @@ namespace NsAppLink
                  * @brief Constructor.
                  *
                  * @param DeviceHandle Device handle.
-                 * @param DeviceAddress Device bluetooth address.
                  * @param RFCOMMChannel RFCOMM channel of AppLink service on remote device.
                  **/
-                SRFCOMMConnection(const tDeviceHandle DeviceHandle, const bdaddr_t & DeviceAddress, const uint8_t RFCOMMChannel);
+                SRFCOMMConnection(const tDeviceHandle DeviceHandle, const uint8_t RFCOMMChannel);
 
                 /**
                  * @brief Device handle.
                  **/
                 tDeviceHandle mDeviceHandle;
-
-                /**
-                 * @brief Device bluetooth address.
-                 **/
-                bdaddr_t mDeviceAddress;
 
                 /**
                  * @brief RFCOMM channel of remote device.
@@ -157,6 +151,14 @@ namespace NsAppLink
                  * @brief Thread that handles connection.
                  **/
                 pthread_t mConnectionThread;
+
+                /**
+                 * @brief Terminate flag.
+                 *
+                 * This flag is set to notify connection thread that connection
+                 * must be closed and connection thread must be terminated.
+                 **/
+                bool mTerminateFlag;
             };
 
             /**
@@ -170,10 +172,9 @@ namespace NsAppLink
                  * @brief Constructor.
                  *
                  * @param BluetoothAdapter Reference to bluetooth adapter.
-                 * @param DeviceHandle Handle of remote device.
-                 * @param RFCOMMChannel RFCOMM channel of AppLink service on remote device.
+                 * @param ConnectionHandle Connection handle.
                  **/
-                SRFCOMMConnectionParameters(CBluetoothAdapter & BluetoothAdapter, tDeviceHandle DeviceHandle, uint8_t RFCOMMChannel);
+                SRFCOMMConnectionParameters(CBluetoothAdapter & BluetoothAdapter, tConnectionHandle ConnectionHandle);
 
                 /**
                  * @brief Reference to bluetooth adapter.
@@ -181,14 +182,9 @@ namespace NsAppLink
                 CBluetoothAdapter & mBluetoothAdapter;
 
                 /**
-                 * @brief Handle of remote device.
+                 * @brief Connection handle.
                  **/
-                tDeviceHandle mDeviceHandle;
-
-                /**
-                 * @brief RFCOMM channel of AppLink service on remote device.
-                 **/
-                uint8_t mRFCOMMChannel;
+                tDeviceHandle mConnectionHandle;
             };
 
             /**
@@ -210,7 +206,7 @@ namespace NsAppLink
              * @param DeviceHandle Handle of device to connect to.
              * @param RFCOMMChannel RFCOMM channel of AppLink service on remote device.
              **/
-            void startRFCOMMConnection(const tDeviceHandle & DeviceHandle, const uint8_t RFCOMMChannel);
+            void startRFCOMMConnection(const tDeviceHandle DeviceHandle, const uint8_t RFCOMMChannel);
 
             /**
              * @brief Stop RFCOMM connection.
@@ -220,7 +216,7 @@ namespace NsAppLink
              *
              * @param ConnectionHandle Handle of connection to stop.
              **/
-            void stopRFCOMMConnection(const tConnectionHandle & ConnectionHandle);
+            void stopRFCOMMConnection(const tConnectionHandle ConnectionHandle);
 
             /**
              * @brief Start routine for device discovery thread.
