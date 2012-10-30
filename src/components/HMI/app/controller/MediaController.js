@@ -312,6 +312,7 @@ MFT.MediaController = Em.Object.create({
 	/*Turn on Applications*/
 	turnOnApp: function(){
 		// Exit form player or radio
+		FFW.UI.onRPCNActivateApp();
 		this.onPlayerExit();
 		MFT.AppModel.set('active',true);
 		this.onApplicationsEnter(MFT.AppModel);
