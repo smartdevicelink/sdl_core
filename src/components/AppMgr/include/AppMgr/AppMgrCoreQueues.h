@@ -11,25 +11,31 @@ namespace log4cplus
     class Logger;
 }
 
+namespace RPC2Communication
+{
+    class RPC2Command;
+}
+
 namespace NsAppManager
 {
 
 template< class QueueType >
-class AppMgrCoreQueues
+class AppMgrCoreQueue
 {
 public:
-    typedef void (*HandlerCallback)( QueueType );
+    typedef void (*HandlerCallback)( QueueType, void* );
 
-    AppMgrCoreQueues(HandlerCallback* cbFn);
+    AppMgrCoreQueue(HandlerCallback cbFn, void *pThis);
+    virtual ~AppMgrCoreQueue();
 
     void executeThreads();
     void pushMessage(QueueType message);
 
 private:
-    AppMgrCoreQueues( const AppMgrCoreQueues& );
-    virtual ~AppMgrCoreQueues();
+    AppMgrCoreQueue( const AppMgrCoreQueue& );
+
     void handleMessage( QueueType message );
-    void* handleQueue( void* );
+    void* handleQueue(void* pThis);
 
     std::queue< QueueType > mQueue;
     System::Mutex mMtx;

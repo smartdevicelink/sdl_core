@@ -8,8 +8,6 @@
 #ifndef APPMGR_H_
 #define APPMGR_H_
 
-#include "system.h"
-#include <queue>
 #include <string>
 #include <map>
 #include "JSONHandler/GetCapabilitiesResponse.h"
@@ -36,6 +34,8 @@ namespace NsAppManager
 {
 
 class RegistryItem;
+template< class QueueType >
+class AppMgrCoreQueue;
 
 struct Comparer {
     bool operator() (const ButtonName &b1, const ButtonName &b2) const;
@@ -58,7 +58,6 @@ public:
 	void pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message );
 
 	void executeThreads();
-	void terminateThreads();
 
 	void setJsonHandler(JSONHandler* handler);
 	JSONHandler* getJsonHandler( ) const;
@@ -70,10 +69,10 @@ private:
 	AppMgrCore();
     AppMgrCore(const AppMgrCore&);
 
-    void handleMobileRPCMessage(const Message &message );
-    void handleMobileRPCNotification(ALRPCMessage* message );
-	void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg );
-    void handleBusRPCMessageOutgoing( RPC2Communication::RPC2Command* msg );
+    static void handleMobileRPCMessage(Message message, void* pThis);
+    static void handleMobileRPCNotification(ALRPCMessage* message, void* pThis );
+    static void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg, void* pThis );
+    static void handleBusRPCMessageOutgoing( RPC2Communication::RPC2Command* msg, void* pThis );
     const ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
     const RegistryItem* registerApplication(const Message &msg );
     void unregisterApplication(const Message &msg );
@@ -85,10 +84,6 @@ private:
     void sendMobileRPCResponse( const Message &msg );
     void sendMobileRPCNotification( ALRPCMessage* msg );
     void sendHMIRPC2Response( RPC2Communication::RPC2Command * msg );
-    void enqueueOutgoingMobileRPCMessage( const Message &message );
-    void enqueueOutgoingMobileRPCNotification( ALRPCMessage* msg );
-	void enqueueOutgoingBusRPCMessage( RPC2Communication::RPC2Command * message );
-
     void mapMessageToSession( int messageId, unsigned char sessionId );
     void removeMessageToSessionMapping( int messageId );
 
@@ -97,40 +92,21 @@ private:
 	void setButtonCapabilities( RPC2Communication::GetCapabilitiesResponse* msg );
     const Capabilities& getButtonCapabilities() const;
 
-	void* handleQueueRPCAppLinkObjectsIncoming( void* );
-	void* handleQueueRPCBusObjectsIncoming( void* );
-	void* handleQueueRPCAppLinkObjectsOutgoing( void* );
-	void* handleQueueRPCBusObjectsOutgoing( void* );
-    void* handleQueueMobileRPCNotificationsOutgoing( void* );
-	
-    std::queue< Message > mQueueRPCAppLinkObjectsIncoming;
-    std::queue< Message > mQueueRPCAppLinkObjectsOutgoing;
-	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsIncoming;
-	std::queue< RPC2Communication::RPC2Command* > mQueueRPCBusObjectsOutgoing;
-    std::queue< ALRPCMessage* > mQueueMobileRPCNotificationsOutgoing;
-
-	System::Mutex mMtxRPCAppLinkObjectsIncoming;
-	System::Mutex mMtxRPCAppLinkObjectsOutgoing;
-	System::Mutex mMtxRPCBusObjectsIncoming;
-	System::Mutex mMtxRPCBusObjectsOutgoing;
-    System::Mutex mMtxMobileRPCNotificationsOutgoing;
-
-	System::Thread mThreadRPCAppLinkObjectsIncoming;
-	System::Thread mThreadRPCAppLinkObjectsOutgoing;
-	System::Thread mThreadRPCBusObjectsIncoming;
-	System::Thread mThreadRPCBusObjectsOutgoing;
-    System::Thread mThreadMobileRPCNotificationsOutgoing;
+    AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
+    AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsOutgoing;
+    AppMgrCoreQueue<RPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
+    AppMgrCoreQueue<RPC2Communication::RPC2Command*>* mQueueRPCBusObjectsOutgoing;
+    AppMgrCoreQueue<ALRPCMessage*>* mQueueMobileRPCNotificationsOutgoing;
 
 	Capabilities mButtonCapabilities;
     ButtonMap    mButtonsMapping;
     MessagesToSessions mMessagesToSessionsMap;
 	
-	bool m_bTerminate;
 	JSONHandler* mJSONHandler;
     JSONRPC2Handler* mJSONRPC2Handler;
 	static log4cplus::Logger mLogger;
 };
 
-}; // namespace NsAppManager
+} // namespace NsAppManager
 
 #endif /* APPMGR_H_ */

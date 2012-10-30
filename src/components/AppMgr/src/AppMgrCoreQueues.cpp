@@ -1,29 +1,32 @@
 #include "AppMgr/AppMgrCoreQueues.h"
 #include "LoggerHelper.hpp"
+#include "JSONHandler/RPC2Command.h"
+#include "JSONHandler/ALRPCMessage.h"
+#include "AppMgr/AppMgrCore.h"
 
 namespace NsAppManager
 {
 
 template< class QueueType >
-log4cplus::Logger AppMgrCoreQueues<QueueType>::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
+log4cplus::Logger AppMgrCoreQueue<QueueType>::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
 
 template< class QueueType >
-AppMgrCoreQueues<QueueType>::AppMgrCoreQueues(HandlerCallback *cbFn)
-    :mThread(new System::ThreadArgImpl<AppMgrCoreQueues>(*this, &AppMgrCoreQueues::handleQueue, NULL))
-    ,mCallbackFn(cbFn)
+AppMgrCoreQueue<QueueType>::AppMgrCoreQueue(HandlerCallback cbFn, void *pThis)
+    :mThread(new System::ThreadArgImpl<AppMgrCoreQueue>(*this, &AppMgrCoreQueue::handleQueue, pThis))
+    ,mCallbackFn((HandlerCallback)cbFn)
 {
     LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCoreQueues constructed!");
 }
 
 template< class QueueType >
-AppMgrCoreQueues<QueueType>::AppMgrCoreQueues(const AppMgrCoreQueues &)
+AppMgrCoreQueue<QueueType>::AppMgrCoreQueue(const AppMgrCoreQueue &)
     :mThread(0)
     ,mCallbackFn(0)
 {
 }
 
 template< class QueueType >
-AppMgrCoreQueues<QueueType>::~AppMgrCoreQueues()
+AppMgrCoreQueue<QueueType>::~AppMgrCoreQueue()
 {
     if(!mThread.Join())
         mThread.Stop();
@@ -32,7 +35,7 @@ AppMgrCoreQueues<QueueType>::~AppMgrCoreQueues()
 }
 
 template< class QueueType >
-void AppMgrCoreQueues<QueueType>::executeThreads()
+void AppMgrCoreQueue<QueueType>::executeThreads()
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Threads are being started!");
     mThread.Start(false);
@@ -41,7 +44,7 @@ void AppMgrCoreQueues<QueueType>::executeThreads()
 }
 
 template< class QueueType >
-void AppMgrCoreQueues<QueueType>::pushMessage( QueueType message )
+void AppMgrCoreQueue<QueueType>::pushMessage( QueueType message )
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Pushing a message...");
     mMtx.Lock();
@@ -53,7 +56,7 @@ void AppMgrCoreQueues<QueueType>::pushMessage( QueueType message )
 }
 
 template< class QueueType >
-void *AppMgrCoreQueues<QueueType>::handleQueue(void *)
+void *AppMgrCoreQueue<QueueType>::handleQueue(void *pThis)
 {
     while(true)
     {
@@ -65,9 +68,13 @@ void *AppMgrCoreQueues<QueueType>::handleQueue(void *)
             mQueue.pop();
             mMtx.Unlock();
 
-            mCallbackFn( msg );
+            mCallbackFn( msg, pThis );
         }
     }
 }
+
+template class AppMgrCoreQueue<RPC2Communication::RPC2Command*>;
+template class AppMgrCoreQueue<Message>;
+template class AppMgrCoreQueue<ALRPCMessage*>;
 
 }
