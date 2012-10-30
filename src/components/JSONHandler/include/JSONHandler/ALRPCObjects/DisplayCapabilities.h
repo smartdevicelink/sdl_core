@@ -12,7 +12,7 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Fri Oct 26 06:31:48 2012
+  generated at	Tue Oct 30 08:29:32 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
@@ -45,9 +45,15 @@ private:
 
   friend class DisplayCapabilitiesMarshaller;
 
-  DisplayType displayType;
-  std::vector<MediaClockFormat> mediaClockFormats;	//!<   [%s..%s] 
-  std::vector<TextField> textFields;	//!<   [%s..%s] 
+
+///  The type of the display. See DisplayType
+    DisplayType displayType;
+
+///  A set of all supported formats of the media clock. See MediaClockFormat
+    std::vector<MediaClockFormat> mediaClockFormats;	//!<   [%s..%s] 
+
+///  A set of all fields that support text data. See TextField
+    std::vector<TextField> textFields;	//!<   [%s..%s] 
 };
 
 #endif

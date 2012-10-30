@@ -16,6 +16,7 @@
 #include "Blob.hpp"
 #include "IBluetoothHandler.hpp"
 #include "BluetoothAPI.hpp"
+ #include "Logger.hpp"
 
 /**
  * \namespace NsTransportLayer
@@ -89,6 +90,7 @@ namespace NsTransportLayer
         void sendBuffer(UInt8 * pBuffer, size_t size);
 
       private:
+        static log4cplus::Logger mLogger;
         Bluetooth::IBluetoothHandler * mpProtocolHandler;
 
         std::queue<Blob> blobQueue;

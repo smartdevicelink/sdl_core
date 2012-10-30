@@ -153,6 +153,21 @@ FFW.UI = FFW.RPCObserver.create({
 			this.client.send(JSONMessage);
 		}
 		
+		if (request.method == "UI.Alert") {
+
+			MFT.UIPopUp.receiveMessage(request.params.AlertText1, request.paras.AlertText2, request.params.duration, request.params.playTone);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	{
+					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+				}
+			};
+			this.client.send(JSONMessage);
+		}
+
 		if (request.method == "UI.SetGlobalProperties") {
 
 			MFT.TTSPopUp.receiveMessage("Set global properties");

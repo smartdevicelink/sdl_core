@@ -6,10 +6,10 @@
 
 #include "CBTAdapter.hpp"
 #include "btinclude.h"
-#include <stdlib.h>
 
 namespace NsTransportLayer
 {
+   log4cplus::Logger CBTAdapter::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("CBTAdapter"));
 
    CBTAdapter::CBTAdapter():
    mpProtocolHandler(NULL),
@@ -23,7 +23,7 @@ namespace NsTransportLayer
 
    int CBTAdapter::scanDevices(std::vector<CBTDevice>& devicesFound)
    {
-      printf("%s:%d CBTAdapter::scanDevices()\n", __FILE__, __LINE__);
+      LOG4CPLUS_INFO(mLogger, "Scanning devices.");
       inquiry_info *ii = NULL;
       int max_rsp, num_rsp;
       int dev_id, sock, len, flags;
@@ -35,7 +35,7 @@ namespace NsTransportLayer
       sock = hci_open_dev( dev_id );
       if (dev_id < 0 || sock < 0)
       {
-         printf("Not possible to open socket!\n");
+         LOG4CPLUS_ERROR(mLogger, "Not possible to open socket!");
          return -1;
       }
 
@@ -47,7 +47,7 @@ namespace NsTransportLayer
       num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
       if(num_rsp < 0)
       {
-         printf("hci_inquiry failed!\n");
+         LOG4CPLUS_WARN(mLogger, "hci_inquiry failed!");
       }
 
       for (i = 0; i < num_rsp; i++)
@@ -58,7 +58,7 @@ namespace NsTransportLayer
          {
             strcpy(name, "[unknown]");
          }
-//         printf("%s  %s\n", addr, name);
+
          CBTDevice device = CBTDevice(name, addr);
          devicesFound.push_back(device);
       }
@@ -69,7 +69,7 @@ namespace NsTransportLayer
 
    int CBTAdapter::startSDPDiscoveryOnDevice(const char* targetDevice, std::vector<int>& portsRFCOMMFound)
    {
-      printf("%s:%d CBTAdapter::startSDPDiscoveryOnDevice()\n", __FILE__, __LINE__);
+      LOG4CPLUS_INFO(mLogger, "Start SDP Discovery.");
       uint8_t svc_uuid_int[] = { 0x93, 0x6D, 0xA0, 0x1F, 0x9A, 0xBD, 0x4D, 0x9D,
                                  0x80, 0xC7, 0x02, 0xAF, 0x85, 0xC8, 0x22, 0xA8 };
       uuid_t svc_uuid;
@@ -131,7 +131,6 @@ namespace NsTransportLayer
                         case SDP_UINT8:
                            if(proto == RFCOMM_UUID)
                            {
-//                              printf("rfcomm channel: %d\n",d->val.int8);
                               portsRFCOMMFound.push_back(d->val.int8);
                            }
                            break;
@@ -144,7 +143,6 @@ namespace NsTransportLayer
 
          }
 
-//         printf("found service record 0x%x\n", rec->handle);
          sdp_record_free( rec );
       }
       sdp_close(session);
@@ -152,7 +150,7 @@ namespace NsTransportLayer
 
    int CBTAdapter::startRFCOMMConnection(const char* targetDevice, int portRFCOMM)
    {
-      printf("%s:%d CBTAdapter::startRFCOMMConnection()device %s, port %d\n", __FILE__, __LINE__, targetDevice, portRFCOMM);
+      LOG4CPLUS_INFO(mLogger, "StartRFCOMMConnection()device " << targetDevice << ", port " << portRFCOMM);
       struct sockaddr_rc addr = { 0 };
       int status;
 
@@ -169,19 +167,19 @@ namespace NsTransportLayer
 
       if(0 < status)
       {
-         printf("Failed to open port!\n");
+         LOG4CPLUS_ERROR(mLogger, "Failed to open port!");
          return -1;
       }
-      printf("Connection successful. sockID=%d \n", sockID);
+      LOG4CPLUS_INFO(mLogger, "Connection successful. sockID= " << sockID);
       return sockID;
    }
 
    int CBTAdapter::processRFCOMM(int sockid)
    {
-      printf("%s:%d CBTAdapter::processRFCOMM()\n", __FILE__, __LINE__);
+      LOG4CPLUS_INFO(mLogger, "ProcessRFCOMM");
       if (sockid < 0)
       {
-         printf("%s:%d CBTAdapter::processRFCOMM() Bad socket id!\n", __FILE__, __LINE__);
+         LOG4CPLUS_ERROR(mLogger, "PprocessRFCOMM: Bad socket id");
          return -1;
       }
 
@@ -196,14 +194,9 @@ namespace NsTransportLayer
          len = recv(sockid, rfcommbuffer, 8, 0);
          if ((len > 0) && (len == 8))
          {
-//            for (int k=0; k<8; k++)
-//            {
-//               printf("CBTAdapter::processRFCOMM() buf[%d] = 0x%2X\n", k, rfcommbuffer[k]);
-//            }
-
             if ((rfcommbuffer[0] == 16) && (rfcommbuffer[1] == 7) && (rfcommbuffer[2] == 1))
             {
-               printf("Start session (RPC Service)\n");
+               LOG4CPLUS_INFO(mLogger, "Start session (RPC Service)");
 
                void* sPacketData = malloc(8);
                memset(sPacketData, 0, 8);
@@ -215,7 +208,7 @@ namespace NsTransportLayer
                }
             } else if ((rfcommbuffer[0] == 16) && (rfcommbuffer[1] == 15) && (rfcommbuffer[2] == 1))
             {
-               printf("Start session (Bulk Service)\n");
+               LOG4CPLUS_INFO(mLogger,"Start session (Bulk Service)");
                void* sPacketData = malloc(8);
                memset(sPacketData, 0, 8);
                memcpy(sPacketData, rfcommbuffer, 8);
@@ -226,12 +219,12 @@ namespace NsTransportLayer
                }
             }else if ((rfcommbuffer[0] == 17) && (rfcommbuffer[1] == 7))
             {
-               printf("Single frame RPC message!\n");
+               LOG4CPLUS_INFO(mLogger,"Single frame RPC message!");
                unsigned int frameSize = (rfcommbuffer[4]<<24);
                frameSize |= (rfcommbuffer[5]<<16);
                frameSize |= (rfcommbuffer[6]<<8);
                frameSize |= rfcommbuffer[7];
-               printf("frameSize = 0x%X\n", frameSize);
+               LOG4CPLUS_INFO(mLogger,"frameSize = 0x" << frameSize);
                unsigned char rfcommpayloadbuffer[1024];
                if (672 > frameSize)
                {// one L2CAP packet
@@ -248,36 +241,33 @@ namespace NsTransportLayer
                   memcpy((UInt8*)sPacketData + 8, rfcommpayloadbuffer, frameSize);
                   blobQueue.push(Blob((UInt8*)sPacketData, frameSize+8, blobQueue.size()));
 
-//                  std::string str = std::string((const char*)sPacketData+8, frameSize);
-//                  printf("%s\n", str.c_str());
-
                   if (NULL != mpProtocolHandler)
                   {
                      mpProtocolHandler->dataReceived();
                   }
                } else
                {
-                  printf("Not All frame received frameSize = 0x%X\n", frameSize);
+                  LOG4CPLUS_WARN(mLogger, "Not All frame received frameSize = 0x" << frameSize);
                }
 
             } else if ((rfcommbuffer[0] == 18) && (rfcommbuffer[1] == 7))
             {
-               printf("MultiPacket RPC frame\n");
+               LOG4CPLUS_INFO(mLogger, "MultiPacket RPC frame");
             } else
             {
-               printf("Unknown packet type!\n");
+               LOG4CPLUS_INFO(mLogger, "Unknown packet type!");
                return -1;
             }
          } else
          {
-            printf("len = %d\n", len);
+            LOG4CPLUS_INFO(mLogger, "len = " << len);
          }
       }
    }
 
   void CBTAdapter::initBluetooth(Bluetooth::IBluetoothHandler * pHandler)
   {
-      printf("%s:%d CBTAdapter::initBluetooth()\n", __FILE__, __LINE__);
+      LOG4CPLUS_INFO(mLogger, "InitBluetooth.");
       if (NULL != pHandler)
       {
          mpProtocolHandler = pHandler;
@@ -286,36 +276,36 @@ namespace NsTransportLayer
 
   void CBTAdapter::deinitBluetooth()
   {
-      printf("%s:%d CBTAdapter::deinitBluetooth()\n", __FILE__, __LINE__);
+      LOG4CPLUS_INFO(mLogger, "DeinitBluetooth");
   }
 
   const Blob CBTAdapter::getBuffer()
   {
-      printf("%s:%d CBTAdapter::getBuffer()\n", __FILE__, __LINE__);
+      LOG4CPLUS_INFO(mLogger, "GetBuffer");
       return blobQueue.front();
   }
 
   void CBTAdapter::releaseBuffer(const Blob& blob)
   {
-      printf("%s:%d CBTAdapter::releaseBuffer()\n", __FILE__, __LINE__);
+      LOG4CPLUS_INFO(mLogger, "ReleaseBuffer");
       free(blob.buffer());
       blobQueue.pop();
   }
 
   void CBTAdapter::sendBuffer(UInt8 * pBuffer, size_t size)
   {
-      printf("%s:%d CBTAdapter::sendBuffer()\n", __FILE__, __LINE__);
+      LOG4CPLUS_INFO(mLogger, "SendBuffer");
 
       if (0!= sockID)
       {
          int status = write(sockID, pBuffer, size);
          if (0 > status)
          {
-            printf("Socket write error!\n");
+            LOG4CPLUS_ERROR(mLogger, "Socket write error!");
          }
       } else
       {
-         printf("No socket opened!\n");
+         LOG4CPLUS_ERROR(mLogger, "No socket opened!");
       }
   }
 } /* namespace NsTransportLayer */

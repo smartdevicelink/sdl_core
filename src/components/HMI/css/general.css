@@ -92,6 +92,40 @@ div {
 	opacity: 1;
 }
 
+/* TTS popUp*/
+
+#UIPopUp.UIPopUp{
+	opacity: 0;
+	left: 200px;
+	width: 400px;
+	height: 200px;
+	background-color: rgba(0, 0, 0, 0.95);
+	z-index: 1;
+	border-radius: 10PX;
+	box-shadow: 0px 0px 7px 5px rgba(0, 0, 0, 0.95);
+	top: 140px;
+	-webkit-transition: opacity 1s ease-in-out;
+	pointer-events: none;
+}
+
+#UIPopUp .popUp{
+	width: 394px;
+	height: 198px;
+	border: 1px solid white;
+	border-radius: 10px;
+}
+
+#UIPopUp .message{
+	top: 10px;
+	left: 10px;
+	width: 278px;
+	height: 81px;
+}
+
+#UIPopUp.received{
+	opacity: 1;
+}
+
 /*WRAPER FOR CONTENT VIEW*/
 
 #app_active_view {
