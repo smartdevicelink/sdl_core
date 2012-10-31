@@ -52,14 +52,6 @@ AppMgrCore::AppMgrCore()
     ,mQueueRPCBusObjectsOutgoing(new AppMgrCoreQueue<RPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageOutgoing, this))
     ,mQueueMobileRPCNotificationsOutgoing(new AppMgrCoreQueue<ALRPCMessage*>(&AppMgrCore::handleMobileRPCNotification, this))
 {
-    LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructing...");
-
-/*    mQueueRPCAppLinkObjectsIncoming->executeThreads();
-    mQueueRPCAppLinkObjectsOutgoing->executeThreads();
-    mQueueRPCBusObjectsIncoming->executeThreads();
-    mQueueRPCBusObjectsOutgoing->executeThreads();
-    mQueueMobileRPCNotificationsOutgoing->executeThreads();*/
-
     LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
 }
 
@@ -207,7 +199,12 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
 
-            //IAppCommand* command = new SubscribeButtonCmd();
+           /* RegistryItem* registeredApp = AppMgrRegistry::getInstance().getItem(sessionID);
+            ButtonParams* params = new ButtonParams();
+            params->mMessage = message;
+            IAppCommand* command = new SubscribeButtonCmd(registeredApp, params);
+            command->execute();
+            delete command; */
 
             SubscribeButton_request * object = (SubscribeButton_request*)message.first;
             core->subscribeButton( message );
@@ -656,7 +653,7 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
     }
 
     //NOTE: Please do not refer to message that has already been sent to another module. It doesn't exist for your module anymore.
-    //LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been outcomed");
+    LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message has been outcomed");
 }
 
 void AppMgrCore::mapMessageToSession(int messageId, unsigned char sessionId)
@@ -790,8 +787,6 @@ const ALRPCMessage* AppMgrCore::queryInfoForRegistration(const RegistryItem* reg
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Querying info for registration of an application " << registryItem->getApplication()->getName() << "!");
 
- //   RPC2Communication::OnButton
-
 	LOG4CPLUS_INFO_EXT(mLogger, " Queried info for registration of an application " << registryItem->getApplication()->getName() << "!");
 }
 
@@ -835,118 +830,7 @@ void AppMgrCore::sendHMIRPC2Response(RPC2Communication::RPC2Command *msg)
 
     mQueueRPCBusObjectsOutgoing->pushMessage(msg);
 }
-/*
-void* AppMgrCore::handleQueueRPCBusObjectsIncoming( void* )
-{
-	while(true)
-	{
-		std::size_t size = mQueueRPCBusObjectsIncoming.size();
-		if( size > 0 )
-		{
-			mMtxRPCBusObjectsIncoming.Lock();
-			RPC2Communication::RPC2Command* msg = mQueueRPCBusObjectsIncoming.front();
-			mQueueRPCBusObjectsIncoming.pop();
-			mMtxRPCBusObjectsIncoming.Unlock();
-			if(!msg)
-			{
-				LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
-				continue;
-			}
-			
-			handleBusRPCMessageIncoming( msg );
-		}
-	}
-}
 
-void* AppMgrCore::handleQueueRPCAppLinkObjectsOutgoing( void* )
-{
-	while(true)
-	{
-		std::size_t size = mQueueRPCAppLinkObjectsOutgoing.size();
-		if( size > 0 )
-		{
-			mMtxRPCAppLinkObjectsOutgoing.Lock();
-            Message msg = mQueueRPCAppLinkObjectsOutgoing.front();
-			mQueueRPCAppLinkObjectsOutgoing.pop();
-			mMtxRPCAppLinkObjectsOutgoing.Unlock();
-            if(!msg.first)
-			{
-				LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
-				continue;
-			}
-			
-			handleMobileRPCMessage( msg );
-		}
-	}
-}
-
-void* AppMgrCore::handleQueueRPCAppLinkObjectsIncoming( void* )
-{
-	while(true)
-	{
-		std::size_t size = mQueueRPCAppLinkObjectsIncoming.size();
-		if( size > 0 )
-		{
-			mMtxRPCAppLinkObjectsIncoming.Lock();
-            Message message = mQueueRPCAppLinkObjectsIncoming.front();
-
-			mQueueRPCAppLinkObjectsIncoming.pop();
-			mMtxRPCAppLinkObjectsIncoming.Unlock();
-            if(!message.first)
-			{
-				LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
-				continue;
-			}
-			
-            handleMobileRPCMessage( message );
-		}
-	}
-}
-
-void* AppMgrCore::handleQueueRPCBusObjectsOutgoing( void* )
-{
-	while(true)
-	{
-		std::size_t size = mQueueRPCBusObjectsOutgoing.size();
-		if( size > 0 )
-		{
-			mMtxRPCBusObjectsOutgoing.Lock();
-			RPC2Communication::RPC2Command* msg = mQueueRPCBusObjectsOutgoing.front();
-			mQueueRPCBusObjectsOutgoing.pop();
-			mMtxRPCBusObjectsOutgoing.Unlock();
-			if(!msg)
-			{
-				LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
-				continue;
-			}
-			
-            handleBusRPCMessageOutgoing( msg );
-		}
-    }
-}
-
-void *AppMgrCore::handleQueueMobileRPCNotificationsOutgoing(void *)
-{
-    while(true)
-    {
-        std::size_t size = mQueueMobileRPCNotificationsOutgoing.size();
-        if( size > 0 )
-        {
-            mMtxMobileRPCNotificationsOutgoing.Lock();
-            ALRPCMessage* msg = mQueueMobileRPCNotificationsOutgoing.front();
-            mQueueMobileRPCNotificationsOutgoing.pop();
-            mMtxMobileRPCNotificationsOutgoing.Unlock();
-            if(!msg)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, " Erroneous null-message has been received!");
-                continue;
-            }
-
-            handleMobileRPCNotification( msg );
-        }
-    }
-}
-*/
 void AppMgrCore::setJsonHandler(JSONHandler* handler)
 {
 	mJSONHandler = handler;
