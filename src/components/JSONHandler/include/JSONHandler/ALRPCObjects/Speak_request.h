@@ -11,8 +11,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -38,7 +38,12 @@ private:
 
   friend class Speak_requestMarshaller;
 
-  std::vector<TTSChunk> ttsChunks;	//!<   [%s..%s] 
+
+/**
+     An array of text chunks of type TTSChunk. See TTSChunk
+     The array must have at least one item
+*/
+    std::vector<TTSChunk> ttsChunks;	//!<   [%s..%s] 
 };
 
 #endif

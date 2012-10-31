@@ -1,238 +1,209 @@
-cmake_minimum_required(VERSION 2.8)
-project (jsonHandler) 
-
-include_directories (./include/
-                     ../../thirdPartyLibs/jsoncpp/include/
-                     ../../thirdPartyLibs/axisCore/include
-                     ../../thirdPartyLibs/axisCore/
-                     ../../thirdPartyLibs/axisCore/src
-                     ../../thirdPartyLibs/MessageBroker/include   
-                     ../../thirdPartyLibs/logger/include
-                     ../../thirdPartyLibs/logger/log4cplus-1.1.0/include
-                    ) 
-
-set(GENERATED_SOURCE
-         ./src/ALRPCObjectsImpl/AddCommand_request.cpp
-         ./src/ALRPCObjectsImpl/AddCommand_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/AddCommand_response.cpp
-         ./src/ALRPCObjectsImpl/AddCommand_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/AddSubMenu_request.cpp
-         ./src/ALRPCObjectsImpl/AddSubMenu_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/AddSubMenu_response.cpp
-         ./src/ALRPCObjectsImpl/AddSubMenu_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/Alert_request.cpp
-         ./src/ALRPCObjectsImpl/Alert_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/Alert_response.cpp
-         ./src/ALRPCObjectsImpl/Alert_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.cpp
-         ./src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.cpp
-         ./src/ALRPCObjectsImpl/AudioStreamingStateMarshaller.cpp
-         ./src/ALRPCObjectsImpl/ButtonCapabilities.cpp
-         ./src/ALRPCObjectsImpl/ButtonCapabilitiesMarshaller.cpp
-         ./src/ALRPCObjectsImpl/ButtonEventModeMarshaller.cpp
-         ./src/ALRPCObjectsImpl/ButtonNameMarshaller.cpp
-         ./src/ALRPCObjectsImpl/ButtonPressModeMarshaller.cpp
-         ./src/ALRPCObjectsImpl/CharacterSetMarshaller.cpp
-         ./src/ALRPCObjectsImpl/Choice.cpp
-         ./src/ALRPCObjectsImpl/ChoiceMarshaller.cpp
-         ./src/ALRPCObjectsImpl/CompassDirectionMarshaller.cpp
-         ./src/ALRPCObjectsImpl/CreateInteractionChoiceSet_request.cpp
-         ./src/ALRPCObjectsImpl/CreateInteractionChoiceSet_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/CreateInteractionChoiceSet_response.cpp
-         ./src/ALRPCObjectsImpl/CreateInteractionChoiceSet_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/DeleteCommand_request.cpp
-         ./src/ALRPCObjectsImpl/DeleteCommand_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/DeleteCommand_response.cpp
-         ./src/ALRPCObjectsImpl/DeleteCommand_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/DeleteInteractionChoiceSet_request.cpp
-         ./src/ALRPCObjectsImpl/DeleteInteractionChoiceSet_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/DeleteInteractionChoiceSet_response.cpp
-         ./src/ALRPCObjectsImpl/DeleteInteractionChoiceSet_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/DeleteSubMenu_request.cpp
-         ./src/ALRPCObjectsImpl/DeleteSubMenu_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/DeleteSubMenu_response.cpp
-         ./src/ALRPCObjectsImpl/DeleteSubMenu_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/DimensionMarshaller.cpp
-         ./src/ALRPCObjectsImpl/DisplayCapabilities.cpp
-         ./src/ALRPCObjectsImpl/DisplayCapabilitiesMarshaller.cpp
-         ./src/ALRPCObjectsImpl/DisplayTypeMarshaller.cpp
-         ./src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.cpp
-         ./src/ALRPCObjectsImpl/EncodedSyncPData_request.cpp
-         ./src/ALRPCObjectsImpl/EncodedSyncPData_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/EncodedSyncPData_response.cpp
-         ./src/ALRPCObjectsImpl/EncodedSyncPData_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/GenericResponse_response.cpp
-         ./src/ALRPCObjectsImpl/GenericResponse_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/GlobalPropertyMarshaller.cpp
-         ./src/ALRPCObjectsImpl/HMILevelMarshaller.cpp
-         ./src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.cpp
-         ./src/ALRPCObjectsImpl/InteractionModeMarshaller.cpp
-         ./src/ALRPCObjectsImpl/LanguageMarshaller.cpp
-         ./src/ALRPCObjectsImpl/Marshaller.cpp
-         ./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.cpp
-         ./src/ALRPCObjectsImpl/MenuParams.cpp
-         ./src/ALRPCObjectsImpl/MenuParamsMarshaller.cpp
-         ./src/ALRPCObjectsImpl/OnAppInterfaceUnregistered.cpp
-         ./src/ALRPCObjectsImpl/OnAppInterfaceUnregisteredMarshaller.cpp
-         ./src/ALRPCObjectsImpl/OnButtonEvent.cpp
-         ./src/ALRPCObjectsImpl/OnButtonEventMarshaller.cpp
-         ./src/ALRPCObjectsImpl/OnButtonPress.cpp
-         ./src/ALRPCObjectsImpl/OnButtonPressMarshaller.cpp
-         ./src/ALRPCObjectsImpl/OnCommand.cpp
-         ./src/ALRPCObjectsImpl/OnCommandMarshaller.cpp
-         ./src/ALRPCObjectsImpl/OnDriverDistraction.cpp
-         ./src/ALRPCObjectsImpl/OnDriverDistractionMarshaller.cpp
-         ./src/ALRPCObjectsImpl/OnEncodedSyncPData.cpp
-         ./src/ALRPCObjectsImpl/OnEncodedSyncPDataMarshaller.cpp
-         ./src/ALRPCObjectsImpl/OnHMIStatus.cpp
-         ./src/ALRPCObjectsImpl/OnHMIStatusMarshaller.cpp
-         ./src/ALRPCObjectsImpl/OnTBTClientState.cpp
-         ./src/ALRPCObjectsImpl/OnTBTClientStateMarshaller.cpp
-         ./src/ALRPCObjectsImpl/PerformInteraction_request.cpp
-         ./src/ALRPCObjectsImpl/PerformInteraction_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/PerformInteraction_response.cpp
-         ./src/ALRPCObjectsImpl/PerformInteraction_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/RegisterAppInterface_request.cpp
-         ./src/ALRPCObjectsImpl/RegisterAppInterface_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/RegisterAppInterface_response.cpp
-         ./src/ALRPCObjectsImpl/RegisterAppInterface_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/ResetGlobalProperties_request.cpp
-         ./src/ALRPCObjectsImpl/ResetGlobalProperties_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/ResetGlobalProperties_response.cpp
-         ./src/ALRPCObjectsImpl/ResetGlobalProperties_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/ResultMarshaller.cpp
-         ./src/ALRPCObjectsImpl/SetGlobalProperties_request.cpp
-         ./src/ALRPCObjectsImpl/SetGlobalProperties_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/SetGlobalProperties_response.cpp
-         ./src/ALRPCObjectsImpl/SetGlobalProperties_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/SetMediaClockTimer_request.cpp
-         ./src/ALRPCObjectsImpl/SetMediaClockTimer_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/SetMediaClockTimer_response.cpp
-         ./src/ALRPCObjectsImpl/SetMediaClockTimer_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/Show_request.cpp
-         ./src/ALRPCObjectsImpl/Show_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/Show_response.cpp
-         ./src/ALRPCObjectsImpl/Show_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/Speak_request.cpp
-         ./src/ALRPCObjectsImpl/Speak_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/Speak_response.cpp
-         ./src/ALRPCObjectsImpl/Speak_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.cpp
-         ./src/ALRPCObjectsImpl/StartTime.cpp
-         ./src/ALRPCObjectsImpl/StartTimeMarshaller.cpp
-         ./src/ALRPCObjectsImpl/SubscribeButton_request.cpp
-         ./src/ALRPCObjectsImpl/SubscribeButton_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/SubscribeButton_response.cpp
-         ./src/ALRPCObjectsImpl/SubscribeButton_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/SyncMsgVersion.cpp
-         ./src/ALRPCObjectsImpl/SyncMsgVersionMarshaller.cpp
-         ./src/ALRPCObjectsImpl/SystemContextMarshaller.cpp
-         ./src/ALRPCObjectsImpl/TBTStateMarshaller.cpp
-         ./src/ALRPCObjectsImpl/TextAlignmentMarshaller.cpp
-         ./src/ALRPCObjectsImpl/TextField.cpp
-         ./src/ALRPCObjectsImpl/TextFieldMarshaller.cpp
-         ./src/ALRPCObjectsImpl/TextFieldNameMarshaller.cpp
-         ./src/ALRPCObjectsImpl/TimerModeMarshaller.cpp
-         ./src/ALRPCObjectsImpl/TriggerSourceMarshaller.cpp
-         ./src/ALRPCObjectsImpl/TTSChunk.cpp
-         ./src/ALRPCObjectsImpl/TTSChunkMarshaller.cpp
-         ./src/ALRPCObjectsImpl/UnregisterAppInterface_request.cpp
-         ./src/ALRPCObjectsImpl/UnregisterAppInterface_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/UnregisterAppInterface_response.cpp
-         ./src/ALRPCObjectsImpl/UnregisterAppInterface_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/UnsubscribeButton_request.cpp
-         ./src/ALRPCObjectsImpl/UnsubscribeButton_requestMarshaller.cpp
-         ./src/ALRPCObjectsImpl/UnsubscribeButton_response.cpp
-         ./src/ALRPCObjectsImpl/UnsubscribeButton_responseMarshaller.cpp
-         ./src/ALRPCObjectsImpl/UpdateModeMarshaller.cpp
-         ./src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.cpp
-   )
-
-add_library(jsonHandler 
-                  ./src/JSONHandler.cpp
-                  ./src/JSONRPC2Handler.cpp
-                  ./src/ALRPCMessage.cpp
-                  ./src/ALRPCNotification.cpp
-                  ./src/ALRPCRequest.cpp
-                  ./src/ALRPCResponse.cpp
-                  ./src/RPC2Command.cpp
-                  ./src/RPC2Marshaller.cpp
-                  ./src/RPC2Notification.cpp
-                  ./src/OnButtonEventMarshaller.cpp
-                  ./src/OnButtonEvent.cpp
-                  ./src/Speak.cpp
-                  ./src/SpeakMarshaller.cpp
-                  ./src/RPC2Request.cpp
-                  ./src/RPC2Response.cpp
-                  ./src/RPC2Error.cpp
-                  ./src/RPC2Marshaller.cpp
-                  ./src/SpeakResponseMarshaller.cpp
-                  ./src/SpeakResponse.cpp
-                  ./src/Alert.cpp
-                  ./src/AlertResponse.cpp
-                  ./src/AlertMarshaller.cpp
-                  ./src/AlertResponseMarshaller.cpp
-                  ./src/Show.cpp
-                  ./src/ShowResponse.cpp
-                  ./src/ShowMarshaller.cpp
-                  ./src/ShowResponseMarshaller.cpp
-                  ./src/GetCapabilities.cpp
-                  ./src/GetCapabilitiesResponseMarshaller.cpp
-                  ./src/GetCapabilitiesResponse.cpp
-                  ./src/GetCapabilitiesMarshaller.cpp
-                  ./src/GetCapabilities.cpp
-                  ./src/OnButtonPress.cpp
-                  ./src/OnButtonPressMarshaller.cpp
-                  ./src/SetGlobalPropertiesResponse.cpp
-                  ./src/SetGlobalPropertiesResponseMarshaller.cpp
-                  ./src/SetGlobalProperties.cpp
-                  ./src/SetGlobalPropertiesMarshaller.cpp
-                  ${GENERATED_SOURCE}
-           )
-
-## Compiler flags
-if(CMAKE_COMPILER_IS_GNUCXX)
-	set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3 -std=c++0x")        ## DON'T Optimize
-    set(CMAKE_EXE_LINKER_FLAGS "-m")  ## Strip binary
-endif()
-
-include(ExternalProject)
-ExternalProject_Add(
-   jsonCpp
-   SOURCE_DIR  ../../thirdPartyLibs/jsoncpp/
-   DOWNLOAD_COMMAND ""
-   CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1   
-   BUILD_COMMAND make
-   INSTALL_DIR ../../thirdPartyLibs/jsoncpp/bin
-   INSTALL_COMMAND make install
+include_directories (
+  ./include/
+  ../../thirdPartyLibs/jsoncpp/include/
+  ../../thirdPartyLibs/axisCore/include
+  ../../thirdPartyLibs/axisCore/
+  ../../thirdPartyLibs/axisCore/src
+  ../../thirdPartyLibs/MessageBroker/include   
+  ../../thirdPartyLibs/logger/include
+  ../../thirdPartyLibs/logger/log4cplus-1.1.0/include
+  ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
 )
 
-ExternalProject_Add(
-   ProtocolHandler
-   SOURCE_DIR ../../thirdPartyLibs/axisCore/
-   DOWNLOAD_COMMAND ""
-   CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1   
-   BUILD_COMMAND make
-   INSTALL_DIR ../../thirdPartyLibs/axisCore/bin
-   INSTALL_COMMAND make install
+set (GENERATED_SOURCES
+    ./src/ALRPCObjectsImpl/AddCommand_request.cpp
+    ./src/ALRPCObjectsImpl/AddCommand_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/AddCommand_response.cpp
+    ./src/ALRPCObjectsImpl/AddCommand_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/AddSubMenu_request.cpp
+    ./src/ALRPCObjectsImpl/AddSubMenu_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/AddSubMenu_response.cpp
+    ./src/ALRPCObjectsImpl/AddSubMenu_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/Alert_request.cpp
+    ./src/ALRPCObjectsImpl/Alert_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/Alert_response.cpp
+    ./src/ALRPCObjectsImpl/Alert_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.cpp
+    ./src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.cpp
+    ./src/ALRPCObjectsImpl/AudioStreamingStateMarshaller.cpp
+    ./src/ALRPCObjectsImpl/ButtonCapabilities.cpp
+    ./src/ALRPCObjectsImpl/ButtonCapabilitiesMarshaller.cpp
+    ./src/ALRPCObjectsImpl/ButtonEventModeMarshaller.cpp
+    ./src/ALRPCObjectsImpl/ButtonNameMarshaller.cpp
+    ./src/ALRPCObjectsImpl/ButtonPressModeMarshaller.cpp
+    ./src/ALRPCObjectsImpl/CharacterSetMarshaller.cpp
+    ./src/ALRPCObjectsImpl/Choice.cpp
+    ./src/ALRPCObjectsImpl/ChoiceMarshaller.cpp
+    ./src/ALRPCObjectsImpl/CreateInteractionChoiceSet_request.cpp
+    ./src/ALRPCObjectsImpl/CreateInteractionChoiceSet_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/CreateInteractionChoiceSet_response.cpp
+    ./src/ALRPCObjectsImpl/CreateInteractionChoiceSet_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/DeleteCommand_request.cpp
+    ./src/ALRPCObjectsImpl/DeleteCommand_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/DeleteCommand_response.cpp
+    ./src/ALRPCObjectsImpl/DeleteCommand_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/DeleteInteractionChoiceSet_request.cpp
+    ./src/ALRPCObjectsImpl/DeleteInteractionChoiceSet_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/DeleteInteractionChoiceSet_response.cpp
+    ./src/ALRPCObjectsImpl/DeleteInteractionChoiceSet_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/DeleteSubMenu_request.cpp
+    ./src/ALRPCObjectsImpl/DeleteSubMenu_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/DeleteSubMenu_response.cpp
+    ./src/ALRPCObjectsImpl/DeleteSubMenu_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/DisplayCapabilities.cpp
+    ./src/ALRPCObjectsImpl/DisplayCapabilitiesMarshaller.cpp
+    ./src/ALRPCObjectsImpl/DisplayTypeMarshaller.cpp
+    ./src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.cpp
+    ./src/ALRPCObjectsImpl/EncodedSyncPData_request.cpp
+    ./src/ALRPCObjectsImpl/EncodedSyncPData_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/EncodedSyncPData_response.cpp
+    ./src/ALRPCObjectsImpl/EncodedSyncPData_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/GenericResponse_response.cpp
+    ./src/ALRPCObjectsImpl/GenericResponse_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/GlobalPropertyMarshaller.cpp
+    ./src/ALRPCObjectsImpl/HMILevelMarshaller.cpp
+    ./src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.cpp
+    ./src/ALRPCObjectsImpl/InteractionModeMarshaller.cpp
+    ./src/ALRPCObjectsImpl/LanguageMarshaller.cpp
+    ./src/ALRPCObjectsImpl/Marshaller.cpp
+    ./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.cpp
+    ./src/ALRPCObjectsImpl/MenuParams.cpp
+    ./src/ALRPCObjectsImpl/MenuParamsMarshaller.cpp
+    ./src/ALRPCObjectsImpl/OnAppInterfaceUnregistered.cpp
+    ./src/ALRPCObjectsImpl/OnAppInterfaceUnregisteredMarshaller.cpp
+    ./src/ALRPCObjectsImpl/OnButtonEvent.cpp
+    ./src/ALRPCObjectsImpl/OnButtonEventMarshaller.cpp
+    ./src/ALRPCObjectsImpl/OnButtonPress.cpp
+    ./src/ALRPCObjectsImpl/OnButtonPressMarshaller.cpp
+    ./src/ALRPCObjectsImpl/OnCommand.cpp
+    ./src/ALRPCObjectsImpl/OnCommandMarshaller.cpp
+    ./src/ALRPCObjectsImpl/OnDriverDistraction.cpp
+    ./src/ALRPCObjectsImpl/OnDriverDistractionMarshaller.cpp
+    ./src/ALRPCObjectsImpl/OnEncodedSyncPData.cpp
+    ./src/ALRPCObjectsImpl/OnEncodedSyncPDataMarshaller.cpp
+    ./src/ALRPCObjectsImpl/OnHMIStatus.cpp
+    ./src/ALRPCObjectsImpl/OnHMIStatusMarshaller.cpp
+    ./src/ALRPCObjectsImpl/OnTBTClientState.cpp
+    ./src/ALRPCObjectsImpl/OnTBTClientStateMarshaller.cpp
+    ./src/ALRPCObjectsImpl/PerformInteraction_request.cpp
+    ./src/ALRPCObjectsImpl/PerformInteraction_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/PerformInteraction_response.cpp
+    ./src/ALRPCObjectsImpl/PerformInteraction_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/RegisterAppInterface_request.cpp
+    ./src/ALRPCObjectsImpl/RegisterAppInterface_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/RegisterAppInterface_response.cpp
+    ./src/ALRPCObjectsImpl/RegisterAppInterface_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/ResetGlobalProperties_request.cpp
+    ./src/ALRPCObjectsImpl/ResetGlobalProperties_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/ResetGlobalProperties_response.cpp
+    ./src/ALRPCObjectsImpl/ResetGlobalProperties_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/ResultMarshaller.cpp
+    ./src/ALRPCObjectsImpl/SetGlobalProperties_request.cpp
+    ./src/ALRPCObjectsImpl/SetGlobalProperties_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/SetGlobalProperties_response.cpp
+    ./src/ALRPCObjectsImpl/SetGlobalProperties_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/SetMediaClockTimer_request.cpp
+    ./src/ALRPCObjectsImpl/SetMediaClockTimer_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/SetMediaClockTimer_response.cpp
+    ./src/ALRPCObjectsImpl/SetMediaClockTimer_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/Show_request.cpp
+    ./src/ALRPCObjectsImpl/Show_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/Show_response.cpp
+    ./src/ALRPCObjectsImpl/Show_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/Speak_request.cpp
+    ./src/ALRPCObjectsImpl/Speak_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/Speak_response.cpp
+    ./src/ALRPCObjectsImpl/Speak_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.cpp
+    ./src/ALRPCObjectsImpl/StartTime.cpp
+    ./src/ALRPCObjectsImpl/StartTimeMarshaller.cpp
+    ./src/ALRPCObjectsImpl/SubscribeButton_request.cpp
+    ./src/ALRPCObjectsImpl/SubscribeButton_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/SubscribeButton_response.cpp
+    ./src/ALRPCObjectsImpl/SubscribeButton_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/SyncMsgVersion.cpp
+    ./src/ALRPCObjectsImpl/SyncMsgVersionMarshaller.cpp
+    ./src/ALRPCObjectsImpl/SystemContextMarshaller.cpp
+    ./src/ALRPCObjectsImpl/TBTStateMarshaller.cpp
+    ./src/ALRPCObjectsImpl/TextAlignmentMarshaller.cpp
+    ./src/ALRPCObjectsImpl/TextField.cpp
+    ./src/ALRPCObjectsImpl/TextFieldMarshaller.cpp
+    ./src/ALRPCObjectsImpl/TextFieldNameMarshaller.cpp
+    ./src/ALRPCObjectsImpl/TriggerSourceMarshaller.cpp
+    ./src/ALRPCObjectsImpl/TTSChunk.cpp
+    ./src/ALRPCObjectsImpl/TTSChunkMarshaller.cpp
+    ./src/ALRPCObjectsImpl/UnregisterAppInterface_request.cpp
+    ./src/ALRPCObjectsImpl/UnregisterAppInterface_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/UnregisterAppInterface_response.cpp
+    ./src/ALRPCObjectsImpl/UnregisterAppInterface_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/UnsubscribeButton_request.cpp
+    ./src/ALRPCObjectsImpl/UnsubscribeButton_requestMarshaller.cpp
+    ./src/ALRPCObjectsImpl/UnsubscribeButton_response.cpp
+    ./src/ALRPCObjectsImpl/UnsubscribeButton_responseMarshaller.cpp
+    ./src/ALRPCObjectsImpl/UpdateModeMarshaller.cpp
+    ./src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.cpp
 )
 
-ExternalProject_Add(
-   messagebroker
-   messagebrokerclient
-   messagebrokerserver
-   SOURCE_DIR ../../thirdPartyLibs/MessageBroker
-   DOWNLOAD_COMMAND ""
-   CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1 
-   BUILD_COMMAND make
-   INSTALL_DIR ../../thirdPartyLibs/MessageBroker/bin
-   INSTALL_COMMAND make install
+
+set (SOURCES
+    ./src/JSONHandler.cpp
+    ./src/JSONRPC2Handler.cpp
+    ./src/ALRPCMessage.cpp
+    ./src/ALRPCNotification.cpp
+    ./src/ALRPCRequest.cpp
+    ./src/ALRPCResponse.cpp
+    ./src/RPC2Command.cpp
+    ./src/RPC2Marshaller.cpp
+    ./src/RPC2Notification.cpp
+    ./src/OnButtonEventMarshaller.cpp
+    ./src/OnButtonEvent.cpp
+    ./src/Speak.cpp
+    ./src/SpeakMarshaller.cpp
+    ./src/RPC2Request.cpp
+    ./src/RPC2Response.cpp
+    ./src/RPC2Error.cpp
+    ./src/RPC2Marshaller.cpp
+    ./src/SpeakResponseMarshaller.cpp
+    ./src/SpeakResponse.cpp
+    ./src/Alert.cpp
+    ./src/AlertResponse.cpp
+    ./src/AlertMarshaller.cpp
+    ./src/AlertResponseMarshaller.cpp
+    ./src/Show.cpp
+    ./src/ShowResponse.cpp
+    ./src/ShowMarshaller.cpp
+    ./src/ShowResponseMarshaller.cpp
+    ./src/GetCapabilities.cpp
+    ./src/GetCapabilitiesResponseMarshaller.cpp
+    ./src/GetCapabilitiesResponse.cpp
+    ./src/GetCapabilitiesMarshaller.cpp
+    ./src/GetCapabilities.cpp
+    ./src/OnButtonPress.cpp
+    ./src/OnButtonPressMarshaller.cpp
+    ./src/SetGlobalPropertiesResponse.cpp
+    ./src/SetGlobalPropertiesResponseMarshaller.cpp
+    ./src/SetGlobalProperties.cpp
+    ./src/SetGlobalPropertiesMarshaller.cpp
+    ./src/ResetGlobalProperties.cpp
+    ./src/ResetGlobalPropertiesMarshaller.cpp
+    ./src/ResetGlobalPropertiesResponse.cpp
+    ./src/ResetGlobalPropertiesResponseMarshaller.cpp
+    ./src/OnAppRegistered.cpp
+    ./src/OnAppRegisteredMarshaller.cpp
+    ./src/OnAppUnregisteredMarshaller.cpp
+    ./src/OnAppUnregistered.cpp
+    ./src/ActivateAppMarshaller.cpp
+    ./src/ActivateApp.cpp
+    ./src/ActivateAppResponseMarshaller.cpp
+    ./src/ActivateAppResponse.cpp
+    ./src/AddCommand.cpp
+    ./src/AddCommandMarshaller.cpp
+    ./src/AddCommandResponse.cpp
+    ./src/AddCommandResponseMarshaller.cpp
+    ./src/DeleteCommand.cpp
+    ./src/DeleteCommandMarshaller.cpp
+    ./src/DeleteCommandResponse.cpp
+    ./src/DeleteCommandResponseMarshaller.cpp
 )
 
-set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_INSTALL_PREFIX .)
-install (TARGETS jsonHandler DESTINATION bin)
-
+add_library("JSONHandler" ${SOURCES} ${GENERATED_SOURCES})

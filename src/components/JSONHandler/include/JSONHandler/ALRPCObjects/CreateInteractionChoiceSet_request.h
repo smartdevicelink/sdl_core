@@ -11,8 +11,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -40,8 +40,10 @@ private:
 
   friend class CreateInteractionChoiceSet_requestMarshaller;
 
-  unsigned int interactionChoiceSetID;	//!<  (0,2000000000)
-  std::vector<Choice> choiceSet;	//!<   [%s..%s] 
+
+///  Unique ID used for this interaction choice set.
+    unsigned int interactionChoiceSetID;	//!<  (0,2000000000)
+    std::vector<Choice> choiceSet;	//!<   [%s..%s] 
 };
 
 #endif

@@ -2,20 +2,24 @@
 #define SUBSCRIBEBUTTON_H
 
 #include "AppMgr/IAppCommand.h"
+#include "AppMgr/AppMgrCore.h"
 
 #include <string>
+
+class ButtonName;
 
 namespace NsAppManager
 {
 
 struct ButtonParams
 {
-	std::string mName;
+    Message mMessage;
 };
 
 class SubscribeButtonCmd : public IAppCommand
 {
 public:
+    SubscribeButtonCmd(const RegistryItem* receiver, const void* params);
 	virtual void execute();
 };
 

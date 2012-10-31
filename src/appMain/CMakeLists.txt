@@ -1,132 +1,50 @@
-cmake_minimum_required(VERSION 2.8)
-
-set (PROJECT appLinkCore)
-project (${PROJECT}) 
-
-set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_INSTALL_PREFIX .)
-set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-
-link_directories(../thirdPartyLibs/jsoncpp
-                 ../components/JSONHandler/bin
-                 ../components/AppMgr/bin
-                 ../thirdPartyLibs/axisCore/bin
-                 ../thirdPartyLibs/jsoncpp/bin
-                 ../thirdPartyLibs/MessageBroker/bin
-                 ../thirdPartyLibs/logger/bin
-                 )
-
 set(LIBRARIES
-        appManager
-        jsonHandler
-        ProtocolHandler
-        messagebrokerclient
-        messagebrokerserver
-        messagebroker
-        jsonCpp
-        bluetooth
-        pthread
-        log4cplus
-        rt
-    )
+  AppMgr
+  JSONHandler
+  #TransportManager
+  ProtocolHandler
+  MessageBroker
+  MessageBrokerClient
+  MessageBrokerServer
+  jsoncpp
+  bluetooth
+  pthread
+  log4cplus
+  rt
+)
 
-include_directories (./
-                     ../thirdPartyLibs/axisCore/utils/misc
-                     ../thirdPartyLibs/axisCore/include
-                     ../thirdPartyLibs/axisCore/src
-                     ../thirdPartyLibs/axisCore/
-                     ../thirdPartyLibs/axisCore/transport/bt
-                     ../thirdPartyLibs/jsoncpp/include/
-                     ../components/JSONHandler/include
-                     ../components/AppMgr/include
-                     ../thirdPartyLibs/MessageBroker/include
-                     ../thirdPartyLibs/logger/include
-                     ../thirdPartyLibs/logger/log4cplus-1.1.0/include
-                     )
+include_directories (
+  ./
+  ../thirdPartyLibs/axisCore/utils/misc
+  ../thirdPartyLibs/axisCore/include
+  ../thirdPartyLibs/axisCore/src
+  ../thirdPartyLibs/axisCore/
+  ../thirdPartyLibs/axisCore/transport/bt
+  ../thirdPartyLibs/jsoncpp/include/
+  ../components/JSONHandler/include
+  ../components/AppMgr/include
+  ../components/TransportManager/include
+  ../thirdPartyLibs/MessageBroker/include
+  ../thirdPartyLibs/logger/include
+  ../thirdPartyLibs/logger/log4cplus-1.1.0/include
+  ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
+)
 
 set (SOURCES
-        appMain.cpp
-        CBTAdapter.cpp
-        CAppTester.cpp
-    )
+  appMain.cpp
+  CBTAdapter.cpp
+  CAppTester.cpp
+)
+
+if( NOT CMAKE_BUILD_TYPE )
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
+endif()
 
 add_executable(${PROJECT} ${SOURCES})
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
-## Compiler flags
-if(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3")        ## DON'T Optimize
-    set(CMAKE_EXE_LINKER_FLAGS "-m")  ## Strip binary
-endif()
-
-include(ExternalProject)
-
-ExternalProject_Add(
-   ProtocolHandler
-   SOURCE_DIR ../thirdPartyLibs/axisCore/
-   DOWNLOAD_COMMAND ""
-   CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1   
-   BUILD_COMMAND make
-   INSTALL_DIR ../thirdPartyLibs/axisCore/bin
-   INSTALL_COMMAND make install
-)
-
-ExternalProject_Add(
-   jsonCpp
-   SOURCE_DIR ../thirdPartyLibs/jsoncpp
-   DOWNLOAD_COMMAND ""
-   CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1 
-   BUILD_COMMAND make
-   INSTALL_DIR ../thirdPartyLibs/jsoncpp/bin
-   INSTALL_COMMAND make install
-)
-
-ExternalProject_Add(
-   jsonHandler
-   SOURCE_DIR ../components/JSONHandler
-   DOWNLOAD_COMMAND ""
-   CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1 
-   BUILD_COMMAND make
-   INSTALL_DIR ../components/JSONHandler/bin
-   INSTALL_COMMAND make install
-)
-
-ExternalProject_Add(
-   messagebroker
-   messagebrokerclient
-   messagebrokerserver
-   SOURCE_DIR ../thirdPartyLibs/MessageBroker
-   DOWNLOAD_COMMAND ""
-   CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1 
-   BUILD_COMMAND make
-   INSTALL_DIR ../thirdPartyLibs/MessageBroker/bin
-   INSTALL_COMMAND make install
-)
-
-ExternalProject_Add(
-   appManager
-   SOURCE_DIR ../components/AppMgr
-   DOWNLOAD_COMMAND ""
-   CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1 
-   BUILD_COMMAND make
-   INSTALL_DIR ../components/AppMgr/bin
-   INSTALL_COMMAND make install
-)
-
-ADD_DEPENDENCIES(${PROJECT}
-                        log4cplus
-                        jsonCpp
-                        messagebroker
-                        messagebrokerserver
-                        messagebrokerclient
-                        ProtocolHandler
-                        jsonHandler
-                        appManager
-                        )
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 install (TARGETS ${PROJECT} DESTINATION bin)
+

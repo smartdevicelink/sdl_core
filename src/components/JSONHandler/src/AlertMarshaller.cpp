@@ -37,10 +37,25 @@ Json::Value AlertMarshaller::toJSON(const Alert& e)
   json["method"]=Json::Value("UI.Alert");
   
   Json::Value j=Json::Value(Json::objectValue);
-  j["AlertText1"]=e.mAlertText1;
-  j["AlertText2"] = e.mAlertText2;
-  j["duration"] = e.mDuration;
-  j["playTone"] = e.mPlayTone;
+  if (e.mAlertText1)
+  {
+    j["AlertText1"]=*e.mAlertText1;  
+  }
+
+  if (e.mAlertText2)
+  {
+    j["AlertText2"] = *e.mAlertText2;
+  }
+  
+  if (e.mDuration)
+  {
+    j["duration"] = *e.mDuration;
+  }
+
+  if (e.mPlayTone)
+  {
+    j["playTone"] = *e.mPlayTone;
+  } 
     
   json["params"]=j;
 
@@ -52,6 +67,11 @@ Json::Value AlertMarshaller::toJSON(const Alert& e)
 
 bool AlertMarshaller::fromJSON(const Json::Value& json,Alert& c)
 {
+  delete c.mAlertText1;
+  delete c.mAlertText2;
+  delete c.mDuration;
+  delete c.mPlayTone;
+
   try
   {
     if(!json.isObject())  return false;
@@ -68,17 +88,33 @@ bool AlertMarshaller::fromJSON(const Json::Value& json,Alert& c)
     Json::Value j=json["params"];
     if(!j.isObject())  return false;
 
-    if(!j.isMember("AlertText1") || !j["AlertText1"].isString())  return false;
-    c.mAlertText1 = j["AlertText1"].asString();
+    if(j.isMember("AlertText1"))
+    {
+      if (!j["AlertText1"].isString())
+        return false;
+      c.mAlertText1 = new std::string(j["AlertText1"].asString());
+    }    
 
-    if(!j.isMember("AlertText2") || !j["AlertText2"].isString())  return false;
-    c.mAlertText2 = j["AlertText2"].asString();
+    if(j.isMember("AlertText2"))
+    {
+      if(!j["AlertText2"].isString()) 
+        return false;
+      c.mAlertText2 = new std::string(j["AlertText2"].asString());
+    }     
 
-    if(!j.isMember("duration") || !j["duration"].isInt()) return false;
-    c.mDuration = j["duration"].asInt();
+    if(j.isMember("duration"))
+    {
+      if (!j["duration"].isInt())
+        return false;
+      c.mDuration = new int(j["duration"].asInt());
+    }     
 
-    if(!j.isMember("playTone") || !j["playTone"].isBool()) return false;
-    c.mPlayTone = j["playTone"].asBool(); 
+    if(j.isMember("playTone"))
+    {
+      if (!j["playTone"].isBool())
+        return false;
+      c.mPlayTone = new bool( j["playTone"].asBool());
+    }     
 
     if(!json.isMember("id")) return false;
 

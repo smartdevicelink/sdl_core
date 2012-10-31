@@ -8,8 +8,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -39,9 +39,14 @@ private:
 
   friend class StartTimeMarshaller;
 
-  unsigned int hours;	//!<  (0,59)
-  unsigned int minutes;	//!<  (0,59)
-  unsigned int seconds;	//!<  (0,59)
+
+/**
+     The hour of the media clock.
+     Some radios only support a max of 19 hours. If out of range, it will be rejected.
+*/
+    unsigned int hours;	//!<  (0,59)
+    unsigned int minutes;	//!<  (0,59)
+    unsigned int seconds;	//!<  (0,59)
 };
 
 #endif

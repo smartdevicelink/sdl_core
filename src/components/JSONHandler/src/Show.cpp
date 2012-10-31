@@ -5,67 +5,89 @@ using namespace RPC2Communication;
 
 Show::Show()
 :RPC2Request( RPC2Marshaller::METHOD_SHOW_REQUEST )
-{}
+{
+    mAlignment = 0;
+    mMainField1 = 0;
+    mMainField2 = 0;
+    mStatusBar = 0;
+    mMediaClock = 0;
+    mMediaTrack = 0;
+}
 
 Show::~Show()
-{}
+{
+    if (mAlignment)
+        delete mAlignment;
+    mAlignment = 0;
+    delete mMainField1;
+    delete mMainField2;
+    delete mStatusBar;
+    delete mMediaTrack;
+    delete mMediaClock;
+}
 
 void Show::setMainField1(const std::string & str)
 {
-    mMainField1 = str;
+    delete mMainField1;
+    mMainField1 = new std::string(str);
 }
         
 void Show::setMainField2(const std::string & str)
 {
-    mMainField2 = str;
+    delete mMainField2;
+    mMainField2 = new std::string(str);
 }
         
 void Show::setTextAlignment(const TextAlignment& s)
 {
-    mAlignment = s;
+    delete mAlignment;
+    mAlignment = new TextAlignment(s);
 }
         
 void Show::setStatusBar(const std::string& s)
 {
-    mStatusBar = s;
+    delete mStatusBar;
+    mStatusBar = new std::string(s);
 }
         
 void Show::setMediaClock(const std::string& s)
 {
-    mMediaClock = s;
+    delete mMediaClock;
+    mMediaClock = new std::string(s);
 }
         
 void Show::setMediaTrack(const std::string& str)
 {
-    mMediaTrack = str;
+    delete mMediaTrack;
+    mMediaTrack = new std::string(str);
 }
 
-std::string Show::getMainField1() const
+const std::string* Show::getMainField1() const
 {
     return mMainField1;
 }
         
-std::string Show::getMainField2() const
+const std::string * Show::getMainField2() const
 {
     return mMainField2;
 }
         
-TextAlignment Show::getTextAlignment() const
+const TextAlignment * Show::getTextAlignment() const
 {
     return mAlignment;
 }
         
-std::string Show::getStatusBar() const
+const std::string* Show::getStatusBar() const
 {
     return mStatusBar;
 }
         
-std::string Show::getMediaClock() const
+const std::string* Show::getMediaClock() const
 {
     return mMediaClock;
 }
         
-std::string Show::getMediaTrack() const
+const std::string* Show::getMediaTrack() const
 {
     return mMediaTrack;
 }

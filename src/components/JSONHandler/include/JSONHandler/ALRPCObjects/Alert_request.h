@@ -12,8 +12,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -54,11 +54,31 @@ private:
 
   friend class Alert_requestMarshaller;
 
-  std::string* alertText1;	//!< (500)
-  std::string* alertText2;	//!< (500)
-  std::vector<TTSChunk>* ttsChunks;	//!<   [%s..%s] 
-  unsigned int* duration;	//!<  (3000,10000)
-  bool* playTone;
+
+///  The first line of the alert text field
+    std::string* alertText1;	//!< (500)
+
+///  The second line of the alert text field
+    std::string* alertText2;	//!< (500)
+
+/**
+     An array of text chunks of type TTSChunk. See TTSChunk
+     The array must have at least one item
+*/
+    std::vector<TTSChunk>* ttsChunks;	//!<   [%s..%s] 
+
+/**
+     Timeout in milliseconds.
+     Typical timeouts are 3-5 seconds
+     If omitted, timeout is set to 5s.
+*/
+    unsigned int* duration;	//!<  (3000,10000)
+
+/**
+     Defines if tone should be played. Tone is played before TTS.
+     If omitted, no tone is played.
+*/
+    bool* playTone;
 };
 
 #endif

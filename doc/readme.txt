@@ -15,6 +15,9 @@
   libbluetooth3, the BlueZ library
   Install library:
   sudo apt-get install libbluetooth3
+  To start web-based HMI we need web-browser with web-socket RFC6455 support.
+  For example Google Chromium. Install it using:
+  sudo apt-get install chromium-browser
 
 * Running application
   ====================
@@ -25,6 +28,7 @@
   Start application with command:
   ./appLinkCore
   Application starts to search devices.
+  Start web-based HMI in browser src/components/HMI/index.html.
   Select the device from a list.
   Application starts SDP request.
   Select port.

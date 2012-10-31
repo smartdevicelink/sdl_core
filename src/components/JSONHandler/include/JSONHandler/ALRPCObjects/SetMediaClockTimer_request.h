@@ -11,8 +11,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -43,8 +43,19 @@ private:
 
   friend class SetMediaClockTimer_requestMarshaller;
 
-  StartTime* startTime;
-  UpdateMode updateMode;
+
+/**
+     See StartTime
+     startTime must be provided for "run"
+     startTime will be ignored for "pause" and "resum"
+*/
+    StartTime* startTime;
+
+/**
+     Enumeration to control the media clock.
+     In case of pause or resume, the start time value is ignored and shall be left out.  For resume, the time continues with the same value as it was when paused.
+*/
+    UpdateMode updateMode;
 };
 
 #endif

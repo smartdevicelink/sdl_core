@@ -10,8 +10,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -44,9 +44,22 @@ private:
 
   friend class AddSubMenu_requestMarshaller;
 
-  unsigned int menuID;	//!<  (0,2000000000)
-  unsigned int* position;	//!<  (0,1000)
-  std::string menuName;	//!< (500)
+
+///  unique ID of the sub menu to add.
+    unsigned int menuID;	//!<  (0,2000000000)
+
+/**
+     Position within the items that are are at top level of the in application menu.
+     0 will insert at the front.
+     1 will insert at the second position.
+     If position is greater or equal than the number of items on top level, the sub menu will be appended to the end.
+     Position of any submenu will always be located before the return and exit options
+     If this param was omitted the entry will be added at the end.
+*/
+    unsigned int* position;	//!<  (0,1000)
+
+///  Text to show in the menu for this sub menu.
+    std::string menuName;	//!< (500)
 };
 
 #endif

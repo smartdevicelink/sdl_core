@@ -19,8 +19,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -77,17 +77,42 @@ private:
 
   friend class RegisterAppInterface_responseMarshaller;
 
-  bool success;
-  Result resultCode;
-  std::string* info;	//!< (1000)
-  SyncMsgVersion* syncMsgVersion;
-  std::string* autoActivateID;	//!< (16)
-  Language* language;
-  DisplayCapabilities* displayCapabilities;
-  std::vector<ButtonCapabilities>* buttonCapabilities;	//!<   [%s..%s] 
-  std::vector<HmiZoneCapabilities>* hmiZoneCapabilities;	//!<   [%s..%s] 
-  std::vector<SpeechCapabilities>* speechCapabilities;	//!<   [%s..%s] 
-  std::vector<VrCapabilities>* vrCapabilities;	//!<   [%s..%s] 
+
+/**
+     true, if successful
+     false, if failed
+*/
+    bool success;
+
+///  See Result
+    Result resultCode;
+
+///  Provides additional human readable info regarding the result.
+    std::string* info;	//!< (1000)
+
+///  See SyncMsgVersion
+    SyncMsgVersion* syncMsgVersion;
+
+///  Provides an id that the app may use on a subsequent registerAppInterface to allow for auto activation (for example after an ignition cycle).
+    std::string* autoActivateID;	//!< (16)
+
+///  The currently active language on Sync. See "Language" for options.
+    Language* language;
+
+///  See DisplayCapabilities
+    DisplayCapabilities* displayCapabilities;
+
+///  See ButtonCapabilities
+    std::vector<ButtonCapabilities>* buttonCapabilities;	//!<   [%s..%s] 
+
+///  See HmiZoneCapabilities
+    std::vector<HmiZoneCapabilities>* hmiZoneCapabilities;	//!<   [%s..%s] 
+
+///  See SpeechCapabilities
+    std::vector<SpeechCapabilities>* speechCapabilities;	//!<   [%s..%s] 
+
+///  See VrCapabilities
+    std::vector<VrCapabilities>* vrCapabilities;	//!<   [%s..%s] 
 };
 
 #endif

@@ -8,8 +8,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -39,8 +39,12 @@ private:
 
   friend class SyncMsgVersionMarshaller;
 
-  unsigned int majorVersion;	//!<  (1,1)
-  unsigned int minorVersion;	//!<  (0,1000)
+
+///  The major version indicates versions that is not-compatible to previous versions.
+    unsigned int majorVersion;	//!<  (1,1)
+
+///  The minor version indicates a change to a previous version that should still allow to be run on an older version (with limited functionality)
+    unsigned int minorVersion;	//!<  (0,1000)
 };
 
 #endif

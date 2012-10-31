@@ -2,15 +2,21 @@
 #define APPMGR_H
 
 #include "JSONHandler/IRPCMessagesObserver.h"
-#include "AppMgr/AppLinkInterface.h"
+#include "JSONHandler/IRPC2CommandsObserver.h"
 #include "mb_controller.hpp"
 
 class JSONHandler;
 class ALRPCMessage;
+class JSONRPC2Handler;
 
 namespace log4cplus
 {
 	class Logger;
+};
+
+namespace RPC2Communication
+{
+    class RPC2Command;
 };
 
 namespace NsAppManager
@@ -20,21 +26,15 @@ class AppMgrRegistry;
 class AppMgrCore;
 class AppFactory;
 	
-class AppMgr: public IRPCMessagesObserver
+class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver
 {
 public:
-
-	/**
-	 * \brief needs to be called before getInstance.
-	 * \param address address to bind to.
-	 * \param port port to bind to.
-	 * \param name name to bind to.
-	 */
-	static void setParams(const std::string& address, uint16_t port, std::string name);
 	
 	static AppMgr& getInstance();
 	
     virtual void onMessageReceivedCallback( ALRPCMessage * message, unsigned char sessionID );
+
+    virtual void onCommandReceivedCallback( RPC2Communication::RPC2Command * command );
 
 	/**
 	 * \brief pure virtual method to process response.
@@ -62,7 +62,7 @@ public:
 
 	void setJsonHandler(JSONHandler* handler);
 
-	const AppLinkInterface& getAppLinkInterface() const;
+    void setJsonRPC2Handler(JSONRPC2Handler* handler);
 
 	void startAppMgr();
 	
@@ -71,7 +71,6 @@ private:
     AppMgr(const AppMgr&);
 	AppMgr();
 
-	AppLinkInterface& mAppLinkInterface;
 	AppMgrRegistry& mAppMgrRegistry;
 	AppMgrCore& mAppMgrCore;
 	AppFactory& mAppFactory;

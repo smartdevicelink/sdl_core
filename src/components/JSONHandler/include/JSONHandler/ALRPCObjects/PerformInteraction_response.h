@@ -12,8 +12,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -50,11 +50,24 @@ private:
 
   friend class PerformInteraction_responseMarshaller;
 
-  bool success;
-  Result resultCode;
-  std::string* info;	//!< (1000)
-  unsigned int* choiceID;	//!<  (0,2000000000)
-  TriggerSource* triggerSource;
+
+/**
+     true, if successful
+     false, if failed
+*/
+    bool success;
+
+///  See Result
+    Result resultCode;
+
+///  Provides additional human readable info regarding the result.
+    std::string* info;	//!< (1000)
+
+///  ID of the choice that was selected in response to PerformInteraction.
+    unsigned int* choiceID;	//!<  (0,2000000000)
+
+///  See TriggerSource
+    TriggerSource* triggerSource;
 };
 
 #endif

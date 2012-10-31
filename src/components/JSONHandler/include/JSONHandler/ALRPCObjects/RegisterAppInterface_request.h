@@ -13,8 +13,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -63,14 +63,61 @@ private:
 
   friend class RegisterAppInterface_requestMarshaller;
 
-  SyncMsgVersion syncMsgVersion;
-  std::string appName;	//!< (100)
-  std::string* ngnMediaScreenAppName;	//!< (100)
-  std::vector<std::string>* vrSynonyms;	//!<   [%s..%s] (40)
-  bool* usesVehicleData;
-  bool isMediaApplication;
-  Language languageDesired;
-  std::string* autoActivateID;	//!< (16)
+
+///  See SyncMsgVersion
+    SyncMsgVersion syncMsgVersion;
+
+/**
+     The mobile application name, e.g. "Ford Drive Green".
+     Needs to be unique over all applications.
+     May not be empty.
+     May not start with a new line character.
+     May not interfere with any name or synonym of previously registered applications and the following list of words @TODO: Create list(global commands)
+     Needs to be unique over all applications. Applications with the same name will be rejected.
+     Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+*/
+    std::string appName;	//!< (100)
+
+/**
+     Provides an abbreviated version of the app name (if needed), that will be displayed on the NGN media screen.
+     If not provided, the appName is used instead (and will be truncated if too long)
+     Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+*/
+    std::string* ngnMediaScreenAppName;	//!< (100)
+
+/**
+     Defines an additional voice recognition command.
+     May not interfere with any name or synonym of previously registered applications and the following list of words @TODO: Create list(global commands)
+     Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+*/
+    std::vector<std::string>* vrSynonyms;	//!<   [%s..%s] (40)
+
+/**
+     If not provided, the default is equal to False"
+     Indicates if the mobile application wants to use vehicle data like GPS or speed.
+*/
+    bool* usesVehicleData;
+
+/**
+     Indicates if the application is a media or a non-media application.
+     Only media applications will be able to stream audio to Sync that is audible outside of the BT media source.
+*/
+    bool isMediaApplication;
+
+/**
+     See Language
+     If the language doesn't match the active language on Sync, it will be rejected.
+     If the language is changed, while an app is registered, it will get disconnected.
+*/
+    Language languageDesired;
+
+/**
+     Used to support auto activation after an initial successful registerAppInterface (for example after an ignition cycle).
+     The app should always provide the id that was provided by the most recent registerAppInterface response.
+     If this is the first call to registerAppInterface, then do not provide this parameter at all.
+     If not provided or not matching with the id of the last registerAppInterface response, the app will not be automatically put into foreground on startup.
+*/
+    std::string* autoActivateID;	//!< (16)
 };
 
 #endif

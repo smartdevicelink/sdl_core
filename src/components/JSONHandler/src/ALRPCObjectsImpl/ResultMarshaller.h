@@ -15,8 +15,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -45,12 +45,12 @@ public:
 
   static const char* getName(Result::ResultInternal e)
   {
-     return (e>=0 && e<22) ? mHashTable[e].name : NULL;
+     return (e>=0 && e<20) ? mHashTable[e].name : NULL;
   }
 
   static const Result::ResultInternal getIndex(const char* s);
 
-  static const PerfectHashTable mHashTable[22];
+  static const PerfectHashTable mHashTable[20];
 };
 
 #endif

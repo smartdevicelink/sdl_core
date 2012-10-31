@@ -10,8 +10,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -41,8 +41,15 @@ private:
 
   friend class TTSChunkMarshaller;
 
-  std::string text;	//!< (500)
-  SpeechCapabilities type;
+
+/**
+     The text or phonemes to speak.
+     May not be empty.
+*/
+    std::string text;	//!< (500)
+
+///  Describes, whether it is text or a specific phoneme set. See SpeechCapabilities
+    SpeechCapabilities type;
 };
 
 #endif

@@ -15,10 +15,20 @@
 #include "JSONHandler/OnButtonPressMarshaller.h"
 #include "JSONHandler/SetGlobalPropertiesMarshaller.h"
 #include "JSONHandler/SetGlobalPropertiesResponseMarshaller.h"
+#include "JSONHandler/ResetGlobalPropertiesMarshaller.h"
+#include "JSONHandler/ResetGlobalPropertiesResponseMarshaller.h"
+#include "JSONHandler/ResetGlobalPropertiesResponse.h"
+#include "JSONHandler/OnAppRegisteredMarshaller.h"
+#include "JSONHandler/OnAppUnregisteredMarshaller.h"
+#include "JSONHandler/ActivateAppMarshaller.h"
+#include "JSONHandler/ActivateAppResponseMarshaller.h"
+#include "JSONHandler/AddCommandMarshaller.h"
+#include "JSONHandler/AddCommandResponseMarshaller.h"
+#include "JSONHandler/DeleteCommandMarshaller.h"
+#include "JSONHandler/DeleteCommandResponseMarshaller.h"
 
 namespace RPC2Communication
 {
-
     class RPC2Marshaller
     {
     public:
@@ -36,7 +46,17 @@ namespace RPC2Communication
         METHOD_GET_CAPABILITIES_RESPONSE=8,
         METHOD_ONBUTTONPRESS=9,
         METHOD_SET_GLOBAL_PROPERTIES_REQUEST=10,
-        METHOD_SET_GLOBAL_PROPERTIES_RESPONSE=11
+        METHOD_SET_GLOBAL_PROPERTIES_RESPONSE=11,
+        METHOD_RESET_GLOBAL_PROPERTIES_REQUEST=12,
+        METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE=13,
+        METHOD_ONAPPREGISTERED=14,
+        METHOD_ONAPPUNREDISTERED=15,
+        METHOD_ACTIVATEAPP_REQUEST=16,
+        METHOD_ACTIVATEAPP_RESPONSE=17,
+        METHOD_ADDCOMMAND_REQUEST=18,
+        METHOD_ADDCOMMAND_RESPONSE=19,
+        METHOD_DELETECOMMAND_REQUEST=20,
+        METHOD_DELETECOMMAND_RESPONSE=21
         };
 
         RPC2Marshaller();
@@ -168,6 +188,102 @@ namespace RPC2Communication
             return mSetGlobalPropertiesResponseMarshaller.toString(res);
         }
 
+        static bool fromString( const std::string& str, ResetGlobalProperties& res )
+        {
+            return mResetGlobalPropertiesMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const ResetGlobalProperties& res)
+        {
+            return mResetGlobalPropertiesMarshaller.toString(res);
+        }
+
+        static bool fromString( const std::string & str, ResetGlobalPropertiesResponse& res )
+        {
+            return mResetGlobalPropertiesResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const ResetGlobalPropertiesResponse& res)
+        {
+            return mResetGlobalPropertiesResponseMarshaller.toString(res);
+        }
+
+        static bool fromString( const std::string & str, OnAppRegistered& res )
+        {
+            return mOnAppRegisteredMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const OnAppRegistered& res)
+        {
+            return mOnAppRegisteredMarshaller.toString(res);
+        }
+
+        static bool fromString( const std::string& str, OnAppUnregistered& res )
+        {
+            return mOnAppUnregisteredMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const OnAppUnregistered& res)
+        {
+            return mOnAppUnregisteredMarshaller.toString(res);
+        }
+
+        static bool fromString( const std::string & str, ActivateApp& res )
+        {
+            return mActivateAppMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const ActivateApp& res)
+        {
+            return mActivateAppMarshaller.toString(res);
+        } 
+
+        static bool fromString(const std::string& str, ActivateAppResponse& res)
+        {
+            return mActivateAppResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const ActivateAppResponse& res)
+        {
+            return mActivateAppResponseMarshaller.toString(res);
+        }
+        static bool fromString(const std::string& str, AddCommand&res)
+        {
+            return mAddCommandMarshaller.fromString(str, res);
+        }
+        static std::string toString(const AddCommand& res)
+        {
+            return mAddCommandMarshaller.toString(res);
+        }
+        static bool fromString(const std::string& str, AddCommandResponse&res)
+        {
+            return mAddCommandResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const AddCommandResponse& res)
+        {
+            return mAddCommandResponseMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string &str, DeleteCommand& res)
+        {
+            return mDeleteCommandMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const DeleteCommand& res)
+        {
+            return mDeleteCommandMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, DeleteCommandResponse& res)
+        {
+            return mDeleteCommandResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toJSON(const DeleteCommandResponse& res)
+        {
+            return mDeleteCommandResponseMarshaller.toString(res);
+        }
 
     private:
         struct localHash
@@ -202,7 +318,16 @@ namespace RPC2Communication
         static OnButtonPressMarshaller mOnButtonPressMarshaller;
         static SetGlobalPropertiesMarshaller mSetGlobalPropertiesMarshaller;
         static SetGlobalPropertiesResponseMarshaller mSetGlobalPropertiesResponseMarshaller;
-
+        static ResetGlobalPropertiesMarshaller mResetGlobalPropertiesMarshaller;
+        static ResetGlobalPropertiesResponseMarshaller mResetGlobalPropertiesResponseMarshaller;
+        static OnAppRegisteredMarshaller mOnAppRegisteredMarshaller;
+        static OnAppUnregisteredMarshaller mOnAppUnregisteredMarshaller;
+        static ActivateAppMarshaller mActivateAppMarshaller;
+        static ActivateAppResponseMarshaller mActivateAppResponseMarshaller;
+        static AddCommandMarshaller mAddCommandMarshaller;
+        static AddCommandResponseMarshaller mAddCommandResponseMarshaller;
+        static DeleteCommandMarshaller mDeleteCommandMarshaller;
+        static DeleteCommandResponseMarshaller mDeleteCommandResponseMarshaller;
     };
 
 }

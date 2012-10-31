@@ -8,8 +8,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Oct 25 06:32:04 2012
-  source stamp	Thu Oct 25 06:28:28 2012
+  generated at	Tue Oct 30 08:29:32 2012
+  source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
@@ -68,7 +68,7 @@ const std::string ResultMarshaller::toString(const Result& e)
 
 }
 
-const PerfectHashTable ResultMarshaller::mHashTable[22]=
+const PerfectHashTable ResultMarshaller::mHashTable[20]=
 {
   {"SUCCESS",0},
   {"INVALID_DATA",1},
@@ -84,12 +84,10 @@ const PerfectHashTable ResultMarshaller::mHashTable[22]=
   {"APPLICATION_NOT_REGISTERED",11},
   {"IN_USE",12},
   {"SUBSCRIBED_ALREADY",13},
-  {"VEHICLE_DATA_NOT_ALLOWED",14},
-  {"VEHICLE_DATA_NOT_AVAILABLE",15},
-  {"REJECTED",16},
-  {"ABORTED",17},
-  {"IGNORED",18},
-  {"UNSUPPORTED_BUTTON",19},
-  {"FILE_NOT_FOUND",20},
-  {"GENERIC_ERROR",21}
+  {"REJECTED",14},
+  {"ABORTED",15},
+  {"IGNORED",16},
+  {"UNSUPPORTED_BUTTON",17},
+  {"FILE_NOT_FOUND",18},
+  {"GENERIC_ERROR",19}
 };

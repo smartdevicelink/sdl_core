@@ -35,6 +35,31 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_SET_GLOBAL_PROPERTIES_REQUEST;
     }
+    if ( s.compare("UI.ResetGlobalProperties") == 0 )
+    {
+        return METHOD_RESET_GLOBAL_PROPERTIES_REQUEST;
+    }
+    if ( s.compare("AppLinkCore.OnAppRegistered") == 0 )
+    {
+        return METHOD_ONAPPREGISTERED;
+    }
+    if ( s.compare("AppLinkCore.OnAppUnregistered") == 0 )
+    {
+        return METHOD_ONAPPUNREDISTERED;
+    }
+    if ( s.compare("AppLinkCore.activateApp") == 0 )
+    {
+      return METHOD_ACTIVATEAPP_REQUEST;
+    }
+    if ( s.compare("UI.AddCommand") == 0 )
+    {
+        return METHOD_ADDCOMMAND_REQUEST;
+    }
+    if ( s.compare("UI.DeleteCommand") == 0 )
+    {
+        return METHOD_DELETECOMMAND_REQUEST;
+    }
+    
     return METHOD_INVALID;
 }
 
@@ -60,6 +85,24 @@ const RPC2Marshaller::Methods RPC2Marshaller::getResponseIndex(const std::string
   {
       return METHOD_SET_GLOBAL_PROPERTIES_RESPONSE;
   }
+  if ( s.compare("UI.ResetGlobalProperties") == 0 )
+  {
+      return METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE;
+  }
+  if ( s.compare("AppLinkCore.activateApp"))
+  {
+    return METHOD_ACTIVATEAPP_RESPONSE;
+  }
+  if ( s.compare("UI.AddCommand") == 0 )
+  {
+      return METHOD_ADDCOMMAND_RESPONSE;
+  }
+  if ( s.compare("UI.DeleteCommand") == 0 )
+  {
+      return METHOD_DELETECOMMAND_RESPONSE;
+  }
+
+  return METHOD_INVALID;
 }
 
 
@@ -192,6 +235,87 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_RESET_GLOBAL_PROPERTIES_REQUEST:
+    {
+        ResetGlobalProperties * rv = new ResetGlobalProperties;
+        if ( ResetGlobalPropertiesMarshaller::fromJSON(json, *rv) )
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE:
+    {
+        ResetGlobalPropertiesResponse * rv = new ResetGlobalPropertiesResponse;
+        if (ResetGlobalPropertiesResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ONAPPREGISTERED:
+    {
+        OnAppRegistered * rv = new OnAppRegistered;
+        if ( OnAppRegisteredMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ONAPPUNREDISTERED:
+    {
+        OnAppUnregistered * rv = new OnAppUnregistered;
+        if ( OnAppUnregisteredMarshaller::fromJSON(json, *rv) )
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ACTIVATEAPP_REQUEST:
+    {
+        ActivateApp * rv = new ActivateApp;
+        if (ActivateAppMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ACTIVATEAPP_RESPONSE:
+    {
+        ActivateAppResponse * rv = new ActivateAppResponse;
+        if (ActivateAppResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ADDCOMMAND_REQUEST:
+    {
+        AddCommand * rv = new AddCommand;
+        if (AddCommandMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ADDCOMMAND_RESPONSE:
+    {
+        AddCommandResponse * rv = new AddCommandResponse;
+        if (AddCommandResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_DELETECOMMAND_REQUEST:
+    {
+        DeleteCommand * rv = new DeleteCommand;
+        if (DeleteCommandMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_DELETECOMMAND_RESPONSE:
+    {
+        DeleteCommandResponse * rv = new DeleteCommandResponse;
+        if (DeleteCommandResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+
   }
 
   return NULL;
@@ -233,6 +357,26 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return SetGlobalPropertiesMarshaller::toJSON(* static_cast<const SetGlobalProperties*>(msg));
     case METHOD_SET_GLOBAL_PROPERTIES_RESPONSE:
       return SetGlobalPropertiesResponseMarshaller::toJSON(* static_cast<const SetGlobalPropertiesResponse*>(msg));
+    case METHOD_RESET_GLOBAL_PROPERTIES_REQUEST:
+      return ResetGlobalPropertiesMarshaller::toJSON(* static_cast<const ResetGlobalProperties*>(msg));
+    case METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE:
+      return ResetGlobalPropertiesResponseMarshaller::toJSON(* static_cast<const ResetGlobalPropertiesResponse*>(msg));
+    case METHOD_ONAPPREGISTERED:
+      return OnAppRegisteredMarshaller::toJSON(* static_cast<const OnAppRegistered*>(msg));
+    case METHOD_ONAPPUNREDISTERED:
+      return OnAppUnregisteredMarshaller::toJSON(* static_cast<const OnAppUnregistered*>(msg));
+    case METHOD_ACTIVATEAPP_REQUEST:
+      return ActivateAppMarshaller::toJSON(* static_cast<const ActivateApp*>(msg));
+    case METHOD_ACTIVATEAPP_RESPONSE:
+      return ActivateAppResponseMarshaller::toJSON(*static_cast<const ActivateAppResponse*>(msg));
+    case METHOD_ADDCOMMAND_REQUEST:
+      return AddCommandMarshaller::toJSON(*static_cast<const AddCommand*>(msg));
+    case METHOD_ADDCOMMAND_RESPONSE:
+      return AddCommandResponseMarshaller::toJSON(*static_cast<const AddCommandResponse*>(msg));
+    case METHOD_DELETECOMMAND_REQUEST:
+      return DeleteCommandMarshaller::toJSON(*static_cast<const DeleteCommand*>(msg));
+    case METHOD_DELETECOMMAND_RESPONSE:
+      return DeleteCommandResponseMarshaller::toJSON(*static_cast<const DeleteCommandResponse*>(msg));
   }
 
   return j;
@@ -278,3 +422,12 @@ GetCapabilitiesResponseMarshaller RPC2Marshaller::mGetCapabilitiesResponseMarsha
 OnButtonPressMarshaller RPC2Marshaller::mOnButtonPressMarshaller;
 SetGlobalPropertiesMarshaller RPC2Marshaller::mSetGlobalPropertiesMarshaller;
 SetGlobalPropertiesResponseMarshaller RPC2Marshaller::mSetGlobalPropertiesResponseMarshaller;
+ResetGlobalPropertiesMarshaller RPC2Marshaller::mResetGlobalPropertiesMarshaller;
+ResetGlobalPropertiesResponseMarshaller RPC2Marshaller::mResetGlobalPropertiesResponseMarshaller;
+OnAppRegisteredMarshaller RPC2Marshaller::mOnAppRegisteredMarshaller;
+OnAppUnregisteredMarshaller RPC2Marshaller::mOnAppUnregisteredMarshaller;
+ActivateAppMarshaller RPC2Marshaller::mActivateAppMarshaller;
+AddCommandMarshaller RPC2Marshaller::mAddCommandMarshaller;
+AddCommandResponseMarshaller RPC2Marshaller::mAddCommandResponseMarshaller;
+DeleteCommandMarshaller RPC2Marshaller::mDeleteCommandMarshaller;
+DeleteCommandResponseMarshaller RPC2Marshaller::mDeleteCommandResponseMarshaller;
