@@ -62,6 +62,23 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 		text:		'bottom'
 	}),
 
+	AddCommand: function(){
+
+		button = MFT.Button.create({
+			elementId:			'media_rightmenu_softButton' + '',
+			action:				null,
+			target:				null,
+			classNames:			['rs-item'],
+			//icon:				null,//'images/media/active_arrow.png',
+			text:				'Browse',
+			//onDown: false,
+			//templateName: 'text'
+		});
+
+		MFT.AppRightMenuView.scrollWrapper.scroller.get('childViews').pushObject(button);
+		MFT.AppRightMenuView.scroll.refresh();
+	},
+
 	scrollWrapper: Em.ContainerView.create({
 
 		elementId:	'media_appScrollWrapper',
@@ -77,7 +94,7 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 			elementId:	'appScroller',
 
 			childViews: [
-				'optionsButton',
+				/*'optionsButton',
 				'browseButton',
 				'hdButton',
 				'repeatButton',
@@ -87,7 +104,7 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 				'moreInfoButton',
 				'directTuneButton',
 				'help_yellow_borders',
-				'help_yellow_dividers'
+				'help_yellow_dividers'*/
 			],
 
 			/**  Help Mode Yellow Borders*/
