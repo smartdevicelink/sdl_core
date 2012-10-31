@@ -40,14 +40,14 @@ void CMessage::saveSentHeader()
    sentHeader->dataSize = sDataSize;
 }
 
-void CMessage::generateInitialMessage(UInt8 serviceType, UInt8 sessionID)
+void CMessage::generateInitialMessage(UInt8 serviceType)
 {
    sVersion        = 0x01;
    sCompressedFlag = 0;
    sFrameType      = 0x00; //Control frame
    sServiceType    = serviceType;
    sFrameData      = 0x01; //Start session
-   sSessionID      = sessionID;
+   sSessionID      = 0;
    sDataSize       = 0x00;
    //sMessageID      = rand() % 0xFFFFFFFF + 1;
 
@@ -78,62 +78,91 @@ void CMessage::generateInitialMessage(UInt8 serviceType, UInt8 sessionID)
    mBluetoothHandler->dataReceived();
 }
 
-void CMessage::generateSingleMessage(UInt8 serviceType, UInt8 sessionID, std::string payload)
+void CMessage::generateSingleMessage(UInt8 protocolVersion,
+                                     UInt8 serviceType,
+                                     UInt8 sessionID,
+                                     std::string payload)
 {
-   sVersion        = 0x01;
+   UInt32 headerSize = 8;
+   if (protocolVersion == 0x02)
+      headerSize = 12;
+
+   sVersion        = protocolVersion;
    sCompressedFlag = 0;
    sFrameType      = 0x01; //Single
    sServiceType    = serviceType;
    sFrameData      = 0x00; //Single Frame
    sSessionID      = sessionID;
    sDataSize       = payload.length();//' + 1; //
-   //sMessageID      = rand() % 0xFFFFFFFF + 1;
+   sMessageID      = 12345;//rand() % 0xFFFFFFFF + 1;
 
    dispayField();
 
-   sPacketData = malloc(8 + sDataSize);
+   sPacketData = malloc(headerSize + sDataSize);
 
    UInt8 firstByte = ( (sVersion << 4) & 0xF0 )
                    | ( (sCompressedFlag << 3) & 0x08)
                    | (sFrameType & 0x07);
 
-   memcpy(sPacketData, &firstByte, 1);
-   memcpy(sPacketData + 1, &sServiceType, 1);
-   memcpy(sPacketData + 2, &sFrameData, 1);
-   memcpy(sPacketData + 3, &sSessionID, 1);
+   UInt32 offset = 0;
+   memcpy(sPacketData + offset++, &firstByte, 1);
+   memcpy(sPacketData + offset++, &sServiceType, 1);
+   memcpy(sPacketData + offset++, &sFrameData, 1);
+   memcpy(sPacketData + offset++, &sSessionID, 1);
 
-   UInt8 tmp1 = sDataSize >> 24;
-   memcpy(sPacketData + 4, &tmp1, 1);
-   UInt8 tmp2 = sDataSize >> 16;
-   memcpy(sPacketData + 5, &tmp2, 1);
-   UInt8 tmp3 = sDataSize >> 8;
-   memcpy(sPacketData + 6, &tmp3, 1);
-   UInt8 tmp4 = sDataSize;
-   memcpy(sPacketData + 7, &tmp4, 1);
+   UInt8 tmp = sDataSize >> 24;
+   memcpy(sPacketData + offset++, &tmp, 1);
+   tmp = sDataSize >> 16;
+   memcpy(sPacketData + offset++, &tmp, 1);
+   tmp = sDataSize >> 8;
+   memcpy(sPacketData + offset++, &tmp, 1);
+   tmp = sDataSize;
+   memcpy(sPacketData + offset++, &tmp, 1);
 
-   memcpy(sPacketData + 8, (void*)const_cast<char*>(payload.c_str()), sDataSize);
 
-   std::cout << "SINGLE MESSAGE GENERATED: " << std::string((char*)sPacketData, sDataSize + 12) <<  std:: endl;
+   if (protocolVersion == 0x02)
+   {
+       UInt8 tmp1 = sMessageID >> 24;
+       memcpy(sPacketData + offset++, &tmp1, 1);
+       tmp1 = sMessageID >> 16;
+       memcpy(sPacketData + offset++, &tmp1, 1);
+       tmp1 = sMessageID >> 8;
+       memcpy(sPacketData + offset++, &tmp1, 1);
+       tmp1 = sMessageID;
+       memcpy(sPacketData + offset++, &tmp1, 1);
+   }
 
-   blobQueue.push(Blob((UInt8*)sPacketData, 8 + sDataSize, blobQueue.size()));
+   memcpy(sPacketData + offset, (void*)const_cast<char*>(payload.c_str()), sDataSize);
+
+   std::cout << "SINGLE MESSAGE GENERATED: "
+             << std::string((char*)(sPacketData + offset), sDataSize) <<  std:: endl;
+
+   blobQueue.push(Blob((UInt8*)sPacketData, offset + sDataSize, blobQueue.size()));
 
    mBluetoothHandler->dataReceived();
 }
 
-void CMessage::generateFinalMessage(UInt8 serviceType, UInt8 sessionID)
+void CMessage::generateFinalMessage(UInt8 protocolVersion,
+                                    UInt8 serviceType,
+                                    UInt8 sessionID,
+                                    UInt32 hashCode)
 {
-   sVersion        = 0x01;
+   UInt32 headerSize = 8;
+   if (protocolVersion == 0x02)
+      headerSize = 12;
+
+   sVersion        = protocolVersion;
    sCompressedFlag = 0;
    sFrameType      = 0x00; //Control frame
    sServiceType    = serviceType;
    sFrameData      = 0x04; //End session
    sSessionID      = sessionID;
    sDataSize       = 0x00;
-  //sMessageID      = rand() % 0xFFFFFFFF + 1;
+   sMessageID      = hashCode;
 
    dispayField();
 
-   sPacketData = malloc(8);
+   sPacketData = malloc(headerSize);
 
    UInt8 firstByte = ( (sVersion << 4) & 0xF0 )
                    | ( (sCompressedFlag << 3) & 0x08)
@@ -144,29 +173,47 @@ void CMessage::generateFinalMessage(UInt8 serviceType, UInt8 sessionID)
    memcpy(sPacketData + 2, &sFrameData, 1);
    memcpy(sPacketData + 3, &sSessionID, 1);
 
-   UInt8 tmp1 = sDataSize >> 24;
-   memcpy(sPacketData + 4, &tmp1, 1);
-   UInt8 tmp2 = sDataSize >> 16;
-   memcpy(sPacketData + 5, &tmp2, 1);
-   UInt8 tmp3 = sDataSize >> 8;
-   memcpy(sPacketData + 6, &tmp3, 1);
-   UInt8 tmp4 = sDataSize;
-   memcpy(sPacketData + 7, &tmp4, 1);
+   UInt8 tmp = sDataSize >> 24;
+   memcpy(sPacketData + 4, &tmp, 1);
+   tmp = sDataSize >> 16;
+   memcpy(sPacketData + 5, &tmp, 1);
+   tmp = sDataSize >> 8;
+   memcpy(sPacketData + 6, &tmp, 1);
+   tmp = sDataSize;
+   memcpy(sPacketData + 7, &tmp, 1);
 
-  //memcpy(sPacketData + 8, &sMessageID, 4);
+   if (protocolVersion == 0x02)
+   {
+       UInt8 tmp1 = sMessageID >> 24;
+       memcpy(sPacketData + 8, &tmp1, 1);
+       tmp1 = sMessageID >> 16;
+       memcpy(sPacketData + 9, &tmp1, 1);
+       tmp1 = sMessageID >> 8;
+       memcpy(sPacketData + 10, &tmp1, 1);
+       tmp1 = sMessageID;
+       memcpy(sPacketData + 11, &tmp1, 1);
+   }
 
-  blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
+  blobQueue.push(Blob((UInt8*)sPacketData, headerSize, blobQueue.size()));
 
   mBluetoothHandler->dataReceived();
 }
 
-void CMessage::generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std::string payload, int messagesQuantity)
+void CMessage::generateMultipleMessages(UInt8 protocolVersion,
+                                        UInt8 serviceType,
+                                        UInt8 sessionID,
+                                        std::string payload,
+                                        int messagesQuantity)
 {
-   //sMessageID      = rand() % 0xFFFFFFFF + 1;
+    int headerSize = 8;
+    if (protocolVersion == 0x02)
+        headerSize = 12;
+
+   sMessageID      = 54321;
 
    for(int i = 0; i < messagesQuantity; i++)
    {
-      sVersion        = 0x01;
+      sVersion        = protocolVersion;
       sCompressedFlag = 0;
 
       if(0 == i)
@@ -206,18 +253,7 @@ void CMessage::generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std:
          numberOfConsecutiveFrames = messagesQuantity - 1;
          totalConsecutivePayloadSize = (payload.length()/* + 1*/) * numberOfConsecutiveFrames;
 
-         sDataSize = 0x08;/*
-         UInt8 *outDataFirstFrame = new UInt8[sDataSize];
-
-         outDataFirstFrame[0] = totalConsecutivePayloadSize >> 24;
-         outDataFirstFrame[1] = totalConsecutivePayloadSize >> 16;
-         outDataFirstFrame[2] = totalConsecutivePayloadSize >> 8;
-         outDataFirstFrame[3] = totalConsecutivePayloadSize;
-
-         outDataFirstFrame[4] = numberOfConsecutiveFrames >> 24;
-         outDataFirstFrame[5] = numberOfConsecutiveFrames >> 16;
-         outDataFirstFrame[6] = numberOfConsecutiveFrames >> 8;
-         outDataFirstFrame[7] = numberOfConsecutiveFrames;*/
+         sDataSize = 0x08;
       }
       else
       {
@@ -226,57 +262,66 @@ void CMessage::generateMultipleMessages(UInt8 serviceType, UInt8 sessionID, std:
 
       dispayField();
 
-      sPacketData = malloc(8 + sDataSize);
+      sPacketData = malloc(headerSize + sDataSize);
 
       UInt8 firstByte = ( (sVersion << 4) & 0xF0 )
                         | ( (sCompressedFlag << 3) & 0x08)
                         | (sFrameType & 0x07);
 
-      memcpy(sPacketData, &firstByte, 1);
-      memcpy(sPacketData + 1, &sServiceType, 1);
-      memcpy(sPacketData + 2, &sFrameData, 1);
-      memcpy(sPacketData + 3, &sSessionID, 1);
+      UInt32 offset = 0;
+      memcpy(sPacketData + offset++, &firstByte, 1);
+      memcpy(sPacketData + offset++, &sServiceType, 1);
+      memcpy(sPacketData + offset++, &sFrameData, 1);
+      memcpy(sPacketData + offset++, &sSessionID, 1);
 
       UInt8 tmp1 = sDataSize >> 24;
-      memcpy(sPacketData + 4, &tmp1, 1);
-      UInt8 tmp2 = sDataSize >> 16;
-      memcpy(sPacketData + 5, &tmp2, 1);
-      UInt8 tmp3 = sDataSize >> 8;
-      memcpy(sPacketData + 6, &tmp3, 1);
-      UInt8 tmp4 = sDataSize;
-      memcpy(sPacketData + 7, &tmp4, 1);
+      memcpy(sPacketData + offset++, &tmp1, 1);
+      tmp1 = sDataSize >> 16;
+      memcpy(sPacketData + offset++, &tmp1, 1);
+      tmp1 = sDataSize >> 8;
+      memcpy(sPacketData + offset++, &tmp1, 1);
+      tmp1 = sDataSize;
+      memcpy(sPacketData + offset++, &tmp1, 1);
 
-      //memcpy(sPacketData + 8, &sMessageID, 4);
+      if (protocolVersion == 0x02)
+      {
+          UInt8 tmp2 = sMessageID >> 24;
+          memcpy(sPacketData + offset++, &tmp2, 1);
+          tmp2 = sMessageID >> 16;
+          memcpy(sPacketData + offset++, &tmp2, 1);
+          tmp2 = sMessageID >> 8;
+          memcpy(sPacketData + offset++, &tmp2, 1);
+          tmp2 = sMessageID;
+          memcpy(sPacketData + offset++, &tmp2, 1);
+      }
 
       if(0 != i)
       {
-         memcpy(sPacketData + 8, (void*)const_cast<char*>(payload.c_str()), sDataSize);
+         memcpy(sPacketData + offset, (void*)const_cast<char*>(payload.c_str()), sDataSize);
       }
       else
       {
          UInt8 tmp = totalConsecutivePayloadSize >> 24;
-         memcpy(sPacketData + 8, &tmp, 1);
+         memcpy(sPacketData + offset++, &tmp, 1);
          tmp = totalConsecutivePayloadSize >> 16;
-         memcpy(sPacketData + 9, &tmp, 1);
+         memcpy(sPacketData + offset++, &tmp, 1);
          tmp = totalConsecutivePayloadSize >> 8;
-         memcpy(sPacketData + 10, &tmp, 1);
+         memcpy(sPacketData + offset++, &tmp, 1);
          tmp = totalConsecutivePayloadSize;
-         memcpy(sPacketData + 11, &tmp, 1);
+         memcpy(sPacketData + offset++, &tmp, 1);
 
          tmp = numberOfConsecutiveFrames >> 24;
-         memcpy(sPacketData + 12, &tmp, 1);
+         memcpy(sPacketData + offset++, &tmp, 1);
          tmp = numberOfConsecutiveFrames >> 16;
-         memcpy(sPacketData + 13, &tmp, 1);
+         memcpy(sPacketData + offset++, &tmp, 1);
          tmp = numberOfConsecutiveFrames >> 8;
-         memcpy(sPacketData + 14, &tmp, 1);
+         memcpy(sPacketData + offset++, &tmp, 1);
          tmp = numberOfConsecutiveFrames;
-         memcpy(sPacketData + 15, &tmp, 1);
-
-         //memcpy(sPacketData + 12, &numberOfConsecutiveFrames, 4);
+         memcpy(sPacketData + offset++, &tmp, 1);
       }
 
 
-      blobQueue.push(Blob((UInt8*)sPacketData, 8 + sDataSize, blobQueue.size()));
+      blobQueue.push(Blob((UInt8*)sPacketData, headerSize + sDataSize, blobQueue.size()));
 
       mBluetoothHandler->dataReceived();
    }
@@ -458,10 +503,23 @@ void CMessage::releaseBuffer(const Blob& blob)
 
 void CMessage::sendBuffer(UInt8 * pBuffer, size_t size)
 {
-    UInt8 *pay = new UInt8[size - 8];
-    memcpy(pay, pBuffer + 8, size - 8);
-    std::cout << "CMessage::sendBuffer() SEND DATA PAYLOAD: " << std::string( ( (char*)pay), size - 8) <<  "\n SIZE : "
-              << std::dec << (size - 8) << std::endl;
+    UInt8 firstByte = 0;
+    memcpy(&firstByte, pBuffer, sizeof(UInt8) );
+
+    UInt8 version = firstByte >> 4;
+    UInt8 headerSize = 8;
+    if (version == 2)
+        headerSize = 12;
+
+    if ( ((int)size - (int)headerSize) > 0)
+    {
+        UInt8 *pay = new UInt8[size - headerSize];
+        memcpy(pay, pBuffer + headerSize, size - headerSize);
+        std::cout << "CMessage::sendBuffer() SEND DATA PAYLOAD: " << std::string( ( (char*)pay), size - headerSize) <<  "\n SIZE : "
+                  << std::dec << (size - headerSize) << std::endl;
+
+        delete [] pay;
+    }
 }
 
 

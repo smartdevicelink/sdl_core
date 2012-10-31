@@ -27,12 +27,11 @@ MFT = Em.Application.create({
 	init: function() {
 		Em.Logger.log('MFT: Application init!');
 		
-		/* connect to backend*/
-		if ( !FLAGS.MCS_ENABLED) {
-			FFW.Backend.connect();
-		}
-		
-		FFW.ButtonsBackend.connect();
+		FFW.Buttons.connect();
+		FFW.TTS.connect();
+		FFW.VR.connect();
+		FFW.UI.connect();
+		FFW.AppLinkCoreClient.connect();
 
 		this._super();
 	},
@@ -52,8 +51,8 @@ MFT = Em.Application.create({
 		
 		if (FLAGS.APP_HIDE_MOUSE_CURSOR) {
 			var style = document.createElement('style');
-            style.setAttribute('type', 'text/css');
-            style.innerHTML = '*{cursor:none !important}';
+	            	style.setAttribute('type', 'text/css');
+        		style.innerHTML = '*{cursor:none !important}';
 			
 			document.getElementsByTagName("head")[0].appendChild(style);			
 		}

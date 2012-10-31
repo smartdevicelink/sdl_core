@@ -2,6 +2,7 @@
 #define BLUETOOTHWRITER_HPP
 
 #include "ProtocolPacketHeader.hpp"
+#include "Logger.hpp"
 
 namespace Bluetooth
 {
@@ -28,7 +29,7 @@ public:
       * @param header Message header
       * @param data Data array
       */
-    ERROR_CODE write(const ProtocolPacketHeader &header, UInt8 *data);
+    ERROR_CODE write(const ProtocolPacketHeader &header, const UInt8 *data);
 
     /**
       * Set BTAdapter pointer for writing
@@ -39,6 +40,7 @@ public:
 private:
     UInt8 *mData;
     Bluetooth::IBluetoothAPI *mBTAdapter;
+    static Logger mLogger;
 };
 
 } //namespace AxisCore

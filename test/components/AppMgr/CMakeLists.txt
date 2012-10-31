@@ -8,7 +8,7 @@ set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 link_directories(../../../src/components/AppMgr
 				 ../../../src/thirdPartyLibs/jsoncpp
 				 ../../../src/components/JSONHandler
-				 ../../../src/thirdPartyLibs/axisCore/bin
+				 ../../../src/thirdPartyLibs/axisCore
 				 ../../../src/thirdPartyLibs/MessageBroker
 				 ../../../src/thirdPartyLibs/logger/bin
 				)

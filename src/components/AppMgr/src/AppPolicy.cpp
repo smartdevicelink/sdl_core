@@ -6,19 +6,21 @@
  */
 
 #include "AppMgr/AppPolicy.h"
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
+log4cplus::Logger AppPolicy::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppPolicy"));
 	
 AppPolicy::AppPolicy( const std::string& policy )
 : mPolicy(policy)
 {
-
+    LOG4CPLUS_INFO_EXT(mLogger, " Created an app policy "<<policy);
 }
 
 AppPolicy::~AppPolicy( )
 {
-	// TODO Auto-generated destructor stub
+    LOG4CPLUS_INFO_EXT(mLogger, " Destroyed an app policy "<<mPolicy);
 }
 
 bool AppPolicy::operator <( const AppPolicy& item2 ) const
@@ -28,7 +30,12 @@ bool AppPolicy::operator <( const AppPolicy& item2 ) const
 
 const std::string& AppPolicy::getPolicyHash( ) const
 {
-	return mPolicy;
+    return mPolicy;
+}
+
+AppPolicy::AppPolicy(const AppPolicy &policy)
+    : mPolicy(policy.getPolicyHash())
+{
 }
 
 };

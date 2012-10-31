@@ -17,22 +17,21 @@
     "methods": {
 	/*
 	 * @descr 
-	 *      
-	 *	
+	 *      Show information in app window, in predefined positions
 	 * 	
 	 * @returns
-	 * 	
+	 * 	result of command execution
  	 * 	
 	 */ 
         "UI.Show": {
-		"parameters": {
-			"mainField1" 	: "string",      
-			"mainField2" 	: "string",      
-			"aligment" 	: "textAlignment",    // data type from AppLink protocol specification  
-			"statusBar" 	: "string",      
-			"mediaClock" 	: "string",      
-			"mediaTrack" 	: "string"
-		},
+			"parameters": {
+				"mainField1" 	: "string",      
+				"mainField2" 	: "string",      
+				"alignment" 	: "textAlignment",    // data type from AppLink protocol specification  
+				"statusBar" 	: "string",      
+				"mediaClock" 	: "string",      
+				"mediaTrack" 	: "string"
+			},
 	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
 				"result": "Result" // data type from AppLink protocol specification
@@ -41,20 +40,19 @@
 
 	/*
 	 * @descr 
-	 *      
-	 *	
+	 *       Show Alert to the user and play sound tone if necessary
 	 * 	
 	 * @returns
-	 * 	
+	 * 	 result of command execution
  	 * 	
 	 */ 
         "UI.Alert": {
-		"parameters": {
-			"AlertText1" 	: "string",      
-			"AlertText2" 	: "string",      
-			"duration" 	: "Integer",
-			"playTone" 	: "bool"
-		},
+			"parameters": {
+				"AlertText1" 	: "string",      
+				"AlertText2" 	: "string",      
+				"duration" 		: "Integer",
+				"playTone" 		: "bool"
+			},
 	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
 				"result": "Result" // data type from AppLink protocol specification
@@ -68,7 +66,7 @@
 	 * @returns
 	 * 	result code
 	 */ 
-        "UI.addCommand": {
+        "UI.AddCommand": {
 		"parameters": {
 			"cmdId" 	: "integer",        	// cmdID from addCommand request in AppLink protocol
 			"menuParams" 	: "MenuParams" 		// data type from AppLink protocol specification
@@ -86,7 +84,7 @@
 	 * @returns
 	 * 	result code
 	 */ 
-        "UI.deleteCommand": {
+        "UI.DeleteCommand": {
 		"parameters": {
 			"cmdId" 	: "integer"       	// cmdID from addCommand request in AppLink protocol
 		}
@@ -97,11 +95,221 @@
         },
 
 	/*
+	 * @descr 
+	 *      add sub menu
+	 *      parameters are copied from AddSubMenu in AppLink protocol
+	 * 	
+	 * @returns
+	 * 	result code
+	 */ 
+        "UI.AddSubMenu": {
+		"parameters": {
+			"menuId" 	: "integer",
+			"position" 	: "integer",
+			"menuName" 	: "string"
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result": "Result" // data type from AppLink protocol specification
+			}
+        },
+
+	/*
+	 * @descr 
+	 *      add sub menu
+	 *      parameters are copied from DeleteSubMenu in AppLink protocol
+	 * 	
+	 * @returns
+	 * 	result code
+	 */ 
+        "UI.DeleteSubMenu": {
+		"parameters": {
+			"menuId" 	: "integer"
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result": "Result" // data type from AppLink protocol specification
+			}
+        },
+
+	/*
+	 * @descr 
+	 *      create new interaction choice set
+	 *      parameters are copied from CreateInteractionChoiceSet in AppLink protocol
+	 * 	// TODO: clarify if it is correct approach
+	 * 	
+	 * @returns
+	 * 	result code
+	 */ 
+        "UI.CreateInteractionChoiceSet": {
+		"parameters": {
+			"interactionChoiceSetID" 	: "integer",
+			"choiceSet" 			: "Choice" 	// data type from AppLink protocol specification
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result": "Result" // data type from AppLink protocol specification
+			}
+        },
+
+	/*
+	 * @descr 
+	 *      create new interaction choice set
+	 *      parameters are copied from DeleteInteractionChoiceSet in AppLink protocol
+	 * 	// TODO: clarify if it is correct approach
+	 * 	
+	 * @returns
+	 * 	result code
+	 */ 
+        "UI.DeleteInteractionChoiceSet": {
+		"parameters": {
+			"interactionChoiceSetID" 	: "integer"
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result": "Result" // data type from AppLink protocol specification
+			}
+        },
+
+	/*
+	 * @descr 
+	 *      start media clock timer
+	 *      parameters are copied from SetMediaClockTimer in AppLink protocol
+	 * 
+	 * 	// TODO: clarify if it is correct approach
+	 * 	
+	 * @returns
+	 * 	result code
+	 */ 
+        "UI.SetMediaClockTimer": {
+		"parameters": {
+			"startTime" 	: "StartTime",       // data type from AppLink protocol specification
+			"updateMode" 	: "UpdateMode",      // data type from AppLink protocol specification
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result": "Result" // data type from AppLink protocol specification
+			}
+        },
+
+	/*
+	 * @descr 
+	 *      set global properties for timeout prompt and help prompt
+	 *      parameters are copied from SetGlobalProperties in AppLink protocol
+	 * 
+	 * 	// TODO: clarify if it is correct approach
+	 * 	
+	 * @returns
+	 * 	result code
+	 */ 
+        "UI.SetGlobalProperties": {
+		"parameters": {
+			[
+				"helpPrompt" 		: "TTSChunk"      // data type from AppLink protocol specification
+			],
+			[
+				"timeoutPrompt" 	: "TTSChunk"      // data type from AppLink protocol specification
+			]
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result": "Result" // data type from AppLink protocol specification
+			}
+        },
+
+	/*
+	 * @descr 
+	 *      set global properties for timeout prompt and help prompt
+	 *      parameters are copied from SetGlobalProperties in AppLink protocol
+	 * 
+	 * 	// TODO: clarify if it is correct approach
+	 * 	
+	 * @returns
+	 * 	result code
+	 */ 
+        "UI.ResetGlobalProperties": {
+		"parameters": {
+			[
+				"property"	: "GlobalProperty"      // enum, data type from AppLink protocol specification
+			]
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result": "Result" // data type from AppLink protocol specification
+			}
+        },
+
+	/*
+	 * @descr 
+	 *      set global properties for timeout prompt and help prompt
+	 *      parameters are copied from PerformInteraction in AppLink protocol
+	 * 
+	 * 	// TODO: clarify if it is correct approach
+	 * 	
+	 * @returns
+	 * 	result code
+	 */ 
+        "UI.PerformInteraction": {
+		"parameters": {
+			"initialText"	: "string",
+			[
+				"initialPrompt"	: "TTSChunk" // data type from AppLink protocol specification
+			],
+			"interactionMode"	: "InteractionMode", // data type from AppLink protocol specification
+			[
+				"interactionChoiceSetIDList"	: "Integer" // id of Choice from CreateInteractionChoiceSet 
+			],
+			[
+				"helpPrompt"	: "TTSChunk" // data type from AppLink protocol specification
+			],
+			[
+				"timeoutPrompt"	: "TTSChunk" // data type from AppLink protocol specification
+			],
+			"timeout"	: "Integer"      // in milliseconds
+		}
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"result"	: "Result",   		// data type from AppLink protocol specification
+				"choiceID"      : "Integer",  		// ID of the choice that was selected in response to PerformInteraction
+				"triggerSource" : "TriggerSource" 	// data type from AppLink protocol specification 
+			}
+        },
+
+	/*
 	 * @descr Notifies AppLink core about command trigerred by VR
 	 */
-	"UI.onCommand": {
+	"UI.OnCommand": {
 		"parameters": {
 			"commandId" : "Integer" // id of triggered command
+		}
+	}
+
+	/*
+	 * @descr Notifies if application is activated (switched from background to foreground)
+	 */
+	"UI.OnAppActivated": {
+		"parameters": {
+			"appName"	: "string"
+		}
+	},
+
+	/*
+	 * @descr Notifies if application is activated (switched from foreground to background)
+	 */
+	"UI.OnAppDeactivated": {
+		"parameters": {
+			"appName"	: "string"
+		}
+	},
+
+	// TODO: not sure  if it is correct place for this method
+	// TODO: what's about VR session in progress?
+	/*
+	 * @descr Notifies if system context is changed
+	 */
+	"UI.OnSystemContext": {
+		"parameters": {
+			"systemContext"	: "SystemContext" // data type from AppLink protocol specification
 		}
 	}
 

@@ -10,7 +10,7 @@ OnButtonEvent::OnButtonEvent()
 OnButtonEvent::~OnButtonEvent()
 {}
 
-const std::string & OnButtonEvent::getName(void) const
+const ButtonName & OnButtonEvent::getName(void) const
 {
     return mName;
 }
@@ -20,7 +20,7 @@ const ButtonEventMode & OnButtonEvent::getMode(void) const
     return mMode;
 }
 
-bool OnButtonEvent::setName(const std::string & s)
+bool OnButtonEvent::setName(const ButtonName & s)
 {
     mName = s;
 }

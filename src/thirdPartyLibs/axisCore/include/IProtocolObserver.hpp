@@ -16,8 +16,10 @@ class IProtocolObserver
 public:
    /**
     * Callback informs client about session start if the session started.
+    * @param sessionID Session ID
+    * @param hashCode Hash code needed for the session finishing
     */
-   virtual void sessionStartedCallback(const UInt8 sessionID) = 0;
+   virtual void sessionStartedCallback(const UInt8 sessionID, const UInt32 hashCode) = 0;
 
    /**
     * Callback informs client about session end if the session ended.

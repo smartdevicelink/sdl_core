@@ -8,8 +8,10 @@
 namespace AxisCore
 {
 
+Logger BluetoothReader::mLogger = Logger::getInstance(LOG4CPLUS_TEXT("AxisCore.ProtocolHandler") );
+
 BluetoothReader::BluetoothReader()
-{
+{    
     mBTAdapter = NULL;
     mData = new UInt8[MAXIMUM_FRAME_SIZE];
 }
@@ -30,20 +32,14 @@ ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt
     if (mBTAdapter)
         blobBufferSize = mBTAdapter->getBuffer().size();
 
-    //blobBufferSize = Bluetooth::getBuffer().size();
-
-    if (dataSize >= blobBufferSize )
+    if ( (dataSize >= blobBufferSize) && (MAXIMUM_FRAME_SIZE >= blobBufferSize) )
     {
-        //memcpy(mData, Bluetooth::getBuffer().buffer(), blobBufferSize);
-        //Bluetooth::releaseBuffer(Bluetooth::getBuffer() );
-
         memcpy(mData, mBTAdapter->getBuffer().buffer(), blobBufferSize);
         mBTAdapter->releaseBuffer(mBTAdapter->getBuffer() );
     }
     else
     {
-        printf("%s:%d BluetoothReader::read() buffer is too small for reading\n"
-               , __FILE__, __LINE__);
+        LOG4CPLUS_WARN(mLogger, "read() - buffer is too small for reading");
         return ERR_FAIL;
     }
 
@@ -71,6 +67,16 @@ ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt
     header.dataSize |= mData[offset++] << 16;
     header.dataSize |= mData[offset++] << 8;
     header.dataSize |= mData[offset++];
+
+    if (header.version == PROTOCOL_VERSION_2)
+    {
+        header.messageID  = mData[offset++] << 24;
+        header.messageID |= mData[offset++] << 16;
+        header.messageID |= mData[offset++] << 8;
+        header.messageID |= mData[offset++];
+    }
+    else
+        header.messageID = 0;
 
     if (data)
         memcpy(data, mData + offset, header.dataSize);

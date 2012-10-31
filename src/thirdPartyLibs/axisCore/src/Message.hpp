@@ -2,6 +2,7 @@
 #define MESSAGE_HPP
 
 #include "ProtocolPacketHeader.hpp"
+#include "Logger.hpp"
 
 namespace AxisCore
 {
@@ -17,6 +18,11 @@ public:
     Message(const ProtocolPacketHeader &header, UInt8 *data, bool isMultiFrame);
 
     ~Message();
+
+    /**
+      * Get message ID
+      */
+    UInt32 getMessageID()       { return mMessageID; }
 
     /**
       * Get pointer to the data array
@@ -48,6 +54,8 @@ private:
     UInt32 mDataOffset;
     UInt8 mLastSubMessageNumber;
     UInt32 mSubMessagesConnected;
+    UInt32 mMessageID;
+    static Logger mLogger;
 };
 
 } //namespace AxisCore

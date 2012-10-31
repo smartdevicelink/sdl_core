@@ -3,6 +3,8 @@ CONFIG += console
 CONFIG -= qt
 
 LIBS += -lbluetooth
+LIBS += -L"../logger/bin" -llog4cplus
+LIBS += -lpthread
 
 SOURCES += src/main.cpp \
     src/ProtocolHandler.cpp \
@@ -32,4 +34,6 @@ INCLUDEPATH += \
     ./src \
     ./utils/misc \
     ./transport/bt \
-    ../../appMain
+    ../../appMain \
+    ../logger/include \
+    ../logger/log4cplus-1.0.4/include

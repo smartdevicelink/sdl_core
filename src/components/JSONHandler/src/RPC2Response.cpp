@@ -1,5 +1,6 @@
 #include "JSONHandler/RPC2Response.h"
 #include <sstream>
+#include <stdlib.h>
 
 using namespace RPC2Communication;
 
@@ -39,4 +40,24 @@ int RPC2Response::getID() const
     }
 
     return atoi(mID.c_str());
+}
+
+Result RPC2Response::getResult() const
+{
+    return mResultCode;
+}
+
+void RPC2Response::setResult(const Result& r)
+{
+    mResultCode = r;
+}
+
+RPC2Error RPC2Response::getError() const
+{
+    return mError;
+}
+
+void RPC2Response::setError(const RPC2Error& error)
+{
+    mError = error;
 }

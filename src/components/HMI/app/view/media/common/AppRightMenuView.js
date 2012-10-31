@@ -304,7 +304,7 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 	},
 
 	loaded: function() {
-		this.set('scroll', new iScroll('media_appScrollWrapper',{scrollbarClass: 'display:none', bounce: true, momentum: false,onBeforeScrollEnd: function(){MFT.AppRightMenuView.scrollEnd();}}));
+		this.set('scroll', new iScroll('media_appScrollWrapper',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.AppRightMenuView.scrollEnd();}}));
 	},
 
 	afterRender: function() {

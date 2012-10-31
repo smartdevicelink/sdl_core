@@ -8,6 +8,8 @@
 namespace AxisCore
 {
 
+Logger BluetoothWriter::mLogger = Logger::getInstance(LOG4CPLUS_TEXT("AxisCore.ProtocolHandler") );
+
 BluetoothWriter::BluetoothWriter()
 {
     mBTAdapter = NULL;
@@ -19,12 +21,12 @@ BluetoothWriter::~BluetoothWriter()
     delete [] mData;
 }
 
-void BluetoothWriter::setBTAdapter(Bluetooth::IBluetoothAPI *adapter)
+void BluetoothWriter::setBTAdapter(IBluetoothAPI *adapter)
 {
     mBTAdapter = adapter;
 }
 
-ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *data)
+ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, const UInt8 *data)
 {
     UInt8 offset = 0;
     UInt8 compress = 0x0;
@@ -47,19 +49,27 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, UInt8 *dat
     mData[offset++] = header.dataSize >> 8;
     mData[offset++] = header.dataSize;
 
+    if (header.version == PROTOCOL_VERSION_2)
+    {
+        mData[offset++] = header.messageID >> 24;
+        mData[offset++] = header.messageID >> 16;
+        mData[offset++] = header.messageID >> 8;
+        mData[offset++] = header.messageID;
+    }
+
     if (data)
     {
-        if ( (offset + header.dataSize) < MAXIMUM_FRAME_SIZE)
+        if ( (offset + header.dataSize) <= MAXIMUM_FRAME_SIZE)
             memcpy(mData + offset, data, header.dataSize);
         else
         {
-            printf("%s:%d BluetoothWriter::write() buffer is too small for writing\n", __FILE__, __LINE__);
+            LOG4CPLUS_WARN(mLogger, "write() - buffer is too small for writing");
             return ERR_FAIL;
         }
     }
 
     if (mBTAdapter)
-        mBTAdapter->sendBuffer(mData, header.dataSize + PROTOCOL_HEADER_SIZE);
+        mBTAdapter->sendBuffer(mData, header.dataSize + offset);
     else
         return ERR_FAIL;
 

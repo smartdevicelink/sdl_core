@@ -10,12 +10,13 @@
 namespace NsAppManager
 {
 	
-Application::Application( const std::string& name )
+Application::Application(const std::string& name , unsigned char sessionId)
 	:IApplication(name)
 	,mNgnMediaScreenAppName("")
 	,m_bUsesVehicleData(false)
 	,m_bIsMediaApplication(false)
 	,mAutoActivateID("")
+    ,mSessionID(sessionId)
 {
 }
 
@@ -28,6 +29,7 @@ Application::Application( const Application& app )
 	,mLanguageDesired(app.getLanguageDesired())
 	,mHMIStatusLevel(app.getApplicationHMIStatusLevel())
 	,mSyncMsgVersion(app.getSyncMsgVersion())
+    ,mSessionID(app.getSessionID())
 {
 	mVrSynonyms = app.getVrSynonyms();
 }
@@ -42,12 +44,12 @@ void Application::setApplicationPriority( const AppPriority& priority )
 	mPriority = priority;
 }
 
-const HMILevel::HMILevelEnum& Application::getApplicationHMIStatusLevel( ) const
+const HMILevel::HMILevelInternal& Application::getApplicationHMIStatusLevel( ) const
 {
 	return mHMIStatusLevel;
 }
 
-void Application::setApplicationHMIStatusLevel( const HMILevel::HMILevelEnum& hmiLevel )
+void Application::setApplicationHMIStatusLevel( const HMILevel::HMILevelInternal& hmiLevel )
 {
 	mHMIStatusLevel = hmiLevel;
 }
@@ -94,7 +96,17 @@ void Application::setAutoActivateID(const std::string& value)
 
 void Application::setSyncMsgVersion(SyncMsgVersion value)
 {
-	mSyncMsgVersion = value;
+    mSyncMsgVersion = value;
+}
+
+void Application::setAppID(const std::string &value)
+{
+    mAppID = value;
+}
+
+void Application::setHMIDisplayLanguageDesired(Language value)
+{
+    mHMIDisplayLanguageDesired = value;
 }
 
 const std::string& Application::getNgnMediaScreenAppName( ) const
@@ -129,7 +141,22 @@ const std::string& Application::getAutoActivateID( ) const
 
 const SyncMsgVersion& Application::getSyncMsgVersion( ) const
 {
-	return mSyncMsgVersion;
+    return mSyncMsgVersion;
+}
+
+const std::string &Application::getAppID() const
+{
+    return mAppID;
+}
+
+const Language &Application::getHMIDisplayLanguageDesired() const
+{
+    return mHMIDisplayLanguageDesired;
+}
+
+unsigned char Application::getSessionID() const
+{
+    return mSessionID;
 }
 
 };

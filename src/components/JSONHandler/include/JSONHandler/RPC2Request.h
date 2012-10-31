@@ -1,6 +1,8 @@
 #ifndef RPC2_REQUEST_CLASS
 #define RPC2_REQUEST_CLASS value
 
+#include "JSONHandler/RPC2Command.h"
+
 namespace RPC2Communication
 {  
     class RPC2Request : public RPC2Command
@@ -15,7 +17,7 @@ namespace RPC2Communication
 
         virtual std::string getIDString() const;
         virtual int getID() const;
-        /* data */
+        
     private:
         std::string mID;
     };

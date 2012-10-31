@@ -23,12 +23,12 @@ public:
         cout << "enter ProtocolObserver() \n";
 
         CMessage *msgGen = new CMessage();
-        mHandler = new ProtocolHandler(this, msgGen);
+        mHandler = new ProtocolHandler(this, msgGen, 2);
         msgGen->initBluetooth(mHandler);
 
-        msgGen->generateInitialMessage(0x07, 0);
+        msgGen->generateInitialMessage(0x07);
 
-        msgGen->generateInitialMessage(0x0F, 1);
+        msgGen->generateInitialMessage(0x0F);
 
         std::string str;
 
@@ -40,7 +40,10 @@ public:
             str.append("_");
         }
 
-        msgGen->generateMultipleMessages(0x07, 0, str, 5);
+        msgGen->generateMultipleMessages(2, 0x07, 1, str, 5);
+        //msgGen->generateSingleMessage(2, 0x07, 1, str);
+
+        delete msgGen;
     }
 
     ~ProtocolObserver()
@@ -48,7 +51,7 @@ public:
         delete mHandler;
     }
 
-    virtual void sessionStartedCallback(const UInt8 sessionID)
+    virtual void sessionStartedCallback(const UInt8 sessionID, const UInt32 hashCode)
     {
         cout << "sessionStartedCallback : Session ID : 0x" << std::hex << (int)sessionID << "\n";
     }
@@ -70,7 +73,7 @@ public:
         std::cout << "RECEIVED DATA PAYLOAD: " << std::string((char*)data, dataSize) <<  "\n SIZE : "
                   << std::dec << dataSize << std::endl;
 
-        mHandler->sendData(0, 0x07, dataSize, data, false);
+        mHandler->sendData(1, 0x07, dataSize, data, false);
 
         delete [] data;
     }

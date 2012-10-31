@@ -1,17 +1,16 @@
 #ifndef IRPCMESSAGES_OBSERVER_CLASS
 #define IRPCMESSAGES_OBSERVER_CLASS value
 
-#include "JSONHandler/MobileRPCMessage.h"
+#include "JSONHandler/ALRPCMessage.h"
 
 class IRPCMessagesObserver
 {
 public:
-    virtual void onMessageReceivedCallback( MobileRPCMessage * message ) = 0;
+    virtual void onMessageReceivedCallback( ALRPCMessage * message, unsigned char sessionID ) = 0;
 
 protected:
     virtual ~IRPCMessagesObserver() {};
 
-    /* data */
 };
 
 #endif

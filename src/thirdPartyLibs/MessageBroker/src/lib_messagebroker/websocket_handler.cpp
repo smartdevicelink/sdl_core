@@ -129,7 +129,7 @@ namespace NsMessageBroker
       {
          payload = b_size;
       }
-
+      memset(Buffer, 0, headerLength);
       Buffer[0] = (char)0x80 | 0x01;
       Buffer[1] = (char)(Buffer[1] | (payload & 0x40) | (payload & 0x20) |
                                      (payload & 0x10) | (payload & 0x08) |

@@ -1,55 +1,63 @@
 #include "AppMgr/AppMgr.h"
 #include "JSONHandler/JSONHandler.h"
 #include "AppMgr/AppFactory.h"
-#include "AppMgr/AppLinkInterface.h"
 #include "AppMgr/AppMgrCore.h"
-#include "AppMgr/RPCAppLinkFactory.h"
-#include "AppMgr/RPCBusFactory.h"
 #include "AppMgr/AppMgrRegistry.h"
 #include "LoggerHelper.hpp"
+#include "JSONHandler/ALRPCMessage.h"
 
 namespace NsAppManager
 {
-	
+log4cplus::Logger AppMgr::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgr"));
+
 AppMgr& AppMgr::getInstance( )
 {
 	static AppMgr appMgr;
 	return appMgr;
 }
 
-void AppMgr::setParams(const std::string& address, uint16_t port, std::string name)
-{
-	AppLinkInterface::setParams(address, port, name);
-}
-
 AppMgr::AppMgr()
-	:mAppLinkInterface(AppLinkInterface::getInstance())
-	,mAppMgrRegistry(AppMgrRegistry::getInstance())
+    :mAppMgrRegistry(AppMgrRegistry::getInstance())
 	,mAppMgrCore(AppMgrCore::getInstance())
-	,mRPCAppLinkFactory(RPCAppLinkFactory::getInstance())
-	,mRPCBusFactory(RPCBusFactory::getInstance())
 	,mAppFactory(AppFactory::getInstance())
 	,mJSONHandler(0)
-	,mLogger( log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgr")) )
 {
-	mAppLinkInterface.registerController();
 	LOG4CPLUS_INFO_EXT(mLogger, " AppMgr constructed!");
 }
 
 AppMgr::~AppMgr()
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " AppMgr destructed!");
+    LOG4CPLUS_INFO_EXT(mLogger, " AppMgr destructed!");
+}
+
+AppMgr::AppMgr(const AppMgr &)
+    :mAppMgrRegistry(AppMgrRegistry::getInstance())
+    ,mAppMgrCore(AppMgrCore::getInstance())
+    ,mAppFactory(AppFactory::getInstance())
+    ,mJSONHandler(0)
+{
 }
 
 void AppMgr::setJsonHandler(JSONHandler* handler)
 {
-	mAppMgrCore.setJsonHandler( handler );
+    mAppMgrCore.setJsonHandler( handler );
 }
 
-void AppMgr::onMessageReceivedCallback( MobileRPCMessage * message )
+void AppMgr::setJsonRPC2Handler(JSONRPC2Handler *handler)
 {
-	LOG4CPLUS_INFO_EXT(mLogger, " Message "<<message->getFunctionName()<<" received");
-	mAppMgrCore.pushMobileRPCMessage( message );
+    mAppMgrCore.setJsonRPC2Handler( handler );
+}
+
+void AppMgr::onMessageReceivedCallback(ALRPCMessage * message , unsigned char sessionID)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " Message "<<message->getMethodId()<<" received from mobile side");
+    mAppMgrCore.pushMobileRPCMessage( message, sessionID );
+}
+
+void AppMgr::onCommandReceivedCallback(RPC2Communication::RPC2Command *command)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " Message "<<command->getMethod()<<" received from HMI side");
+    mAppMgrCore.pushRPC2CommunicationMessage(command);
 }
 
 /**
@@ -60,7 +68,7 @@ void AppMgr::onMessageReceivedCallback( MobileRPCMessage * message )
 void AppMgr::processResponse(std::string method, Json::Value& root)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Processing a response to "<<method);
-	mAppLinkInterface.processResponse(method, root);
+    //mAppLinkInterface.processResponse(method, root);
 }
 
 /**
@@ -70,7 +78,7 @@ void AppMgr::processResponse(std::string method, Json::Value& root)
 void AppMgr::processRequest(Json::Value& root)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Processing a request");
-	mAppLinkInterface.processRequest(root);
+    //mAppLinkInterface.processRequest(root);
 }
 
 /**
@@ -85,7 +93,15 @@ void AppMgr::processRequest(Json::Value& root)
 void AppMgr::processNotification(Json::Value& root)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Processing a notification");
-	mAppLinkInterface.processNotification(root);
+    //mAppLinkInterface.processNotification(root);
+}
+
+void AppMgr::startAppMgr()
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " Starting AppMgr...");
+    //mAppLinkInterface.registerController();
+    //mAppLinkInterface.prepareComponent();
+    LOG4CPLUS_INFO_EXT(mLogger, " Started AppMgr!");
 }
 
 };

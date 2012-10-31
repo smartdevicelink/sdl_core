@@ -1,8 +1,10 @@
 #include "JSONHandler/RPC2Request.h"
 #include <sstream>
+#include <stdlib.h>
 
-RPC2Request::RPC2Request( const std::string & methodName )
-:RPC2Command( methodName )
+using namespace RPC2Communication;
+
+RPC2Request::RPC2Request( )
 {}
 
 RPC2Request::RPC2Request( int method )

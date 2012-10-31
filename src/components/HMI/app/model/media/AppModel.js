@@ -20,17 +20,17 @@ MFT.AppModel = Em.Object.create({
 		this.set('player', MFT.MediaCDPlayer.create({data: this.PlayList}));
 	},
 	
-PlayList: MFT.Playlist.create({
-	
-	selectedIndex: 	0,
-	
-	items: {
-		0:MFT.PlaylistItem.create({title: 'title',album:'album',artist:'artist',genre:'genre',disk:'disk',duration:123})
-	},
-	
-	homeWidgetIcon: 'images/media/sd-h-ico.png',
-	homeWidgetIcon_blur: 'images/media/help/sd-h-ico_blur.png'
-}),
+	PlayList: MFT.Playlist.create({
+		
+		selectedIndex: 	0,
+		
+		items: {
+			0:MFT.PlaylistItem.create({field1: 'title', field2:'album', mediaTrack:'artist', mediaClock: "0:00", appName: "<App name>"})
+		},
+		
+		homeWidgetIcon: 'images/media/sd-h-ico.png',
+		homeWidgetIcon_blur: 'images/media/help/sd-h-ico_blur.png'
+	}),
 
 browseData : Em.Object.create({
 		

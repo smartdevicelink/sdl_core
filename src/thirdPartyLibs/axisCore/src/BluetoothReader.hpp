@@ -2,6 +2,7 @@
 #define BLUETOOTHREADER_HPP
 
 #include "ProtocolPacketHeader.hpp"
+#include "Logger.hpp"
 
 namespace Bluetooth
 {
@@ -35,11 +36,12 @@ public:
       * Set BTAdapter pointer for reading
       * @param adapter Pointer to NsTransportLayer::CBTAdapter
       */
-    void setBTAdapter(Bluetooth::IBluetoothAPI *adapter);
+    void setBTAdapter(IBluetoothAPI *adapter);
 
 private:
     UInt8 *mData;
     Bluetooth::IBluetoothAPI *mBTAdapter;
+    static Logger mLogger;
 };
 
 } //namespace AxisCore

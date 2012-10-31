@@ -14,6 +14,11 @@
 #include <map>
 #include <string>
 
+namespace log4cplus
+{
+	class Logger;
+};
+
 namespace NsAppManager
 {
 	
@@ -30,13 +35,15 @@ public:
 	const RegistryItem* registerApplication( const Application* app );
 	void unregisterApplication( RegistryItem* item  );
 
-	const RegistryItem* getItem( const Application* app ) const;
-	const RegistryItem* getItem( const std::string& app ) const;
+    RegistryItem *getItem( const Application* app ) const;
+    RegistryItem* getItem( const std::string& app ) const;
+    RegistryItem *getItem( unsigned char sessionID ) const;
 
 private:
 	AppMgrRegistry( );
-
+    AppMgrRegistry( const AppMgrRegistry& );
 	Items mRegistryItems;
+	static log4cplus::Logger mLogger;
 };
 
 }; // namespace NsAppManager

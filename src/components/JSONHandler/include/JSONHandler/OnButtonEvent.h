@@ -1,7 +1,8 @@
 #ifndef ON_BUTTON_EVENT_CLASS
 #define ON_BUTTON_EVENT_CLASS
 
-#include "JSONHandler/ButtonEventMode.h"
+#include "JSONHandler/ALRPCObjects/ButtonEventMode.h"
+#include "JSONHandler/ALRPCObjects/ButtonName.h"
 #include "JSONHandler/RPC2Notification.h"
 
 namespace RPC2Communication
@@ -12,14 +13,14 @@ namespace RPC2Communication
         OnButtonEvent();
         virtual ~OnButtonEvent();
 
-        const std::string & getName(void) const;
+        const ButtonName & getName(void) const;
         const ButtonEventMode & getMode(void) const;
 
-        bool setName(const std::string & s);
+        bool setName(const ButtonName & s);
         bool setMode(const ButtonEventMode& s);
     
     private:
-        std::string mName;
+        ButtonName mName;
         ButtonEventMode mMode;
 
         friend class OnButtonEventMarshaller;

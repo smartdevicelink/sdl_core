@@ -25,7 +25,7 @@
 	],
 	/** Enable Welcome Orientation screen if MCS is disabled*/
 	isActive: function(){
-		return (FFW.Backend.isFirstStart == true && FLAGS.MCS_ENABLED == false)
+//		return (FFW.Backend.isFirstStart == true && FLAGS.MCS_ENABLED == false)
 	}.property('FFW.Backend.isFirstStart'),
 	/** Background layer */
 	mask: Em.View.extend({

@@ -22,17 +22,17 @@
 	 * @returns
 	 *      result code of execution
 	 */ 
-        "Voice.Speak": {
+        "TTS.Speak": {
             "parameters": {
-		[
-			"ttsChunks"	: "TTSChunk" // data type from AppLink protocol specification
-		]
-             },
+				[
+					"ttsChunks"	: "TTSChunk" // data type from AppLink protocol specification
+				]
+            },
 	     
-	     returns: // return value is provided in corresponding response object, id of request and response should be equal
-	     {
-			"resultCode" 	: "Result" // data type from AppLink protocol specification
-	     }
+			returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"resultCode" 	: "Result" // data type from AppLink protocol specification
+			}
         }
 
 	// TODO: do we need any notifications?

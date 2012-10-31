@@ -1,7 +1,8 @@
 #include <json/reader.h>
 #include <json/value.h>
 #include <json/writer.h>
-#include "JSONHandler/ButtonEventModeMarshaller.h"
+#include "ALRPCObjectsImpl/ButtonEventModeMarshaller.h"
+#include "ALRPCObjectsImpl/ButtonNameMarshaller.h"
 #include "JSONHandler/OnButtonEventMarshaller.h"
 
 using namespace RPC2Communication;
@@ -35,12 +36,12 @@ Json::Value OnButtonEventMarshaller::toJSON(const OnButtonEvent& e)
 {  
   Json::Value json(Json::objectValue);
   
-  json["jsonrpc"]=Json::Value(Json::objectValue);
-  json["method"]=Json::Value("OnButtonEvent");
+  json["jsonrpc"]=Json::Value("2.0");
+  json["method"]=Json::Value("Buttons.OnButtonEvent");
   
   Json::Value j=Json::Value(Json::objectValue);
   
-  j["name"]=Json::Value(e.mName);
+  j["name"]=ButtonNameMarshaller::toJSON(e.mName);
   j["mode"]=ButtonEventModeMarshaller::toJSON(e.mMode);
   
   json["params"]=j;
@@ -60,7 +61,7 @@ bool OnButtonEventMarshaller::fromJSON(const Json::Value& json,OnButtonEvent& c)
     if(!json.isMember("method") 
         || !json["method"].isString() )
         return false;
-    if (json["method"].asString().compare("OnButtonEvent"))  
+    if (json["method"].asString().compare("Buttons.OnButtonEvent"))  
         return false;
 
     if(!json.isMember("params"))  return false;
@@ -71,8 +72,7 @@ bool OnButtonEventMarshaller::fromJSON(const Json::Value& json,OnButtonEvent& c)
     if(!j.isMember("mode"))  return false;
 
     if(!ButtonEventModeMarshaller::fromJSON(j["mode"],c.mMode))  return false;
-    if(!j["name"].isString())  return false;
-    c.mName=j["name"].asString();
+    if(!ButtonNameMarshaller::fromJSON(j["name"], c.mName))  return false;
   } 
   catch(...)
   {
