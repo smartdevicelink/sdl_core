@@ -1,7 +1,7 @@
 set(LIBRARIES
   AppMgr
   JSONHandler
-  #TransportManager
+  TransportManager
   ProtocolHandler
   MessageBroker
   MessageBrokerClient

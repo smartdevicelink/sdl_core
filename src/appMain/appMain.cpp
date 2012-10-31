@@ -32,6 +32,9 @@
 #include "Logger.hpp"
 
 #include "CAppTester.hpp"
+
+#include "TransportManager/ITransportManager.hpp"
+
 /**
  * \brief Entry point of the program.
  * \param argc number of argument
@@ -45,6 +48,9 @@ int main(int argc, char** argv)
     Logger logger = Logger::getInstance(LOG4CPLUS_TEXT("appMain"));
     PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
     LOG4CPLUS_INFO(logger, " Application started!");
+
+    NsAppLink::NsTransportManager::ITransportManager * transportManager = NsAppLink::NsTransportManager::ITransportManager::create();
+    transportManager->run();
 
     NsTransportLayer::CBTAdapter btadapter;
 
