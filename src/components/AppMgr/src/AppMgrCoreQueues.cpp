@@ -12,10 +12,17 @@ log4cplus::Logger AppMgrCoreQueue<QueueType>::mLogger = log4cplus::Logger::getIn
 
 template< class QueueType >
 AppMgrCoreQueue<QueueType>::AppMgrCoreQueue(HandlerCallback cbFn, void *pThis)
-    :mThread(new System::ThreadArgImpl<AppMgrCoreQueue>(*this, &AppMgrCoreQueue::handleQueue, pThis))
+    :mThread(new System::Thread(new System::ThreadArgImpl<AppMgrCoreQueue>(*this, &AppMgrCoreQueue::handleQueue, pThis)))
     ,mCallbackFn((HandlerCallback)cbFn)
 {
-    LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCoreQueues constructed!");
+    if(pThis && mThread && mCallbackFn)
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCoreQueues constructed!");
+    }
+    else
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " AppMgrCoreQueues not constructed! Check if params are non-null!");
+    }
 }
 
 template< class QueueType >
@@ -28,9 +35,12 @@ AppMgrCoreQueue<QueueType>::AppMgrCoreQueue(const AppMgrCoreQueue &)
 template< class QueueType >
 AppMgrCoreQueue<QueueType>::~AppMgrCoreQueue()
 {
-    if(!mThread.Join())
-        mThread.Stop();
-
+    if(mThread)
+    {
+        if(!mThread->Join())
+            mThread->Stop();
+        delete mThread;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCoreQueues detructed!");
 }
 
@@ -38,7 +48,7 @@ template< class QueueType >
 void AppMgrCoreQueue<QueueType>::executeThreads()
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Threads are being started!");
-    mThread.Start(false);
+    mThread->Start(false);
 
     LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
 }
