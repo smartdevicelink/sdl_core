@@ -51,6 +51,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
       return METHOD_ACTIVATEAPP_REQUEST;
     }
+    if ( s.compare("UI.AddCommand") == 0 )
+    {
+        return METHOD_ADDCOMMAND_REQUEST;
+    }
     
     return METHOD_INVALID;
 }
@@ -84,6 +88,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getResponseIndex(const std::string
   if ( s.compare("AppLinkCore.activateApp"))
   {
     return METHOD_ACTIVATEAPP_RESPONSE;
+  }
+  if ( s.compare("UI.AddCommand"))
+  {
+      return METHOD_ADDCOMMAND_RESPONSE;
   }
 
   return METHOD_INVALID;
@@ -267,6 +275,22 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_ADDCOMMAND_REQUEST:
+    {
+        AddCommand * rv = new AddCommand;
+        if (AddCommandMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ADDCOMMAND_RESPONSE:
+    {
+        AddCommandResponse * rv = new AddCommandResponse;
+        if (AddCommandResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
 
   }
 
@@ -321,6 +345,10 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return ActivateAppMarshaller::toJSON(* static_cast<const ActivateApp*>(msg));
     case METHOD_ACTIVATEAPP_RESPONSE:
       return ActivateAppResponseMarshaller::toJSON(*static_cast<const ActivateAppResponse*>(msg));
+    case METHOD_ADDCOMMAND_REQUEST:
+      return AddCommandMarshaller::toJSON(*static_cast<const AddCommand*>(msg));
+    case METHOD_ADDCOMMAND_RESPONSE:
+      return AddCommandResponseMarshaller::toJSON(*static_cast<const AddCommandResponse*>(msg));
   }
 
   return j;
@@ -371,3 +399,5 @@ ResetGlobalPropertiesResponseMarshaller RPC2Marshaller::mResetGlobalPropertiesRe
 OnAppRegisteredMarshaller RPC2Marshaller::mOnAppRegisteredMarshaller;
 OnAppUnregisteredMarshaller RPC2Marshaller::mOnAppUnregisteredMarshaller;
 ActivateAppMarshaller RPC2Marshaller::mActivateAppMarshaller;
+AddCommandMarshaller RPC2Marshaller::mAddCommandMarshaller;
+AddCommandResponseMarshaller RPC2Marshaller::mAddCommandResponseMarshaller;
