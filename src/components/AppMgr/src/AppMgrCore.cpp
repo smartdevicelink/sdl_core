@@ -24,6 +24,10 @@
 #include "JSONHandler/RPC2Request.h"
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
+#include "JSONHandler/AddCommand.h"
+#include "JSONHandler/AddCommandResponse.h"
+#include "JSONHandler/ALRPCObjects/AddCommand_request.h"
+#include "JSONHandler/ALRPCObjects/AddCommand_response.h"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 
@@ -318,6 +322,20 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             core->sendHMIRPC2Response(alert);
             break;
         }
+        case Marshaller::METHOD_ADDCOMMAND_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
+            AddCommand_request* object = (AddCommand_request*)message.first;
+            RPC2Communication::AddCommand* addCmd = new RPC2Communication::AddCommand();
+            core->mapMessageToSession(addCmd->getID(), sessionID);
+            addCmd->setCmdId(object->get_cmdID());
+            if(object->get_menuParams())
+            {
+                addCmd->setMenuParams(*object->get_menuParams());
+            }
+            core->sendHMIRPC2Response(addCmd);
+            break;
+        }
         case Marshaller::METHOD_SHOW_RESPONSE:
         case Marshaller::METHOD_SPEAK_RESPONSE:
         case Marshaller::METHOD_SETGLOBALPROPERTIES_RESPONSE:
@@ -327,6 +345,17 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_UNSUBSCRIBEBUTTON_RESPONSE:
         case Marshaller::METHOD_ONAPPINTERFACEUNREGISTERED:
         case Marshaller::METHOD_ALERT_RESPONSE:
+        case Marshaller::METHOD_ADDCOMMAND_RESPONSE:
+        case Marshaller::METHOD_ADDSUBMENU_RESPONSE:
+        case Marshaller::METHOD_CREATEINTERACTIONCHOICESET_RESPONSE:
+        case Marshaller::METHOD_DELETECOMMAND_RESPONSE:
+        case Marshaller::METHOD_DELETEINTERACTIONCHOICESET_RESPONSE:
+        case Marshaller::METHOD_DELETESUBMENU_RESPONSE:
+        case Marshaller::METHOD_ENCODEDSYNCPDATA_RESPONSE:
+        case Marshaller::METHOD_GENERICRESPONSE_RESPONSE:
+        case Marshaller::METHOD_PERFORMINTERACTION_RESPONSE:
+        case Marshaller::METHOD_SETMEDIACLOCKTIMER_RESPONSE:
+        case Marshaller::METHOD_UNREGISTERAPPINTERFACE_RESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A "<< message.first->getMethodId() << " response or notification has been invoked");
             LOG4CPLUS_INFO_EXT(mLogger, "sendRPCMessage called for " << core->mJSONHandler << " message "<< message.first);
@@ -334,8 +363,9 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             break;
         }
 
+        case Marshaller::METHOD_INVALID:
 		default:
-            LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< message.first->getMethodId() <<" has been received!");
+            LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message "<< message.first->getMethodId() <<" has been received!");
 			break;
     }
 }
@@ -513,6 +543,19 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             core->sendHMIRPC2Response(response);
             break;
         }
+        case RPC2Communication::RPC2Marshaller::METHOD_ADDCOMMAND_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand response has been income");
+            RPC2Communication::AddCommandResponse* object = (RPC2Communication::AddCommandResponse*)msg;
+            AddCommand_response* response = new AddCommand_response();
+            response->set_success(true);
+            response->set_resultCode(object->getResult());
+            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
+            core->removeMessageToSessionMapping(object->getID());
+            Message responseMessage = Message(response, sessionID);
+            core->sendMobileRPCResponse( responseMessage );
+            break;
+        }
 		case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
 		default:
 			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethod() <<" has been received!");
@@ -582,6 +625,12 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, "An ActivateApp Response sending to HMI.");
             core->mJSONRPC2Handler->sendResponse( static_cast<RPC2Communication::RPC2Response*>(msg) );
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_ADDCOMMAND_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been income");
+            core->mJSONRPC2Handler->sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
