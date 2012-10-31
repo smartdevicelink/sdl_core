@@ -11,6 +11,7 @@
 #include "AppMgr/AppPolicy.h"
 #include "AppMgr/RegistryItem.h"
 #include "AppMgr/AppMgrCoreQueues.h"
+#include "AppMgr/SubscribeButton.h"
 #include "JSONHandler/ALRPCMessage.h"
 #include "JSONHandler/ALRPCRequest.h"
 #include "JSONHandler/ALRPCResponse.h"
@@ -120,6 +121,11 @@ void AppMgrCore::executeThreads()
 	LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
 }
 
+template<class Object> void handleMessage(Object message)
+{
+
+}
+
 void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
 {
     unsigned char sessionID = message.second;
@@ -200,6 +206,9 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_SUBSCRIBEBUTTON_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
+
+            //IAppCommand* command = new SubscribeButtonCmd();
+
             SubscribeButton_request * object = (SubscribeButton_request*)message.first;
             core->subscribeButton( message );
             SubscribeButton_response* response = new SubscribeButton_response();
