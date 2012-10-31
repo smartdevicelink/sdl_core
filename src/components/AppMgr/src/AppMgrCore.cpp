@@ -331,6 +331,11 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             core->sendHMIRPC2Response(alert);
             break;
         }
+        case Marshaller::METHOD_ONBUTTONPRESS:
+        {
+            LOG4CPLUS_INFO(mLogger, "OnButtonPress Notification has been received.");
+            core->mJSONHandler->sendRPCMessage(message.first, sessionID);
+        }
         case Marshaller::METHOD_ADDCOMMAND_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
