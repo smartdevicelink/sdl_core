@@ -3,6 +3,11 @@
 
 #include "RegistryItem.h"
 
+namespace log4cplus
+{
+    class Logger;
+}
+
 namespace NsAppManager
 {
 	
@@ -19,6 +24,7 @@ protected:
     IAppCommand(const RegistryItem* receiver);
     const RegistryItem* mReceiver;
 	const void* mParams;
+    static log4cplus::Logger mLogger;
 
 private:
     IAppCommand(const IAppCommand&);
