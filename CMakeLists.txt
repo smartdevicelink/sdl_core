@@ -7,6 +7,7 @@ set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3")
 set(CMAKE_EXE_LINKER_FLAGS "-m")
+option( BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 
 # Building application
 
