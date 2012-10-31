@@ -13,7 +13,7 @@
 * \def DEBUG_ON
 * \brief Switches on debug messages.
 */ 
-#define DEBUG_ON
+//#define DEBUG_ON
 
 #ifdef DEBUG_ON 
 /**

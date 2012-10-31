@@ -62,6 +62,8 @@ void AppMgrCoreQueue<QueueType>::pushMessage( QueueType message )
     mQueue.push(message);
 
     mMtx.Unlock();
+
+    mBinarySemaphore.Notify();
     LOG4CPLUS_INFO_EXT(mLogger, " Pushed a message");
 }
 
@@ -73,13 +75,16 @@ void *AppMgrCoreQueue<QueueType>::handleQueue(void *pThis)
         std::size_t size = mQueue.size();
         if( size > 0 )
         {
+            LOG4CPLUS_INFO_EXT(mLogger, "Handling message in queue.");
             mMtx.Lock();
             QueueType msg = mQueue.front();
             mQueue.pop();
             mMtx.Unlock();
 
             mCallbackFn( msg, pThis );
+            LOG4CPLUS_INFO_EXT(mLogger, "Message handled.");
         }
+        mBinarySemaphore.Wait();
     }
 }
 
