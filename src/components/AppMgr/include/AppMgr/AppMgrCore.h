@@ -50,6 +50,7 @@ typedef std::pair<int, unsigned char> MessageToSession;
 
 class AppMgrCore
 {
+    friend class SubscribeButtonCmd;
 public:
 	virtual ~AppMgrCore();
 
@@ -73,6 +74,7 @@ private:
     static void handleMobileRPCNotification(ALRPCMessage* message, void* pThis );
     static void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg, void* pThis );
     static void handleBusRPCMessageOutgoing( RPC2Communication::RPC2Command* msg, void* pThis );
+    template<class Object> void handleMessage(Object message);
     const ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
     const RegistryItem* registerApplication(const Message &msg );
     void unregisterApplication(const Message &msg );

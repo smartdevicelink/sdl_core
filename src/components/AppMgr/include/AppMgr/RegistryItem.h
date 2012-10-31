@@ -40,7 +40,6 @@ public:
 
 private:
 	RegistryItem( const RegistryItem& );
-	
 	Policies mAppPolicies;
 	const Application* mApplication;
 	static log4cplus::Logger mLogger;
