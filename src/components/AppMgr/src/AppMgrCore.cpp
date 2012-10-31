@@ -157,7 +157,8 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                 response->set_resultCode(Result::APPLICATION_NOT_REGISTERED);
             }
             Message responseMessage = Message(response, sessionID);
-            core->sendMobileRPCResponse( responseMessage );
+            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            //core->sendMobileRPCResponse( responseMessage );
             if(registeredApp)
             {
                 const Application* app = registeredApp->getApplication();
@@ -187,7 +188,8 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             response->set_success(true);
             response->set_resultCode(Result::SUCCESS);
             Message responseMessage = Message(response, sessionID);
-            core->sendMobileRPCResponse( responseMessage );
+            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            //core->sendMobileRPCResponse( responseMessage );
             OnAppInterfaceUnregistered* msgUnregistered = new OnAppInterfaceUnregistered();
             msgUnregistered->set_reason(AppInterfaceUnregisteredReason(AppInterfaceUnregisteredReason::USER_EXIT));
             core->sendMobileRPCResponse( Message(msgUnregistered, message.second) );
@@ -208,7 +210,8 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             response->set_success(true);
             response->set_resultCode(Result::SUCCESS);
             Message responseMessage = Message(response, sessionID);
-            core->sendMobileRPCResponse( responseMessage );
+            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            //core->sendMobileRPCResponse( responseMessage );
             break;
         }
         case Marshaller::METHOD_UNSUBSCRIBEBUTTON_REQUEST:
@@ -222,7 +225,8 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             response->set_success(true);
             response->set_resultCode(Result::SUCCESS);
             Message responseMessage = Message(response, sessionID);
-            core->sendMobileRPCResponse( responseMessage );
+            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            //core->sendMobileRPCResponse( responseMessage );
             break;
         }
         case Marshaller::METHOD_SHOW_REQUEST:
@@ -256,6 +260,10 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, "Show request almost handled" );
             core->mapMessageToSession(showRPC2Request->getID(), sessionID);
             core->sendHMIRPC2Response(showRPC2Request);
+            Show_response * mobileResponse = new Show_response;
+            mobileResponse->set_success(true);
+            mobileResponse->set_resultCode(Result::SUCCESS);
+            core->mJSONHandler->sendRPCMessage(mobileResponse, sessionID);
             break;
         }
         case Marshaller::METHOD_SPEAK_REQUEST:
@@ -266,6 +274,10 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             speakRPC2Request->setTTSChunks(object->get_ttsChunks());
             core->mapMessageToSession(speakRPC2Request->getID(), sessionID);
             core->sendHMIRPC2Response(speakRPC2Request);
+            Speak_response * mobileResponse = new Speak_response;
+            mobileResponse->set_resultCode(Result::SUCCESS);
+            mobileResponse->set_success(true);
+            core->mJSONHandler->sendRPCMessage(mobileResponse, sessionID);
             break;
         }
         case Marshaller::METHOD_SETGLOBALPROPERTIES_REQUEST:
@@ -284,6 +296,10 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                 setGPRPC2Request->setTimeoutPrompt(*object->get_timeoutPrompt());
             }
             core->sendHMIRPC2Response(setGPRPC2Request);
+            SetGlobalProperties_response * mobileResponse = new SetGlobalProperties_response;
+            mobileResponse->set_success(true);
+            mobileResponse->set_resultCode(Result::SUCCESS);
+            core->mJSONHandler->sendRPCMessage(mobileResponse, sessionID);
             break;
         }
         case Marshaller::METHOD_RESETGLOBALPROPERTIES_REQUEST:
@@ -295,6 +311,10 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             resetGPRPC2Request->setProperty(object->get_properties());
 
             core->sendHMIRPC2Response(resetGPRPC2Request);
+            ResetGlobalProperties_response * mobileResponse = new ResetGlobalProperties_response;
+            mobileResponse->set_success(true);
+            mobileResponse->set_resultCode(Result::SUCCESS);
+            core->mJSONHandler->sendRPCMessage(mobileResponse, sessionID);
             break;
         }
         case Marshaller::METHOD_ALERT_REQUEST:

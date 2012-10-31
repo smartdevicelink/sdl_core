@@ -55,6 +55,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_ADDCOMMAND_REQUEST;
     }
+    if ( s.compare("UI.DeleteCommand") == 0 )
+    {
+        return METHOD_DELETECOMMAND_REQUEST;
+    }
     
     return METHOD_INVALID;
 }
@@ -89,9 +93,13 @@ const RPC2Marshaller::Methods RPC2Marshaller::getResponseIndex(const std::string
   {
     return METHOD_ACTIVATEAPP_RESPONSE;
   }
-  if ( s.compare("UI.AddCommand"))
+  if ( s.compare("UI.AddCommand") == 0 )
   {
       return METHOD_ADDCOMMAND_RESPONSE;
+  }
+  if ( s.compare("UI.DeleteCommand") == 0 )
+  {
+      return METHOD_DELETECOMMAND_RESPONSE;
   }
 
   return METHOD_INVALID;
@@ -291,6 +299,22 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_DELETECOMMAND_REQUEST:
+    {
+        DeleteCommand * rv = new DeleteCommand;
+        if (DeleteCommandMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_DELETECOMMAND_RESPONSE:
+    {
+        DeleteCommandResponse * rv = new DeleteCommandResponse;
+        if (DeleteCommandResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
 
   }
 
@@ -349,6 +373,10 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return AddCommandMarshaller::toJSON(*static_cast<const AddCommand*>(msg));
     case METHOD_ADDCOMMAND_RESPONSE:
       return AddCommandResponseMarshaller::toJSON(*static_cast<const AddCommandResponse*>(msg));
+    case METHOD_DELETECOMMAND_REQUEST:
+      return DeleteCommandMarshaller::toJSON(*static_cast<const DeleteCommand*>(msg));
+    case METHOD_DELETECOMMAND_RESPONSE:
+      return DeleteCommandResponseMarshaller::toJSON(*static_cast<const DeleteCommandResponse*>(msg));
   }
 
   return j;
@@ -401,3 +429,5 @@ OnAppUnregisteredMarshaller RPC2Marshaller::mOnAppUnregisteredMarshaller;
 ActivateAppMarshaller RPC2Marshaller::mActivateAppMarshaller;
 AddCommandMarshaller RPC2Marshaller::mAddCommandMarshaller;
 AddCommandResponseMarshaller RPC2Marshaller::mAddCommandResponseMarshaller;
+DeleteCommandMarshaller RPC2Marshaller::mDeleteCommandMarshaller;
+DeleteCommandResponseMarshaller RPC2Marshaller::mDeleteCommandResponseMarshaller;

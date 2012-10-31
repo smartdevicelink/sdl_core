@@ -24,6 +24,8 @@
 #include "JSONHandler/ActivateAppResponseMarshaller.h"
 #include "JSONHandler/AddCommandMarshaller.h"
 #include "JSONHandler/AddCommandResponseMarshaller.h"
+#include "JSONHandler/DeleteCommandMarshaller.h"
+#include "JSONHandler/DeleteCommandResponseMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -52,7 +54,9 @@ namespace RPC2Communication
         METHOD_ACTIVATEAPP_REQUEST=16,
         METHOD_ACTIVATEAPP_RESPONSE=17,
         METHOD_ADDCOMMAND_REQUEST=18,
-        METHOD_ADDCOMMAND_RESPONSE=19
+        METHOD_ADDCOMMAND_RESPONSE=19,
+        METHOD_DELETECOMMAND_REQUEST=20,
+        METHOD_DELETECOMMAND_RESPONSE=21
         };
 
         RPC2Marshaller();
@@ -254,9 +258,31 @@ namespace RPC2Communication
         static bool fromString(const std::string& str, AddCommandResponse&res)
         {
             return mAddCommandResponseMarshaller.fromString(str, res);
-        }static std::string toString(const AddCommandResponse& res)
+        }
+
+        static std::string toString(const AddCommandResponse& res)
         {
             return mAddCommandResponseMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string &str, DeleteCommand& res)
+        {
+            return mDeleteCommandMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const DeleteCommand& res)
+        {
+            return mDeleteCommandMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, DeleteCommandResponse& res)
+        {
+            return mDeleteCommandResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toJSON(const DeleteCommandResponse& res)
+        {
+            return mDeleteCommandResponseMarshaller.toString(res);
         }
 
     private:
@@ -300,6 +326,8 @@ namespace RPC2Communication
         static ActivateAppResponseMarshaller mActivateAppResponseMarshaller;
         static AddCommandMarshaller mAddCommandMarshaller;
         static AddCommandResponseMarshaller mAddCommandResponseMarshaller;
+        static DeleteCommandMarshaller mDeleteCommandMarshaller;
+        static DeleteCommandResponseMarshaller mDeleteCommandResponseMarshaller;
     };
 
 }
