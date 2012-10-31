@@ -63,6 +63,7 @@ void JSONHandler::sessionEndedCallback(const UInt8 sessionID)
 
 void JSONHandler::dataReceivedCallback(const UInt8 sessionID, const UInt32 messageID, const UInt32 dataSize)
 {
+    LOG4CPLUS_INFO( mLogger, "Received message from mobile App." );
     UInt8 *data = new UInt8[dataSize+1];
     memset(data, 0, dataSize+1);
 
@@ -72,6 +73,8 @@ void JSONHandler::dataReceivedCallback(const UInt8 sessionID, const UInt32 messa
         return; 
     }
     mProtocolHandler -> receiveData(sessionID, messageID, AxisCore::SERVICE_TYPE_RPC, dataSize, data);
+
+    LOG4CPLUS_INFO( mLogger, "Message size is " << dataSize << "; sessionID is " << sessionID );
 
     std::string str = std::string( (const char*)data, dataSize);
     std::string receivedString = clearEmptySpaces( str );
