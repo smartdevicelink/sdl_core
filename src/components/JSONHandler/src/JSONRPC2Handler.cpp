@@ -151,9 +151,9 @@ void * JSONRPC2Handler::waitForResponsesToHMI( void * params )
     while ( 1 )
     {
         while ( !handler -> mResponsesToHMI.empty() )
-        {
-            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: received command.");
+        {            
             const RPC2Communication::RPC2Response * command = handler -> mResponsesToHMI.pop();
+            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: received command " << command->getID());
             Json::Value commandJson = RPC2Communication::RPC2Marshaller::toJSON( command );
 
             if ( commandJson.isNull() )
@@ -164,6 +164,8 @@ void * JSONRPC2Handler::waitForResponsesToHMI( void * params )
 
             handler -> prepareMessage( commandJson );
             handler -> sendJsonMessage( commandJson );
+
+            delete command;
         }
         handler -> mResponsesToHMI.wait();
     }
@@ -195,6 +197,8 @@ void * JSONRPC2Handler::waitForRequestsToHMI( void * params )
 
             handler -> prepareMessage( commandJson );
             handler -> sendJsonMessage( commandJson );
+
+            delete command;
         }
         handler -> mRequestsToHMI.wait();
     }
@@ -225,6 +229,8 @@ void * JSONRPC2Handler::waitForNotificationsToHMI( void * params )
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: processed command" );
 
             handler -> sendJsonMessage( commandJson );
+
+            delete command;
         }
         handler -> mNotificationsToHMI.wait();
     }

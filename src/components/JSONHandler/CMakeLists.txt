@@ -192,6 +192,10 @@ set (SOURCES
     ./src/OnAppRegisteredMarshaller.cpp
     ./src/OnAppUnregisteredMarshaller.cpp
     ./src/OnAppUnregistered.cpp
+    ./src/ActivateAppMarshaller.cpp
+    ./src/ActivateApp.cpp
+    ./src/ActivateAppResponseMarshaller.cpp
+    ./src/ActivateAppResponse.cpp
 )
 
 add_library("JSONHandler" ${SOURCES} ${GENERATED_SOURCES})

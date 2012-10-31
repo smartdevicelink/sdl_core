@@ -173,7 +173,7 @@ int main(int argc, char** argv)
     for(it = devicesFound.begin(); it != devicesFound.end(); it++)
     {
         NsTransportLayer::CBTDevice device = *it;
-        LOG4CPLUS_INFO(logger, "" << i++ << ": " << device.getDeviceAddr().c_str() << " " << device.getDeviceName().c_str());
+        printf("%d: %s %s\n", i++, device.getDeviceAddr().c_str(), device.getDeviceName().c_str());
     }
 
     std::cin >> i;

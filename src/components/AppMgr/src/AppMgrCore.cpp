@@ -16,23 +16,6 @@
 #include "JSONHandler/ALRPCResponse.h"
 #include "JSONHandler/ALRPCNotification.h"
 #include "JSONHandler/ALRPCObjects/Marshaller.h"
-#include "JSONHandler/ALRPCObjects/RegisterAppInterface_request.h"
-#include "JSONHandler/ALRPCObjects/RegisterAppInterface_response.h"
-#include "JSONHandler/ALRPCObjects/SubscribeButton_request.h"
-#include "JSONHandler/ALRPCObjects/SubscribeButton_response.h"
-#include "JSONHandler/ALRPCObjects/UnsubscribeButton_request.h"
-#include "JSONHandler/ALRPCObjects/UnsubscribeButton_response.h"
-#include "JSONHandler/ALRPCObjects/ButtonCapabilities.h"
-#include "JSONHandler/ALRPCObjects/AppInterfaceUnregisteredReason.h"
-#include "JSONHandler/ALRPCObjects/OnButtonEvent.h"
-#include "JSONHandler/ALRPCObjects/OnButtonPress.h"
-#include "JSONHandler/ALRPCObjects/OnAppInterfaceUnregistered.h"
-#include "JSONHandler/ALRPCObjects/OnHMIStatus.h"
-#include "JSONHandler/ALRPCObjects/HMILevel.h"
-#include "JSONHandler/ALRPCObjects/SetGlobalProperties_request.h"
-#include "JSONHandler/ALRPCObjects/SetGlobalProperties_response.h"
-#include "JSONHandler/ALRPCObjects/ResetGlobalProperties_request.h"
-#include "JSONHandler/ALRPCObjects/ResetGlobalProperties_response.h"
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"
 #include "JSONHandler/OnButtonEvent.h"
@@ -41,11 +24,6 @@
 #include "JSONHandler/RPC2Request.h"
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
-#include "JSONHandler/GetCapabilitiesResponse.h"
-#include "JSONHandler/SetGlobalProperties.h"
-#include "JSONHandler/ResetGlobalProperties.h"
-#include "JSONHandler/OnAppRegistered.h"
-#include "JSONHandler/OnAppUnregistered.h"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 
@@ -514,6 +492,27 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             core->sendMobileRPCResponse( responseMessage );
             break;
         }
+        case RPC2Communication::RPC2Marshaller::METHOD_ACTIVATEAPP_REQUEST:
+        {
+            LOG4CPLUS_INFO(mLogger, "ActivateApp has been received!");
+            RPC2Communication::ActivateApp* object = static_cast<RPC2Communication::ActivateApp*>(msg);
+            if ( !object )
+            {
+                LOG4CPLUS_ERROR(mLogger, "Couldn't cast object to ActivateApp type");
+                break;
+            }     
+            /*OnHMIStatus * hmiStatus = new OnHMIStatus;
+            hmiStatus->set_hmiLevel(HMILevel::HMI_FULL);
+            hmiStatus->set_audioStreamingState(AudioStreamingState::NOT_AUDIBLE);
+            hmiStatus->set_systemContext(SystemContext::SYSCTXT_MENU);
+            Message hmiMessage = Message(hmiStatus, 1);
+            core->sendMobileRPCResponse( hmiMessage );*/
+            RPC2Communication::ActivateAppResponse * response = new RPC2Communication::ActivateAppResponse;
+            response->setID(object->getID());
+            response->setResult(Result::SUCCESS);
+            core->sendHMIRPC2Response(response);
+            break;
+        }
 		case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
 		default:
 			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethod() <<" has been received!");
@@ -579,6 +578,12 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
             core->mJSONRPC2Handler->sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
+        case RPC2Communication::RPC2Marshaller::METHOD_ACTIVATEAPP_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "An ActivateApp Response sending to HMI.");
+            core->mJSONRPC2Handler->sendResponse( static_cast<RPC2Communication::RPC2Response*>(msg) );
+            break;
+        }
         case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
         default:
         {
@@ -587,7 +592,8 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
         }
     }
 
-    LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been outcomed");
+    //NOTE: Please do not refer to message that has already been sent to another module. It doesn't exist for your module anymore.
+    //LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been outcomed");
 }
 
 void AppMgrCore::mapMessageToSession(int messageId, unsigned char sessionId)

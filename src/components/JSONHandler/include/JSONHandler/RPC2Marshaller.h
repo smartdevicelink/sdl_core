@@ -20,6 +20,8 @@
 #include "JSONHandler/ResetGlobalPropertiesResponse.h"
 #include "JSONHandler/OnAppRegisteredMarshaller.h"
 #include "JSONHandler/OnAppUnregisteredMarshaller.h"
+#include "JSONHandler/ActivateAppMarshaller.h"
+#include "JSONHandler/ActivateAppResponseMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -44,7 +46,9 @@ namespace RPC2Communication
         METHOD_RESET_GLOBAL_PROPERTIES_REQUEST=12,
         METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE=13,
         METHOD_ONAPPREGISTERED=14,
-        METHOD_ONAPPUNREDISTERED=15
+        METHOD_ONAPPUNREDISTERED=15,
+        METHOD_ACTIVATEAPP_REQUEST=16,
+        METHOD_ACTIVATEAPP_RESPONSE=17
         };
 
         RPC2Marshaller();
@@ -216,6 +220,26 @@ namespace RPC2Communication
             return mOnAppUnregisteredMarshaller.toString(res);
         }
 
+        static bool fromString( const std::string & str, ActivateApp& res )
+        {
+            return mActivateAppMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const ActivateApp& res)
+        {
+            return mActivateAppMarshaller.toString(res);
+        } 
+
+        static bool fromString(const std::string& str, ActivateAppResponse& res)
+        {
+            return mActivateAppResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const ActivateAppResponse& res)
+        {
+            return mActivateAppResponseMarshaller.toString(res);
+        }
+
     private:
         struct localHash
         {
@@ -253,6 +277,8 @@ namespace RPC2Communication
         static ResetGlobalPropertiesResponseMarshaller mResetGlobalPropertiesResponseMarshaller;
         static OnAppRegisteredMarshaller mOnAppRegisteredMarshaller;
         static OnAppUnregisteredMarshaller mOnAppUnregisteredMarshaller;
+        static ActivateAppMarshaller mActivateAppMarshaller;
+        static ActivateAppResponseMarshaller mActivateAppResponseMarshaller;
     };
 
 }

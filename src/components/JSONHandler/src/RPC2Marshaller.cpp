@@ -47,6 +47,11 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_ONAPPUNREDISTERED;
     }
+    if ( s.compare("AppLinkCore.activateApp") == 0 )
+    {
+      return METHOD_ACTIVATEAPP_REQUEST;
+    }
+    
     return METHOD_INVALID;
 }
 
@@ -76,6 +81,12 @@ const RPC2Marshaller::Methods RPC2Marshaller::getResponseIndex(const std::string
   {
       return METHOD_RESET_GLOBAL_PROPERTIES_RESPONSE;
   }
+  if ( s.compare("AppLinkCore.activateApp"))
+  {
+    return METHOD_ACTIVATEAPP_RESPONSE;
+  }
+
+  return METHOD_INVALID;
 }
 
 
@@ -240,6 +251,23 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_ACTIVATEAPP_REQUEST:
+    {
+        ActivateApp * rv = new ActivateApp;
+        if (ActivateAppMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ACTIVATEAPP_RESPONSE:
+    {
+        ActivateAppResponse * rv = new ActivateAppResponse;
+        if (ActivateAppResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+
   }
 
   return NULL;
@@ -289,6 +317,10 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return OnAppRegisteredMarshaller::toJSON(* static_cast<const OnAppRegistered*>(msg));
     case METHOD_ONAPPUNREDISTERED:
       return OnAppUnregisteredMarshaller::toJSON(* static_cast<const OnAppUnregistered*>(msg));
+    case METHOD_ACTIVATEAPP_REQUEST:
+      return ActivateAppMarshaller::toJSON(* static_cast<const ActivateApp*>(msg));
+    case METHOD_ACTIVATEAPP_RESPONSE:
+      return ActivateAppResponseMarshaller::toJSON(*static_cast<const ActivateAppResponse*>(msg));
   }
 
   return j;
@@ -338,3 +370,4 @@ ResetGlobalPropertiesMarshaller RPC2Marshaller::mResetGlobalPropertiesMarshaller
 ResetGlobalPropertiesResponseMarshaller RPC2Marshaller::mResetGlobalPropertiesResponseMarshaller;
 OnAppRegisteredMarshaller RPC2Marshaller::mOnAppRegisteredMarshaller;
 OnAppUnregisteredMarshaller RPC2Marshaller::mOnAppUnregisteredMarshaller;
+ActivateAppMarshaller RPC2Marshaller::mActivateAppMarshaller;

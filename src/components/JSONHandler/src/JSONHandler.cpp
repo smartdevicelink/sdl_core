@@ -10,7 +10,7 @@
 #include <pthread.h>
 #include <signal.h>
 
-log4cplus::Logger JSONHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONRPC2Handler"));
+log4cplus::Logger JSONHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONHandler"));
 
 JSONHandler::JSONHandler( AxisCore::ProtocolHandler * protocolHandler )
 :mProtocolHandler( protocolHandler )
@@ -75,6 +75,8 @@ void JSONHandler::dataReceivedCallback(const UInt8 sessionID, const UInt32 messa
 
     std::string str = std::string( (const char*)data, dataSize);
     std::string receivedString = clearEmptySpaces( str );
+
+    delete[] data;
 
     mIncomingMessages.push( receivedString );
 }
