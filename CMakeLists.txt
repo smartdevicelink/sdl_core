@@ -20,6 +20,13 @@ add_subdirectory(./src/components)
 add_subdirectory(./src/appMain)
 
 # Building tests
+option(BUILD_TESTS "Possibility to build and run tests" OFF)
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(./src/thirdPartyLibs/gtest-1.6.0)
+    add_subdirectory(./test)
+endif()
+
 
 # Building documentation
 
