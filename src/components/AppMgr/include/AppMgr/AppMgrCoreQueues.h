@@ -39,7 +39,7 @@ private:
 
     std::queue< QueueType > mQueue;
     System::Mutex mMtx;
-    System::Thread mThread;
+    System::Thread* mThread;
     HandlerCallback mCallbackFn;
     static log4cplus::Logger mLogger;
 };
