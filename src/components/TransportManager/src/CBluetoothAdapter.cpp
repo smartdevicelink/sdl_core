@@ -38,22 +38,6 @@ mAppLinkRFCOMMChannels(AppLinkRFCOMMChannels)
 {
 }
 
-NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::SRFCOMMConnection(void):
-mDeviceHandle(InvalidDeviceHandle),
-mRFCOMMChannel(0u),
-mConnectionThread(),
-mTerminateFlag(false)
-{
-}
-
-NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::SRFCOMMConnection(const NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection & Other):
-mDeviceHandle(Other.mDeviceHandle),
-mRFCOMMChannel(Other.mRFCOMMChannel),
-mConnectionThread(Other.mConnectionThread),
-mTerminateFlag(Other.mTerminateFlag)
-{
-}
-
 NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::SRFCOMMConnection(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, const uint8_t RFCOMMChannel):
 mDeviceHandle(DeviceHandle),
 mRFCOMMChannel(RFCOMMChannel),
@@ -105,8 +89,17 @@ NsAppLink::NsTransportManager::CBluetoothAdapter::~CBluetoothAdapter(void)
 
     for (tRFCOMMConnectionMap::iterator connectionIterator = mRFCOMMConnections.begin(); connectionIterator != mRFCOMMConnections.end(); ++connectionIterator)
     {
-        connectionIterator->second.mTerminateFlag = true;
-        connectionThreads.push_back(connectionIterator->second.mConnectionThread);
+        SRFCOMMConnection * connection = connectionIterator->second;
+
+        if (0 != connection)
+        {
+            connection->mTerminateFlag = true;
+            connectionThreads.push_back(connection->mConnectionThread);
+        }
+        else
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "Connection " << connectionIterator->first << " is null");
+        }
     }
 
     pthread_mutex_unlock(&mRFCOMMConnectionsMutex);
@@ -176,37 +169,55 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::startRFCOMMConnection(con
         tRFCOMMConnectionMap::const_iterator connectionIterator;
         for (connectionIterator = mRFCOMMConnections.begin(); connectionIterator != mRFCOMMConnections.end(); ++connectionIterator)
         {
-            const SRFCOMMConnection & connection = connectionIterator->second;
+            const SRFCOMMConnection * connection = connectionIterator->second;
 
-            if ((connection.mDeviceHandle == DeviceHandle) &&
-                (connection.mRFCOMMChannel == RFCOMMChannel))
+            if (0 != connection)
             {
-                LOG4CPLUS_WARN_EXT(mLogger, "Connection for device " << DeviceHandle << " channel " << static_cast<uint32_t>(RFCOMMChannel) << " is already opened (" << connectionIterator->first << ")");
-                break;
+                if ((connection->mDeviceHandle == DeviceHandle) &&
+                    (connection->mRFCOMMChannel == RFCOMMChannel))
+                {
+                    LOG4CPLUS_WARN_EXT(mLogger, "Connection for device " << DeviceHandle << " channel " << static_cast<uint32_t>(RFCOMMChannel) << " is already opened (" << connectionIterator->first << ")");
+                    break;
+                }
+            }
+            else
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "Connection " << connectionIterator->first << " is null");
             }
         }
 
         if (mRFCOMMConnections.end() == connectionIterator)
         {
-            std::pair<tRFCOMMConnectionMap::iterator, bool> insertResult = mRFCOMMConnections.insert(std::make_pair(newConnectionHandle, SRFCOMMConnection(DeviceHandle, RFCOMMChannel)));
+            std::pair<tRFCOMMConnectionMap::iterator, bool> insertResult = mRFCOMMConnections.insert(std::make_pair(newConnectionHandle, new SRFCOMMConnection(DeviceHandle, RFCOMMChannel)));
 
             if (true == insertResult.second)
             {
-                SRFCOMMConnection & newConnection = insertResult.first->second;
-                SRFCOMMConnectionParameters * connectionParameters = new SRFCOMMConnectionParameters(*this, newConnectionHandle);
+                SRFCOMMConnection * newConnection = insertResult.first->second;
 
-                int errorCode = pthread_create(&newConnection.mConnectionThread, 0, &CBluetoothAdapter::connectionThreadStartRoutine, static_cast<void*>(connectionParameters));
-
-                if (0 == errorCode)
+                if (0 != newConnection)
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "Connection thread started for connection " << newConnectionHandle << " (device " << DeviceHandle << " channel " << static_cast<uint32_t>(RFCOMMChannel) << ")");
+                    SRFCOMMConnectionParameters * connectionParameters = new SRFCOMMConnectionParameters(*this, newConnectionHandle);
+
+                    int errorCode = pthread_create(&newConnection->mConnectionThread, 0, &CBluetoothAdapter::connectionThreadStartRoutine, static_cast<void*>(connectionParameters));
+
+                    if (0 == errorCode)
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, "Connection thread started for connection " << newConnectionHandle << " (device " << DeviceHandle << " channel " << static_cast<uint32_t>(RFCOMMChannel) << ")");
+                    }
+                    else
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "Connection thread start failed for connection " << newConnectionHandle << " (device " << DeviceHandle << " channel " << static_cast<uint32_t>(RFCOMMChannel) << ")");
+
+                        delete connectionParameters;
+                        mRFCOMMConnections.erase(insertResult.first);
+                        delete newConnection;
+                    }
                 }
                 else
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "Connection thread start failed for connection " << newConnectionHandle << " (device " << DeviceHandle << " channel " << static_cast<uint32_t>(RFCOMMChannel) << ")");
+                    LOG4CPLUS_ERROR_EXT(mLogger, "Failed to allocate connection " << newConnectionHandle);
 
-                    delete connectionParameters;
-                    mRFCOMMConnections.erase(insertResult.first);
+                    mRFCOMMConnections.erase(newConnectionHandle);
                 }
             }
             else
@@ -227,17 +238,24 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::stopRFCOMMConnection(cons
 
     if (mRFCOMMConnections.end() != connectionIterator)
     {
-        SRFCOMMConnection & connection = connectionIterator->second;
+        SRFCOMMConnection * connection = connectionIterator->second;
 
-        if (false == connection.mTerminateFlag)
+        if (0 != connection)
         {
-            connection.mTerminateFlag = true;
+            if (false == connection->mTerminateFlag)
+            {
+                connection->mTerminateFlag = true;
 
-            LOG4CPLUS_WARN_EXT(mLogger, "Connection " << ConnectionHandle << "(device " << connection.mDeviceHandle << " channel " << static_cast<uint32_t>(connection.mRFCOMMChannel) << ") has been marked for termination");
+                LOG4CPLUS_WARN_EXT(mLogger, "Connection " << ConnectionHandle << "(device " << connection->mDeviceHandle << " channel " << static_cast<uint32_t>(connection->mRFCOMMChannel) << ") has been marked for termination");
+            }
+            else
+            {
+                LOG4CPLUS_WARN_EXT(mLogger, "Connection " << ConnectionHandle << " is already terminating");
+            }
         }
         else
         {
-            LOG4CPLUS_WARN_EXT(mLogger, "Connection " << ConnectionHandle << " is already terminating");
+            LOG4CPLUS_ERROR_EXT(mLogger, "Connection " << ConnectionHandle << " is null");
         }
     }
     else
@@ -491,34 +509,42 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
 
                     for (tRFCOMMConnectionMap::const_iterator connectionIterator = mRFCOMMConnections.begin(); connectionIterator != mRFCOMMConnections.end(); ++connectionIterator)
                     {
-                        const SRFCOMMConnection connection = connectionIterator->second;
-                        tBluetoothDevicesMap::const_iterator newDeviceIterator = newDevices.find(connection.mDeviceHandle);
+                        const SRFCOMMConnection * connection = connectionIterator->second;
 
-                        if (newDevices.end() == newDeviceIterator)
+                        if (0 != connection)
                         {
-                            LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (device " << connectionIterator->second.mDeviceHandle << " is lost)");
+                            tBluetoothDevicesMap::const_iterator newDeviceIterator = newDevices.find(connection->mDeviceHandle);
 
-                            connectionsToTerminate.push_back(connectionIterator->first);
-                        }
-                        else
-                        {
-                            const std::vector<uint8_t> & appLinkRFCOMMChannels = newDeviceIterator->second.mAppLinkRFCOMMChannels;
-
-                            if (appLinkRFCOMMChannels.end() == std::find(appLinkRFCOMMChannels.begin(), appLinkRFCOMMChannels.end(), connectionIterator->second.mRFCOMMChannel))
+                            if (newDevices.end() == newDeviceIterator)
                             {
-                                LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (no AppLink service found on channel " << static_cast<uint32_t>(connectionIterator->second.mRFCOMMChannel) << ")");
+                                LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (device " << connection->mDeviceHandle << " is lost)");
 
                                 connectionsToTerminate.push_back(connectionIterator->first);
                             }
                             else
                             {
-                                const std::pair<tDeviceHandle, uint8_t> newConnection(connection.mDeviceHandle, connection.mRFCOMMChannel);
+                                const std::vector<uint8_t> & appLinkRFCOMMChannels = newDeviceIterator->second.mAppLinkRFCOMMChannels;
 
-                                if (connectionsToEstablish.find(newConnection) != connectionsToEstablish.end())
+                                if (appLinkRFCOMMChannels.end() == std::find(appLinkRFCOMMChannels.begin(), appLinkRFCOMMChannels.end(), connection->mRFCOMMChannel))
                                 {
-                                    connectionsToEstablish.erase(newConnection);
+                                    LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (no AppLink service found on channel " << static_cast<uint32_t>(connection->mRFCOMMChannel) << ")");
+
+                                    connectionsToTerminate.push_back(connectionIterator->first);
+                                }
+                                else
+                                {
+                                    const std::pair<tDeviceHandle, uint8_t> newConnection(connection->mDeviceHandle, connection->mRFCOMMChannel);
+
+                                    if (connectionsToEstablish.find(newConnection) != connectionsToEstablish.end())
+                                    {
+                                        connectionsToEstablish.erase(newConnection);
+                                    }
                                 }
                             }
+                        }
+                        else
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, "Connection " << connectionIterator->first << " is null");
                         }
                     }
 
@@ -585,12 +611,18 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const Ns
 
     pthread_mutex_lock(&mRFCOMMConnectionsMutex);
 
+    SRFCOMMConnection * connection = 0;
     tRFCOMMConnectionMap::const_iterator connectionIterator = mRFCOMMConnections.find(ConnectionHandle);
 
     if (connectionIterator != mRFCOMMConnections.end())
     {
-        deviceHandle = connectionIterator->second.mDeviceHandle;
-        remoteSocketAddress.rc_channel = connectionIterator->second.mRFCOMMChannel;
+        connection = connectionIterator->second;
+
+        if (0 != connection)
+        {
+            deviceHandle = connection->mDeviceHandle;
+            remoteSocketAddress.rc_channel = connection->mRFCOMMChannel;
+        }
     }
     else
     {
@@ -599,54 +631,95 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const Ns
 
     pthread_mutex_unlock(&mRFCOMMConnectionsMutex);
 
-    if (InvalidDeviceHandle != deviceHandle)
+    if (0 != connection)
     {
-        bool isDeviceValid = false;
-
-        pthread_mutex_lock(&mDevicesMutex);
-
-        tBluetoothDevicesMap::const_iterator deviceIterator = mDevices.find(deviceHandle);
-
-        if (deviceIterator != mDevices.end())
+        if (InvalidDeviceHandle != deviceHandle)
         {
-            isDeviceValid = true;
-            memcpy(&remoteSocketAddress.rc_bdaddr, &deviceIterator->second.mAddress, sizeof(bdaddr_t));
-        }
-        else
-        {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Device " << deviceHandle << " does not exist");
-        }
+            bool isDeviceValid = false;
 
-        pthread_mutex_unlock(&mDevicesMutex);
+            pthread_mutex_lock(&mDevicesMutex);
 
-        if (true == isDeviceValid)
-        {
-            int rfcommSocket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+            tBluetoothDevicesMap::const_iterator deviceIterator = mDevices.find(deviceHandle);
 
-            if (-1 != rfcommSocket)
+            if (deviceIterator != mDevices.end())
             {
-                char remoteDeviceAddressString[32];
-                ba2str(&remoteSocketAddress.rc_bdaddr, remoteDeviceAddressString);
-
-                if (0 == connect(rfcommSocket, (struct sockaddr *)&remoteSocketAddress, sizeof(remoteSocketAddress)))
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, "Connection " << ConnectionHandle << " to remote device " << remoteDeviceAddressString << " established");
-                }
-                else
-                {
-                    LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to connect to remote device " << remoteDeviceAddressString << " for connection " << ConnectionHandle);
-                }
-
-                if (0 != close(rfcommSocket))
-                {
-                    LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to close RFCOMM socket for connection " << ConnectionHandle);
-                }
+                isDeviceValid = true;
+                memcpy(&remoteSocketAddress.rc_bdaddr, &deviceIterator->second.mAddress, sizeof(bdaddr_t));
             }
             else
             {
-                LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to create RFCOMM socket for connection " << ConnectionHandle);
+                LOG4CPLUS_ERROR_EXT(mLogger, "Device " << deviceHandle << " does not exist");
+            }
+
+            pthread_mutex_unlock(&mDevicesMutex);
+
+            if (true == isDeviceValid)
+            {
+                int rfcommSocket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+
+                if (-1 != rfcommSocket)
+                {
+                    char remoteDeviceAddressString[32];
+                    ba2str(&remoteSocketAddress.rc_bdaddr, remoteDeviceAddressString);
+
+                    if (0 == connect(rfcommSocket, (struct sockaddr *)&remoteSocketAddress, sizeof(remoteSocketAddress)))
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, "Connection " << ConnectionHandle << " to remote device " << remoteDeviceAddressString << " established");
+
+                        while (false == connection->mTerminateFlag)
+                        {
+                            uint8_t recvBuffer[4096];
+
+                            ssize_t bytesReceived = recv(rfcommSocket, recvBuffer, sizeof(recvBuffer), MSG_DONTWAIT);
+
+                            if ((bytesReceived < 0) &&
+                                ((EAGAIN == errno) ||
+                                 (EWOULDBLOCK == errno)))
+                            {
+                                bytesReceived = 0;
+                            }
+
+                            if (bytesReceived >= 0)
+                            {
+                                if (bytesReceived > 0)
+                                {
+                                    LOG4CPLUS_INFO_EXT(mLogger, "Received " << bytesReceived << " bytes for connection " << ConnectionHandle);
+
+                                    mListener.onFrameReceived(this, ConnectionHandle, recvBuffer, static_cast<size_t>(bytesReceived));
+                                }
+                            }
+                            else
+                            {
+                                LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "recv() failed for connection " << ConnectionHandle);
+
+                                connection->mTerminateFlag = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to connect to remote device " << remoteDeviceAddressString << " for connection " << ConnectionHandle);
+                    }
+
+                    if (0 != close(rfcommSocket))
+                    {
+                        LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to close RFCOMM socket for connection " << ConnectionHandle);
+                    }
+                }
+                else
+                {
+                    LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to create RFCOMM socket for connection " << ConnectionHandle);
+                }
             }
         }
+        else
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "Device handle for connection " << ConnectionHandle << " is invalid");
+        }
+    }
+    else
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "Connection " << ConnectionHandle << " is null");
     }
 
     LOG4CPLUS_INFO_EXT(mLogger, "Removing connection " << ConnectionHandle << " from connection map");
@@ -654,6 +727,8 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const Ns
     pthread_mutex_lock(&mRFCOMMConnectionsMutex);
     mRFCOMMConnections.erase(ConnectionHandle);
     pthread_mutex_unlock(&mRFCOMMConnectionsMutex);
+
+    delete connection;
 
     LOG4CPLUS_INFO_EXT(mLogger, "Connection thread finished for connection " << ConnectionHandle);
 }

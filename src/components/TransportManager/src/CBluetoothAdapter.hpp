@@ -118,18 +118,6 @@ namespace NsAppLink
             struct SRFCOMMConnection
             {
                 /**
-                 * @brief Default constructor.
-                 **/
-                SRFCOMMConnection(void);
-
-                /**
-                 * @brief Copy constructor.
-                 *
-                 * @param Other RFCOMM connection that must be copied.
-                 **/
-                SRFCOMMConnection(const SRFCOMMConnection & Other);
-
-                /**
                  * @brief Constructor.
                  *
                  * @param DeviceHandle Device handle.
@@ -195,7 +183,7 @@ namespace NsAppLink
             /**
              * @brief RFCOMM connection map.
              **/
-            typedef std::map<tConnectionHandle, SRFCOMMConnection> tRFCOMMConnectionMap;
+            typedef std::map<tConnectionHandle, SRFCOMMConnection *> tRFCOMMConnectionMap;
 
             /**
              * @brief Start RFCOMM connection.

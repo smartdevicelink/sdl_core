@@ -16,7 +16,7 @@ void NsAppLink::NsTransportManager::IDeviceAdapterListener::onDeviceDisconnected
 {
 }
 
-void NsAppLink::NsTransportManager::IDeviceAdapterListener::onFrameReceived(NsAppLink::NsTransportManager::IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, const Blob & Data)
+void NsAppLink::NsTransportManager::IDeviceAdapterListener::onFrameReceived(NsAppLink::NsTransportManager::IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
 }
 
