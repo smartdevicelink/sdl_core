@@ -27,8 +27,12 @@
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/AddCommand.h"
 #include "JSONHandler/AddCommandResponse.h"
+#include "JSONHandler/DeleteCommand.h"
+#include "JSONHandler/DeleteCommandResponse.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_request.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_response.h"
+#include "JSONHandler/ALRPCObjects/DeleteCommand_request.h"
+#include "JSONHandler/ALRPCObjects/DeleteCommand_response.h"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 
@@ -367,6 +371,24 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             core->sendHMIRPC2Response(addCmd);
             break;
         }
+        case Marshaller::METHOD_DELETECOMMAND_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
+            DeleteCommand_request* object = (DeleteCommand_request*)message.first;
+            RPC2Communication::DeleteCommand* deleteCmd = new RPC2Communication::DeleteCommand();
+            core->mapMessageToSession(deleteCmd->getID(), sessionID);
+            deleteCmd->setCmdId(object->get_cmdID());
+            core->sendHMIRPC2Response(deleteCmd);
+            break;
+        }
+        case Marshaller::METHOD_DELETESUBMENU_REQUEST:
+        {
+            break;
+        }
+        case Marshaller::METHOD_DELETEINTERACTIONCHOICESET_REQUEST:
+        {
+            break;
+        }
         case Marshaller::METHOD_SHOW_RESPONSE:
         case Marshaller::METHOD_SPEAK_RESPONSE:
         case Marshaller::METHOD_SETGLOBALPROPERTIES_RESPONSE:
@@ -587,6 +609,19 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             core->sendMobileRPCResponse( responseMessage );
             break;
         }
+        case RPC2Communication::RPC2Marshaller::METHOD_DELETECOMMAND_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand response has been income");
+            RPC2Communication::DeleteCommandResponse* object = (RPC2Communication::DeleteCommandResponse*)msg;
+            DeleteCommand_response* response = new DeleteCommand_response();
+            response->set_success(true);
+            response->set_resultCode(object->getResult());
+            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
+            core->removeMessageToSessionMapping(object->getID());
+            Message responseMessage = Message(response, sessionID);
+            core->sendMobileRPCResponse( responseMessage );
+            break;
+        }
 		case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
 		default:
 			LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethod() <<" has been received!");
@@ -661,6 +696,12 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
         case RPC2Communication::RPC2Marshaller::METHOD_ADDCOMMAND_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been income");
+            core->mJSONRPC2Handler->sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_DELETECOMMAND_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been income");
             core->mJSONRPC2Handler->sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
             break;
         }
