@@ -36,6 +36,7 @@ namespace NsAppManager
 class RegistryItem;
 template< class QueueType >
 class AppMgrCoreQueue;
+class ButtonMapping;
 
 struct Comparer {
     bool operator() (const ButtonName &b1, const ButtonName &b2) const;

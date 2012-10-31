@@ -23,6 +23,7 @@ set (SOURCES
 	./src/AppMgrCoreQueues.cpp
     ./src/AppPolicy.cpp
     ./src/RegistryItem.cpp
+	./src/ButtonMapping.cpp
 )
 
 add_library("AppMgr" ${SOURCES})
