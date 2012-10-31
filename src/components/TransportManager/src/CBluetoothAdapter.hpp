@@ -140,12 +140,12 @@ namespace NsAppLink
                 /**
                  * @brief Device handle.
                  **/
-                tDeviceHandle mDeviceHandle;
+                const tDeviceHandle mDeviceHandle;
 
                 /**
                  * @brief RFCOMM channel of remote device.
                  **/
-                uint8_t mRFCOMMChannel;
+                const uint8_t mRFCOMMChannel;
 
                 /**
                  * @brief Thread that handles connection.
@@ -252,7 +252,7 @@ namespace NsAppLink
              *
              * @param ConnectionHandle Connection handle.
              **/
-            void connectionThread(const tConnectionHandle & ConnectionHandle);
+            void connectionThread(const tConnectionHandle ConnectionHandle);
 
             /**
              * @brief Listener for device adapter notifications.

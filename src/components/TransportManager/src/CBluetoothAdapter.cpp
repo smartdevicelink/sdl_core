@@ -7,9 +7,14 @@
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
+#include <bluetooth/rfcomm.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #include "IDeviceAdapterListener.hpp"
 #include "CBluetoothAdapter.hpp"
+
+#define LOG4CPLUS_ERROR_EXT_WITH_ERRNO(logger, message) LOG4CPLUS_ERROR_EXT(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
 
 NsAppLink::NsTransportManager::CBluetoothAdapter::SBluetoothDevice::SBluetoothDevice(void):
 mAddress(),
@@ -273,7 +278,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
 
             if (0 != hci_devba(deviceID, &adapterAddress))
             {
-                LOG4CPLUS_ERROR_EXT(mLogger, "Address of bluetooth adapter " << deviceID << " can't be determined, error code " << errno << " (" << strerror(errno) << ")");
+                LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Address of bluetooth adapter " << deviceID << " can't be determined");
             }
             else
             {
@@ -281,7 +286,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
 
                 if (deviceHandle >= 0)
                 {
-                    char adapterAddressString[16];
+                    char adapterAddressString[32];
                     ba2str(&adapterAddress, adapterAddressString);
                     LOG4CPLUS_INFO_EXT(mLogger, "Starting hci_inquiry on device " << deviceID << " (" << adapterAddressString << ")");
 
@@ -352,7 +357,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
 
                                     if (false == appLinkRFCOMMChannels.empty())
                                     {
-                                        char deviceAddressString[16];
+                                        char deviceAddressString[32];
                                         char deviceName[256];
                                         ba2str(&inquiryInfoList[i].bdaddr, deviceAddressString);
                                         std::stringstream rfcommChannelsString;
@@ -369,7 +374,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
 
                                         if (0 != hci_read_remote_name(deviceHandle, &inquiryInfoList[i].bdaddr, sizeof(deviceName) / sizeof(deviceName[0]), deviceName, 0))
                                         {
-                                            LOG4CPLUS_WARN_EXT(mLogger, "hci_read_remote_name failed, error code " << errno << " (" << strerror(errno) << ")");
+                                            LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "hci_read_remote_name failed");
                                             strncpy(deviceName, deviceAddressString, sizeof(deviceName) / sizeof(deviceName[0]));
                                         }
 
@@ -447,7 +452,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
 
                     for (tBluetoothDevicesMap::const_iterator deviceIterator = mDevices.begin(); deviceIterator != mDevices.end(); ++deviceIterator)
                     {
-                        char deviceAddressString[16];
+                        char deviceAddressString[32];
                         ba2str(&deviceIterator->second.mAddress, deviceAddressString);
                         LOG4CPLUS_INFO_EXT(mLogger, std::setw(10) << deviceIterator->first << std::setw(0) << ": " << deviceAddressString << ", " << deviceIterator->second.mName.c_str());
                     }
@@ -544,10 +549,102 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
 
 void * NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThreadStartRoutine(void * Data)
 {
-    //LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+    SRFCOMMConnectionParameters * connectionParameters = static_cast<SRFCOMMConnectionParameters*>(Data);
+
+    if (0 != connectionParameters)
+    {
+        CBluetoothAdapter & bluetoothAdapter(connectionParameters->mBluetoothAdapter);
+        tConnectionHandle connectionHandle(connectionParameters->mConnectionHandle);
+
+        delete connectionParameters;
+        connectionParameters = 0;
+
+        bluetoothAdapter.connectionThread(connectionHandle);
+    }
+
+    return 0;
 }
 
-void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const NsAppLink::NsTransportManager::tConnectionHandle & ConnectionHandle)
+void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle)
 {
-    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+    LOG4CPLUS_INFO_EXT(mLogger, "Connection thread started for connection " << ConnectionHandle);
+
+    struct sockaddr_rc remoteSocketAddress = {0};
+    remoteSocketAddress.rc_family = AF_BLUETOOTH;
+
+    tDeviceHandle deviceHandle = InvalidDeviceHandle;
+
+    pthread_mutex_lock(&mRFCOMMConnectionsMutex);
+
+    tRFCOMMConnectionMap::const_iterator connectionIterator = mRFCOMMConnections.find(ConnectionHandle);
+
+    if (connectionIterator != mRFCOMMConnections.end())
+    {
+        deviceHandle = connectionIterator->second.mDeviceHandle;
+        remoteSocketAddress.rc_channel = connectionIterator->second.mRFCOMMChannel;
+    }
+    else
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "Connection " << ConnectionHandle << " does not exist");
+    }
+
+    pthread_mutex_unlock(&mRFCOMMConnectionsMutex);
+
+    if (InvalidDeviceHandle != deviceHandle)
+    {
+        bool isDeviceValid = false;
+
+        pthread_mutex_lock(&mDevicesMutex);
+
+        tBluetoothDevicesMap::const_iterator deviceIterator = mDevices.find(deviceHandle);
+
+        if (deviceIterator != mDevices.end())
+        {
+            isDeviceValid = true;
+            memcpy(&remoteSocketAddress.rc_bdaddr, &deviceIterator->second.mAddress, sizeof(bdaddr_t));
+        }
+        else
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "Device " << deviceHandle << " does not exist");
+        }
+
+        pthread_mutex_unlock(&mDevicesMutex);
+
+        if (true == isDeviceValid)
+        {
+            int rfcommSocket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+
+            if (-1 != rfcommSocket)
+            {
+                char remoteDeviceAddressString[32];
+                ba2str(&remoteSocketAddress.rc_bdaddr, remoteDeviceAddressString);
+
+                if (0 == connect(rfcommSocket, (struct sockaddr *)&remoteSocketAddress, sizeof(remoteSocketAddress)))
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "Connection " << ConnectionHandle << " to remote device " << remoteDeviceAddressString << " established");
+                }
+                else
+                {
+                    LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to connect to remote device " << remoteDeviceAddressString << " for connection " << ConnectionHandle);
+                }
+
+                if (0 != close(rfcommSocket))
+                {
+                    LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to close RFCOMM socket for connection " << ConnectionHandle);
+                }
+            }
+            else
+            {
+                LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to create RFCOMM socket for connection " << ConnectionHandle);
+            }
+        }
+    }
+
+    LOG4CPLUS_INFO_EXT(mLogger, "Removing connection " << ConnectionHandle << " from connection map");
+
+    pthread_mutex_lock(&mRFCOMMConnectionsMutex);
+    mRFCOMMConnections.erase(ConnectionHandle);
+    pthread_mutex_unlock(&mRFCOMMConnectionsMutex);
+
+    LOG4CPLUS_INFO_EXT(mLogger, "Connection thread finished for connection " << ConnectionHandle);
 }
