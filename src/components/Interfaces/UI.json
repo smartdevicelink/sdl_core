@@ -61,7 +61,7 @@
 
 	/*
 	 * @descr 
-	 *      add new command to VR
+	 *      add new command to UI
 	 * 	
 	 * @returns
 	 * 	result code
@@ -79,7 +79,7 @@
 	
 	/*
 	 * @descr 
-	 *      add new command to VR
+	 *      add new command to UI
 	 * 	
 	 * @returns
 	 * 	result code
@@ -276,7 +276,7 @@
         },
 
 	/*
-	 * @descr Notifies AppLink core about command trigerred by VR
+	 * @descr Notifies AppLink core about command trigerred by UI
 	 */
 	"UI.OnCommand": {
 		"parameters": {
@@ -316,4 +316,49 @@
     }, //methods end
     
     "id": "integer" //REQUIRED for request methods. NOT to be used for notifications
+	
+	/*
+	 * @descr 
+	 *      method should be invoked at system startup
+	 *	provides information about UI buttons capabilities
+	 * 	
+	 * @returns
+	 * 		UI Buttons capabilites
+	 */ 
+        "UI.getButtonCapabilities": {
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"capabilities"	: "ButtonCapabilities" // data type from AppLink protocol specification
+			}
+        },
+		
+		/*
+	 * @descr 
+	 *      method should be invoked at system startup
+	 *	provides information about Display capabilities
+	 * 	
+	 * @returns
+	 * 		UI Display capabilites
+	 */ 
+        "UI.getDisplayCapabilities": {
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"capabilities"	: "DisplayCapabilities" // data type from AppLink protocol specification
+			}
+        },
+		
+			/*
+	 * @descr 
+	 *      method should be invoked at system startup
+	 *	provides information about HMI zone capabilities(for future)
+	 * 	
+	 * @returns
+	 * 		UI Display capabilites
+	 */ 
+        "UI.getHmiZoneCapabilities": {
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"capabilities"	: "HmiZoneCapabilities" // data type from AppLink protocol specification
+			}
+        },
 }
