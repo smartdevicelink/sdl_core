@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <iomanip>
 #include <set>
+#include <unistd.h>
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
@@ -270,6 +271,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
 
     while (false == mShutdownFlag)
     {
+        bool discoerySucceeded = false;
         int deviceID = hci_get_route(0);
 
         if (deviceID >= 0)
@@ -296,6 +298,8 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
                     if (numberOfDevices >= 0)
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, "hci_inquiry: found " << numberOfDevices << " devices");
+
+                        discoerySucceeded = true;
 
                         for (int i = 0; i < numberOfDevices; ++i)
                         {
@@ -539,6 +543,11 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
         else
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "No bluetooth adapter device found");
+        }
+
+        if (false == discoerySucceeded)
+        {
+            sleep(1);
         }
     }
 
