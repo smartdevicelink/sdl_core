@@ -242,5 +242,19 @@ FFW.UI = FFW.RPCObserver.create({
 			"params"	:	{"appName":[MFT.AppModel.PlayList.items[0].appName]}
 		};
 		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * handle RPC requests here
+ 	 */	
+	onCommand: function(commandId) {
+		Em.Logger.log("FFW.UI.onCommand");
+
+		var JSONMessage = {
+			"jsonrpc"	:	"2.0",
+			"method"	:	"UI.OnCommand",
+			"params"	:	{"commandId":commandId, }
+		};
+		this.client.send(JSONMessage);
 	}
 })

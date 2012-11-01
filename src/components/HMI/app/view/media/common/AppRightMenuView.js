@@ -70,20 +70,13 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 
 		button = MFT.Button.create({
 			elementId:			'media_rightmenu_softButton' + commandId,
-			action:				'onCommand()',
+			click:				function(){
+				FFW.UI.onCommand(this.commandId);
+			},
 			commandId:			commandId, 
 			classNames:			['rs-item'],
 			//icon:				null,//'images/media/active_arrow.png',
-			text:				params.menuName,
-			onCommand:		function(){
-				var JSONMessage = {
-					"jsonrpc"	:	"2.0",
-					"id"		: 	FFW.UI.client.idStart,
-					"method"	:	"UI.OnCommand",
-					"params"	:	{"commandId":this.commandId, }
-				};
-				this.client.send(JSONMessage);
-			}
+			text:				params.menuName	
 		});
 
 		MFT.AppRightMenuView.scrollWrapper.scroller.get('childViews').pushObject(button);
