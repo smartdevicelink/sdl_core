@@ -74,9 +74,6 @@ private:
     const RegistryItem* registerApplication(const Message &msg );
     void unregisterApplication(const Message &msg );
     unsigned char findSessionIdByMessage(int messageId) const;
-    void sendMobileRPCResponse( const Message &msg );
-    void sendMobileRPCNotification( ALRPCMessage* msg );
-    void sendHMIRPC2Response( RPC2Communication::RPC2Command * msg );
     void mapMessageToSession( int messageId, unsigned char sessionId );
     void removeMessageToSessionMapping( int messageId );
 
@@ -86,10 +83,7 @@ private:
     const Capabilities& getButtonCapabilities() const;
 
     AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
-    AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsOutgoing;
     AppMgrCoreQueue<RPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
-    AppMgrCoreQueue<RPC2Communication::RPC2Command*>* mQueueRPCBusObjectsOutgoing;
-    AppMgrCoreQueue<ALRPCMessage*>* mQueueMobileRPCNotificationsOutgoing;
 
 	Capabilities mButtonCapabilities;
     ButtonMapping    mButtonsMapping;

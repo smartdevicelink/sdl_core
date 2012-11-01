@@ -4,6 +4,7 @@
 #include "JSONHandler/ALRPCObjects/SubscribeButton_request.h"
 #include "JSONHandler/ALRPCObjects/SubscribeButton_response.h"
 #include "JSONHandler/ALRPCObjects/ButtonName.h"
+#include "JSONHandler/JSONHandler.h"
 #include "LoggerHelper.hpp"
 
 namespace NsAppManager
@@ -26,8 +27,7 @@ void SubscribeButtonCmd::execute()
     response->setMessageType(ALRPCMessage::RESPONSE);
     response->set_success(true);
     response->set_resultCode(Result::SUCCESS);
-    Message responseMessage = Message(response, msg->second);
-    AppMgrCore::getInstance().sendMobileRPCResponse( responseMessage );
+    AppMgrCore::getInstance().mJSONHandler->sendRPCMessage(response, msg->second);
 }
 
 }
