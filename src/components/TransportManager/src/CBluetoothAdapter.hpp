@@ -62,14 +62,54 @@ namespace NsAppLink
              * @brief Send frame.
              *
              * @param ConnectionHandle Connection handle.
-             * @param Data Frame payload data.
+             * @param Data Frame data.
+             * @param DataSize Size of data in bytes.
              *
              * @return Frame sequence number. May be used to identify
              *         this frame when send result callback is received.
              **/
-            virtual int sendFrame(tConnectionHandle ConnectionHandle, const Blob & Data);
+            virtual int sendFrame(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize);
 
         private:
+            /**
+             * @brief Frame.
+             *
+             * Used to store data frames that must be sent to remote device.
+             **/
+            struct SFrame
+            {
+                /**
+                 * @brief Constructor.
+                 *
+                 * @param Data Frame data. SFrame stores a copy of this data,
+                 *             i.e. data may be freed after SFrame object is constructed.
+                 * @param DataSize Size of frame data in bytes.
+                 **/
+                SFrame(const uint8_t * Data, const size_t DataSize);
+
+                /**
+                 * @brief Destructor.
+                 *
+                 * Frees stored frame data.
+                 **/
+                ~SFrame(void);
+
+                /**
+                 * @brief Frame data.
+                 **/
+                uint8_t * mData;
+
+                /**
+                 * @brief Frame data size in bytes.
+                 **/
+                size_t mDataSize;
+            };
+
+            /**
+             * @brief Map of frame sequence number to frame data.
+             **/
+            typedef std::map<int, SFrame*> tFrameMap;
+
             /**
              * @brief Internal structure describing bluetooth device.
              **/
@@ -126,6 +166,13 @@ namespace NsAppLink
                 SRFCOMMConnection(const tDeviceHandle DeviceHandle, const uint8_t RFCOMMChannel);
 
                 /**
+                 * @brief Destructor.
+                 *
+                 * Clears map of frames to send.
+                 **/
+                ~SRFCOMMConnection(void);
+
+                /**
                  * @brief Device handle.
                  **/
                 const tDeviceHandle mDeviceHandle;
@@ -139,6 +186,34 @@ namespace NsAppLink
                  * @brief Thread that handles connection.
                  **/
                 pthread_t mConnectionThread;
+
+                /**
+                 * @brief File descriptors of notification pipe.
+                 *
+                 * Notification pipe is used to wake up connection thread
+                 * on external event (e.g. new data is available to send or
+                 * connection is requested to be terminated).
+                 *
+                 * mNotificationPipeFds[0] is a descriptor of the read end of the pipe
+                 * (the one that is used in poll() by connection thread) and
+                 * mNotificationPipeFds[1] is a descriptor of the write end of the pipe
+                 * (the one that is used in methods exposed to transport manager to
+                 * wake up connection thread when necessary).
+                 *
+                 * @note eventfd cannot be used instead of a pipe because it does not
+                 *       conform to POSIX (eventfd is Linux-specific).
+                 **/
+                int mNotificationPipeFds[2];
+
+                /**
+                 * @brief Sequence number for next frame.
+                 **/
+                int mNextFrameSequenceNumber;
+
+                /**
+                 * @brief Map of frames that must be sent to remote device.
+                 **/
+                tFrameMap mFramesToSend;
 
                 /**
                  * @brief Terminate flag.
