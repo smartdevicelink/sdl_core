@@ -342,8 +342,6 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_ONCOMMAND:
         {
             LOG4CPLUS_INFO(mLogger, "OnCommand Notification has been received.");
-            OnCommand* object = (OnCommand*)message.first;
-        //    object->get_cmdID()
             core->mJSONHandler->sendRPCMessage(message.first, sessionID);
             break;
         }
@@ -498,6 +496,15 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             RPC2Communication::OnCommand* object = (RPC2Communication::OnCommand*)msg;
             OnCommand* event = new OnCommand();
             event->set_cmdID(object->getCommandId());
+            RegistryItem* item = core->mCommandMapping.findRegistryItemAssignedToCommand(object->getCommandId());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
+            LOG4CPLUS_INFO_EXT(mLogger, "sessionID found " << sessionID);
+            core->mJSONHandler->sendRPCMessage(event, sessionID);
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_GET_CAPABILITIES_RESPONSE:
