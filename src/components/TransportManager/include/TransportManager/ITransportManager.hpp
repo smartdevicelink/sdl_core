@@ -9,7 +9,8 @@ namespace NsAppLink
 {
     namespace NsTransportManager
     {
-        class ITransportManagerListener;
+        class ITransportManagerDeviceListener;
+        class ITransportManagerDataListener;
         class Blob;
 
         /**
@@ -57,18 +58,32 @@ namespace NsAppLink
             virtual void getDeviceList(tDeviceList & DeviceList) const = 0;
 
             /**
-             * @brief Add listener.
+             * @brief Add listener to the data-related events
              *
              * @param Listener Pointer to listener.
              **/
-            virtual void addListener(ITransportManagerListener * Listener) = 0;
+            virtual void addDataListener(ITransportManagerDataListener * Listener) = 0;
 
             /**
-             * @brief Remove listener.
+             * @brief Remove listener to the data-related events.
              *
              * @param Listener Pointer to listener.
              **/
-            virtual void removeListener(ITransportManagerListener * Listener) = 0;
+            virtual void removeDataListener(ITransportManagerDataListener * Listener) = 0;
+
+            /**
+             * @brief Add listener to the device-related events.
+             *
+             * @param Listener Pointer to listener.
+             **/
+            virtual void addDeviceListener(ITransportManagerDeviceListener * Listener) = 0;
+
+            /**
+             * @brief Remove listenerto the device-related events.
+             *
+             * @param Listener Pointer to listener.
+             **/
+            virtual void removeDeviceListener(ITransportManagerDeviceListener * Listener) = 0;
 
             /**
              * @brief Send frame.

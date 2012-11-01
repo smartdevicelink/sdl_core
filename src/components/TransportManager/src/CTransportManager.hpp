@@ -6,6 +6,8 @@
 #include "IHandleGenerator.hpp"
 #include "Logger.hpp"
 
+#include <pthread.h>
+
 namespace NsAppLink
 {
     namespace NsTransportManager
@@ -47,18 +49,32 @@ namespace NsAppLink
             virtual void getDeviceList(tDeviceList & DeviceList) const;
 
             /**
-             * @brief Add listener.
+             * @brief Add listener to the data-related events
              *
              * @param Listener Pointer to listener.
              **/
-            virtual void addListener(ITransportManagerListener * Listener);
+            virtual void addDataListener(ITransportManagerDataListener * Listener);
 
             /**
-             * @brief Remove listener.
+             * @brief Remove listener to the data-related events.
              *
              * @param Listener Pointer to listener.
              **/
-            virtual void removeListener(ITransportManagerListener * Listener);
+            virtual void removeDataListener(ITransportManagerDataListener * Listener);
+
+            /**
+             * @brief Add listener to the device-related events.
+             *
+             * @param Listener Pointer to listener.
+             **/
+            virtual void addDeviceListener(ITransportManagerDeviceListener * Listener);
+
+            /**
+             * @brief Remove listenerto the device-related events.
+             *
+             * @param Listener Pointer to listener.
+             **/
+            virtual void removeDeviceListener(ITransportManagerDeviceListener * Listener);
 
             /**
              * @brief Send frame.
@@ -91,7 +107,7 @@ namespace NsAppLink
              **/
             virtual tConnectionHandle generateNewConnectionHandle(void);
 
-        private:
+        protected:
             /**
              * @brief Device adapters.
              **/
@@ -101,6 +117,26 @@ namespace NsAppLink
              * @brief Logger.
              **/
             const log4cplus::Logger mLogger;
+
+            /**
+             * @brief Mutex restricting access to data listeners.
+             **/
+            mutable pthread_mutex_t mDataListenersMutex;
+
+            /**
+             * @brief Mutex restricting access to device listeners.
+             **/
+            mutable pthread_mutex_t mDeviceListenersMutex;
+
+            /**
+             * @brief Data listeners
+             **/
+            std::vector<ITransportManagerDataListener*> mDataListeners;
+
+            /**
+             * @brief Device listeners
+             **/
+            std::vector<ITransportManagerDeviceListener*> mDeviceListeners;
         };
     }
 }

@@ -10,10 +10,11 @@ set (SOURCES
     ./src/IDeviceAdapterListener.cpp
     ./src/IHandleGenerator.cpp
     ./src/ITransportManager.cpp
-    ./src/ITransportManagerListener.cpp
     ./src/CBluetoothAdapter.cpp
     ./src/CTransportManager.cpp
     ./src/SInternalDeviceInfo.cpp
+    ./src/ITransportManagerDeviceListener.cpp
+    ./src/ITransportManagerDataListener.cpp
 )
 
 add_library("TransportManager" ${SOURCES})

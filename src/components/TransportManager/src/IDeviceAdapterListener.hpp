@@ -6,7 +6,8 @@
 #include <vector>
 
 #include "TransportManager/ITransportManager.hpp"
-#include "TransportManager/ITransportManagerListener.hpp"
+#include "TransportManager/ITransportManagerDataListener.hpp"
+#include "TransportManager/ITransportManagerDeviceListener.hpp"
 
 #include "SInternalDeviceInfo.hpp"
 

@@ -1,10 +1,7 @@
-#ifndef __TRANSPORTMANAGER_ITRANSPORTMANAGERLISTENER_HPP__
-#define __TRANSPORTMANAGER_ITRANSPORTMANAGERLISTENER_HPP__
-
-#include <vector>
+#ifndef __TRANSPORTMANAGER_ITRANSPORTMANAGERDATALISTENER_HPP__
+#define __TRANSPORTMANAGER_ITRANSPORTMANAGERDATALISTENER_HPP__
 
 #include "TransportManager/ITransportManager.hpp"
-#include "TransportManager/SDeviceInfo.hpp"
 
 namespace NsAppLink
 {
@@ -42,38 +39,19 @@ namespace NsAppLink
         };
 
         /**
-         * @brief Interface of transport manager listener.
+         * @brief Interface of transport manager listener related to data information.
          *
          * Clients of transport manager must inherit this interface
-         * in order to register as listener to receive callbacks.
+         * in order to register as listener to receive callbacks about data information
          **/
-        class ITransportManagerListener
+        class ITransportManagerDataListener
         {
+        public:
             /**
-             * @brief Destructor.
-             **/
-            virtual ~ITransportManagerListener(void);
-
-            /**
-             * @brief Available devices list updated.
+             * @brief Destructor
              *
-             * @param DeviceList New list of available devices.
              **/
-            virtual void onDeviceListUpdated(const tDeviceList & DeviceList);
-
-            /**
-             * @brief Device connected.
-             *
-             * @param ConnectedDevice DeviceInfo of connected device.
-             **/
-            virtual void onDeviceConnected(const SDeviceInfo & ConnectedDevice);
-
-            /**
-             * @brief Device disconnected.
-             *
-             * @param DisconnectedDevice DeviceInfo of disconnected device.
-             **/
-            virtual void onDeviceDisconnected(const SDeviceInfo & DisconnectedDevice);
+            virtual ~ITransportManagerDataListener();
 
             /**
              * @brief Frame received callbacks.
@@ -95,4 +73,6 @@ namespace NsAppLink
     }
 }
 
-#endif
+
+
+#endif // __TRANSPORTMANAGER_ITRANSPORTMANAGERDATALISTENER_HPP__
