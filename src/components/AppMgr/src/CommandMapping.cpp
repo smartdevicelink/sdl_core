@@ -7,6 +7,10 @@ namespace NsAppManager
 
 log4cplus::Logger CommandMapping::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("CommandMapping"));
 
+CommandMapping::CommandMapping()
+{
+}
+
 void CommandMapping::addCommand(unsigned int commandId, RegistryItem *app)
 {
     LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to a command " << commandId << " in app " << app->getApplication()->getName() );

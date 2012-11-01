@@ -342,6 +342,8 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_ONCOMMAND:
         {
             LOG4CPLUS_INFO(mLogger, "OnCommand Notification has been received.");
+            OnCommand* object = (OnCommand*)message.first;
+        //    object->get_cmdID()
             core->mJSONHandler->sendRPCMessage(message.first, sessionID);
             break;
         }
@@ -352,6 +354,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             RPC2Communication::AddCommand* addCmd = new RPC2Communication::AddCommand();
             core->mapMessageToSession(addCmd->getID(), sessionID);
             addCmd->setCmdId(object->get_cmdID());
+            core->mCommandMapping.addCommand(object->get_cmdID(), AppMgrRegistry::getInstance().getItem(sessionID));
             if(object->get_menuParams())
             {
                 addCmd->setMenuParams(*object->get_menuParams());
@@ -366,6 +369,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             RPC2Communication::DeleteCommand* deleteCmd = new RPC2Communication::DeleteCommand();
             core->mapMessageToSession(deleteCmd->getID(), sessionID);
             deleteCmd->setCmdId(object->get_cmdID());
+            core->mCommandMapping.removeCommand(object->get_cmdID());
             core->mJSONRPC2Handler->sendRequest(deleteCmd);
             break;
         }
@@ -837,11 +841,6 @@ void AppMgrCore::setJsonRPC2Handler(JSONRPC2Handler *handler)
 JSONRPC2Handler *AppMgrCore::getJsonRPC2Handler() const
 {
     return mJSONRPC2Handler;
-}
-
-bool Comparer::operator ()(const ButtonName &b1, const ButtonName &b2) const
-{
-    return b1.get() < b2.get();
 }
 
 }

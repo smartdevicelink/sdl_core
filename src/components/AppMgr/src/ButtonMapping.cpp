@@ -56,4 +56,9 @@ ButtonMapping::ButtonMapping(const ButtonMapping &)
 {
 }
 
+bool Comparer::operator ()(const ButtonName &b1, const ButtonName &b2) const
+{
+    return b1.get() < b2.get();
+}
+
 }

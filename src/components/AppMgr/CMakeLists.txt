@@ -24,6 +24,7 @@ set (SOURCES
     ./src/AppPolicy.cpp
     ./src/RegistryItem.cpp
 	./src/ButtonMapping.cpp
+	./src/CommandMapping.cpp
 )
 
 add_library("AppMgr" ${SOURCES})
