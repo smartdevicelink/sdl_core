@@ -36,6 +36,7 @@ namespace NsAppLink
          **/
         class ITransportManagerDataListener
         {
+        public:
             /**
              * @brief Destructor
              *

@@ -15,6 +15,7 @@ namespace NsAppLink
          **/
         class ITransportManagerDeviceListener
         {
+        public:
             /**
              * @brief Destructor
              *
