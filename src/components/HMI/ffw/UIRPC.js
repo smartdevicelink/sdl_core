@@ -211,7 +211,7 @@ FFW.UI = FFW.RPCObserver.create({
 				"result":	"SUCCESS" //  type (enum) from AppLink protocol
 			};
 			this.client.send(JSONMessage);
-		},
+		}
 
 		if (request.method == "UI.DeleteCommand") {
 			
