@@ -2,6 +2,7 @@
 #define __TRANSPORTMANAGER_ITRANSPORTMANAGERDEVICELISTENER_HPP__
 
 #include "TransportManager/SDeviceInfo.hpp"
+#include "TransportManager/ITransportManager.hpp"
 
 namespace NsAppLink
 {
@@ -31,20 +32,22 @@ namespace NsAppLink
             virtual void onDeviceListUpdated(const tDeviceList & DeviceList);
 
             /**
-             * @brief Device connected.
+             * @brief Application connected.
              *
              * @param ConnectedDevice DeviceInfo of connected device.
+             * @param Connection Connection handle
              * @return void
              **/
-            virtual void onDeviceConnected(const SDeviceInfo & ConnectedDevice);
+            virtual void onApplicationConnected(const SDeviceInfo & ConnectedDevice, const tConnectionHandle Connection);
 
             /**
-             * @brief Device disconnected.
+             * @brief Application disconnected.
              *
              * @param DisconnectedDevice DeviceInfo of disconnected device.
+             * @param Connection Connection handle
              * @return void
              **/
-            virtual void onDeviceDisconnected(const SDeviceInfo & DisconnectedDevice);
+            virtual void onApplicationDisconnected(const SDeviceInfo & DisconnectedDevice, const tConnectionHandle Connection);
         };
     }
 }

@@ -9,10 +9,10 @@ void NsAppLink::NsTransportManager::ITransportManagerDeviceListener::onDeviceLis
 {
 }
 
-void NsAppLink::NsTransportManager::ITransportManagerDeviceListener::onDeviceConnected(const SDeviceInfo & ConnectedDevice)
+void NsAppLink::NsTransportManager::ITransportManagerDeviceListener::onApplicationConnected(const SDeviceInfo & ConnectedDevice, const tConnectionHandle Connection)
 {
 }
 
-void NsAppLink::NsTransportManager::ITransportManagerDeviceListener::onDeviceDisconnected(const SDeviceInfo & DisconnectedDevice)
+void NsAppLink::NsTransportManager::ITransportManagerDeviceListener::onApplicationDisconnected(const SDeviceInfo & DisconnectedDevice, const tConnectionHandle Connection)
 {
 }

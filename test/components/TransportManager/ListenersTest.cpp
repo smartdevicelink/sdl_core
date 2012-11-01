@@ -33,8 +33,8 @@ namespace test
                 {
                 public:
                     MOCK_METHOD1(onDeviceListUpdated, void(const NsAppLink::NsTransportManager::tDeviceList & DeviceList));
-                    MOCK_METHOD1(onDeviceConnected, void(const NsAppLink::NsTransportManager::SDeviceInfo & ConnectedDevice));
-                    MOCK_METHOD1(onDeviceDisconnected, void(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice));
+                    MOCK_METHOD2(onApplicationConnected, void(const NsAppLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection));
+                    MOCK_METHOD2(onApplicationDisconnected, void(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection));
                 };
 
                 class TestTransportManager: public NsAppLink::NsTransportManager::CTransportManager
@@ -57,7 +57,7 @@ namespace test
 
                         for (deviceListenersIterator = mDeviceListeners.begin(); deviceListenersIterator != mDeviceListeners.end(); ++deviceListenersIterator)
                         {
-                            (*deviceListenersIterator)->onDeviceConnected(dummyDeviceInfo);
+                            (*deviceListenersIterator)->onApplicationConnected(dummyDeviceInfo, NsAppLink::NsTransportManager::InvalidConnectionHandle);
                         }
                     }
                 };
@@ -91,11 +91,11 @@ TEST(test_TransportManagerListeners, allRegisteredDeviceListenersCalled)
     test::components::TransportManager::ListenersTest::MockDeviceListener mockDeviceListener1;
     test::components::TransportManager::ListenersTest::MockDeviceListener mockDeviceListener2;
 
-    EXPECT_CALL(mockDeviceListener1, onDeviceConnected(_))
+    EXPECT_CALL(mockDeviceListener1, onApplicationConnected(_, _))
         .Times(1)
     ;
 
-    EXPECT_CALL(mockDeviceListener2, onDeviceConnected(_))
+    EXPECT_CALL(mockDeviceListener2, onApplicationConnected(_, _))
         .Times(1)
     ;
 
@@ -128,11 +128,11 @@ TEST(test_TransportManagerListeners, notRegisteredDeviceListenersAreNotCalled)
     test::components::TransportManager::ListenersTest::MockDeviceListener mockDeviceListener1;
     test::components::TransportManager::ListenersTest::MockDeviceListener mockDeviceListener2;
 
-    EXPECT_CALL(mockDeviceListener1, onDeviceConnected(_))
+    EXPECT_CALL(mockDeviceListener1, onApplicationConnected(_, _))
         .Times(0)
     ;
 
-    EXPECT_CALL(mockDeviceListener2, onDeviceConnected(_))
+    EXPECT_CALL(mockDeviceListener2, onApplicationConnected(_, _))
         .Times(0)
     ;
 
@@ -166,11 +166,11 @@ TEST(test_TransportManagerListeners, deviceListenersCanBeRemoved)
     test::components::TransportManager::ListenersTest::MockDeviceListener mockDeviceListener1;
     test::components::TransportManager::ListenersTest::MockDeviceListener mockDeviceListener2;
 
-    EXPECT_CALL(mockDeviceListener1, onDeviceConnected(_))
+    EXPECT_CALL(mockDeviceListener1, onApplicationConnected(_, _))
         .Times(1)
     ;
 
-    EXPECT_CALL(mockDeviceListener2, onDeviceConnected(_))
+    EXPECT_CALL(mockDeviceListener2, onApplicationConnected(_, _))
         .Times(0)
     ;
 
