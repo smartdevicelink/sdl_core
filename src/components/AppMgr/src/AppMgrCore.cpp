@@ -30,8 +30,11 @@
 #include "JSONHandler/AddCommandResponse.h"
 #include "JSONHandler/DeleteCommand.h"
 #include "JSONHandler/DeleteCommandResponse.h"
+#include "JSONHandler/AddSubMenu.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_request.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_response.h"
+#include "JSONHandler/ALRPCObjects/AddSubMenu_request.h"
+#include "JSONHandler/ALRPCObjects/AddSubMenu_response.h"
 #include "JSONHandler/ALRPCObjects/DeleteCommand_request.h"
 #include "JSONHandler/ALRPCObjects/DeleteCommand_response.h"
 #include <sys/socket.h>
@@ -369,6 +372,21 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             deleteCmd->setCmdId(object->get_cmdID());
             core->mCommandMapping.removeCommand(object->get_cmdID());
             core->mJSONRPC2Handler->sendRequest(deleteCmd);
+            break;
+        }
+        case Marshaller::METHOD_ADDSUBMENU_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
+            AddSubMenu_request* object = (AddSubMenu_request*)message.first;
+            RPC2Communication::AddSubMenu* addSubMenu = new RPC2Communication::AddSubMenu();
+            core->mapMessageToSession(addSubMenu->getID(), sessionID);
+            addSubMenu->setMenuId(object->get_menuID());
+            addSubMenu->setMenuName(object->get_menuName());
+            if(object->get_position())
+            {
+                addSubMenu->setPosition(*object->get_position());
+            }
+            core->mJSONRPC2Handler->sendRequest(addSubMenu);
             break;
         }
         case Marshaller::METHOD_DELETESUBMENU_REQUEST:
