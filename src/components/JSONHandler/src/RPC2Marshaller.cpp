@@ -59,6 +59,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_DELETECOMMAND_REQUEST;
     }
+    if ( s.compare("UI.OnCommand") == 0 )
+    {
+        return METHOD_UIONCOMMAND_NOTIFICATION;
+    }
     
     return METHOD_INVALID;
 }
@@ -315,6 +319,14 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_UIONCOMMAND_NOTIFICATION:
+    {
+        OnCommand * rv = new OnCommand;
+        if (OnCommandMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
 
   }
 
@@ -377,6 +389,8 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return DeleteCommandMarshaller::toJSON(*static_cast<const DeleteCommand*>(msg));
     case METHOD_DELETECOMMAND_RESPONSE:
       return DeleteCommandResponseMarshaller::toJSON(*static_cast<const DeleteCommandResponse*>(msg));
+    case METHOD_UIONCOMMAND_NOTIFICATION:
+      return OnCommandMarshaller::toJSON(*static_cast<const OnCommand*>(msg));
   }
 
   return j;
@@ -431,3 +445,4 @@ AddCommandMarshaller RPC2Marshaller::mAddCommandMarshaller;
 AddCommandResponseMarshaller RPC2Marshaller::mAddCommandResponseMarshaller;
 DeleteCommandMarshaller RPC2Marshaller::mDeleteCommandMarshaller;
 DeleteCommandResponseMarshaller RPC2Marshaller::mDeleteCommandResponseMarshaller;
+OnCommandMarshaller RPC2Marshaller::mOnCommandMarshaller;

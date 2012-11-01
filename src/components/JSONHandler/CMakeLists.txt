@@ -204,6 +204,8 @@ set (SOURCES
     ./src/DeleteCommandMarshaller.cpp
     ./src/DeleteCommandResponse.cpp
     ./src/DeleteCommandResponseMarshaller.cpp
+    ./src/OnCommand.cpp
+    ./src/OnCommandMarshaller.cpp
 )
 
 add_library("JSONHandler" ${SOURCES} ${GENERATED_SOURCES})

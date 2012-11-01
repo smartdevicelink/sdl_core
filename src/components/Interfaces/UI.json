@@ -317,20 +317,7 @@
     
     "id": "integer" //REQUIRED for request methods. NOT to be used for notifications
 	
-	/*
-	 * @descr 
-	 *      method should be invoked at system startup
-	 *	provides information about UI buttons capabilities
-	 * 	
-	 * @returns
-	 * 		UI Buttons capabilites
-	 */ 
-        "UI.getButtonCapabilities": {
-	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
-			{
-				"capabilities"	: "ButtonCapabilities" // data type from AppLink protocol specification
-			}
-        },
+	
 		
 		/*
 	 * @descr 
@@ -358,7 +345,9 @@
         "UI.getHmiZoneCapabilities": {
 	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
 			{
+				[
 				"capabilities"	: "HmiZoneCapabilities" // data type from AppLink protocol specification
+				]
 			}
-        },
+        }
 }

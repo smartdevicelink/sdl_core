@@ -26,6 +26,7 @@
 #include "JSONHandler/AddCommandResponseMarshaller.h"
 #include "JSONHandler/DeleteCommandMarshaller.h"
 #include "JSONHandler/DeleteCommandResponseMarshaller.h"
+#include "JSONHandler/OnCommandMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -56,7 +57,8 @@ namespace RPC2Communication
         METHOD_ADDCOMMAND_REQUEST=18,
         METHOD_ADDCOMMAND_RESPONSE=19,
         METHOD_DELETECOMMAND_REQUEST=20,
-        METHOD_DELETECOMMAND_RESPONSE=21
+        METHOD_DELETECOMMAND_RESPONSE=21,
+        METHOD_UIONCOMMAND_NOTIFICATION=22
         };
 
         RPC2Marshaller();
@@ -280,9 +282,19 @@ namespace RPC2Communication
             return mDeleteCommandResponseMarshaller.fromString(str, res);
         }
 
-        static std::string toJSON(const DeleteCommandResponse& res)
+        static std::string toString(const DeleteCommandResponse& res)
         {
             return mDeleteCommandResponseMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, OnCommand& res)
+        {
+            return mOnCommandMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const OnCommand& res)
+        {
+            return mOnCommandMarshaller.toString(res);
         }
 
     private:
@@ -328,6 +340,7 @@ namespace RPC2Communication
         static AddCommandResponseMarshaller mAddCommandResponseMarshaller;
         static DeleteCommandMarshaller mDeleteCommandMarshaller;
         static DeleteCommandResponseMarshaller mDeleteCommandResponseMarshaller;
+        static OnCommandMarshaller mOnCommandMarshaller;
     };
 
 }
