@@ -31,6 +31,7 @@
 #include "JSONHandler/DeleteCommand.h"
 #include "JSONHandler/DeleteCommandResponse.h"
 #include "JSONHandler/AddSubMenu.h"
+#include "JSONHandler/AddSubMenuResponse.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_request.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_response.h"
 #include "JSONHandler/ALRPCObjects/AddSubMenu_request.h"
@@ -643,6 +644,18 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand response has been income");
             RPC2Communication::DeleteCommandResponse* object = (RPC2Communication::DeleteCommandResponse*)msg;
             DeleteCommand_response* response = new DeleteCommand_response();
+            response->set_success(true);
+            response->set_resultCode(object->getResult());
+            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
+            core->removeMessageToSessionMapping(object->getID());
+            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_ADDSUBMENU_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An AddSubMenu response has been income");
+            RPC2Communication::AddSubMenuResponse* object = (RPC2Communication::AddSubMenuResponse*)msg;
+            AddSubMenu_response* response = new AddSubMenu_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
             unsigned char sessionID = core->findSessionIdByMessage(object->getID());
