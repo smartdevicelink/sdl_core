@@ -52,7 +52,7 @@ bool ResetGlobalPropertiesResponseMarshaller::fromJSON(const Json::Value& json,R
     
     if(!json.isMember("jsonrpc"))  return false;
 
-    if(!json.isMember("result"))
+    if(json.isMember("result"))
     {
         Result r;
         if(!ResultMarshaller::fromJSON(json["result"],r)) return false;

@@ -146,9 +146,7 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				}
+				"result":	 "SUCCESS" //  type (enum) from AppLink protocol
 			};
 			this.client.send(JSONMessage);
 		}
@@ -161,9 +159,7 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				}
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
 			};
 			this.client.send(JSONMessage);
 		}
@@ -181,9 +177,7 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				}
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
 			};
 			this.client.send(JSONMessage);
 		}
@@ -201,9 +195,7 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				}
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
 			};
 			this.client.send(JSONMessage);
 		}
@@ -216,9 +208,7 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				}
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
 			};
 			this.client.send(JSONMessage);
 		}

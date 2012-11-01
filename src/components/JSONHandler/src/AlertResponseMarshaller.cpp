@@ -52,7 +52,7 @@ bool AlertResponseMarshaller::fromJSON(const Json::Value& json,AlertResponse& c)
     
     if(!json.isMember("jsonrpc"))  return false;
 
-    if(!json.isMember("result"))
+    if(json.isMember("result"))
     {
         Result r;
         if(!ResultMarshaller::fromJSON(json["result"],r)) return false;
@@ -63,7 +63,7 @@ bool AlertResponseMarshaller::fromJSON(const Json::Value& json,AlertResponse& c)
         if (!json.isMember("error"))
             return false;
         //TODO: error marshaller
-    }     
+    }  
 
     if(!json.isMember("id")) return false;
 
