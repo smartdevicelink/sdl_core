@@ -207,6 +207,21 @@ FFW.UI = FFW.RPCObserver.create({
 			};
 			this.client.send(JSONMessage);
 		}
+
+		if (request.method == "UI.AddCommand") {
+			
+			MFT.AppRightMenuView.AddCommand(request.params.cmdId, request.params.menuParams);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	{
+					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+				}
+			};
+			this.client.send(JSONMessage);
+		}
 	},
 	
 	/*

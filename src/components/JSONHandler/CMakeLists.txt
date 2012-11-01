@@ -196,6 +196,10 @@ set (SOURCES
     ./src/ActivateApp.cpp
     ./src/ActivateAppResponseMarshaller.cpp
     ./src/ActivateAppResponse.cpp
+    ./src/AddCommand.cpp
+    ./src/AddCommandMarshaller.cpp
+    ./src/AddCommandResponse.cpp
+    ./src/AddCommandResponseMarshaller.cpp
 )
 
 add_library("JSONHandler" ${SOURCES} ${GENERATED_SOURCES})

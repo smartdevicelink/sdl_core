@@ -7,6 +7,7 @@ set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3")
 set(CMAKE_EXE_LINKER_FLAGS "-m")
+option( BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 
 # Building application
 
@@ -20,6 +21,15 @@ add_subdirectory(./src/components)
 add_subdirectory(./src/appMain)
 
 # Building tests
+option(BUILD_TESTS "Possibility to build and run tests" OFF)
+if(BUILD_TESTS)
+    enable_testing()    
+    # Framework GoogleTest is also integrated together gmock
+    # and must not be added separately
+    add_subdirectory(./src/thirdPartyLibs/gmock-1.6.0)
+    add_subdirectory(./test)
+endif()
+
 
 # Building documentation
 

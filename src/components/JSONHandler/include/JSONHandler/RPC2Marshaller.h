@@ -22,6 +22,8 @@
 #include "JSONHandler/OnAppUnregisteredMarshaller.h"
 #include "JSONHandler/ActivateAppMarshaller.h"
 #include "JSONHandler/ActivateAppResponseMarshaller.h"
+#include "JSONHandler/AddCommandMarshaller.h"
+#include "JSONHandler/AddCommandResponseMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -48,7 +50,9 @@ namespace RPC2Communication
         METHOD_ONAPPREGISTERED=14,
         METHOD_ONAPPUNREDISTERED=15,
         METHOD_ACTIVATEAPP_REQUEST=16,
-        METHOD_ACTIVATEAPP_RESPONSE=17
+        METHOD_ACTIVATEAPP_RESPONSE=17,
+        METHOD_ADDCOMMAND_REQUEST=18,
+        METHOD_ADDCOMMAND_RESPONSE=19
         };
 
         RPC2Marshaller();
@@ -239,6 +243,21 @@ namespace RPC2Communication
         {
             return mActivateAppResponseMarshaller.toString(res);
         }
+        static bool fromString(const std::string& str, AddCommand&res)
+        {
+            return mAddCommandMarshaller.fromString(str, res);
+        }
+        static std::string toString(const AddCommand& res)
+        {
+            return mAddCommandMarshaller.toString(res);
+        }
+        static bool fromString(const std::string& str, AddCommandResponse&res)
+        {
+            return mAddCommandResponseMarshaller.fromString(str, res);
+        }static std::string toString(const AddCommandResponse& res)
+        {
+            return mAddCommandResponseMarshaller.toString(res);
+        }
 
     private:
         struct localHash
@@ -279,6 +298,8 @@ namespace RPC2Communication
         static OnAppUnregisteredMarshaller mOnAppUnregisteredMarshaller;
         static ActivateAppMarshaller mActivateAppMarshaller;
         static ActivateAppResponseMarshaller mActivateAppResponseMarshaller;
+        static AddCommandMarshaller mAddCommandMarshaller;
+        static AddCommandResponseMarshaller mAddCommandResponseMarshaller;
     };
 
 }
