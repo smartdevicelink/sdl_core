@@ -19,7 +19,7 @@ namespace RPC2Communication
 
         void setMenuId( int menuId );
         void setPosition( int position );
-        void setMenuName( std::string & menuName );
+        void setMenuName( const std::string & menuName );
 
     private:
         int menuId;

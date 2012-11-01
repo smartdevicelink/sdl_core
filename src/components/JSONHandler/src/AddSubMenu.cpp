@@ -47,7 +47,7 @@ void AddSubMenu::setPosition( int  position )
     this->position = new int(position);
 }
 
-void AddSubMenu::setMenuName( std::string & menuName )
+void AddSubMenu::setMenuName( const std::string & menuName )
 {
     this->menuName = menuName;
 }
