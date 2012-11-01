@@ -20,6 +20,7 @@
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"
 #include "JSONHandler/OnButtonEvent.h"
+#include "JSONHandler/OnCommand.h"
 #include "JSONHandler/RPC2Marshaller.h"
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/RPC2Request.h"
@@ -357,6 +358,13 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO(mLogger, "OnButtonPress Notification has been received.");
             core->mJSONHandler->sendRPCMessage(message.first, sessionID);
+            break;
+        }
+        case Marshaller::METHOD_ONCOMMAND:
+        {
+            LOG4CPLUS_INFO(mLogger, "OnCommand Notification has been received.");
+            core->mJSONHandler->sendRPCMessage(message.first, sessionID);
+            break;
         }
         case Marshaller::METHOD_ADDCOMMAND_REQUEST:
         {
@@ -501,6 +509,14 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             LOG4CPLUS_INFO_EXT(mLogger, "sessionID found " << sessionID);
             Message message = Message(event, sessionID);
             core->sendMobileRPCResponse( message );
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_UIONCOMMAND_NOTIFICATION:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand notification has been invoked");
+            RPC2Communication::OnCommand* object = (RPC2Communication::OnCommand*)msg;
+            OnCommand* event = new OnCommand();
+            event->set_cmdID(object->getCommandId());
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_GET_CAPABILITIES_RESPONSE:
