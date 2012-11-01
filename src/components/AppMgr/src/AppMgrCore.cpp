@@ -30,8 +30,11 @@
 #include "JSONHandler/AddCommandResponse.h"
 #include "JSONHandler/DeleteCommand.h"
 #include "JSONHandler/DeleteCommandResponse.h"
+#include "JSONHandler/AddSubMenu.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_request.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_response.h"
+#include "JSONHandler/ALRPCObjects/AddSubMenu_request.h"
+#include "JSONHandler/ALRPCObjects/AddSubMenu_response.h"
 #include "JSONHandler/ALRPCObjects/DeleteCommand_request.h"
 #include "JSONHandler/ALRPCObjects/DeleteCommand_response.h"
 #include <sys/socket.h>
@@ -352,6 +355,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             RPC2Communication::AddCommand* addCmd = new RPC2Communication::AddCommand();
             core->mapMessageToSession(addCmd->getID(), sessionID);
             addCmd->setCmdId(object->get_cmdID());
+            core->mCommandMapping.addCommand(object->get_cmdID(), AppMgrRegistry::getInstance().getItem(sessionID));
             if(object->get_menuParams())
             {
                 addCmd->setMenuParams(*object->get_menuParams());
@@ -366,7 +370,23 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             RPC2Communication::DeleteCommand* deleteCmd = new RPC2Communication::DeleteCommand();
             core->mapMessageToSession(deleteCmd->getID(), sessionID);
             deleteCmd->setCmdId(object->get_cmdID());
+            core->mCommandMapping.removeCommand(object->get_cmdID());
             core->mJSONRPC2Handler->sendRequest(deleteCmd);
+            break;
+        }
+        case Marshaller::METHOD_ADDSUBMENU_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
+            AddSubMenu_request* object = (AddSubMenu_request*)message.first;
+            RPC2Communication::AddSubMenu* addSubMenu = new RPC2Communication::AddSubMenu();
+            core->mapMessageToSession(addSubMenu->getID(), sessionID);
+            addSubMenu->setMenuId(object->get_menuID());
+            addSubMenu->setMenuName(object->get_menuName());
+            if(object->get_position())
+            {
+                addSubMenu->setPosition(*object->get_position());
+            }
+            core->mJSONRPC2Handler->sendRequest(addSubMenu);
             break;
         }
         case Marshaller::METHOD_DELETESUBMENU_REQUEST:
@@ -494,6 +514,15 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             RPC2Communication::OnCommand* object = (RPC2Communication::OnCommand*)msg;
             OnCommand* event = new OnCommand();
             event->set_cmdID(object->getCommandId());
+            RegistryItem* item = core->mCommandMapping.findRegistryItemAssignedToCommand(object->getCommandId());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
+            LOG4CPLUS_INFO_EXT(mLogger, "sessionID found " << sessionID);
+            core->mJSONHandler->sendRPCMessage(event, sessionID);
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_GET_CAPABILITIES_RESPONSE:
@@ -837,11 +866,6 @@ void AppMgrCore::setJsonRPC2Handler(JSONRPC2Handler *handler)
 JSONRPC2Handler *AppMgrCore::getJsonRPC2Handler() const
 {
     return mJSONRPC2Handler;
-}
-
-bool Comparer::operator ()(const ButtonName &b1, const ButtonName &b2) const
-{
-    return b1.get() < b2.get();
 }
 
 }

@@ -11,6 +11,7 @@
 #include <string>
 #include <map>
 #include "AppMgr/ButtonMapping.h"
+#include "AppMgr/CommandMapping.h"
 #include "JSONHandler/GetCapabilitiesResponse.h"
 
 class RegisterAppInterface_request;
@@ -87,6 +88,7 @@ private:
 
 	Capabilities mButtonCapabilities;
     ButtonMapping    mButtonsMapping;
+    CommandMapping   mCommandMapping;
     MessagesToSessions mMessagesToSessionsMap;
 	
 	JSONHandler* mJSONHandler;
