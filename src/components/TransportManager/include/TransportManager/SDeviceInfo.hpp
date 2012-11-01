@@ -58,6 +58,11 @@ namespace NsAppLink
              * @brief User-friendly device name.
              **/
             std::string mUserFriendlyName;
+
+            /**
+             * @brief Unique device identifier across all devices
+             **/
+            std::string mUniqueDeviceId;
         };
 
         /**
