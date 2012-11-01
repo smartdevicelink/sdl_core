@@ -63,6 +63,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_UIONCOMMAND_NOTIFICATION;
     }
+    if ( s.compare("UI.AddSubMenu") == 0 )
+    {
+        return METHOD_ADDSUBMENU_REQUEST;
+    }
     
     return METHOD_INVALID;
 }
@@ -327,6 +331,14 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_ADDSUBMENU_REQUEST:
+    {
+        AddSubMenu * rv = new AddSubMenu;
+        if (AddSubMenuMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
 
   }
 
@@ -391,6 +403,8 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return DeleteCommandResponseMarshaller::toJSON(*static_cast<const DeleteCommandResponse*>(msg));
     case METHOD_UIONCOMMAND_NOTIFICATION:
       return OnCommandMarshaller::toJSON(*static_cast<const OnCommand*>(msg));
+    case METHOD_ADDSUBMENU_REQUEST:
+      return AddSubMenuMarshaller::toJSON(*static_cast<const AddSubMenu*>(msg));
   }
 
   return j;
@@ -446,3 +460,4 @@ AddCommandResponseMarshaller RPC2Marshaller::mAddCommandResponseMarshaller;
 DeleteCommandMarshaller RPC2Marshaller::mDeleteCommandMarshaller;
 DeleteCommandResponseMarshaller RPC2Marshaller::mDeleteCommandResponseMarshaller;
 OnCommandMarshaller RPC2Marshaller::mOnCommandMarshaller;
+AddSubMenuMarshaller RPC2Marshaller::mAddSubMenuMarshaller;
