@@ -28,6 +28,7 @@
 #include "JSONHandler/DeleteCommandResponseMarshaller.h"
 #include "JSONHandler/OnCommandMarshaller.h"
 #include "JSONHandler/AddSubMenuMarshaller.h"
+#include "JSONHandler/AddSubMenuResponseMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -60,7 +61,8 @@ namespace RPC2Communication
         METHOD_DELETECOMMAND_REQUEST=20,
         METHOD_DELETECOMMAND_RESPONSE=21,
         METHOD_UIONCOMMAND_NOTIFICATION=22,
-        METHOD_ADDSUBMENU_REQUEST=23
+        METHOD_ADDSUBMENU_REQUEST=23,
+        METHOD_ADDSUBMENU_RESPONSE=24
         };
 
         RPC2Marshaller();
@@ -309,6 +311,16 @@ namespace RPC2Communication
             return mAddSubMenuMarshaller.toString(res);
         }
 
+        static bool fromString(const std::string &str, AddSubMenuResponse& res)
+        {
+            return mAddSubMenuResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const AddSubMenuResponse& res)
+        {
+            return mAddSubMenuResponseMarshaller.toString(res);
+        }
+
     private:
         struct localHash
         {
@@ -354,6 +366,7 @@ namespace RPC2Communication
         static DeleteCommandResponseMarshaller mDeleteCommandResponseMarshaller;
         static OnCommandMarshaller mOnCommandMarshaller;
         static AddSubMenuMarshaller mAddSubMenuMarshaller;
+        static AddSubMenuResponseMarshaller mAddSubMenuResponseMarshaller;
     };
 
 }

@@ -208,6 +208,8 @@ set (SOURCES
     ./src/OnCommandMarshaller.cpp
     ./src/AddSubMenu.cpp
     ./src/AddSubMenuMarshaller.cpp
+    ./src/AddSubMenuResponse.cpp
+    ./src/AddSubMenuResponseMarshaller.cpp
 )
 
 add_library("JSONHandler" ${SOURCES} ${GENERATED_SOURCES})
