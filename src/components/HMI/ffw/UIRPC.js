@@ -212,6 +212,19 @@ FFW.UI = FFW.RPCObserver.create({
 			};
 			this.client.send(JSONMessage);
 		}
+
+		if (request.method == "UI.DeleteCommand") {
+			
+			MFT.AppRightMenuView.DeleteCommand(request.params.cmdId);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
 	},
 	
 	/*

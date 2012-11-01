@@ -12,7 +12,7 @@
  */
 
 // all classes belong from namespace example
-interface RPC2Communication;
+interface RPC2Communication::UI;
 
 version "1.2";
 
@@ -131,7 +131,7 @@ DeleteSubMenu(
    */ 
 CreateInteractionChoiceSet(
   int (0..2000000000) interactionChoiceSetID,
-  Choice[1..100] choiceSet   // data type from AppLink protocol specification
+  Choice choiceSet[1..100]   // data type from AppLink protocol specification
   -> ) // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -159,11 +159,11 @@ DeleteInteractionChoiceSet(
    */ 
 PerformInteraction(
   string(500) initialText,
-  TTSChunk[1..100] initialPrompt, //data type from AppLink protocol specification
+  TTSChunk initialPrompt[1..100], //data type from AppLink protocol specification
   InteractionMode interactionMode, // data type from AppLink protocol specification
-  int (0..2000000000) [1..100] interactionChoiceSetIDList,// List of interaction choice set IDs to use with an interaction
-  TTSChunk[1..100] * helpPrompt, //data type from AppLink protocol specification
-  TTSChunk[1..100] * timeoutPrompt, // data type from AppLink protocol specification
+  int (0..2000000000)  interactionChoiceSetIDList[1..100],// List of interaction choice set IDs to use with an interaction
+  TTSChunk * helpPrompt[1..100], //data type from AppLink protocol specification
+  TTSChunk * timeoutPrompt[1..100], // data type from AppLink protocol specification
   int (5000..100000) * timeout //in milliseconds
   -> 
   int (0..2000000000) * choiceID, // ID of the choice that was selected in response to PerformInteraction
@@ -196,8 +196,8 @@ SetMediaClockTimer(
    *  result code
    */ 
 SetGlobalProperties(
-  TTSChunk[1..100] * helpPrompt, // data type from AppLink protocol specification
-  TTSChunk[1..100] * timeoutPrompt // data type from AppLink protocol specification
+  TTSChunk * helpPrompt[1..100], // data type from AppLink protocol specification
+  TTSChunk * timeoutPrompt[1..100] // data type from AppLink protocol specification
   -> ) // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -211,7 +211,7 @@ SetGlobalProperties(
    *  result code
    */ 
 ResetGlobalProperties(
-  GlobalProperty[1..100] properties // enum, data type from AppLink protocol specification
+  GlobalProperty properties[1..100] // enum, data type from AppLink protocol specification
   -> ) // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -267,7 +267,7 @@ GetDisplayCapabilities(
    */ 
 GetHmiZoneCapabilities(
   ->
-  HmiZoneCapabilities[1..100] capabilities // data type from AppLink protocol specification
+  HmiZoneCapabilities capabilities[1..100] // data type from AppLink protocol specification
   )
 
 /*

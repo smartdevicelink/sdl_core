@@ -62,20 +62,41 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 		text:		'bottom'
 	}),
 
-	AddCommand: function(){
+	AddCommand: function( commandId, params){
+
+		//parentID
+		//position
+		//menuName
 
 		button = MFT.Button.create({
-			elementId:			'media_rightmenu_softButton' + '',
-			action:				null,
-			target:				null,
+			elementId:			'media_rightmenu_softButton' + commandId,
+			action:				'onCommand()',
+			commandId:			commandId, 
 			classNames:			['rs-item'],
 			//icon:				null,//'images/media/active_arrow.png',
-			text:				'Browse',
-			//onDown: false,
-			//templateName: 'text'
+			text:				params.menuName,
+			onCommand:		function(){
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	FFW.UI.client.idStart,
+					"method"	:	"UI.OnCommand",
+					"params"	:	{"commandId":this.commandId, }
+				};
+				this.client.send(JSONMessage);
+			}
 		});
 
 		MFT.AppRightMenuView.scrollWrapper.scroller.get('childViews').pushObject(button);
+		MFT.AppRightMenuView.scroll.refresh();
+	},
+
+	DeleteCommand: function(commandId){
+
+		//parentID
+		//position
+		//menuName
+
+		Ember.View.views['media_rightmenu_softButton' + commandId].destroy();
 		MFT.AppRightMenuView.scroll.refresh();
 	},
 
