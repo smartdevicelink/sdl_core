@@ -10,6 +10,7 @@
 
 #include <string>
 #include <map>
+#include "AppMgr/ButtonMapping.h"
 #include "JSONHandler/GetCapabilitiesResponse.h"
 
 class RegisterAppInterface_request;
@@ -36,15 +37,8 @@ namespace NsAppManager
 class RegistryItem;
 template< class QueueType >
 class AppMgrCoreQueue;
-class ButtonMapping;
-
-struct Comparer {
-    bool operator() (const ButtonName &b1, const ButtonName &b2) const;
-};
 
 typedef std::vector<ButtonCapabilities> Capabilities;
-typedef std::map<ButtonName, RegistryItem*, Comparer> ButtonMap;
-typedef std::pair<ButtonName, RegistryItem*> ButtonMapItem;
 typedef std::pair<ALRPCMessage*, unsigned char> Message;
 typedef std::map<int, unsigned char> MessagesToSessions;
 typedef std::pair<int, unsigned char> MessageToSession;
@@ -79,11 +73,7 @@ private:
     const ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
     const RegistryItem* registerApplication(const Message &msg );
     void unregisterApplication(const Message &msg );
-    void subscribeButton(const Message &msg );
-    void unsubscribeButton(const Message &msg );
-    unsigned char findSessionIdSubscribedToButton(ButtonName appName) const;
     unsigned char findSessionIdByMessage(int messageId) const;
-    void clearButtonSubscribtion(unsigned char sessionID);
     void sendMobileRPCResponse( const Message &msg );
     void sendMobileRPCNotification( ALRPCMessage* msg );
     void sendHMIRPC2Response( RPC2Communication::RPC2Command * msg );
@@ -102,7 +92,7 @@ private:
     AppMgrCoreQueue<ALRPCMessage*>* mQueueMobileRPCNotificationsOutgoing;
 
 	Capabilities mButtonCapabilities;
-    ButtonMap    mButtonsMapping;
+    ButtonMapping    mButtonsMapping;
     MessagesToSessions mMessagesToSessionsMap;
 	
 	JSONHandler* mJSONHandler;

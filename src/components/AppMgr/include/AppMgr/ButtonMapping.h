@@ -24,9 +24,11 @@ typedef std::pair<ButtonName, RegistryItem*> ButtonMapItem;
 class ButtonMapping
 {
 public:
+    ButtonMapping();
     void addButton( const ButtonName& buttonName, RegistryItem* app );
     void removeButton(const ButtonName& buttonName);
     void removeItem( RegistryItem* app );
+    RegistryItem *findRegistryItemSubscribedToButton(const ButtonName &appName) const;
 
 private:
     ButtonMapping(const ButtonMapping&);

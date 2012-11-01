@@ -213,7 +213,8 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             delete command; */
 
             SubscribeButton_request * object = (SubscribeButton_request*)message.first;
-            core->subscribeButton( message );
+            RegistryItem* item = AppMgrRegistry::getInstance().getItem(message.second);
+            core->mButtonsMapping.addButton( object->get_buttonName(), item );
             SubscribeButton_response* response = new SubscribeButton_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(ALRPCMessage::RESPONSE);
@@ -228,7 +229,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeButton request has been invoked");
             UnsubscribeButton_request * object = (UnsubscribeButton_request*)message.first;
-            core->unsubscribeButton( message );
+            core->mButtonsMapping.removeButton( object->get_buttonName() );
             UnsubscribeButton_response* response = new UnsubscribeButton_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(ALRPCMessage::RESPONSE);
@@ -470,7 +471,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             event->set_buttonEventMode(object->getMode());
             const ButtonName & name = object->getName();
             event->set_buttonName(name);
-            unsigned char sessionID = core->findSessionIdSubscribedToButton(name);
+            RegistryItem* item = core->mButtonsMapping.findRegistryItemSubscribedToButton(name);
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             Message message = Message(event, sessionID);
             core->sendMobileRPCResponse( message );
             break;
@@ -484,7 +491,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             event->set_buttonName(name);
             event->set_buttonPressMode(object->getMode());
             LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
-            unsigned char sessionID = core->findSessionIdSubscribedToButton(name);
+            RegistryItem* item = core->mButtonsMapping.findRegistryItemSubscribedToButton(name);
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             LOG4CPLUS_INFO_EXT(mLogger, "sessionID found " << sessionID);
             Message message = Message(event, sessionID);
             core->sendMobileRPCResponse( message );
@@ -727,25 +740,6 @@ void AppMgrCore::removeMessageToSessionMapping(int messageId)
     mMessagesToSessionsMap.erase(messageId);
 }
 
-unsigned char AppMgrCore::findSessionIdSubscribedToButton( ButtonName appName ) const
-{
-    ButtonMap::const_iterator it = mButtonsMapping.find( appName );
-    if ( it != mButtonsMapping.end() )
-    {
-        if ( !it-> second )
-        {
-            LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found" );
-            return '0';
-        }
-        if ( it->second->getApplication() )
-        {
-            return it->second->getApplication()->getSessionID();
-        }
-    }
-    LOG4CPLUS_INFO_EXT(mLogger, "Button " << appName.get() << " not found in subscribed." );
-    return '0';
-}
-
 unsigned char AppMgrCore::findSessionIdByMessage(int messageId) const
 {
     return mMessagesToSessionsMap.find(messageId)->second;
@@ -807,41 +801,9 @@ void AppMgrCore::unregisterApplication(const Message &msg)
     RegistryItem* app = AppMgrRegistry::getInstance().getItem(sessionID);
     const std::string& appName = app->getApplication()->getName();
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName << "!");
-    clearButtonSubscribtion(sessionID);
+    mButtonsMapping.removeItem(app);
     AppMgrRegistry::getInstance().unregisterApplication(app);
-
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName << "!");
-}
-
-void AppMgrCore::subscribeButton( const Message& msg )
-{
-    ALRPCMessage* message = msg.first;
-    unsigned char sessionID = msg.second;
-    SubscribeButton_request * object = (SubscribeButton_request*)message;
-    const ButtonName& name = object->get_buttonName();
-    RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
-    LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to button " << name.get() << " in session " << sessionID );
-    mButtonsMapping.insert(ButtonMapItem(name, item));
-}
-
-void AppMgrCore::unsubscribeButton(const Message& msg )
-{
-    ALRPCMessage* message = msg.first;
-    unsigned char sessionID = msg.second;
-    UnsubscribeButton_request * object = (UnsubscribeButton_request*)message;
-    const ButtonName& name = object->get_buttonName();
-    mButtonsMapping.erase(name);
-}
-
-void AppMgrCore::clearButtonSubscribtion(unsigned char sessionID)
-{
-    for(ButtonMap::iterator it = mButtonsMapping.begin(); it != mButtonsMapping.end(); it++)
-    {
-        if(it->second->getApplication()->getSessionID() == sessionID)
-        {
-            mButtonsMapping.erase(it->first);
-        }
-    }
 }
 
 const ALRPCMessage* AppMgrCore::queryInfoForRegistration(const RegistryItem* registryItem)
