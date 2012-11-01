@@ -1,5 +1,7 @@
 #include <errno.h>
+#include <fcntl.h>
 #include <iomanip>
+#include <poll.h>
 #include <set>
 #include <unistd.h>
 
@@ -16,6 +18,31 @@
 #include "CBluetoothAdapter.hpp"
 
 #define LOG4CPLUS_ERROR_EXT_WITH_ERRNO(logger, message) LOG4CPLUS_ERROR_EXT(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
+
+NsAppLink::NsTransportManager::CBluetoothAdapter::SFrame::SFrame(const uint8_t* Data, const size_t DataSize):
+mData(0),
+mDataSize(0)
+{
+    if ((0 != mData) &&
+        (0u != mDataSize))
+    {
+        mData = new uint8_t[DataSize];
+
+        if (0 != mData)
+        {
+            mDataSize = DataSize;
+            memcpy(mData, Data, DataSize);
+        }
+    }
+}
+
+NsAppLink::NsTransportManager::CBluetoothAdapter::SFrame::~SFrame(void)
+{
+    if (0 != mData)
+    {
+        delete [] mData;
+    }
+}
 
 NsAppLink::NsTransportManager::CBluetoothAdapter::SBluetoothDevice::SBluetoothDevice(void):
 mAddress(),
@@ -42,8 +69,21 @@ NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::SRFCOMMConn
 mDeviceHandle(DeviceHandle),
 mRFCOMMChannel(RFCOMMChannel),
 mConnectionThread(),
+mNotificationPipeFds(),
+mNextFrameSequenceNumber(0),
+mFramesToSend(),
 mTerminateFlag(false)
 {
+    mNotificationPipeFds[0] = mNotificationPipeFds[1] = -1;
+}
+
+NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnection::~SRFCOMMConnection(void)
+{
+    for (tFrameMap::iterator frameIterator = mFramesToSend.begin(); frameIterator != mFramesToSend.end(); ++frameIterator)
+    {
+        delete frameIterator->second;
+    }
+    mFramesToSend.clear();
 }
 
 NsAppLink::NsTransportManager::CBluetoothAdapter::SRFCOMMConnectionParameters::SRFCOMMConnectionParameters(NsAppLink::NsTransportManager::CBluetoothAdapter & BluetoothAdapter, NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle):
@@ -94,6 +134,14 @@ NsAppLink::NsTransportManager::CBluetoothAdapter::~CBluetoothAdapter(void)
         if (0 != connection)
         {
             connection->mTerminateFlag = true;
+            if (-1 != connection->mNotificationPipeFds[1])
+            {
+                uint8_t c = 0;
+                if (1 != write(connection->mNotificationPipeFds[1], &c, 1))
+                {
+                    LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to wake up connection thread for connection " << connectionIterator->first);
+                }
+            }
             connectionThreads.push_back(connection->mConnectionThread);
         }
         else
@@ -151,11 +199,62 @@ NsAppLink::NsTransportManager::EDeviceType NsAppLink::NsTransportManager::CBluet
     return DeviceBluetooth;
 }
 
-int NsAppLink::NsTransportManager::CBluetoothAdapter::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const NsAppLink::NsTransportManager::Blob& Data)
+int NsAppLink::NsTransportManager::CBluetoothAdapter::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
-    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+    int frameSequenceNumber = -1;
 
-    return -1;
+    if (0u == DataSize)
+    {
+        LOG4CPLUS_WARN_EXT(mLogger, "DataSize=0");
+    }
+    else if (0 == Data)
+    {
+        LOG4CPLUS_WARN_EXT(mLogger, "Data is null");
+    }
+    else
+    {
+        pthread_mutex_lock(&mRFCOMMConnectionsMutex);
+
+        tRFCOMMConnectionMap::iterator connectionIterator = mRFCOMMConnections.find(ConnectionHandle);
+
+        if (mRFCOMMConnections.end() == connectionIterator)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "Connection " << ConnectionHandle << " does not exist");
+        }
+        else
+        {
+            SRFCOMMConnection * connection = connectionIterator->second;
+
+            if (0 != connection)
+            {
+                frameSequenceNumber = connection->mNextFrameSequenceNumber++;
+
+                if (connection->mFramesToSend.find(frameSequenceNumber) == connection->mFramesToSend.end())
+                {
+                    connection->mFramesToSend[frameSequenceNumber] = new SFrame(Data, DataSize);
+
+                    if (-1 != connection->mNotificationPipeFds[1])
+                    {
+                        uint8_t c = 0;
+                        if (1 != write(connection->mNotificationPipeFds[1], &c, 1))
+                        {
+                            LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to wake up connection thread for connection " << connectionIterator->first);
+                        }
+                    }
+                }
+                else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "Sequence number " << frameSequenceNumber << " is already present in the map");
+
+                    frameSequenceNumber = -1;
+                }
+            }
+        }
+
+        pthread_mutex_unlock(&mRFCOMMConnectionsMutex);
+    }
+
+    return frameSequenceNumber;
 }
 
 void NsAppLink::NsTransportManager::CBluetoothAdapter::startRFCOMMConnection(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, const uint8_t RFCOMMChannel)
@@ -245,8 +344,16 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::stopRFCOMMConnection(cons
             if (false == connection->mTerminateFlag)
             {
                 connection->mTerminateFlag = true;
+                if (-1 != connection->mNotificationPipeFds[1])
+                {
+                    uint8_t c = 0;
+                    if (1 != write(connection->mNotificationPipeFds[1], &c, 1))
+                    {
+                        LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to wake up connection thread for connection " << connectionIterator->first);
+                    }
+                }
 
-                LOG4CPLUS_WARN_EXT(mLogger, "Connection " << ConnectionHandle << "(device " << connection->mDeviceHandle << " channel " << static_cast<uint32_t>(connection->mRFCOMMChannel) << ") has been marked for termination");
+                LOG4CPLUS_INFO_EXT(mLogger, "Connection " << ConnectionHandle << "(device " << connection->mDeviceHandle << " channel " << static_cast<uint32_t>(connection->mRFCOMMChannel) << ") has been marked for termination");
             }
             else
             {
@@ -655,60 +762,201 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const Ns
 
             if (true == isDeviceValid)
             {
-                int rfcommSocket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+                pthread_mutex_lock(&mRFCOMMConnectionsMutex);
+                bool isPipeCreated = (0 == pipe(connection->mNotificationPipeFds));
+                int notificationPipeReadFd = connection->mNotificationPipeFds[0];
+                pthread_mutex_unlock(&mRFCOMMConnectionsMutex);
 
-                if (-1 != rfcommSocket)
+                if (true == isPipeCreated)
                 {
-                    char remoteDeviceAddressString[32];
-                    ba2str(&remoteSocketAddress.rc_bdaddr, remoteDeviceAddressString);
+                    isPipeCreated = (0 == fcntl(notificationPipeReadFd, F_SETFL, fcntl(notificationPipeReadFd, F_GETFL) | O_NONBLOCK));
 
-                    if (0 == connect(rfcommSocket, (struct sockaddr *)&remoteSocketAddress, sizeof(remoteSocketAddress)))
+                    if (false == isPipeCreated)
                     {
-                        LOG4CPLUS_INFO_EXT(mLogger, "Connection " << ConnectionHandle << " to remote device " << remoteDeviceAddressString << " established");
+                        LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to set O_NONBLOCK for notification pipe for connection " << ConnectionHandle);
+                    }
+                }
 
-                        while (false == connection->mTerminateFlag)
+                if (true == isPipeCreated)
+                {
+                    int rfcommSocket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+
+                    if (-1 != rfcommSocket)
+                    {
+                        char remoteDeviceAddressString[32];
+                        ba2str(&remoteSocketAddress.rc_bdaddr, remoteDeviceAddressString);
+
+                        if (0 == connect(rfcommSocket, (struct sockaddr *)&remoteSocketAddress, sizeof(remoteSocketAddress)))
                         {
-                            uint8_t recvBuffer[4096];
+                            LOG4CPLUS_INFO_EXT(mLogger, "Connection " << ConnectionHandle << " to remote device " << remoteDeviceAddressString << " established");
 
-                            ssize_t bytesReceived = recv(rfcommSocket, recvBuffer, sizeof(recvBuffer), MSG_DONTWAIT);
+                            pollfd pollFds[2];
+                            pollFds[0].fd = rfcommSocket;
+                            pollFds[0].events = POLLIN | POLLPRI;
+                            pollFds[1].fd = connection->mNotificationPipeFds[0];
+                            pollFds[1].events = POLLIN | POLLPRI;
 
-                            if ((bytesReceived < 0) &&
-                                ((EAGAIN == errno) ||
-                                 (EWOULDBLOCK == errno)))
+                            while (false == connection->mTerminateFlag)
                             {
-                                bytesReceived = 0;
-                            }
-
-                            if (bytesReceived >= 0)
-                            {
-                                if (bytesReceived > 0)
+                                if (-1 != poll(pollFds, sizeof(pollFds) / sizeof(pollFds[0]), -1))
                                 {
-                                    LOG4CPLUS_INFO_EXT(mLogger, "Received " << bytesReceived << " bytes for connection " << ConnectionHandle);
+                                    if (0 != (pollFds[0].revents & (POLLERR | POLLHUP | POLLNVAL)))
+                                    {
+                                        LOG4CPLUS_INFO_EXT(mLogger, "Connection " << ConnectionHandle << " terminated");
 
-                                    mListener.onFrameReceived(this, ConnectionHandle, recvBuffer, static_cast<size_t>(bytesReceived));
+                                        connection->mTerminateFlag = true;
+                                    }
+                                    else if (0 != (pollFds[1].revents & (POLLERR | POLLHUP | POLLNVAL)))
+                                    {
+                                        LOG4CPLUS_ERROR_EXT(mLogger, "Notification pipe for connection " << ConnectionHandle << " terminated");
+
+                                        connection->mTerminateFlag = true;
+                                    }
+                                    else
+                                    {
+                                        uint8_t buffer[4096];
+                                        ssize_t bytesRead = -1;
+
+                                        if (0 != pollFds[0].revents)
+                                        {
+                                            do
+                                            {
+                                                bytesRead = recv(rfcommSocket, buffer, sizeof(buffer), MSG_DONTWAIT);
+
+                                                if ((bytesRead < 0) &&
+                                                    ((EAGAIN == errno) ||
+                                                     (EWOULDBLOCK == errno)))
+                                                {
+                                                    bytesRead = 0;
+                                                }
+
+                                                if (bytesRead >= 0)
+                                                {
+                                                    if (bytesRead > 0)
+                                                    {
+                                                        LOG4CPLUS_INFO_EXT(mLogger, "Received " << bytesRead << " bytes for connection " << ConnectionHandle);
+
+                                                        mListener.onFrameReceived(this, ConnectionHandle, buffer, static_cast<size_t>(bytesRead));
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "recv() failed for connection " << ConnectionHandle);
+
+                                                    connection->mTerminateFlag = true;
+                                                }
+                                            } while (bytesRead > 0);
+                                        }
+
+                                        if ((false == connection->mTerminateFlag) &&
+                                            (0 != pollFds[1].revents))
+                                        {
+                                            do
+                                            {
+                                                bytesRead = read(notificationPipeReadFd, buffer, sizeof(buffer));
+                                            } while (bytesRead > 0);
+
+                                            if ((bytesRead < 0) &&
+                                                (EAGAIN != errno))
+                                            {
+                                                LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to clear notification pipe for connection " << ConnectionHandle);
+
+                                                connection->mTerminateFlag = true;
+                                            }
+
+                                            tFrameMap framesToSend;
+
+                                            pthread_mutex_lock(&mRFCOMMConnectionsMutex);
+                                            framesToSend.swap(connection->mFramesToSend);
+                                            pthread_mutex_unlock(&mRFCOMMConnectionsMutex);
+
+                                            for (tFrameMap::iterator frameIterator = framesToSend.begin(); frameIterator != framesToSend.end(); ++frameIterator)
+                                            {
+                                                int frameSequenceNumber = frameIterator->first;
+                                                SFrame * frame = frameIterator->second;
+                                                ESendStatus frameSendStatus = SendStatusUnknownError;
+
+                                                if (0 != frame)
+                                                {
+                                                    if ((0 != frame->mData) &&
+                                                        (0u != frame->mDataSize))
+                                                    {
+                                                        ssize_t bytesSent = send(rfcommSocket, frame->mData, frame->mDataSize, 0);
+
+                                                        if (static_cast<size_t>(bytesSent) == frame->mDataSize)
+                                                        {
+                                                            frameSendStatus = SendStatusOK;
+                                                        }
+                                                        else
+                                                        {
+                                                            if (bytesSent >= 0)
+                                                            {
+                                                                LOG4CPLUS_ERROR_EXT(mLogger, "Sent " << bytesSent << " bytes while " << frame->mDataSize << " had been requested for connection " << ConnectionHandle << " frame " << frameSequenceNumber);
+                                                            }
+                                                            else
+                                                            {
+                                                                LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Send failed for connection " << ConnectionHandle << " frame " << frameSequenceNumber);
+                                                            }
+
+                                                            frameSendStatus = SendStatusFailed;
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        LOG4CPLUS_ERROR_EXT(mLogger, "Frame data is invalid for connection " << ConnectionHandle << " frame " << frameSequenceNumber);
+
+                                                        frameSendStatus = SendStatusInternalError;
+                                                    }
+
+                                                    delete frame;
+                                                }
+                                                else
+                                                {
+                                                    LOG4CPLUS_ERROR_EXT(mLogger, "Frame data is null for connection " << ConnectionHandle << " frame " << frameSequenceNumber);
+
+                                                    frameSendStatus = SendStatusInternalError;
+                                                }
+
+                                                mListener.onFrameSendCompleted(this, ConnectionHandle, frameSequenceNumber, frameSendStatus);
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "poll() failed for connection " << ConnectionHandle);
+
+                                    connection->mTerminateFlag = true;
                                 }
                             }
-                            else
-                            {
-                                LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "recv() failed for connection " << ConnectionHandle);
+                        }
+                        else
+                        {
+                            LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to connect to remote device " << remoteDeviceAddressString << " for connection " << ConnectionHandle);
+                        }
 
-                                connection->mTerminateFlag = true;
-                            }
+                        if (0 != close(rfcommSocket))
+                        {
+                            LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to close RFCOMM socket for connection " << ConnectionHandle);
                         }
                     }
                     else
                     {
-                        LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to connect to remote device " << remoteDeviceAddressString << " for connection " << ConnectionHandle);
+                        LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to create RFCOMM socket for connection " << ConnectionHandle);
                     }
 
-                    if (0 != close(rfcommSocket))
-                    {
-                        LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to close RFCOMM socket for connection " << ConnectionHandle);
-                    }
+                    pthread_mutex_lock(&mRFCOMMConnectionsMutex);
+
+                    close(connection->mNotificationPipeFds[0]);
+                    close(connection->mNotificationPipeFds[1]);
+
+                    connection->mNotificationPipeFds[0] = connection->mNotificationPipeFds[1] = -1;
+
+                    pthread_mutex_unlock(&mRFCOMMConnectionsMutex);
                 }
                 else
                 {
-                    LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to create RFCOMM socket for connection " << ConnectionHandle);
+                    LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to create notification pipe for connection " << ConnectionHandle);
                 }
             }
         }

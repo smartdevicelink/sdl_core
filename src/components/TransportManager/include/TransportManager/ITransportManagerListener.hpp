@@ -26,6 +26,16 @@ namespace NsAppLink
             SendStatusTimeout,
 
             /**
+             * @brief Sending frame has failed.
+             **/
+            SendStatusFailed,
+
+            /**
+             * @brief Transport manager internal error.
+             **/
+            SendStatusInternalError,
+
+            /**
              * @brief Unknown error.
              **/
             SendStatusUnknownError
