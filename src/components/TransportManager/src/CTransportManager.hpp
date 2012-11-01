@@ -47,18 +47,32 @@ namespace NsAppLink
             virtual void getDeviceList(tDeviceList & DeviceList) const;
 
             /**
-             * @brief Add listener.
+             * @brief Add listener to the data-related events
              *
              * @param Listener Pointer to listener.
              **/
-            virtual void addListener(ITransportManagerListener * Listener);
+            virtual void addDataListener(ITransportManagerDataListener * Listener);
 
             /**
-             * @brief Remove listener.
+             * @brief Remove listener to the data-related events.
              *
              * @param Listener Pointer to listener.
              **/
-            virtual void removeListener(ITransportManagerListener * Listener);
+            virtual void removeDataListener(ITransportManagerDataListener * Listener);
+
+            /**
+             * @brief Add listener to the device-related events.
+             *
+             * @param Listener Pointer to listener.
+             **/
+            virtual void addDeviceListener(ITransportManagerDeviceListener * Listener);
+
+            /**
+             * @brief Remove listenerto the device-related events.
+             *
+             * @param Listener Pointer to listener.
+             **/
+            virtual void removeDeviceListener(ITransportManagerDeviceListener * Listener);
 
             /**
              * @brief Send frame.

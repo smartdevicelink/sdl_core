@@ -35,12 +35,22 @@ void NsAppLink::NsTransportManager::CTransportManager::getDeviceList(NsAppLink::
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }
 
-void NsAppLink::NsTransportManager::CTransportManager::addListener(NsAppLink::NsTransportManager::ITransportManagerListener * Listener)
+void NsAppLink::NsTransportManager::CTransportManager::addDataListener(NsAppLink::NsTransportManager::ITransportManagerDataListener * Listener)
 {
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }
 
-void NsAppLink::NsTransportManager::CTransportManager::removeListener(NsAppLink::NsTransportManager::ITransportManagerListener * Listener)
+void NsAppLink::NsTransportManager::CTransportManager::removeDataListener(NsAppLink::NsTransportManager::ITransportManagerDataListener * Listener)
+{
+    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+}
+
+void NsAppLink::NsTransportManager::CTransportManager::addDeviceListener(NsAppLink::NsTransportManager::ITransportManagerDeviceListener * Listener)
+{
+    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+}
+
+void NsAppLink::NsTransportManager::CTransportManager::removeDeviceListener(NsAppLink::NsTransportManager::ITransportManagerDeviceListener * Listener)
 {
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }
