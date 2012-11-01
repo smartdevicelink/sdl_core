@@ -14,6 +14,8 @@ set (SOURCES
     ./src/CBluetoothAdapter.cpp
     ./src/CTransportManager.cpp
     ./src/SInternalDeviceInfo.cpp
+    ./src/ITransportManagerDeviceListener.cpp
+    ./src/ITransportManagerDataListener.cpp
 )
 
 add_library("TransportManager" ${SOURCES})
