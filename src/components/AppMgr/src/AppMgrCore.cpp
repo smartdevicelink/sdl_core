@@ -32,6 +32,8 @@
 #include "JSONHandler/DeleteCommandResponse.h"
 #include "JSONHandler/AddSubMenu.h"
 #include "JSONHandler/AddSubMenuResponse.h"
+#include "JSONHandler/DeleteSubMenu.h"
+#include "JSONHandler/DeleteSubMenuResponse.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_request.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_response.h"
 #include "JSONHandler/ALRPCObjects/AddSubMenu_request.h"
@@ -392,6 +394,12 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         }
         case Marshaller::METHOD_DELETESUBMENU_REQUEST:
         {
+            LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubmenu request has been invoked");
+            DeleteSubMenu_request* object = (DeleteSubMenu_request*)message.first;
+            RPC2Communication::DeleteSubMenu* delSubMenu = new RPC2Communication::DeleteSubMenu();
+            core->mapMessageToSession(delSubMenu->getID(), sessionID);
+            delSubMenu->setMenuId(object->get_menuID());
+            core->mJSONRPC2Handler->sendRequest(delSubMenu);
             break;
         }
         case Marshaller::METHOD_DELETEINTERACTIONCHOICESET_REQUEST:
@@ -663,6 +671,18 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             LOG4CPLUS_INFO_EXT(mLogger, " An AddSubMenu response has been income");
             RPC2Communication::AddSubMenuResponse* object = (RPC2Communication::AddSubMenuResponse*)msg;
             AddSubMenu_response* response = new AddSubMenu_response();
+            response->set_success(true);
+            response->set_resultCode(object->getResult());
+            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
+            core->removeMessageToSessionMapping(object->getID());
+            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_DELETESUBMENU_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubMenu response has been income");
+            RPC2Communication::DeleteSubMenuResponse* object = (RPC2Communication::DeleteSubMenuResponse*)msg;
+            DeleteSubMenu_response* response = new DeleteSubMenu_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
             unsigned char sessionID = core->findSessionIdByMessage(object->getID());
