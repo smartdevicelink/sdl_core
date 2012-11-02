@@ -67,6 +67,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_ADDSUBMENU_REQUEST;
     }
+    if ( s.compare("UI.DeleteSubMenu") == 0 )
+    {
+        return METHOD_DELETESUBMENU_REQUEST;
+    }
     
     return METHOD_INVALID;
 }
@@ -112,6 +116,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getResponseIndex(const std::string
   if ( s.compare("UI.AddSubMenu") == 0 )
   {
       return METHOD_ADDSUBMENU_RESPONSE;
+  }
+  if ( s.compare("UI.DeleteSubMenu") == 0 )
+  {
+      return METHOD_DELETESUBMENU_RESPONSE;
   }
 
   return METHOD_INVALID;
@@ -351,6 +359,22 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_DELETESUBMENU_REQUEST:
+    {
+        DeleteSubMenu * rv = new DeleteSubMenu;
+        if (DeleteSubMenuMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_DELETESUBMENU_RESPONSE:
+    {
+        DeleteSubMenuResponse * rv = new DeleteSubMenuResponse;
+        if (DeleteSubMenuResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
 
   }
 
@@ -419,6 +443,10 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return AddSubMenuMarshaller::toJSON(*static_cast<const AddSubMenu*>(msg));
     case METHOD_ADDSUBMENU_RESPONSE:
       return AddSubMenuResponseMarshaller::toJSON(*static_cast<const AddSubMenuResponse*>(msg));
+    case METHOD_DELETESUBMENU_REQUEST:
+      return DeleteSubMenuMarshaller::toJSON(*static_cast<const DeleteSubMenu*>(msg));
+    case METHOD_DELETESUBMENU_RESPONSE:
+      return DeleteSubMenuResponseMarshaller::toJSON(*static_cast<const DeleteSubMenuResponse*>(msg));
   }
 
   return j;
@@ -476,3 +504,5 @@ DeleteCommandResponseMarshaller RPC2Marshaller::mDeleteCommandResponseMarshaller
 OnCommandMarshaller RPC2Marshaller::mOnCommandMarshaller;
 AddSubMenuMarshaller RPC2Marshaller::mAddSubMenuMarshaller;
 AddSubMenuResponseMarshaller RPC2Marshaller::mAddSubMenuResponseMarshaller;
+DeleteSubMenuMarshaller RPC2Marshaller::mDeleteSubMenuMarshaller;
+DeleteSubMenuResponseMarshaller RPC2Marshaller::mDeleteSubMenuResponseMarshaller;
