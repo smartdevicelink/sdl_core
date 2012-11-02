@@ -210,6 +210,10 @@ set (SOURCES
     ./src/AddSubMenuMarshaller.cpp
     ./src/AddSubMenuResponse.cpp
     ./src/AddSubMenuResponseMarshaller.cpp
+    ./src/DeleteSubMenu.cpp
+    ./src/DeleteSubMenuMarshaller.cpp
+    ./src/DeleteSubMenuResponse.cpp
+    ./src/DeleteSubMenuResponseMarshaller.cpp
 )
 
 add_library("JSONHandler" ${SOURCES} ${GENERATED_SOURCES})

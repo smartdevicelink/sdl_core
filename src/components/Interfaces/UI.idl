@@ -66,7 +66,7 @@ Show(string(500) * mainField1,
 Alert(
   string(500) * AlertText1,
   string(500) * AlertText2,
-  int(3000 .. 10000) * duration,
+  unsigned int(3000 .. 10000) * duration,
   bool * playTone
   -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
@@ -78,7 +78,7 @@ Alert(
    *  result code
    */ 
 AddCommand(
-  int (0..2000000000) cmdId,  // cmdID from addCommand request in AppLink protocol
+  unsigned int (2000000000) cmdId,  // cmdID from addCommand request in AppLink protocol
   MenuParams menuParams   //data type from AppLink protocol specification
   -> ) // return value is provided in corresponding response object, id of request and response should be equal
 
@@ -90,7 +90,7 @@ AddCommand(
    *  result code
    */ 
 DeleteCommand(
-  int (0..2000000000) cmdId  // cmdID from addCommand request in AppLink protocol
+  unsigned int (2000000000) cmdId  // cmdID from addCommand request in AppLink protocol
   -> )  // return value is provided in corresponding response object, id of request and response should be equal
 
 
@@ -103,8 +103,8 @@ DeleteCommand(
    *  result code
    */ 
 AddSubMenu(
-  int (0..2000000000) menuId,
-  int (0..1000) * position,
+  unsigned int (2000000000) menuId,
+  unsigned int (1000) * position,
   string(500) menuName
   -> )  // return value is provided in corresponding response object, id of request and response should be equal
 
@@ -117,7 +117,7 @@ AddSubMenu(
    *  result code
    */ 
 DeleteSubMenu(
-  int (0..2000000000) menuId
+  unsigned int (2000000000) menuId
   -> )  //// return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -130,7 +130,7 @@ DeleteSubMenu(
    *  result code
    */ 
 CreateInteractionChoiceSet(
-  int (0..2000000000) interactionChoiceSetID,
+  unsigned int (2000000000) interactionChoiceSetID,
   Choice choiceSet[1..100]   // data type from AppLink protocol specification
   -> ) // return value is provided in corresponding response object, id of request and response should be equal
 
@@ -144,7 +144,7 @@ CreateInteractionChoiceSet(
    *  result code
    */ 
 DeleteInteractionChoiceSet(
-  int(0..2000000000) interactionChoiceSetID,
+  unsigned int(2000000000) interactionChoiceSetID,
   -> )  // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -161,12 +161,12 @@ PerformInteraction(
   string(500) initialText,
   TTSChunk initialPrompt[1..100], //data type from AppLink protocol specification
   InteractionMode interactionMode, // data type from AppLink protocol specification
-  int (0..2000000000)  interactionChoiceSetIDList[1..100],// List of interaction choice set IDs to use with an interaction
+  unsigned int (2000000000)  interactionChoiceSetIDList[1..100],// List of interaction choice set IDs to use with an interaction
   TTSChunk * helpPrompt[1..100], //data type from AppLink protocol specification
   TTSChunk * timeoutPrompt[1..100], // data type from AppLink protocol specification
-  int (5000..100000) * timeout //in milliseconds
+  unsigned int (5000..100000) * timeout //in milliseconds
   -> 
-  int (0..2000000000) * choiceID, // ID of the choice that was selected in response to PerformInteraction
+  unsigned int (2000000000) * choiceID, // ID of the choice that was selected in response to PerformInteraction
   TriggerSource * triggerSource //data type from AppLink protocol specification
   )
 
@@ -218,7 +218,7 @@ ResetGlobalProperties(
    * @descr Notifies AppLink core about command trigerred by UI
    */
 oneway  OnCommand (
-  int (0..2000000000) commandId // id of triggered command
+  unsigned int (2000000000) commandId // id of triggered command
   )
 
 /*
