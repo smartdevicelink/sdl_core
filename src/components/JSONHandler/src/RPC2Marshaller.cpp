@@ -71,6 +71,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_DELETESUBMENU_REQUEST;
     }
+    if ( s.compare("UI.CreateInteractionChoiceSet") == 0 )
+    {
+        return METHOD_CREATEINTERACTIONCHOICESET_REQUEST;
+    }
     
     return METHOD_INVALID;
 }
@@ -120,6 +124,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getResponseIndex(const std::string
   if ( s.compare("UI.DeleteSubMenu") == 0 )
   {
       return METHOD_DELETESUBMENU_RESPONSE;
+  }
+  if ( s.compare("UI.CreateInteractionChoiceSet") == 0 )
+  {
+      return METHOD_CREATEINTERACTIONCHOICESET_RESPONSE;
   }
 
   return METHOD_INVALID;
@@ -375,6 +383,22 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_CREATEINTERACTIONCHOICESET_REQUEST:
+    {
+        CreateInteractionChoiceSet * rv = new CreateInteractionChoiceSet;
+        if (CreateInteractionChoiceSetMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_CREATEINTERACTIONCHOICESET_RESPONSE:
+    {
+        CreateInteractionChoiceSetResponse * rv = new CreateInteractionChoiceSetResponse;
+        if (CreateInteractionChoiceSetResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
 
   }
 
@@ -447,6 +471,10 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return DeleteSubMenuMarshaller::toJSON(*static_cast<const DeleteSubMenu*>(msg));
     case METHOD_DELETESUBMENU_RESPONSE:
       return DeleteSubMenuResponseMarshaller::toJSON(*static_cast<const DeleteSubMenuResponse*>(msg));
+    case METHOD_CREATEINTERACTIONCHOICESET_REQUEST:
+      return CreateInteractionChoiceSetMarshaller::toJSON(*static_cast<const CreateInteractionChoiceSet*>(msg));
+    case METHOD_CREATEINTERACTIONCHOICESET_RESPONSE:
+      return CreateInteractionChoiceSetResponseMarshaller::toJSON(*static_cast<const CreateInteractionChoiceSetResponse*> (msg));
   }
 
   return j;
@@ -506,3 +534,5 @@ AddSubMenuMarshaller RPC2Marshaller::mAddSubMenuMarshaller;
 AddSubMenuResponseMarshaller RPC2Marshaller::mAddSubMenuResponseMarshaller;
 DeleteSubMenuMarshaller RPC2Marshaller::mDeleteSubMenuMarshaller;
 DeleteSubMenuResponseMarshaller RPC2Marshaller::mDeleteSubMenuResponseMarshaller;
+CreateInteractionChoiceSetMarshaller RPC2Marshaller::mCreateInteractionChoiceSetMarshaller;
+CreateInteractionChoiceSetResponseMarshaller RPC2Marshaller::mCreateInteractionChoiceSetResponseMarshaller;
