@@ -31,6 +31,8 @@
 #include "JSONHandler/AddSubMenuResponseMarshaller.h"
 #include "JSONHandler/DeleteSubMenuMarshaller.h"
 #include "JSONHandler/DeleteSubMenuResponseMarshaller.h"
+#include "JSONHandler/CreateInteractionChoiceSetMarshaller.h"
+#include "JSONHandler/CreateInteractionChoiceSetResponseMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -66,7 +68,9 @@ namespace RPC2Communication
         METHOD_ADDSUBMENU_REQUEST=23,
         METHOD_ADDSUBMENU_RESPONSE=24,
         METHOD_DELETESUBMENU_REQUEST=25,
-        METHOD_DELETESUBMENU_RESPONSE=26
+        METHOD_DELETESUBMENU_RESPONSE=26,
+        METHOD_CREATEINTERACTIONCHOICESET_REQUEST=27,
+        METHOD_CREATEINTERACTIONCHOICESET_RESPONSE=28
         };
 
         RPC2Marshaller();
@@ -345,6 +349,26 @@ namespace RPC2Communication
             return mDeleteSubMenuResponseMarshaller.toString(res);
         }
 
+        static bool fromString(const std::string& str, CreateInteractionChoiceSet& res)
+        {
+            return mCreateInteractionChoiceSetMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const CreateInteractionChoiceSet& res)
+        {
+            return mCreateInteractionChoiceSetMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, CreateInteractionChoiceSetResponse& res)
+        {
+            return mCreateInteractionChoiceSetResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const CreateInteractionChoiceSetResponse& res)
+        {
+            return mCreateInteractionChoiceSetResponseMarshaller.toString(res);
+        }
+
     private:
         struct localHash
         {
@@ -393,6 +417,8 @@ namespace RPC2Communication
         static AddSubMenuResponseMarshaller mAddSubMenuResponseMarshaller;
         static DeleteSubMenuMarshaller mDeleteSubMenuMarshaller;
         static DeleteSubMenuResponseMarshaller mDeleteSubMenuResponseMarshaller;
+        static CreateInteractionChoiceSetMarshaller mCreateInteractionChoiceSetMarshaller;
+        static CreateInteractionChoiceSetResponseMarshaller mCreateInteractionChoiceSetResponseMarshaller;
     };
 
 }

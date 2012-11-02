@@ -214,6 +214,10 @@ set (SOURCES
     ./src/DeleteSubMenuMarshaller.cpp
     ./src/DeleteSubMenuResponse.cpp
     ./src/DeleteSubMenuResponseMarshaller.cpp
+    ./src/CreateInteractionChoiceSet.cpp
+    ./src/CreateInteractionChoiceSetMarshaller.cpp
+    ./src/CreateInteractionChoiceSetResponse.cpp
+    ./src/CreateInteractionChoiceSetResponseMarshaller.cpp
 )
 
 add_library("JSONHandler" ${SOURCES} ${GENERATED_SOURCES})
