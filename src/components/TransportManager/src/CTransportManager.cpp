@@ -83,7 +83,7 @@ void NsAppLink::NsTransportManager::CTransportManager::removeDeviceListener(NsAp
     pthread_mutex_unlock(&mDeviceListenersMutex);
 }
 
-int NsAppLink::NsTransportManager::CTransportManager::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const NsAppLink::NsTransportManager::Blob & Data)
+int NsAppLink::NsTransportManager::CTransportManager::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 

@@ -1,6 +1,8 @@
 #ifndef __TRANSPORTMANAGER_ITRANSPORTMANAGER_HPP__
 #define __TRANSPORTMANAGER_ITRANSPORTMANAGER_HPP__
 
+#include <stdint.h>
+#include <sys/types.h>
 #include <vector>
 
 #include "TransportManager/SDeviceInfo.hpp"
@@ -11,7 +13,6 @@ namespace NsAppLink
     {
         class ITransportManagerDeviceListener;
         class ITransportManagerDataListener;
-        class Blob;
 
         /**
          * @brief Connection handle.
@@ -90,11 +91,12 @@ namespace NsAppLink
              *
              * @param ConnectionHandle Connection handle.
              * @param Data Frame payload data.
+             * @param DataSize Size of data in bytes.
              *
              * @return Frame sequence number. May be used to identify
              *         this frame when send result callback is received.
              **/
-            virtual int sendFrame(tConnectionHandle ConnectionHandle, const Blob & Data) = 0;
+            virtual int sendFrame(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize) = 0;
         };
     }
 }

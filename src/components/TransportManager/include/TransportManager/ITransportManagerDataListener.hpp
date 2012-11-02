@@ -1,6 +1,9 @@
 #ifndef __TRANSPORTMANAGER_ITRANSPORTMANAGERDATALISTENER_HPP__
 #define __TRANSPORTMANAGER_ITRANSPORTMANAGERDATALISTENER_HPP__
 
+#include <stdint.h>
+#include <sys/types.h>
+
 #include "TransportManager/ITransportManager.hpp"
 
 namespace NsAppLink
@@ -58,8 +61,9 @@ namespace NsAppLink
              *
              * @param ConnectionHandle Connection handle.
              * @param Data Received frame payload data.
+             * @param DataSize Size of data in bytes.
              **/
-            virtual void onFrameReceived(tConnectionHandle ConnectionHandle, const Blob & Data);
+            virtual void onFrameReceived(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize);
 
             /**
              * @brief Frame send completed callback.

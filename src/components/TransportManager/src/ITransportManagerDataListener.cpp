@@ -2,10 +2,9 @@
 
 NsAppLink::NsTransportManager::ITransportManagerDataListener::~ITransportManagerDataListener()
 {
-
 }
 
-void NsAppLink::NsTransportManager::ITransportManagerDataListener::onFrameReceived(tConnectionHandle ConnectionHandle, const Blob & Data)
+void NsAppLink::NsTransportManager::ITransportManagerDataListener::onFrameReceived(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
 }
 
