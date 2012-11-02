@@ -2,12 +2,14 @@
 
 NsAppLink::NsTransportManager::SInternalDeviceInfo::SInternalDeviceInfo(void):
 mDeviceHandle(NsAppLink::NsTransportManager::InvalidDeviceHandle),
-mUserFriendlyName()
+mUserFriendlyName(),
+mUniqueDeviceId()
 {
 }
 
-NsAppLink::NsTransportManager::SInternalDeviceInfo::SInternalDeviceInfo(NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, const std::string & UserFriendlyName):
+NsAppLink::NsTransportManager::SInternalDeviceInfo::SInternalDeviceInfo(NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, const std::string & UserFriendlyName, const std::string & UniqueDeviceId):
 mDeviceHandle(DeviceHandle),
-mUserFriendlyName(UserFriendlyName)
+mUserFriendlyName(UserFriendlyName),
+mUniqueDeviceId(UniqueDeviceId)
 {
 }

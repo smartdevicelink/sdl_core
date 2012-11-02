@@ -147,6 +147,11 @@ namespace NsAppLink
                 std::string mName;
 
                 /**
+                * @brief Unique device identifier across all devices.
+                **/
+                std::string mUniqueDeviceId;
+
+                /**
                  * @brief List of RFCOMM channels where AppLink service has been discovered.
                  **/
                 std::vector<uint8_t> mAppLinkRFCOMMChannels;

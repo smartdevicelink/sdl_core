@@ -24,8 +24,9 @@ namespace NsAppLink
              *
              * @param DeviceHandle Device handle.
              * @param UserFriendlyName User-friendly device name.
+             * @param UniqueDeviceId Unique device identifier across all devices.
              **/
-            SInternalDeviceInfo(tDeviceHandle DeviceHandle, const std::string & UserFriendlyName);
+            SInternalDeviceInfo(tDeviceHandle DeviceHandle, const std::string & UserFriendlyName, const std::string & UniqueDeviceId);
 
             /**
              * @brief Device handle.
@@ -36,6 +37,11 @@ namespace NsAppLink
              * @brief User-friendly device name.
              **/
             std::string mUserFriendlyName;
+
+            /**
+             * @brief Unique device identifier across all devices.
+             **/
+            std::string mUniqueDeviceId;
         };
 
         /**
