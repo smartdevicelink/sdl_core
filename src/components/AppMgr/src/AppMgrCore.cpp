@@ -257,7 +257,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                 showRPC2Request->setTextAlignment(*object->get_alignment());
             }
             LOG4CPLUS_INFO_EXT(mLogger, "Show request almost handled" );
-            core->mapMessageToSession(showRPC2Request->getID(), sessionID);
+            core->mMessageMapping.addMessage(showRPC2Request->getID(), sessionID);
             core->mJSONRPC2Handler->sendRequest(showRPC2Request);
             Show_response * mobileResponse = new Show_response;
             mobileResponse->set_success(true);
@@ -271,7 +271,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             Speak_request* object = (Speak_request*)message.first;
             RPC2Communication::Speak* speakRPC2Request = new RPC2Communication::Speak();
             speakRPC2Request->setTTSChunks(object->get_ttsChunks());
-            core->mapMessageToSession(speakRPC2Request->getID(), sessionID);
+            core->mMessageMapping.addMessage(speakRPC2Request->getID(), sessionID);
             core->mJSONRPC2Handler->sendRequest(speakRPC2Request);
             Speak_response * mobileResponse = new Speak_response;
             mobileResponse->set_resultCode(Result::SUCCESS);
@@ -284,7 +284,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties request has been invoked");
             SetGlobalProperties_request* object = (SetGlobalProperties_request*)message.first;
             RPC2Communication::SetGlobalProperties* setGPRPC2Request = new RPC2Communication::SetGlobalProperties();
-            core->mapMessageToSession(setGPRPC2Request->getID(), sessionID);
+            core->mMessageMapping.addMessage(setGPRPC2Request->getID(), sessionID);
             if(object->get_helpPrompt())
             {
                 setGPRPC2Request->setHelpPrompt(*object->get_helpPrompt());
@@ -306,7 +306,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A ResetGlobalProperties request has been invoked");
             ResetGlobalProperties_request* object = (ResetGlobalProperties_request*)message.first;
             RPC2Communication::ResetGlobalProperties* resetGPRPC2Request = new RPC2Communication::ResetGlobalProperties();
-            core->mapMessageToSession(resetGPRPC2Request->getID(), sessionID);
+            core->mMessageMapping.addMessage(resetGPRPC2Request->getID(), sessionID);
             resetGPRPC2Request->setProperty(object->get_properties());
 
             core->mJSONRPC2Handler->sendRequest(resetGPRPC2Request);
@@ -321,7 +321,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " An Alert request has been invoked");
             Alert_request* object = (Alert_request*)message.first;
             RPC2Communication::Alert* alert = new RPC2Communication::Alert();
-            core->mapMessageToSession(alert->getID(), sessionID);
+            core->mMessageMapping.addMessage(alert->getID(), sessionID);
             if(object->get_alertText1())
             {
                 alert->setAlertText1(*object->get_alertText1());
@@ -358,7 +358,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
             AddCommand_request* object = (AddCommand_request*)message.first;
             RPC2Communication::AddCommand* addCmd = new RPC2Communication::AddCommand();
-            core->mapMessageToSession(addCmd->getID(), sessionID);
+            core->mMessageMapping.addMessage(addCmd->getID(), sessionID);
             addCmd->setCmdId(object->get_cmdID());
             core->mCommandMapping.addCommand(object->get_cmdID(), AppMgrRegistry::getInstance().getItem(sessionID));
             if(object->get_menuParams())
@@ -373,7 +373,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
             DeleteCommand_request* object = (DeleteCommand_request*)message.first;
             RPC2Communication::DeleteCommand* deleteCmd = new RPC2Communication::DeleteCommand();
-            core->mapMessageToSession(deleteCmd->getID(), sessionID);
+            core->mMessageMapping.addMessage(deleteCmd->getID(), sessionID);
             deleteCmd->setCmdId(object->get_cmdID());
             core->mCommandMapping.removeCommand(object->get_cmdID());
             core->mJSONRPC2Handler->sendRequest(deleteCmd);
@@ -384,7 +384,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
             AddSubMenu_request* object = (AddSubMenu_request*)message.first;
             RPC2Communication::AddSubMenu* addSubMenu = new RPC2Communication::AddSubMenu();
-            core->mapMessageToSession(addSubMenu->getID(), sessionID);
+            core->mMessageMapping.addMessage(addSubMenu->getID(), sessionID);
             addSubMenu->setMenuId(object->get_menuID());
             addSubMenu->setMenuName(object->get_menuName());
             if(object->get_position())
@@ -399,7 +399,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubmenu request has been invoked");
             DeleteSubMenu_request* object = (DeleteSubMenu_request*)message.first;
             RPC2Communication::DeleteSubMenu* delSubMenu = new RPC2Communication::DeleteSubMenu();
-            core->mapMessageToSession(delSubMenu->getID(), sessionID);
+            core->mMessageMapping.addMessage(delSubMenu->getID(), sessionID);
             delSubMenu->setMenuId(object->get_menuID());
             core->mJSONRPC2Handler->sendRequest(delSubMenu);
             break;
@@ -409,7 +409,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet request has been invoked");
             CreateInteractionChoiceSet_request* object = (CreateInteractionChoiceSet_request*)message.first;
             RPC2Communication::CreateInteractionChoiceSet* createInteractionChoiceSet = new RPC2Communication::CreateInteractionChoiceSet();
-            core->mapMessageToSession(createInteractionChoiceSet->getID(), sessionID);
+            core->mMessageMapping.addMessage(createInteractionChoiceSet->getID(), sessionID);
             createInteractionChoiceSet->setChoiceSet(object->get_choiceSet());
             createInteractionChoiceSet->setInteractionChoiceSetID(object->get_interactionChoiceSetID());
             core->mJSONRPC2Handler->sendRequest(createInteractionChoiceSet);
@@ -562,8 +562,8 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_resultCode(object->getResult());
             response->set_success(true);
-            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
-            core->removeMessageToSessionMapping(object->getID());
+            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -575,8 +575,8 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_resultCode(object->getResult());
             response->set_success(true);
-            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
-            core->removeMessageToSessionMapping(object->getID());
+            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -588,8 +588,8 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_resultCode(object->getResult());
             response->set_success(true);
-            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
-            core->removeMessageToSessionMapping(object->getID());
+            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -601,8 +601,8 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
-            core->removeMessageToSessionMapping(object->getID());
+            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -622,8 +622,8 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             Alert_response* response = new Alert_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
-            core->removeMessageToSessionMapping(object->getID());
+            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -662,8 +662,8 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AddCommand_response* response = new AddCommand_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
-            core->removeMessageToSessionMapping(object->getID());
+            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -674,8 +674,8 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             DeleteCommand_response* response = new DeleteCommand_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
-            core->removeMessageToSessionMapping(object->getID());
+            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -686,8 +686,8 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AddSubMenu_response* response = new AddSubMenu_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
-            core->removeMessageToSessionMapping(object->getID());
+            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -698,8 +698,8 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             DeleteSubMenu_response* response = new DeleteSubMenu_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
-            core->removeMessageToSessionMapping(object->getID());
+            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -710,8 +710,8 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             CreateInteractionChoiceSet_response* response = new CreateInteractionChoiceSet_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->findSessionIdByMessage(object->getID());
-            core->removeMessageToSessionMapping(object->getID());
+            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -808,21 +808,6 @@ void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg
 
     //NOTE: Please do not refer to message that has already been sent to another module. It doesn't exist for your module anymore.
     LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message has been outcomed");
-}
-
-void AppMgrCore::mapMessageToSession(int messageId, unsigned char sessionId)
-{
-    mMessagesToSessionsMap.insert(MessageToSession(messageId, sessionId));
-}
-
-void AppMgrCore::removeMessageToSessionMapping(int messageId)
-{
-    mMessagesToSessionsMap.erase(messageId);
-}
-
-unsigned char AppMgrCore::findSessionIdByMessage(int messageId) const
-{
-    return mMessagesToSessionsMap.find(messageId)->second;
 }
 
 const RegistryItem* AppMgrCore::registerApplication( const Message& object )

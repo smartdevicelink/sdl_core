@@ -12,6 +12,7 @@
 #include <map>
 #include "AppMgr/ButtonMapping.h"
 #include "AppMgr/CommandMapping.h"
+#include "AppMgr/MessageMapping.h"
 #include "JSONHandler/GetCapabilitiesResponse.h"
 
 class RegisterAppInterface_request;
@@ -41,8 +42,6 @@ class AppMgrCoreQueue;
 
 typedef std::vector<ButtonCapabilities> Capabilities;
 typedef std::pair<ALRPCMessage*, unsigned char> Message;
-typedef std::map<int, unsigned char> MessagesToSessions;
-typedef std::pair<int, unsigned char> MessageToSession;
 
 class AppMgrCore
 {
@@ -74,9 +73,6 @@ private:
     const ALRPCMessage* queryInfoForRegistration( const RegistryItem* registryItem );
     const RegistryItem* registerApplication(const Message &msg );
     void unregisterApplication(const Message &msg );
-    unsigned char findSessionIdByMessage(int messageId) const;
-    void mapMessageToSession( int messageId, unsigned char sessionId );
-    void removeMessageToSessionMapping( int messageId );
 
 	void registerApplicationOnHMI( const std::string& name );
 
@@ -89,7 +85,7 @@ private:
 	Capabilities mButtonCapabilities;
     ButtonMapping    mButtonsMapping;
     CommandMapping   mCommandMapping;
-    MessagesToSessions mMessagesToSessionsMap;
+    MessageMapping   mMessageMapping;
 	
 	JSONHandler* mJSONHandler;
     JSONRPC2Handler* mJSONRPC2Handler;
