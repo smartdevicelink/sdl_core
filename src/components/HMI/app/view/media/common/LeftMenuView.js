@@ -12,6 +12,8 @@
 MFT.LeftMenuView = Em.ContainerView.extend({
 		/** View ID*/
 		elementId: 'media_leftmenu',
+
+		classNameBindings:  [ 'MFT.States.media.appoptions.active:hidden' ],
 		
 		/** View components*/
 		childViews: [

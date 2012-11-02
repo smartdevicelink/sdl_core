@@ -56,9 +56,9 @@ MFT.MediaController = Em.Object.create({
 	radioDataArray : [MFT.AmModel],
 	
 	playerDataArray : [MFT.CDModel],
-	
-	
-	
+
+
+
 	/**  On radio module exit event */
 	onRadioExit: function(){
 		if(this.radioDataArray.length >0){
@@ -393,6 +393,12 @@ MFT.MediaController = Em.Object.create({
 	turnOnOptions: function(){
 		this.resetDirectTune();
 		MFT.States.goToState('media.options');
+	},
+
+	/** Application Options */
+	turnOnAppOptions: function(){
+		this.resetDirectTune();
+		MFT.States.goToState('media.appoptions');
 	},
 	
 	optionsBack: function(){

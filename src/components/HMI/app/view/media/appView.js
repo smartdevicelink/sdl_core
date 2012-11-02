@@ -14,7 +14,7 @@ MFT.appView = Em.ContainerView.create(MFT.LoadableView,{
 	elementId: 'app_view_container',
 	
 	classNameBindings:	[
-							'MFT.States.app.active:active_state'
+							'MFT.States.app.active:active_state',
 						],
 	
 	classNames: 'hidden',
