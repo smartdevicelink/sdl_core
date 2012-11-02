@@ -13,7 +13,7 @@ namespace NsAppManager
 
 log4cplus::Logger RegistryItem::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("RegistryItem"));
 	
-RegistryItem::RegistryItem( const Application* app )
+RegistryItem::RegistryItem( Application* app )
 : mApplication(app)
 {
 }
@@ -55,7 +55,7 @@ void RegistryItem::unregisterPolicy( AppPolicy* policy )
 	mAppPolicies.erase(policyIterator);
 }
 
-const Application* RegistryItem::getApplication( ) const
+Application* RegistryItem::getApplication( ) const
 {
 	return mApplication;
 }

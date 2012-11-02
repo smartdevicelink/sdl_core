@@ -76,7 +76,7 @@ AppMgrRegistry::~AppMgrRegistry( )
     LOG4CPLUS_INFO_EXT(mLogger, " Destructed a registry!");
 }
 
-const RegistryItem* AppMgrRegistry::registerApplication( const Application* app )
+const RegistryItem* AppMgrRegistry::registerApplication( Application* app )
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Registering an application "<<app->getName());
 	mRegistryItems.insert(Item(app->getName(), new RegistryItem(app)));

@@ -615,12 +615,19 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR(mLogger, "Couldn't cast object to ActivateApp type");
                 break;
             }     
-            /*OnHMIStatus * hmiStatus = new OnHMIStatus;
+            OnHMIStatus * hmiStatus = new OnHMIStatus;
             hmiStatus->set_hmiLevel(HMILevel::HMI_FULL);
-            hmiStatus->set_audioStreamingState(AudioStreamingState::NOT_AUDIBLE);
+            const std::string& appName = object->getAppName()[0];
+            RegistryItem* app = AppMgrRegistry::getInstance().getItem(appName);
+            if(!app)
+            {
+                LOG4CPLUS_ERROR(mLogger, "Couldn't find a registered app by the name "<<appName);
+                break;
+            }
+            app->getApplication()->setApplicationHMIStatusLevel(HMILevel::HMI_FULL);
+            hmiStatus->set_audioStreamingState(app->getApplication()->getApplicationAudioStreamingState());
             hmiStatus->set_systemContext(SystemContext::SYSCTXT_MENU);
-            Message hmiMessage = Message(hmiStatus, 1);
-            core->sendMobileRPCResponse( hmiMessage );*/
+            core->mJSONHandler->sendRPCMessage( hmiStatus, app->getApplication()->getSessionID() );
             RPC2Communication::ActivateAppResponse * response = new RPC2Communication::ActivateAppResponse;
             response->setID(object->getID());
             response->setResult(Result::SUCCESS);

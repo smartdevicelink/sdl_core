@@ -12,17 +12,12 @@
 #include "JSONHandler/ALRPCObjects/Language.h"
 #include "JSONHandler/ALRPCObjects/SyncMsgVersion.h"
 #include "JSONHandler/ALRPCObjects/HMILevel.h"
+#include "JSONHandler/ALRPCObjects/AudioStreamingState.h"
 #include <string>
 #include <vector>
 
 namespace NsAppManager
 {
-
-typedef enum
-{
-	SS_AUDIBLE,
-	SS_NOT_AUDIBLE
-} AudioStreamingState;
 
 class Application : public IApplication
 {
