@@ -7,10 +7,16 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
 )
 
-set (SOURCES
+# Sources are separated for each Transport Manager test
+set (SOURCES_LISTENERS_TEST
     ./ListenersTest.cpp
 )
 
+set (SOURCES_HANDLEGENERATORS_TEST
+    ./HandleGeneratorsTest.cpp
+)
+
+# Libraries seeems to be the same for all Transport Manager test
 set (LIBRARIES
     gtest
     gtest_main
@@ -21,6 +27,10 @@ set (LIBRARIES
     bluetooth
 )
 
-add_executable("test_TransportManagerListeners" ${SOURCES})
+add_executable("test_TransportManagerListeners" ${SOURCES_LISTENERS_TEST})
 target_link_libraries("test_TransportManagerListeners" ${LIBRARIES})
 add_test(test_TransportManagerListeners test_TransportManagerListeners)
+
+add_executable("test_TransportManagerHandleGenerators" ${SOURCES_HANDLEGENERATORS_TEST})
+target_link_libraries("test_TransportManagerHandleGenerators" ${LIBRARIES})
+add_test(test_TransportManagerHandleGenerators test_TransportManagerHandleGenerators)
