@@ -129,6 +129,16 @@ namespace NsAppLink
             mutable pthread_mutex_t mDeviceListenersMutex;
 
             /**
+             * @brief Mutex restricting access to new device handle generation
+             **/
+            mutable pthread_mutex_t mDeviceHandleGenerationMutex;
+
+            /**
+             * @brief Mutex restricting access to new conenction handle generation
+             **/
+            mutable pthread_mutex_t mConnectionHandleGenerationMutex;
+
+            /**
              * @brief Data listeners
              **/
             std::vector<ITransportManagerDataListener*> mDataListeners;
@@ -137,6 +147,20 @@ namespace NsAppLink
              * @brief Device listeners
              **/
             std::vector<ITransportManagerDeviceListener*> mDeviceListeners;
+
+            /**
+             * @brief Last used device handle
+             *
+             * Used during device handle generation
+             **/
+            tDeviceHandle mLastUsedDeviceHandle;
+
+            /**
+             * @brief Last used connection handle
+             *
+             * Used during connection handle generation
+             **/
+            tConnectionHandle mLastUsedConnectionHandle;
         };
     }
 }

@@ -40,6 +40,12 @@ namespace test
                 class TestTransportManager: public NsAppLink::NsTransportManager::CTransportManager
                 {
                 public:
+                    void run()
+                    {
+                        // Preventing parent function processing.
+                        // Does not needed inside this test.
+                    }
+
                     void test()
                     {
                         //Calling callbacks on all listeners
