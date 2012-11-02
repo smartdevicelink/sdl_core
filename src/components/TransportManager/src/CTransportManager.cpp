@@ -10,13 +10,19 @@ mDeviceAdapters(),
 mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager"))),
 mDataListenersMutex(),
 mDeviceListenersMutex(),
+mDeviceHandleGenerationMutex(),
+mConnectionHandleGenerationMutex(),
 mDataListeners(),
-mDeviceListeners()
+mDeviceListeners(),
+mLastUsedDeviceHandle(0),
+mLastUsedConnectionHandle(0)
 {
     mDeviceAdapters.push_back(new CBluetoothAdapter(*this, *this));
 
     pthread_mutex_init(&mDataListenersMutex, 0);
     pthread_mutex_init(&mDeviceListenersMutex, 0);
+    pthread_mutex_init(&mDeviceHandleGenerationMutex, 0);
+    pthread_mutex_init(&mConnectionHandleGenerationMutex, 0);
 
     LOG4CPLUS_INFO_EXT(mLogger, "TransportManager constructed");
 }
@@ -32,6 +38,8 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
 
     pthread_mutex_destroy(&mDataListenersMutex);
     pthread_mutex_destroy(&mDeviceListenersMutex);
+    pthread_mutex_destroy(&mDeviceHandleGenerationMutex);
+    pthread_mutex_destroy(&mConnectionHandleGenerationMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::run(void)
@@ -84,14 +92,24 @@ int NsAppLink::NsTransportManager::CTransportManager::sendFrame(NsAppLink::NsTra
 
 NsAppLink::NsTransportManager::tDeviceHandle NsAppLink::NsTransportManager::CTransportManager::generateNewDeviceHandle(void)
 {
-    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+    tDeviceHandle outputDeviceHandle;
 
-    return InvalidDeviceHandle;
+    pthread_mutex_lock(&mDeviceHandleGenerationMutex);
+    ++mLastUsedDeviceHandle;
+    outputDeviceHandle = mLastUsedDeviceHandle;
+    pthread_mutex_unlock(&mDeviceHandleGenerationMutex);
+
+    return outputDeviceHandle;
 }
 
 NsAppLink::NsTransportManager::tConnectionHandle NsAppLink::NsTransportManager::CTransportManager::generateNewConnectionHandle(void)
 {
-    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+    tConnectionHandle outputConnectionHandle;
 
-    return InvalidConnectionHandle;
+    pthread_mutex_lock(&mConnectionHandleGenerationMutex);
+    ++mLastUsedConnectionHandle;
+    outputConnectionHandle = mLastUsedConnectionHandle;
+    pthread_mutex_unlock(&mConnectionHandleGenerationMutex);
+
+    return outputConnectionHandle;
 }
