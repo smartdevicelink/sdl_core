@@ -743,6 +743,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const Ns
         if (InvalidDeviceHandle != deviceHandle)
         {
             bool isDeviceValid = false;
+            SDeviceInfo clientDeviceInfo;
 
             pthread_mutex_lock(&mDevicesMutex);
 
@@ -752,6 +753,10 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const Ns
             {
                 isDeviceValid = true;
                 memcpy(&remoteSocketAddress.rc_bdaddr, &deviceIterator->second.mAddress, sizeof(bdaddr_t));
+
+                clientDeviceInfo.mDeviceHandle = deviceHandle;
+                clientDeviceInfo.mDeviceType = getDeviceType();
+                clientDeviceInfo.mUserFriendlyName = deviceIterator->second.mName;
             }
             else
             {
@@ -789,6 +794,8 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const Ns
                         if (0 == connect(rfcommSocket, (struct sockaddr *)&remoteSocketAddress, sizeof(remoteSocketAddress)))
                         {
                             LOG4CPLUS_INFO_EXT(mLogger, "Connection " << ConnectionHandle << " to remote device " << remoteDeviceAddressString << " established");
+
+                            mListener.onApplicationConnected(clientDeviceInfo, ConnectionHandle);
 
                             pollfd pollFds[2];
                             pollFds[0].fd = rfcommSocket;
@@ -929,6 +936,8 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const Ns
                                     connection->mTerminateFlag = true;
                                 }
                             }
+
+                            mListener.onApplicationDisconnected(clientDeviceInfo, ConnectionHandle);
                         }
                         else
                         {

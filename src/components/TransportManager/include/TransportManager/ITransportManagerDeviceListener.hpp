@@ -27,7 +27,6 @@ namespace NsAppLink
              * @brief Available devices list updated.
              *
              * @param DeviceList New list of available devices.
-             * @return void
              **/
             virtual void onDeviceListUpdated(const tDeviceList & DeviceList);
 
@@ -35,8 +34,7 @@ namespace NsAppLink
              * @brief Application connected.
              *
              * @param ConnectedDevice DeviceInfo of connected device.
-             * @param Connection Connection handle
-             * @return void
+             * @param Connection Connection handle.
              **/
             virtual void onApplicationConnected(const SDeviceInfo & ConnectedDevice, const tConnectionHandle Connection);
 
@@ -44,8 +42,7 @@ namespace NsAppLink
              * @brief Application disconnected.
              *
              * @param DisconnectedDevice DeviceInfo of disconnected device.
-             * @param Connection Connection handle
-             * @return void
+             * @param Connection Connection handle.
              **/
             virtual void onApplicationDisconnected(const SDeviceInfo & DisconnectedDevice, const tConnectionHandle Connection);
         };
