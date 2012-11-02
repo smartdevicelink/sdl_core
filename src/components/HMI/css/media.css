@@ -2737,3 +2737,61 @@
 
 /* cancel scrollbar animation */
 .cancelBarAnimation{-webkit-transition:none !important;}
+
+#media_app_options_view.media_app_options_view{
+	top: 56px;
+	width: 800px;
+	height: 367px;
+	z-index: 1;
+}
+
+#media_app_options_view .buttonsWrapper {
+	top: 70px;
+	left: 100px;
+	width: 600px;
+	height: 260px;
+	overflow: hidden;
+}
+
+#media_app_options_view .scrollButtons{
+	width: 550px;
+	float: left;
+	margin-right: 10px;
+	height: 51px;
+	font-size: 20px;
+	line-height: 50px;
+	border: 1px solid #393939;
+	border-bottom: none;
+	cursor: pointer;
+	background-image: url(../images/list/list_item_bg.png);
+	position: relative;
+}
+
+#media_app_options_view .scrollArrows{
+	height: 47px;
+	width: 47px;
+	border: #393939 1px solid;
+	border-radius: 2px;
+}
+
+#media_app_options_view .scrollArrowUp {
+	position: relative;
+}
+
+#media_app_options_view .scrollArrowDown {
+	bottom: 0;
+	right: 0;
+}
+
+#media_app_options_view .scrollBar {
+	float: right;
+	position: relative;
+	height: 260px;
+}
+
+#media_app_options_view .scroller {
+	position: relative;
+	height: 20px;
+	background: #555;
+	-webkit-transition: 0.4s ;
+}

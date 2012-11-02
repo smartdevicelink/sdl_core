@@ -225,6 +225,32 @@ FFW.UI = FFW.RPCObserver.create({
 			};
 			this.client.send(JSONMessage);
 		}
+
+		if (request.method == "UI.AddSubMenu") {
+			
+			MFT.AppOptionsView.AddSubMenu(request.menuId, request.menuName);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
+
+		if (request.method == "UI.DeleteSubMenul") {
+			
+			MFT.AppOptionsView.DeleteSubMenul(request.menuId);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
 	},
 	
 	/*
