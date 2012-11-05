@@ -461,33 +461,6 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
     }
 }
 
-void AppMgrCore::handleMobileRPCNotification(ALRPCMessage *message, void *pThis)
-{
-    LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC notification "<< message->getMethodId() <<" has been received!");
-    if(!pThis)
-    {
-        LOG4CPLUS_ERROR_EXT(mLogger, " pThis should point to an instance of AppMgrCore class");
-        return;
-    }
-    AppMgrCore* core = (AppMgrCore*)pThis;
-    switch(message->getMethodId())
-    {
-        case Marshaller::METHOD_ONAPPINTERFACEUNREGISTERED:
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, " An OnAppInterfaceUnregistered notification has been invoked");
-
-            OnAppInterfaceUnregistered* object = (OnAppInterfaceUnregistered*)message;
-            core->mJSONHandler->sendRPCMessage(message, 1);//just temporarily!!!
-            break;
-        }
-        default:
-        {
-            LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC notification "<< message->getMethodId() <<" has been received!");
-            break;
-        }
-    }
-}
-
 void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg , void *pThis)
 {
     LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been incoming...");
@@ -743,91 +716,6 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
 	}
 
     LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been invoked!");
-}
-
-void AppMgrCore::handleBusRPCMessageOutgoing(RPC2Communication::RPC2Command *msg, void *pThis)
-{
-    LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been outcoming...");
-    if(!pThis)
-    {
-        LOG4CPLUS_ERROR_EXT(mLogger, " pThis should point to an instance of AppMgrCore class");
-        return;
-    }
-    AppMgrCore* core = (AppMgrCore*)pThis;
-
-    switch(msg->getMethod())
-    {
-        case RPC2Communication::RPC2Marshaller::METHOD_GET_CAPABILITIES_REQUEST:
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, " A GetCapabilities request has been outcoming");
-            //RPC2Communication::GetCapabilities * object = (RPC2Communication::GetCapabilities*)msg;
-            core->mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
-            break;
-        }
-        case RPC2Communication::RPC2Marshaller::METHOD_SHOW_REQUEST:
-        {
-            core->mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
-            break;
-        }
-        case RPC2Communication::RPC2Marshaller::METHOD_SPEAK_REQUEST:
-        {
-            core->mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
-            break;
-        }
-        case RPC2Communication::RPC2Marshaller::METHOD_SET_GLOBAL_PROPERTIES_REQUEST:
-        {
-            core->mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
-            break;
-        }
-        case RPC2Communication::RPC2Marshaller::METHOD_RESET_GLOBAL_PROPERTIES_REQUEST:
-        {
-            core->mJSONRPC2Handler -> sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
-            break;
-        }
-        case RPC2Communication::RPC2Marshaller::METHOD_ONAPPREGISTERED:
-        {
-            core->mJSONRPC2Handler -> sendNotification( static_cast<RPC2Communication::RPC2Notification*>(msg) );
-            break;
-        }
-        case RPC2Communication::RPC2Marshaller::METHOD_ONAPPUNREDISTERED:
-        {
-            core-> mJSONRPC2Handler -> sendNotification( static_cast<RPC2Communication::RPC2Notification*>(msg) );
-            break;
-        }
-        case RPC2Communication::RPC2Marshaller::METHOD_ALERT_REQUEST:
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, " An Alert request has been income");
-            core->mJSONRPC2Handler->sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
-            break;
-        }
-        case RPC2Communication::RPC2Marshaller::METHOD_ACTIVATEAPP_RESPONSE:
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, "An ActivateApp Response sending to HMI.");
-            core->mJSONRPC2Handler->sendResponse( static_cast<RPC2Communication::RPC2Response*>(msg) );
-            break;
-        }
-        case RPC2Communication::RPC2Marshaller::METHOD_ADDCOMMAND_REQUEST:
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been income");
-            core->mJSONRPC2Handler->sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
-            break;
-        }
-        case RPC2Communication::RPC2Marshaller::METHOD_DELETECOMMAND_REQUEST:
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been income");
-            core->mJSONRPC2Handler->sendRequest( static_cast<RPC2Communication::RPC2Request*>(msg) );
-            break;
-        }
-        case RPC2Communication::RPC2Marshaller::METHOD_INVALID:
-        default:
-        {
-            LOG4CPLUS_ERROR_EXT(mLogger, " An undefined RPC message "<< msg->getMethod() <<" has been received!");
-            break;
-        }
-    }
-
-    //NOTE: Please do not refer to message that has already been sent to another module. It doesn't exist for your module anymore.
-    LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message has been outcomed");
 }
 
 const RegistryItem* AppMgrCore::registerApplication( const Message& object )
