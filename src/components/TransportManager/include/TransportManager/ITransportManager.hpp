@@ -51,12 +51,11 @@ namespace NsAppLink
             virtual void run(void) = 0;
 
             /**
-             * @brief Get list of available devices.
+             * @brief Start scanning for new devices.
              *
-             * @param DeviceList Reference to a variable that will
-             *                   receive device list.
+             * List of new devices will be supplied in onDeviceListUpdated callback.
              **/
-            virtual void getDeviceList(tDeviceList & DeviceList) const = 0;
+            virtual void scanForNewDevices(void) = 0;
 
             /**
              * @brief Add listener to the data-related events
