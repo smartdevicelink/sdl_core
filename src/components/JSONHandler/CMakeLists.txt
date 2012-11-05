@@ -222,6 +222,8 @@ set (SOURCES
     ./src/DeleteInteractionChoiceSetMarshaller.cpp
     ./src/DeleteInteractionChoiceSetResponse.cpp
     ./src/DeleteInteractionChoiceSetResponseMarshaller.cpp
+    ./src/PerformInteraction.cpp
+    ./src/PerformInteractionMarshaller.cpp
 )
 
 add_library("JSONHandler" ${SOURCES} ${GENERATED_SOURCES})

@@ -247,26 +247,14 @@ oneway OnSystemContext(
 /*
    * @descr 
    *      method should be invoked at system startup
-   *  provides information about Display capabilities
+   *  provides information about UI capabilities
    *  
    * @returns
    *    UI Display capabilites
    */
-GetDisplayCapabilities(
+GetCapabilities(
   ->
-  DisplayCapabilities capabilities // data type from AppLink protocol specification
-  );
-
-/*
-   * @descr 
-   *      method should be invoked at system startup
-   *  provides information about HMI zone capabilities(for future)
-   *  
-   * @returns
-   *    UI Display capabilites
-   */ 
-GetHmiZoneCapabilities(
-  ->
+  DisplayCapabilities capabilities, // data type from AppLink protocol specification
   HmiZoneCapabilities capabilities[1:100] // data type from AppLink protocol specification
   );
 
