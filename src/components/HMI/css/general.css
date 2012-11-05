@@ -115,8 +115,15 @@ div {
 	border-radius: 10px;
 }
 
-#UIPopUp .message{
+#UIPopUp .message1{
 	top: 10px;
+	left: 10px;
+	width: 278px;
+	height: 81px;
+}
+
+#UIPopUp .message2{
+	top: 40px;
 	left: 10px;
 	width: 278px;
 	height: 81px;

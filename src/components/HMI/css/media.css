@@ -72,7 +72,7 @@
 	position:relative;
 }
 #media_amButton {
-	top: 10px;
+	/*top: 10px;*/
 	display: none;
 }
 
@@ -96,7 +96,7 @@
 /*FM*/
 
 #media_fmButton {
-	top: 20px;
+	/*top: 20px;*/
 	display: none;
 }
 
@@ -124,7 +124,7 @@
 }
 
 #media_siriusButton {
-	top: 30px;
+	/*top: 30px;*/
 	display: none;
 }
 
@@ -148,9 +148,8 @@
 /*CD,USB*/
 
 #media_cdButton, #media_usbButton {
-	top: 30px;
+	/*top: 30px;*/
 	font-size: 18px;
-	padding-left: 48px;
 	line-height: 48px;
 	display: none;
 }
@@ -168,7 +167,6 @@
 
 #media_sdButton {
 	font-size: 18px;
-	padding-left: 48px;
 	line-height: 48px;
 	display: block;
 }
@@ -181,7 +179,6 @@
 
 #media_btButton {
 	font-size: 18px;
-	padding-left: 48px;
 	line-height: 48px;
 	display: block;
 }
@@ -194,7 +191,6 @@
 
 #media_avinButton {
 	font-size: 18px;
-	padding-left: 48px;
 	line-height: 48px;
 	display: block;
 }
@@ -205,7 +201,6 @@
 
 #media_appButton {
 	font-size: 18px;
-	padding-left: 48px;
 	line-height: 48px;
 	display: block;
 }
@@ -214,10 +209,19 @@
 	display: none !important;
 }
 
+#media_leftmenu .media-ls-item{
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#media_leftmenu .media-ls-item span{
+	padding-left: 48px;
+}
+
 /*SCROLL DOWN*/
 
 #media_scrolldownButton {
-	top: 30px;
+	/*top: 30px;*/
 	display: none;
 }
 
@@ -2794,4 +2798,8 @@
 	height: 20px;
 	background: #555;
 	-webkit-transition: 0.4s ;
+}
+
+#media_app_options_view .rs-item {
+	width: 535px;
 }

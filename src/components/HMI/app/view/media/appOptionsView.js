@@ -44,13 +44,18 @@ MFT.AppOptionsView = Em.ContainerView.create({
         });
 
         MFT.AppOptionsView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
-        MFT.AppOptionsView.scroll.refresh();
+        MFT.AppOptionsView.buttonsWrapper.scroll.refresh();
     },
 
     DeleteSubMenu: function(menuId){
 
-        Ember.View.views['media_app_options_view' + menuId].destroy();
-        MFT.AppRightMenuView.scroll.refresh();
+        if(Ember.View.views['media_app_options_view' + menuId]){
+            Ember.View.views['media_app_options_view' + menuId].destroy();
+            MFT.AppOptionsView.buttonsWrapper.scroll.refresh();
+            return "SUCCESS";
+        }else{
+            return "INVALID_DATA";
+        }
     },
 
     buttonsWrapper: Em.ContainerView.extend({
