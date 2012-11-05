@@ -135,7 +135,6 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
 			LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
             RegisterAppInterface_request * object = (RegisterAppInterface_request*)message.first;
             const RegistryItem* registeredApp =  core->registerApplication( message );
-            const ALRPCMessage* info = core->queryInfoForRegistration( registeredApp );
             RegisterAppInterface_response* response = new RegisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(ALRPCMessage::RESPONSE);
@@ -777,13 +776,6 @@ void AppMgrCore::unregisterApplication(const Message &msg)
     mButtonsMapping.removeItem(app);
     AppMgrRegistry::getInstance().unregisterApplication(app);
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName << "!");
-}
-
-const ALRPCMessage* AppMgrCore::queryInfoForRegistration(const RegistryItem* registryItem)
-{
-	LOG4CPLUS_INFO_EXT(mLogger, " Querying info for registration of an application " << registryItem->getApplication()->getName() << "!");
-
-	LOG4CPLUS_INFO_EXT(mLogger, " Queried info for registration of an application " << registryItem->getApplication()->getName() << "!");
 }
 
 void AppMgrCore::registerApplicationOnHMI( const std::string& name )
