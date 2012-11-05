@@ -50,7 +50,7 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
     }
 }
 
-void NsAppLink::NsTransportManager::CTransportManager::getDeviceList(NsAppLink::NsTransportManager::tDeviceList & DeviceList) const
+void NsAppLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
 {
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }

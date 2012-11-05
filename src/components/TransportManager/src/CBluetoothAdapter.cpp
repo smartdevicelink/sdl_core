@@ -194,16 +194,9 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::run(void)
     }
 }
 
-void NsAppLink::NsTransportManager::CBluetoothAdapter::getDeviceList(NsAppLink::NsTransportManager::tInternalDeviceList & DeviceList) const
+void NsAppLink::NsTransportManager::CBluetoothAdapter::scanForNewDevices(void)
 {
-    pthread_mutex_lock(&mDevicesMutex);
-
-    for (tBluetoothDevicesMap::const_iterator di = mDevices.begin(); di != mDevices.end(); ++di)
-    {
-        DeviceList.push_back(SInternalDeviceInfo(di->first, di->second.mName, di->second.mUniqueDeviceId));
-    }
-
-    pthread_mutex_unlock(&mDevicesMutex);
+    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }
 
 NsAppLink::NsTransportManager::EDeviceType NsAppLink::NsTransportManager::CBluetoothAdapter::getDeviceType(void) const
@@ -604,7 +597,12 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::deviceDiscoveryThread(voi
                         LOG4CPLUS_INFO_EXT(mLogger, "Client device list updated");
 
                         tInternalDeviceList clientDeviceList;
-                        getDeviceList(clientDeviceList);
+
+                        for (tBluetoothDevicesMap::const_iterator di = newDevices.begin(); di != newDevices.end(); ++di)
+                        {
+                            clientDeviceList.push_back(SInternalDeviceInfo(di->first, di->second.mName, di->second.mUniqueDeviceId));
+                        }
+
                         mListener.onDeviceListUpdated(this, clientDeviceList);
                     }
 
