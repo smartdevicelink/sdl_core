@@ -36,6 +36,8 @@
 #include "JSONHandler/DeleteSubMenuResponse.h"
 #include "JSONHandler/CreateInteractionChoiceSet.h"
 #include "JSONHandler/CreateInteractionChoiceSetResponse.h"
+#include "JSONHandler/DeleteInteractionChoiceSet.h"
+#include "JSONHandler/DeleteInteractionChoiceSetResponse.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_request.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_response.h"
 #include "JSONHandler/ALRPCObjects/AddSubMenu_request.h"
@@ -417,6 +419,12 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         }
         case Marshaller::METHOD_DELETEINTERACTIONCHOICESET_REQUEST:
         {
+            LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet request has been invoked");
+            DeleteInteractionChoiceSet_request* object = (DeleteInteractionChoiceSet_request*)message.first;
+            RPC2Communication::DeleteInteractionChoiceSet* deleteInteractionChoiceSet = new RPC2Communication::DeleteInteractionChoiceSet();
+            core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getID(), sessionID);
+            deleteInteractionChoiceSet->setInteractionChoiceSetId(object->get_interactionChoiceSetID());
+            core->mJSONRPC2Handler->sendRequest(deleteInteractionChoiceSet);
             break;
         }
         case Marshaller::METHOD_SHOW_RESPONSE:
@@ -708,6 +716,18 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet response has been income");
             RPC2Communication::CreateInteractionChoiceSetResponse* object = (RPC2Communication::CreateInteractionChoiceSetResponse*)msg;
             CreateInteractionChoiceSet_response* response = new CreateInteractionChoiceSet_response();
+            response->set_success(true);
+            response->set_resultCode(object->getResult());
+            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            core->mMessageMapping.removeMessage(object->getID());
+            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_DELETEINTERACTIONCHOICESET_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet response has been income");
+            RPC2Communication::DeleteInteractionChoiceSetResponse* object = (RPC2Communication::DeleteInteractionChoiceSetResponse*)msg;
+            DeleteInteractionChoiceSet_response* response = new DeleteInteractionChoiceSet_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
             unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
