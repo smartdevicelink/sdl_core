@@ -21,6 +21,7 @@ add_subdirectory(./src/components)
 add_subdirectory(./src/appMain)
 
 # Building tests
+add_subdirectory(./test/components)
 
 # Building documentation
 
