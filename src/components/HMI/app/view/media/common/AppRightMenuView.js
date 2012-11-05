@@ -110,18 +110,6 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 			
 			elementId:	'appScroller',
 
-			childViews: [
-				'optionsButton'
-			],
-
-			optionsButton: MFT.Button.extend({
-				elementId:		'media_rightmenu_optionButton',
-				classNames:		['rs-item'],
-				icon:			'images/media/active_arrow.png',
-				text:			'Options',
-				action:			'turnOnAppOptions',
-				target:			'MFT.MediaController'
-			})
 		})
 	}),
 	
@@ -150,6 +138,17 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 
 	loaded: function() {
 		this.set('scroll', new iScroll('media_appScrollWrapper',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.AppRightMenuView.scrollEnd();}}));
+		button = MFT.Button.create({
+			elementId:		'media_rightmenu_optionButton',
+			classNames:		['rs-item'],
+			icon:			'images/media/active_arrow.png',
+			text:			'Options',
+			action:			'turnOnAppOptions',
+			target:			'MFT.MediaController'
+		});
+
+		MFT.AppRightMenuView.scrollWrapper.scroller.get('childViews').pushObject(button);
+		MFT.AppRightMenuView.scroll.refresh();
 	},
 
 	afterRender: function() {

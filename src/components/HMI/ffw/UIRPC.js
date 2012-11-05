@@ -228,7 +228,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.AddSubMenu") {
 			
-			MFT.AppOptionsView.AddSubMenu(request.menuId, request.menuName);
+			MFT.AppOptionsView.AddSubMenu(request.params.menuId, request.params.menuName);
 
 			// send repsonse
 			var JSONMessage = {
@@ -239,15 +239,13 @@ FFW.UI = FFW.RPCObserver.create({
 			this.client.send(JSONMessage);
 		}
 
-		if (request.method == "UI.DeleteSubMenul") {
-			
-			MFT.AppOptionsView.DeleteSubMenul(request.menuId);
+		if (request.method == "UI.DeleteSubMenu") {
 
 			// send repsonse
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+				"result":	MFT.AppOptionsView.DeleteSubMenu(request.params.menuId)  //  type (enum) from AppLink protocol
 			};
 			this.client.send(JSONMessage);
 		}
