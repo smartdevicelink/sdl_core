@@ -142,7 +142,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             {
                 response->set_autoActivateID(*object->get_autoActivateID());
             }
-            response->set_buttonCapabilities(core->getButtonCapabilities());
+            response->set_buttonCapabilities(core->mButtonCapabilities.get());
             if(registeredApp)
             {
                 response->set_success(true);
@@ -531,7 +531,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetButtonCapabilities response has been income");
             RPC2Communication::GetCapabilitiesResponse * object = (RPC2Communication::GetCapabilitiesResponse*)msg;
-            core->setButtonCapabilities( object );
+            core->mButtonCapabilities.set( object );
             break;
         }
         case RPC2Communication::RPC2Marshaller::METHOD_SHOW_RESPONSE:
@@ -781,21 +781,6 @@ void AppMgrCore::unregisterApplication(const Message &msg)
 void AppMgrCore::registerApplicationOnHMI( const std::string& name )
 {
 
-}
-
-void AppMgrCore::setButtonCapabilities( RPC2Communication::GetCapabilitiesResponse* msg )
-{
-    std::vector<RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal> result = msg->getCapabilities();
-    Capabilities caps;
-    for( std::vector<RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal>::iterator it = result.begin(); it != result.end(); it++ )
-    {
-        mButtonCapabilities.push_back(it->capability);
-    }
-}
-
-const Capabilities& AppMgrCore::getButtonCapabilities() const
-{
-	return mButtonCapabilities;
 }
 
 void AppMgrCore::setJsonHandler(JSONHandler* handler)

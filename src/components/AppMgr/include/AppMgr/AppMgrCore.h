@@ -13,7 +13,7 @@
 #include "AppMgr/ButtonMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/MessageMapping.h"
-#include "JSONHandler/GetCapabilitiesResponse.h"
+#include "AppMgr/ButtonCapabilities.h"
 
 class RegisterAppInterface_request;
 class RegisterAppInterface_response;
@@ -40,7 +40,6 @@ class RegistryItem;
 template< class QueueType >
 class AppMgrCoreQueue;
 
-typedef std::vector<ButtonCapabilities> Capabilities;
 typedef std::pair<ALRPCMessage*, unsigned char> Message;
 
 class AppMgrCore
@@ -74,13 +73,10 @@ private:
 
 	void registerApplicationOnHMI( const std::string& name );
 
-	void setButtonCapabilities( RPC2Communication::GetCapabilitiesResponse* msg );
-    const Capabilities& getButtonCapabilities() const;
-
     AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
     AppMgrCoreQueue<RPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
-	Capabilities mButtonCapabilities;
+    ButtonCapabilitiesContainer mButtonCapabilities;
     ButtonMapping    mButtonsMapping;
     CommandMapping   mCommandMapping;
     MessageMapping   mMessageMapping;
