@@ -9,19 +9,14 @@
 #define APPMGR_H_
 
 #include <string>
-#include <map>
 #include "AppMgr/ButtonMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/MessageMapping.h"
 #include "AppMgr/ButtonCapabilities.h"
 
-class RegisterAppInterface_request;
-class RegisterAppInterface_response;
-class SubscribeButton_request;
 class ALRPCMessage;
 class JSONHandler;
 class JSONRPC2Handler;
-class UnsubscribeButton_request;
 
 namespace RPC2Communication
 {
