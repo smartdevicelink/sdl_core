@@ -66,6 +66,7 @@ ActivateApp(
 oneway OnAppRegistered(
     string(100) appName,
     string appIcon,
+    string deviceName,
     string(40) * vrSynonym[1:100], // sysnonyms assossiated with app to start it
     bool isMediaApplication,
     Language languageDesired  // data type from AppLink protocol specification

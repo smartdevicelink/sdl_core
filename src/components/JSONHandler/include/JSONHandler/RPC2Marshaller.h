@@ -35,6 +35,7 @@
 #include "JSONHandler/CreateInteractionChoiceSetResponseMarshaller.h"
 #include "JSONHandler/DeleteInteractionChoiceSetMarshaller.h"
 #include "JSONHandler/DeleteInteractionChoiceSetResponseMarshaller.h"
+#include "JSONHandler/PerformInteractionMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -74,7 +75,9 @@ namespace RPC2Communication
         METHOD_CREATEINTERACTIONCHOICESET_REQUEST=27,
         METHOD_CREATEINTERACTIONCHOICESET_RESPONSE=28,
         METHOD_DELETEINTERACTIONCHOICESET_REQUEST=29,
-        METHOD_DELETEINTERACTIONCHOICESET_RESPONSE=30
+        METHOD_DELETEINTERACTIONCHOICESET_RESPONSE=30,
+        METHOD_PERFORMINTERACTION_REQUEST=31,
+        METHOD_PERFORMINTERACTION_RESPONSE=32
         };
 
         RPC2Marshaller();
@@ -393,6 +396,16 @@ namespace RPC2Communication
             return mDeleteInteractionChoiceSetResponseMarshaller.toString(res);
         }
 
+        static bool fromString(const std::string& str, PerformInteraction& res)
+        {
+            return mPerformInteractionMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const PerformInteraction&res)
+        {
+            return mPerformInteractionMarshaller.toString(res);
+        }
+
     private:
         struct localHash
         {
@@ -445,6 +458,7 @@ namespace RPC2Communication
         static CreateInteractionChoiceSetResponseMarshaller mCreateInteractionChoiceSetResponseMarshaller;
         static DeleteInteractionChoiceSetMarshaller mDeleteInteractionChoiceSetMarshaller;
         static DeleteInteractionChoiceSetResponseMarshaller mDeleteInteractionChoiceSetResponseMarshaller;
+        static PerformInteractionMarshaller mPerformInteractionMarshaller;
     };
 
 }

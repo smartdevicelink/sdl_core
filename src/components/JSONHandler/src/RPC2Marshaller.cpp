@@ -78,7 +78,11 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     if ( s.compare("UI.DeleteInteractionChoiceSet") == 0 )
     {
         return METHOD_DELETEINTERACTIONCHOICESET_REQUEST;
-    }    
+    }  
+    if ( s.compare("UI.PerformInteraction") == 0 )  
+    {
+        return METHOD_PERFORMINTERACTION_REQUEST;
+    }
     
     return METHOD_INVALID;
 }
@@ -423,6 +427,14 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_PERFORMINTERACTION_REQUEST:
+    {
+        PerformInteraction * rv = new PerformInteraction;
+        if (PerformInteractionMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
 
   }
 
@@ -503,6 +515,8 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return DeleteInteractionChoiceSetMarshaller::toJSON(*static_cast<const DeleteInteractionChoiceSet*>(msg));
     case METHOD_DELETEINTERACTIONCHOICESET_RESPONSE:
       return DeleteInteractionChoiceSetResponseMarshaller::toJSON(*static_cast<const DeleteInteractionChoiceSetResponse*>(msg));
+    case METHOD_PERFORMINTERACTION_REQUEST:
+      return PerformInteractionMarshaller::toJSON(*static_cast<const PerformInteraction*>(msg));
   }
 
   return j;
@@ -566,3 +580,4 @@ CreateInteractionChoiceSetMarshaller RPC2Marshaller::mCreateInteractionChoiceSet
 CreateInteractionChoiceSetResponseMarshaller RPC2Marshaller::mCreateInteractionChoiceSetResponseMarshaller;
 DeleteInteractionChoiceSetMarshaller RPC2Marshaller::mDeleteInteractionChoiceSetMarshaller;
 DeleteInteractionChoiceSetResponseMarshaller RPC2Marshaller::mDeleteInteractionChoiceSetResponseMarshaller;
+PerformInteractionMarshaller RPC2Marshaller::mPerformInteractionMarshaller;
