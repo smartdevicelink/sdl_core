@@ -33,6 +33,8 @@
 #include "JSONHandler/DeleteSubMenuResponseMarshaller.h"
 #include "JSONHandler/CreateInteractionChoiceSetMarshaller.h"
 #include "JSONHandler/CreateInteractionChoiceSetResponseMarshaller.h"
+#include "JSONHandler/DeleteInteractionChoiceSetMarshaller.h"
+#include "JSONHandler/DeleteInteractionChoiceSetResponseMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -70,7 +72,9 @@ namespace RPC2Communication
         METHOD_DELETESUBMENU_REQUEST=25,
         METHOD_DELETESUBMENU_RESPONSE=26,
         METHOD_CREATEINTERACTIONCHOICESET_REQUEST=27,
-        METHOD_CREATEINTERACTIONCHOICESET_RESPONSE=28
+        METHOD_CREATEINTERACTIONCHOICESET_RESPONSE=28,
+        METHOD_DELETEINTERACTIONCHOICESET_REQUEST=29,
+        METHOD_DELETEINTERACTIONCHOICESET_RESPONSE=30
         };
 
         RPC2Marshaller();
@@ -369,6 +373,26 @@ namespace RPC2Communication
             return mCreateInteractionChoiceSetResponseMarshaller.toString(res);
         }
 
+        static bool fromString(const std::string &str, DeleteInteractionChoiceSet&res)
+        {
+            return mDeleteInteractionChoiceSetMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const DeleteInteractionChoiceSet& res)
+        {
+            return mDeleteInteractionChoiceSetMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string & str, DeleteInteractionChoiceSetResponse& res)
+        {
+            return mDeleteInteractionChoiceSetResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const DeleteInteractionChoiceSetResponse& res)
+        {
+            return mDeleteInteractionChoiceSetResponseMarshaller.toString(res);
+        }
+
     private:
         struct localHash
         {
@@ -419,6 +443,8 @@ namespace RPC2Communication
         static DeleteSubMenuResponseMarshaller mDeleteSubMenuResponseMarshaller;
         static CreateInteractionChoiceSetMarshaller mCreateInteractionChoiceSetMarshaller;
         static CreateInteractionChoiceSetResponseMarshaller mCreateInteractionChoiceSetResponseMarshaller;
+        static DeleteInteractionChoiceSetMarshaller mDeleteInteractionChoiceSetMarshaller;
+        static DeleteInteractionChoiceSetResponseMarshaller mDeleteInteractionChoiceSetResponseMarshaller;
     };
 
 }

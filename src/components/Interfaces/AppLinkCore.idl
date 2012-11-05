@@ -44,7 +44,7 @@ envelope "JSON-RPC 2.0";
 GetAppList(
     ->
     { string(100) appName, string(100) * ngnMediaScreenAppName, string * icon } appList []
-    )
+    );
 
 /*
      * @descr 
@@ -58,7 +58,7 @@ GetAppList(
 ActivateApp(
     string(100) appName 
     -> // return value is provided in corresponding response object, id of request and response should be equal
-)
+);
 
 /*
      * @descr Notifies if new application is registered
@@ -69,7 +69,7 @@ oneway OnAppRegistered(
     string(40) * vrSynonym[1:100], // sysnonyms assossiated with app to start it
     bool isMediaApplication,
     Language languageDesired  // data type from AppLink protocol specification
-)
+);
 
 /*
      * @descr Notifies if application is unregistered
@@ -77,4 +77,4 @@ oneway OnAppRegistered(
 oneway OnAppUnregistered(
     string(100) appName,
     AppInterfaceUnregisteredReason * reason  // data type from AppLink protocol specification
-)
+);

@@ -42,8 +42,8 @@ envelope "JSON-RPC 2.0";
      */
 GetCapabilities(
     ->
-    ButtonCapabilities capabilities[1..100] // data type from AppLink protocol specification
-)
+    ButtonCapabilities capabilities[1:100] // data type from AppLink protocol specification
+);
 
 /*
      * @descr Notifies application of UP/DOWN events for buttons
@@ -51,7 +51,7 @@ GetCapabilities(
 oneway OnButtonEvent(
     ButtonName name,  // data type from AppLink protocol specification
     ButtonEventMode mode  // data type from AppLink protocol specification
-)
+);
 
 /*
      * @descr Notifies application of LONG/SHORT press events for buttons
@@ -59,7 +59,7 @@ oneway OnButtonEvent(
 oneway OnButtonPress(
     ButtonName name,  // data type from AppLink protocol specification
     ButtonPressMode mode  // data type from AppLink protocol specification
-)
+);
 
 /*
 "id": "integer" //REQUIRED for request methods. NOT to be used for notifications

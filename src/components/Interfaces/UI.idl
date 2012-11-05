@@ -66,7 +66,7 @@ Show(string(500) * mainField1,
 Alert(
   string(500) * AlertText1,
   string(500) * AlertText2,
-  unsigned int(3000 .. 10000) * duration,
+  unsigned int(3000..10000) * duration,
   bool * playTone
   -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
@@ -80,7 +80,7 @@ Alert(
 AddCommand(
   unsigned int (2000000000) cmdId,  // cmdID from addCommand request in AppLink protocol
   MenuParams menuParams   //data type from AppLink protocol specification
-  -> ) // return value is provided in corresponding response object, id of request and response should be equal
+  -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
    * @descr 
@@ -91,7 +91,7 @@ AddCommand(
    */ 
 DeleteCommand(
   unsigned int (2000000000) cmdId  // cmdID from addCommand request in AppLink protocol
-  -> )  // return value is provided in corresponding response object, id of request and response should be equal
+  -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
 
 /*
@@ -106,7 +106,7 @@ AddSubMenu(
   unsigned int (2000000000) menuId,
   unsigned int (1000) * position,
   string(500) menuName
-  -> )  // return value is provided in corresponding response object, id of request and response should be equal
+  -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
    * @descr 
@@ -118,7 +118,7 @@ AddSubMenu(
    */ 
 DeleteSubMenu(
   unsigned int (2000000000) menuId
-  -> )  //// return value is provided in corresponding response object, id of request and response should be equal
+  -> );  //// return value is provided in corresponding response object, id of request and response should be equal
 
 /*
    * @descr 
@@ -131,8 +131,8 @@ DeleteSubMenu(
    */ 
 CreateInteractionChoiceSet(
   unsigned int (2000000000) interactionChoiceSetID,
-  Choice choiceSet[1..100]   // data type from AppLink protocol specification
-  -> ) // return value is provided in corresponding response object, id of request and response should be equal
+  Choice choiceSet[1:100]   // data type from AppLink protocol specification
+  -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
    * @descr 
@@ -145,7 +145,7 @@ CreateInteractionChoiceSet(
    */ 
 DeleteInteractionChoiceSet(
   unsigned int(2000000000) interactionChoiceSetID,
-  -> )  // return value is provided in corresponding response object, id of request and response should be equal
+  -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
    * @descr 
@@ -159,16 +159,16 @@ DeleteInteractionChoiceSet(
    */ 
 PerformInteraction(
   string(500) initialText,
-  TTSChunk initialPrompt[1..100], //data type from AppLink protocol specification
+  TTSChunk initialPrompt[1:100], //data type from AppLink protocol specification
   InteractionMode interactionMode, // data type from AppLink protocol specification
   unsigned int (2000000000)  interactionChoiceSetIDList[1..100],// List of interaction choice set IDs to use with an interaction
-  TTSChunk * helpPrompt[1..100], //data type from AppLink protocol specification
-  TTSChunk * timeoutPrompt[1..100], // data type from AppLink protocol specification
+  TTSChunk * helpPrompt[1:100], //data type from AppLink protocol specification
+  TTSChunk * timeoutPrompt[1:100], // data type from AppLink protocol specification
   unsigned int (5000..100000) * timeout //in milliseconds
   -> 
   unsigned int (2000000000) * choiceID, // ID of the choice that was selected in response to PerformInteraction
   TriggerSource * triggerSource //data type from AppLink protocol specification
-  )
+  );
 
 /*
    * @descr 
@@ -183,7 +183,7 @@ PerformInteraction(
 SetMediaClockTimer(
   StartTime * startTime, // data type from AppLink protocol specification
   UpdateMode updateMode  // data type from AppLink protocol specification
-  -> )// return value is provided in corresponding response object, id of request and response should be equal
+  -> );// return value is provided in corresponding response object, id of request and response should be equal
 
 /*
    * @descr 
@@ -196,9 +196,9 @@ SetMediaClockTimer(
    *  result code
    */ 
 SetGlobalProperties(
-  TTSChunk * helpPrompt[1..100], // data type from AppLink protocol specification
-  TTSChunk * timeoutPrompt[1..100] // data type from AppLink protocol specification
-  -> ) // return value is provided in corresponding response object, id of request and response should be equal
+  TTSChunk * helpPrompt[1:100], // data type from AppLink protocol specification
+  TTSChunk * timeoutPrompt[1:100] // data type from AppLink protocol specification
+  -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
    * @descr 
@@ -211,29 +211,29 @@ SetGlobalProperties(
    *  result code
    */ 
 ResetGlobalProperties(
-  GlobalProperty properties[1..100] // enum, data type from AppLink protocol specification
-  -> ) // return value is provided in corresponding response object, id of request and response should be equal
+  GlobalProperty properties[1:100] // enum, data type from AppLink protocol specification
+  -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
    * @descr Notifies AppLink core about command trigerred by UI
    */
 oneway  OnCommand (
   unsigned int (2000000000) commandId // id of triggered command
-  )
+  );
 
 /*
    * @descr Notifies AppLink if application is activated (switched from background to foreground) by UI
    */
 oneway OnAppActivated(
   string(100) appName
-)
+);
 
 /*
    * @descr Notifies AppLink if application is deactivated (switched from background to foreground )
    */
 oneway OnAppDeactivated(
   string(100) appName
-)
+);
 
 // TODO: not sure  if it is correct place for this method
   // TODO: what's about VR session in progress?
@@ -242,7 +242,7 @@ oneway OnAppDeactivated(
    */
 oneway OnSystemContext(
   SystemContext systemContext
-  )
+  );
 
 /*
    * @descr 
@@ -255,7 +255,7 @@ oneway OnSystemContext(
 GetDisplayCapabilities(
   ->
   DisplayCapabilities capabilities // data type from AppLink protocol specification
-  )
+  );
 
 /*
    * @descr 
@@ -267,8 +267,8 @@ GetDisplayCapabilities(
    */ 
 GetHmiZoneCapabilities(
   ->
-  HmiZoneCapabilities capabilities[1..100] // data type from AppLink protocol specification
-  )
+  HmiZoneCapabilities capabilities[1:100] // data type from AppLink protocol specification
+  );
 
 /*
 "id": "integer" //REQUIRED for request methods. NOT to be used for notifications

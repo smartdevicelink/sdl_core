@@ -27,7 +27,7 @@
         "AppLinkCore.getAppList": {
 	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
 			"parameters": {
-				[
+				"appList" : [
 					"appName"		: "string",
 					"ngnMediaScreenAppName" : "string",
 					"icon"			: "string",

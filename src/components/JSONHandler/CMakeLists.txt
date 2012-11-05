@@ -218,6 +218,10 @@ set (SOURCES
     ./src/CreateInteractionChoiceSetMarshaller.cpp
     ./src/CreateInteractionChoiceSetResponse.cpp
     ./src/CreateInteractionChoiceSetResponseMarshaller.cpp
+    ./src/DeleteInteractionChoiceSet.cpp
+    ./src/DeleteInteractionChoiceSetMarshaller.cpp
+    ./src/DeleteInteractionChoiceSetResponse.cpp
+    ./src/DeleteInteractionChoiceSetResponseMarshaller.cpp
 )
 
 add_library("JSONHandler" ${SOURCES} ${GENERATED_SOURCES})

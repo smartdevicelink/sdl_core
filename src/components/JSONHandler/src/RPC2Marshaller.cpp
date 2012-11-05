@@ -75,6 +75,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_CREATEINTERACTIONCHOICESET_REQUEST;
     }
+    if ( s.compare("UI.DeleteInteractionChoiceSet") == 0 )
+    {
+        return METHOD_DELETEINTERACTIONCHOICESET_REQUEST;
+    }    
     
     return METHOD_INVALID;
 }
@@ -128,6 +132,10 @@ const RPC2Marshaller::Methods RPC2Marshaller::getResponseIndex(const std::string
   if ( s.compare("UI.CreateInteractionChoiceSet") == 0 )
   {
       return METHOD_CREATEINTERACTIONCHOICESET_RESPONSE;
+  }
+  if ( s.compare("UI.DeleteInteractionChoiceSet") == 0 )
+  {
+      return METHOD_DELETEINTERACTIONCHOICESET_RESPONSE;
   }
 
   return METHOD_INVALID;
@@ -399,6 +407,22 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_DELETEINTERACTIONCHOICESET_REQUEST:
+    {
+        DeleteInteractionChoiceSet * rv = new DeleteInteractionChoiceSet;
+        if (DeleteInteractionChoiceSetMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_DELETEINTERACTIONCHOICESET_RESPONSE:
+    {
+        DeleteInteractionChoiceSetResponse *rv = new DeleteInteractionChoiceSetResponse;
+        if (DeleteInteractionChoiceSetResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
 
   }
 
@@ -475,6 +499,10 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return CreateInteractionChoiceSetMarshaller::toJSON(*static_cast<const CreateInteractionChoiceSet*>(msg));
     case METHOD_CREATEINTERACTIONCHOICESET_RESPONSE:
       return CreateInteractionChoiceSetResponseMarshaller::toJSON(*static_cast<const CreateInteractionChoiceSetResponse*> (msg));
+    case METHOD_DELETEINTERACTIONCHOICESET_REQUEST:
+      return DeleteInteractionChoiceSetMarshaller::toJSON(*static_cast<const DeleteInteractionChoiceSet*>(msg));
+    case METHOD_DELETEINTERACTIONCHOICESET_RESPONSE:
+      return DeleteInteractionChoiceSetResponseMarshaller::toJSON(*static_cast<const DeleteInteractionChoiceSetResponse*>(msg));
   }
 
   return j;
@@ -536,3 +564,5 @@ DeleteSubMenuMarshaller RPC2Marshaller::mDeleteSubMenuMarshaller;
 DeleteSubMenuResponseMarshaller RPC2Marshaller::mDeleteSubMenuResponseMarshaller;
 CreateInteractionChoiceSetMarshaller RPC2Marshaller::mCreateInteractionChoiceSetMarshaller;
 CreateInteractionChoiceSetResponseMarshaller RPC2Marshaller::mCreateInteractionChoiceSetResponseMarshaller;
+DeleteInteractionChoiceSetMarshaller RPC2Marshaller::mDeleteInteractionChoiceSetMarshaller;
+DeleteInteractionChoiceSetResponseMarshaller RPC2Marshaller::mDeleteInteractionChoiceSetResponseMarshaller;
