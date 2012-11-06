@@ -7,6 +7,7 @@
 #include "Logger.hpp"
 
 #include <pthread.h>
+#include <vector>
 
 namespace NsAppLink
 {
@@ -107,7 +108,138 @@ namespace NsAppLink
              **/
             virtual tConnectionHandle generateNewConnectionHandle(void);
 
+            // Handling Device Adapters callbacks
+
+            /**
+             * @brief Available devices list updated callback.
+             *
+             * @param DeviceAdapter Calling device adapter.
+             * @param DeviceList New list of available devices.
+             **/
+            virtual void onDeviceListUpdated(IDeviceAdapter * DeviceAdapter, const tInternalDeviceList & DeviceList);
+
+            /**
+             * @brief Application connected callback.
+             *
+             * @param ConnectedDevice DeviceInfo of device with connected application.
+             * @param Connection Connection handle.
+             **/
+            virtual void onApplicationConnected(const SDeviceInfo & ConnectedDevice, const tConnectionHandle ConnectionHandle);
+
+            /**
+             * @brief Application disconnected callback.
+             *
+             * @param ConnectedDevice DeviceInfo of device with connected application.
+             * @param Connection Connection handle.
+             **/
+            virtual void onApplicationDisconnected(const SDeviceInfo & DisconnectedDevice, const tConnectionHandle ConnectionHandle);
+
+            /**
+             * @brief Frame received callback.
+             *
+             * @param DeviceAdapter Calling device adapter.
+             * @param ConnectionHandle Connection handle.
+             * @param Data Received frame data.
+             * @param DataSize Size of received data in bytes.
+             *
+             * @note  %Data pointed by parameter Data is valid only until
+             *        this callback returns control to the caller. Callback
+             *        handler is responsible to copy this data to its own
+             *        location if it needs the data after return.
+             **/
+            virtual void onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize);
+
+            /**
+             * @brief Frame send completed callback.
+             *
+             * @param DeviceAdapter Calling device adapter.
+             * @param ConnectionHandle Connection handle.
+             * @param FrameSequenceNumber Sequence numbere of frame that was previously returned by ITransportManager::sendFrame.
+             * @param SendStatus Result status.
+             **/
+            virtual void onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus);
+
         protected:
+
+            /**
+             * @brief Enumeration that represents type of the device listener callback
+             *        that must be called
+             **/
+            enum EDeviceListenerCallbackType
+            {
+                DeviceListenerCallbackType_DeviceListUpdated = 0,
+                DeviceListenerCallbackType_ApplicationConnected = 1,
+                DeviceListenerCallbackType_ApplicationDisconnected = 2
+            };
+
+            /**
+             * @brief Device listener callback information
+             *
+             * Used to store data for calling device listeners
+             **/
+            struct SDeviceListenerCallback
+            {
+                /**
+                 * @brief Constructor for creating DeviceListUpdated callback.
+                 *
+                 * @param CallbackType Type of the callback
+                 * @param DeviceList Device list
+                 **/
+                SDeviceListenerCallback(EDeviceListenerCallbackType CallbackType, const tDeviceList & DeviceList);
+
+                /**
+                 * @brief Constructor for creating ApplicationConnected and ApplicationDisconnected callbacks
+                 *
+                 * @param CallbackType Type of the callback
+                 * @param DeviceInfo Device information
+                 * @param ConnectionHandle Connection handle
+                 **/
+                SDeviceListenerCallback(EDeviceListenerCallbackType CallbackType, const SDeviceInfo & DeviceInfo, const tConnectionHandle & ConnectionHandle);
+
+                /**
+                 * @brief Destructor.
+                 *
+                 **/
+                ~SDeviceListenerCallback(void);
+
+                /**
+                 * @brief Type of the callback that must be called
+                 **/
+                EDeviceListenerCallbackType mCallbackType;
+
+                /**
+                 * @brief Device list (will be sent in the DeviceListUpdated callback)
+                 **/
+                tDeviceList mDeviceList;
+
+                /**
+                 * @brief Device information (will be sent in the ApplicationConnected and ApplicationDisconnected callbacks)
+                 **/
+                SDeviceInfo mDeviceInfo;
+
+                /**
+                 * @brief Connection handle (will be sent in the ApplicationConnected and ApplicationDisconnected callbacks)
+                 **/
+                tConnectionHandle mConnectionHandle;
+            };
+
+            /**
+             * @brief Start routine for Application-related callbacks.
+             *
+             * @param Data Must be pointer to CTransportManager instance.
+             *
+             * @return Thread return value.
+             **/
+            static void * applicationCallbacksThreadStartRoutine(void * Data);
+
+            /**
+             * @brief Application-related callbacks thread.
+             *
+             * From this thread all application-related callbacks are called
+             *
+             **/
+            void applicationCallbacksThread();
+
             /**
              * @brief Device adapters.
              **/
@@ -161,6 +293,28 @@ namespace NsAppLink
              * Used during connection handle generation
              **/
             tConnectionHandle mLastUsedConnectionHandle;
+
+            /**
+             * @brief ID of thread, which sends Application-related callbacks
+             **/
+            pthread_t mApplicationCallbacksThread;
+
+            /**
+             * @brief Condition variable used for device listeners callbacks synchronization
+             **/
+            pthread_cond_t mDeviceListenersConditionVar;
+
+            /**
+             * @brief Vector of the device listeners callbacks to call
+             **/
+            std::vector<SDeviceListenerCallback> mDeviceListenersCallbacks;
+
+            /**
+             * @brief Terminate flag.
+             *
+             * This flag is set to notify threads that they must be terminated.
+             **/
+            bool mTerminateFlag;
         };
     }
 }
