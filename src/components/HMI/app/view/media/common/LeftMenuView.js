@@ -13,7 +13,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 		/** View ID*/
 		elementId: 'media_leftmenu',
 
-		classNameBindings:  [ 'MFT.States.media.appoptions.active:hidden' ],
+		classNameBindings:  [ 'hideMenu:hidden' ],
 		
 		/** View components*/
 		childViews: [
@@ -35,6 +35,14 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 			elementId: 'media_left_menu_border',
 			classNames:['ls_border']
 		}),
+
+		hideMenu: function(){
+			if( (MFT.States.media.appsubmenu.active == true) || (MFT.States.media.appoptions.active == true) ){
+				return true;
+			}else{
+				return false;
+			}
+		}.property('MFT.States.media.appsubmenu.active', 'MFT.States.media.appoptions.active'),
 		
 		/** AM Station Button*/
 		amButton:  MFT.ToggleIndicatorsButton.create({

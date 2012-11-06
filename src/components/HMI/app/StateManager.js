@@ -337,6 +337,10 @@ var StateManager = Em.StateManager.extend({
 			viewLoaded: true
 		}),
 
+		appsubmenu: Em.State.create({
+			viewLoaded: true
+		}),
+
 		options: Em.State.create({
 		})
 	}),

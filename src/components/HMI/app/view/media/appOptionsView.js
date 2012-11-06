@@ -35,7 +35,7 @@ MFT.AppOptionsView = Em.ContainerView.create({
         button = MFT.Button.create({
             elementId:          'media_app_options_view' + menuId,
             click:              function(){
-                //FFW.UI.onCommand(this.commandId);
+                FFW.UI.onCommand(menuId);
             },
             commandId:          menuId, 
             classNames:         ['rs-item'],
@@ -144,6 +144,20 @@ MFT.AppOptionsView = Em.ContainerView.create({
             this.coeficient = this.scroll.wrapperH / this.scroll.scrollerH;
             this.scrollBarH = (this.scroll.wrapperH - 98) * this.coeficient - 49;
             this.scrollBar.scroller.set( 'style', 'height:' + this.scrollBarH + 'px;' );
+
+            button = MFT.Button.create({
+                elementId:          'media_app_options_view',
+                click:              function(){
+                    MFT.MediaController.turnOnAppSubMenu(1);
+                },
+                commandId:          1, 
+                classNames:         ['rs-item'],
+                //icon:             null,//'images/media/active_arrow.png',
+                text:               "menuName" 
+            });
+
+            MFT.AppOptionsView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
+            MFT.AppOptionsView.buttonsWrapper.scroll.refresh();
         }
     }),
 

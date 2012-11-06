@@ -57,6 +57,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -76,6 +77,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -95,6 +97,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -114,6 +117,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -133,6 +137,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -154,6 +159,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -174,6 +180,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -194,6 +201,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -214,6 +222,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -234,6 +243,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -254,6 +264,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -274,6 +285,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -294,6 +306,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -314,6 +327,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
@@ -334,6 +348,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				var self = this;
+				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){

@@ -400,6 +400,11 @@ MFT.MediaController = Em.Object.create({
 		this.resetDirectTune();
 		MFT.States.goToState('media.appoptions');
 	},
+
+	/** Application Sub Mennu */
+	turnOnAppSubMenu: function(id){
+		MFT.States.goToState('media.appsubmenu');
+	},
 	
 	optionsBack: function(){
 		if(MFT.AmModel.active || MFT.FmModel.active || MFT.SiriusModel.active){
