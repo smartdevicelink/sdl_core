@@ -199,6 +199,16 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::scanForNewDevices(void)
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }
 
+void NsAppLink::NsTransportManager::CBluetoothAdapter::connectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
+{
+    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+}
+
+void NsAppLink::NsTransportManager::CBluetoothAdapter::disconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
+{
+    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+}
+
 NsAppLink::NsTransportManager::EDeviceType NsAppLink::NsTransportManager::CBluetoothAdapter::getDeviceType(void) const
 {
     return DeviceBluetooth;
