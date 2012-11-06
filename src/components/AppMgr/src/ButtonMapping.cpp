@@ -13,6 +13,11 @@ ButtonMapping::ButtonMapping()
 
 void ButtonMapping::addButton(const ButtonName &buttonName, RegistryItem *app)
 {
+    if(!app)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Adding a button to a null registry item");
+        return;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to button " << buttonName.get() << " in app " << app->getApplication()->getName() );
     mButtonsMapping.insert(ButtonMapItem(buttonName, app));
 }
@@ -24,6 +29,11 @@ void ButtonMapping::removeButton(const ButtonName &buttonName)
 
 void ButtonMapping::removeItem(RegistryItem *app)
 {
+    if(!app)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Trying to remove a null item");
+        return;
+    }
     for(ButtonMap::iterator it = mButtonsMapping.begin(); it != mButtonsMapping.end(); it++)
     {
         if(it->second->getApplication()->getSessionID() == app->getApplication()->getSessionID())
