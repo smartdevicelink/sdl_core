@@ -38,12 +38,16 @@
 #include "JSONHandler/CreateInteractionChoiceSetResponse.h"
 #include "JSONHandler/DeleteInteractionChoiceSet.h"
 #include "JSONHandler/DeleteInteractionChoiceSetResponse.h"
+#include "JSONHandler/PerformInteraction.h"
+#include "JSONHandler/PerformInteractionResponse.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_request.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_response.h"
 #include "JSONHandler/ALRPCObjects/AddSubMenu_request.h"
 #include "JSONHandler/ALRPCObjects/AddSubMenu_response.h"
 #include "JSONHandler/ALRPCObjects/DeleteCommand_request.h"
 #include "JSONHandler/ALRPCObjects/DeleteCommand_response.h"
+#include "JSONHandler/ALRPCObjects/PerformInteraction_request.h"
+#include "JSONHandler/ALRPCObjects/PerformInteraction_response.h"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 
@@ -426,6 +430,31 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             core->mJSONRPC2Handler->sendRequest(deleteInteractionChoiceSet);
             break;
         }
+        case Marshaller::METHOD_PERFORMINTERACTION_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction request has been invoked");
+            PerformInteraction_request* object = (PerformInteraction_request*)message.first;
+            RPC2Communication::PerformInteraction* performInteraction = new RPC2Communication::PerformInteraction();
+            core->mMessageMapping.addMessage(performInteraction->getID(), sessionID);
+            if(object->get_helpPrompt())
+            {
+                performInteraction->setHelpPrompt(*object->get_helpPrompt());
+            }
+            performInteraction->setInitialPrompt(object->get_initialPrompt());
+            performInteraction->setInitialText(object->get_initialText());
+            performInteraction->setInteractionChoiceSetIDList(object->get_interactionChoiceSetIDList());
+            performInteraction->setInteractionMode(object->get_interactionMode());
+            if(object->get_timeout())
+            {
+                performInteraction->setTimeout(*object->get_timeout());
+            }
+            if(object->get_timeoutPrompt())
+            {
+                performInteraction->setTimeoutPrompt(*object->get_timeoutPrompt());
+            }
+            core->mJSONRPC2Handler->sendRequest(performInteraction);
+            break;
+        }
         case Marshaller::METHOD_SHOW_RESPONSE:
         case Marshaller::METHOD_SPEAK_RESPONSE:
         case Marshaller::METHOD_SETGLOBALPROPERTIES_RESPONSE:
@@ -700,6 +729,19 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet response has been income");
             RPC2Communication::DeleteInteractionChoiceSetResponse* object = (RPC2Communication::DeleteInteractionChoiceSetResponse*)msg;
             DeleteInteractionChoiceSet_response* response = new DeleteInteractionChoiceSet_response();
+            response->set_success(true);
+            response->set_resultCode(object->getResult());
+            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            core->mMessageMapping.removeMessage(object->getID());
+            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            break;
+        }
+        case RPC2Communication::RPC2Marshaller::METHOD_PERFORMINTERACTION_RESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction response has been income");
+            RPC2Communication::PerformInteractionResponse* object = (RPC2Communication::PerformInteractionResponse*)msg;
+            PerformInteraction_response* response = new PerformInteraction_response();
+        //    response->set_choiceID(object->get)
             response->set_success(true);
             response->set_resultCode(object->getResult());
             unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
