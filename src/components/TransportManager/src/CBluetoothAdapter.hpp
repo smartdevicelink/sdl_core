@@ -2,7 +2,9 @@
 #define __TRANSPORTMANAGER_CBLUETOOTHADAPTER_HPP__
 
 #include <bluetooth/bluetooth.h>
+#include <bluetooth/sdp.h>
 #include <pthread.h>
+#include <time.h>
 
 #include "Logger.hpp"
 
@@ -11,6 +13,7 @@
 #include "IDeviceAdapter.hpp"
 #include "IHandleGenerator.hpp"
 
+class A;
 namespace NsAppLink
 {
     namespace NsTransportManager
@@ -85,6 +88,11 @@ namespace NsAppLink
 
         private:
             /**
+             * @brief Interval between service discovery for connected devices in seconds.
+             **/
+            static const time_t cConnectedDevicesServiceDiscoveryInterval = 10;
+
+            /**
              * @brief Frame.
              *
              * Used to store data frames that must be sent to remote device.
@@ -124,6 +132,11 @@ namespace NsAppLink
             typedef std::map<int, SFrame*> tFrameMap;
 
             /**
+             * @brief Vector of RFCOMM channels.
+             **/
+            typedef std::vector<uint8_t> tRFCOMMChannelVector;
+
+            /**
              * @brief Internal structure describing bluetooth device.
              **/
             struct SBluetoothDevice
@@ -147,7 +160,7 @@ namespace NsAppLink
                  * @param Name User-friendly device name.
                  * @param AppLinkRFCOMMChannels List of RFCOMM channels where AppLink service has been discovered.
                  **/
-                SBluetoothDevice(const bdaddr_t & Address, const char * Name, const std::vector<uint8_t> & AppLinkRFCOMMChannels);
+                SBluetoothDevice(const bdaddr_t & Address, const char * Name, const tRFCOMMChannelVector & AppLinkRFCOMMChannels);
 
                 /**
                  * @brief Device bluetooth address.
@@ -167,7 +180,18 @@ namespace NsAppLink
                 /**
                  * @brief List of RFCOMM channels where AppLink service has been discovered.
                  **/
-                std::vector<uint8_t> mAppLinkRFCOMMChannels;
+                tRFCOMMChannelVector mAppLinkRFCOMMChannels;
+
+                /**
+                 * @brief Flag indicating that device is connected.
+                 *
+                 * This flag is set by connectDevice and reset by disconnectDevice.
+                 * If device is connected service discovery is periodically performed on this
+                 * device. All newly discovered AppLink applications are automatically
+                 * connected and all connections for applications that are no longer
+                 * discoverable are disconnected.
+                 **/
+                bool mIsConnected;
             };
 
             /**
@@ -336,6 +360,31 @@ namespace NsAppLink
             void connectionThread(const tConnectionHandle ConnectionHandle);
 
             /**
+             * @brief Get unique device ID.
+             *
+             * Get TransportManager-unique identifier of
+             * bluetooth device based on its bluetooth address.
+             *
+             * @param DeviceAddress Address of device.
+             *
+             * @return Unique device identifier.
+             **/
+            static std::string getUniqueDeviceId(const bdaddr_t & DeviceAddress);
+
+            /**
+             * @brief Discover AppLink RFCOMM channels.
+             *
+             * Run service discovery for specified remote bluetooth device
+             * and discover RFCOMM channels with AppLink service.
+             *
+             * @param DeviceAddress Address of device.
+             * @param AppLinkRFCOMMChannels Reference to variable that will
+             *                              receive list of RFCOMM channels
+             *                              with AppLink service discovered.
+             **/
+            void discoverAppLinkRFCOMMChannels(const bdaddr_t & DeviceAddress, tRFCOMMChannelVector & AppLinkRFCOMMChannels);
+
+            /**
              * @brief Listener for device adapter notifications.
              **/
             IDeviceAdapterListener & mListener;
@@ -370,6 +419,24 @@ namespace NsAppLink
             bool mDeviceDiscoveryThreadStarted;
 
             /**
+             * @brief Flag indicating that device scan was requested.
+             *
+             * This flag is set in scanForNewDevices and reset after requested
+             * device scan is completed.
+             **/
+            bool mDeviceScanRequested;
+
+            /**
+             * @brief Mutex restricting access to DeviceScanRequested flag.
+             **/
+            pthread_mutex_t mDeviceScanRequestedMutex;
+
+            /**
+             * @brief Conditional variable for signaling discovery thread about requested device scan.
+             **/
+            pthread_cond_t mDeviceScanRequestedCond;
+
+            /**
              * @brief Map of device handle to bluetooth device.
              *
              * This map contains all currently available bluetooth devices.
@@ -390,6 +457,11 @@ namespace NsAppLink
              * @brief Mutex restricting access to RFCOMM connections map.
              **/
             mutable pthread_mutex_t mRFCOMMConnectionsMutex;
+
+            /**
+             * @brief UUID of AppLink service.
+             **/
+            uuid_t mAppLinkServiceUUID;
         };
     }
 }

@@ -34,6 +34,9 @@ namespace NsAppLink
             /**
              * @brief Available devices list updated callback.
              *
+             * Called when device scanning initiated with scanForNewDevices
+             * is completed.
+             *
              * @param DeviceAdapter Calling device adapter.
              * @param DeviceList New list of available devices.
              **/
