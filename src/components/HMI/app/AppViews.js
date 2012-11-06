@@ -30,6 +30,7 @@ MFT.AppViews = Em.ContainerView.extend({
 //		MFT.VideoErrorPopupView,
 		MFT.ControlButtons,
 		MFT.AppOptionsView,
+		MFT.AppSubMenuView,
 		'activeAview'
 	],
 	

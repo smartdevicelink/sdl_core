@@ -2741,7 +2741,13 @@
 
 /* cancel scrollbar animation */
 .cancelBarAnimation{-webkit-transition:none !important;}
-
+		
+#media_app_sub_menu_view.media_app_sub_menu_view{
+	top: 56px;
+	width: 800px;
+	height: 367px;
+	z-index: 1;
+}
 #media_app_options_view.media_app_options_view{
 	top: 56px;
 	width: 800px;

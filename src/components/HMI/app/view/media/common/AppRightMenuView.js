@@ -15,7 +15,7 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 	/** Class Names bindings for visual representation*/
 	classNameBindings: 	[
 		'MFT.AppModel.active:visible_display',
-		'MFT.States.media.appoptions.active:hidden'
+		'hideMenu:hidden'
 	],
 	/** Right menu scrolling object */
 	scroll: null,
@@ -34,7 +34,15 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 		'scrollWrapper',
 		'bottomScrollButton'
 	],
-	
+
+	hideMenu: function(){
+		if( (MFT.States.media.appsubmenu.active == true) || (MFT.States.media.appoptions.active == true) ){
+			return true;
+		}else{
+			return false;
+		}
+	}.property('MFT.States.media.appsubmenu.active', 'MFT.States.media.appoptions.active'),
+
 	topScrollButton: MFT.Button.extend({
 		classNameBindings: 	[
 			'parentView.scrollTopPos:visible_display'
