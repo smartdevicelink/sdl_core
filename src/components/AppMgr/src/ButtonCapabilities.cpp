@@ -14,6 +14,11 @@ ButtonCapabilitiesContainer::ButtonCapabilitiesContainer()
 
 void ButtonCapabilitiesContainer::set(RPC2Communication::GetCapabilitiesResponse *msg)
 {
+    if(!msg)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Trying to set a null pointer: is this the intent?");
+        return;
+    }
     std::vector<RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal> result = msg->getCapabilities();
     for( std::vector<RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal>::iterator it = result.begin(); it != result.end(); it++ )
     {
