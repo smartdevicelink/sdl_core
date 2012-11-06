@@ -14,6 +14,11 @@ MessageMapping::MessageMapping()
 
 void MessageMapping::addMessage(int msgId, RegistryItem *app)
 {
+    if(!app)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Adding a message to a null registry item");
+        return;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to a message " << msgId << " in app " << app->getApplication()->getName() );
     mMessageMapping.insert(MessageMapItem(msgId, app));
 }
@@ -37,6 +42,11 @@ void MessageMapping::removeMessage(int msgId)
 
 void MessageMapping::removeItem(RegistryItem *app)
 {
+    if(!app)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Trying to remove a null item");
+        return;
+    }
     for(MessageMap::iterator it = mMessageMapping.begin(); it != mMessageMapping.end(); it++)
     {
         if(it->second->getApplication()->getSessionID() == app->getApplication()->getSessionID())
