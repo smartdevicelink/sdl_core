@@ -70,6 +70,11 @@ void AppMgrCoreQueue<QueueType>::pushMessage( QueueType message )
 template< class QueueType >
 void *AppMgrCoreQueue<QueueType>::handleQueue(void *pThis)
 {
+    if(!pThis)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " pThis should be non-null!");
+        return 0;
+    }
     while(true)
     {
         std::size_t size = mQueue.size();
