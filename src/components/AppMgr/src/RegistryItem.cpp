@@ -16,6 +16,12 @@ log4cplus::Logger RegistryItem::mLogger = log4cplus::Logger::getInstance(LOG4CPL
 RegistryItem::RegistryItem( Application* app )
 : mApplication(app)
 {
+    if(!app)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "No application to register! Please specify a valid application instance!");
+        return;
+    }
+    LOG4CPLUS_INFO_EXT(mLogger, " RegistryItem constructed for the application "<<app?app->getName():"NULL!");
 }
 
 RegistryItem::RegistryItem( const RegistryItem& item )
@@ -25,6 +31,7 @@ RegistryItem::RegistryItem( const RegistryItem& item )
 
 RegistryItem::~RegistryItem( )
 {
+    LOG4CPLUS_INFO_EXT(mLogger, " RegistryItem destroyed for the application "<<mApplication?mApplication->getName():"NULL!");
 	if(mApplication)
 	{
 		delete mApplication;
@@ -44,6 +51,7 @@ RegistryItem::~RegistryItem( )
 
 const AppPolicy* RegistryItem::registerPolicy( const std::string& hash )
 {
+    LOG4CPLUS_INFO_EXT(mLogger, " Registering a policy "<<hash);
 	AppPolicy* policy = new AppPolicy(hash);
 	mAppPolicies.insert(policy);
 	return *mAppPolicies.find(policy);
@@ -51,6 +59,7 @@ const AppPolicy* RegistryItem::registerPolicy( const std::string& hash )
 
 void RegistryItem::unregisterPolicy( AppPolicy* policy )
 {
+    LOG4CPLUS_INFO_EXT(mLogger, " Unregistering a policy "<<policy->getPolicyHash());
 	Policies::iterator policyIterator = mAppPolicies.find(policy);
 	mAppPolicies.erase(policyIterator);
 }
