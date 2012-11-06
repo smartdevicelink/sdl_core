@@ -92,6 +92,11 @@ AppMgrCore::~AppMgrCore()
 void AppMgrCore::pushMobileRPCMessage( ALRPCMessage * message, unsigned char sessionID )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Pushing mobile RPC message...");
+    if(!message)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "Nothing to push! A null-ptr occured!");
+        return;
+    }
 	
     mQueueRPCAppLinkObjectsIncoming->pushMessage(Message(message, sessionID));
 	
@@ -101,7 +106,12 @@ void AppMgrCore::pushMobileRPCMessage( ALRPCMessage * message, unsigned char ses
 void AppMgrCore::pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Returning a message from HMI...");
-	
+    if(!message)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "Nothing to push! A null-ptr occured!");
+        return;
+    }
+
     mQueueRPCBusObjectsIncoming->pushMessage(message);
 	
 	LOG4CPLUS_INFO_EXT(mLogger, " Returned a message from HMI");
@@ -125,6 +135,12 @@ template<class Object> void handleMessage(Object message)
 void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
 {
     unsigned char sessionID = message.second;
+    ALRPCMessage* mobileMsg = message.first;
+    if(!mobileMsg)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " No message associated with the session "<<sessionID<<"!");
+        return;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message "<< message.first->getMethodId() <<" has been received!");
     if(!pThis)
     {
@@ -132,46 +148,51 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         return;
     }
     AppMgrCore* core = (AppMgrCore*)pThis;
-    switch(message.first->getMethodId())
+
+    switch(mobileMsg->getMethodId())
 	{
 		case Marshaller::METHOD_REGISTERAPPINTERFACE_REQUEST:
 		{
 			LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
-            RegisterAppInterface_request * object = (RegisterAppInterface_request*)message.first;
+            RegisterAppInterface_request * object = (RegisterAppInterface_request*)mobileMsg;
             const RegistryItem* registeredApp =  core->registerApplication( message );
             RegisterAppInterface_response* response = new RegisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(ALRPCMessage::RESPONSE);
+            if(!registeredApp)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been registered!");
+                response->set_success(false);
+                response->set_resultCode(Result::APPLICATION_NOT_REGISTERED);
+                core->mJSONHandler->sendRPCMessage(response, sessionID);
+                break;
+            }
+
             if(object->get_autoActivateID())
             {
                 response->set_autoActivateID(*object->get_autoActivateID());
             }
             response->set_buttonCapabilities(core->mButtonCapabilities.get());
-            if(registeredApp)
-            {
-                response->set_success(true);
-                response->set_resultCode(Result::SUCCESS);
-            }
-            else
-            {
-                response->set_success(false);
-                response->set_resultCode(Result::APPLICATION_NOT_REGISTERED);
-            }
+            response->set_success(true);
+            response->set_resultCode(Result::SUCCESS);
+
             core->mJSONHandler->sendRPCMessage(response, sessionID);
 
-            if(registeredApp)
+            const Application* app = registeredApp->getApplication();
+            if(!app)
             {
-                const Application* app = registeredApp->getApplication();
-                OnHMIStatus* status = new OnHMIStatus();
-                status->set_hmiLevel(app->getApplicationHMIStatusLevel());
-                core->mJSONHandler->sendRPCMessage(status, sessionID);
-                RPC2Communication::OnAppRegistered* appRegistered = new RPC2Communication::OnAppRegistered();
-                appRegistered->setAppName(app->getName());
-                appRegistered->setIsMediaApplication(app->getIsMediaApplication());
-                appRegistered->setLanguageDesired(app->getLanguageDesired());
-                appRegistered->setVrSynonyms(app->getVrSynonyms());
-                core->mJSONRPC2Handler->sendNotification(appRegistered);
+                LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been found in registered items!");
+                break;
             }
+            OnHMIStatus* status = new OnHMIStatus();
+            status->set_hmiLevel(app->getApplicationHMIStatusLevel());
+            core->mJSONHandler->sendRPCMessage(status, sessionID);
+            RPC2Communication::OnAppRegistered* appRegistered = new RPC2Communication::OnAppRegistered();
+            appRegistered->setAppName(app->getName());
+            appRegistered->setIsMediaApplication(app->getIsMediaApplication());
+            appRegistered->setLanguageDesired(app->getLanguageDesired());
+            appRegistered->setVrSynonyms(app->getVrSynonyms());
+            core->mJSONRPC2Handler->sendNotification(appRegistered);
 
             break;
 		}
@@ -179,8 +200,20 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
 
-            UnregisterAppInterface_request * object = (UnregisterAppInterface_request*)message.first;
-            std::string appName = AppMgrRegistry::getInstance().getItem(message.second)->getApplication()->getName();
+            UnregisterAppInterface_request * object = (UnregisterAppInterface_request*)mobileMsg;
+            RegistryItem* registeredApp = AppMgrRegistry::getInstance().getItem(sessionID);
+            if(!registeredApp)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " Session "<<sessionID<<" hasn't been associated with application!");
+                break;
+            }
+            const Application* app = registeredApp->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " No application has been associated with this registry item!");
+                break;
+            }
+            std::string appName = app->getName();
             core->unregisterApplication( message );
             UnregisterAppInterface_response* response = new UnregisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
@@ -191,7 +224,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
 
             OnAppInterfaceUnregistered* msgUnregistered = new OnAppInterfaceUnregistered();
             msgUnregistered->set_reason(AppInterfaceUnregisteredReason(AppInterfaceUnregisteredReason::USER_EXIT));
-            core->mJSONHandler->sendRPCMessage(msgUnregistered, message.second);
+            core->mJSONHandler->sendRPCMessage(msgUnregistered, sessionID);
             RPC2Communication::OnAppUnregistered* appUnregistered = new RPC2Communication::OnAppUnregistered();
             appUnregistered->setAppName(appName);
             appUnregistered->setReason(AppInterfaceUnregisteredReason(AppInterfaceUnregisteredReason::USER_EXIT));
@@ -209,8 +242,13 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             command->execute();
             delete command; */
 
-            SubscribeButton_request * object = (SubscribeButton_request*)message.first;
-            RegistryItem* item = AppMgrRegistry::getInstance().getItem(message.second);
+            SubscribeButton_request * object = (SubscribeButton_request*)mobileMsg;
+            RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " Session "<<sessionID<<" hasn't been associated with application!");
+                break;
+            }
             core->mButtonsMapping.addButton( object->get_buttonName(), item );
             SubscribeButton_response* response = new SubscribeButton_response();
             response->setCorrelationID(object->getCorrelationID());
@@ -223,7 +261,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_UNSUBSCRIBEBUTTON_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeButton request has been invoked");
-            UnsubscribeButton_request * object = (UnsubscribeButton_request*)message.first;
+            UnsubscribeButton_request * object = (UnsubscribeButton_request*)mobileMsg;
             core->mButtonsMapping.removeButton( object->get_buttonName() );
             UnsubscribeButton_response* response = new UnsubscribeButton_response();
             response->setCorrelationID(object->getCorrelationID());
@@ -236,8 +274,8 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_SHOW_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Show request has been invoked");
-            LOG4CPLUS_INFO_EXT(mLogger, "message " << message.first );
-            Show_request* object = (Show_request*)message.first;
+            LOG4CPLUS_INFO_EXT(mLogger, "message " << mobileMsg->getMethodId() );
+            Show_request* object = (Show_request*)mobileMsg;
             RPC2Communication::Show* showRPC2Request = new RPC2Communication::Show();
             LOG4CPLUS_INFO_EXT(mLogger, "showrpc2request created");
             if(object->get_mainField1())
@@ -273,7 +311,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_SPEAK_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Speak request has been invoked");
-            Speak_request* object = (Speak_request*)message.first;
+            Speak_request* object = (Speak_request*)mobileMsg;
             RPC2Communication::Speak* speakRPC2Request = new RPC2Communication::Speak();
             speakRPC2Request->setTTSChunks(object->get_ttsChunks());
             core->mMessageMapping.addMessage(speakRPC2Request->getID(), sessionID);
@@ -287,7 +325,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_SETGLOBALPROPERTIES_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties request has been invoked");
-            SetGlobalProperties_request* object = (SetGlobalProperties_request*)message.first;
+            SetGlobalProperties_request* object = (SetGlobalProperties_request*)mobileMsg;
             RPC2Communication::SetGlobalProperties* setGPRPC2Request = new RPC2Communication::SetGlobalProperties();
             core->mMessageMapping.addMessage(setGPRPC2Request->getID(), sessionID);
             if(object->get_helpPrompt())
@@ -309,7 +347,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_RESETGLOBALPROPERTIES_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A ResetGlobalProperties request has been invoked");
-            ResetGlobalProperties_request* object = (ResetGlobalProperties_request*)message.first;
+            ResetGlobalProperties_request* object = (ResetGlobalProperties_request*)mobileMsg;
             RPC2Communication::ResetGlobalProperties* resetGPRPC2Request = new RPC2Communication::ResetGlobalProperties();
             core->mMessageMapping.addMessage(resetGPRPC2Request->getID(), sessionID);
             resetGPRPC2Request->setProperty(object->get_properties());
@@ -324,7 +362,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_ALERT_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An Alert request has been invoked");
-            Alert_request* object = (Alert_request*)message.first;
+            Alert_request* object = (Alert_request*)mobileMsg;
             RPC2Communication::Alert* alert = new RPC2Communication::Alert();
             core->mMessageMapping.addMessage(alert->getID(), sessionID);
             if(object->get_alertText1())
@@ -349,23 +387,29 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_ONBUTTONPRESS:
         {
             LOG4CPLUS_INFO(mLogger, "OnButtonPress Notification has been received.");
-            core->mJSONHandler->sendRPCMessage(message.first, sessionID);
+            core->mJSONHandler->sendRPCMessage(mobileMsg, sessionID);
             break;
         }
         case Marshaller::METHOD_ONCOMMAND:
         {
             LOG4CPLUS_INFO(mLogger, "OnCommand Notification has been received.");
-            core->mJSONHandler->sendRPCMessage(message.first, sessionID);
+            core->mJSONHandler->sendRPCMessage(mobileMsg, sessionID);
             break;
         }
         case Marshaller::METHOD_ADDCOMMAND_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
-            AddCommand_request* object = (AddCommand_request*)message.first;
+            AddCommand_request* object = (AddCommand_request*)mobileMsg;
             RPC2Communication::AddCommand* addCmd = new RPC2Communication::AddCommand();
             core->mMessageMapping.addMessage(addCmd->getID(), sessionID);
             addCmd->setCmdId(object->get_cmdID());
-            core->mCommandMapping.addCommand(object->get_cmdID(), AppMgrRegistry::getInstance().getItem(sessionID));
+            RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " Session "<<sessionID<<" hasn't been associated with application!");
+                break;
+            }
+            core->mCommandMapping.addCommand(object->get_cmdID(), item);
             if(object->get_menuParams())
             {
                 addCmd->setMenuParams(*object->get_menuParams());
@@ -376,7 +420,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_DELETECOMMAND_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
-            DeleteCommand_request* object = (DeleteCommand_request*)message.first;
+            DeleteCommand_request* object = (DeleteCommand_request*)mobileMsg;
             RPC2Communication::DeleteCommand* deleteCmd = new RPC2Communication::DeleteCommand();
             core->mMessageMapping.addMessage(deleteCmd->getID(), sessionID);
             deleteCmd->setCmdId(object->get_cmdID());
@@ -387,7 +431,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_ADDSUBMENU_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
-            AddSubMenu_request* object = (AddSubMenu_request*)message.first;
+            AddSubMenu_request* object = (AddSubMenu_request*)mobileMsg;
             RPC2Communication::AddSubMenu* addSubMenu = new RPC2Communication::AddSubMenu();
             core->mMessageMapping.addMessage(addSubMenu->getID(), sessionID);
             addSubMenu->setMenuId(object->get_menuID());
@@ -402,7 +446,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_DELETESUBMENU_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubmenu request has been invoked");
-            DeleteSubMenu_request* object = (DeleteSubMenu_request*)message.first;
+            DeleteSubMenu_request* object = (DeleteSubMenu_request*)mobileMsg;
             RPC2Communication::DeleteSubMenu* delSubMenu = new RPC2Communication::DeleteSubMenu();
             core->mMessageMapping.addMessage(delSubMenu->getID(), sessionID);
             delSubMenu->setMenuId(object->get_menuID());
@@ -412,7 +456,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_CREATEINTERACTIONCHOICESET_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet request has been invoked");
-            CreateInteractionChoiceSet_request* object = (CreateInteractionChoiceSet_request*)message.first;
+            CreateInteractionChoiceSet_request* object = (CreateInteractionChoiceSet_request*)mobileMsg;
             RPC2Communication::CreateInteractionChoiceSet* createInteractionChoiceSet = new RPC2Communication::CreateInteractionChoiceSet();
             core->mMessageMapping.addMessage(createInteractionChoiceSet->getID(), sessionID);
             createInteractionChoiceSet->setChoiceSet(object->get_choiceSet());
@@ -423,7 +467,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_DELETEINTERACTIONCHOICESET_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet request has been invoked");
-            DeleteInteractionChoiceSet_request* object = (DeleteInteractionChoiceSet_request*)message.first;
+            DeleteInteractionChoiceSet_request* object = (DeleteInteractionChoiceSet_request*)mobileMsg;
             RPC2Communication::DeleteInteractionChoiceSet* deleteInteractionChoiceSet = new RPC2Communication::DeleteInteractionChoiceSet();
             core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getID(), sessionID);
             deleteInteractionChoiceSet->setInteractionChoiceSetId(object->get_interactionChoiceSetID());
@@ -433,7 +477,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_PERFORMINTERACTION_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction request has been invoked");
-            PerformInteraction_request* object = (PerformInteraction_request*)message.first;
+            PerformInteraction_request* object = (PerformInteraction_request*)mobileMsg;
             RPC2Communication::PerformInteraction* performInteraction = new RPC2Communication::PerformInteraction();
             core->mMessageMapping.addMessage(performInteraction->getID(), sessionID);
             if(object->get_helpPrompt())
@@ -476,21 +520,25 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case Marshaller::METHOD_SETMEDIACLOCKTIMER_RESPONSE:
         case Marshaller::METHOD_UNREGISTERAPPINTERFACE_RESPONSE:
         {
-            LOG4CPLUS_INFO_EXT(mLogger, " A "<< message.first->getMethodId() << " response or notification has been invoked");
-            LOG4CPLUS_INFO_EXT(mLogger, "sendRPCMessage called for " << core->mJSONHandler << " message "<< message.first);
-            core->mJSONHandler->sendRPCMessage(message.first, sessionID);
+            LOG4CPLUS_INFO_EXT(mLogger, " A "<< mobileMsg->getMethodId() << " response or notification has been invoked");
+            core->mJSONHandler->sendRPCMessage(mobileMsg, sessionID);
             break;
         }
 
         case Marshaller::METHOD_INVALID:
 		default:
-            LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message "<< message.first->getMethodId() <<" has been received!");
+            LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message "<< mobileMsg->getMethodId() <<" has been received!");
 			break;
     }
 }
 
 void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg , void *pThis)
 {
+    if(!msg)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Incoming null pointer from HMI side!");
+        return;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been incoming...");
 
     if(!pThis)
@@ -515,7 +563,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mJSONHandler->sendRPCMessage(event, sessionID);
             break;
         }
@@ -534,7 +588,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             LOG4CPLUS_INFO_EXT(mLogger, "sessionID found " << sessionID);
             core->mJSONHandler->sendRPCMessage(event, sessionID);
             break;
@@ -551,7 +611,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             LOG4CPLUS_INFO_EXT(mLogger, "sessionID found " << sessionID);
             core->mJSONHandler->sendRPCMessage(event, sessionID);
             break;
@@ -577,7 +643,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -596,7 +668,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -615,7 +693,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -634,7 +718,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -661,7 +751,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -678,16 +774,22 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             OnHMIStatus * hmiStatus = new OnHMIStatus;
             hmiStatus->set_hmiLevel(HMILevel::HMI_FULL);
             const std::string& appName = object->getAppName()[0];
-            RegistryItem* app = AppMgrRegistry::getInstance().getItem(appName);
-            if(!app)
+            RegistryItem* item = AppMgrRegistry::getInstance().getItem(appName);
+            if(!item)
             {
                 LOG4CPLUS_ERROR(mLogger, "Couldn't find a registered app by the name "<<appName);
                 break;
             }
-            app->getApplication()->setApplicationHMIStatusLevel(HMILevel::HMI_FULL);
-            hmiStatus->set_audioStreamingState(app->getApplication()->getApplicationAudioStreamingState());
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            app->setApplicationHMIStatusLevel(HMILevel::HMI_FULL);
+            hmiStatus->set_audioStreamingState(app->getApplicationAudioStreamingState());
             hmiStatus->set_systemContext(SystemContext::SYSCTXT_MENU);
-            core->mJSONHandler->sendRPCMessage( hmiStatus, app->getApplication()->getSessionID() );
+            core->mJSONHandler->sendRPCMessage( hmiStatus, app->getSessionID() );
             RPC2Communication::ActivateAppResponse * response = new RPC2Communication::ActivateAppResponse;
             response->setID(object->getID());
             response->setResult(Result::SUCCESS);
@@ -707,7 +809,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -725,7 +833,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -743,7 +857,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -761,7 +881,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -779,7 +905,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -797,7 +929,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -816,7 +954,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 break;
             }
-            unsigned char sessionID = item->getApplication()->getSessionID();
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                break;
+            }
+            unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -835,6 +979,12 @@ const RegistryItem* AppMgrCore::registerApplication( const Message& object )
 {
     ALRPCMessage* msg = object.first;
     unsigned char sessionID = object.second;
+    if(!msg)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "No message for session "<<sessionID<<"!");
+        return 0;
+    }
+
     RegisterAppInterface_request * request = (RegisterAppInterface_request*)msg;
     LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() << "!");
 
@@ -883,12 +1033,29 @@ void AppMgrCore::unregisterApplication(const Message &msg)
 {
     ALRPCMessage* message = msg.first;
     unsigned char sessionID = msg.second;
-    UnregisterAppInterface_request* request = (UnregisterAppInterface_request*)message;
-    RegistryItem* app = AppMgrRegistry::getInstance().getItem(sessionID);
-    const std::string& appName = app->getApplication()->getName();
+    if(!message)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "No message for session "<<sessionID<<"!");
+        return;
+    }
+
+    RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
+    if(!item)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+        return;
+    }
+    Application* app = item->getApplication();
+    if(!app)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+        return;
+    }
+
+    const std::string& appName = app->getName();
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName << "!");
-    mButtonsMapping.removeItem(app);
-    AppMgrRegistry::getInstance().unregisterApplication(app);
+    mButtonsMapping.removeItem(item);
+    AppMgrRegistry::getInstance().unregisterApplication(item);
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName << "!");
 }
 
@@ -899,6 +1066,11 @@ void AppMgrCore::registerApplicationOnHMI( const std::string& name )
 
 void AppMgrCore::setJsonHandler(JSONHandler* handler)
 {
+    if(!handler)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "A null pointer is being assigned - is this the intent?");
+        return;
+    }
 	mJSONHandler = handler;
 }
 
@@ -909,6 +1081,11 @@ JSONHandler* AppMgrCore::getJsonHandler( ) const
 
 void AppMgrCore::setJsonRPC2Handler(JSONRPC2Handler *handler)
 {
+    if(!handler)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "A null pointer is being assigned - is this the intent?");
+        return;
+    }
     mJSONRPC2Handler = handler;
 }
 
