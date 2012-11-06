@@ -51,6 +51,20 @@ namespace NsAppLink
             virtual void scanForNewDevices(void);
 
             /**
+             * @brief Connect to all applications discovered on device.
+             *
+             * @param DeviceHandle Handle of device to connect to.
+             **/
+            virtual void connectDevice(const tDeviceHandle DeviceHandle);
+
+            /**
+             * @brief Disconnect from all applications connected on device.
+             *
+             * @param DeviceHandle Handle of device to disconnect from.
+             **/
+            virtual void disconnectDevice(const tDeviceHandle DeviceHandle);
+
+            /**
              * @brief Get type of devices handled by this device adapter.
              *
              * @return Device type.

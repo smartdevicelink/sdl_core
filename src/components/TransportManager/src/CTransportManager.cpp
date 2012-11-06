@@ -81,6 +81,16 @@ void NsAppLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
     LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
 }
 
+void NsAppLink::NsTransportManager::CTransportManager::connectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
+{
+    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+}
+
+void NsAppLink::NsTransportManager::CTransportManager::disconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
+{
+    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+}
+
 void NsAppLink::NsTransportManager::CTransportManager::addDataListener(NsAppLink::NsTransportManager::ITransportManagerDataListener * Listener)
 {
     pthread_mutex_lock(&mDataListenersMutex);
