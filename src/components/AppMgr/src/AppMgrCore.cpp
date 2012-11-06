@@ -571,7 +571,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_resultCode(object->getResult());
             response->set_success(true);
-            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -584,7 +590,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_resultCode(object->getResult());
             response->set_success(true);
-            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -597,7 +609,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_resultCode(object->getResult());
             response->set_success(true);
-            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -610,7 +628,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->setMessageType(ALRPCMessage::RESPONSE);
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -631,7 +655,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             Alert_response* response = new Alert_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -671,7 +701,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AddCommand_response* response = new AddCommand_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -683,7 +719,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             DeleteCommand_response* response = new DeleteCommand_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -695,7 +737,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AddSubMenu_response* response = new AddSubMenu_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -707,7 +755,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             DeleteSubMenu_response* response = new DeleteSubMenu_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -719,7 +773,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             CreateInteractionChoiceSet_response* response = new CreateInteractionChoiceSet_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -731,7 +791,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             DeleteInteractionChoiceSet_response* response = new DeleteInteractionChoiceSet_response();
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -744,7 +810,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         //    response->set_choiceID(object->get)
             response->set_success(true);
             response->set_resultCode(object->getResult());
-            unsigned char sessionID = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID())->getApplication()->getSessionID();
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                break;
+            }
+            unsigned char sessionID = item->getApplication()->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
