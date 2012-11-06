@@ -13,6 +13,11 @@ CommandMapping::CommandMapping()
 
 void CommandMapping::addCommand(unsigned int commandId, RegistryItem *app)
 {
+    if(!app)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Adding a command to a null registry item");
+        return;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to a command " << commandId << " in app " << app->getApplication()->getName() );
     mCommandMapping.insert(CommandMapItem(commandId, app));
 }
@@ -24,6 +29,11 @@ void CommandMapping::removeCommand(unsigned int commandId)
 
 void CommandMapping::removeItem(RegistryItem *app)
 {
+    if(!app)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Trying to remove a null item");
+        return;
+    }
     for(CommandMap::iterator it = mCommandMapping.begin(); it != mCommandMapping.end(); it++)
     {
         if(it->second->getApplication()->getSessionID() == app->getApplication()->getSessionID())
