@@ -16,6 +16,11 @@
 #include <string>
 #include <vector>
 
+namespace log4cplus
+{
+    class Logger;
+}
+
 namespace NsAppManager
 {
 
@@ -66,8 +71,10 @@ private:
 	AudioStreamingState mAudioStreamingState;
     std::string mAppID;
     Language mHMIDisplayLanguageDesired;
+
+    static log4cplus::Logger mLogger;
 };
 
-}; // namespace NsAppManager
+} // namespace NsAppManager
 
 #endif /* APPLICATION_H_ */
