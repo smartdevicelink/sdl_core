@@ -92,9 +92,16 @@ namespace NsTransportLayer
       uint32_t range = 0x0000ffff;
       attrid_list = sdp_list_append( NULL, &range );
 
-      // get a list of service records that have UUID 0xabcd
+      // get a list of service records that have UUID
       err = sdp_service_search_attr_req( session, search_list,
                                          SDP_ATTR_REQ_RANGE, attrid_list, &response_list);
+      //check error
+      if (0 > err)
+      {
+         LOG4CPLUS_ERROR(mLogger, "startSDPDiscoveryOnDevice: Error: " << err << ".");
+         return -1;
+      }
+
       sdp_list_t *r = response_list;
 
       // go through each of the service records
