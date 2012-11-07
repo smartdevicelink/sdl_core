@@ -19,7 +19,7 @@ void MessageMapping::addMessage(int msgId, RegistryItem *app)
         LOG4CPLUS_ERROR_EXT(mLogger, " Adding a message to a null registry item");
         return;
     }
-    LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to a message " << msgId << " in app " << app->getApplication()->getName() );
+    LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a message " << msgId << " in app " << app->getApplication()->getName() );
     mMessageMapping.insert(MessageMapItem(msgId, app));
 }
 
@@ -68,6 +68,7 @@ RegistryItem *MessageMapping::findRegistryItemAssignedToCommand(int msgId) const
         }
         if ( it->second->getApplication() )
         {
+            LOG4CPLUS_INFO_EXT(mLogger, "An application "<< it->second->getApplication()->getName() <<" is subscribed to a message " << msgId );
             return it->second;
         }
     }
