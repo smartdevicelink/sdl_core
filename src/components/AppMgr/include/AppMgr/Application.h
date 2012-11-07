@@ -30,30 +30,30 @@ public:
     Application( const std::string& name, unsigned char sessionId );
 	virtual ~Application( );
 	virtual void setApplicationPriority( const AppPriority& priority );
-	void setApplicationHMIStatusLevel( const HMILevel::HMILevelInternal& hmiLevel );
-	const HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
-	void setApplicationAudioStreamingState( const AudioStreamingState& hmiLevel );
-	const AudioStreamingState& getApplicationAudioStreamingState( ) const;
+	void setApplicationHMIStatusLevel( const AppLinkRPC::HMILevel::HMILevelInternal& hmiLevel );
+	const AppLinkRPC::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
+	void setApplicationAudioStreamingState( const AppLinkRPC::AudioStreamingState& hmiLevel );
+	const AppLinkRPC::AudioStreamingState& getApplicationAudioStreamingState( ) const;
 
 	void setNgnMediaScreenAppName(const std::string& value);
 	void setVrSynonyms(const std::vector<std::string>& value);
 	void setUsesVehicleData(bool value);
 	void setIsMediaApplication(bool value);
-	void setLanguageDesired(Language value);
+	void setLanguageDesired(AppLinkRPC::Language value);
 	void setAutoActivateID(const std::string& value);
-	void setSyncMsgVersion(SyncMsgVersion value);
+	void setSyncMsgVersion(AppLinkRPC::SyncMsgVersion value);
     void setAppID( const std::string& value );
-    void setHMIDisplayLanguageDesired( Language value );
+    void setHMIDisplayLanguageDesired( AppLinkRPC::Language value );
 
 	const std::string& getNgnMediaScreenAppName( ) const;
 	const std::vector<std::string>& getVrSynonyms( ) const;
 	bool getUsesVehicleData( ) const;
 	bool getIsMediaApplication( ) const;
-	const Language& getLanguageDesired( ) const;
+	const AppLinkRPC::Language& getLanguageDesired( ) const;
 	const std::string& getAutoActivateID( ) const;
-	const SyncMsgVersion& getSyncMsgVersion( ) const;
+	const AppLinkRPC::SyncMsgVersion& getSyncMsgVersion( ) const;
     const std::string& getAppID( ) const;
-    const Language& getHMIDisplayLanguageDesired( ) const;
+    const AppLinkRPC::Language& getHMIDisplayLanguageDesired( ) const;
     unsigned char getSessionID() const;
 
 private:
@@ -64,13 +64,13 @@ private:
 	std::vector<std::string> mVrSynonyms;
 	bool m_bUsesVehicleData;
 	bool m_bIsMediaApplication;
-	Language mLanguageDesired;
+	AppLinkRPC::Language mLanguageDesired;
 	std::string mAutoActivateID;
-	SyncMsgVersion mSyncMsgVersion;
-	HMILevel::HMILevelInternal mHMIStatusLevel;
-	AudioStreamingState mAudioStreamingState;
+	AppLinkRPC::SyncMsgVersion mSyncMsgVersion;
+	AppLinkRPC::HMILevel::HMILevelInternal mHMIStatusLevel;
+	AppLinkRPC::AudioStreamingState mAudioStreamingState;
     std::string mAppID;
-    Language mHMIDisplayLanguageDesired;
+    AppLinkRPC::Language mHMIDisplayLanguageDesired;
 
     static log4cplus::Logger mLogger;
 };

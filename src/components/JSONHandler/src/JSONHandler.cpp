@@ -37,7 +37,7 @@ void JSONHandler::setRPCMessagesObserver( IRPCMessagesObserver * messagesObserve
     mMessagesObserver = messagesObserver;
 }
 
-void JSONHandler::sendRPCMessage( const ALRPCMessage * message, unsigned char sessionId )
+void JSONHandler::sendRPCMessage( const AppLinkRPC::ALRPCMessage * message, unsigned char sessionId )
 {
     LOG4CPLUS_INFO(mLogger, "An outgoing message has been received" );
     if ( message )
@@ -74,7 +74,7 @@ void JSONHandler::dataReceivedCallback(const UInt8 sessionID, const UInt32 messa
     }
     mProtocolHandler -> receiveData(sessionID, messageID, AxisCore::SERVICE_TYPE_RPC, dataSize, data);
 
-    LOG4CPLUS_INFO( mLogger, "Message size is " << dataSize << "; sessionID is " << sessionID );
+    LOG4CPLUS_INFO( mLogger, "Mobile message size is " << dataSize << "; sessionID is " << sessionID );
 
     std::string str = std::string( (const char*)data, dataSize);
     std::string receivedString = clearEmptySpaces( str );
@@ -110,24 +110,24 @@ void * JSONHandler::waitForIncomingMessages( void * params )
     {        
         while ( ! handler -> mIncomingMessages.empty() )
         {
-            LOG4CPLUS_INFO( mLogger, "Incoming message received." );
+            LOG4CPLUS_INFO( mLogger, "Incoming mobile message received." );
             std::string jsonMessage = handler -> mIncomingMessages.pop();
 
-            ALRPCMessage * currentMessage = Marshaller::fromString( jsonMessage );
+            AppLinkRPC::ALRPCMessage * currentMessage = AppLinkRPC::Marshaller::fromString( jsonMessage );
 
             if ( !currentMessage )
             {
-                LOG4CPLUS_ERROR( mLogger, "Invalid message received." );
+                LOG4CPLUS_ERROR( mLogger, "Invalid mobile message received." );
                 continue;
             }
 
             if ( !handler -> mMessagesObserver )
             {
-                LOG4CPLUS_ERROR( mLogger, "Cannot handle message: MessageObserver doesn't exist." );
+                LOG4CPLUS_ERROR( mLogger, "Cannot handle mobile message: MessageObserver doesn't exist." );
                 pthread_exit( 0 );
             }
             handler -> mMessagesObserver -> onMessageReceivedCallback( currentMessage, handler -> mSessionID );
-            LOG4CPLUS_INFO( mLogger, "Incoming message handled." );
+            LOG4CPLUS_INFO( mLogger, "Incoming mobile message handled." );
         }
         handler -> mIncomingMessages.wait();
     }
@@ -145,10 +145,10 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
     {
         while ( ! handler -> mOutgoingMessages.empty() )
         {
-            const ALRPCMessage * message = handler -> mOutgoingMessages.pop();
-            LOG4CPLUS_INFO( mLogger, "Outgoing message " << message->getMethodId() << " received." );
+            const AppLinkRPC::ALRPCMessage * message = handler -> mOutgoingMessages.pop();
+            LOG4CPLUS_INFO( mLogger, "Outgoing mobile message " << message->getMethodId() << " received." );
 
-            std::string messageString = Marshaller::toString( message );
+            std::string messageString = AppLinkRPC::Marshaller::toString( message );
 
             UInt8* pData;
             pData = new UInt8[messageString.length() + 1];
@@ -156,14 +156,14 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
 
             if ( !handler -> mProtocolHandler )
             {
-                LOG4CPLUS_ERROR( mLogger, "Cannot handle message: ProtocolHandler doesn't exist." );
+                LOG4CPLUS_ERROR( mLogger, "Cannot handle mobile message: ProtocolHandler doesn't exist." );
                 pthread_exit( 0 );
             }
             handler -> mProtocolHandler -> sendData( handler -> mSessionID,  AxisCore::SERVICE_TYPE_RPC, 
                     messageString.size() + 1, pData, false );
 
             delete message;
-            LOG4CPLUS_INFO( mLogger, "Outgoing message handled." );
+            LOG4CPLUS_INFO( mLogger, "Outgoing mobile message handled." );
         }
         handler -> mOutgoingMessages.wait();
     }

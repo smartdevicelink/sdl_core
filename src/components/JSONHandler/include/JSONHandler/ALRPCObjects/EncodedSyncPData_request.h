@@ -1,5 +1,5 @@
-#ifndef ENCODEDSYNCPDATA_REQUEST_INCLUDE
-#define ENCODEDSYNCPDATA_REQUEST_INCLUDE
+#ifndef APPLINKRPC_ENCODEDSYNCPDATA_REQUEST_INCLUDE
+#define APPLINKRPC_ENCODEDSYNCPDATA_REQUEST_INCLUDE
 
 #include <vector>
 #include <string>
@@ -11,39 +11,43 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Oct 30 08:29:32 2012
+  generated at	Wed Nov  7 13:10:41 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
+namespace AppLinkRPC
+{
 
 ///  Allows encoded data in the form of SyncP packets to be sent to the SYNC module
 
-class EncodedSyncPData_request : public ALRPCRequest
-{
-public:
-
-  EncodedSyncPData_request(const EncodedSyncPData_request& c);
-  EncodedSyncPData_request(void);
+  class EncodedSyncPData_request : public ALRPCRequest
+  {
+  public:
   
-  virtual ~EncodedSyncPData_request(void);
+    EncodedSyncPData_request(const EncodedSyncPData_request& c);
+    EncodedSyncPData_request(void);
+    
+    virtual ~EncodedSyncPData_request(void);
+  
+    EncodedSyncPData_request& operator =(const EncodedSyncPData_request&);
+  
+    bool checkIntegrity(void);
 
-  EncodedSyncPData_request& operator =(const EncodedSyncPData_request&);
+    const std::vector<std::string>* get_data(void) const;
 
-  bool checkIntegrity(void);
+    void reset_data(void);
+    bool set_data(const std::vector<std::string>& data_);
 
-  const std::vector<std::string>* get_data(void) const;
-
-  void reset_data(void);
-  bool set_data(const std::vector<std::string>& data_);
-
-private:
-
-  friend class EncodedSyncPData_requestMarshaller;
+  private:
+  
+    friend class EncodedSyncPData_requestMarshaller;
 
 
 ///  Contains base64 encoded string of SyncP packets.
-    std::vector<std::string>* data;	//!<   [%s..%s] (10000)
-};
+      std::vector<std::string>* data;	//!<   [%s..%s] (10000)
+  };
+
+}
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef BUTTONCAPABILITIES_INCLUDE
-#define BUTTONCAPABILITIES_INCLUDE
+#ifndef APPLINKRPC_BUTTONCAPABILITIES_INCLUDE
+#define APPLINKRPC_BUTTONCAPABILITIES_INCLUDE
 
 
 #include "ButtonName.h"
@@ -9,63 +9,67 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Oct 30 08:29:32 2012
+  generated at	Wed Nov  7 13:10:41 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
 
+namespace AppLinkRPC
+{
 
 ///  Contains information about a buttons capabilities.
 
-class ButtonCapabilities
-{
-public:
+  class ButtonCapabilities
+  {
+  public:
+  
+    ButtonCapabilities(const ButtonCapabilities& c);
+    ButtonCapabilities(void);
+  
+    bool checkIntegrity(void);
+  // getters
 
-  ButtonCapabilities(const ButtonCapabilities& c);
-  ButtonCapabilities(void);
-
-  bool checkIntegrity(void);
-// getters
-
-  bool get_longPressAvailable(void) const;
-  const ButtonName& get_name(void) const;
-  bool get_shortPressAvailable(void) const;
-  bool get_upDownAvailable(void) const;
+    bool get_longPressAvailable(void) const;
+    const ButtonName& get_name(void) const;
+    bool get_shortPressAvailable(void) const;
+    bool get_upDownAvailable(void) const;
 
 // setters
 
-  bool set_longPressAvailable(bool longPressAvailable_);
-  bool set_name(const ButtonName& name_);
-  bool set_shortPressAvailable(bool shortPressAvailable_);
-  bool set_upDownAvailable(bool upDownAvailable_);
+    bool set_longPressAvailable(bool longPressAvailable_);
+    bool set_name(const ButtonName& name_);
+    bool set_shortPressAvailable(bool shortPressAvailable_);
+    bool set_upDownAvailable(bool upDownAvailable_);
 
-private:
+  private:
 
-  friend class ButtonCapabilitiesMarshaller;
+    friend class ButtonCapabilitiesMarshaller;
 
 
 /**
      The button supports a LONG press.
      Whenever the button is pressed long, onButtonPressed( LONG) will be invoked.
 */
-    bool longPressAvailable;
+      bool longPressAvailable;
 
 ///  The name of the button. See ButtonName.
-    ButtonName name;
+      ButtonName name;
 
 /**
      The button supports a short press.
      Whenever the button is pressed short, onButtonPressed( SHORT) will be invoked.
 */
-    bool shortPressAvailable;
+      bool shortPressAvailable;
 
 /**
      The button supports "button down" and "button up".
      Whenever the button is pressed, onButtonEvent( DOWN) will be invoked.
      Whenever the button is released, onButtonEvent( UP) will be invoked.
 */
-    bool upDownAvailable;
-};
+      bool upDownAvailable;
+  };
+
+}
 
 #endif

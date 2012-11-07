@@ -32,7 +32,7 @@ public:
 	
 	static AppMgr& getInstance();
 	
-    virtual void onMessageReceivedCallback( ALRPCMessage * message, unsigned char sessionID );
+    virtual void onMessageReceivedCallback( AppLinkRPC::ALRPCMessage * message, unsigned char sessionID );
 
     virtual void onCommandReceivedCallback( RPC2Communication::RPC2Command * command );
 

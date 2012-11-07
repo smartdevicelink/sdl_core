@@ -15,20 +15,20 @@ namespace NsAppManager
 class RegistryItem;
 
 struct Comparer {
-    bool operator() (const ButtonName &b1, const ButtonName &b2) const;
+    bool operator() (const AppLinkRPC::ButtonName &b1, const AppLinkRPC::ButtonName &b2) const;
 };
 
-typedef std::map<ButtonName, RegistryItem*, Comparer> ButtonMap;
-typedef std::pair<ButtonName, RegistryItem*> ButtonMapItem;
+typedef std::map<AppLinkRPC::ButtonName, RegistryItem*, Comparer> ButtonMap;
+typedef std::pair<AppLinkRPC::ButtonName, RegistryItem*> ButtonMapItem;
 
 class ButtonMapping
 {
 public:
     ButtonMapping();
-    void addButton( const ButtonName& buttonName, RegistryItem* app );
-    void removeButton(const ButtonName& buttonName);
+    void addButton( const AppLinkRPC::ButtonName& buttonName, RegistryItem* app );
+    void removeButton(const AppLinkRPC::ButtonName& buttonName);
     void removeItem( RegistryItem* app );
-    RegistryItem *findRegistryItemSubscribedToButton(const ButtonName &btnName) const;
+    RegistryItem *findRegistryItemSubscribedToButton(const AppLinkRPC::ButtonName &appName) const;
 
 private:
     ButtonMapping(const ButtonMapping&);

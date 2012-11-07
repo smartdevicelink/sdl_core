@@ -144,6 +144,112 @@ set (GENERATED_SOURCES
     ./src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.cpp
 )
 
+set (GENERATED_RPC_SOURCES
+    ./src/RPC2ObjectsImpl/UI/AddCommand.cpp
+    ./src/RPC2ObjectsImpl/UI/AddCommandMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/AddCommandResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/AddCommandResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/AddSubMenu.cpp
+    ./src/RPC2ObjectsImpl/UI/AddSubMenuMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/AddSubMenuResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/AddSubMenuResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/Alert.cpp
+    ./src/RPC2ObjectsImpl/UI/AlertMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/AlertResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/AlertResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/CreateInteractionChoiceSet.cpp
+    ./src/RPC2ObjectsImpl/UI/CreateInteractionChoiceSetMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/CreateInteractionChoiceSetResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/CreateInteractionChoiceSetResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/DeleteCommand.cpp
+    ./src/RPC2ObjectsImpl/UI/DeleteCommandMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/DeleteCommandResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/DeleteCommandResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/DeleteInteractionChoiceSet.cpp
+    ./src/RPC2ObjectsImpl/UI/DeleteInteractionChoiceSetMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/DeleteInteractionChoiceSetResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/DeleteInteractionChoiceSetResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/DeleteSubMenu.cpp
+    ./src/RPC2ObjectsImpl/UI/DeleteSubMenuMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/DeleteSubMenuResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/DeleteSubMenuResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/GetCapabilities.cpp
+    ./src/RPC2ObjectsImpl/UI/GetCapabilitiesMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/GetCapabilitiesResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/GetCapabilitiesResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/Marshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/OnAppActivated.cpp
+    ./src/RPC2ObjectsImpl/UI/OnAppActivatedMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/OnAppDeactivated.cpp
+    ./src/RPC2ObjectsImpl/UI/OnAppDeactivatedMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/OnCommand.cpp
+    ./src/RPC2ObjectsImpl/UI/OnCommandMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/OnSystemContext.cpp
+    ./src/RPC2ObjectsImpl/UI/OnSystemContextMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/PerformInteraction.cpp
+    ./src/RPC2ObjectsImpl/UI/PerformInteractionMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/PerformInteractionResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/PerformInteractionResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/ResetGlobalProperties.cpp
+    ./src/RPC2ObjectsImpl/UI/ResetGlobalPropertiesMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/ResetGlobalPropertiesResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/ResetGlobalPropertiesResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/SetGlobalProperties.cpp
+    ./src/RPC2ObjectsImpl/UI/SetGlobalPropertiesMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/SetGlobalPropertiesResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/SetGlobalPropertiesResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/SetMediaClockTimer.cpp
+    ./src/RPC2ObjectsImpl/UI/SetMediaClockTimerMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/SetMediaClockTimerResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/SetMediaClockTimerResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/Show.cpp
+    ./src/RPC2ObjectsImpl/UI/ShowMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/ShowResponse.cpp
+    ./src/RPC2ObjectsImpl/UI/ShowResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/TTS/GetCapabilities.cpp
+    ./src/RPC2ObjectsImpl/TTS/GetCapabilitiesMarshaller.cpp
+    ./src/RPC2ObjectsImpl/TTS/GetCapabilitiesResponse.cpp
+    ./src/RPC2ObjectsImpl/TTS/GetCapabilitiesResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/TTS/Marshaller.cpp
+    ./src/RPC2ObjectsImpl/TTS/Speak.cpp
+    ./src/RPC2ObjectsImpl/TTS/SpeakMarshaller.cpp
+    ./src/RPC2ObjectsImpl/TTS/SpeakResponse.cpp
+    ./src/RPC2ObjectsImpl/TTS/SpeakResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/ActivateApp.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/ActivateAppMarshaller.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/ActivateAppResponse.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/ActivateAppResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/Marshaller.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/OnAppRegistered.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/OnAppRegisteredMarshaller.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/OnAppUnregistered.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/OnAppUnregisteredMarshaller.cpp
+    ./src/RPC2ObjectsImpl/Buttons/GetCapabilities.cpp
+    ./src/RPC2ObjectsImpl/Buttons/GetCapabilitiesMarshaller.cpp
+    ./src/RPC2ObjectsImpl/Buttons/GetCapabilitiesResponse.cpp
+    ./src/RPC2ObjectsImpl/Buttons/GetCapabilitiesResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/Buttons/Marshaller.cpp
+    ./src/RPC2ObjectsImpl/Buttons/OnButtonEvent.cpp
+    ./src/RPC2ObjectsImpl/Buttons/OnButtonEventMarshaller.cpp
+    ./src/RPC2ObjectsImpl/Buttons/OnButtonPress.cpp
+    ./src/RPC2ObjectsImpl/Buttons/OnButtonPressMarshaller.cpp
+    ./src/RPC2ObjectsImpl/VR/AddCommand.cpp
+    ./src/RPC2ObjectsImpl/VR/AddCommandMarshaller.cpp
+    ./src/RPC2ObjectsImpl/VR/AddCommandResponse.cpp
+    ./src/RPC2ObjectsImpl/VR/AddCommandResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/VR/DeleteCommand.cpp
+    ./src/RPC2ObjectsImpl/VR/DeleteCommandMarshaller.cpp
+    ./src/RPC2ObjectsImpl/VR/DeleteCommandResponse.cpp
+    ./src/RPC2ObjectsImpl/VR/DeleteCommandResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/VR/GetCapabilities.cpp
+    ./src/RPC2ObjectsImpl/VR/GetCapabilitiesMarshaller.cpp
+    ./src/RPC2ObjectsImpl/VR/GetCapabilitiesResponse.cpp
+    ./src/RPC2ObjectsImpl/VR/GetCapabilitiesResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/VR/Marshaller.cpp
+    ./src/RPC2ObjectsImpl/VR/OnCommand.cpp
+    ./src/RPC2ObjectsImpl/VR/OnCommandMarshaller.cpp
+)
+
 
 set (SOURCES
     ./src/JSONHandler.cpp
@@ -153,77 +259,11 @@ set (SOURCES
     ./src/ALRPCRequest.cpp
     ./src/ALRPCResponse.cpp
     ./src/RPC2Command.cpp
-    ./src/RPC2Marshaller.cpp
     ./src/RPC2Notification.cpp
-    ./src/OnButtonEventMarshaller.cpp
-    ./src/OnButtonEvent.cpp
-    ./src/Speak.cpp
-    ./src/SpeakMarshaller.cpp
     ./src/RPC2Request.cpp
     ./src/RPC2Response.cpp
-    ./src/RPC2Error.cpp
-    ./src/RPC2Marshaller.cpp
-    ./src/SpeakResponseMarshaller.cpp
-    ./src/SpeakResponse.cpp
-    ./src/Alert.cpp
-    ./src/AlertResponse.cpp
-    ./src/AlertMarshaller.cpp
-    ./src/AlertResponseMarshaller.cpp
-    ./src/Show.cpp
-    ./src/ShowResponse.cpp
-    ./src/ShowMarshaller.cpp
-    ./src/ShowResponseMarshaller.cpp
-    ./src/GetCapabilities.cpp
-    ./src/GetCapabilitiesResponseMarshaller.cpp
-    ./src/GetCapabilitiesResponse.cpp
-    ./src/GetCapabilitiesMarshaller.cpp
-    ./src/GetCapabilities.cpp
-    ./src/OnButtonPress.cpp
-    ./src/OnButtonPressMarshaller.cpp
-    ./src/SetGlobalPropertiesResponse.cpp
-    ./src/SetGlobalPropertiesResponseMarshaller.cpp
-    ./src/SetGlobalProperties.cpp
-    ./src/SetGlobalPropertiesMarshaller.cpp
-    ./src/ResetGlobalProperties.cpp
-    ./src/ResetGlobalPropertiesMarshaller.cpp
-    ./src/ResetGlobalPropertiesResponse.cpp
-    ./src/ResetGlobalPropertiesResponseMarshaller.cpp
-    ./src/OnAppRegistered.cpp
-    ./src/OnAppRegisteredMarshaller.cpp
-    ./src/OnAppUnregisteredMarshaller.cpp
-    ./src/OnAppUnregistered.cpp
-    ./src/ActivateAppMarshaller.cpp
-    ./src/ActivateApp.cpp
-    ./src/ActivateAppResponseMarshaller.cpp
-    ./src/ActivateAppResponse.cpp
-    ./src/AddCommand.cpp
-    ./src/AddCommandMarshaller.cpp
-    ./src/AddCommandResponse.cpp
-    ./src/AddCommandResponseMarshaller.cpp
-    ./src/DeleteCommand.cpp
-    ./src/DeleteCommandMarshaller.cpp
-    ./src/DeleteCommandResponse.cpp
-    ./src/DeleteCommandResponseMarshaller.cpp
-    ./src/OnCommand.cpp
-    ./src/OnCommandMarshaller.cpp
-    ./src/AddSubMenu.cpp
-    ./src/AddSubMenuMarshaller.cpp
-    ./src/AddSubMenuResponse.cpp
-    ./src/AddSubMenuResponseMarshaller.cpp
-    ./src/DeleteSubMenu.cpp
-    ./src/DeleteSubMenuMarshaller.cpp
-    ./src/DeleteSubMenuResponse.cpp
-    ./src/DeleteSubMenuResponseMarshaller.cpp
-    ./src/CreateInteractionChoiceSet.cpp
-    ./src/CreateInteractionChoiceSetMarshaller.cpp
-    ./src/CreateInteractionChoiceSetResponse.cpp
-    ./src/CreateInteractionChoiceSetResponseMarshaller.cpp
-    ./src/DeleteInteractionChoiceSet.cpp
-    ./src/DeleteInteractionChoiceSetMarshaller.cpp
-    ./src/DeleteInteractionChoiceSetResponse.cpp
-    ./src/DeleteInteractionChoiceSetResponseMarshaller.cpp
-    ./src/PerformInteraction.cpp
-    ./src/PerformInteractionMarshaller.cpp
+    ./src/RPC2Error.cpp 
+    ./src/RPC2ErrorMarshaller.cpp 
 )
 
-add_library("JSONHandler" ${SOURCES} ${GENERATED_SOURCES})
+add_library("JSONHandler" ${SOURCES} ${GENERATED_SOURCES} ${GENERATED_RPC_SOURCES})

@@ -14,7 +14,9 @@
 #include "AppMgr/MessageMapping.h"
 #include "AppMgr/ButtonCapabilities.h"
 
-class ALRPCMessage;
+namespace AppLinkRPC{
+    class ALRPCMessage;
+}
 class JSONHandler;
 class JSONRPC2Handler;
 class RegisterAppInterface_request;
@@ -36,7 +38,7 @@ class RegistryItem;
 template< class QueueType >
 class AppMgrCoreQueue;
 
-typedef std::pair<ALRPCMessage*, unsigned char> Message;
+typedef std::pair<AppLinkRPC::ALRPCMessage*, unsigned char> Message;
 
 class AppMgrCore
 {
@@ -45,7 +47,7 @@ public:
 	virtual ~AppMgrCore();
 
 	static AppMgrCore& getInstance();
-    void pushMobileRPCMessage(ALRPCMessage * message , unsigned char sessionID);
+    void pushMobileRPCMessage(AppLinkRPC::ALRPCMessage * message , unsigned char sessionID);
 	void pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message );
 
 	void executeThreads();

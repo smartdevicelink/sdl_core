@@ -1,10 +1,10 @@
 #ifndef RPCS2_NOTIFICATION_CLASS
-#define RPCS2_NOTIFICATION_CLASS value
+#define RPCS2_NOTIFICATION_CLASS
 
-#include "JSONHandler/RPC2Command.h"
+#include "RPC2Command.h"
 
 namespace RPC2Communication
-{    
+{
     class RPC2Notification : public RPC2Command
     {
     public:
@@ -12,8 +12,11 @@ namespace RPC2Communication
         RPC2Notification( int method );
         ~RPC2Notification();
 
-    };
+       
+    private:
 
+    };
 }
 
 #endif
+

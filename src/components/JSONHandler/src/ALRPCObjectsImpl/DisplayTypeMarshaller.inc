@@ -42,7 +42,7 @@ class DisplayType_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -92,7 +92,7 @@ DisplayType_intHash::hash (register const char *str, register unsigned int len)
   return hval + asso_values[(unsigned char)str[len - 1]];
 }
 
-const struct PerfectHashTable *
+const struct AppLinkRPC::PerfectHashTable *
 DisplayType_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
@@ -100,7 +100,7 @@ DisplayType_intHash::getPointer (register const char *str, register unsigned int
        0,  0,  0,  3,  4,  5,  0,  0,  3,  4, 10,  0,  0,  0,
        4, 10,  0,  0,  0,  0,  5
     };
-  static const struct PerfectHashTable wordlist[] =
+  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""},
 #line 20 "gen/deep/pimpl/next/DisplayTypeMarshaller.gp"

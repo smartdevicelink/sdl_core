@@ -58,7 +58,7 @@ void AppMgr::setJsonRPC2Handler(JSONRPC2Handler *handler)
     mAppMgrCore.setJsonRPC2Handler( handler );
 }
 
-void AppMgr::onMessageReceivedCallback(ALRPCMessage * message , unsigned char sessionID)
+void AppMgr::onMessageReceivedCallback(AppLinkRPC::ALRPCMessage * message , unsigned char sessionID)
 {
     if(!message)
     {

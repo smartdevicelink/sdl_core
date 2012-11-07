@@ -1,9 +1,7 @@
 #ifndef RPC2_RESPONSE_CLASS
-#define RPC2_RESPONSE_CLASS value
+#define RPC2_RESPONSE_CLASS
 
-#include "JSONHandler/RPC2Command.h"
-#include "JSONHandler/ALRPCObjects/Result.h"
-#include "JSONHandler/RPC2Error.h"
+#include "RPC2Command.h"
 
 namespace RPC2Communication
 {
@@ -11,28 +9,23 @@ namespace RPC2Communication
     {
     public:
         RPC2Response( );
-        RPC2Response( int method );
+        RPC2Response(int method);
+        RPC2Response(int method ,unsigned int id);
+        RPC2Response(int method ,unsigned int id,int res);
         virtual ~RPC2Response();
 
-        virtual void setID( const std::string & id );
-        virtual void setID( int id );
+        virtual unsigned int getId() const;
+        virtual void setId(unsigned int id);
 
-        virtual std::string getIDString() const;
-        virtual int getID() const;
+        virtual int getResult() const;
+        virtual void setResult(int r);
 
-        virtual Result getResult() const;
-        virtual void setResult(const Result& r);
-
-        virtual RPC2Error getError() const;
-        virtual void setError(const RPC2Error& error);
 
     private:
-        std::string mID;
-        Result mResultCode;
-        RPC2Error mError;
+        unsigned int mId;
+        int mResultCode;
 
     };
-
 }
 
 #endif

@@ -69,7 +69,7 @@ namespace NsTransportLayer
 
    int CBTAdapter::startSDPDiscoveryOnDevice(const char* targetDevice, std::vector<int>& portsRFCOMMFound)
    {
-      LOG4CPLUS_INFO(mLogger, "Start SDP Discovery.");
+      LOG4CPLUS_INFO_EXT(mLogger, "Start SDP Discovery.");
       uint8_t svc_uuid_int[] = { 0x93, 0x6D, 0xA0, 0x1F, 0x9A, 0xBD, 0x4D, 0x9D,
                                  0x80, 0xC7, 0x02, 0xAF, 0x85, 0xC8, 0x22, 0xA8 };
       uuid_t svc_uuid;
@@ -81,18 +81,26 @@ namespace NsTransportLayer
       str2ba( targetDevice, &target );
 
       // connect to the SDP server running on the remote machine
+      LOG4CPLUS_INFO_EXT(mLogger, "connect to the SDP server running on the remote machine");
       const bdaddr_t src = (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
       session = sdp_connect( &src, &target, SDP_RETRY_IF_BUSY );
+      if ( !session )
+      {
+         LOG4CPLUS_ERROR(mLogger, "Cannot connect to SDP server on remote machine.");
+         return -1;
+      }
 
       // specify the UUID of the application we're searching for
+      LOG4CPLUS_INFO_EXT(mLogger, "specify the UUID of the application we're searching for");
       sdp_uuid128_create( &svc_uuid, &svc_uuid_int );
       search_list = sdp_list_append( NULL, &svc_uuid );
 
       // specify that we want a list of all the matching applications' attributes
+      LOG4CPLUS_INFO_EXT(mLogger, "specify that we want a list of all the matching applications' attributes");
       uint32_t range = 0x0000ffff;
       attrid_list = sdp_list_append( NULL, &range );
-
-      // get a list of service records that have UUID
+      // get a list of service records that have UUID 0xabcd
+      LOG4CPLUS_INFO_EXT(mLogger, "get a list of service records that have UUID 0xabcd");
       err = sdp_service_search_attr_req( session, search_list,
                                          SDP_ATTR_REQ_RANGE, attrid_list, &response_list);
       //check error

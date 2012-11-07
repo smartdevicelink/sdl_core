@@ -6,7 +6,10 @@
 
 namespace RPC2Communication
 {
-    class GetCapabilitiesResponse;
+    namespace Buttons
+    {
+        class GetCapabilitiesResponse;
+    }
 }
 
 namespace log4cplus
@@ -20,10 +23,10 @@ namespace NsAppManager
 class ButtonCapabilitiesContainer
 {
 public:
-    typedef std::vector<ButtonCapabilities> Capabilities;
+    typedef std::vector<AppLinkRPC::ButtonCapabilities> Capabilities;
 
     ButtonCapabilitiesContainer();
-    void set( RPC2Communication::GetCapabilitiesResponse* msg );
+    void set( RPC2Communication::Buttons::GetCapabilitiesResponse* msg );
     const Capabilities& get() const;
 private:
     ButtonCapabilitiesContainer(const ButtonCapabilitiesContainer&);

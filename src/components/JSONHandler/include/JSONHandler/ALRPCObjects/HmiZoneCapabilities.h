@@ -1,41 +1,45 @@
-#ifndef HMIZONECAPABILITIES_INCLUDE
-#define HMIZONECAPABILITIES_INCLUDE
+#ifndef APPLINKRPC_HMIZONECAPABILITIES_INCLUDE
+#define APPLINKRPC_HMIZONECAPABILITIES_INCLUDE
 
 
 /*
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Oct 30 08:29:32 2012
+  generated at	Wed Nov  7 13:10:41 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
+namespace AppLinkRPC
+{
 
 /**
      Contains information about the HMI zone capabilities.
      For future use.
 */
 
-class HmiZoneCapabilities
-{
-public:
-  enum HmiZoneCapabilitiesInternal
+  class HmiZoneCapabilities
   {
-    INVALID_ENUM=-1,
-    FRONT=0,
-    BACK=1
+  public:
+    enum HmiZoneCapabilitiesInternal
+    {
+      INVALID_ENUM=-1,
+      FRONT=0,
+      BACK=1
+    };
+  
+    HmiZoneCapabilities() : mInternal(INVALID_ENUM)				{}
+    HmiZoneCapabilities(HmiZoneCapabilitiesInternal e) : mInternal(e)		{}
+  
+    HmiZoneCapabilitiesInternal get(void) const	{ return mInternal; }
+    void set(HmiZoneCapabilitiesInternal e)		{ mInternal=e; }
+  
+  private:
+    HmiZoneCapabilitiesInternal mInternal;
+    friend class HmiZoneCapabilitiesMarshaller;
   };
-
-  HmiZoneCapabilities() : mInternal(INVALID_ENUM)				{}
-  HmiZoneCapabilities(HmiZoneCapabilitiesInternal e) : mInternal(e)		{}
-
-  HmiZoneCapabilitiesInternal get(void) const	{ return mInternal; }
-  void set(HmiZoneCapabilitiesInternal e)		{ mInternal=e; }
-
-private:
-  HmiZoneCapabilitiesInternal mInternal;
-  friend class HmiZoneCapabilitiesMarshaller;
-};
+  
+}
 
 #endif

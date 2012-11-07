@@ -48,22 +48,22 @@ void Application::setApplicationPriority( const AppPriority& priority )
 	mPriority = priority;
 }
 
-const HMILevel::HMILevelInternal& Application::getApplicationHMIStatusLevel( ) const
+const AppLinkRPC::HMILevel::HMILevelInternal& Application::getApplicationHMIStatusLevel( ) const
 {
 	return mHMIStatusLevel;
 }
 
-void Application::setApplicationHMIStatusLevel( const HMILevel::HMILevelInternal& hmiLevel )
+void Application::setApplicationHMIStatusLevel( const AppLinkRPC::HMILevel::HMILevelInternal& hmiLevel )
 {
 	mHMIStatusLevel = hmiLevel;
 }
 
-const AudioStreamingState& Application::getApplicationAudioStreamingState( ) const
+const AppLinkRPC::AudioStreamingState& Application::getApplicationAudioStreamingState( ) const
 {
 	return mAudioStreamingState;
 }
 
-void Application::setApplicationAudioStreamingState( const AudioStreamingState& streamingState )
+void Application::setApplicationAudioStreamingState( const AppLinkRPC::AudioStreamingState& streamingState )
 {
 	mAudioStreamingState = streamingState;
 }
@@ -88,7 +88,7 @@ void Application::setIsMediaApplication(bool value)
 	m_bIsMediaApplication = value;
 }
 
-void Application::setLanguageDesired(Language value)
+void Application::setLanguageDesired(AppLinkRPC::Language value)
 {
 	mLanguageDesired = value;
 }
@@ -98,7 +98,7 @@ void Application::setAutoActivateID(const std::string& value)
 	mAutoActivateID = value;
 }
 
-void Application::setSyncMsgVersion(SyncMsgVersion value)
+void Application::setSyncMsgVersion(AppLinkRPC::SyncMsgVersion value)
 {
     mSyncMsgVersion = value;
 }
@@ -108,7 +108,7 @@ void Application::setAppID(const std::string &value)
     mAppID = value;
 }
 
-void Application::setHMIDisplayLanguageDesired(Language value)
+void Application::setHMIDisplayLanguageDesired(AppLinkRPC::Language value)
 {
     mHMIDisplayLanguageDesired = value;
 }
@@ -133,7 +133,7 @@ bool Application::getIsMediaApplication( ) const
 	return m_bIsMediaApplication;
 }
 
-const Language& Application::getLanguageDesired( ) const
+const AppLinkRPC::Language& Application::getLanguageDesired( ) const
 {
 	return mLanguageDesired;
 }
@@ -143,7 +143,7 @@ const std::string& Application::getAutoActivateID( ) const
 	return mAutoActivateID;
 }
 
-const SyncMsgVersion& Application::getSyncMsgVersion( ) const
+const AppLinkRPC::SyncMsgVersion& Application::getSyncMsgVersion( ) const
 {
     return mSyncMsgVersion;
 }
@@ -153,7 +153,7 @@ const std::string &Application::getAppID() const
     return mAppID;
 }
 
-const Language &Application::getHMIDisplayLanguageDesired() const
+const AppLinkRPC::Language &Application::getHMIDisplayLanguageDesired() const
 {
     return mHMIDisplayLanguageDesired;
 }

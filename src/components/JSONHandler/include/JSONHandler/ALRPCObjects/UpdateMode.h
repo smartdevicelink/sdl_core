@@ -1,16 +1,18 @@
-#ifndef UPDATEMODE_INCLUDE
-#define UPDATEMODE_INCLUDE
+#ifndef APPLINKRPC_UPDATEMODE_INCLUDE
+#define APPLINKRPC_UPDATEMODE_INCLUDE
 
 
 /*
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Oct 30 08:29:32 2012
+  generated at	Wed Nov  7 13:10:41 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
+namespace AppLinkRPC
+{
 
 /**
      Describes how the media clock timer should behave on the platform
@@ -20,27 +22,29 @@
      Resume the media clock timer
 */
 
-class UpdateMode
-{
-public:
-  enum UpdateModeInternal
+  class UpdateMode
   {
-    INVALID_ENUM=-1,
-    COUNTUP=0,
-    COUNTDOWN=1,
-    PAUSE=2,
-    RESUME=3
+  public:
+    enum UpdateModeInternal
+    {
+      INVALID_ENUM=-1,
+      COUNTUP=0,
+      COUNTDOWN=1,
+      PAUSE=2,
+      RESUME=3
+    };
+  
+    UpdateMode() : mInternal(INVALID_ENUM)				{}
+    UpdateMode(UpdateModeInternal e) : mInternal(e)		{}
+  
+    UpdateModeInternal get(void) const	{ return mInternal; }
+    void set(UpdateModeInternal e)		{ mInternal=e; }
+  
+  private:
+    UpdateModeInternal mInternal;
+    friend class UpdateModeMarshaller;
   };
-
-  UpdateMode() : mInternal(INVALID_ENUM)				{}
-  UpdateMode(UpdateModeInternal e) : mInternal(e)		{}
-
-  UpdateModeInternal get(void) const	{ return mInternal; }
-  void set(UpdateModeInternal e)		{ mInternal=e; }
-
-private:
-  UpdateModeInternal mInternal;
-  friend class UpdateModeMarshaller;
-};
+  
+}
 
 #endif

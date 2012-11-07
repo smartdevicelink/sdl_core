@@ -1,10 +1,12 @@
 #ifndef PERFECTHASHTABLE_INCLUDE
 #define PERFECTHASHTABLE_INCLUDE
 
-struct PerfectHashTable
+namespace AppLinkRPC
 {
-  const char *name;
-  unsigned int idx;
-};
-
+  struct PerfectHashTable
+  {
+    const char *name;
+    unsigned int idx;
+  };
+}
 #endif

@@ -15,7 +15,7 @@ class SpeechCapabilities_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,7 +25,7 @@ SpeechCapabilities_intHash::hash (register const char *str, register unsigned in
   return len;
 }
 
-const struct PerfectHashTable *
+const struct AppLinkRPC::PerfectHashTable *
 SpeechCapabilities_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
@@ -33,7 +33,7 @@ SpeechCapabilities_intHash::getPointer (register const char *str, register unsig
        0,  0,  0,  0,  4,  0,  0,  7,  0,  0,  0,  0, 12, 13,
        0, 15
     };
-  static const struct PerfectHashTable wordlist[] =
+  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
 #line 17 "gen/deep/pimpl/next/SpeechCapabilitiesMarshaller.gp"

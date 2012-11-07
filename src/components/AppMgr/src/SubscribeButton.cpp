@@ -29,14 +29,14 @@ void SubscribeButtonCmd::execute()
         LOG4CPLUS_ERROR_EXT(mLogger, " No params supplied in constructor, null pointer exception is about to occur!");
         return;
     }
-    SubscribeButton_request * object = (SubscribeButton_request*)msg->first;
+    AppLinkRPC::SubscribeButton_request * object = (AppLinkRPC::SubscribeButton_request*)msg->first;
     RegistryItem* item = AppMgrRegistry::getInstance().getItem(msg->second);
     AppMgrCore::getInstance().mButtonsMapping.addButton( object->get_buttonName(), item );
-    SubscribeButton_response* response = new SubscribeButton_response();
+    AppLinkRPC::SubscribeButton_response* response = new AppLinkRPC::SubscribeButton_response();
     response->setCorrelationID(object->getCorrelationID());
-    response->setMessageType(ALRPCMessage::RESPONSE);
+    response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
     response->set_success(true);
-    response->set_resultCode(Result::SUCCESS);
+    response->set_resultCode(AppLinkRPC::Result::SUCCESS);
     AppMgrCore::getInstance().mJSONHandler->sendRPCMessage(response, msg->second);
 }
 
