@@ -71,12 +71,20 @@ void RegistryItem::unregisterPolicy( AppPolicy* policy )
 
 Application* RegistryItem::getApplication( ) const
 {
-    LOG4CPLUS_ERROR_EXT(mLogger, "About to return a null application: a null ptr exception may occur right after this line!");
+    if(!mApplication)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "About to return a null application: a null ptr exception may occur right after this line!");
+    }
 	return mApplication;
 }
 
 bool RegistryItem::operator <(const RegistryItem& item2 ) const
 {
+    if(!this->getApplication() || !item2.getApplication())
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "Cannot perform registry items comparison, due to null application(s) assigned to (some of) them");
+        return false;
+    }
 	return this->getApplication()->getName() < item2.getApplication()->getName();
 }
 
