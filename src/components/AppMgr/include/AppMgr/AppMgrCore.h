@@ -19,7 +19,11 @@ namespace AppLinkRPC{
 }
 class JSONHandler;
 class JSONRPC2Handler;
-class RegisterAppInterface_request;
+
+namespace AppLinkRPC
+{
+    class RegisterAppInterface_request;
+}
 
 namespace RPC2Communication
 {
@@ -66,7 +70,7 @@ private:
     static void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg, void* pThis );
 
     template<class Object> void handleMessage(Object message);
-    const RegistryItem* registerApplication(RegisterAppInterface_request *request , const unsigned char &sessionID);
+    const RegistryItem* registerApplication(AppLinkRPC::RegisterAppInterface_request *request , const unsigned char &sessionID);
     void unregisterApplication(const Message &msg );
 
 	void registerApplicationOnHMI( const std::string& name );

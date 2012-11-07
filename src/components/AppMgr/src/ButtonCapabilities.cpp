@@ -12,18 +12,15 @@ ButtonCapabilitiesContainer::ButtonCapabilitiesContainer()
     LOG4CPLUS_INFO_EXT(mLogger, " ButtonCapabilitiesContainer constructed!");
 }
 
-void ButtonCapabilitiesContainer::set(RPC2Communication::Buttons::GetCapabilitiesResponse *msg)
+void ButtonCapabilitiesContainer::set(const std::vector<AppLinkRPC::ButtonCapabilities>& caps)
 {
-    if(!msg)
+    if(caps.empty())
     {
-        LOG4CPLUS_ERROR_EXT(mLogger, " Trying to set a null pointer: is this the intent?");
+        LOG4CPLUS_ERROR_EXT(mLogger, " Trying to set empty capabilities set");
         return;
     }
-    std::vector<RPC2Communication::Buttons::GetCapabilitiesResponse> result = msg->getCapabilities();
-    for( std::vector<RPC2Communication::Buttons::GetCapabilitiesResponse>::iterator it = result.begin(); it != result.end(); it++ )
-    {
-        mButtonCapabilities.push_back(it->capability);
-    }
+
+    mButtonCapabilities = caps;
 }
 
 const ButtonCapabilitiesContainer::Capabilities& ButtonCapabilitiesContainer::get() const

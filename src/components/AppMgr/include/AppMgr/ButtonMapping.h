@@ -28,7 +28,7 @@ public:
     void addButton( const AppLinkRPC::ButtonName& buttonName, RegistryItem* app );
     void removeButton(const AppLinkRPC::ButtonName& buttonName);
     void removeItem( RegistryItem* app );
-    RegistryItem *findRegistryItemSubscribedToButton(const AppLinkRPC::ButtonName &appName) const;
+    RegistryItem *findRegistryItemSubscribedToButton(const AppLinkRPC::ButtonName &btnName) const;
 
 private:
     ButtonMapping(const ButtonMapping&);

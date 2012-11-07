@@ -583,8 +583,8 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         case RPC2Communication::Buttons::Marshaller::METHOD_GETCAPABILITIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetButtonCapabilities response has been income");
-            RPC2Communication::Buttons::GetCapabilitiesResponse * object = (RPC2Communication::Buttons::GetCapabilitiesResponse*)msg;
-            core->mButtonCapabilities.set( object );
+            RPC2Communication::Buttons::GetCapabilitiesResponse * object = (RPC2Communication::Buttons::GetCapabilitiesResponse*)msg;        
+            core->mButtonCapabilities.set( object->get_capabilities() );
             return;
         }        
 		case RPC2Communication::Buttons::Marshaller::METHOD_INVALID:
@@ -758,7 +758,6 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
                 return;
             }
-            LOG4CPLUS_INFO_EXT(mLogger, "A registry item for the name "<<appName<<" has been found!");
             Application* app = item->getApplication();
             if(!app)
             {
@@ -990,17 +989,14 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
     LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been invoked!");
 }
 
-const RegistryItem* AppMgrCore::registerApplication( RegisterAppInterface_request * request, const unsigned char& sessionID )
+const RegistryItem* AppMgrCore::registerApplication( AppLinkRPC::RegisterAppInterface_request * request, const unsigned char& sessionID )
 {
-    AppLinkRPC::ALRPCMessage* msg = object.first;
-    unsigned char sessionID = object.second;
-    if(!msg)
+    if(!request)
     {
-        LOG4CPLUS_ERROR_EXT(mLogger, "No message for session "<<sessionID<<"!");
+        LOG4CPLUS_ERROR_EXT(mLogger, "Null-request specified for session "<<sessionID<<"!");
         return 0;
     }
 
-    AppLinkRPC::RegisterAppInterface_request * request = (AppLinkRPC::RegisterAppInterface_request*)msg;
     LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() << "!");
 
     const std::string& appName = request->get_appName();

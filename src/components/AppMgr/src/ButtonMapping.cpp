@@ -44,7 +44,7 @@ void ButtonMapping::removeItem(RegistryItem *app)
 }
 
 
-RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const AppLinkRPC::ButtonName &appName ) const
+RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const AppLinkRPC::ButtonName &btnName ) const
 {
     ButtonMap::const_iterator it = mButtonsMapping.find( btnName );
     if ( it != mButtonsMapping.end() )

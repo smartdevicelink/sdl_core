@@ -26,7 +26,7 @@ public:
     typedef std::vector<AppLinkRPC::ButtonCapabilities> Capabilities;
 
     ButtonCapabilitiesContainer();
-    void set( RPC2Communication::Buttons::GetCapabilitiesResponse* msg );
+    void set(const std::vector<AppLinkRPC::ButtonCapabilities> &caps );
     const Capabilities& get() const;
 private:
     ButtonCapabilitiesContainer(const ButtonCapabilitiesContainer&);
