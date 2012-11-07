@@ -145,43 +145,12 @@ MFT.AppOptionsView = Em.ContainerView.create({
             this.scrollBarH = (this.scroll.wrapperH - 98) * this.coeficient - 49;
             this.scrollBar.scroller.set( 'style', 'height:' + this.scrollBarH + 'px;' );
 
-            button = MFT.Button.create({
-                elementId:          'media_app_options_view',
-                click:              function(){
-                    MFT.MediaController.turnOnAppSubMenu(1);
-                },
-                commandId:          1, 
-                classNames:         ['rs-item'],
-                //icon:             null,//'images/media/active_arrow.png',
-                text:               "menuName" 
-            });
-
-            MFT.AppOptionsView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
             MFT.AppOptionsView.buttonsWrapper.scroll.refresh();
         }
     }),
 
     afterRender: function() {
-/*
-        var butt;
 
-        for(var i in MFT.InfoController.get('appsParams')){
-
-            butt = MFT.Button.create({
-                goToState:          MFT.InfoController.get('appsParams')[i].goToState,
-                classNames:         MFT.InfoController.get('appsParams')[i].classNames,
-                icon:               MFT.InfoController.get('appsParams')[i].icon,
-                textBinding:        MFT.InfoController.get('appsParams')[i].textBinding,
-                arrow:              MFT.InfoController.get('appsParams')[i].arrow,
-                action:             MFT.InfoController.get('appsParams')[i].action,
-                target:             MFT.InfoController.get('appsParams')[i].target,
-                disabledBinding:    MFT.InfoController.get('appsParams')[i].disabledBinding,
-                onDown:             MFT.InfoController.get('appsParams')[i].onDown
-            });
-
-            MFT.AppOptionsView.buttonsWrapper.buttonsScroll.get('_childViews').pushObject(butt);
-        }
-*/
         setTimeout(function () { MFT.AppOptionsView.buttonsWrapper.loaded(); }, 200);
         
     }

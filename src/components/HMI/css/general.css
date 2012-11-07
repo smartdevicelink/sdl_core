@@ -171,6 +171,7 @@ div {
 
 #VRPopUp.received{
 	opacity: 1;
+	visibility: visible;
 }
 
 /*

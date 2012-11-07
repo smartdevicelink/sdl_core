@@ -85,7 +85,8 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 			commandId:			commandId, 
 			classNames:			['rs-item'],
 			//icon:				null,//'images/media/active_arrow.png',
-			text:				params.menuName	
+			text:				params.menuName,
+            templateName:       'text'
 		});
 
 		MFT.AppRightMenuView.scrollWrapper.scroller.get('childViews').pushObject(button);

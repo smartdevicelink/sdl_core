@@ -395,7 +395,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 		/** Voice Recognition button */
 		VRButton: MFT.Button.create({
 			elementId:	'VRButton',
-			classNames:	'VRButton'
+			classNames:	'VRButton',
+			actionUp:		function(){
+				this._super();
+				MFT.VRPopUp.receiveMessage();
+			}
 		}),
 	})
 });

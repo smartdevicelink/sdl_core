@@ -14,20 +14,14 @@ MFT.VRPopUp = Em.ContainerView.create({
 
     elementId:          'VRPopUp',
 
-    classNames:         'VRPopUp',
+    classNames:         'VRPopUp hide',
 
     classNameBindings:      ['received'],
 
     childViews: [
         'popUp',
-        'message1',
-        'message2',
         'buttonsWrapper'
     ],
-
-    content1:           'Title',
-
-    content2:           'Text',
 
     received:           false,
 
@@ -43,7 +37,8 @@ MFT.VRPopUp = Em.ContainerView.create({
                 commandId:          commandId, 
                 classNames:         ['rs-item'],
                 //icon:             null,//'images/media/active_arrow.png',
-                text:               vrCommands[val]
+                text:               vrCommands[val],
+                templateName:       'text'
             });
 
             MFT.VRPopUp.scrollWrapper.scroller.get('childViews').pushObject(button);
@@ -66,31 +61,13 @@ MFT.VRPopUp = Em.ContainerView.create({
         classNames:         'popUp',
     }),
 
-    message1 : MFT.Label.extend({
-
-        elementId:          'message1',
-
-        classNames:         'message1',
-
-        contentBinding:     'parentView.content1'
-    }),
-
-    message2 : MFT.Label.extend({
-
-        elementId:          'message2',
-
-        classNames:         'message2',
-
-        contentBinding:     'parentView.content2'
-    }),
-
-    receiveMessage: function(msg1, msg2, duration, playTone){
+    receiveMessage: function(){
         var self = this;
-
-        this.set('content1', msg1);
-        this.set('content2', msg2);
-        this.set('received', true);
-        //setTimeout(function(){self.set('received', false);}, duration);
+        if(this.received){
+            this.set('received', false);
+        }else{
+            this.set('received', true);
+        }
     },
 
     buttonsWrapper: Em.ContainerView.extend({
@@ -180,43 +157,12 @@ MFT.VRPopUp = Em.ContainerView.create({
             this.scrollBarH = (this.scroll.wrapperH - 98) * this.coeficient - 49;
             this.scrollBar.scroller.set( 'style', 'height:' + this.scrollBarH + 'px;' );
 
-            button = MFT.Button.create({
-                elementId:          'media_app_options_view',
-                click:              function(){
-                    MFT.MediaController.turnOnAppSubMenu(1);
-                },
-                commandId:          1, 
-                classNames:         ['rs-item'],
-                //icon:             null,//'images/media/active_arrow.png',
-                text:               "menuName" 
-            });
-
-            MFT.VRPopUp.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
             MFT.VRPopUp.buttonsWrapper.scroll.refresh();
         }
     }),
 
     afterRender: function() {
-/*
-        var butt;
 
-        for(var i in MFT.InfoController.get('appsParams')){
-
-            butt = MFT.Button.create({
-                goToState:          MFT.InfoController.get('appsParams')[i].goToState,
-                classNames:         MFT.InfoController.get('appsParams')[i].classNames,
-                icon:               MFT.InfoController.get('appsParams')[i].icon,
-                textBinding:        MFT.InfoController.get('appsParams')[i].textBinding,
-                arrow:              MFT.InfoController.get('appsParams')[i].arrow,
-                action:             MFT.InfoController.get('appsParams')[i].action,
-                target:             MFT.InfoController.get('appsParams')[i].target,
-                disabledBinding:    MFT.InfoController.get('appsParams')[i].disabledBinding,
-                onDown:             MFT.InfoController.get('appsParams')[i].onDown
-            });
-
-            MFT.VRPopUp.buttonsWrapper.buttonsScroll.get('_childViews').pushObject(butt);
-        }
-*/
         setTimeout(function () { MFT.VRPopUp.buttonsWrapper.loaded(); }, 200);
         
     }
