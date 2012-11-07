@@ -1,0 +1,157 @@
+#include "../include/JSONHandler/RPC2Objects/UI/PerformInteraction.h"
+#include "../include/JSONHandler/RPC2Objects/UI/Marshaller.h"
+
+/*
+  interface	RPC2Communication::UI
+  version	1.2
+  generated at	Wed Nov  7 11:26:14 2012
+  source stamp	Wed Nov  7 09:29:07 2012
+  author	robok0der
+*/
+
+using namespace RPC2Communication;
+using namespace AppLinkRPC;
+using namespace RPC2Communication::UI;
+
+
+PerformInteraction& PerformInteraction::operator =(const PerformInteraction& c)
+{
+  initialText=c.initialText;
+  initialPrompt=c.initialPrompt;
+  interactionMode=c.interactionMode;
+  interactionChoiceSetIDList=c.interactionChoiceSetIDList;
+  if(helpPrompt)  delete helpPrompt;
+  helpPrompt= c.helpPrompt ? new std::vector<TTSChunk>(c.helpPrompt[0]) : 0;
+  if(timeoutPrompt)  delete timeoutPrompt;
+  timeoutPrompt= c.timeoutPrompt ? new std::vector<TTSChunk>(c.timeoutPrompt[0]) : 0;
+  if(timeout)  delete timeout;
+  timeout= c.timeout ? new unsigned int(c.timeout[0]) : 0;
+  return *this;
+}
+
+
+PerformInteraction::~PerformInteraction(void)
+{
+  if(helpPrompt)  delete helpPrompt;
+  if(timeoutPrompt)  delete timeoutPrompt;
+  if(timeout)  delete timeout;
+}
+
+
+PerformInteraction::PerformInteraction(void) : 
+  RPC2Request(Marshaller::METHOD_PERFORMINTERACTION),
+  helpPrompt(0),
+  timeoutPrompt(0),
+  timeout(0)
+{
+}
+
+
+PerformInteraction::PerformInteraction(const PerformInteraction& c) : RPC2Request(Marshaller::METHOD_PERFORMINTERACTION,c.getId())
+{
+  *this=c;
+}
+
+
+const std::string& PerformInteraction::get_initialText(void)
+{
+  return initialText;
+}
+
+bool PerformInteraction::set_initialText(const std::string& initialText_)
+{
+  initialText=initialText_;
+  return true;
+}
+
+const std::vector< TTSChunk>& PerformInteraction::get_initialPrompt(void)
+{
+  return initialPrompt;
+}
+
+bool PerformInteraction::set_initialPrompt(const std::vector< TTSChunk>& initialPrompt_)
+{
+  initialPrompt=initialPrompt_;
+  return true;
+}
+
+const InteractionMode& PerformInteraction::get_interactionMode(void)
+{
+  return interactionMode;
+}
+
+bool PerformInteraction::set_interactionMode(const InteractionMode& interactionMode_)
+{
+  interactionMode=interactionMode_;
+  return true;
+}
+
+const std::vector< unsigned int>& PerformInteraction::get_interactionChoiceSetIDList(void)
+{
+  return interactionChoiceSetIDList;
+}
+
+bool PerformInteraction::set_interactionChoiceSetIDList(const std::vector< unsigned int>& interactionChoiceSetIDList_)
+{
+  interactionChoiceSetIDList=interactionChoiceSetIDList_;
+  return true;
+}
+
+const std::vector< TTSChunk>* PerformInteraction::get_helpPrompt(void)
+{
+  return helpPrompt;
+}
+
+bool PerformInteraction::set_helpPrompt(const std::vector< TTSChunk>& helpPrompt_)
+{
+  if(helpPrompt)  delete helpPrompt;
+  helpPrompt=new std::vector< TTSChunk>(helpPrompt_);
+  return true;
+}
+
+void PerformInteraction::reset_helpPrompt(void)
+{
+  if(helpPrompt)  delete helpPrompt;
+  helpPrompt=0;
+}
+
+const std::vector< TTSChunk>* PerformInteraction::get_timeoutPrompt(void)
+{
+  return timeoutPrompt;
+}
+
+bool PerformInteraction::set_timeoutPrompt(const std::vector< TTSChunk>& timeoutPrompt_)
+{
+  if(timeoutPrompt)  delete timeoutPrompt;
+  timeoutPrompt=new std::vector< TTSChunk>(timeoutPrompt_);
+  return true;
+}
+
+void PerformInteraction::reset_timeoutPrompt(void)
+{
+  if(timeoutPrompt)  delete timeoutPrompt;
+  timeoutPrompt=0;
+}
+
+const unsigned int* PerformInteraction::get_timeout(void)
+{
+  return timeout;
+}
+
+bool PerformInteraction::set_timeout(const unsigned int& timeout_)
+{
+  if(timeout)  delete timeout;
+  timeout=new unsigned int(timeout_);
+  return true;
+}
+
+void PerformInteraction::reset_timeout(void)
+{
+  if(timeout)  delete timeout;
+  timeout=0;
+}
+
+bool PerformInteraction::checkIntegrity(void)
+{
+  return PerformInteractionMarshaller::checkIntegrity(*this);
+}
