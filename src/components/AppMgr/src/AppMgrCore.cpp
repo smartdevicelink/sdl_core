@@ -145,7 +145,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         LOG4CPLUS_ERROR_EXT(mLogger, " No message associated with the session "<<sessionID<<"!");
         return;
     }
-    LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message "<< message.first->getMethodId() <<" has been received!");
+    LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message "<< mobileMsg->getMethodId() <<" has been received for the session id "<<sessionID<<"!");
     if(!pThis)
     {
         LOG4CPLUS_ERROR_EXT(mLogger, " pThis should point to an instance of AppMgrCore class");
@@ -574,6 +574,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 break;
             }
             unsigned char sessionID = app->getSessionID();
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mJSONHandler->sendRPCMessage(event, sessionID);
             break;
         }
@@ -599,7 +600,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 break;
             }
             unsigned char sessionID = app->getSessionID();
-            LOG4CPLUS_INFO_EXT(mLogger, "sessionID found " << sessionID);
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mJSONHandler->sendRPCMessage(event, sessionID);
             break;
         }
@@ -622,7 +623,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 break;
             }
             unsigned char sessionID = app->getSessionID();
-            LOG4CPLUS_INFO_EXT(mLogger, "sessionID found " << sessionID);
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mJSONHandler->sendRPCMessage(event, sessionID);
             break;
         }
@@ -655,6 +656,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             }
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -680,6 +682,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             }
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -705,6 +708,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             }
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -730,6 +734,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             }
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -763,6 +768,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             }
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getID());
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
         }
@@ -793,7 +799,9 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             app->setApplicationHMIStatusLevel(HMILevel::HMI_FULL);
             hmiStatus->set_audioStreamingState(app->getApplicationAudioStreamingState());
             hmiStatus->set_systemContext(SystemContext::SYSCTXT_MENU);
-            core->mJSONHandler->sendRPCMessage( hmiStatus, app->getSessionID() );
+            unsigned char sessionID = app->getSessionID();
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
+            core->mJSONHandler->sendRPCMessage( hmiStatus, sessionID );
             RPC2Communication::ActivateAppResponse * response = new RPC2Communication::ActivateAppResponse;
             response->setID(object->getID());
             response->setResult(Result::SUCCESS);
@@ -820,6 +828,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 break;
             }
             unsigned char sessionID = app->getSessionID();
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -844,6 +853,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 break;
             }
             unsigned char sessionID = app->getSessionID();
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -868,6 +878,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 break;
             }
             unsigned char sessionID = app->getSessionID();
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -892,6 +903,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 break;
             }
             unsigned char sessionID = app->getSessionID();
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -916,6 +928,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 break;
             }
             unsigned char sessionID = app->getSessionID();
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -940,6 +953,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 break;
             }
             unsigned char sessionID = app->getSessionID();
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -965,6 +979,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 break;
             }
             unsigned char sessionID = app->getSessionID();
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mMessageMapping.removeMessage(object->getID());
             core->mJSONHandler->sendRPCMessage(response, sessionID);
             break;
@@ -987,7 +1002,7 @@ const RegistryItem* AppMgrCore::registerApplication( RegisterAppInterface_reques
         return 0;
     }
 
-    LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() << "!");
+    LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() <<" session id"<<sessionID<<"!");
 
     const std::string& appName = request->get_appName();
     Application* application = new Application( appName, sessionID );
@@ -1025,7 +1040,7 @@ const RegistryItem* AppMgrCore::registerApplication( RegisterAppInterface_reques
 	application->setSyncMsgVersion(syncMsgVersion);
 
 	application->setApplicationHMIStatusLevel(HMILevel::HMI_NONE);
-    LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
+    LOG4CPLUS_INFO_EXT(mLogger, "Application "<<application->getName()<<" session id" <<sessionID<< " created." );
 
     return AppMgrRegistry::getInstance().registerApplication( application );
 }
@@ -1054,10 +1069,10 @@ void AppMgrCore::unregisterApplication(const Message &msg)
     }
 
     const std::string& appName = app->getName();
-    LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName << "!");
+    LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName <<" session id " <<sessionID<< "!");
     mButtonsMapping.removeItem(item);
     AppMgrRegistry::getInstance().unregisterApplication(item);
-    LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName << "!");
+    LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName << " session id " <<sessionID<< "!");
 }
 
 void AppMgrCore::registerApplicationOnHMI( const std::string& name )
