@@ -11,7 +11,7 @@ ButtonMapping::ButtonMapping()
 {
 }
 
-void ButtonMapping::addButton(const ButtonName &buttonName, RegistryItem *app)
+void ButtonMapping::addButton(const AppLinkRPC::ButtonName &buttonName, RegistryItem *app)
 {
     if(!app)
     {
@@ -22,7 +22,7 @@ void ButtonMapping::addButton(const ButtonName &buttonName, RegistryItem *app)
     mButtonsMapping.insert(ButtonMapItem(buttonName, app));
 }
 
-void ButtonMapping::removeButton(const ButtonName &buttonName)
+void ButtonMapping::removeButton(const AppLinkRPC::ButtonName &buttonName)
 {
     mButtonsMapping.erase(buttonName);
 }
@@ -43,7 +43,7 @@ void ButtonMapping::removeItem(RegistryItem *app)
     }
 }
 
-RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const ButtonName &appName ) const
+RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const AppLinkRPC::ButtonName &appName ) const
 {
     ButtonMap::const_iterator it = mButtonsMapping.find( appName );
     if ( it != mButtonsMapping.end() )
@@ -66,7 +66,7 @@ ButtonMapping::ButtonMapping(const ButtonMapping &)
 {
 }
 
-bool Comparer::operator ()(const ButtonName &b1, const ButtonName &b2) const
+bool Comparer::operator ()(const AppLinkRPC::ButtonName &b1, const AppLinkRPC::ButtonName &b2) const
 {
     return b1.get() < b2.get();
 }

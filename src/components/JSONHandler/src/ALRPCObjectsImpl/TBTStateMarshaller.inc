@@ -15,7 +15,7 @@ class TBTState_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,7 +25,7 @@ TBTState_intHash::hash (register const char *str, register unsigned int len)
   return len;
 }
 
-const struct PerfectHashTable *
+const struct AppLinkRPC::PerfectHashTable *
 TBTState_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
@@ -33,7 +33,7 @@ TBTState_intHash::getPointer (register const char *str, register unsigned int le
        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 13,
       14, 15,  0,  0,  0,  0, 20
     };
-  static const struct PerfectHashTable wordlist[] =
+  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""},

@@ -1,6 +1,6 @@
-#include "../../include/JSONHandler/ALRPCObjects/AddCommand_request.h"
+#include "../include/JSONHandler/ALRPCObjects/AddCommand_request.h"
 #include "AddCommand_requestMarshaller.h"
-#include "../../include/JSONHandler/ALRPCObjects/Marshaller.h"
+#include "../include/JSONHandler/ALRPCObjects/Marshaller.h"
 #include "MenuParamsMarshaller.h"
 
 #define PROTOCOL_VERSION	1
@@ -10,11 +10,12 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Oct 30 08:29:32 2012
+  generated at	Wed Nov  7 13:10:41 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
+using namespace AppLinkRPC;
 AddCommand_request& AddCommand_request::operator =(const AddCommand_request& c)
 {
   cmdID= c.cmdID;

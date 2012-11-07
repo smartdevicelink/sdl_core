@@ -6,7 +6,7 @@
 class IRPCMessagesObserver
 {
 public:
-    virtual void onMessageReceivedCallback( ALRPCMessage * message, unsigned char sessionID ) = 0;
+    virtual void onMessageReceivedCallback( AppLinkRPC::ALRPCMessage * message, unsigned char sessionID ) = 0;
 
 protected:
     virtual ~IRPCMessagesObserver() {};

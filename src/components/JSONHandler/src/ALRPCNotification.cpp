@@ -1,5 +1,6 @@
 #include "JSONHandler/ALRPCNotification.h"
 
+using namespace AppLinkRPC;
 
 ALRPCNotification::ALRPCNotification(void) :
     ALRPCMessage(0,NOTIFICATION)

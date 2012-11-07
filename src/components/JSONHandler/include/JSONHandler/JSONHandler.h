@@ -24,7 +24,7 @@ public:
 
     /*Methods for IRPCMessagesObserver*/
     void setRPCMessagesObserver( IRPCMessagesObserver * messagesObserver );
-    void sendRPCMessage( const ALRPCMessage * message, unsigned char sessionId );   
+    void sendRPCMessage( const AppLinkRPC::ALRPCMessage * message, unsigned char sessionId );   
     /*End of methods for IRPCMessagesObserver*/
        
     //static Json::Value getParametersFromJSON( const std::string & jsonString );
@@ -45,7 +45,7 @@ private:
 
     MessageQueue<std::string>          mIncomingMessages;
     pthread_t             mWaitForIncomingMessagesThread;
-    MessageQueue<const ALRPCMessage*>    mOutgoingMessages;
+    MessageQueue<const AppLinkRPC::ALRPCMessage*>    mOutgoingMessages;
     pthread_t             mWaitForOutgoingMessagesThread;
 
 };

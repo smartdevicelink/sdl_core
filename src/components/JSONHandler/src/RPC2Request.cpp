@@ -1,42 +1,36 @@
+
 #include "JSONHandler/RPC2Request.h"
-#include <sstream>
-#include <stdlib.h>
 
 using namespace RPC2Communication;
 
-RPC2Request::RPC2Request( )
-{}
 
-RPC2Request::RPC2Request( int method )
-:RPC2Command( method )
-{}
+RPC2Request::RPC2Request() : RPC2Command(REQUEST), mId(0) 
+{
+}
+
+RPC2Request::RPC2Request(int method) : RPC2Command(REQUEST, method), mId(0) 
+{
+}
+
+
+RPC2Request::RPC2Request(int method,unsigned int id) : RPC2Command(REQUEST, method), mId(id) 
+{
+}
+
 
 RPC2Request::~RPC2Request()
-{}
-
-void RPC2Request::setID( const std::string & id )
 {
-    mID = id;
 }
 
-void RPC2Request::setID( int id )
+void RPC2Request::setId(unsigned int id)
 {
-     std::stringstream stream;
-     stream << id;
-     mID = stream.str();
+  mId=id;
 }
 
-std::string RPC2Request::getIDString() const
+unsigned int RPC2Request::getId() const
 {
-    return mID;
+  return mId;
 }
 
-int RPC2Request::getID() const
-{
-    if ( mID.empty() )
-    {
-        return 0;
-    }
 
-    return atoi(mID.c_str());
-}
+

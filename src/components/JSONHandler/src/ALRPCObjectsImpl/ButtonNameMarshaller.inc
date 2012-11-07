@@ -42,7 +42,7 @@ class ButtonName_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -95,7 +95,7 @@ ButtonName_intHash::hash (register const char *str, register unsigned int len)
   return hval;
 }
 
-const struct PerfectHashTable *
+const struct AppLinkRPC::PerfectHashTable *
 ButtonName_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
@@ -103,7 +103,7 @@ ButtonName_intHash::getPointer (register const char *str, register unsigned int 
        0,  0,  2,  0,  0,  0,  6,  0,  8,  9,  8,  8,  8,  8,
        0,  8,  8,  8,  8,  0,  0,  8,  8,  8
     };
-  static const struct PerfectHashTable wordlist[] =
+  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""},
 #line 17 "gen/deep/pimpl/next/ButtonNameMarshaller.gp"

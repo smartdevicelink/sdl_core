@@ -66,7 +66,7 @@ Show(string(500) * mainField1,
 Alert(
   string(500) * AlertText1,
   string(500) * AlertText2,
-  unsigned int(3000..10000) * duration,
+  unsigned int(3000:10000) * duration,
   bool * playTone
   -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
@@ -144,7 +144,7 @@ CreateInteractionChoiceSet(
    *  result code
    */ 
 DeleteInteractionChoiceSet(
-  unsigned int(2000000000) interactionChoiceSetID,
+  unsigned int(2000000000) interactionChoiceSetID
   -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -161,10 +161,10 @@ PerformInteraction(
   string(500) initialText,
   TTSChunk initialPrompt[1:100], //data type from AppLink protocol specification
   InteractionMode interactionMode, // data type from AppLink protocol specification
-  unsigned int (2000000000)  interactionChoiceSetIDList[1..100],// List of interaction choice set IDs to use with an interaction
+  unsigned int (2000000000)  interactionChoiceSetIDList[1:100],// List of interaction choice set IDs to use with an interaction
   TTSChunk * helpPrompt[1:100], //data type from AppLink protocol specification
   TTSChunk * timeoutPrompt[1:100], // data type from AppLink protocol specification
-  unsigned int (5000..100000) * timeout //in milliseconds
+  unsigned int (5000:100000) * timeout //in milliseconds
   -> 
   unsigned int (2000000000) * choiceID, // ID of the choice that was selected in response to PerformInteraction
   TriggerSource * triggerSource //data type from AppLink protocol specification

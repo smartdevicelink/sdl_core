@@ -3,15 +3,19 @@
 
 #include "ALRPCMessage.h"
 
-class ALRPCNotification : public ALRPCMessage
+namespace AppLinkRPC
 {
-public:
-    ALRPCNotification( unsigned int protocolVersion );
-    ALRPCNotification( unsigned int protocolVersion, int methodID);
-    ALRPCNotification(void);
-    virtual ~ALRPCNotification();
+    class ALRPCNotification : public ALRPCMessage
+    {
+    public:
+        ALRPCNotification( unsigned int protocolVersion );
+        ALRPCNotification( unsigned int protocolVersion, int methodID);
+        ALRPCNotification(void);
+        virtual ~ALRPCNotification();
 
-    /* data */
-};
+        /* data */
+    };
+
+}
 
 #endif

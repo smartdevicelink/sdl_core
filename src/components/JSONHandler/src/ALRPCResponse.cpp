@@ -1,5 +1,7 @@
 #include "JSONHandler/ALRPCResponse.h"
 
+using namespace AppLinkRPC;
+
 ALRPCResponse::ALRPCResponse( unsigned int protocolVersion )
 :ALRPCMessage( protocolVersion, RESPONSE ) 
 , mCorrelationID(0)

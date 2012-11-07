@@ -5,21 +5,24 @@
 
 #include "ALRPCMessage.h"
 
-class ALRPCResponse : public ALRPCMessage
+namespace AppLinkRPC
 {
-public:
-    ALRPCResponse( unsigned int protocolVersion );
-    ALRPCResponse( unsigned int protocolVersion, int methodID );
-    ALRPCResponse(void);
-    virtual ~ALRPCResponse();
+    class ALRPCResponse : public ALRPCMessage
+    {
+    public:
+        ALRPCResponse( unsigned int protocolVersion );
+        ALRPCResponse( unsigned int protocolVersion, int methodID );
+        ALRPCResponse(void);
+        virtual ~ALRPCResponse();
 
-    virtual unsigned int getCorrelationID() const;
-    virtual void setCorrelationID( unsigned int correlationID );
+        virtual unsigned int getCorrelationID() const;
+        virtual void setCorrelationID( unsigned int correlationID );
 
-private:
-    /* data */
-    unsigned int 	mCorrelationID;
+    private:
+        /* data */
+        unsigned int 	mCorrelationID;
 
-};
+    };
+}
 
 #endif

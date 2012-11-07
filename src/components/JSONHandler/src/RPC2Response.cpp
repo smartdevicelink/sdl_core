@@ -1,63 +1,49 @@
+
 #include "JSONHandler/RPC2Response.h"
-#include <sstream>
-#include <stdlib.h>
 
 using namespace RPC2Communication;
 
-RPC2Response::RPC2Response( )
-:RPC2Command( )
-{}
 
-RPC2Response::RPC2Response( int method )
-:RPC2Command( method )
-{}
+RPC2Response::RPC2Response() : RPC2Command(RESPONSE), mId(0) , mResultCode(-1)
+{
+}
+
+RPC2Response::RPC2Response(int method) : RPC2Command(RESPONSE, method), mId(0) , mResultCode(-1)
+{
+}
+
+
+RPC2Response::RPC2Response(int method,unsigned int id) : RPC2Command(RESPONSE, method), mId(id) , mResultCode(-1)
+{
+}
+
+
+RPC2Response::RPC2Response(int method,unsigned int id,int res) : RPC2Command(RESPONSE, method), mId(id) , mResultCode(res)
+{
+}
+
 
 RPC2Response::~RPC2Response()
-{}
-
-void RPC2Response::setID( const std::string & id )
 {
-    mID = id;
 }
 
-void RPC2Response::setID( int id )
+void RPC2Response::setId(unsigned int id)
 {
-     std::stringstream stream;
-     stream << id;
-     mID = stream.str();
+  mId=id;
 }
 
-std::string RPC2Response::getIDString() const
+unsigned int RPC2Response::getId() const
 {
-    return mID;
+  return mId;
 }
 
-int RPC2Response::getID() const
-{
-    if ( mID.empty() )
-    {
-        return 0;
-    }
 
-    return atoi(mID.c_str());
+int RPC2Response::getResult() const
+{
+  return mResultCode;
 }
 
-Result RPC2Response::getResult() const
+void RPC2Response::setResult(int r)
 {
-    return mResultCode;
-}
-
-void RPC2Response::setResult(const Result& r)
-{
-    mResultCode = r;
-}
-
-RPC2Error RPC2Response::getError() const
-{
-    return mError;
-}
-
-void RPC2Response::setError(const RPC2Error& error)
-{
-    mError = error;
+  mResultCode=r;
 }

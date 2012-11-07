@@ -1,5 +1,5 @@
-#ifndef SYNCMSGVERSION_INCLUDE
-#define SYNCMSGVERSION_INCLUDE
+#ifndef APPLINKRPC_SYNCMSGVERSION_INCLUDE
+#define APPLINKRPC_SYNCMSGVERSION_INCLUDE
 
 
 
@@ -8,43 +8,47 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Oct 30 08:29:32 2012
+  generated at	Wed Nov  7 13:10:41 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
 
+namespace AppLinkRPC
+{
 
 ///  Specifies the version number of the SYNC V4 protocol, that is supported by the mobile application
 
-class SyncMsgVersion
-{
-public:
+  class SyncMsgVersion
+  {
+  public:
+  
+    SyncMsgVersion(const SyncMsgVersion& c);
+    SyncMsgVersion(void);
+  
+    bool checkIntegrity(void);
+  // getters
 
-  SyncMsgVersion(const SyncMsgVersion& c);
-  SyncMsgVersion(void);
-
-  bool checkIntegrity(void);
-// getters
-
-  unsigned int get_majorVersion(void) const;
-  unsigned int get_minorVersion(void) const;
+    unsigned int get_majorVersion(void) const;
+    unsigned int get_minorVersion(void) const;
 
 // setters
 
-  bool set_majorVersion(unsigned int majorVersion_);
-  bool set_minorVersion(unsigned int minorVersion_);
+    bool set_majorVersion(unsigned int majorVersion_);
+    bool set_minorVersion(unsigned int minorVersion_);
 
-private:
+  private:
 
-  friend class SyncMsgVersionMarshaller;
+    friend class SyncMsgVersionMarshaller;
 
 
 ///  The major version indicates versions that is not-compatible to previous versions.
-    unsigned int majorVersion;	//!<  (1,1)
+      unsigned int majorVersion;	//!<  (1,1)
 
 ///  The minor version indicates a change to a previous version that should still allow to be run on an older version (with limited functionality)
-    unsigned int minorVersion;	//!<  (0,1000)
-};
+      unsigned int minorVersion;	//!<  (0,1000)
+  };
+
+}
 
 #endif

@@ -1,16 +1,18 @@
-#ifndef INTERACTIONMODE_INCLUDE
-#define INTERACTIONMODE_INCLUDE
+#ifndef APPLINKRPC_INTERACTIONMODE_INCLUDE
+#define APPLINKRPC_INTERACTIONMODE_INCLUDE
 
 
 /*
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Oct 30 08:29:32 2012
+  generated at	Wed Nov  7 13:10:41 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
+namespace AppLinkRPC
+{
 
 /**
      For application-requested interactions, this mode indicates the method in which the user is notified and uses the interaction.
@@ -22,26 +24,28 @@
      Selections can be made either from the menu display or by speaking the command.
 */
 
-class InteractionMode
-{
-public:
-  enum InteractionModeInternal
+  class InteractionMode
   {
-    INVALID_ENUM=-1,
-    MANUAL_ONLY=0,
-    VR_ONLY=1,
-    BOTH=2
+  public:
+    enum InteractionModeInternal
+    {
+      INVALID_ENUM=-1,
+      MANUAL_ONLY=0,
+      VR_ONLY=1,
+      BOTH=2
+    };
+  
+    InteractionMode() : mInternal(INVALID_ENUM)				{}
+    InteractionMode(InteractionModeInternal e) : mInternal(e)		{}
+  
+    InteractionModeInternal get(void) const	{ return mInternal; }
+    void set(InteractionModeInternal e)		{ mInternal=e; }
+  
+  private:
+    InteractionModeInternal mInternal;
+    friend class InteractionModeMarshaller;
   };
-
-  InteractionMode() : mInternal(INVALID_ENUM)				{}
-  InteractionMode(InteractionModeInternal e) : mInternal(e)		{}
-
-  InteractionModeInternal get(void) const	{ return mInternal; }
-  void set(InteractionModeInternal e)		{ mInternal=e; }
-
-private:
-  InteractionModeInternal mInternal;
-  friend class InteractionModeMarshaller;
-};
+  
+}
 
 #endif

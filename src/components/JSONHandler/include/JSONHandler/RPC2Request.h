@@ -1,7 +1,7 @@
 #ifndef RPC2_REQUEST_CLASS
-#define RPC2_REQUEST_CLASS value
+#define RPC2_REQUEST_CLASS
 
-#include "JSONHandler/RPC2Command.h"
+#include "RPC2Command.h"
 
 namespace RPC2Communication
 {  
@@ -10,16 +10,16 @@ namespace RPC2Communication
     public:
         RPC2Request( );
         RPC2Request( int method );
+        RPC2Request( int method ,unsigned int id);
         virtual ~RPC2Request();
 
-        virtual void setID( const std::string & id );
-        virtual void setID( int id );
+        virtual unsigned int getId() const;
+        virtual void setId(unsigned int id);        
 
-        virtual std::string getIDString() const;
-        virtual int getID() const;
-        
     private:
-        std::string mID;
+//! mId should be >0
+        unsigned int mId;
+        
     };
 
 }
