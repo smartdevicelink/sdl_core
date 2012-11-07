@@ -85,6 +85,10 @@ FFW.UI = FFW.RPCObserver.create({
 	onRPCRegistered: function () {
 		Em.Logger.log("FFW.UI.onRPCRegistered");
 		this._super();
+
+ 		// notify other components that UI is ready 
+		//  main purpose is to nitofy ALCore
+		this.onReady();
 	},
 	
 	/*
@@ -295,25 +299,9 @@ FFW.UI = FFW.RPCObserver.create({
 		}
 	},
 	
-	/*
-	 * handle RPC requests here
- 	 */	
-	onRPCActivateApp: function() {
-		Em.Logger.log("FFW.UI.onRPCActivateApp");
-
-		// send request
-
-		var JSONMessage = {
-			"jsonrpc"	:	"2.0",
-			"id"		: 	this.client.idStart,
-			"method"	:	"AppLinkCore.activateApp",
-			"params"	:	{"appName":[MFT.AppModel.PlayList.items[0].appName]}
-		};
-		this.client.send(JSONMessage);
-	},
 
 	/*
-	 * handle RPC requests here
+	 * send notification when command was triggered
  	 */	
 	onCommand: function(commandId) {
 		Em.Logger.log("FFW.UI.onCommand");
@@ -322,6 +310,20 @@ FFW.UI = FFW.RPCObserver.create({
 			"jsonrpc"	:	"2.0",
 			"method"	:	"UI.OnCommand",
 			"params"	:	{"commandId":commandId, }
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * notification that UI is ready
+	 * AppLinkCore should be sunscribed to this notification
+ 	 */	
+	onReady: function() {
+		Em.Logger.log("FFW.UI.onReady");
+
+		var JSONMessage = {
+			"jsonrpc"	:	"2.0",
+			"method"	:	"UI.OnReady"
 		};
 		this.client.send(JSONMessage);
 	}

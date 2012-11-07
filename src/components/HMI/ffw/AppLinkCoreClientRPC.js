@@ -160,19 +160,20 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 
 
 	/*
-	 * unregister component is RPC bus
-	 */
-	activateApp: function(name) {
-		this.activateAppRequestId = this.generateId();
+	 * handle RPC requests here
+ 	 */	
+	ActivateApp: function() {
+		Em.Logger.log("FFW.ALCore.ActivateApp");
+
+		// send request
 
 		var JSONMessage = {
-			"jsonrpc":	"2.0",
-			"id": 		this.activateAppRequestId,
-			"method":	"AppLinkCore.ActivateApp",
-			"params":	{
-				"name" : name
-			}
+			"jsonrpc"	:	"2.0",
+			"id"		: 	this.client.idStart,
+			"method"	:	"AppLinkCore.activateApp",
+			"params"	:	{"appName":[MFT.AppModel.PlayList.items[0].appName]}
 		};
-		this.send(JSONMessage);
+		this.client.send(JSONMessage);
 	},
+
 })

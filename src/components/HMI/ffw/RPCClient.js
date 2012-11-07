@@ -214,9 +214,13 @@ FFW.RPCClient = Em.Object.extend({
      * stringify object and send via socket connection
  	 */	
 	send: function(obj) {
-		var strJson = JSON.stringify(obj);
-		Em.Logger.log(strJson);
-		this.socket.send(strJson);
+		if (this.socket.readyState == this.socket.OPEN) {
+			var strJson = JSON.stringify(obj);
+			Em.Logger.log(strJson);
+			this.socket.send(strJson);
+		} else {
+			Em.Logger.error("RPCClient: Can't send message since socket is not ready");
+		}
 	},
 	
 	/*
