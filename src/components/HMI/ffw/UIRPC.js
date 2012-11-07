@@ -249,6 +249,50 @@ FFW.UI = FFW.RPCObserver.create({
 			};
 			this.client.send(JSONMessage);
 		}
+
+		if (request.method == "UI.CreateInteractionChoiceSet") {
+
+			MFT.AppModel.interactionChoises.push(request.params);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	MFT.AppOptionsView.DeleteSubMenu(request.params.menuId)  //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
+
+		if (request.method == "UI.DeleteInteractionChoiceSet") {
+
+			for(var val in MFT.AppModel.interactionChoises){
+				if(MFT.AppModel.interactionChoises[val].interactionChoiceSetID == request.params.interactionChoiceSetID ){
+					MFT.AppModel.interactionChoises.splice(val, 1);
+					break;
+				}
+			}
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	MFT.AppOptionsView.DeleteSubMenu(request.params.menuId)  //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
+
+		if (request.method == "UI.PerformInteraction") {
+
+			MFT.AppSubMenuView.PerformInteraction(request.params.interactionChoiceSetIDList);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	MFT.AppOptionsView.DeleteSubMenu(request.params.menuId)  //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
 	},
 	
 	/*
