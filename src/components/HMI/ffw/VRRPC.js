@@ -90,6 +90,32 @@ FFW.VR = FFW.RPCObserver.create({
 	onRPCRequest: function(request) {
 		Em.Logger.log("FFW.VR.onRPCRequest");
 		this._super();
+
+		if (request.method == "UI.AddCommand") {
+			
+			MFT.VRPopUp.AddCommand(request.params.cmdId, request.params.vrCommands);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
+
+		if (request.method == "UI.DeleteCommand") {
+			
+			MFT.VRPopUp.DeleteCommand(request.params.cmdId);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
 		
 /*
 		if (FFW.VR.onRPCNotification == "VRClient.onFullScreenChanged") {
