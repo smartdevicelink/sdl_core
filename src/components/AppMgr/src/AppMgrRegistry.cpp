@@ -27,7 +27,7 @@ void AppMgrRegistry::unregisterApplication( RegistryItem* item )
         return;
     }
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application "<< item->getApplication()->getName());
-	Items::iterator registryItemIterator = mRegistryItems.find(item->getApplication()->getName());
+    Items::const_iterator registryItemIterator = mRegistryItems.find(item->getApplication()->getName());
 	mRegistryItems.erase(registryItemIterator);
 }
 
@@ -38,12 +38,18 @@ RegistryItem *AppMgrRegistry::getItem( const Application* app ) const
         LOG4CPLUS_ERROR_EXT(mLogger, " Getting registry item for null application!");
         return 0;
     }
-	return mRegistryItems.find(app->getName())->second;
+    return getItem( app->getName() );
 }
 
 RegistryItem *AppMgrRegistry::getItem( const std::string& app ) const
 {
-    return mRegistryItems.find(app)->second;
+    Items::const_iterator it = mRegistryItems.find(app);
+    if(it != mRegistryItems.end())
+    {
+        return it->second;
+    }
+    LOG4CPLUS_ERROR_EXT(mLogger, " Cannot find registry item by the name "<< app);
+    return 0;
 }
 
 RegistryItem *AppMgrRegistry::getItem(unsigned char sessionID) const
