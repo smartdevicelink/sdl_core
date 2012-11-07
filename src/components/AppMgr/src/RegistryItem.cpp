@@ -21,7 +21,7 @@ RegistryItem::RegistryItem( Application* app )
         LOG4CPLUS_ERROR_EXT(mLogger, "No application to register! Please specify a valid application instance!");
         return;
     }
-    LOG4CPLUS_INFO_EXT(mLogger, " RegistryItem constructed for the application "<<app?app->getName():"NULL!");
+    LOG4CPLUS_INFO_EXT(mLogger, " RegistryItem constructed for the application "<<app->getName());
 }
 
 RegistryItem::RegistryItem( const RegistryItem& item )
