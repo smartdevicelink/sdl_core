@@ -28,7 +28,7 @@ public:
     void addButton( const ButtonName& buttonName, RegistryItem* app );
     void removeButton(const ButtonName& buttonName);
     void removeItem( RegistryItem* app );
-    RegistryItem *findRegistryItemSubscribedToButton(const ButtonName &appName) const;
+    RegistryItem *findRegistryItemSubscribedToButton(const ButtonName &btnName) const;
 
 private:
     ButtonMapping(const ButtonMapping&);

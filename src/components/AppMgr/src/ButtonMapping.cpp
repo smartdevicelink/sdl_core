@@ -18,7 +18,7 @@ void ButtonMapping::addButton(const ButtonName &buttonName, RegistryItem *app)
         LOG4CPLUS_ERROR_EXT(mLogger, " Adding a button to a null registry item");
         return;
     }
-    LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to button " << buttonName.get() << " in app " << app->getApplication()->getName() );
+    LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to button " << buttonName.get() << " in app " << app->getApplication()->getName() );
     mButtonsMapping.insert(ButtonMapItem(buttonName, app));
 }
 
@@ -43,9 +43,9 @@ void ButtonMapping::removeItem(RegistryItem *app)
     }
 }
 
-RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const ButtonName &appName ) const
+RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const ButtonName &btnName ) const
 {
-    ButtonMap::const_iterator it = mButtonsMapping.find( appName );
+    ButtonMap::const_iterator it = mButtonsMapping.find( btnName );
     if ( it != mButtonsMapping.end() )
     {
         if ( !it->second )
@@ -55,10 +55,11 @@ RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const ButtonNam
         }
         if ( it->second->getApplication() )
         {
+            LOG4CPLUS_INFO_EXT(mLogger, "An application "<< it->second->getApplication()->getName() <<" is subscribed to a button " << btnName.get() );
             return it->second;
         }
     }
-    LOG4CPLUS_INFO_EXT(mLogger, "Button " << appName.get() << " not found in subscribed." );
+    LOG4CPLUS_INFO_EXT(mLogger, "Button " << btnName.get() << " not found in subscribed." );
     return 0;
 }
 
