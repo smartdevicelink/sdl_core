@@ -45,8 +45,8 @@ target_link_libraries(${PROJECT} ${LIBRARIES})
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-execute_process(COMMAND ln -s -f ${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html
-                                 ${CMAKE_CURRENT_BINARY_DIR}/hmi_link)
+
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
 
 install (TARGETS ${PROJECT} DESTINATION bin)
 

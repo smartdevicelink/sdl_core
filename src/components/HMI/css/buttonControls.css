@@ -26,7 +26,7 @@
 	left: 32px;
 	-webkit-transition: 0.2s ;
 }
-#app_controlButtonsUpBtn.pressed{
+#TUNEUP.pressed{
 	background: url(../images/home/controlButtons/UpButton_pressed.png) !important;
 	background-position: -32px 0 !important;
 	width: 137px !important;
@@ -42,7 +42,7 @@
 	left: 32px;
 	-webkit-transition: 0.2s ;
 }
-#app_controlButtonsDownBtn.pressed{
+#TUNEDOWN.pressed{
 	background: url(../images/home/controlButtons/DownButton_pressed.png) no-repeat;
 	background-position: -32px -132px !important;
 	width: 137px !important;
@@ -59,7 +59,7 @@
 	top: 31px;
 	-webkit-transition: 0.2s ;
 }
-#app_controlButtonsLeftBtn.pressed{
+#SEEKLEFT.pressed{
 	background: url(../images/home/controlButtons/LeftButton_pressed.png) no-repeat;
 	width: 63px !important;
 	height: 138px !important;
@@ -76,7 +76,7 @@
 	top: 31px;
 	-webkit-transition: 0.2s ;
 }
-#app_controlButtonsRightBtn.pressed{
+#SEEKRIGHT.pressed{
 	background: url(../images/home/controlButtons/RightButton_pressed.png) no-repeat;
 	background-position: -131px -31px !important;
 	width: 68px !important;
@@ -93,7 +93,7 @@
 	top: 55px;
 	-webkit-transition: 0.2s ;
 }
-#app_controlButtonsOkBtn.pressed{
+#OK.pressed{
 	background: url(../images/home/controlButtons/OkButton_pressed.png) no-repeat;
 	background-position: -55px -55px !important;
 	width: 89px !important;
@@ -123,4 +123,15 @@
 #buttonControls .btnNotPressed.pressed{
 	box-shadow: inset 5px 5px 10px black, inset -3px -3px 10px #383737;
 	line-height: 76px;
+}
+#buttonControls .VRButton{
+	background: url(../images/home/controlButtons/vr.png) no-repeat;
+	width: 89px;
+	height: 90px;
+	left: 10px;
+	top: 315px;
+	-webkit-transition: 0.2s;
+}
+#VRButton.pressed{
+	background: url(../images/home/controlButtons/vr_pressed.png) no-repeat;
 }
