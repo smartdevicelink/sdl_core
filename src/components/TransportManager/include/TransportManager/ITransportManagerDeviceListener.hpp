@@ -26,6 +26,9 @@ namespace NsAppLink
             /**
              * @brief Available devices list updated.
              *
+             * Called when device scanning initiated with scanForNewDevices
+             * is completed.
+             *
              * @param DeviceList New list of available devices.
              **/
             virtual void onDeviceListUpdated(const tDeviceList & DeviceList);
