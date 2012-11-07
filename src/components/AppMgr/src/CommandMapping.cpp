@@ -18,7 +18,7 @@ void CommandMapping::addCommand(unsigned int commandId, RegistryItem *app)
         LOG4CPLUS_ERROR_EXT(mLogger, " Adding a command to a null registry item");
         return;
     }
-    LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to a command " << commandId << " in app " << app->getApplication()->getName() );
+    LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a command " << commandId << " in app " << app->getApplication()->getName() );
     mCommandMapping.insert(CommandMapItem(commandId, app));
 }
 
@@ -50,11 +50,12 @@ RegistryItem *CommandMapping::findRegistryItemAssignedToCommand(unsigned int com
     {
         if ( !it->second )
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found" );
+            LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found!" );
             return 0;
         }
         if ( it->second->getApplication() )
         {
+            LOG4CPLUS_INFO_EXT(mLogger, "An application "<< it->second->getApplication()->getName() <<" is subscribed to a command " << commandId );
             return it->second;
         }
     }
