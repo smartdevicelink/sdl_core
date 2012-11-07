@@ -118,11 +118,11 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
 
   if(!json["id"].isInt()) return 0;
 
-// here is extension of protocol, two fields added: _Result and _Method
-  if(!json["result"].isMember("_Result") || !json["result"]["_Result"].isString())  return 0;
-  if(!json["result"].isMember("_Method") || !json["result"]["_Method"].isString())  return 0;
+// here is extension of protocol, two fields added: resultCode and method
+  if(!json["result"].isMember("resultCode") || !json["result"]["resultCode"].isString())  return 0;
+  if(!json["result"].isMember("method") || !json["result"]["method"].isString())  return 0;
 
-  Methods m=getIndex(json["result"]["_Method"].asString().c_str());
+  Methods m=getIndex(json["result"]["method"].asString().c_str());
 
   switch(m)
   {

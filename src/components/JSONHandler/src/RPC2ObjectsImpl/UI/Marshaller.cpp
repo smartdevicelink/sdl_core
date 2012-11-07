@@ -31,6 +31,7 @@
 #include "../include/JSONHandler/RPC2Objects/UI/SetMediaClockTimerResponse.h"
 #include "../include/JSONHandler/RPC2Objects/UI/Show.h"
 #include "../include/JSONHandler/RPC2Objects/UI/ShowResponse.h"
+#include <iostream>
 
 namespace RPC2Communication
 {
@@ -103,6 +104,7 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
     return new RPC2Error(rv);
   }
 
+  std::cout<<"UI Marshaller::fromJSON::json.isMember(id) " << json.isMember("id")<<std::endl;
   if(!json.isMember("id"))				// notification
   {
     if(!json.isMember("method") || !json["method"].isString())  return 0;
@@ -137,6 +139,7 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
     return 0;
   }
 
+  std::cout<<"UI Marshaller::fromJSON::json.isMember(method) " << json.isMember("method")<<std::endl;
   if(json.isMember("method"))				// request
   {
     if(!json["id"].isInt())  return 0;
@@ -214,16 +217,22 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
     }
     return 0;
   }
+  std::cout<<"UI Marshaller::fromJSON::json.isMember(result) " << json.isMember("result")<<std::endl;
 							// response
   if(!json.isMember("result"))  return 0;
 
+std::cout<<"UI Marshaller::fromJSON::json.isMember(id) " << json.isMember("id")<<std::endl;
   if(!json["id"].isInt()) return 0;
 
-// here is extension of protocol, two fields added: _Result and _Method
-  if(!json["result"].isMember("_Result") || !json["result"]["_Result"].isString())  return 0;
-  if(!json["result"].isMember("_Method") || !json["result"]["_Method"].isString())  return 0;
+// here is extension of protocol, two fields added: resultCode and method
+  if(!json["result"].isMember("resultCode") || !json["result"]["resultCode"].isString())  return 0;
+  std::cout<<"UI Marshaller::fromJSON::json.isMember(resultCode) " << json["result"].isMember("resultCode")<<std::endl;
+  if(!json["result"].isMember("method") || !json["result"]["method"].isString())  return 0;
+  std::cout<<"UI Marshaller::fromJSON::json.isMember(method) " << json["result"].isMember("method")<<std::endl;
 
-  Methods m=getIndex(json["result"]["_Method"].asString().c_str());
+  Methods m=getIndex(json["result"]["method"].asString().c_str());
+
+  std::cout<<"UI Marshaller::fromJSON:: method " << json["result"]["method"].asString() << std::endl;
 
   switch(m)
   {

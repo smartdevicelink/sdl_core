@@ -65,8 +65,8 @@ Json::Value PerformInteractionResponseMarshaller::toJSON(const PerformInteractio
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
   AppLinkRPC::Result r(static_cast<AppLinkRPC::Result::ResultInternal>(e.getResult()));
-  json["result"]["_Result"]=AppLinkRPC::ResultMarshaller::toJSON(r);
-  json["result"]["_Method"]=Json::Value("UI.PerformInteractionResponse");
+  json["result"]["resultCode"]=AppLinkRPC::ResultMarshaller::toJSON(r);
+  json["result"]["method"]=Json::Value("UI.PerformInteractionResponse");
 
   if(e.choiceID)
     json["result"]["choiceID"]=Json::Value(e.choiceID[0]);;
@@ -91,11 +91,11 @@ bool PerformInteractionResponseMarshaller::fromJSON(const Json::Value& json,Perf
     if(!js.isObject())  return false;
 
     Result r;
-    if(!js.isMember("_Result") || !js["_Result"].isString())  return false;
-    if(!js.isMember("_Method") || !js["_Method"].isString())  return false;
-    if(js["_Method"].asString().compare("UI.PerformInteractionResponse")) return false;
+    if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
+    if(!js.isMember("method") || !js["method"].isString())  return false;
+    if(js["method"].asString().compare("UI.PerformInteractionResponse")) return false;
 
-    if(!AppLinkRPC::ResultMarshaller::fromJSON(js["_Result"],r))  return false;
+    if(!AppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
     if(c.choiceID)  delete c.choiceID;
     c.choiceID=0;

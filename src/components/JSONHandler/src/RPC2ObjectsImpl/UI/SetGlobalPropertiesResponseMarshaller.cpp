@@ -60,8 +60,8 @@ Json::Value SetGlobalPropertiesResponseMarshaller::toJSON(const SetGlobalPropert
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
   AppLinkRPC::Result r(static_cast<AppLinkRPC::Result::ResultInternal>(e.getResult()));
-  json["result"]["_Result"]=AppLinkRPC::ResultMarshaller::toJSON(r);
-  json["result"]["_Method"]=Json::Value("UI.SetGlobalPropertiesResponse");
+  json["result"]["resultCode"]=AppLinkRPC::ResultMarshaller::toJSON(r);
+  json["result"]["method"]=Json::Value("UI.SetGlobalPropertiesResponse");
 
   return json;
 }
@@ -82,11 +82,11 @@ bool SetGlobalPropertiesResponseMarshaller::fromJSON(const Json::Value& json,Set
     if(!js.isObject())  return false;
 
     Result r;
-    if(!js.isMember("_Result") || !js["_Result"].isString())  return false;
-    if(!js.isMember("_Method") || !js["_Method"].isString())  return false;
-    if(js["_Method"].asString().compare("UI.SetGlobalPropertiesResponse")) return false;
+    if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
+    if(!js.isMember("method") || !js["method"].isString())  return false;
+    if(js["method"].asString().compare("UI.SetGlobalPropertiesResponse")) return false;
 
-    if(!AppLinkRPC::ResultMarshaller::fromJSON(js["_Result"],r))  return false;
+    if(!AppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
   }
   catch(...)

@@ -46,6 +46,7 @@ void JSONRPC2Handler::subscribeToNotifications()
     subscribeTo( "Buttons.OnButtonEvent" );
     subscribeTo( "Buttons.OnButtonPress" );
     subscribeTo( "UI.OnCommand" );
+    subscribeTo( "UI.OnReady" );
 }
 
 void JSONRPC2Handler::setRPC2CommandsObserver( 
@@ -136,6 +137,7 @@ void * JSONRPC2Handler::waitForResponsesFromHMI( void * params )
             ResponseContainer response = handler -> mResponsesFromHMI.pop();
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI: received response " << response.methodName );
             RPC2Communication::RPC2Command * currentCommand = RPC2Communication::UI::Marshaller::fromJSON( response.response );// response.methodName
+            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI: checked if UI message " << response.methodName );
             if ( !currentCommand )
             {
                 currentCommand = RPC2Communication::TTS::Marshaller::fromJSON( response.response );

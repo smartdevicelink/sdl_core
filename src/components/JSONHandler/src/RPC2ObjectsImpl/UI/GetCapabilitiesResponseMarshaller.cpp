@@ -70,8 +70,8 @@ Json::Value GetCapabilitiesResponseMarshaller::toJSON(const GetCapabilitiesRespo
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
   AppLinkRPC::Result r(static_cast<AppLinkRPC::Result::ResultInternal>(e.getResult()));
-  json["result"]["_Result"]=AppLinkRPC::ResultMarshaller::toJSON(r);
-  json["result"]["_Method"]=Json::Value("UI.GetCapabilitiesResponse");
+  json["result"]["resultCode"]=AppLinkRPC::ResultMarshaller::toJSON(r);
+  json["result"]["method"]=Json::Value("UI.GetCapabilitiesResponse");
 
   json["result"]["displayCapabilities"]=DisplayCapabilitiesMarshaller::toJSON(e.displayCapabilities);;
   {
@@ -102,11 +102,11 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
     if(!js.isObject())  return false;
 
     Result r;
-    if(!js.isMember("_Result") || !js["_Result"].isString())  return false;
-    if(!js.isMember("_Method") || !js["_Method"].isString())  return false;
-    if(js["_Method"].asString().compare("UI.GetCapabilitiesResponse")) return false;
+    if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
+    if(!js.isMember("method") || !js["method"].isString())  return false;
+    if(js["method"].asString().compare("UI.GetCapabilitiesResponse")) return false;
 
-    if(!AppLinkRPC::ResultMarshaller::fromJSON(js["_Result"],r))  return false;
+    if(!AppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
     if(!js.isMember("displayCapabilities") || !DisplayCapabilitiesMarshaller::fromJSON(js["displayCapabilities"],c.displayCapabilities))  return false;
 

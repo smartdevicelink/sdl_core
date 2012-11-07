@@ -150,7 +150,10 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	 "SUCCESS" //  type (enum) from AppLink protocol
+				"result":	 {
+					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+					"method" : "UI.ShowResponse"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
@@ -163,7 +166,10 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+				"result":	{
+					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+					"method" : "UI.AlertResponse"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
@@ -181,7 +187,10 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+				"result":	{ 
+					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+					"method" : "UI.SetGlobalPropertiesResponse"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
@@ -199,7 +208,10 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+				"result":	{
+					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+					"method" : "UI.ResetGlobalPropertiesResponse"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
@@ -212,7 +224,10 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+				"result":	{
+					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+					"method" : "UI.AddCommandResponse"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
@@ -225,7 +240,10 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+				"result":	{
+					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+					"method" : "UI.DeleteCommandResponse"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
@@ -238,7 +256,10 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+				"result":	{
+					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+					"method" : "UI.AddSubMenuResponse"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
@@ -249,7 +270,10 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	MFT.AppOptionsView.DeleteSubMenu(request.params.menuId)  //  type (enum) from AppLink protocol
+				"result":	{
+					"resultCode" : MFT.AppOptionsView.DeleteSubMenu(request.params.menuId),  //  type (enum) from AppLink protocol
+					"method" : "UI.DeleteSubMenuResponse"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
@@ -262,7 +286,10 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	MFT.AppOptionsView.DeleteSubMenu(request.params.menuId)  //  type (enum) from AppLink protocol
+				"result":	{
+					"resultCode" : "SUCCESS",  //  type (enum) from AppLink protocol
+					"method" : "UI.CreateInteractionChoiceSetResponse"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
@@ -280,7 +307,10 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	MFT.AppOptionsView.DeleteSubMenu(request.params.menuId)  //  type (enum) from AppLink protocol
+				"result":	{
+					"resultCode" : "SUCCESS",  //  type (enum) from AppLink protocol
+					"method" : "UI.DeleteInteractionChoiceSetResponse"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
@@ -293,7 +323,10 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	MFT.AppOptionsView.DeleteSubMenu(request.params.menuId)  //  type (enum) from AppLink protocol
+				"result":	{
+					"resultCode" : "SUCCESS",  //  type (enum) from AppLink protocol
+					"method" : "UI.PerformInteractionResponse"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
