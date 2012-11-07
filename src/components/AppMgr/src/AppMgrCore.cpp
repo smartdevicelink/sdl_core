@@ -40,6 +40,10 @@
 #include "JSONHandler/DeleteInteractionChoiceSetResponse.h"
 #include "JSONHandler/PerformInteraction.h"
 #include "JSONHandler/PerformInteractionResponse.h"
+#include "JSONHandler/ALRPCObjects/RegisterAppInterface_request.h"
+#include "JSONHandler/ALRPCObjects/RegisterAppInterface_response.h"
+#include "JSONHandler/ALRPCObjects/UnregisterAppInterface_request.h"
+#include "JSONHandler/ALRPCObjects/UnregisterAppInterface_response.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_request.h"
 #include "JSONHandler/ALRPCObjects/AddCommand_response.h"
 #include "JSONHandler/ALRPCObjects/AddSubMenu_request.h"
@@ -155,7 +159,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
 		{
 			LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
             RegisterAppInterface_request * object = (RegisterAppInterface_request*)mobileMsg;
-            const RegistryItem* registeredApp =  core->registerApplication( message );
+            const RegistryItem* registeredApp =  core->registerApplication( object, sessionID );
             RegisterAppInterface_response* response = new RegisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(ALRPCMessage::RESPONSE);
@@ -975,17 +979,14 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
     LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been invoked!");
 }
 
-const RegistryItem* AppMgrCore::registerApplication( const Message& object )
+const RegistryItem* AppMgrCore::registerApplication( RegisterAppInterface_request * request, const unsigned char& sessionID )
 {
-    ALRPCMessage* msg = object.first;
-    unsigned char sessionID = object.second;
-    if(!msg)
+    if(!request)
     {
         LOG4CPLUS_ERROR_EXT(mLogger, "No message for session "<<sessionID<<"!");
         return 0;
     }
 
-    RegisterAppInterface_request * request = (RegisterAppInterface_request*)msg;
     LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() << "!");
 
     const std::string& appName = request->get_appName();
