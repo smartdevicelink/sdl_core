@@ -774,7 +774,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         }
         case RPC2Communication::RPC2Marshaller::METHOD_ACTIVATEAPP_REQUEST:
         {
-            LOG4CPLUS_INFO(mLogger, "ActivateApp has been received!");
+            LOG4CPLUS_INFO_EXT(mLogger, "ActivateApp has been received!");
             RPC2Communication::ActivateApp* object = static_cast<RPC2Communication::ActivateApp*>(msg);
             if ( !object )
             {
@@ -784,12 +784,14 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             OnHMIStatus * hmiStatus = new OnHMIStatus;
             hmiStatus->set_hmiLevel(HMILevel::HMI_FULL);
             const std::string& appName = object->getAppName()[0];
+            LOG4CPLUS_INFO_EXT(mLogger, "App name is "<<appName);
             RegistryItem* item = AppMgrRegistry::getInstance().getItem(appName);
             if(!item)
             {
                 LOG4CPLUS_ERROR(mLogger, "Couldn't find a registered app by the name "<<appName);
                 break;
             }
+            LOG4CPLUS_INFO_EXT(mLogger, "A registry item for the name "<<appName<<" has been found!");
             Application* app = item->getApplication();
             if(!app)
             {
