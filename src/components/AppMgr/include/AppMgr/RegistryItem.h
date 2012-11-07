@@ -26,13 +26,13 @@ class RegistryItem
 public:
 	typedef std::set<AppPolicy*> Policies;
 	
-	RegistryItem( const Application* app );
+    RegistryItem(Application *app );
 	virtual ~RegistryItem( );
 
 	void setApplication( const Application* app );
 	const AppPolicy* registerPolicy( const std::string& hash );
 	void unregisterPolicy( AppPolicy* policy );
-	const Application* getApplication() const;
+    Application *getApplication() const;
 	bool operator<(const RegistryItem& item2) const;
 
 	Policies getApplicationPolicies(const Application* app) const;
@@ -40,9 +40,8 @@ public:
 
 private:
 	RegistryItem( const RegistryItem& );
-	
 	Policies mAppPolicies;
-	const Application* mApplication;
+    Application* mApplication;
 	static log4cplus::Logger mLogger;
 };
 

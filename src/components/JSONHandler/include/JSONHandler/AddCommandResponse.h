@@ -2,7 +2,6 @@
 #define ADDCOMMANDRESPONSE_CLASS
 
 #include "JSONHandler/RPC2Response.h"
-#include <string>
 
 namespace RPC2Communication
 {

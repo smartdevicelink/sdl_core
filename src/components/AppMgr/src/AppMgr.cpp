@@ -40,22 +40,42 @@ AppMgr::AppMgr(const AppMgr &)
 
 void AppMgr::setJsonHandler(JSONHandler* handler)
 {
+    if(!handler)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Setting null handler!");
+        return;
+    }
     mAppMgrCore.setJsonHandler( handler );
 }
 
 void AppMgr::setJsonRPC2Handler(JSONRPC2Handler *handler)
 {
+    if(!handler)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Setting null handler!");
+        return;
+    }
     mAppMgrCore.setJsonRPC2Handler( handler );
 }
 
 void AppMgr::onMessageReceivedCallback(ALRPCMessage * message , unsigned char sessionID)
 {
+    if(!message)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Calling a function with null command! Session id "<<sessionID);
+        return;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, " Message "<<message->getMethodId()<<" received from mobile side");
     mAppMgrCore.pushMobileRPCMessage( message, sessionID );
 }
 
 void AppMgr::onCommandReceivedCallback(RPC2Communication::RPC2Command *command)
 {
+    if(!command)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Calling a function with null command!");
+        return;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, " Message "<<command->getMethod()<<" received from HMI side");
     mAppMgrCore.pushRPC2CommunicationMessage(command);
 }

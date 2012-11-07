@@ -52,7 +52,7 @@ bool SetGlobalPropertiesResponseMarshaller::fromJSON(const Json::Value& json,Set
     
     if(!json.isMember("jsonrpc"))  return false;
 
-    if(!json.isMember("result"))
+    if(json.isMember("result"))
     {
         Result r;
         if(!ResultMarshaller::fromJSON(json["result"],r)) return false;

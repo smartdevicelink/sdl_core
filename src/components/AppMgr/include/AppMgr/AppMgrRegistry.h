@@ -32,7 +32,7 @@ public:
 
 	static AppMgrRegistry& getInstance( );
 
-	const RegistryItem* registerApplication( const Application* app );
+    const RegistryItem* registerApplication(Application *app );
 	void unregisterApplication( RegistryItem* item  );
 
     RegistryItem *getItem( const Application* app ) const;

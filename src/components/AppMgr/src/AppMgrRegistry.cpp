@@ -21,6 +21,11 @@ AppMgrRegistry& AppMgrRegistry::getInstance( )
 
 void AppMgrRegistry::unregisterApplication( RegistryItem* item )
 {
+    if(!item)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Trying to unregister null app!");
+        return;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application "<< item->getApplication()->getName());
 	Items::iterator registryItemIterator = mRegistryItems.find(item->getApplication()->getName());
 	mRegistryItems.erase(registryItemIterator);
@@ -28,6 +33,11 @@ void AppMgrRegistry::unregisterApplication( RegistryItem* item )
 
 RegistryItem *AppMgrRegistry::getItem( const Application* app ) const
 {
+    if(!app)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Getting registry item for null application!");
+        return 0;
+    }
 	return mRegistryItems.find(app->getName())->second;
 }
 
@@ -41,6 +51,11 @@ RegistryItem *AppMgrRegistry::getItem(unsigned char sessionID) const
     for(Items::const_iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
     {
         RegistryItem* item =  it->second;
+        if(!item)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " NULL-application registered for this session ID - "<<sessionID);
+            return 0;
+        }
         const Application* app = item->getApplication();
         if(app->getSessionID() == sessionID)
         {
@@ -76,11 +91,16 @@ AppMgrRegistry::~AppMgrRegistry( )
     LOG4CPLUS_INFO_EXT(mLogger, " Destructed a registry!");
 }
 
-const RegistryItem* AppMgrRegistry::registerApplication( const Application* app )
+const RegistryItem* AppMgrRegistry::registerApplication( Application* app )
 {
+    if(!app)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Trying to register a null-application!");
+        return 0;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, " Registering an application "<<app->getName());
 	mRegistryItems.insert(Item(app->getName(), new RegistryItem(app)));
 	return mRegistryItems.find(app->getName())->second;
 }
 
-};
+}

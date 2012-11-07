@@ -200,6 +200,30 @@ set (SOURCES
     ./src/AddCommandMarshaller.cpp
     ./src/AddCommandResponse.cpp
     ./src/AddCommandResponseMarshaller.cpp
+    ./src/DeleteCommand.cpp
+    ./src/DeleteCommandMarshaller.cpp
+    ./src/DeleteCommandResponse.cpp
+    ./src/DeleteCommandResponseMarshaller.cpp
+    ./src/OnCommand.cpp
+    ./src/OnCommandMarshaller.cpp
+    ./src/AddSubMenu.cpp
+    ./src/AddSubMenuMarshaller.cpp
+    ./src/AddSubMenuResponse.cpp
+    ./src/AddSubMenuResponseMarshaller.cpp
+    ./src/DeleteSubMenu.cpp
+    ./src/DeleteSubMenuMarshaller.cpp
+    ./src/DeleteSubMenuResponse.cpp
+    ./src/DeleteSubMenuResponseMarshaller.cpp
+    ./src/CreateInteractionChoiceSet.cpp
+    ./src/CreateInteractionChoiceSetMarshaller.cpp
+    ./src/CreateInteractionChoiceSetResponse.cpp
+    ./src/CreateInteractionChoiceSetResponseMarshaller.cpp
+    ./src/DeleteInteractionChoiceSet.cpp
+    ./src/DeleteInteractionChoiceSetMarshaller.cpp
+    ./src/DeleteInteractionChoiceSetResponse.cpp
+    ./src/DeleteInteractionChoiceSetResponseMarshaller.cpp
+    ./src/PerformInteraction.cpp
+    ./src/PerformInteractionMarshaller.cpp
 )
 
 add_library("JSONHandler" ${SOURCES} ${GENERATED_SOURCES})

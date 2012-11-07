@@ -17,6 +17,22 @@
     "methods": {
 	/*
 	 * @descr 
+	 *      method should be invoked at application registration
+	 *	provides information about TTS capabilities
+	 * 	
+	 * @returns
+	 * 		TTS capabilites
+	 */ 
+        "TTS.GetCapabilities": {
+	    	returns: // return value is provided in corresponding response object, id of request and response should be equal
+			{
+				"capabilities"	: "SpeechCapabilities" // data type from AppLink protocol specification
+			}
+        },
+	
+	
+	/*
+	 * @descr 
 	 *      method should be invoked to perform text to speech
 	 * 	
 	 * @returns
@@ -24,15 +40,15 @@
 	 */ 
         "TTS.Speak": {
             "parameters": {
-				[
-					"ttsChunks"	: "TTSChunk" // data type from AppLink protocol specification
-				]
-            },
+		[
+			"ttsChunks"	: "TTSChunk" // data type from AppLink protocol specification
+		]
+             },
 	     
-			returns: // return value is provided in corresponding response object, id of request and response should be equal
-			{
-				"resultCode" 	: "Result" // data type from AppLink protocol specification
-			}
+	     returns: // return value is provided in corresponding response object, id of request and response should be equal
+	     {
+			"resultCode" 	: "Result" // data type from AppLink protocol specification
+	     }
         }
 
 	// TODO: do we need any notifications?

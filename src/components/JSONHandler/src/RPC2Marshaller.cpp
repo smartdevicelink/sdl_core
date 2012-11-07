@@ -55,6 +55,34 @@ const RPC2Marshaller::Methods RPC2Marshaller::getIndex(const std::string & s)
     {
         return METHOD_ADDCOMMAND_REQUEST;
     }
+    if ( s.compare("UI.DeleteCommand") == 0 )
+    {
+        return METHOD_DELETECOMMAND_REQUEST;
+    }
+    if ( s.compare("UI.OnCommand") == 0 )
+    {
+        return METHOD_UIONCOMMAND_NOTIFICATION;
+    }
+    if ( s.compare("UI.AddSubMenu") == 0 )
+    {
+        return METHOD_ADDSUBMENU_REQUEST;
+    }
+    if ( s.compare("UI.DeleteSubMenu") == 0 )
+    {
+        return METHOD_DELETESUBMENU_REQUEST;
+    }
+    if ( s.compare("UI.CreateInteractionChoiceSet") == 0 )
+    {
+        return METHOD_CREATEINTERACTIONCHOICESET_REQUEST;
+    }
+    if ( s.compare("UI.DeleteInteractionChoiceSet") == 0 )
+    {
+        return METHOD_DELETEINTERACTIONCHOICESET_REQUEST;
+    }  
+    if ( s.compare("UI.PerformInteraction") == 0 )  
+    {
+        return METHOD_PERFORMINTERACTION_REQUEST;
+    }
     
     return METHOD_INVALID;
 }
@@ -89,9 +117,29 @@ const RPC2Marshaller::Methods RPC2Marshaller::getResponseIndex(const std::string
   {
     return METHOD_ACTIVATEAPP_RESPONSE;
   }
-  if ( s.compare("UI.AddCommand"))
+  if ( s.compare("UI.AddCommand") == 0 )
   {
       return METHOD_ADDCOMMAND_RESPONSE;
+  }
+  if ( s.compare("UI.DeleteCommand") == 0 )
+  {
+      return METHOD_DELETECOMMAND_RESPONSE;
+  }
+  if ( s.compare("UI.AddSubMenu") == 0 )
+  {
+      return METHOD_ADDSUBMENU_RESPONSE;
+  }
+  if ( s.compare("UI.DeleteSubMenu") == 0 )
+  {
+      return METHOD_DELETESUBMENU_RESPONSE;
+  }
+  if ( s.compare("UI.CreateInteractionChoiceSet") == 0 )
+  {
+      return METHOD_CREATEINTERACTIONCHOICESET_RESPONSE;
+  }
+  if ( s.compare("UI.DeleteInteractionChoiceSet") == 0 )
+  {
+      return METHOD_DELETEINTERACTIONCHOICESET_RESPONSE;
   }
 
   return METHOD_INVALID;
@@ -291,6 +339,102 @@ RPC2Command* RPC2Marshaller::fromJSON(const Json::Value& json, const std::string
         delete rv;
         return NULL;
     }
+    case METHOD_DELETECOMMAND_REQUEST:
+    {
+        DeleteCommand * rv = new DeleteCommand;
+        if (DeleteCommandMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_DELETECOMMAND_RESPONSE:
+    {
+        DeleteCommandResponse * rv = new DeleteCommandResponse;
+        if (DeleteCommandResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_UIONCOMMAND_NOTIFICATION:
+    {
+        OnCommand * rv = new OnCommand;
+        if (OnCommandMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ADDSUBMENU_REQUEST:
+    {
+        AddSubMenu * rv = new AddSubMenu;
+        if (AddSubMenuMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_ADDSUBMENU_RESPONSE:
+    {
+        AddSubMenuResponse * rv = new AddSubMenuResponse;
+        if (AddSubMenuResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_DELETESUBMENU_REQUEST:
+    {
+        DeleteSubMenu * rv = new DeleteSubMenu;
+        if (DeleteSubMenuMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_DELETESUBMENU_RESPONSE:
+    {
+        DeleteSubMenuResponse * rv = new DeleteSubMenuResponse;
+        if (DeleteSubMenuResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_CREATEINTERACTIONCHOICESET_REQUEST:
+    {
+        CreateInteractionChoiceSet * rv = new CreateInteractionChoiceSet;
+        if (CreateInteractionChoiceSetMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_CREATEINTERACTIONCHOICESET_RESPONSE:
+    {
+        CreateInteractionChoiceSetResponse * rv = new CreateInteractionChoiceSetResponse;
+        if (CreateInteractionChoiceSetResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_DELETEINTERACTIONCHOICESET_REQUEST:
+    {
+        DeleteInteractionChoiceSet * rv = new DeleteInteractionChoiceSet;
+        if (DeleteInteractionChoiceSetMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_DELETEINTERACTIONCHOICESET_RESPONSE:
+    {
+        DeleteInteractionChoiceSetResponse *rv = new DeleteInteractionChoiceSetResponse;
+        if (DeleteInteractionChoiceSetResponseMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
+    case METHOD_PERFORMINTERACTION_REQUEST:
+    {
+        PerformInteraction * rv = new PerformInteraction;
+        if (PerformInteractionMarshaller::fromJSON(json, *rv))
+          return rv;
+        delete rv;
+        return NULL;
+    }
 
   }
 
@@ -349,6 +493,30 @@ Json::Value RPC2Marshaller::toJSON(const RPC2Command* msg)
       return AddCommandMarshaller::toJSON(*static_cast<const AddCommand*>(msg));
     case METHOD_ADDCOMMAND_RESPONSE:
       return AddCommandResponseMarshaller::toJSON(*static_cast<const AddCommandResponse*>(msg));
+    case METHOD_DELETECOMMAND_REQUEST:
+      return DeleteCommandMarshaller::toJSON(*static_cast<const DeleteCommand*>(msg));
+    case METHOD_DELETECOMMAND_RESPONSE:
+      return DeleteCommandResponseMarshaller::toJSON(*static_cast<const DeleteCommandResponse*>(msg));
+    case METHOD_UIONCOMMAND_NOTIFICATION:
+      return OnCommandMarshaller::toJSON(*static_cast<const OnCommand*>(msg));
+    case METHOD_ADDSUBMENU_REQUEST:
+      return AddSubMenuMarshaller::toJSON(*static_cast<const AddSubMenu*>(msg));
+    case METHOD_ADDSUBMENU_RESPONSE:
+      return AddSubMenuResponseMarshaller::toJSON(*static_cast<const AddSubMenuResponse*>(msg));
+    case METHOD_DELETESUBMENU_REQUEST:
+      return DeleteSubMenuMarshaller::toJSON(*static_cast<const DeleteSubMenu*>(msg));
+    case METHOD_DELETESUBMENU_RESPONSE:
+      return DeleteSubMenuResponseMarshaller::toJSON(*static_cast<const DeleteSubMenuResponse*>(msg));
+    case METHOD_CREATEINTERACTIONCHOICESET_REQUEST:
+      return CreateInteractionChoiceSetMarshaller::toJSON(*static_cast<const CreateInteractionChoiceSet*>(msg));
+    case METHOD_CREATEINTERACTIONCHOICESET_RESPONSE:
+      return CreateInteractionChoiceSetResponseMarshaller::toJSON(*static_cast<const CreateInteractionChoiceSetResponse*> (msg));
+    case METHOD_DELETEINTERACTIONCHOICESET_REQUEST:
+      return DeleteInteractionChoiceSetMarshaller::toJSON(*static_cast<const DeleteInteractionChoiceSet*>(msg));
+    case METHOD_DELETEINTERACTIONCHOICESET_RESPONSE:
+      return DeleteInteractionChoiceSetResponseMarshaller::toJSON(*static_cast<const DeleteInteractionChoiceSetResponse*>(msg));
+    case METHOD_PERFORMINTERACTION_REQUEST:
+      return PerformInteractionMarshaller::toJSON(*static_cast<const PerformInteraction*>(msg));
   }
 
   return j;
@@ -401,3 +569,15 @@ OnAppUnregisteredMarshaller RPC2Marshaller::mOnAppUnregisteredMarshaller;
 ActivateAppMarshaller RPC2Marshaller::mActivateAppMarshaller;
 AddCommandMarshaller RPC2Marshaller::mAddCommandMarshaller;
 AddCommandResponseMarshaller RPC2Marshaller::mAddCommandResponseMarshaller;
+DeleteCommandMarshaller RPC2Marshaller::mDeleteCommandMarshaller;
+DeleteCommandResponseMarshaller RPC2Marshaller::mDeleteCommandResponseMarshaller;
+OnCommandMarshaller RPC2Marshaller::mOnCommandMarshaller;
+AddSubMenuMarshaller RPC2Marshaller::mAddSubMenuMarshaller;
+AddSubMenuResponseMarshaller RPC2Marshaller::mAddSubMenuResponseMarshaller;
+DeleteSubMenuMarshaller RPC2Marshaller::mDeleteSubMenuMarshaller;
+DeleteSubMenuResponseMarshaller RPC2Marshaller::mDeleteSubMenuResponseMarshaller;
+CreateInteractionChoiceSetMarshaller RPC2Marshaller::mCreateInteractionChoiceSetMarshaller;
+CreateInteractionChoiceSetResponseMarshaller RPC2Marshaller::mCreateInteractionChoiceSetResponseMarshaller;
+DeleteInteractionChoiceSetMarshaller RPC2Marshaller::mDeleteInteractionChoiceSetMarshaller;
+DeleteInteractionChoiceSetResponseMarshaller RPC2Marshaller::mDeleteInteractionChoiceSetResponseMarshaller;
+PerformInteractionMarshaller RPC2Marshaller::mPerformInteractionMarshaller;

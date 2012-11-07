@@ -20,10 +20,13 @@ MFT.UIPopUp = Em.ContainerView.create({
 
 	childViews: [
 		'popUp',
-		'message'
+		'message1',
+		'message2'
 	],
 
-	content:			'Messaage',
+	content1:			'Title',
+
+	content2:			'Text',
 
 	received: 			false,
 
@@ -34,19 +37,29 @@ MFT.UIPopUp = Em.ContainerView.create({
 		classNames:			'popUp',
 	}),
 
-	message : MFT.Label.extend({
+	message1 : MFT.Label.extend({
 
-		elementId:			'message',
+		elementId:			'message1',
 
-		classNames:			'message',
+		classNames:			'message1',
 
-		contentBinding:		'parentView.content'
+		contentBinding:		'parentView.content1'
+	}),
+
+	message2 : MFT.Label.extend({
+
+		elementId:			'message2',
+
+		classNames:			'message2',
+
+		contentBinding:		'parentView.content2'
 	}),
 
 	receiveMessage: function(msg1, msg2, duration, playTone){
 		var self = this;
 
-		this.set('content', msg1);
+		this.set('content1', msg1);
+		this.set('content2', msg2);
 		this.set('received', true);
 		setTimeout(function(){self.set('received', false);}, duration);
 	}

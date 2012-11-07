@@ -1,0 +1,66 @@
+/*
+ * 
+ * @name Buttons
+ * 
+ * @desc Component provides notifications from HMI regarding button events 
+ * 
+ * @category    HMI
+ * @version 1.0
+ *
+ * @author  Sergey Solovey
+ *
+ */
+
+interface RPC2Communication::Buttons;
+
+version "1.2";
+
+using AppLinkRPC;
+
+prefix "Buttons.";
+
+#if 0
+/*
+ The only currently supported Json RPC version is 2.0
+*/
+
+envelope "JSON-RPC 2.0";
+
+// The following is for RPCBus controller:
+//serviceUrl "/localhost:6087";
+
+#endif
+
+/*
+     * @descr 
+     *      method should be invoked at system startup
+     *  provides information about all supported hardware buttons and their capabilites
+     *  
+     * @returns
+     *      button capabilites
+     *      array of supported buttons
+     */
+GetCapabilities(
+    ->
+    ButtonCapabilities capabilities[1:100] // data type from AppLink protocol specification
+);
+
+/*
+     * @descr Notifies application of UP/DOWN events for buttons
+     */
+oneway OnButtonEvent(
+    ButtonName name,  // data type from AppLink protocol specification
+    ButtonEventMode mode  // data type from AppLink protocol specification
+);
+
+/*
+     * @descr Notifies application of LONG/SHORT press events for buttons
+     */
+oneway OnButtonPress(
+    ButtonName name,  // data type from AppLink protocol specification
+    ButtonPressMode mode  // data type from AppLink protocol specification
+);
+
+/*
+"id": "integer" //REQUIRED for request methods. NOT to be used for notifications
+*/

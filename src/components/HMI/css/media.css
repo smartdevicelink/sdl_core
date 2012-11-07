@@ -72,7 +72,7 @@
 	position:relative;
 }
 #media_amButton {
-	top: 10px;
+	/*top: 10px;*/
 	display: none;
 }
 
@@ -96,7 +96,7 @@
 /*FM*/
 
 #media_fmButton {
-	top: 20px;
+	/*top: 20px;*/
 	display: none;
 }
 
@@ -124,7 +124,7 @@
 }
 
 #media_siriusButton {
-	top: 30px;
+	/*top: 30px;*/
 	display: none;
 }
 
@@ -148,9 +148,8 @@
 /*CD,USB*/
 
 #media_cdButton, #media_usbButton {
-	top: 30px;
+	/*top: 30px;*/
 	font-size: 18px;
-	padding-left: 48px;
 	line-height: 48px;
 	display: none;
 }
@@ -168,7 +167,6 @@
 
 #media_sdButton {
 	font-size: 18px;
-	padding-left: 48px;
 	line-height: 48px;
 	display: block;
 }
@@ -181,7 +179,6 @@
 
 #media_btButton {
 	font-size: 18px;
-	padding-left: 48px;
 	line-height: 48px;
 	display: block;
 }
@@ -194,7 +191,6 @@
 
 #media_avinButton {
 	font-size: 18px;
-	padding-left: 48px;
 	line-height: 48px;
 	display: block;
 }
@@ -205,7 +201,6 @@
 
 #media_appButton {
 	font-size: 18px;
-	padding-left: 48px;
 	line-height: 48px;
 	display: block;
 }
@@ -214,10 +209,19 @@
 	display: none !important;
 }
 
+#media_leftmenu .media-ls-item{
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#media_leftmenu .media-ls-item span{
+	padding-left: 48px;
+}
+
 /*SCROLL DOWN*/
 
 #media_scrolldownButton {
-	top: 30px;
+	/*top: 30px;*/
 	display: none;
 }
 
@@ -2737,3 +2741,71 @@
 
 /* cancel scrollbar animation */
 .cancelBarAnimation{-webkit-transition:none !important;}
+		
+#media_app_sub_menu_view.media_app_sub_menu_view{
+	top: 56px;
+	width: 800px;
+	height: 367px;
+	z-index: 1;
+}
+#media_app_options_view.media_app_options_view{
+	top: 56px;
+	width: 800px;
+	height: 367px;
+	z-index: 1;
+}
+
+#media_app_options_view .buttonsWrapper {
+	top: 70px;
+	left: 100px;
+	width: 600px;
+	height: 260px;
+	overflow: hidden;
+}
+
+#media_app_options_view .scrollButtons{
+	width: 550px;
+	float: left;
+	margin-right: 10px;
+	height: 51px;
+	font-size: 20px;
+	line-height: 50px;
+	border: 1px solid #393939;
+	border-bottom: none;
+	cursor: pointer;
+	background-image: url(../images/list/list_item_bg.png);
+	position: relative;
+}
+
+#media_app_options_view .scrollArrows{
+	height: 47px;
+	width: 47px;
+	border: #393939 1px solid;
+	border-radius: 2px;
+}
+
+#media_app_options_view .scrollArrowUp {
+	position: relative;
+}
+
+#media_app_options_view .scrollArrowDown {
+	bottom: 0;
+	right: 0;
+}
+
+#media_app_options_view .scrollBar {
+	float: right;
+	position: relative;
+	height: 260px;
+}
+
+#media_app_options_view .scroller {
+	position: relative;
+	height: 20px;
+	background: #555;
+	-webkit-transition: 0.4s ;
+}
+
+#media_app_options_view .rs-item {
+	width: 535px;
+}

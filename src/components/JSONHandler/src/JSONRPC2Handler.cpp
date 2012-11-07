@@ -42,6 +42,7 @@ void JSONRPC2Handler::subscribeToNotifications()
 {
     subscribeTo( "Buttons.OnButtonEvent" );
     subscribeTo( "Buttons.OnButtonPress" );
+    subscribeTo( "UI.OnCommand" );
 }
 
 void JSONRPC2Handler::setRPC2CommandsObserver( 

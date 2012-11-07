@@ -145,8 +145,8 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
     {
         while ( ! handler -> mOutgoingMessages.empty() )
         {
-            LOG4CPLUS_INFO( mLogger, "Outgoing message received." );
             const ALRPCMessage * message = handler -> mOutgoingMessages.pop();
+            LOG4CPLUS_INFO( mLogger, "Outgoing message " << message->getMethodId() << " received." );
 
             std::string messageString = Marshaller::toString( message );
 

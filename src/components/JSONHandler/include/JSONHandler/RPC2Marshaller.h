@@ -24,6 +24,18 @@
 #include "JSONHandler/ActivateAppResponseMarshaller.h"
 #include "JSONHandler/AddCommandMarshaller.h"
 #include "JSONHandler/AddCommandResponseMarshaller.h"
+#include "JSONHandler/DeleteCommandMarshaller.h"
+#include "JSONHandler/DeleteCommandResponseMarshaller.h"
+#include "JSONHandler/OnCommandMarshaller.h"
+#include "JSONHandler/AddSubMenuMarshaller.h"
+#include "JSONHandler/AddSubMenuResponseMarshaller.h"
+#include "JSONHandler/DeleteSubMenuMarshaller.h"
+#include "JSONHandler/DeleteSubMenuResponseMarshaller.h"
+#include "JSONHandler/CreateInteractionChoiceSetMarshaller.h"
+#include "JSONHandler/CreateInteractionChoiceSetResponseMarshaller.h"
+#include "JSONHandler/DeleteInteractionChoiceSetMarshaller.h"
+#include "JSONHandler/DeleteInteractionChoiceSetResponseMarshaller.h"
+#include "JSONHandler/PerformInteractionMarshaller.h"
 
 namespace RPC2Communication
 {
@@ -52,7 +64,20 @@ namespace RPC2Communication
         METHOD_ACTIVATEAPP_REQUEST=16,
         METHOD_ACTIVATEAPP_RESPONSE=17,
         METHOD_ADDCOMMAND_REQUEST=18,
-        METHOD_ADDCOMMAND_RESPONSE=19
+        METHOD_ADDCOMMAND_RESPONSE=19,
+        METHOD_DELETECOMMAND_REQUEST=20,
+        METHOD_DELETECOMMAND_RESPONSE=21,
+        METHOD_UIONCOMMAND_NOTIFICATION=22,
+        METHOD_ADDSUBMENU_REQUEST=23,
+        METHOD_ADDSUBMENU_RESPONSE=24,
+        METHOD_DELETESUBMENU_REQUEST=25,
+        METHOD_DELETESUBMENU_RESPONSE=26,
+        METHOD_CREATEINTERACTIONCHOICESET_REQUEST=27,
+        METHOD_CREATEINTERACTIONCHOICESET_RESPONSE=28,
+        METHOD_DELETEINTERACTIONCHOICESET_REQUEST=29,
+        METHOD_DELETEINTERACTIONCHOICESET_RESPONSE=30,
+        METHOD_PERFORMINTERACTION_REQUEST=31,
+        METHOD_PERFORMINTERACTION_RESPONSE=32
         };
 
         RPC2Marshaller();
@@ -254,9 +279,131 @@ namespace RPC2Communication
         static bool fromString(const std::string& str, AddCommandResponse&res)
         {
             return mAddCommandResponseMarshaller.fromString(str, res);
-        }static std::string toString(const AddCommandResponse& res)
+        }
+
+        static std::string toString(const AddCommandResponse& res)
         {
             return mAddCommandResponseMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string &str, DeleteCommand& res)
+        {
+            return mDeleteCommandMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const DeleteCommand& res)
+        {
+            return mDeleteCommandMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, DeleteCommandResponse& res)
+        {
+            return mDeleteCommandResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const DeleteCommandResponse& res)
+        {
+            return mDeleteCommandResponseMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, OnCommand& res)
+        {
+            return mOnCommandMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const OnCommand& res)
+        {
+            return mOnCommandMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, AddSubMenu& res)
+        {
+            return mAddSubMenuMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const AddSubMenu&res)
+        {
+            return mAddSubMenuMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string &str, AddSubMenuResponse& res)
+        {
+            return mAddSubMenuResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const AddSubMenuResponse& res)
+        {
+            return mAddSubMenuResponseMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string &str, DeleteSubMenu& res)
+        {
+            return mDeleteSubMenuMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const DeleteSubMenu& res)
+        {
+            return mDeleteSubMenuMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, DeleteSubMenuResponse& res)
+        {
+            return mDeleteSubMenuResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const DeleteSubMenuResponse& res)
+        {
+            return mDeleteSubMenuResponseMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, CreateInteractionChoiceSet& res)
+        {
+            return mCreateInteractionChoiceSetMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const CreateInteractionChoiceSet& res)
+        {
+            return mCreateInteractionChoiceSetMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, CreateInteractionChoiceSetResponse& res)
+        {
+            return mCreateInteractionChoiceSetResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const CreateInteractionChoiceSetResponse& res)
+        {
+            return mCreateInteractionChoiceSetResponseMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string &str, DeleteInteractionChoiceSet&res)
+        {
+            return mDeleteInteractionChoiceSetMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const DeleteInteractionChoiceSet& res)
+        {
+            return mDeleteInteractionChoiceSetMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string & str, DeleteInteractionChoiceSetResponse& res)
+        {
+            return mDeleteInteractionChoiceSetResponseMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const DeleteInteractionChoiceSetResponse& res)
+        {
+            return mDeleteInteractionChoiceSetResponseMarshaller.toString(res);
+        }
+
+        static bool fromString(const std::string& str, PerformInteraction& res)
+        {
+            return mPerformInteractionMarshaller.fromString(str, res);
+        }
+
+        static std::string toString(const PerformInteraction&res)
+        {
+            return mPerformInteractionMarshaller.toString(res);
         }
 
     private:
@@ -300,6 +447,18 @@ namespace RPC2Communication
         static ActivateAppResponseMarshaller mActivateAppResponseMarshaller;
         static AddCommandMarshaller mAddCommandMarshaller;
         static AddCommandResponseMarshaller mAddCommandResponseMarshaller;
+        static DeleteCommandMarshaller mDeleteCommandMarshaller;
+        static DeleteCommandResponseMarshaller mDeleteCommandResponseMarshaller;
+        static OnCommandMarshaller mOnCommandMarshaller;
+        static AddSubMenuMarshaller mAddSubMenuMarshaller;
+        static AddSubMenuResponseMarshaller mAddSubMenuResponseMarshaller;
+        static DeleteSubMenuMarshaller mDeleteSubMenuMarshaller;
+        static DeleteSubMenuResponseMarshaller mDeleteSubMenuResponseMarshaller;
+        static CreateInteractionChoiceSetMarshaller mCreateInteractionChoiceSetMarshaller;
+        static CreateInteractionChoiceSetResponseMarshaller mCreateInteractionChoiceSetResponseMarshaller;
+        static DeleteInteractionChoiceSetMarshaller mDeleteInteractionChoiceSetMarshaller;
+        static DeleteInteractionChoiceSetResponseMarshaller mDeleteInteractionChoiceSetResponseMarshaller;
+        static PerformInteractionMarshaller mPerformInteractionMarshaller;
     };
 
 }

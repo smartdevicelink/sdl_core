@@ -146,9 +146,7 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				}
+				"result":	 "SUCCESS" //  type (enum) from AppLink protocol
 			};
 			this.client.send(JSONMessage);
 		}
@@ -161,9 +159,7 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				}
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
 			};
 			this.client.send(JSONMessage);
 		}
@@ -181,9 +177,7 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				}
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
 			};
 			this.client.send(JSONMessage);
 		}
@@ -201,9 +195,7 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				}
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
 			};
 			this.client.send(JSONMessage);
 		}
@@ -216,9 +208,44 @@ FFW.UI = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				}
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
+
+		if (request.method == "UI.DeleteCommand") {
+			
+			MFT.AppRightMenuView.DeleteCommand(request.params.cmdId);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
+
+		if (request.method == "UI.AddSubMenu") {
+			
+			MFT.AppOptionsView.AddSubMenu(request.params.menuId, request.params.menuName);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
+
+		if (request.method == "UI.DeleteSubMenu") {
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	MFT.AppOptionsView.DeleteSubMenu(request.params.menuId)  //  type (enum) from AppLink protocol
 			};
 			this.client.send(JSONMessage);
 		}
@@ -237,6 +264,20 @@ FFW.UI = FFW.RPCObserver.create({
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.activateApp",
 			"params"	:	{"appName":[MFT.AppModel.PlayList.items[0].appName]}
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * handle RPC requests here
+ 	 */	
+	onCommand: function(commandId) {
+		Em.Logger.log("FFW.UI.onCommand");
+
+		var JSONMessage = {
+			"jsonrpc"	:	"2.0",
+			"method"	:	"UI.OnCommand",
+			"params"	:	{"commandId":commandId, }
 		};
 		this.client.send(JSONMessage);
 	}
