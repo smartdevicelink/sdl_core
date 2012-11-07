@@ -124,4 +124,4 @@ void AppMgr::startAppMgr()
     LOG4CPLUS_INFO_EXT(mLogger, " Started AppMgr!");
 }
 
-};
+}

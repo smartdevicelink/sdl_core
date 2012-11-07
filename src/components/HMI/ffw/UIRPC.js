@@ -85,6 +85,10 @@ FFW.UI = FFW.RPCObserver.create({
 	onRPCRegistered: function () {
 		Em.Logger.log("FFW.UI.onRPCRegistered");
 		this._super();
+
+ 		// notify other components that UI is ready 
+		//  main purpose is to nitofy ALCore
+		this.onReady();
 	},
 	
 	/*
@@ -249,27 +253,55 @@ FFW.UI = FFW.RPCObserver.create({
 			};
 			this.client.send(JSONMessage);
 		}
+
+		if (request.method == "UI.CreateInteractionChoiceSet") {
+
+			MFT.AppModel.interactionChoises.push(request.params);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	MFT.AppOptionsView.DeleteSubMenu(request.params.menuId)  //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
+
+		if (request.method == "UI.DeleteInteractionChoiceSet") {
+
+			for(var val in MFT.AppModel.interactionChoises){
+				if(MFT.AppModel.interactionChoises[val].interactionChoiceSetID == request.params.interactionChoiceSetID ){
+					MFT.AppModel.interactionChoises.splice(val, 1);
+					break;
+				}
+			}
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	MFT.AppOptionsView.DeleteSubMenu(request.params.menuId)  //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
+
+		if (request.method == "UI.PerformInteraction") {
+
+			MFT.AppSubMenuView.PerformInteraction(request.params.interactionChoiceSetIDList);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	MFT.AppOptionsView.DeleteSubMenu(request.params.menuId)  //  type (enum) from AppLink protocol
+			};
+			this.client.send(JSONMessage);
+		}
 	},
 	
-	/*
-	 * handle RPC requests here
- 	 */	
-	onRPCActivateApp: function() {
-		Em.Logger.log("FFW.UI.onRPCActivateApp");
-
-		// send request
-
-		var JSONMessage = {
-			"jsonrpc"	:	"2.0",
-			"id"		: 	this.client.idStart,
-			"method"	:	"AppLinkCore.activateApp",
-			"params"	:	{"appName":[MFT.AppModel.PlayList.items[0].appName]}
-		};
-		this.client.send(JSONMessage);
-	},
 
 	/*
-	 * handle RPC requests here
+	 * send notification when command was triggered
  	 */	
 	onCommand: function(commandId) {
 		Em.Logger.log("FFW.UI.onCommand");
@@ -278,6 +310,20 @@ FFW.UI = FFW.RPCObserver.create({
 			"jsonrpc"	:	"2.0",
 			"method"	:	"UI.OnCommand",
 			"params"	:	{"commandId":commandId, }
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * notification that UI is ready
+	 * AppLinkCore should be sunscribed to this notification
+ 	 */	
+	onReady: function() {
+		Em.Logger.log("FFW.UI.onReady");
+
+		var JSONMessage = {
+			"jsonrpc"	:	"2.0",
+			"method"	:	"UI.OnReady"
 		};
 		this.client.send(JSONMessage);
 	}

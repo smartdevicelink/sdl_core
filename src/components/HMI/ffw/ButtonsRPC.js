@@ -203,19 +203,16 @@ FFW.Buttons = FFW.RPCObserver.create({
 	 */
 	buttonPressed: function(id, type) {
 
-		if (this.client.socket.readyState == this.client.socket.OPEN) {
-			var JSONMessage = {
-				"jsonrpc" :	"2.0",
-				"method"  :	"Buttons.OnButtonPress",
-				"params"  :	{
-					"name"	  : id,
-					"mode"    : type
-				}
-			};
+		var JSONMessage = {
+			"jsonrpc" :	"2.0",
+			"method"  :	"Buttons.OnButtonPress",
+			"params"  :	{
+				"name"	  : id,
+				"mode"    : type
+			}
+		};
 
-			this.client.send(JSONMessage);
-		}
-		
+		this.client.send(JSONMessage);
 	},
 
 	/*
@@ -225,18 +222,16 @@ FFW.Buttons = FFW.RPCObserver.create({
 	 */
 	buttonEvent: function(id, type) {
 
-		if (this.client.socket.readyState == this.client.socket.OPEN) {
-			var JSONMessage = {
-				"jsonrpc" :	"2.0",
-				"method"  :	"Buttons.OnButtonEvent",
-				"params"  :	{
-					"name"	  : id,
-					"mode"    : type
-				}
-			};
+		var JSONMessage = {
+			"jsonrpc" :	"2.0",
+			"method"  :	"Buttons.OnButtonEvent",
+			"params"  :	{
+				"name"	  : id,
+				"mode"    : type
+			}
+		};
 
-			this.client.send(JSONMessage);
-		}
-		
+		this.client.send(JSONMessage);
+	
 	}
 })

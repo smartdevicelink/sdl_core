@@ -6,10 +6,13 @@
  */
 
 #include "AppMgr/Application.h"
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
 	
+log4cplus::Logger Application::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("Application"));
+
 Application::Application(const std::string& name , unsigned char sessionId)
 	:IApplication(name)
 	,mNgnMediaScreenAppName("")
@@ -18,6 +21,7 @@ Application::Application(const std::string& name , unsigned char sessionId)
 	,mAutoActivateID("")
     ,mSessionID(sessionId)
 {
+    LOG4CPLUS_INFO_EXT(mLogger, " Created an application "<< name <<" for the session id "<<sessionId);
 }
 
 Application::Application( const Application& app )
@@ -36,7 +40,7 @@ Application::Application( const Application& app )
 
 Application::~Application( )
 {
-	// TODO Auto-generated destructor stub
+    LOG4CPLUS_INFO_EXT(mLogger, " Deleted an application "<< mName << " session id "<<mSessionID);
 }
 
 void Application::setApplicationPriority( const AppPriority& priority )
@@ -159,4 +163,4 @@ unsigned char Application::getSessionID() const
     return mSessionID;
 }
 
-};
+}
