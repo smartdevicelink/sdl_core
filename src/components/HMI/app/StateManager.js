@@ -333,6 +333,10 @@ var StateManager = Em.StateManager.extend({
 		app: Em.State.create({
 		}),
 
+		appperforminteraction: Em.State.create({
+			viewLoaded: true,
+		}),
+
 		appoptions: Em.State.create({
 			viewLoaded: true,
 

@@ -2757,6 +2757,14 @@
 	overflow: hidden;
 }
 
+#media_app_perform_interaction_view.media_app_perform_interaction_view{
+	top: 56px;
+	width: 800px;
+	height: 367px;
+	z-index: 1;
+}
+
+
 #media_app_sub_menu_view .scrollButtons{
 	width: 550px;
 	float: left;
