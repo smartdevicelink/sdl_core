@@ -28,9 +28,10 @@ mDeviceListenersCallbacks(),
 mTerminateFlag(false),
 mDataListenersCallbacks(),
 mDataCallbacksThreads(),
-mDataCallbacksConditionVars()
+mDataCallbacksConditionVars(),
+mDevicesByAdapter()
 {
-    mDeviceAdapters.push_back(new CBluetoothAdapter(*this, *this));
+    addDeviceAdapter(new CBluetoothAdapter(*this, *this));
 
     pthread_mutex_init(&mDataListenersMutex, 0);
     pthread_mutex_init(&mDeviceListenersMutex, 0);
@@ -50,7 +51,7 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
 
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
-        delete *di;
+        removeDeviceAdapter((*di));
     }
 
     pthread_mutex_destroy(&mDataListenersMutex);
@@ -512,4 +513,22 @@ bool CTransportManager::isThreadForConnectionHandleExist(const tConnectionHandle
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "Result of checking is: " << bThreadExist);
 
     return bThreadExist;
+}
+
+void CTransportManager::addDeviceAdapter(IDeviceAdapter* DeviceAdapter)
+{
+    mDeviceAdapters.push_back(DeviceAdapter);
+    mDevicesByAdapter.insert(std::make_pair(DeviceAdapter, new tInternalDeviceList()));
+}
+
+void CTransportManager::removeDeviceAdapter(IDeviceAdapter* DeviceAdapter)
+{
+    tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
+    if(devicesIterator != mDevicesByAdapter.end())
+    {
+        delete devicesIterator->second;
+        mDevicesByAdapter.erase(DeviceAdapter);
+    }
+
+    delete DeviceAdapter;
 }

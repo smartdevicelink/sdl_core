@@ -356,6 +356,11 @@ namespace NsAppLink
             typedef std::map<tConnectionHandle, pthread_cond_t*> tDataCallbacksConditionVariables;
 
             /**
+             * @brief Map for storing available devices for each device adapter
+             **/
+            typedef std::map<IDeviceAdapter*, tInternalDeviceList*> tDevicesByAdapterMap;
+
+            /**
              * @brief Start routine for Application-related callbacks.
              *
              * @param Data Must be pointer to CTransportManager instance.
@@ -414,6 +419,22 @@ namespace NsAppLink
              * @attention This function is not thread safe
              **/
             bool isThreadForConnectionHandleExist(const tConnectionHandle ConnectionHandle);
+
+            /**
+             * @brief Adds new device adapter
+             *
+             * @param DeviceAdapter Device adapter to add
+             * @return void
+             **/
+            void addDeviceAdapter(NsAppLink::NsTransportManager::IDeviceAdapter* DeviceAdapter);
+
+            /**
+             * @brief Removes device adapter
+             *
+             * @param DeviceAdapter Device adapter to removeD
+             * @return void
+             **/
+            void removeDeviceAdapter(NsAppLink::NsTransportManager::IDeviceAdapter* DeviceAdapter);
 
             /**
              * @brief Device adapters.
@@ -505,6 +526,11 @@ namespace NsAppLink
              * @brief Condition variables for each connection handle
              **/
             tDataCallbacksConditionVariables mDataCallbacksConditionVars;
+
+            /**
+             * @brief Devices for each adapter
+             **/
+            tDevicesByAdapterMap mDevicesByAdapter;
         };
     }
 }
