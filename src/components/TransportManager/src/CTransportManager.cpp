@@ -80,7 +80,7 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
     return;
 
 
-    sleep (5);
+    sleep (2);
 
     tInternalDeviceList list;
     
@@ -97,6 +97,23 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
     list.push_back(device2);
     
     onDeviceListUpdated(mDeviceAdapters.front(), list);
+
+    //sleep(2);
+
+    connectDevice(3);
+
+    //sleep(2);
+
+    disconnectDevice(3);
+
+    //sleep(2);
+
+    disconnectDevice(2);
+
+    //sleep(2);
+
+    connectDevice(2);
+    
     return;
 
 
@@ -157,12 +174,66 @@ void NsAppLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
 
 void NsAppLink::NsTransportManager::CTransportManager::connectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
-    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+    LOG4CPLUS_INFO_EXT(mLogger, "Searching for device adapter for handling DeviceHandle: " << DeviceHandle);
+
+    tDevicesByAdapterMap::const_iterator deviceAdaptersIterator;
+
+    pthread_mutex_lock(&mDevicesByAdapterMutex);
+
+    for(deviceAdaptersIterator = mDevicesByAdapter.begin(); deviceAdaptersIterator != mDevicesByAdapter.end(); ++deviceAdaptersIterator)
+    {
+        IDeviceAdapter* pDeviceAdapter = deviceAdaptersIterator->first;
+        tInternalDeviceList *pDevices = deviceAdaptersIterator->second;
+
+        LOG4CPLUS_INFO_EXT(mLogger, "Processing adapter with type: "<<pDeviceAdapter->getDeviceType());
+
+        tInternalDeviceList::const_iterator devicesInAdapterIterator;
+        for(devicesInAdapterIterator = pDevices->begin(); devicesInAdapterIterator != pDevices->end(); ++devicesInAdapterIterator)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Processing device with unique Id: "<<devicesInAdapterIterator->mUniqueDeviceId << ", DeviceHandle: "<<devicesInAdapterIterator->mDeviceHandle);
+            if(devicesInAdapterIterator->mDeviceHandle == DeviceHandle)
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "DeviceHandle relates to adapter: "<<pDeviceAdapter->getDeviceType());
+                pDeviceAdapter->connectDevice(DeviceHandle);
+            }
+        }
+    }
+
+    LOG4CPLUS_INFO_EXT(mLogger, "Connect for DeviceHandle was processed");
+
+    pthread_mutex_unlock(&mDevicesByAdapterMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::disconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
-    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+    LOG4CPLUS_INFO_EXT(mLogger, "Searching for device adapter for handling DeviceHandle: " << DeviceHandle);
+
+    tDevicesByAdapterMap::const_iterator deviceAdaptersIterator;
+
+    pthread_mutex_lock(&mDevicesByAdapterMutex);
+
+    for(deviceAdaptersIterator = mDevicesByAdapter.begin(); deviceAdaptersIterator != mDevicesByAdapter.end(); ++deviceAdaptersIterator)
+    {
+        IDeviceAdapter* pDeviceAdapter = deviceAdaptersIterator->first;
+        tInternalDeviceList *pDevices = deviceAdaptersIterator->second;
+
+        LOG4CPLUS_INFO_EXT(mLogger, "Processing adapter with type: "<<pDeviceAdapter->getDeviceType());
+
+        tInternalDeviceList::const_iterator devicesInAdapterIterator;
+        for(devicesInAdapterIterator = pDevices->begin(); devicesInAdapterIterator != pDevices->end(); ++devicesInAdapterIterator)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Processing device with unique Id: "<<devicesInAdapterIterator->mUniqueDeviceId << ", DeviceHandle: "<<devicesInAdapterIterator->mDeviceHandle);
+            if(devicesInAdapterIterator->mDeviceHandle == DeviceHandle)
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "DeviceHandle relates to adapter: "<<pDeviceAdapter->getDeviceType());
+                pDeviceAdapter->disconnectDevice(DeviceHandle);
+            }
+        }
+    }
+
+    LOG4CPLUS_INFO_EXT(mLogger, "Disonnect for DeviceHandle was processed");
+
+    pthread_mutex_unlock(&mDevicesByAdapterMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::addDataListener(NsAppLink::NsTransportManager::ITransportManagerDataListener * Listener)
