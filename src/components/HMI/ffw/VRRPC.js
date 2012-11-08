@@ -99,7 +99,10 @@ FFW.VR = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+				"result"	: 	{
+					"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+					"method" 	:  request.method + "Response"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
@@ -112,7 +115,10 @@ FFW.VR = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+				"result"	: 	{
+					"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+					"method" 	:  request.method + "Response"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
