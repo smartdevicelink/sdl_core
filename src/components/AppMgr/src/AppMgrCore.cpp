@@ -631,7 +631,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
     {
         case RPC2Communication::UI::Marshaller::METHOD_ONCOMMAND:
         {
-            LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand notification has been invoked");
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand UI notification has been invoked");
             RPC2Communication::UI::OnCommand* object = (RPC2Communication::UI::OnCommand*)msg;
             AppLinkRPC::OnCommand* event = new AppLinkRPC::OnCommand();
             event->set_cmdID(object->get_commandId());
@@ -990,6 +990,26 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         }
         case RPC2Communication::VR::Marshaller::METHOD_ONCOMMAND:
         {
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand VR notification has been invoked");
+            RPC2Communication::VR::OnCommand* object = (RPC2Communication::VR::OnCommand*)msg;
+            RegistryItem* item = core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_cmdID());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                return;
+            }
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                return;
+            }
+            unsigned char sessionID = app->getSessionID();
+
+            AppLinkRPC::OnCommand* event = new AppLinkRPC::OnCommand();
+            event->set_cmdID(object->get_cmdID());
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
+            core->mJSONHandler->sendRPCMessage(event, sessionID);
             return;
         }
         case RPC2Communication::VR::Marshaller::METHOD_INVALID:
