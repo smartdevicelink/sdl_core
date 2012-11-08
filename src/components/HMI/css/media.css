@@ -2864,3 +2864,7 @@
 #media_app_options_view .rs-item {
 	width: 535px;
 }
+
+#VRPopUp .rs-item {
+	width: 595px;
+}
