@@ -418,26 +418,30 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
             AppLinkRPC::DeleteCommand_request* object = (AppLinkRPC::DeleteCommand_request*)mobileMsg;
 
-            CommandType cmdType = core->mCommandMapping.getType(object->get_cmdID());
-            if(cmdType == CommandType::UI)
+            CommandTypes cmdTypes;
+            core->mCommandMapping.getTypes(object->get_cmdID(), cmdTypes);
+            for(CommandTypes::iterator it = cmdTypes.begin(); it != cmdTypes.end(); it++)
             {
-                RPC2Communication::UI::DeleteCommand* deleteCmd = new RPC2Communication::UI::DeleteCommand();
-                deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
-                deleteCmd->set_cmdId(object->get_cmdID());
-                core->mCommandMapping.removeCommand(object->get_cmdID());
-                HMIHandler::getInstance().sendRequest(deleteCmd);
+                CommandType cmdType = *it;
+                if(cmdType == CommandType::UI)
+                {
+                    RPC2Communication::UI::DeleteCommand* deleteCmd = new RPC2Communication::UI::DeleteCommand();
+                    deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
+                    deleteCmd->set_cmdId(object->get_cmdID());
+                    core->mCommandMapping.removeCommand(object->get_cmdID(), cmdType);
+                    HMIHandler::getInstance().sendRequest(deleteCmd);
+                }
+                else if(cmdType == CommandType::VR)
+                {
+                    RPC2Communication::VR::DeleteCommand* deleteCmd = new RPC2Communication::VR::DeleteCommand();
+                    deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
+                    deleteCmd->set_cmdId(object->get_cmdID());
+                    core->mCommandMapping.removeCommand(object->get_cmdID(), cmdType);
+                    HMIHandler::getInstance().sendRequest(deleteCmd);
+                }
             }
-            if(cmdType == CommandType::VR)
-            {
-                RPC2Communication::VR::DeleteCommand* deleteCmd = new RPC2Communication::VR::DeleteCommand();
-                deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
-                deleteCmd->set_cmdId(object->get_cmdID());
-                core->mCommandMapping.removeCommand(object->get_cmdID());
-                HMIHandler::getInstance().sendRequest(deleteCmd);
-            }
-
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_ADDSUBMENU_REQUEST:
@@ -631,7 +635,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             RPC2Communication::UI::OnCommand* object = (RPC2Communication::UI::OnCommand*)msg;
             AppLinkRPC::OnCommand* event = new AppLinkRPC::OnCommand();
             event->set_cmdID(object->get_commandId());
-            Application* app = core->getApplicationFromItemCheckNotNull(core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_commandId()));
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_commandId(), CommandType::UI));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -912,7 +916,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand VR notification has been invoked");
             RPC2Communication::VR::OnCommand* object = (RPC2Communication::VR::OnCommand*)msg;
-            Application* app = core->getApplicationFromItemCheckNotNull(core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_cmdID()));
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_cmdID(), CommandType::VR));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
