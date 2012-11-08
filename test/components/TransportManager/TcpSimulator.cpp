@@ -9,25 +9,20 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdint.h>
-
-
-// -------------------------------------------------------------------------
-
-// Todo: implement receiveing IP adress from the command line arguments 
-const std::string TranspMgrIPAddress("213.130.0.1");
-
-// Todo: implement receiveing IP port from the command line arguments
-const int TranspMgrPort = 80;
-
-// The real size of the data to send to the Transport Manager
-// Todo: implement receiveing this info from the command line
-const unsigned int TranspMgrDataActualSize = 64;
-
-// The size that is reported in the packet header (can be different from the real size to generate errors)
-// Todo: implement receiveing this info from the command line
-const unsigned int TranspMgrDataReportedSize = 64;
+#include <getopt.h>
 
 // -------------------------------------------------------------------------
+
+/**
+ * @brief Confituration of the application
+ */
+struct Config
+{
+    std::string ipAddress;
+    int port;
+    uint32_t actualDataSize;
+    uint32_t reportedDataSize;    
+};
 
 /**
  * @brief The header of the protocol
@@ -169,13 +164,130 @@ void CTranspMgrTcpClient::send(const void* pData, size_t dataSize)
     }
 }
 
+// -------------------------------------------------------------------------
+
+static void printUsage(const std::string &programName)
+{
+    std::cout << "Usage: " << programName << " [OPTION]" << std::endl;
+    std::cout << "Send test packate to the TransportManager in order to test TCP Adapter" << std::endl;
+    std::cout << std::endl;
+    std::cout << "-i, --ip IP_ADDRESS           IP address where to send the packet" << std::endl;
+    std::cout << "-p, --port PORT_NUMBER        TCP port number" << std::endl;
+    std::cout << "-a, --actual-size SIZE        The real size of the data in the packate to send" << std::endl;
+    std::cout << "-r, --reported-size SIZE      The size of the packate which is written in the packate header" << std::endl;
+
+    std::cout << "-h, --help                    Print this help" << std::endl << std::endl;
+}
+
+// -------------------------------------------------------------------------
+
+static bool initConfig(int argc, char **argv, Config *pConfig)
+{
+    bool result = true;
+   
+    struct option long_options[] =
+    {
+        {"help", no_argument, 0, 'h'},
+        {"ip", required_argument, 0, 'i'},
+        {"port", required_argument, 0, 'p'},
+        {"actual-size", required_argument, 0, 'a'},
+        {"reported-size", required_argument, 0, 'r'},
+        {0, 0, 0, 0}
+    };
+
+    pConfig->ipAddress = "127.0.0.1";       // default ip address
+    pConfig->port = 12345;                  // default port
+    pConfig->actualDataSize = 32;
+    pConfig->reportedDataSize = 32;
+
+    while (true)
+    {
+        int option_index = 0;
+        int c;
+    
+        c = getopt_long(argc, argv, "hi:p:a:r:", long_options, &option_index);
+
+        if (c == -1)
+            break;
+
+        switch (c)
+        {
+            case 'i':
+                if (optarg)
+                {
+                    // Todo: parse this string for valid IP address
+                    pConfig->ipAddress = optarg;
+                }
+                else
+                {
+                    std::cout << "Error: IP address is missing" << std::endl;
+                    result = false;
+                }
+                break;
+
+            case 'p':
+                if (optarg)
+                {
+                    pConfig->port = atoi(optarg);
+                }
+                else 
+                {
+                    std::cout << "Error: port is missing" << std::endl;
+                    result = false;
+                }
+                break;
+ 
+            case 'a':
+                if (optarg)
+                {
+                    pConfig->actualDataSize = atoi(optarg);
+                }
+                else 
+                {
+                    std::cout << "Error: data size is missing" << std::endl;
+                    result = false;
+                }
+                break;
+ 
+            case 'r':
+                if (optarg)
+                {
+                    pConfig->reportedDataSize = atoi(optarg);
+                }
+                else 
+                {
+                    std::cout << "Error: data size is missing" << std::endl;
+                    result = false;
+                }
+                break;
+
+            default:
+                result = false;
+        }
+    }
+    
+    if (result == false)
+    {
+        printUsage(argv[0]);
+    }
+
+    return result;
+}
+
 // ----------------------------------------------------------------------------
 
-int main(int argc, const char *argv[])
+int main(int argc, char **argv)
 {
-    CTranspMgrTcpClient client(TranspMgrIPAddress, TranspMgrPort);
+    Config config;
 
-    size_t totalBuffSize = sizeof(PacketHeader) + TranspMgrDataActualSize;
+    if (initConfig(argc, argv, &config) == false)
+    {
+        return 0;  // can't continue, do not have enough configuration data
+    }
+
+    CTranspMgrTcpClient client(config.ipAddress, config.port);
+    
+    size_t totalBuffSize = sizeof(PacketHeader) + config.actualDataSize;
     uint8_t *pBuff = new uint8_t[totalBuffSize];
     PacketHeader *pHeader = (PacketHeader*)pBuff;
 
@@ -185,11 +297,11 @@ int main(int argc, const char *argv[])
     pHeader->serviceType = 0x0F;                            // Bulk Data 
     pHeader->frameData = 0;                                 // Reserved
     pHeader->sessionId = 0;                                 // unknown
-    pHeader->dataSize = TranspMgrDataReportedSize;          // The size of the data in the packet
+    pHeader->dataSize = config.reportedDataSize;            // The size of the data in the packet
     pHeader->messageId = 0;                                 // unknown
 
     // just fill the data with the single value
-    memset(&(pBuff[sizeof(PacketHeader)]), 0xFF, TranspMgrDataActualSize);
+    memset(&(pBuff[sizeof(PacketHeader)]), 0xFF, config.actualDataSize);
 
     try
     {
