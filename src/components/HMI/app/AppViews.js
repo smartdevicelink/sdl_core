@@ -32,7 +32,6 @@ MFT.AppViews = Em.ContainerView.extend({
 		MFT.ControlButtons,
 		MFT.AppOptionsView,
 		MFT.AppSubMenuView,
-		MFT.AppSubMenuView,
 		MFT.AppPerformInteractionChoise,
 		'activeAview'
 	],

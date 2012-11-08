@@ -17,6 +17,11 @@ FFW.UI = FFW.RPCObserver.create({
  	 */		
 	 client:		FFW.RPCClient.create({ componentName: "UI" }),
 
+	 /*
+	 *	id for request Perform Interaction 
+ 	 */
+ 	 performInteractionRequestId: -1,
+
 	/*
    	 * Default values for global properties
  	 */
@@ -236,9 +241,12 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.PerformInteraction") {
 
+			this.performInteractionRequestId = request.id;
+
 			MFT.AppPerformInteractionChoise.PerformInteraction(request.params.interactionChoiceSetIDList);
 
 			resultCode = "SUCCESS";
+
 		}
 
 		// send repsonse
@@ -264,6 +272,28 @@ FFW.UI = FFW.RPCObserver.create({
 			"jsonrpc"	:	"2.0",
 			"method"	:	"UI.OnCommand",
 			"params"	:	{"commandId":commandId, }
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * send notification when command was triggered
+ 	 */	
+	onChoosed: function(commandId) {
+		Em.Logger.log("FFW.UI.PerformInteractionResponse");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc"	:	"2.0",
+			"id"		: 	this.performInteractionRequestId,
+			"result":	{
+				"success":			true,
+				"info":				"Choosed",
+				"resultCode":		"SUCCESS",
+				"method":			"UI.PerformInteractionResponse",
+				"choiceID":			commandId,
+				"triggerSource":	"MENU"
+			}
 		};
 		this.client.send(JSONMessage);
 	},
