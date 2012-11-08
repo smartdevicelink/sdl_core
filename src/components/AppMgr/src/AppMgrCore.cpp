@@ -909,7 +909,14 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction response has been income");
             RPC2Communication::UI::PerformInteractionResponse* object = (RPC2Communication::UI::PerformInteractionResponse*)msg;
             AppLinkRPC::PerformInteraction_response* response = new AppLinkRPC::PerformInteraction_response();
-        //    response->set_choiceID(object->get)
+            if(object->get_choiceID())
+            {
+                response->set_choiceID(*object->get_choiceID());
+            }
+            if(object->get_triggerSource())
+            {
+                response->set_triggerSource(*object->get_triggerSource());
+            }
             response->set_success(true);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
