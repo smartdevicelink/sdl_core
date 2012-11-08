@@ -84,7 +84,7 @@ private:
     ButtonMapping    mButtonsMapping;
     CommandMapping   mCommandMapping;
     MessageMapping   mMessageMapping;
-	
+    bool             m_bHMIReady;
 	JSONHandler* mJSONHandler;
     JSONRPC2Handler* mJSONRPC2Handler;
 	static log4cplus::Logger mLogger;
