@@ -72,7 +72,7 @@ MFT.VRPopUp = Em.ContainerView.create({
 
     buttonsWrapper: Em.ContainerView.extend({
         classNames:         'buttonsWrapper',
-        elementId:          'buttonsWrapper',
+        elementId:          'buttonsWrapperVR',
         childViews: [
             'buttonsScroll',
             'scrollBar'
@@ -90,7 +90,7 @@ MFT.VRPopUp = Em.ContainerView.create({
 
         buttonsScroll: Em.ContainerView.extend( Ember.TargetActionSupport, {
             classNames: 'buttonsScroll',
-            elementId:  'buttonsScroll',
+            elementId:  'buttonsScrollVR',
             actionUp:   function(){
                 this._parentView.pos = this._parentView.scroll.y - this._parentView.scroll.startY;
             }
@@ -98,7 +98,7 @@ MFT.VRPopUp = Em.ContainerView.create({
 
         scrollBar: Em.ContainerView.extend({
             classNames:         'scrollBar',
-            elementId:          'scrollBar',
+            elementId:          'scrollBarVR',
             childViews: [
                 'scrollArrowUp',
                 'scroller',
