@@ -75,7 +75,6 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
         return;
     }
 
-
     return;
 
 
@@ -124,7 +123,14 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
 
 void NsAppLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
 {
-    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+    LOG4CPLUS_INFO_EXT(mLogger, "Scanning new devices on all registered device adapters");
+    for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Initiating scanning of new devices on adapter: " <<(*di)->getDeviceType());
+        (*di)->scanForNewDevices();
+        LOG4CPLUS_INFO_EXT(mLogger, "Scanning of new devices initiated on adapter: " <<(*di)->getDeviceType());
+    }
+    LOG4CPLUS_INFO_EXT(mLogger, "Scanning of new devices initiated");
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::connectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
