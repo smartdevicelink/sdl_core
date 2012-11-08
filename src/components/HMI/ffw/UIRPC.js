@@ -290,12 +290,9 @@ FFW.UI = FFW.RPCObserver.create({
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.performInteractionRequestId,
 			"result":	{
-				"success":			true,
-				"info":				"Choosed",
 				"resultCode":		"SUCCESS",
-				"method":			"UI.PerformInteractionResponse",
 				"choiceID":			commandId,
-				"triggerSource":	"MENU"
+				"method":			"UI.PerformInteractionResponse"
 			}
 		};
 		this.client.send(JSONMessage);
