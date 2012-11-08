@@ -12,13 +12,13 @@
 #include "AppMgr/RegistryItem.h"
 #include "AppMgr/AppMgrCoreQueues.h"
 #include "AppMgr/SubscribeButton.h"
+#include "AppMgr/HMIHandler.h"
 #include "JSONHandler/ALRPCMessage.h"
 #include "JSONHandler/ALRPCRequest.h"
 #include "JSONHandler/ALRPCResponse.h"
 #include "JSONHandler/ALRPCNotification.h"
 #include "JSONHandler/ALRPCObjects/Marshaller.h"
 #include "JSONHandler/JSONHandler.h"
-#include "JSONHandler/JSONRPC2Handler.h"
 #include "JSONHandler/RPC2Objects/UI/Marshaller.h"
 #include "JSONHandler/RPC2Objects/VR/Marshaller.h"
 #include "JSONHandler/RPC2Objects/TTS/Marshaller.h"
@@ -44,18 +44,15 @@ AppMgrCore& AppMgrCore::getInstance( )
 
 AppMgrCore::AppMgrCore()
     :mJSONHandler(0)
-    ,m_bHMIReady(false)
-    ,mJSONRPC2Handler(0)
     ,mQueueRPCAppLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
     ,mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<RPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
 {
     LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
+    HMIHandler::getInstance().setReadyState(true);
 }
 
 AppMgrCore::AppMgrCore(const AppMgrCore &)
     :mJSONHandler(0)
-    ,m_bHMIReady(false)
-    ,mJSONRPC2Handler(0)
     ,mQueueRPCAppLinkObjectsIncoming(0)
     ,mQueueRPCBusObjectsIncoming(0)
 {
@@ -174,7 +171,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             appRegistered->set_isMediaApplication(app->getIsMediaApplication());
             appRegistered->set_languageDesired(app->getLanguageDesired());
             appRegistered->set_vrSynonym(app->getVrSynonyms());
-            core->mJSONRPC2Handler->sendNotification(appRegistered);
+            HMIHandler::getInstance().sendNotification(appRegistered);
 
             break;
 		}
@@ -210,7 +207,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             RPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new RPC2Communication::AppLinkCore::OnAppUnregistered();
             appUnregistered->set_appName(appName);
             appUnregistered->set_reason(AppLinkRPC::AppInterfaceUnregisteredReason(AppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
-            core->mJSONRPC2Handler->sendNotification(appUnregistered);
+            HMIHandler::getInstance().sendNotification(appUnregistered);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_SUBSCRIBEBUTTON_REQUEST:
@@ -283,7 +280,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             }
             LOG4CPLUS_INFO_EXT(mLogger, "Show request almost handled" );
             core->mMessageMapping.addMessage(showRPC2Request->getId(), sessionID);
-            core->mJSONRPC2Handler->sendRequest(showRPC2Request);
+            HMIHandler::getInstance().sendRequest(showRPC2Request);
             AppLinkRPC::Show_response * mobileResponse = new AppLinkRPC::Show_response;
             mobileResponse->set_success(true);
             mobileResponse->set_resultCode(AppLinkRPC::Result::SUCCESS);
@@ -297,7 +294,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             RPC2Communication::TTS::Speak* speakRPC2Request = new RPC2Communication::TTS::Speak();
             speakRPC2Request->set_ttsChunks(object->get_ttsChunks());
             core->mMessageMapping.addMessage(speakRPC2Request->getId(), sessionID);
-            core->mJSONRPC2Handler->sendRequest(speakRPC2Request);
+            HMIHandler::getInstance().sendRequest(speakRPC2Request);
             AppLinkRPC::Speak_response * mobileResponse = new AppLinkRPC::Speak_response;
             mobileResponse->set_resultCode(AppLinkRPC::Result::SUCCESS);
             mobileResponse->set_success(true);
@@ -319,7 +316,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             {
                 setGPRPC2Request->set_timeoutPrompt(*object->get_timeoutPrompt());
             }
-            core->mJSONRPC2Handler->sendRequest(setGPRPC2Request);
+            HMIHandler::getInstance().sendRequest(setGPRPC2Request);
             AppLinkRPC::SetGlobalProperties_response * mobileResponse = new AppLinkRPC::SetGlobalProperties_response;
             mobileResponse->set_success(true);
             mobileResponse->set_resultCode(AppLinkRPC::Result::SUCCESS);
@@ -334,7 +331,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             core->mMessageMapping.addMessage(resetGPRPC2Request->getId(), sessionID);
             resetGPRPC2Request->set_properties(object->get_properties());
 
-            core->mJSONRPC2Handler->sendRequest(resetGPRPC2Request);
+            HMIHandler::getInstance().sendRequest(resetGPRPC2Request);
             AppLinkRPC::ResetGlobalProperties_response * mobileResponse = new AppLinkRPC::ResetGlobalProperties_response;
             mobileResponse->set_success(true);
             mobileResponse->set_resultCode(AppLinkRPC::Result::SUCCESS);
@@ -363,7 +360,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             {
                 alert->set_playTone(*object->get_playTone());
             }
-            core->mJSONRPC2Handler->sendRequest(alert);
+            HMIHandler::getInstance().sendRequest(alert);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_ONBUTTONPRESS:
@@ -388,36 +385,29 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                 break;
             }
             AppLinkRPC::AddCommand_request* object = (AppLinkRPC::AddCommand_request*)mobileMsg;
-            RPC2Communication::RPC2Request* addCmd = NULL;
-            CommandType cmdType = CommandType::UNDEFINED;
-            if(object->get_menuParams())
-            {
-                addCmd = new RPC2Communication::UI::AddCommand();
-                cmdType = CommandType::UI;
-            }
-            else if(object->get_vrCommands())
-            {
-                addCmd = new RPC2Communication::VR::AddCommand();
-                cmdType = CommandType::VR;
-            }
-            else
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, " Cannot deduct the command type: neither UI nor VR params are found within the request!");
-                break;
-            }
-            core->mMessageMapping.addMessage(addCmd->getId(), sessionID);
-            ((RPC2Communication::UI::AddCommand*)addCmd)->set_cmdId(object->get_cmdID()); //Doesn't matter to which type to cast: RPC2Communication::VR::AddCommand also has this method with the same param
 
-            core->mCommandMapping.addCommand(object->get_cmdID(), cmdType, item);
             if(object->get_menuParams())
             {
-                ((RPC2Communication::UI::AddCommand*)addCmd)->set_menuParams(*object->get_menuParams());
+                RPC2Communication::UI::AddCommand * addCmd = new RPC2Communication::UI::AddCommand();
+                CommandType cmdType = CommandType::UI;
+                addCmd->set_menuParams(*object->get_menuParams());
+                addCmd->set_cmdId(object->get_cmdID());
+                core->mMessageMapping.addMessage(addCmd->getId(), sessionID);
+                core->mCommandMapping.addCommand(object->get_cmdID(), cmdType, item);
+                HMIHandler::getInstance().sendRequest(addCmd);
+
             }
             if(object->get_vrCommands())
             {
-                ((RPC2Communication::VR::AddCommand*)addCmd)->set_vrCommands(*object->get_vrCommands());
+                RPC2Communication::VR::AddCommand * addCmd = new RPC2Communication::VR::AddCommand();
+                CommandType cmdType = CommandType::VR;
+                addCmd->set_vrCommands(*object->get_vrCommands());
+                addCmd->set_cmdId(object->get_cmdID());
+                core->mMessageMapping.addMessage(addCmd->getId(), sessionID);
+                core->mCommandMapping.addCommand(object->get_cmdID(), cmdType, item);
+                HMIHandler::getInstance().sendRequest(addCmd);
             }
-            core->mJSONRPC2Handler->sendRequest(addCmd);
+
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_DELETECOMMAND_REQUEST:
@@ -442,7 +432,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
             ((RPC2Communication::UI::DeleteCommand*)deleteCmd)->set_cmdId(object->get_cmdID()); //Doesn't matter to which type to cast: RPC2Communication::VR::DeleteCommand also has this method with the same param
             core->mCommandMapping.removeCommand(object->get_cmdID());
-            core->mJSONRPC2Handler->sendRequest(deleteCmd);
+            HMIHandler::getInstance().sendRequest(deleteCmd);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_ADDSUBMENU_REQUEST:
@@ -457,7 +447,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             {
                 addSubMenu->set_position(*object->get_position());
             }
-            core->mJSONRPC2Handler->sendRequest(addSubMenu);
+            HMIHandler::getInstance().sendRequest(addSubMenu);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_DELETESUBMENU_REQUEST:
@@ -467,7 +457,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             RPC2Communication::UI::DeleteSubMenu* delSubMenu = new RPC2Communication::UI::DeleteSubMenu();
             core->mMessageMapping.addMessage(delSubMenu->getId(), sessionID);
             delSubMenu->set_menuId(object->get_menuID());
-            core->mJSONRPC2Handler->sendRequest(delSubMenu);
+            HMIHandler::getInstance().sendRequest(delSubMenu);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_CREATEINTERACTIONCHOICESET_REQUEST:
@@ -478,7 +468,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             core->mMessageMapping.addMessage(createInteractionChoiceSet->getId(), sessionID);
             createInteractionChoiceSet->set_choiceSet(object->get_choiceSet());
             createInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
-            core->mJSONRPC2Handler->sendRequest(createInteractionChoiceSet);
+            HMIHandler::getInstance().sendRequest(createInteractionChoiceSet);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_DELETEINTERACTIONCHOICESET_REQUEST:
@@ -488,7 +478,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             RPC2Communication::UI::DeleteInteractionChoiceSet* deleteInteractionChoiceSet = new RPC2Communication::UI::DeleteInteractionChoiceSet();
             core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getId(), sessionID);
             deleteInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
-            core->mJSONRPC2Handler->sendRequest(deleteInteractionChoiceSet);
+            HMIHandler::getInstance().sendRequest(deleteInteractionChoiceSet);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_PERFORMINTERACTION_REQUEST:
@@ -513,7 +503,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             {
                 performInteraction->set_timeoutPrompt(*object->get_timeoutPrompt());
             }
-            core->mJSONRPC2Handler->sendRequest(performInteraction);
+            HMIHandler::getInstance().sendRequest(performInteraction);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_SHOW_RESPONSE:
@@ -991,7 +981,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             RPC2Communication::AppLinkCore::ActivateAppResponse * response = new RPC2Communication::AppLinkCore::ActivateAppResponse;
             response->setId(object->getId());
             response->setResult(AppLinkRPC::Result::SUCCESS);
-            core->mJSONRPC2Handler->sendResponse(response);
+            HMIHandler::getInstance().sendResponse(response);
             return;
         }
         case RPC2Communication::AppLinkCore::Marshaller::METHOD_INVALID:
@@ -1125,12 +1115,12 @@ void AppMgrCore::setJsonRPC2Handler(JSONRPC2Handler *handler)
         LOG4CPLUS_ERROR_EXT(mLogger, "A null pointer is being assigned - is this the intent?");
         return;
     }
-    mJSONRPC2Handler = handler;
+    HMIHandler::getInstance().setJsonRPC2Handler(handler);
 }
 
 JSONRPC2Handler *AppMgrCore::getJsonRPC2Handler() const
 {
-    return mJSONRPC2Handler;
+    return HMIHandler::getInstance().getJsonRPC2Handler();
 }
 
 }
