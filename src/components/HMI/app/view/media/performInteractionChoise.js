@@ -1,3 +1,4 @@
+
 /**
  * @name MFT.AppSubMenuView
  * 
@@ -10,12 +11,12 @@
  * @author      Andriy Melnik
  */
  
-MFT.AppSubMenuView = Em.ContainerView.create({
-    classNameBindings:  [ 'MFT.States.media.appoptions.appsubmenu.active:active_state' ],
+MFT.AppPerformInteractionChoise = Em.ContainerView.create({
+    classNameBindings:  [ 'MFT.States.media.appperforminteraction.active:active_state' ],
 
-    classNames:        ['media_app_sub_menu_view', 'hidden'],
+    classNames:        ['media_app_perform_interaction_view', 'hidden'],
 
-    elementId:          'media_app_sub_menu_view',
+    elementId:          'media_app_perform_interaction_view',
     childViews:         [
                             'backButton',
                             'buttonsWrapper'
@@ -23,45 +24,43 @@ MFT.AppSubMenuView = Em.ContainerView.create({
 
     backButton: MFT.Button.extend({
         classNames:        ['backButton','button'],     
-        action:            'back',
-        target:            'MFT.States',   
+        action:            'optionsBack',
+        target:            'MFT.MediaController',   
         icon:              'images/media/ico_back.png',   
     }),
 
-    SubMenuActivate: function( menuId ){
+    PerformInteraction: function( interactionChoiceSetIDList ){
 
-        if(MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').length > 0){
-            for(var i = 0; i < MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').length; i++ ){
-                Ember.View.views[MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews')[i].elementId].destroy();
-            }
-        }
+        for(var IDList in interactionChoiceSetIDList){
 
-        for(var id = 0; i < MFT.AppModel.subMenuCommands.length; i++){
-            if( menuId == MFT.AppModel.subMenuCommands[id].menuParams.parentID ){
-                button = MFT.Button.create({
-                    elementId:          'media_app_subMenu_view' + MFT.AppModel.subMenuCommands[id].cmdId,
-                    click:              function(){
-                        FFW.UI.onCommand(this.commandId);
-                    },
-                    commandId:          MFT.AppModel.subMenuCommands[id].cmdId, 
-                    classNames:         ['rs-item'],
-                    //icon:             null,//'images/media/active_arrow.png',
-                    text:               MFT.AppModel.subMenuCommands[id].menuParams.menuName 
-                });
+            for(var ChoisesVal in MFT.AppModel.interactionChoises){
 
-                MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
+                if( interactionChoiceSetIDList[IDList] == MFT.AppModel.interactionChoises[ChoisesVal].interactionChoiceSetID ){
+                    
+                    for(var ChoiseSet in MFT.AppModel.interactionChoises[ChoisesVal].choiceSet){
+                        button = MFT.Button.create({
+                            elementId:          'media_app_options_view' + MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
+                            click:              function(){
+                                FFW.UI.onCommand(MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID);
+                            },
+                            commandId:          MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID, 
+                            classNames:         ['rs-item'],
+                            //icon:             null,//'images/media/active_arrow.png',
+                            text:               MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName 
+                        });
+
+                        MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
+                    }
+                }
             }
         }
 
         MFT.AppSubMenuView.buttonsWrapper.scroll.refresh();
-
-        MFT.States.goToState('media.appoptions.appsubmenu');
-
     },
 
     buttonsWrapper: Em.ContainerView.extend({
         classNames:         'buttonsWrapper',
-        elementId:          'buttonsWrapperSubMenu',
+        elementId:          'buttonsWrapperPerformInteraction',
         childViews: [
             'buttonsScroll',
             'scrollBar'
@@ -79,7 +78,7 @@ MFT.AppSubMenuView = Em.ContainerView.create({
 
         buttonsScroll: Em.ContainerView.extend( Ember.TargetActionSupport, {
             classNames: 'buttonsScroll',
-            elementId:  'buttonsScrollSubMenu',
+            elementId:  'buttonsScrollPerformInteraction',
             actionUp:   function(){
                 this._parentView.pos = this._parentView.scroll.y - this._parentView.scroll.startY;
             }
@@ -87,7 +86,7 @@ MFT.AppSubMenuView = Em.ContainerView.create({
 
         scrollBar: Em.ContainerView.extend({
             classNames:         'scrollBar',
-            elementId:          'scrollBarSubMenu',
+            elementId:          'scrollBarPerformInteraction',
             childViews: [
                 'scrollArrowUp',
                 'scroller',
@@ -141,10 +140,24 @@ MFT.AppSubMenuView = Em.ContainerView.create({
         },
         
         loaded: function() {
-            this.set('scroll', new iScroll('buttonsWrapperSubMenu',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.AppSubMenuView.buttonsWrapper.scrollEnd();}}));
+            this.set('scroll', new iScroll('buttonsWrapperPerformInteraction',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.AppSubMenuView.buttonsWrapper.scrollEnd();}}));
             this.coeficient = this.scroll.wrapperH / this.scroll.scrollerH;
             this.scrollBarH = (this.scroll.wrapperH - 98) * this.coeficient - 49;
             this.scrollBar.scroller.set( 'style', 'height:' + this.scrollBarH + 'px;' );
+
+            button = MFT.Button.create({
+                elementId:          'media_app_options_view',
+                click:              function(){
+                    MFT.MediaController.turnOnAppSubMenu(1);
+                },
+                commandId:          1, 
+                classNames:         ['rs-item'],
+                //icon:             null,//'images/media/active_arrow.png',
+                text:               "menuName" 
+            });
+
+            MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
+            MFT.AppSubMenuView.buttonsWrapper.scroll.refresh();
         }
     }),
 

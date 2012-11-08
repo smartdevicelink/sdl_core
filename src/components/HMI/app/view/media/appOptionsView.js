@@ -11,9 +11,7 @@
  */
  
 MFT.AppOptionsView = Em.ContainerView.create({
-    classNameBindings:  [ 'MFT.States.media.appoptions.active:active_state',
-                          //  'MFT.MediaController.currentOptionsData.view',
-                        ],
+    classNameBindings:  [ 'MFT.States.media.appoptions.active:active_state' ],
 
     classNames:        ['media_app_options_view', 'hidden'],
 

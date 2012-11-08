@@ -236,7 +236,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.PerformInteraction") {
 
-			MFT.AppSubMenuView.PerformInteraction(request.params.interactionChoiceSetIDList);
+			MFT.AppPerformInteractionChoise.PerformInteraction(request.params.interactionChoiceSetIDList);
 
 			resultCode = "SUCCESS";
 		}
