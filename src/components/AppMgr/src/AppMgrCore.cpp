@@ -281,10 +281,6 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, "Show request almost handled" );
             core->mMessageMapping.addMessage(showRPC2Request->getId(), sessionID);
             HMIHandler::getInstance().sendRequest(showRPC2Request);
-            AppLinkRPC::Show_response * mobileResponse = new AppLinkRPC::Show_response;
-            mobileResponse->set_success(true);
-            mobileResponse->set_resultCode(AppLinkRPC::Result::SUCCESS);
-            core->mJSONHandler->sendRPCMessage(mobileResponse, sessionID);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_SPEAK_REQUEST:
