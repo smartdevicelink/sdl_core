@@ -11,15 +11,15 @@ CommandMapping::CommandMapping()
 {
 }
 
-void CommandMapping::addCommand(unsigned int commandId, RegistryItem *app)
+void CommandMapping::addCommand(unsigned int commandId, CommandType type, RegistryItem *app)
 {
     if(!app)
     {
         LOG4CPLUS_ERROR_EXT(mLogger, " Adding a command to a null registry item");
         return;
     }
-    LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a command " << commandId << " in app " << app->getApplication()->getName() );
-    mCommandMapping.insert(CommandMapItem(commandId, app));
+    LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a command " << commandId << " type " << type.getType() << " in app " << app->getApplication()->getName() );
+    mCommandMapping.insert(CommandMapItem(commandId, Command(type, app)));
 }
 
 void CommandMapping::removeCommand(unsigned int commandId)
@@ -34,13 +34,34 @@ void CommandMapping::removeItem(RegistryItem *app)
         LOG4CPLUS_ERROR_EXT(mLogger, " Trying to remove a null item");
         return;
     }
+    if(!app->getApplication())
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " Trying to remove an item without an application");
+        return;
+    }
     for(CommandMap::iterator it = mCommandMapping.begin(); it != mCommandMapping.end(); it++)
     {
-        if(it->second->getApplication()->getSessionID() == app->getApplication()->getSessionID())
+        Command& command = it->second;
+        RegistryItem* registryItem = command.second;
+        if(registryItem->getApplication())
         {
-            mCommandMapping.erase(it->first);
+            if(registryItem->getApplication()->getSessionID() == app->getApplication()->getSessionID())
+            {
+                mCommandMapping.erase(it->first);
+            }
         }
     }
+}
+
+CommandType CommandMapping::getType(unsigned int commandId) const
+{
+    CommandMap::const_iterator it = mCommandMapping.find( commandId );
+    if ( it != mCommandMapping.end() )
+    {
+        const Command& command = it->second;
+        return command.first;
+    }
+    return CommandType::UNDEFINED;
 }
 
 RegistryItem *CommandMapping::findRegistryItemAssignedToCommand(unsigned int commandId) const
@@ -48,16 +69,19 @@ RegistryItem *CommandMapping::findRegistryItemAssignedToCommand(unsigned int com
     CommandMap::const_iterator it = mCommandMapping.find( commandId );
     if ( it != mCommandMapping.end() )
     {
-        if ( !it->second )
+        const Command& command = it->second;
+        RegistryItem* registryItem = command.second;
+        if( registryItem )
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found!" );
+            if ( registryItem->getApplication() )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "An application "<< registryItem->getApplication()->getName() <<" is subscribed to a command " << commandId );
+                return registryItem;
+            }
+            LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!" );
             return 0;
         }
-        if ( it->second->getApplication() )
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, "An application "<< it->second->getApplication()->getName() <<" is subscribed to a command " << commandId );
-            return it->second;
-        }
+        LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found!" );
     }
     LOG4CPLUS_INFO_EXT(mLogger, "Command " << commandId << " not found in subscribed." );
     return 0;
@@ -65,6 +89,36 @@ RegistryItem *CommandMapping::findRegistryItemAssignedToCommand(unsigned int com
 
 CommandMapping::CommandMapping(const CommandMapping &)
 {
+}
+
+CommandType::CommandType()
+    :mType(CommandType::UNDEFINED)
+{
+}
+
+CommandType::CommandType(const CommandType& src)
+    :mType(src.getType())
+{
+}
+
+CommandType::CommandType(const CommandType::Type& type)
+    :mType(type)
+{
+}
+
+bool CommandType::operator ==(const CommandType::Type &type) const
+{
+    return mType == type;
+}
+
+bool CommandType::operator ==(const CommandType &type) const
+{
+    return mType == type.getType();
+}
+
+const CommandType::Type& CommandType::getType() const
+{
+    return mType;
 }
 
 }

@@ -387,13 +387,16 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             }
             AppLinkRPC::AddCommand_request* object = (AppLinkRPC::AddCommand_request*)mobileMsg;
             RPC2Communication::RPC2Request* addCmd = NULL;
+            CommandType cmdType = CommandType::UNDEFINED;
             if(object->get_menuParams())
             {
                 addCmd = new RPC2Communication::UI::AddCommand();
+                cmdType = CommandType::UI;
             }
             else if(object->get_vrCommands())
             {
                 addCmd = new RPC2Communication::VR::AddCommand();
+                cmdType = CommandType::VR;
             }
             else
             {
@@ -403,7 +406,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             core->mMessageMapping.addMessage(addCmd->getId(), sessionID);
             ((RPC2Communication::UI::AddCommand*)addCmd)->set_cmdId(object->get_cmdID()); //Doesn't matter to which type to cast: RPC2Communication::VR::AddCommand also has this method with the same param
 
-            core->mCommandMapping.addCommand(object->get_cmdID(), item);
+            core->mCommandMapping.addCommand(object->get_cmdID(), cmdType, item);
             if(object->get_menuParams())
             {
                 ((RPC2Communication::UI::AddCommand*)addCmd)->set_menuParams(*object->get_menuParams());
@@ -419,9 +422,23 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
             AppLinkRPC::DeleteCommand_request* object = (AppLinkRPC::DeleteCommand_request*)mobileMsg;
-            RPC2Communication::UI::DeleteCommand* deleteCmd = new RPC2Communication::UI::DeleteCommand();
+            RPC2Communication::RPC2Request* deleteCmd = NULL;
+            CommandType cmdType = core->mCommandMapping.getType(object->get_cmdID());
+            if(cmdType == CommandType::UI)
+            {
+                deleteCmd = new RPC2Communication::UI::DeleteCommand();
+            }
+            else if(cmdType == CommandType::VR)
+            {
+                deleteCmd = new RPC2Communication::VR::DeleteCommand();
+            }
+            else
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " Cannot deduct the command type! Command type is "<<cmdType.getType());
+                break;
+            }
             core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
-            deleteCmd->set_cmdId(object->get_cmdID());
+            ((RPC2Communication::UI::DeleteCommand*)deleteCmd)->set_cmdId(object->get_cmdID()); //Doesn't matter to which type to cast: RPC2Communication::VR::DeleteCommand also has this method with the same param
             core->mCommandMapping.removeCommand(object->get_cmdID());
             core->mJSONRPC2Handler->sendRequest(deleteCmd);
             break;
