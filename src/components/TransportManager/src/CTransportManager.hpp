@@ -437,6 +437,14 @@ namespace NsAppLink
             void removeDeviceAdapter(NsAppLink::NsTransportManager::IDeviceAdapter* DeviceAdapter);
 
             /**
+             * @brief Sends callback DeviceListUpdated to subscribers
+             *
+             * @return void
+             * @attention This function is not thread safe
+             **/
+            void sendDeviceListUpdatedCallback();
+
+            /**
              * @brief Device adapters.
              **/
             std::vector<IDeviceAdapter*> mDeviceAdapters;
@@ -531,6 +539,11 @@ namespace NsAppLink
              * @brief Devices for each adapter
              **/
             tDevicesByAdapterMap mDevicesByAdapter;
+
+            /**
+             * @brief Mutex restricting access to devices information for each adapter
+             **/
+            mutable pthread_mutex_t mDevicesByAdapterMutex;
         };
     }
 }

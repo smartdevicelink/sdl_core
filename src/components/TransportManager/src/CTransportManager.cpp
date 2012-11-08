@@ -29,7 +29,8 @@ mTerminateFlag(false),
 mDataListenersCallbacks(),
 mDataCallbacksThreads(),
 mDataCallbacksConditionVars(),
-mDevicesByAdapter()
+mDevicesByAdapter(),
+mDevicesByAdapterMutex()
 {
     addDeviceAdapter(new CBluetoothAdapter(*this, *this));
 
@@ -76,6 +77,26 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
         return;
     }
 
+    return;
+
+
+    sleep (5);
+
+    tInternalDeviceList list;
+    
+    SInternalDeviceInfo device1;
+    device1.mDeviceHandle = 1;
+    device1.mUniqueDeviceId = "BT-UNIQUE-DEVICE-ID-111111111111";
+    device1.mUserFriendlyName = "BT-FRIENDLY-NAME-111111111111";
+    list.push_back(device1);
+
+    SInternalDeviceInfo device2;
+    device2.mDeviceHandle = 2;
+    device2.mUniqueDeviceId = "BT-UNIQUE-DEVICE-ID-22222222222";
+    device2.mUserFriendlyName = "BT-FRIENDLY-NAME-222222222222";
+    list.push_back(device2);
+    
+    onDeviceListUpdated(mDeviceAdapters.front(), list);
     return;
 
 
@@ -205,7 +226,35 @@ NsAppLink::NsTransportManager::tConnectionHandle NsAppLink::NsTransportManager::
 
 void CTransportManager::onDeviceListUpdated(IDeviceAdapter * DeviceAdapter, const tInternalDeviceList & DeviceList)
 {
-    LOG4CPLUS_INFO_EXT(mLogger, "onDeviceListUpdated called");
+    if(0 == DeviceAdapter)
+    {
+        LOG4CPLUS_WARN_EXT(mLogger, "DeviceAdapter=0");
+    }
+    else
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Device adapter type is: "<<DeviceAdapter->getDeviceType() << ", number of devices is: "<<DeviceList.size());
+        pthread_mutex_lock(&mDevicesByAdapterMutex);
+
+        tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
+        if(devicesIterator == mDevicesByAdapter.end())
+        {
+            LOG4CPLUS_WARN_EXT(mLogger, "Invalid adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+        }
+        else
+        {
+            // Updating devices for adapter
+            tInternalDeviceList *pDevices = devicesIterator->second;
+            pDevices->clear();
+            std::copy(DeviceList.begin(), DeviceList.end(), std::back_inserter(*pDevices));
+
+            LOG4CPLUS_INFO_EXT(mLogger, "Devices list for adapter is updated. Adapter type is: "<<DeviceAdapter->getDeviceType());
+
+            pthread_mutex_unlock(&mDevicesByAdapterMutex);
+
+            // Calling callback with new device list to subscribers
+            sendDeviceListUpdatedCallback();
+        }
+    }
 }
 
 void CTransportManager::onApplicationConnected(const SDeviceInfo & ConnectedDevice, const tConnectionHandle ConnectionHandle)
@@ -531,4 +580,55 @@ void CTransportManager::removeDeviceAdapter(IDeviceAdapter* DeviceAdapter)
     }
 
     delete DeviceAdapter;
+}
+
+void CTransportManager::sendDeviceListUpdatedCallback()
+{
+    LOG4CPLUS_INFO_EXT(mLogger, "Preparing complete device list from all adapters");
+
+    // Preparing complete device list
+    tDeviceList devices;
+
+    tDevicesByAdapterMap::const_iterator deviceAdaptersIterator;
+
+    pthread_mutex_lock(&mDevicesByAdapterMutex);
+
+    for(deviceAdaptersIterator = mDevicesByAdapter.begin(); deviceAdaptersIterator != mDevicesByAdapter.end(); ++deviceAdaptersIterator)
+    {
+        IDeviceAdapter* pDeviceAdapter = deviceAdaptersIterator->first;
+        tInternalDeviceList *pDevices = deviceAdaptersIterator->second;
+
+        LOG4CPLUS_INFO_EXT(mLogger, "Processing adapter with type: "<<pDeviceAdapter->getDeviceType());
+
+        tInternalDeviceList::const_iterator devicesInAdapterIterator;
+        for(devicesInAdapterIterator = pDevices->begin(); devicesInAdapterIterator != pDevices->end(); ++devicesInAdapterIterator)
+        {
+            SDeviceInfo deviceInfo;
+
+            deviceInfo.mDeviceHandle = devicesInAdapterIterator->mDeviceHandle;
+            deviceInfo.mDeviceType = pDeviceAdapter->getDeviceType();
+            deviceInfo.mUniqueDeviceId = devicesInAdapterIterator->mUniqueDeviceId;
+            deviceInfo.mUserFriendlyName = devicesInAdapterIterator->mUserFriendlyName;
+
+            devices.push_back(deviceInfo);
+
+            LOG4CPLUS_INFO_EXT(mLogger, "Processed device with unique Id: "<<devicesInAdapterIterator->mUniqueDeviceId << ", friendlyName: "<<devicesInAdapterIterator->mUserFriendlyName);
+        }
+    }
+
+    LOG4CPLUS_INFO_EXT(mLogger, "Complete device list from all adapters was prepared. Preparing callback OnDeviceListUpdated for sending");
+
+    pthread_mutex_unlock(&mDevicesByAdapterMutex);
+
+    // Sending DeviceListUpdatedCallback
+    pthread_mutex_lock(&mDeviceListenersMutex);
+
+    SDeviceListenerCallback cb(CTransportManager::DeviceListenerCallbackType_DeviceListUpdated, devices);
+    mDeviceListenersCallbacks.push_back(cb);
+
+    pthread_cond_signal(&mDeviceListenersConditionVar);
+
+    pthread_mutex_unlock(&mDeviceListenersMutex);
+
+    LOG4CPLUS_INFO_EXT(mLogger, "Callback OnDeviceListUpdated was prepared for sending");
 }
