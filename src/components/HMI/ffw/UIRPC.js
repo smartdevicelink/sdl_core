@@ -184,7 +184,11 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.AddCommand") {
 			
-			MFT.AppRightMenuView.AddCommand(request.params.cmdId, request.params.menuParams);
+			if( request.params.menuParams.parentID == 0 ){
+				MFT.AppRightMenuView.AddCommand(request.params.cmdId, request.params.menuParams);
+			}else{
+				MFT.AppModel.subMenuCommands.push(request.params);
+			}
 
 			resultCode = "SUCCESS";
 

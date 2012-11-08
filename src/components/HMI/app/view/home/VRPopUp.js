@@ -152,7 +152,7 @@ MFT.VRPopUp = Em.ContainerView.create({
         },
         
         loaded: function() {
-            this.set('scroll', new iScroll('buttonsWrapper',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.VRPopUp.buttonsWrapper.scrollEnd();}}));
+            this.set('scroll', new iScroll('buttonsWrapperVR',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.VRPopUp.buttonsWrapper.scrollEnd();}}));
             this.coeficient = this.scroll.wrapperH / this.scroll.scrollerH;
             this.scrollBarH = (this.scroll.wrapperH - 98) * this.coeficient - 49;
             this.scrollBar.scroller.set( 'style', 'height:' + this.scrollBarH + 'px;' );

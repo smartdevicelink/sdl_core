@@ -37,7 +37,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 		}),
 
 		hideMenu: function(){
-			if( (MFT.States.media.appsubmenu.active == true) || (MFT.States.media.appoptions.active == true) ){
+			if( (MFT.States.media.appoptions.appsubmenu.active == true) || (MFT.States.media.appoptions.active == true) ){
 				return true;
 			}else{
 				return false;
