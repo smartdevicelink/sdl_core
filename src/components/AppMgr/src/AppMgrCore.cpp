@@ -410,25 +410,25 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
             AppLinkRPC::DeleteCommand_request* object = (AppLinkRPC::DeleteCommand_request*)mobileMsg;
-            RPC2Communication::RPC2Request* deleteCmd = NULL;
+
             CommandType cmdType = core->mCommandMapping.getType(object->get_cmdID());
             if(cmdType == CommandType::UI)
             {
-                deleteCmd = new RPC2Communication::UI::DeleteCommand();
+                RPC2Communication::UI::DeleteCommand* deleteCmd = new RPC2Communication::UI::DeleteCommand();
+                core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
+                deleteCmd->set_cmdId(object->get_cmdID());
+                core->mCommandMapping.removeCommand(object->get_cmdID());
+                HMIHandler::getInstance().sendRequest(deleteCmd);
             }
-            else if(cmdType == CommandType::VR)
+            if(cmdType == CommandType::VR)
             {
-                deleteCmd = new RPC2Communication::VR::DeleteCommand();
+                RPC2Communication::VR::DeleteCommand* deleteCmd = new RPC2Communication::VR::DeleteCommand();
+                core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
+                deleteCmd->set_cmdId(object->get_cmdID());
+                core->mCommandMapping.removeCommand(object->get_cmdID());
+                HMIHandler::getInstance().sendRequest(deleteCmd);
             }
-            else
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, " Cannot deduct the command type! Command type is "<<cmdType.getType());
-                break;
-            }
-            core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
-            ((RPC2Communication::UI::DeleteCommand*)deleteCmd)->set_cmdId(object->get_cmdID()); //Doesn't matter to which type to cast: RPC2Communication::VR::DeleteCommand also has this method with the same param
-            core->mCommandMapping.removeCommand(object->get_cmdID());
-            HMIHandler::getInstance().sendRequest(deleteCmd);
+
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_ADDSUBMENU_REQUEST:
