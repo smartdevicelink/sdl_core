@@ -366,13 +366,13 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         }
         case AppLinkRPC::Marshaller::METHOD_ONBUTTONPRESS:
         {
-            LOG4CPLUS_INFO(mLogger, "OnButtonPress Notification has been received.");
+            LOG4CPLUS_INFO_EXT(mLogger, "OnButtonPress Notification has been received.");
             core->mJSONHandler->sendRPCMessage(mobileMsg, sessionID);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_ONCOMMAND:
         {
-            LOG4CPLUS_INFO(mLogger, "OnCommand Notification has been received.");
+            LOG4CPLUS_INFO_EXT(mLogger, "OnCommand Notification has been received.");
             core->mJSONHandler->sendRPCMessage(mobileMsg, sessionID);
             break;
         }
@@ -902,6 +902,25 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
 
     switch(msg->getMethod())
     {
+        case RPC2Communication::VR::Marshaller::METHOD_ADDCOMMANDRESPONSE:
+        {
+            return;
+        }
+        case RPC2Communication::VR::Marshaller::METHOD_DELETECOMMANDRESPONSE:
+        {
+            return;
+        }
+        case RPC2Communication::VR::Marshaller::METHOD_ONCOMMAND:
+        {
+            return;
+        }
+        case RPC2Communication::VR::Marshaller::METHOD_INVALID:
+        default:
+            LOG4CPLUS_ERROR_EXT(mLogger, " Not VR RPC message "<< msg->getMethod() <<" has been received!");
+    }
+
+    switch(msg->getMethod())
+    {
         case RPC2Communication::TTS::Marshaller::METHOD_SPEAKRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Speak response has been income");
@@ -949,11 +968,11 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         }        
         case RPC2Communication::AppLinkCore::Marshaller::METHOD_ACTIVATEAPP:
         {
-            LOG4CPLUS_INFO(mLogger, "ActivateApp has been received!");
+            LOG4CPLUS_INFO_EXT(mLogger, "ActivateApp has been received!");
             RPC2Communication::AppLinkCore::ActivateApp* object = static_cast<RPC2Communication::AppLinkCore::ActivateApp*>(msg);
             if ( !object )
             {
-                LOG4CPLUS_ERROR(mLogger, "Couldn't cast object to ActivateApp type");
+                LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't cast object to ActivateApp type");
                 return;
             }     
             AppLinkRPC::OnHMIStatus * hmiStatus = new AppLinkRPC::OnHMIStatus;
@@ -962,7 +981,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             RegistryItem* item = AppMgrRegistry::getInstance().getItem(appName);
             if(!item)
             {
-                LOG4CPLUS_ERROR(mLogger, "Couldn't find a registered app by the name "<<appName);
+                LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't find a registered app by the name "<<appName);
                 return;
             }
             Application* app = item->getApplication();
