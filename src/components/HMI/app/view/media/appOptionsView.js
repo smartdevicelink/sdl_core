@@ -11,7 +11,7 @@
  */
  
 MFT.AppOptionsView = Em.ContainerView.create({
-    classNameBindings:  [ 'MFT.States.media.appoptions.active:active_state' ],
+    classNameBindings:  [ 'hideMenu:active_state' ],
 
     classNames:        ['media_app_options_view', 'hidden'],
 
@@ -20,6 +20,15 @@ MFT.AppOptionsView = Em.ContainerView.create({
                             'backButton',
                             'buttonsWrapper'
                         ],
+
+    hideMenu: function(){
+        if( (MFT.States.media.appperforminteraction.active == false) && (MFT.States.media.appoptions.appsubmenu.active == false) && (MFT.States.media.appoptions.active == true) ){
+            return true;
+        }else{
+            return false;
+        }
+    }.property('MFT.States.media.appoptions.appsubmenu.active', 'MFT.States.media.appoptions.active', 'MFT.States.media.appperforminteraction.active'),
+        
 
     backButton: MFT.Button.extend({
         classNames:        ['backButton','button'],     

@@ -1,11 +1,11 @@
 
 /**
- * @name MFT.AppSubMenuView
+ * @name MFT.AppPerformInteractionChoise
  * 
  * @desc Media App Options module visual representation
  * 
  * @category    View
- * @filesource  app/view/media/AppSubMenuView.js
+ * @filesource  app/view/media/AppPerformInteractionChoise.js
  * @version     2.0
  *
  * @author      Andriy Melnik
@@ -31,11 +31,14 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create({
 
     PerformInteraction: function( interactionChoiceSetIDList ){
 
-        var buttonsCount = MFT.AppPerformInteractionChoise.buttonsWrapper.buttonsScroll.get('childViews').length;
-        if(buttonsCount > 0){
-            for(var i = 0; i < buttonsCount; i++ ){
-                Ember.View.views[MFT.AppPerformInteractionChoise.buttonsWrapper.buttonsScroll.get('childViews')[i].elementId].destroy();
+        var i = this.buttonsWrapper.buttonsScroll.get('childViews').length-1;
+        if(i >= 0){
+            do{
+                var button = this.buttonsWrapper.buttonsScroll.get('childViews')[i];
+                Em.View.views[button.elementId].destroy();
+                i--;
             }
+            while (i>=0);
         }
 
         for(var IDList = 0; IDList< interactionChoiceSetIDList.length; IDList++){
@@ -48,7 +51,7 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create({
                         button = MFT.Button.create({
                             elementId:          'media_app_options_view' + MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
                             click:              function(){
-                                FFW.UI.onCommand(MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID);
+                                FFW.UI.onChoosed(this.commandId);
                             },
                             commandId:          MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID, 
                             classNames:         ['rs-item'],
@@ -63,7 +66,7 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create({
             }
         }
 
-        MFT.AppSubMenuView.buttonsWrapper.scroll.refresh();
+        MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.refresh();
 
         MFT.MediaController.turnOnAppPerform();
     },
@@ -106,11 +109,11 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create({
             scrollArrowUp:   MFT.Button.extend({
                 classNames: 'scrollArrows scrollArrowUp button',
                 click:      function(){
-                    MFT.AppSubMenuView.buttonsWrapper.scroll.scrollTo(0, MFT.AppSubMenuView.buttonsWrapper.scroll.y + 52, 200);
-                    if( MFT.AppSubMenuView.buttonsWrapper.scroll.y < -52){
-                        MFT.AppSubMenuView.buttonsWrapper.set('scrollPos', MFT.AppSubMenuView.buttonsWrapper.scroll.y + 52);
+                    MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.scrollTo(0, MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.y + 52, 200);
+                    if( MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.y < -52){
+                        MFT.AppPerformInteractionChoise.buttonsWrapper.set('scrollPos', MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.y + 52);
                     }else{
-                        MFT.AppSubMenuView.buttonsWrapper.set('scrollPos', 0);
+                        MFT.AppPerformInteractionChoise.buttonsWrapper.set('scrollPos', 0);
                     }
                 }
             }),
@@ -124,11 +127,11 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create({
             scrollArrowDown:   MFT.Button.extend({
                 classNames: 'scrollArrows scrollArrowDown button',
                 click:      function(){
-                    MFT.AppSubMenuView.buttonsWrapper.scroll.scrollTo(0, MFT.AppSubMenuView.buttonsWrapper.scroll.y - 52, 200);
-                    if( Math.abs(MFT.AppSubMenuView.buttonsWrapper.scroll.y) < ((MFT.AppSubMenuView.buttonsWrapper.scroll.scrollerH - MFT.AppSubMenuView.buttonsWrapper.scroll.wrapperH) - 52) ){
-                        MFT.AppSubMenuView.buttonsWrapper.set('scrollPos', MFT.AppSubMenuView.buttonsWrapper.scroll.y - 52);
+                    MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.scrollTo(0, MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.y - 52, 200);
+                    if( Math.abs(MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.y) < ((MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.scrollerH - MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.wrapperH) - 52) ){
+                        MFT.AppPerformInteractionChoise.buttonsWrapper.set('scrollPos', MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.y - 52);
                     }else{
-                        MFT.AppSubMenuView.buttonsWrapper.set('scrollPos',  (MFT.AppSubMenuView.buttonsWrapper.scroll.scrollerH - MFT.AppSubMenuView.buttonsWrapper.scroll.wrapperH));
+                        MFT.AppPerformInteractionChoise.buttonsWrapper.set('scrollPos',  (MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.scrollerH - MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.wrapperH));
                     }
                 }
             }),
@@ -140,59 +143,26 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create({
         }),
         
         scrollEnd:  function(){
-            if( MFT.AppSubMenuView.buttonsWrapper.scroll.y > 0){
+            if( MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.y > 0){
                 this.set('scrollPos', 0);
-            }else if( Math.abs(MFT.AppSubMenuView.buttonsWrapper.scroll.y) > (MFT.AppSubMenuView.buttonsWrapper.scroll.scrollerH - MFT.AppSubMenuView.buttonsWrapper.scroll.wrapperH) ){
-                this.set('scrollPos', MFT.AppSubMenuView.buttonsWrapper.scroll.scrollerH - MFT.AppSubMenuView.buttonsWrapper.scroll.wrapperH);
+            }else if( Math.abs(MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.y) > (MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.scrollerH - MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.wrapperH) ){
+                this.set('scrollPos', MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.scrollerH - MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.wrapperH);
             }else{
-                this.set('scrollPos', MFT.AppSubMenuView.buttonsWrapper.scroll.y);
+                this.set('scrollPos', MFT.AppPerformInteractionChoise.buttonsWrapper.scroll.y);
             }
         },
         
         loaded: function() {
-            this.set('scroll', new iScroll('buttonsWrapperPerformInteraction',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.AppSubMenuView.buttonsWrapper.scrollEnd();}}));
+            this.set('scroll', new iScroll('buttonsWrapperPerformInteraction',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.AppPerformInteractionChoise.buttonsWrapper.scrollEnd();}}));
             this.coeficient = this.scroll.wrapperH / this.scroll.scrollerH;
             this.scrollBarH = (this.scroll.wrapperH - 98) * this.coeficient - 49;
             this.scrollBar.scroller.set( 'style', 'height:' + this.scrollBarH + 'px;' );
-
-            button = MFT.Button.create({
-                elementId:          'media_app_options_view',
-                click:              function(){
-                    MFT.MediaController.turnOnAppSubMenu(1);
-                },
-                commandId:          1, 
-                classNames:         ['rs-item'],
-                //icon:             null,//'images/media/active_arrow.png',
-                text:               "menuName" 
-            });
-
-            MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
-            MFT.AppSubMenuView.buttonsWrapper.scroll.refresh();
         }
     }),
 
     afterRender: function() {
-/*
-        var butt;
 
-        for(var i in MFT.InfoController.get('appsParams')){
-
-            butt = MFT.Button.create({
-                goToState:          MFT.InfoController.get('appsParams')[i].goToState,
-                classNames:         MFT.InfoController.get('appsParams')[i].classNames,
-                icon:               MFT.InfoController.get('appsParams')[i].icon,
-                textBinding:        MFT.InfoController.get('appsParams')[i].textBinding,
-                arrow:              MFT.InfoController.get('appsParams')[i].arrow,
-                action:             MFT.InfoController.get('appsParams')[i].action,
-                target:             MFT.InfoController.get('appsParams')[i].target,
-                disabledBinding:    MFT.InfoController.get('appsParams')[i].disabledBinding,
-                onDown:             MFT.InfoController.get('appsParams')[i].onDown
-            });
-
-            MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('_childViews').pushObject(butt);
-        }
-*/
-        setTimeout(function () { MFT.AppSubMenuView.buttonsWrapper.loaded(); }, 200);
+        setTimeout(function () { MFT.AppPerformInteractionChoise.buttonsWrapper.loaded(); }, 200);
         
     }
 });

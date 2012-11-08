@@ -30,23 +30,25 @@ MFT.AppSubMenuView = Em.ContainerView.create({
 
     SubMenuActivate: function( menuId ){
 
-        if(MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').length > 0){
-            for(var i = 0; i < MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').length; i++ ){
+        var buttonsCount = MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').length;
+        if(buttonsCount > 0){
+            for(var i = 0; i < buttonsCount; i++ ){
                 Ember.View.views[MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews')[i].elementId].destroy();
             }
         }
 
-        for(var id = 0; i < MFT.AppModel.subMenuCommands.length; i++){
-            if( menuId == MFT.AppModel.subMenuCommands[id].menuParams.parentID ){
+        var i = 0;
+        for(i = 0; i < MFT.AppModel.subMenuCommands.length; i++){
+            if( menuId == MFT.AppModel.subMenuCommands[i].menuParams.parentID ){
                 button = MFT.Button.create({
-                    elementId:          'media_app_subMenu_view' + MFT.AppModel.subMenuCommands[id].cmdId,
+                    elementId:          'media_app_subMenu_view' + MFT.AppModel.subMenuCommands[i].cmdId,
                     click:              function(){
                         FFW.UI.onCommand(this.commandId);
                     },
-                    commandId:          MFT.AppModel.subMenuCommands[id].cmdId, 
+                    commandId:          MFT.AppModel.subMenuCommands[i].cmdId, 
                     classNames:         ['rs-item'],
                     //icon:             null,//'images/media/active_arrow.png',
-                    text:               MFT.AppModel.subMenuCommands[id].menuParams.menuName 
+                    text:               MFT.AppModel.subMenuCommands[i].menuParams.menuName 
                 });
 
                 MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);

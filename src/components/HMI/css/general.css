@@ -100,7 +100,7 @@ div {
 	width: 400px;
 	height: 200px;
 	background-color: rgba(0, 0, 0, 0.95);
-	z-index: 1;
+	z-index: 2;
 	border-radius: 10PX;
 	box-shadow: 0px 0px 7px 5px rgba(0, 0, 0, 0.95);
 	top: 140px;
@@ -118,15 +118,17 @@ div {
 #UIPopUp .message1{
 	top: 10px;
 	left: 10px;
-	width: 278px;
+	width: 374px;
 	height: 81px;
+	text-align: center;
 }
 
 #UIPopUp .message2{
 	top: 40px;
 	left: 10px;
-	width: 278px;
+	width: 374px;
 	height: 81px;
+	text-align: center;
 }
 
 #UIPopUp.received{

@@ -42,7 +42,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 			}else{
 				return false;
 			}
-		}.property('MFT.States.media.appsubmenu.active', 'MFT.States.media.appoptions.active', 'MFT.States.media.appperforminteraction.active'),
+		}.property('MFT.States.media.appoptions.appsubmenu.active', 'MFT.States.media.appoptions.active', 'MFT.States.media.appperforminteraction.active'),
 		
 		/** AM Station Button*/
 		amButton:  MFT.ToggleIndicatorsButton.create({

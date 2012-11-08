@@ -207,6 +207,7 @@ void * JSONRPC2Handler::waitForResponsesToHMI( void * params )
             if ( commandJson.isNull() )
             {
                 LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
+                continue;
             }
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: processed command" );
 
@@ -252,6 +253,7 @@ void * JSONRPC2Handler::waitForRequestsToHMI( void * params )
             if ( commandJson.isNull() )
             {
                 LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
+                continue;
             }
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: processed command" );
 
@@ -297,6 +299,7 @@ void * JSONRPC2Handler::waitForNotificationsToHMI( void * params )
             if ( commandJson.isNull() )
             {
                 LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
+                continue;
             }
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: processed command" );
 

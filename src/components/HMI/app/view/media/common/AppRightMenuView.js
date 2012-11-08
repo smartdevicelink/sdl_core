@@ -41,7 +41,7 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 		}else{
 			return false;
 		}
-	}.property('MFT.States.media.appsubmenu.active', 'MFT.States.media.appoptions.active', 'MFT.States.media.appperforminteraction.active'),
+	}.property('MFT.States.media.appoptions.appsubmenu.active', 'MFT.States.media.appoptions.active', 'MFT.States.media.appperforminteraction.active'),
 
 	topScrollButton: MFT.Button.extend({
 		classNameBindings: 	[
