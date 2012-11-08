@@ -588,7 +588,47 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
 
     }
 
+    pthread_mutex_lock(&mDataListenersMutex);
+
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Terminating connection thread");
+
+    // Deleting data associated with connection handle
+
+    tDataCallbacksConditionVariables::iterator conditionVarDeleteIterator = mDataCallbacksConditionVars.find(ConnectionHandle);
+    if(conditionVarDeleteIterator != mDataCallbacksConditionVars.end())
+    {
+        delete conditionVarDeleteIterator->second;
+        mDataCallbacksConditionVars.erase(ConnectionHandle);
+    }
+    else
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Failed to remove condition variable");
+    }
+
+    tDataCallbacks::iterator callbacksVectorIterator = mDataListenersCallbacks.find(ConnectionHandle);
+    if(callbacksVectorIterator != mDataListenersCallbacks.end())
+    {
+        callbacksVectorIterator->second->clear();
+        delete callbacksVectorIterator->second;
+        mDataListenersCallbacks.erase(ConnectionHandle);
+    }
+    else
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Failed to remove callbacks vector");
+    }
+
+    tDataCallbacksThreads::iterator threadIterator = mDataCallbacksThreads.find(ConnectionHandle);
+    if(threadIterator != mDataCallbacksThreads.end())
+    {
+        mDataCallbacksThreads.erase(ConnectionHandle);
+    }
+    else
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Failed to remove thread");
+    }
+
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Connection thread terminated");
+    pthread_mutex_unlock(&mDataListenersMutex);
 }
 
 void* CTransportManager::dataCallbacksThreadStartRoutine(void* Data)
