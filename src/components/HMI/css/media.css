@@ -2764,6 +2764,17 @@
 	z-index: 1;
 }
 
+#media_app_perform_interaction_view .buttonsWrapper {
+	top: 70px;
+	left: 100px;
+	width: 600px;
+	height: 260px;
+	overflow: hidden;
+}
+
+#media_app_perform_interaction_view .rs-item {
+	width: 535px;
+}
 
 #media_app_sub_menu_view .scrollButtons{
 	width: 550px;

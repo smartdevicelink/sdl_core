@@ -31,13 +31,20 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create({
 
     PerformInteraction: function( interactionChoiceSetIDList ){
 
-        for(var IDList in interactionChoiceSetIDList){
+        var buttonsCount = MFT.AppPerformInteractionChoise.buttonsWrapper.buttonsScroll.get('childViews').length;
+        if(buttonsCount > 0){
+            for(var i = 0; i < buttonsCount; i++ ){
+                Ember.View.views[MFT.AppPerformInteractionChoise.buttonsWrapper.buttonsScroll.get('childViews')[i].elementId].destroy();
+            }
+        }
 
-            for(var ChoisesVal in MFT.AppModel.interactionChoises){
+        for(var IDList = 0; IDList< interactionChoiceSetIDList.length; IDList++){
+
+            for(var ChoisesVal = 0; ChoisesVal < MFT.AppModel.interactionChoises.length; ChoisesVal++){
 
                 if( interactionChoiceSetIDList[IDList] == MFT.AppModel.interactionChoises[ChoisesVal].interactionChoiceSetID ){
                     
-                    for(var ChoiseSet in MFT.AppModel.interactionChoises[ChoisesVal].choiceSet){
+                    for(var ChoiseSet = 0; ChoiseSet < MFT.AppModel.interactionChoises[ChoisesVal].choiceSet.length; ChoiseSet++){
                         button = MFT.Button.create({
                             elementId:          'media_app_options_view' + MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
                             click:              function(){
@@ -46,16 +53,19 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create({
                             commandId:          MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID, 
                             classNames:         ['rs-item'],
                             //icon:             null,//'images/media/active_arrow.png',
-                            text:               MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName 
+                            text:               MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
+                            templateName:       'text'
                         });
 
-                        MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
+                        MFT.AppPerformInteractionChoise.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
                     }
                 }
             }
         }
 
         MFT.AppSubMenuView.buttonsWrapper.scroll.refresh();
+
+        MFT.MediaController.turnOnAppPerform();
     },
 
     buttonsWrapper: Em.ContainerView.extend({
