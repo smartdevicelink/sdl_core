@@ -403,12 +403,29 @@ namespace NsAppLink
             bool startApplicationCallbacksThread();
 
             /**
-             * @brief Starts thread for application-related callbacks
+             * @brief Stops thread for application-related callbacks
+             *
+             * @return void
+             * @warning terminate flag must be set to true before calling this function
+             **/
+            void stopApplicationCallbacksThread();
+
+            /**
+             * @brief Starts thread for data-related callbacks for given connection handle
              *
              * @param ConnectionHandle Connection Handle
              * @return bool
              **/
             bool startDataCallbacksThread(const tConnectionHandle ConnectionHandle);
+
+            /**
+             * @brief Stops thread for data-related callbacks for given connection handle
+             *
+             * @param ConnectionHandle Connection Handle
+             * @return void
+             * @warning terminate flag must be set to true before calling this function
+             **/
+            void stopDataCallbacksThread(const tConnectionHandle ConnectionHandle);
 
             /**
              * @brief Check thread existence for given ConnectionHandle

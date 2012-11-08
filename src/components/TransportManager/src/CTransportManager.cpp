@@ -69,13 +69,18 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
         (*di)->run();
-        //static_cast<CBluetoothAdapter*>(*di)->scanForNewDevices();
+        //(*di)->scanForNewDevices();
     }
 
     if( false == startApplicationCallbacksThread())
     {
         return;
     }
+
+
+    //sleep(20);
+
+    //connectDevice(1);
 
     return;
 
@@ -330,21 +335,47 @@ void CTransportManager::onDeviceListUpdated(IDeviceAdapter * DeviceAdapter, cons
 
 void CTransportManager::onApplicationConnected(const SDeviceInfo & ConnectedDevice, const tConnectionHandle ConnectionHandle)
 {
-    LOG4CPLUS_TRACE_EXT(mLogger, "onApplicationConnected called");
+    TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "onApplicationConnected");
 
     startDataCallbacksThread(ConnectionHandle);
 
-    LOG4CPLUS_TRACE_EXT(mLogger, "END of onApplicationConnected called");
+    // Sending callback
+    pthread_mutex_lock(&mDeviceListenersMutex);
+
+    SDeviceListenerCallback cb(CTransportManager::DeviceListenerCallbackType_ApplicationConnected, ConnectedDevice, ConnectionHandle);
+    mDeviceListenersCallbacks.push_back(cb);
+
+    pthread_cond_signal(&mDeviceListenersConditionVar);
+
+    pthread_mutex_unlock(&mDeviceListenersMutex);
+
+    TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "END of onApplicationConnected");
 }
 
 void CTransportManager::onApplicationDisconnected(const SDeviceInfo & DisconnectedDevice, const tConnectionHandle ConnectionHandle)
 {
-    LOG4CPLUS_INFO_EXT(mLogger, "onApplicationDisconnected called");
+    TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "onApplicationDisconnected");
+
+    //TODO: Checking Connection Handle validity
+
+    stopDataCallbacksThread(ConnectionHandle);
+
+    // Sending callback
+    pthread_mutex_lock(&mDeviceListenersMutex);
+
+    SDeviceListenerCallback cb(CTransportManager::DeviceListenerCallbackType_ApplicationDisconnected, DisconnectedDevice, ConnectionHandle);
+    mDeviceListenersCallbacks.push_back(cb);
+
+    pthread_cond_signal(&mDeviceListenersConditionVar);
+
+    pthread_mutex_unlock(&mDeviceListenersMutex);
+
+    TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "END of onApplicationDisconnected");
 }
 
 void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
-    LOG4CPLUS_INFO_EXT(mLogger, "onFrameReceived called");
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameReceived called. DA: "<<DeviceAdapter<<", DataSize: "<<DataSize);
 }
 
 void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
@@ -415,6 +446,12 @@ void CTransportManager::applicationCallbacksThread()
         pthread_mutex_lock(&mDeviceListenersMutex);
         pthread_cond_wait(&mDeviceListenersConditionVar, &mDeviceListenersMutex);
 
+        if(mTerminateFlag)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Thread must be terminated");
+            continue;
+        }
+
         LOG4CPLUS_INFO_EXT(mLogger, "Callback to send added. Number of callbacks: " << mDeviceListenersCallbacks.size());
 
         std::vector<SDeviceListenerCallback>::const_iterator callbackIterator;
@@ -454,6 +491,8 @@ void CTransportManager::applicationCallbacksThread()
 
         pthread_mutex_unlock(&mDeviceListenersMutex);
     }
+
+    LOG4CPLUS_INFO_EXT(mLogger, "ApplicationsCallback thread terminated");
 }
 
 void* CTransportManager::applicationCallbacksThreadStartRoutine(void* Data)
@@ -486,6 +525,12 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
     {
         pthread_mutex_lock(&mDataListenersMutex);
         pthread_cond_wait(conditionVar, &mDataListenersMutex);
+
+        if(mTerminateFlag)
+        {
+            TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Thread must be terminated");
+            continue;
+        }
 
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Triggered callback calling");
 
@@ -543,7 +588,7 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
 
     }
 
-    LOG4CPLUS_INFO_EXT(mLogger, "Connection thread terminated (Connection handle: " << ConnectionHandle << ")");
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Connection thread terminated");
 }
 
 void* CTransportManager::dataCallbacksThreadStartRoutine(void* Data)
@@ -580,6 +625,15 @@ bool CTransportManager::startApplicationCallbacksThread()
         LOG4CPLUS_ERROR_EXT(mLogger, "Device listeners thread cannot be started, error code " << errorCode);
         return false;
     }
+}
+
+void CTransportManager::stopApplicationCallbacksThread()
+{
+    LOG4CPLUS_TRACE_EXT(mLogger, "Stopping application-callbacks thread");
+
+    pthread_mutex_lock(&mDeviceListenersMutex);
+    pthread_cond_signal(&mDeviceListenersConditionVar);
+    pthread_mutex_unlock(&mDeviceListenersMutex);
 }
 
 bool CTransportManager::startDataCallbacksThread(const tConnectionHandle ConnectionHandle)
@@ -623,6 +677,28 @@ bool CTransportManager::startDataCallbacksThread(const tConnectionHandle Connect
 
     pthread_mutex_unlock(&mDataListenersMutex);
 }
+
+void CTransportManager::stopDataCallbacksThread(const tConnectionHandle ConnectionHandle)
+{
+    TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "Stopping data-callbacks thread");
+
+    pthread_mutex_lock(&mDataListenersMutex);
+
+    tDataCallbacksConditionVariables::iterator conditionVarIterator = mDataCallbacksConditionVars.find(ConnectionHandle);
+
+    if(conditionVarIterator == mDataCallbacksConditionVars.end())
+    {
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "ConnectionHandle is invalid");
+    }
+    else
+    {
+        pthread_cond_t *conditionVar = conditionVarIterator->second;
+        pthread_cond_signal(conditionVar);
+    }
+
+    pthread_mutex_unlock(&mDataListenersMutex);
+}
+
 
 bool CTransportManager::isThreadForConnectionHandleExist(const tConnectionHandle ConnectionHandle)
 {
