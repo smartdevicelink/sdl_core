@@ -187,7 +187,8 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {"UI.CreateInteractionChoiceSet",18,&Marshaller::mCreateInteractionChoiceSet},
       {""}, {""}, {""}, {""}, {""}, {""}, {""},
 #line 25 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.CreateInteractionChoiceSetResponse",19,&Marshaller::mCreateInteractionChoiceSetResponse}
+      {"UI.CreateInteractionChoiceSetResponse",19,&Marshaller::mCreateInteractionChoiceSetResponse},
+      {"UI.OnReady", 50,&Marshaller::mOnReady}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)

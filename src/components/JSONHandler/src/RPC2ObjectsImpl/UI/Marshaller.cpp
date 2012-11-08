@@ -31,7 +31,6 @@
 #include "../include/JSONHandler/RPC2Objects/UI/SetMediaClockTimerResponse.h"
 #include "../include/JSONHandler/RPC2Objects/UI/Show.h"
 #include "../include/JSONHandler/RPC2Objects/UI/ShowResponse.h"
-#include <iostream>
 
 namespace RPC2Communication
 {
@@ -104,12 +103,13 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
     return new RPC2Error(rv);
   }
 
-  std::cout<<"UI Marshaller::fromJSON::json.isMember(id) " << json.isMember("id")<<std::endl;
   if(!json.isMember("id"))				// notification
   {
     if(!json.isMember("method") || !json["method"].isString())  return 0;
 
     Methods m=getIndex(json["method"].asString().c_str());
+    if (json["method"].asString().compare("UI.OnReady") == 0)
+      m = METHOD_ONREADY;
 
     switch(m)
     {
@@ -133,13 +133,17 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         OnSystemContext *rv=new OnSystemContext;
         return OnSystemContextMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
+      case METHOD_ONREADY:
+      {
+        OnReady * rv = new OnReady;
+        return OnReadyMarshaller::fromJSON(json, *rv) ? rv : 0;
+      }
       default:
         return 0;
     }
     return 0;
   }
 
-  std::cout<<"UI Marshaller::fromJSON::json.isMember(method) " << json.isMember("method")<<std::endl;
   if(json.isMember("method"))				// request
   {
     if(!json["id"].isInt())  return 0;
@@ -217,22 +221,17 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
     }
     return 0;
   }
-  std::cout<<"UI Marshaller::fromJSON::json.isMember(result) " << json.isMember("result")<<std::endl;
 							// response
   if(!json.isMember("result"))  return 0;
 
-std::cout<<"UI Marshaller::fromJSON::json.isMember(id) " << json.isMember("id")<<std::endl;
   if(!json["id"].isInt()) return 0;
 
 // here is extension of protocol, two fields added: resultCode and method
   if(!json["result"].isMember("resultCode") || !json["result"]["resultCode"].isString())  return 0;
-  std::cout<<"UI Marshaller::fromJSON::json.isMember(resultCode) " << json["result"].isMember("resultCode")<<std::endl;
+  
   if(!json["result"].isMember("method") || !json["result"]["method"].isString())  return 0;
-  std::cout<<"UI Marshaller::fromJSON::json.isMember(method) " << json["result"].isMember("method")<<std::endl;
-
+  
   Methods m=getIndex(json["result"]["method"].asString().c_str());
-
-  std::cout<<"UI Marshaller::fromJSON:: method " << json["result"]["method"].asString() << " : " << m << std::endl;
 
   switch(m)
   {
@@ -324,6 +323,8 @@ Json::Value Marshaller::Notification2JSON(const RPC2Communication::RPC2Notificat
       return OnCommandMarshaller::toJSON(*static_cast<const OnCommand*>(msg));
     case METHOD_ONSYSTEMCONTEXT:
       return OnSystemContextMarshaller::toJSON(*static_cast<const OnSystemContext*>(msg));
+    case METHOD_ONREADY:
+      return OnReadyMarshaller::toJSON(*static_cast<const OnReady*>(msg));
     default:
       return j;
   }
@@ -430,7 +431,7 @@ Json::Value Marshaller::toJSON(const RPC2Command* msg)
 }
 
 
-const Marshaller::localHash Marshaller::mHashTable[30]=
+const Marshaller::localHash Marshaller::mHashTable[31]=
 {
   {"UI.AddCommand",0,&Marshaller::mAddCommand},
   {"UI.AddCommandResponse",1,&Marshaller::mAddCommandResponse},
@@ -461,7 +462,8 @@ const Marshaller::localHash Marshaller::mHashTable[30]=
   {"UI.SetMediaClockTimer",26,&Marshaller::mSetMediaClockTimer},
   {"UI.SetMediaClockTimerResponse",27,&Marshaller::mSetMediaClockTimerResponse},
   {"UI.Show",28,&Marshaller::mShow},
-  {"UI.ShowResponse",29,&Marshaller::mShowResponse}
+  {"UI.ShowResponse",29,&Marshaller::mShowResponse},
+  {"UI.OnReady",50,&Marshaller::mOnReady}
 
 };
 
@@ -497,3 +499,4 @@ SetMediaClockTimerMarshaller Marshaller::mSetMediaClockTimer;
 SetMediaClockTimerResponseMarshaller Marshaller::mSetMediaClockTimerResponse;
 ShowMarshaller Marshaller::mShow;
 ShowResponseMarshaller Marshaller::mShowResponse;
+OnReadyMarshaller Marshaller::mOnReady;

@@ -41,6 +41,7 @@
 #include "../src/RPC2ObjectsImpl/UI/SetMediaClockTimerResponseMarshaller.h"
 #include "../src/RPC2ObjectsImpl/UI/ShowMarshaller.h"
 #include "../src/RPC2ObjectsImpl/UI/ShowResponseMarshaller.h"
+#include "../src/RPC2ObjectsImpl/UI/OnReadyMarshaller.h"
 
 /*
   interface	RPC2Communication::UI
@@ -91,7 +92,8 @@ namespace RPC2Communication
         METHOD_SETMEDIACLOCKTIMER=38,
         METHOD_SETMEDIACLOCKTIMERRESPONSE=39,
         METHOD_SHOW=40,
-        METHOD_SHOWRESPONSE=41
+        METHOD_SHOWRESPONSE=41,
+        METHOD_ONREADY=50
       };
 
 
@@ -436,6 +438,16 @@ namespace RPC2Communication
         return mShowResponse.toString(res);
       }
 
+      static bool fromString(const std::string& str, OnReady&res)
+      {
+        return mOnReady.fromString(str, res);
+      }
+
+      static std::string toString(const OnReady& res)
+      {
+        return mOnReady.toString(res);
+      }
+
 
       struct localHash
       {
@@ -452,12 +464,12 @@ namespace RPC2Communication
       
       static const char* getName(Methods e)
       {
-        return (e>=0 && e<30) ? mHashTable[e].name : NULL;
+        return (e>=0 && e<31) ? mHashTable[e].name : NULL;
       }
       
       static const Methods getIndex(const char* s);
       
-      static const localHash mHashTable[30];
+      static const localHash mHashTable[31];
       friend class Marshaller_intHash;
       
       static ::RPC2Communication::RPC2ErrorMarshaller mRPC2ErrorInternal;
@@ -492,6 +504,7 @@ namespace RPC2Communication
       static SetMediaClockTimerResponseMarshaller mSetMediaClockTimerResponse;
       static ShowMarshaller mShow;
       static ShowResponseMarshaller mShowResponse;
+      static OnReadyMarshaller mOnReady;
 
     };
   }

@@ -248,6 +248,8 @@ set (GENERATED_RPC_SOURCES
     ./src/RPC2ObjectsImpl/VR/Marshaller.cpp
     ./src/RPC2ObjectsImpl/VR/OnCommand.cpp
     ./src/RPC2ObjectsImpl/VR/OnCommandMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/OnReady.cpp
+    ./src/RPC2ObjectsImpl/UI/OnReadyMarshaller.cpp
 )
 
 
