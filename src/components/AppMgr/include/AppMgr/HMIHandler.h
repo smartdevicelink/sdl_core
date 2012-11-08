@@ -10,6 +10,11 @@ class RPC2Response;
 class RPC2Request;
 }
 
+namespace log4cplus
+{
+class Logger;
+}
+
 namespace NsAppManager
 {
 
@@ -32,6 +37,8 @@ private:
     HMIHandler(const HMIHandler&);
     bool             m_bHMIReady;
     JSONRPC2Handler* mJSONRPC2Handler;
+
+    static log4cplus::Logger mLogger;
 };
 
 }
