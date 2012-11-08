@@ -572,13 +572,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             event->set_buttonEventMode(object->get_mode());
             const AppLinkRPC::ButtonName & name = object->get_name();
             event->set_buttonName(name);
-            RegistryItem* item = core->mButtonsMapping.findRegistryItemSubscribedToButton(name);
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mButtonsMapping.findRegistryItemSubscribedToButton(name));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -598,13 +592,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             event->set_buttonName(name);
             event->set_buttonPressMode(object->get_mode());
             LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
-            RegistryItem* item = core->mButtonsMapping.findRegistryItemSubscribedToButton(name);
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mButtonsMapping.findRegistryItemSubscribedToButton(name));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -635,13 +623,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             RPC2Communication::UI::OnCommand* object = (RPC2Communication::UI::OnCommand*)msg;
             AppLinkRPC::OnCommand* event = new AppLinkRPC::OnCommand();
             event->set_cmdID(object->get_commandId());
-            RegistryItem* item = core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_commandId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_commandId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -660,13 +642,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             response->set_success(true);
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -686,13 +662,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             response->set_success(true);
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -712,13 +682,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
             response->set_success(true);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -737,13 +701,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AppLinkRPC::Alert_response* response = new AppLinkRPC::Alert_response();
             response->set_success(true);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -762,13 +720,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AppLinkRPC::AddCommand_response* response = new AppLinkRPC::AddCommand_response();
             response->set_success(true);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -787,13 +739,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AppLinkRPC::DeleteCommand_response* response = new AppLinkRPC::DeleteCommand_response();
             response->set_success(true);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -811,13 +757,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AppLinkRPC::AddSubMenu_response* response = new AppLinkRPC::AddSubMenu_response();
             response->set_success(true);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -836,13 +776,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AppLinkRPC::DeleteSubMenu_response* response = new AppLinkRPC::DeleteSubMenu_response();
             response->set_success(true);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -861,13 +795,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AppLinkRPC::CreateInteractionChoiceSet_response* response = new AppLinkRPC::CreateInteractionChoiceSet_response();
             response->set_success(true);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -886,13 +814,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AppLinkRPC::DeleteInteractionChoiceSet_response* response = new AppLinkRPC::DeleteInteractionChoiceSet_response();
             response->set_success(true);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -908,6 +830,14 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction response has been income");
             RPC2Communication::UI::PerformInteractionResponse* object = (RPC2Communication::UI::PerformInteractionResponse*)msg;
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                return;
+            }
+            unsigned char sessionID = app->getSessionID();
+
             AppLinkRPC::PerformInteraction_response* response = new AppLinkRPC::PerformInteraction_response();
             if(object->get_choiceID())
             {
@@ -918,20 +848,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 response->set_triggerSource(*object->get_triggerSource());
             }
             response->set_success(true);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
-            if(!app)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
-                return;
-            }
-            unsigned char sessionID = app->getSessionID();
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));         
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             core->mJSONHandler->sendRPCMessage(response, sessionID);
@@ -948,13 +865,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand VR response has been income");
             RPC2Communication::VR::AddCommandResponse* object = (RPC2Communication::VR::AddCommandResponse*)msg;
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -974,13 +885,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand VR response has been income");
             RPC2Communication::VR::DeleteCommandResponse* object = (RPC2Communication::VR::DeleteCommandResponse*)msg;
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -999,13 +904,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand VR notification has been invoked");
             RPC2Communication::VR::OnCommand* object = (RPC2Communication::VR::OnCommand*)msg;
-            RegistryItem* item = core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_cmdID());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_cmdID()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -1034,13 +933,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             response->set_success(true);
-            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -1083,13 +976,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AppLinkRPC::OnHMIStatus * hmiStatus = new AppLinkRPC::OnHMIStatus;
             hmiStatus->set_hmiLevel(AppLinkRPC::HMILevel::HMI_FULL);
             const std::string& appName = object->get_appName();
-            RegistryItem* item = AppMgrRegistry::getInstance().getItem(appName);
-            if(!item)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't find a registered app by the name "<<appName);
-                return;
-            }
-            Application* app = item->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(appName));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -1196,6 +1083,22 @@ void AppMgrCore::unregisterApplication(const Message &msg)
 void AppMgrCore::registerApplicationOnHMI( const std::string& name )
 {
 
+}
+
+Application *AppMgrCore::getApplicationFromItemCheckNotNull(const RegistryItem *item) const
+{
+    if(!item)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+        return 0;
+    }
+    Application* app = item->getApplication();
+    if(!app)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+        return 0;
+    }
+    return 0;
 }
 
 void AppMgrCore::setJsonHandler(JSONHandler* handler)
