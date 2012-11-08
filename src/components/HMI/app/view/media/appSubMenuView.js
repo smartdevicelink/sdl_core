@@ -25,7 +25,7 @@ MFT.AppSubMenuView = Em.ContainerView.create({
 
     backButton: MFT.Button.extend({
         classNames:        ['backButton','button'],     
-        action:            'Back',
+        action:            'back',
         target:            'MFT.States',   
         icon:              'images/media/ico_back.png',   
     }),
@@ -40,7 +40,7 @@ MFT.AppSubMenuView = Em.ContainerView.create({
             }
         }
 
-        for(var id in MFT.AppModel.subMenuCommands){
+        for(var id = 0; i < MFT.AppModel.subMenuCommands.length; i++){
             if( menuId == MFT.AppModel.subMenuCommands[id].menuParams.parentID ){
                 button = MFT.Button.create({
                     elementId:          'media_app_subMenu_view' + MFT.AppModel.subMenuCommands[id].cmdId,
