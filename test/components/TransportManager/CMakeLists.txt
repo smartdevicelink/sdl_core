@@ -16,6 +16,11 @@ set (SOURCES_HANDLEGENERATORS_TEST
     ./HandleGeneratorsTest.cpp
 )
 
+# Sources for the TCP Simulator
+set (SOURCES_TCP_SIMULATOR
+    ./TcpSimulator.cpp
+)
+
 # Libraries seeems to be the same for all Transport Manager test
 set (LIBRARIES
     gtest
@@ -34,3 +39,7 @@ add_test(test_TransportManagerListeners test_TransportManagerListeners)
 add_executable("test_TransportManagerHandleGenerators" ${SOURCES_HANDLEGENERATORS_TEST})
 target_link_libraries("test_TransportManagerHandleGenerators" ${LIBRARIES})
 add_test(test_TransportManagerHandleGenerators test_TransportManagerHandleGenerators)
+
+add_executable("test_TransportManagerTCPSimulator" ${SOURCES_TCP_SIMULATOR})
+# It doesn't require any additional libraries at the moment
+
