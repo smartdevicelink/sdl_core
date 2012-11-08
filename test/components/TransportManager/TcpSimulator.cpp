@@ -19,17 +19,32 @@ const std::string TranspMgrIPAddress("213.130.0.1");
 // Todo: implement receiveing IP port from the command line arguments
 const int TranspMgrPort = 80;
 
-// The real size of the packet to send to the Transport Manager
+// The real size of the data to send to the Transport Manager
 // Todo: implement receiveing this info from the command line
-const unsigned int TranspMgrBuffActualSize = 64;
+const unsigned int TranspMgrDataActualSize = 64;
 
 // The size that is reported in the packet header (can be different from the real size to generate errors)
 // Todo: implement receiveing this info from the command line
-const unsigned int TranspMgrBuffReportedSize = 64;
+const unsigned int TranspMgrDataReportedSize = 64;
 
-// The buffer to send to the Transport Manager
-//const unsigned char TranspMgrTestBuff[TranspMgrBuffActualSize] = {0, 0, 0};
+// -------------------------------------------------------------------------
 
+/**
+ * @brief The header of the protocol
+ */
+struct PacketHeader
+{
+    uint8_t version:4;
+    bool compressionFlag:1;
+    uint8_t frameType:3;
+    uint8_t serviceType;
+    uint8_t frameData;
+    uint8_t sessionId;
+    uint32_t dataSize;
+    uint32_t messageId;
+};
+
+// -------------------------------------------------------------------------
 
 /**
  * @brief The class incapsulates connection routines to the TCP socket of the Transport Manager
@@ -61,21 +76,19 @@ public:
      */
     void disconnect();
     
-    
     /**
      *  @brief Sends data packet to the Transport Manager
      *
      *  @brief pData Pointer to the data to send
      *  @brief dataSize Size of the buffer to send 
      */
-    void send(void *pData, size_t dataSize);
+    void send(const void *pData, size_t dataSize);
         
 private:
     int mPort;
     std::string mIpAddress;
     
     int mSocketFd;                    // socket file descriptor
-   
 };
 
 // ----------------------------------------------------------------------------
@@ -138,23 +151,56 @@ void CTranspMgrTcpClient::disconnect()
 
 // ----------------------------------------------------------------------------
 
+void CTranspMgrTcpClient::send(const void* pData, size_t dataSize)
+{
+    if (pData != NULL)
+    {
+        ssize_t written = write(mSocketFd, pData, dataSize);
+        
+        if (written == -1)
+        {
+            throw new std::string("Error writing into the socket");
+        }
+        if (written != dataSize)
+        {
+            std::cout << "Warning: expected to send " << dataSize << 
+                " bytes, but sent " << written << " bytes\n";
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+
 int main(int argc, const char *argv[])
 {
     CTranspMgrTcpClient client(TranspMgrIPAddress, TranspMgrPort);
-    
+
+    size_t totalBuffSize = sizeof(PacketHeader) + TranspMgrDataActualSize;
+    uint8_t *pBuff = new uint8_t[totalBuffSize];
+    PacketHeader *pHeader = (PacketHeader*)pBuff;
+
+    pHeader->version = 2;                                   // Protocol Version 2
+    pHeader->compressionFlag = false;                       // Uncompressed data
+    pHeader->frameType = 1;                                 // Single frame
+    pHeader->serviceType = 0x0F;                            // Bulk Data 
+    pHeader->frameData = 0;                                 // Reserved
+    pHeader->sessionId = 0;                                 // unknown
+    pHeader->dataSize = TranspMgrDataReportedSize;          // The size of the data in the packet
+    pHeader->messageId = 0;                                 // unknown
+
+    // just fill the data with the single value
+    memset(&(pBuff[sizeof(PacketHeader)]), 0xFF, TranspMgrDataActualSize);
+
     try
     {
         client.connect();
+
+        client.send(pBuff, totalBuffSize);    
     }
     catch (std::string *pError)
     {
         std::cout << *pError << std::endl;
-        client.disconnect();
-        exit(0);
     }
-        
-    // Todo: send some data
-        
         
     client.disconnect();
  
