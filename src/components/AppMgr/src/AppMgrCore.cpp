@@ -48,7 +48,6 @@ AppMgrCore::AppMgrCore()
     ,mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<RPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
 {
     LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
-    HMIHandler::getInstance().setReadyState(true);
 }
 
 AppMgrCore::AppMgrCore(const AppMgrCore &)
@@ -605,6 +604,12 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
 
     switch(msg->getMethod())
     {
+        case RPC2Communication::UI::Marshaller::METHOD_ONREADY:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnReady UI notification has been invoked");
+            HMIHandler::getInstance().setReadyState(true);
+            return;
+        }
         case RPC2Communication::UI::Marshaller::METHOD_ONCOMMAND:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand UI notification has been invoked");
