@@ -74,7 +74,6 @@ private:
     const RegistryItem* registerApplication(AppLinkRPC::RegisterAppInterface_request *request , const unsigned char &sessionID);
     void unregisterApplication(const Message &msg );
 
-	void registerApplicationOnHMI( const std::string& name );
     Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
 
     AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;

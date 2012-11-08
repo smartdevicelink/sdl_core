@@ -1068,11 +1068,6 @@ void AppMgrCore::unregisterApplication(const Message &msg)
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName << " session id " <<sessionID<< "!");
 }
 
-void AppMgrCore::registerApplicationOnHMI( const std::string& name )
-{
-
-}
-
 Application *AppMgrCore::getApplicationFromItemCheckNotNull(const RegistryItem *item) const
 {
     if(!item)
