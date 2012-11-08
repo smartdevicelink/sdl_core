@@ -30,11 +30,14 @@ MFT.AppSubMenuView = Em.ContainerView.create({
 
     SubMenuActivate: function( menuId ){
 
-        var buttonsCount = MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').length;
-        if(buttonsCount > 0){
-            for(var i = 0; i < buttonsCount; i++ ){
-                Ember.View.views[MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews')[i].elementId].destroy();
+        var i = this.buttonsWrapper.buttonsScroll.get('childViews').length-1;
+        if(i >= 0){
+            do{
+                var button = this.buttonsWrapper.buttonsScroll.get('childViews')[i];
+                Em.View.views[button.elementId].destroy();
+                i--;
             }
+            while (i>=0);
         }
 
         var i = 0;
