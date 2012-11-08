@@ -38,24 +38,24 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""},
 #line 24 "../src/RPC2ObjectsImpl/VR/Marshaller.gp"
-      {"VR.OnCommand",6,&Marshaller::mOnCommand},
+      {"VR.OnCommand",48,&Marshaller::mOnCommand},
 #line 18 "../src/RPC2ObjectsImpl/VR/Marshaller.gp"
-      {"VR.AddCommand",0,&Marshaller::mAddCommand},
+      {"VR.AddCommand",42,&Marshaller::mAddCommand},
       {""}, {""},
 #line 20 "../src/RPC2ObjectsImpl/VR/Marshaller.gp"
-      {"VR.DeleteCommand",2,&Marshaller::mDeleteCommand},
+      {"VR.DeleteCommand",44,&Marshaller::mDeleteCommand},
       {""},
 #line 22 "../src/RPC2ObjectsImpl/VR/Marshaller.gp"
-      {"VR.GetCapabilities",4,&Marshaller::mGetCapabilities},
+      {"VR.GetCapabilities",46,&Marshaller::mGetCapabilities},
       {""}, {""},
 #line 19 "../src/RPC2ObjectsImpl/VR/Marshaller.gp"
-      {"VR.AddCommandResponse",1,&Marshaller::mAddCommandResponse},
+      {"VR.AddCommandResponse",43,&Marshaller::mAddCommandResponse},
       {""}, {""},
 #line 21 "../src/RPC2ObjectsImpl/VR/Marshaller.gp"
-      {"VR.DeleteCommandResponse",3,&Marshaller::mDeleteCommandResponse},
+      {"VR.DeleteCommandResponse",45,&Marshaller::mDeleteCommandResponse},
       {""},
 #line 23 "../src/RPC2ObjectsImpl/VR/Marshaller.gp"
-      {"VR.GetCapabilitiesResponse",5,&Marshaller::mGetCapabilitiesResponse}
+      {"VR.GetCapabilitiesResponse",47,&Marshaller::mGetCapabilitiesResponse}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)

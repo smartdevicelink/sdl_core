@@ -43,8 +43,8 @@ MFT.AppOptionsView = Em.ContainerView.create({
             text:               menuName 
         });
 
-        MFT.AppOptionsView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
-        MFT.AppOptionsView.buttonsWrapper.scroll.refresh();
+        this.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
+        this.buttonsWrapper.scroll.refresh();
     },
 
     DeleteSubMenu: function(menuId){
@@ -59,8 +59,8 @@ MFT.AppOptionsView = Em.ContainerView.create({
     },
 
     buttonsWrapper: Em.ContainerView.extend({
+        elementId:          'buttonsWrapperSubMenu',
         classNames:         'buttonsWrapper',
-        elementId:          'buttonsWrapper',
         childViews: [
             'buttonsScroll',
             'scrollBar'
@@ -78,7 +78,7 @@ MFT.AppOptionsView = Em.ContainerView.create({
 
         buttonsScroll: Em.ContainerView.extend( Ember.TargetActionSupport, {
             classNames: 'buttonsScroll',
-            elementId:  'buttonsScroll',
+            elementId:  'buttonsScrollSubMenu',
             actionUp:   function(){
                 this._parentView.pos = this._parentView.scroll.y - this._parentView.scroll.startY;
             }
@@ -86,7 +86,7 @@ MFT.AppOptionsView = Em.ContainerView.create({
 
         scrollBar: Em.ContainerView.extend({
             classNames:         'scrollBar',
-            elementId:          'scrollBar',
+            elementId:          'scrollBarSubMenu',
             childViews: [
                 'scrollArrowUp',
                 'scroller',

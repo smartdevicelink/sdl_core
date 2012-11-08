@@ -232,7 +232,7 @@ std::cout<<"UI Marshaller::fromJSON::json.isMember(id) " << json.isMember("id")<
 
   Methods m=getIndex(json["result"]["method"].asString().c_str());
 
-  std::cout<<"UI Marshaller::fromJSON:: method " << json["result"]["method"].asString() << std::endl;
+  std::cout<<"UI Marshaller::fromJSON:: method " << json["result"]["method"].asString() << " : " << m << std::endl;
 
   switch(m)
   {
