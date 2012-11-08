@@ -36,12 +36,12 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 	],
 
 	hideMenu: function(){
-		if( (MFT.States.media.appoptions.appsubmenu.active == true) || (MFT.States.media.appoptions.active == true) ){
+		if( (MFT.States.media.appperforminteraction.active == true) || (MFT.States.media.appoptions.appsubmenu.active == true) || (MFT.States.media.appoptions.active == true) ){
 			return true;
 		}else{
 			return false;
 		}
-	}.property('MFT.States.media.appsubmenu.active', 'MFT.States.media.appoptions.active'),
+	}.property('MFT.States.media.appsubmenu.active', 'MFT.States.media.appoptions.active', 'MFT.States.media.appperforminteraction.active'),
 
 	topScrollButton: MFT.Button.extend({
 		classNameBindings: 	[

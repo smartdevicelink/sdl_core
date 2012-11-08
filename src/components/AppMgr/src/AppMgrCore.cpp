@@ -19,6 +19,7 @@
 #include "JSONHandler/ALRPCNotification.h"
 #include "JSONHandler/ALRPCObjects/Marshaller.h"
 #include "JSONHandler/JSONHandler.h"
+#include "JSONHandler/JSONRPC2Handler.h"
 #include "JSONHandler/RPC2Objects/UI/Marshaller.h"
 #include "JSONHandler/RPC2Objects/VR/Marshaller.h"
 #include "JSONHandler/RPC2Objects/TTS/Marshaller.h"
@@ -255,6 +256,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, "message " << mobileMsg->getMethodId() );
             AppLinkRPC::Show_request* object = (AppLinkRPC::Show_request*)mobileMsg;
             RPC2Communication::UI::Show* showRPC2Request = new RPC2Communication::UI::Show();
+            showRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             LOG4CPLUS_INFO_EXT(mLogger, "showrpc2request created");
             if(object->get_mainField1())
             {
@@ -287,6 +289,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A Speak request has been invoked");
             AppLinkRPC::Speak_request* object = (AppLinkRPC::Speak_request*)mobileMsg;
             RPC2Communication::TTS::Speak* speakRPC2Request = new RPC2Communication::TTS::Speak();
+            speakRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             speakRPC2Request->set_ttsChunks(object->get_ttsChunks());
             core->mMessageMapping.addMessage(speakRPC2Request->getId(), sessionID);
             HMIHandler::getInstance().sendRequest(speakRPC2Request);
@@ -301,6 +304,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties request has been invoked");
             AppLinkRPC::SetGlobalProperties_request* object = (AppLinkRPC::SetGlobalProperties_request*)mobileMsg;
             RPC2Communication::UI::SetGlobalProperties* setGPRPC2Request = new RPC2Communication::UI::SetGlobalProperties();
+            setGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(setGPRPC2Request->getId(), sessionID);
             if(object->get_helpPrompt())
             {
@@ -323,6 +327,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A ResetGlobalProperties request has been invoked");
             AppLinkRPC::ResetGlobalProperties_request* object = (AppLinkRPC::ResetGlobalProperties_request*)mobileMsg;
             RPC2Communication::UI::ResetGlobalProperties* resetGPRPC2Request = new RPC2Communication::UI::ResetGlobalProperties();
+            resetGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(resetGPRPC2Request->getId(), sessionID);
             resetGPRPC2Request->set_properties(object->get_properties());
 
@@ -338,6 +343,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " An Alert request has been invoked");
             AppLinkRPC::Alert_request* object = (AppLinkRPC::Alert_request*)mobileMsg;
             RPC2Communication::UI::Alert* alert = new RPC2Communication::UI::Alert();
+            alert->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(alert->getId(), sessionID);
             if(object->get_alertText1())
             {
@@ -384,6 +390,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             if(object->get_menuParams())
             {
                 RPC2Communication::UI::AddCommand * addCmd = new RPC2Communication::UI::AddCommand();
+                addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 CommandType cmdType = CommandType::UI;
                 addCmd->set_menuParams(*object->get_menuParams());
                 addCmd->set_cmdId(object->get_cmdID());
@@ -395,6 +402,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             if(object->get_vrCommands())
             {
                 RPC2Communication::VR::AddCommand * addCmd = new RPC2Communication::VR::AddCommand();
+                addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 CommandType cmdType = CommandType::VR;
                 addCmd->set_vrCommands(*object->get_vrCommands());
                 addCmd->set_cmdId(object->get_cmdID());
@@ -414,6 +422,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             if(cmdType == CommandType::UI)
             {
                 RPC2Communication::UI::DeleteCommand* deleteCmd = new RPC2Communication::UI::DeleteCommand();
+                deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
                 deleteCmd->set_cmdId(object->get_cmdID());
                 core->mCommandMapping.removeCommand(object->get_cmdID());
@@ -422,6 +431,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             if(cmdType == CommandType::VR)
             {
                 RPC2Communication::VR::DeleteCommand* deleteCmd = new RPC2Communication::VR::DeleteCommand();
+                deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
                 deleteCmd->set_cmdId(object->get_cmdID());
                 core->mCommandMapping.removeCommand(object->get_cmdID());
@@ -435,6 +445,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
             AppLinkRPC::AddSubMenu_request* object = (AppLinkRPC::AddSubMenu_request*)mobileMsg;
             RPC2Communication::UI::AddSubMenu* addSubMenu = new RPC2Communication::UI::AddSubMenu();
+            addSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(addSubMenu->getId(), sessionID);
             addSubMenu->set_menuId(object->get_menuID());
             addSubMenu->set_menuName(object->get_menuName());
@@ -450,6 +461,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubmenu request has been invoked");
             AppLinkRPC::DeleteSubMenu_request* object = (AppLinkRPC::DeleteSubMenu_request*)mobileMsg;
             RPC2Communication::UI::DeleteSubMenu* delSubMenu = new RPC2Communication::UI::DeleteSubMenu();
+            delSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(delSubMenu->getId(), sessionID);
             delSubMenu->set_menuId(object->get_menuID());
             HMIHandler::getInstance().sendRequest(delSubMenu);
@@ -460,6 +472,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet request has been invoked");
             AppLinkRPC::CreateInteractionChoiceSet_request* object = (AppLinkRPC::CreateInteractionChoiceSet_request*)mobileMsg;
             RPC2Communication::UI::CreateInteractionChoiceSet* createInteractionChoiceSet = new RPC2Communication::UI::CreateInteractionChoiceSet();
+            createInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(createInteractionChoiceSet->getId(), sessionID);
             createInteractionChoiceSet->set_choiceSet(object->get_choiceSet());
             createInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
@@ -471,6 +484,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet request has been invoked");
             AppLinkRPC::DeleteInteractionChoiceSet_request* object = (AppLinkRPC::DeleteInteractionChoiceSet_request*)mobileMsg;
             RPC2Communication::UI::DeleteInteractionChoiceSet* deleteInteractionChoiceSet = new RPC2Communication::UI::DeleteInteractionChoiceSet();
+            deleteInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getId(), sessionID);
             deleteInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
             HMIHandler::getInstance().sendRequest(deleteInteractionChoiceSet);
@@ -481,6 +495,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction request has been invoked");
             AppLinkRPC::PerformInteraction_request* object = (AppLinkRPC::PerformInteraction_request*)mobileMsg;
             RPC2Communication::UI::PerformInteraction* performInteraction = new RPC2Communication::UI::PerformInteraction();
+            performInteraction->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(performInteraction->getId(), sessionID);
             if(object->get_helpPrompt())
             {
@@ -1086,7 +1101,7 @@ Application *AppMgrCore::getApplicationFromItemCheckNotNull(const RegistryItem *
         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
         return 0;
     }
-    return 0;
+    return app;
 }
 
 void AppMgrCore::setJsonHandler(JSONHandler* handler)
