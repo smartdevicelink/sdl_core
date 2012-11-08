@@ -244,21 +244,24 @@ FFW.UI = FFW.RPCObserver.create({
 			this.performInteractionRequestId = request.id;
 
 			MFT.AppPerformInteractionChoise.PerformInteraction(request.params.interactionChoiceSetIDList);
-
-			resultCode = "SUCCESS";
+			
+			resultCode = null;
 
 		}
 
-		// send repsonse
-		var JSONMessage = {
-			"jsonrpc"	:	"2.0",
-			"id"		: 	request.id,
-			"result":	{
-				"resultCode" : resultCode, //  type (enum) from AppLink protocol
-				"method" : request.method + "Response"
-			}
-		};
-		this.client.send(JSONMessage);
+		if(resultCode){
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result":	{
+					"resultCode" : resultCode, //  type (enum) from AppLink protocol
+					"method" : request.method + "Response"
+				}
+			};
+			this.client.send(JSONMessage);
+		}
 	},
 	
 
