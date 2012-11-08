@@ -1086,7 +1086,7 @@ Application *AppMgrCore::getApplicationFromItemCheckNotNull(const RegistryItem *
         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
         return 0;
     }
-    return 0;
+    return app;
 }
 
 void AppMgrCore::setJsonHandler(JSONHandler* handler)
