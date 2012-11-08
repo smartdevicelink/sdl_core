@@ -60,8 +60,8 @@ Json::Value AddCommandResponseMarshaller::toJSON(const AddCommandResponse& e)
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
   AppLinkRPC::Result r(static_cast<AppLinkRPC::Result::ResultInternal>(e.getResult()));
-  json["result"]["_Result"]=AppLinkRPC::ResultMarshaller::toJSON(r);
-  json["result"]["_Method"]=Json::Value("VR.AddCommandResponse");
+  json["result"]["resultCode"]=AppLinkRPC::ResultMarshaller::toJSON(r);
+  json["result"]["method"]=Json::Value("VR.AddCommandResponse");
 
   return json;
 }
@@ -82,11 +82,11 @@ bool AddCommandResponseMarshaller::fromJSON(const Json::Value& json,AddCommandRe
     if(!js.isObject())  return false;
 
     Result r;
-    if(!js.isMember("_Result") || !js["_Result"].isString())  return false;
-    if(!js.isMember("_Method") || !js["_Method"].isString())  return false;
-    if(js["_Method"].asString().compare("VR.AddCommandResponse")) return false;
+    if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
+    if(!js.isMember("method") || !js["method"].isString())  return false;
+    if(js["method"].asString().compare("VR.AddCommandResponse")) return false;
 
-    if(!AppLinkRPC::ResultMarshaller::fromJSON(js["_Result"],r))  return false;
+    if(!AppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
   }
   catch(...)
