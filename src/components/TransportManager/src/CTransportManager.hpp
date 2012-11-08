@@ -187,6 +187,16 @@ namespace NsAppLink
             };
 
             /**
+             * @brief Enumeration that represents type of the data listener callback
+             *        that must be called
+             **/
+            enum EDataListenerCallbackType
+            {
+                DataListenerCallbackType_FrameReceived = 0,
+                DataListenerCallbackType_FrameSendCompleted = 1
+            };
+
+            /**
              * @brief Device listener callback information
              *
              * Used to store data for calling device listeners
@@ -238,6 +248,114 @@ namespace NsAppLink
             };
 
             /**
+             * @brief Data listener callback information
+             *
+             * Used to store data for calling data listeners
+             **/
+            struct SDataListenerCallback
+            {
+                /**
+                 * @brief Constructor for creating FrameReceived callback.
+                 *
+                 * @param CallbackType Type of the callback
+                 * @param ConnectionHandle Connection handle
+                 * @param Data Data
+                 * @param DataSize Size of the data
+                 **/
+                SDataListenerCallback(NsAppLink::NsTransportManager::CTransportManager::EDataListenerCallbackType CallbackType, NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, uint8_t* Data, size_t DataSize);
+
+                /**
+                 * @brief Constructor for creating FrameSendCompleted callback
+                 *
+                 * @param CallbackType Type of the callback
+                 * @param ConnectionHandle Connection handle
+                 * @param FrameSequenceNumber Sequence Number
+                 * @param SendStatus Status of operation
+                 **/
+                SDataListenerCallback(EDataListenerCallbackType CallbackType, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus);
+
+                /**
+                 * @brief Destructor.
+                 *
+                 **/
+                ~SDataListenerCallback(void);
+
+                /**
+                 * @brief Type of the callback that must be called
+                 **/
+                EDataListenerCallbackType mCallbackType;
+
+                /**
+                 * @brief Connection handle (will be sent in the ApplicationConnected and ApplicationDisconnected callbacks)
+                 **/
+                tConnectionHandle mConnectionHandle;
+
+                /**
+                 * @brief Data to send
+                 **/
+                uint8_t * mData;
+
+                /**
+                 * @brief Size of the data
+                 **/
+                size_t mDataSize;
+
+                /**
+                 * @brief Sequence number
+                 **/
+                int mFrameSequenceNumber;
+
+                /**
+                 * @brief Operation status
+                 **/
+                ESendStatus mSendStatus;
+            };
+
+            /**
+             * @brief Struct that contains startup params for data-threads
+             **/
+            struct SDataThreadStartupParams
+            {
+                /**
+                 * @brief Constructor
+                 *
+                 * @param TransportManager Pointer to the Transport Manager
+                 * @param ConnectionHandle Connection Handle
+                 **/
+                SDataThreadStartupParams(NsAppLink::NsTransportManager::CTransportManager* TransportManager, NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle);
+
+                /**
+                 * @brief Pointer to Transport Manager
+                 **/
+                CTransportManager * mTransportManager;
+
+                /**
+                 * @brief Connection Handle
+                 **/
+                tConnectionHandle mConnectionHandle;
+            };
+
+            /**
+             * @brief Map for storing Data Callbacks threads.
+             **/
+            typedef std::map<tConnectionHandle, pthread_t> tDataCallbacksThreads;
+
+            /**
+             * @brief Vector for storing Data Callbacks.
+             **/
+            typedef std::vector<SDataListenerCallback> tDataCallbacksVector;
+
+            /**
+             * @brief Map for storing callbacks for each connection handle
+             **/
+            typedef std::map<tConnectionHandle, tDataCallbacksVector*> tDataCallbacks;
+
+            /**
+             * @brief Map for storing condition variables for each connection handle
+             **/
+            typedef std::map<tConnectionHandle, pthread_cond_t*> tDataCallbacksConditionVariables;
+
+            /**
              * @brief Start routine for Application-related callbacks.
              *
              * @param Data Must be pointer to CTransportManager instance.
@@ -253,6 +371,49 @@ namespace NsAppLink
              *
              **/
             void applicationCallbacksThread();
+
+            /**
+             * @brief Start routine for Data-related callbacks.
+             *
+             * @param Data Must be pointer to CTransportManager instance.
+             *
+             * @return Thread return value.
+             **/
+            static void * dataCallbacksThreadStartRoutine(void * Data);
+
+            /**
+             * @brief Data-related callbacks thread.
+             *
+             * From this thread all data-related callbacks related to given connection handle are called
+             *
+             * @param ConnectionHandle Connection handle
+             **/
+            void dataCallbacksThread(const tConnectionHandle ConnectionHandle);
+
+            /**
+             * @brief Starts thread for application-related callbacks
+             *
+             * @return bool Thread start status
+             **/
+            bool startApplicationCallbacksThread();
+
+            /**
+             * @brief Starts thread for application-related callbacks
+             *
+             * @param ConnectionHandle Connection Handle
+             * @return bool
+             **/
+            bool startDataCallbacksThread(const tConnectionHandle ConnectionHandle);
+
+            /**
+             * @brief Check thread existence for given ConnectionHandle
+             *
+             * @param ConnectionHandle Connection Handle
+             * @return bool
+             *
+             * @attention This function is not thread safe
+             **/
+            bool isThreadForConnectionHandleExist(const tConnectionHandle ConnectionHandle);
 
             /**
              * @brief Device adapters.
@@ -329,6 +490,21 @@ namespace NsAppLink
              * This flag is set to notify threads that they must be terminated.
              **/
             bool mTerminateFlag;
+
+            /**
+             * @brief Data callbacks for each connection handle
+             **/
+            tDataCallbacks mDataListenersCallbacks;
+
+            /**
+             * @brief Threads for sending data callbacks for each connection handle
+             **/
+            tDataCallbacksThreads mDataCallbacksThreads;
+
+            /**
+             * @brief Condition variables for each connection handle
+             **/
+            tDataCallbacksConditionVariables mDataCallbacksConditionVars;
         };
     }
 }
