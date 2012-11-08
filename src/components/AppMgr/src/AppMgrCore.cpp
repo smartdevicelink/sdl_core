@@ -379,20 +379,38 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case AppLinkRPC::Marshaller::METHOD_ADDCOMMAND_REQUEST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
-            AppLinkRPC::AddCommand_request* object = (AppLinkRPC::AddCommand_request*)mobileMsg;
-            RPC2Communication::UI::AddCommand* addCmd = new RPC2Communication::UI::AddCommand();
-            core->mMessageMapping.addMessage(addCmd->getId(), sessionID);
-            addCmd->set_cmdId(object->get_cmdID());
             RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
             if(!item)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, " Session "<<sessionID<<" hasn't been associated with application!");
                 break;
             }
+            AppLinkRPC::AddCommand_request* object = (AppLinkRPC::AddCommand_request*)mobileMsg;
+            RPC2Communication::RPC2Request* addCmd = NULL;
+            if(object->get_menuParams())
+            {
+                addCmd = new RPC2Communication::UI::AddCommand();
+            }
+            else if(object->get_vrCommands())
+            {
+                addCmd = new RPC2Communication::VR::AddCommand();
+            }
+            else
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " Cannot deduct the command type: neither UI nor VR params are found within the request!");
+                break;
+            }
+            core->mMessageMapping.addMessage(addCmd->getId(), sessionID);
+            ((RPC2Communication::UI::AddCommand*)addCmd)->set_cmdId(object->get_cmdID()); //Doesn't matter to which type to cast: RPC2Communication::VR::AddCommand also has this method with the same param
+
             core->mCommandMapping.addCommand(object->get_cmdID(), item);
             if(object->get_menuParams())
             {
-                addCmd->set_menuParams(*object->get_menuParams());
+                ((RPC2Communication::UI::AddCommand*)addCmd)->set_menuParams(*object->get_menuParams());
+            }
+            if(object->get_vrCommands())
+            {
+                ((RPC2Communication::VR::AddCommand*)addCmd)->set_vrCommands(*object->get_vrCommands());
             }
             core->mJSONRPC2Handler->sendRequest(addCmd);
             break;
