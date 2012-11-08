@@ -965,6 +965,27 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         }
         case RPC2Communication::VR::Marshaller::METHOD_DELETECOMMANDRESPONSE:
         {
+            LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand VR response has been income");
+            RPC2Communication::VR::DeleteCommandResponse* object = (RPC2Communication::VR::DeleteCommandResponse*)msg;
+            RegistryItem* item = core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId());
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+                return;
+            }
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                return;
+            }
+            unsigned char sessionID = app->getSessionID();
+
+            AppLinkRPC::DeleteCommand_response* response = new AppLinkRPC::DeleteCommand_response();
+            response->set_success(true);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+            core->mMessageMapping.removeMessage(object->getId());
+            core->mJSONHandler->sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::VR::Marshaller::METHOD_ONCOMMAND:
