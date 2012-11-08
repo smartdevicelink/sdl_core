@@ -42,7 +42,7 @@ FFW.VR = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.VR.onRPCRegistered");
 		this._super();
 	},
-	
+
 	/*
      * Client is unregistered - no more requests
  	 */	
@@ -67,7 +67,7 @@ FFW.VR = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.VR.onRPCResult");
 		this._super();
 	 },
-	
+
 	/*
 	 * handle RPC erros here
  	 */	
@@ -83,7 +83,7 @@ FFW.VR = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.VR.onRPCNotification");
 		this._super();
 	},
-	
+
 	/*
 	 * handle RPC requests here
  	 */	

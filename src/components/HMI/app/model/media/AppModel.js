@@ -24,6 +24,11 @@ MFT.AppModel = Em.Object.create({
 	 * Array of Interaction Choises
 	 */
 	 interactionChoises:	new Array(),
+
+	 /*
+	 * Array of Interaction Choises
+	 */
+	 subMenuCommands:	new Array(),
 	
 	PlayList: MFT.Playlist.create({
 		
