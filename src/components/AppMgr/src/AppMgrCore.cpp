@@ -193,7 +193,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                 break;
             }
             std::string appName = app->getName();
-            core->unregisterApplication( message );
+            core->unregisterApplication( sessionID );
             AppLinkRPC::UnregisterAppInterface_response* response = new AppLinkRPC::UnregisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
@@ -1062,28 +1062,16 @@ const RegistryItem* AppMgrCore::registerApplication( AppLinkRPC::RegisterAppInte
     return AppMgrRegistry::getInstance().registerApplication( application );
 }
 
-void AppMgrCore::unregisterApplication(const Message &msg)
+void AppMgrCore::unregisterApplication(const unsigned char &sessionID)
 {
-    AppLinkRPC::ALRPCMessage* message = msg.first;
-    unsigned char sessionID = msg.second;
-    if(!message)
-    {
-        LOG4CPLUS_ERROR_EXT(mLogger, "No message for session "<<sessionID<<"!");
-        return;
-    }
-
     RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
-    if(!item)
-    {
-        LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
-        return;
-    }
-    Application* app = item->getApplication();
+    Application* app = getApplicationFromItemCheckNotNull( item );
     if(!app)
     {
         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
         return;
     }
+    LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << app->getName() << " session id" << sessionID << "!");
 
     const std::string& appName = app->getName();
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName <<" session id " <<sessionID<< "!");

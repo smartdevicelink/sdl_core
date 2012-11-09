@@ -72,7 +72,7 @@ private:
 
     template<class Object> void handleMessage(Object message);
     const RegistryItem* registerApplication(AppLinkRPC::RegisterAppInterface_request *request , const unsigned char &sessionID);
-    void unregisterApplication(const Message &msg );
+    void unregisterApplication(const unsigned char &sessionID);
 
     Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
 
