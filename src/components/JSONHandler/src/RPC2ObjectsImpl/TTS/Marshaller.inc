@@ -37,16 +37,16 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
 #line 20 "../src/RPC2ObjectsImpl/TTS/Marshaller.gp"
-      {"TTS.Speak",2,&Marshaller::mSpeak},
+      {"TTS.Speak",10,&Marshaller::mSpeak},
       {""}, {""}, {""}, {""}, {""}, {""}, {""},
 #line 21 "../src/RPC2ObjectsImpl/TTS/Marshaller.gp"
-      {"TTS.SpeakResponse",3,&Marshaller::mSpeakResponse},
+      {"TTS.SpeakResponse",11,&Marshaller::mSpeakResponse},
       {""},
 #line 18 "../src/RPC2ObjectsImpl/TTS/Marshaller.gp"
-      {"TTS.GetCapabilities",0,&Marshaller::mGetCapabilities},
+      {"TTS.GetCapabilities",8,&Marshaller::mGetCapabilities},
       {""}, {""}, {""}, {""}, {""}, {""}, {""},
 #line 19 "../src/RPC2ObjectsImpl/TTS/Marshaller.gp"
-      {"TTS.GetCapabilitiesResponse",1,&Marshaller::mGetCapabilitiesResponse}
+      {"TTS.GetCapabilitiesResponse",9,&Marshaller::mGetCapabilitiesResponse}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)

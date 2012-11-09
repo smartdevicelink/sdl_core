@@ -11,7 +11,9 @@
  */
  
 MFT.AppSubMenuView = Em.ContainerView.create({
-    classNameBindings:  [ 'MFT.States.media.appoptions.appsubmenu.active:active_state' ],
+    classNameBindings:  [ 'MFT.States.media.appsubmenu.active:active_state',
+                          //  'MFT.MediaController.currentOptionsData.view',
+                        ],
 
     classNames:        ['media_app_sub_menu_view', 'hidden'],
 
@@ -23,50 +25,43 @@ MFT.AppSubMenuView = Em.ContainerView.create({
 
     backButton: MFT.Button.extend({
         classNames:        ['backButton','button'],     
-        action:            'back',
-        target:            'MFT.States',   
+        action:            'optionsBack',
+        target:            'MFT.MediaController',   
         icon:              'images/media/ico_back.png',   
     }),
 
-    SubMenuActivate: function( menuId ){
+    PerformInteraction: function( interactionChoiceSetIDList ){
 
-        var i = this.buttonsWrapper.buttonsScroll.get('childViews').length-1;
-        if(i >= 0){
-            do{
-                var button = this.buttonsWrapper.buttonsScroll.get('childViews')[i];
-                Em.View.views[button.elementId].destroy();
-                i--;
-            }
-            while (i>=0);
-        }
+        for(var IDList in interactionChoiceSetIDList){
 
-        var i = 0;
-        for(i = 0; i < MFT.AppModel.subMenuCommands.length; i++){
-            if( menuId == MFT.AppModel.subMenuCommands[i].menuParams.parentID ){
-                button = MFT.Button.create({
-                    elementId:          'media_app_subMenu_view' + MFT.AppModel.subMenuCommands[i].cmdId,
-                    click:              function(){
-                        FFW.UI.onCommand(this.commandId);
-                    },
-                    commandId:          MFT.AppModel.subMenuCommands[i].cmdId, 
-                    classNames:         ['rs-item'],
-                    //icon:             null,//'images/media/active_arrow.png',
-                    text:               MFT.AppModel.subMenuCommands[i].menuParams.menuName 
-                });
+            for(var ChoisesVal in MFT.AppModel.interactionChoises){
 
-                MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
+                if( interactionChoiceSetIDList[IDList] == MFT.AppModel.interactionChoises[ChoisesVal].interactionChoiceSetID ){
+                    
+                    for(var ChoiseSet in MFT.AppModel.interactionChoises[ChoisesVal].choiceSet){
+                        button = MFT.Button.create({
+                            elementId:          'media_app_options_view' + MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
+                            click:              function(){
+                                FFW.UI.onCommand(MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID);
+                            },
+                            commandId:          MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID, 
+                            classNames:         ['rs-item'],
+                            //icon:             null,//'images/media/active_arrow.png',
+                            text:               MFT.AppModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName 
+                        });
+
+                        MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
+                    }
+                }
             }
         }
 
         MFT.AppSubMenuView.buttonsWrapper.scroll.refresh();
-
-        MFT.States.goToState('media.appoptions.appsubmenu');
-
     },
 
     buttonsWrapper: Em.ContainerView.extend({
         classNames:         'buttonsWrapper',
-        elementId:          'buttonsWrapperSubMenu',
+        elementId:          'buttonsWrapper',
         childViews: [
             'buttonsScroll',
             'scrollBar'
@@ -84,7 +79,7 @@ MFT.AppSubMenuView = Em.ContainerView.create({
 
         buttonsScroll: Em.ContainerView.extend( Ember.TargetActionSupport, {
             classNames: 'buttonsScroll',
-            elementId:  'buttonsScrollSubMenu',
+            elementId:  'buttonsScroll',
             actionUp:   function(){
                 this._parentView.pos = this._parentView.scroll.y - this._parentView.scroll.startY;
             }
@@ -92,7 +87,7 @@ MFT.AppSubMenuView = Em.ContainerView.create({
 
         scrollBar: Em.ContainerView.extend({
             classNames:         'scrollBar',
-            elementId:          'scrollBarSubMenu',
+            elementId:          'scrollBar',
             childViews: [
                 'scrollArrowUp',
                 'scroller',
@@ -146,10 +141,24 @@ MFT.AppSubMenuView = Em.ContainerView.create({
         },
         
         loaded: function() {
-            this.set('scroll', new iScroll('buttonsWrapperSubMenu',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.AppSubMenuView.buttonsWrapper.scrollEnd();}}));
+            this.set('scroll', new iScroll('buttonsWrapper',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.AppSubMenuView.buttonsWrapper.scrollEnd();}}));
             this.coeficient = this.scroll.wrapperH / this.scroll.scrollerH;
             this.scrollBarH = (this.scroll.wrapperH - 98) * this.coeficient - 49;
             this.scrollBar.scroller.set( 'style', 'height:' + this.scrollBarH + 'px;' );
+
+            button = MFT.Button.create({
+                elementId:          'media_app_options_view',
+                click:              function(){
+                    MFT.MediaController.turnOnAppSubMenu(1);
+                },
+                commandId:          1, 
+                classNames:         ['rs-item'],
+                //icon:             null,//'images/media/active_arrow.png',
+                text:               "menuName" 
+            });
+
+            MFT.AppSubMenuView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
+            MFT.AppSubMenuView.buttonsWrapper.scroll.refresh();
         }
     }),
 

@@ -41,6 +41,7 @@ namespace NsAppManager
 class RegistryItem;
 template< class QueueType >
 class AppMgrCoreQueue;
+class Application;
 
 typedef std::pair<AppLinkRPC::ALRPCMessage*, unsigned char> Message;
 
@@ -73,7 +74,7 @@ private:
     const RegistryItem* registerApplication(AppLinkRPC::RegisterAppInterface_request *request , const unsigned char &sessionID);
     void unregisterApplication(const Message &msg );
 
-	void registerApplicationOnHMI( const std::string& name );
+    Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
 
     AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
     AppMgrCoreQueue<RPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
@@ -82,9 +83,8 @@ private:
     ButtonMapping    mButtonsMapping;
     CommandMapping   mCommandMapping;
     MessageMapping   mMessageMapping;
-	
 	JSONHandler* mJSONHandler;
-    JSONRPC2Handler* mJSONRPC2Handler;
+
 	static log4cplus::Logger mLogger;
 };
 

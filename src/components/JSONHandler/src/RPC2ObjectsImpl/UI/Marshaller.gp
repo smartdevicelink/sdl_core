@@ -45,3 +45,4 @@ UI.SetMediaClockTimer,26,&Marshaller::mSetMediaClockTimer
 UI.SetMediaClockTimerResponse,27,&Marshaller::mSetMediaClockTimerResponse
 UI.Show,28,&Marshaller::mShow
 UI.ShowResponse,29,&Marshaller::mShowResponse
+UI.OnReady,50,&Marshaller::mOnReady

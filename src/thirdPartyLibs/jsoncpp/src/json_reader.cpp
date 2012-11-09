@@ -293,7 +293,6 @@ Reader::readToken( Token &token )
       token.type_ = tokenArrayEnd;
       break;
    case '"':
-   case '\'':
       token.type_ = tokenString;
       ok = readString();
       break;
@@ -876,7 +875,7 @@ Reader::getFormatedErrorMessages() const
 
 bool
 Reader::isQuotes ( char c ) {
-	if ( c == '\'' || c == '"' )
+	if ( c == '"' ) //c == '\'' || 
 			return true;
 	return false;
 }

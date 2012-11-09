@@ -3,6 +3,7 @@
 #include "JSONHandler/RPC2Objects/TTS/Marshaller.h"
 #include "JSONHandler/RPC2Objects/VR/Marshaller.h"
 #include "JSONHandler/RPC2Objects/AppLinkCore/Marshaller.h"
+#include "JSONHandler/RPC2Objects/Buttons/Marshaller.h"
 
 log4cplus::Logger JSONRPC2Handler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONRPC2Handler"));
 
@@ -102,12 +103,17 @@ void * JSONRPC2Handler::waitForCommandsFromHMI( void * params )
             {
                 currentCommand = RPC2Communication::AppLinkCore::Marshaller::fromJSON( jsonMessage );
             }
-            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI: handle command" );
+            if ( !currentCommand )
+            {
+                currentCommand = RPC2Communication::Buttons::Marshaller::fromJSON( jsonMessage );
+            }
+
             if ( !currentCommand )
             {
                 LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
                 continue;
             }
+            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI: handle command" );
 
             if ( !handler -> mCommandsObserver )
             {
@@ -201,6 +207,7 @@ void * JSONRPC2Handler::waitForResponsesToHMI( void * params )
             if ( commandJson.isNull() )
             {
                 LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
+                continue;
             }
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: processed command" );
 
@@ -246,6 +253,7 @@ void * JSONRPC2Handler::waitForRequestsToHMI( void * params )
             if ( commandJson.isNull() )
             {
                 LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
+                continue;
             }
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: processed command" );
 
@@ -291,6 +299,7 @@ void * JSONRPC2Handler::waitForNotificationsToHMI( void * params )
             if ( commandJson.isNull() )
             {
                 LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
+                continue;
             }
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: processed command" );
 

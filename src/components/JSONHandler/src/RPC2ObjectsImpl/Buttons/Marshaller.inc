@@ -95,16 +95,16 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""},
 #line 21 "../src/RPC2ObjectsImpl/Buttons/Marshaller.gp"
-      {"Buttons.OnButtonPress",3,&Marshaller::mOnButtonPress},
+      {"Buttons.OnButtonPress",7,&Marshaller::mOnButtonPress},
       {""},
 #line 18 "../src/RPC2ObjectsImpl/Buttons/Marshaller.gp"
-      {"Buttons.GetCapabilities",0,&Marshaller::mGetCapabilities},
+      {"Buttons.GetCapabilities",4,&Marshaller::mGetCapabilities},
       {""}, {""},
 #line 20 "../src/RPC2ObjectsImpl/Buttons/Marshaller.gp"
-      {"Buttons.OnButtonEvent",2,&Marshaller::mOnButtonEvent},
+      {"Buttons.OnButtonEvent",6,&Marshaller::mOnButtonEvent},
       {""}, {""}, {""}, {""},
 #line 19 "../src/RPC2ObjectsImpl/Buttons/Marshaller.gp"
-      {"Buttons.GetCapabilitiesResponse",1,&Marshaller::mGetCapabilitiesResponse}
+      {"Buttons.GetCapabilitiesResponse",5,&Marshaller::mGetCapabilitiesResponse}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)

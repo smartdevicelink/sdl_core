@@ -17,6 +17,11 @@ FFW.UI = FFW.RPCObserver.create({
  	 */		
 	 client:		FFW.RPCClient.create({ componentName: "UI" }),
 
+	 /*
+	 *	id for request Perform Interaction 
+ 	 */
+ 	 performInteractionRequestId: -1,
+
 	/*
    	 * Default values for global properties
  	 */
@@ -139,6 +144,8 @@ FFW.UI = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.UI.onRPCRequest");
 		this._super();
 
+		var resultCode = null;
+
 		if (request.method == "UI.Show") {
 
 			MFT.AppModel.PlayList.items[0].set('field1', request.params.mainField1);
@@ -146,32 +153,14 @@ FFW.UI = FFW.RPCObserver.create({
 			MFT.AppModel.PlayList.items[0].set('mediaClock', request.params.mediaClock);
 			MFT.AppModel.PlayList.items[0].set('mediaTrack', request.params.mediaTrack);
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result":	 {
-					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
-					"method" : "UI.ShowResponse"
-				}
-			};
-			this.client.send(JSONMessage);
+			resultCode = "SUCCESS";
 		}
 		
 		if (request.method == "UI.Alert") {
 
 			MFT.UIPopUp.receiveMessage(request.params.AlertText1, request.params.AlertText2, request.params.duration, request.params.playTone);
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
-					"method" : "UI.AlertResponse"
-				}
-			};
-			this.client.send(JSONMessage);
+			resultCode = "SUCCESS";
 		}
 
 		if (request.method == "UI.SetGlobalProperties") {
@@ -183,16 +172,7 @@ FFW.UI = FFW.RPCObserver.create({
 			// TODO: please process as array 
 			this.globalProperties.set('timeoutPrompt', request.params.timeoutPrompt);
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result":	{ 
-					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
-					"method" : "UI.SetGlobalPropertiesResponse"
-				}
-			};
-			this.client.send(JSONMessage);
+			resultCode = "SUCCESS";
 		}
 		
 		if (request.method == "UI.ResetGlobalProperties") {
@@ -204,94 +184,46 @@ FFW.UI = FFW.RPCObserver.create({
 				MFT.TTSPopUp.receiveMessage("Reset property: " + reuqest.params[i]);
 			}
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
-					"method" : "UI.ResetGlobalPropertiesResponse"
-				}
-			};
-			this.client.send(JSONMessage);
+			resultCode = "SUCCESS";
 		}
 
 		if (request.method == "UI.AddCommand") {
 			
-			MFT.AppRightMenuView.AddCommand(request.params.cmdId, request.params.menuParams);
+			if( request.params.menuParams.parentID == 0 ){
+				MFT.AppRightMenuView.AddCommand(request.params.cmdId, request.params.menuParams);
+			}else{
+				MFT.AppModel.subMenuCommands.push(request.params);
+			}
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
-					"method" : "UI.AddCommandResponse"
-				}
-			};
-			this.client.send(JSONMessage);
+			resultCode = "SUCCESS";
+
 		}
 
 		if (request.method == "UI.DeleteCommand") {
 			
 			MFT.AppRightMenuView.DeleteCommand(request.params.cmdId);
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
-					"method" : "UI.DeleteCommandResponse"
-				}
-			};
-			this.client.send(JSONMessage);
+			resultCode = "SUCCESS";
 		}
 
 		if (request.method == "UI.AddSubMenu") {
 			
 			MFT.AppOptionsView.AddSubMenu(request.params.menuId, request.params.menuName);
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
-					"method" : "UI.AddSubMenuResponse"
-				}
-			};
-			this.client.send(JSONMessage);
+			resultCode = "SUCCESS";
 		}
 
 		if (request.method == "UI.DeleteSubMenu") {
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : MFT.AppOptionsView.DeleteSubMenu(request.params.menuId),  //  type (enum) from AppLink protocol
-					"method" : "UI.DeleteSubMenuResponse"
-				}
-			};
-			this.client.send(JSONMessage);
+			resultCode =  MFT.AppOptionsView.DeleteSubMenu(request.params.menuId);
+
 		}
 
 		if (request.method == "UI.CreateInteractionChoiceSet") {
 
 			MFT.AppModel.interactionChoises.push(request.params);
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS",  //  type (enum) from AppLink protocol
-					"method" : "UI.CreateInteractionChoiceSetResponse"
-				}
-			};
-			this.client.send(JSONMessage);
+			resultCode = "SUCCESS";
 		}
 
 		if (request.method == "UI.DeleteInteractionChoiceSet") {
@@ -303,29 +235,29 @@ FFW.UI = FFW.RPCObserver.create({
 				}
 			}
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS",  //  type (enum) from AppLink protocol
-					"method" : "UI.DeleteInteractionChoiceSetResponse"
-				}
-			};
-			this.client.send(JSONMessage);
+			resultCode = "SUCCESS";
+
 		}
 
 		if (request.method == "UI.PerformInteraction") {
 
-			MFT.AppSubMenuView.PerformInteraction(request.params.interactionChoiceSetIDList);
+			this.performInteractionRequestId = request.id;
+
+			MFT.AppPerformInteractionChoise.PerformInteraction(request.params.interactionChoiceSetIDList);
+			
+			resultCode = null;
+
+		}
+
+		if(resultCode){
 
 			// send repsonse
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
 				"result":	{
-					"resultCode" : "SUCCESS",  //  type (enum) from AppLink protocol
-					"method" : "UI.PerformInteractionResponse"
+					"resultCode" : resultCode, //  type (enum) from AppLink protocol
+					"method" : request.method + "Response"
 				}
 			};
 			this.client.send(JSONMessage);
@@ -343,6 +275,25 @@ FFW.UI = FFW.RPCObserver.create({
 			"jsonrpc"	:	"2.0",
 			"method"	:	"UI.OnCommand",
 			"params"	:	{"commandId":commandId, }
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * send notification when command was triggered
+ 	 */	
+	onChoosed: function(commandId) {
+		Em.Logger.log("FFW.UI.PerformInteractionResponse");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc"	:	"2.0",
+			"id"		: 	this.performInteractionRequestId,
+			"result":	{
+				"resultCode":		"SUCCESS",
+				"choiceID":			commandId,
+				"method":			"UI.PerformInteractionResponse"
+			}
 		};
 		this.client.send(JSONMessage);
 	},

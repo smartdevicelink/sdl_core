@@ -114,80 +114,81 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""},
 #line 46 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.Show",28,&Marshaller::mShow},
+      {"UI.Show",40,&Marshaller::mShow},
 #line 22 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.Alert",4,&Marshaller::mAlert},
+      {"UI.Alert",16,&Marshaller::mAlert},
       {""}, {""}, {""},
 #line 36 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.OnCommand",18,&Marshaller::mOnCommand},
+      {"UI.OnCommand",30,&Marshaller::mOnCommand},
       {""}, {""},
 #line 47 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.ShowResponse",29,&Marshaller::mShowResponse},
+      {"UI.ShowResponse",41,&Marshaller::mShowResponse},
 #line 26 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.DeleteCommand",8,&Marshaller::mDeleteCommand},
+      {"UI.DeleteCommand",20,&Marshaller::mDeleteCommand},
 #line 34 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.OnAppActivated",16,&Marshaller::mOnAppActivated},
+      {"UI.OnAppActivated",28,&Marshaller::mOnAppActivated},
 #line 20 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.AddSubMenu",2,&Marshaller::mAddSubMenu},
+      {"UI.AddSubMenu",14,&Marshaller::mAddSubMenu},
 #line 35 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.OnAppDeactivated",17,&Marshaller::mOnAppDeactivated},
+      {"UI.OnAppDeactivated",29,&Marshaller::mOnAppDeactivated},
       {""},
 #line 38 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.PerformInteraction",20,&Marshaller::mPerformInteraction},
+      {"UI.PerformInteraction",32,&Marshaller::mPerformInteraction},
 #line 42 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.SetGlobalProperties",24,&Marshaller::mSetGlobalProperties},
+      {"UI.SetGlobalProperties",36,&Marshaller::mSetGlobalProperties},
       {""},
 #line 27 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.DeleteCommandResponse",9,&Marshaller::mDeleteCommandResponse},
+      {"UI.DeleteCommandResponse",21,&Marshaller::mDeleteCommandResponse},
       {""},
 #line 21 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.AddSubMenuResponse",3,&Marshaller::mAddSubMenuResponse},
+      {"UI.AddSubMenuResponse",15,&Marshaller::mAddSubMenuResponse},
       {""}, {""},
 #line 39 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.PerformInteractionResponse",21,&Marshaller::mPerformInteractionResponse},
+      {"UI.PerformInteractionResponse",33,&Marshaller::mPerformInteractionResponse},
 #line 43 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.SetGlobalPropertiesResponse",25,&Marshaller::mSetGlobalPropertiesResponse},
+      {"UI.SetGlobalPropertiesResponse",37,&Marshaller::mSetGlobalPropertiesResponse},
 #line 23 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.AlertResponse",5,&Marshaller::mAlertResponse},
+      {"UI.AlertResponse",17,&Marshaller::mAlertResponse},
       {""},
 #line 37 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.OnSystemContext",19,&Marshaller::mOnSystemContext},
+      {"UI.OnSystemContext",31,&Marshaller::mOnSystemContext},
 #line 28 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.DeleteInteractionChoiceSet",10,&Marshaller::mDeleteInteractionChoiceSet},
+      {"UI.DeleteInteractionChoiceSet",22,&Marshaller::mDeleteInteractionChoiceSet},
       {""},
 #line 44 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.SetMediaClockTimer",26,&Marshaller::mSetMediaClockTimer},
+      {"UI.SetMediaClockTimer",38,&Marshaller::mSetMediaClockTimer},
       {""},
 #line 18 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.AddCommand",0,&Marshaller::mAddCommand},
+      {"UI.AddCommand",12,&Marshaller::mAddCommand},
 #line 40 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.ResetGlobalProperties",22,&Marshaller::mResetGlobalProperties},
+      {"UI.ResetGlobalProperties",34,&Marshaller::mResetGlobalProperties},
       {""},
 #line 30 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.DeleteSubMenu",12,&Marshaller::mDeleteSubMenu},
+      {"UI.DeleteSubMenu",24,&Marshaller::mDeleteSubMenu},
 #line 29 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.DeleteInteractionChoiceSetResponse",11,&Marshaller::mDeleteInteractionChoiceSetResponse},
+      {"UI.DeleteInteractionChoiceSetResponse",23,&Marshaller::mDeleteInteractionChoiceSetResponse},
 #line 32 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.GetCapabilities",14,&Marshaller::mGetCapabilities},
+      {"UI.GetCapabilities",26,&Marshaller::mGetCapabilities},
 #line 45 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.SetMediaClockTimerResponse",27,&Marshaller::mSetMediaClockTimerResponse},
+      {"UI.SetMediaClockTimerResponse",39,&Marshaller::mSetMediaClockTimerResponse},
       {""},
 #line 19 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.AddCommandResponse",1,&Marshaller::mAddCommandResponse},
+      {"UI.AddCommandResponse",13,&Marshaller::mAddCommandResponse},
 #line 41 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.ResetGlobalPropertiesResponse",23,&Marshaller::mResetGlobalPropertiesResponse},
+      {"UI.ResetGlobalPropertiesResponse",35,&Marshaller::mResetGlobalPropertiesResponse},
       {""},
 #line 31 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.DeleteSubMenuResponse",13,&Marshaller::mDeleteSubMenuResponse},
+      {"UI.DeleteSubMenuResponse",25,&Marshaller::mDeleteSubMenuResponse},
       {""},
 #line 33 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.GetCapabilitiesResponse",15,&Marshaller::mGetCapabilitiesResponse},
+      {"UI.GetCapabilitiesResponse",27,&Marshaller::mGetCapabilitiesResponse},
       {""}, {""},
 #line 24 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.CreateInteractionChoiceSet",6,&Marshaller::mCreateInteractionChoiceSet},
+      {"UI.CreateInteractionChoiceSet",18,&Marshaller::mCreateInteractionChoiceSet},
       {""}, {""}, {""}, {""}, {""}, {""}, {""},
 #line 25 "../src/RPC2ObjectsImpl/UI/Marshaller.gp"
-      {"UI.CreateInteractionChoiceSetResponse",7,&Marshaller::mCreateInteractionChoiceSetResponse}
+      {"UI.CreateInteractionChoiceSetResponse",19,&Marshaller::mCreateInteractionChoiceSetResponse},
+      {"UI.OnReady", 50,&Marshaller::mOnReady}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)

@@ -333,12 +333,16 @@ var StateManager = Em.StateManager.extend({
 		app: Em.State.create({
 		}),
 
-		appoptions: Em.State.create({
-			viewLoaded: true
+		appperforminteraction: Em.State.create({
+			viewLoaded: true,
 		}),
 
-		appsubmenu: Em.State.create({
-			viewLoaded: true
+		appoptions: Em.State.create({
+			viewLoaded: true,
+
+			appsubmenu: Em.State.create({
+				viewLoaded: true
+			})
 		}),
 
 		options: Em.State.create({

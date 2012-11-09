@@ -42,7 +42,7 @@ FFW.VR = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.VR.onRPCRegistered");
 		this._super();
 	},
-	
+
 	/*
      * Client is unregistered - no more requests
  	 */	
@@ -67,7 +67,7 @@ FFW.VR = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.VR.onRPCResult");
 		this._super();
 	 },
-	
+
 	/*
 	 * handle RPC erros here
  	 */	
@@ -83,7 +83,7 @@ FFW.VR = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.VR.onRPCNotification");
 		this._super();
 	},
-	
+
 	/*
 	 * handle RPC requests here
  	 */	
@@ -91,7 +91,7 @@ FFW.VR = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.VR.onRPCRequest");
 		this._super();
 
-		if (request.method == "UI.AddCommand") {
+		if (request.method == "VR.AddCommand") {
 			
 			MFT.VRPopUp.AddCommand(request.params.cmdId, request.params.vrCommands);
 
@@ -99,12 +99,15 @@ FFW.VR = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+				"result"	: 	{
+					"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+					"method" 	:  request.method + "Response"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
 
-		if (request.method == "UI.DeleteCommand") {
+		if (request.method == "VR.DeleteCommand") {
 			
 			MFT.VRPopUp.DeleteCommand(request.params.cmdId);
 
@@ -112,19 +115,13 @@ FFW.VR = FFW.RPCObserver.create({
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
-				"result":	"SUCCESS" //  type (enum) from AppLink protocol
+				"result"	: 	{
+					"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+					"method" 	:  request.method + "Response"
+				}
 			};
 			this.client.send(JSONMessage);
 		}
 		
-/*
-		if (FFW.VR.onRPCNotification == "VRClient.onFullScreenChanged") {
-			this.resizeVideo = true;
-			this.FullScreenRequestId = request.id;
-			Em.Logger.log("resizeVideo = " + this.resizeVideo);
-			Em.Logger.log("FullScreenRequestId = " + this.FullScreenRequestId);
-			this.set("isFullScreen", request.params.isFullScreen);
-		}
-*/
 	}
 })

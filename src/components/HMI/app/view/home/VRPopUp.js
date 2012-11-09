@@ -27,31 +27,42 @@ MFT.VRPopUp = Em.ContainerView.create({
 
     AddCommand: function( commandId, vrCommands){
 
-        for(var val in vrCommands){
+        for(var i=0;i<vrCommands.length;i++){
 
             button = MFT.Button.create({
-                elementId:          'media_rightmenu_softButton' + vrCommands[val],
-                click:              function(){
+                elementId:          'vrCommand_' + commandId + "_" + Math.floor((Math.random()*100)+1),
+                click:              function() {
                     FFW.UI.onCommand(this.commandId);
+		    MFT.VRPopUp.set('received', false);
                 },
                 commandId:          commandId, 
                 classNames:         ['rs-item'],
                 //icon:             null,//'images/media/active_arrow.png',
-                text:               vrCommands[val],
+                text:               vrCommands[i],
                 templateName:       'text'
             });
 
-            MFT.VRPopUp.scrollWrapper.scroller.get('childViews').pushObject(button);
+            this.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
         }
-        MFT.VRPopUp.scroll.refresh();
+
+//        this.scroll.refresh();
     },
 
     DeleteCommand: function(commandId){
 
-        if(Ember.View.views['media_rightmenu_softButton' + commandId]){
-            Ember.View.views['media_rightmenu_softButton' + commandId].destroy();
-        }
-        MFT.VRPopUp.scroll.refresh();
+	  var i = this.buttonsWrapper.buttonsScroll.get('childViews').length-1;
+	  do
+	  {
+		var button = this.buttonsWrapper.buttonsScroll.get('childViews')[i];
+		if (button.commandId == commandId) {
+			Em.View.views[button.elementId].destroy();
+			this.buttonsWrapper.buttonsScroll.get('childViews').splice(i, 1);
+		}
+		i--;
+	  }
+	  while (i>=0);
+
+//        MFT.VRPopUp.scroll.refresh();
     },
 
     popUp : Em.View.extend({
@@ -72,7 +83,7 @@ MFT.VRPopUp = Em.ContainerView.create({
 
     buttonsWrapper: Em.ContainerView.extend({
         classNames:         'buttonsWrapper',
-        elementId:          'buttonsWrapper',
+        elementId:          'buttonsWrapperVR',
         childViews: [
             'buttonsScroll',
             'scrollBar'
@@ -90,7 +101,7 @@ MFT.VRPopUp = Em.ContainerView.create({
 
         buttonsScroll: Em.ContainerView.extend( Ember.TargetActionSupport, {
             classNames: 'buttonsScroll',
-            elementId:  'buttonsScroll',
+            elementId:  'buttonsScrollVR',
             actionUp:   function(){
                 this._parentView.pos = this._parentView.scroll.y - this._parentView.scroll.startY;
             }
@@ -98,7 +109,7 @@ MFT.VRPopUp = Em.ContainerView.create({
 
         scrollBar: Em.ContainerView.extend({
             classNames:         'scrollBar',
-            elementId:          'scrollBar',
+            elementId:          'scrollBarVR',
             childViews: [
                 'scrollArrowUp',
                 'scroller',
@@ -152,7 +163,7 @@ MFT.VRPopUp = Em.ContainerView.create({
         },
         
         loaded: function() {
-            this.set('scroll', new iScroll('buttonsWrapper',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.VRPopUp.buttonsWrapper.scrollEnd();}}));
+            this.set('scroll', new iScroll('buttonsWrapperVR',{scrollbarClass: 'display:none', momentum: true, bounce: false, onBeforeScrollEnd: function(){MFT.VRPopUp.buttonsWrapper.scrollEnd();}}));
             this.coeficient = this.scroll.wrapperH / this.scroll.scrollerH;
             this.scrollBarH = (this.scroll.wrapperH - 98) * this.coeficient - 49;
             this.scrollBar.scroller.set( 'style', 'height:' + this.scrollBarH + 'px;' );
