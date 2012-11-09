@@ -1,6 +1,7 @@
 #include "AppMgr/SubscribeButton.h"
 #include "AppMgr/AppMgrCore.h"
 #include "AppMgr/AppMgrRegistry.h"
+#include "AppMgr/MobileHandler.h"
 #include "JSONHandler/ALRPCObjects/SubscribeButton_request.h"
 #include "JSONHandler/ALRPCObjects/SubscribeButton_response.h"
 #include "JSONHandler/ALRPCObjects/ButtonName.h"
@@ -37,7 +38,7 @@ void SubscribeButtonCmd::execute()
     response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
     response->set_success(true);
     response->set_resultCode(AppLinkRPC::Result::SUCCESS);
-    AppMgrCore::getInstance().mJSONHandler->sendRPCMessage(response, msg->second);
+    MobileHandler::getInstance().sendRPCMessage(response, msg->second);
 }
 
 }
