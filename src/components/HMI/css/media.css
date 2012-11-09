@@ -2743,10 +2743,11 @@
 .cancelBarAnimation{-webkit-transition:none !important;}
 		
 #media_app_sub_menu_view.media_app_sub_menu_view{
-	top: 56px;
+	position: absolute;
 	width: 800px;
-	height: 367px;
-	z-index: 1;
+	height: 480px;
+	z-index: 501;
+	background-image: url(../images/media/bg.png);
 }
 
 #media_app_sub_menu_view .buttonsWrapper {
@@ -2823,10 +2824,11 @@
 	width: 535px;
 }
 #media_app_options_view.media_app_options_view{
-	top: 56px;
+	position: absolute;
 	width: 800px;
-	height: 367px;
-	z-index: 1;
+	height: 480px;
+	z-index: 501;
+	background-image: url(../images/media/bg.png);
 }
 
 #media_app_options_view .buttonsWrapper {
