@@ -28,6 +28,7 @@ set (SOURCES
     ./src/MessageMapping.cpp
     ./src/ButtonCapabilities.cpp
     ./src/HMIHandler.cpp
+    ./src/MobileHandler.cpp
 )
 
 add_library("AppMgr" ${SOURCES})
