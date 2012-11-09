@@ -134,11 +134,11 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
 		{
 			LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
             AppLinkRPC::RegisterAppInterface_request * object = (AppLinkRPC::RegisterAppInterface_request*)mobileMsg;
-            const RegistryItem* registeredApp =  core->registerApplication( object, sessionID );
+            Application* app = core->getApplicationFromItemCheckNotNull(core->registerApplication( object, sessionID ));
             AppLinkRPC::RegisterAppInterface_response* response = new AppLinkRPC::RegisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
-            if(!registeredApp)
+            if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been registered!");
                 response->set_success(false);
@@ -157,12 +157,6 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
 
             core->mJSONHandler->sendRPCMessage(response, sessionID);
 
-            const Application* app = registeredApp->getApplication();
-            if(!app)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been found in registered items!");
-                break;
-            }
             AppLinkRPC::OnHMIStatus* status = new AppLinkRPC::OnHMIStatus();
             status->set_hmiLevel(app->getApplicationHMIStatusLevel());
             core->mJSONHandler->sendRPCMessage(status, sessionID);
@@ -180,13 +174,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
 
             AppLinkRPC::UnregisterAppInterface_request * object = (AppLinkRPC::UnregisterAppInterface_request*)mobileMsg;
-            RegistryItem* registeredApp = AppMgrRegistry::getInstance().getItem(sessionID);
-            if(!registeredApp)
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, " Session "<<sessionID<<" hasn't been associated with application!");
-                break;
-            }
-            const Application* app = registeredApp->getApplication();
+            Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionID));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, " No application has been associated with this registry item!");
