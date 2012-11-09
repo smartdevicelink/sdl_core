@@ -15,15 +15,25 @@ HMIHandler& HMIHandler::getInstance()
 
 void HMIHandler::setReadyState(bool ready)
 {
-    m_bHMIReady = ready;
+    if(mJSONRPC2Handler)
+    {
+        m_bHMIReady = ready;
+    }
+    else
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " HMIHandler is about to set ready, but is null!");
+    }
 }
 
 void HMIHandler::sendNotification(const RPC2Communication::RPC2Notification *command)
 {
     if(m_bHMIReady)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Sending a notification "<<command->getMethod());
-        mJSONRPC2Handler->sendNotification(command);
+        if(mJSONRPC2Handler)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " Sending a notification "<<command->getMethod());
+            mJSONRPC2Handler->sendNotification(command);
+        }
     }
     else
     {
@@ -35,8 +45,11 @@ void HMIHandler::sendResponse(const RPC2Communication::RPC2Response *command)
 {
     if(m_bHMIReady)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Sending a response "<<command->getMethod());
-        mJSONRPC2Handler->sendResponse(command);
+        if(mJSONRPC2Handler)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " Sending a response "<<command->getMethod());
+            mJSONRPC2Handler->sendResponse(command);
+        }
     }
     else
     {
@@ -48,8 +61,11 @@ void HMIHandler::sendRequest(const RPC2Communication::RPC2Request *command)
 {
     if(m_bHMIReady)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Sending a request "<<command->getMethod());
-        mJSONRPC2Handler->sendRequest(command);
+        if(mJSONRPC2Handler)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " Sending a request "<<command->getMethod());
+            mJSONRPC2Handler->sendRequest(command);
+        }
     }
     else
     {
