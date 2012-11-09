@@ -15,7 +15,14 @@ MobileHandler &MobileHandler::getInstance()
 
 void MobileHandler::sendRPCMessage(const AppLinkRPC::ALRPCMessage *message, unsigned char sessionId)
 {
-    mJSONHandler->sendRPCMessage(message, sessionId);
+    if(mJSONHandler)
+    {
+        mJSONHandler->sendRPCMessage(message, sessionId);
+    }
+    else
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " MobileHandler is null!");
+    }
 }
 
 void MobileHandler::setJsonHandler(JSONHandler *handler)
