@@ -4,6 +4,20 @@
 
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"
+#include "JSONHandler/ALRPCMessage.h"
+#include "JSONHandler/ALRPCRequest.h"
+#include "JSONHandler/ALRPCResponse.h"
+#include "JSONHandler/ALRPCNotification.h"
+#include "JSONHandler/ALRPCObjects/Marshaller.h"
+#include "JSONHandler/RPC2Objects/UI/Marshaller.h"
+#include "JSONHandler/RPC2Objects/VR/Marshaller.h"
+#include "JSONHandler/RPC2Objects/TTS/Marshaller.h"
+#include "JSONHandler/RPC2Objects/Buttons/Marshaller.h"
+#include "JSONHandler/RPC2Objects/AppLinkCore/Marshaller.h"
+#include "JSONHandler/RPC2Command.h"
+#include "JSONHandler/RPC2Request.h"
+#include "JSONHandler/RPC2Response.h"
+#include "JSONHandler/RPC2Notification.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -11,9 +25,31 @@
 #include <string>
 #include <iostream>
 
+Logger logger = Logger::getInstance(LOG4CPLUS_TEXT("testAppMgr"));
+
+int basicWorkflow()
+{
+    NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
+
+    AppLinkRPC::RegisterAppInterface_request* registerApp = new AppLinkRPC::RegisterAppInterface_request();
+    registerApp->set_appName("MyNewFuckingTestApp");
+    registerApp->set_isMediaApplication(true);
+    registerApp->set_languageDesired(AppLinkRPC::Language::EN_US);
+    registerApp->set_ngnMediaScreenAppName("NgnMediaScreenAppName");
+    registerApp->set_usesVehicleData(false);
+    std::vector<std::string> vrSynonyms;
+    vrSynonyms.push_back("qwqwwqwqw");
+    vrSynonyms.push_back("asdadsadd");
+    vrSynonyms.push_back("zxczczcxzc");
+    registerApp->set_vrSynonyms(vrSynonyms);
+
+    appMgr.onMessageReceivedCallback(registerApp, 0);
+
+    return EXIT_SUCCESS;
+}
+
 int main()
 {
-    Logger logger = Logger::getInstance(LOG4CPLUS_TEXT("testAppMgr"));
     PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
     LOG4CPLUS_INFO_EXT(logger, " Application started!");
 
@@ -32,11 +68,16 @@ int main()
  //   appMgr.setJsonHandler(&jsonHandler);
 
 
-    LOG4CPLUS_INFO(logger, "Start AppMgr threads!");
+    LOG4CPLUS_INFO_EXT(logger, "Start AppMgr threads!");
     appMgr.executeThreads();
 
+    basicWorkflow();
+
+    for(;;)
+    {
+    }
+
+    LOG4CPLUS_INFO_EXT(logger, "Stopping AppMgr threads!");
+
     return EXIT_SUCCESS;
-
-
-	return 0;
 }
