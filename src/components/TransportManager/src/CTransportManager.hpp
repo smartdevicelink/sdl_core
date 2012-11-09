@@ -138,7 +138,7 @@ namespace NsAppLink
              * @param ConnectedDevice DeviceInfo of device with connected application.
              * @param Connection Connection handle.
              **/
-            virtual void onApplicationConnected(const SDeviceInfo & ConnectedDevice, const tConnectionHandle ConnectionHandle);
+            virtual void onApplicationConnected(IDeviceAdapter * DeviceAdapter, const SDeviceInfo & ConnectedDevice, const tConnectionHandle ConnectionHandle);
 
             /**
              * @brief Application disconnected callback.
@@ -146,7 +146,7 @@ namespace NsAppLink
              * @param ConnectedDevice DeviceInfo of device with connected application.
              * @param Connection Connection handle.
              **/
-            virtual void onApplicationDisconnected(const SDeviceInfo & DisconnectedDevice, const tConnectionHandle ConnectionHandle);
+            virtual void onApplicationDisconnected(IDeviceAdapter * DeviceAdapter, const SDeviceInfo & DisconnectedDevice, const tConnectionHandle ConnectionHandle);
 
             /**
              * @brief Frame received callback.
@@ -361,6 +361,11 @@ namespace NsAppLink
             typedef std::map<IDeviceAdapter*, tInternalDeviceList*> tDevicesByAdapterMap;
 
             /**
+             * @brief Map for storing device adapters which are responsible for handling single Connection Handle
+             **/
+            typedef std::map<tConnectionHandle, IDeviceAdapter*> tDeviceAdaptersByConnectionHandleMap;
+
+            /**
              * @brief Start routine for Application-related callbacks.
              *
              * @param Data Must be pointer to CTransportManager instance.
@@ -561,6 +566,16 @@ namespace NsAppLink
              * @brief Mutex restricting access to devices information for each adapter
              **/
             mutable pthread_mutex_t mDevicesByAdapterMutex;
+
+            /**
+             * @brief Map for storing device adapters which are responsible for handling single Connection Handle
+             **/
+            tDeviceAdaptersByConnectionHandleMap mDeviceAdaptersByConnectionHandle;
+
+            /**
+             * @brief Mutex restricting access to device adapters which are responsible for handling single Connection Handle
+             **/
+            mutable pthread_mutex_t mDeviceAdaptersByConnectionHandleMutex;
         };
     }
 }

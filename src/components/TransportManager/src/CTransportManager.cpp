@@ -30,7 +30,9 @@ mDataListenersCallbacks(),
 mDataCallbacksThreads(),
 mDataCallbacksConditionVars(),
 mDevicesByAdapter(),
-mDevicesByAdapterMutex()
+mDevicesByAdapterMutex(),
+mDeviceAdaptersByConnectionHandle(),
+mDeviceAdaptersByConnectionHandleMutex()
 {
     addDeviceAdapter(new CBluetoothAdapter(*this, *this));
 
@@ -38,6 +40,7 @@ mDevicesByAdapterMutex()
     pthread_mutex_init(&mDeviceListenersMutex, 0);
     pthread_mutex_init(&mDeviceHandleGenerationMutex, 0);
     pthread_mutex_init(&mConnectionHandleGenerationMutex, 0);
+    pthread_mutex_init(&mDeviceAdaptersByConnectionHandleMutex, 0);
 
     pthread_cond_init(&mDeviceListenersConditionVar, NULL);
 
@@ -59,6 +62,7 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
     pthread_mutex_destroy(&mDeviceListenersMutex);
     pthread_mutex_destroy(&mDeviceHandleGenerationMutex);
     pthread_mutex_destroy(&mConnectionHandleGenerationMutex);
+    pthread_mutex_destroy(&mDeviceAdaptersByConnectionHandleMutex);
 
     pthread_cond_destroy(&mDeviceListenersConditionVar);
 
@@ -78,6 +82,10 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
     {
         return;
     }
+
+    //sleep(20);
+
+    //connectDevice(1);
 
 /*
     tConnectionHandle h10 = 1;
@@ -147,10 +155,10 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
 
 
 
-    onApplicationConnected(SDeviceInfo(), h1);
-    onApplicationConnected(SDeviceInfo(), h2);
-    onApplicationConnected(SDeviceInfo(), h3);
-    onApplicationConnected(SDeviceInfo(), h4);
+    onApplicationConnected(mDeviceAdapters.front(), SDeviceInfo(), h1);
+    onApplicationConnected(mDeviceAdapters.front(), SDeviceInfo(), h2);
+    onApplicationConnected(mDeviceAdapters.front(), SDeviceInfo(), h3);
+    onApplicationConnected(mDeviceAdapters.front(), SDeviceInfo(), h4);
 
     sleep(5);
     pthread_mutex_lock(&mDataListenersMutex);
@@ -287,9 +295,28 @@ void NsAppLink::NsTransportManager::CTransportManager::removeDeviceListener(NsAp
 
 int NsAppLink::NsTransportManager::CTransportManager::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
-    LOG4CPLUS_ERROR_EXT(mLogger, "Not implemented");
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "sendFrame called. DataSize: "<<DataSize);
 
-    return -1;
+    int result = -1;
+
+    // Searching device adapter
+    pthread_mutex_lock(&mDeviceAdaptersByConnectionHandleMutex);
+
+    tDeviceAdaptersByConnectionHandleMap::iterator deviceAdapterIterator = mDeviceAdaptersByConnectionHandle.find(ConnectionHandle);
+    if(deviceAdapterIterator != mDeviceAdaptersByConnectionHandle.end())
+    {
+        IDeviceAdapter *pDeviceAdapter = deviceAdapterIterator->second;
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Device adapter found (type: "<<pDeviceAdapter->getDeviceType()<<"). Sending frame to it");
+        result = pDeviceAdapter->sendFrame(ConnectionHandle, Data, DataSize);
+    }
+    else
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Device adapter that handles Connection Handle was not found");
+    }
+
+    pthread_mutex_unlock(&mDeviceAdaptersByConnectionHandleMutex);
+
+    return result;
 }
 
 NsAppLink::NsTransportManager::tDeviceHandle NsAppLink::NsTransportManager::CTransportManager::generateNewDeviceHandle(void)
@@ -349,11 +376,16 @@ void CTransportManager::onDeviceListUpdated(IDeviceAdapter * DeviceAdapter, cons
     }
 }
 
-void CTransportManager::onApplicationConnected(const SDeviceInfo & ConnectedDevice, const tConnectionHandle ConnectionHandle)
+void CTransportManager::onApplicationConnected(IDeviceAdapter * DeviceAdapter, const SDeviceInfo & ConnectedDevice, const tConnectionHandle ConnectionHandle)
 {
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "onApplicationConnected");
 
     startDataCallbacksThread(ConnectionHandle);
+
+    // Storing device adapter for that handle
+    pthread_mutex_lock(&mDeviceAdaptersByConnectionHandleMutex);
+    mDeviceAdaptersByConnectionHandle.insert(std::make_pair(ConnectionHandle, DeviceAdapter));
+    pthread_mutex_unlock(&mDeviceAdaptersByConnectionHandleMutex);
 
     // Sending callback
     pthread_mutex_lock(&mDeviceListenersMutex);
@@ -368,13 +400,18 @@ void CTransportManager::onApplicationConnected(const SDeviceInfo & ConnectedDevi
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "END of onApplicationConnected");
 }
 
-void CTransportManager::onApplicationDisconnected(const SDeviceInfo & DisconnectedDevice, const tConnectionHandle ConnectionHandle)
+void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter, const SDeviceInfo& DisconnectedDevice, const tConnectionHandle ConnectionHandle)
 {
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "onApplicationDisconnected");
 
     //TODO: Checking Connection Handle validity
 
     stopDataCallbacksThread(ConnectionHandle);
+
+    // Removing device adapter for that handle
+    pthread_mutex_lock(&mDeviceAdaptersByConnectionHandleMutex);
+    mDeviceAdaptersByConnectionHandle.erase(ConnectionHandle);
+    pthread_mutex_unlock(&mDeviceAdaptersByConnectionHandleMutex);
 
     // Sending callback
     pthread_mutex_lock(&mDeviceListenersMutex);
