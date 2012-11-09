@@ -13,6 +13,7 @@
 #include "AppMgr/AppMgrCoreQueues.h"
 #include "AppMgr/SubscribeButton.h"
 #include "AppMgr/HMIHandler.h"
+#include "AppMgr/MobileHandler.h"
 #include "JSONHandler/ALRPCMessage.h"
 #include "JSONHandler/ALRPCRequest.h"
 #include "JSONHandler/ALRPCResponse.h"
@@ -44,16 +45,14 @@ AppMgrCore& AppMgrCore::getInstance( )
 }
 
 AppMgrCore::AppMgrCore()
-    :mJSONHandler(0)
-    ,mQueueRPCAppLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
+    :mQueueRPCAppLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
     ,mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<RPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
 {
     LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
 }
 
 AppMgrCore::AppMgrCore(const AppMgrCore &)
-    :mJSONHandler(0)
-    ,mQueueRPCAppLinkObjectsIncoming(0)
+    :mQueueRPCAppLinkObjectsIncoming(0)
     ,mQueueRPCBusObjectsIncoming(0)
 {
 }
@@ -143,7 +142,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                 LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been registered!");
                 response->set_success(false);
                 response->set_resultCode(AppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                core->mJSONHandler->sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
                 break;
             }
 
@@ -155,11 +154,11 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             response->set_success(true);
             response->set_resultCode(AppLinkRPC::Result::SUCCESS);
 
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
 
             AppLinkRPC::OnHMIStatus* status = new AppLinkRPC::OnHMIStatus();
             status->set_hmiLevel(app->getApplicationHMIStatusLevel());
-            core->mJSONHandler->sendRPCMessage(status, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(status, sessionID);
             RPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new RPC2Communication::AppLinkCore::OnAppRegistered();
             appRegistered->set_appName(app->getName());
             appRegistered->set_isMediaApplication(app->getIsMediaApplication());
@@ -187,11 +186,11 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
             response->set_success(true);
             response->set_resultCode(AppLinkRPC::Result::SUCCESS);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
 
             AppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new AppLinkRPC::OnAppInterfaceUnregistered();
             msgUnregistered->set_reason(AppLinkRPC::AppInterfaceUnregisteredReason(AppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
-            core->mJSONHandler->sendRPCMessage(msgUnregistered, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionID);
             RPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new RPC2Communication::AppLinkCore::OnAppUnregistered();
             appUnregistered->set_appName(appName);
             appUnregistered->set_reason(AppLinkRPC::AppInterfaceUnregisteredReason(AppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
@@ -222,7 +221,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
             response->set_success(true);
             response->set_resultCode(AppLinkRPC::Result::SUCCESS);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_UNSUBSCRIBEBUTTON_REQUEST:
@@ -235,7 +234,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
             response->set_success(true);
             response->set_resultCode(AppLinkRPC::Result::SUCCESS);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_SHOW_REQUEST:
@@ -284,7 +283,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             AppLinkRPC::Speak_response * mobileResponse = new AppLinkRPC::Speak_response;
             mobileResponse->set_resultCode(AppLinkRPC::Result::SUCCESS);
             mobileResponse->set_success(true);
-            core->mJSONHandler->sendRPCMessage(mobileResponse, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionID);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_SETGLOBALPROPERTIES_REQUEST:
@@ -307,7 +306,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             AppLinkRPC::SetGlobalProperties_response * mobileResponse = new AppLinkRPC::SetGlobalProperties_response;
             mobileResponse->set_success(true);
             mobileResponse->set_resultCode(AppLinkRPC::Result::SUCCESS);
-            core->mJSONHandler->sendRPCMessage(mobileResponse, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionID);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_RESETGLOBALPROPERTIES_REQUEST:
@@ -323,7 +322,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             AppLinkRPC::ResetGlobalProperties_response * mobileResponse = new AppLinkRPC::ResetGlobalProperties_response;
             mobileResponse->set_success(true);
             mobileResponse->set_resultCode(AppLinkRPC::Result::SUCCESS);
-            core->mJSONHandler->sendRPCMessage(mobileResponse, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionID);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_ALERT_REQUEST:
@@ -355,13 +354,13 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case AppLinkRPC::Marshaller::METHOD_ONBUTTONPRESS:
         {
             LOG4CPLUS_INFO_EXT(mLogger, "OnButtonPress Notification has been received.");
-            core->mJSONHandler->sendRPCMessage(mobileMsg, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(mobileMsg, sessionID);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_ONCOMMAND:
         {
             LOG4CPLUS_INFO_EXT(mLogger, "OnCommand Notification has been received.");
-            core->mJSONHandler->sendRPCMessage(mobileMsg, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(mobileMsg, sessionID);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_ADDCOMMAND_REQUEST:
@@ -530,7 +529,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         case AppLinkRPC::Marshaller::METHOD_UNREGISTERAPPINTERFACE_RESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A "<< mobileMsg->getMethodId() << " response or notification has been invoked");
-            core->mJSONHandler->sendRPCMessage(mobileMsg, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(mobileMsg, sessionID);
             break;
         }
 
@@ -574,7 +573,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             }
             unsigned char sessionID = app->getSessionID();
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(event, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(event, sessionID);
             return;
         }
         case RPC2Communication::Buttons::Marshaller::METHOD_ONBUTTONPRESS:
@@ -594,7 +593,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             }
             unsigned char sessionID = app->getSessionID();
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(event, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(event, sessionID);
             return;
         }        
         case RPC2Communication::Buttons::Marshaller::METHOD_GETCAPABILITIESRESPONSE:
@@ -631,7 +630,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             }
             unsigned char sessionID = app->getSessionID();
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(event, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(event, sessionID);
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_SHOWRESPONSE:
@@ -651,7 +650,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_SETGLOBALPROPERTIESRESPONSE:
@@ -671,7 +670,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_RESETGLOBALPROPERTIESRESPONSE:
@@ -691,7 +690,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_ALERTRESPONSE:
@@ -710,7 +709,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_ADDCOMMANDRESPONSE:
@@ -729,7 +728,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_DELETECOMMANDRESPONSE:
@@ -747,7 +746,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             }
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_ADDSUBMENURESPONSE:
@@ -766,7 +765,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_DELETESUBMENURESPONSE:
@@ -785,7 +784,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_CREATEINTERACTIONCHOICESETRESPONSE:
@@ -804,7 +803,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_DELETEINTERACTIONCHOICESETRESPONSE:
@@ -823,7 +822,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_PERFORMINTERACTIONRESPONSE:
@@ -851,7 +850,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));         
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_INVALID:
@@ -878,7 +877,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::VR::Marshaller::METHOD_DELETECOMMANDRESPONSE:
@@ -897,7 +896,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             response->set_success(true);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             core->mMessageMapping.removeMessage(object->getId());
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::VR::Marshaller::METHOD_ONCOMMAND:
@@ -915,7 +914,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AppLinkRPC::OnCommand* event = new AppLinkRPC::OnCommand();
             event->set_cmdID(object->get_cmdID());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(event, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(event, sessionID);
             return;
         }
         case RPC2Communication::VR::Marshaller::METHOD_INVALID:
@@ -942,7 +941,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            core->mJSONHandler->sendRPCMessage(response, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
         case RPC2Communication::TTS::Marshaller::METHOD_INVALID:
@@ -961,7 +960,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             {
                 event->set_reason(*object->get_reason());
             }            
-            core->mJSONHandler->sendRPCMessage(event, 1);//just temporarily!!!
+            MobileHandler::getInstance().sendRPCMessage(event, 1);//just temporarily!!!
             return;
         }        
         case RPC2Communication::AppLinkCore::Marshaller::METHOD_ACTIVATEAPP:
@@ -985,7 +984,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             app->setApplicationHMIStatusLevel(AppLinkRPC::HMILevel::HMI_FULL);
             hmiStatus->set_audioStreamingState(app->getApplicationAudioStreamingState());
             hmiStatus->set_systemContext(AppLinkRPC::SystemContext::SYSCTXT_MENU);
-            core->mJSONHandler->sendRPCMessage( hmiStatus, app->getSessionID() );
+            MobileHandler::getInstance().sendRPCMessage( hmiStatus, app->getSessionID() );
             RPC2Communication::AppLinkCore::ActivateAppResponse * response = new RPC2Communication::AppLinkCore::ActivateAppResponse;
             response->setId(object->getId());
             response->setResult(AppLinkRPC::Result::SUCCESS);
@@ -1091,12 +1090,12 @@ void AppMgrCore::setJsonHandler(JSONHandler* handler)
         LOG4CPLUS_ERROR_EXT(mLogger, "A null pointer is being assigned - is this the intent?");
         return;
     }
-	mJSONHandler = handler;
+    MobileHandler::getInstance().setJsonHandler(handler);
 }
 
 JSONHandler* AppMgrCore::getJsonHandler( ) const
 {
-    return mJSONHandler;
+    MobileHandler::getInstance().getJsonHandler();
 }
 
 void AppMgrCore::setJsonRPC2Handler(JSONRPC2Handler *handler)

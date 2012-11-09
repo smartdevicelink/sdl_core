@@ -83,7 +83,6 @@ private:
     ButtonMapping    mButtonsMapping;
     CommandMapping   mCommandMapping;
     MessageMapping   mMessageMapping;
-	JSONHandler* mJSONHandler;
 
 	static log4cplus::Logger mLogger;
 };
