@@ -65,6 +65,8 @@ public:
     void setJsonRPC2Handler(JSONRPC2Handler* handler);
 
 	void startAppMgr();
+
+    void executeThreads();
 	
 private:
 	virtual ~AppMgr();

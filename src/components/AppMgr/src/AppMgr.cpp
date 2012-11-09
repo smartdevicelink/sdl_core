@@ -124,4 +124,13 @@ void AppMgr::startAppMgr()
     LOG4CPLUS_INFO_EXT(mLogger, " Started AppMgr!");
 }
 
+void AppMgr::executeThreads()
+{
+    LOG4CPLUS_INFO_EXT(mLogger, " Threads are being started!");
+
+    mAppMgrCore.executeThreads();
+
+    LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
+}
+
 }
