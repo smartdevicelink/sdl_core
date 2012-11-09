@@ -262,7 +262,7 @@ namespace NsAppLink
                  * @param Data Data
                  * @param DataSize Size of the data
                  **/
-                SDataListenerCallback(NsAppLink::NsTransportManager::CTransportManager::EDataListenerCallbackType CallbackType, NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, uint8_t* Data, size_t DataSize);
+                SDataListenerCallback(NsAppLink::NsTransportManager::CTransportManager::EDataListenerCallbackType CallbackType, NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize);
 
                 /**
                  * @brief Constructor for creating FrameSendCompleted callback
@@ -293,7 +293,7 @@ namespace NsAppLink
                 /**
                  * @brief Data to send
                  **/
-                uint8_t * mData;
+                const uint8_t * mData;
 
                 /**
                  * @brief Size of the data

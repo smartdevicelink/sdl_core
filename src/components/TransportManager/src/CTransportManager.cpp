@@ -61,6 +61,8 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
     pthread_mutex_destroy(&mConnectionHandleGenerationMutex);
 
     pthread_cond_destroy(&mDeviceListenersConditionVar);
+
+    //TODO: Implement all threads shutdown and wait
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::run(void)
@@ -77,11 +79,25 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
         return;
     }
 
+/*
+    tConnectionHandle h10 = 1;
+    onApplicationConnected(SDeviceInfo(), h10);
+    sleep(4);
+
+    uint8_t buf[512] = {1};
+    
+    onFrameReceived(mDeviceAdapters[0], h10, buf, 512);
+
+    sleep(4);
+
+    uint8_t buf2[1024] = {2};
+
+    onFrameReceived(mDeviceAdapters[0], h10, buf2, 1024);
 
     //sleep(20);
 
     //connectDevice(1);
-
+*/
     return;
 
 
@@ -376,6 +392,36 @@ void CTransportManager::onApplicationDisconnected(const SDeviceInfo & Disconnect
 void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameReceived called. DA: "<<DeviceAdapter<<", DataSize: "<<DataSize);
+
+    pthread_mutex_lock(&mDataListenersMutex);
+
+    tDataCallbacksConditionVariables::iterator conditionVarIterator = mDataCallbacksConditionVars.find(ConnectionHandle);
+
+    if(conditionVarIterator == mDataCallbacksConditionVars.end())
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Condition variable was not found. Possible problems with connection initialization or connection handle is invalid");
+    }
+    else
+    {
+        pthread_cond_t *conditionVar = conditionVarIterator->second;
+
+        tDataCallbacks::iterator callbacksMapIterator = mDataListenersCallbacks.find(ConnectionHandle);
+        if(callbacksMapIterator == mDataListenersCallbacks.end())
+        {
+            TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "Callbacks vector was not found. Possible problems with connection initialization or connection handle is invalid");
+        }
+        else
+        {
+            tDataCallbacksVector *pCallbacksVector = callbacksMapIterator->second;
+
+            SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameReceived, ConnectionHandle, Data, DataSize);
+            pCallbacksVector->push_back(newCallback);
+
+            pthread_cond_signal(conditionVar);
+        }
+    }
+
+    pthread_mutex_unlock(&mDataListenersMutex);
 }
 
 void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
@@ -403,7 +449,7 @@ CTransportManager::SDeviceListenerCallback::~SDeviceListenerCallback(void )
 {
 }
 
-CTransportManager::SDataListenerCallback::SDataListenerCallback(CTransportManager::EDataListenerCallbackType CallbackType, tConnectionHandle ConnectionHandle, uint8_t* Data, size_t DataSize)
+CTransportManager::SDataListenerCallback::SDataListenerCallback(CTransportManager::EDataListenerCallbackType CallbackType, tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize)
 : mCallbackType(CallbackType)
 , mConnectionHandle(ConnectionHandle)
 , mData(Data)
@@ -509,15 +555,17 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
 {
     pthread_mutex_lock(&mDataListenersMutex);
     tDataCallbacksConditionVariables::iterator conditionVarIterator = mDataCallbacksConditionVars.find(ConnectionHandle);
-    pthread_mutex_unlock(&mDataListenersMutex);
 
     if(conditionVarIterator == mDataCallbacksConditionVars.end())
     {
         TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "Condition variable was not found");
+        pthread_mutex_unlock(&mDataListenersMutex);
         return;
     }
 
     pthread_cond_t *conditionVar = conditionVarIterator->second;
+
+    pthread_mutex_unlock(&mDataListenersMutex);
 
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Waiting for callbacks");
 
@@ -567,9 +615,11 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
                 {
                     case CTransportManager::DataListenerCallbackType_FrameReceived:
                         (*dataListenersIterator)->onFrameReceived(callbackIterator->mConnectionHandle, callbackIterator->mData, callbackIterator->mDataSize);
+                        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Callback onFrameReceived on listener #" << deviceListenerIndex << " was called. DataSize: " << callbackIterator->mDataSize);
                         break;
                     case CTransportManager::DataListenerCallbackType_FrameSendCompleted:
                         (*dataListenersIterator)->onFrameSendCompleted(callbackIterator->mConnectionHandle, callbackIterator->mFrameSequenceNumber, callbackIterator->mSendStatus);
+                        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Callback onFrameReceived on listener #" << deviceListenerIndex << " was called. FrameSequenceNumber: " << callbackIterator->mFrameSequenceNumber<<", SendStatus: "<<callbackIterator->mSendStatus);
                         break;
                     default:
                         TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "Unknown callback type: " << (*callbackIterator).mCallbackType);
