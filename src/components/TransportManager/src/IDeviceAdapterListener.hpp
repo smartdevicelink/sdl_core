@@ -45,18 +45,20 @@ namespace NsAppLink
             /**
              * @brief Application connected callback.
              *
+             * @param DeviceAdapter Device adapter
              * @param ConnectedDevice DeviceInfo of device with connected application.
              * @param Connection Connection handle.
              **/
-            virtual void onApplicationConnected(const SDeviceInfo & ConnectedDevice, const tConnectionHandle ConnectionHandle);
+            virtual void onApplicationConnected(IDeviceAdapter * DeviceAdapter, const SDeviceInfo & ConnectedDevice, const tConnectionHandle ConnectionHandle);
 
             /**
              * @brief Application disconnected callback.
              *
+             * @param DeviceAdapter Device adapter
              * @param ConnectedDevice DeviceInfo of device with connected application.
              * @param Connection Connection handle.
              **/
-            virtual void onApplicationDisconnected(const SDeviceInfo & DisconnectedDevice, const tConnectionHandle ConnectionHandle);
+            virtual void onApplicationDisconnected(IDeviceAdapter * DeviceAdapter, const SDeviceInfo & DisconnectedDevice, const tConnectionHandle ConnectionHandle);
 
             /**
              * @brief Frame received callback.

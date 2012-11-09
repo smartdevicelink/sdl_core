@@ -8,11 +8,11 @@ void NsAppLink::NsTransportManager::IDeviceAdapterListener::onDeviceListUpdated(
 {
 }
 
-void NsAppLink::NsTransportManager::IDeviceAdapterListener::onApplicationConnected(const NsAppLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle)
+void NsAppLink::NsTransportManager::IDeviceAdapterListener::onApplicationConnected(NsAppLink::NsTransportManager::IDeviceAdapter * DeviceAdapter, const NsAppLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle)
 {
 }
 
-void NsAppLink::NsTransportManager::IDeviceAdapterListener::onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle)
+void NsAppLink::NsTransportManager::IDeviceAdapterListener::onApplicationDisconnected(NsAppLink::NsTransportManager::IDeviceAdapter * DeviceAdapter, const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle)
 {
 }
 

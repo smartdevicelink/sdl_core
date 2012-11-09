@@ -875,7 +875,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const Ns
                         {
                             LOG4CPLUS_INFO_EXT(mLogger, "Connection " << ConnectionHandle << " to remote device " << clientDeviceInfo.mUniqueDeviceId << " established");
 
-                            mListener.onApplicationConnected(clientDeviceInfo, ConnectionHandle);
+                            mListener.onApplicationConnected(this, clientDeviceInfo, ConnectionHandle);
 
                             pollfd pollFds[2];
                             pollFds[0].fd = rfcommSocket;
@@ -1017,7 +1017,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const Ns
                                 }
                             }
 
-                            mListener.onApplicationDisconnected(clientDeviceInfo, ConnectionHandle);
+                            mListener.onApplicationDisconnected(this, clientDeviceInfo, ConnectionHandle);
                         }
                         else
                         {
