@@ -27,11 +27,20 @@ void MobileHandler::sendRPCMessage(const AppLinkRPC::ALRPCMessage *message, unsi
 
 void MobileHandler::setJsonHandler(JSONHandler *handler)
 {
+    if(!handler)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "A null pointer is being assigned - is this the intent?");
+        return;
+    }
     mJSONHandler = handler;
 }
 
 JSONHandler *MobileHandler::getJsonHandler() const
 {
+    if(!mJSONHandler)
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "JSON Mobile handler hasn't yet been assigned, but an attempt to retrieve it has been made! Face a core dump soon...(((");
+    }
     return mJSONHandler;
 }
 
