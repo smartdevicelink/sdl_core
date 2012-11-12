@@ -17,12 +17,12 @@ log4cplus::Logger Application::mLogger = log4cplus::Logger::getInstance(LOG4CPLU
  * \brief Default class constructor
  */
 Application::Application(const std::string& name , unsigned char sessionId)
-	:IApplication(name)
-	,mNgnMediaScreenAppName("")
+    :mNgnMediaScreenAppName("")
 	,m_bUsesVehicleData(false)
 	,m_bIsMediaApplication(false)
 	,mAutoActivateID("")
     ,mSessionID(sessionId)
+    ,mName(name)
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Created an application "<< name <<" for the session id "<<sessionId);
 }
@@ -31,8 +31,8 @@ Application::Application(const std::string& name , unsigned char sessionId)
  * \brief Copy constructor
  */
 Application::Application( const Application& app )
-	:IApplication(app.getName())
-	,mNgnMediaScreenAppName(app.getNgnMediaScreenAppName())
+    :mNgnMediaScreenAppName(app.getNgnMediaScreenAppName())
+    ,mName(app.getName())
 	,m_bUsesVehicleData(app.getUsesVehicleData())
 	,m_bIsMediaApplication(app.getIsMediaApplication())
 	,mAutoActivateID(app.getAutoActivateID())
@@ -50,15 +50,6 @@ Application::Application( const Application& app )
 Application::~Application( )
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Deleted an application "<< mName << " session id "<<mSessionID);
-}
-
-/**
- * \brief Set application priority
- * \param priority a priority to set
- */
-void Application::setApplicationPriority( const AppPriority& priority )
-{
-	mPriority = priority;
 }
 
 /**
@@ -266,6 +257,15 @@ const AppLinkRPC::Language &Application::getHMIDisplayLanguageDesired() const
 unsigned char Application::getSessionID() const
 {
     return mSessionID;
+}
+
+/**
+ * \brief retrieve application name
+ * \return application name
+ */
+const std::string &Application::getName() const
+{
+    return mName;
 }
 
 }

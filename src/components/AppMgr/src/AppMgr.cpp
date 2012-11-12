@@ -1,6 +1,5 @@
 #include "AppMgr/AppMgr.h"
 #include "JSONHandler/JSONHandler.h"
-#include "AppMgr/AppFactory.h"
 #include "AppMgr/AppMgrCore.h"
 #include "AppMgr/AppMgrRegistry.h"
 #include "LoggerHelper.hpp"

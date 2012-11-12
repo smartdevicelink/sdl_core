@@ -8,7 +8,6 @@
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
 
-#include "IApplication.h"
 #include "JSONHandler/ALRPCObjects/Language.h"
 #include "JSONHandler/ALRPCObjects/SyncMsgVersion.h"
 #include "JSONHandler/ALRPCObjects/HMILevel.h"
@@ -27,7 +26,7 @@ namespace NsAppManager
 /**
  * \brief class Application acts as a metaphor for every mobile application being registered on HMI
  */
-class Application : public IApplication
+class Application
 {
 public:
 
@@ -40,12 +39,6 @@ public:
      * \brief Default class destructor
      */
 	virtual ~Application( );
-
-    /**
-     * \brief Set application priority
-     * \param priority a priority to set
-     */
-	virtual void setApplicationPriority( const AppPriority& priority );
 
     /**
      * \brief Set application HMI status level
@@ -185,6 +178,12 @@ public:
      */
     unsigned char getSessionID() const;
 
+    /**
+     * \brief retrieve application name
+     * \return application name
+     */
+    const std::string& getName() const;
+
 private:
 
     /**
@@ -192,6 +191,7 @@ private:
      */
 	Application(const Application& );
 	
+    const std::string mName;
     const unsigned char mSessionID;
 	std::string mNgnMediaScreenAppName;
 	std::vector<std::string> mVrSynonyms;
