@@ -7,10 +7,18 @@ namespace NsAppManager
 
 log4cplus::Logger ButtonMapping::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ButtonMapping"));
 
+/**
+ * \brief Default class constructor
+ */
 ButtonMapping::ButtonMapping()
 {
 }
 
+/**
+ * \brief add a button to a mapping
+ * \param buttonName button name
+ * \param app application to map a button to
+ */
 void ButtonMapping::addButton(const AppLinkRPC::ButtonName &buttonName, RegistryItem *app)
 {
     if(!app)
@@ -22,11 +30,19 @@ void ButtonMapping::addButton(const AppLinkRPC::ButtonName &buttonName, Registry
     mButtonsMapping.insert(ButtonMapItem(buttonName, app));
 }
 
+/**
+ * \brief remove a button from a mapping
+ * \param buttonName button name
+ */
 void ButtonMapping::removeButton(const AppLinkRPC::ButtonName &buttonName)
 {
     mButtonsMapping.erase(buttonName);
 }
 
+/**
+ * \brief remove an application from a mapping
+ * \param app application to remove all associated buttons from mapping
+ */
 void ButtonMapping::removeItem(RegistryItem *app)
 {
     if(!app)
@@ -43,7 +59,11 @@ void ButtonMapping::removeItem(RegistryItem *app)
     }
 }
 
-
+/**
+ * \brief find a registry item subscribed to button
+ * \param btnName button name
+ * \return RegistryItem instance
+ */
 RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const AppLinkRPC::ButtonName &btnName ) const
 {
     ButtonMap::const_iterator it = mButtonsMapping.find( btnName );
@@ -64,10 +84,19 @@ RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const AppLinkRP
     return 0;
 }
 
+/**
+ * \brief Copy constructor
+ */
 ButtonMapping::ButtonMapping(const ButtonMapping &)
 {
 }
 
+/**
+ * \brief comparison operator
+ * \param b1 button name 1
+ * \param b2 button name 2
+ * \return comparison result
+ */
 bool Comparer::operator ()(const AppLinkRPC::ButtonName &b1, const AppLinkRPC::ButtonName &b2) const
 {
     return b1.get() < b2.get();
