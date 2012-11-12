@@ -26,7 +26,6 @@ AppMgr& AppMgr::getInstance( )
 AppMgr::AppMgr()
     :mAppMgrRegistry(AppMgrRegistry::getInstance())
 	,mAppMgrCore(AppMgrCore::getInstance())
-	,mAppFactory(AppFactory::getInstance())
 	,mJSONHandler(0)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " AppMgr constructed!");
@@ -46,7 +45,6 @@ AppMgr::~AppMgr()
 AppMgr::AppMgr(const AppMgr &)
     :mAppMgrRegistry(AppMgrRegistry::getInstance())
     ,mAppMgrCore(AppMgrCore::getInstance())
-    ,mAppFactory(AppFactory::getInstance())
     ,mJSONHandler(0)
 {
 }

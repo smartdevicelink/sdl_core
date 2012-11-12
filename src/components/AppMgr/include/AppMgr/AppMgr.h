@@ -113,7 +113,6 @@ private:
 
 	AppMgrRegistry& mAppMgrRegistry;
 	AppMgrCore& mAppMgrCore;
-	AppFactory& mAppFactory;
 
 	JSONHandler* mJSONHandler;
 	static log4cplus::Logger mLogger;
