@@ -10,7 +10,6 @@ include_directories (
 )
 
 set (SOURCES
-  ./src/BluetoothWriter.cpp
   ./src/Message.cpp
   ./src/ProtocolHandler.cpp
   ./MessageGenerator/CMessage.cpp

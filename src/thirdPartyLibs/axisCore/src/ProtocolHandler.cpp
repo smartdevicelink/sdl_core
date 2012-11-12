@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "TransportManager/ITransportManager.hpp"
+
 #include "ProtocolHandler.hpp"
 #include "ProtocolPacketHeader.hpp"
 #include "IProtocolObserver.hpp"
@@ -13,9 +15,12 @@ namespace AxisCore
 Logger ProtocolHandler::mLogger = Logger::getInstance(LOG4CPLUS_TEXT("AxisCore.ProtocolHandler") );
 
 ProtocolHandler::ProtocolHandler(IProtocolObserver *observer,
+                                 NsAppLink::NsTransportManager::ITransportManager * transportManager,
                                  const UInt8 protocolVersion) :
                 NsAppLink::NsTransportManager::ITransportManagerDataListener(),
+                mConnectionHandle(NsAppLink::NsTransportManager::InvalidConnectionHandle),
                 mProtocolObserver(observer),
+                mTransportManager(transportManager),
                 mProtocolVersion(protocolVersion),
                 mSessionIdCounter(1)
 {    
@@ -23,13 +28,6 @@ ProtocolHandler::ProtocolHandler(IProtocolObserver *observer,
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
     srand(time(0) );
-    /*
-    if (btAdapter)
-    {
-        mBTReader.setBTAdapter(btAdapter);
-        mBTWriter.setBTAdapter(btAdapter);
-    }
-    */
 }
 
 ProtocolHandler::~ProtocolHandler()
@@ -75,7 +73,7 @@ ERROR_CODE ProtocolHandler::startSession(const UInt8 servType)
                                 0,
                                 0);
 
-    if (mBTWriter.write(header, 0) == ERR_OK)
+    if (ERR_OK == sendFrame(mConnectionHandle, header, 0))
         LOG4CPLUS_INFO(mLogger, "startSession() - OK");
     else
     {
@@ -120,7 +118,7 @@ ERROR_CODE ProtocolHandler::endSession(const UInt8 sessionID, const UInt32 hashC
                                     0,
                                     _hashCode);
 
-        if (mBTWriter.write(header, 0) == ERR_OK)
+        if (ERR_OK == sendFrame(mConnectionHandle, header, 0))
         {
             LOG4CPLUS_INFO(mLogger, "endSession() - OK\n");
             mHashCodes.erase(sessionID);
@@ -155,7 +153,7 @@ ERROR_CODE ProtocolHandler::sendSingleFrameMessage(const UInt8 sessionID,
                                 dataSize,
                                 mMessageCounters[sessionID]++);
 
-    if (mBTWriter.write(header, data) != ERR_OK)
+    if (ERR_OK != sendFrame(mConnectionHandle, header, data))
     {
         LOG4CPLUS_WARN(mLogger, "sendSingleFrame() - write failed");
         retVal = ERR_FAIL;
@@ -207,7 +205,7 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
     outDataFirstFrame[6] = numOfFrames >> 8;
     outDataFirstFrame[7] = numOfFrames;
 
-    if (mBTWriter.write(firstHeader, outDataFirstFrame) != ERR_OK)
+    if (ERR_OK != sendFrame(mConnectionHandle, firstHeader, outDataFirstFrame))
     {
         LOG4CPLUS_WARN(mLogger, "sendData() - write first frame FAIL");
         delete [] outDataFirstFrame;
@@ -236,7 +234,7 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
 
             memcpy(outDataFrame, data + (maxDataSize * i), maxDataSize);
 
-            if (mBTWriter.write(header, outDataFrame) != ERR_OK)
+            if (ERR_OK != sendFrame(mConnectionHandle, header, outDataFrame))
             {
                 LOG4CPLUS_WARN(mLogger, "sendData() - write consecutive frame FAIL");
                 retVal = ERR_FAIL;
@@ -258,7 +256,7 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
 
             memcpy(outDataFrame, data + (maxDataSize * i), lastDataSize);
 
-            if (mBTWriter.write(header, outDataFrame) != ERR_OK)
+            if (ERR_OK != sendFrame(mConnectionHandle, header, outDataFrame))
             {
                 LOG4CPLUS_WARN(mLogger, "sendData() - write last frame FAIL");
                 retVal = ERR_FAIL;
@@ -382,7 +380,7 @@ ERROR_CODE ProtocolHandler::sendStartSessionAck(const UInt8 sessionID)
                                 0,
                                 hashCode);
 
-    if (mBTWriter.write(header, 0) == ERR_OK)
+    if (ERR_OK == sendFrame(mConnectionHandle, header, 0))
         LOG4CPLUS_INFO(mLogger, "sendStartSessionAck() - BT write OK");
     else
     {
@@ -407,7 +405,7 @@ ERROR_CODE ProtocolHandler::sendEndSessionNAck(const UInt8 sessionID)
                                 0,
                                 0);
 
-    if (mBTWriter.write(header, 0) == ERR_OK)
+    if (ERR_OK == sendFrame(mConnectionHandle, header, 0))
         LOG4CPLUS_INFO(mLogger, "sendEndSessionNAck() - BT write OK");
     else
     {
@@ -684,15 +682,12 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
     return retVal;
 }
 
-/*
-void ProtocolHandler::onError(BLUETOOTH_ERROR errCode)
-{
-    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-}
-*/
 void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
+    
+    //Temp solution for single connection 
+    mConnectionHandle = ConnectionHandle;
     
     //@TODO check for ConnectionHandle.
     //@TODO check for data size - crash is possible.
@@ -716,14 +711,9 @@ void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnection
         
         header.frameType = firstByte & 0x07u;
 
-        header.serviceType = Data[offset];
-        offset++;
-        
-        header.frameData = Data[offset];
-        offset++;
-        
-        header.sessionID = Data[offset];
-        offset++;
+        header.serviceType = Data[offset++];        
+        header.frameData = Data[offset++];        
+        header.sessionID = Data[offset++];
         
         header.dataSize  = Data[offset++] << 24u;
         header.dataSize |= Data[offset++] << 16u;
@@ -757,6 +747,68 @@ void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnection
     {
         LOG4CPLUS_WARN(mLogger, "onFrameReceived() - incorrect or NULL data");
     }   
+}
+
+ERROR_CODE ProtocolHandler::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const ProtocolPacketHeader &header, const UInt8 *data)
+{
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
+    
+    if (NsAppLink::NsTransportManager::InvalidConnectionHandle == mConnectionHandle)
+    {
+        LOG4CPLUS_ERROR(mLogger, "sendFrame() - InvalidConnectionHandle - unable to send data");
+        return ERR_FAIL;
+    }
+    
+    UInt8 offset = 0;
+    UInt8 compress = 0x0;
+    UInt8 rawData[MAXIMUM_FRAME_SIZE];
+    if (header.compress)
+    {
+        compress = 0x1;
+    }
+    UInt8 firstByte = ( (header.version << 4) & 0xF0 )
+                      | ( (compress << 3) & 0x08)
+                      | (header.frameType & 0x07);
+         
+    rawData[offset++] = firstByte;
+    rawData[offset++] = header.serviceType;    
+    rawData[offset++] = header.frameData;    
+    rawData[offset++] = header.sessionID;
+
+    rawData[offset++] = header.dataSize >> 24;
+    rawData[offset++] = header.dataSize >> 16;
+    rawData[offset++] = header.dataSize >> 8;
+    rawData[offset++] = header.dataSize;
+
+    if (header.version == PROTOCOL_VERSION_2)
+    {
+        rawData[offset++] = header.messageID >> 24;
+        rawData[offset++] = header.messageID >> 16;
+        rawData[offset++] = header.messageID >> 8;
+        rawData[offset++] = header.messageID;
+    }
+
+    if (data)
+    {
+        if ( (offset + header.dataSize) <= MAXIMUM_FRAME_SIZE)
+            memcpy(rawData + offset, data, header.dataSize);
+        else
+        {
+            LOG4CPLUS_WARN(mLogger, "sendFrame() - buffer is too small for writing");
+            return ERR_FAIL;
+        }
+    }
+
+    if (mTransportManager)
+    {
+        mTransportManager->sendFrame(ConnectionHandle, rawData, header.dataSize + offset);
+    }
+    else
+    {
+        return ERR_FAIL;
+    }
+    
+    return ERR_OK;
 }
 
 } //namespace AxisCore

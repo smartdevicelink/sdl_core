@@ -51,11 +51,9 @@ int main(int argc, char** argv)
     NsAppLink::NsTransportManager::ITransportManager * transportManager = NsAppLink::NsTransportManager::ITransportManager::create();
     transportManager->run();
 
-//    NsTransportLayer::CBTAdapter btadapter;
-
     JSONHandler jsonHandler;
 
-    AxisCore::ProtocolHandler* pProtocolHandler = new AxisCore::ProtocolHandler(&jsonHandler/*, &btadapter*/, 1);
+    AxisCore::ProtocolHandler* pProtocolHandler = new AxisCore::ProtocolHandler(&jsonHandler, transportManager, 1);
 
     jsonHandler.setProtocolHandler(pProtocolHandler);
 
@@ -88,7 +86,8 @@ int main(int argc, char** argv)
     {
       LOG4CPLUS_FATAL(logger, "Bind failed!");
       exit(EXIT_FAILURE);
-    } else
+    } 
+    else
     {
       LOG4CPLUS_INFO(logger, "Bind successful!");
     }
@@ -97,7 +96,8 @@ int main(int argc, char** argv)
     {
       LOG4CPLUS_FATAL(logger, "Listen failed!");
       exit(EXIT_FAILURE);
-    } else
+    } 
+    else
     {
       LOG4CPLUS_INFO(logger, " Listen successful!");
     }
@@ -130,109 +130,11 @@ int main(int argc, char** argv)
     NsAppManager::AppMgrCore& appMgrCore = NsAppManager::AppMgrCore::getInstance();
     appMgrCore.executeThreads();
 
-    /**********************************/
-    /*** Check main function parameters***/
-    if (4 < argc)
+    while (1)
     {
-      LOG4CPLUS_ERROR(logger, "too many arguments");
-      return EXIT_SUCCESS;
-    } else if(1 < argc)
-    {
-      LOG4CPLUS_INFO(logger, "perform test");
-      int sessioncount = 1;
-      if (argc == 3)
-      {
-        sessioncount = atoi(argv[2]);
-        if (0 >= sessioncount)
-        {
-           sessioncount = 1;
-        }
-      }
-      NsApplicationTester::CAppTester apptester;
-      delete pProtocolHandler;
-      pProtocolHandler = new AxisCore::ProtocolHandler(&jsonHandler/*, &apptester*/, 1);
-      jsonHandler.setProtocolHandler(pProtocolHandler);
-      apptester.startSession(sessioncount);
-      apptester.sendDataFromFile(argv[1]);
-      while(true);
+        sleep(100500);
     }
-    /**********************************/
-
-    /*** Start BT Devices Discovery***/
-/*
-    std::vector<NsTransportLayer::CBTDevice> devicesFound;
-    btadapter.scanDevices(devicesFound);
-    if (0 < devicesFound.size())
-    {
-        LOG4CPLUS_INFO(logger, "Found " << devicesFound.size() << " devices.");
-        printf("Please make your choice, 0 for exit:\n");
-        printf("\n");
-    } else
-    {
-        LOG4CPLUS_FATAL(logger, "No any devices found!");
-        return EXIT_SUCCESS;
-    }
-
-    std::vector<NsTransportLayer::CBTDevice>::iterator it;
-    int i = 1;
-    for(it = devicesFound.begin(); it != devicesFound.end(); it++)
-    {
-        NsTransportLayer::CBTDevice device = *it;
-        printf("%d: %s %s\n", i++, device.getDeviceAddr().c_str(), device.getDeviceName().c_str());
-    }
-
-    std::cin >> i;
-    std::string discoveryDeviceAddr = "";
-    if ((0 < i) && (i <= devicesFound.size()))
-    {
-        discoveryDeviceAddr = devicesFound[i-1].getDeviceAddr();
-    } else
-    {
-        LOG4CPLUS_INFO(logger, "Exit!");
-        return EXIT_SUCCESS;
-    }
-*/
-    /*** Start SDP Discovery on device***/
-/*
-    std::vector<int> portsRFCOMMFound;
-    btadapter.startSDPDiscoveryOnDevice(discoveryDeviceAddr.c_str(), portsRFCOMMFound);
-    if (0 < portsRFCOMMFound.size())
-    {
-        printf("Found %d ports on %s device\n", portsRFCOMMFound.size(), discoveryDeviceAddr.c_str());
-        printf("Please make your choice, 0 for exit:\n");
-    } else
-    {
-        LOG4CPLUS_FATAL(logger, "No any ports discovered!");
-        return EXIT_SUCCESS;
-    }
-
-    std::vector<int>::iterator itr;
-    int j = 1;
-    for(itr = portsRFCOMMFound.begin(); itr != portsRFCOMMFound.end(); itr++)
-    {
-        printf("%d: %d \n", j++, *itr);
-    }
-
-    std::cin >> j;
-    int portRFCOMM = 0;
-    if ((0 < j) && (j <= portsRFCOMMFound.size()))
-    {
-        portRFCOMM = portsRFCOMMFound[j-1];
-    } else
-    {
-        LOG4CPLUS_INFO(logger, "Exit!");
-        return EXIT_SUCCESS;
-    }
-*/
-    /*** Start RFCOMM connection***/
-/*
-    int sockID = btadapter.startRFCOMMConnection(discoveryDeviceAddr.c_str(), portRFCOMM);
-
-    if (0 < sockID)
-    {
-        btadapter.processRFCOMM(sockID);
-    }
-*/
+        
     return EXIT_SUCCESS;
 } 
 

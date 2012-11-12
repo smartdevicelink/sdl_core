@@ -6,7 +6,6 @@
 
 #include "TransportManager/ITransportManagerDataListener.hpp"
 #include "Message.hpp"
-#include "BluetoothWriter.hpp"
 #include "Logger.hpp"
 
 namespace AxisCore
@@ -29,6 +28,7 @@ public:
      * @param protocolVersion Protocol version
      */
     ProtocolHandler(IProtocolObserver *observer,
+                    NsAppLink::NsTransportManager::ITransportManager * transportManager,
                     const UInt8 protocolVersion);
 
     /**
@@ -79,16 +79,21 @@ public:
 
 private:
 
-      /**
-	* @brief Processing frame received callbacks.
-	*
-	* @param ConnectionHandle Connection handle.
-	* @param Data Received frame payload data.
-	* @param DataSize Size of data in bytes.
-	**/
-      virtual void onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize);
+    /**
+     * @brief Processing frame received callbacks.
+     *
+     * @param ConnectionHandle Connection handle.
+     * @param Data Received frame payload data.
+     * @param DataSize Size of data in bytes.
+    **/
+    virtual void onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize);
   
-//    virtual void onError(BLUETOOTH_ERROR errCode);
+    /**
+     * Write data to device
+     * @param header Message header
+     * @param data Data array
+     */
+    ERROR_CODE sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const ProtocolPacketHeader &header, const UInt8 *data);
 
     enum State 
     {
@@ -115,12 +120,17 @@ private:
 
 
     IProtocolObserver *mProtocolObserver;
+    NsAppLink::NsTransportManager::ITransportManager * mTransportManager;
+    
+    /**
+     * @brief Temporary solution to provide single connection.
+     */
+    NsAppLink::NsTransportManager::tConnectionHandle mConnectionHandle;
     std::map<UInt8, UInt8> mSessionStates;
     std::map<UInt8, UInt32> mHashCodes;
     std::map<UInt8, UInt32> mMessageCounters;
     std::map<UInt8, std::queue<Message *> > mToUpperLevelMessagesQueues;
     std::map<UInt8, Message *> mIncompleteMultiFrameMessages;
-    BluetoothWriter mBTWriter;
     UInt8 mProtocolVersion;
     UInt8 mSessionIdCounter;
     static Logger mLogger;
