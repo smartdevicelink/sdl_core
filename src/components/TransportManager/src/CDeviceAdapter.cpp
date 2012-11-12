@@ -764,15 +764,6 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::handleCommunication(const Ns
                         {
                             LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to set O_NONBLOCK for notification pipe for connection " << ConnectionHandle);
                         }
-
-                        pthread_mutex_lock(&mConnectionsMutex);
-
-                        close(connection->mNotificationPipeFds[0]);
-                        close(connection->mNotificationPipeFds[1]);
-
-                        connection->mNotificationPipeFds[0] = connection->mNotificationPipeFds[1] = -1;
-
-                        pthread_mutex_unlock(&mConnectionsMutex);
                     }
                     else
                     {
@@ -797,6 +788,18 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::handleCommunication(const Ns
         else
         {
             LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Socket is invalid for connection " << ConnectionHandle);
+        }
+
+        if (true == isPipeCreated)
+        {
+            pthread_mutex_lock(&mConnectionsMutex);
+
+            close(connection->mNotificationPipeFds[0]);
+            close(connection->mNotificationPipeFds[1]);
+
+            connection->mNotificationPipeFds[0] = connection->mNotificationPipeFds[1] = -1;
+
+            pthread_mutex_unlock(&mConnectionsMutex);
         }
     }
     else
