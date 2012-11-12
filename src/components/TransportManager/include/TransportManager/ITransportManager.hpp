@@ -26,6 +26,7 @@ namespace NsAppLink
 
         /**
          * @brief Interface of transport manager.
+         * @interface ITransportManager
          **/
         class ITransportManager
         {

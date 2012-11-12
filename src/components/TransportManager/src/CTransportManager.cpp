@@ -53,10 +53,29 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
 
     mTerminateFlag = true;
 
+    // Terminating all threads
+    stopApplicationCallbacksThread();
+    LOG4CPLUS_INFO_EXT(mLogger, "Waiting for application callbacks thread termination");
+    pthread_join(mApplicationCallbacksThread, 0);
+    LOG4CPLUS_INFO_EXT(mLogger, "Application callbacks thread terminated");
+
+    tDataCallbacksThreads::iterator threadsIterator;
+    for (threadsIterator = mDataCallbacksThreads.begin(); threadsIterator != mDataCallbacksThreads.end(); ++threadsIterator)
+    {
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, threadsIterator->first, "Waiting for thread stoping");
+        stopDataCallbacksThread(threadsIterator->first);
+        pthread_join(threadsIterator->second, 0);
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, threadsIterator->first, "Thread terminated");
+    }
+
+    LOG4CPLUS_INFO_EXT(mLogger, "All data callbacks threads terminated. Terminating device adapters");
+
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
         removeDeviceAdapter((*di));
     }
+
+    LOG4CPLUS_INFO_EXT(mLogger, "All device adapters removed");
 
     pthread_mutex_destroy(&mDataListenersMutex);
     pthread_mutex_destroy(&mDeviceListenersMutex);
@@ -66,7 +85,7 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
 
     pthread_cond_destroy(&mDeviceListenersConditionVar);
 
-    //TODO: Implement all threads shutdown and wait
+    LOG4CPLUS_INFO_EXT(mLogger, "Component terminated");
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::run(void)
@@ -98,66 +117,12 @@ void NsAppLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
 
 void NsAppLink::NsTransportManager::CTransportManager::connectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
-    LOG4CPLUS_INFO_EXT(mLogger, "Searching for device adapter for handling DeviceHandle: " << DeviceHandle);
-
-    tDevicesByAdapterMap::const_iterator deviceAdaptersIterator;
-
-    pthread_mutex_lock(&mDevicesByAdapterMutex);
-
-    for(deviceAdaptersIterator = mDevicesByAdapter.begin(); deviceAdaptersIterator != mDevicesByAdapter.end(); ++deviceAdaptersIterator)
-    {
-        IDeviceAdapter* pDeviceAdapter = deviceAdaptersIterator->first;
-        tInternalDeviceList *pDevices = deviceAdaptersIterator->second;
-
-        LOG4CPLUS_INFO_EXT(mLogger, "Processing adapter with type: "<<pDeviceAdapter->getDeviceType());
-
-        tInternalDeviceList::const_iterator devicesInAdapterIterator;
-        for(devicesInAdapterIterator = pDevices->begin(); devicesInAdapterIterator != pDevices->end(); ++devicesInAdapterIterator)
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, "Processing device with unique Id: "<<devicesInAdapterIterator->mUniqueDeviceId << ", DeviceHandle: "<<devicesInAdapterIterator->mDeviceHandle);
-            if(devicesInAdapterIterator->mDeviceHandle == DeviceHandle)
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, "DeviceHandle relates to adapter: "<<pDeviceAdapter->getDeviceType());
-                pDeviceAdapter->connectDevice(DeviceHandle);
-            }
-        }
-    }
-
-    LOG4CPLUS_INFO_EXT(mLogger, "Connect for DeviceHandle was processed");
-
-    pthread_mutex_unlock(&mDevicesByAdapterMutex);
+    connectDisconnectDevice(DeviceHandle, true);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::disconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
-    LOG4CPLUS_INFO_EXT(mLogger, "Searching for device adapter for handling DeviceHandle: " << DeviceHandle);
-
-    tDevicesByAdapterMap::const_iterator deviceAdaptersIterator;
-
-    pthread_mutex_lock(&mDevicesByAdapterMutex);
-
-    for(deviceAdaptersIterator = mDevicesByAdapter.begin(); deviceAdaptersIterator != mDevicesByAdapter.end(); ++deviceAdaptersIterator)
-    {
-        IDeviceAdapter* pDeviceAdapter = deviceAdaptersIterator->first;
-        tInternalDeviceList *pDevices = deviceAdaptersIterator->second;
-
-        LOG4CPLUS_INFO_EXT(mLogger, "Processing adapter with type: "<<pDeviceAdapter->getDeviceType());
-
-        tInternalDeviceList::const_iterator devicesInAdapterIterator;
-        for(devicesInAdapterIterator = pDevices->begin(); devicesInAdapterIterator != pDevices->end(); ++devicesInAdapterIterator)
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, "Processing device with unique Id: "<<devicesInAdapterIterator->mUniqueDeviceId << ", DeviceHandle: "<<devicesInAdapterIterator->mDeviceHandle);
-            if(devicesInAdapterIterator->mDeviceHandle == DeviceHandle)
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, "DeviceHandle relates to adapter: "<<pDeviceAdapter->getDeviceType());
-                pDeviceAdapter->disconnectDevice(DeviceHandle);
-            }
-        }
-    }
-
-    LOG4CPLUS_INFO_EXT(mLogger, "Disonnect for DeviceHandle was processed");
-
-    pthread_mutex_unlock(&mDevicesByAdapterMutex);
+    connectDisconnectDevice(DeviceHandle, false);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::addDataListener(NsAppLink::NsTransportManager::ITransportManagerDataListener * Listener)
@@ -298,8 +263,6 @@ void CTransportManager::onApplicationConnected(IDeviceAdapter * DeviceAdapter, c
 void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter, const SDeviceInfo& DisconnectedDevice, const tConnectionHandle ConnectionHandle)
 {
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "onApplicationDisconnected");
-
-    //TODO: Checking Connection Handle validity
 
     stopDataCallbacksThread(ConnectionHandle);
 
@@ -830,4 +793,45 @@ void CTransportManager::sendDeviceListUpdatedCallback()
     pthread_mutex_unlock(&mDeviceListenersMutex);
 
     LOG4CPLUS_INFO_EXT(mLogger, "Callback OnDeviceListUpdated was prepared for sending");
+}
+
+void CTransportManager::connectDisconnectDevice(const tDeviceHandle DeviceHandle, bool Connect)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, "Performing "<<(Connect?"CONNECT":"DISCONNECT")<<" for device with handle: " << DeviceHandle);
+    LOG4CPLUS_INFO_EXT(mLogger, "Searching for device adapter for handling DeviceHandle: " << DeviceHandle);
+
+    tDevicesByAdapterMap::const_iterator deviceAdaptersIterator;
+
+    pthread_mutex_lock(&mDevicesByAdapterMutex);
+
+    for(deviceAdaptersIterator = mDevicesByAdapter.begin(); deviceAdaptersIterator != mDevicesByAdapter.end(); ++deviceAdaptersIterator)
+    {
+        IDeviceAdapter* pDeviceAdapter = deviceAdaptersIterator->first;
+        tInternalDeviceList *pDevices = deviceAdaptersIterator->second;
+
+        LOG4CPLUS_INFO_EXT(mLogger, "Processing adapter with type: "<<pDeviceAdapter->getDeviceType());
+
+        tInternalDeviceList::const_iterator devicesInAdapterIterator;
+        for(devicesInAdapterIterator = pDevices->begin(); devicesInAdapterIterator != pDevices->end(); ++devicesInAdapterIterator)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Processing device with unique Id: "<<devicesInAdapterIterator->mUniqueDeviceId << ", DeviceHandle: "<<devicesInAdapterIterator->mDeviceHandle);
+            if(devicesInAdapterIterator->mDeviceHandle == DeviceHandle)
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "DeviceHandle relates to adapter: "<<pDeviceAdapter->getDeviceType());
+
+                if(Connect)
+                {
+                    pDeviceAdapter->connectDevice(DeviceHandle);
+                }
+                else
+                {
+                    pDeviceAdapter->disconnectDevice(DeviceHandle);
+                }
+            }
+        }
+    }
+
+    LOG4CPLUS_INFO_EXT(mLogger, (Connect?"CONNECT":"DISCONNECT")<<" operation performed on device with handle: " << DeviceHandle);
+
+    pthread_mutex_unlock(&mDevicesByAdapterMutex);
 }

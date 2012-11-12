@@ -22,6 +22,7 @@ namespace NsAppLink
          *
          * Used to notify transport manager about events in
          * device adapters.
+         * @interface IDeviceAdapterListener
          **/
         class IDeviceAdapterListener
         {
