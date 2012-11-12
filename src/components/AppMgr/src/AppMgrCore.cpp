@@ -105,11 +105,6 @@ void AppMgrCore::executeThreads()
 	LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
 }
 
-template<class Object> void handleMessage(Object message)
-{
-
-}
-
 void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
 {
     unsigned char sessionID = message.second;
