@@ -467,6 +467,15 @@ namespace NsAppLink
             void sendDeviceListUpdatedCallback();
 
             /**
+             * @brief Connects and disconnects device by its handle
+             *
+             * @param DeviceHandle Handle of the device to connect or disconnect
+             * @param Connect Flag of device operation: true for connect, false for disconnect. Defaults to true.
+             * @return void
+             **/
+            void connectDisconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, bool Connect = true);
+
+            /**
              * @brief Device adapters.
              **/
             std::vector<IDeviceAdapter*> mDeviceAdapters;
