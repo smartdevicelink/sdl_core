@@ -7,12 +7,20 @@ namespace NsAppManager
 
 log4cplus::Logger HMIHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
 
+/**
+ * \brief Returning class instance
+ * \return class instance
+ */
 HMIHandler& HMIHandler::getInstance()
 {
     static HMIHandler instance;
     return instance;
 }
 
+/**
+ * \brief set handler ready state
+ * \param ready ready state
+ */
 void HMIHandler::setReadyState(bool ready)
 {
     if(mJSONRPC2Handler)
@@ -25,6 +33,10 @@ void HMIHandler::setReadyState(bool ready)
     }
 }
 
+/**
+ * \brief send notification via associated handler
+ * \param command notification to send
+ */
 void HMIHandler::sendNotification(const RPC2Communication::RPC2Notification *command)
 {
     if(m_bHMIReady)
@@ -41,6 +53,10 @@ void HMIHandler::sendNotification(const RPC2Communication::RPC2Notification *com
     }
 }
 
+/**
+ * \brief send response via associated handler
+ * \param command response to send
+ */
 void HMIHandler::sendResponse(const RPC2Communication::RPC2Response *command)
 {
     if(m_bHMIReady)
@@ -57,6 +73,10 @@ void HMIHandler::sendResponse(const RPC2Communication::RPC2Response *command)
     }
 }
 
+/**
+ * \brief send request via associated handler
+ * \param command request to send
+ */
 void HMIHandler::sendRequest(const RPC2Communication::RPC2Request *command)
 {
     if(m_bHMIReady)
@@ -73,6 +93,10 @@ void HMIHandler::sendRequest(const RPC2Communication::RPC2Request *command)
     }
 }
 
+/**
+ * \brief set Json RPC2 handler
+ * \param handler Json RPC2 handler instance
+ */
 void HMIHandler::setJsonRPC2Handler(JSONRPC2Handler *handler)
 {
     if(!handler)
@@ -83,6 +107,10 @@ void HMIHandler::setJsonRPC2Handler(JSONRPC2Handler *handler)
     mJSONRPC2Handler = handler;
 }
 
+/**
+ * \brief get Json RPC2 handler
+ * \return Json RPC2 handler instance
+ */
 JSONRPC2Handler *HMIHandler::getJsonRPC2Handler() const
 {
     if(!mJSONRPC2Handler)
@@ -92,6 +120,9 @@ JSONRPC2Handler *HMIHandler::getJsonRPC2Handler() const
     return mJSONRPC2Handler;
 }
 
+/**
+ * \brief Default class constructor
+ */
 HMIHandler::HMIHandler()
     :mJSONRPC2Handler(0)
     ,m_bHMIReady(false)
@@ -99,6 +130,9 @@ HMIHandler::HMIHandler()
     LOG4CPLUS_INFO_EXT(mLogger, " HMIHandler constructed!");
 }
 
+/**
+ * \brief Copy constructor
+ */
 HMIHandler::HMIHandler(const HMIHandler &)
     :mJSONRPC2Handler(0)
     ,m_bHMIReady(false)
