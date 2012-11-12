@@ -61,13 +61,11 @@ ERROR_CODE BluetoothWriter::write(const ProtocolPacketHeader &header, const UInt
         }
     }
 
-    /*
     if (mBTAdapter)
         mBTAdapter->sendBuffer(mData, header.dataSize + offset);
     else
         return ERR_FAIL;
-    */
-    
+
     return ERR_OK;
 }
 

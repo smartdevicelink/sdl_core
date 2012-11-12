@@ -4,11 +4,6 @@
 #include "ProtocolPacketHeader.hpp"
 #include "Logger.hpp"
 
-namespace Bluetooth
-{
-    class IBluetoothAPI;
-}
-
 namespace AxisCore
 {
 

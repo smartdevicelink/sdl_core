@@ -146,16 +146,16 @@ namespace NsApplicationTester
 
      //mpProtocolHandler->dataReceived();
   }
-/*
+
   void CAppTester::initBluetooth(Bluetooth::IBluetoothHandler * pHandler)
   {
       printf("%s:%d CAppTester::initBluetooth()\n", __FILE__, __LINE__);
       if (NULL != pHandler)
       {
-         mpProtocolHandler = pHandler;
+         //mpProtocolHandler = pHandler;
       }
   }
-*/
+
   void CAppTester::deinitBluetooth()
   {
       printf("%s:%d CAppTester::deinitBluetooth()\n", __FILE__, __LINE__);

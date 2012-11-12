@@ -150,7 +150,7 @@ int main(int argc, char** argv)
       }
       NsApplicationTester::CAppTester apptester;
       delete pProtocolHandler;
-      pProtocolHandler = new AxisCore::ProtocolHandler(&jsonHandler/*, &apptester*/, 1);
+      pProtocolHandler = new AxisCore::ProtocolHandler(&jsonHandler/*, &apptester,*/ 1);
       jsonHandler.setProtocolHandler(pProtocolHandler);
       apptester.startSession(sessioncount);
       apptester.sendDataFromFile(argv[1]);

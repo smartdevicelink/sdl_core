@@ -4,25 +4,18 @@
 #include <queue>
 #include <string>
 
-#include "../../utils/misc/Types.hpp"
-#include "../../transport/bt/Blob.hpp"
-#include "../../transport/bt/BluetoothAPI.hpp"
-#include "../../transport/bt/IBluetoothHandler.hpp"
+#include "../utils/misc/Types.hpp"
+#include "../transport/bt/Blob.hpp"
 
 namespace AxisCore
 {
 
-using namespace Bluetooth;
-
 struct ProtocolPacketHeader;
 
-class CMessage : public Bluetooth::IBluetoothAPI
+class CMessage
 {
 public:
    CMessage();
-
-   virtual void initBluetooth(IBluetoothHandler * pHandler);
-   virtual void deinitBluetooth();
 
    virtual const Blob getBuffer();
    virtual void releaseBuffer(const Blob&);
@@ -67,8 +60,6 @@ private:
    UInt32 sMessageID;
 
    void* sPacketData;
-
-   IBluetoothHandler *mBluetoothHandler;
 
    int getBit(const UInt32 value, const UInt32 position);
    void setBit(UInt32 value, const UInt32 position);

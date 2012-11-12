@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include "BluetoothReader.hpp"
-#include "../../../appMain/CBTAdapter.hpp"
 
 namespace AxisCore
 {
@@ -12,7 +11,6 @@ Logger BluetoothReader::mLogger = Logger::getInstance(LOG4CPLUS_TEXT("AxisCore.P
 
 BluetoothReader::BluetoothReader()
 {    
-    mBTAdapter = NULL;
     mData = new UInt8[MAXIMUM_FRAME_SIZE];
 }
 
@@ -21,17 +19,15 @@ BluetoothReader::~BluetoothReader()
     delete [] mData;
 }
 
-void BluetoothReader::setBTAdapter(Bluetooth::IBluetoothAPI *adapter)
-{
-    mBTAdapter = adapter;
-}
-
 ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt32 dataSize)
 {
     UInt32 blobBufferSize = 0;
+    /*
     if (mBTAdapter)
         blobBufferSize = mBTAdapter->getBuffer().size();
+    */
 
+    /*
     if ( (dataSize >= blobBufferSize) && (MAXIMUM_FRAME_SIZE >= blobBufferSize) )
     {
         memcpy(mData, mBTAdapter->getBuffer().buffer(), blobBufferSize);
@@ -42,7 +38,8 @@ ERROR_CODE BluetoothReader::read(ProtocolPacketHeader &header, UInt8 *data, UInt
         LOG4CPLUS_WARN(mLogger, "read() - buffer is too small for reading");
         return ERR_FAIL;
     }
-
+    */
+    
     UInt8 offset = 0;
     UInt8 firstByte = 0;
     memcpy(&firstByte, mData, sizeof(UInt8) );

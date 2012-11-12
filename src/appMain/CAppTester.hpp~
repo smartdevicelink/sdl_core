@@ -41,7 +41,7 @@ namespace NsApplicationTester
 		    int startSession(int count);
 		    int sendDataFromFile(const char * fileName);
 
-        //void initBluetooth(Bluetooth::IBluetoothHandler * pHandler);
+        void initBluetooth(Bluetooth::IBluetoothHandler * pHandler);
         void deinitBluetooth();
 
         const Blob getBuffer();

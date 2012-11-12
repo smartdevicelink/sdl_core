@@ -14,7 +14,6 @@ Logger ProtocolHandler::mLogger = Logger::getInstance(LOG4CPLUS_TEXT("AxisCore.P
 
 ProtocolHandler::ProtocolHandler(IProtocolObserver *observer,
                                  const UInt8 protocolVersion) :
-                NsAppLink::NsTransportManager::ITransportManagerDataListener(),
                 mProtocolObserver(observer),
                 mProtocolVersion(protocolVersion),
                 mSessionIdCounter(1)

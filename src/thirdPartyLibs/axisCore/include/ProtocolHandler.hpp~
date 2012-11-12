@@ -120,6 +120,7 @@ private:
     std::map<UInt8, UInt32> mMessageCounters;
     std::map<UInt8, std::queue<Message *> > mToUpperLevelMessagesQueues;
     std::map<UInt8, Message *> mIncompleteMultiFrameMessages;
+    BluetoothReader mBTReader;
     BluetoothWriter mBTWriter;
     UInt8 mProtocolVersion;
     UInt8 mSessionIdCounter;
