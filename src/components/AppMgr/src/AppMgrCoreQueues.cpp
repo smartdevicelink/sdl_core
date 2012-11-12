@@ -10,6 +10,11 @@ namespace NsAppManager
 template< class QueueType >
 log4cplus::Logger AppMgrCoreQueue<QueueType>::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
 
+/**
+ * \brief Class constructor
+ * \param cbFn callback function for a handler thread
+ * \param pThis pointer to an instance of the class the cbFn is being called of
+ */
 template< class QueueType >
 AppMgrCoreQueue<QueueType>::AppMgrCoreQueue(HandlerCallback cbFn, void *pThis)
     :mThread(new System::Thread(new System::ThreadArgImpl<AppMgrCoreQueue>(*this, &AppMgrCoreQueue::handleQueue, pThis)))
@@ -25,6 +30,9 @@ AppMgrCoreQueue<QueueType>::AppMgrCoreQueue(HandlerCallback cbFn, void *pThis)
     }
 }
 
+/**
+ * \brief Default copy constructor
+ */
 template< class QueueType >
 AppMgrCoreQueue<QueueType>::AppMgrCoreQueue(const AppMgrCoreQueue &)
     :mThread(0)
@@ -32,6 +40,9 @@ AppMgrCoreQueue<QueueType>::AppMgrCoreQueue(const AppMgrCoreQueue &)
 {
 }
 
+/**
+ * \brief Default destructor
+ */
 template< class QueueType >
 AppMgrCoreQueue<QueueType>::~AppMgrCoreQueue()
 {
@@ -44,6 +55,9 @@ AppMgrCoreQueue<QueueType>::~AppMgrCoreQueue()
     LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCoreQueues detructed!");
 }
 
+/**
+ * \brief execute inner threads
+ */
 template< class QueueType >
 void AppMgrCoreQueue<QueueType>::executeThreads()
 {
@@ -53,6 +67,10 @@ void AppMgrCoreQueue<QueueType>::executeThreads()
     LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
 }
 
+/**
+ * \brief push a message to a queue
+ * \param message a message being pushed
+ */
 template< class QueueType >
 void AppMgrCoreQueue<QueueType>::pushMessage( QueueType message )
 {
@@ -67,6 +85,10 @@ void AppMgrCoreQueue<QueueType>::pushMessage( QueueType message )
     LOG4CPLUS_INFO_EXT(mLogger, " Pushed a message");
 }
 
+/**
+ * \brief handle a queue
+ * \param pThis a pointer to an instance of the class the callback function is being called of
+ */
 template< class QueueType >
 void *AppMgrCoreQueue<QueueType>::handleQueue(void *pThis)
 {
