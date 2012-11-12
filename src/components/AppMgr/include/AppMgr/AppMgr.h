@@ -89,8 +89,6 @@ public:
      */
     void setJsonRPC2Handler(JSONRPC2Handler* handler);
 
-	void startAppMgr();
-
     /**
      * \brief method to execute threads.
      */

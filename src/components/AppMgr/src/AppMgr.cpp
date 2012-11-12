@@ -146,14 +146,6 @@ void AppMgr::processNotification(Json::Value& root)
     //mAppLinkInterface.processNotification(root);
 }
 
-void AppMgr::startAppMgr()
-{
-    LOG4CPLUS_INFO_EXT(mLogger, " Starting AppMgr...");
-    //mAppLinkInterface.registerController();
-    //mAppLinkInterface.prepareComponent();
-    LOG4CPLUS_INFO_EXT(mLogger, " Started AppMgr!");
-}
-
 /**
  * \brief method to execute threads.
  */
