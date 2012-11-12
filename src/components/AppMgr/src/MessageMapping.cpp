@@ -8,10 +8,18 @@ namespace NsAppManager
 
 log4cplus::Logger MessageMapping::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("MessageMapping"));
 
+/**
+ * \brief Default class constructor
+ */
 MessageMapping::MessageMapping()
 {
 }
 
+/**
+ * \brief add a message to a mapping
+ * \param msgId message id
+ * \param app application to map a message to
+ */
 void MessageMapping::addMessage(int msgId, RegistryItem *app)
 {
     if(!app)
@@ -23,6 +31,11 @@ void MessageMapping::addMessage(int msgId, RegistryItem *app)
     mMessageMapping.insert(MessageMapItem(msgId, app));
 }
 
+/**
+ * \brief add a message to a mapping
+ * \param msgId message id
+ * \param sessionId session to map appropriate application with message
+ */
 void MessageMapping::addMessage(int msgId, unsigned char sessionID)
 {
     RegistryItem* app = AppMgrRegistry::getInstance().getItem(sessionID);
@@ -35,11 +48,19 @@ void MessageMapping::addMessage(int msgId, unsigned char sessionID)
     addMessage(msgId, app);
 }
 
+/**
+ * \brief remove a message from a mapping
+ * \param msgId message id
+ */
 void MessageMapping::removeMessage(int msgId)
 {
     mMessageMapping.erase(msgId);
 }
 
+/**
+ * \brief remove an application from a mapping
+ * \param app application to remove all associated messages from mapping
+ */
 void MessageMapping::removeItem(RegistryItem *app)
 {
     if(!app)
@@ -56,6 +77,11 @@ void MessageMapping::removeItem(RegistryItem *app)
     }
 }
 
+/**
+ * \brief find a registry item subscribed to message
+ * \param msgId message id
+ * \return RegistryItem instance
+ */
 RegistryItem *MessageMapping::findRegistryItemAssignedToCommand(int msgId) const
 {
     MessageMap::const_iterator it = mMessageMapping.find( msgId );
@@ -76,6 +102,9 @@ RegistryItem *MessageMapping::findRegistryItemAssignedToCommand(int msgId) const
     return 0;
 }
 
+/**
+ * \brief Copy constructor
+ */
 MessageMapping::MessageMapping(const MessageMapping &)
 {
 }
