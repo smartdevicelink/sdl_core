@@ -53,10 +53,29 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
 
     mTerminateFlag = true;
 
+    // Terminating all threads
+    stopApplicationCallbacksThread();
+    LOG4CPLUS_INFO_EXT(mLogger, "Waiting for application callbacks thread termination");
+    pthread_join(mApplicationCallbacksThread, 0);
+    LOG4CPLUS_INFO_EXT(mLogger, "Application callbacks thread terminated");
+
+    tDataCallbacksThreads::iterator threadsIterator;
+    for (threadsIterator = mDataCallbacksThreads.begin(); threadsIterator != mDataCallbacksThreads.end(); ++threadsIterator)
+    {
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, threadsIterator->first, "Waiting for thread stoping");
+        stopDataCallbacksThread(threadsIterator->first);
+        pthread_join(threadsIterator->second, 0);
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, threadsIterator->first, "Thread terminated");
+    }
+
+    LOG4CPLUS_INFO_EXT(mLogger, "All data callbacks threads terminated. Terminating device adapters");
+
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
         removeDeviceAdapter((*di));
     }
+
+    LOG4CPLUS_INFO_EXT(mLogger, "All device adapters removed");
 
     pthread_mutex_destroy(&mDataListenersMutex);
     pthread_mutex_destroy(&mDeviceListenersMutex);
@@ -66,7 +85,7 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
 
     pthread_cond_destroy(&mDeviceListenersConditionVar);
 
-    //TODO: Implement all threads shutdown and wait
+    LOG4CPLUS_INFO_EXT(mLogger, "Component terminated");
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::run(void)
