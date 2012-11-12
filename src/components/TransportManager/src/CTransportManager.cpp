@@ -318,8 +318,6 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
 {
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "onApplicationDisconnected");
 
-    //TODO: Checking Connection Handle validity
-
     stopDataCallbacksThread(ConnectionHandle);
 
     // Removing device adapter for that handle
