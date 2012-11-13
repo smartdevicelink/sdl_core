@@ -24,9 +24,14 @@ ProtocolHandler::ProtocolHandler(IProtocolObserver *observer,
                 mProtocolVersion(protocolVersion),
                 mSessionIdCounter(1)
 {    
-    PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties") );
+    //PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties") );
+    if (0 != mTransportManager)
+    {
+        mTransportManager->addDataListener(this);
+    }
+    
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-
+    LOG4CPLUS_INFO(mLogger, "   !!!!   ****    !!!!   ****    !!!!   >>>>FUCKYEA!!!<<<<< ProtocolHandler consturcted");
     srand(time(0) );
 }
 
@@ -686,6 +691,8 @@ void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnection
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     
+    LOG4CPLUS_INFO(mLogger, "   !!!!   ****    !!!!   ****    !!!!   >>>>FUCKYEA!!!<<<<< onFrameReceived(): DataSize: " << DataSize);
+    
     //Temp solution for single connection 
     mConnectionHandle = ConnectionHandle;
     
@@ -731,11 +738,17 @@ void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnection
         {
             header.messageID = 0u;
         }
-
+        
         const UInt32 dataPayloadSize = DataSize - offset;
         
+        if (dataPayloadSize != header.dataSize)
+        {
+            LOG4CPLUS_ERROR(mLogger, "onFrameReceived() - EPIC FAIL: dataPayloadSize != header.dataSize");
+            return;
+        }
+        
         UInt8 * data = 0;
-        if (dataPayloadSize > 0u)
+        if (dataPayloadSize != 0u)
         {
             data = new UInt8[DataSize - offset];
             memcpy(data, Data + offset, dataPayloadSize);

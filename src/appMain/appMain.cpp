@@ -33,6 +33,7 @@
 #include "CAppTester.hpp"
 
 #include "TransportManager/ITransportManager.hpp"
+#include "TransportManager/ITransportManagerDeviceListener.hpp"
 
 /**
  * \brief Entry point of the program.
@@ -40,6 +41,33 @@
  * \param argv array of arguments
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
+
+class CTransportManagerListener : public NsAppLink::NsTransportManager::ITransportManagerDeviceListener
+{
+public:
+    
+    CTransportManagerListener(NsAppLink::NsTransportManager::ITransportManager * transportManager);
+    
+private:
+    
+    virtual void onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList& DeviceList);
+    
+    NsAppLink::NsTransportManager::ITransportManager * mTransportManager;
+};
+
+CTransportManagerListener::CTransportManagerListener(NsAppLink::NsTransportManager::ITransportManager* transportManager)
+: mTransportManager(transportManager)
+{
+}
+
+void CTransportManagerListener::onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList& DeviceList)
+{
+    if (false == DeviceList.empty())
+    {
+        mTransportManager->connectDevice(DeviceList[0].mDeviceHandle);
+    }
+}
+
 int main(int argc, char** argv)
 {
     /*** Components instance section***/
@@ -49,7 +77,12 @@ int main(int argc, char** argv)
     LOG4CPLUS_INFO(logger, " Application started!");
 
     NsAppLink::NsTransportManager::ITransportManager * transportManager = NsAppLink::NsTransportManager::ITransportManager::create();
+    CTransportManagerListener tsl(transportManager);
+    transportManager->addDeviceListener(&tsl);
+    
     transportManager->run();
+    
+    transportManager->scanForNewDevices();
 
     JSONHandler jsonHandler;
 

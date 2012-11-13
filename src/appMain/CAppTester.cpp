@@ -31,7 +31,7 @@ namespace NsApplicationTester
       ((UInt8*)sPacketData)[1] = 7;
       ((UInt8*)sPacketData)[2] = 1;
       blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
-      /*
+/*
       if (NULL != mpProtocolHandler)
       {
          mpProtocolHandler->dataReceived();
@@ -50,7 +50,7 @@ namespace NsApplicationTester
             mpProtocolHandler->dataReceived();
          }
       }
-      */
+*/      
    }
    
    int CAppTester::sendDataFromFile(const char * fileName)
