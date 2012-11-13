@@ -175,9 +175,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
                         LOG4CPLUS_INFO_EXT(mLogger, "hci_inquiry: found " << numberOfDevices << " devices");
 
                         for (int i = 0; i < numberOfDevices; ++i)
-                        {
-                            if (inquiryInfoList[i].bdaddr.b[5] != 0x10) continue;
-                            
+                        {                            
                             tRFCOMMChannelVector appLinkRFCOMMChannels;
                             discoverAppLinkRFCOMMChannels(inquiryInfoList[i].bdaddr, appLinkRFCOMMChannels);
 
