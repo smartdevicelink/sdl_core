@@ -67,14 +67,14 @@ public:
 
     /**
      * \brief push mobile RPC message to a queue
-     * \param mesage a message to be pushed
-     * \param sessionId an id of a session associated with the application which pushes a message
+     * \param message a message to be pushed
+     * \param sessionID an id of a session associated with the application which pushes a message
      */
     void pushMobileRPCMessage(AppLinkRPC::ALRPCMessage * message , unsigned char sessionID);
 
     /**
      * \brief push HMI RPC2 message to a queue
-     * \param mesage a message to be pushed
+     * \param message a message to be pushed
      */
 	void pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message );
 

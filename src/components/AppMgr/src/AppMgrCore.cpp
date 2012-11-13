@@ -82,8 +82,8 @@ AppMgrCore::~AppMgrCore()
 
 /**
  * \brief push mobile RPC message to a queue
- * \param mesage a message to be pushed
- * \param sessionId an id of a session associated with the application which pushes a message
+ * \param message a message to be pushed
+ * \param sessionID an id of a session associated with the application which pushes a message
  */
 void AppMgrCore::pushMobileRPCMessage( AppLinkRPC::ALRPCMessage * message, unsigned char sessionID )
 {
@@ -101,7 +101,7 @@ void AppMgrCore::pushMobileRPCMessage( AppLinkRPC::ALRPCMessage * message, unsig
 
 /**
  * \brief push HMI RPC2 message to a queue
- * \param mesage a message to be pushed
+ * \param message a message to be pushed
  */
 void AppMgrCore::pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message )
 {
