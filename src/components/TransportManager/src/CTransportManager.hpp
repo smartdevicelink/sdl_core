@@ -484,6 +484,14 @@ namespace NsAppLink
             void sendDataCallback(const SDataListenerCallback& callback);
 
             /**
+             * @brief Sends device callback
+             *
+             * @param callback Callback to send
+             * @return void
+             **/
+            void sendDeviceCallback(const SDeviceListenerCallback& callback);
+
+            /**
              * @brief Device adapters.
              **/
             std::vector<IDeviceAdapter*> mDeviceAdapters;

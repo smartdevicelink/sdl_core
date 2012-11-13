@@ -248,14 +248,8 @@ void CTransportManager::onApplicationConnected(IDeviceAdapter * DeviceAdapter, c
     pthread_mutex_unlock(&mDeviceAdaptersByConnectionHandleMutex);
 
     // Sending callback
-    pthread_mutex_lock(&mDeviceListenersMutex);
-
     SDeviceListenerCallback cb(CTransportManager::DeviceListenerCallbackType_ApplicationConnected, ConnectedDevice, ConnectionHandle);
-    mDeviceListenersCallbacks.push_back(cb);
-
-    pthread_cond_signal(&mDeviceListenersConditionVar);
-
-    pthread_mutex_unlock(&mDeviceListenersMutex);
+    sendDeviceCallback(cb);
 
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "END of onApplicationConnected");
 }
@@ -272,14 +266,8 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
     pthread_mutex_unlock(&mDeviceAdaptersByConnectionHandleMutex);
 
     // Sending callback
-    pthread_mutex_lock(&mDeviceListenersMutex);
-
     SDeviceListenerCallback cb(CTransportManager::DeviceListenerCallbackType_ApplicationDisconnected, DisconnectedDevice, ConnectionHandle);
-    mDeviceListenersCallbacks.push_back(cb);
-
-    pthread_cond_signal(&mDeviceListenersConditionVar);
-
-    pthread_mutex_unlock(&mDeviceListenersMutex);
+    sendDeviceCallback(cb);
 
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "END of onApplicationDisconnected");
 }
@@ -727,14 +715,8 @@ void CTransportManager::sendDeviceListUpdatedCallback()
     pthread_mutex_unlock(&mDevicesByAdapterMutex);
 
     // Sending DeviceListUpdatedCallback
-    pthread_mutex_lock(&mDeviceListenersMutex);
-
     SDeviceListenerCallback cb(CTransportManager::DeviceListenerCallbackType_DeviceListUpdated, devices);
-    mDeviceListenersCallbacks.push_back(cb);
-
-    pthread_cond_signal(&mDeviceListenersConditionVar);
-
-    pthread_mutex_unlock(&mDeviceListenersMutex);
+    sendDeviceCallback(cb);
 
     LOG4CPLUS_INFO_EXT(mLogger, "Callback OnDeviceListUpdated was prepared for sending");
 }
@@ -811,4 +793,14 @@ void CTransportManager::sendDataCallback(const CTransportManager::SDataListenerC
     }
 
     pthread_mutex_unlock(&mDataListenersMutex);
+}
+
+void CTransportManager::sendDeviceCallback(const CTransportManager::SDeviceListenerCallback& callback)
+{
+    pthread_mutex_lock(&mDeviceListenersMutex);
+
+    mDeviceListenersCallbacks.push_back(callback);
+    pthread_cond_signal(&mDeviceListenersConditionVar);
+
+    pthread_mutex_unlock(&mDeviceListenersMutex);
 }
