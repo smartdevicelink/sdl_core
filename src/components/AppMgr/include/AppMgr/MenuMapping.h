@@ -32,6 +32,7 @@ typedef std::vector<unsigned int> MenuCommands;
  */
 class MenuMapping
 {
+public:
     /**
      * \brief Default class constructor
      */
