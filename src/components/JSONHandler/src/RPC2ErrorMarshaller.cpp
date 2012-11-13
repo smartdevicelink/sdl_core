@@ -1,7 +1,5 @@
-
 #include <cstdlib>
 #include <cstring>
-
 #include "JSONHandler/RPC2ErrorMarshaller.h"
 
 using namespace RPC2Communication;

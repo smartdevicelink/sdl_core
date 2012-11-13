@@ -18,6 +18,11 @@
   To start web-based HMI we need web-browser with web-socket RFC6455 support.
   For example Google Chromium. Install it using:
   sudo apt-get install chromium-browser
+  In current implementation Chromium is required for autostart HMI feature.
+  For HMI autostart please create in the executable folder file named hmi_link.
+  This file should contain one string with full path to HMI index.html file.
+  For example:
+  /home/user/projects/applink/src/components/HMI/index.html
 
 * Running application
   ====================
@@ -27,8 +32,8 @@
   Device should contain AppLink compatible application installed.
   Start application with command:
   ./appLinkCore
-  Application starts to search devices.
-  Start web-based HMI in browser src/components/HMI/index.html.
+  Application starts to search devices and starts HMI in cromium-browser.
+  In case HMI has not been started please start web-based HMI manually in browser opening src/components/HMI/index.html.
   Select the device from a list.
   Application starts SDP request.
   Select port.

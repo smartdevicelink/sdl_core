@@ -51,6 +51,7 @@ namespace NsApplicationTester
             mpProtocolHandler->dataReceived();
          }
       }
+      return count;
    }
    
    int CAppTester::sendDataFromFile(const char * fileName)

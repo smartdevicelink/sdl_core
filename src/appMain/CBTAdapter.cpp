@@ -65,6 +65,7 @@ namespace NsTransportLayer
 
     free( ii );
     close( sock );
+    return devicesFound.size();
    }
 
    int CBTAdapter::startSDPDiscoveryOnDevice(const char* targetDevice, std::vector<int>& portsRFCOMMFound)
@@ -161,6 +162,7 @@ namespace NsTransportLayer
          sdp_record_free( rec );
       }
       sdp_close(session);
+      return portsRFCOMMFound.size();
    }
 
    int CBTAdapter::startRFCOMMConnection(const char* targetDevice, int portRFCOMM)
