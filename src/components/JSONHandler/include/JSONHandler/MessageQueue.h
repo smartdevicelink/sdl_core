@@ -1,27 +1,77 @@
 #ifndef MESSAGE_QUEUE_CLASS
-#define MESSAGE_QUEUE_CLASS value
+#define MESSAGE_QUEUE_CLASS 
 
-#include <queue>
 #include <pthread.h>
+#include <queue>
 
+/**
+ * \class MessageQueue
+ * \brief Wrapper for multithreading queue.
+*/
 template <typename T> class MessageQueue
 {
 public:
+    /**
+     * \brief Default constructor
+    */
     MessageQueue();
-    MessageQueue( std::queue<T> queue );
+
+    /**
+     * \brief Constructor
+     * \param queue Existing queue.
+    */
+    explicit MessageQueue( std::queue<T> queue );
+
+    /**
+     * \brief Destructor
+    */
     ~MessageQueue();
 
+    /**
+     * \brief Returns size of the queue.
+     * \return Size of the queue.
+     */
     int size() const;
+
+    /**
+     * \brief If queue is empty.
+     * \return Is queue empty.
+     */
     bool empty() const;
 
+    /**
+     * \brief Adds element to the queue.
+     * \param element Element to be added to the queue.n
+     */
     void push( const T & element );
+
+    /**
+     * \brief Removes element from the queue and returns it.
+     * \return To element of the queue.
+     */
     T pop();
+
+    /**
+     * \brief Conditional wait.
+     */
     void wait();
 
 private:
+    /**
+      *\brief Queue
+    */
     std::queue<T> mQueue;
+    /**
+      *\brief Mutex for queue locking.
+    */
     mutable pthread_mutex_t mMutex;
+    /**
+      *\brief Condition for waiting.
+    */
     pthread_cond_t mCond;
+    /**
+      *\brief Bool condition for waiting.
+    */
     bool mIsUp;
 };
 

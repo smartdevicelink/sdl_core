@@ -1,31 +1,92 @@
 #ifndef ALRPCMESSAGE_INCLUDE
 #define ALRPCMESSAGE_INCLUDE
 
+/**
+  *\namespace AppLinkRPC
+  *\brief Namespace for AppLink JSON protocol related functionality.
+*/
 namespace AppLinkRPC
 {
+    /**
+     * \class ALRPCMessage
+     * \brief Base class for AppLink Json messages classes.
+    */
     class ALRPCMessage
     {
     public:
+        /**
+         *\enum MessageType
+         *\brief AppLink message types.
+        */
         enum MessageType { REQUEST = 0x0, RESPONSE = 0x1, NOTIFICATION = 0x2, UNDEFINED };
 
     public:
+        /**
+         * \brief Constructor
+         * \param protocolVersion Version of AppLink protocol (currently 1,2)
+         * \param messageType Type of AppLink message
+        */
         ALRPCMessage( unsigned int protocolVersion, MessageType messageType );
+
+        /**
+         * \brief Constructor
+         * \param protocolVersion Version of AppLink protocol (currently 1,2).
+         * \param messageType Type of AppLink message.
+         * \param methodID ID of RPC in message.
+        */
         ALRPCMessage( unsigned int protocolVersion, MessageType messageType,int methodID);
+        /**
+         * \brief Destructor
+        */
         virtual ~ALRPCMessage();
 
+        /**
+         * \brief Getter for protocol version.
+        */
         virtual unsigned int getProtocolVersion() const;
+
+        /**
+         * \brief Getter for type of message.
+        */
         virtual MessageType  getMessageType() const;
+
+        /**
+         * \brief Getter for id of RPC.
+        */
         virtual int getMethodId() const;
 
+        /**
+         * \breif Setter for protocol version.
+        */
         virtual void setProtocolVersion( unsigned int protocolVersion );
+
+        /**
+         * \brief setter for type of message.
+        */
         virtual void setMessageType( MessageType messageType );
+
+        /**
+         * \brief setter for id of RPC.
+        */
         virtual void setMethodId(int packetID );
 
     private:
-        /* data */
+        /**
+         * \brief Applink protocol version (currently 1,2)
+        */
         unsigned int mProtocolVersion;
+
+        /**
+         * \brief Type of Message 
+         * \sa enum MessageType
+        */
         MessageType mMessageType;
-        int mMethodId;   // function name + "_" + MessageType+ "Id"
+
+        /**
+         * \brief Id of RPC called in message
+         * function name + "_" + MessageType+ "Id"
+        */
+        int mMethodId;   
     };
 
 }
