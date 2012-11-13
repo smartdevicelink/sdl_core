@@ -414,7 +414,8 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                     core->mMenuMapping.addCommand(cmdId, menuId);
                 }
                 core->mMessageMapping.addMessage(addCmd->getId(), sessionID);
-                core->mCommandMapping.addCommand(object->get_cmdID(), cmdType, item);
+                core->mCommandMapping.addCommand(cmdId, cmdType, item);
+                core->mRequestMapping.addMessage(addCmd->getId(), cmdId);
                 HMIHandler::getInstance().sendRequest(addCmd);
 
             }
@@ -427,6 +428,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                 addCmd->set_cmdId(object->get_cmdID());
                 core->mMessageMapping.addMessage(addCmd->getId(), sessionID);
                 core->mCommandMapping.addCommand(object->get_cmdID(), cmdType, item);
+                core->mRequestMapping.addMessage(addCmd->getId(), object->get_cmdID());
                 HMIHandler::getInstance().sendRequest(addCmd);
             }
 
@@ -451,6 +453,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                     deleteCmd->set_cmdId(cmdId);
                     core->mCommandMapping.removeCommand(cmdId, cmdType);
                     core->mMenuMapping.removeCommand(cmdId);
+                    core->mRequestMapping.addMessage(deleteCmd->getId(), cmdId);
                     HMIHandler::getInstance().sendRequest(deleteCmd);
                 }
                 else if(cmdType == CommandType::VR)
@@ -460,6 +463,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                     core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
                     deleteCmd->set_cmdId(object->get_cmdID());
                     core->mCommandMapping.removeCommand(object->get_cmdID(), cmdType);
+                    core->mRequestMapping.addMessage(deleteCmd->getId(), object->get_cmdID());
                     HMIHandler::getInstance().sendRequest(deleteCmd);
                 }
             }
@@ -780,15 +784,22 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
-
-            AppLinkRPC::AddCommand_response* response = new AppLinkRPC::AddCommand_response();
-            response->set_success(true);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-
             unsigned char sessionID = app->getSessionID();
+            unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(object->getId());
+            if(core->mCommandMapping.getUnrespondedRequestCount(cmdId) <= 1)
+            {
+                AppLinkRPC::AddCommand_response* response = new AppLinkRPC::AddCommand_response();
+                response->set_success(true);
+                response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+                core->mRequestMapping.removeRequest(object->getId());
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+            }
+
+            core->mCommandMapping.decrementUnrespondedRequestCount(cmdId);
+
             core->mMessageMapping.removeMessage(object->getId());
-            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_DELETECOMMANDRESPONSE:
@@ -801,13 +812,23 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
-            AppLinkRPC::DeleteCommand_response* response = new AppLinkRPC::DeleteCommand_response();
-            response->set_success(true);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
 
             unsigned char sessionID = app->getSessionID();
+            unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(object->getId());
+            if(core->mCommandMapping.getUnrespondedRequestCount(cmdId) <= 1)
+            {
+                AppLinkRPC::DeleteCommand_response* response = new AppLinkRPC::DeleteCommand_response();
+                response->set_success(true);
+                response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+                core->mRequestMapping.removeRequest(object->getId());
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+            }
+
+            core->mCommandMapping.decrementUnrespondedRequestCount(cmdId);
+
             core->mMessageMapping.removeMessage(object->getId());
-            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_ADDSUBMENURESPONSE:
