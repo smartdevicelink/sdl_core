@@ -1,7 +1,10 @@
 #include "AppMgr/MenuMapping.h"
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
+
+log4cplus::Logger MenuMapping::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("MenuMapping"));
 
 /**
  * \brief Default class constructor
@@ -17,6 +20,7 @@ MenuMapping::MenuMapping()
  */
 void MenuMapping::addCommand(const unsigned int& commandId, const unsigned int& menuId)
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "Inserting a command " << commandId << " into a menu " << menuId );
     mMenuMapping.insert(MenuMapItem(commandId, menuId));
 }
 
@@ -26,6 +30,7 @@ void MenuMapping::addCommand(const unsigned int& commandId, const unsigned int& 
  */
 void MenuMapping::removeCommand(const unsigned int &commandId)
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "Removing a command " << commandId );
     mMenuMapping.erase(commandId);
 }
 
@@ -35,6 +40,7 @@ void MenuMapping::removeCommand(const unsigned int &commandId)
  */
 void MenuMapping::removeMenu(const unsigned int& menuId)
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "Removing a menu " << menuId );
     MenuCommands commands;
     findCommandsAssignedToMenu(menuId, commands);
 
@@ -51,11 +57,13 @@ void MenuMapping::removeMenu(const unsigned int& menuId)
  */
 unsigned int MenuMapping::findMenuAssignedToCommand(const unsigned int& commandId) const
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "Finding a menu associated with a command " << commandId );
     MenuMap::const_iterator it = mMenuMapping.find(commandId);
     if(it != mMenuMapping.end())
     {
         return it->second;
     }
+    LOG4CPLUS_ERROR_EXT(mLogger, "Command " << commandId << " isn't associated with any menu" );
     return -1;
 }
 
@@ -66,6 +74,7 @@ unsigned int MenuMapping::findMenuAssignedToCommand(const unsigned int& commandI
  */
 void MenuMapping::findCommandsAssignedToMenu(const unsigned int& menuId, MenuCommands &commands) const
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "Finding a command list associated with a menu " << menuId );
     commands.clear();
     for(MenuMap::const_iterator it = mMenuMapping.begin(); it != mMenuMapping.end(); it++)
     {
