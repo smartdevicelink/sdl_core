@@ -1,0 +1,82 @@
+CPPFLAGS= -D_GNU_SOURCE -D_REENTRANT -Wall -g -I.
+GENERATORFLAGS=-sh h -sc cpp -a
+
+LIBName=JSONHandler
+TARGET=../include/JSONHandler/ALRPCObjects/
+TARGET_PIMPL=../src/ALRPCObjectsImpl/
+NAMESPACENAME=AppLinkRPC
+
+#RPC2=RPC2
+TARGET_RPC2=../include/JSONHandler/RPC2Objects/UI/
+TARGET_RPC2_PIMPL=../src/RPC2ObjectsImpl/UI/
+
+
+GPSRC=$(wildcard $(TARGET_PIMPL)/*.gp $(TARGET_RPC2_PIMPL)/*.gp)
+GPINC=$(GPSRC:.gp=.inc)
+SRC=$(wildcard $(TARGET)/*.cpp) $(wildcard $(TARGET_PIMPL)/*.cpp) $(wildcard ../src/*.cpp)  \
+ $(wildcard $(TARGET_RPC2)/*.cpp) $(wildcard $(TARGET_RPC2_PIMPL)/*.cpp)
+# $(wildcard user/*.cc)
+#$(wildcard lib/*.cc) 
+OBJ=$(SRC:.cc=.o)
+
+XML=v4_protocol_v1_2_no_extra.xml
+#XML=../../../v4_protocol_v1_2.xml
+IDL=UI.idl
+
+PROG=alrpctest
+PROG2=rpc2test
+
+IDLCOMP=scripts/idlgen.pl
+IDLCOMPSRC=scripts/idlgen.yp
+
+#ALNS=AlRPC
+#ALNS=AppLinkRPC
+
+# just try with different stylers (uncrustify is best). any code transformation filter may be used try "fold -s -w 20"
+STYLER=
+#STYLER=-s "astyle --style=java"
+# just4lulz
+#STYLER=-s "fold -s -w 20"
+
+.PHONY: generated test exec clean
+
+all: generated generated2 $(OBJ)
+
+test: exec
+
+exec: $(TARGET) $(TARGET_IMPL)  $(PROG)  $(PROG2)
+
+generated: $(TARGET) $(TARGET_IMPL)
+
+generated2: $(IDLCOMP) $(TARGET_RPC2) $(TARGET_RPC2_IMPL)
+
+#$(TARGET_RPC2) $(TARGET_RPC2_IMPL):
+#	mkdir -p $@
+
+$(TARGET) $(TARGET_IMPL): $(XML)
+	scripts/robok0der.pl -mg $(TARGET) $(TARGET_PIMPL) -i $(XML) -p 42 -lib $(LIBName) -n $(NAMESPACENAME) $(GENERATORFLAGS)
+	make
+
+$(TARGET_RPC2) $(TARGET_RPC2_PIMPL): $(IDLCOMP) 
+	$(IDLCOMP) -i $(IDL) -o $(TARGET_RPC2) $(TARGET_RPC2_PIMPL) $(LIBName) -f $(TARGET) $(TARGET_PIMPL) -fn $(NAMESPACENAME) $(GENERATORFLAGS)
+	make
+
+$(GPINC): $(GPSRC) $(TARGET_IMPL)
+
+%.inc: %.gp
+	gperf $< --output-file=$@
+
+$(OBJ): $(GPINC)
+
+$(PROG): $(OBJ) user/test.o
+	g++ $^ -ljson_cpp -o $@
+
+$(PROG2): $(OBJ) user/test2.o
+	g++ $^ -ljson_cpp -o $@
+
+$(IDLCOMP): $(IDLCOMPSRC)
+	yapp -b '/usr/bin/perl' -o $@ -s $^
+	chmod 755 $@
+
+clean:
+	rm -Rf $(GPINC) $(OBJ) $(PROG) $(PROG2) user/test.o user/test2.o $(TARGET) $(TARGET_PIMPL) fuzzer.log $(TARGET_RPC2) $(TARGET_RPC2_PIMPL) $(IDLCOMP)
