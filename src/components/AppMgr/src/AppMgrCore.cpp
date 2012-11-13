@@ -608,16 +608,18 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonEvent notification has been invoked");
             RPC2Communication::Buttons::OnButtonEvent * object = (RPC2Communication::Buttons::OnButtonEvent*)msg;
-            AppLinkRPC::OnButtonEvent* event = new AppLinkRPC::OnButtonEvent();
-            event->set_buttonEventMode(object->get_mode());
             const AppLinkRPC::ButtonName & name = object->get_name();
-            event->set_buttonName(name);
             Application* app = core->getApplicationFromItemCheckNotNull(core->mButtonsMapping.findRegistryItemSubscribedToButton(name));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::OnButtonEvent* event = new AppLinkRPC::OnButtonEvent();
+            event->set_buttonEventMode(object->get_mode());
+
+            event->set_buttonName(name);
+
             unsigned char sessionID = app->getSessionID();
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             MobileHandler::getInstance().sendRPCMessage(event, sessionID);
@@ -627,17 +629,19 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonPress notification has been invoked");
             RPC2Communication::Buttons::OnButtonPress * object = (RPC2Communication::Buttons::OnButtonPress*)msg;
-            AppLinkRPC::OnButtonPress* event = new AppLinkRPC::OnButtonPress();
             const AppLinkRPC::ButtonName & name = object->get_name();
-            event->set_buttonName(name);
-            event->set_buttonPressMode(object->get_mode());
-            LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
             Application* app = core->getApplicationFromItemCheckNotNull(core->mButtonsMapping.findRegistryItemSubscribedToButton(name));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::OnButtonPress* event = new AppLinkRPC::OnButtonPress();
+
+            event->set_buttonName(name);
+            event->set_buttonPressMode(object->get_mode());
+            LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
+
             unsigned char sessionID = app->getSessionID();
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             MobileHandler::getInstance().sendRPCMessage(event, sessionID);
@@ -667,14 +671,15 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand UI notification has been invoked");
             RPC2Communication::UI::OnCommand* object = (RPC2Communication::UI::OnCommand*)msg;
-            AppLinkRPC::OnCommand* event = new AppLinkRPC::OnCommand();
-            event->set_cmdID(object->get_commandId());
             Application* app = core->getApplicationFromItemCheckNotNull(core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_commandId(), CommandType::UI));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::OnCommand* event = new AppLinkRPC::OnCommand();
+            event->set_cmdID(object->get_commandId());
+
             unsigned char sessionID = app->getSessionID();
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             MobileHandler::getInstance().sendRPCMessage(event, sessionID);
@@ -684,16 +689,17 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Show response has been income");
             RPC2Communication::UI::ShowResponse* object = (RPC2Communication::UI::ShowResponse*)msg;
-            AppLinkRPC::Show_response* response = new AppLinkRPC::Show_response();
-            response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-            response->set_success(true);
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::Show_response* response = new AppLinkRPC::Show_response();
+            response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+            response->set_success(true);
+
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
@@ -703,17 +709,19 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         case RPC2Communication::UI::Marshaller::METHOD_SETGLOBALPROPERTIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties response has been income");
-            AppLinkRPC::SetGlobalProperties_response* response = new AppLinkRPC::SetGlobalProperties_response();
             RPC2Communication::UI::SetGlobalPropertiesResponse* object = (RPC2Communication::UI::SetGlobalPropertiesResponse*)msg;
-            response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-            response->set_success(true);
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::SetGlobalProperties_response* response = new AppLinkRPC::SetGlobalProperties_response();
+
+            response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+            response->set_success(true);
+
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
@@ -723,17 +731,19 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         case RPC2Communication::UI::Marshaller::METHOD_RESETGLOBALPROPERTIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A ResetGlobalProperties response has been income");
-            AppLinkRPC::ResetGlobalProperties_response* response = new AppLinkRPC::ResetGlobalProperties_response();
             RPC2Communication::UI::ResetGlobalPropertiesResponse* object = (RPC2Communication::UI::ResetGlobalPropertiesResponse*)msg;
-            response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
-            response->set_success(true);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::ResetGlobalProperties_response* response = new AppLinkRPC::ResetGlobalProperties_response();
+
+            response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
+            response->set_success(true);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
@@ -744,15 +754,16 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An Alert response has been income");
             RPC2Communication::UI::AlertResponse* object = (RPC2Communication::UI::AlertResponse*)msg;
-            AppLinkRPC::Alert_response* response = new AppLinkRPC::Alert_response();
-            response->set_success(true);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::Alert_response* response = new AppLinkRPC::Alert_response();
+            response->set_success(true);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
@@ -763,15 +774,17 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand UI response has been income");
             RPC2Communication::UI::AddCommandResponse* object = (RPC2Communication::UI::AddCommandResponse*)msg;
-            AppLinkRPC::AddCommand_response* response = new AppLinkRPC::AddCommand_response();
-            response->set_success(true);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+
+            AppLinkRPC::AddCommand_response* response = new AppLinkRPC::AddCommand_response();
+            response->set_success(true);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
@@ -782,15 +795,16 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand UI response has been income");
             RPC2Communication::UI::DeleteCommandResponse* object = (RPC2Communication::UI::DeleteCommandResponse*)msg;
-            AppLinkRPC::DeleteCommand_response* response = new AppLinkRPC::DeleteCommand_response();
-            response->set_success(true);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::DeleteCommand_response* response = new AppLinkRPC::DeleteCommand_response();
+            response->set_success(true);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
@@ -800,15 +814,16 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddSubMenu response has been income");
             RPC2Communication::UI::AddSubMenuResponse* object = (RPC2Communication::UI::AddSubMenuResponse*)msg;
-            AppLinkRPC::AddSubMenu_response* response = new AppLinkRPC::AddSubMenu_response();
-            response->set_success(true);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::AddSubMenu_response* response = new AppLinkRPC::AddSubMenu_response();
+            response->set_success(true);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
@@ -819,15 +834,16 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubMenu response has been income");
             RPC2Communication::UI::DeleteSubMenuResponse* object = (RPC2Communication::UI::DeleteSubMenuResponse*)msg;
-            AppLinkRPC::DeleteSubMenu_response* response = new AppLinkRPC::DeleteSubMenu_response();
-            response->set_success(true);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::DeleteSubMenu_response* response = new AppLinkRPC::DeleteSubMenu_response();
+            response->set_success(true);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
@@ -838,15 +854,16 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet response has been income");
             RPC2Communication::UI::CreateInteractionChoiceSetResponse* object = (RPC2Communication::UI::CreateInteractionChoiceSetResponse*)msg;
-            AppLinkRPC::CreateInteractionChoiceSet_response* response = new AppLinkRPC::CreateInteractionChoiceSet_response();
-            response->set_success(true);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::CreateInteractionChoiceSet_response* response = new AppLinkRPC::CreateInteractionChoiceSet_response();
+            response->set_success(true);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
@@ -857,15 +874,16 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet response has been income");
             RPC2Communication::UI::DeleteInteractionChoiceSetResponse* object = (RPC2Communication::UI::DeleteInteractionChoiceSetResponse*)msg;
-            AppLinkRPC::DeleteInteractionChoiceSet_response* response = new AppLinkRPC::DeleteInteractionChoiceSet_response();
-            response->set_success(true);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::DeleteInteractionChoiceSet_response* response = new AppLinkRPC::DeleteInteractionChoiceSet_response();
+            response->set_success(true);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
@@ -975,16 +993,17 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Speak response has been income");
             RPC2Communication::TTS::SpeakResponse* object = (RPC2Communication::TTS::SpeakResponse*)msg;
-            AppLinkRPC::Speak_response* response = new AppLinkRPC::Speak_response();
-            response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
-            response->set_success(true);
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::Speak_response* response = new AppLinkRPC::Speak_response();
+            response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+            response->set_success(true);
+
             unsigned char sessionID = app->getSessionID();
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
@@ -1019,8 +1038,6 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't cast object to ActivateApp type");
                 return;
             }     
-            AppLinkRPC::OnHMIStatus * hmiStatus = new AppLinkRPC::OnHMIStatus;
-            hmiStatus->set_hmiLevel(AppLinkRPC::HMILevel::HMI_FULL);
             const std::string& appName = object->get_appName();
             Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(appName));
             if(!app)
@@ -1028,6 +1045,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                 return;
             }
+            AppLinkRPC::OnHMIStatus * hmiStatus = new AppLinkRPC::OnHMIStatus;
+            hmiStatus->set_hmiLevel(AppLinkRPC::HMILevel::HMI_FULL);
+
+
             app->setApplicationHMIStatusLevel(AppLinkRPC::HMILevel::HMI_FULL);
             hmiStatus->set_audioStreamingState(app->getApplicationAudioStreamingState());
             hmiStatus->set_systemContext(AppLinkRPC::SystemContext::SYSCTXT_MENU);
