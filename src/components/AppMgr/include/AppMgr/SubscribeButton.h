@@ -26,6 +26,7 @@ public:
     /**
      * \brief Class constructor
      * \param receiver a registry item associated with application that will execute command
+     * \param receiver a registry item associated with application that will execute command
      */
     SubscribeButtonCmd(const RegistryItem* receiver, const void* params);
 
