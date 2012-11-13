@@ -404,8 +404,15 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                 RPC2Communication::UI::AddCommand * addCmd = new RPC2Communication::UI::AddCommand();
                 addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 CommandType cmdType = CommandType::UI;
-                addCmd->set_menuParams(*object->get_menuParams());
-                addCmd->set_cmdId(object->get_cmdID());
+                const unsigned int& cmdId = object->get_cmdID();
+                const AppLinkRPC::MenuParams* menuParams = object->get_menuParams();
+                addCmd->set_menuParams(*menuParams);
+                addCmd->set_cmdId(cmdId);
+                if(menuParams->get_parentID())
+                {
+                    const unsigned int& menuId = *menuParams->get_parentID();
+                    core->mMenuMapping.addCommand(cmdId, menuId);
+                }
                 core->mMessageMapping.addMessage(addCmd->getId(), sessionID);
                 core->mCommandMapping.addCommand(object->get_cmdID(), cmdType, item);
                 HMIHandler::getInstance().sendRequest(addCmd);
@@ -440,8 +447,10 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                     RPC2Communication::UI::DeleteCommand* deleteCmd = new RPC2Communication::UI::DeleteCommand();
                     deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
-                    deleteCmd->set_cmdId(object->get_cmdID());
-                    core->mCommandMapping.removeCommand(object->get_cmdID(), cmdType);
+                    const unsigned int& cmdId = object->get_cmdID();
+                    deleteCmd->set_cmdId(cmdId);
+                    core->mCommandMapping.removeCommand(cmdId, cmdType);
+                    core->mMenuMapping.removeCommand(cmdId);
                     HMIHandler::getInstance().sendRequest(deleteCmd);
                 }
                 else if(cmdType == CommandType::VR)

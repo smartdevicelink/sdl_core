@@ -12,6 +12,7 @@
 #include "AppMgr/ButtonMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/MessageMapping.h"
+#include "AppMgr/MenuMapping.h"
 #include "AppMgr/ButtonCapabilities.h"
 
 namespace AppLinkRPC{
@@ -161,6 +162,7 @@ private:
     ButtonMapping    mButtonsMapping;
     CommandMapping   mCommandMapping;
     MessageMapping   mMessageMapping;
+    MenuMapping      mMenuMapping;
 
 	static log4cplus::Logger mLogger;
 };
