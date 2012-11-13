@@ -7,26 +7,42 @@ namespace NsAppManager
 
 log4cplus::Logger ButtonMapping::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ButtonMapping"));
 
+/**
+ * \brief Default class constructor
+ */
 ButtonMapping::ButtonMapping()
 {
 }
 
-void ButtonMapping::addButton(const ButtonName &buttonName, RegistryItem *app)
+/**
+ * \brief add a button to a mapping
+ * \param buttonName button name
+ * \param app application to map a button to
+ */
+void ButtonMapping::addButton(const AppLinkRPC::ButtonName &buttonName, RegistryItem *app)
 {
     if(!app)
     {
         LOG4CPLUS_ERROR_EXT(mLogger, " Adding a button to a null registry item");
         return;
     }
-    LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to button " << buttonName.get() << " in app " << app->getApplication()->getName() );
+    LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to button " << buttonName.get() << " in app " << app->getApplication()->getName() );
     mButtonsMapping.insert(ButtonMapItem(buttonName, app));
 }
 
-void ButtonMapping::removeButton(const ButtonName &buttonName)
+/**
+ * \brief remove a button from a mapping
+ * \param buttonName button name
+ */
+void ButtonMapping::removeButton(const AppLinkRPC::ButtonName &buttonName)
 {
     mButtonsMapping.erase(buttonName);
 }
 
+/**
+ * \brief remove an application from a mapping
+ * \param app application to remove all associated buttons from mapping
+ */
 void ButtonMapping::removeItem(RegistryItem *app)
 {
     if(!app)
@@ -43,9 +59,14 @@ void ButtonMapping::removeItem(RegistryItem *app)
     }
 }
 
-RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const ButtonName &appName ) const
+/**
+ * \brief find a registry item subscribed to button
+ * \param btnName button name
+ * \return RegistryItem instance
+ */
+RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const AppLinkRPC::ButtonName &btnName ) const
 {
-    ButtonMap::const_iterator it = mButtonsMapping.find( appName );
+    ButtonMap::const_iterator it = mButtonsMapping.find( btnName );
     if ( it != mButtonsMapping.end() )
     {
         if ( !it->second )
@@ -55,18 +76,28 @@ RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const ButtonNam
         }
         if ( it->second->getApplication() )
         {
+            LOG4CPLUS_INFO_EXT(mLogger, "An application "<< it->second->getApplication()->getName() <<" is subscribed to a button " << btnName.get() );
             return it->second;
         }
     }
-    LOG4CPLUS_INFO_EXT(mLogger, "Button " << appName.get() << " not found in subscribed." );
+    LOG4CPLUS_INFO_EXT(mLogger, "Button " << btnName.get() << " not found in subscribed." );
     return 0;
 }
 
+/**
+ * \brief Copy constructor
+ */
 ButtonMapping::ButtonMapping(const ButtonMapping &)
 {
 }
 
-bool Comparer::operator ()(const ButtonName &b1, const ButtonName &b2) const
+/**
+ * \brief comparison operator
+ * \param b1 button name 1
+ * \param b2 button name 2
+ * \return comparison result
+ */
+bool Comparer::operator ()(const AppLinkRPC::ButtonName &b1, const AppLinkRPC::ButtonName &b2) const
 {
     return b1.get() < b2.get();
 }

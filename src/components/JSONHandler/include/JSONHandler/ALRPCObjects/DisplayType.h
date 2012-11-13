@@ -1,45 +1,49 @@
-#ifndef DISPLAYTYPE_INCLUDE
-#define DISPLAYTYPE_INCLUDE
+#ifndef APPLINKRPC_DISPLAYTYPE_INCLUDE
+#define APPLINKRPC_DISPLAYTYPE_INCLUDE
 
 
 /*
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Oct 30 08:29:32 2012
+  generated at	Wed Nov  7 13:10:41 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
+namespace AppLinkRPC
+{
 
 ///  See DAES for further infos regarding the displays]
 
-class DisplayType
-{
-public:
-  enum DisplayTypeInternal
+  class DisplayType
   {
-    INVALID_ENUM=-1,
-    CID=0,
-    TYPE2=1,
-    TYPE5=2,
-    NGN=3,
-    GEN2_8_DMA=4,
-    GEN2_6_DMA=5,
-    MFD3=6,
-    MFD4=7,
-    MFD5=8
+  public:
+    enum DisplayTypeInternal
+    {
+      INVALID_ENUM=-1,
+      CID=0,
+      TYPE2=1,
+      TYPE5=2,
+      NGN=3,
+      GEN2_8_DMA=4,
+      GEN2_6_DMA=5,
+      MFD3=6,
+      MFD4=7,
+      MFD5=8
+    };
+  
+    DisplayType() : mInternal(INVALID_ENUM)				{}
+    DisplayType(DisplayTypeInternal e) : mInternal(e)		{}
+  
+    DisplayTypeInternal get(void) const	{ return mInternal; }
+    void set(DisplayTypeInternal e)		{ mInternal=e; }
+  
+  private:
+    DisplayTypeInternal mInternal;
+    friend class DisplayTypeMarshaller;
   };
-
-  DisplayType() : mInternal(INVALID_ENUM)				{}
-  DisplayType(DisplayTypeInternal e) : mInternal(e)		{}
-
-  DisplayTypeInternal get(void) const	{ return mInternal; }
-  void set(DisplayTypeInternal e)		{ mInternal=e; }
-
-private:
-  DisplayTypeInternal mInternal;
-  friend class DisplayTypeMarshaller;
-};
+  
+}
 
 #endif

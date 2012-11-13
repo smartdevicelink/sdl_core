@@ -42,7 +42,7 @@ class HMILevel_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -80,14 +80,14 @@ HMILevel_intHash::hash (register const char *str, register unsigned int len)
   return len + asso_values[(unsigned char)str[0]];
 }
 
-const struct PerfectHashTable *
+const struct AppLinkRPC::PerfectHashTable *
 HMILevel_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  4,  0,  0,  7,  0,  4, 10
     };
-  static const struct PerfectHashTable wordlist[] =
+  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
 #line 20 "gen/deep/pimpl/next/HMILevelMarshaller.gp"

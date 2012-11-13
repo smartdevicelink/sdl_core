@@ -1,5 +1,5 @@
-#ifndef ADDSUBMENU_REQUEST_INCLUDE
-#define ADDSUBMENU_REQUEST_INCLUDE
+#ifndef APPLINKRPC_ADDSUBMENU_REQUEST_INCLUDE
+#define APPLINKRPC_ADDSUBMENU_REQUEST_INCLUDE
 
 #include <string>
 
@@ -10,43 +10,45 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Oct 30 08:29:32 2012
+  generated at	Wed Nov  7 13:10:41 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
+namespace AppLinkRPC
+{
 
 ///  Adds a sub menu to the in-application menu.
 
-class AddSubMenu_request : public ALRPCRequest
-{
-public:
-
-  AddSubMenu_request(const AddSubMenu_request& c);
-  AddSubMenu_request(void);
+  class AddSubMenu_request : public ALRPCRequest
+  {
+  public:
   
-  virtual ~AddSubMenu_request(void);
+    AddSubMenu_request(const AddSubMenu_request& c);
+    AddSubMenu_request(void);
+    
+    virtual ~AddSubMenu_request(void);
+  
+    AddSubMenu_request& operator =(const AddSubMenu_request&);
+  
+    bool checkIntegrity(void);
 
-  AddSubMenu_request& operator =(const AddSubMenu_request&);
+    unsigned int get_menuID(void) const;
+    const unsigned int* get_position(void) const;
+    const std::string& get_menuName(void) const;
 
-  bool checkIntegrity(void);
+    bool set_menuID(unsigned int menuID_);
+    void reset_position(void);
+    bool set_position(unsigned int position_);
+    bool set_menuName(const std::string& menuName_);
 
-  unsigned int get_menuID(void) const;
-  const unsigned int* get_position(void) const;
-  const std::string& get_menuName(void) const;
-
-  bool set_menuID(unsigned int menuID_);
-  void reset_position(void);
-  bool set_position(unsigned int position_);
-  bool set_menuName(const std::string& menuName_);
-
-private:
-
-  friend class AddSubMenu_requestMarshaller;
+  private:
+  
+    friend class AddSubMenu_requestMarshaller;
 
 
 ///  unique ID of the sub menu to add.
-    unsigned int menuID;	//!<  (0,2000000000)
+      unsigned int menuID;	//!<  (0,2000000000)
 
 /**
      Position within the items that are are at top level of the in application menu.
@@ -56,10 +58,12 @@ private:
      Position of any submenu will always be located before the return and exit options
      If this param was omitted the entry will be added at the end.
 */
-    unsigned int* position;	//!<  (0,1000)
+      unsigned int* position;	//!<  (0,1000)
 
 ///  Text to show in the menu for this sub menu.
-    std::string menuName;	//!< (500)
-};
+      std::string menuName;	//!< (500)
+  };
+
+}
 
 #endif

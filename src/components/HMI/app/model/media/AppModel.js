@@ -20,6 +20,16 @@ MFT.AppModel = Em.Object.create({
 		this.set('player', MFT.MediaCDPlayer.create({data: this.PlayList}));
 	},
 	
+	/*
+	 * Array of Interaction Choises
+	 */
+	 interactionChoises:	new Array(),
+
+	 /*
+	 * Array of Interaction Choises
+	 */
+	 subMenuCommands:	new Array(),
+	
 	PlayList: MFT.Playlist.create({
 		
 		selectedIndex: 	0,

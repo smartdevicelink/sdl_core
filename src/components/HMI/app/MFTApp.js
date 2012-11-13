@@ -30,8 +30,8 @@ MFT = Em.Application.create({
 		FFW.Buttons.connect();
 		FFW.TTS.connect();
 		FFW.VR.connect();
-		FFW.UI.connect();
 		FFW.AppLinkCoreClient.connect();
+		FFW.UI.connect();
 
 		this._super();
 	},

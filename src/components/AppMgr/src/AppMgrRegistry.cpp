@@ -13,12 +13,20 @@ namespace NsAppManager
 
 log4cplus::Logger AppMgrRegistry::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrRegistry"));
 	
+/**
+ * \brief Returning class instance
+ * \return class instance
+ */
 AppMgrRegistry& AppMgrRegistry::getInstance( )
 {
 	static AppMgrRegistry registry;
 	return registry;
 }
 
+/**
+ * \brief unregister an application
+ * \param item a registry item associated with the aplication being unregistered
+ */
 void AppMgrRegistry::unregisterApplication( RegistryItem* item )
 {
     if(!item)
@@ -27,10 +35,15 @@ void AppMgrRegistry::unregisterApplication( RegistryItem* item )
         return;
     }
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application "<< item->getApplication()->getName());
-	Items::iterator registryItemIterator = mRegistryItems.find(item->getApplication()->getName());
+    Items::const_iterator registryItemIterator = mRegistryItems.find(item->getApplication()->getName());
 	mRegistryItems.erase(registryItemIterator);
 }
 
+/**
+ * \brief get registry item associated with the application
+ * \param app application we need to retrieve a registry tem for
+ * \return RegistryItem instance
+ */
 RegistryItem *AppMgrRegistry::getItem( const Application* app ) const
 {
     if(!app)
@@ -38,14 +51,30 @@ RegistryItem *AppMgrRegistry::getItem( const Application* app ) const
         LOG4CPLUS_ERROR_EXT(mLogger, " Getting registry item for null application!");
         return 0;
     }
-	return mRegistryItems.find(app->getName())->second;
+    return getItem( app->getName() );
 }
 
+/**
+ * \brief get registry item associated with the application
+ * \param app a name of the application we need to retrieve a registry tem for
+ * \return RegistryItem instance
+ */
 RegistryItem *AppMgrRegistry::getItem( const std::string& app ) const
 {
-    return mRegistryItems.find(app)->second;
+    Items::const_iterator it = mRegistryItems.find(app);
+    if(it != mRegistryItems.end())
+    {
+        return it->second;
+    }
+    LOG4CPLUS_ERROR_EXT(mLogger, " Cannot find registry item by the name "<< app);
+    return 0;
 }
 
+/**
+ * \brief get registry item associated with the application
+ * \param sessionID id of a session associated with the application we need to retrieve a registry item for
+ * \return RegistryItem instance
+ */
 RegistryItem *AppMgrRegistry::getItem(unsigned char sessionID) const
 {
     for(Items::const_iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
@@ -66,15 +95,24 @@ RegistryItem *AppMgrRegistry::getItem(unsigned char sessionID) const
     return 0;
 }
 
+/**
+ * \brief Default class constructor
+ */
 AppMgrRegistry::AppMgrRegistry( )
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Created a registry!");
 }
 
+/**
+ * \brief Copy constructor
+ */
 AppMgrRegistry::AppMgrRegistry(const AppMgrRegistry &)
 {
 }
 
+/**
+ * \brief Default class destructor
+ */
 AppMgrRegistry::~AppMgrRegistry( )
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Destructing a registry!");
@@ -91,6 +129,11 @@ AppMgrRegistry::~AppMgrRegistry( )
     LOG4CPLUS_INFO_EXT(mLogger, " Destructed a registry!");
 }
 
+/**
+ * \brief register an application
+ * \param app application we are registering
+ * \return RegistryItem instance created for the application we've just registered
+ */
 const RegistryItem* AppMgrRegistry::registerApplication( Application* app )
 {
     if(!app)

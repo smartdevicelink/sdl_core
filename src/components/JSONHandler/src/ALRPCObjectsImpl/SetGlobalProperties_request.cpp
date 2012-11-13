@@ -1,6 +1,6 @@
-#include "../../include/JSONHandler/ALRPCObjects/SetGlobalProperties_request.h"
+#include "../include/JSONHandler/ALRPCObjects/SetGlobalProperties_request.h"
 #include "SetGlobalProperties_requestMarshaller.h"
-#include "../../include/JSONHandler/ALRPCObjects/Marshaller.h"
+#include "../include/JSONHandler/ALRPCObjects/Marshaller.h"
 #include "TTSChunkMarshaller.h"
 
 #define PROTOCOL_VERSION	1
@@ -10,11 +10,12 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Oct 30 08:29:32 2012
+  generated at	Wed Nov  7 13:10:41 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
+using namespace AppLinkRPC;
 SetGlobalProperties_request& SetGlobalProperties_request::operator =(const SetGlobalProperties_request& c)
 {
   helpPrompt= c.helpPrompt ? new std::vector<TTSChunk>(c.helpPrompt[0]) : 0;

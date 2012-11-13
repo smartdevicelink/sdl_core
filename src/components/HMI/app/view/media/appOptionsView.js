@@ -11,9 +11,7 @@
  */
  
 MFT.AppOptionsView = Em.ContainerView.create({
-    classNameBindings:  [ 'MFT.States.media.appoptions.active:active_state',
-                          //  'MFT.MediaController.currentOptionsData.view',
-                        ],
+    classNameBindings:  [ 'hideMenu:active_state' ],
 
     classNames:        ['media_app_options_view', 'hidden'],
 
@@ -22,6 +20,15 @@ MFT.AppOptionsView = Em.ContainerView.create({
                             'backButton',
                             'buttonsWrapper'
                         ],
+
+    hideMenu: function(){
+        if( (MFT.States.media.appperforminteraction.active == false) && (MFT.States.media.appoptions.appsubmenu.active == false) && (MFT.States.media.appoptions.active == true) ){
+            return true;
+        }else{
+            return false;
+        }
+    }.property('MFT.States.media.appoptions.appsubmenu.active', 'MFT.States.media.appoptions.active', 'MFT.States.media.appperforminteraction.active'),
+        
 
     backButton: MFT.Button.extend({
         classNames:        ['backButton','button'],     
@@ -35,7 +42,7 @@ MFT.AppOptionsView = Em.ContainerView.create({
         button = MFT.Button.create({
             elementId:          'media_app_options_view' + menuId,
             click:              function(){
-                FFW.UI.onCommand(menuId);
+                MFT.AppSubMenuView.SubMenuActivate(menuId);
             },
             commandId:          menuId, 
             classNames:         ['rs-item'],
@@ -43,8 +50,8 @@ MFT.AppOptionsView = Em.ContainerView.create({
             text:               menuName 
         });
 
-        MFT.AppOptionsView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
-        MFT.AppOptionsView.buttonsWrapper.scroll.refresh();
+        this.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
+        this.buttonsWrapper.scroll.refresh();
     },
 
     DeleteSubMenu: function(menuId){
@@ -59,8 +66,8 @@ MFT.AppOptionsView = Em.ContainerView.create({
     },
 
     buttonsWrapper: Em.ContainerView.extend({
+        elementId:          'buttonsWrapperOptions',
         classNames:         'buttonsWrapper',
-        elementId:          'buttonsWrapper',
         childViews: [
             'buttonsScroll',
             'scrollBar'
@@ -78,7 +85,7 @@ MFT.AppOptionsView = Em.ContainerView.create({
 
         buttonsScroll: Em.ContainerView.extend( Ember.TargetActionSupport, {
             classNames: 'buttonsScroll',
-            elementId:  'buttonsScroll',
+            elementId:  'buttonsScrollOptionsu',
             actionUp:   function(){
                 this._parentView.pos = this._parentView.scroll.y - this._parentView.scroll.startY;
             }
@@ -86,7 +93,7 @@ MFT.AppOptionsView = Em.ContainerView.create({
 
         scrollBar: Em.ContainerView.extend({
             classNames:         'scrollBar',
-            elementId:          'scrollBar',
+            elementId:          'scrollBarOptions',
             childViews: [
                 'scrollArrowUp',
                 'scroller',
@@ -140,48 +147,17 @@ MFT.AppOptionsView = Em.ContainerView.create({
         },
         
         loaded: function() {
-            this.set('scroll', new iScroll('buttonsWrapper',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.AppOptionsView.buttonsWrapper.scrollEnd();}}));
+            this.set('scroll', new iScroll('buttonsWrapperOptions',{scrollbarClass: 'display:none', momentum: false, onBeforeScrollEnd: function(){MFT.AppOptionsView.buttonsWrapper.scrollEnd();}}));
             this.coeficient = this.scroll.wrapperH / this.scroll.scrollerH;
             this.scrollBarH = (this.scroll.wrapperH - 98) * this.coeficient - 49;
             this.scrollBar.scroller.set( 'style', 'height:' + this.scrollBarH + 'px;' );
 
-            button = MFT.Button.create({
-                elementId:          'media_app_options_view',
-                click:              function(){
-                    MFT.MediaController.turnOnAppSubMenu(1);
-                },
-                commandId:          1, 
-                classNames:         ['rs-item'],
-                //icon:             null,//'images/media/active_arrow.png',
-                text:               "menuName" 
-            });
-
-            MFT.AppOptionsView.buttonsWrapper.buttonsScroll.get('childViews').pushObject(button);
             MFT.AppOptionsView.buttonsWrapper.scroll.refresh();
         }
     }),
 
     afterRender: function() {
-/*
-        var butt;
 
-        for(var i in MFT.InfoController.get('appsParams')){
-
-            butt = MFT.Button.create({
-                goToState:          MFT.InfoController.get('appsParams')[i].goToState,
-                classNames:         MFT.InfoController.get('appsParams')[i].classNames,
-                icon:               MFT.InfoController.get('appsParams')[i].icon,
-                textBinding:        MFT.InfoController.get('appsParams')[i].textBinding,
-                arrow:              MFT.InfoController.get('appsParams')[i].arrow,
-                action:             MFT.InfoController.get('appsParams')[i].action,
-                target:             MFT.InfoController.get('appsParams')[i].target,
-                disabledBinding:    MFT.InfoController.get('appsParams')[i].disabledBinding,
-                onDown:             MFT.InfoController.get('appsParams')[i].onDown
-            });
-
-            MFT.AppOptionsView.buttonsWrapper.buttonsScroll.get('_childViews').pushObject(butt);
-        }
-*/
         setTimeout(function () { MFT.AppOptionsView.buttonsWrapper.loaded(); }, 200);
         
     }

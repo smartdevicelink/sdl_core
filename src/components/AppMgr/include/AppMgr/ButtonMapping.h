@@ -14,23 +14,66 @@ namespace NsAppManager
 
 class RegistryItem;
 
+/**
+ * \brief Comparer acts as a comparer that allows to create std::map with AppLinkRPC::ButtonName as a key
+ */
 struct Comparer {
-    bool operator() (const ButtonName &b1, const ButtonName &b2) const;
+    bool operator() (const AppLinkRPC::ButtonName &b1, const AppLinkRPC::ButtonName &b2) const;
 };
 
-typedef std::map<ButtonName, RegistryItem*, Comparer> ButtonMap;
-typedef std::pair<ButtonName, RegistryItem*> ButtonMapItem;
+/**
+ * \brief a button_name-registered-app map
+ */
+typedef std::map<AppLinkRPC::ButtonName, RegistryItem*, Comparer> ButtonMap;
 
+/**
+ * \brief a button_name-registered-app map item
+ */
+typedef std::pair<AppLinkRPC::ButtonName, RegistryItem*> ButtonMapItem;
+
+/**
+ * \brief ButtonMapping acts as a mapping of buttons to registered application which subscribes to them
+ */
 class ButtonMapping
 {
 public:
+
+    /**
+     * \brief Default class constructor
+     */
     ButtonMapping();
-    void addButton( const ButtonName& buttonName, RegistryItem* app );
-    void removeButton(const ButtonName& buttonName);
+
+    /**
+     * \brief add a button to a mapping
+     * \param buttonName button name
+     * \param app application to map a button to
+     */
+    void addButton( const AppLinkRPC::ButtonName& buttonName, RegistryItem* app );
+
+    /**
+     * \brief remove a button from a mapping
+     * \param buttonName button name
+     */
+    void removeButton(const AppLinkRPC::ButtonName& buttonName);
+
+    /**
+     * \brief remove an application from a mapping
+     * \param app application to remove all associated buttons from mapping
+     */
     void removeItem( RegistryItem* app );
-    RegistryItem *findRegistryItemSubscribedToButton(const ButtonName &appName) const;
+
+    /**
+     * \brief find a registry item subscribed to button
+     * \param btnName button name
+     * \return RegistryItem instance
+     */
+    RegistryItem *findRegistryItemSubscribedToButton(const AppLinkRPC::ButtonName &btnName) const;
 
 private:
+
+    /**
+     * \brief Copy constructor
+     */
     ButtonMapping(const ButtonMapping&);
 
     ButtonMap    mButtonsMapping;

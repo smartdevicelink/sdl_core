@@ -10,6 +10,7 @@ use XML::Simple;
 use JSON::XS;
 use Data::Dumper;
 use File::Spec;
+use Cwd;
 
 use strict;
 
@@ -37,6 +38,7 @@ sub args_parse
      if($t eq '-ee')   {  $config{'ee'}=1; next; }
      if($t eq '-p')    {  $config{'pver'}=shift @args;   next;   }
      if($t eq '-g')    {  $config{'pragma'}=1;   next;   }
+     if($t eq '-a')    {  $config{'abs'}=1;   next;   }
 
      if($t eq '-md')   {  $config{'dryrun'}=shift @args; $config{'mode'}='dryrun'; next; }
      if($t eq '-mf')   {  $config{'fuzzer'}=shift @args; $config{'mode'}='fuzzer'; next; }
@@ -73,6 +75,13 @@ foreach(qw(name date version))
 
 my %json=(
   'Float' => 'Double',
+  'Integer' => 'Int',
+  'Boolean' => 'Bool',
+  'String' => 'String'
+);
+
+my %json2=(
+  'Float' => 'Numeric',
   'Integer' => 'Int',
   'Boolean' => 'Bool',
   'String' => 'String'
@@ -179,8 +188,9 @@ goto generate if $config{'mode'} eq 'generate';
 printf STDERR "random is %u\n",$rnd;
 srand($rnd);
 
-my $maxstring=1000;
-my $maxarray=1000;
+
+my $maxstring=10;
+my $maxarray=10;
 
 sub generate_type_valid
 {
@@ -190,7 +200,7 @@ sub generate_type_valid
   if($p->{'array'} eq 'true')
   {
     my $minsize=0;
-    my $maxsize=4;
+    my $maxsize=$maxarray;
     
     $minsize=$p->{'minsize'} if exists $p->{'minsize'};
     $maxsize=$p->{'maxsize'} if exists $p->{'maxsize'};
@@ -229,7 +239,7 @@ sub generate_type_valid
 
   if($p->{'type'} eq 'String')
   {
-    my $maxl=10;
+    my $maxl=$maxstring;
     $maxl= $p->{'maxlength'} if exists $p->{'maxlength'};
     return chr(1+int rand 127) x int rand $maxl;
 #    return chr(int rand 256) x int rand $maxl;
@@ -388,6 +398,15 @@ my $p2i=File::Spec->abs2rel($path,$pimpl);
 my $i2p=File::Spec->abs2rel($pimpl,$path);
 my $i2l=File::Spec->abs2rel($lib,$path);
 
+$p2i=$path if exists $config{'abs'};
+$i2p=$pimpl if exists $config{'abs'};
+$i2l=$lib if exists $config{'abs'};
+
+$p2i=~s/\/$//;
+$i2p=~s/\/$//;
+$i2l=~s/\/$//;
+
+
 my $ns=$config{'ns'};
 my $ind= $ns eq '' ? '' : '  ';
 
@@ -400,7 +419,8 @@ my $sc=exists $config{'sc'} ? $config{'sc'} : 'cc';
 my $timestamp=gmtime(time());
 
 my $pragma='';
-$pragma = sprintf "#pragma GCC dependency \"%s\"\n\n",File::Spec->canonpath($config{'xml'}) if exists $config{'pragma'};
+#$pragma = sprintf "#pragma GCC dependency \"%s\"\n\n",File::Spec->canonpath($config{'xml'}) if exists $config{'pragma'};
+$pragma = sprintf "#pragma GCC dependency \"%s\"\n\n",Cwd::realpath($config{'xml'}) if exists $config{'pragma'};
 
 my $timemod;
 
@@ -475,7 +495,6 @@ printf FO "namespace %s\n{\n  struct PerfectHashTable\n  {\n    const char *name
 
 print FO "\n#endif\n";
 close FO;
-
 
 # enums processing, 4 files per type produced.
 foreach(sort keys %types)
@@ -554,8 +573,8 @@ private:
   open(FO,mkpath(sprintf('%s%sMarshaller',$pimpl,$k),$sh)) or die;
   print FO header_h($k.'Marshaller');
   
-#  printf FO "#include <string>\n#include <json/value.h>\n\n#include \"PerfectHashTable.%s\"\n\n#include \"../%s.%s\"\n\n",$sh,$k,$sh;
-  printf FO "#include <string>\n#include <json/value.h>\n#include <json/reader.h>\n#include <json/writer.h>\n\n#include \"PerfectHashTable.%s\"\n\n#include \"%s/%s.%s\"\n\n",$sh,$p2i,$k,$sh;
+#  printf FO "#include <string>\n#include <json/json.h>\n\n#include \"PerfectHashTable.%s\"\n\n#include \"../%s.%s\"\n\n",$sh,$k,$sh;
+  printf FO "#include <string>\n#include <json/json.h>\n\n#include \"PerfectHashTable.%s\"\n\n#include \"%s/%s.%s\"\n\n",$sh,$p2i,$k,$sh;
 
   print FO $hat;
   printf FO "namespace %s\n{\n",$ns if $ns ne '';
@@ -1117,7 +1136,7 @@ bool #name#::set_All(const tUnion& t)
 
   print FO header_h($k.'Marshaller');
 
-  printf FO "#include <string>\n#include <json/value.h>\n#include <json/reader.h>\n#include <json/writer.h>\n\n#include \"PerfectHashTable.%s\"\n#include \"%s/%s.%s\"\n\n",
+  printf FO "#include <string>\n#include <json/json.h>\n\n#include \"PerfectHashTable.%s\"\n#include \"%s/%s.%s\"\n\n",
         $sh,$p2i,$k,$sh;
 
   print FO $hat;
@@ -1371,7 +1390,7 @@ const std::string #name#Marshaller::toString(const #name#& e)
       
       if(exists $json{$n->{'type'}})
       {
-        printf FO "        if(!j[i].is%s())\n",$json{$n->{'type'}};
+        printf FO "        if(!j[i].is%s())\n",$json2{$n->{'type'}};
         printf FO "          return false;\n";
         printf FO "        else\n";
         printf FO "          c.mInternal.%s[i]=j[i].as%s();\n",$n->{'name'},$json{$n->{'type'}};
@@ -1394,7 +1413,7 @@ const std::string #name#Marshaller::toString(const #name#& e)
         printf FO "      const Json::Value& j=json[\"%s\"];\n",$n->{'name'};
       if(exists $json{$n->{'type'}})
       {
-        printf FO "      if(!j.is%s())  return false;\n",$json{$n->{'type'}};
+        printf FO "      if(!j.is%s())  return false;\n",$json2{$n->{'type'}};
         printf FO "      c.mInternal.%s=j.as%s();\n",$n->{'name'},$json{$n->{'type'}};
       }
       else
@@ -1622,7 +1641,7 @@ sub declare_deserialize
       
         if(exists $json{$n->{'type'}})
         {
-          $rv.=sprintf "        if(!j[i].is%s())\n",$json{$n->{'type'}};
+          $rv.=sprintf "        if(!j[i].is%s())\n",$json2{$n->{'type'}};
           $rv.=sprintf "          return false;\n";
           $rv.=sprintf "        else\n";
           $rv.=sprintf "          c.%s[0][i]=j[i].as%s();\n",$n->{'name'},$json{$n->{'type'}};
@@ -1644,7 +1663,7 @@ sub declare_deserialize
         $rv.=sprintf "      const Json::Value& j=json[\"%s\"];\n",$n->{'name'};
         if(exists $json{$n->{'type'}})
         {
-          $rv.=sprintf "      if(!j.is%s())  return false;\n",$json{$n->{'type'}};
+          $rv.=sprintf "      if(!j.is%s())  return false;\n",$json2{$n->{'type'}};
           $rv.=sprintf "      c.%s=new %s(j.as%s());\n",$n->{'name'},$n->{'ctype'},$json{$n->{'type'}};
         }
         else
@@ -1669,7 +1688,7 @@ sub declare_deserialize
       
         if(exists $json{$n->{'type'}})
         {
-          $rv.=sprintf "        if(!j[i].is%s())\n",$json{$n->{'type'}};
+          $rv.=sprintf "        if(!j[i].is%s())\n",$json2{$n->{'type'}};
           $rv.=sprintf "          return false;\n";
           $rv.=sprintf "        else\n";
           $rv.=sprintf "          c.%s[i]=j[i].as%s();\n",$n->{'name'},$json{$n->{'type'}};
@@ -1691,7 +1710,7 @@ sub declare_deserialize
         $rv.=sprintf "    {\n      const Json::Value& j=json[\"%s\"];\n",$n->{'name'};
         if(exists $json{$n->{'type'}})
         {
-          $rv.=sprintf "      if(!j.is%s())  return false;\n",$json{$n->{'type'}};
+          $rv.=sprintf "      if(!j.is%s())  return false;\n",$json2{$n->{'type'}};
           $rv.=sprintf "      c.%s=j.as%s();\n",$n->{'name'},$json{$n->{'type'}};
         }
         else
@@ -1914,7 +1933,7 @@ nxt:
 
   print FO header_h($k.'Marshaller');
 
-  printf FO "#include <string>\n#include <json/value.h>\n#include <json/reader.h>\n#include <json/writer.h>\n\n#include \"%s/%s.%s\"\n\n",
+  printf FO "#include <string>\n#include <json/json.h>\n\n#include \"%s/%s.%s\"\n\n",
         $p2i,$k,$sh;
 
   print FO $hat;
@@ -2119,8 +2138,8 @@ for(my $i=0;$i<@table;$i++)
   
   printf FO "#include \"%s.%s\"\n",$_,$sh foreach sort keys %tps;
 
-  printf FO "#include \"%s%s.h\"\n\n",$lib,$mt;
-#  printf FO "#include \"%s/%s.hh\"\n\n",$i2l,$mt;
+#  printf FO "#include \"%s%s.hh\"\n\n",$libs,$mt;
+  printf FO "#include \"%s/%s.h\"\n\n",$i2l,$mt;
 
   print FO $hat;
 
@@ -2310,7 +2329,7 @@ nxt:
 
   print FO header_h($k.'Marshaller');
 
-  printf FO "#include <string>\n#include <json/value.h>\n#include <json/reader.h>\n#include <json/writer.h>\n\n#include \"%s/%s.%s\"\n\n",
+  printf FO "#include <string>\n#include <json/json.h>\n\n#include \"%s/%s.%s\"\n\n",
         $p2i,$k,$sh;
 
   print FO $hat;
@@ -2485,7 +2504,7 @@ sub mkfuncname
 
 open(FO,mkpath($path.'Marshaller',$sh)) or die;
 print FO header_h('Marshaller');
-print FO "#include <string>\n#include <json/value.h>\n#include <json/reader.h>\n#include <json/writer.h>\n\n";
+print FO "#include <string>\n#include <json/json.h>\n\n";
 
 foreach(@table)
 {
@@ -2738,7 +2757,7 @@ close FO;
 
 open(FO,mkpath($path.'RPC',$sh)) or die;
 print FO header_h('RPC');
-print FO "#include <string>\n#include <json/value.h>\n#include <json/reader.h>\n#include <json/writer.h>\n\n";
+print FO "#include <string>\n#include <json/json.h>\n\n";
 
 printf FO "#include \"%s.%s\"\n",$_,$sh foreach sort keys %types;
 
@@ -2749,7 +2768,6 @@ print FO "\n";
 print FO $hat;
 
 print FO "\n\n#endif\n";
-
 
 print STDERR "done\n";
 #die Dumper \%types;

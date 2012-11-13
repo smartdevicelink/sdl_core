@@ -1,35 +1,37 @@
-#ifndef MEDIACLOCKFORMAT_INCLUDE
-#define MEDIACLOCKFORMAT_INCLUDE
+#ifndef APPLINKRPC_MEDIACLOCKFORMAT_INCLUDE
+#define APPLINKRPC_MEDIACLOCKFORMAT_INCLUDE
 
 
 /*
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Oct 30 08:29:32 2012
+  generated at	Wed Nov  7 13:10:41 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
-
-class MediaClockFormat
+namespace AppLinkRPC
 {
-public:
-  enum MediaClockFormatInternal
+
+  class MediaClockFormat
   {
-    INVALID_ENUM=-1,
+  public:
+    enum MediaClockFormatInternal
+    {
+      INVALID_ENUM=-1,
 
 /**
      minutesFieldWidth = 2;minutesFieldMax = 19;secondsFieldWidth = 2;secondsFieldMax = 99;maxHours = 19;maxMinutes = 59;maxSeconds = 59;
      used for Type II and CID headunits
 */
-    CLOCK1=0,
+      CLOCK1=0,
 
 /**
      minutesFieldWidth = 3;minutesFieldMax = 199;secondsFieldWidth = 2;secondsFieldMax = 99;maxHours = 59;maxMinutes = 59;maxSeconds = 59;
      used for Type V headunit
 */
-    CLOCK2=1,
+      CLOCK2=1,
 
 /**
      5 characters possible
@@ -39,7 +41,7 @@ public:
      :|sp : colon or space
      used for Type II headunit
 */
-    CLOCKTEXT1=2,
+      CLOCKTEXT1=2,
 
 /**
      5 chars possible
@@ -50,7 +52,7 @@ public:
      used for CID headunit
      NOTE: difference between CLOCKTEXT1 and CLOCKTEXT2 is the supported character set
 */
-    CLOCKTEXT2=3,
+      CLOCKTEXT2=3,
 
 /**
      6 chars possible
@@ -60,18 +62,20 @@ public:
      :|sp : colon or space
      used for Type V headunit
 */
-    CLOCKTEXT3=4
+      CLOCKTEXT3=4
+    };
+  
+    MediaClockFormat() : mInternal(INVALID_ENUM)				{}
+    MediaClockFormat(MediaClockFormatInternal e) : mInternal(e)		{}
+  
+    MediaClockFormatInternal get(void) const	{ return mInternal; }
+    void set(MediaClockFormatInternal e)		{ mInternal=e; }
+  
+  private:
+    MediaClockFormatInternal mInternal;
+    friend class MediaClockFormatMarshaller;
   };
-
-  MediaClockFormat() : mInternal(INVALID_ENUM)				{}
-  MediaClockFormat(MediaClockFormatInternal e) : mInternal(e)		{}
-
-  MediaClockFormatInternal get(void) const	{ return mInternal; }
-  void set(MediaClockFormatInternal e)		{ mInternal=e; }
-
-private:
-  MediaClockFormatInternal mInternal;
-  friend class MediaClockFormatMarshaller;
-};
+  
+}
 
 #endif

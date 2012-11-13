@@ -1,6 +1,7 @@
 #include "AppMgr/SubscribeButton.h"
 #include "AppMgr/AppMgrCore.h"
 #include "AppMgr/AppMgrRegistry.h"
+#include "AppMgr/MobileHandler.h"
 #include "JSONHandler/ALRPCObjects/SubscribeButton_request.h"
 #include "JSONHandler/ALRPCObjects/SubscribeButton_response.h"
 #include "JSONHandler/ALRPCObjects/ButtonName.h"
@@ -10,6 +11,10 @@
 namespace NsAppManager
 {
 
+/**
+ * \brief Class constructor
+ * \param receiver a registry item associated with application that will execute command
+ */
 SubscribeButtonCmd::SubscribeButtonCmd(const RegistryItem *receiver, const void *params)
     :IAppCommand(receiver, params)
 {
@@ -20,6 +25,9 @@ SubscribeButtonCmd::SubscribeButtonCmd(const RegistryItem *receiver, const void 
     }
 }
 
+/**
+ * \brief method to being called upon command execution, derived from IAppCommand
+ */
 void SubscribeButtonCmd::execute()
 {
     LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButtonCmd command has been executing");
@@ -29,15 +37,15 @@ void SubscribeButtonCmd::execute()
         LOG4CPLUS_ERROR_EXT(mLogger, " No params supplied in constructor, null pointer exception is about to occur!");
         return;
     }
-    SubscribeButton_request * object = (SubscribeButton_request*)msg->first;
+    AppLinkRPC::SubscribeButton_request * object = (AppLinkRPC::SubscribeButton_request*)msg->first;
     RegistryItem* item = AppMgrRegistry::getInstance().getItem(msg->second);
     AppMgrCore::getInstance().mButtonsMapping.addButton( object->get_buttonName(), item );
-    SubscribeButton_response* response = new SubscribeButton_response();
+    AppLinkRPC::SubscribeButton_response* response = new AppLinkRPC::SubscribeButton_response();
     response->setCorrelationID(object->getCorrelationID());
-    response->setMessageType(ALRPCMessage::RESPONSE);
+    response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
     response->set_success(true);
-    response->set_resultCode(Result::SUCCESS);
-    AppMgrCore::getInstance().mJSONHandler->sendRPCMessage(response, msg->second);
+    response->set_resultCode(AppLinkRPC::Result::SUCCESS);
+    MobileHandler::getInstance().sendRPCMessage(response, msg->second);
 }
 
 }

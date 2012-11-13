@@ -36,12 +36,12 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 	],
 
 	hideMenu: function(){
-		if( (MFT.States.media.appsubmenu.active == true) || (MFT.States.media.appoptions.active == true) ){
+		if( (MFT.States.media.appperforminteraction.active == true) || (MFT.States.media.appoptions.appsubmenu.active == true) || (MFT.States.media.appoptions.active == true) ){
 			return true;
 		}else{
 			return false;
 		}
-	}.property('MFT.States.media.appsubmenu.active', 'MFT.States.media.appoptions.active'),
+	}.property('MFT.States.media.appoptions.appsubmenu.active', 'MFT.States.media.appoptions.active', 'MFT.States.media.appperforminteraction.active'),
 
 	topScrollButton: MFT.Button.extend({
 		classNameBindings: 	[
@@ -73,10 +73,6 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 
 	AddCommand: function( commandId, params){
 
-		//parentID
-		//position
-		//menuName
-
 		button = MFT.Button.create({
 			elementId:			'media_rightmenu_softButton' + commandId,
 			click:				function(){
@@ -85,7 +81,8 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 			commandId:			commandId, 
 			classNames:			['rs-item'],
 			//icon:				null,//'images/media/active_arrow.png',
-			text:				params.menuName	
+			text:				params.menuName,
+            templateName:       'text'
 		});
 
 		MFT.AppRightMenuView.scrollWrapper.scroller.get('childViews').pushObject(button);
@@ -93,10 +90,6 @@ MFT.AppRightMenuView = Em.ContainerView.create({
 	},
 
 	DeleteCommand: function(commandId){
-
-		//parentID
-		//position
-		//menuName
 
 		if(Ember.View.views['media_rightmenu_softButton' + commandId]){
 			Ember.View.views['media_rightmenu_softButton' + commandId].destroy();

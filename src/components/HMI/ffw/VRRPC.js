@@ -42,7 +42,7 @@ FFW.VR = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.VR.onRPCRegistered");
 		this._super();
 	},
-	
+
 	/*
      * Client is unregistered - no more requests
  	 */	
@@ -67,7 +67,7 @@ FFW.VR = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.VR.onRPCResult");
 		this._super();
 	 },
-	
+
 	/*
 	 * handle RPC erros here
  	 */	
@@ -83,22 +83,45 @@ FFW.VR = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.VR.onRPCNotification");
 		this._super();
 	},
-	
+
 	/*
 	 * handle RPC requests here
  	 */	
 	onRPCRequest: function(request) {
 		Em.Logger.log("FFW.VR.onRPCRequest");
 		this._super();
-		
-/*
-		if (FFW.VR.onRPCNotification == "VRClient.onFullScreenChanged") {
-			this.resizeVideo = true;
-			this.FullScreenRequestId = request.id;
-			Em.Logger.log("resizeVideo = " + this.resizeVideo);
-			Em.Logger.log("FullScreenRequestId = " + this.FullScreenRequestId);
-			this.set("isFullScreen", request.params.isFullScreen);
+
+		if (request.method == "VR.AddCommand") {
+			
+			MFT.VRPopUp.AddCommand(request.params.cmdId, request.params.vrCommands);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result"	: 	{
+					"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+					"method" 	:  request.method + "Response"
+				}
+			};
+			this.client.send(JSONMessage);
 		}
-*/
+
+		if (request.method == "VR.DeleteCommand") {
+			
+			MFT.VRPopUp.DeleteCommand(request.params.cmdId);
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result"	: 	{
+					"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+					"method" 	:  request.method + "Response"
+				}
+			};
+			this.client.send(JSONMessage);
+		}
+		
 	}
 })

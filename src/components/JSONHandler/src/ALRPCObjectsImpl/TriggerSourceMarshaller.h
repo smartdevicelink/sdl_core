@@ -1,56 +1,58 @@
-#ifndef TRIGGERSOURCEMARSHALLER_INCLUDE
-#define TRIGGERSOURCEMARSHALLER_INCLUDE
+#ifndef APPLINKRPC_TRIGGERSOURCEMARSHALLER_INCLUDE
+#define APPLINKRPC_TRIGGERSOURCEMARSHALLER_INCLUDE
 
 #include <string>
-#include <json/value.h>
-#include <json/reader.h>
-#include <json/writer.h>
+#include <json/json.h>
 
 #include "PerfectHashTable.h"
 
-#include "../../include/JSONHandler/ALRPCObjects/TriggerSource.h"
+#include "../include/JSONHandler/ALRPCObjects/TriggerSource.h"
 
 
 /*
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Oct 30 08:29:32 2012
+  generated at	Wed Nov  7 13:10:41 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
+namespace AppLinkRPC
+{
 
 //! marshalling class for TriggerSource
 
-class TriggerSourceMarshaller
-{
-public:
-
-  static std::string toName(const TriggerSource& e) 	{ return getName(e.mInternal) ?: ""; }
-
-  static bool fromName(TriggerSource& e,const std::string& s)
-  { 
-    return (e.mInternal=getIndex(s.c_str()))!=TriggerSource::INVALID_ENUM;
-  }
-
-  static bool checkIntegrity(TriggerSource& e)		{ return e.mInternal!=TriggerSource::INVALID_ENUM; } 
-  static bool checkIntegrityConst(const TriggerSource& e)	{ return e.mInternal!=TriggerSource::INVALID_ENUM; } 
-
-  static bool fromString(const std::string& s,TriggerSource& e);
-  static const std::string toString(const TriggerSource& e);
-
-  static bool fromJSON(const Json::Value& s,TriggerSource& e);
-  static Json::Value toJSON(const TriggerSource& e);
-
-  static const char* getName(TriggerSource::TriggerSourceInternal e)
+  class TriggerSourceMarshaller
   {
-     return (e>=0 && e<2) ? mHashTable[e].name : NULL;
-  }
-
-  static const TriggerSource::TriggerSourceInternal getIndex(const char* s);
-
-  static const PerfectHashTable mHashTable[2];
-};
+  public:
+  
+    static std::string toName(const TriggerSource& e) 	{ return getName(e.mInternal) ?: ""; }
+  
+    static bool fromName(TriggerSource& e,const std::string& s)
+    { 
+      return (e.mInternal=getIndex(s.c_str()))!=TriggerSource::INVALID_ENUM;
+    }
+  
+    static bool checkIntegrity(TriggerSource& e)		{ return e.mInternal!=TriggerSource::INVALID_ENUM; } 
+    static bool checkIntegrityConst(const TriggerSource& e)	{ return e.mInternal!=TriggerSource::INVALID_ENUM; } 
+  
+    static bool fromString(const std::string& s,TriggerSource& e);
+    static const std::string toString(const TriggerSource& e);
+  
+    static bool fromJSON(const Json::Value& s,TriggerSource& e);
+    static Json::Value toJSON(const TriggerSource& e);
+  
+    static const char* getName(TriggerSource::TriggerSourceInternal e)
+    {
+       return (e>=0 && e<2) ? mHashTable[e].name : NULL;
+    }
+  
+    static const TriggerSource::TriggerSourceInternal getIndex(const char* s);
+  
+    static const PerfectHashTable mHashTable[2];
+  };
+  
+}
 
 #endif

@@ -1,5 +1,5 @@
 #include "AppMgr/ButtonCapabilities.h"
-#include "JSONHandler/GetCapabilitiesResponse.h"
+#include "JSONHandler/RPC2Objects/Buttons/GetCapabilitiesResponse.h"
 #include "LoggerHelper.hpp"
 
 namespace NsAppManager
@@ -7,30 +7,41 @@ namespace NsAppManager
 
 log4cplus::Logger ButtonCapabilitiesContainer::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ButtonCapabilities"));
 
+/**
+ * \brief Default class constructor
+ */
 ButtonCapabilitiesContainer::ButtonCapabilitiesContainer()
 {
     LOG4CPLUS_INFO_EXT(mLogger, " ButtonCapabilitiesContainer constructed!");
 }
 
-void ButtonCapabilitiesContainer::set(RPC2Communication::GetCapabilitiesResponse *msg)
+/**
+ * \brief set button capabilities
+ * \param caps button capabilities
+ */
+void ButtonCapabilitiesContainer::set(const std::vector<AppLinkRPC::ButtonCapabilities>& caps)
 {
-    if(!msg)
+    if(caps.empty())
     {
-        LOG4CPLUS_ERROR_EXT(mLogger, " Trying to set a null pointer: is this the intent?");
+        LOG4CPLUS_ERROR_EXT(mLogger, " Trying to set empty capabilities set");
         return;
     }
-    std::vector<RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal> result = msg->getCapabilities();
-    for( std::vector<RPC2Communication::GetCapabilitiesResponse::GetCapabilitiesResponseInternal>::iterator it = result.begin(); it != result.end(); it++ )
-    {
-        mButtonCapabilities.push_back(it->capability);
-    }
+
+    mButtonCapabilities = caps;
 }
 
+/**
+ * \brief get button capabilities
+ * \return button capabilities
+ */
 const ButtonCapabilitiesContainer::Capabilities& ButtonCapabilitiesContainer::get() const
 {
     return mButtonCapabilities;
 }
 
+/**
+ * \brief Default class copy constructor
+ */
 ButtonCapabilitiesContainer::ButtonCapabilitiesContainer(const NsAppManager::ButtonCapabilitiesContainer &)
 {
 }

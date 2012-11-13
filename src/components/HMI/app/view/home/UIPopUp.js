@@ -20,6 +20,7 @@ MFT.UIPopUp = Em.ContainerView.create({
 
 	childViews: [
 		'popUp',
+		'applicationName',
 		'message1',
 		'message2'
 	],
@@ -35,6 +36,15 @@ MFT.UIPopUp = Em.ContainerView.create({
 		elementId:			'popUp',
 
 		classNames:			'popUp',
+	}),
+
+	applicationName :	MFT.Label.extend({
+
+		elementId:			'applicationName',
+
+		classNames:			'applicationName',
+
+		contentBinding:		'MFT.AppModel.PlayList.items.0.appName'
 	}),
 
 	message1 : MFT.Label.extend({

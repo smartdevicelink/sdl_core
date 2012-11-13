@@ -26,11 +26,13 @@ MFT.AppViews = Em.ContainerView.extend({
 		MFT.BottomControls,
 		MFT.TTSPopUp,
 		MFT.UIPopUp,
+		MFT.VRPopUp,
 //		MFT.PlayerControllsView,
 //		MFT.VideoErrorPopupView,
 		MFT.ControlButtons,
 		MFT.AppOptionsView,
 		MFT.AppSubMenuView,
+		MFT.AppPerformInteractionChoise,
 		'activeAview'
 	],
 	

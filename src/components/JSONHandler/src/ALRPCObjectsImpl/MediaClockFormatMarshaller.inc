@@ -42,7 +42,7 @@ class MediaClockFormat_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -80,7 +80,7 @@ MediaClockFormat_intHash::hash (register const char *str, register unsigned int 
   return len + asso_values[(unsigned char)str[len - 1]];
 }
 
-const struct PerfectHashTable *
+const struct AppLinkRPC::PerfectHashTable *
 MediaClockFormat_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
@@ -88,7 +88,7 @@ MediaClockFormat_intHash::getPointer (register const char *str, register unsigne
        0,  0,  0,  0,  0,  0,  6,  0,  0,  0, 10,  6, 10,  0,
        0, 10
     };
-  static const struct PerfectHashTable wordlist[] =
+  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""},
 #line 18 "gen/deep/pimpl/next/MediaClockFormatMarshaller.gp"

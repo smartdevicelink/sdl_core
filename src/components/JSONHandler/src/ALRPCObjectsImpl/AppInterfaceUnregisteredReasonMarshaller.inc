@@ -42,7 +42,7 @@ class AppInterfaceUnregisteredReason_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -80,7 +80,7 @@ AppInterfaceUnregisteredReason_intHash::hash (register const char *str, register
   return len + asso_values[(unsigned char)str[0]];
 }
 
-const struct PerfectHashTable *
+const struct AppLinkRPC::PerfectHashTable *
 AppInterfaceUnregisteredReason_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
@@ -89,7 +89,7 @@ AppInterfaceUnregisteredReason_intHash::getPointer (register const char *str, re
        0, 15, 16, 17,  0,  0,  0, 16, 12,  0,  0,  0,  0,  0,
       28,  0,  0, 31
     };
-  static const struct PerfectHashTable wordlist[] =
+  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
 #line 17 "gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.gp"

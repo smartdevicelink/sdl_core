@@ -312,7 +312,7 @@ MFT.MediaController = Em.Object.create({
 	/*Turn on Applications*/
 	turnOnApp: function(){
 		// Exit form player or radio
-		FFW.UI.onRPCActivateApp();
+		FFW.AppLinkCoreClient.ActivateApp();
 		this.onPlayerExit();
 		MFT.AppModel.set('active',true);
 		this.onApplicationsEnter(MFT.AppModel);
@@ -402,8 +402,13 @@ MFT.MediaController = Em.Object.create({
 	},
 
 	/** Application Sub Mennu */
-	turnOnAppSubMenu: function(id){
+	turnOnAppSubMenu: function(){
 		MFT.States.goToState('media.appsubmenu');
+	},
+
+	/** Application Sub Mennu */
+	turnOnAppPerform: function(){
+		MFT.States.goToState('media.appperforminteraction');
 	},
 	
 	optionsBack: function(){
