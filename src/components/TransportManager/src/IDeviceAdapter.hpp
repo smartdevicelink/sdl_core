@@ -14,6 +14,7 @@ namespace NsAppLink
     {
         /**
          * @brief Interface for device adapter.
+         * @interface IDeviceAdapter
          **/
         class IDeviceAdapter
         {

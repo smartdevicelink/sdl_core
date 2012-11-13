@@ -9,6 +9,7 @@ namespace NsAppLink
     {
         /**
          * @brief Interface for handle generator.
+         * @interface IHandleGenerator
          **/
         class IHandleGenerator
         {

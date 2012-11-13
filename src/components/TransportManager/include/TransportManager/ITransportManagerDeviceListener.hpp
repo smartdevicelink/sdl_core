@@ -13,6 +13,8 @@ namespace NsAppLink
          *
          * Clients of transport manager must inherit this interface
          * in order to register as listener to receive callbacks about device information
+         *
+         * @interface ITransportManagerDeviceListener
          **/
         class ITransportManagerDeviceListener
         {
