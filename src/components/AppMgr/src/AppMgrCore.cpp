@@ -488,7 +488,15 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             RPC2Communication::UI::DeleteSubMenu* delSubMenu = new RPC2Communication::UI::DeleteSubMenu();
             delSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(delSubMenu->getId(), sessionID);
-            delSubMenu->set_menuId(object->get_menuID());
+            const unsigned int& menuId = object->get_menuID();
+            delSubMenu->set_menuId(menuId);
+            MenuCommands menuCommands;
+            core->mMenuMapping.findCommandsAssignedToMenu(menuId, menuCommands);
+            for(MenuCommands::iterator it = menuCommands.begin(); it != menuCommands.end(); it++)
+            {
+                core->mCommandMapping.removeCommand(*it, CommandType::UI);
+                core->mMenuMapping.removeCommand(*it);
+            }
             HMIHandler::getInstance().sendRequest(delSubMenu);
             break;
         }
