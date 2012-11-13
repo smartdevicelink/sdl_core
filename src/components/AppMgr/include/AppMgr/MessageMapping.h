@@ -45,7 +45,7 @@ public:
     /**
      * \brief add a message to a mapping
      * \param msgId message id
-     * \param sessionId session to map appropriate application with message
+     * \param sessionID session to map appropriate application with message
      */
     void addMessage( int msgId, unsigned char sessionID );
 
