@@ -476,6 +476,14 @@ namespace NsAppLink
             void connectDisconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, bool Connect = true);
 
             /**
+             * @brief Sends data callback
+             *
+             * @param callback Callback to send
+             * @return void
+             **/
+            void sendDataCallback(const SDataListenerCallback& callback);
+
+            /**
              * @brief Device adapters.
              **/
             std::vector<IDeviceAdapter*> mDeviceAdapters;

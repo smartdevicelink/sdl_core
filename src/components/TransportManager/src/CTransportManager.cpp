@@ -287,71 +287,15 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
 void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameReceived called. DA: "<<DeviceAdapter<<", DataSize: "<<DataSize);
-
-    pthread_mutex_lock(&mDataListenersMutex);
-
-    tDataCallbacksConditionVariables::iterator conditionVarIterator = mDataCallbacksConditionVars.find(ConnectionHandle);
-
-    if(conditionVarIterator == mDataCallbacksConditionVars.end())
-    {
-        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Condition variable was not found. Possible problems with connection initialization or connection handle is invalid");
-    }
-    else
-    {
-        pthread_cond_t *conditionVar = conditionVarIterator->second;
-
-        tDataCallbacks::iterator callbacksMapIterator = mDataListenersCallbacks.find(ConnectionHandle);
-        if(callbacksMapIterator == mDataListenersCallbacks.end())
-        {
-            TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "Callbacks vector was not found. Possible problems with connection initialization or connection handle is invalid");
-        }
-        else
-        {
-            tDataCallbacksVector *pCallbacksVector = callbacksMapIterator->second;
-
-            SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameReceived, ConnectionHandle, Data, DataSize);
-            pCallbacksVector->push_back(newCallback);
-
-            pthread_cond_signal(conditionVar);
-        }
-    }
-
-    pthread_mutex_unlock(&mDataListenersMutex);
+    SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameReceived, ConnectionHandle, Data, DataSize);
+    sendDataCallback(newCallback);
 }
 
 void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted called. DA: "<<DeviceAdapter<<", FrameSequenceNumber: "<<FrameSequenceNumber <<", SendStatus: " <<SendStatus);
-
-    pthread_mutex_lock(&mDataListenersMutex);
-
-    tDataCallbacksConditionVariables::iterator conditionVarIterator = mDataCallbacksConditionVars.find(ConnectionHandle);
-
-    if(conditionVarIterator == mDataCallbacksConditionVars.end())
-    {
-        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Condition variable was not found. Possible problems with connection initialization or connection handle is invalid");
-    }
-    else
-    {
-        pthread_cond_t *conditionVar = conditionVarIterator->second;
-
-        tDataCallbacks::iterator callbacksMapIterator = mDataListenersCallbacks.find(ConnectionHandle);
-        if(callbacksMapIterator == mDataListenersCallbacks.end())
-        {
-            TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "Callbacks vector was not found. Possible problems with connection initialization or connection handle is invalid");
-        }
-        else
-        {
-            tDataCallbacksVector *pCallbacksVector = callbacksMapIterator->second;
-
-            SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameSendCompleted, ConnectionHandle, FrameSequenceNumber, SendStatus);
-            pCallbacksVector->push_back(newCallback);
-
-            pthread_cond_signal(conditionVar);
-        }
-    }
-
-    pthread_mutex_unlock(&mDataListenersMutex);
+    SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameSendCompleted, ConnectionHandle, FrameSequenceNumber, SendStatus);
+    sendDataCallback(newCallback);
 }
 
 CTransportManager::SDeviceListenerCallback::SDeviceListenerCallback(CTransportManager::EDeviceListenerCallbackType CallbackType, const tDeviceList& DeviceList)
@@ -834,4 +778,37 @@ void CTransportManager::connectDisconnectDevice(const tDeviceHandle DeviceHandle
     LOG4CPLUS_INFO_EXT(mLogger, (Connect?"CONNECT":"DISCONNECT")<<" operation performed on device with handle: " << DeviceHandle);
 
     pthread_mutex_unlock(&mDevicesByAdapterMutex);
+}
+
+void CTransportManager::sendDataCallback(const CTransportManager::SDataListenerCallback& callback)
+{
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, callback.mConnectionHandle, "Preparing callback of type: "<<callback.mCallbackType<<", to send");
+
+    pthread_mutex_lock(&mDataListenersMutex);
+
+    tDataCallbacksConditionVariables::iterator conditionVarIterator = mDataCallbacksConditionVars.find(callback.mConnectionHandle);
+
+    if(conditionVarIterator == mDataCallbacksConditionVars.end())
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, callback.mConnectionHandle, "Condition variable was not found. Possible problems with connection initialization or connection handle is invalid");
+    }
+    else
+    {
+        pthread_cond_t *conditionVar = conditionVarIterator->second;
+
+        tDataCallbacks::iterator callbacksMapIterator = mDataListenersCallbacks.find(callback.mConnectionHandle);
+        if(callbacksMapIterator == mDataListenersCallbacks.end())
+        {
+            TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, callback.mConnectionHandle, "Callbacks vector was not found. Possible problems with connection initialization or connection handle is invalid");
+        }
+        else
+        {
+            tDataCallbacksVector *pCallbacksVector = callbacksMapIterator->second;
+            pCallbacksVector->push_back(callback);
+
+            pthread_cond_signal(conditionVar);
+        }
+    }
+
+    pthread_mutex_unlock(&mDataListenersMutex);
 }
