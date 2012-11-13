@@ -164,6 +164,7 @@ public:
     /**
      * \brief add a command to a mapping
      * \param commandId command id
+     * \param type command type
      * \param app application to map a command to
      */
     void addCommand( unsigned int commandId, CommandType type, RegistryItem* app );
