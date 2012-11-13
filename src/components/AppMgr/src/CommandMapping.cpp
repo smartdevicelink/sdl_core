@@ -7,10 +7,19 @@ namespace NsAppManager
 
 log4cplus::Logger CommandMapping::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("CommandMapping"));
 
+/**
+ * \brief Default class constructor
+ */
 CommandMapping::CommandMapping()
 {
 }
 
+/**
+ * \brief add a command to a mapping
+ * \param commandId command id
+ * \param type command type
+ * \param app application to map a command to
+ */
 void CommandMapping::addCommand(unsigned int commandId, CommandType type, RegistryItem *app)
 {
     if(!app)
@@ -22,11 +31,20 @@ void CommandMapping::addCommand(unsigned int commandId, CommandType type, Regist
     mCommandMapping.insert(CommandMapItem(CommandKey(commandId, type), app));
 }
 
+/**
+ * \brief remove a command from a mapping
+ * \param commandId command id
+ * \param type a type of a command
+ */
 void CommandMapping::removeCommand(unsigned int commandId, CommandType type)
 {
     mCommandMapping.erase(CommandKey(commandId, type));
 }
 
+/**
+ * \brief remove an application from a mapping
+ * \param app application to remove all associated commands from mapping
+ */
 void CommandMapping::removeItem(RegistryItem *app)
 {
     if(!app)
@@ -52,8 +70,14 @@ void CommandMapping::removeItem(RegistryItem *app)
     }
 }
 
+/**
+ * \brief retrieve types associated with command id in current mapping
+ * \param commandId command id to search for types
+ * \param types input container of command types to be filled with result
+ */
 void CommandMapping::getTypes( unsigned int commandId, CommandTypes& types ) const
 {
+    types.clear();
     for(CommandType type = CommandType::FIRST; type != CommandType::LAST; type++)
     {
         CommandMap::const_iterator it = mCommandMapping.find( CommandKey(commandId, type) );
@@ -64,6 +88,12 @@ void CommandMapping::getTypes( unsigned int commandId, CommandTypes& types ) con
     }
 }
 
+/**
+ * \brief find a registry item subscribed to command
+ * \param commandId command id
+ * \param type command type
+ * \return RegistryItem instance
+ */
 RegistryItem *CommandMapping::findRegistryItemAssignedToCommand(unsigned int commandId, CommandType type) const
 {
     CommandMap::const_iterator it = mCommandMapping.find( CommandKey(commandId, type) );
@@ -86,65 +116,122 @@ RegistryItem *CommandMapping::findRegistryItemAssignedToCommand(unsigned int com
     return 0;
 }
 
+/**
+ * \brief Copy constructor
+ */
 CommandMapping::CommandMapping(const CommandMapping &)
 {
 }
 
+/**
+ * \brief Default constructor
+ */
 CommandType::CommandType()
     :mType(CommandType::UNDEFINED)
 {
 }
 
+/**
+ * \brief Copy constructor
+ */
 CommandType::CommandType(const CommandType& src)
     :mType(src.getType())
 {
 }
 
+/**
+ * \brief Class constructor
+ * \param type command type to create a class with
+ */
 CommandType::CommandType(const CommandType::Type& type)
     :mType(type)
 {
 }
 
+/**
+ * \brief comparison operator
+ * \param type of a command to compare with
+ * \return comparison result
+ */
 bool CommandType::operator ==(const CommandType::Type &type) const
 {
     return mType == type;
 }
 
+/**
+ * \brief comparison operator
+ * \param type of a command to compare with
+ * \return comparison result
+ */
 bool CommandType::operator ==(const CommandType &type) const
 {
     return mType == type.getType();
 }
 
+/**
+ * \brief comparison operator
+ * \param type of a command to compare with
+ * \return comparison result
+ */
 bool CommandType::operator <(const CommandType::Type &type) const
 {
     return mType < type;
 }
 
+/**
+ * \brief comparison operator
+ * \param type of a command to compare with
+ * \return comparison result
+ */
 bool CommandType::operator <(const CommandType &type) const
 {
     return mType < type.getType();
 }
 
+/**
+ * \brief comparison operator
+ * \param type of a command to compare with
+ * \return comparison result
+ */
 bool CommandType::operator >(const CommandType::Type &type) const
 {
     return mType > type;
 }
 
+/**
+ * \brief comparison operator
+ * \param type of a command to compare with
+ * \return comparison result
+ */
 bool CommandType::operator >(const CommandType &type) const
 {
     return mType > type.getType();
 }
 
+/**
+ * \brief comparison operator
+ * \param type of a command to compare with
+ * \return comparison result
+ */
 bool CommandType::operator !=(const CommandType::Type &type) const
 {
     return mType != type;
 }
 
+/**
+ * \brief comparison operator
+ * \param type of a command to compare with
+ * \return comparison result
+ */
 bool CommandType::operator !=(const CommandType &type) const
 {
     return mType != type.getType();
 }
 
+/**
+ * \brief pre-increment operator
+ * \return incremented value
+ */
 CommandType& CommandType::operator ++()
 {
     if(mType != CommandType::LAST)
@@ -155,6 +242,10 @@ CommandType& CommandType::operator ++()
     return *this;
 }
 
+/**
+ * \brief post-increment operator
+ * \return incremented value
+ */
 CommandType CommandType::operator++ (int)
 {
     CommandType result(*this);
@@ -162,6 +253,10 @@ CommandType CommandType::operator++ (int)
     return result;
 }
 
+/**
+ * \brief get command type
+ * \return command type
+ */
 const CommandType::Type& CommandType::getType() const
 {
     return mType;

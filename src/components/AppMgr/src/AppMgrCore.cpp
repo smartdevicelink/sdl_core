@@ -38,12 +38,19 @@ namespace NsAppManager
 
 log4cplus::Logger AppMgrCore::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
 
+/**
+ * \brief Returning class instance
+ * \return class instance
+ */
 AppMgrCore& AppMgrCore::getInstance( )
 {
 	static AppMgrCore appMgr;
 	return appMgr;
 }
 
+/**
+ * \brief Default class constructor
+ */
 AppMgrCore::AppMgrCore()
     :mQueueRPCAppLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
     ,mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<RPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
@@ -51,12 +58,18 @@ AppMgrCore::AppMgrCore()
     LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
 }
 
+/**
+ * \brief Copy constructor
+ */
 AppMgrCore::AppMgrCore(const AppMgrCore &)
     :mQueueRPCAppLinkObjectsIncoming(0)
     ,mQueueRPCBusObjectsIncoming(0)
 {
 }
 
+/**
+ * \brief Default class destructor
+ */
 AppMgrCore::~AppMgrCore()
 {
     if(mQueueRPCAppLinkObjectsIncoming)
@@ -67,6 +80,11 @@ AppMgrCore::~AppMgrCore()
 	LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore destructed!");
 }
 
+/**
+ * \brief push mobile RPC message to a queue
+ * \param message a message to be pushed
+ * \param sessionID an id of a session associated with the application which pushes a message
+ */
 void AppMgrCore::pushMobileRPCMessage( AppLinkRPC::ALRPCMessage * message, unsigned char sessionID )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Pushing mobile RPC message...");
@@ -81,6 +99,10 @@ void AppMgrCore::pushMobileRPCMessage( AppLinkRPC::ALRPCMessage * message, unsig
 	LOG4CPLUS_INFO_EXT(mLogger, " Pushed mobile RPC message");
 }
 
+/**
+ * \brief push HMI RPC2 message to a queue
+ * \param message a message to be pushed
+ */
 void AppMgrCore::pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Returning a message from HMI...");
@@ -95,6 +117,9 @@ void AppMgrCore::pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * 
 	LOG4CPLUS_INFO_EXT(mLogger, " Returned a message from HMI");
 }
 
+/**
+ * \brief method to execute threads.
+ */
 void AppMgrCore::executeThreads()
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Threads are being started!");
@@ -105,11 +130,11 @@ void AppMgrCore::executeThreads()
 	LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
 }
 
-template<class Object> void handleMessage(Object message)
-{
-
-}
-
+/**
+ * \brief mobile RPC message handler
+ * \param mesage a message to be handled
+ * \param pThis a pointer to AppMgrCore class instance
+ */
 void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
 {
     unsigned char sessionID = message.second;
@@ -540,6 +565,11 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
     }
 }
 
+/**
+ * \brief push HMI RPC2 message to a queue
+ * \param msg a message to be pushed
+ * \param pThis a pointer to AppMgrCore class instance
+ */
 void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg , void *pThis)
 {
     if(!msg)
@@ -999,6 +1029,12 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
     LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been invoked!");
 }
 
+/**
+ * \brief Register an application
+ * \param request a RegisterAppInterface request which is the source for application fields initial values
+ * \param sessionID an id of the session which will be associated with the application
+ * \return A instance of RegistryItem created for application
+ */
 const RegistryItem* AppMgrCore::registerApplication( AppLinkRPC::RegisterAppInterface_request * request, const unsigned char& sessionID )
 {
     if(!request)
@@ -1049,6 +1085,10 @@ const RegistryItem* AppMgrCore::registerApplication( AppLinkRPC::RegisterAppInte
     return AppMgrRegistry::getInstance().registerApplication( application );
 }
 
+/**
+ * \brief unregister an application associated with the given session
+ * \param sessionID an id of the session asociated with the application to be unregistered
+ */
 void AppMgrCore::unregisterApplication(const unsigned char &sessionID)
 {
     RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
@@ -1067,6 +1107,11 @@ void AppMgrCore::unregisterApplication(const unsigned char &sessionID)
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName << " session id " <<sessionID<< "!");
 }
 
+/**
+ * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
+ * \param item a RegistryItem from which to retrieve an app pointer
+ * \return Application instance retrieved from item
+ */
 Application *AppMgrCore::getApplicationFromItemCheckNotNull(const RegistryItem *item) const
 {
     if(!item)
@@ -1083,6 +1128,10 @@ Application *AppMgrCore::getApplicationFromItemCheckNotNull(const RegistryItem *
     return app;
 }
 
+/**
+ * \brief set Json mobile handler
+ * \param handler a handler instance
+ */
 void AppMgrCore::setJsonHandler(JSONHandler* handler)
 {
     if(!handler)
@@ -1093,11 +1142,19 @@ void AppMgrCore::setJsonHandler(JSONHandler* handler)
     MobileHandler::getInstance().setJsonHandler(handler);
 }
 
+/**
+ * \brief get Json mobile handler
+ * \return JSONHandler instance
+ */
 JSONHandler* AppMgrCore::getJsonHandler( ) const
 {
     MobileHandler::getInstance().getJsonHandler();
 }
 
+/**
+ * \brief set Json RPC2 handler
+ * \param handler a handler instance
+ */
 void AppMgrCore::setJsonRPC2Handler(JSONRPC2Handler *handler)
 {
     if(!handler)
@@ -1108,6 +1165,10 @@ void AppMgrCore::setJsonRPC2Handler(JSONRPC2Handler *handler)
     HMIHandler::getInstance().setJsonRPC2Handler(handler);
 }
 
+/**
+ * \brief get Json RPC2 handler
+ * \return JSONRPC2Handler instance
+ */
 JSONRPC2Handler *AppMgrCore::getJsonRPC2Handler() const
 {
     return HMIHandler::getInstance().getJsonRPC2Handler();

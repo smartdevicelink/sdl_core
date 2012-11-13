@@ -11,6 +11,11 @@
 namespace NsAppManager
 {
 
+/**
+ * \brief Class constructor
+ * \param receiver a registry item associated with application that will execute command
+ * \param params parameters to executor
+ */
 SubscribeButtonCmd::SubscribeButtonCmd(const RegistryItem *receiver, const void *params)
     :IAppCommand(receiver, params)
 {
@@ -21,6 +26,9 @@ SubscribeButtonCmd::SubscribeButtonCmd(const RegistryItem *receiver, const void 
     }
 }
 
+/**
+ * \brief method to being called upon command execution, derived from IAppCommand
+ */
 void SubscribeButtonCmd::execute()
 {
     LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButtonCmd command has been executing");

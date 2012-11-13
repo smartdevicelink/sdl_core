@@ -13,6 +13,10 @@ namespace NsAppManager
 
 log4cplus::Logger RegistryItem::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("RegistryItem"));
 	
+/**
+ * \brief Class constructor
+ * \param app application to register
+ */
 RegistryItem::RegistryItem( Application* app )
 : mApplication(app)
 {
@@ -24,11 +28,17 @@ RegistryItem::RegistryItem( Application* app )
     LOG4CPLUS_INFO_EXT(mLogger, " RegistryItem constructed for the application "<<app->getName());
 }
 
+/**
+ * \brief Copy constructor
+ */
 RegistryItem::RegistryItem( const RegistryItem& item )
 : mApplication(item.getApplication())
 {
 }
 
+/**
+ * \brief Default class destructor
+ */
 RegistryItem::~RegistryItem( )
 {
     LOG4CPLUS_INFO_EXT(mLogger, " RegistryItem destroyed for the application "<<mApplication?mApplication->getName():"NULL!");
@@ -49,6 +59,11 @@ RegistryItem::~RegistryItem( )
 	mAppPolicies.clear();
 }
 
+/**
+ * \brief register application policy
+ * \param hash policy text representation
+ * \return app policy instance
+ */
 const AppPolicy* RegistryItem::registerPolicy( const std::string& hash )
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Registering a policy "<<hash);
@@ -57,6 +72,10 @@ const AppPolicy* RegistryItem::registerPolicy( const std::string& hash )
 	return *mAppPolicies.find(policy);
 }
 
+/**
+ * \brief unregister application policy
+ * \param policy policy to be unregistered
+ */
 void RegistryItem::unregisterPolicy( AppPolicy* policy )
 {
     if(!policy)
@@ -69,6 +88,10 @@ void RegistryItem::unregisterPolicy( AppPolicy* policy )
 	mAppPolicies.erase(policyIterator);
 }
 
+/**
+ * \brief get associated application
+ * \return asssociated application
+ */
 Application* RegistryItem::getApplication( ) const
 {
     if(!mApplication)
@@ -78,6 +101,11 @@ Application* RegistryItem::getApplication( ) const
 	return mApplication;
 }
 
+/**
+ * \brief comparison operator
+ * \param item2 item to compare with
+ * \return comparison result
+ */
 bool RegistryItem::operator <(const RegistryItem& item2 ) const
 {
     if(!this->getApplication() || !item2.getApplication())
@@ -88,6 +116,11 @@ bool RegistryItem::operator <(const RegistryItem& item2 ) const
 	return this->getApplication()->getName() < item2.getApplication()->getName();
 }
 
+/**
+ * \brief get application policies
+ * \param app application to get policies for
+ * \return app policy set
+ */
 RegistryItem::Policies RegistryItem::getApplicationPolicies( const Application* app ) const
 {
     if(!app)
@@ -99,8 +132,12 @@ RegistryItem::Policies RegistryItem::getApplicationPolicies( const Application* 
 	return policySet;
 }
 
-RegistryItem::Policies RegistryItem::getApplicationPolicies(
-		const std::string& app ) const
+/**
+ * \brief get application policies
+ * \param app name of an application to get policies for
+ * \return app policy set
+ */
+RegistryItem::Policies RegistryItem::getApplicationPolicies( const std::string& app ) const
 {
 	Policies policySet;
 	return policySet;

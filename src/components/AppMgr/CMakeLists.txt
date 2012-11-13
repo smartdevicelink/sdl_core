@@ -15,9 +15,7 @@ set (SOURCES
     ./src/SubscribeButton.cpp
     ./src/IAppCommand.cpp
     ./src/AppMgr.cpp
-    ./src/AppFactory.cpp
     ./src/AppMgrRegistry.cpp
-    ./src/IApplication.cpp
     ./src/Application.cpp
     ./src/AppMgrCore.cpp
     ./src/AppMgrCoreQueues.cpp
