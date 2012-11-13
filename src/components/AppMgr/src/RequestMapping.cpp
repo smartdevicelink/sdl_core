@@ -1,9 +1,12 @@
 #include "AppMgr/RequestMapping.h"
 #include "AppMgr/AppMgrRegistry.h"
 #include "AppMgr/RegistryItem.h"
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
+
+log4cplus::Logger RequestMapping::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("RequestMapping"));
 
 /**
  * \brief Default class constructor
@@ -19,6 +22,7 @@ RequestMapping::RequestMapping()
  */
 void RequestMapping::addMessage(int msgId, unsigned int cmdId)
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "Mapping a message " << msgId << " to a commandId " << cmdId );
     mRequestMapping.insert(RequestMapItem(msgId, cmdId));
 }
 
@@ -28,6 +32,7 @@ void RequestMapping::addMessage(int msgId, unsigned int cmdId)
  */
 void RequestMapping::removeMessage(int msgId)
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "Unmapping a message " << msgId );
     mRequestMapping.erase(msgId);
 }
 
@@ -53,12 +58,15 @@ void RequestMapping::removeRequest(unsigned int cmdId)
  */
 unsigned int RequestMapping::findRequestIdAssignedToMessage(int msgId) const
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "Searching a message " << msgId << " for mapped command id " );
     RequestMap::const_iterator it = mRequestMapping.find( msgId );
     if ( it != mRequestMapping.end() )
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "A message " << msgId << " is mapped to a command id " << it->second );
         return it->second;
     }
 
+    LOG4CPLUS_ERROR_EXT(mLogger, " No commands assigned to a message "<<msgId);
     return -1;
 }
 

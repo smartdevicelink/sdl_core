@@ -3,6 +3,11 @@
 
 #include <map>
 
+namespace log4cplus
+{
+    class Logger;
+}
+
 namespace NsAppManager
 {
 
@@ -61,6 +66,7 @@ private:
     RequestMapping(const RequestMapping&);
 
     RequestMap    mRequestMapping;
+    static log4cplus::Logger mLogger;
 };
 
 }
