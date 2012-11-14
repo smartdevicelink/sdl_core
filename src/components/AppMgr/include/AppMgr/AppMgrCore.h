@@ -14,7 +14,7 @@
 #include "AppMgr/MessageMapping.h"
 #include "AppMgr/MenuMapping.h"
 #include "AppMgr/RequestMapping.h"
-#include "AppMgr/ButtonCapabilities.h"
+#include "AppMgr/CapabilitesContainer.h"
 
 namespace AppLinkRPC{
     class ALRPCMessage;
@@ -159,7 +159,7 @@ private:
     AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
     AppMgrCoreQueue<RPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
-    ButtonCapabilitiesContainer mButtonCapabilities;
+    CapabilitiesContainer<AppLinkRPC::ButtonCapabilities> mButtonCapabilities;
     ButtonMapping    mButtonsMapping;
     CommandMapping   mCommandMapping;
     MessageMapping   mMessageMapping;
