@@ -399,12 +399,14 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             }
             AppLinkRPC::AddCommand_request* object = (AppLinkRPC::AddCommand_request*)mobileMsg;
 
+            const unsigned int& cmdId = object->get_cmdID();
             if(object->get_menuParams())
             {
+                LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand UI request has been invoked");
                 RPC2Communication::UI::AddCommand * addCmd = new RPC2Communication::UI::AddCommand();
                 addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 CommandType cmdType = CommandType::UI;
-                const unsigned int& cmdId = object->get_cmdID();
+
                 const AppLinkRPC::MenuParams* menuParams = object->get_menuParams();
                 addCmd->set_menuParams(*menuParams);
                 addCmd->set_cmdId(cmdId);
@@ -421,14 +423,15 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             }
             if(object->get_vrCommands())
             {
+                LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand VR request has been invoked");
                 RPC2Communication::VR::AddCommand * addCmd = new RPC2Communication::VR::AddCommand();
                 addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 CommandType cmdType = CommandType::VR;
                 addCmd->set_vrCommands(*object->get_vrCommands());
-                addCmd->set_cmdId(object->get_cmdID());
+                addCmd->set_cmdId(cmdId);
                 core->mMessageMapping.addMessage(addCmd->getId(), sessionID);
-                core->mCommandMapping.addCommand(object->get_cmdID(), cmdType, item);
-                core->mRequestMapping.addMessage(addCmd->getId(), object->get_cmdID());
+                core->mCommandMapping.addCommand(cmdId, cmdType, item);
+                core->mRequestMapping.addMessage(addCmd->getId(), cmdId);
                 HMIHandler::getInstance().sendRequest(addCmd);
             }
 
@@ -957,13 +960,21 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
                 return;
             }
             unsigned char sessionID = app->getSessionID();
+            unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(object->getId());
+            if(core->mCommandMapping.getUnrespondedRequestCount(cmdId) <= 1)
+            {
+                AppLinkRPC::AddCommand_response* response = new AppLinkRPC::AddCommand_response();
+                response->set_success(true);
+                response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+                core->mRequestMapping.removeRequest(object->getId());
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+            }
 
-            AppLinkRPC::AddCommand_response* response = new AppLinkRPC::AddCommand_response();
-            response->set_success(true);
-            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
+            core->mCommandMapping.decrementUnrespondedRequestCount(cmdId);
+
             core->mMessageMapping.removeMessage(object->getId());
-            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
-            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+
             return;
         }
         case RPC2Communication::VR::Marshaller::METHOD_DELETECOMMANDRESPONSE:
