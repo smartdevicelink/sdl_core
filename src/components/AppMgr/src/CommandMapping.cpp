@@ -29,7 +29,7 @@ void CommandMapping::addCommand(unsigned int commandId, CommandType type, Regist
     }
     LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a command " << commandId << " type " << type.getType() << " in app " << app->getApplication()->getName() );
     mCommandMapping.insert(CommandMapItem(CommandKey(commandId, type), app));
-    const unsigned int& reqsCount = getUnrespondedRequestCount(commandId);
+    const unsigned int& reqsCount = incrementUnrespondedRequestCount(commandId);
     mRequestsPerCommand.insert(RequestAwaitingResponse(commandId, reqsCount));
 }
 
@@ -149,17 +149,16 @@ unsigned int CommandMapping::incrementUnrespondedRequestCount(const unsigned int
 {
     LOG4CPLUS_INFO_EXT(mLogger, "Incrementing for unresponded requests for command " << cmdId );
     RequestsAwaitingResponse::iterator it = mRequestsPerCommand.find(cmdId);
+    unsigned int reqsCount = it != mRequestsPerCommand.end() ? it->second : 0;
+    LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId <<" was " << reqsCount );
+    reqsCount++;
     if(it != mRequestsPerCommand.end())
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId <<" was " << it->second );
-        unsigned int reqsCount = it->second + 1;
         mRequestsPerCommand.erase(it);
-        mRequestsPerCommand.insert(RequestAwaitingResponse(cmdId, reqsCount));
-        LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId <<" became " << reqsCount );
-        return reqsCount;
     }
-    LOG4CPLUS_INFO_EXT(mLogger, "No unresponded requests for command " << cmdId <<" found! " );
-    return 0;
+    mRequestsPerCommand.insert(RequestAwaitingResponse(cmdId, reqsCount));
+    LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId <<" became " << reqsCount );
+    return reqsCount;
 }
 
 /**
@@ -174,6 +173,11 @@ unsigned int CommandMapping::decrementUnrespondedRequestCount(const unsigned int
     if(it != mRequestsPerCommand.end())
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId <<" was " << it->second );
+        if(it->second <= 0)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "Trying to decrement already null value!" );
+            return 0;
+        }
         unsigned int reqsCount = it->second - 1;
         mRequestsPerCommand.erase(it);
         mRequestsPerCommand.insert(RequestAwaitingResponse(cmdId, reqsCount));
