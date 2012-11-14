@@ -662,10 +662,12 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         case RPC2Communication::Buttons::Marshaller::METHOD_GETCAPABILITIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetButtonCapabilities response has been income");
-            RPC2Communication::Buttons::GetCapabilitiesResponse * object = (RPC2Communication::Buttons::GetCapabilitiesResponse*)msg;        
-            core->mButtonCapabilities.set( object->get_capabilities() );
+            RPC2Communication::Buttons::GetCapabilitiesResponse * btnCaps = (RPC2Communication::Buttons::GetCapabilitiesResponse*)msg;
+            core->mButtonCapabilities.set( btnCaps->get_capabilities() );
+            RPC2Communication::UI::GetCapabilitiesResponse * uiCaps = (RPC2Communication::UI::GetCapabilitiesResponse*)msg;
+            core->mDisplayCapabilities = uiCaps->get_displayCapabilities();
             return;
-        }        
+        }
 		case RPC2Communication::Buttons::Marshaller::METHOD_INVALID:
 		default:
 			LOG4CPLUS_ERROR_EXT(mLogger, " Not Buttons RPC message "<< msg->getMethod() <<" has been received!");

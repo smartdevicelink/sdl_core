@@ -160,6 +160,7 @@ private:
     AppMgrCoreQueue<RPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
     CapabilitiesContainer<AppLinkRPC::ButtonCapabilities> mButtonCapabilities;
+    AppLinkRPC::DisplayCapabilities mDisplayCapabilities;
     ButtonMapping    mButtonsMapping;
     CommandMapping   mCommandMapping;
     MessageMapping   mMessageMapping;
