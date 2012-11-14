@@ -681,6 +681,16 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnReady UI notification has been invoked");
             HMIHandler::getInstance().setReadyState(true);
+
+            RPC2Communication::UI::GetCapabilities* getUiCapsRequest = new RPC2Communication::UI::GetCapabilities();
+            HMIHandler::getInstance().sendRequest(getUiCapsRequest);
+            RPC2Communication::VR::GetCapabilities* getVrCapsRequest = new RPC2Communication::VR::GetCapabilities();
+            HMIHandler::getInstance().sendRequest(getVrCapsRequest);
+            RPC2Communication::TTS::GetCapabilities* getTtsCapsRequest = new RPC2Communication::TTS::GetCapabilities();
+            HMIHandler::getInstance().sendRequest(getTtsCapsRequest);
+            RPC2Communication::Buttons::GetCapabilities* getButtonsCapsRequest = new RPC2Communication::Buttons::GetCapabilities();
+            HMIHandler::getInstance().sendRequest(getButtonsCapsRequest);
+
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_GETCAPABILITIESRESPONSE:
