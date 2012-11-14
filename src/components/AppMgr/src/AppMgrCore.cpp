@@ -668,13 +668,6 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             LOG4CPLUS_INFO_EXT(mLogger, " A GetButtonCapabilities response has been income");
             RPC2Communication::Buttons::GetCapabilitiesResponse * btnCaps = (RPC2Communication::Buttons::GetCapabilitiesResponse*)msg;
             core->mButtonCapabilities.set( btnCaps->get_capabilities() );
-            RPC2Communication::UI::GetCapabilitiesResponse * uiCaps = (RPC2Communication::UI::GetCapabilitiesResponse*)msg;
-            core->mDisplayCapabilities = uiCaps->get_displayCapabilities();
-            core->mHmiZoneCapabilities.set( uiCaps->get_hmiZoneCapabilities() );
-            RPC2Communication::VR::GetCapabilitiesResponse * vrCaps = (RPC2Communication::VR::GetCapabilitiesResponse*)msg;
-            core->mVrCapabilities.set(vrCaps->get_capabilities());
-            RPC2Communication::TTS::GetCapabilitiesResponse * ttsCaps = (RPC2Communication::TTS::GetCapabilitiesResponse*)msg;
-            core->mSpeechCapabilities.set(ttsCaps->get_capabilities());
             return;
         }
 		case RPC2Communication::Buttons::Marshaller::METHOD_INVALID:
@@ -688,6 +681,14 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnReady UI notification has been invoked");
             HMIHandler::getInstance().setReadyState(true);
+            return;
+        }
+        case RPC2Communication::UI::Marshaller::METHOD_GETCAPABILITIESRESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A GetUICapabilities response has been income");
+            RPC2Communication::UI::GetCapabilitiesResponse * uiCaps = (RPC2Communication::UI::GetCapabilitiesResponse*)msg;
+            core->mDisplayCapabilities = uiCaps->get_displayCapabilities();
+            core->mHmiZoneCapabilities.set( uiCaps->get_hmiZoneCapabilities() );
             return;
         }
         case RPC2Communication::UI::Marshaller::METHOD_ONCOMMAND:
@@ -963,6 +964,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
 
     switch(msg->getMethod())
     {
+        case RPC2Communication::VR::Marshaller::METHOD_GETCAPABILITIESRESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A GetVRCapabilities response has been income");
+            RPC2Communication::VR::GetCapabilitiesResponse * vrCaps = (RPC2Communication::VR::GetCapabilitiesResponse*)msg;
+            core->mVrCapabilities.set(vrCaps->get_capabilities());
+            return;
+        }
         case RPC2Communication::VR::Marshaller::METHOD_ADDCOMMANDRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand VR response has been income");
@@ -1042,6 +1050,13 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
 
     switch(msg->getMethod())
     {
+        case RPC2Communication::TTS::Marshaller::METHOD_GETCAPABILITIESRESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A GetTTSCapabilities response has been income");
+            RPC2Communication::TTS::GetCapabilitiesResponse * ttsCaps = (RPC2Communication::TTS::GetCapabilitiesResponse*)msg;
+            core->mSpeechCapabilities.set(ttsCaps->get_capabilities());
+            return;
+        }
         case RPC2Communication::TTS::Marshaller::METHOD_SPEAKRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Speak response has been income");
