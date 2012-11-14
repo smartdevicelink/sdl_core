@@ -71,7 +71,7 @@ int main(int argc, char** argv)
         return EXIT_SUCCESS;
     }
 
-    NsMessageBroker::TcpServer *pJSONRPC20Server = new NsMessageBroker::TcpServer(std::string("127.0.0.1"), 8087, pMessageBroker);
+    NsMessageBroker::TcpServer *pJSONRPC20Server = new NsMessageBroker::TcpServer(std::string("0.0.0.0"), 8087, pMessageBroker);
     if (!pJSONRPC20Server)
     {
         LOG4CPLUS_INFO(logger, " Wrong pJSONRPC20Server pointer!");
