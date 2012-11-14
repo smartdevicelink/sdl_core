@@ -161,6 +161,7 @@ private:
 
     CapabilitiesContainer<AppLinkRPC::ButtonCapabilities> mButtonCapabilities;
     AppLinkRPC::DisplayCapabilities mDisplayCapabilities;
+    CapabilitiesContainer<AppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilities;
     ButtonMapping    mButtonsMapping;
     CommandMapping   mCommandMapping;
     MessageMapping   mMessageMapping;
