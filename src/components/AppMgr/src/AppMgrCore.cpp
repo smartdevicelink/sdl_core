@@ -669,6 +669,8 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             core->mHmiZoneCapabilities.set( uiCaps->get_hmiZoneCapabilities() );
             RPC2Communication::VR::GetCapabilitiesResponse * vrCaps = (RPC2Communication::VR::GetCapabilitiesResponse*)msg;
             core->mVrCapabilities.set(vrCaps->get_capabilities());
+            RPC2Communication::TTS::GetCapabilitiesResponse * ttsCaps = (RPC2Communication::TTS::GetCapabilitiesResponse*)msg;
+            core->mSpeechCapabilities.set(ttsCaps->get_capabilities());
             return;
         }
 		case RPC2Communication::Buttons::Marshaller::METHOD_INVALID:

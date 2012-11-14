@@ -163,6 +163,7 @@ private:
     AppLinkRPC::DisplayCapabilities mDisplayCapabilities;
     CapabilitiesContainer<AppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilities;
     CapabilitiesContainer<AppLinkRPC::VrCapabilities> mVrCapabilities;
+    CapabilitiesContainer<AppLinkRPC::SpeechCapabilities> mSpeechCapabilities;
     ButtonMapping    mButtonsMapping;
     CommandMapping   mCommandMapping;
     MessageMapping   mMessageMapping;
