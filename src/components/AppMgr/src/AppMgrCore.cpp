@@ -176,6 +176,10 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                 response->set_autoActivateID(*object->get_autoActivateID());
             }
             response->set_buttonCapabilities(core->mButtonCapabilities.get());
+            response->set_displayCapabilities(core->mDisplayCapabilities);
+            response->set_hmiZoneCapabilities(core->mHmiZoneCapabilities.get());
+            response->set_speechCapabilities(core->mSpeechCapabilities.get());
+            response->set_vrCapabilities(core->mVrCapabilities.get());
             response->set_success(true);
             response->set_resultCode(AppLinkRPC::Result::SUCCESS);
 
