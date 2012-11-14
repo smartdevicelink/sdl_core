@@ -45,6 +45,37 @@ namespace NsAppLink
         struct SDeviceInfo
         {
             /**
+             * @brief Constructor for creating empty struct
+             *
+             **/
+            SDeviceInfo();
+
+            /**
+             * @brief Constructor for creating struct with predefined values
+             *
+             * @param DeviceHandle DeviceHandle
+             * @param DeviceType DeviceType
+             * @param UserFriendlyName User-friendly name
+             * @param UniqueDeviceId Unique device id
+             **/
+            SDeviceInfo(tDeviceHandle DeviceHandle, EDeviceType DeviceType, std::string UserFriendlyName, std::string UniqueDeviceId);
+
+            /**
+             * @brief Copy constructor
+             *
+             * @param other Reference to object to be copied
+             **/
+            SDeviceInfo(const SDeviceInfo& other);
+
+            /**
+             * @brief Comparison operator.
+             *
+             * @param i_other Reference to the object to be compared with
+             * @return bool
+             **/
+            bool operator==( const SDeviceInfo& i_other ) const;
+
+            /**
              * @brief Device handle.
              **/
             tDeviceHandle mDeviceHandle;

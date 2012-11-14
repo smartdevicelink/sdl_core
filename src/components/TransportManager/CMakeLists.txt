@@ -6,6 +6,7 @@ include_directories (
 )
 
 set (SOURCES
+    ./src/SDeviceInfo.cpp
     ./src/IDeviceAdapter.cpp
     ./src/IDeviceAdapterListener.cpp
     ./src/IHandleGenerator.cpp
