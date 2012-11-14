@@ -26,6 +26,7 @@ set (SOURCES
     ./src/MessageMapping.cpp
     ./src/MenuMapping.cpp
     ./src/ButtonCapabilities.cpp
+    ./src/CapabilitesContainer.cpp
     ./src/HMIHandler.cpp
     ./src/MobileHandler.cpp
     ./src/RequestMapping.cpp
