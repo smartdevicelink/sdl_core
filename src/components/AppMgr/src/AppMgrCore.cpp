@@ -1183,6 +1183,8 @@ void AppMgrCore::unregisterApplication(const unsigned char &sessionID)
     const std::string& appName = app->getName();
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName <<" session id " <<sessionID<< "!");
     mButtonsMapping.removeItem(item);
+    mCommandMapping.removeItem(item);
+    mMessageMapping.removeItem(item);
     AppMgrRegistry::getInstance().unregisterApplication(item);
     LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName << " session id " <<sessionID<< "!");
 }
