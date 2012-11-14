@@ -1,3 +1,10 @@
+/**
+* \file RPC2Notification.hpp
+* \brief RPC2Notification class header.
+* \author PVyshnevska
+*/
+
+
 #ifndef RPCS2_NOTIFICATION_CLASS
 #define RPCS2_NOTIFICATION_CLASS
 
@@ -34,5 +41,5 @@ namespace RPC2Communication
     };
 }
 
-#endif
+#endif  //  RPCS2_NOTIFICATION_CLASS
 

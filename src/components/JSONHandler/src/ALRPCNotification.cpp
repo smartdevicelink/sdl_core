@@ -1,20 +1,27 @@
+/**
+* \file ALRPCNotification.cpp
+* \brief ALRPCNotification class source file.
+* \author PVyshnevska
+*/
+
+
 #include "JSONHandler/ALRPCNotification.h"
 
 using namespace AppLinkRPC;
 
 ALRPCNotification::ALRPCNotification(void) :
-    ALRPCMessage(0,NOTIFICATION)
+ALRPCMessage(0,NOTIFICATION)
 {
 }
 
 
 ALRPCNotification::ALRPCNotification( unsigned int protocolVersion) :
-    ALRPCMessage(protocolVersion,NOTIFICATION)
+ALRPCMessage(protocolVersion,NOTIFICATION)
 {
 }
 
 ALRPCNotification::ALRPCNotification( unsigned int protocolVersion, int methodId ) :
-    ALRPCMessage(protocolVersion,NOTIFICATION, methodId)
+ALRPCMessage(protocolVersion,NOTIFICATION, methodId)
 {
 }
 

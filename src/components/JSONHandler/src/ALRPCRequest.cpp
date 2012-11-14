@@ -1,19 +1,26 @@
+/**
+* \file ALRPCRequest.cpp
+* \brief ALRPCRequest class source file.
+* \author PVyshnevska
+*/
+
+
 #include "JSONHandler/ALRPCRequest.h"
 
 using namespace AppLinkRPC;
 
-ALRPCRequest::ALRPCRequest( unsigned int protocolVersion )
-:ALRPCMessage( protocolVersion, REQUEST ) 
+ALRPCRequest::ALRPCRequest( unsigned int protocolVersion ) :
+ALRPCMessage( protocolVersion, REQUEST ) 
 , mCorrelationID(0)
 {}
 
-ALRPCRequest::ALRPCRequest(void)
-:ALRPCMessage( 0, REQUEST ) 
+ALRPCRequest::ALRPCRequest(void) :
+ALRPCMessage( 0, REQUEST ) 
 , mCorrelationID(0)
 {}
 
-ALRPCRequest::ALRPCRequest( unsigned int protocolVersion,  int methodId )
-:ALRPCMessage( protocolVersion, REQUEST, methodId)
+ALRPCRequest::ALRPCRequest( unsigned int protocolVersion,  int methodId ) :
+ALRPCMessage( protocolVersion, REQUEST, methodId)
 , mCorrelationID(0)
 {}
 

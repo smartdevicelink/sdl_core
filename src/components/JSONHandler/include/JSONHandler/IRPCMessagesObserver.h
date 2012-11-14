@@ -1,5 +1,12 @@
+/**
+* \file IRPCMessagesObserver.hpp
+* \brief Abstract class IRPCMessagesObserver header.
+* \author PVyshnevska
+*/
+
+
 #ifndef IRPCMESSAGES_OBSERVER_CLASS
-#define IRPCMESSAGES_OBSERVER_CLASS value
+#define IRPCMESSAGES_OBSERVER_CLASS 
 
 #include "JSONHandler/ALRPCMessage.h"
 
@@ -27,4 +34,4 @@ protected:
 
 };
 
-#endif
+#endif  //  IRPCMESSAGES_OBSERVER_CLASS

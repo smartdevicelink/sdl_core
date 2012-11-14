@@ -1,3 +1,10 @@
+/**
+* \file RPC2Request.hpp
+* \brief RPC2Request class header.
+* \author PVyshnevska
+*/
+
+
 #ifndef RPC2_REQUEST_CLASS
 #define RPC2_REQUEST_CLASS
 
@@ -62,4 +69,4 @@ namespace RPC2Communication
 
 }
 
-#endif
+#endif  //  RPC2_REQUEST_CLASS

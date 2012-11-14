@@ -1,3 +1,10 @@
+/**
+* \file ALRPCMessage.hpp
+* \brief ALRPCMessage class header.
+* \author PVyshnevska
+*/
+
+
 #ifndef ALRPCMESSAGE_INCLUDE
 #define ALRPCMESSAGE_INCLUDE
 

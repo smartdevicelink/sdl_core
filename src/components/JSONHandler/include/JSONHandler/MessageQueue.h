@@ -1,5 +1,13 @@
+/**
+* \file MessageQueue.hpp
+* \brief Template MessageQueue class header.
+* \author PVyshnevska
+*/
+
+
 #ifndef MESSAGE_QUEUE_CLASS
 #define MESSAGE_QUEUE_CLASS 
+
 
 #include <pthread.h>
 #include <queue>
@@ -154,4 +162,4 @@ template <typename T> T MessageQueue<T>::pop( )
     return result; 
 }
 
-#endif
+#endif  //  MESSAGE_QUEUE_CLASS

@@ -1,3 +1,10 @@
+/**
+* \file JSONHandler.hpp
+* \brief JSONHandler class header.
+* \author PVyshnevska
+*/
+
+
 #ifndef JSONHANDLER_CLASS
 #define JSONHANDLER_CLASS 
 
@@ -50,7 +57,7 @@ public:
 
     /**
      * \brief Callback for Protocol layer handler to notify of message received.
-     * \param #{3:name} ID of session in which message was received.
+     * \param sessionID ID of session in which message was received.
      * \param messageID ID of received message.
      * \param dataSize Size of received message in bytes.
      */
@@ -60,7 +67,7 @@ public:
     /*Methods for IRPCMessagesObserver*/
     /**
      * \brief Sets pointer to instance of the class implementing RPC handling (Application Manager).
-     * \param #{3:name} Pointer to object of the class implementing IRPCMessagesObserver
+     * \param messagesObserver Pointer to object of the class implementing IRPCMessagesObserver
      * \sa IRPCMessagesObserver
      */
     void setRPCMessagesObserver( IRPCMessagesObserver * messagesObserver );
@@ -143,4 +150,4 @@ private:
 
 };
 
-#endif
+#endif  //  JSONHANDLER_CLASS

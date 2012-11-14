@@ -1,3 +1,10 @@
+/**
+* \file RPC2Response.hpp
+* \brief RPC2Response class header.
+* \author PVyshnevska
+*/
+
+
 #ifndef RPC2_RESPONSE_CLASS
 #define RPC2_RESPONSE_CLASS
 
@@ -86,4 +93,4 @@ namespace RPC2Communication
     };
 }
 
-#endif
+#endif // RPC2_RESPONSE_CLASS

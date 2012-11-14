@@ -1,5 +1,13 @@
+/**
+* \file JSONRPC2Handler.hpp
+* \brief JSONRPC2Handler class header.
+* \author PVyshnevska
+*/
+
+
 #ifndef JSONRPC2HANDLER_CLASS
 #define JSONRPC2HANDLER_CLASS
+
 
 #include <json/value.h>
 #include "mb_controller.hpp"
@@ -201,4 +209,4 @@ private:
     pthread_t                               mWaitForNotificationsToHMI;
 };
 
-#endif
+#endif  //  JSONRPC2HANDLER_CLASS

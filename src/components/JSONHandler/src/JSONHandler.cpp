@@ -1,3 +1,10 @@
+/**
+* \file JSONHandler.cpp
+* \brief JSONHandler class source file.
+* \author PVyshnevska
+*/
+
+
 #include <stdio.h>
 #include <algorithm>
 #include <string.h>
@@ -11,8 +18,8 @@
 
 log4cplus::Logger JSONHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONHandler"));
 
-JSONHandler::JSONHandler( AxisCore::ProtocolHandler * protocolHandler )
-:mProtocolHandler( protocolHandler )
+JSONHandler::JSONHandler( AxisCore::ProtocolHandler * protocolHandler ) :
+mProtocolHandler( protocolHandler )
 {
     pthread_create( &mWaitForIncomingMessagesThread, NULL, &JSONHandler::waitForIncomingMessages, (void *)this );
     pthread_create( &mWaitForOutgoingMessagesThread, NULL, &JSONHandler::waitForOutgoingMessages, (void *)this );
@@ -31,7 +38,7 @@ void JSONHandler::setRPCMessagesObserver( IRPCMessagesObserver * messagesObserve
 {
     if ( !messagesObserver )
     {
-        LOG4CPLUS_ERROR( mLogger, "Invalid incoming message." );
+        LOG4CPLUS_ERROR( mLogger, "Invalid (null) pointer to IRPCMessagesObserver." );
     }
     mMessagesObserver = messagesObserver;
 }
@@ -86,15 +93,11 @@ void JSONHandler::dataReceivedCallback(const UInt8 sessionID, const UInt32 messa
 
 std::string JSONHandler::clearEmptySpaces( const std::string & input )
 {
-    std::string result = "";
-    for ( int i = 0; i < input.size(); i++ )
-    {
-        if ( (input[i] != 0x09) && (input[i] != 0x20) && (input[i] != 0x0A) )
-        {
-            result += input[i];
-        }
-    }
-    return result;
+    LOG4CPLUS_INFO_EXT(mLogger, "Input string: " << input);
+    std::string str = input;
+    str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
+    LOG4CPLUS_INFO_EXT(mLogger, "After clearing new lines: " << str);
+    return str;
 }
 
 void * JSONHandler::waitForIncomingMessages( void * params )

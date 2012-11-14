@@ -1,3 +1,10 @@
+/**
+* \file ALRPCMessage.cpp
+* \brief ALRPCMessage class source file.
+* \author PVyshnevska
+*/
+
+
 #include "JSONHandler/ALRPCMessage.h"
 
 using namespace AppLinkRPC;

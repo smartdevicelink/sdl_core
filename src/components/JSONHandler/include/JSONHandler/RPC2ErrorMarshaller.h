@@ -1,3 +1,10 @@
+/**
+* \file RPC2ErrorMarshaller.hpp
+* \brief RPC2ErrorMarshaller class header.
+* \author PVyshnevska
+*/
+
+
 #ifndef RPC2ERRORMARSHALLER_INCLUDE
 #define RPC2ERRORMARSHALLER_INCLUDE
 
@@ -50,4 +57,4 @@ namespace RPC2Communication
 }
 
 
-#endif
+#endif //  RPC2ERRORMARSHALLER_INCLUDE

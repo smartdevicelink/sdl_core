@@ -1,3 +1,10 @@
+/**
+* \file JSONRPC2Handler.cpp
+* \brief JSONRPC2Handler class source file.
+* \author PVyshnevska
+*/
+
+
 #include "JSONHandler/JSONRPC2Handler.h"
 #include "JSONHandler/RPC2Objects/UI/Marshaller.h"
 #include "JSONHandler/RPC2Objects/TTS/Marshaller.h"
@@ -7,8 +14,8 @@
 
 log4cplus::Logger JSONRPC2Handler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONRPC2Handler"));
 
-JSONRPC2Handler::JSONRPC2Handler( const std::string& address, uint16_t port )
-:NsMessageBroker::CMessageBrokerController( address, port, "AppLinkCore" )
+JSONRPC2Handler::JSONRPC2Handler( const std::string& address, uint16_t port ) :
+NsMessageBroker::CMessageBrokerController( address, port, "AppLinkCore" )
 {
     pthread_create( &mWaitForCommandsFromHMI, NULL, &JSONRPC2Handler::waitForCommandsFromHMI, (void *)this );
     pthread_create( &mWaitForRequestsToHMI, NULL, &JSONRPC2Handler::waitForRequestsToHMI, (void *)this );
@@ -47,6 +54,7 @@ void JSONRPC2Handler::subscribeToNotifications()
     subscribeTo( "Buttons.OnButtonEvent" );
     subscribeTo( "Buttons.OnButtonPress" );
     subscribeTo( "UI.OnCommand" );
+    subscribeTo( "VR.OnCommand" );
     subscribeTo( "UI.OnReady" );
 }
 

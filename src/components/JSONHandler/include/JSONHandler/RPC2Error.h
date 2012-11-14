@@ -1,3 +1,10 @@
+/**
+* \file RPC2Error.hpp
+* \brief RPC2Error class header.
+* \author PVyshnevska
+*/
+
+
 #ifndef RPC2COMMUNICATION_RPC2ERROR
 #define RPC2COMMUNICATION_RPC2ERROR
 
@@ -128,4 +135,4 @@ namespace RPC2Communication
     };
 }
 
-#endif
+#endif  //  RPC2COMMUNICATION_RPC2ERROR

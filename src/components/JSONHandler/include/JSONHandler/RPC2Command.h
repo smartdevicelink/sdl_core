@@ -1,3 +1,10 @@
+/**
+* \file RPC2Command.hpp
+* \brief RPC2Command class header.
+* \author PVyshnevska
+*/
+
+
 #ifndef RPC2COMMAND_CLASS
 #define RPC2COMMAND_CLASS
 
@@ -84,4 +91,4 @@ namespace RPC2Communication
 
 }
 
-#endif
+#endif  //  RPC2COMMAND_CLASS

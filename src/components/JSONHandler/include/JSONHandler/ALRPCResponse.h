@@ -1,3 +1,10 @@
+/**
+* \file ALRPCResponse.h
+* \brief Class ALRPCResponse header.
+* \author PVyshnevska
+*/
+
+
 #ifndef ALRPCRESPONSE_INCLUDE
 #define ALRPCRESPONSE_INCLUDE
 
@@ -47,7 +54,7 @@ namespace AppLinkRPC
         virtual unsigned int getCorrelationID() const;
 
         /**
-         * \brief {2: Brief Description}
+         * \brief Setter for correlation id.
          * \param correlationID Correlation ID of Json message
          */
         virtual void setCorrelationID( unsigned int correlationID );
@@ -61,4 +68,4 @@ namespace AppLinkRPC
     };
 }
 
-#endif
+#endif  // ALRPCRESPONSE_INCLUDE

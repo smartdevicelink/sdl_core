@@ -1,3 +1,10 @@
+/**
+* \file ALRPCNotification.hpp
+* \brief Class ALRPCNotification header.
+* \author PVyshnevska
+*/
+
+
 #ifndef ALRPCNOTIFICATION_INCLUDE
 #define ALRPCNOTIFICATION_INCLUDE
 
@@ -43,4 +50,4 @@ namespace AppLinkRPC
 
 }
 
-#endif
+#endif //  ALRPCNOTIFICATION_INCLUDE

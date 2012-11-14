@@ -1,3 +1,10 @@
+/**
+* \file RPC2ErrorMarshaller.cpp
+* \brief RPC2ErrorMarshaller class source file.
+* \author PVyshnevska
+*/
+
+
 #include <cstdlib>
 #include <cstring>
 #include "JSONHandler/RPC2ErrorMarshaller.h"

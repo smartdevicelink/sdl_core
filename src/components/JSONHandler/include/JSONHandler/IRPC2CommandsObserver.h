@@ -1,3 +1,10 @@
+/**
+* \file IRPC2CommandsObserver.hpp
+* \brief Abstract class IRPC2CommandsObserver header.
+* \author PVyshnevska
+*/
+
+
 #ifndef IRPC2COMMANDS_OBSERVER_CLASS
 #define IRPC2COMMANDS_OBSERVER_CLASS
 
@@ -27,4 +34,4 @@ protected:
 
 };
 
-#endif
+#endif  //  IRPC2COMMANDS_OBSERVER_CLASS

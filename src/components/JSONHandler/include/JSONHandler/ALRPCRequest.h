@@ -1,3 +1,10 @@
+/**
+* \file ALRPCRequest.hpp
+* \brief Class ALRPCRequest header.
+* \author PVyshnevska
+*/
+
+
 #ifndef ALRPCREQUEST_INCLUDE
 #define ALRPCREQUEST_INCLUDE
 
@@ -62,4 +69,4 @@ namespace AppLinkRPC
 
 }
 
-#endif
+#endif  // ALRPCREQUEST_INCLUDE
