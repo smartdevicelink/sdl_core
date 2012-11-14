@@ -29,6 +29,8 @@ void CommandMapping::addCommand(unsigned int commandId, CommandType type, Regist
     }
     LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a command " << commandId << " type " << type.getType() << " in app " << app->getApplication()->getName() );
     mCommandMapping.insert(CommandMapItem(CommandKey(commandId, type), app));
+    const unsigned int& reqsCount = getUnrespondedRequestCount(commandId);
+    mRequestsPerCommand.insert(RequestAwaitingResponse(commandId, reqsCount));
 }
 
 /**
@@ -39,6 +41,7 @@ void CommandMapping::addCommand(unsigned int commandId, CommandType type, Regist
 void CommandMapping::removeCommand(unsigned int commandId, CommandType type)
 {
     mCommandMapping.erase(CommandKey(commandId, type));
+    decrementUnrespondedRequestCount(commandId);
 }
 
 /**
@@ -64,7 +67,10 @@ void CommandMapping::removeItem(RegistryItem *app)
         {
             if(registryItem->getApplication()->getSessionID() == app->getApplication()->getSessionID())
             {
-                mCommandMapping.erase(it->first);
+                const CommandKey& cmdKey = it->first;
+                mCommandMapping.erase(cmdKey);
+                const unsigned int& commandId = std::get<0>(cmdKey);
+                decrementUnrespondedRequestCount(commandId);
             }
         }
     }
@@ -113,6 +119,68 @@ RegistryItem *CommandMapping::findRegistryItemAssignedToCommand(unsigned int com
         LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found!" );
     }
     LOG4CPLUS_INFO_EXT(mLogger, "Command " << commandId << " of type " <<type.getType()<< " not found in subscribed." );
+    return 0;
+}
+
+/**
+ * \brief get count of unresponsed requests associated with the given command id
+ * \param cmdId id of command we need to count unresponded requests for
+ * \return unresponded requests count
+ */
+unsigned int CommandMapping::getUnrespondedRequestCount(const unsigned int &cmdId) const
+{
+    LOG4CPLUS_INFO_EXT(mLogger, "Searching for unresponded requests for command " << cmdId );
+    RequestsAwaitingResponse::const_iterator it = mRequestsPerCommand.find(cmdId);
+    if(it != mRequestsPerCommand.end())
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId <<" is " << it->second );
+        return it->second;
+    }
+    LOG4CPLUS_INFO_EXT(mLogger, "No unresponded requests for command " << cmdId <<" found! " );
+    return 0;
+}
+
+/**
+ * \brief increment count of unresponsed requests associated with the given command id
+ * \param cmdId id of command we need to increment unresponded request count for
+ * \return unresponded requests count after the operation
+ */
+unsigned int CommandMapping::incrementUnrespondedRequestCount(const unsigned int &cmdId)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, "Incrementing for unresponded requests for command " << cmdId );
+    RequestsAwaitingResponse::iterator it = mRequestsPerCommand.find(cmdId);
+    if(it != mRequestsPerCommand.end())
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId <<" was " << it->second );
+        unsigned int reqsCount = it->second + 1;
+        mRequestsPerCommand.erase(it);
+        mRequestsPerCommand.insert(RequestAwaitingResponse(cmdId, reqsCount));
+        LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId <<" became " << reqsCount );
+        return reqsCount;
+    }
+    LOG4CPLUS_INFO_EXT(mLogger, "No unresponded requests for command " << cmdId <<" found! " );
+    return 0;
+}
+
+/**
+ * \brief decrement count of unresponsed requests associated with the given command id
+ * \param cmdId id of command we need to decrement unresponded request count for
+ * \return unresponded requests count after the operation
+ */
+unsigned int CommandMapping::decrementUnrespondedRequestCount(const unsigned int &cmdId)
+{
+    LOG4CPLUS_INFO_EXT(mLogger, "Decrementing for unresponded requests for command " << cmdId );
+    RequestsAwaitingResponse::iterator it = mRequestsPerCommand.find(cmdId);
+    if(it != mRequestsPerCommand.end())
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId <<" was " << it->second );
+        unsigned int reqsCount = it->second - 1;
+        mRequestsPerCommand.erase(it);
+        mRequestsPerCommand.insert(RequestAwaitingResponse(cmdId, reqsCount));
+        LOG4CPLUS_INFO_EXT(mLogger, "Unresponded requests for command " << cmdId <<" became " << reqsCount );
+        return reqsCount;
+    }
+    LOG4CPLUS_INFO_EXT(mLogger, "No unresponded requests for command " << cmdId <<" found! " );
     return 0;
 }
 

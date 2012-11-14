@@ -150,6 +150,16 @@ typedef std::pair<CommandKey, RegistryItem*> CommandMapItem;
 typedef std::vector<CommandType> CommandTypes;
 
 /**
+ * \brief command_id-to-request_number map (command id is a key);
+ */
+typedef std::map<unsigned int, unsigned int> RequestsAwaitingResponse;
+
+/**
+ * \brief command_id-to-request_number map item (command id is a key);
+ */
+typedef std::pair<unsigned int, unsigned int> RequestAwaitingResponse;
+
+/**
  * \brief CommandMapping acts as a mapping of command to registsred application that subscribed to them
  */
 class CommandMapping
@@ -197,6 +207,27 @@ public:
      */
     RegistryItem *findRegistryItemAssignedToCommand(unsigned int commandId, CommandType type) const;
 
+    /**
+     * \brief get count of unresponsed requests associated with the given command id
+     * \param cmdId id of command we need to count unresponded requests for
+     * \return unresponded requests count
+     */
+    unsigned int getUnrespondedRequestCount(const unsigned int& cmdId) const;
+
+    /**
+     * \brief increment count of unresponsed requests associated with the given command id
+     * \param cmdId id of command we need to increment unresponded request count for
+     * \return unresponded requests count after the operation
+     */
+    unsigned int incrementUnrespondedRequestCount(const unsigned int& cmdId);
+
+    /**
+     * \brief decrement count of unresponsed requests associated with the given command id
+     * \param cmdId id of command we need to decrement unresponded request count for
+     * \return unresponded requests count after the operation
+     */
+    unsigned int decrementUnrespondedRequestCount(const unsigned int& cmdId);
+
 private:
 
     /**
@@ -206,6 +237,7 @@ private:
 
     CommandType   mCommandType;
     CommandMap    mCommandMapping;
+    RequestsAwaitingResponse mRequestsPerCommand;
     static log4cplus::Logger mLogger;
 };
 
