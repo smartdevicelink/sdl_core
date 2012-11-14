@@ -29,8 +29,6 @@ void CommandMapping::addCommand(unsigned int commandId, CommandType type, Regist
     }
     LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a command " << commandId << " type " << type.getType() << " in app " << app->getApplication()->getName() );
     mCommandMapping.insert(CommandMapItem(CommandKey(commandId, type), app));
-    const unsigned int& reqsCount = incrementUnrespondedRequestCount(commandId);
-    mRequestsPerCommand.insert(RequestAwaitingResponse(commandId, reqsCount));
 }
 
 /**
@@ -41,7 +39,6 @@ void CommandMapping::addCommand(unsigned int commandId, CommandType type, Regist
 void CommandMapping::removeCommand(unsigned int commandId, CommandType type)
 {
     mCommandMapping.erase(CommandKey(commandId, type));
-    decrementUnrespondedRequestCount(commandId);
 }
 
 /**
