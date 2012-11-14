@@ -61,5 +61,6 @@ CapabilitiesContainer<DeviceCapabilities>::CapabilitiesContainer(const Capabilit
 
 template class CapabilitiesContainer<AppLinkRPC::ButtonCapabilities>;
 template class CapabilitiesContainer<AppLinkRPC::HmiZoneCapabilities>;
+template class CapabilitiesContainer<AppLinkRPC::VrCapabilities>;
 
 }

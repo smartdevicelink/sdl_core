@@ -10,6 +10,7 @@ namespace log4cplus
 
 #include "JSONHandler/RPC2Objects/Buttons/GetCapabilitiesResponse.h"
 #include "JSONHandler/RPC2Objects/UI/GetCapabilitiesResponse.h"
+#include "JSONHandler/RPC2Objects/VR/GetCapabilitiesResponse.h"
 
 namespace NsAppManager
 {
