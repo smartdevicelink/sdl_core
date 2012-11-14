@@ -453,10 +453,19 @@ namespace NsAppLink
             /**
              * @brief Removes device adapter
              *
-             * @param DeviceAdapter Device adapter to removeD
+             * @note This function does not deletes DeviceAdapter pointer
+             *
+             * @param DeviceAdapter Device adapter to remove
              * @return void
              **/
             void removeDeviceAdapter(NsAppLink::NsTransportManager::IDeviceAdapter* DeviceAdapter);
+
+            /**
+             * @brief All device adapters initialized here
+             *
+             * @return void
+             **/
+            virtual void initializeDeviceAdapters();
 
             /**
              * @brief Sends callback DeviceListUpdated to subscribers

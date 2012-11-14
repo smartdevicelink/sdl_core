@@ -34,8 +34,6 @@ mDevicesByAdapterMutex(),
 mDeviceAdaptersByConnectionHandle(),
 mDeviceAdaptersByConnectionHandleMutex()
 {
-    addDeviceAdapter(new CBluetoothAdapter(*this, *this));
-
     pthread_mutex_init(&mDataListenersMutex, 0);
     pthread_mutex_init(&mDeviceListenersMutex, 0);
     pthread_mutex_init(&mDeviceHandleGenerationMutex, 0);
@@ -90,6 +88,8 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
 
 void NsAppLink::NsTransportManager::CTransportManager::run(void)
 {
+    initializeDeviceAdapters();
+
     LOG4CPLUS_INFO_EXT(mLogger, "Starting device adapters");
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
@@ -346,6 +346,7 @@ void CTransportManager::applicationCallbacksThread()
 
     while(false == mTerminateFlag)
     {
+        //TODO: Move locking after callback processing. Currently if any callbacks will be added before thread will start their processing will be delayed
         pthread_mutex_lock(&mDeviceListenersMutex);
         pthread_cond_wait(&mDeviceListenersConditionVar, &mDeviceListenersMutex);
 
@@ -672,8 +673,12 @@ void CTransportManager::removeDeviceAdapter(IDeviceAdapter* DeviceAdapter)
         delete devicesIterator->second;
         mDevicesByAdapter.erase(DeviceAdapter);
     }
+}
 
-    delete DeviceAdapter;
+void CTransportManager::initializeDeviceAdapters()
+{
+    addDeviceAdapter(new CBluetoothAdapter(*this, *this));
+    LOG4CPLUS_INFO_EXT(mLogger, "Device adapters initialized");
 }
 
 void CTransportManager::sendDeviceListUpdatedCallback()
