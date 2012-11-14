@@ -306,8 +306,10 @@ namespace NsAppLink
              * and if it's not, add it to map and start connection thread.
              *
              * @param Connection Connection to start.
+             *
+             * @return true if connection thread has been started, false otherwise.
              **/
-            void startConnection(SConnection * Connection);
+            bool startConnection(SConnection * Connection);
 
             /**
              * @brief Stop connection.
@@ -347,6 +349,14 @@ namespace NsAppLink
              * @param ConnectionHandle Connection handle.
              **/
             void handleCommunication(const tConnectionHandle ConnectionHandle);
+
+            /**
+             * @brief Update client device list.
+             *
+             * This method is called when list of devices is changed to
+             * notify device adapter listener about new list of devices.
+             **/
+            void updateClientDeviceList(void);
 
             /**
              * @brief Create list of connections possible for specified device.

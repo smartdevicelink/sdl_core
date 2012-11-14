@@ -293,23 +293,9 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
                 }
             }
 
-            LOG4CPLUS_INFO_EXT(mLogger, "Updating client device list");
-
-            tInternalDeviceList clientDeviceList;
-
-            for (tDeviceMap::const_iterator di = newDevices.begin(); di != newDevices.end(); ++di)
-            {
-                const SDevice * device = di->second;
-
-                if (0 != device)
-                {
-                    clientDeviceList.push_back(SInternalDeviceInfo(di->first, device->mName, device->mUniqueDeviceId));
-                }
-            }
-
             mDeviceScanRequested = false;
 
-            mListener.onDeviceListUpdated(this, clientDeviceList);
+            updateClientDeviceList();
         }
 
         std::vector<tConnectionHandle> connectionsToTerminate;
@@ -489,8 +475,6 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::connectionThread(const Ns
                     {
                         LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to connect to remote device " << getUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for connection " << ConnectionHandle);
                     }
-
-                    close(rfcommSocket);
                 }
                 else
                 {

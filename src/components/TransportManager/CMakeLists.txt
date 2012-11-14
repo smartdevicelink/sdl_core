@@ -13,6 +13,7 @@ set (SOURCES
     ./src/CBluetoothAdapter.cpp
     ./src/CDeviceAdapter.cpp
     ./src/CTransportManager.cpp
+    ./src/CTCPAdapter.cpp
     ./src/SInternalDeviceInfo.cpp
     ./src/ITransportManagerDeviceListener.cpp
     ./src/ITransportManagerDataListener.cpp
