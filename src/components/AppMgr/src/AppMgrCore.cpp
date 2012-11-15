@@ -1053,6 +1053,17 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
+        case RPC2Communication::UI::Marshaller::METHOD_ONDRIVERDISTRACTION:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnDriverDistraction UI notification has been invoked");
+            RPC2Communication::UI::OnDriverDistraction* object = (RPC2Communication::UI::OnDriverDistraction*)msg;
+
+            AppLinkRPC::OnDriverDistraction* event = new AppLinkRPC::OnDriverDistraction();
+            event->set_state(object->get_state());
+
+            MobileHandler::getInstance().sendRPCMessage(event, 1);
+            return;
+        }
         case RPC2Communication::UI::Marshaller::METHOD_INVALID:
         default:
             LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message "<< msg->getMethod() <<" has been received!");
