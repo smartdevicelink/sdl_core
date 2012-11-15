@@ -17,7 +17,8 @@ MFT.WidgetMediaView = Em.ContainerView.extend({
 	childViews: [
 		'radio',
 		'cd',
-		'other',
+		'bluetooth',
+		'avin',
 		'SavePresetPopup'
 	],
 	/** AM , FM , Sirius modules */
@@ -107,53 +108,55 @@ MFT.WidgetMediaView = Em.ContainerView.extend({
 		)
 	
 	}),
-	/** Other Modules (Bluetooth , AV IN)*/
-	other: Em.View.extend({
+	/**  BLUETOOTH */
+	bluetooth: Em.View.extend({
 		/** Element Id*/
-		elementId: 'home_widgetMedia_others',
+		elementId: 'home_widgetMedia_bluetooth',
 		/** Visual representation is current others group selected*/
 		classNameBindings: 	[
-			'currentStateOnMediaExit:active_state',
+			'MFT.BTModel.active:active_state',
 			'MFT.helpMode:helpmode_blur_text'
 		],
-		
 		classNames:			'hidden',
-		/* Check for selected module - Bluetooth or AV IN*/
-        currentStateOnMediaExit: function(){
-			switch(MFT.MediaController.activeState){
-				case 'media.avin': {
-					if(MFT.helpMode){
-						this.set('ico', 'images/media/help/line-h-ico_blur.png' );
-					}else{
-						this.set('ico', 'images/media/line-h-ico.png' );
-					}
-					this.set('title', 'AV In' );
-					
-					break;
-				}
-			
-				case 'media.bluetooth' : {
-					if(MFT.helpMode){
-						this.set('ico', 'images/media/help/bt-h-ico_blur.png' );
-					}else{
-						this.set('ico', 'images/media/bt-h-ico.png' );
-					}
-					this.set('title', 'Bluetooth' );
-					break;
-				}
-			}
-		
-			return (MFT.MediaController.activeState === 'media.avin' || MFT.MediaController.activeState === 'media.bluetooth');
-        }.property('MFT.MediaController.activeState','MFT.helpMode'),
 		
 		/** Template */
 		template:  Em.Handlebars.compile(
 			'<div class="info">'+
 				'<div class="ico_holder">'+				
-					'<img class="ico" {{bindAttr src="view.ico"}} {{bindAttr class="MFT.helpMode:ico_blur"}} />'+
+					'<div class="bluetooth_ico" {{bindAttr class="MFT.helpMode:ico_blur"}}></div>'+
 				'</div>'+
 				'<div class="info_holder">'+
-					'<div class="title">{{view.title}}</div>'+
+					'<div class="title">Bluetooth</div>'+
+				'</div>'+
+			'</div>'
+		)
+	
+	}),
+	
+	/**  AV IN */
+	avin: Em.View.extend({
+		/** Element Id*/
+		elementId: 'home_widgetMedia_avin',
+		/** Visual representation is current others group selected*/
+		classNameBindings: 	[
+			'isAvin:active_state',
+			'MFT.helpMode:helpmode_blur_text'
+		],
+		
+		classNames:			'hidden',
+		/* Check for selected module - Bluetooth or AV IN*/
+        isAvin: function(){
+			return (MFT.MediaController.activeState === 'media.avin');
+        }.property('MFT.MediaController.activeState'),
+		
+		/** Template */
+		template:  Em.Handlebars.compile(
+			'<div class="info">'+
+				'<div class="ico_holder">'+				
+					'<div class="avin_ico" {{bindAttr class="MFT.helpMode:ico_blur"}}></div>'+
+				'</div>'+
+				'<div class="info_holder">'+
+					'<div class="title">AV In</div>'+
 				'</div>'+
 			'</div>'
 		)
@@ -161,9 +164,10 @@ MFT.WidgetMediaView = Em.ContainerView.extend({
 	
 	/** Save Preset Popup*/
 	SavePresetPopup: Em.View.extend({
+		classNameBindings: 'MFT.localization',
 		elementId: 'home_widgetMedia_presetPopup',
 		template:  Em.Handlebars.compile(
-			'<div class="preset-stored" style="top:-40px;">Preset saved</div>'
+			'<div class="preset-stored" style="top:-40px;">{{MFT.locale.label.view_media_popUp}}</div>'
 		)
 	})
 });

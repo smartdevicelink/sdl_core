@@ -12,20 +12,9 @@
  
 MFT.InfoCalendarView = Em.View.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.info.calendar.active:active_state','MFT.helpMode'],
+	classNameBindings: ['MFT.helpMode'],
 	
 	elementId:		'info_calendar',
-	
-	classNames:	   'hidden',
-	
-	stateObj: MFT.States.info.calendar,
-	
-	activeDisabled: function(){
-		if (!MFT.helpMode) {
-			return true;
-		}
-				 
-	}.property('MFT.helpMode'),
 	
 	template: Ember.Handlebars.compile(
 		'<div class="inner-wrapper">'+

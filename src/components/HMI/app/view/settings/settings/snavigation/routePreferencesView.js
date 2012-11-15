@@ -11,15 +11,13 @@
  */
  
 MFT.SettingsSettingsNavigationRoutePreferencesView = Em.ContainerView.create(MFT.LoadableView,{
-	classNameBindings:	['MFT.States.settings.settings.snavigation.routePreferences.active:active_state','MFT.helpMode'],
-	classNames:		   ['hidden'],
+	classNameBindings:	['MFT.helpMode'],
 	elementId:			'settings_settings_navigation_routePreferences',
 	childViews:		   [
 							  'backButton',
 							  'topTitile',
 							  'list'
 						  ],
-	stateObj: MFT.States.settings.settings.snavigation.routePreferences,					  
 	backButton: MFT.Button.extend({
 	classNames:		   ['backButton','button'],		
 	action:			   'back',
@@ -36,6 +34,8 @@ MFT.SettingsSettingsNavigationRoutePreferencesView = Em.ContainerView.create(MFT
 			
 			elementId:	  'settings_settings_navigation_routePreferences_list',
 			
+			classNameBindings: ['MFT.helpMode: help_mode'],
+			
 			itemsOnPage:	5,
 			
 			disableScrollbar:  true,
@@ -43,8 +43,9 @@ MFT.SettingsSettingsNavigationRoutePreferencesView = Em.ContainerView.create(MFT
 			items:[
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_routePreferences_preferred',
 					tButtonValue:		 1,
 					tButtonRange: 		 3,
@@ -56,10 +57,12 @@ MFT.SettingsSettingsNavigationRoutePreferencesView = Em.ContainerView.create(MFT
 			},
 			{
 				
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_routePreferences_avoidFreeways',
 					labelIcon:		    'images/settings/ico_settings_settings_navigation_routePreferences_avoidFreeways.png',
+					templateName: 'icon',
 					tButtonValue: 		 1,
 					tButtonRange:		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_routePreferences_onOff',
@@ -70,10 +73,12 @@ MFT.SettingsSettingsNavigationRoutePreferencesView = Em.ContainerView.create(MFT
 			},	
 			{
 				
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_routePreferences_avoidTollroads',
 					labelIcon:		    'images/settings/ico_settings_settings_navigation_routePreferences_avoidTollroads.png',
+					templateName: 'icon',
 					tButtonValue: 		 1,
 					tButtonRange:		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_routePreferences_onOff',
@@ -84,10 +89,12 @@ MFT.SettingsSettingsNavigationRoutePreferencesView = Em.ContainerView.create(MFT
 			},
 			{
 				
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_routePreferences_avoidFerriesCarTrains',
 					labelIcon:		    'images/settings/ico_settings_settings_navigation_routePreferences_avoidFerries.png',
+					templateName: 'icon',
 					tButtonValue: 		 1,
 					tButtonRange:		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_routePreferences_onOff',
@@ -98,10 +105,12 @@ MFT.SettingsSettingsNavigationRoutePreferencesView = Em.ContainerView.create(MFT
 			},
 			{
 				
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_routePreferences_useHOVLanes',
 					labelIcon:		    'images/settings/ico_settings_settings_navigation_routePreferences_useHOV.png',
+					templateName: 'icon',
 					tButtonValue: 		 1,
 					tButtonRange:		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_routePreferences_onOff',
@@ -109,7 +118,7 @@ MFT.SettingsSettingsNavigationRoutePreferencesView = Em.ContainerView.create(MFT
 					tButtonDisabled:	  true
 				}		
 								
-			},				
+			}				
 		]
 	})
 });

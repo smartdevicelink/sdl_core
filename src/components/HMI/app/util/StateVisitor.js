@@ -19,9 +19,9 @@ MFT.StateVisitor = {
 	visit: function( state ) {
 		// load script if necessary
 		if ( !state.viewLoaded ) {
-			FFW.AppendScript.pushScript( 'app/view/'+state.get('path').replace(/\./g,'/')+'View.js' );
+			FFW.AppendScript.pushScript( state.get('path') );
 		} else {
-			MFT.TransitionIterator.start(state);
+			MFT.TransitionIterator.start( state );
 		}
 	}
 };

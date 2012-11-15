@@ -11,19 +11,13 @@
  */
 
 MFT.SettingsSoundView = Em.ContainerView.create(MFT.LoadableView,{
-	
-	classNameBindings: 	['MFT.States.settings.sound.active:active_state','MFT.helpMode'],
-	
-	classNames:		   ['hidden'],
-	
+			
 	elementId:			'settings_sound_view',
 	
 	childViews:		   [
 							  'list'
 						  ],
 						  
-	stateObj: MFT.States.settings.sound,
-
 	list:	MFT.List.extend({
 			
 			elementId:	  'settings_sound_list',
@@ -39,6 +33,7 @@ MFT.SettingsSoundView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					contentBinding:	 'MFT.locale.label.view_settings_sound_bass',
 					icon:	    	   'images/settings/ico_plus-minus-pannel_disabled.png',
+					templateName: 'icon',
 					disabled:    	   true
 				}								
 			},
@@ -48,6 +43,7 @@ MFT.SettingsSoundView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					contentBinding:	 'MFT.locale.label.view_settings_sound_midrage',
 					icon:	    	   'images/settings/ico_plus-minus-pannel_disabled.png',
+					templateName: 'icon',
 					disabled:    	   true
 				}								
 			},
@@ -57,6 +53,7 @@ MFT.SettingsSoundView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					contentBinding:	 'MFT.locale.label.view_settings_sound_treble',
 					icon:	    	   'images/settings/ico_plus-minus-pannel_disabled.png',
+					templateName: 'icon',
 					disabled:    	   true
 				}								
 			},
@@ -65,11 +62,11 @@ MFT.SettingsSoundView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					className:   'button',
 					textBinding: 'MFT.locale.label.view_settings_sound_setBalance',
-					arrow:	   true,
+					templateName: 'arrow',
 					goToState:   'setSoundBalanceFader',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}
 			},
 			{
@@ -77,7 +74,7 @@ MFT.SettingsSoundView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					className:   'button',
 					textBinding: 'MFT.locale.label.view_settings_sound_playTHX',
-					arrow:	   true,
+					templateName: 'arrow',
 					goToState:   'setSoundBalanceFader',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
@@ -85,7 +82,7 @@ MFT.SettingsSoundView = Em.ContainerView.create(MFT.LoadableView,{
 				}
 			},
 			{				
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
 					labelContentBinding:  'MFT.locale.label.view_settings_sound_dsp',
 					tButtonValue:		 0,
@@ -96,7 +93,7 @@ MFT.SettingsSoundView = Em.ContainerView.create(MFT.LoadableView,{
 				}					
 			},
 			{				
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
 					labelContentBinding:  'MFT.locale.label.view_settings_sound_speed',
 					tButtonValue:		 0,

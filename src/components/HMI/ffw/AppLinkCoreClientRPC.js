@@ -58,8 +58,8 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		this._super();
 
 		// subscribe to notifications
-		this.onAppRegusteredSubscribeRequestId 			= this.client.subscribeToNotification(this.onAppRegisteredNotification);
-		this.onAppUnregusteredSubscribeRequestId 		= this.client.subscribeToNotification(this.onAppUnregisteredNotification);
+		this.onAppRegisteredSubscribeRequestId 			= this.client.subscribeToNotification(this.onAppRegisteredNotification);
+		this.onAppUnregisteredSubscribeRequestId 		= this.client.subscribeToNotification(this.onAppUnregisteredNotification);
 	},
 	
 	/*
@@ -120,14 +120,14 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		{	
 			// add new app to the list
 			MFT.TTSPopUp.receiveMessage(notification.params.appName + " connected!");
-			MFT.AppModel.PlayList.items[0].set('appName', notification.params.appName);
+			MFT.ApplinkModel.showInfo.set('appName', notification.params.appName);
 		}
 
 		if (notification.method == this.onAppUnregisteredNotification)
 		{	
 			//  remove app from list
 			MFT.TTSPopUp.receiveMessage(notification.params.appName + " disconnected!");
-			MFT.AppModel.PlayList.items[0].set('appName', "<No app>");
+			MFT.ApplinkModel.showInfo.set('appName', "<No app>");
 		}
 	},
 
@@ -140,7 +140,6 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		
 		// nothing to do, it is client
 	},
-
 
 	/*
 	 * unregister component is RPC bus
@@ -171,7 +170,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.activateApp",
-			"params"	:	{"appName":[MFT.AppModel.PlayList.items[0].appName]}
+			"params"	:	{"appName":[MFT.ApplinkModel.showInfo.appName]}
 		};
 		this.client.send(JSONMessage);
 	},

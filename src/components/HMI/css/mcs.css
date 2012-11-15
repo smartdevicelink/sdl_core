@@ -43,14 +43,14 @@
 	text-align: center;
 }
 #view_settings_vehicle_MultiContourSeat_Adjust .MultiContourSeat_customMassage_previewButtonTop {
-	top: 100px;
-	left: 205px;
+	top: 113px;
+	left: 535px;
 	width: 120px;
 	text-align: center;
 }
 #view_settings_vehicle_MultiContourSeat_Adjust .MultiContourSeat_customMassage_previewButtonBottom {
-	top: 220px;
-	left: 205px;
+	top: 239px;
+	left: 535px;
 	width: 120px;
 	text-align: center;
 }
@@ -1142,13 +1142,13 @@
 }
 
 #seatsMassageView2_1 #MultiContourSeat_customMassage .seats-message-1 {
-	left: 720px;
-	top: 96px;
+	left: 150px;
+	top: 107px;
 }
 
 #seatsMassageView2_1 #MultiContourSeat_customMassage .seats-message-2 {
-	left: 720px;
-	top: 216px;
+	left: 150px;
+	top: 234px;
 }
 
 #seatsMassageView2_1_upperLabel {
@@ -1181,14 +1181,14 @@
 
 /* BEGIN HMI concept 2.2 */
 #seatsMassageView2_2 .MultiContourSeat_customMassage_previewButtonTop {
-	top: 116px;
-	left: 205px;
+	top: 134px;
+	left: 625px;
 	width: 120px;
 	text-align: center;
 }
 #seatsMassageView2_2 .MultiContourSeat_customMassage_previewButtonBottom {
-	top: 246px;
-	left: 205px;
+	top: 282px;
+	left: 625px;
 	width: 120px;
 	text-align: center;
 }
@@ -1250,8 +1250,8 @@
 }
 
 #seatsMassageView2_2 #MultiContourSeat_customMassage .seats-message-1 {
-	left: 720px;
-	top: 112px;
+	left: 230px;
+	top: 128px;
 }
 
 #seatsMassageView2_2 #MultiContourSeat_customMassage .seats-message-2 {

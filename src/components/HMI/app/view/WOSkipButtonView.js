@@ -24,9 +24,10 @@
 		this._super();
 		/**  Stop Video */
 		MFT.VideoPlayerController.stop();
-		/** Show WO Deny PopUp*/
-		MFT.WelcomeOrientationView.set('woDeny',true);
-		MFT.WelcomeOrientationView.set('hide',false);
+		/** Show System Select Menu*/
+		MFT.AppController.set('active',true);
+		/* remove WO VIEW*/
+		MFT.WelcomeOrientationView.remove();
 		
 	}
  });

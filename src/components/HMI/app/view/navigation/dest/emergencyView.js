@@ -12,14 +12,10 @@
 
 MFT.NavigationDestinationEmergencyView = Em.ContainerView.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.navigation.dest.emergency.active:active_state','MFT.helpMode'],
+	classNameBindings: ['MFT.helpMode','MFT.localization'],
 	
 	elementId:		'view_navi_destination_emergency',
-	
-	classNames:	   ['hidden'],
-	
-	stateObj: MFT.States.navigation.dest.emergency,
-	
+		
 	childViews: [
 		'backButton',
 		'content',

@@ -33,12 +33,17 @@ FFW.AppendScript =  Em.Object.create({
 		}		
 	},
 	
+	// get state name for last loaded view
+	getState: function() {
+		return this.sciptsQueue.shift();
+	},
+	
 	// onLoad handeler
 	// dispatch when script loaded
 	// can load next script from queue if necessary
 	onLoad: function() {
 		this.set('loading', false);
-		
+				
 		if ( this.sciptsQueue.length ) {
 			this.loadNext()
 		}
@@ -48,7 +53,7 @@ FFW.AppendScript =  Em.Object.create({
 	// and call loading
 	loadNext: function() {
 		this.set('loading', true);
-		this.loadScript( this.sciptsQueue.shift() );
+		this.loadScript( 'app/view/' + this.sciptsQueue[0].replace(/\./g,'/') + 'View.js' );
 	},
 	
 	// load script

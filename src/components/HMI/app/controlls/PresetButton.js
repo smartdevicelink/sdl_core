@@ -35,20 +35,19 @@ MFT.PresetButton = MFT.Button.extend({
 	
 	/** Define button template */
 	template: Ember.Handlebars.compile(
-		'{{#with view}}'+
-			'<span>{{num}}</span>'+
-			'<p>{{frequency}}</p>'+
-		'{{/with}}'
+		'<span>{{view.num}}</span>'+
+		'<p>{{view.frequency}}</p>'
 	),
 	
 	/** Trigger action on mousedown */
 	actionDown: function() {
-			this._super()
 			
 			if (MFT.helpMode) {
 				MFT.VideoPlayerController.start('ent_Presets');
 				return;
 			}
+			
+			this._super();
 			
 			var self = this;
 			/** init timer for save preset logic*/

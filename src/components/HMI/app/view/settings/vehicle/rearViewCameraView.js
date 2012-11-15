@@ -11,10 +11,9 @@
  */
  
 MFT.SettingsVehicleRearCameraView = Em.View.create(MFT.LoadableView,{
-	classNameBindings:	   ['MFT.States.settings.vehicle.rearViewCamera.active:active_state','MFT.helpMode'],
+	classNameBindings:	   ['MFT.helpMode'],
 	classNames:			  'hidden',
 	elementId:			   'settings_vehicle_RearCamera',
-	stateObj: MFT.States.settings.vehicle.rearViewCamera,
 	template: Ember.Handlebars.compile(
 		'{{view MFT.Button '+
 			'class="button backButton" '+

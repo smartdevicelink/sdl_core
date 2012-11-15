@@ -13,12 +13,7 @@ MFT.radioView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	/** View Id */	
 	elementId: 'radio_view',
-	
-	stateObj: MFT.States.media.radio,
-	
-	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.media.radio.active:active_state'],
-	
+		
 	/** View Components*/
 	childViews: [
 		'AMFM',
@@ -57,8 +52,16 @@ MFT.radioView = Em.ContainerView.create(MFT.LoadableView,{
 					'<div class="fmgenre">{{view.controler.currentActiveData.genre}}</div>'+
 				'</div>'+	
 				'<div class="divider_o"></div>'+	
-				'<div id="band" {{bindAttr class="view.controler.directTuneHide:visible_display"}}>{{view.controler.currentActiveData.frequency}}</div>'+
-				'<div id="band_dir" {{bindAttr class="view.controler.directTuneHide:hidden_display"}}>{{view.controler.directTuneToString}}</div>'
+				
+				'<div id="band">'+
+					'{{#if view.controler.directKeypressed}}'+
+						'{{view.controler.directTuneToString}}'+
+					'{{else}}'+
+						'{{view.controler.currentActiveData.frequency}}'+
+					'{{/if}}'+
+				'</div>'
+				
+				
 		),
 			
 			/** Formate Station name according to HD or non HD State of Station*/	
@@ -84,24 +87,38 @@ MFT.radioView = Em.ContainerView.create(MFT.LoadableView,{
 			/** controler binding*/
 			controlerBinding: 'MFT.MediaController',
 			
-			stateObj: MFT.States.media.Sirius,
-			
 			/** Define Template*/	
 			template:  Em.Handlebars.compile(
-					'<div class="siriusband" {{bindAttr class="view.controler.isStationLogo:hidden_display view.controler.directKeypressed:hidden"}}>'+
+					'<div class="siriusband" {{bindAttr class="view.controler.isStationLogo:hidden_display"}}>'+
 						'{{view.controler.currentActiveData.frequency}}'+
 					'</div>'+
-					'<div class="directune_band" {{bindAttr class="view.controler.directKeypressed:visible_display"}}>'+
-						'{{view.controler.directTuneToString}}'+
-					'</div>'+
-					'<div {{bindAttr class="view.controler.directKeypressed:hidden_display"}} >'+
-						'<div class="channel">{{view.controler.currentActiveData.channel}}</div>'+
+					'<div>'+
+						'<div class="channel" {{bindAttr class="view.controler.directKeypressed:hidden_display"}}>{{view.controler.currentActiveData.channel}}</div>'+
+						'<div class="channel hidden_display"{{bindAttr class="view.controler.directKeypressed:visible_display"}}>'+
+							'Channel {{view.controler.directTuneToString}}'+
+						'</div>'+
+						
+						
 						'<div class="siriusgenre">{{view.controler.currentActiveData.genre}}</div>'+
 						'<div class="titanium" {{bindAttr class="view.controler.isStationLogo:visible_display"}} {{bindAttr class="MFT.helpMode:logo_blur"}} {{bindAttr src="MFT.SiriusModel.sir1.selectedItem.logo"}}></div>'+
 						'<div class="siriustitle">{{view.controler.currentActiveData.title}}</div>'+
 						'<div class="siriusartist">{{view.controler.currentActiveData.artist}}</div>'+
-						'{{view MFT.Button target="MFT.MediaController"'+
-						'action="turnAlertHelpVideoOn" classNames="btn_alert" classNameBindings="MFT.helpMode:btn_alert_help" onDown=false}}'+
+						'{{view MFT.Button '+
+							'target="MFT.MediaController"'+
+							'action="turnAlertHelpVideoOn" '+
+							'classNameBindings="MFT.helpMode:help" '+
+							'classNames="button btn_alert" '+
+							'onDown=false '+
+							'textBinding="MFT.locale.label.view_media_sirius_alert" '+
+							/* Binnding to helpMode invert function */
+							'disabledBinding="MFT.RightMenuView.replayButton.disabled" '+							
+						'}}'+ 
+						'{{view MFT.Button '+
+								'elementId="media_sirius_alert_help_yellow_border" '+
+								'classNameBindings="MFT.helpMode:active_state" '+
+								'classNames="hidden" '+
+								'onDown=false '+
+						'}} '+
 					'</div>'	
 			)
 	})

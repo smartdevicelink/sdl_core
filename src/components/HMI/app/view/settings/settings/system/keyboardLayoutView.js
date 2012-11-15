@@ -11,15 +11,13 @@
  */
 
 MFT.SettingsSettingsSystemKeyboardLayoutView = Em.ContainerView.create(MFT.LoadableView,{
-	classNameBindings:	['MFT.States.settings.settings.system.keyboardLayout.active:active_state','MFT.helpMode'],
-	classNames:		   ['hidden'],
+	classNameBindings:	['MFT.helpMode'],
 	elementId:			'settings_settings_system_keyboardLayout',
 	childViews:		   [
 							  'backButton',
 							  'topTitile',
 							  'list'
 						  ],
-	stateObj: MFT.States.settings.settings.system.keyboardLayout,
 	backButton: MFT.Button.extend({
 	classNames:		  ['backButton','button'],		
 	action:			  'back',

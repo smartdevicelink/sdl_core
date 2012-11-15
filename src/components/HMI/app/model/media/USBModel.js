@@ -22,12 +22,12 @@ MFT.USBModel = Em.Object.create({
 	PlayList: MFT.Playlist.create({
 		selectedIndex: 					0,
 			items: {
-				0:MFT.PlaylistItem.create({title: 'Track 1',album:'Color of the Fall',artist:'Luk Marko',genre:'Rock',disk:'Fall',duration:123}),
-				1:MFT.PlaylistItem.create({title: 'Track 2',album:'Color of the Fall',artist:'Luk Marko',genre:'Rock',disk:'Fall',duration:123}),
-				2:MFT.PlaylistItem.create({title: 'Track 3',album:'Color of the Fall',artist:'Luk Marko',genre:'Rock',disk:'Fall',duration:123}),
-				3:MFT.PlaylistItem.create({title: 'Track 4',album:'Color of the Fall',artist:'Luk Marko',genre:'Rock',disk:'Fall',duration:123}),
-				4:MFT.PlaylistItem.create({title: 'Track 5',album:'Color of the Fall',artist:'Luk Marko',genre:'Rock',disk:'Fall',duration:123}),
-				5:MFT.PlaylistItem.create({title: 'Track 6',album:'Color of the Fall',artist:'Luk Marko',genre:'Rock',disk:'Fall',duration:123})
+				0:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track1 ),
+				1:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track2 ),
+				2:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track3 ),
+				3:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track4 ),
+				4:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track5 ),
+				5:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track6 )
 			},
 			
 			homeWidgetIcon: 'images/media/usb-h-ico.png',
@@ -36,7 +36,7 @@ MFT.USBModel = Em.Object.create({
 	}),
 		
 	browseData : Em.Object.create({
-		title: 'USB Hard Disk Drive DSK5',
+		titleBinding: 'MFT.locale.label.view_media_usb_browse_USBHardDisk',
 		
 		disableScrollbar: true,
 		
@@ -44,14 +44,14 @@ MFT.USBModel = Em.Object.create({
 			{
 				type:MFT.Button,
 				params:{
-					text:'Music',
+					textBinding: 'MFT.locale.label.view_media_usb_browse_music',
 					disabled:	true
 				}
 			},
 			{
 				type:MFT.Button,
 				params:{
-					text:'Explore device',
+					textBinding: 'MFT.locale.label.view_media_usb_browse_exploreDevice',
 					disabled:	true
 				}
 			}
@@ -71,8 +71,9 @@ MFT.USBModel = Em.Object.create({
 	
 					params:{
 						textBinding: 'MFT.locale.label.view_media_usb_options_soundSettings',
-						arrow:		true,
-						disabled: 	 true
+						templateName:		  'arrow',
+						action: 'turnOnSoundSettings',
+						target: 'MFT.MediaController'
 					}							
 				},
 				
@@ -81,7 +82,7 @@ MFT.USBModel = Em.Object.create({
 	
 					params:{
 						textBinding: 'MFT.locale.label.view_media_usb_options_mediaPlayerSettings',
-						arrow:		true,
+						templateName:		  'arrow',
 						disabled: 	 true
 					}							
 				},
@@ -91,7 +92,7 @@ MFT.USBModel = Em.Object.create({
 	
 					params:{
 						textBinding: 'MFT.locale.label.view_media_usb_options_compression_deviceInformation',
-						arrow:		true,
+						templateName:		  'arrow',
 						disabled: 	 true
 					}							
 				},

@@ -13,19 +13,13 @@
 MFT.SettingsHelpView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	elementId:	'settings_help',
-	
-	classNameBindings: ['MFT.States.settings.help.active:active_state','MFT.helpMode'],
-	
-	classNames: 'hidden',
-	
+		
 	childViews: [
 		'listLeft',
 		'listRight',
 		'bottomLabel'
 	],
-	
-	stateObj: MFT.States.settings.help,
-	
+		
 	listLeft: MFT.List.extend({
 		elementId:		   'settings_help_list_left',
 		
@@ -40,11 +34,11 @@ MFT.SettingsHelpView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					goToState:   'whereAmI',
 					icon:		'images/settings/ico_upArrow.png',
-					text:		'Where am I?',
-					arrow:		true,
+					textBinding: 'MFT.locale.label.view_settings_settings_whereAmI',
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 
 				}			
 					
@@ -55,11 +49,11 @@ MFT.SettingsHelpView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					goToState:   'systemInformation',
 					icon:		'images/settings/ico_settings_white.png',
-					text:		'System Information',
-					arrow:		true,
+					textBinding: 'MFT.locale.label.view_settings_settings_systemInformation',
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-				    disabledBinding: 'MFT.helpMode'
+				    helpMode: true
 				}							
 			},
 			{
@@ -68,11 +62,11 @@ MFT.SettingsHelpView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					goToState:   'softwareLicenses',
 					icon:		'images/settings/ico_licenses.png',
-					text:		'Software Licenses',
-					arrow:		true,
+					textBinding: 'MFT.locale.label.view_settings_settings_softwareLicenses',
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-				    disabledBinding: 'MFT.helpMode'
+				    helpMode: true
 				}
 			},
 			{
@@ -81,11 +75,11 @@ MFT.SettingsHelpView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					goToState:   'drivingRestrictions',
 					icon:		'images/settings/ico_forbiddance.png',
-					text:		'Driving Restrictions',
-					arrow:		true,
+					textBinding: 'MFT.locale.label.view_settings_settings_drivingRestrictions',
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-				    disabledBinding: 'MFT.helpMode'
+				    helpMode: true
 				}			
 			},
 			{
@@ -94,11 +88,11 @@ MFT.SettingsHelpView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					goToState:   'helpAssist',
 					icon:		'images/settings/ico_assist.png',					
-					text:		'911 Assist',
-					arrow:		true,
+					textBinding: 'MFT.locale.label.view_settings_settings_911Assist',
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-				    disabledBinding: 'MFT.helpMode'
+				    helpMode: true
 				}			
 			}
 		],
@@ -119,11 +113,11 @@ MFT.SettingsHelpView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					goToState:   'voiceCommandList',
 					icon:		'images/settings/ico_voice.png',					
-					text:		'Voice Command List',
-					arrow:		true,
+					textBinding: 'MFT.locale.label.view_settings_settings_voiceCommandList',
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-				    disabledBinding: 'MFT.helpMode'
+				    helpMode: true
 				}			
 			}
 		]
@@ -131,6 +125,6 @@ MFT.SettingsHelpView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	bottomLabel: MFT.Label.extend({
 		elementId:		   'settings_help_bottom_label',
-		content:			 'For help contact SYNC Support 1-877-945-3648'
+		contentBinding: 	  Ember.Binding.oneWay('MFT.locale.label.view_settings_settings_forHelp')
 	})
 });

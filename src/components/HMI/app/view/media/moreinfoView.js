@@ -12,13 +12,9 @@
 
 MFT.MoreInfoView = Em.ContainerView.create(MFT.LoadableView,{
 	
-	elementId: 'media_moreinfo',
-	
-	classNameBindings: 	['MFT.States.media.moreinfo.active:active_state'],
-	
-	classNames: 		 ['moreInfo_view','hidden'],
-	
-	stateObj:MFT.States.media.moreinfo,
+	elementId: 				 'media_moreinfo',
+		
+	classNames: 		 		['moreInfo_view'],
 
 	/** Child views*/
 	childViews: [
@@ -32,26 +28,30 @@ MFT.MoreInfoView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	/** Button back to previous state*/
 	backButton: MFT.Button.extend({
-		elementId: 'media_moreinfo_backButton',
+		elementId: 			 'media_moreinfo_backButton',
 		classNames:			'moreInfo_backButton',
-		icon:				 'images/media/ico_back.png',
-		action:			   "backMoreInfo",
-		target:			   'MFT.MediaController',
-		onDown:      		   false
+		icon:				  'images/media/ico_back.png',
+		action:			    "backMoreInfo",
+		target:			    'MFT.MediaController',
+		onDown:      		    false
 		}),
 	
 	/** Upper title*/
 	title: MFT.Label.extend({
-		elementId: 'media_moreinfo_title',
+		elementId: 			 'media_moreinfo_title',
+		classNameBindings:['MFT.helpMode:helpmode_blur_text'],
 		classNames: 			'moreInfo_title',
-		content: 			  'Song Information'
+		contentBinding:  	    Ember.Binding.oneWay( 'MFT.locale.label.view_media_moreInfo_title'),
 	}),
 	
 	/** Button "What is playing" */
-	whatsPlayingButton: MFT.Button.extend({
-		elementId: 	'media_moreinfo_whatsplayingButton',
-		classNameBindings:['MFT.helpMode:helpmode'],
-		classNames:	'moreInfo_whatIsPlayingButton',
+	whatsPlayingButton: 		MFT.Button.extend({
+		elementId: 			 'media_moreinfo_whatsplayingButton',
+		classNameBindings:	 ['MFT.helpMode:helpmode'],
+		classNames:			'moreInfo_whatIsPlayingButton',
+		textBinding:  	       Ember.Binding.oneWay( 'MFT.locale.label.view_media_moreInfo_whatIsPlaying'),
+		icon:				  'images/phone/ico_sound_active.png',
+		disabled:			  true
 	}),
 	
 	/** Album image*/
@@ -78,11 +78,11 @@ MFT.MoreInfoView = Em.ContainerView.create(MFT.LoadableView,{
 		classNames:		   'cd-more-info',
 		/** Items */
 		
-		items: [{type:MFT.Label,params:{icon:'images/media/list/ico_mi1.png',contentBinding:'MFT.MediaController.currentModuleData.selectedItem.album'}},
-				{type:MFT.Label,params:{icon:'images/media/list/ico_mi2.png',contentBinding:'MFT.MediaController.currentModuleData.selectedItem.title'}},
-				{type:MFT.Label,params:{icon:'images/media/list/ico_mi3.png',contentBinding:'MFT.MediaController.currentModuleData.selectedItem.disk'}},
-				{type:MFT.Label,params:{icon:'images/media/list/ico_mi4.png',contentBinding:'MFT.MediaController.currentModuleData.selectedItem.genre',}},
-				{type:MFT.Label,params:{icon:'images/media/list/ico_mi5.png',contentBinding:'MFT.MediaController.currentModuleData.selectedItem.artist'}}
+		items: [{type:MFT.Label,params:{templateName: 'icon',icon:'images/media/list/ico_mi1.png',contentBinding:'MFT.MediaController.currentModuleData.selectedItem.album'}},
+				{type:MFT.Label,params:{templateName: 'icon',icon:'images/media/list/ico_mi2.png',contentBinding:'MFT.MediaController.currentModuleData.selectedItem.title'}},
+				{type:MFT.Label,params:{templateName: 'icon',icon:'images/media/list/ico_mi3.png',contentBinding:'MFT.MediaController.currentModuleData.selectedItem.disk'}},
+				{type:MFT.Label,params:{templateName: 'icon',icon:'images/media/list/ico_mi4.png',contentBinding:'MFT.MediaController.currentModuleData.selectedItem.genre',}},
+				{type:MFT.Label,params:{templateName: 'icon',icon:'images/media/list/ico_mi5.png',contentBinding:'MFT.MediaController.currentModuleData.selectedItem.artist'}}
 		],  
 		
 		itemsOnPage:	5

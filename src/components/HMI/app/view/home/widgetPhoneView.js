@@ -43,11 +43,12 @@ MFT.WidgetPhoneView = Em.ContainerView.extend({
 		
 		classNameBindings: [
 			'MFT.PhoneController.model.onCall:hidden',
-			'MFT.helpMode:helpmode_box'
 		],
+		
+		classNames: ['helpmode_box_shadow'],
 					
 		elementId:			'home_widgetPhone_dndButton',
-		text:				'Do Not Disturb',
+		textBinding:		  Em.Binding.oneWay('MFT.locale.label.view_wigetPhone_label'),
 		
 		contentBinding:		Em.Binding.oneWay('MFT.PhoneController.model.dnd'),
 		action:				'onDND',

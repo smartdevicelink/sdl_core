@@ -102,8 +102,15 @@ MFT.Button = Em.View.extend(Ember.TargetActionSupport, {
 			}
 			return;
 		}
+		/*
+		 * Not trigger action when help mode active,
+		 * only for helpMode buttons
+		 */
+		if ( this.helpMode && MFT.helpMode ) {
+			return;
+		}
 		
-		if ( !this.onDown || (this.helpMode && MFT.helpMode) ) {
+		if ( !this.onDown) {
 			this.triggerAction();
 		}
 	},
@@ -135,6 +142,10 @@ MFT.Button = Em.View.extend(Ember.TargetActionSupport, {
 	),
 	
 	templates: {
+		text: Em.Handlebars.compile(
+			'<span>{{view.text}}</span>'
+		),
+		
 		rightText: Em.Handlebars.compile(
 			'<img class="ico" {{bindAttr src="view.icon"}} />'+
 			'<span>{{view.text}}</span>'+
@@ -151,10 +162,6 @@ MFT.Button = Em.View.extend(Ember.TargetActionSupport, {
 			'<img class="ico" {{bindAttr src="view.icon"}} />'+
 			'<span>{{view.text}}</span>'+
 			'<img class="right_ico" {{bindAttr src="view.righticon"}} />'
-		),
-		
-		text: Em.Handlebars.compile(
-			'<span>{{view.text}}</span>'
 		)
 	}
 	

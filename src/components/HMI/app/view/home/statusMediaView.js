@@ -26,7 +26,7 @@ MFT.StatusMediaView =  Em.ContainerView.extend({
 	statusHome: MFT.Label.extend({
 		elementId:	'media_status_homestatus',
 		classNameBindings: ['MFT.States.home.active:visible'],		
-		content:			'Entertainment'
+		contentBinding:	Ember.Binding.oneWay('MFT.locale.label.view_mediaStatus_entertainment')
 	}),
 	
 	statusInfo: Em.ContainerView.extend({
@@ -38,13 +38,9 @@ MFT.StatusMediaView =  Em.ContainerView.extend({
 		
 		info: Em.View.extend({
 			elementId:	'media_status_radio_info',
-			
 			controlerBinding: 'MFT.MediaController',
-			
 			/** Bind class for visual representation */	
 			classNameBindings: ['MFT.States.home.active:hidden_display:visible_display'],
-			/** is BLUETOOTH active*/
-			isBT: function(){return (this.controler.activeState === 'media.bluetooth');}.property('controler.activeState'),
 			/** is AVIN active*/
 			isAV: function(){return (this.controler.activeState === 'media.avin');}.property('controler.activeState'),
 			/** Define module layout */
@@ -52,15 +48,15 @@ MFT.StatusMediaView =  Em.ContainerView.extend({
 				'<div class="statusInfo">'+
 					'<div class="station">'+
 						'<span {{bindAttr class="MFT.CDModel.active:visible_display MFT.SDModel.active:visible_display MFT.USBModel.active:visible_display"}}>{{MFT.MediaController.currentModuleData.selectedItem.title}}</span>'+ // title
-						'<span {{bindAttr class="view.isBT:visible_display"}}>Bluetooth</span>'+  // BLUETOOTH
-						'<span {{bindAttr class="view.isAV:visible_display"}}>AV In</span>'+ 		//AV IN
+						'<span {{bindAttr class="MFT.BTModel.active:visible_display"}}>{{MFT.locale.label.view_mediaStatus_bluetooth}}</span>'+  // BLUETOOTH
+						'<span {{bindAttr class="view.isAV:visible_display"}}{{MFT.locale.label.view_mediaStatus_avIn}}</span>'+ 		//AV IN
 						'<span {{bindAttr class="MFT.SiriusModel.active:visible_display MFT.AmModel.active:visible_display MFT.FmModel.active:visible_display"}}>{{view.controler.currentActiveData.frequency}}</span>'+   // frequency
 					'</div>'+
 					'<div class="icon  antenaIco"'+
 						'{{bindAttr class="MFT.CDModel.active:cdIco"}}'+ // CD icon
 						'{{bindAttr class="MFT.SDModel.active:sdIco"}}'+ // SD icon
 						'{{bindAttr class="MFT.USBModel.active:usbIco"}}'+ // USB icon
-						'{{bindAttr class="view.isBT:btIco"}}'+ // BLUETOOTH icon
+						'{{bindAttr class="MFT.BTModel.active:btIco"}}'+ // BLUETOOTH icon
 						'{{bindAttr class="view.isAV:avIco"}}'+ // AVIN icon
 						'{{bindAttr class="view.controler.currentModuleData.selectedItem.isHd:statushdicon"}}'+ // HD icon
 						'{{bindAttr class="MFT.SiriusModel.active:siriusIco"}}>'+ // Sirius icon

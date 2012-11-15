@@ -31,12 +31,12 @@ FFW.Scale = Em.Object.create({
 			$('body').css({'-webkit-transform':'scale('+this.scalePoint+')','-webkit-transform-origin':'0px 0px' });
 			
 			/** Left Shift*/
-			var LeftShiftAppPercents = (FFW.Backend.windowSize.width - 800*this.scalePoint*FFW.Backend.windowDensity) / 2 * this.scalePoint;
+			var LeftShiftAppPercents = (FFW.Backend.windowSize.width - 800*this.scalePoint*FFW.Backend.windowDensity) / 2 / FFW.Backend.windowDensity;
 			/** Right Shift*/
-			var UpShiftAppPercents = (FFW.Backend.windowSize.height - 480*this.scalePoint*FFW.Backend.windowDensity) / 2 * this.scalePoint;
+			var UpShiftAppPercents = (FFW.Backend.windowSize.height - 480*this.scalePoint*FFW.Backend.windowDensity) / 2 / FFW.Backend.windowDensity;
 			/** Align Application*/
 			$('body').css({'margin-left': LeftShiftAppPercents + 'px', 'margin-top': UpShiftAppPercents + 'px'});
-			
+
 			//send response to BE for video resize
 			Em.Logger.log("FFW.Backend.resizeVideo = " + FFW.Backend.resizeVideo);
 			if(FFW.Backend.resizeVideo)

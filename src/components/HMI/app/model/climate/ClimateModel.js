@@ -68,9 +68,11 @@ MFT.ClimateModel = MFT.ClimateData.create({
 		if ( !this.on.value ) {
 			this.on.on();
 			this.toggleAuto();
+			
 			return;
 		}
 		
+		this.maxDefrost.off();
 		this.driverTemp.decrease();
 	},
 	
@@ -99,6 +101,7 @@ MFT.ClimateModel = MFT.ClimateData.create({
 			return;
 		}
 		
+		this.maxDefrost.off();
 		this.passangerTemp.decrease();
 	},
 	
@@ -179,6 +182,26 @@ MFT.ClimateModel = MFT.ClimateData.create({
  		this.windShield.increase();
  	},
  	
+ 	/** Toggle windshield value and change dependencies */
+	toggleMaxDefrost: function() {
+		if ( !this.on.value ) {
+			this.on.on();
+		}
+		
+		if ( this.maxDefrost.value ) {
+			this.maxDefrost.increase();
+			this.windShield.off();
+		} else {
+			this.maxDefrost.increase();
+	 		this.windShield.on();
+	 		this.dualMode.off();
+	 		this.driverTemp.max();
+	 		this.fan.set('value',7);
+	 		this.fan.disable();
+	 		this.autoFan.on();
+		}
+ 	},
+ 	
  	/** Toggle rear defrost value */
  	toggleRearDeforost: function() {
  		this.rearDeforost.increase();
@@ -195,6 +218,7 @@ MFT.ClimateModel = MFT.ClimateData.create({
  		this.ac.off();
  		this.maxAc.off();
  		this.recirculation.off();
+ 		this.maxDefrost.off();
  		this.fan.disable();
  		
  		this.setAirflowMode(this.autoAirflow);
@@ -230,11 +254,15 @@ MFT.ClimateModel = MFT.ClimateData.create({
  		
  		if ( this.maxAc.value ) {
  			this.ac.on();
+ 			this.maxDefrost.off();
  			this.dualMode.off();
 	 		this.driverTemp.min();
 	 		this.autoFan.on();
 	 		this.fan.disable();
  			this.recirculation.on();
+ 			
+ 			this.simpleAirflowPanel.on();
+ 			this.simpleAirflowFeet.off();
  		} else {
  			this.recirculation.off();
  		}
@@ -249,7 +277,7 @@ MFT.ClimateModel = MFT.ClimateData.create({
 		}
  		
  		//toggle recirculation
- 		if ( this.windShield.value === 0) {
+ 		if ( (this.windShield.value === 0) && (this.maxDefrost.value === 0) ) {
  			this.recirculation.increase();
  			
  			// change dependencies
@@ -322,6 +350,61 @@ MFT.ClimateModel = MFT.ClimateData.create({
  		this.setAirflowMode(this.airflow.items.both);
  	},
  	
+ 	setSimplePanelAirflow: function() {
+ 		this.simpleAirflowPanel.increase();
+ 		this.onSimpleAirflowAdapter();
+ 	},
+ 	
+ 	setSimpleFeetAirflow: function() {
+ 		this.simpleAirflowFeet.increase();
+ 		this.onSimpleAirflowAdapter();
+ 	},
+ 	
+ 	onAirflowAdapter: function() {
+ 		if ( this.airflow.items.both.value ) {
+ 			this.simpleAirflowPanel.on();
+ 			this.simpleAirflowFeet.on();
+ 			return;
+ 		}
+ 		
+ 		if ( this.airflow.items.panel.value ) {
+ 			this.simpleAirflowPanel.on();
+ 			this.simpleAirflowFeet.off();
+ 			return;
+ 		}
+ 		
+ 		if ( this.airflow.items.feet.value ) {
+ 			this.simpleAirflowPanel.off();
+ 			this.simpleAirflowFeet.on();
+ 			return;
+ 		}
+ 		
+ 		this.simpleAirflowPanel.off();
+ 		this.simpleAirflowFeet.off();
+ 	},
+ 	
+ 	onSimpleAirflowAdapter: function() {
+ 		if ( this.simpleAirflowPanel.value &&  this.simpleAirflowFeet.value ) {
+ 			this.setAirflowMode(this.airflow.items.both);
+ 			return;
+ 		}
+ 		
+ 		if ( this.simpleAirflowPanel.value ) {
+ 			this.setAirflowMode(this.airflow.items.panel);
+ 			return;
+ 		}
+ 		
+ 		if ( this.simpleAirflowFeet.value ) {
+ 			this.setAirflowMode(this.airflow.items.feet);
+ 			return;
+ 		}
+ 		
+ 		if ( this.on.value ) {
+ 			this.setAirflowMode(this.autoAirflow);
+ 		}
+ 		
+ 	},
+ 	
  	/* 
  	 * Toggle airflow mode when 'Wind shield' is off
  	 *
@@ -332,6 +415,9 @@ MFT.ClimateModel = MFT.ClimateData.create({
  			if( this.windShield.value ) {
  				this.airflow.mode.off();
  				
+ 				this.simpleAirflowPanel.off();
+ 				this.simpleAirflowFeet.off();
+ 				
  				this.recirculation.off();
  				
  				if ( this.maxAc.value ) {
@@ -340,6 +426,11 @@ MFT.ClimateModel = MFT.ClimateData.create({
  				this.maxAc.off();
 			} else {
 				this.airflow.mode.on();
+				
+				this.maxDefrost.off();
+				
+				this.simpleAirflowPanel.revert();
+ 				this.simpleAirflowFeet.revert();
 				
 				this.recirculation.revert();
  				this.maxAc.revert();			
@@ -433,6 +524,11 @@ MFT.ClimateModel = MFT.ClimateData.create({
  		} else {
  			this.auto.off();
  		}
+ 		
+ 		if ( this.autoAirflow.value ) {
+ 			this.simpleAirflowPanel.off();
+ 			this.simpleAirflowFeet.off();
+ 		} 		
  	}.observes('this.autoFan.value','this.autoAirflow.value'),
  	
  	/*
@@ -445,6 +541,8 @@ MFT.ClimateModel = MFT.ClimateData.create({
  		if( this.on.value ) {
  			this.driverTemp.enable();
  			this.passangerTemp.enable();
+ 			this.simpleAirflowPanel.revert();
+ 			this.simpleAirflowFeet.revert();
  		} else {
  			this.on.set('offStates', {
  				windShield: 	this.windShield.value,
@@ -467,6 +565,9 @@ MFT.ClimateModel = MFT.ClimateData.create({
  			this.ac.off();
  			this.maxAc.off();
  			this.recirculation.off();
+ 			
+ 			this.simpleAirflowPanel.off();
+ 			this.simpleAirflowFeet.off();
  		}
  	}.observes('this.on.value'),
  	

@@ -12,10 +12,14 @@
 
 MFT.LoadableView = Ember.Mixin.create({
 	
-	classNameBindings: ['stateObj.active:active_state'],
+	classNameBindings: [
+		'stateObj.active:active_state:inactive_state'
+	],
 		
 	init: function() {
 		this._super();
+		
+		this.set( 'stateObj', MFT.States.getState( FFW.AppendScript.getState() ) );
 		
 		// EXCEPTION
 		if ( !this.stateObj ) {
@@ -32,6 +36,13 @@ MFT.LoadableView = Ember.Mixin.create({
 		
 		//this.loadTime = Date.now();
 		
+		
+		// for testing
+		/*var self = this;
+		setTimeout(function(){
+			self.loadView();
+		},1000)
+		*/
 		this.loadView();
 	},
 	
@@ -43,25 +54,6 @@ MFT.LoadableView = Ember.Mixin.create({
 			// for root views
 			MFT.views.activeAview.get('childViews').pushObject(this);
 		}
-		
-		/*
-		if ( this.stateObj.view) {
-			// Insert to Super Root View if it is needed by design
-			if(this.root){
-				if (!this.root.view.get('childViews').contains(this.stateObj.view) ) {				
-					this.root.view.get('childViews').pushObject(this.stateObj.view);
-				}
-			}else{
-				// Root views
-				if ( !this.stateObj.parentState.view ) {
-					this.stateObj.parentState.view = MFT.views.activeAview;
-				}
-				// View first open
-				if (!this.stateObj.parentState.view.get('childViews').contains(this.stateObj.view) ) {				
-					this.stateObj.parentState.view.get('childViews').pushObject(this.stateObj.view);
-				}
-			}
-		}*/
 	},
 	
 	didInsertElement: function() {

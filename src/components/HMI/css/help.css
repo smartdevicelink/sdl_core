@@ -1,0 +1,83 @@
+.helpmode .blured_background {
+	visibility: visible !important;
+}
+
+.helpmode #phone .active_in_helpmode span {
+	color: inherit;
+	text-shadow: none;
+}
+
+.helpmode #phone span {
+	color: transparent;
+	text-shadow: 0 0 6px #fff;
+	pointer-events:none;
+	position: relative;
+	z-index: 9000;
+}
+
+/* Disabled gray blur for buttons and lables*/
+.helpmode .disabled span {  
+    color: transparent;
+    text-shadow: 0 0 6px #999 !important;
+    pointer-events:none;
+} 
+
+.helpmode .helpmode_box_shadow {
+	border-radius: 0px !important;
+	-moz-box-shadow: 0px 0px 6px 3px #f3c800;
+	-webkit-box-shadow: 0 0 6px 3px #f3c800;
+	box-shadow: 0px 0px 6px 3px #f3c800;
+	border-color: #F3C800 !important;
+}
+
+.helpmode .helpmode_box_top_shadow {
+	border-radius: 0px !important;
+	-moz-box-shadow: 0px -2px 6px 3px #f3c800;
+	-webkit-box-shadow: 0px -2px 6px 3px #f3c800;
+	box-shadow: 0px -2px 6px 3px #F3C800;
+	border-color: #F3C800 !important;
+}
+
+.helpmode .helpmode_box_bottom_shadow {
+	border-radius: 0px !important;
+	-moz-box-shadow: 0px 2px 6px 3px #f3c800;
+	-webkit-box-shadow: 0px 2px 6px 3px #f3c800;
+	box-shadow: 0px 2px 6px 3px #F3C800;
+	border-color: #F3C800 !important;
+}
+
+.helpmode .helpmode_box_left_shadow {
+	border-radius: 0px !important;
+	-moz-box-shadow: -2px 0px 6px 3px #f3c800;
+	-webkit-box-shadow: -2px 0px 6px 3px #f3c800;
+	box-shadow: -2px 0px 6px 3px #F3C800;
+	border-color: #F3C800 !important;
+}
+
+.helpmode .helpmode_box_right_shadow {
+	border-radius: 0px !important;
+	-moz-box-shadow: 2px 0px 6px 3px #f3c800;
+	-webkit-box-shadow: 2px 0px 6px 3px #f3c800;
+	box-shadow: 2px 0px 6px 3px #F3C800;
+	border-color: #F3C800 !important;
+}
+
+.helpmode .helpmode_left_delim {
+	border-left-color: #F3C800 !important;
+}
+
+.helpmode .helpmode_right_delim {
+	border-right-color: #F3C800 !important;
+}
+
+.helpmode .helpmode_bottom_delim {
+	border-bottom-color: #F3C800 !important;
+}
+
+.helpmode .helpmode_top_delim {
+	border-top-color: #F3C800 !important;
+}
+
+.helpmode .faq_show {
+	left: 182px !important;
+}

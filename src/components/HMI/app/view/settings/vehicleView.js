@@ -13,21 +13,15 @@
 MFT.SettingsVehicleView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	elementId:	'settings_vehicle',
-	
-	classNameBindings: ['MFT.States.settings.vehicle.active:active_state','MFT.helpMode'],
-	
-	classNames: 'hidden',
-	
+		
 	childViews: [
 		'popUp',
 		'listVehicleSettings'
 	],
-	
-	stateObj: MFT.States.settings.vehicle,
-	
+		
 	// Enable valet mode popup
 	popUp: Em.ContainerView.extend({
-		classNameBindings:	   ['MFT.SettingsController.valetPopUp:visible_display:hidden_display'],
+		classNameBindings:	   ['MFT.SettingsController.valetPopUp:active_state:inactive_state','MFT.helpMode:help-mode'],
 		elementId:			   'settings_vehicle_enableValetMode_popUp',
 		
 		childViews: [
@@ -69,14 +63,28 @@ MFT.SettingsVehicleView = Em.ContainerView.create(MFT.LoadableView,{
 				classNames: 'button yesButton',
 				action: 'onEnterPin',
 				target: MFT.SettingsController,
-				textBinding: 'MFT.locale.label.view_settings_vehicle_enableValetMode_yes'
+				textBinding: 'MFT.locale.label.view_settings_vehicle_enableValetMode_yes',
+				disabled: function(){
+					 if(MFT.helpMode){ 
+					 	return true
+					 }else{
+					  	return false;
+					 }
+				}.property('MFT.helpMode')
 			}),
 			
 			noButton: MFT.Button.extend({
 				classNames: 'button noButton',
 				action: 'hideValetPopUp',
 				target: MFT.SettingsController,
-				textBinding: 'MFT.locale.label.view_settings_vehicle_enableValetMode_no'
+				textBinding: 'MFT.locale.label.view_settings_vehicle_enableValetMode_no',
+				disabled: function(){
+					 if(MFT.helpMode){ 
+					 	return true
+					 }else{
+					  	return false;
+					 }
+				}.property('MFT.helpMode')
 			})
 		})
 	}),
@@ -96,10 +104,10 @@ MFT.SettingsVehicleView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'ambientLighting',
 					icon:		'images/settings/ico_ambientLighting.png',
 					textBinding: 'MFT.locale.label.view_settings_vehicle_ambientLighting',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
 					
 			},
@@ -110,10 +118,10 @@ MFT.SettingsVehicleView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'healthReport',
 					icon:		'images/settings/ico_vehicleHealthReport.png',
 					textBinding: 'MFT.locale.label.view_settings_vehicle_VehicleHealthReport',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}							
 			},
 			{
@@ -123,10 +131,10 @@ MFT.SettingsVehicleView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'doorKeypadCode',
 					icon:		'images/settings/ico_doorKeypadCode.png',
 					textBinding: 'MFT.locale.label.view_settings_vehicle_DoorKeypadCode',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}
 			},
 			{
@@ -136,10 +144,10 @@ MFT.SettingsVehicleView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:	'rearViewCamera',
 					icon:		'images/settings/ico_rearViewCamera.png',
 					textBinding: 'MFT.locale.label.view_settings_vehicle_RearViewCamera',
-					arrow:		true,
+					templateName: 'arrow',
 					action:		'onChildState',
 					target:	 	'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
 			},
 			{
@@ -148,12 +156,12 @@ MFT.SettingsVehicleView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					icon:		    'images/settings/ico_enableValetMode.png',					
 					textBinding:     'MFT.locale.label.view_settings_vehicle_EnableValetMode',
-					arrow:		   true,
+					templateName: 'arrow',
 					action:	  	  'showValetPopUp',
 					target:		  'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
-			}/*,
+			},
 			{
 				type:		MFT.Button,
 				
@@ -161,12 +169,12 @@ MFT.SettingsVehicleView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'mcs',
 					icon:		'images/settings/ico_enableValetMode.png',					
 					textBinding: 'MFT.locale.label.view_settings_vehicle_SeatComfort',
-					arrow:	   true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
 					hidden:	  FLAGS.MCS_ENABLED ? false : true
 				}			
-			}*/
+			}
 		],
 		
 		itemsOnPage:	6
