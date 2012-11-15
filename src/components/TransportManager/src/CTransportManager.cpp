@@ -425,49 +425,63 @@ void* CTransportManager::applicationCallbacksThreadStartRoutine(void* Data)
 
 void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHandle)
 {
-    pthread_mutex_lock(&mDataListenersMutex);
-    tDataCallbacksConditionVariables::iterator conditionVarIterator = mDataCallbacksConditionVars.find(ConnectionHandle);
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Started data callbacks thread");
 
+    pthread_mutex_lock(&mDataListenersMutex);
+
+    // Checking condition variable
+    tDataCallbacksConditionVariables::iterator conditionVarIterator = mDataCallbacksConditionVars.find(ConnectionHandle);
     if(conditionVarIterator == mDataCallbacksConditionVars.end())
     {
-        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "Condition variable was not found");
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "Condition variable was not found on thread start.");
         pthread_mutex_unlock(&mDataListenersMutex);
         return;
     }
-
     pthread_cond_t *conditionVar = conditionVarIterator->second;
 
+    // Checking callbacks vector
+    tDataCallbacks::iterator callbacksMapIterator = mDataListenersCallbacks.find(ConnectionHandle);
+    if(callbacksMapIterator == mDataListenersCallbacks.end())
+    {
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "Callbacks vector was not found on thread start.");
+        pthread_mutex_unlock(&mDataListenersMutex);
+        return;
+    }
+    tDataCallbacksVector *pCallbacksVector = callbacksMapIterator->second;
     pthread_mutex_unlock(&mDataListenersMutex);
 
-    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Waiting for callbacks");
-
+    
     while(false == mTerminateFlag)
     {
         pthread_mutex_lock(&mDataListenersMutex);
-        pthread_cond_wait(conditionVar, &mDataListenersMutex);
+
+        while(pCallbacksVector->empty() && (false == mTerminateFlag))
+        {
+            TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "No callbacks to process. Waiting");
+            pthread_cond_wait(conditionVar, &mDataListenersMutex);
+            TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Callbacks processing triggered");
+        }
 
         if(mTerminateFlag)
         {
-            TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Thread must be terminated");
-            continue;
-        }
-
-        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Triggered callback calling");
-
-        tDataCallbacks::iterator callbacksMapIterator = mDataListenersCallbacks.find(ConnectionHandle);
-        if(callbacksMapIterator == mDataListenersCallbacks.end())
-        {
-            TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "Callbacks vector was not found");
+            TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Shutdown is on progress. Skipping callback processing.");
             pthread_mutex_unlock(&mDataListenersMutex);
-            continue;
+            break;
         }
 
-        tDataCallbacksVector *pCallbacksVector = callbacksMapIterator->second;
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Copying callbacks and device listeners to process");
 
-        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Callback to send added. Number of callbacks: " << pCallbacksVector->size());
+        tDataCallbacksVector callbacksToProcess(*pCallbacksVector);
+        pCallbacksVector->clear();
+
+        std::vector<ITransportManagerDataListener*> dataListenersToSend(mDataListeners);
+
+        pthread_mutex_unlock(&mDataListenersMutex);
+
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Starting callbacks processing. Number of callbacks: " << callbacksToProcess.size());
 
         tDataCallbacksVector::const_iterator callbackIterator;
-        for(callbackIterator = pCallbacksVector->begin(); callbackIterator != pCallbacksVector->end(); ++callbackIterator)
+        for(callbackIterator = callbacksToProcess.begin(); callbackIterator != callbacksToProcess.end(); ++callbackIterator)
         {
             TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Processing callback of type: " << (*callbackIterator).mCallbackType);
 
@@ -477,37 +491,32 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
             }
 
             std::vector<ITransportManagerDataListener*>::const_iterator dataListenersIterator;
-            int deviceListenerIndex = 0;
+            int dataListenerIndex = 0;
 
-            for (dataListenersIterator = mDataListeners.begin(), deviceListenerIndex=0; dataListenersIterator != mDataListeners.end(); ++dataListenersIterator, ++deviceListenerIndex)
+            for (dataListenersIterator = dataListenersToSend.begin(), dataListenerIndex=0; dataListenersIterator != dataListenersToSend.end(); ++dataListenersIterator, ++dataListenerIndex)
             {
-                TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Calling callback on listener #" << deviceListenerIndex);
+                TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Calling callback on listener #" << dataListenerIndex);
 
                 switch((*callbackIterator).mCallbackType)
                 {
                     case CTransportManager::DataListenerCallbackType_FrameReceived:
                         (*dataListenersIterator)->onFrameReceived(callbackIterator->mConnectionHandle, callbackIterator->mData, callbackIterator->mDataSize);
-                        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Callback onFrameReceived on listener #" << deviceListenerIndex << " was called. DataSize: " << callbackIterator->mDataSize);
+                        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Callback onFrameReceived on listener #" << dataListenerIndex << " was called. DataSize: " << callbackIterator->mDataSize);
                         break;
                     case CTransportManager::DataListenerCallbackType_FrameSendCompleted:
                         (*dataListenersIterator)->onFrameSendCompleted(callbackIterator->mConnectionHandle, callbackIterator->mFrameSequenceNumber, callbackIterator->mSendStatus);
-                        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Callback onFrameReceived on listener #" << deviceListenerIndex << " was called. FrameSequenceNumber: " << callbackIterator->mFrameSequenceNumber<<", SendStatus: "<<callbackIterator->mSendStatus);
+                        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Callback onFrameReceived on listener #" << dataListenerIndex << " was called. FrameSequenceNumber: " << callbackIterator->mFrameSequenceNumber<<", SendStatus: "<<callbackIterator->mSendStatus);
                         break;
                     default:
                         TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "Unknown callback type: " << (*callbackIterator).mCallbackType);
                         break;
                 }
 
-                LOG4CPLUS_INFO_EXT(mLogger, "Callback on listener #" << deviceListenerIndex <<" called"<<", ConnectionHandle: "<<ConnectionHandle);
+                LOG4CPLUS_INFO_EXT(mLogger, "Callback on listener #" << dataListenerIndex <<" called"<<", ConnectionHandle: "<<ConnectionHandle);
             }
         }
 
-        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "All callbacks processed");
-        pCallbacksVector->clear();
-
-
-        pthread_mutex_unlock(&mDataListenersMutex);
-
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "All callbacks processed. Starting next callbacks processing iteration");
     }
 
     pthread_mutex_lock(&mDataListenersMutex);
