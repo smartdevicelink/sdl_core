@@ -39,6 +39,7 @@ namespace NsAppManager
 {
 
 log4cplus::Logger AppMgrCore::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
+const std::string AppMgrCore::mAutoActivateIdFileName = "autoActivateId";
 
 /**
  * \brief Returning class instance
@@ -57,7 +58,7 @@ AppMgrCore::AppMgrCore()
     :mQueueRPCAppLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
     ,mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<RPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
 {
-    std::ifstream file("autoActivateId");
+    std::ifstream file(mAutoActivateIdFileName);
     if( file.is_open() )
     {
         if( file.good() )
@@ -93,6 +94,13 @@ AppMgrCore::~AppMgrCore()
     if(mQueueRPCBusObjectsIncoming)
         delete mQueueRPCBusObjectsIncoming;
 
+    if(!mLastAutoActivateId.empty())
+    {
+        if(!serializeToFile(mAutoActivateIdFileName, mLastAutoActivateId))
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " AppMgrCore cannot serialize to a file!");
+        }
+    }
 	LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore destructed!");
 }
 
@@ -1260,6 +1268,32 @@ Application *AppMgrCore::getApplicationFromItemCheckNotNull(const RegistryItem *
         return 0;
     }
     return app;
+}
+
+/**
+ * \brief serialize a string value to the text file
+ * \param fileName name of the file to serialize to
+ * \param value a value to serialize
+ * \return success of an operation - true or false
+ */
+bool AppMgrCore::serializeToFile(const std::string &fileName, const std::string& value) const
+{
+    if(!value.empty())
+    {
+        std::ofstream file(fileName, std::ios::out | std::ios::trunc);
+        if(file.is_open())
+        {
+            file << value;
+            file.close();
+            return true;
+        }
+        else
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot serialize to a file: error creating file!");
+            return false;
+        }
+    }
+    return false;
 }
 
 /**

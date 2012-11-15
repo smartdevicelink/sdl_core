@@ -45,8 +45,10 @@ template< class QueueType >
 class AppMgrCoreQueue;
 class Application;
 
+/**
+ * \brief a connection between a mobile RPC message and a session
+ */
 typedef std::pair<AppLinkRPC::ALRPCMessage*, unsigned char> Message;
-
 
 /**
  * \brief Core app manager class which acts as a core for application manager
@@ -156,6 +158,14 @@ private:
      */
     Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
 
+    /**
+     * \brief serialize a string value to the text file
+     * \param fileName name of the file to serialize to
+     * \param value a value to serialize
+     * \return success of an operation - true or false
+     */
+    bool serializeToFile(const std::string& fileName, const std::string &value) const;
+
     AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
     AppMgrCoreQueue<RPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
@@ -169,6 +179,8 @@ private:
     MessageMapping   mMessageMapping;
     MenuMapping      mMenuMapping;
     RequestMapping   mRequestMapping;
+
+    static const std::string mAutoActivateIdFileName;
 
     std::string      mLastAutoActivateId;
 
