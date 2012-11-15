@@ -190,9 +190,35 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                 break;
             }
 
-            if(object->get_autoActivateID())
+            const std::string& autoActivateIdFound = core->mAutoActivateIds.findAutoActivateIdAssignedToName(object->get_appName());
+            if(!autoActivateIdFound.empty())
             {
-                response->set_autoActivateID(*object->get_autoActivateID());
+                if(object->get_autoActivateID())
+                {
+                    if(*object->get_autoActivateID() != autoActivateIdFound)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been registered because its autoActivateId " <<*object->get_autoActivateID()<< " differs from the one specified before - " << autoActivateIdFound);
+                        break;
+                    }
+                }
+                else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been registered because its autoActivateId NULL differs from the one specified before - " << autoActivateIdFound);
+                    break;
+                }
+            }
+            else
+            {
+                if(!object->get_autoActivateID())
+                {
+                    const std::string& autoActivateId = core->mAutoActivateIds.addApplicationName(object->get_appName());
+                    response->set_autoActivateID(autoActivateId);
+                }
+                else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been registered because it specified an autoActivateId "<<*object->get_autoActivateID()<<" while id hasn't yet been registered!");
+                    break;
+                }
             }
             response->set_buttonCapabilities(core->mButtonCapabilities.get());
             response->set_displayCapabilities(core->mDisplayCapabilities);

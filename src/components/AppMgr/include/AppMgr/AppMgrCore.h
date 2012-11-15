@@ -15,6 +15,7 @@
 #include "AppMgr/MenuMapping.h"
 #include "AppMgr/RequestMapping.h"
 #include "AppMgr/CapabilitesContainer.h"
+#include "AppMgr/AutoActivateIdMapping.h"
 
 namespace AppLinkRPC{
     class ALRPCMessage;
@@ -179,6 +180,8 @@ private:
     MessageMapping   mMessageMapping;
     MenuMapping      mMenuMapping;
     RequestMapping   mRequestMapping;
+
+    AutoActivateIdMapping  mAutoActivateIds;
 
     static const std::string mAutoActivateIdFileName;
 
