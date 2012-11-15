@@ -32,6 +32,8 @@
 #include "JSONHandler/RPC2Notification.h"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
+#include <iostream>
+#include <fstream>
 
 namespace NsAppManager
 {
@@ -55,6 +57,20 @@ AppMgrCore::AppMgrCore()
     :mQueueRPCAppLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
     ,mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<RPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
 {
+    std::ifstream file("autoActivateId");
+    if( file.is_open() )
+    {
+        if( file.good() )
+        {
+            std::getline( file, mLastAutoActivateId );
+        }
+        file.close();
+    }
+    else
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot deserialize a file: probably file doesn't exist!");
+    }
+
     LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
 }
 

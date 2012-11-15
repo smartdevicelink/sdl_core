@@ -170,6 +170,8 @@ private:
     MenuMapping      mMenuMapping;
     RequestMapping   mRequestMapping;
 
+    std::string      mLastAutoActivateId;
+
 	static log4cplus::Logger mLogger;
 };
 
