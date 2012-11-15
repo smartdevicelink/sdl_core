@@ -94,13 +94,8 @@ AppMgrCore::~AppMgrCore()
     if(mQueueRPCBusObjectsIncoming)
         delete mQueueRPCBusObjectsIncoming;
 
-    if(!mLastAutoActivateId.empty())
-    {
-        if(!serializeToFile(mAutoActivateIdFileName, mLastAutoActivateId))
-        {
-            LOG4CPLUS_ERROR_EXT(mLogger, " AppMgrCore cannot serialize to a file!");
-        }
-    }
+    std::ofstream(mAutoActivateIdFileName, std::ios::trunc);
+
 	LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore destructed!");
 }
 
