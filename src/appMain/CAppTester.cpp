@@ -68,20 +68,24 @@ namespace NsApplicationTester
         return -1;
       }
 
-      int startpos = 1;
+      int startpos = 0;
       file_str.seekg(0, ios::end);
       int length = file_str.tellg();
       file_str.seekg(0, ios::beg);
+      printf("length = %d \n", length);
       while (startpos < length)
       {
         char * raw_data = new char[length];
         file_str.getline(raw_data, length);
-        startpos += strlen(raw_data);
+        printf("strlen = %d \n", strlen(raw_data));
+        startpos += strlen(raw_data)+1;
         std::string instr = std::string(raw_data, strlen(raw_data));
         delete[] raw_data;
         printf("Input string:\n %s\n", instr.c_str());
         // create a Blob and send
         generateSingleMessage(1, 7, 1, instr);
+        printf("length = %d \n", length);
+        printf("startpos = %d \n", startpos);
       }
       file_str.close();
       return 0;
