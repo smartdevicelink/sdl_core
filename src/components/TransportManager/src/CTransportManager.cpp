@@ -247,6 +247,8 @@ void CTransportManager::onApplicationConnected(IDeviceAdapter * DeviceAdapter, c
     mDeviceAdaptersByConnectionHandle.insert(std::make_pair(ConnectionHandle, DeviceAdapter));
     pthread_mutex_unlock(&mDeviceAdaptersByConnectionHandleMutex);
 
+    TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "Sending callback");
+    
     // Sending callback
     SDeviceListenerCallback cb(CTransportManager::DeviceListenerCallbackType_ApplicationConnected, ConnectedDevice, ConnectionHandle);
     sendDeviceCallback(cb);
@@ -342,31 +344,46 @@ CTransportManager::SDataThreadStartupParams::SDataThreadStartupParams(CTransport
 
 void CTransportManager::applicationCallbacksThread()
 {
-    LOG4CPLUS_INFO_EXT(mLogger, "Waiting for callbacks to send");
+    LOG4CPLUS_INFO_EXT(mLogger, "Started application callbacks thread");
 
     while(false == mTerminateFlag)
     {
-        //TODO: Move locking after callback processing. Currently if any callbacks will be added before thread will start their processing will be delayed
         pthread_mutex_lock(&mDeviceListenersMutex);
-        pthread_cond_wait(&mDeviceListenersConditionVar, &mDeviceListenersMutex);
+
+        while(mDeviceListenersCallbacks.empty() && (false == mTerminateFlag))
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "No callbacks to process. Waiting");
+            pthread_cond_wait(&mDeviceListenersConditionVar, &mDeviceListenersMutex);
+            LOG4CPLUS_INFO_EXT(mLogger, "Callbacks processing triggered");
+        }
 
         if(mTerminateFlag)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "Thread must be terminated");
-            continue;
+            LOG4CPLUS_INFO_EXT(mLogger, "Shutdown is on progress. Skipping callback processing.");
+            break;
         }
 
-        LOG4CPLUS_INFO_EXT(mLogger, "Callback to send added. Number of callbacks: " << mDeviceListenersCallbacks.size());
+        LOG4CPLUS_INFO_EXT(mLogger, "Copying callbacks and device listeners to process");
+
+        std::vector<SDeviceListenerCallback> callbacksToProcess(mDeviceListenersCallbacks);
+        mDeviceListenersCallbacks.clear();
+
+        std::vector<ITransportManagerDeviceListener*> deviceListenersToSend(mDeviceListeners);
+
+        pthread_mutex_unlock(&mDeviceListenersMutex);
+
+        LOG4CPLUS_INFO_EXT(mLogger, "Starting callbacks processing. Number of callbacks: " << callbacksToProcess.size());
 
         std::vector<SDeviceListenerCallback>::const_iterator callbackIterator;
-        for(callbackIterator = mDeviceListenersCallbacks.begin(); callbackIterator != mDeviceListenersCallbacks.end(); ++callbackIterator)
+
+        for(callbackIterator = callbacksToProcess.begin(); callbackIterator != callbacksToProcess.end(); ++callbackIterator)
         {
             LOG4CPLUS_INFO_EXT(mLogger, "Processing callback of type: " << (*callbackIterator).mCallbackType);
 
             std::vector<ITransportManagerDeviceListener*>::const_iterator deviceListenersIterator;
             int deviceListenerIndex = 0;
 
-            for (deviceListenersIterator = mDeviceListeners.begin(), deviceListenerIndex=0; deviceListenersIterator != mDeviceListeners.end(); ++deviceListenersIterator, ++deviceListenerIndex)
+            for (deviceListenersIterator = deviceListenersToSend.begin(), deviceListenerIndex=0; deviceListenersIterator != deviceListenersToSend.end(); ++deviceListenersIterator, ++deviceListenerIndex)
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "Calling callback on listener #" << deviceListenerIndex);
 
@@ -390,10 +407,7 @@ void CTransportManager::applicationCallbacksThread()
             }
         }
 
-        LOG4CPLUS_INFO_EXT(mLogger, "All callbacks processed");
-        mDeviceListenersCallbacks.clear();
-
-        pthread_mutex_unlock(&mDeviceListenersMutex);
+        LOG4CPLUS_INFO_EXT(mLogger, "All callbacks processed. Starting next callbacks processing iteration");
     }
 
     LOG4CPLUS_INFO_EXT(mLogger, "ApplicationsCallback thread terminated");
@@ -802,10 +816,14 @@ void CTransportManager::sendDataCallback(const CTransportManager::SDataListenerC
 
 void CTransportManager::sendDeviceCallback(const CTransportManager::SDeviceListenerCallback& callback)
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "Sending new device callback. Type: " << callback.mCallbackType);
     pthread_mutex_lock(&mDeviceListenersMutex);
 
     mDeviceListenersCallbacks.push_back(callback);
+    LOG4CPLUS_INFO_EXT(mLogger, "Device callback was added to pool");
+
     pthread_cond_signal(&mDeviceListenersConditionVar);
 
     pthread_mutex_unlock(&mDeviceListenersMutex);
+    LOG4CPLUS_INFO_EXT(mLogger, "Triggering device callback processing");
 }
