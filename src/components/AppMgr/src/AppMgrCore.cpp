@@ -594,6 +594,8 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
             AppLinkRPC::SetMediaClockTimer_request* object = (AppLinkRPC::SetMediaClockTimer_request*)mobileMsg;
             RPC2Communication::UI::SetMediaClockTimer* setTimer = new RPC2Communication::UI::SetMediaClockTimer();
+            setTimer->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+            core->mMessageMapping.addMessage(setTimer->getId(), sessionID);
             if(object->get_startTime())
             {
                 setTimer->set_startTime(*object->get_startTime());
@@ -999,6 +1001,26 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             }
             response->set_success(true);
             response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));         
+            core->mMessageMapping.removeMessage(object->getId());
+            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
+            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+            return;
+        }
+        case RPC2Communication::UI::Marshaller::METHOD_SETMEDIACLOCKTIMERRESPONSE:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer response has been income");
+            RPC2Communication::UI::SetMediaClockTimerResponse* object = (RPC2Communication::UI::SetMediaClockTimerResponse*)msg;
+            Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                return;
+            }
+            unsigned char sessionID = app->getSessionID();
+
+            AppLinkRPC::SetMediaClockTimer_response* response = new AppLinkRPC::SetMediaClockTimer_response();
+            response->set_success(true);
+            response->set_resultCode(static_cast<AppLinkRPC::Result::ResultInternal>(object->getResult()));
             core->mMessageMapping.removeMessage(object->getId());
             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()<<" session id "<<sessionID);
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
