@@ -1383,7 +1383,7 @@ void AppMgrCore::setJsonHandler(JSONHandler* handler)
  */
 JSONHandler* AppMgrCore::getJsonHandler( ) const
 {
-    MobileHandler::getInstance().getJsonHandler();
+    return MobileHandler::getInstance().getJsonHandler();
 }
 
 /**
