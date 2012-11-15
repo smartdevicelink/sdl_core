@@ -33,7 +33,8 @@ mDataCallbacksConditionVars(),
 mDevicesByAdapter(),
 mDevicesByAdapterMutex(),
 mDeviceAdaptersByConnectionHandle(),
-mDeviceAdaptersByConnectionHandleMutex()
+mDeviceAdaptersByConnectionHandleMutex(),
+mFrameDataForConnection()
 {
     pthread_mutex_init(&mDataListenersMutex, 0);
     pthread_mutex_init(&mDeviceListenersMutex, 0);
@@ -66,6 +67,8 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
         pthread_join(threadsIterator->second, 0);
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, threadsIterator->first, "Thread terminated");
     }
+
+    destroyFrameDataForAllConnections();
 
     LOG4CPLUS_INFO_EXT(mLogger, "All data callbacks threads terminated. Terminating device adapters");
 
@@ -278,6 +281,9 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
 void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameReceived called. DA: "<<DeviceAdapter<<", DataSize: "<<DataSize);
+
+    initializeFrameDataForConnection(ConnectionHandle);
+
     SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameReceived, ConnectionHandle, Data, DataSize);
     sendDataCallback(newCallback);
 }
@@ -945,4 +951,44 @@ bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t * Data, si
     memmove(mpDataBuffer, &mpDataBuffer[requiredDataSize], mDataSize);
 
     return true;
+}
+
+void CTransportManager::initializeFrameDataForConnection(tConnectionHandle ConnectionHandle)
+{
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Initializing frame data");
+    pthread_mutex_lock(&mDataListenersMutex);
+
+    tFrameDataForConnectionMap::iterator frameDataIterator = mFrameDataForConnection.find(ConnectionHandle);
+    if(frameDataIterator == mFrameDataForConnection.end())
+    {
+        SFrameDataForConnection *pFrameData = new SFrameDataForConnection(ConnectionHandle);
+        mFrameDataForConnection[ConnectionHandle] = pFrameData;
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "New frame data storage was created");
+    }
+
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Frame data was initialized");
+    pthread_mutex_unlock(&mDataListenersMutex);
+}
+
+void CTransportManager::destroyFrameDataForAllConnections()
+{
+    LOG4CPLUS_INFO_EXT(mLogger, "Destroying frame data for all connections");
+    pthread_mutex_lock(&mDataListenersMutex);
+
+    for(tFrameDataForConnectionMap::iterator dataIterator = mFrameDataForConnection.begin(); dataIterator != mFrameDataForConnection.end(); ++dataIterator)
+    {
+        tConnectionHandle connectionHandle = dataIterator->first;
+        SFrameDataForConnection *pFrameData = dataIterator->second;
+
+        if(0 != pFrameData)
+        {
+            delete pFrameData;
+            pFrameData = 0;
+        }
+
+        LOG4CPLUS_INFO_EXT(mLogger, "Frame data for connection "<<connectionHandle<< " was destroyed");
+    }
+
+    LOG4CPLUS_INFO_EXT(mLogger, "Frame data was destroyed");
+    pthread_mutex_unlock(&mDataListenersMutex);
 }

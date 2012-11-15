@@ -443,6 +443,11 @@ namespace NsAppLink
             typedef std::map<tConnectionHandle, IDeviceAdapter*> tDeviceAdaptersByConnectionHandleMap;
 
             /**
+             * @brief Map for storing and processing frame data for each connection
+             **/
+            typedef std::map<tConnectionHandle, SFrameDataForConnection*> tFrameDataForConnectionMap;
+
+            /**
              * @brief Start routine for Application-related callbacks.
              *
              * @param Data Must be pointer to CTransportManager instance.
@@ -578,6 +583,21 @@ namespace NsAppLink
             void sendDeviceCallback(const SDeviceListenerCallback& callback);
 
             /**
+             * @brief Initializes frame data for connection if it was not initialized before
+             *
+             * @param ConnectionHandle Connection Handle
+             * @return void
+             **/
+            void initializeFrameDataForConnection(tConnectionHandle ConnectionHandle);
+
+            /**
+             * @brief Destroys all frame data for all connections
+             *
+             * @return void
+             **/
+            void destroyFrameDataForAllConnections();
+
+            /**
              * @brief Device adapters.
              **/
             std::vector<IDeviceAdapter*> mDeviceAdapters;
@@ -687,6 +707,11 @@ namespace NsAppLink
              * @brief Mutex restricting access to device adapters which are responsible for handling single Connection Handle
              **/
             mutable pthread_mutex_t mDeviceAdaptersByConnectionHandleMutex;
+
+            /**
+             * @brief Map for storing and processing frame data for each connection
+             **/
+            tFrameDataForConnectionMap mFrameDataForConnection;
         };
     }
 }
