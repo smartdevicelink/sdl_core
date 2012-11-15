@@ -20,15 +20,21 @@ AutoActivateIdMapping::AutoActivateIdMapping()
  * \param appName application to be added to mapping
  * \return auto-activate id assigned to an application
  */
-const std::string& AutoActivateIdMapping::addApplicationName(const std::string &appName)
+std::string AutoActivateIdMapping::addApplicationName(const std::string &appName)
 {
+    if(appName.empty())
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "Trying to add a null-named application!" );
+        return "";
+    }
     std::stringstream st(std::stringstream::in | std::stringstream::out);
     st << mLastAutoActivateId;
-    std::string strAAId;
+    std::string strAAId = "";
     st >> strAAId;
     addId(appName, strAAId);
     mLastAutoActivateId++;
     LOG4CPLUS_INFO_EXT(mLogger, "Added an application " << appName << " to auto-activate id " << strAAId );
+    return strAAId;
 }
 
 /**
@@ -38,6 +44,11 @@ const std::string& AutoActivateIdMapping::addApplicationName(const std::string &
  */
 void AutoActivateIdMapping::addId(const std::string &appName, const std::string &id)
 {
+    if(appName.empty() || id.empty())
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "Trying to add a null-named application or to a null id value!" );
+        return;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, "Added an application " << appName << " to auto-activate id " << id );
     mAutoActivateIds.insert(AutoActivateID(appName, id));
 }
@@ -48,6 +59,16 @@ void AutoActivateIdMapping::addId(const std::string &appName, const std::string 
  */
 void AutoActivateIdMapping::removeId(const std::string &id)
 {
+    if(id.empty())
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "Trying to add a null id!" );
+        return;
+    }
+    if(mAutoActivateIds.empty())
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Nothing to remove: a map is empty!" );
+        return;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, "Removing an auto-activate id " << id );
     for(AutoActivateIDs::iterator it = mAutoActivateIds.begin(); it != mAutoActivateIds.end(); it++)
     {
@@ -64,6 +85,16 @@ void AutoActivateIdMapping::removeId(const std::string &id)
  */
 void AutoActivateIdMapping::removeApplicationName(const std::string &appName)
 {
+    if(appName.empty())
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "Trying to remove a null-named application!" );
+        return;
+    }
+    if(mAutoActivateIds.empty())
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Nothing to remove: a map is empty!" );
+        return;
+    }
     LOG4CPLUS_INFO_EXT(mLogger, "Removing an application " << appName );
     mAutoActivateIds.erase(appName);
 }
@@ -75,11 +106,23 @@ void AutoActivateIdMapping::removeApplicationName(const std::string &appName)
  */
 std::string AutoActivateIdMapping::findAutoActivateIdAssignedToName(const std::string &name) const
 {
+    if(name.empty())
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, "Trying to search for a null-named application!" );
+        return "";
+    }
+    if(mAutoActivateIds.empty())
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Nothing to find: a map is empty!" );
+        return "";
+    }
+    LOG4CPLUS_INFO_EXT(mLogger, "Searching for an auto-activate id for the application " << name );
     AutoActivateIDs::const_iterator it = mAutoActivateIds.find( name );
     if ( it != mAutoActivateIds.end() )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "An application "<< name <<" has auto activate id " << it->second );
-        return it->second;
+        const std::string& aaId = it->second;
+        LOG4CPLUS_INFO_EXT(mLogger, "An application "<< name <<" has auto activate id " << aaId );
+        return aaId;
     }
     LOG4CPLUS_INFO_EXT(mLogger, "Application " << name << " not found in subscribed." );
     return "";

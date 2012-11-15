@@ -40,7 +40,7 @@ public:
      * \param appName application to be added to mapping
      * \return auto-activate id assigned to an application
      */
-    const std::string &addApplicationName( const std::string& appName );
+    std::string addApplicationName( const std::string& appName );
 
     /**
      * \brief remove an application from a mapping
