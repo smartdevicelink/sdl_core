@@ -147,6 +147,7 @@ void NsAppLink::NsTransportManager::CTCPAdapter::mainThread(void)
                                 if (true == mDevices.insert(std::make_pair(deviceHandle, device)).second)
                                 {
                                     device->mIsConnected = true;
+                                    device->mUniqueDeviceId = std::string("TCP-") + deviceName;
 
                                     LOG4CPLUS_INFO_EXT(mLogger, "Added new device " << deviceHandle << ": " << device->mName << " (" << device->mUniqueDeviceId << ")");
                                 }
