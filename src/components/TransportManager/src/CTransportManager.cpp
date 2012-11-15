@@ -35,7 +35,6 @@ mDevicesByAdapterMutex(),
 mDeviceAdaptersByConnectionHandle(),
 mDeviceAdaptersByConnectionHandleMutex()
 {
-    addDeviceAdapter(new CTCPAdapter(*this, *this));
     pthread_mutex_init(&mDataListenersMutex, 0);
     pthread_mutex_init(&mDeviceListenersMutex, 0);
     pthread_mutex_init(&mDeviceHandleGenerationMutex, 0);
@@ -703,6 +702,7 @@ void CTransportManager::removeDeviceAdapter(IDeviceAdapter* DeviceAdapter)
 void CTransportManager::initializeDeviceAdapters()
 {
     addDeviceAdapter(new CBluetoothAdapter(*this, *this));
+    addDeviceAdapter(new CTCPAdapter(*this, *this));
     LOG4CPLUS_INFO_EXT(mLogger, "Device adapters initialized");
 }
 
