@@ -26,6 +26,11 @@ set (SOURCES_DRAFT_TEST
     ./TransportManagerDraftTest.cpp
 )
 
+# Sources for the TransportManager test with correct device adapter behavior
+set (SOURCES_DRAFT_TEST
+    ./TransportManagerTestWithCorrectDeviceAdapter.cpp
+)
+
 # Libraries seeems to be the same for all Transport Manager test
 set (LIBRARIES
     gtest
@@ -51,3 +56,8 @@ add_executable("test_TransportManagerTCPSimulator" ${SOURCES_TCP_SIMULATOR})
 add_executable("test_TransportManagerDraftTest" ${SOURCES_DRAFT_TEST})
 target_link_libraries("test_TransportManagerDraftTest" ${LIBRARIES})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable("test_TransportManagerTestWithCorrectDeviceAdapter" ${SOURCES_DRAFT_TEST})
+target_link_libraries("test_TransportManagerTestWithCorrectDeviceAdapter" ${LIBRARIES})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+add_test(test_TransportManagerTestWithCorrectDeviceAdapter test_TransportManagerTestWithCorrectDeviceAdapter)
