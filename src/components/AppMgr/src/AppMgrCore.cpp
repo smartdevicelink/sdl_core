@@ -177,24 +177,28 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
 		{
 			LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
             AppLinkRPC::RegisterAppInterface_request * object = (AppLinkRPC::RegisterAppInterface_request*)mobileMsg;
+            const std::string& appName = object->get_appName();
             Application* app = core->getApplicationFromItemCheckNotNull(core->registerApplication( object, sessionID ));
             AppLinkRPC::RegisterAppInterface_response* response = new AppLinkRPC::RegisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
             if(!app)
             {
-                LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been registered!");
+                LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< appName <<" hasn't been registered!");
                 response->set_success(false);
                 response->set_resultCode(AppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
                 MobileHandler::getInstance().sendRPCMessage(response, sessionID);
                 break;
             }
-
-            const std::string& autoActivateIdFound = core->mAutoActivateIds.findAutoActivateIdAssignedToName(object->get_appName());
+            LOG4CPLUS_INFO_EXT(mLogger, " About to find auto-activate id in a map...");
+            std::string autoActivateIdFound = core->mAutoActivateIds.findAutoActivateIdAssignedToName(appName);
+            LOG4CPLUS_INFO_EXT(mLogger, " found something like this: "<<autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound);
             if(!autoActivateIdFound.empty())
             {
+                LOG4CPLUS_INFO_EXT(mLogger, "Found already registered AutoActivateId"<<(autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound) << " assigned to app name "<< appName);
                 if(object->get_autoActivateID())
                 {
+                    LOG4CPLUS_INFO_EXT(mLogger, "There is an AutoActivateId supplied withtin this RegisterAppInterface request: "<< *object->get_autoActivateID());
                     if(*object->get_autoActivateID() != autoActivateIdFound)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been registered because its autoActivateId " <<*object->get_autoActivateID()<< " differs from the one specified before - " << autoActivateIdFound);
@@ -209,8 +213,10 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             }
             else
             {
+                LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId has previously been assigned to app name "<< appName);
                 if(!object->get_autoActivateID())
                 {
+                    LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request - about to register an application "<< appName);
                     const std::string& autoActivateId = core->mAutoActivateIds.addApplicationName(object->get_appName());
                     response->set_autoActivateID(autoActivateId);
                 }
