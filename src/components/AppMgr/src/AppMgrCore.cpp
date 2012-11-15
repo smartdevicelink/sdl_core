@@ -589,6 +589,19 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             HMIHandler::getInstance().sendRequest(performInteraction);
             break;
         }
+        case AppLinkRPC::Marshaller::METHOD_SETMEDIACLOCKTIMER_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
+            AppLinkRPC::SetMediaClockTimer_request* object = (AppLinkRPC::SetMediaClockTimer_request*)mobileMsg;
+            RPC2Communication::UI::SetMediaClockTimer* setTimer = new RPC2Communication::UI::SetMediaClockTimer();
+            if(object->get_startTime())
+            {
+                setTimer->set_startTime(*object->get_startTime());
+            }
+            setTimer->set_updateMode(object->get_updateMode());
+            HMIHandler::getInstance().sendRequest(setTimer);
+            break;
+        }
         case AppLinkRPC::Marshaller::METHOD_SHOW_RESPONSE:
         case AppLinkRPC::Marshaller::METHOD_SPEAK_RESPONSE:
         case AppLinkRPC::Marshaller::METHOD_SETGLOBALPROPERTIES_RESPONSE:
