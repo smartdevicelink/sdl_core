@@ -22,9 +22,10 @@ AutoActivateIdMapping::AutoActivateIdMapping()
  */
 const std::string& AutoActivateIdMapping::addApplicationName(const std::string &appName)
 {
-    std::stringstream st;
+    std::stringstream st(std::stringstream::in | std::stringstream::out);
     st << mLastAutoActivateId;
-    std::string strAAId = st.str();
+    std::string strAAId;
+    st >> strAAId;
     addId(appName, strAAId);
     mLastAutoActivateId++;
     LOG4CPLUS_INFO_EXT(mLogger, "Added an application " << appName << " to auto-activate id " << strAAId );
