@@ -1180,6 +1180,11 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AppLinkRPC::OnHMIStatus * hmiStatus = new AppLinkRPC::OnHMIStatus;
             hmiStatus->set_hmiLevel(AppLinkRPC::HMILevel::HMI_FULL);
 
+            core->mLastAutoActivateId = app->getAutoActivateID();
+            if(!core->serializeToFile(core->mAutoActivateIdFileName, core->mLastAutoActivateId))
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "Cannot serialize auto-activate id!");
+            }
 
             app->setApplicationHMIStatusLevel(AppLinkRPC::HMILevel::HMI_FULL);
             hmiStatus->set_audioStreamingState(app->getApplicationAudioStreamingState());
