@@ -15,93 +15,112 @@ MFT.AppViews = Em.ContainerView.extend({
 	
 	elementId:	'app',
 	
+	classNameBindings: [
+		'MFT.localization',
+		'MFT.helpMode:helpmode'
+	],
+	
 	childViews: [
-//		MFT.WelcomeOrientationView,
-//		MFT.WOSkippButtonView,
+		//MFT.WelcomeOrientationView,
+		MFT.SelectSystempopup,
+		//MFT.WOSkippButtonView,
 		MFT.StatusClimateView,
 		MFT.StatusMediaView,
 		MFT.StatusNavigationView,
+		MFT.StatusInfoView,
 		MFT.StatusPhoneView,
 		MFT.TopControls,
 		MFT.BottomControls,
 		MFT.TTSPopUp,
-		MFT.UIPopUp,
+		MFT.AlertPopUp,
 		MFT.VRPopUp,
-//		MFT.PlayerControllsView,
-//		MFT.VideoErrorPopupView,
+		//MFT.PlayerControllsView,
+		//MFT.VideoErrorPopupView,
 		MFT.ControlButtons,
-		MFT.AppOptionsView,
-		MFT.AppSubMenuView,
-		MFT.AppPerformInteractionChoise,
 		'activeAview'
 	],
 	
 	// Active module view container
 	activeAview: Em.ContainerView.extend({
-		elementId:	'active_view',
-		
-		childViews: [
-			MFT.HomeView,
-			MFT.ClimateView,
-			MFT.NavigationView,
-			MFT.PhoneView,
-			MFT.MediaView,
-			MFT.SettingsView,
-			MFT.InfoView
-		]
+		elementId:	'active_view'
 	}),
-	
-	init: function() {
-		this._super();
-	
-		// for testing
-		if (FLAGS.EXTENDED_LOG) {			
-			Em.Logger.log( '* EXTENDED LOG IS ENABLED *' );
-			Em.Logger.log( 'Analyze render time of each view' );
-			Em.Logger.log( 'To disable this feature set FLAGS.EXTENDED_LOG to false' );
-			
-			MFT.startTime = Date.now();
-			
-			//var endTime = 0;
-			Em.View.reopen({
-				afterRender: function(){
-					this._super();
-										
-					//endTime = Date.now() - startTime;
-					
-					// for debug only, to be removed from release code
-					//this.sleep(20);
-					
-					Em.Logger.log(Date.now() - MFT.startTime + 'ms: ' +this.elementId );
-					MFT.startTime = Date.now();
-				},
-				
-				sleep: function(ms) {
-					ms += new Date().getTime();
-					while (new Date() < ms){}
-				} 
-			})
-		}
-		
-		//IF IOS set warning view height - 1 px;(FIX AVA2-BUG_IOS-12 - (Brown line under app is shown after app is launched)) 
-		if(FFW.isIOS){
-			$('#warning_view').css('height','479px') ;
-		}
-		
-	},
 
 	/*
 	 * This method is called when the app is fully rendered
-	 * and ready to be displayed. We notify the backend to hide
-	 * the splash.
+	 * and ready to be displayed.
+	 * We notify the backend to hide the splash
+	 * and load internal view modules
 	 */
-	afterRender: function() {
-		Em.Logger.log('MFT Rendered!');
-		WarningOkButtonView.appLoaded();
-//		FFW.Backend.notifyAppLoaded();
+	didInsertElement: function() {
+		this._super();
 		
+		//Em.Logger.log('MFT Rendered!');
+		if ( FLAGS.MCS_ENABLED ) {
+			WarningOkButtonView.appLoaded();
+		} else {
+			FFW.Backend.notifyAppLoaded();
+			MFT.set('appReady',true);
+		}
+		
+		// preload other views
+		//FFW.AppendScript.pushScript('phone');
+		FFW.AppendScript.pushScript('media');
+		FFW.AppendScript.pushScript('media.applink');
+		FFW.AppendScript.pushScript('media.applink.applinkoptions');
+		//FFW.AppendScript.pushScript('info');
+		//FFW.AppendScript.pushScript('settings');
+		
+		// preload climate view
+		//FFW.AppendScript.pushScript( 'climate' );
+		// depends on vechicle type
+		//FFW.AppendScript.pushScript( MFT.ClimateController.get('climateVechicleMode') );
+		
+		// preload navigation view
+		// depends on sd card settings
+		/*if ( FFW.Backend.isNavigationEnabled ) {
+			FFW.AppendScript.pushScript('navigation');
+		}
+		*/
+		// preload big images
+		// to resolve blinking issue
 		FFW.PreloadImages.preload();
 		
+		//MFT.TransitionsTest.init();
 	}
 });
-
+/*
+MFT.TransitionsTest = {
+	
+	startId: 0,
+	
+	querry: [],
+	
+	init: function() {
+		this.loadChildStates(MFT.States.states);
+	},
+	
+	start: function() {
+		var self = this;
+		
+		this.startId = setInterval(function(){
+			if ( self.querry.length ) {
+				MFT.States.goToState( self.querry.shift() );
+			}
+		},100);
+	},
+	
+	loadChildStates: function( states ) {
+		for (var state in states ) {
+		
+			this.querry.push( states[state].get('path') );
+			
+			//console.log( states[state].get('path') );
+						
+			if ( !states[state].get('isLeaf') ) {
+				this.loadChildStates(states[state].states);
+			}
+			
+		}
+	}
+};
+*/

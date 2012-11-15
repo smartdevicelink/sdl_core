@@ -148,17 +148,17 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.Show") {
 
-			MFT.AppModel.PlayList.items[0].set('field1', request.params.mainField1);
-			MFT.AppModel.PlayList.items[0].set('field2', request.params.mainField2);
-			MFT.AppModel.PlayList.items[0].set('mediaClock', request.params.mediaClock);
-			MFT.AppModel.PlayList.items[0].set('mediaTrack', request.params.mediaTrack);
+			MFT.ApplinkModel.showInfo.set('field1', request.params.mainField1);
+			MFT.ApplinkModel.showInfo.set('field2', request.params.mainField2);
+			MFT.ApplinkModel.showInfo.set('mediaClock', request.params.mediaClock);
+			MFT.ApplinkModel.showInfo.set('mediaTrack', request.params.mediaTrack);
 
 			resultCode = "SUCCESS";
 		}
 		
 		if (request.method == "UI.Alert") {
 
-			MFT.UIPopUp.receiveMessage(request.params.AlertText1, request.params.AlertText2, request.params.duration, request.params.playTone);
+			MFT.AlertPopUp.activate(request.params.AlertText1, request.params.AlertText2, request.params.duration, request.params.playTone);
 
 			resultCode = "SUCCESS";
 		}
@@ -189,11 +189,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.AddCommand") {
 			
-			if( request.params.menuParams.parentID == 0 ){
-				MFT.AppRightMenuView.AddCommand(request.params.cmdId, request.params.menuParams);
-			}else{
-				MFT.AppModel.subMenuCommands.push(request.params);
-			}
+			MFT.MediaController.applinkAddCommand(request.params);
 
 			resultCode = "SUCCESS";
 
@@ -201,36 +197,36 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.DeleteCommand") {
 			
-			MFT.AppRightMenuView.DeleteCommand(request.params.cmdId);
+			MFT.ApplinkOptionsView.DeleteCommand(request.params.cmdId);
 
 			resultCode = "SUCCESS";
 		}
 
 		if (request.method == "UI.AddSubMenu") {
 			
-			MFT.AppOptionsView.AddSubMenu(request.params.menuId, request.params.menuName);
+			MFT.ApplinkOptionsView.AddSubMenu(request.params.menuId, request.params.menuName);
 
 			resultCode = "SUCCESS";
 		}
 
 		if (request.method == "UI.DeleteSubMenu") {
 
-			resultCode =  MFT.AppOptionsView.DeleteSubMenu(request.params.menuId);
+			resultCode =  MFT.ApplinkOptionsView.DeleteSubMenu(request.params.menuId);
 
 		}
 
 		if (request.method == "UI.CreateInteractionChoiceSet") {
 
-			MFT.AppModel.interactionChoises.push(request.params);
+			MFT.ApplinkModel.interactionChoises.push(request.params);
 
 			resultCode = "SUCCESS";
 		}
 
 		if (request.method == "UI.DeleteInteractionChoiceSet") {
 
-			for(var val in MFT.AppModel.interactionChoises){
-				if(MFT.AppModel.interactionChoises[val].interactionChoiceSetID == request.params.interactionChoiceSetID ){
-					MFT.AppModel.interactionChoises.splice(val, 1);
+			for(var val in MFT.ApplinkModel.interactionChoises){
+				if(MFT.ApplinkModel.interactionChoises[val].interactionChoiceSetID == request.params.interactionChoiceSetID ){
+					MFT.ApplinkModel.interactionChoises.splice(val, 1);
 					break;
 				}
 			}
@@ -243,7 +239,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 			this.performInteractionRequestId = request.id;
 
-			MFT.AppPerformInteractionChoise.PerformInteraction(request.params.interactionChoiceSetIDList);
+			MFT.MediaController.turnOnApplinkPerform(request.params);
 			
 			resultCode = null;
 
@@ -268,13 +264,13 @@ FFW.UI = FFW.RPCObserver.create({
 	/*
 	 * send notification when command was triggered
  	 */	
-	onCommand: function(commandId) {
+	onCommand: function(element) {
 		Em.Logger.log("FFW.UI.onCommand");
 
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
 			"method"	:	"UI.OnCommand",
-			"params"	:	{"commandId":commandId, }
+			"params"	:	{"commandId":element.commandId, }
 		};
 		this.client.send(JSONMessage);
 	},

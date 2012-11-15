@@ -11,11 +11,8 @@
  */
  
 MFT.PhoneSettingsManagePhoneBookView = Em.ContainerView.create( MFT.LoadableView, {
-	
-	stateObj:	MFT.States.phone.phoneSettings.managePhoneBook,
-	
-	classNameBindings:	['MFT.helpMode'],
-	classNames:		   ['hidden'],
+		
+	classNameBindings:	['MFT.helpMode','MFT.localization'],
 	elementId:			'phone_settings_phoneBook_view',
 	childViews:		   [
 							  'backButton',
@@ -25,8 +22,8 @@ MFT.PhoneSettingsManagePhoneBookView = Em.ContainerView.create( MFT.LoadableView
 
 	backButton: MFT.Button.extend({
 		classNames:		   ['backButton','button'],		
-		action:			   'back',
-		target:			   'MFT.States',	
+		action:			   'onBackState',
+		target:			   'MFT.PhoneController',	
 		icon:				 'images/media/ico_back.png',	
 	}),
 	
@@ -47,8 +44,9 @@ MFT.PhoneSettingsManagePhoneBookView = Em.ContainerView.create( MFT.LoadableView
 				
 				{
 								
-					type:		MFT.LablePlusToggleButton,
+					type:		MFT.LabelPlusToggleButton,
 					params:		{
+						classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 						labelContentBinding:  'MFT.locale.label.view_phone_phoneSettings_managePhoneBook_auto',
 						tButtonValue:		 0,
 						tButtonRange: 		 2,
@@ -61,8 +59,9 @@ MFT.PhoneSettingsManagePhoneBookView = Em.ContainerView.create( MFT.LoadableView
 				
 				{
 								
-					type:		MFT.LablePlusToggleButton,
+					type:		MFT.LabelPlusToggleButton,
 					params:		{
+						classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 						labelContentBinding:  'MFT.locale.label.view_phone_phoneSettings_managePhoneBook_display',
 						tButtonValue:		 0,
 						tButtonRange: 		 2,

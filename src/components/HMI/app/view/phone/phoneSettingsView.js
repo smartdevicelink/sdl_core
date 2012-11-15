@@ -13,11 +13,7 @@
 MFT.SettingsPhoneView = Em.ContainerView.create( MFT.LoadableView, {
 		
 	elementId:	'phone_settings',
-				
-	classNames: ['hidden'],
-	
-	stateObj: MFT.States.phone.phoneSettings,
-
+		
 	childViews: [
 		'help',
 		'content'
@@ -26,10 +22,8 @@ MFT.SettingsPhoneView = Em.ContainerView.create( MFT.LoadableView, {
 	help: Em.ContainerView.extend({
 		elementId:			'phone_settings_help',
 		
-		classNames:			'help',
-		
-		classNameBindings: ['MFT.helpMode:visible'],
-		
+		classNames:			['blured_background','shifted'],
+
 		childViews: [
 			'dndButton'
 		],
@@ -38,10 +32,12 @@ MFT.SettingsPhoneView = Em.ContainerView.create( MFT.LoadableView, {
 			
 			elementId:		'phone_settings_help_dndButton',
 			
+			classNames:		['helpmode_box_shadow','active_in_helpmode'],
+			
 			action:			'onDND',
 			target:			'MFT.PhoneController',
 			
-			text:			'Do Not Disturb',						
+			textBinding: Ember.Binding.oneWay('MFT.locale.label.view_phone_settings_doNotDisturb'),					
 			icon:			'images/common/toggle.png',
 			
 			onDown: false
@@ -67,8 +63,7 @@ MFT.SettingsPhoneView = Em.ContainerView.create( MFT.LoadableView, {
 					
 					params:		{
 						templateName:	'arrow',
-						text:		'Bluetooth Devices',
-						disabledBinding:	'MFT.helpMode',	
+						textBinding: 'MFT.locale.label.view_phone_settings_bluetoothDevices',
 						
 						arrow:		true,
 						goToState:   'bluetoothDevices',
@@ -77,32 +72,35 @@ MFT.SettingsPhoneView = Em.ContainerView.create( MFT.LoadableView, {
 
 					}				
 				},
-				{
-					type:		MFT.Button,
-					
+				{									
+					type:		MFT.LabelPlusToggleButton,
 					params:		{
-						text:		'Bluetooth',
-						disabled:	true,
+						labelContentBinding:  'MFT.locale.label.view_phone_settings_bluetooth',
+						tButtonValue:		 0,
+						tButtonRange: 		 2,
+						tButtonLabelsBinding: 'MFT.locale.label.view_phone_settings_onOff',
+						labelDisabled: 		 true,
+						tButtonDisabled:	   true
+					}			
 						
-						icon:		'images/common/toggle.png'
-					}				
 				},
-				{
-					type:		MFT.Button,
-					
+				{									
+					type:		MFT.LabelPlusToggleButton,
 					params:		{
-						text:		'Do Not Disturb',
-						disabled:	true,
-						
-						icon:		'images/common/toggle.png'
-					}				
+						labelContentBinding:  'MFT.locale.label.view_phone_settings_doNotDisturb',
+						tButtonValue:		 0,
+						tButtonRange: 		 2,
+						tButtonLabelsBinding: 'MFT.locale.label.view_phone_settings_onOff',
+						labelDisabled: 		 true,
+						tButtonDisabled:	   true
+					}			
 				},
 				{
 					type:		MFT.Button,
 					
 					params:		{
 						templateName:	'arrow',
-						text:		'911 Assist',
+						textBinding: 'MFT.locale.label.view_phone_settings_911Assist',
 						disabled:	true,
 						
 						arrow:		true
@@ -113,8 +111,7 @@ MFT.SettingsPhoneView = Em.ContainerView.create( MFT.LoadableView, {
 					
 					params:		{
 						templateName:	'arrow',
-						text:		'Phone Ringer',
-						disabledBinding:	'MFT.helpMode',	
+						textBinding: 'MFT.locale.label.view_phone_settings_phoneRinger',
 						
 						arrow:		true,
 						goToState:   'phoneRinger',
@@ -128,8 +125,7 @@ MFT.SettingsPhoneView = Em.ContainerView.create( MFT.LoadableView, {
 					
 					params:		{
 						templateName:	'arrow',
-						text:		'Text Message Notification',
-						disabledBinding:	'MFT.helpMode',
+						textBinding: 'MFT.locale.label.view_phone_settings_textMessageN',
 						
 						arrow:		true,
 						
@@ -142,9 +138,9 @@ MFT.SettingsPhoneView = Em.ContainerView.create( MFT.LoadableView, {
 					type:		MFT.Button,
 					
 					params:		{
+						lableToggleClases: 'lableToggle button',
 						templateName:	'arrow',
-						text:		'Internet Data Connection',
-						disabledBinding:	'MFT.helpMode',
+						textBinding: 'MFT.locale.label.view_phone_settings_internetDataC',
 						
 						arrow:		true,
 						
@@ -159,7 +155,7 @@ MFT.SettingsPhoneView = Em.ContainerView.create( MFT.LoadableView, {
 					params:		{
 						templateName:	'arrow',
 
-						text:		'Manage Phonebook',
+						textBinding: 'MFT.locale.label.view_phone_settings_managePhonebook',
 						
 						arrow:		true,
 						
@@ -168,15 +164,17 @@ MFT.SettingsPhoneView = Em.ContainerView.create( MFT.LoadableView, {
 						target:	  'MFT.PhoneController',
 					}				
 				},
-				{
-					type:		MFT.Button,
-					
+				{									
+					type:		MFT.LabelPlusToggleButton,
 					params:		{
-						text:		'Roaming Warning',
-						disabled:	true,
+						labelContentBinding:  'MFT.locale.label.view_phone_settings_roamingWarning',
+						tButtonValue:		 0,
+						tButtonRange: 		 2,
+						tButtonLabelsBinding: 'MFT.locale.label.view_phone_settings_onOff',
+						labelDisabled: 		 true,
+						tButtonDisabled:	   true
+					}			
 						
-						icon:		'images/common/toggle.png'
-					}		
 				}
 			],
 			

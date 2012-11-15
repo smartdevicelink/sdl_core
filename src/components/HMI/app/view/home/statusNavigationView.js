@@ -13,9 +13,12 @@ MFT.StatusNavigationView = Em.ContainerView.extend({
 	/** View Id */
 	elementId:	'status_nav',
 	
-	classNames: ['status_bar'],
+	classNames: ['status_bar','hidden'],
 
-	classNameBindings: ['MFT.States.navigation.active:selected'],
+	classNameBindings: [
+		'FFW.Backend.isNavigationEnabled:active_state',
+		'MFT.States.navigation.active:selected'
+	],
 	
 	/** Navigation components */		
 	childViews: [
@@ -27,7 +30,7 @@ MFT.StatusNavigationView = Em.ContainerView.extend({
 	statusHome: MFT.Label.create({
 		elementId:		'navigation_status_label',
 		classNameBindings: ['MFT.States.home.active:visible'],
-		content:		'Navigation'
+		contentBinding:	    Ember.Binding.oneWay('MFT.locale.label.view_statusNavigation_navigation')
 	}),
 	
 	/** On status view */
@@ -35,7 +38,7 @@ MFT.StatusNavigationView = Em.ContainerView.extend({
 		classNameBindings: ['MFT.States.home.active:hidden_display'],
 		elementId:		'navigation_status_on',
 		template: Em.Handlebars.compile(
-			'<div class="nav_distance">3.1 Miles</div>'+
+			'<div class="nav_distance">{{MFT.NavigationController.model.distance_left.value}} {{MFT.NavigationController.model.distance_left.longLable}}</div>'+
 			'<img class="ico" src="images/nav/ico_nav_statusbar.png" />'
 		)
 	}),

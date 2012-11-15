@@ -11,18 +11,22 @@
  */
 MFT.NavigationModel = Em.Object.create({
 	
-	init: function(){
-		this.zoomRate.set('value', 0.55);
-		
-		this._super();
-	},
-	
 	typeView: 	MFT.RangedValue.create(),
 	
 	mapView: 	MFT.RangedValue.create(),
 	
+	zoomRate: 	MFT.NavigationMapZoom.create(),
+	
 	mute:  		MFT.RangedValue.create({range:1}),
 	
-	zoomRate: 	MFT.NavigationMapZoom.create()
+	distance_total: MFT.NavigationDistance.create({value:15}),
 	
+	distance_left: MFT.NavigationDistance.create({value:3.1}),
+	
+	distance_to_next_turn: MFT.NavigationDistance.create({value:0.7}),
+	
+	distance_to_next_street: MFT.NavigationDistance.create({value:0.1}),
+	
+	distance_to_prev_street: MFT.NavigationDistance.create({value:400, distanceType:0})
+
 })

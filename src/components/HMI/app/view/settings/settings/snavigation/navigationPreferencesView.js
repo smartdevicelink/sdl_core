@@ -11,15 +11,13 @@
  */
  
 MFT.SettingsSettingsNavigationNavigationPreferencesView = Em.ContainerView.create(MFT.LoadableView,{
-	classNameBindings:	['MFT.States.settings.settings.snavigation.navigationPreferences.active:active_state','MFT.helpMode'],
-	classNames:		   ['hidden'],
+	classNameBindings:	['MFT.helpMode'],
 	elementId:			'settings_settings_navigation_navigationPreferences',
 	childViews:		   [
 							  'backButton',
 							  'topTitile',
 							  'list'
 						  ],
-	stateObj: 	MFT.States.settings.settings.snavigation.navigationPreferences,				  
 	backButton: MFT.Button.extend({
 		classNames:		   ['backButton','button'],		
 		action:			   'back',
@@ -43,8 +41,9 @@ MFT.SettingsSettingsNavigationNavigationPreferencesView = Em.ContainerView.creat
 			items:[
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_navigationPreferences_guidancePrompts',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
@@ -56,8 +55,9 @@ MFT.SettingsSettingsNavigationNavigationPreferencesView = Em.ContainerView.creat
 			},
 			{
 				
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_navigationPreferences_auto',
 					tButtonValue: 		 0,
 					tButtonRange:		 2,

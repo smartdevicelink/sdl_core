@@ -13,13 +13,7 @@
 MFT.SettingsSettingsNavigationView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	elementId:	'settings_settings_navigation',
-	
-	classNameBindings: ['MFT.States.settings.settings.snavigation.active:active_state','MFT.helpMode'],
-	
-	classNames: 'hidden',
-	
-	stateObj:MFT.States.settings.settings.snavigation,
-	
+				
 	childViews: [
 		'backButton',
 		'topTitile',
@@ -33,13 +27,14 @@ MFT.SettingsSettingsNavigationView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	backButton: MFT.Button.extend({
 		classNames:		  ['backButton','button'],		
-		action:			  'back',
-		target:			  'MFT.States',	
+		action:			  'onPreviousState',
+		target:			  'MFT.SettingsController',	
 		icon:				'images/media/ico_back.png',	
 	}),
 	
 	list: MFT.List.extend({
 		elementId:		   'settings_settings_navigation_list',
+		classNameBindings: ['MFT.helpMode:help-mode'],
 		
 		disableScrollbar:	true,
 		
@@ -51,10 +46,10 @@ MFT.SettingsSettingsNavigationView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					goToState:   'mapPreferences',
 					textBinding: 'MFT.locale.label.view_settings_settings_navigation_mapPreferences',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
 					
 			},
@@ -64,10 +59,10 @@ MFT.SettingsSettingsNavigationView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					goToState:   'routePreferences',
 					textBinding: 'MFT.locale.label.view_settings_settings_navigation_routePreferences',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
 					
 			},
@@ -77,10 +72,10 @@ MFT.SettingsSettingsNavigationView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					goToState:   'navigationPreferences',
 					textBinding: 'MFT.locale.label.view_settings_settings_navigation_navigationPreferences',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
 					
 			},
@@ -90,10 +85,10 @@ MFT.SettingsSettingsNavigationView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					goToState:   'trafficPreferences',
 					textBinding: 'MFT.locale.label.view_settings_settings_navigation_trafficPreferences',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
 					
 			},
@@ -103,10 +98,10 @@ MFT.SettingsSettingsNavigationView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 					goToState:   'avoidAreas',
 					textBinding: 'MFT.locale.label.view_settings_settings_navigation_avoidAreas',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
 					
 			}

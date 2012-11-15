@@ -10,14 +10,15 @@
  * @author		Gerashchenko Maksym
  */
  
-MFT.InfoView = Em.ContainerView.create({
+MFT.InfoView = Em.ContainerView.create( MFT.LoadableView, {
  	
  	elementId:	'info_view',
- 	
- 	classNames:	'block hidden',
- 
+ 	 
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.info.active:active_state','MFT.helpMode'],
+	classNameBindings: [
+		'MFT.helpMode',
+		'FFW.Backend.isNavigationEnabled::green_bg'	
+	],
 	
 	controllerBinding: Ember.Binding.oneWay('MFT.InfoController'),
 		
@@ -27,7 +28,7 @@ MFT.InfoView = Em.ContainerView.create({
 	],
 	
 	
-/** Left menu */
+	/** Left menu */
 	leftMenu: Em.ContainerView.extend({
 		elementId:	'info_leftMenu',
 		

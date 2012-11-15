@@ -69,10 +69,10 @@ MFT.PhoneModel = Em.Object.create({
 		this.dialpadPrivacy.increase();
 		
 		if ( this.dialpadPrivacy.value ) {
-			this.set('statusModeText', 'Privacy mode');
+			this.set('statusModeText', MFT.locale.label.view_statusPhone_privacyMode);
 		} else {
 			if ( this.dialpadMute.value ) {
-				this.set('statusModeText', 'Microphone mute');
+				this.set('statusModeText', MFT.locale.label.view_statusPhone_microphoneMute);
 			} else {
 				this.set('statusModeText', null);
 			}
@@ -89,10 +89,10 @@ MFT.PhoneModel = Em.Object.create({
 		this.dialpadMute.increase();
 		
 		if ( this.dialpadMute.value ) {
-			this.set('statusModeText', 'Microphone mute');
+			this.set('statusModeText', MFT.locale.label.view_statusPhone_microphoneMute);
 		} else {
 			if ( this.dialpadPrivacy.value ) {
-				this.set('statusModeText', 'Privacy mode');
+				this.set('statusModeText', MFT.locale.label.view_statusPhone_privacyMode);
 			} else {
 				this.set('statusModeText', null);
 			}

@@ -16,7 +16,7 @@ MFT.ClimateController = Em.Object.create({
 	modelBinding: FLAGS.EMULATE_CAN_CLIMATE ? 'MFT.ClimateModel' : 'MFT.ClimateModelCAN',
 	
 	/** Initial substate */
-	activeState: 'climate.front',
+	activeState: 'climate.full',
 	
 	/** PROPERTY */
 	
@@ -29,6 +29,77 @@ MFT.ClimateController = Em.Object.create({
 	/** Flags for rear temperature mode labels */
 	isRearFullHeated: false,
 	isRearFullCooled: false,
+	
+	
+	/**
+	 * Climate mode property
+	 * 
+	 * Observes vehicle model property
+	 * needs to determine climate module visual mode
+	 *
+	 * @property FFW.Backend.vehicleModel
+	 * @return {string} full, simple
+	 */
+	climateVechicleMode: function() {
+	MFT.VideoPlayerController.close();
+	 	switch ( FFW.Backend.vehicleModel ) {
+	 		case 'edge':
+	 			return this.activeState;
+	 			break;
+	 		
+	 		case 'explorer':
+	 			return this.activeState;
+	 			break;
+	 		
+	 		case 'escape_2013':
+	 			return 'climate.simple';
+	 			break;
+	 		
+	 		case 'f150_2013':
+	 			return this.activeState;
+	 			break;
+	 		
+	 		case 'flex_2013':
+	 			return this.activeState;
+	 			break;
+	 		
+	 		case 'focus':
+	 			return 'climate.simple';
+	 			break;
+	 		
+	 		case 'fusion_2013':
+	 			return 'climate.simple';
+	 			break;
+	 		
+	 		case 'taurus_2013':
+	 			return this.activeState;
+	 			break;
+
+	 		default:
+	 			return this.activeState;
+	 	}
+	}.property('FFW.Backend.vehicleModel'),
+	
+	// observer for vechicle mode
+	// used to switch climate modes on runtime
+	climateVechicleModeSwitcher: function() {
+		if ( MFT.States.climate.active ) {
+			MFT.States.goToState( this.get('climateVechicleMode') );
+			this.model.onAirflowAdapter();
+		}
+	}.observes('this.climateVechicleMode'),
+	
+	// property to determine climate simple mode
+	// return true when simple climate is active
+	// used for bindings in views
+	// to hide unnecessary components
+	isSimple: function() {
+		if ( this.get('climateVechicleMode') === 'climate.simple' ) {
+			return true;
+		} else {
+			return false;
+		}
+	}.property('this.climateVechicleMode'),
 	
 	
 	/** EVENT HENDLERS */
@@ -47,14 +118,14 @@ MFT.ClimateController = Em.Object.create({
 	
 	/** Show/hide climate rear controls */
 	onToggleRear: function() {
-		if ( MFT.States.currentState.name == 'front') {
+		if ( MFT.States.currentState.name == 'full') {
 			if ( MFT.helpMode ) {
-				MFT.VideoPlayerController.start('climate_rear_Climate', 'climate.rear');
+				MFT.VideoPlayerController.start('climate_rear_Climate', 'climate.full.rear');
 			} else {
-				MFT.States.goToState('climate.rear');
+				MFT.States.goToState('climate.full.rear');
 			}			
 		} else {
-			MFT.States.goToState('climate.front');
+			MFT.States.back();
 		}
 	},
 	
@@ -82,6 +153,13 @@ MFT.ClimateController = Em.Object.create({
 	onToggleDualMode: function() {
 		// Help mode video
 		if ( MFT.helpMode ) {
+			// TEMPERARY
+			// do not play video
+			// if climate in simple mode
+			if (this.get('isSimple')) {
+				MFT.VideoPlayerController.start('no_video');
+				return;
+			}
 			MFT.VideoPlayerController.start('climate_Dual');
 			
 			return;
@@ -173,6 +251,11 @@ MFT.ClimateController = Em.Object.create({
  		this.model.toggleWindShield();
  	},
 	
+	/* Max wind shield button handler */
+ 	onToggleMaxDefrost: function() {
+ 		this.model.toggleMaxDefrost();
+ 	},
+	
 	/** Rear defrost button handler */
  	onToggleRearDeforost: function() {
  		this.model.toggleRearDeforost();
@@ -182,6 +265,13 @@ MFT.ClimateController = Em.Object.create({
  	onToggleAuto: function() {
  		// Help mode video
 		if ( MFT.helpMode ) {
+			// TEMPERARY
+			// do not play video
+			// if climate in simple mode
+			if (this.get('isSimple')) {
+				MFT.VideoPlayerController.start('no_video');
+				return;
+			}
 			MFT.VideoPlayerController.start('climate_Auto');
 			
 			return;
@@ -199,6 +289,14 @@ MFT.ClimateController = Em.Object.create({
  	onToggleMaxAc: function() {
  		// Help mode video
 		if ( MFT.helpMode ) {
+			// TEMPERARY
+			// do not play video
+			// if climate in simple mode
+			if (this.get('isSimple')) {
+				MFT.VideoPlayerController.start('no_video');
+				return;
+			}
+			
 			MFT.VideoPlayerController.start('climate_Max_AC');
 			
 			return;
@@ -211,6 +309,13 @@ MFT.ClimateController = Em.Object.create({
  	onToggleRecirculation: function() {
  		// Help mode video
 		if ( MFT.helpMode ) {
+			// TEMPERARY
+			// do not play video
+			// if climate in simple mode
+			if (this.get('isSimple')) {
+				MFT.VideoPlayerController.start('no_video');
+				return;
+			}
 			MFT.VideoPlayerController.start('climate_Recirculation');
 			
 			return;
@@ -252,6 +357,16 @@ MFT.ClimateController = Em.Object.create({
  		this.model.setBothAirflow();
  	},
  	
+ 	/**
+ 	 * Simple airflow behaviors
+ 	 */
+	onPanelSimpleAirflow: function() {
+		this.model.setSimplePanelAirflow();
+	},
+	
+	onFeetSimpleAirflow: function() {
+		this.model.setSimpleFeetAirflow();
+	},
  	
  	/** REAR CONTROLS */
  	

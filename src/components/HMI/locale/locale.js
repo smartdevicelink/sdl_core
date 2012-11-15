@@ -12,9 +12,9 @@
 
 MFT.locale = Em.Object.create({
 	
-	label: null,
+	label: MFT[MFT.localization],
 	
 	setLang: function(lang) {
-		this.set( 'label', lang );
-	}
+		this.set( 'label', MFT[MFT.localization] );
+	}.observes('MFT.localization')		
 });

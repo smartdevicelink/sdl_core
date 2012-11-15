@@ -32,7 +32,7 @@ MFT.TopControls = Em.ContainerView.extend({
 		clock: Em.View.extend({
 			elementId:			'clock',
 			
-			classNameBindings: ['FLAGS.HELP_MODE::mcs'],
+			classNameBindings: ['FLAGS.MCS_ENABLED:mcs'],
 					
 			afterRender: function() {
 				MFT.SettingsController.getTime(new Date);
@@ -56,15 +56,26 @@ MFT.TopControls = Em.ContainerView.extend({
 			
 			actionDown: function(event) {
 				// Click handeler
-				MFT.SettingsClockView.listClockSettings.set('currentPage',1);
-				MFT.States.goToState('settings.clock');				
+				MFT.States.goToState('settings.clock');
+				
+				// return if state view loaded
+				if ( MFT.States.currentState.viewLoaded ) {
+					return;
+				}
+				
+				// add observer on active state to hide left menu
+				MFT.States.currentState.addObserver('active', function(){
+					if (this.active) {
+						MFT.SettingsClockView.listClockSettings.set('currentPage',1);
+					}
+				});				
 			}
 		}),
 		
 		vSeparator: Em.View.extend({
 			elementId:	'top_controls_separator',
 			
-			classNameBindings: ['FLAGS.HELP_MODE::hidden'],
+			classNameBindings: ['FLAGS.MCS_ENABLED:hidden'],
 			
 			classNames: 'help_dev'
 		}),
@@ -74,7 +85,7 @@ MFT.TopControls = Em.ContainerView.extend({
 			
 			indClassBinding:	Em.Binding.oneWay('MFT.helpMode'),
 			
-			hidden:			!FLAGS.HELP_MODE,
+			hidden:				FLAGS.MCS_ENABLED,
 					
 			template: Em.Handlebars.compile(
 				'<div class="inact" {{bindAttr class="view.indClass:act"}}></div>'+
@@ -84,7 +95,7 @@ MFT.TopControls = Em.ContainerView.extend({
 			
 			/** Toggle Help mode */
 			actionDown: function(event) {
-				if ( FLAGS.HELP_MODE ) {
+				if ( FLAGS.MCS_ENABLED ) {
 					return;
 				}
 			
@@ -92,14 +103,6 @@ MFT.TopControls = Em.ContainerView.extend({
 				
 				/** Switch off video player if active */
 				if(MFT.VideoPlayerController.model.isReady) MFT.VideoPlayerController.stop(); 
-				
-				/** Toggle FAQ button animation */
-				$('#faq_btn').animate({
-					left: MFT.helpMode ? 182: 110,
-				},{ 
-					duration: 500, 
-					queue: false 
-				});
 				
 				/** Close FAQ state if active */
 				if( MFT.States.faq.active ) {
@@ -113,6 +116,10 @@ MFT.TopControls = Em.ContainerView.extend({
 
 	toggleFAQButton: MFT.Button.extend({
 		elementId:			'faq_btn',
+		
+		// for helpmode
+		classNames:			['faq_show'],
+		
 		activeBinding:		Em.Binding.oneWay('MFT.States.faq.active'),
 			
 		template: Ember.Handlebars.compile(

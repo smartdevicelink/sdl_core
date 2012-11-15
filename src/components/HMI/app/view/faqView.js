@@ -11,12 +11,7 @@
  */
 
 MFT.FAQView = Em.ContainerView.create(MFT.LoadableView, {
-	 	
- 	classNames:	'hidden',
-	
-	/** Define state*/
-	stateObj: MFT.States.faq,
-	
+
 	/** Element ID*/
 	elementId: 'fag_view',
 	
@@ -47,7 +42,7 @@ MFT.FAQView = Em.ContainerView.create(MFT.LoadableView, {
 				type:		MFT.Button,
 				
 				params:		{
-					text:		'MFT Guide Welcome Orientation',
+					textBinding: 'MFT.locale.label.view_faq_mftGuide',
 					videoName:   'FAQ_Welcome_orientation',
 					action:	  'playRecord',
 					target:	  'MFT.FAQController',
@@ -59,7 +54,7 @@ MFT.FAQView = Em.ContainerView.create(MFT.LoadableView, {
 				type:		MFT.Button,
 
 				params:		{
-					text:		'MyFord Touch 4 Corner Menu System',
+					textBinding: 'MFT.locale.label.view_faq_myFordTouch4',
 					videoName:   'FAQ_4_corners',
 					action:	  'playRecord',
 					target:	  'MFT.FAQController',
@@ -70,7 +65,7 @@ MFT.FAQView = Em.ContainerView.create(MFT.LoadableView, {
 				type:		MFT.Button,
 
 				params:		{
-					text:		'Customize Your MyFord Touch System',
+					textBinding: 'MFT.locale.label.view_faq_customize',
 					videoName:   'FAQ_Customization',
 					action:	  'playRecord',
 					target:	  'MFT.FAQController',
@@ -81,7 +76,7 @@ MFT.FAQView = Em.ContainerView.create(MFT.LoadableView, {
 				type:		MFT.Button,
 
 				params:		{
-					text:		'Use Voice Commands',
+					textBinding: 'MFT.locale.label.view_faq_useVoiceC',
 					videoName:   'FAQ_Voice_commands',
 					action:	  'playRecord',
 					target:	  'MFT.FAQController',
@@ -92,7 +87,7 @@ MFT.FAQView = Em.ContainerView.create(MFT.LoadableView, {
 				type:		MFT.Button,
 
 				params:		{
-					text:		'MyFord Touch Nav System',
+					textBinding: 'MFT.locale.label.view_faq_myFordTouchN',
 					videoName:   'FAQ_Nav_system',
 					action:	  'playRecord',
 					target:	  'MFT.FAQController',
@@ -103,8 +98,52 @@ MFT.FAQView = Em.ContainerView.create(MFT.LoadableView, {
 				type:		MFT.Button,
 
 				params:		{
-					text:		'Pair Your Phone and Make Hands-Free Calls',
+					textBinding: 'MFT.locale.label.view_faq_pairYourP',
 					videoName:   'FAQ_Pair_phones',
+					action:	  'playRecord',
+					target:	  'MFT.FAQController',
+					onDown: false
+				}			
+			},
+			{
+				type:		MFT.Button,
+
+				params:		{
+					textBinding: 'MFT.locale.label.view_faq_multipleConnected',
+					videoName:   'FAQ_Multiple_Connected_Phones',
+					action:	  'playRecord',
+					target:	  'MFT.FAQController',
+					onDown: false
+				}			
+			},
+			{
+				type:		MFT.Button,
+
+				params:		{
+					textBinding: 'MFT.locale.label.view_faq_wifi',
+					videoName:   'FAQ_WiFi',
+					action:	  'playRecord',
+					target:	  'MFT.FAQController',
+					onDown: false
+				}			
+			},
+			{
+				type:		MFT.Button,
+
+				params:		{
+					textBinding: 'MFT.locale.label.view_faq_syncServices',
+					videoName:   'FAQ_SYNC_Services',
+					action:	  'playRecord',
+					target:	  'MFT.FAQController',
+					onDown: false
+				}			
+			},
+			{
+				type:		MFT.Button,
+
+				params:		{
+					textBinding: 'MFT.locale.label.view_faq_wallpaper',
+					videoName:   'FAQ_Wallpaper',
 					action:	  'playRecord',
 					target:	  'MFT.FAQController',
 					onDown: false
@@ -119,8 +158,8 @@ MFT.FAQView = Em.ContainerView.create(MFT.LoadableView, {
 	faq_bottom: Em.View.create({
 		elementId: ['faq_bottom'] ,
 		template: Em.Handlebars.compile(
-			'<div > For further assistance about your in-vehicle MyFord Touch system, call 1-800-392-3673. </div>'+
-			'<div class="second-line"> Select option 3 for an In-Vehicle Technology Team representative. </div>'
+			'<div > {{MFT.locale.label.view_faq_forFurther}} </div>'+
+			'<div class="second-line"> {{MFT.locale.label.view_faq_selectOption}} </div>'
 		)
 	})
 });

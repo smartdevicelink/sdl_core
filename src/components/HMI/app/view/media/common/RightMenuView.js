@@ -87,54 +87,69 @@ MFT.RightMenuView = Em.ContainerView.create({
 									'isHDActive:isHd',
 									'MFT.FmModel.active:visible_display' , 
 									'MFT.AmModel.active:visible_display', 
-									'MFT.helpMode:hd_blur helpmode_blur_cont',
-									'isHDhelpModeActive:hd_active_blur'],
+								  ],
 									
-			classNames:			['rs-item','hdButton', 'hidden_display'],
+			classNames:			['rs-item', 'hidden_display','top_rightmenu_button_blur'],
 			
-			isHDhelpModeActive: function() {
-				return (MFT.MediaController.currentModuleData.get('selectedItem').isHd  && MFT.helpMode);
-			}.property('MFT.MediaController.currentModuleData.selectedItem.isHd','MFT.helpMode'),
 			
 			isHDActive: function(){
-				if(!MFT.MediaController.directTuneSelected){
+				if(!MFT.MediaController.directTuneSelected && MFT.FmModel.active){
 					return (MFT.MediaController.currentModuleData.get('selectedItem').isHd);
 				}else{
+					if(MFT.FmModel.active && MFT.MediaController.currentModuleData.get('selectedDirectItem'))
 					return (MFT.MediaController.currentModuleData.get('selectedDirectItem').isHd);
 				}	
-			}.property('MFT.MediaController.currentModuleData.selectedItem', 'MFT.MediaController.directTuneSelected'),
+			}.property('MFT.MediaController.currentModuleData.selectedItem', 'MFT.MediaController.directTuneSelected','MFT.FmModel.active'),
 			
-			text:				'HD Radio',
+			textBinding:		   Ember.Binding.oneWay('MFT.locale.label.view_media_hdradio'),
 			
-			icon:				'images/media/passiv_horiz_led.png',				
+			icon: 'images/media/passiv_horiz_led.png',
 			
+			onIconChange: function(){
+				if(this.get('isHDActive')){
+					this.set('icon', 'images/media/active_horiz_led.png');
+				}else{
+					this.set('icon', 'images/media/passiv_horiz_led.png');
+				}
+			}.observes('this.isHDActive'),
+							
 			disabled:			true,
-			/** Define button template */
-			template: Ember.Handlebars.compile(
-				'{{#with view}}'+
-						'<div class="ico"></div>'+
-						'<span>{{text}}</span>'+
-				'{{/with}}'
-			)
+			
+			// rerender the view if the template name changes
+			templateNameChanged: function() {
+				
+				if(MFT.helpMode){
+					this.set('templateName','text');
+					this.rerender();
+				}else{
+					this.set('templateName','');
+					this.rerender();
+				}
+			}.observes('MFT.helpMode')
+			
 		}),
 		repeatButton:  MFT.Button.extend({
-			classNameBindings: 	['MFT.CDModel.active:visible_display',
+			classNameBindings: 	[ 'MFT.CDModel.active:visible_display',
 									'MFT.SDModel.active:visible_display',
-									'MFT.USBModel.active:visible_display',,'MFT.helpMode:repeatButton_blur'],
+									'MFT.USBModel.active:visible_display'
+								  ],
 			elementId: 'media_rightmenu_repeatButton',
-			classNames:			['rs-item','hidden_display'],
-			icon:				'images/media/passiv_horiz_led.png',
-			text:				'Repeat',
-			disabled:		true,
-			/** Define button template */
-			template: Ember.Handlebars.compile(
-				'{{#with view}}'+
-					'{{#unless MFT.helpMode}}'+
-						'<img class="ico" {{bindAttr src="icon"}} />'+
-						'<span>{{text}}</span>'+
-					'{{/unless}}'+
-				'{{/with}}'
-			)
+			classNames:			['rs-item','hidden_display','top_rightmenu_button_blur'],
+			icon:				  'images/media/passiv_horiz_led.png',
+			textBinding:		   Ember.Binding.oneWay('MFT.locale.label.view_media_repeat'),
+			disabled:			  true,
+			
+			// rerender the view if the template name changes
+			templateNameChanged: function() {
+				
+				if(MFT.helpMode){
+					this.set('templateName','text');
+					this.rerender();
+				}else{
+					this.set('templateName','');
+					this.rerender();
+				}
+			}.observes('MFT.helpMode')
 		}),
 		shuffleButton:  MFT.Button.extend({
 			classNameBindings: 	['MFT.CDModel.active:visible_display',
@@ -142,12 +157,12 @@ MFT.RightMenuView = Em.ContainerView.create({
 									'MFT.USBModel.active:visible_display',,'MFT.helpMode:shuffleButton_help'],
 			elementId: 'media_rightmenu_shuffleButton',
 			classNames:			['rs-item','hidden_display'],
-			icon:				'images/media/passiv_horiz_led.png',
-			text:				'Shuffle',
-			target:			'MFT.MediaController',
-			action:			'turnShuffleHelpVideoOn',
-			onDown: false,
-			disabled:		true,
+			icon:				  'images/media/passiv_horiz_led.png',
+			textBinding:		   Ember.Binding.oneWay('MFT.locale.label.view_media_shuffle'),
+			target:			    'MFT.MediaController',
+			action:			    'turnShuffleHelpVideoOn',
+			onDown:			    false,
+			disabled:			  true,
 			helpModel: function(){
 				(MFT.helpMode)? this.set('disabled',false): this.set('disabled',true);
 			}.observes('MFT.helpMode')
@@ -155,14 +170,14 @@ MFT.RightMenuView = Em.ContainerView.create({
 		
 		replayButton:  MFT.Button.extend({
 			classNameBindings: 	['MFT.SiriusModel.active:visible_display','MFT.helpMode:replay_button_help'],
-			elementId:	'media_rightmenu_replayButton',
-			classNames:			['rs-item','hidden_display'],
-			icon:				'images/media/passiv_horiz_led.png',
-			text:				'Replay',
-			target:			'MFT.MediaController',
-			action:			'turnReplayHelpVideoOn',
-			disabled:		true,
-			onDown: false,
+			elementId:			'media_rightmenu_replayButton',
+			classNames:		   ['rs-item','hidden_display'],
+			icon:				 'images/media/passiv_horiz_led.png',
+			textBinding:		  Ember.Binding.oneWay('MFT.locale.label.view_media_replay'),
+			target:			   'MFT.MediaController',
+			action:			   'turnReplayHelpVideoOn',
+			disabled:			 true,
+			onDown: 			   false,
 			helpModel: function(){
 				(MFT.helpMode)? this.set('disabled',false): this.set('disabled',true);
 			}.observes('MFT.helpMode')
@@ -179,16 +194,14 @@ MFT.RightMenuView = Em.ContainerView.create({
 			onDown: false,
 			
 			text: function(){
-				if(MFT.States){
-					if(MFT.USBModel.active){
-						this.set('action','turnSimilarHelpVideoOn')
-						return 'Similar Music'
-					}else{
-						this.set('action','turnScanHelpVideoOn')
-						return 'Scan'
-					}
+				if(MFT.USBModel.active || MFT.SDModel.active ){
+					this.set('action','turnSimilarHelpVideoOn')
+					return MFT.locale.label.view_media_similarMusic
+				}else{
+					this.set('action','turnScanHelpVideoOn')
+					return MFT.locale.label.view_media_scan;
 				}
-			}.property('MFT.MediaController.currentModuleData.selectedItem'),
+			}.property('MFT.MediaController.currentModuleData.selectedItem','MFT.locale.label'),
 			
 			helpModel: function(){
 				(MFT.helpMode)? this.set('disabled',false): this.set('disabled',true);
@@ -205,7 +218,7 @@ MFT.RightMenuView = Em.ContainerView.create({
 			target:				'MFT.MediaController',
 			classNames:			['rs-item','hidden_display'],
 			icon:				'images/media/active_arrow.png',
-			text:				'More Info'
+			textBinding:		   Ember.Binding.oneWay('MFT.locale.label.view_media_moreInfo'),
 		}),
 		
 		optionsButton: MFT.Button.extend({
@@ -213,13 +226,10 @@ MFT.RightMenuView = Em.ContainerView.create({
 			classNameBindings: ['MFT.helpMode:option_blur'],
 			classNames:			['rs-item'],
 			icon:				'images/media/active_arrow.png',
-			text:				'Options',
+			textBinding:		   Ember.Binding.oneWay('MFT.locale.label.view_media_options'),
 			action:			  'turnOnOptions',
 			target:    'MFT.MediaController',
-			
-			disabled: function(){
-				return ( MFT.SDModel.active || MFT.helpMode )
-			}.property('MFT.SDModel.active','MFT.helpMode'),
+			disabledBinding:  'MFT.helpMode',
 			
 			// Define button template
 			template: Ember.Handlebars.compile(
@@ -239,7 +249,9 @@ MFT.RightMenuView = Em.ContainerView.create({
 				'MFT.FmModel.active:visible_display',
 				'MFT.helpMode:direct_button_help'
 			],
-						
+			
+			templateName:	'text',
+			
 			elementId:	'media_rightmenu_directButton',
 			classNames:			['rs-item', 'hidden_display'],
 			target:				'MFT.MediaController',
@@ -249,12 +261,12 @@ MFT.RightMenuView = Em.ContainerView.create({
 			text: function(){	
 					if(!MFT.MediaController.directTuneHide){
 						this.set('action','offDirectTune');
-						return 'Presets'
+						return MFT.locale.label.view_media_presets
 					}else{
 						this.set('action','onDirectTune');
-						return 'Direct Tune'
+						return MFT.locale.label.view_media_directTune
 					}
-				}.property('MFT.MediaController.directTuneHide')
+				}.property('MFT.MediaController.directTuneHide','MFT.locale.label')
 		}),
 		
 		
@@ -267,7 +279,7 @@ MFT.RightMenuView = Em.ContainerView.create({
 			target:			   'MFT.MediaController',
 			classNames:			['rs-item','hidden_display'],
 			icon:				'images/media/active_arrow.png',
-			text:				'Browse',
+			textBinding:		   Ember.Binding.oneWay('MFT.locale.label.view_media_browse'),
 			onDown: false,
 		})		
 });

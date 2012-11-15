@@ -9,45 +9,36 @@
  *
  * @author		Igor Zhavoronkin
  */
-MFT.MediaView = Em.ContainerView.create({
+MFT.MediaView = Em.ContainerView.create(MFT.LoadableView,{
 	/** View Id */
 	elementId:	'media',
- 	
- 	classNames:	'block hidden',
-	
-	/** Bind class for visual representation */
-	classNameBindings: ['isActive:active_state'],
-	
-	/*Set Active State On Child active state = true*/
-	isActive: function(){
-		return MFT.States.media.childStates.filterProperty('active', true).length === 1;
-	}.property('MFT.States.media.childStates.@each.active'),
-	
+ 		
 	/** Media components */		
 	childViews: [
 		'leftMenu',
 		'presets',
 		'rightMenu',
-		'appRightMenu',
 		'SavePresetPopup',
-		'directTune'
+		'directTune',
+		'applinkSoftButtons'
 	],
 	/** Left Menu view component */
 	leftMenu: MFT.LeftMenuView,
 	
-	rightMenu:  MFT.RightMenuView,
-	
-	appRightMenu:  MFT.AppRightMenuView,
+	rightMenu: MFT.RightMenuView,
 	
 	presets: MFT.PresetsView,
 	
 	directTune: MFT.DirectTune,
+
+	applinkSoftButtons: MFT.ApplinkSoftButtons,
 	
 	/** Save Preset Popup*/
 	SavePresetPopup: Em.View.extend({
+		classNameBindings: 'MFT.localization',
 		elementId: 'media_popup',
 		template:  Em.Handlebars.compile(
-			'<div class="preset-stored">Preset saved</div>'
+			'<div class="preset-stored">{{MFT.locale.label.view_media_popUp}}</div>'
 		)
 	})
 });

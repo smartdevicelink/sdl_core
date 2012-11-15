@@ -11,15 +11,12 @@
  */
 
 MFT.SettingsSettingsMediaPlayerBluetoothDevicesView = Em.ContainerView.create(MFT.LoadableView,{
-	classNameBindings:	['MFT.States.settings.settings.mediaPlayer.bluetoothDevices.active:active_state','MFT.helpMode'],
-	classNames:		   ['hidden'],
 	elementId:			'settings_settings_mediaPlayer_bluetoothDevices',
 	childViews:		   [
 							  'backButton',
 							  'topTitile',
 							  'list'
 						  ],	
-	stateObj: 	MFT.States.settings.settings.mediaPlayer.bluetoothDevices,				  						  
 	backButton: MFT.Button.extend({
 	classNames:		  ['backButton','button'],		
 	action:			  'back',
@@ -29,7 +26,7 @@ MFT.SettingsSettingsMediaPlayerBluetoothDevicesView = Em.ContainerView.create(MF
 	
 	topTitile: MFT.Label.extend({
 		classNames:		  ['block-header-title'],
-		content:			 'Bluetooth App'
+		contentBinding: Ember.Binding.oneWay('MFT.locale.label.view_settings_settings_mediaPlayer_bluetoothDevices_title'),
 	}),				  
 	
 	list:	MFT.List.extend({
@@ -45,28 +42,31 @@ MFT.SettingsSettingsMediaPlayerBluetoothDevicesView = Em.ContainerView.create(MF
 								
 				type:		 MFT.Button,
 				params:		{
-					text:	'Bluetooth Devices',
-					arrow:	   true,
-					disabled:	true
+					textBinding: 			'MFT.locale.label.view_settings_settings_mediaPlayer_bluetoothDevices_bluetoothDevices',
+					templateName:		   'arrow',
+					disabled:			   true
 				}			
 					
 			},
 			{
 								
-				type:		 MFT.Label,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
-					content:	 'Bluetooth',
-					icon:		'images/settings/ico_on-off-wide.png',
-					disabled:    true
+					labelContentBinding:   'MFT.locale.label.view_settings_settings_mediaPlayer_bluetoothDevices_bluetooth',
+					tButtonValue:		  0,
+					tButtonRange: 		  2,
+					tButtonLabelsBinding:  'MFT.locale.label.view_settings_settings_mediaPlayer_bluetoothDevices_onOf',
+					labelDisabled: 		 true,
+					tButtonDisabled:	   true
 				}			
 					
 			},
 			{
 				type:		MFT.Button,
 				params:		{
-					text:    'Internet Data Connections',
-					arrow:	   true,
-					disabled:	true
+					textBinding:           'MFT.locale.label.view_settings_settings_mediaPlayer_bluetoothDevices_InternetDataC',
+					templateName: 		  'arrow',
+					disabled:			  true
 				}
 			}
 		]

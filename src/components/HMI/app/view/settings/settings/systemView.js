@@ -11,15 +11,13 @@
  */
 
 MFT.SettingsSettingsSystemView = Em.ContainerView.create(MFT.LoadableView,{
-	classNameBindings:	['MFT.States.settings.settings.system.active:active_state','MFT.helpMode'],
-	classNames:		   ['hidden'],
+	classNameBindings:	['MFT.helpMode'],
 	elementId:			'settings_settings_system',
 	childViews:		   [
 							  'backButton',
 							  'topTitile',
 							  'list'
 						  ],
-	stateObj: MFT.States.settings.settings.system,			  
 	backButton: MFT.Button.extend({
 	classNames:		   ['backButton','button'],		
 	action:			   'back',
@@ -43,67 +41,75 @@ MFT.SettingsSettingsSystemView = Em.ContainerView.create(MFT.LoadableView,{
 			disableScrollbarBinding: 'MFT.helpMode',
 			
 			items:[
-			{
-								
-				type:		 MFT.Label,
+			{				
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
-					contentBinding:	 'MFT.locale.label.view_settings_settings_system_language',
-					icon:		'images/settings/ico_languages.png',
-					disabled:    true
-				}			
-					
+					classNames:			['lableToggleButton', 'list-item', 'ember-view', 'tripleToggle'],
+					labelContentBinding:  'MFT.locale.label.view_settings_settings_system_language',
+					tButtonValue:		 0,
+					tButtonRange: 		 3,
+					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_system_language_engEspFr',
+					labelDisabled: 		 true,
+					tButtonDisabled:	   true
+				}	
+			},
+			{				
+				type:	MFT.LabelPlusToggleButton,
+				params:{
+					classNames:			['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
+					tButtonValueBinding:	'MFT.SettingsModel.temperatureType',
+					tButtonValueBinding:	'MFT.SettingsModel.distanceType',
+					tButtonRange:			2,
+					labelContentBinding:	'MFT.locale.label.view_settings_settings_system_distance',
+					tButtonLabelsBinding:	'MFT.locale.label.view_settings_settings_system_distance_kmMi',
+					labelDisabledBinding: 	'MFT.helpMode',
+					tButtonDisabledBinding:  'MFT.helpMode'
+				}										
 			},
 			{
-				type:		MFT.Label,
-				params:		{
-					contentBinding:	 'MFT.locale.label.view_settings_settings_system_distance',
-					icon:		'images/settings/ico_distance.png',
-					disabled:    true
-				}							
-			},
-			{
-				type:		MFT.Label,
-				params:		{
-					contentBinding:	 'MFT.locale.label.view_settings_settings_system_temperature',
-					icon:		'images/settings/ico_temperature.png',
-					disabled:    true
+				type:	MFT.LabelPlusToggleButton,
+				params:{
+					classNames:			['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
+					tButtonValueBinding:	'MFT.SettingsModel.temperatureType',
+					tButtonRange:			2,
+					labelContentBinding:	'MFT.locale.label.view_settings_settings_system_temperature',
+					tButtonLabelsBinding:	'MFT.locale.label.view_settings_settings_system_temperature_frCel',
+					labelDisabledBinding: 	'MFT.helpMode',
+					tButtonDisabledBinding:  'MFT.helpMode'
 				}
 			},
-				{
+			{
 				type:		MFT.Label,
 				params:		{
 					classNames:  ['list-item','big-ico'],
 					contentBinding:	 'MFT.locale.label.view_settings_settings_system_systemPrompt',
 					icon:	    'images/settings/ico_plus-minus-pannel-disabled.png',
+					templateName: 'icon',
 					disabled:    true
 				}
 			},
-			{
-				type:		MFT.Label,
+			{				
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
-					contentBinding:	 'MFT.locale.label.view_settings_settings_system_touch',
-					icon:	   'images/settings/ico_on-off-wide.png',
-					disabled:    true
-				}
-			},
-			{
-				type:		MFT.Label,
-				params:		{
-						content:	'Touch Panel Button Beep',
-					icon:	   'images/settings/ico_on-off-wide.png',
-					disabled:    true
-				}
+					classNames:			['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
+					labelContentBinding:  'MFT.locale.label.view_settings_settings_system_touch',
+					tButtonValue:		 0,
+					tButtonRange: 		 2,
+					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_system_onOff',
+					labelDisabled: 		 true,
+					tButtonDisabled:	   true
+				}	
 			},
 			{
 				type:		MFT.Button,
 				params:		{
 					className:   'button',
 					textBinding: 'MFT.locale.label.view_settings_settings_system_keyboardLayout',
-					arrow:	   true,
+					templateName: 'arrow',
 					goToState:   'keyboardLayout',
 					action:	  'onChildState',
 					target:	  'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode',
+					helpMode: true,
 					onDown: false
 				}
 			},
@@ -113,11 +119,11 @@ MFT.SettingsSettingsSystemView = Em.ContainerView.create(MFT.LoadableView,{
 
 					className:  'button',
 					textBinding: 'MFT.locale.label.view_settings_settings_system_installApplications',
-					arrow:	  true,
+					templateName: 'arrow',
 					goToState:  'installApplications',
 					action:	 'onChildState',
 					target:	 'MFT.SettingsController',
-					disabledBinding: 'MFT.helpMode',
+					helpMode: true,
 					onDown: false
 				}
 			},
@@ -126,7 +132,7 @@ MFT.SettingsSettingsSystemView = Em.ContainerView.create(MFT.LoadableView,{
 				params:		{
 
 					className:   'button',
-					text:		'Master Reset',
+					textBinding: 'MFT.locale.label.view_settings_settings_system_masterReset',
 					disabled:	true
 				}
 			}

@@ -19,8 +19,13 @@ MFT.WidgetNavigationView = Em.View.extend({
 	
 	/** Define module template */
 	template: Ember.Handlebars.compile(
-            	'<div id="home_screen_arrow" {{bindAttr class="MFT.helpMode:help"}}></div>'+
-            	'<div id="home_main_mi">3.1mi</div>'+
-                '<div id="home_main_st">Main St</div>'		
-			)
+		'{{#unless FFW.Backend.isNavigationEnabled}}'+
+			'<div id="home_non_nav" {{bindAttr class="MFT.helpMode:help"}}></div>'+
+		'{{/unless}}'+
+		'{{#if FFW.Backend.isNavigationEnabled}}'+
+			'<div id="home_screen_arrow" {{bindAttr class="MFT.helpMode:help"}}></div>'+
+			'<div id="home_main_mi">{{MFT.NavigationController.model.distance_left.value}}{{MFT.NavigationController.model.distance_left.shortLable}}</div>'+
+			'<div id="home_main_st">Main St</div>'+
+		'{{/if}}'
+	)
 });

@@ -1,17 +1,18 @@
 /**
- * @name MFT.LablePlusToggleButton
+ * @name MFT.LabelPlusToggleButton
  * 
  * @desc Universal label component with toggle buttons for MFT application
  * 
  * @category	Controlls
- * @filesource	app/controlls/LablePlusToggleButton.js
+ * @filesource	app/controlls/LabelPlusToggleButton.js
  * @version		2.0
  *
  * @author		Maksym Getashchenko
  */
 
 
-MFT.LablePlusToggleButton = Em.ContainerView.extend({
+MFT.LabelPlusToggleButton = Em.ContainerView.extend({
+		
 	classNames:			['lableToggleButton'],
 
 	/** Label text */
@@ -19,6 +20,8 @@ MFT.LablePlusToggleButton = Em.ContainerView.extend({
 
 	/** Label ico */
 	labelIcon:			null,
+	
+	templateName: '',
 
 	/** Index of selected item */
 	tButtonValue:		'',
@@ -49,6 +52,7 @@ MFT.LablePlusToggleButton = Em.ContainerView.extend({
 		classNames:			['lableToggle'],
 		contentBinding:		'parentView.labelContent',
 		iconBinding:		'parentView.labelIcon',
+		templateNameBinding: 'parentView.templateName',
 		disabledBinding:	'parentView.labelDisabled',
 	}),
 

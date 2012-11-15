@@ -10,15 +10,12 @@
  * @author		Artem Petrosyan
  */
  
- MFT.HomeView = Em.ContainerView.extend({
+ MFT.HomeView = Em.ContainerView.create(MFT.LoadableView,{
  
  	elementId:	'home',
- 	
- 	classNames:	'block hidden',
- 	
+ 	 	
  	/** Bind class for visual representation */
 	classNameBindings: [
-		'MFT.States.home.active:active_state',
 		'MFT.helpMode:help'
 	],
 	

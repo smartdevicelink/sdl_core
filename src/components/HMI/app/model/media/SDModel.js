@@ -25,12 +25,12 @@ PlayList: MFT.Playlist.create({
 	selectedIndex: 					4,
 	
 	items: {
-		0:MFT.PlaylistItem.create({title: 'The Electric Broncos',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-		1:MFT.PlaylistItem.create({title: 'Track 2',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-		2:MFT.PlaylistItem.create({title: 'Track 3',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-		3:MFT.PlaylistItem.create({title: 'Track 4',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-		4:MFT.PlaylistItem.create({title: 'Track 5',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-		5:MFT.PlaylistItem.create({title: 'Track 6',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123})
+		0:MFT.PlaylistItem.create( MFT.locale.label.view_media_sd_playList_track1 ),
+		1:MFT.PlaylistItem.create( MFT.locale.label.view_media_sd_playList_track2 ),
+		2:MFT.PlaylistItem.create( MFT.locale.label.view_media_sd_playList_track3 ),
+		3:MFT.PlaylistItem.create( MFT.locale.label.view_media_sd_playList_track4 ),
+		4:MFT.PlaylistItem.create( MFT.locale.label.view_media_sd_playList_track5 ),
+		5:MFT.PlaylistItem.create( MFT.locale.label.view_media_sd_playList_track6 )
 	},
 	
 	homeWidgetIcon: 'images/media/sd-h-ico.png',
@@ -39,7 +39,7 @@ PlayList: MFT.Playlist.create({
 
 browseData : Em.Object.create({
 		
-		title: 'USB SD Drive DSK4',
+		titleBinding:  'MFT.locale.label.view_media_sd_browse_title',
 		
 		disableScrollbar: true,
 		
@@ -47,17 +47,70 @@ browseData : Em.Object.create({
 			{
 				type:MFT.Button,
 				params:{
-					text:'Music',
+					textBinding:  'MFT.locale.label.view_media_sd_browse_music',
 					disabled:	true
 				}
 			},
 			{
 				type:MFT.Button,
 				params:{
-					text:'Explore device',
+					textBinding:  'MFT.locale.label.view_media_sd_browse_exploreDevice',
 					disabled:	true
 				}
 			}
 		]
-	})
+	}),
+	
+	optionsData: Em.Object.create({
+				
+		view: 'sd',
+		
+		titleBinding: 'MFT.locale.label.view_media_usb_options_title',
+		
+		items:[
+				
+				{
+					type:		MFT.Button,
+	
+					params:{
+						textBinding: 'MFT.locale.label.view_media_usb_options_soundSettings',
+						templateName:		  'arrow',
+						action: 'turnOnSoundSettings',
+						target: 'MFT.MediaController'
+					}							
+				},
+				
+				{
+					type:		MFT.Button,
+	
+					params:{
+						textBinding: 'MFT.locale.label.view_media_usb_options_mediaPlayerSettings',
+						templateName:		  'arrow',
+						disabled: 	 true
+					}							
+				},
+				
+				{
+					type:		MFT.Button,
+	
+					params:{
+						textBinding: 'MFT.locale.label.view_media_usb_options_compression_deviceInformation',
+						templateName:		  'arrow',
+						disabled: 	 true
+					}							
+				},
+				
+				{
+					type:		MFT.LablePlusButton ,
+	
+					params:{
+						labelContentBinding:  'MFT.locale.label.view_media_usb_options_compression_updateIndex',
+						buttonTexBindingt:	'MFT.locale.label.view_media_usb_options_compression_start',
+						labelDisabled:		true,
+						buttonDisabled: 	   true
+					}							
+				}
+					
+			]
+		})
 });

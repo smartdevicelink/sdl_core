@@ -9,13 +9,43 @@
  *
  * @author		Igor Zhavoronkin
  */
+ 
 MFT.SiriusModel = Em.Object.create( {
 	
 	band:	MFT.RangedValue.create({value:-1, activeBand:0}),
 	
 	active: false,
+	
+	directTunestations: MFT.Playlist.create( {
+		/** Direct tune Data */
+		directTuneItems: {
+			0:MFT.PlaylistItem.create({frequency: 'Hard Radio',genre: 'Rock',title: 'Rock Together',artist: 'The Band'}),
+			1:MFT.PlaylistItem.create({frequency: 'Pop2K',genre: 'Rock',title: 'Rock Together',artist: 'The Band'}),
+			2:MFT.PlaylistItem.create({frequency: 'Moto FM',genre: 'Pop',title: 'Road',artist: 'Mario'}),
+			3:MFT.PlaylistItem.create({frequency: 'Kids Radio',genre: 'Pop',title: 'Butterfly',artist: 'Kids Band'}),
+			4:MFT.PlaylistItem.create({frequency: 'Lite Radio',genre: 'Techno',title: 'Sea Sound',artist: 'Mark Elton'}),
+			5:MFT.PlaylistItem.create({frequency: 'Home FM',genre: 'Rock',title: 'Take it easy',artist: 'No Rules'}),
+			6:MFT.PlaylistItem.create({frequency: 'Highway',genre: 'Electronic',title: 'Electro',artist: 'NFS Band'}),
+			7:MFT.PlaylistItem.create({frequency: 'Disco',genre: 'Rock',title: 'Rock Together',artist: 'The Band'}),
+			8:MFT.PlaylistItem.create({frequency: 'The Pulse',genre: 'Pop',title: 'Road',artist: 'Mario'}),
+			9:MFT.PlaylistItem.create({frequency: 'Elvis Radio',genre: 'Pop',title: 'Butterfly',artist: 'Kids Band'}),
+			10:MFT.PlaylistItem.create({frequency: 'Classic Vini',genre: 'Techno',title: 'Sea Sound',artist: 'Mark Elton'}),
+			11:MFT.PlaylistItem.create({frequency: 'The Loft',genre: 'Rock',title: 'Take it easy',artist: 'No Rules'}),
+			12:MFT.PlaylistItem.create({frequency: 'Deep Tracks',genre: 'Electronic',title: 'Electro',artist: 'NFS Band'}),
+			13:MFT.PlaylistItem.create({frequency: 'Jam On',genre: 'Rock',title: 'Rock Together',artist: 'The Band'}),
+			14:MFT.PlaylistItem.create({frequency: 'The Spectrum',genre: 'Pop',title: 'Road',artist: 'Mario'}),
+			15:MFT.PlaylistItem.create({frequency: 'The Heat',genre: 'R&B',title: 'Butterfly',artist: 'Kids Band'}),
+			16:MFT.PlaylistItem.create({frequency: 'BPM',genre: 'Dance',title: 'Sea Sound',artist: 'Mark Elton'}),
+			17:MFT.PlaylistItem.create({frequency: 'Home FM',genre: 'Rock',title: 'Take it easy',artist: 'No Rules'}),
+			18:MFT.PlaylistItem.create({frequency: 'Highway',genre: 'Electronic',title: 'Electro',artist: 'NFS Band'}),
+			19:MFT.PlaylistItem.create({frequency: 'Hard Radio',genre: 'Rock',title: 'Rock Together',artist: 'The Band'}),
+			20:MFT.PlaylistItem.create({frequency: 'Moto FM',genre: 'Pop',title: 'Road',artist: 'Mario'})
+		}
+		
+	}),
 			
 	sir1: MFT.Playlist.create( {
+		
 		selectedIndex: 					3,
 
 		items: {
@@ -25,29 +55,7 @@ MFT.SiriusModel = Em.Object.create( {
 			3:MFT.PlaylistItem.create({frequency: '1st Wave',channel: 'Channel 2',genre: 'Pop',title: 'Rainbow',artist: 'The Sky'}),
 			4:MFT.PlaylistItem.create({frequency: 'Titanium',channel: 'Channel 34',genre: 'Rock',title: 'The Spring',artist: 'Jessica Rocky',logo: 'images/media/sirius-logo.png'}),
 			5:MFT.PlaylistItem.create({frequency: 'Margvlle',channel: 'Channel 1',genre: 'Classic',title: 'Tenth Symphony',artist: 'Dr. Classic'})					
-		},
-		
-		/** Direct tune dial station matrix */
-		directTunes: [
-			[1,1,6],
-			[1,4,5],
-			[3,2,5],
-			[3,8,6],
-			[7,2,4],
-			[7,3,9]
-		],
-		
-		/** Direct tune Data */
-		directTuneItems: {
-			116:MFT.PlaylistItem.create({frequency: 'Hard Radio',channel: 'Channel 116',genre: 'Rock',title: 'Rock Together',artist: 'The Band'}),
-			145:MFT.PlaylistItem.create({frequency: 'Moto FM',channel: 'Channel 145',genre: 'Pop',title: 'Road',artist: 'Mario'}),
-			325:MFT.PlaylistItem.create({frequency: 'Kids Radio',channel: 'Channel 325',genre: 'Pop',title: 'Butterfly',artist: 'Kids Band'}),
-			386:MFT.PlaylistItem.create({frequency: 'Lite Radio',channel: 'Channel 386',genre: 'Techno',title: 'Sea Sound',artist: 'Mark Elton'}),
-			724:MFT.PlaylistItem.create({frequency: 'Home FM',channel: 'Channel 724',genre: 'Rock',title: 'Take it easy',artist: 'No Rules'}),
-			739:MFT.PlaylistItem.create({frequency: 'Highway',channel: 'Channel 739',genre: 'Electronic',title: 'Electro',artist: 'NFS Band'})
 		}
-		
-		
 	}),
 	
 	sir2: MFT.Playlist.create( {
@@ -60,26 +68,6 @@ MFT.SiriusModel = Em.Object.create( {
 			3:MFT.PlaylistItem.create({frequency: 'Pop Fm',channel: 'Channel 2',genre: 'Pop',title: 'Angels',artist: 'Michael Johnson'}),
 			4:MFT.PlaylistItem.create({frequency: 'Mix',channel: 'Channel 39',genre: 'Rock',title: 'Hello From Odessa',artist: 'The Black Sea'}),
 			5:MFT.PlaylistItem.create({frequency: 'Classic FM',channel: 'Channel 2',genre: 'Classic',title: 'Tenth Symphony',artist: 'Dr. Classic'})					
-		},
-		
-		/** Direct tune dial station matrix */
-		directTunes: [
-			[1,1,6],
-			[1,4,5],
-			[3,2,5],
-			[3,8,6],
-			[7,2,4],
-			[7,3,9]
-		],
-		
-		/** Direct tune Data */
-		directTuneItems: {
-			116:MFT.PlaylistItem.create({frequency: 'Hard Radio',channel: 'Channel 116',genre: 'Rock',title: 'Rock Together',artist: 'The Band'}),
-			145:MFT.PlaylistItem.create({frequency: 'Moto FM',channel: 'Channel 145',genre: 'Pop',title: 'Road',artist: 'Mario'}),
-			325:MFT.PlaylistItem.create({frequency: 'Kids Radio',channel: 'Channel 325',genre: 'Pop',title: 'Butterfly',artist: 'Kids Band'}),
-			386:MFT.PlaylistItem.create({frequency: 'Lite Radio',channel: 'Channel 386',genre: 'Techno',title: 'Sea Sound',artist: 'Mark Elton'}),
-			724:MFT.PlaylistItem.create({frequency: 'Home FM',channel: 'Channel 724',genre: 'Rock',title: 'Take it easy',artist: 'No Rules'}),
-			739:MFT.PlaylistItem.create({frequency: 'Highway',channel: 'Channel 739',genre: 'Electronic',title: 'Electro',artist: 'NFS Band'})
 		}
 	}),
 	
@@ -93,32 +81,12 @@ MFT.SiriusModel = Em.Object.create( {
 			3:MFT.PlaylistItem.create({frequency: 'Maximum',channel: 'Channel 4',genre: 'Pop',title: 'Come with me',artist: 'The Bees'}),
 			4:MFT.PlaylistItem.create({frequency: 'Modern',channel: 'Channel 37',genre: 'Rock',title: 'The Spring',artist: 'Jessics Rocky'}),
 			5:MFT.PlaylistItem.create({frequency: 'Nostalgie',channel: 'Channel 32',genre: 'Classic',title: 'Tenth Symphony',artist: 'Dr. Classic'})					
-		},
-		
-		/** Direct tune dial station matrix */
-		directTunes: [
-			[1,1,6],
-			[1,4,5],
-			[3,2,5],
-			[3,8,6],
-			[7,2,4],
-			[7,3,9]
-		],
-		
-		/** Direct tune Data */
-		directTuneItems: {
-			116:MFT.PlaylistItem.create({frequency: 'Hard Radio',channel: 'Channel 116',genre: 'Rock',title: 'Rock Together',artist: 'The Band'}),
-			145:MFT.PlaylistItem.create({frequency: 'Moto FM',channel: 'Channel 145',genre: 'Pop',title: 'Road',artist: 'Mario'}),
-			325:MFT.PlaylistItem.create({frequency: 'Kids Radio',channel: 'Channel 325',genre: 'Pop',title: 'Butterfly',artist: 'Kids Band'}),
-			386:MFT.PlaylistItem.create({frequency: 'Lite Radio',channel: 'Channel 386',genre: 'Techno',title: 'Sea Sound',artist: 'Mark Elton'}),
-			724:MFT.PlaylistItem.create({frequency: 'Home FM',channel: 'Channel 724',genre: 'Rock',title: 'Take it easy',artist: 'No Rules'}),
-			739:MFT.PlaylistItem.create({frequency: 'Highway',channel: 'Channel 739',genre: 'Electronic',title: 'Electro',artist: 'NFS Band'})
 		}
 	}),
 	
 	browseData : Em.Object.create({
 				
-		title: 'SIRIUS Channel Guide',
+		titleBinding: 'MFT.locale.label.view_media_sirius_browse_title',
 		
 		currentPage: 0,
 		
@@ -128,8 +96,9 @@ MFT.SiriusModel = Em.Object.create( {
 				{
 					type:MFT.Button,
 					params:{
-						text:'All Chanels',
-						rightText:	'158',
+						templateName: 'rightText',
+						textBinding: 'MFT.locale.label.view_media_sirius_browse_AllChanels',
+						rightText: '158',
 						icon: 'images/media/ico_plus.png',
 						disabled:	true
 					}
@@ -137,72 +106,81 @@ MFT.SiriusModel = Em.Object.create( {
 				{
 					type:MFT.Button,
 					params:{
-						text:'Pop',
-						rightText:	'13',
+						templateName: 'rightText',
+						textBinding: 'MFT.locale.label.view_media_sirius_browse_pop',
+						rightText: '13',
 						icon: 'images/media/ico_plus.png',
 						disabled:	true
 					}
 				},{
 					type:MFT.Button,
 					params:{
-						text:'Rock',
-						rightText:	'24',
+						templateName: 'rightText',
+						textBinding: 'MFT.locale.label.view_media_sirius_browse_rock',
+						rightText: '24',
 						icon: 'images/media/ico_plus.png',
 						disabled:	true
 					}
 				},{
 					type:MFT.Button,
 					params:{
-						text:'Hip-Hop / R&B',
-						rightText:	'6',
+						templateName: 'rightText',
+						textBinding: 'MFT.locale.label.view_media_sirius_browse_hipHop',
+						rightText: '6',
 						icon: 'images/media/ico_plus.png',
 						disabled:	true
 					}
 				},{
 					type:MFT.Button,
 					params:{
-						text:'Dance / Electrinic',
-						rightText:	'3',
+						templateName: 'rightText',
+						textBinding: 'MFT.locale.label.view_media_sirius_browse_dance',
+						rightText: '3',
 						icon: 'images/media/ico_plus.png',
 						disabled:	true
 					}
 				},{
 					type:MFT.Button,
 					params:{
-						text:'Classic',
-						rightText:	'235',
+						templateName: 'rightText',
+						textBinding: 'MFT.locale.label.view_media_sirius_browse_classic',
+						rightText: '235',
 						icon: 'images/media/ico_plus.png',
 						disabled:	true
 					}
 				},{
 					type:MFT.Button,
 					params:{
-						text:'Retro',
-						rightText:	'43',
+						templateName: 'rightText',
+						textBinding: 'MFT.locale.label.view_media_sirius_browse_retro',
+						rightText: '43',
 						icon: 'images/media/ico_plus.png',
 						disabled:	true
 					}
 				},{
 					type:MFT.Button,
 					params:{
-						text:'Trance',
-						rightText:	'56',
+						templateName: 'rightText',
+						textBinding: 'MFT.locale.label.view_media_sirius_browse_trance',
+						rightText: '56',
 						icon: 'images/media/ico_plus.png',
 						disabled:	true
 					}
 				},{
 					type:MFT.Button,
 					params:{
-						text:'Jazz',
-						rightText:	'201',
+						templateName: 'rightText',
+						textBinding: 'MFT.locale.label.view_media_sirius_browse_jazz',
+						rightText: '201',
 						icon: 'images/media/ico_plus.png',
 						disabled:	true
 					}
 				},{
 					type:MFT.Button,
 					params:{
-						text:'Disco',
-						rightText:	'17',
+						templateName: 'rightText',
+						textBinding: 'MFT.locale.label.view_media_sirius_browse_disco',
+						rightText: '17',
 						icon: 'images/media/ico_plus.png',
 						disabled:	true
 					}
@@ -223,8 +201,9 @@ MFT.SiriusModel = Em.Object.create( {
 	
 					params:{
 						textBinding: 'MFT.locale.label.view_media_sirius_options_soundSettings',
-						arrow:		true,
-						disabled: 	 true
+						templateName:		  'arrow',
+						action: 'turnOnSoundSettings',
+						target: 'MFT.MediaController'
 					}							
 				},
 				
@@ -235,7 +214,7 @@ MFT.SiriusModel = Em.Object.create( {
 						labelContentBinding:  'MFT.locale.label.view_media_sirius_options_setCategory',
 						buttonTexBindingt:	'MFT.locale.label.view_media_sirius_options_allChannels',
 						labelDisabled:		true,
-						buttonArrow:		  true,
+						templateName:		  'arrow',
 						buttonDisabled: 	   true
 					}							
 				},
@@ -247,14 +226,14 @@ MFT.SiriusModel = Em.Object.create( {
 						labelContentBinding:  'MFT.locale.label.view_media_sirius_options_parentalLockout',
 						buttonTexBindingt:	'MFT.locale.label.view_media_sirius_options_changePIN',
 						labelDisabled:		true,
-						buttonArrow:		  true,
+						templateName:		  'arrow',
 						buttonDisabled: 	   true
 					}							
 				},
 						
 				{
 								
-					type:		MFT.LablePlusToggleButton,
+					type:		MFT.LabelPlusToggleButton,
 					params:		{
 						labelContentBinding:  'MFT.locale.label.view_media_sirius_options_alerts',
 						tButtonValue:		 1,

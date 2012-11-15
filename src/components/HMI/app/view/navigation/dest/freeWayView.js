@@ -12,14 +12,10 @@
 
 MFT.NavigationDestinationFreeWayView = Em.ContainerView.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.navigation.dest.freeWay.active:active_state','MFT.helpMode',],
+	classNameBindings: ['MFT.helpMode'],
 	
 	elementId:		'view_navi_destination_freeWay',
-	
-	classNames:	   ['hidden'],
-	
-	stateObj: MFT.States.navigation.dest.freeWay,
-	
+		
 	childViews: [
 		'heading',
 		'backButton',

@@ -35,7 +35,7 @@ MFT.LablePlusButton = Em.ContainerView.extend({
 	buttonRightText: null,
 	
 	/** Enable of button arrow**/
-	buttonArrow: null,
+	templateName: 'text',
 	
 	/** Button icon**/
 	buttonIcon: null,
@@ -79,7 +79,7 @@ MFT.LablePlusButton = Em.ContainerView.extend({
 		actionBinding: 'parentView.buttonAction',
 		targetBinding: 'parentView.buttonTarget',		
 		rightTextBinding: 'parentView.buttonRightText',
-		arrowBinding:	'parentView.buttonArrow',
+		templateNameBinding:	'parentView.templateName',
 		iconBinding:	'parentView.buttonIcon',	
 		timerBinding:	'parentView.buttonTimer',	
 		touchleaveBinding:	'parentView.buttonTouchleave',

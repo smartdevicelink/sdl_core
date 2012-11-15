@@ -27,11 +27,35 @@ MFT.NavigationController = Em.Object.create({
 			
 			return;
 		}
+		this.turnOffMenu();
 		this.model.typeView.toggleIndicators();
 	},
 	
 	toggleMapView: function(){
+		this.turnOffMenu();
 		this.model.mapView.toggleIndicators();
+	},
+	
+	turnOnMenu: function(){
+		MFT.States.goToState('navigation.menu');
+	},
+	
+	turnOffMenu: function(){
+		if(MFT.States.navigation.menu.active){
+			MFT.States.back();
+		}
+	},
+	
+	onHelpMode: function(){
+		if(MFT.helpMode)this.turnOffMenu();
+	}.observes('MFT.helpMode'),
+	
+	turnOnNavSettings: function(){
+		MFT.States.goToState('settings.settings.snavigation');
+	},
+	
+	turnOnSiriusLink: function(){
+		MFT.States.goToState('info.travelLink');
 	},
 	
 	toggleMute: function(){
@@ -39,10 +63,12 @@ MFT.NavigationController = Em.Object.create({
 	},
 	
 	zoomIn: function(){
+		this.turnOffMenu();
 		this.model.zoomRate.zoomIn();
 	},
 	
 	zoomOut: function(){
+		this.turnOffMenu();
 		this.model.zoomRate.zoomOut();
 	},
 	

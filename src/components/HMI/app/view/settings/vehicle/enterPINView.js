@@ -11,12 +11,10 @@
  */
 
 MFT.SettingsVehicleEnableValetModeEnteringPINView = Em.ContainerView.create(MFT.LoadableView,{
-	classNameBindings:	['MFT.States.settings.vehicle.enterPIN.active:active_state','MFT.helpMode'],
+	classNameBindings:	['MFT.helpMode','MFT.localization'],
 	classNames:		   ['hidden'],
 	elementId:			'settings_vehicle_enableValetMode_enteringPin',
-	
-	stateObj: MFT.States.settings.vehicle.enterPIN,
-	
+		
 	childViews:		   [
 							  'backButton',
 							  'topTitile',

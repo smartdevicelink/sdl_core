@@ -72,10 +72,23 @@ MFT.ClimateTemperature = Em.Object.extend({
 	 		} else if (this.value <= this.minValue) {
 	 			this.set('valueStr', 'LO');
 	 		} else {
-	 			this.set('valueStr', this.value+'&deg;')
+	 			if ( MFT.SettingsModel.temperatureType ) {
+	 				this.set('valueStr', this.toCelsius(this.value)+'&deg;');
+	 			} else {
+	 				this.set('valueStr', this.value+'&deg;');
+	 			}
 	 		}
  		} else {
  			this.set('valueStr','OFF');
  		}	
- 	}.observes('value','enabled')
+ 	}.observes('value','enabled','MFT.SettingsModel.temperatureType'),
+ 	
+ 	/**
+ 	 * convert temperature to Celsius
+ 	 * @return Number
+ 	 */
+ 	toCelsius: function(temp) {
+ 		temp = ( temp - 32 ) * 0.5;
+ 		return temp.toFixed(1);
+ 	}
 })
