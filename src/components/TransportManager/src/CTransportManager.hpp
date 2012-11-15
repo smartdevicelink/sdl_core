@@ -15,6 +15,16 @@ namespace NsAppLink
     {
         class IDeviceAdapter;
 
+        // Some constants
+
+        const uint8_t PROTOCOL_HEADER_V1_SIZE = 8;
+        const uint8_t PROTOCOL_HEADER_V2_SIZE = 12;
+
+        const uint8_t PROTOCOL_VERSION_1 = 0x01;
+        const uint8_t PROTOCOL_VERSION_2 = 0x02;
+
+        // Class definition
+
         /**
          * @brief Transport manager implementation.
          **/
@@ -333,6 +343,73 @@ namespace NsAppLink
                  * @brief Connection Handle
                  **/
                 tConnectionHandle mConnectionHandle;
+            };
+
+            /**
+             * @brief Incapsulates frame data for each connection
+             **/
+            struct SFrameDataForConnection
+            {
+                /**
+                 * @brief Constructor
+                 *
+                 **/
+                SFrameDataForConnection(tConnectionHandle ConnectionHandle);
+
+                /**
+                 * @brief Destructor
+                 *
+                 **/
+                ~SFrameDataForConnection();
+
+                /**
+                 * @brief Appends new data to the buffer
+                 *
+                 * @param Data Data to append
+                 * @param DataSize Size of data
+                 * @return void
+                 **/
+                void appendFrameData(const uint8_t * Data, size_t DataSize);
+
+                /**
+                 * @brief Extracts single frame and returns it
+                 *
+                 * @param[out] Data Pointer to the frame data
+                 * @param[out] size_t Size of the returned frame.
+                 *
+                 * @return bool Result of extract operation
+                 *
+                 * @warning Memory for this buffer is allocated in the method call but must be freed
+                 *          when it does not needed by caller component ONLY if method returns true
+                 **/
+                bool extractFrame(uint8_t * Data, size_t & DataSize);
+
+                /**
+                 * @brief Pointer to the data buffer
+                 **/
+                uint8_t *mpDataBuffer;
+
+                /**
+                 * @brief Size of the data in the buffer
+                 **/
+                size_t mDataSize;
+
+                /**
+                 * @brief Size of the data buffer
+                 **/
+                size_t mBufferSize;
+
+                /**
+                 * @brief Handle of the connection
+                 *
+                 * @note Used only for debugging purposes
+                 **/
+                tConnectionHandle mConnectionHandle;
+
+                /**
+                 * @brief Logger
+                 **/
+                Logger mLogger;
             };
 
             /**

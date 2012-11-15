@@ -838,3 +838,111 @@ void CTransportManager::sendDeviceCallback(const CTransportManager::SDeviceListe
     pthread_mutex_unlock(&mDeviceListenersMutex);
     LOG4CPLUS_INFO_EXT(mLogger, "Triggering device callback processing");
 }
+
+CTransportManager::SFrameDataForConnection::SFrameDataForConnection(tConnectionHandle ConnectionHandle)
+: mDataSize(0)
+, mConnectionHandle(ConnectionHandle)
+, mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager")))
+{
+    mBufferSize = 512;
+    mpDataBuffer = new uint8_t[mBufferSize];
+
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Initialized frame data for connection container");
+}
+
+CTransportManager::SFrameDataForConnection::~SFrameDataForConnection()
+{
+    if(0 != mpDataBuffer)
+    {
+        delete mpDataBuffer;
+        mpDataBuffer = 0;
+    }
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "Frame data for connection container destroyed");
+}
+
+void CTransportManager::SFrameDataForConnection::appendFrameData(const uint8_t* Data, size_t DataSize)
+{
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "Appending data to container. DataSize: " << DataSize);
+
+    // Checking that data can be added to existing buffer
+    if( (mDataSize+DataSize) <= mBufferSize)
+    {
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "Data can be appended to existing buffer. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize<<", DataSize: " << DataSize);
+        memcpy(&mpDataBuffer[mDataSize], Data, DataSize);
+        mDataSize += DataSize;
+    }
+    else
+    {
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "Data cannot be appended to existing buffer. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize<<", DataSize: " << DataSize);
+
+        size_t newSize = mBufferSize * 3;
+        uint8_t *newBuffer = new uint8_t[newSize];
+
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "New buffer allocated. Buffer size: "<<newSize<<", was: "<<mBufferSize);
+
+        memcpy(newBuffer, mpDataBuffer, mDataSize);
+        memcpy(&newBuffer[mDataSize], Data, DataSize);
+        delete mpDataBuffer;
+        mpDataBuffer = 0; // Paranoid mode on
+
+        mpDataBuffer = newBuffer;
+        mDataSize = mDataSize+DataSize;
+        mBufferSize = newSize;
+    }
+
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "Data appended. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize);
+}
+
+bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t * Data, size_t & DataSize)
+{
+    if(mDataSize < PROTOCOL_HEADER_V1_SIZE)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, mConnectionHandle, "Not enough data for version in the buffer. No changes was made");
+        return false;
+    }
+
+    // Extracting version
+    uint8_t firstByte = mpDataBuffer[0];
+    uint8_t version = firstByte >> 4;
+
+    uint8_t offset = sizeof(uint32_t);
+    uint32_t frameDataSize  = mpDataBuffer[offset++] << 24;
+    frameDataSize  |= mpDataBuffer[offset++] << 16;
+    frameDataSize  |= mpDataBuffer[offset++] << 8;
+    frameDataSize  |= mpDataBuffer[offset++];
+
+    size_t requiredDataSize = 0;
+
+    if(version == PROTOCOL_VERSION_1)
+    {
+        requiredDataSize = (PROTOCOL_HEADER_V1_SIZE + frameDataSize);
+    }
+    else if(version == PROTOCOL_VERSION_2)
+    {
+        requiredDataSize = (PROTOCOL_HEADER_V2_SIZE + frameDataSize);
+    }
+    else
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, mConnectionHandle, "Unsupported version received: " << version);
+        return false;
+        //TODO: Think about what to do in that case. Possible solution - signal about that and terminate connection
+        // For that method CDeviceAdapter::StopConnection can be used (must be unprotected before)
+    }
+
+    if(mDataSize < requiredDataSize)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, mConnectionHandle, "Frame canot be extracted. Its size: " << requiredDataSize << ", Available data size: "<<mDataSize);
+        return false;
+    }
+
+    // Extracting frame from buffer
+    Data = new uint8_t[requiredDataSize];
+    memcpy(Data, mpDataBuffer, requiredDataSize);
+    DataSize = frameDataSize;
+
+    // Shifting buffer
+    mDataSize -= requiredDataSize;
+    memmove(mpDataBuffer, &mpDataBuffer[requiredDataSize], mDataSize);
+
+    return true;
+}
