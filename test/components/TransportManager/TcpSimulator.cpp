@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <getopt.h>
 
+
 // -------------------------------------------------------------------------
 
 /**
@@ -20,23 +21,56 @@ struct Config
 {
     std::string ipAddress;
     int port;
+    int protocolVersion;
     uint32_t actualDataSize;
     uint32_t reportedDataSize;    
 };
 
 /**
- * @brief The header of the protocol
+ * @brief The common part of the header for both protocol versions 
  */
-struct PacketHeader
+struct PacketHeaderBase
 {
     uint8_t version:4;
     bool compressionFlag:1;
     uint8_t frameType:3;
     uint8_t serviceType;
-    uint8_t frameData;
+    uint8_t frameData; 
     uint8_t sessionId;
     uint32_t dataSize;
+};
+
+/**
+ * @brief The header of the protocol version 1
+ */
+struct PacketHeaderV1
+{
+    PacketHeaderBase base;
+
+    // no additional fields
+};
+
+/**
+ * @brief The header of the protocol version 2
+ */
+struct PacketHeaderV2
+{
+    PacketHeaderBase base;
+
     uint32_t messageId;
+};
+
+// -------------------------------------------------------------------------
+/**
+ * @brief Default config values
+ */
+const Config DefaultConfigValues = 
+{
+    std::string("127.0.0.1"),       // Default IP address
+    12345,                          // Default TCP port
+    2,                              // Default protocol version
+    32,                             // Default actual data size
+    32,                             // Default reported data size
 };
 
 // -------------------------------------------------------------------------
@@ -169,12 +203,22 @@ void CTranspMgrTcpClient::send(const void* pData, size_t dataSize)
 static void printUsage(const std::string &programName)
 {
     std::cout << "Usage: " << programName << " [OPTION]" << std::endl;
-    std::cout << "Send test packate to the TransportManager in order to test TCP Adapter" << std::endl;
+    std::cout << "Send test packet to the TransportManager in order to test TCP Adapter" << std::endl;
     std::cout << std::endl;
-    std::cout << "-i, --ip IP_ADDRESS           IP address where to send the packet" << std::endl;
-    std::cout << "-p, --port PORT_NUMBER        TCP port number" << std::endl;
-    std::cout << "-a, --actual-size SIZE        The real size of the data in the packate to send" << std::endl;
-    std::cout << "-r, --reported-size SIZE      The size of the packate which is written in the packate header" << std::endl;
+    std::cout << "-i, --ip IP_ADDRESS           IP address where to send the packet (Default: " 
+        << DefaultConfigValues.ipAddress << ")" << std::endl;
+
+    std::cout << "-p, --port PORT_NUMBER        TCP port number (Default: " 
+        << DefaultConfigValues.port << ")" << std::endl;
+
+    std::cout << "-v, --version [1 | 2]         Protocol version. (Default: " 
+        << DefaultConfigValues.protocolVersion << ")" << std::endl;
+
+    std::cout << "-a, --actual-size SIZE        The real size of the data in the packet to send (Default: "
+        << DefaultConfigValues.actualDataSize << ")" << std::endl;
+    
+    std::cout << "-r, --reported-size SIZE      The size of the packet which is written in the packet header (Default: " 
+        << DefaultConfigValues.reportedDataSize << ")" << std::endl;
 
     std::cout << "-h, --help                    Print this help" << std::endl << std::endl;
 }
@@ -190,22 +234,20 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
         {"help", no_argument, 0, 'h'},
         {"ip", required_argument, 0, 'i'},
         {"port", required_argument, 0, 'p'},
+        {"version", required_argument, 0, 'v'},
         {"actual-size", required_argument, 0, 'a'},
         {"reported-size", required_argument, 0, 'r'},
         {0, 0, 0, 0}
     };
 
-    pConfig->ipAddress = "127.0.0.1";       // default ip address
-    pConfig->port = 12345;                  // default port
-    pConfig->actualDataSize = 32;
-    pConfig->reportedDataSize = 32;
+    *pConfig = DefaultConfigValues;
 
     while (true)
     {
         int option_index = 0;
         int c;
     
-        c = getopt_long(argc, argv, "hi:p:a:r:", long_options, &option_index);
+        c = getopt_long(argc, argv, "hi:p:v:a:r:", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -234,6 +276,17 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
                 {
                     std::cout << "Error: port is missing" << std::endl;
                     result = false;
+                }
+                break;
+ 
+            case 'v':
+                if (optarg)
+                {
+                    pConfig->protocolVersion = atoi(optarg);
+                }
+                else 
+                {
+                    std::cout << "Default protocol version is" << DefaultConfigValues.protocolVersion << std::endl;
                 }
                 break;
  
@@ -274,11 +327,60 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
     return result;
 }
 
+// -------------------------------------------------------------------------
+
+static uint8_t* makePacket(const Config &config, int &packetSize)
+{
+    uint8_t *pBuff = 0;
+    PacketHeaderBase *pBase;
+    size_t headerSize;
+
+    if (config.protocolVersion == 1)
+    {
+        headerSize = sizeof(PacketHeaderV1);
+    }
+    else if (config.protocolVersion == 2)
+    {
+        headerSize = sizeof(PacketHeaderV2);
+    }
+    else
+    {
+        throw new std::string("Unsupported protocol version");
+    }
+    
+    packetSize = headerSize + config.actualDataSize;
+
+    pBuff = new uint8_t[packetSize];
+    pBase = (PacketHeaderBase*)pBuff;
+
+    pBase->version = config.protocolVersion;
+    pBase->compressionFlag = false;
+    pBase->frameType = 1;
+    pBase->serviceType = 0x0F;
+    pBase->frameData = 0;
+    pBase->sessionId = 0;
+    pBase->dataSize = config.reportedDataSize;            // The size of the data in the packet
+ 
+    if (config.protocolVersion == 2)
+    {
+        PacketHeaderV2 *pHeader = (PacketHeaderV2*)pBuff;
+
+        pHeader->messageId = 0;
+    }
+    
+    // just fill the data with the single value
+    memset(&(pBuff[headerSize]), 0xFF, config.actualDataSize);
+
+    return pBuff;
+}
+
 // ----------------------------------------------------------------------------
 
 int main(int argc, char **argv)
 {
     Config config;
+    uint8_t *pBuff = 0;
+    int buffSize;
 
     if (initConfig(argc, argv, &config) == false)
     {
@@ -286,34 +388,24 @@ int main(int argc, char **argv)
     }
 
     CTranspMgrTcpClient client(config.ipAddress, config.port);
-    
-    size_t totalBuffSize = sizeof(PacketHeader) + config.actualDataSize;
-    uint8_t *pBuff = new uint8_t[totalBuffSize];
-    PacketHeader *pHeader = (PacketHeader*)pBuff;
-
-    pHeader->version = 2;                                   // Protocol Version 2
-    pHeader->compressionFlag = false;                       // Uncompressed data
-    pHeader->frameType = 1;                                 // Single frame
-    pHeader->serviceType = 0x0F;                            // Bulk Data 
-    pHeader->frameData = 0;                                 // Reserved
-    pHeader->sessionId = 0;                                 // unknown
-    pHeader->dataSize = config.reportedDataSize;            // The size of the data in the packet
-    pHeader->messageId = 0;                                 // unknown
-
-    // just fill the data with the single value
-    memset(&(pBuff[sizeof(PacketHeader)]), 0xFF, config.actualDataSize);
-
+   
     try
     {
+        pBuff = makePacket(config, /*out*/buffSize);
+        
         client.connect();
 
-        client.send(pBuff, totalBuffSize);    
+        client.send(pBuff, buffSize);    
+
+        std::cout << "The packet has been sent successfully" << std::endl;
     }
     catch (std::string *pError)
     {
         std::cout << *pError << std::endl;
     }
         
+    delete pBuff;
+
     client.disconnect();
  
     return 0;

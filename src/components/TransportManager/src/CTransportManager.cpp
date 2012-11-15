@@ -2,6 +2,7 @@
 
 #include "CTransportManager.hpp"
 #include "CBluetoothAdapter.hpp"
+#include "CTCPAdapter.hpp"
 #include "TransportManagerLoggerHelpers.hpp"
 
 #include <algorithm>
@@ -34,6 +35,7 @@ mDevicesByAdapterMutex(),
 mDeviceAdaptersByConnectionHandle(),
 mDeviceAdaptersByConnectionHandleMutex()
 {
+    addDeviceAdapter(new CTCPAdapter(*this, *this));
     pthread_mutex_init(&mDataListenersMutex, 0);
     pthread_mutex_init(&mDeviceListenersMutex, 0);
     pthread_mutex_init(&mDeviceHandleGenerationMutex, 0);

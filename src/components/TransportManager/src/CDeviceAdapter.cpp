@@ -377,8 +377,10 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::waitForThreadsTermination(vo
     LOG4CPLUS_INFO_EXT(mLogger, "Connection threads terminated");
 }
 
-void NsAppLink::NsTransportManager::CDeviceAdapter::startConnection(NsAppLink::NsTransportManager::CDeviceAdapter::SConnection * Connection)
+bool NsAppLink::NsTransportManager::CDeviceAdapter::startConnection(NsAppLink::NsTransportManager::CDeviceAdapter::SConnection * Connection)
 {
+    bool isConnectionThreadStarted = false;
+
     if (0 != Connection)
     {
         tConnectionHandle newConnectionHandle = mHandleGenerator.generateNewConnectionHandle();
@@ -424,6 +426,8 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::startConnection(NsAppLink::N
                         if (0 == errorCode)
                         {
                             LOG4CPLUS_INFO_EXT(mLogger, "Connection thread started for connection " << newConnectionHandle << " (device " << newConnection->mDeviceHandle << ")");
+
+                            isConnectionThreadStarted = true;
                         }
                         else
                         {
@@ -458,6 +462,8 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::startConnection(NsAppLink::N
     {
         LOG4CPLUS_ERROR_EXT(mLogger, "Connection is null");
     }
+
+    return isConnectionThreadStarted;
 }
 
 void NsAppLink::NsTransportManager::CDeviceAdapter::stopConnection(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle)
@@ -649,25 +655,25 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::handleCommunication(const Ns
                                             {
                                                 bytesRead = recv(connectionSocket, buffer, sizeof(buffer), MSG_DONTWAIT);
 
-                                                if ((bytesRead < 0) &&
-                                                    ((EAGAIN == errno) ||
-                                                     (EWOULDBLOCK == errno)))
+                                                if (bytesRead > 0)
                                                 {
-                                                    bytesRead = 0;
+                                                    LOG4CPLUS_INFO_EXT(mLogger, "Received " << bytesRead << " bytes for connection " << ConnectionHandle);
+
+                                                    mListener.onFrameReceived(this, ConnectionHandle, buffer, static_cast<size_t>(bytesRead));
                                                 }
-
-                                                if (bytesRead >= 0)
+                                                else if (bytesRead < 0)
                                                 {
-                                                    if (bytesRead > 0)
+                                                    if ((EAGAIN != errno) &&
+                                                        (EWOULDBLOCK != errno))
                                                     {
-                                                        LOG4CPLUS_INFO_EXT(mLogger, "Received " << bytesRead << " bytes for connection " << ConnectionHandle);
+                                                        LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "recv() failed for connection " << ConnectionHandle);
 
-                                                        mListener.onFrameReceived(this, ConnectionHandle, buffer, static_cast<size_t>(bytesRead));
+                                                        connection->mTerminateFlag = true;
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "recv() failed for connection " << ConnectionHandle);
+                                                    LOG4CPLUS_INFO_EXT(mLogger, "Connection " << ConnectionHandle << " closed by remote peer");
 
                                                     connection->mTerminateFlag = true;
                                                 }
@@ -780,14 +786,11 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::handleCommunication(const Ns
                 LOG4CPLUS_ERROR_EXT(mLogger, "Device handle for connection " << ConnectionHandle << " is invalid");
             }
 
-            if (0 != close(connectionSocket))
-            {
-                LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to close RFCOMM socket for connection " << ConnectionHandle);
-            }
+            close(connectionSocket);
         }
         else
         {
-            LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Socket is invalid for connection " << ConnectionHandle);
+            LOG4CPLUS_ERROR_EXT(mLogger, "Socket is invalid for connection " << ConnectionHandle);
         }
 
         if (true == isPipeCreated)
@@ -806,6 +809,29 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::handleCommunication(const Ns
     {
         LOG4CPLUS_ERROR_EXT(mLogger, "Connection " << ConnectionHandle << " is not valid");
     }
+}
+
+void NsAppLink::NsTransportManager::CDeviceAdapter::updateClientDeviceList(void )
+{
+    LOG4CPLUS_INFO_EXT(mLogger, "Updating client device list");
+
+    tInternalDeviceList clientDeviceList;
+
+    pthread_mutex_lock(&mDevicesMutex);
+
+    for (tDeviceMap::const_iterator di = mDevices.begin(); di != mDevices.end(); ++di)
+    {
+        const SDevice * device = di->second;
+
+        if (0 != device)
+        {
+            clientDeviceList.push_back(SInternalDeviceInfo(di->first, device->mName, device->mUniqueDeviceId));
+        }
+    }
+
+    pthread_mutex_unlock(&mDevicesMutex);
+
+    mListener.onDeviceListUpdated(this, clientDeviceList);
 }
 
 void NsAppLink::NsTransportManager::CDeviceAdapter::createConnectionsListForDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, std::vector<NsAppLink::NsTransportManager::CDeviceAdapter::SConnection *> & ConnectionsList)
