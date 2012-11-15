@@ -245,6 +245,32 @@ FFW.UI = FFW.RPCObserver.create({
 
 		}
 
+		if (request.method == "UI.SetMediaClockTimer") {
+
+			resultCode = MFT.MediaController.applinkSetMediaClockTimer(request.params);
+
+		}
+
+		if (request.method == "UI.GetCapabilities") {
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result"	:	{
+					"capabilities":{
+						"DisplayCapabilities"	: "CID",
+						"HmiZoneCapabilities"	: "FRONT"
+					},
+
+					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+				}
+			};
+			this.client.send(JSONMessage);
+
+			resultCode = null;
+		}
+
 		if(resultCode){
 
 			// send repsonse

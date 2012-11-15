@@ -138,6 +138,23 @@ FFW.VR = FFW.RPCObserver.create({
 			};
 			this.client.send(JSONMessage);
 		}
+
+		if (request.method == "VR.GetCapabilities") {
+
+			// send repsonse
+			var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	request.id,
+				"result"	:	{
+					"capabilities":{
+						"VrCapabilities "	: {"some command"},
+					},
+
+					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+				}
+			};
+			this.client.send(JSONMessage);
+		}
 		
 	}
 })
