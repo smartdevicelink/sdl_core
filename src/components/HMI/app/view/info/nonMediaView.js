@@ -81,6 +81,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 			
 			childViews: [
 				'optionsButton',
+				'routeInfoButton',
 				'softButton1',
 				'softButton2',
 				'softButton3',
@@ -90,6 +91,18 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 			
 			optionsButton: MFT.Button.extend({
 				text: 'Options',
+				
+				templateName: 'arrow',
+				
+				goToState:	'options',
+				action:		'onChildState',
+				target:		'MFT.InfoController'
+			}),
+			
+			routeInfoButton: MFT.Button.extend({
+				text: 'Route Info',
+				
+				hidden:	true,
 				
 				templateName: 'arrow'
 			}),
