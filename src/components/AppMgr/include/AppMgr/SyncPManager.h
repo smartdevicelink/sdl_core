@@ -12,6 +12,7 @@ class SyncPManager
 public:
 
     typedef std::vector<std::string> PData;
+    typedef std::vector<std::string> RawData;
 
     SyncPManager();
 
@@ -20,6 +21,10 @@ public:
     void setPData(const PData& data);
 
     const PData& getPData() const;
+
+    void setRawData(const RawData& data);
+
+    RawData getRawData() const;
 
 private:
 
