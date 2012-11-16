@@ -110,7 +110,7 @@ FFW.TTS = FFW.RPCObserver.create({
 			this.client.send(JSONMessage);
 		}
 
-
+		/*
 		if (request.method == "TTS.GetCapabilities") {
 
 			// send repsonse
@@ -127,5 +127,6 @@ FFW.TTS = FFW.RPCObserver.create({
 			};
 			this.client.send(JSONMessage);
 		}
+		*/
 	}
 })

@@ -250,7 +250,7 @@ FFW.UI = FFW.RPCObserver.create({
 			resultCode = MFT.MediaController.applinkSetMediaClockTimer(request.params);
 
 		}
-
+		/*
 		if (request.method == "UI.GetCapabilities") {
 
 			// send repsonse
@@ -270,6 +270,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 			resultCode = null;
 		}
+		*/
 
 		if(resultCode){
 

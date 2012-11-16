@@ -138,7 +138,7 @@ FFW.VR = FFW.RPCObserver.create({
 			};
 			this.client.send(JSONMessage);
 		}
-
+		/*
 		if (request.method == "VR.GetCapabilities") {
 
 			// send repsonse
@@ -155,6 +155,7 @@ FFW.VR = FFW.RPCObserver.create({
 			};
 			this.client.send(JSONMessage);
 		}
+		*/
 		
 	}
 })

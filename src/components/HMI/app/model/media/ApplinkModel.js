@@ -48,7 +48,7 @@ MFT.ApplinkModel = Em.Object.create({
 		cuttTime:	0,
 		countUp:	true,
 		pause:		true
-	})
+	}),
 
 	startTimer: function(){
 		if(this.showInfo.pause){
