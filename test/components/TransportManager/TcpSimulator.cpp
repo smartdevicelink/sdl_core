@@ -329,6 +329,20 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
 
 // -------------------------------------------------------------------------
 
+static uint32_t uint32ToNetOrder(const uint32_t value)
+{
+    uint32_t result = 0;
+
+    result |= (value & 0x000000FF) << 24;
+    result |= (value & 0x0000FF00) << 8;
+    result |= (value & 0x00FF0000) >> 8;
+    result |= (value & 0xFF000000) >> 24;
+
+    return result;
+}
+
+// -------------------------------------------------------------------------
+
 static uint8_t* makePacket(const Config &config, int &packetSize)
 {
     uint8_t *pBuff = 0;
@@ -359,7 +373,7 @@ static uint8_t* makePacket(const Config &config, int &packetSize)
     pBase->serviceType = 0x0F;
     pBase->frameData = 0;
     pBase->sessionId = 0;
-    pBase->dataSize = config.reportedDataSize;            // The size of the data in the packet
+    pBase->dataSize = uint32ToNetOrder(config.reportedDataSize);           // convert data size to network order 
  
     if (config.protocolVersion == 2)
     {
