@@ -1,0 +1,15 @@
+/**
+ * CSS for AppLink aplications
+ */
+ 
+#info_nonMedia {
+	width: 800px;
+	height: 480px;
+}
+
+#info_nonMedia .inner_content {
+	left: 180px;
+	top: 90px;
+	width: 600px;
+	height: 300px;
+}

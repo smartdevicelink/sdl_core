@@ -121,7 +121,11 @@ var StateManager = Em.StateManager.extend({
 		
 		apps: Em.State.create({
 			
-		})		
+		}),
+		
+		nonMedia: Em.State.create({
+		
+		})
 	}),
 	
 	/** settings state */
