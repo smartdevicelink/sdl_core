@@ -7,6 +7,7 @@
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 
 #include <stddef.h>
+#include <stdio.h>
 
 using ::testing::_;
 using ::testing::Invoke;
@@ -38,21 +39,6 @@ namespace test { namespace components { namespace TransportManager { namespace T
     }
 
     // ---------------- TEST CLASSES ---------------- //
-
-    /**
-     * @brief The header of the protocol
-     */
-    struct PacketHeaderV2
-    {
-        uint8_t version:4;
-        bool compressionFlag:1;
-        uint8_t frameType:3;
-        uint8_t serviceType;
-        uint8_t frameData;
-        uint8_t sessionId;
-        uint32_t dataSize;
-        uint32_t messageId;
-    };
 
     /**
      * @brief Class that represents custom device adapter that will send known data
@@ -108,30 +94,44 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
             // Send three frames to transport manager
 
-            size_t totalBuffSize = sizeof(PacketHeaderV2) + 200;
-            uint8_t *pBuff = new uint8_t[totalBuffSize];
-            PacketHeaderV2 *pHeader = (PacketHeaderV2*)pBuff;
-
-            pHeader->version = 2;                                   // Protocol Version 2
-            pHeader->compressionFlag = false;                       // Uncompressed data
-            pHeader->frameType = 1;                                 // Single frame
-            pHeader->serviceType = 0x0F;                            // Bulk Data
-            pHeader->frameData = 0;                                 // Reserved
-            pHeader->sessionId = 0;                                 // unknown
-            pHeader->dataSize = 200;                                // The size of the data in the packet
-            pHeader->messageId = 0;                                 // unknown
-
-            // just fill the data with the single value
-            memset(&(pBuff[sizeof(PacketHeaderV2)]), 0xFF, 200);
+            uint8_t raw_data[] = {
+                0x22, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC8,
+                0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                0xFF, 0xFF, 0xFF, 0xFF
+            };
 
             // Sending only header first
-            uint8_t *pSendBuff = pBuff;
+            uint8_t *pSendBuff = raw_data;
 
             LOG4CPLUS_INFO_EXT(mLogger, "-------------- Sending Frame #1 -----------------");
-            mListener.onFrameReceived(this, Data::ConnectionHandle, pSendBuff, sizeof(PacketHeaderV2));
+            mListener.onFrameReceived(this, Data::ConnectionHandle, pSendBuff, 12);
 
             // Sending first part of the data
-            pSendBuff+=sizeof(PacketHeaderV2);
+            pSendBuff+=12;
             LOG4CPLUS_INFO_EXT(mLogger, "-------------- Sending Frame #2 -----------------");
             mListener.onFrameReceived(this, Data::ConnectionHandle, pSendBuff, static_cast<size_t>(100));
 
@@ -315,7 +315,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
             .Times(1)
         ;
 
-        EXPECT_CALL(tmClient, onFrameReceived(Data::ConnectionHandle, _, sizeof(PacketHeaderV2) + 200))
+        EXPECT_CALL(tmClient, onFrameReceived(Data::ConnectionHandle, _, 212))
             .Times(1)
             .WillOnce(Invoke(&tmClient, &MockTransportManagerClient::doFrameReceived))
         ;
@@ -344,7 +344,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
         LOG4CPLUS_INFO_EXT(logger, "*************************** Calling SCAN FOR DEVICES *****************************");
         pTm->scanForNewDevices();
 
-        sleep(15);
+        sleep(10);
 
         LOG4CPLUS_INFO_EXT(logger, "*************************** Deleting TM and shutting down *****************************");
 
