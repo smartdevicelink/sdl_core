@@ -503,7 +503,7 @@ namespace NsAppLink
              * @param ConnectionHandle Connection Handle
              * @return bool
              **/
-            bool startDataCallbacksThread(const tConnectionHandle ConnectionHandle);
+            void startDataCallbacksThread(const tConnectionHandle ConnectionHandle);
 
             /**
              * @brief Stops thread for data-related callbacks for given connection handle

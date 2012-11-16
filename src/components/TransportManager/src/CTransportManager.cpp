@@ -636,7 +636,7 @@ void CTransportManager::stopApplicationCallbacksThread()
     pthread_mutex_unlock(&mDeviceListenersMutex);
 }
 
-bool CTransportManager::startDataCallbacksThread(const tConnectionHandle ConnectionHandle)
+void CTransportManager::startDataCallbacksThread(const tConnectionHandle ConnectionHandle)
 {
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "Starting data-callbacks thread");
 
