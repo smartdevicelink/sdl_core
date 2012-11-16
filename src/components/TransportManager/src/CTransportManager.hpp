@@ -231,6 +231,21 @@ namespace NsAppLink
                 SDeviceListenerCallback(EDeviceListenerCallbackType CallbackType, const SDeviceInfo & DeviceInfo, const tConnectionHandle & ConnectionHandle);
 
                 /**
+                 * @brief Copy constructor
+                 *
+                 * @param other Reference to object to be copied
+                 **/
+                SDeviceListenerCallback(const SDeviceListenerCallback& other);
+
+                /**
+                 * @brief Comparison operator.
+                 *
+                 * @param i_other Reference to the object to be compared with
+                 * @return bool
+                 **/
+                bool operator==( const SDeviceListenerCallback& i_other ) const;
+
+                /**
                  * @brief Destructor.
                  *
                  **/
@@ -285,6 +300,21 @@ namespace NsAppLink
                 SDataListenerCallback(EDataListenerCallbackType CallbackType, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus);
 
                 /**
+                 * @brief Copy constructor
+                 *
+                 * @param other Reference to object to be copied
+                 **/
+                SDataListenerCallback(const SDataListenerCallback& other);
+
+                /**
+                 * @brief Comparison operator.
+                 *
+                 * @param i_other Reference to the object to be compared with
+                 * @return bool
+                 **/
+                bool operator==( const SDataListenerCallback& i_other ) const;
+
+                /**
                  * @brief Destructor.
                  *
                  **/
@@ -303,7 +333,7 @@ namespace NsAppLink
                 /**
                  * @brief Data to send
                  **/
-                const uint8_t * mData;
+                uint8_t * mData;
 
                 /**
                  * @brief Size of the data
@@ -363,6 +393,21 @@ namespace NsAppLink
                 ~SFrameDataForConnection();
 
                 /**
+                 * @brief Copy constructor
+                 *
+                 * @param other Reference to object to be copied
+                 **/
+                SFrameDataForConnection(const SFrameDataForConnection& other);
+
+                /**
+                 * @brief Comparison operator.
+                 *
+                 * @param i_other Reference to the object to be compared with
+                 * @return bool
+                 **/
+                bool operator==( const SFrameDataForConnection& i_other ) const;
+
+                /**
                  * @brief Appends new data to the buffer
                  *
                  * @param Data Data to append
@@ -382,7 +427,7 @@ namespace NsAppLink
                  * @warning Memory for this buffer is allocated in the method call but must be freed
                  *          when it does not needed by caller component ONLY if method returns true
                  **/
-                bool extractFrame(uint8_t * Data, size_t & DataSize);
+                bool extractFrame(uint8_t *& Data, size_t & DataSize);
 
                 /**
                  * @brief Pointer to the data buffer

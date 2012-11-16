@@ -333,6 +333,22 @@ CTransportManager::SDeviceListenerCallback::SDeviceListenerCallback(CTransportMa
 {
 }
 
+CTransportManager::SDeviceListenerCallback::SDeviceListenerCallback(const SDeviceListenerCallback& other)
+: mCallbackType(other.mCallbackType)
+, mDeviceList(other.mDeviceList)
+, mDeviceInfo(other.mDeviceInfo)
+, mConnectionHandle(other.mConnectionHandle)
+{
+}
+
+bool CTransportManager::SDeviceListenerCallback::operator==( const SDeviceListenerCallback& i_other ) const
+{
+    return ( (mCallbackType == i_other.mCallbackType)
+          && (mDeviceList == i_other.mDeviceList)
+          && (mDeviceInfo == i_other.mDeviceInfo)
+          && (mConnectionHandle == i_other.mConnectionHandle));
+}
+
 CTransportManager::SDeviceListenerCallback::~SDeviceListenerCallback(void )
 {
 }
@@ -340,12 +356,21 @@ CTransportManager::SDeviceListenerCallback::~SDeviceListenerCallback(void )
 CTransportManager::SDataListenerCallback::SDataListenerCallback(CTransportManager::EDataListenerCallbackType CallbackType, tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize)
 : mCallbackType(CallbackType)
 , mConnectionHandle(ConnectionHandle)
-, mData(Data)
+, mData(0)
 , mDataSize(DataSize)
 , mFrameSequenceNumber(-1)
 , mSendStatus(NsAppLink::NsTransportManager::SendStatusUnknownError)
 {
+    if ((0 != Data) &&
+        (0u != DataSize))
+    {
+        mData = new uint8_t[DataSize];
 
+        if (0 != mData)
+        {
+            memcpy(mData, Data, DataSize);     
+        }
+    }
 }
 
 CTransportManager::SDataListenerCallback::SDataListenerCallback(CTransportManager::EDataListenerCallbackType CallbackType, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
@@ -359,9 +384,43 @@ CTransportManager::SDataListenerCallback::SDataListenerCallback(CTransportManage
 
 }
 
+NsAppLink::NsTransportManager::CTransportManager::SDataListenerCallback::SDataListenerCallback(const SDataListenerCallback& other)
+: mCallbackType(other.mCallbackType)
+, mConnectionHandle(other.mConnectionHandle)
+, mData(0)
+, mDataSize(other.mDataSize)
+, mFrameSequenceNumber(other.mFrameSequenceNumber)
+, mSendStatus(other.mSendStatus)
+{
+    if ((0 != other.mData) &&
+        (0u != other.mDataSize))
+    {
+        mData = new uint8_t[other.mDataSize];
+
+        if (0 != mData)
+        {
+            mDataSize = other.mDataSize;
+            memcpy(mData, other.mData, mDataSize);
+        }
+    }
+}
+
+bool NsAppLink::NsTransportManager::CTransportManager::SDataListenerCallback::operator==( const SDataListenerCallback& i_other ) const
+{
+    return ( (mCallbackType == i_other.mCallbackType)
+          && (mConnectionHandle == i_other.mConnectionHandle)
+          && (mDataSize == i_other.mDataSize)
+          && (mFrameSequenceNumber == i_other.mFrameSequenceNumber)
+          && (mSendStatus == i_other.mSendStatus)
+          && (0 == memcmp(mData, i_other.mData, i_other.mDataSize)));
+}
+
 CTransportManager::SDataListenerCallback::~SDataListenerCallback(void )
 {
-
+    if (0 != mData)
+    {
+        delete[] mData;
+    }
 }
 
 CTransportManager::SDataThreadStartupParams::SDataThreadStartupParams(CTransportManager* TransportManager, tConnectionHandle ConnectionHandle)
@@ -917,11 +976,11 @@ void CTransportManager::SFrameDataForConnection::appendFrameData(const uint8_t* 
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "Data appended. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize);
 }
 
-bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t * Data, size_t & DataSize)
+bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t *& Data, size_t & DataSize)
 {
     if(mDataSize < PROTOCOL_HEADER_V1_SIZE)
     {
-        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, mConnectionHandle, "Not enough data for version in the buffer. No changes was made");
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, mConnectionHandle, "Not enough data for version in the buffer. No changes was made. mDataSize: "<<mDataSize);
         return false;
     }
 
@@ -969,6 +1028,28 @@ bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t * Data, si
     memmove(mpDataBuffer, &mpDataBuffer[requiredDataSize], mDataSize);
 
     return true;
+}
+
+
+NsAppLink::NsTransportManager::CTransportManager::SFrameDataForConnection::SFrameDataForConnection(const SFrameDataForConnection& other)
+: mDataSize(other.mDataSize)
+, mBufferSize(other.mBufferSize)
+, mConnectionHandle(other.mConnectionHandle)
+, mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager")))
+{
+    mpDataBuffer = new uint8_t[other.mBufferSize];
+    memcpy(mpDataBuffer, other.mpDataBuffer, other.mBufferSize);
+
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "Initialized frame data for connection container");
+}
+
+bool NsAppLink::NsTransportManager::CTransportManager::SFrameDataForConnection::operator==( const SFrameDataForConnection& i_other ) const
+{
+    return ( (mDataSize == i_other.mDataSize)
+          && (mBufferSize == i_other.mBufferSize)
+          && (mConnectionHandle == i_other.mConnectionHandle)
+          && (0 == memcmp(mpDataBuffer, i_other.mpDataBuffer, mBufferSize))
+          );
 }
 
 CTransportManager::SFrameDataForConnection* CTransportManager::initializeFrameDataForConnection(tConnectionHandle ConnectionHandle)
