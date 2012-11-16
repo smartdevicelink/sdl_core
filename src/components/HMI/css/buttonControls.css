@@ -12,6 +12,23 @@
 	top: 0px;
 	left: 790px;
 }
+#infoTable.infoTable{
+	width: 270px;
+	height: 147px;
+	top: 308px;
+	left: 895px;
+	background-color: whiteSmoke;
+	color: black;
+	border: 1px solid gray;
+}
+#infoTable .applinkGPLabel{
+	width: 125px;
+	border-right: 1px solid #14100F;
+	height: 148px;
+}
+#infoTable .applinkGPData{
+	left: 130px;
+}
 #buttonControls .ContainerControlls{
 	left: 34px;
 	background: url(../images/home/controlButtons/backGroundControllButtons.png) no-repeat;
@@ -122,7 +139,7 @@
 }
 #buttonControls .btnNotPressed.pressed{
 	box-shadow: inset 5px 5px 10px black, inset -3px -3px 10px #383737;
-	line-height: 76px;
+	line-height: 45px;
 }
 #buttonControls .VRButton{
 	background: url(../images/home/controlButtons/vr.png) no-repeat;
