@@ -18,7 +18,6 @@
 	background: url(../images/home/home_screen_blur.png) no-repeat !important;
 }
 
-
 #home_topControls_temperature {
 	position: absolute;
 	top: 10px;
@@ -53,4 +52,8 @@
 	height: 183px;
 	left: 400px;
 	top: 183px
+}
+
+.helpmode .voiceButton{
+	opacity: 0;
 }

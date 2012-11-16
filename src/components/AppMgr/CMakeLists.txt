@@ -24,9 +24,12 @@ set (SOURCES
     ./src/ButtonMapping.cpp
     ./src/CommandMapping.cpp
     ./src/MessageMapping.cpp
-    ./src/ButtonCapabilities.cpp
+    ./src/MenuMapping.cpp
+    ./src/CapabilitesContainer.cpp
     ./src/HMIHandler.cpp
     ./src/MobileHandler.cpp
+    ./src/RequestMapping.cpp
+    ./src/AutoActivateIdMapping.cpp
 )
 
 add_library("AppMgr" ${SOURCES})

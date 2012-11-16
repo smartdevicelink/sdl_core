@@ -13,15 +13,8 @@ MFT.playerView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	elementId: 'media_player_view_container',
 	
-	classNameBindings:[
-						'MFT.States.media.player.active:active_state',
-						'MFT.helpMode:helpmode_blur_text'
-						],
-	
-	classNames: 'hidden',
-	
-	stateObj: MFT.States.media.player,
-	
+	classNameBindings:['MFT.helpMode:helpmode_blur_text'],
+		
 	/** View components*/
 	childViews: [
 			'controlls',
@@ -33,7 +26,6 @@ MFT.playerView = Em.ContainerView.create(MFT.LoadableView,{
 		elementId: 'media_player_view_info',
 		
 		template: Em.Handlebars.compile(
-			'{{#with view}}'+
 			'<div class="track-info">'+
 				'<div class="total">{{MFT.MediaController.currentSelectedPlayer.currentTrack}}/{{MFT.MediaController.currentSelectedPlayer.totalTracks}}</div>'+
             	'<div class="divider_o"></div>'+
@@ -42,8 +34,7 @@ MFT.playerView = Em.ContainerView.create(MFT.LoadableView,{
 				'<div class="time">{{MFT.MediaController.currentSelectedPlayer.formateTimeToString}}</div>'+
 				'<div id="cd_logo" {{bindAttr class="MFT.CDModel.active:visible_display MFT.SDModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
 				'<div id="usb_logo" {{bindAttr class="MFT.USBModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
-			'</div>'+
-			'{{/with}}'
+			'</div>'
 		)
 	}),
 	
@@ -76,10 +67,8 @@ MFT.playerView = Em.ContainerView.create(MFT.LoadableView,{
 			action:				'playTrack',
 			/** Define button template */
 			template: Ember.Handlebars.compile(
-				
 					'<img class="playIcon hideicon"{{bindAttr class="MFT.MediaController.currentSelectedPlayer.isPlaying:visible"}} src="images/media/ico_pause.png" />'+
 					'<img class="playIcon showicon"{{bindAttr class="MFT.MediaController.currentSelectedPlayer.isPlaying:not-visible"}} src="images/media/ico-play.png" />'
-							
 			)
 		}),
 		NextTrackButton: MFT.Button.extend({

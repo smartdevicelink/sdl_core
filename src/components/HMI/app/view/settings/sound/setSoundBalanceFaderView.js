@@ -11,12 +11,9 @@
  */
  
 MFT.SettingsSoundSetBalanceAndFadeView = Em.View.create(MFT.LoadableView,{
-	classNameBindings:	   ['MFT.States.settings.sound.setSoundBalanceFader.active:active_state','MFT.helpMode'],
-	classNames:			  'hidden',
+	classNameBindings:	   ['MFT.helpMode','MFT.localization'],
 	elementId:			   'settings_sound_soundBalanceFade',
-	
-	stateObj: MFT.States.settings.sound.setSoundBalanceFader,
-	
+		
 	template: Ember.Handlebars.compile(
 		'{{view MFT.Button '+
 			'class="button backButton" '+

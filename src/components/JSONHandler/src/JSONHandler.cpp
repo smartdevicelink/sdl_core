@@ -1,14 +1,13 @@
-
-#include "JSONHandler/JSONHandler.h"
-#include "JSONHandler/ALRPCObjects/Marshaller.h"
+#include <stdio.h>
 #include <algorithm>
 #include <string.h>
-#include <stdio.h>
-#include <json/reader.h>
-#include <json/writer.h>
-#include <algorithm>
 #include <pthread.h>
 #include <signal.h>
+#include <json/reader.h>
+#include <json/writer.h>
+#include "JSONHandler/JSONHandler.h"
+#include "JSONHandler/ALRPCObjects/Marshaller.h"
+
 
 log4cplus::Logger JSONHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONHandler"));
 

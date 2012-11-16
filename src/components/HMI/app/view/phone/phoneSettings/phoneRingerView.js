@@ -11,11 +11,8 @@
  */
  
 MFT.PhoneSettingsPhoneRingerView = Em.ContainerView.create( MFT.LoadableView, {
-	
-	stateObj:	MFT.States.phone.phoneSettings.phoneRinger,
-	
+		
 	classNameBindings:	['MFT.helpMode'],
-	classNames:		   ['hidden'],
 	elementId:			'phone_settings_phoneRinger_view',
 	childViews:		   [
 							  'backButton',
@@ -25,8 +22,8 @@ MFT.PhoneSettingsPhoneRingerView = Em.ContainerView.create( MFT.LoadableView, {
 
 	backButton: MFT.Button.extend({
 		classNames:		   ['backButton','button'],		
-		action:			   'back',
-		target:			   'MFT.States',	
+		action:			   'onBackState',
+		target:			   'MFT.PhoneController',	
 		icon:				 'images/media/ico_back.png',	
 	}),
 	

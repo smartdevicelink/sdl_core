@@ -12,7 +12,10 @@
 #include "AppMgr/ButtonMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/MessageMapping.h"
-#include "AppMgr/ButtonCapabilities.h"
+#include "AppMgr/MenuMapping.h"
+#include "AppMgr/RequestMapping.h"
+#include "AppMgr/CapabilitesContainer.h"
+#include "AppMgr/AutoActivateIdMapping.h"
 
 namespace AppLinkRPC{
     class ALRPCMessage;
@@ -43,8 +46,10 @@ template< class QueueType >
 class AppMgrCoreQueue;
 class Application;
 
+/**
+ * \brief a connection between a mobile RPC message and a session
+ */
 typedef std::pair<AppLinkRPC::ALRPCMessage*, unsigned char> Message;
-
 
 /**
  * \brief Core app manager class which acts as a core for application manager
@@ -67,14 +72,14 @@ public:
 
     /**
      * \brief push mobile RPC message to a queue
-     * \param mesage a message to be pushed
-     * \param sessionId an id of a session associated with the application which pushes a message
+     * \param message a message to be pushed
+     * \param sessionID an id of a session associated with the application which pushes a message
      */
     void pushMobileRPCMessage(AppLinkRPC::ALRPCMessage * message , unsigned char sessionID);
 
     /**
      * \brief push HMI RPC2 message to a queue
-     * \param mesage a message to be pushed
+     * \param message a message to be pushed
      */
 	void pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message );
 
@@ -154,13 +159,33 @@ private:
      */
     Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
 
+    /**
+     * \brief serialize a string value to the text file
+     * \param fileName name of the file to serialize to
+     * \param value a value to serialize
+     * \return success of an operation - true or false
+     */
+    bool serializeToFile(const std::string& fileName, const std::string &value) const;
+
     AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
     AppMgrCoreQueue<RPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
-    ButtonCapabilitiesContainer mButtonCapabilities;
+    CapabilitiesContainer<AppLinkRPC::ButtonCapabilities> mButtonCapabilities;
+    AppLinkRPC::DisplayCapabilities mDisplayCapabilities;
+    CapabilitiesContainer<AppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilities;
+    CapabilitiesContainer<AppLinkRPC::VrCapabilities> mVrCapabilities;
+    CapabilitiesContainer<AppLinkRPC::SpeechCapabilities> mSpeechCapabilities;
     ButtonMapping    mButtonsMapping;
     CommandMapping   mCommandMapping;
     MessageMapping   mMessageMapping;
+    MenuMapping      mMenuMapping;
+    RequestMapping   mRequestMapping;
+
+    AutoActivateIdMapping  mAutoActivateIds;
+
+    static const std::string mAutoActivateIdFileName;
+
+    std::string      mLastAutoActivateId;
 
 	static log4cplus::Logger mLogger;
 };

@@ -42,6 +42,7 @@
 #include "../src/RPC2ObjectsImpl/UI/ShowMarshaller.h"
 #include "../src/RPC2ObjectsImpl/UI/ShowResponseMarshaller.h"
 #include "../src/RPC2ObjectsImpl/UI/OnReadyMarshaller.h"
+#include "../src/RPC2ObjectsImpl/UI/OnDriverDistractionMarshaller.h"
 
 /*
   interface	RPC2Communication::UI
@@ -93,7 +94,8 @@ namespace RPC2Communication
         METHOD_SETMEDIACLOCKTIMERRESPONSE=39,
         METHOD_SHOW=40,
         METHOD_SHOWRESPONSE=41,
-        METHOD_ONREADY=50
+        METHOD_ONREADY=50,
+        METHOD_ONDRIVERDISTRACTION=51
       };
 
 
@@ -438,6 +440,7 @@ namespace RPC2Communication
         return mShowResponse.toString(res);
       }
 
+// OnReady
       static bool fromString(const std::string& str, OnReady&res)
       {
         return mOnReady.fromString(str, res);
@@ -446,6 +449,17 @@ namespace RPC2Communication
       static std::string toString(const OnReady& res)
       {
         return mOnReady.toString(res);
+      }
+
+// OnDriverDistraction
+      static bool fromString(const std::string& str, OnDriverDistraction&res)
+      {
+        return mOnDriverDistraction.fromString(str, res);
+      }
+
+      static std::string toString(const OnDriverDistraction& res)
+      {
+        return mOnDriverDistraction.toString(res);
       }
 
 
@@ -505,6 +519,7 @@ namespace RPC2Communication
       static ShowMarshaller mShow;
       static ShowResponseMarshaller mShowResponse;
       static OnReadyMarshaller mOnReady;
+      static OnDriverDistractionMarshaller mOnDriverDistraction;
 
     };
   }

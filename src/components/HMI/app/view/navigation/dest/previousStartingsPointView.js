@@ -12,16 +12,13 @@
 
 MFT.NavigationDestinationPreviousStartingsPointView = Em.ContainerView.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.navigation.dest.previousStartingsPoint.active:active_state','MFT.helpMode',],
+	classNameBindings: ['MFT.helpMode'],
 	
 	elementId:		'view_navi_destination_previousStartingsPoint',
-	
-	classNames:	   ['hidden'],
-	
-	stateObj: MFT.States.navigation.dest.previousStartingsPoint,
-	
+		
 	childViews: [
 		'backButton',
+		'voiceButton',
 		'content',
 		'heading'
 	],
@@ -31,6 +28,12 @@ MFT.NavigationDestinationPreviousStartingsPointView = Em.ContainerView.create(MF
 		action:			  'back',
 		target:			  'MFT.States',	
 		icon:				'images/media/ico_back.png',	
+	}),
+	
+	voiceButton: MFT.Button.extend({
+		classNames:		  ['voiceButton','button'],		
+		icon:				'images/settings/ico_voice.png',	
+		disabled:			true
 	}),
 	
 	/** Upper title*/

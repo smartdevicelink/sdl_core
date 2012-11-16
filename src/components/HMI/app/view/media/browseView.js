@@ -15,15 +15,13 @@ MFT.browseView = Em.ContainerView.create(MFT.LoadableView,{
 	elementId: 'media_browse_view',
 	
 	classNameBindings:[
-						'MFT.States.media.browse.active:active_state',
 						'sirBlur:sirhelpblur',
 						'cdBlur:cdhelpblur',
-						'usbBlur:usbhelpblur'
+						'usbBlur:usbhelpblur',
+						'MFT.localization'
 					 ],
 	/** View class*/
-	classNames: ['browse_view','hidden'],
-	
-	stateObj:MFT.States.media.browse,
+	classNames: ['browse_view'],
 	
 	/** Child views*/
 	childViews: [
@@ -40,7 +38,8 @@ MFT.browseView = Em.ContainerView.create(MFT.LoadableView,{
 			}else if(MFT.CDModel.active){
 				this.set('cdBlur',true);
 			}else{
-			}	this.set('usbBlur',true);
+				this.set('usbBlur',true);
+			}	
 		}else{
 			this.set('sirBlur',false);
 			this.set('cdBlur',false);
@@ -51,7 +50,7 @@ MFT.browseView = Em.ContainerView.create(MFT.LoadableView,{
 	/** Button back to previous state*/
 	backButton: MFT.Button.extend({
 		elementId: 			   'media_browse_back_button',
-		classNames:			  'backButton',
+		classNames:			  'backButton button',
 		icon:		  			'images/media/ico_back.png',
 		action:				  "browseBack",
 		target:		          'MFT.MediaController',
@@ -61,7 +60,7 @@ MFT.browseView = Em.ContainerView.create(MFT.LoadableView,{
 	/** Upper title*/
 	heading: MFT.Label.extend({
 		elementId: 'media_browse_heading_lable',
-		classNameBindings: ['MFT.helpMode: hidden'],
+		classNameBindings: ['MFT.helpMode: helpmode_blur_text'],
 		classNames: 'title',
 		contentBinding:  Ember.Binding.oneWay('MFT.MediaController.currentBrowseData.title')
 	}),
@@ -70,7 +69,7 @@ MFT.browseView = Em.ContainerView.create(MFT.LoadableView,{
 	browesAllSources: MFT.Button.extend({
 	
 		elementId: 'media_browse_browseall_button',
-		classNameBindings: ['MFT.helpMode: hidden' , 
+		classNameBindings: ['MFT.helpMode: helpmode_blur_text' , 
 							'MFT.SDModel.active:media_usb_browse_browseall_button',
 							'MFT.USBModel.active:media_usb_browse_browseall_button',
 						   ],
@@ -80,7 +79,7 @@ MFT.browseView = Em.ContainerView.create(MFT.LoadableView,{
 		onDown:      			  false,
 		/** Define button template */
 		template: Ember.Handlebars.compile(
-			'<span>Browse</span><span class="all_sources_span">All Sources</span>'+
+			'<span> {{MFT.locale.label.view_media_usb_browse_browse}} </span><span class="all_sources_span"> {{MFT.locale.label.view_media_usb_browse_allSources}} </span>'+
 			'<img class="arrow-ico" src="images/common/arrow_ico.png" />'
 		)
 	}),
@@ -97,7 +96,7 @@ MFT.browseView = Em.ContainerView.create(MFT.LoadableView,{
 		
 		itemsBinding:  Ember.Binding.oneWay('MFT.MediaController.currentBrowseData.items'),
 		
-		currentPageBinding:   Ember.Binding.oneWay('MFT.MediaController.currentBrowseData.currentPage'),
+		currentPageBinding:   'MFT.MediaController.currentBrowseData.currentPage',
 		
 		itemsOnPage:	5
 	})

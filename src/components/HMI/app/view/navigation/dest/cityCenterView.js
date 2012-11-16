@@ -12,14 +12,10 @@
 
 MFT.NavigationDestinationCityCenterView = Em.ContainerView.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.navigation.dest.cityCenter.active:active_state','MFT.helpMode',],
+	classNameBindings: ['MFT.helpMode'],
 	
 	elementId:		'view_navi_destination_cityCenter',
-	
-	classNames:	   ['hidden'],
-	
-	stateObj: MFT.States.navigation.dest.cityCenter,
-	
+		
 	childViews: [
 		'backButton',
 		'content'

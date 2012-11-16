@@ -34,22 +34,26 @@ MFT.ClimateData = Em.Object.extend({
 		mode: null,
 		
 		items: {
-			defrost:		MFT.ToggleValue.create(),
-			panel:			MFT.ToggleValue.create({ value: true }),
-			feet:			MFT.ToggleValue.create(),
-			both:			MFT.ToggleValue.create()
+			defrost:		MFT.RangedValue.create({ range: 1 }),
+			panel:			MFT.RangedValue.create({ range: 1, value: 1 }),
+			feet:			MFT.RangedValue.create({ range: 1 }),
+			both:			MFT.RangedValue.create({ range: 1 }),
 		}		
 	},
 	
+	simpleAirflowPanel:		MFT.RangedValue.create({ range: 1, value: 1 }),
+	simpleAirflowFeet:		MFT.RangedValue.create({ range: 1 }),
+	
 	/** front */	
 	windShield:				MFT.RangedValue.create({ range: 1 }),
+	maxDefrost:				MFT.RangedValue.create({ range: 1 }),
 	rearDeforost:			MFT.RangedValue.create({ range: 1 }),
 	ac:						MFT.RangedValue.create({ range: 1 }),
 	maxAc:					MFT.RangedValue.create({ range: 1 }),
 	recirculation:			MFT.RangedValue.create({ range: 1 }),
-	auto:					MFT.ToggleValue.create(),
-	autoFan:				MFT.ToggleValue.create(),
-	autoAirflow:			MFT.ToggleValue.create(),
+	auto:					MFT.RangedValue.create({ range: 1 }),
+	autoFan:				MFT.RangedValue.create({ range: 1 }),
+	autoAirflow:			MFT.RangedValue.create({ range: 1 }),
 	
 	fan:					MFT.RangedValue.create({ range: 7, cycle: false }),
 	
@@ -59,5 +63,4 @@ MFT.ClimateData = Em.Object.extend({
 	
 	rearTemp:				MFT.RangedValue.create({ range: 9, cycle: false }),
 	rearFan:				MFT.RangedValue.create({ range: 7, cycle: false })
-
 });

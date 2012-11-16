@@ -19,10 +19,15 @@
 
 FLAGS = Em.Object.create({
   	/** 
+	 *  Set language for localization
+	 */
+  	SET_LOCALIZATION:		'eng',	
+	
+	/** 
 	 *  Emulate CAN network for Climate
 	 *  true for MFT Guide production build
 	 */
-  	EMULATE_CAN_CLIMATE:	true,
+  	EMULATE_CAN_CLIMATE:		true,
 
   	/** 
 	 *  Emulate Phone
@@ -34,7 +39,7 @@ FLAGS = Em.Object.create({
 	 *  Emulate WebSocket connection
 	 *  false for MFT Guide production build
 	 */
-	EMULATE_WS: 			false,
+	EMULATE_WS: 			true,
 
   	/** 
 	 *  Emulate Android environment
@@ -47,13 +52,10 @@ FLAGS = Em.Object.create({
 	 *  Extended logging only for debug and development 
 	 *  !!! MUST BE false for release build !!! 
 	 */
-  	EXTENDED_LOG:			false,
+  	DEBUG_MODE:				false,
 
 	/** hide mouse cursor from screen */
-	APP_HIDE_MOUSE_CURSOR:	false,
-
-
-	HELP_MODE:			false,
+	APP_HIDE_MOUSE_CURSOR:		false,
 
   	/** 
 	 *  show MCS screen in settings -> vehicle menu 
@@ -74,11 +76,5 @@ FLAGS = Em.Object.create({
 	 *  Active concept for MCS massage feature
 	 */
 
-	MCS_ACTIVE_CONCEPT:		1,
-
-  	/** 
-	 *  Use RPC or JavaScriptFacade interface for Video Player communications 
-	 *  TEMPORARY
-	 */
-  	VIDEO_PLAYER_JS:		false
+	MCS_ACTIVE_CONCEPT:		1
 });

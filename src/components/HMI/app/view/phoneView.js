@@ -10,18 +10,10 @@
  * @author		Artem Petrosyan
  */
 
-MFT.PhoneView = Em.ContainerView.create({
-	
-	stateId:	'phone',
-	
+MFT.PhoneView = Em.ContainerView.create(MFT.LoadableView,{
+		
 	elementId:	'phone',
- 	
- 	classNames:	'hidden',
-	
-	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.phone.active:active_state'],
-	
-	
+ 		
 	/** Initial phone components */		
 	childViews: [
 		'info',
@@ -31,14 +23,14 @@ MFT.PhoneView = Em.ContainerView.create({
 	
 	/** Info block */
 	info: Em.View.extend({
-		classNameBindings: ['MFT.helpMode:hide'],
+		//classNameBindings: ['MFT.helpMode:hide'],
 		
 		elementId:	'phone_info',
 		
 		template: Ember.Handlebars.compile(
-			'{{#if MFT.PhoneController.model.readyForCall}}<div id="phone_info_name">Paul&rsquo;s Phone</div>{{/if}}'+
+			'{{#if MFT.PhoneController.model.readyForCall}}<div id="phone_info_name"><span>{{MFT.locale.label.view_wigetPhone_phone}}</div></span>{{/if}}'+
 			'{{#if MFT.PhoneController.model.onCall}}'+
-				'<div id="phone_info_name">Sarah <span id="phone_info_number">{{MFT.PhoneController.model.phoneStatusNumber}}</span><p>3:47</p></div>'+
+				'<div id="phone_info_name"><span>Sarah</span> <span id="phone_info_number">{{MFT.PhoneController.model.phoneStatusNumber}}</span><p><span>3:47</span></p></div>'+
 			'{{/if}}'
 		)
 	}),
@@ -46,6 +38,8 @@ MFT.PhoneView = Em.ContainerView.create({
 	/** Left menu */
 	menu: Em.ContainerView.extend({
 		elementId:	'phone_menu',
+		
+		//classNameBindings: ['MFT.PhoneController.hideMenu:hide'],
 		
 		childViews: [
 			'border',
@@ -62,8 +56,6 @@ MFT.PhoneView = Em.ContainerView.create({
 			classNames:	'ls-items',
 			
 			childViews: [
-				'help',
-				'helpDivider',
 				'dialpadButton',
 				'quickdialButton',
 				'phonebookButton',
@@ -72,20 +64,12 @@ MFT.PhoneView = Em.ContainerView.create({
 				'settingsButton'
 			],
 			
-			help: MFT.HelpBlock.extend({
-				elementId:	'phone_menu_help'
-			}),
-		
-			helpDivider: MFT.HelpDivider.extend({
-				elementId:	'phone_help_divider'
-			}),
-			
 			dialpadButton: MFT.Button.extend({
 				elementId:			'phone_menu_dialpadButton',
 				
-				classNames:			'ls-item lsp1_p',
+				classNames:			'ls-item lsp1_p active_in_helpmode',
 				classNameBindings:	['MFT.States.phone.dialpad.active:phone_active'],
-				textBinding:		Em.Binding.oneWay('MFT.locale.label.phone'),
+				textBinding:		Em.Binding.oneWay('MFT.locale.label.view_phone_phone'),
 				icon:				'images/phone/ico_phone.png',
 				action:				'subState',
 				target:				'MFT.PhoneController',
@@ -96,9 +80,9 @@ MFT.PhoneView = Em.ContainerView.create({
 			quickdialButton: MFT.Button.extend({
 				elementId:			'phone_menu_quickdialButton',
 				
-				classNames:			'ls-item lsp1_p',
+				classNames:			['ls-item lsp1_p','helpmode_box_shadow', 'active_in_helpmode'],
 				classNameBindings:	['MFT.States.phone.quickdial.active:phone_active'],
-				textBinding:		Em.Binding.oneWay('MFT.locale.label.quickdial'),
+				textBinding:		Em.Binding.oneWay('MFT.locale.label.view_phone_quickdial'),
 				icon:				'images/phone/ico_quickdial.png',
 				action:				'subState',
 				target:				'MFT.PhoneController',
@@ -115,9 +99,9 @@ MFT.PhoneView = Em.ContainerView.create({
 			phonebookButton: MFT.Button.extend({
 				elementId:			'phone_menu_phonebookButton',
 				
-				classNames:			'ls-item lsp1_p',
+				classNames:			'ls-item lsp1_p active_in_helpmode',
 				classNameBindings:	['MFT.States.phone.phonebook.active:phone_active'],
-				textBinding:		Em.Binding.oneWay('MFT.locale.label.phonebook'),
+				textBinding:		Em.Binding.oneWay('MFT.locale.label.view_phone_phonebook'),
 				icon:				'images/phone/ico_phonebook.png',
 				action:				'subState',
 				target:				'MFT.PhoneController',
@@ -128,9 +112,9 @@ MFT.PhoneView = Em.ContainerView.create({
 			historyButton: MFT.Button.extend({
 				elementId:			'phone_menu_historyButton',
 				
-				classNames:			'ls-item lsp1_p',
+				classNames:			'ls-item lsp1_p active_in_helpmode',
 				classNameBindings:	['MFT.States.phone.history.active:phone_active'],
-				textBinding:		Em.Binding.oneWay('MFT.locale.label.history'),
+				textBinding:		Em.Binding.oneWay('MFT.locale.label.view_phone_history'),
 				icon:				'images/phone/ico_history.png',
 				action:				'subState',
 				target:				'MFT.PhoneController',
@@ -141,9 +125,9 @@ MFT.PhoneView = Em.ContainerView.create({
 			messagingButton: MFT.Button.extend({
 				elementId:			'phone_menu_messagingButton',
 				
-				classNames:			'ls-item lsp1_p',
+				classNames:			['ls-item lsp1_p','helpmode_box_top_shadow','active_in_helpmode'],
 				classNameBindings:	['MFT.States.phone.messaging.active:phone_active'],
-				textBinding:		Em.Binding.oneWay('MFT.locale.label.messaging'),
+				textBinding:		Em.Binding.oneWay('MFT.locale.label.view_phone_messaging'),
 				icon:				'images/phone/ico_messaging.png',
 				action:				'subState',
 				target:				'MFT.PhoneController',
@@ -160,9 +144,9 @@ MFT.PhoneView = Em.ContainerView.create({
 			settingsButton: MFT.Button.extend({
 				elementId:			'phone_menu_settingsButton',
 				
-				classNames:			'ls-item lsp1_p',
+				classNames:			['ls-item lsp1_p','helpmode_box_bottom_shadow','active_in_helpmode'],
 				classNameBindings:	['MFT.States.phone.phoneSettings.active:phone_active'],
-				textBinding:		Em.Binding.oneWay('MFT.locale.label.settings'),
+				textBinding:		Em.Binding.oneWay('MFT.locale.label.view_phone_settings'),
 				icon:				'images/phone/ico_settings.png',
 				action:				'subState',
 				target:				'MFT.PhoneController',
@@ -182,6 +166,6 @@ MFT.PhoneView = Em.ContainerView.create({
 	endCallMessage: MFT.Label.extend({
 		elementId:	'phone_endCallMessage',
 		
-		content:	'Call Ended'
+		contentBinding:	Em.Binding.oneWay('MFT.locale.label.view_phone_popUp_callEnded')
 	})
 });

@@ -12,14 +12,15 @@
 
 MFT.DirectTune = Em.ContainerView.create({
 	
-	classNameBindings: ['MFT.MediaController.directTuneStations.length:visible'],
+	classNameBindings: ['MFT.MediaController.directTuneStations.length:visible','MFT.MediaController.isSiriusDirectTunestations:visible'],
 	
 	elementId: 'media_directTune',
 	
 	childViews: [
 		'backspaceButton',
 		'enterButton',
-		'tuneButtons'
+		'tuneButtons',
+		//'siriusButtons'
 	],
 	
 	backspaceButton: MFT.Button.extend({
@@ -34,15 +35,15 @@ MFT.DirectTune = Em.ContainerView.create({
 		onDown:				false,
 		
 		disabled: function() {
-			return !MFT.MediaController.directTune.length;
-		}.property('MFT.MediaController.directTune.length'),
+			return (!MFT.MediaController.directTune.length && !MFT.MediaController.siriusDirectTune.length);
+		}.property('MFT.MediaController.directTune.length','MFT.MediaController.siriusDirectTune.length'),
 	}),
 	
 	enterButton: MFT.Button.extend({
 		elementId:			'media_directTune_keyEnter',
 		
 		classNames:			'key',
-		text:				'Enter',
+		textBinding: 		   'MFT.locale.label.view_media_directTune_enter',
 		
 		target:				'MFT.MediaController',
 		action:				'onDirectTuneSet',
@@ -77,17 +78,29 @@ MFT.DirectTune = Em.ContainerView.create({
 					text:				String(ind),
 					disabledBinding:	'isDisabled',
 					target:				'MFT.MediaController',
-					action:				'onDirectTuneKeyPress',
-					
+					action:		'onDirectTuneKeyPress',
 					onDown:				false,
 					
 					isDisabled:	function() {
-						if ( MFT.DirectTune.get('keys').contains( this.index ) ) {
-							return false
-						} else {
-							return true;
+						
+						if(MFT.SiriusModel.active)
+						
+						{
+							if(MFT.MediaController.get('disableZeroNum') && this.index == 0)
+							{
+									return true;
+							}else{
+								return MFT.MediaController.get('directTuneKeys');
+							}
+						}else
+						{
+							if ( MFT.DirectTune.get('keys').contains( this.index ) ) {
+								return false
+							} else {
+								return true;
+							}
 						}
-					}.property('MFT.DirectTune.keys')	
+						}.property('MFT.DirectTune.keys','MFT.MediaController.disableZeroNum')	
 				});
 							
 				// Push element to list

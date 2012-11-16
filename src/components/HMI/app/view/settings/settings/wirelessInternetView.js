@@ -11,15 +11,13 @@
  */
  
 MFT.SettingsSettingsWirelessInternetView = Em.ContainerView.create(MFT.LoadableView,{
-	classNameBindings:	   ['MFT.States.settings.settings.wirelessInternet.active:active_state','MFT.helpMode'],
+	classNameBindings:	   ['MFT.helpMode'],
 	controller:			  'MFT.SettingsController',
-	classNames:			  'hidden',
 	elementId:			   'settings_settings_wirelessInternet',
 	childViews:[
 		'backButton',
 		'view',
 	],	
-	stateObj: MFT.States.settings.settings.wirelessInternet,				  						  
 	backButton: MFT.Button.extend({
 	classNames:		  ['backButton','button'],		
 	action:			  'back',

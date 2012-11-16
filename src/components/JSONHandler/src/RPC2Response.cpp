@@ -1,4 +1,3 @@
-
 #include "JSONHandler/RPC2Response.h"
 
 using namespace RPC2Communication;

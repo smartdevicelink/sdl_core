@@ -14,6 +14,7 @@ namespace NsAppManager
 /**
  * \brief Class constructor
  * \param receiver a registry item associated with application that will execute command
+ * \param params parameters to executor
  */
 SubscribeButtonCmd::SubscribeButtonCmd(const RegistryItem *receiver, const void *params)
     :IAppCommand(receiver, params)

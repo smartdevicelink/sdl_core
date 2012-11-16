@@ -9,23 +9,14 @@
  *
  * @author		Igor Zhavoronkin
  */
+ 
 MFT.AmModel = Em.Object.create( {
 	
 	band:		MFT.RangedValue.create({range:2, activeBand:0}),
 	
 	active: true,
-		
-	am1: MFT.Playlist.create( {
-		selectedIndex: 					3,
-
-		items: {
-			0:MFT.PlaylistItem.create({frequency: 530}),
-			1:MFT.PlaylistItem.create({frequency: 950}),
-			2:MFT.PlaylistItem.create({frequency: 1270}),
-			3:MFT.PlaylistItem.create({frequency: 800}),
-			4:MFT.PlaylistItem.create({frequency: 1130}),
-			5:MFT.PlaylistItem.create({frequency: 760})
-		},
+	
+	directTunestations: MFT.Playlist.create({
 		/** Direct tune dial station matrix */
 		directTunes: [
 			[6,0,0], 
@@ -40,6 +31,22 @@ MFT.AmModel = Em.Object.create( {
 			1176:MFT.PlaylistItem.create({frequency: 1176}),
 			1370:MFT.PlaylistItem.create({frequency: 1370}),
 		}
+	
+	}),
+	
+		
+	am1: MFT.Playlist.create( {
+		
+		selectedIndex: 					3,
+
+		items: {
+			0:MFT.PlaylistItem.create({frequency: 530}),
+			1:MFT.PlaylistItem.create({frequency: 950}),
+			2:MFT.PlaylistItem.create({frequency: 1270}),
+			3:MFT.PlaylistItem.create({frequency: 800}),
+			4:MFT.PlaylistItem.create({frequency: 1130}),
+			5:MFT.PlaylistItem.create({frequency: 760})
+		}
 		
 	}),
 	
@@ -53,21 +60,6 @@ MFT.AmModel = Em.Object.create( {
 			3:MFT.PlaylistItem.create({frequency: 800}),
 			4:MFT.PlaylistItem.create({frequency: 950}),
 			5:MFT.PlaylistItem.create({frequency: 1130})
-		},
-		
-		/** Direct tune dial station matrix */
-		directTunes: [
-			[6,0,0], 
-			[9,5,0],
-			[1,1,7,6],
-			[1,3,7,0]
-		],
-		/** Direct tune Data */
-		directTuneItems: {
-			600:MFT.PlaylistItem.create({frequency: 600}),
-			950:MFT.PlaylistItem.create({frequency: 950}),
-			1176:MFT.PlaylistItem.create({frequency: 1176}),
-			1370:MFT.PlaylistItem.create({frequency: 1370}),
 		}
 	}),
 	
@@ -84,8 +76,9 @@ MFT.AmModel = Em.Object.create( {
 	
 					params:{
 						textBinding: 'MFT.locale.label.view_media_amFm_options_soundSettings',
-						arrow:		true,
-						disabled: 	 true
+						templateName:		'arrow',
+						action: 'turnOnSoundSettings',
+						target: 'MFT.MediaController'
 					}							
 				},
 				
@@ -96,14 +89,14 @@ MFT.AmModel = Em.Object.create( {
 						labelContentBinding:  'MFT.locale.label.view_media_amFm_options_setPTY',
 						buttonTexBindingt:	'MFT.locale.label.view_media_amFm_options_noProgram',
 						labelDisabled:		true,
-						buttonArrow:		  true,
+						templateName:		 'arrow',
 						buttonDisabled: 	   true
 					}							
 				},
 	
 				{
 								
-					type:		MFT.LablePlusToggleButton,
+					type:		MFT.LabelPlusToggleButton,
 					params:		{
 						labelContentBinding:  'MFT.locale.label.view_media_amFm_options_RDS',
 						tButtonValue:		 2,
@@ -122,14 +115,14 @@ MFT.AmModel = Em.Object.create( {
 						labelContentBinding:  'MFT.locale.label.view_media_amFm_options_autoset',
 						buttonTexBindingt:	'MFT.locale.label.view_media_amFm_options_refresh',
 						labelDisabled:		true,
-						buttonArrow:		  true,
+						templateName:		 'arrow',
 						buttonDisabled: 	   true
 					}							
 				},
 				
 								{
 								
-					type:		MFT.LablePlusToggleButton,
+					type:		MFT.LabelPlusToggleButton,
 					params:		{
 						labelContentBinding:  'MFT.locale.label.view_media_amFm_options_TAG',
 						tButtonValue:		 1,
@@ -143,5 +136,4 @@ MFT.AmModel = Em.Object.create( {
 	
 			]
 		})
-	
 });

@@ -20,6 +20,7 @@ MobileHandler &MobileHandler::getInstance()
 /**
  * \brief send a message via associated handler
  * \param message message to send
+ * \param sessionId id of a session associated with application that sent the message
  */
 void MobileHandler::sendRPCMessage(const AppLinkRPC::ALRPCMessage *message, unsigned char sessionId)
 {

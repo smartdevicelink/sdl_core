@@ -250,6 +250,8 @@ set (GENERATED_RPC_SOURCES
     ./src/RPC2ObjectsImpl/VR/OnCommandMarshaller.cpp
     ./src/RPC2ObjectsImpl/UI/OnReady.cpp
     ./src/RPC2ObjectsImpl/UI/OnReadyMarshaller.cpp
+    ./src/RPC2ObjectsImpl/UI/OnDriverDistraction.cpp
+    ./src/RPC2ObjectsImpl/UI/OnDriverDistractionMarshaller.cpp
 )
 
 

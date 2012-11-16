@@ -10,20 +10,12 @@
  * @author		Gerashchenko Maksym
  */
  
- MFT.SettingsView = Em.ContainerView.create({
+ MFT.SettingsView = Em.ContainerView.create(MFT.LoadableView, {
  	
  	elementId:	'settings_view',
- 	
- 	classNames:	'block hidden',
-
+ 	 	
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.settings.active:active_state','MFT.helpMode'],
-	
-	/*Set Active State On Child active state = true*/
-	isActive: function(){
-		return MFT.States.settings.childStates.filterProperty('active', true).length === 1;
-	}.property('MFT.States.settings.childStates.@each.active'),
-	
+	classNameBindings: ['MFT.helpMode'],
 			
 	/** Settings components */
 	childViews: [
@@ -64,8 +56,8 @@
 				
 				goToState:   			 'clock',	
 				classNames:			'ls-item lsp1_p',
-				classNameBindings:	['MFT.States.settings.clock.active:settings_active'],
-				text:				  'Clock',
+				classNameBindings:	 ['MFT.States.settings.clock.active:settings_active'],
+				textBinding:	  	   'MFT.locale.label.view_settings_clock',
 				icon:				  'images/settings/ico_clock.png',
 				action:				'onState',
 				target:				'MFT.SettingsController',
@@ -76,8 +68,8 @@
 				
 				goToState:   			 'display',	
 				classNames:			'ls-item lsp1_p',
-				classNameBindings:	['MFT.States.settings.display.active:settings_active'],
-				text:				  'Display',
+				classNameBindings:	 ['MFT.States.settings.display.active:settings_active'],
+				textBinding:	  	   'MFT.locale.label.view_settings_display',
 				icon:				  'images/settings/ico_display.png',
 				action:				'onState',
 				target:				'MFT.SettingsController',
@@ -89,7 +81,7 @@
 				goToState:   			 'sound',	
 				classNames:			'ls-item lsp1_p',
 				classNameBindings:	['MFT.States.settings.sound.active:settings_active'],
-				text:				  'Sound',
+				textBinding:	  	   'MFT.locale.label.view_settings_sound',
 				icon:				  'images/settings/ico_sound.png',
 				action:				'onState',
 				target:				'MFT.SettingsController',
@@ -101,7 +93,7 @@
 				goToState:   			 'vehicle',	
 				classNames:			'ls-item lsp1_p',
 				classNameBindings:	['MFT.States.settings.vehicle.active:settings_active'],
-				text:				  'Vehicle',
+				textBinding:	  	   'MFT.locale.label.view_settings_vehicle',
 				icon:				  'images/settings/ico_vehicle.png',
 				action:				'onState',
 				target:				'MFT.SettingsController',
@@ -113,7 +105,7 @@
 				goToState:   			 'settings',	
 				classNames:			'ls-item lsp1_p',
 				classNameBindings:	 ['MFT.States.settings.settings.active:settings_active'],
-				text:				  'Settings',
+				textBinding:	  	   'MFT.locale.label.view_settings_settings',
 				icon:				  'images/settings/ico_settings.png',
 				action:				'onState',
 				target:				'MFT.SettingsController',
@@ -125,7 +117,7 @@
 				goToState:   			 'help',	
 				classNames:			'ls-item lsp1_p',
 				classNameBindings:	 ['MFT.States.settings.help.active:settings_active'],
-				text:				  'Help',
+				textBinding:	  	   'MFT.locale.label.view_settings_help',
 				icon:				  'images/settings/ico_help.png',
 				action:				'onState',
 				target:				'MFT.SettingsController',

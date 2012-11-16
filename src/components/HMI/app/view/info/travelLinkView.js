@@ -12,14 +12,10 @@
 
 MFT.InfoTravelLinkView = Em.ContainerView.create(MFT.LoadableView,{
 	
-	classNameBindings: ['MFT.States.info.travelLink.active:active_state','MFT.helpMode'],
+	classNameBindings: ['MFT.helpMode','MFT.localization'],
 	
 	elementId:	'info_travelLink',
 		
-	classNames: 'hidden',
-	
-	stateObj: MFT.States.info.travelLink,
-	
 	childViews: [
 		'imageLogo',
 		'listLeft',
@@ -28,7 +24,8 @@ MFT.InfoTravelLinkView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	imageLogo: MFT.Label.extend({
 		elementId:	'info_travelLink_logo',	
-		icon: 		 'images/info/info_travelLink_sirius_logo.png'
+		icon: 		 'images/info/info_travelLink_sirius_logo.png',
+		templateName: 'icon',
 	}),
 	
 	listLeft: MFT.List.extend({
@@ -46,7 +43,7 @@ MFT.InfoTravelLinkView = Em.ContainerView.create(MFT.LoadableView,{
 				
 				params:		{
 					textBinding: 	  'MFT.locale.label.view_info_travelLink_trafficOnRoute',
-					arrow:			true,
+					templateName: 'arrow',
 					disabled:         true,
 				}			
 					
@@ -57,7 +54,7 @@ MFT.InfoTravelLinkView = Em.ContainerView.create(MFT.LoadableView,{
 				
 				params:		{
 					textBinding: 	  'MFT.locale.label.view_info_travelLink_trafficNearby',
-					arrow:			true,
+					templateName: 'arrow',
 					disabled:         true,
 				}			
 					
@@ -68,7 +65,7 @@ MFT.InfoTravelLinkView = Em.ContainerView.create(MFT.LoadableView,{
 				
 				params:		{
 					textBinding: 	  'MFT.locale.label.view_info_travelLink_fuelPrices',
-					arrow:			true,
+					templateName: 'arrow',
 					disabled:         true,
 				}			
 					
@@ -79,7 +76,7 @@ MFT.InfoTravelLinkView = Em.ContainerView.create(MFT.LoadableView,{
 				
 				params:		{
 					textBinding: 	  'MFT.locale.label.view_info_travelLink_movieListings',
-					arrow:			true,
+					templateName: 'arrow',
 					disabled:         true,
 				}			
 					
@@ -111,7 +108,7 @@ MFT.InfoTravelLinkView = Em.ContainerView.create(MFT.LoadableView,{
 				
 				params:		{
 					textBinding: 	  'MFT.locale.label.view_info_travelLink_weather',
-					arrow:			true,
+					templateName: 'arrow',
 					disabled:         true,
 				}			
 					
@@ -122,7 +119,7 @@ MFT.InfoTravelLinkView = Em.ContainerView.create(MFT.LoadableView,{
 				
 				params:		{
 					textBinding: 	  'MFT.locale.label.view_info_travelLink_sportsInfo',
-					arrow:			true,
+					templateName: 'arrow',
 					disabled:         true,
 				}			
 					
@@ -133,11 +130,11 @@ MFT.InfoTravelLinkView = Em.ContainerView.create(MFT.LoadableView,{
 				
 				params:		{
 					textBinding: 	  'MFT.locale.label.view_info_travelLink_skiConditions',
-					arrow:			true,
+					templateName: 'arrow',
 					disabled:         true,
 				}			
 					
-			},
+			}
 		]
 	})
 });

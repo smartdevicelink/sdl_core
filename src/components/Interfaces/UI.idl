@@ -259,5 +259,15 @@ GetCapabilities(
   );
 
 /*
+  * @descr 
+   *      Notification is sent from HMI to AppManager on showing warning
+   *  to user.
+   *  
+   */
+notification OnDriverDistraction(
+    DriverDistractionState state // data type from AppLink protocol specification
+  )
+
+/*
 "id": "integer" //REQUIRED for request methods. NOT to be used for notifications
 */

@@ -12,16 +12,13 @@
 
 MFT.NavigationDestinationStreetAddress = Em.ContainerView.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.navigation.dest.streetAddress.active:active_state','MFT.helpMode',],
+	classNameBindings: ['MFT.helpMode'],
 	
 	elementId:		'view_navi_destination_streetAddress',
-	
-	classNames:	   ['hidden'],
-	
-	stateObj: MFT.States.navigation.dest.streetAddress,
-	
+		
 	childViews: [
 		'backButton',
+		'voiceButton',
 		'content'
 	],
 	  
@@ -30,6 +27,12 @@ MFT.NavigationDestinationStreetAddress = Em.ContainerView.create(MFT.LoadableVie
 		action:			  'back',
 		target:			  'MFT.States',	
 		icon:				'images/media/ico_back.png',	
+	}),
+		
+	voiceButton: MFT.Button.extend({
+		classNames:		  ['voiceButton','button'],		
+		icon:				'images/settings/ico_voice.png',	
+		disabled:			true
 	}),
 	
 	content: Em.View.create({

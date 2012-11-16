@@ -45,12 +45,14 @@ var DataImages = [
 		"images/nav/dest/navi_destination_LatitudeLongitude_bg.png" ,
 		"images/nav/dest/navi_destination_LatitudeLongitude_bg_help.png",
 		//phone
+		/*
 		"images/phone/phone_help_dialpad.jpg" ,
 		"images/phone/phone_help_quickdial.jpg" ,
 		"images/phone/phone_help_phonebook.jpg" ,
 		"images/phone/phone_help_history.jpg" ,
 		"images/phone/phone_help_messaging.jpg" ,
 		"images/phone/phone_help_settings.jpg" ,
+		*/
 		"images/phone/phone_settings_bluetoothDevices_bg_help.png" ,
 		"images/phone/phone_settings_phoneRinger_bg_help.png" ,
 		"images/phone/phone_settings_textMessageNotification_bg_help.png" ,
@@ -62,5 +64,5 @@ var DataImages = [
 		"images/media/help/sir_bro_view_blur.png" ,
 		"images/media/help/broall_view_blur.jpg" ,
 		//Settings
-		"images/settings/view_info_apps_911Assist_help2.png" 
+		"images/settings/view_settings_help_911Assist_bg_help.png" 
 ];

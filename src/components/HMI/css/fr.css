@@ -1,0 +1,17 @@
+
+.fr #navigation_destination_myHome_view .view {
+	left: 71px;
+	font-size: 18px;
+}
+
+.fr #view_navi_destination_map .poi {
+	top: 313px;
+	font-size: 18px;
+	line-height: 15px;
+}
+
+.fr #view_navi_destination_map .view{
+	top: 122px;
+	left: -22px;
+	font-size: 18px;
+}

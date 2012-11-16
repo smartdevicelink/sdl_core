@@ -25,7 +25,8 @@ MFT.WidgetClimateView = Em.ContainerView.extend({
 	
 	powerButton: MFT.Button.create({		
 		classNameBindings:		[
-			'hidden'
+			'hidden',
+			'MFT.ClimateController.isSimple:simple_climate'
 		],
 		
 		hidden: function() {
@@ -44,13 +45,15 @@ MFT.WidgetClimateView = Em.ContainerView.extend({
 		elementId:				'home_widgetClimate_powerButton',
 		action:					'onActivate',
 		target:					'MFT.ClimateController',
-		onDown:					false
+		onDown:					false,
+		icon:					'images/climate/power_button/power_icon.png'
 	}),
 	
 	driverTemp: MFT.Label.create({
 		classNameBindings:		[
 			'MFT.ClimateController.model.on.value:visible',
-			'MFT.helpMode:helpmode_blur_text'
+			'MFT.helpMode:helpmode_blur_text',
+			'MFT.ClimateController.isSimple:simple_climate_temp'
 		],
 		
 		elementId:				'home_widgetClimate_driverTemp',
@@ -60,7 +63,8 @@ MFT.WidgetClimateView = Em.ContainerView.extend({
 	passengerTemp: MFT.Label.create({
 		classNameBindings:		[
 			'MFT.ClimateController.model.on.value:visible',
-			'MFT.helpMode:helpmode_blur_text'
+			'MFT.helpMode:helpmode_blur_text',
+			'MFT.ClimateController.isSimple:simple_climate_temp'
 		],
 		
 		elementId:				'home_widgetClimate_passengerTemp',
@@ -70,7 +74,11 @@ MFT.WidgetClimateView = Em.ContainerView.extend({
 	driverControls: Em.ContainerView.create({
 		elementId:		'home_widgetClimate_driverControls',
 		
-		classNameBindings: ['MFT.helpMode:helpmode_box'],
+		classNames:		['helpmode_box_shadow'],
+		
+		classNameBindings: [
+			'MFT.ClimateController.isSimple:hidden'
+		],
 		
 		childViews: [
 			'heatedSeatButton',
@@ -79,6 +87,7 @@ MFT.WidgetClimateView = Em.ContainerView.extend({
 		
 		heatedSeatButton: MFT.IndButton.create({
 			elementId:			'home_widgetClimate_driverControls_heatedSeatButton',
+			classNames:			['helpmode_right_delim'],
 			action:				'onChangeDriverHeatedSeat',
 			target:				'MFT.ClimateController',
 			contentBinding:		Em.Binding.oneWay('MFT.ClimateController.model.driverHeatedSeat'),
@@ -89,8 +98,8 @@ MFT.WidgetClimateView = Em.ContainerView.extend({
 		}),
 		
 		cooledSeatButton: MFT.IndButton.create({
-			classNameBindings: ['MFT.helpMode:divider'],
 			elementId:			'home_widgetClimate_driverControls_cooledSeatButton',
+			classNames:			['helpmode_left_delim'],
 			action:				'onChangeDriverCooledSeat',
 			target:				'MFT.ClimateController',
 			contentBinding:		Em.Binding.oneWay('MFT.ClimateController.model.driverCooledSeat'),
@@ -103,7 +112,10 @@ MFT.WidgetClimateView = Em.ContainerView.extend({
 	
 	heatedSteerButton: MFT.IndButton.create({
 		elementId:			'home_widgetClimate_driverControls_heatedSteerButton',
-		classNameBindings: 	['MFT.helpMode: helpmode_blur_cont'],
+		classNameBindings: 	[
+			'MFT.helpMode: helpmode_blur_cont',
+			'MFT.ClimateController.isSimple:hidden'
+		],
 		action:				'onChangeDriverHeatedSteer',
 		target:				'MFT.ClimateController',
 		contentBinding:		Em.Binding.oneWay('MFT.ClimateController.model.driverHeatedSteer'),
@@ -116,7 +128,11 @@ MFT.WidgetClimateView = Em.ContainerView.extend({
 	passengerControls: Em.ContainerView.create({
 		elementId:			'home_widgetClimate_passengerControls',
 		
-		classNameBindings: ['MFT.helpMode:helpmode_box'],
+		classNames:			['helpmode_box_shadow'],
+		
+		classNameBindings: [
+			'MFT.ClimateController.isSimple:hidden'
+		],
 		
 		childViews: [
 			'heatedSeatButton',
@@ -125,6 +141,7 @@ MFT.WidgetClimateView = Em.ContainerView.extend({
 		
 		heatedSeatButton: MFT.IndButton.create({
 			elementId:			'home_widgetClimate_passengerControls_heatedSeatButton',
+			classNames:			['helpmode_right_delim'],
 			action:				'onChangePassangerHeatedSeat',
 			target:				'MFT.ClimateController',
 			contentBinding:		Em.Binding.oneWay('MFT.ClimateController.model.passangerHeatedSeat'),
@@ -135,8 +152,8 @@ MFT.WidgetClimateView = Em.ContainerView.extend({
 		}),
 		
 		cooledSeatButton: MFT.IndButton.create({
-			classNameBindings: ['MFT.helpMode:divider'],
 			elementId:			'home_widgetClimate_passengerControls_cooledSeatButton',
+			classNames:			['helpmode_left_delim'],
 			action:				'onChangePassangerCooledSeat',
 			target:				'MFT.ClimateController',
 			contentBinding:		Em.Binding.oneWay('MFT.ClimateController.model.passangerCooledSeat'),

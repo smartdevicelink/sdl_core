@@ -14,16 +14,11 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	elementId:	'navigation_destination',
 	
-	classNameBindings: ['MFT.States.navigation.dest.active:active_state','MFT.helpMode'],
-	
-	classNames: ['hidden'],
-	
-	stateObj: MFT.States.navigation.dest,
-	
+	classNameBindings: ['MFT.helpMode','MFT.localization'],
+		
 	childViews: [
 		'backButton',
 		'topTitile',
-		'pushToTalkButton',
 		'editButtons',
 		'list'
 	],
@@ -40,15 +35,6 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 		contentBinding:	 Ember.Binding.oneWay('MFT.locale.label.view_navigation_destination')
 	}),	
 	
-	pushToTalkButton: MFT.Button.extend({
-		elementId:		   'navigation_destination_pushToTalk_buttton',
-		classNames:		  ['button'],		
-		action:	  		  '',
-		target:	          'MFT.NavigationController',	
-		icon:				'images/nav/ico_pushToTalk.png',
-		disabledBinding:	 Ember.Binding.oneWay('MFT.helpMode'),
-	}),	
-	
 	list: MFT.List.extend({
 		elementId:		   'navigation_destination_list',
 		
@@ -57,6 +43,19 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 		itemsOnPage:		 5,
 		
 		columnsNumber:	   2,
+		
+		// Used to save list page state
+		// before entering helpmode
+		// And restore state
+		// after helpmode off
+		onHelpMode: function() {
+			if ( MFT.helpMode ) {
+				this.beforeHelpmodePage = this.get('currentPage');
+				this.set('currentPage', 0);
+			} else {
+				this.set('currentPage', this.beforeHelpmodePage);
+			}
+		}.observes('MFT.helpMode'),
 		
 		/** Items */
 		items: [
@@ -68,11 +67,10 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'myHome',
 					icon:		'images/nav/dest/ico_myHome.png',
 					textBinding: 'MFT.locale.label.view_navigation_destination_myHome',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  	'MFT.NavigationController',
-					disabledBinding: 'MFT.helpMode',
-					voiceOver: true,
+					helpMode: true
 				}			
 					
 			},
@@ -84,11 +82,10 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'streetAddress',
 					icon:		'images/nav/dest/ico_adress.png',
 					textBinding: 'MFT.locale.label.view_navigation_destination_streetAddress',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  	'MFT.NavigationController',
-					disabledBinding: 'MFT.helpMode',
-					voiceOver: true,
+					helpMode: true
 				}			
 					
 			},
@@ -100,11 +97,10 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'favorites',
 					icon:		'images/nav/dest/ico_favorites.png',
 					textBinding: 'MFT.locale.label.view_navigation_destination_favorites',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  	'MFT.NavigationController',
-					disabledBinding: 'MFT.helpMode',
-					voiceOver: true,
+					helpMode: true
 				}			
 					
 			},
@@ -116,11 +112,10 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'intersection',
 					icon:		'images/nav/dest/ico_intersection.png',
 					textBinding: 'MFT.locale.label.view_navigation_destination_intersection',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  	'MFT.NavigationController',
-					disabledBinding: 'MFT.helpMode',
-					voiceOver: true,
+					helpMode: true
 				}			
 					
 			},
@@ -132,11 +127,10 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'previousDestinations',
 					icon:		'images/nav/dest/ico_destination.png',
 					textBinding: 'MFT.locale.label.view_navigation_destination_previousDestinations',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  	'MFT.NavigationController',
-					disabledBinding: 'MFT.helpMode',
-					voiceOver: true,
+					helpMode: true
 				}			
 					
 			},
@@ -148,10 +142,10 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'cityCenter',
 					icon:		'images/nav/dest/ico_cityCenter.png',
 					textBinding: 'MFT.locale.label.view_navigation_destination_cityCenter',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  	'MFT.NavigationController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
 					
 			},
@@ -163,11 +157,10 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'POI',
 					icon:		'images/nav/dest/ico_poi.png',
 					textBinding: 'MFT.locale.label.view_navigation_destination_POI',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  	'MFT.NavigationController',
-					disabledBinding: 'MFT.helpMode',
-					voiceOver: true,
+					helpMode: true,
 				}			
 					
 			},
@@ -179,10 +172,10 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'map',
 					icon:		'images/nav/dest/ico_map.png',
 					textBinding: 'MFT.locale.label.view_navigation_destination_map',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  	'MFT.NavigationController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
 					
 			},
@@ -194,11 +187,10 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'emergency',
 					icon:		'images/nav/dest/ico_emergency.png',
 					textBinding: 'MFT.locale.label.view_navigation_destination_emergency',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  	'MFT.NavigationController',
-					disabledBinding: 'MFT.helpMode',
-					voiceOver: true,
+					helpMode: true,
 				}			
 					
 			},
@@ -219,10 +211,10 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'previousStartingsPoint',
 					icon:		'images/nav/dest/ico_destination.png',
 					textBinding: 'MFT.locale.label.view_navigation_destination_previousStartingsPoint',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  	'MFT.NavigationController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
 					
 			},
@@ -234,10 +226,10 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'freeWay',
 					icon:		'images/nav/dest/ico_freeWay.png',
 					textBinding: 'MFT.locale.label.view_navigation_destination_freewayEntranceExit',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  	'MFT.NavigationController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
 					
 			},
@@ -249,10 +241,10 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					goToState:   'latitudeLongitude',
 					icon:		'images/nav/dest/ico_latLong.png',
 					textBinding: 'MFT.locale.label.view_navigation_destination_latitudeLongitude',
-					arrow:		true,
+					templateName: 'arrow',
 					action:	  'onChildState',
 					target:	  	'MFT.NavigationController',
-					disabledBinding: 'MFT.helpMode'
+					helpMode: true
 				}			
 					
 			}
@@ -267,8 +259,6 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					'textBinding="MFT.locale.label.view_navigation_destination_editRouteCancelRoute" '+
 					'elementId="navigation_destination_editRoute_Button" '+
 					'classNames="button" '+
-					'action="" '+
-					'target="" '+
 					'disabled=true '+
 				'}}'+
 				'<div class="delim"></div>'+
@@ -276,8 +266,6 @@ MFT.NavigationDestinationView = Em.ContainerView.create(MFT.LoadableView,{
 					'textBinding="MFT.locale.label.view_navigation_destination_CancelRoute"'+
 					'elementId="navigation_destination_cancelRoute_Button" '+
 					'classNames="button" '+
-					'action="" '+
-					'target="" '+
 					'disabled=true '+
 				'}}'+
 			'</div>'
