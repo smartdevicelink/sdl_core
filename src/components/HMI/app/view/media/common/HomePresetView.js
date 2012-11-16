@@ -16,7 +16,7 @@ MFT.HomePresetView = Em.ContainerView.extend({
 	
 	classNames: ['home-preset-buttons-wraper'],
 	
-	childViews: ['wrapper','preset_help_yellow_box'],
+	childViews: ['wrapper'],
 	
 	wrapper:Em.ContainerView.extend({
 
@@ -26,7 +26,7 @@ MFT.HomePresetView = Em.ContainerView.extend({
 		
 		presetDataBinding:  Ember.Binding.oneWay('MFT.MediaController.currentModuleData'),
 		
-		classNames: 'preset-items',
+		classNames: ['preset-items','helpmode_box_shadow'],
 		
 		'1': MFT.PresetButton.extend({
 			elementId: 'media_home_preset_button1',
@@ -37,9 +37,7 @@ MFT.HomePresetView = Em.ContainerView.extend({
 			dataBinding:  Ember.Binding.oneWay('parentView.presetData'),
 			/** Define button template */
 			template: Ember.Handlebars.compile(
-				'{{#with view}}'+
-					'<p>{{frequency}}</p>'+
-				'{{/with}}'
+				'<p>{{view.frequency}}</p>'
 			)
 		}),
 		'2': MFT.PresetButton.extend({
@@ -51,9 +49,7 @@ MFT.HomePresetView = Em.ContainerView.extend({
 			dataBinding:  Ember.Binding.oneWay('parentView.presetData'),
 			/** Define button template */
 			template: Ember.Handlebars.compile(
-				'{{#with view}}'+
-					'<p>{{frequency}}</p>'+
-				'{{/with}}'
+				'<p>{{view.frequency}}</p>'
 			)
 		}),
 		'3': MFT.PresetButton.extend({
@@ -65,9 +61,7 @@ MFT.HomePresetView = Em.ContainerView.extend({
 			dataBinding:  Ember.Binding.oneWay('parentView.presetData'),
 			/** Define button template */
 			template: Ember.Handlebars.compile(
-				'{{#with view}}'+
-					'<p>{{frequency}}</p>'+
-				'{{/with}}'
+				'<p>{{view.frequency}}</p>'
 			)
 		}),
 		'4': MFT.PresetButton.extend({
@@ -79,9 +73,7 @@ MFT.HomePresetView = Em.ContainerView.extend({
 			dataBinding: Ember.Binding.oneWay( 'parentView.presetData'),
 			/** Define button template */
 			template: Ember.Handlebars.compile(
-				'{{#with view}}'+
-					'<p>{{frequency}}</p>'+
-				'{{/with}}'
+				'<p>{{view.frequency}}</p>'
 			)
 		}),
 		'5': MFT.PresetButton.extend({
@@ -93,9 +85,7 @@ MFT.HomePresetView = Em.ContainerView.extend({
 			dataBinding:  Ember.Binding.oneWay('parentView.presetData'),
 			/** Define button template */
 			template: Ember.Handlebars.compile(
-				'{{#with view}}'+
-					'<p>{{frequency}}</p>'+
-				'{{/with}}'
+				'<p>{{view.frequency}}</p>'
 			)
 		}),
 		'6': MFT.PresetButton.extend({
@@ -107,21 +97,9 @@ MFT.HomePresetView = Em.ContainerView.extend({
 			dataBinding:  Ember.Binding.oneWay('parentView.presetData'),
 			/** Define button template */
 			template: Ember.Handlebars.compile(
-				'{{#with view}}'+
-					'<p>{{frequency}}</p>'+
-				'{{/with}}'
+				'<p>{{view.frequency}}</p>'
 			)
 			
 		})
-	}),
-	
-	preset_help_yellow_box: MFT.Button.extend({
-		elementId: 'home_presets_yellow_box',
-		classNameBindings:['MFT.helpMode:active_state', 'MFT.helpMode:helpmode_box'],
-		classNames: ['hidden','home-help-preset-buttons-wraper'],
-		target: 'MFT.MediaController',
-		action: 'turnPresetHelpVideoOn',
-		onDown:				false
 	})
-	
 });

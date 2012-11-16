@@ -69,6 +69,12 @@ MFT.List = Em.ContainerView.extend({
 	onCurrentPageChange: function(){
 		this.set('listScrollingAttributes', 'margin-top: '+(this.get('currentPage')* this.itemsOnPage*(-50))+'px');
 	}.observes('currentPage'),
+
+	/** Method for delete certain item from list */
+	deleteItem: function(id){
+		this.items.splice(id, 1);
+		this.list.refresh();
+	},
 	
 	
 	/** List components */

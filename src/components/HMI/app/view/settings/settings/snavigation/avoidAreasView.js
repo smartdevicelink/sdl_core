@@ -12,14 +12,10 @@
 
 MFT.SettingsSettingsNavigationAreasView = Em.ContainerView.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.settings.settings.snavigation.avoidAreas.active:active_state','MFT.helpMode',],
+	classNameBindings: ['MFT.helpMode',],
 	
 	elementId:		'settings_settings_navigation_avoidAreas_view',
-	
-	classNames:	   ['hidden'],
-	
-	stateObj: MFT.States.settings.settings.snavigation.avoidAreas,
-	
+			
 	childViews: [
 		'backButton',
 		'topTitile',
@@ -46,7 +42,7 @@ MFT.SettingsSettingsNavigationAreasView = Em.ContainerView.create(MFT.LoadableVi
 		classNames:		  ['button'],		
 		action:			  'onChildState',
 		target:			  'MFT.settingsController',	
-		arrow:			   true,
+		templateName:		'arrow',
 		textBinding:		 'MFT.locale.label.view_settings_settings_navigation_avoidAreas_add',
 		disabled:	        true
 	})

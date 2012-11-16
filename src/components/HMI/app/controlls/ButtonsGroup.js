@@ -53,6 +53,8 @@ MFT.ButtonsGroup = Em.ContainerView.extend( {
 		for( var i = 0; i < this.innerRange; i++ ){
 			/** Button */
 			element = MFT.Button.create({
+				templateName:		'text',
+				
 				classNames:			' button' + i + ' ' + self.classes,
 				classNameBindings:	['isSelected:active','parentView.disabled'],
 				index: 				i,

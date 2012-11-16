@@ -140,7 +140,7 @@ MFT.SeatsMassageView5_1 = Em.ContainerView.extend({
 				this.scrollbar.set('currentPage', 0);
 			}.observes('MFT.MCSController.seat'),
 			items:[{
-				type:	MFT.LablePlusToggleButton,
+				type:	MFT.LabelPlusToggleButton,
 				params:{
 					tButtonsClases:			'btn btn-28 toggles button',
 					classContainer:			'seats-message-actions-3',
@@ -156,7 +156,7 @@ MFT.SeatsMassageView5_1 = Em.ContainerView.extend({
 				}   
 			},
 			{
-				type:	MFT.LablePlusToggleButton,
+				type:	MFT.LabelPlusToggleButton,
 				params:{
 					tButtonsClases:			'btn btn-28 toggles button',
 					classContainer:			'seats-message-actions-3',
@@ -172,7 +172,7 @@ MFT.SeatsMassageView5_1 = Em.ContainerView.extend({
 				}   
 			},
 			{
-				type:	MFT.LablePlusToggleButton,
+				type:	MFT.LabelPlusToggleButton,
 				params:{
 					tButtonsClases:			'btn btn-28 toggles button',
 					classContainer:			'seats-message-actions-3',
@@ -188,7 +188,7 @@ MFT.SeatsMassageView5_1 = Em.ContainerView.extend({
 				}   
 			},
 			{
-				type:	MFT.LablePlusToggleButton,
+				type:	MFT.LabelPlusToggleButton,
 				params:{
 					tButtonsClases:			'btn btn-28 toggles button',
 					classContainer:			'seats-message-actions-3',
@@ -204,7 +204,7 @@ MFT.SeatsMassageView5_1 = Em.ContainerView.extend({
 				}   
 			},
 			{
-				type:	MFT.LablePlusToggleButton,
+				type:	MFT.LabelPlusToggleButton,
 				params:{
 					tButtonsClases:			'btn btn-28 toggles button',
 					classContainer:			'seats-message-actions-3',
@@ -220,7 +220,7 @@ MFT.SeatsMassageView5_1 = Em.ContainerView.extend({
 				}   
 			},
 			{
-				type:	MFT.LablePlusToggleButton,
+				type:	MFT.LabelPlusToggleButton,
 				params:{
 					tButtonsClases:			'btn btn-28 toggles button',
 					classContainer:			'seats-message-actions-3',
@@ -236,7 +236,7 @@ MFT.SeatsMassageView5_1 = Em.ContainerView.extend({
 				}   
 			},
 			{
-				type:	MFT.LablePlusToggleButton,
+				type:	MFT.LabelPlusToggleButton,
 				params:{
 					tButtonsClases:			'btn btn-28 toggles button',
 					classContainer:			'seats-message-actions-3',

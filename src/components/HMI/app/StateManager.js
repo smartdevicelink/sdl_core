@@ -20,22 +20,15 @@ Em.State.reopen({
 	viewLoaded: false,
 	
 	enter: function() {
-		//Em.Logger.log('enter: ', this.get('path'));		
 		MFT.TransitionIterator.stateOnEnter.push(this);
 		
-		//
 		MFT.StateVisitor.visit(this);
-		
-		if (FLAGS.EXTENDED_LOG) {
-			MFT.startTime = Date.now();	
-		}
-		
+
 		// Switch off video player if active
 		MFT.VideoPlayerController.close();
 	},
 	
 	exit: function() {
-		//Em.Logger.log('exit: ', this.get('path'));
 		MFT.TransitionIterator.stateOnExit.push(this);
 	}
 });
@@ -43,8 +36,6 @@ Em.State.reopen({
 
 // State Manager class
 var StateManager = Em.StateManager.extend({
-	// used for logging state transitions
-	enableLogging: FLAGS.EXTENDED_LOG,
 	
 	// default state
 	initialState: MFT.homeView,
@@ -75,7 +66,7 @@ var StateManager = Em.StateManager.extend({
 	
 	/** Home state */
 	home: Em.State.create({
-		viewLoaded: true		
+				
 	}),
 	
 	/** FAQ state */
@@ -91,25 +82,21 @@ var StateManager = Em.StateManager.extend({
 	
 	/** Climate state */
 	climate: Em.State.create({
-		view:	MFT.ClimateView,
-		
-		viewLoaded: true,
-		
-		front:	Em.State.create({
-			viewLoaded: true
+
+		full:	Em.State.create({
+			
+			rear:	Em.State.create({
+			
+			})
 		}),
-		
-		rear:	Em.State.create({
-			viewLoaded: true
+
+		simple: Em.State.create({
+			
 		})
 	}),
 	
 	/** info state */
 	info: Em.State.create({
-		
-		view:	MFT.InfoView,
-		
-		viewLoaded: true,
 		
 		exit: function() {
 			MFT.InfoController.set('activeState', MFT.States.currentState.get('path'));
@@ -134,19 +121,22 @@ var StateManager = Em.StateManager.extend({
 		
 		apps: Em.State.create({
 			
-		})		
+		}),
+		
+		nonMedia: Em.State.create({
+			
+			options: Em.State.create({
+				
+			})
+		})
 	}),
 	
 	/** settings state */
-	settings: Em.State.create({
-
-		view:	MFT.SettingsView,
-
-		viewLoaded: true,
-
+	settings: Em.State.create({	
+			 
 		exit: function() {
 			this._super();
-
+			
 			var path = MFT.States.currentState.get('path');
 			
 			if ( path.split('.').length > 2 ) {
@@ -197,12 +187,11 @@ var StateManager = Em.StateManager.extend({
 
 			enterPIN: Em.State.create({
 				
-			}),
-
+			})/*,
+			
 			mcs: Em.State.create({
 				
-			})
-
+			})*/
 		}),
 		
 		settings: Em.State.create({
@@ -237,6 +226,16 @@ var StateManager = Em.StateManager.extend({
 			}),
 			
 			snavigation: Em.State.create({
+				enter: function() {
+						if(MFT.States.currentState.get('path') != 'faq'){
+							if(MFT.States.currentState.get('path') == 'navigation.menu'){
+								MFT.SettingsController.set('previousState','navigation');
+							}else{
+								MFT.SettingsController.set('previousState',MFT.States.currentState.get('path'));
+							}
+						}
+						this._super();
+				},
 				
 				mapPreferences: Em.State.create({
 					
@@ -294,11 +293,7 @@ var StateManager = Em.StateManager.extend({
 		
 	/** Media state */
 	media: Em.State.create({
-	
-		view:	MFT.MediaView,
 		
-		viewLoaded: true,
-		  
 		exit: function() {
 			MFT.MediaController.set('activeState', MFT.States.currentState.get('path'));
 			MFT.MediaController.resetDirectTune();
@@ -330,19 +325,17 @@ var StateManager = Em.StateManager.extend({
 		avin: Em.State.create({
 		}),
 		
-		app: Em.State.create({
-		}),
+		applink: Em.State.create({
 
-		appperforminteraction: Em.State.create({
-			viewLoaded: true,
-		}),
+			applinkperforminteractionchoise: Em.State.create({
+			}),
 
-		appoptions: Em.State.create({
-			viewLoaded: true,
+			applinkoptions: Em.State.create({
 
-			appsubmenu: Em.State.create({
-				viewLoaded: true
+				applinkoptionssubmenu: Em.State.create({
+				})
 			})
+
 		}),
 
 		options: Em.State.create({
@@ -351,15 +344,18 @@ var StateManager = Em.StateManager.extend({
 	
 	/** Navigation state */
 	navigation: Em.State.create({
-		
-		view: MFT.NavigationView,
-		
-		viewLoaded: true,
-		
+
 		exit: function() {
-			MFT.NavigationController.set('activeState', MFT.States.currentState.get('path'));
+			if(MFT.States.currentState.get('path') == 'navigation.menu'){
+				MFT.NavigationController.set('activeState', 'navigation');
+			}else{
+				MFT.NavigationController.set('activeState', MFT.States.currentState.get('path'));
+			}
 			this._super();
 		},
+		
+		menu: Em.State.create({
+		}),
 		
 		dest: Em.State.create({
 			
@@ -415,14 +411,23 @@ var StateManager = Em.StateManager.extend({
 	
 	/** Phone state */
 	phone: Em.State.create({
-		
-		view:	MFT.PhoneView,
-		
-		viewLoaded: true,
-				
-		exit: function() {
-			MFT.PhoneController.set('activeState', MFT.States.currentState.get('path'));
+
+		enter: function() {
+			MFT.PhoneController.set('hideMenu', false);
+			
 			this._super();
+		},
+		
+		exit: function() {
+			this._super();
+			
+			var path = MFT.States.currentState.get('path');
+			
+			if ( path.split('.').length > 2 ) {
+				MFT.PhoneController.set('activeState', path.substring( 0, path.indexOf('.',6) ));
+			} else {
+				MFT.PhoneController.set('activeState', path);
+			}
 		},
 		
 		dialpad: Em.State.create({

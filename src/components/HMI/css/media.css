@@ -30,7 +30,7 @@
 }
 
 /* Direct Tune */
-#media_directTune_tuneButtons {
+#media_directTune_tuneButtons , #media_directTune_sirius_tuneButtons {
 	width: 390px;
 	height: 99px;
 	
@@ -72,7 +72,7 @@
 	position:relative;
 }
 #media_amButton {
-	/*top: 10px;*/
+	top: 10px;
 	display: none;
 }
 
@@ -96,7 +96,7 @@
 /*FM*/
 
 #media_fmButton {
-	/*top: 20px;*/
+	top: 20px;
 	display: none;
 }
 
@@ -124,7 +124,7 @@
 }
 
 #media_siriusButton {
-	/*top: 30px;*/
+	top: 30px;
 	display: none;
 }
 
@@ -148,10 +148,23 @@
 /*CD,USB*/
 
 #media_cdButton, #media_usbButton {
-	/*top: 30px;*/
+	top: 30px;
 	font-size: 18px;
+	padding-left: 48px;
 	line-height: 48px;
 	display: none;
+}
+
+#media_options_view.help-mode .toogleButtonContainer{
+	border:none !important;
+}
+
+#media_options_back_btn{
+	top:11px;
+}
+
+#media_option_title_header{
+	top:19px;
 }
 
 #media_options_view.usb .lablePlusButton .button {
@@ -163,10 +176,25 @@
 	margin-left: 0px;
 }
 
+#media_options_view.fr.am #media_options_list_item1 .label,
+#media_options_view.fr.fm #media_options_list_item1 .label,
+#media_options_view.fr.sirius #media_options_list_item1 .label {
+	line-height: 20px;
+	width: 346px;
+	margin: 3px 0 0 13px;
+}
+
+#media_options_view.fr.am #media_options_list_item1 .label span,
+#media_options_view.fr.fm #media_options_list_item1 .label span,
+#media_options_view.fr.sirius #media_options_list_item1 .label span {
+	margin: 0 0 0 0;
+}
+
 /*SD*/
 
 #media_sdButton {
 	font-size: 18px;
+	padding-left: 48px;
 	line-height: 48px;
 	display: block;
 }
@@ -175,10 +203,22 @@
 	display: none !important;
 }
 
+
+#media_options_view.sd .lablePlusButton .button {
+	width: 148px;
+	text-align: center;
+}
+
+#media_options_view.sd .lablePlusButton .button span {
+	margin-left: 0px;
+}
+
+
 /*Bluetooth*/
 
 #media_btButton {
 	font-size: 18px;
+	padding-left: 48px;
 	line-height: 48px;
 	display: block;
 }
@@ -191,6 +231,7 @@
 
 #media_avinButton {
 	font-size: 18px;
+	padding-left: 48px;
 	line-height: 48px;
 	display: block;
 }
@@ -198,30 +239,28 @@
 #media_avinButton.displayed {
 	display: none !important;
 }
+/**APPLINK*/
 
-#media_appButton {
+#media_applinkButton {
 	font-size: 18px;
 	line-height: 48px;
 	display: block;
-}
-
-#media_appButton.displayed {
-	display: none !important;
-}
-
-#media_leftmenu .media-ls-item{
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
-#media_leftmenu .media-ls-item span{
-	padding-left: 48px;
+#media_applinkButton.displayed {
+	display: none !important;
+}
+
+#media_applinkButton span {
+	margin-left: 50px;
 }
 
 /*SCROLL DOWN*/
 
 #media_scrolldownButton {
-	/*top: 30px;*/
+	top: 30px;
 	display: none;
 }
 
@@ -287,7 +326,6 @@
 .media-ls-item {
 	z-index: 201;
 	position: relative;
-	width: 150px;
 	height: 50px;
 	cursor: pointer;
 	background: url(../images/media/ls-item_bg.png) no-repeat;
@@ -420,46 +458,6 @@
 
 #media_rightmenu_optionButton.disabled img {
 	opacity: 0.3 !important;
-}
-
-#media_appRightMenu{
-	right: 0;
-}
-
-#media_appRightMenu .media_rightmenu_topButton{
-	right: 4px;
-	top: 90px;
-	width: 152px;
-	z-index: 2;
-	background-color: gray;
-	height: 50px;
-	border-top-left-radius: 5px;
-	border-top-right-radius: 5px;
-}
-
-#media_appRightMenu .media_rightmenu_bottomButton{
-	right: 4px;
-	top: 342px;
-	width: 152px;
-	z-index: 2;
-	background-color: gray;
-	height: 50px;
-	border-bottom-left-radius: 5px;
-	border-bottom-right-radius: 5px;
-}
-
-#media_appRightMenu .right-stock{
-	overflow: hidden;
-	position: absolute;
-	right: 4px;
-	top: 90px;
-	margin: 0;
-	z-index: 1;
-	float: none;
-	width: 150px;
-	border: 1px solid #393939;
-	-webkit-border-radius: 3px;
-	height: 300px;
 }
 
 .bcs_border {
@@ -658,6 +656,7 @@
 	width: 328px;
 	height: 79px;
 	cursor:pointer;
+	background: none;
 }
 #home_presets_yellow_box .home-help-preset-buttons-wraper {
 	top: 82px;
@@ -1017,6 +1016,11 @@
 	-webkit-border-radius: 3px;
 }
 
+#applink_view_container .track-info{
+	left: 165px;
+	top: 55px;
+}
+
 .track-info {
 	z-index: 199;
 	position: absolute;
@@ -1026,16 +1030,6 @@
 }
 
 .track-info > .total {
-	position: absolute;
-	top: 30px;
-	left: 10px;
-	width: 300px;
-	text-align: left;
-	font-size: 20px;
-	color: #999999;
-}
-
-.track-info > .device {
 	position: absolute;
 	top: 30px;
 	left: 10px;
@@ -1067,23 +1061,14 @@
 	top: 65px;
 }
 
-
-#app_view_container .title{
-	top: 79px;
-	font-size: 38px;
-	left: 7px;
-}
-
-#app_view_container .album{
-	top: 123px;
-	font-size: 26px;
+.track-info > .device {
+	position: absolute;
+	top: 30px;
 	left: 10px;
-}
-
-#app_view_container .artist{
-	top: 155px;
-	font-size: 26px;
-	left: 10px;
+	width: 300px;
+	text-align: left;
+	font-size: 20px;
+	color: #999999;
 }
 
 
@@ -1520,7 +1505,7 @@
 
 .blur-text {
 	color: transparent !important;
-	text-shadow: 0 0 9px #fff !important;
+	text-shadow: 0 0 3px #fff !important;
 }
 
 #help_media_block {
@@ -1813,6 +1798,18 @@
 	display: none;
 }
 
+#media_popup.fr .preset-stored {
+	position: relative;
+	width: 350px;
+	margin: auto auto;
+}
+
+#home_widgetMedia_presetPopup.fr .preset-stored {
+	position: relative;
+	width: 350px;
+	margin: auto auto;
+}
+
 #video-error {
 	background: #000000;
 	border: 1px solid #a03333;
@@ -1866,14 +1863,6 @@
 	border-radius: 2px;
 	cursor: pointer;
 	z-index: 1001;
-}
-
-.moreInfo_backButton.notpressed {
-	background: url(../images/climate/left_person_control/lb_bg.png) no-repeat;
-}
-
-.moreInfo_backButton.pressed {
-	background: url(../images/climate/power_button/powerbg_pressed.png);
 }
 
 .moreInfo_title {
@@ -1958,17 +1947,43 @@
 	float: right;
 	margin-right: 65px;
 	margin-top: 88px;
-	background:url(../images/media/ico_whatIsPlaying.png) no-repeat;
-	width:137px;
-	height:50px;
+	width: 135px;
+	height: 48px;
+	border-radius: 2px;
+	border: 1px solid #393939;
 }
 
-.moreInfo_whatIsPlayingButton.helpmode{
-	background:url(../images/media/help/ico_whatIsPlaying_blur.png) no-repeat;
-	width:147px;
-	height:50px;
+.moreInfo_whatIsPlayingButton .ico{
+	padding: 12px 11px 11px 13px;
+	position: relative;
+	float: left;
+}
+
+.moreInfo_whatIsPlayingButton span{
+	position: relative;
+	width: 55px;
+	padding: 6px 0 0 5px;
+	float: left;
+}
+
+.fr .moreInfo_whatIsPlayingButton{
+	white-space: nowrap;
+}
+
+.fr .moreInfo_whatIsPlayingButton span{
+	padding: 14px 0 0 5px;
+}
+
+.helpmode .moreInfo_whatIsPlayingButton{
 	margin-right: 60px;
 	margin-top: 83px;
+	padding: 6px;
+	border: none;
+	background: url(../images/media/help/ico_whatIsPlaying_blur.png) no-repeat;
+}
+
+.helpmode .moreInfo_whatIsPlayingButton .ico{
+	opacity: 0;
 }
 
 #media_moreinfo_list_blur{
@@ -1980,9 +1995,9 @@
 	
 }
  
-#media .backButton, #media .block-header-title{
+/*#media .backButton, #media .block-header-title{
 	margin-top: 11px;
-}
+}*/
 
 /* Media options */
 #media_options_view {
@@ -2001,6 +2016,10 @@
 	height: 251px;;
 }
 
+#media_options_list .arrow-ico{
+	z-index:0;
+}
+
 #media_options_list .list-content {
 	width: 670px;
 }
@@ -2014,13 +2033,13 @@
 	line-height: 50px;
 }
 
-#media_options_list .list-item > span{
+#media_options_list span{
 	margin-left: 13px;
+	z-index:1;
+	position:relative;
 }
 
-#media_options_list .list-item .lableToggle span {
-	margin-left: 13px;
-}
+
 
 #media_options_list .list-item .ico {
 	float: right;
@@ -2041,25 +2060,17 @@
 	width: 198px;
 }
 
-#media_options_list .toogleButtonContainer .delim {
-	position: relative;
-	float: left;
-	border: #393939 1px solid;
-	height: 26px;
-	width: 0px;
-}
-
 #media_options_list .toggles, #media_options_list .toggles span{
 	width: 98px;
 }
 
 .help-mode #media_options_view .list-item span{
-	text-shadow: 0 0 9px #999;
+	text-shadow: 0 0 3px #999;
 }
 
 
 .help-mode #media_options_list .list-item span{
-	text-shadow: 0 0 9px #999;
+	text-shadow: 0 0 3px #999;
 }
 
 .help-mode #media_options_list .toogleButtonContainer  {
@@ -2067,53 +2078,69 @@
 }
 
 /* Media Am,Fm options */
-#media_options_view.am.help-mode {
-	background-image: url(../images/media/media_am_options_bg_help.png);
-	background-repeat: no-repeat;
-	background-position: 60px 86px;
-	background-color: #000;
+.helpmode .am #media_options_view_blur  {
+	background: url(../images/media/media_am_options_bg_help.png) no-repeat;
+	top:86px;
+	left:60px;
+	width:682px;
+	height:261px;
 }
 
-#media_options_view.fm.help-mode {
-	background-image: url(../images/media/media_fm_options_bg_help.png);
-	background-repeat: no-repeat;
-	background-position: 60px 86px;
-	background-color: #000;
+.helpmode .fm #media_options_view_blur  {
+	background: url(../images/media/media_fm_options_bg_help.png) no-repeat;
+	top:86px;
+	left:60px;
+	width:682px;
+	height:261px;
 }
 
 
 /* Media Sitius options */
-#media_options_view.sirius.help-mode {
-	background-image: url(../images/media/media_sirius_options_bg_help.png);
-	background-repeat: no-repeat;
-	background-position: 60px 86px;
-	background-color: #000;
+.helpmode .sirius #media_options_view_blur { 
+	background: url(../images/media/media_sirius_options_bg_help.png) no-repeat;
+	top:86px;
+	left:60px;
+	width:682px;
+	height:261px;
+	
 }
 
 /* Media CD options */
-#media_options_view.cd.help-mode  {
-	background-image: url(../images/media/media_cd_options_bg_help.png);
-	background-repeat: no-repeat;
-	background-position: 61px 86px;
-	background-color: #000;
+.helpmode .cd #media_options_view_blur {
+	background: url(../images/media/media_cd_options_bg_help.png) no-repeat;
+	top:86px;
+	left:60px;
+	width:682px;
+	height:111px;
 }
 
 /* Media USB options */
-#media_options_view.usb.help-mode  {
-	background-image: url(../images/media/media_usb_options_bg_help.png);
-	background-repeat: no-repeat;
-	background-position: 60px 86px;
-	background-color: #000;
+.helpmode .usb #media_options_view_blur {
+	background: url(../images/media/media_usb_options_bg_help.png) no-repeat;
+	top:86px;
+	left:60px;
+	width:682px;
+	height:211px;
+}
+
+/* Media SD options */
+.helpmode .sd #media_options_view_blur {
+	background: url(../images/media/media_usb_options_bg_help.png) no-repeat;
+	top:86px;
+	left:60px;
+	width:682px;
+	height:211px;
 }
 
 
 
 /* Media Bluetooth options */
-#media_options_view.bt.help-mode  {
-	background-image: url(../images/media/media_bt_options_bg_help.png);
-	background-repeat: no-repeat;
-	background-position: 60px 86px;
-	background-color: #000;
+.helpmode .bt  #media_options_view_blur {
+	background: url(../images/media/media_bt_options_bg_help.png) no-repeat;
+	width:682px;
+	height:162px;
+	top:86px;
+	left:60px;
 }
 
 /******************** FOR Browse View********************************/
@@ -2122,14 +2149,6 @@
 	height: 480px;
 	z-index:503;
 	background:url(../images/media/bg.png) no-repeat;
-}
-
-.browse_view .backButton.notpressed {
-	background: url(../images/climate/left_person_control/lb_bg.png) no-repeat;
-}
-
-.browse_view .backButton.pressed {
-	background: url(../images/climate/power_button/powerbg_pressed.png);
 }
 
 .browse_view .backButton .ico {
@@ -2153,7 +2172,6 @@
 }
 
 .browse_view .browesAllSources {
-	
 	width: 148px;
 	height: 96px;
 	top:190px;
@@ -2179,6 +2197,15 @@
 	line-height: 25px;
 	cursor:pointer;
 	
+}
+
+.helpmode .browesAllSources{
+	pointer-events: none;
+	margin: 1px 1px;
+}
+
+.helpmode .browesAllSources img {
+	opacity: 0;
 }
 
 .all_sources_span{
@@ -2228,14 +2255,29 @@
 	left: 5px;
 }
 
+
+#media_browseall_heading_lable{
+	z-index:1;
+	
+}
+
+#media_browseAll_list .arrow-ico{
+	z-index:0;
+}
+
+#media_browseAll_list span{
+	z-index:1;
+}
+
 #media_browseAll_view{
 	z-index:505;
 }
 
-#media_browseAll_view.help_blur{
+.helpmode #media_browseall_blur_bg{
 	width:800px;
 	height:480px;
 	background:url(../images/media/help/broall_view_blur.jpg) no-repeat;
+	top:0px;
 }
 
 #media_usb_browse_list .list .list-content .list-item span{
@@ -2377,12 +2419,11 @@
 }
 
 
-#band, .band-dir{
+#band{
 	position: absolute;
 	top: 38px;
 	left: 18px;
 	font-size: 62px;
-	display:none;
 }
 
 #band_dir{
@@ -2505,21 +2546,31 @@
 	position: absolute;
 	top: 150px;
 	left: 393px;
-	z-index:100;
-	background: url(../images/media/btn_alert.png) no-repeat;
-	width:80px;
-	height:40px;
+	z-index: 100;
+	width: 78px;
+	height: 38px;
+	text-align: center;
+	font-size: 19px;
+	line-height: 39px;
+	border: 1px solid #333;
+	-webkit-border-radius: 2px;
 }
 
-.btn_alert_help{
-	position: absolute;
+#media_sirius_alert_help_yellow_border{
 	top: 142px;
 	left: 384px;
-	z-index:100;
-	cursor:pointer;
-	background:url(../images/media/help/tag_alert_bg.png) no-repeat;
-	width:97px;
-	height:57px;
+	width: 100px;
+	height: 54px;
+	background: url(../images/media/help/tag_alert_bg.png) no-repeat;
+}
+
+.btn_alert.disabled{
+	color: #999 !important;
+}
+
+.btn_alert.help{
+	text-shadow: none !important;
+	color: white;
 }
 
 .siriustitle {
@@ -2659,13 +2710,91 @@
 	z-index:501;
 }
 
-#app_view_container{
-	left:152px;
-	top:55px;
+
+#applink_view_container{
 	z-index:501;
 }
 
-#home_widgetMedia_cd, #home_widgetMedia_others{ width:399px; height:193px}
+#applink_view_container .title{
+	top: 79px;
+	font-size: 38px;
+	left: 7px;
+}
+
+#applink_view_container .album{
+	top: 123px;
+	font-size: 26px;
+	left: 10px;
+}
+
+#applink_view_container .artist{
+	top: 155px;
+	font-size: 26px;
+	left: 10px;
+}
+
+#applink_view_container .player_controlls{
+	top: 292px;
+	left: 165px;
+}
+
+#media_app_perform_interaction_view{
+	width: 800px;
+	height: 480px;
+	z-index: 502;
+	background: url(../images/media/bg.png) no-repeat;
+}
+
+#media_app_perform_interaction_view .backButton {
+	top: 80px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+#media_app_perform_interaction_view .list{
+	position: absolute;
+	width: 629px;
+	height: 251px;
+	border-radius: 2px;
+	left: 100px;
+	top: 154px;
+}
+
+#media_app_perform_interaction_view .list-content{
+	width: 578px;
+}
+
+#media_app_options_view{
+	width: 800px;
+	height: 480px;
+	z-index: 502;
+	background: url(../images/media/bg.png) no-repeat;
+}
+
+#media_app_options_view .backButton {
+	top: 80px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+#media_app_options_view .list{
+	position: absolute;
+	width: 629px;
+	height: 251px;
+	border-radius: 2px;
+	left: 100px;
+	top: 154px;
+}
+
+#media_app_options_view .list-content{
+	width: 578px;
+}
+
+#home_widgetMedia_cd {width:399px; height:193px}
 #home_widgetMedia_cd .album_title  {width:400px; text-align:center; font-size:28px;}
 #home_widgetMedia_cd .song_title{width:400px; text-align:center; font-size:24px; top:33px;}
 #home_widgetMedia_cd .info{top: 55px; width:400px;}
@@ -2674,15 +2803,29 @@
 #home_widgetMedia_cd .ico_blur {top:-5px; left:-5px; margin-left:45%; position:absolute;}
 
 
-#home_widgetMedia_others .title{width:400px; text-align:center; font-size:24px;}
-#home_widgetMedia_others .info{top: 55px; width:100%;}
-#home_widgetMedia_others .ico_holder{width:400px; top:-7px;}
-#home_widgetMedia_others .ico {margin-left:48%;}
-#home_widgetMedia_others .ico_blur {top:-5px; left:-5px; margin-left:48%; position:absolute;}
+#home_widgetMedia_bluetooth .title{width:400px; text-align:center; font-size:24px;}
+#home_widgetMedia_bluetooth .info{top: 55px; width:100%;}
+#home_widgetMedia_bluetooth .ico_holder{width:400px; top:-7px;}
+#home_widgetMedia_bluetooth .ico_blur {top:-5px; left:-5px; margin-left:48%; position:absolute; background:url(../images/media/help/bt-h-ico_blur.png) no-repeat !important; width:34px !important; height:40px !important;}
+#home_widgetMedia_bluetooth .bluetooth_ico {
+	background: url(../images/media/bt-h-ico.png) no-repeat;
+	width:24px;
+	height:30px;
+	margin-left:48%;
+}
+
+#home_widgetMedia_avin .title{width:400px; text-align:center; font-size:24px;}
+#home_widgetMedia_avin .info{top: 55px; width:100%;}
+#home_widgetMedia_avin .ico_holder{width:400px; top:-7px;}
+
+
+#home_widgetMedia_avin .avin_ico{ background: url(../images/media/line-h-ico.png) no-repeat; width:14px; height:36px; margin-left:48%;}
+#home_widgetMedia_avin .ico_blur {top:-5px; left:-5px; margin-left:48%; position:absolute; background: url(../images/media/help/line-h-ico_blur.png) no-repeat!important; width:24px !important; height:46px !important;}
+
 
 /* HELP MODE*/
 
-/* rigth menn*/
+/* rigth menu*/
 #media_rightmenu.help_mode{ border:none; left:-5px;}
 
 /* replay button*/
@@ -2695,10 +2838,21 @@
 .scan_button_help{ border-bottom:none; left:4px; cursor:pointer; z-index:2;}
 /*direct tune*/
 .direct_button_help {border-bottom:none; left:4px;cursor:pointer; margin-bottom:1px; z-index:2;}
-/* hd button*/
-#media_am-fm_hdButton.hd_blur{ background: url(../images/media/help/hd_inactive_btn-blur.png) no-repeat !important; width:162px; height:49px; left:-2px;bottom: 5px; margin-bottom:2px; border-bottom: none;}
-/* repeat button*/
-.repeatButton_blur{ background:url(../images/media/help/repeat_button_blur.png) no-repeat !important; width:162px; height:49px; left:-2px;bottom: 5px; margin-bottom:2px; border-bottom: none;}
+
+
+/*hd active button blur*/
+.helpmode .isHd.top_rightmenu_button_blur{  background:url(../images/media/help/top_rightmenu_button_blur_active.png) no-repeat !important;width:162px; height:49px; left:-2px; bottom: 5px; margin-bottom:2px; border-bottom: none;}
+
+
+/* repeat button / hd button*/
+.helpmode .top_rightmenu_button_blur{ background:url(../images/media/help/top_rightmenu_button_blur.png) no-repeat !important; width:162px; height:49px; left:-2px;bottom: 5px; margin-bottom:2px; border-bottom: none;}
+
+.helpmode .top_rightmenu_button_blur span {
+	position:relative;
+	top:6px;
+	left:6px;
+}
+
 /* shuffle button*/
 .shuffleButton_help{border-bottom:none; left:4px; cursor:pointer; z-index:2; margin-bottom:1px;}
 /* more info button*/
@@ -2706,8 +2860,7 @@
 
 /*option button*/
 #media_rightmenu_optionButton.option_blur{ background:url(../images/media/help/option_btn_blur.png) no-repeat !important; width:162px !important; height:49px !important; left:-2px; border-bottom: none; margin-bottom:2px; bottom:4px;}
-/*hd active button blur*/
-#media_am-fm_hdButton.hd_active_blur{ background:url(../images/media/help/hd_active_btn-blur.png) no-repeat !important;width:162px; height:49px; left:-2px; bottom: 5px; margin-bottom:2px; border-bottom: none;}
+
 
 /* Browse button*/
 #media_rightmenu_browseButton{ z-index:2;}
@@ -2741,15 +2894,17 @@
 
 /* cancel scrollbar animation */
 .cancelBarAnimation{-webkit-transition:none !important;}
-		
-#media_app_sub_menu_view.media_app_sub_menu_view{
-	top: 56px;
+
+
+#media_applink_soft_buttons_view.media_applink_soft_buttons_view{
+	position: absolute;
 	width: 800px;
-	height: 367px;
+	height: 480px;
 	z-index: 1;
+	background-image: url(../images/media/bg.png);
 }
 
-#media_app_sub_menu_view .buttonsWrapper {
+#media_applink_soft_buttons_view .buttonsWrapper {
 	top: 70px;
 	left: 100px;
 	width: 600px;
@@ -2757,26 +2912,7 @@
 	overflow: hidden;
 }
 
-#media_app_perform_interaction_view.media_app_perform_interaction_view{
-	top: 56px;
-	width: 800px;
-	height: 367px;
-	z-index: 1;
-}
-
-#media_app_perform_interaction_view .buttonsWrapper {
-	top: 70px;
-	left: 100px;
-	width: 600px;
-	height: 260px;
-	overflow: hidden;
-}
-
-#media_app_perform_interaction_view .rs-item {
-	width: 535px;
-}
-
-#media_app_sub_menu_view .scrollButtons{
+#media_applink_soft_buttons_view .scrollButtons{
 	width: 550px;
 	float: left;
 	margin-right: 10px;
@@ -2790,100 +2926,120 @@
 	position: relative;
 }
 
-#media_app_sub_menu_view .scrollArrows{
+#media_applink_soft_buttons_view .scrollArrows{
 	height: 47px;
 	width: 47px;
 	border: #393939 1px solid;
 	border-radius: 2px;
 }
 
-#media_app_sub_menu_view .scrollArrowUp {
+#media_applink_soft_buttons_view .scrollArrowUp {
 	position: relative;
 }
 
-#media_app_sub_menu_view .scrollArrowDown {
+#media_applink_soft_buttons_view .scrollArrowDown {
 	bottom: 0;
 	right: 0;
 }
 
-#media_app_sub_menu_view .scrollBar {
+#media_applink_soft_buttons_view .scrollBar {
 	float: right;
 	position: relative;
 	height: 260px;
 }
 
-#media_app_sub_menu_view .scroller {
+#media_applink_soft_buttons_view .scroller {
 	position: relative;
 	height: 20px;
 	background: #555;
 	-webkit-transition: 0.4s ;
 }
 
-#media_app_sub_menu_view .rs-item {
+#media_applink_soft_buttons_view .rs-item {
 	width: 535px;
 }
-#media_app_options_view.media_app_options_view{
-	top: 56px;
-	width: 800px;
-	height: 367px;
-	z-index: 1;
+
+
+#media_rightmenu_topButton_applinkSoftButtons.media_rightmenu_topButton {
+	right: 4px;
+	top: 90px;
+	width: 152px;
+	z-index: 2;
+	background-color: gray;
+	height: 50px;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
 }
 
-#media_app_options_view .buttonsWrapper {
-	top: 70px;
+#media_appScrollWrapper_applinkSoftButtons{
+	overflow: hidden;
+	position: absolute;
+	right: 4px;
+	top: 90px;
+	margin: 0;
+	z-index: 1;
+	float: none;
+	width: 150px;
+	border: 1px solid #393939;
+	-webkit-border-radius: 3px;
+	height: 300px;
+}
+
+#media_rightmenu_bottomButton_applinkSoftButtons.media_rightmenu_bottomButton {
+	right: 4px;
+	top: 342px;
+	width: 152px;
+	z-index: 2;
+	background-color: gray;
+	height: 50px;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
+
+#applink_view_container .buttonsWrapper{
+	top: 135px;
 	left: 100px;
 	width: 600px;
 	height: 260px;
 	overflow: hidden;
 }
 
-#media_app_options_view .scrollButtons{
-	width: 550px;
-	float: left;
-	margin-right: 10px;
-	height: 51px;
-	font-size: 20px;
-	line-height: 50px;
-	border: 1px solid #393939;
-	border-bottom: none;
-	cursor: pointer;
-	background-image: url(../images/list/list_item_bg.png);
+#applink_view_container .scrollBar{
 	position: relative;
+	height: 260px;
+	float: right;
 }
 
-#media_app_options_view .scrollArrows{
+#applink_view_container .scrollArrowUp {
+	position: relative;
 	height: 47px;
 	width: 47px;
 	border: #393939 1px solid;
 	border-radius: 2px;
 }
 
-#media_app_options_view .scrollArrowUp {
-	position: relative;
-}
-
-#media_app_options_view .scrollArrowDown {
-	bottom: 0;
-	right: 0;
-}
-
-#media_app_options_view .scrollBar {
-	float: right;
-	position: relative;
-	height: 260px;
-}
-
-#media_app_options_view .scroller {
+#applink_view_container .scroller{
 	position: relative;
 	height: 20px;
 	background: #555;
-	-webkit-transition: 0.4s ;
+	-webkit-transition: 0.4s;
 }
 
-#media_app_options_view .rs-item {
-	width: 535px;
+#applink_view_container .scrollArrowDown {
+	height: 47px;
+	width: 47px;
+	border: #393939 1px solid;
+	border-radius: 2px;
+	bottom: 0;
 }
 
-#VRPopUp .rs-item {
-	width: 595px;
+#applink_view_container .rs-item{
+	width: 536px;
+}
+
+#media_app_sub_menu_view.media_app_sub_menu_view {
+	width: 800px;
+	height: 480px;
+	z-index: 503;
+	background: url(../images/media/bg.png) no-repeat;
 }

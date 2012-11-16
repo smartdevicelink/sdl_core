@@ -12,16 +12,13 @@
 
 MFT.NavigationDestinationIntersectionView = Em.ContainerView.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.navigation.dest.intersection.active:active_state','MFT.helpMode',],
+	classNameBindings: ['MFT.helpMode'],
 	
 	elementId:		'view_navi_destination_intersection',
-	
-	classNames:	   ['hidden'],
-	
-	stateObj: MFT.States.navigation.dest.intersection,
-	
+		
 	childViews: [
 		'backButton',
+		'voiceButton',
 		'content'
 	],
 	  
@@ -30,6 +27,12 @@ MFT.NavigationDestinationIntersectionView = Em.ContainerView.create(MFT.Loadable
 		action:			  'back',
 		target:			  'MFT.States',	
 		icon:				'images/media/ico_back.png',	
+	}),
+	
+	voiceButton: MFT.Button.extend({
+		classNames:		  ['voiceButton','button'],		
+		icon:				'images/settings/ico_voice.png',	
+		disabled:			true
 	}),
 	
 	content: Em.View.create({

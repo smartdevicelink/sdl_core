@@ -24,26 +24,15 @@ MFT.InfoController = Em.Object.create({
 		
 		MFT.States.goToState(MFT.States.currentState.get('path')+'.'+event.goToState);
 	},
-	
-	appsScroll: null,
-	/*
-	*
-	*	Refactor
-	*	Modify state name!
-	*
-	*
-	*/
 
-	appsParams:{
+	applicationList:{
 		0:	{
 				classNames:			'scrollButtons button notpressed',
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				/*action:				'turnOnApp',*/
-				click:				function(){
-					MFT.SettingsController.onState();
-				},
+				action:				'turnOnApplink',
+				target:				'MFT.MediaController',
 				disabledBinding:	'MFT.helpMode',
 				onDown:				false
 			},
@@ -52,10 +41,8 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				/*action:				'turnOnApp',*/
-				click:				function(){
-					MFT.SettingsController.onState();
-				},
+				action:				'turnOnApplink',
+				target:				'MFT.MediaController',
 				disabledBinding:	'MFT.helpMode',
 				onDown:				false
 			},
@@ -64,10 +51,8 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				/*action:				'turnOnApp',*/
-				click:				function(){
-					MFT.SettingsController.onState();
-				},
+				action:				'turnOnApplink',
+				target:				'MFT.MediaController',
 				disabledBinding:	'MFT.helpMode',
 				onDown:				false
 			},
@@ -76,10 +61,8 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				/*action:				'turnOnApp',*/
-				click:				function(){
-					MFT.SettingsController.onState();
-				},
+				action:				'turnOnApplink',
+				target:				'MFT.MediaController',
 				disabledBinding:	'MFT.helpMode',
 				onDown:				false
 			},
@@ -88,10 +71,8 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				/*action:				'turnOnApp',*/
-				click:				function(){
-					MFT.SettingsController.onState();
-				},
+				action:				'turnOnApplink',
+				target:				'MFT.MediaController',
 				disabledBinding:	'MFT.helpMode',
 				onDown:				false
 			},
@@ -100,10 +81,8 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				/*action:				'turnOnApp',*/
-				click:				function(){
-					MFT.SettingsController.onState();
-				},
+				action:				'turnOnApplink',
+				target:				'MFT.MediaController',
 				disabledBinding:	'MFT.helpMode',
 				onDown:				false
 			},
@@ -112,10 +91,8 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				/*action:				'turnOnApp',*/
-				click:				function(){
-					MFT.SettingsController.onState();
-				},
+				action:				'turnOnApplink',
+				target:				'MFT.MediaController',
 				disabledBinding:	'MFT.helpMode',
 				onDown:				false
 			},
@@ -124,10 +101,8 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				/*action:				'turnOnApp',*/
-				click:				function(){
-					MFT.SettingsController.onState();
-				},
+				action:				'turnOnApplink',
+				target:				'MFT.MediaController',
 				disabledBinding:	'MFT.helpMode',
 				onDown:				false
 			},
@@ -136,10 +111,8 @@ MFT.InfoController = Em.Object.create({
 				icon:				'images/info/ico_vehicle.png',
 				textBinding:		'MFT.locale.label.view_info_apps_vehicle_VehicleHealthReport',
 				arrow:				true,
-				/*action:				'turnOnApp',*/
-				click:				function(){
-					MFT.SettingsController.onState();
-				},
+				action:				'turnOnApplink',
+				target:				'MFT.MediaController',
 				disabledBinding:	'MFT.helpMode',
 				onDown:				false
 			}

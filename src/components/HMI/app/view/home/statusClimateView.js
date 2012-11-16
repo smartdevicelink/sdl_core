@@ -32,7 +32,7 @@ MFT.StatusClimateView = Em.ContainerView.extend({
 	
 		classNameBindings: ['MFT.States.home.active:visible'],
 		
-		content:		'Climate'
+		contentBinding:	    Ember.Binding.oneWay('MFT.locale.label.view_statusClimate_climate')
 	}),
 	
 	/** Off status view */
@@ -82,7 +82,10 @@ MFT.StatusClimateView = Em.ContainerView.extend({
 			
 			elementId:			'status_climate_driverSeat',
 			
-			classNameBindings:	['MFT.ClimateController.isOff:hidden'],
+			classNameBindings:	[
+				'MFT.ClimateController.isOff:hidden',
+				'MFT.ClimateController.isSimple:hidden_display'
+			],
 						
 			heatBinding:		Em.Binding.oneWay('MFT.ClimateController.model.driverHeatedSeat.value'),
 			coolBinding:		Em.Binding.oneWay('MFT.ClimateController.model.driverCooledSeat.value'),
@@ -110,7 +113,10 @@ MFT.StatusClimateView = Em.ContainerView.extend({
 			
 			elementId:			'status_climate_passangerSeat',
 			
-			classNameBindings:	['MFT.ClimateController.isOff:hidden'],
+			classNameBindings:	[
+				'MFT.ClimateController.isOff:hidden',
+				'MFT.ClimateController.isSimple:hidden_display'
+			],
 			
 			heatBinding:		Em.Binding.oneWay('MFT.ClimateController.model.passangerHeatedSeat.value'),
 			coolBinding:		Em.Binding.oneWay('MFT.ClimateController.model.passangerCooledSeat.value'),
@@ -139,6 +145,6 @@ MFT.StatusClimateView = Em.ContainerView.extend({
 	 * should be called when user press climate statusbar
 	 */
 	actionUp: function(event){
-		MFT.States.goToState( MFT.ClimateController.activeState );
+		MFT.States.goToState( MFT.ClimateController.get('climateVechicleMode') );
 	}
 });

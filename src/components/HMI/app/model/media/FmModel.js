@@ -15,6 +15,28 @@ MFT.FmModel = Em.Object.create({
 	
 	active: false,
 	
+	directTunestations: MFT.Playlist.create({
+		
+			/** Direct tune dial station matrix */
+			directTunes: [
+				[9,8,7],
+				[1,0,0,4],
+				[1,0,2,0],
+				[1,0,3,4],
+				[1,0,7,1]
+			],
+			
+			/** Direct tune Data */
+			directTuneItems: {
+				987:MFT.PlaylistItem.create({frequency: '98.7',genre: 'Trance',title: 'Space',artist: 'Dreamers', isHd: false}),
+				1004:MFT.PlaylistItem.create({frequency: '100.4',genre: 'Pop',title: 'Take me with you',artist: 'Silva', isHd: false}),
+				1020:MFT.PlaylistItem.create({frequency: '102.0',genre: 'Jazz',title: 'Dance alone',artist: 'Jazzy', isHd: false}),
+				1034:MFT.PlaylistItem.create({frequency: '103.4',genre: 'Pop',title: 'Space',artist: 'Dreamers', isHd: false}),
+				1071:MFT.PlaylistItem.create({frequency: '107.1',genre: 'Jazz',title: 'Dance alone',artist: 'Jazzy', isHd: false}),
+			}
+	
+	}),
+	
 	fm1: MFT.Playlist.create( {
 		selectedIndex: 					1,
 
@@ -25,24 +47,6 @@ MFT.FmModel = Em.Object.create({
 			3:MFT.PlaylistItem.create({frequency: '103.5',genre: 'Pop',title: 'LETS DANCE',artist: 'MICHAEL JOHNSON',isHd: true}),
 			4:MFT.PlaylistItem.create({frequency: '106.1',genre: 'Pop Rock',title: 'YESTERDAY NIGHT',artist: 'JOHN SMITH', isHd: false}),
 			5:MFT.PlaylistItem.create({frequency: '105.2',genre: 'Classic',title: 'TENTH SYMPHONY',artist: 'SPENCER M.', isHd: false})
-		},
-		
-		/** Direct tune dial station matrix */
-		directTunes: [
-			[9,8,7],
-			[1,0,0,4],
-			[1,0,2,0],
-			[1,0,3,4],
-			[1,0,7,1]
-		],
-		
-		/** Direct tune Data */
-		directTuneItems: {
-			987:MFT.PlaylistItem.create({frequency: '98.7',genre: 'Trance',title: 'Space',artist: 'Dreamers', isHd: false}),
-			1004:MFT.PlaylistItem.create({frequency: '100.4',genre: 'Pop',title: 'Take me with you',artist: 'Silva', isHd: false}),
-			1020:MFT.PlaylistItem.create({frequency: '102.0',genre: 'Jazz',title: 'Dance alone',artist: 'Jazzy', isHd: false}),
-			1034:MFT.PlaylistItem.create({frequency: '103.4',genre: 'Pop',title: 'Space',artist: 'Dreamers', isHd: false}),
-			1071:MFT.PlaylistItem.create({frequency: '107.1',genre: 'Jazz',title: 'Dance alone',artist: 'Jazzy', isHd: false}),
 		}
 	}),
 	
@@ -56,24 +60,6 @@ MFT.FmModel = Em.Object.create({
 			3:MFT.PlaylistItem.create({frequency: '103.5',genre: 'Club',title: 'JUMP AND DOWN',artist: 'THE PROJECT X',isHd: true}),
 			4:MFT.PlaylistItem.create({frequency: '104.1',genre: 'Pop',title: 'HONEY',artist: 'EPTON JOHN', isHd: false}),
 			5:MFT.PlaylistItem.create({frequency: '105.2',genre: 'Pop',title: 'LETS DANCE',artist: 'MICHAEL JOHNSON', isHd: false})
-		},
-		
-		/** Direct tune dial station matrix */
-		directTunes: [
-			[9,8,7],
-			[1,0,0,4],
-			[1,0,2,0],
-			[1,0,3,4],
-			[1,0,7,1]
-		],
-		
-		/** Direct tune Data */
-		directTuneItems: {
-			987:MFT.PlaylistItem.create({frequency: '98.7',genre: 'Trance',title: 'Space',artist: 'Dreamers', isHd: false}),
-			1004:MFT.PlaylistItem.create({frequency: '100.4',genre: 'Pop',title: 'Take me with you',artist: 'Silva', isHd: false}),
-			1020:MFT.PlaylistItem.create({frequency: '102.0',genre: 'Jazz',title: 'Dance alone',artist: 'Jazzy', isHd: false}),
-			1034:MFT.PlaylistItem.create({frequency: '103.4',genre: 'Pop',title: 'Space',artist: 'Dreamers', isHd: false}),
-			1071:MFT.PlaylistItem.create({frequency: '107.1',genre: 'Jazz',title: 'Dance alone',artist: 'Jazzy', isHd: false}),
 		}
 	}),
 	
@@ -87,26 +73,7 @@ MFT.FmModel = Em.Object.create({
 			3:MFT.PlaylistItem.create({frequency: '107.5',genre: 'Classic',title: 'SUNSET',artist: 'SKYLARK',isHd: true}),
 			4:MFT.PlaylistItem.create({frequency: '106.1',genre: 'Pop',title: 'HONEY',artist: 'EPTON JOHN', isHd: false}),
 			5:MFT.PlaylistItem.create({frequency: '104.2',genre: 'Classic',title: 'TENTH SYMPHONY',artist: 'SPENCER M.', isHd: false})
-		},
-		
-		/** Direct tune dial station matrix */
-		directTunes: [
-			[9,8,7],
-			[1,0,0,4],
-			[1,0,2,0],
-			[1,0,3,4],
-			[1,0,7,1]
-		],
-		
-		/** Direct tune Data */
-		directTuneItems: {
-			987:MFT.PlaylistItem.create({frequency: '98.7',genre: 'Trance',title: 'Space',artist: 'Dreamers', isHd: false}),
-			1004:MFT.PlaylistItem.create({frequency: '100.4',genre: 'Pop',title: 'Take me with you',artist: 'Silva', isHd: false}),
-			1020:MFT.PlaylistItem.create({frequency: '102.0',genre: 'Jazz',title: 'Dance alone',artist: 'Jazzy', isHd: false}),
-			1034:MFT.PlaylistItem.create({frequency: '103.4',genre: 'Pop',title: 'Space',artist: 'Dreamers', isHd: false}),
-			1071:MFT.PlaylistItem.create({frequency: '107.1',genre: 'Jazz',title: 'Dance alone',artist: 'Jazzy', isHd: false}),
 		}
-
 	}),
 	
 	optionsData: Em.Object.create({
@@ -122,8 +89,9 @@ MFT.FmModel = Em.Object.create({
 	
 					params:{
 						textBinding: 'MFT.locale.label.view_media_amFm_options_soundSettings',
-						arrow:		true,
-						disabled: 	 true
+						templateName:		  'arrow',
+						action: 'turnOnSoundSettings',
+						target: 'MFT.MediaController'
 					}							
 				},
 				
@@ -134,14 +102,14 @@ MFT.FmModel = Em.Object.create({
 						labelContentBinding:  'MFT.locale.label.view_media_amFm_options_setPTY',
 						buttonTexBindingt:	'MFT.locale.label.view_media_amFm_options_noProgram',
 						labelDisabled:		true,
-						buttonArrow:		  true,
+						templateName:		  'arrow',
 						buttonDisabled: 	   true
 					}							
 				},
 	
 				{
 								
-					type:		MFT.LablePlusToggleButton,
+					type:		MFT.LabelPlusToggleButton,
 					params:		{
 						labelContentBinding:  'MFT.locale.label.view_media_amFm_options_RDS',
 						tButtonValue:		 0,
@@ -160,14 +128,14 @@ MFT.FmModel = Em.Object.create({
 						labelContentBinding:  'MFT.locale.label.view_media_amFm_options_autoset',
 						buttonTexBindingt:	'MFT.locale.label.view_media_amFm_options_refresh',
 						labelDisabled:		true,
-						buttonArrow:		  true,
+						templateName:		  'arrow',
 						buttonDisabled: 	   true
 					}							
 				},
 				
 								{
 								
-					type:		MFT.LablePlusToggleButton,
+					type:		MFT.LabelPlusToggleButton,
 					params:		{
 						labelContentBinding:  'MFT.locale.label.view_media_amFm_options_TAG',
 						tButtonValue:		 1,

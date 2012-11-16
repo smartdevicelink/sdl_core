@@ -12,7 +12,7 @@
  
 MFT.SettingsHelp911AssistView = Em.View.create(MFT.LoadableView,{
 	
-	classNameBindings:	   ['MFT.States.settings.help.helpAssist.active:active_state'],
+	classNameBindings:	   ['MFT.localization'],
 	
 	controller:			  'MFT.SettingsController',
 	
@@ -22,11 +22,7 @@ MFT.SettingsHelp911AssistView = Em.View.create(MFT.LoadableView,{
 	}
 				 
 	}.property('MFT.helpMode'),
-	
-	stateObj: MFT.States.settings.help.helpAssist,
-	
-	classNames:			  'hidden',
-	
+		
 	elementId:			   ['settings_help_911Assist'],
 	
 	template: Ember.Handlebars.compile(
@@ -41,7 +37,7 @@ MFT.SettingsHelp911AssistView = Em.View.create(MFT.LoadableView,{
 		'<div id="viewSettingsDisplay_911-assist" class="block-header-title">{{MFT.locale.label.view_info_apps_911Assist_header}}</div>'+
 		'<div class="inner-content">'+
 			'<div class="ico-911"></div>'+
-			'<div id="viewSettingsDisplay_vri" class="label-20 disabled btn btn-98 vri">{{MFT.locale.label.view_info_apps_911Assist_vri}}</div>'+
+			'<div id="viewSettingsDisplay_vri" class="label-20 disabled btn btn-98 vri"><span>{{MFT.locale.label.view_info_apps_911Assist_vri}}</span></div>'+
 			'<div id="viewSettingsDisplay_assist-911" class="label-20 disabled assist-911">{{MFT.locale.label.view_info_apps_911Assist_911_connected}}.</div>'+
 			'<div id="viewSettingsDisplay_assist-a911" class="text-block disabled text-block-500 a911">'+
 				'{{MFT.locale.label.view_info_apps_911Assist_911}}'+

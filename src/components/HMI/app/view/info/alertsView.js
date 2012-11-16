@@ -10,78 +10,96 @@
  * @author		Maksym Gerashchenko
  */
  
-MFT.InfoAlertsView = Em.View.create(MFT.LoadableView,{
+MFT.InfoAlertsView = Em.ContainerView.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.info.alerts.active:active_state','MFT.helpMode'],
+	classNameBindings: ['MFT.helpMode','MFT.localization'],
 	
 	elementId:		'info_alerts',
 	
-	classNames:	   'hidden',
+	childViews: [
+		'listCaption',
+		'mainlist',
+		'rightlist',
+		'helpModeBg'
+	],
 	
-	stateObj: MFT.States.info.alerts,
+	listCaption: MFT.LabelPlusToggleButton.extend({
+		elementId:			'info_alerts_listCaption',
+		labelContentBinding:  'MFT.locale.label.view_info_alerts_sort',
+		tButtonValue:		 0,
+		tButtonRange: 		 2,
+		tButtonLabelsBinding: 'MFT.locale.label.view_info_alerts_dateIcon',
+		labelDisabled: 		 true,
+		tButtonDisabled:	   true
+	}),
 	
-	activeDisabled: function(){
-		if (!MFT.helpMode) {
-			return true;
-		}
-				 
-	}.property('MFT.helpMode'),
-	
-	template: Ember.Handlebars.compile(
-			'<div class="list-item">'+
-				'{{view MFT.LablePlusToggleButton '+
-					'labelContentBinding="MFT.locale.label.view_info_alerts_sort" '+
-					'tButtonValue=0 '+
-					'tButtonRange=2 '+
-					'tButtonLabelsBinding="MFT.locale.label.view_info_alerts_dateIcon" '+
-					'labelDisabled=true '+
-					'tButtonDisabled=true '+
-				'}}'+
+	mainlist:	MFT.List.extend({
 			
-				'{{view MFT.Button '+
-					'textBinding="MFT.locale.label.view_info_alerts_911Assist" '+
-					'elementId="info_alerts_911Assist_button" '+
-					'classNames="button" '+
-					'action="" '+
-					'target="" '+
-					'icon="images/info/ico_emergcyAndEnvelope.png" '+
-					'righticon="images/info/ico_arrowLock.png" '+
-					'disabled=true '+
-				'}} '+	
-			'</div>'+
-		
-		'{{view MFT.ScrollBar '+	
-			'currentPage=0 '+
-			'pageCount=1 '+
-			'listHeight= 301 '+
-			'scrollBarIsDisabledBinding="MFT.helpMode" '+
-		'}} '+
-		
-		'<div id="viewControllButtons">'+
-			'{{view MFT.Button '+
-				'textBinding="MFT.locale.label.view_info_alerts_view" '+
-				'elementId="view_info_alerts_view_button" '+
-				'classNames="button" '+
-				'action="" '+
-				'target="" '+
-				'disabled=true '+
-			'}} '+	
-			'{{view MFT.Button '+
-				'textBinding="MFT.locale.label.view_info_alerts_delete" '+
-				'elementId="info_alerts_delete_button" '+
-				'classNames="button" '+
-				'action="" '+
-				'target="" '+
-				'disabled=true '+
-			'}} '+	
-			'{{view MFT.Button '+
-				'textBinding="MFT.locale.label.view_info_alerts_deleteAll" '+
-				'elementId="info_alerts_deleteAll_button" '+
-				'classNames="button" '+
-				'action="" '+
-				'target="" '+
-				'disabled=true '+
-			'}} '+	
-		'</div>'
-	)
+			elementId:	  'info_alerts_list',
+			
+			itemsOnPage:	6,
+			
+			items:[
+				{
+					type:		MFT.Label,
+			
+					params:		{
+						disabled: 	true
+					}			
+				},
+				{
+					type:		MFT.Button,
+					params:		{
+						classNames:  ['ember-view ffw-button notpressed list-item disabled active'],
+						textBinding: 'MFT.locale.label.view_info_alerts_911Assist',
+						templateName: 'rightIcon',
+						icon:		 'images/info/ico_emergcyAndEnvelope.png',
+						righticon:	'images/info/ico_arrowLock.png',
+						disabled:	 true
+					}							
+				}
+			]
+	}),
+	
+	rightlist: MFT.List.extend({
+			
+			elementId:	  'info_alerts_rightList',
+			
+			itemsOnPage:	5,
+			
+			disableScrollbar:  true,
+			
+			items:[
+				{
+					type:		MFT.Button,
+					params:		{
+						className:  'button',
+						textBinding: 'MFT.locale.label.view_info_alerts_view',
+						disabled:	true
+					}							
+				},
+				{
+					type:		MFT.Button,
+					params:		{
+						className:  'button',
+						textBinding: 'MFT.locale.label.view_info_alerts_delete',
+						disabled:	true
+					}							
+				},
+				{
+					type:		MFT.Button,
+					params:		{
+						className:  'button',
+						textBinding: 'MFT.locale.label.view_info_alerts_deleteAll',
+						disabled:	true
+					}							
+				}
+			]			
+	}),
+	
+	helpModeBg: Em.View.extend({
+		elementId: 'info_alert_bg_helpMode',
+		classNameBindings: ['MFT.helpMode: active_state'],
+		classNames:'hidden'
+	})
 });

@@ -279,6 +279,14 @@ MFT.VideoPlayerController = Ember.Object.create({
 			 MFT.WOSkippButtonView.remove();
 		}
 		
+		/* Show system settings popup*/
+		
+		if(MFT.AppController.wo_video_first_launch)
+		{
+			MFT.AppController.set('active',true);
+			MFT.AppController.set('wo_video_first_launch',false);
+		}
+		
 	},
 	
 	/** 

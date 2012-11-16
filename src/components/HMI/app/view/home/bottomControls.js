@@ -4,10 +4,10 @@
  * @desc BottomControlls module visual representation
  * 
  * @category	View
- * @filesource	app/view/home/BottomControls.js
+ * @filesource	app/view/BottomControls.js
  * @version		2.0
  *
- * @author		Andriy Melnik
+ * @author		Igor Zhavoronkin
  */
  
 MFT.BottomControls = Em.ContainerView.extend({
@@ -22,20 +22,33 @@ MFT.BottomControls = Em.ContainerView.extend({
 	
 	information : Em.View.extend({
 		elementId:			'info_but',
-		classNameBindings: ['MFT.States.info.active:selected'],
-		
+		classNameBindings: [
+			'MFT.States.info.active:selected',
+			'FFW.Backend.isNavigationEnabled::hidden_display'
+		],
+				
 		template: Em.Handlebars.compile(
 			'<div id="info_but_click"></div>'
 		),
 		
 		actionDown: function(event){
-			MFT.States.goToState( MFT.InfoController.activeState );
+			if ( !MFT.States.info.active ) {
+				MFT.States.goToState( MFT.InfoController.activeState );
+			}
 		}
 	}),
 	
 	home: Em.View.extend({
 		elementId:			'home_but',
-		classNameBindings: ['MFT.States.home.active:selected'],
+		classNameBindings: [
+			'MFT.States.home.active:selected',
+			'FFW.Backend.isNavigationEnabled::large'
+		],
+		
+		template: Em.Handlebars.compile(
+			'<div id="home_but_click" {{bindAttr class="FFW.Backend.isNavigationEnabled::large"}}></div>'
+		),
+		
 		actionDown: function(event){
 			MFT.States.goToState('home');
 		}
@@ -44,19 +57,19 @@ MFT.BottomControls = Em.ContainerView.extend({
 	settings: Em.View.extend({
 		elementId:			'setting_but',
 		
-		classNameBindings: ['isActive:selected'],
-		
-		/*Set Active State On Child active state = true*/
-		isActive: function(){
-			return MFT.States.settings.childStates.filterProperty('active', true).length === 1;
-		}.property('MFT.States.settings.childStates.@each.active'),
+		classNameBindings: [
+			'MFT.States.settings.active:selected',
+			'FFW.Backend.isNavigationEnabled::large'
+		],
 		
 		template: Em.Handlebars.compile(
-			'<div id="setting_but_click"></div>'
+			'<div id="setting_but_click" {{bindAttr class="FFW.Backend.isNavigationEnabled::large"}}></div>'
 		),
 		
 		actionDown: function(event){
-			MFT.States.goToState( MFT.SettingsController.activeState );
+			if ( !MFT.States.settings.active ) {
+				MFT.States.goToState( MFT.SettingsController.activeState );
+			}
 		}
 	})
 });

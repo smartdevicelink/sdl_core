@@ -27,6 +27,9 @@ MFT.PhoneController = Em.Object.create({
 		}
 	},
 	
+	// flag for hiding left menu
+	hideMenu: false,
+	
 	/** DIALPAD SECTION */
 	
 	/** Dialpad key press handeler */
@@ -102,7 +105,7 @@ MFT.PhoneController = Em.Object.create({
 	/** Status label text */
 	phoneStatus: function() {
 		if( this.model.readyForCall ) {
-			return 'Paul&rsquo;s Phone'
+			return MFT.locale.label.view_wigetPhone_phone;
 		} else {
 			if ( this.model.statusModeText ) {
 				return this.model.statusModeText;
@@ -112,6 +115,26 @@ MFT.PhoneController = Em.Object.create({
 	}.property('this.model.readyForCall', 'this.model.statusModeText', 'this.model.phoneStatusNumber'),
 	
 	onChildState: function(event){
+		//this.set('hideMenu', true);
 		MFT.States.goToState(MFT.States.currentState.get('path')+'.'+event.goToState);
+		
+		// return if state view loaded
+		if ( MFT.States.currentState.viewLoaded ) {
+			return;
+		}
+		
+		// add observer on active state to hide left menu
+		MFT.States.currentState.addObserver('active', function(){
+			if (this.active) {
+				MFT.PhoneController.set('hideMenu', true);
+			}
+		});
+	},
+	
+	onBackState: function(event){
+		MFT.States.back();
+		
+		// show left menu
+		this.set('hideMenu', false);
 	}
 });

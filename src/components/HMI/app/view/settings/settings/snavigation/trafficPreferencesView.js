@@ -11,15 +11,13 @@
  */
  
 MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(MFT.LoadableView,{
-	classNameBindings:	['MFT.States.settings.settings.snavigation.trafficPreferences.active:active_state','MFT.helpMode'],
-	classNames:		   ['hidden'],
+	classNameBindings:	['MFT.helpMode'],
 	elementId:			'settings_settings_navigation_trafficPreferences',
 	childViews:		   [
 							  'backButton',
 							  'topTitile',
 							  'list'
 						  ],
-	stateObj: MFT.States.settings.settings.snavigation.trafficPreferences,
 	backButton: MFT.Button.extend({
 		classNames:		   ['backButton','button'],		
 		action:			   'back',
@@ -43,8 +41,9 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			items:[
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_avoidTrafficProblems',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
@@ -56,8 +55,9 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			},
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_trafficAlertNotification',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
@@ -69,10 +69,12 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			},
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_accidentMapIcon',
 					labelIcon:		    'images/settings/trafficPreferences_ico/ico_acciden.png',
+					templateName: 'icon',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_onOff',
@@ -83,10 +85,12 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			},
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_trafficJamMapIcon',
 					labelIcon:		    'images/settings/trafficPreferences_ico/ico_trafficJam.png',
+					templateName: 'icon',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_onOff',
@@ -97,10 +101,12 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			},
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_roadClosed',
 					labelIcon:		    'images/settings/trafficPreferences_ico/ico_roadClosed.png',
+					templateName: 'icon',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_onOff',
@@ -111,10 +117,12 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			},
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_roadWorks',
 					labelIcon:		    'images/settings/trafficPreferences_ico/ico_roadWorks.png',
+					templateName: 'icon',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_onOff',
@@ -125,10 +133,12 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			},
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_incidentMapIcons',
 					labelIcon:		    'images/settings/trafficPreferences_ico/ico_incident.png',
+					templateName: 'icon',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_onOff',
@@ -139,10 +149,12 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			},
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_difficultDrivingConditions',
 					labelIcon:		    'images/settings/trafficPreferences_ico/ico_difficultDriving.png',
+					templateName: 'icon',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_onOff',
@@ -153,10 +165,12 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			},
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_snowIce',
 					labelIcon:		    'images/settings/trafficPreferences_ico/ico_snow.png',
+					templateName: 'icon',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_onOff',
@@ -167,10 +181,12 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			},
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_smogAlerts',
 					labelIcon:		    'images/settings/trafficPreferences_ico/ico_smog.png',
+					templateName: 'icon',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_onOff',
@@ -181,10 +197,12 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			},
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_weatherWarning',
 					labelIcon:		    'images/settings/trafficPreferences_ico/ico_weatherWarning.png',
+					templateName: 'icon',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_onOff',
@@ -195,10 +213,12 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			},
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_reducesVisibility',
 					labelIcon:		    'images/settings/trafficPreferences_ico/ico_reducesVisibility.png',
+					templateName: 'icon',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_onOff',
@@ -209,10 +229,12 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 			},
 			{
 								
-				type:		MFT.LablePlusToggleButton,
+				type:		MFT.LabelPlusToggleButton,
 				params:		{
+					classNames:		   ['lableToggleButton', 'list-item', 'ember-view', 'wideDoubleToggle'],
 					labelContentBinding:  'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_turnOnYourRadio',
 					labelIcon:		    'images/settings/trafficPreferences_ico/ico_turnOnYourRadio.png',
+					templateName: 'icon',
 					tButtonValue:		 0,
 					tButtonRange: 		 2,
 					tButtonLabelsBinding: 'MFT.locale.label.view_settings_settings_navigation_trafficPreferences_onOff',
@@ -220,7 +242,7 @@ MFT.SettingsSettingsNavigationTrafficPreferencesView = Em.ContainerView.create(M
 					tButtonDisabled:	  true
 				}			
 					
-			},
+			}
 		]
 	})
 });

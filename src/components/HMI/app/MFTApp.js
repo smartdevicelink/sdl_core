@@ -23,25 +23,31 @@ MFT = Em.Application.create({
  	
  	// determine home view {string}
  	homeView: 'home',
+	
+	/** Set language for localization */
+	localization: 'eng',
+
+	//Application ready flag
+	appReady: false,
+	
+	// Debug text
+	debugText: 'debug&nbsp;mode',
  	
 	init: function() {
-		Em.Logger.log('MFT: Application init!');
-		
-		FFW.Buttons.connect();
-		FFW.TTS.connect();
-		FFW.VR.connect();
-		FFW.AppLinkCoreClient.connect();
-		FFW.UI.connect();
+        Em.Logger.log('MFT: Application init!');
+        
+        FFW.Buttons.connect();
+        FFW.TTS.connect();
+        FFW.VR.connect();
+        FFW.AppLinkCoreClient.connect();
+        FFW.UI.connect();
 
-		this._super();
+        this._super();
 	},
 	 	  	
   	/** Application ready event */
 	ready: function() {
 		Em.Logger.log('MFT: Application ready!');
-		
-		/** Set localization  */
-		MFT.locale.setLang(MFT.eng);
 		
 		/** State manager init */
 		MFT.States = StateManager.create();
@@ -51,8 +57,8 @@ MFT = Em.Application.create({
 		
 		if (FLAGS.APP_HIDE_MOUSE_CURSOR) {
 			var style = document.createElement('style');
-	            	style.setAttribute('type', 'text/css');
-        		style.innerHTML = '*{cursor:none !important}';
+            style.setAttribute('type', 'text/css');
+            style.innerHTML = '*{cursor:none !important}';
 			
 			document.getElementsByTagName("head")[0].appendChild(style);			
 		}

@@ -11,23 +11,25 @@
  */
  
 MFT.optionsView = Em.ContainerView.create(MFT.LoadableView,{
-	classNameBindings:	[ 'MFT.States.media.options.active:active_state',
-							'MFT.MediaController.currentOptionsData.view',
-							'MFT.helpMode'
-						  ],
-	
-	classNames:		   ['hidden'],
-	
-	stateObj: MFT.States.media.options,
 	
 	elementId:			'media_options_view',
+	
+	classNameBindings:	[
+		'MFT.MediaController.currentOptionsData.view',
+		'MFT.localization',
+		'MFT.helpMode:helpmode_blur_text_light'
+	],
+		
+	
 	childViews:		   [
 							  'backButton',
 							  'topTitile',
-							  'list'
+							  'list',
+							  'helpbgblur'
 						  ],
 
 	backButton: MFT.Button.extend({
+		elementId: 			'media_options_back_btn',
 		classNames:		   ['backButton','button'],		
 		action:			   'optionsBack',
 		target:			   'MFT.MediaController',	
@@ -35,6 +37,7 @@ MFT.optionsView = Em.ContainerView.create(MFT.LoadableView,{
 	}),
 	
 	topTitile: MFT.Label.extend({
+		elementId:		'media_option_title_header',
 		classNames:		  ['block-header-title'],
 		contentBinding:	  Ember.Binding.oneWay('MFT.MediaController.currentOptionsData.title')
 	}),				  
@@ -49,5 +52,9 @@ MFT.optionsView = Em.ContainerView.create(MFT.LoadableView,{
 			
 			itemsBinding: Ember.Binding.oneWay('MFT.MediaController.currentOptionsData.items')
  
+	}),
+	
+	helpbgblur: Em.View.create({
+		elementId: 'media_options_view_blur',
 	})
 });

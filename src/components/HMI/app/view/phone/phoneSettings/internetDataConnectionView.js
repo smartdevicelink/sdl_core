@@ -11,10 +11,8 @@
  */
  
 MFT.PhoneSettingsInternetDataConnectionView = Em.ContainerView.create( MFT.LoadableView, {
-	stateObj:	MFT.States.phone.phoneSettings.internetDataConnection,
 	
-	classNameBindings:	['MFT.helpMode'],
-	classNames:		   ['hidden'],
+	classNameBindings:	['MFT.helpMode','MFT.localization'],
 	elementId:			'phone_settings_internetDataConnection_view',
 	childViews:		   [
 							  'backButton',
@@ -24,8 +22,8 @@ MFT.PhoneSettingsInternetDataConnectionView = Em.ContainerView.create( MFT.Loada
 
 	backButton: MFT.Button.extend({
 		classNames:		   ['backButton','button'],		
-		action:			   'back',
-		target:			   'MFT.States',	
+		action:			   'onBackState',
+		target:			   'MFT.PhoneController',	
 		icon:				 'images/media/ico_back.png',	
 	}),
 	
@@ -49,12 +47,13 @@ MFT.PhoneSettingsInternetDataConnectionView = Em.ContainerView.create( MFT.Loada
 			elementId:		  ['phone_settings_phoneRinger_phone_label'],
 			icon:			   'images/phone/ico_phoneMelody.png',
 			contentBinding:	 'MFT.locale.label.view_phone_phoneSettings_internetDataConnection_PaulPhone',
-			disabled:		   true
+			disabled:		   true,
+			templateName:	'icon'
 				
 		}),
 		
-		connection: MFT.LablePlusToggleButton.extend({
-			elementId:		    'phone_settings_phoneRinger_connection_LablePlusToggleButton',
+		connection: MFT.LabelPlusToggleButton.extend({
+			elementId:		    'phone_settings_phoneRinger_connection_LabelPlusToggleButton',
 			labelContentBinding:  'MFT.locale.label.view_phone_phoneSettings_internetDataConncetion_connectionProfile',
 			tButtonValue:		 2,
 			tButtonRange: 		 3,
@@ -74,12 +73,12 @@ MFT.PhoneSettingsInternetDataConnectionView = Em.ContainerView.create( MFT.Loada
 			elementId:		 'phone_settings_phoneRinger_DUNSettings_button',
 			classNames:  		'button',
 			textBinding:       'MFT.locale.label.view_phone_phoneSettings_internetDataConncetion_DUNSettings',
-			arrow: 			 true,
+			templateName: 		'arrow',
 			disabled:   		  true
 			
 		}),
 		
-		queryOnConnect: MFT.LablePlusToggleButton.extend({
+		queryOnConnect: MFT.LabelPlusToggleButton.extend({
 			elementId:		  	['phone_settings_phoneRinger_OnConnect_Lable'],
 			labelContentBinding:  'MFT.locale.label.view_phone_phoneSettings_internetDataConncetion_queryOnConnect',
 			tButtonValue:		 null,

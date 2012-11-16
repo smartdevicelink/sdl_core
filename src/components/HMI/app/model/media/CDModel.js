@@ -25,16 +25,16 @@ MFT.CDModel= Em.Object.create({
 		selectedIndex: 					0,
 		
 		items: {
-			0:MFT.PlaylistItem.create({title: 'The Electric Broncos',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-			1:MFT.PlaylistItem.create({title: 'Track 2',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-			2:MFT.PlaylistItem.create({title: 'Track 3',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-			3:MFT.PlaylistItem.create({title: 'Track 4',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-			4:MFT.PlaylistItem.create({title: 'Track 5',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-			5:MFT.PlaylistItem.create({title: 'Track 6',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-			6:MFT.PlaylistItem.create({title: 'Track 7',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-			7:MFT.PlaylistItem.create({title: 'Track 8',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-			8:MFT.PlaylistItem.create({title: 'Track 9',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
-			9:MFT.PlaylistItem.create({title: 'Track 10',album:'Love Bomb',artist:'Epton Joe',genre:'Electronic',disk:'Lazerhorse',duration:123}),
+			0:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track1 ),
+			1:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track2 ),
+			2:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track3 ),
+			3:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track4 ),
+			4:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track5 ),
+			5:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track6 ),
+			6:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track7 ),
+			7:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track8 ),
+			8:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track9 ),
+			9:MFT.PlaylistItem.create( MFT.locale.label.view_media_cd_playList_track10 ),
 		},
 		
 		homeWidgetIcon: 'images/media/cd-ico-home.png',
@@ -43,7 +43,7 @@ MFT.CDModel= Em.Object.create({
 	
 	browseData : Em.Object.create({
 				
-		title: 'CD Track list',
+		titleBinding:	'MFT.locale.label.view_media_cd_browse_CDTrack',
 		
 		disableScrollbar: false,
 		
@@ -135,13 +135,14 @@ MFT.CDModel= Em.Object.create({
 	
 					params:{
 						textBinding: 'MFT.locale.label.view_media_bt_options_soundSettings',
-						arrow:		true,
-						disabled: true
+						templateName:		  'arrow',
+						action: 'turnOnSoundSettings',
+						target: 'MFT.MediaController'
 					}							
 				},
 				
 				{
-					type:		MFT.LablePlusToggleButton,
+					type:		MFT.LabelPlusToggleButton,
 					params:{
 						labelContentBinding:  'MFT.locale.label.view_media_cd_options_compression',
 						tButtonValue: 		 1,

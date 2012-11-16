@@ -1,11 +1,28 @@
+#debug_view {
+	z-index: 20000;
+	pointer-events: none;
+	color: #0F0;
+	font-weight: bold;
+	padding: 5px;
+	margin: 5px;
+	background-color: #000;
+	opacity: .8;
+}
+
+/* Button component */
 .ffw-button {
 	cursor: pointer;
+	background: url(../images/common/button.png) repeat-x;
+}
+
+.ffw-button.large {
+	background: url(../images/common/button_large.png) repeat-x;
+}
+
+.ffw-button.small {
+	background: url(../images/common/button_small.png) repeat-x;
 }
 
 .ffw-button.pressed {
-	background-color: aqua;
-}
-
-.ffw-button.not-pressed {
-	background-color: red;
+	background-position: bottom;
 }

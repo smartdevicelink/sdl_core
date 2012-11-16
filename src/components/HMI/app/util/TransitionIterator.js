@@ -25,6 +25,10 @@ MFT.TransitionIterator = {
 	// inactive states
 	stateOnExit: [],
 	
+	// start transition timestamp
+	// used in DEBUG_MODE
+	startTime: 0,
+	
 	/**
 	 * Init transition:
 	 * set destination state path
@@ -32,6 +36,11 @@ MFT.TransitionIterator = {
 	 * @path {string}
 	 */
 	init: function( path ) {
+		
+		if ( FLAGS.DEBUG_MODE ) {
+			this.startTime = Date.now();
+		}
+		
 		this.finalPath = path;
 		this.ready = false;
 	},
@@ -61,5 +70,11 @@ MFT.TransitionIterator = {
 		
 		// unblock transition
 		this.ready = true;
+		
+		// show transition time
+		// used in DEBUG_MODE
+		if (this.startTime) {
+			MFT.set('debugText', ((Date.now() - this.startTime)/1000).toFixed(2) );
+		}
 	}
 };

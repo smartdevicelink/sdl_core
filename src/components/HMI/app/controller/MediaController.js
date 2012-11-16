@@ -15,10 +15,16 @@ MFT.MediaController = Em.Object.create({
 	activeState: 'media.radio',
 	
 	/** text labels (dinamicaly could be changed)*/
-	amLabel :'AM 1', fmLabel :'FM', siriusLabel:'SIRIUS',
+	amLabelBinding: Ember.Binding.oneWay('MFT.locale.label.view_media_am1'),
+	
+	fmLabelBinding: Ember.Binding.oneWay('MFT.locale.label.view_media_fm'),
+	
+	siriusLabelBinding: Ember.Binding.oneWay('MFT.locale.label.view_media_sirius'),
 	
 	/** Selected direct tune station */
 	directTune: [],
+	/** Selected direct tune station for sirius*/
+	siriusDirectTune: [],
 	
 	/** Hide direct tune component */
 	directTuneHide: true,
@@ -57,8 +63,17 @@ MFT.MediaController = Em.Object.create({
 	
 	playerDataArray : [MFT.CDModel],
 
+	/** Current applink Sub Menu identificator*/
+	currentApplinkSubMenuid: null,
 
-
+	/** Current applink Perform Interaction Choise identificator*/
+	currentApplinkPerformInteractionChoiseId: null,
+	
+	/** Current Direct tune data*/
+	currentDirectTuneData: MFT.AmModel.directTunestations,
+	
+	
+	
 	/**  On radio module exit event */
 	onRadioExit: function(){
 		if(this.radioDataArray.length >0){
@@ -82,9 +97,18 @@ MFT.MediaController = Em.Object.create({
 		
 		// Hide direct tune
 		this.offDirectTune();
+		if(this.directTuneSelected){
+			this.set('directTuneSelected', false);
+		}
 		
 		this.radioDataArray.push(data);
+		/** load  options data*/
+		this.set('currentOptionsData', this.radioDataArray[0].optionsData);
+		/** load  direct tune  data*/
+		this.set('currentDirectTuneData', this.radioDataArray[0].directTunestations);
+		/** Set Active bans*/
 		this.radioDataArray[0].band.set('value',this.radioDataArray[0].band.activeBand);
+		/** Set current data active state*/
 		this.radioDataArray[0].set('active',true);
 	},
 	
@@ -107,6 +131,9 @@ MFT.MediaController = Em.Object.create({
 	onPlayerEnter: function(data){
 		// Hide direct tune
 		this.offDirectTune();
+		if(this.directTuneSelected){
+			this.set('directTuneSelected', false);
+		}
 		
 		//Player
 		this.playerDataArray.push(data);	
@@ -116,38 +143,14 @@ MFT.MediaController = Em.Object.create({
 			this.set('currentOptionsData', this.playerDataArray[0].optionsData);
 		}
 		this.set('currentSelectedPlayer',this.playerDataArray[0].player); 
-		// Exit Radio
-		this.onRadioExit();
-		this.playerDataArray[0].set('active',true);
+		
 		
 		// Set player state
 		if(!MFT.States.media.player.active && !MFT.States.media.browseall.active){
 			MFT.States.goToState('media.player');
-		}	
-	},
-	
-	/**  On applications module enter event */
-	
-	onApplicationsEnter: function(data){
-		// Hide direct tune
-		this.offDirectTune();
-		
-		//Player
-		this.playerDataArray.push(data);	
-		//this.set('currentBrowseData', this.playerDataArray[0].browseData);
-		//this.set('currentModuleData',this.playerDataArray[0].PlayList);
-		if(this.playerDataArray[0].optionsData){
-			this.set('currentOptionsData', this.playerDataArray[0].optionsData);
 		}
-		this.set('currentSelectedPlayer',this.playerDataArray[0].player); 
-		// Exit Radio
 		this.onRadioExit();
 		this.playerDataArray[0].set('active',true);
-		
-		// Set player state
-		if(!MFT.States.media.app.active){
-			MFT.States.goToState('media.app');
-		}	
 	},
 	
 	/****************** AM *******************/
@@ -166,16 +169,16 @@ MFT.MediaController = Em.Object.create({
 		switch(MFT.AmModel.band.value){
 			case 0:{
 				this.set('currentModuleData', MFT.AmModel.am1); 
-				this.set('amLabel','AM 1');
+				this.set('amLabel', MFT.locale.label.view_media_am1);
 				break;
 			}
 			case 1:{
 				this.set('currentModuleData', MFT.AmModel.amAst);
-				this.set('amLabel','AM AST');
+				this.set('amLabel',MFT.locale.label.view_media_amAst);
 				break;
 			}
 			default:
-				this.set('amLabel','AM');
+				this.set('amLabel', MFT.locale.label.view_media_am);
 				break;			
 		}
 	}.observes('MFT.AmModel.band.value'),
@@ -194,21 +197,21 @@ MFT.MediaController = Em.Object.create({
 
 	/*Observes for model value changed - switch selected station view*/
 	switchFmSubstate: function(){
-
+		
 		switch(MFT.FmModel.band.value){
 			case 0:{
 				this.set('currentModuleData', MFT.FmModel.fm1); 
-				this.set('fmLabel','FM 1');
+				this.set('fmLabel', MFT.locale.label.view_media_fm1);
 				break;
 			}
 			case 1:{
 				this.set('currentModuleData', MFT.FmModel.fm2); 
-				this.set('fmLabel','FM 2');
+				this.set('fmLabel', MFT.locale.label.view_media_fm2);
 				break;
 			}
 			case 2:{
 				this.set('currentModuleData', MFT.FmModel.fmAst); 
-				this.set('fmLabel','FM AST');
+				this.set('fmLabel', MFT.locale.label.view_media_fmAst);
 				break;
 			}				
 			default:
@@ -229,8 +232,6 @@ MFT.MediaController = Em.Object.create({
 			this.onRadioEnter(MFT.SiriusModel);
 			/** load sirius browse data*/
 			this.set('currentBrowseData', MFT.SiriusModel.browseData);
-			/** load sirius options data*/
-			this.set('currentOptionsData', MFT.SiriusModel.optionsData);
 		}	
 	},
 	
@@ -262,9 +263,8 @@ MFT.MediaController = Em.Object.create({
 	
 	/** Check for logo in station data*/
 	onStationLogoChange: function(){
-		if(this.currentModuleData.get('selectedDirectItem'))
-		if(this.directTuneSelected){
-			this.set('isStationLogo', this.currentModuleData.get('selectedDirectItem').logo.length > 1);
+		if(this.directTuneSelected && this.currentDirectTuneData.get('selectedDirectItem') ){
+			this.set('isStationLogo', this.currentDirectTuneData.get('selectedDirectItem').logo.length > 1);
 		}else{
 			this.set('isStationLogo', this.currentModuleData.get('selectedItem').logo.length > 1);
 		}
@@ -276,14 +276,15 @@ MFT.MediaController = Em.Object.create({
 	/** On Preset Direct data Change */
 	currentActiveData: function(){
 		if(this.directTuneSelected){
-			return this.currentModuleData.get('selectedDirectItem');
+			return this.currentDirectTuneData.get('selectedDirectItem');
 		}else{
 			return this.currentModuleData.get('selectedItem');
 		}
 	}.property(
 		'MFT.MediaController.currentModuleData.selectedItem',
-		'MFT.MediaController.currentModuleData.selectedDirectItem',
-		'MFT.MediaController.directTuneSelected'
+		'MFT.MediaController.currentDirectTuneData.selectedDirectItem',
+		'MFT.MediaController.directTuneSelected',
+		'MFT.SiriusModel.directTunestations.selectedDirectItem'
 	),		
 	
 	/****************** CD *******************/
@@ -305,17 +306,6 @@ MFT.MediaController = Em.Object.create({
 	turnOnSD: function(){
 		this.onPlayerExit();
 		this.onPlayerEnter(MFT.SDModel);
-	},
-	
-	
-	/****************** APP *******************/
-	/*Turn on Applications*/
-	turnOnApp: function(){
-		// Exit form player or radio
-		FFW.AppLinkCoreClient.ActivateApp();
-		this.onPlayerExit();
-		MFT.AppModel.set('active',true);
-		this.onApplicationsEnter(MFT.AppModel);
 	},
 	
 	/*Turn on More Info*/
@@ -368,6 +358,9 @@ MFT.MediaController = Em.Object.create({
 		MFT.States.goToState('media.bluetooth');
 		// hide directTune
 		this.offDirectTune();
+		if(this.directTuneSelected){
+			this.set('directTuneSelected', false);
+		}
 	},
 	/*Turn on SD*/
 	turnOnAVin: function(){
@@ -378,6 +371,9 @@ MFT.MediaController = Em.Object.create({
 		MFT.States.goToState('media.avin');
 		// hide directTune
 		this.offDirectTune();
+		if(this.directTuneSelected){
+			this.set('directTuneSelected', false);
+		}
 	},
 	
 	/* Scroll left menu up*/
@@ -391,24 +387,81 @@ MFT.MediaController = Em.Object.create({
 	
 	/** Options */
 	turnOnOptions: function(){
-		this.resetDirectTune();
 		MFT.States.goToState('media.options');
 	},
+	
+	/** Application */
+	turnOnApplink: function(){
+		
+		this.onPlayerEnter(MFT.ApplinkModel);
 
-	/** Application Options */
-	turnOnAppOptions: function(){
-		this.resetDirectTune();
-		MFT.States.goToState('media.appoptions');
+		// Exit form player or radio
+		this.onPlayerExit();
+		this.onRadioExit();
+		// Set Applink Data active
+		MFT.ApplinkModel.set('active',true);
+		// Go to Applink state
+		MFT.States.goToState('media.applink');
+		// hide directTune
+		this.offDirectTune();
+		if(this.directTuneSelected){
+			this.set('directTuneSelected', false);
+		}
+
 	},
 
-	/** Application Sub Mennu */
-	turnOnAppSubMenu: function(){
-		MFT.States.goToState('media.appsubmenu');
+	/** Applink Options */
+	turnOnApplinkOptions: function(el){
+		MFT.States.goToState('media.applink.applinkoptions');
 	},
 
-	/** Application Sub Mennu */
-	turnOnAppPerform: function(){
-		MFT.States.goToState('media.appperforminteraction');
+	/** Applink Sub Mennu */
+	turnOnApplinkSubMenu: function(el){
+		this.set('currentApplinkSubMenuid', el.menuId);
+		MFT.States.goToState('media.applink.applinkoptions.applinkoptionssubmenu');
+	},
+
+	/** Applink Perform Interaction Choise */
+	turnOnApplinkPerform: function(el){
+		if(MFT.States.media.applink.applinkperforminteractionchoise.active){
+			MFT.AppPerformInteractionChoise.PerformInteraction(el.interactionChoiceSetIDList);
+		}else{
+			this.set('currentApplinkPerformInteractionChoiseId', el.interactionChoiceSetIDList);
+		}
+		MFT.States.goToState('media.applink.applinkperforminteractionchoise');
+	},
+
+	/** Applink AddCommand handler */
+	applinkAddCommand: function(params){
+		if( params.menuParams.parentID == 0 ){
+			MFT.ApplinkOptionsView.AddCommand(params.cmdId, params.menuParams);
+		}else{
+			if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
+				MFT.ApplinkModel.subMenuCommands.push(params);
+				MFT.ApplinkOptionsSubMenuView.SubMenuActivate(MFT.MediaController.currentApplinkSubMenuid);
+			}else{
+				MFT.ApplinkModel.subMenuCommands.push(params);
+			}
+		}
+	},
+
+	/** Applink Setter for Media Clock Timer */
+	applinkSetMediaClockTimer: function(params){
+		if(params.startTime){
+			MFT.ApplinkModel.showInfo.set('duration', params.startTime);
+		}
+		if(params.updateMode.COUNTUP){
+			MFT.ApplinkModel.showInfo.set('countUp', true);
+		}
+		if(params.updateMode.COUNTDOWN){
+			MFT.ApplinkModel.showInfo.set('countUp', false);
+		}
+		if(params.updateMode.PAUSE){
+			MFT.ApplinkModel.showInfo.set('pause', true);
+		}
+		if(params.updateMode.RESUME){
+			MFT.ApplinkModel.showInfo.set('pause', false);
+		}
 	},
 	
 	optionsBack: function(){
@@ -421,6 +474,10 @@ MFT.MediaController = Em.Object.create({
 		}
 	},
 	
+	turnOnSoundSettings: function(){
+		MFT.States.goToState('settings.sound');
+	},
+	
 	//SIRIUS Browse
 	turnOnSiriusBrowse: function(){
 		// cancel scrollbar animation
@@ -429,15 +486,17 @@ MFT.MediaController = Em.Object.create({
 		Ember.run.later(function(){
 		 	MFT.browseView.list.set('cancelAnimation',false);
 		}, 200);
+		
 		// set browse data
 		this.set('currentBrowseData', MFT.SiriusModel.browseData);
-
+		
+		if(MFT.SiriusModel.active){
+			this.onRadioExit();
+		}
 		//Turn Sirius Model Active
 		this.onRadioEnter(MFT.SiriusModel);
 		// Switch Browse state
 		MFT.States.goToState('media.browse');
-		/** TODO load sirius options data*/
-		//this.set('currentOptionsData', MFT.SiriusModel.optionsData);
 
 		this.listUp();
 		
@@ -487,7 +546,12 @@ MFT.MediaController = Em.Object.create({
 	onStorePreset: function(playlistItem, playlist,index){
 		/** Copy data from active station to current pressed*/
 		if(this.directTuneSelected){
-			playlistItem.copy(playlist.get('selectedDirectItem'));
+			if(!MFT.SiriusModel.active){
+				playlistItem.copy(this.currentDirectTuneData.get('selectedDirectItem'));
+			}else{
+				
+				playlistItem.copy(MFT.SiriusModel.directTunestations.get('selectedDirectItem'));
+			}
 			this.set('directTuneSelected',false);
 		}else{
 			playlistItem.copy(playlist.get('selectedItem'));
@@ -515,6 +579,8 @@ MFT.MediaController = Em.Object.create({
 		this.playerDataArray[0].player.play();
 	},
 	
+	/********************************************************  DIRECT TUNE LOGIC ******************************************/
+	
 	/**
 	 * Direct tune methods
 	 */
@@ -523,41 +589,55 @@ MFT.MediaController = Em.Object.create({
 			MFT.VideoPlayerController.start('ent_Direct_tune');
 			
 			return;
-		}		
+		}
+				
 		this.set('directTuneHide', false );
-		this.currentModuleData.set('selectedDirectTuneStation',null);
+			
+		this.currentDirectTuneData.set('selectedDirectTuneStation',null);
+		
 		this.set('directTuneSelected',false);
 	},
 	
-	  
+	 /* Turn off direct tune buttom*/ 
 	offDirectTune: function() {
 		this.set('directTuneHide', true );
-		if(this.directTuneSelected){
-			this.set('directTuneSelected', false);
-		}
 	},
-	
+	/* On Direct tune hide event */
 	onDirectTuneHide: function() {
 		if ( this.directTuneHide ) {
+			// SIRIUS (needs for visual representation)
+			this.set('isSiriusDirectTunestations',false);
+			
 			this.set('directTuneStations', [] );
-			MFT.MediaController.set('directKeypressed', false);
+			
+			this.set('directKeypressed', false); // need to determine that direct number was pressed
 			
 		} else {
-			this.set('directTune', [] );
+			
+			this.set('directTune', [] ); 
+			
 			this.set('directTuneFinished', false );
-			this.set('directTuneStations', this.currentModuleData.directTunes );
+			
+			if(!MFT.SiriusModel.active){
+				this.set('directTuneStations', this.currentDirectTuneData.directTunes);
+			}else{
+				// SIRIUS
+				this.set('isSiriusDirectTunestations',true);	
+			}
 		}
 	}.observes('this.directTuneHide'),
 	
 	/** Direct tune key press handeler */
 	onDirectTuneKeyPress: function( view ) {
+		
 		this.set('directKeypressed', true);
+		
 		this.set('directTuneSelected', false);
 		
-		if(this.currentModuleData.get('selectedDirectTuneStation') != null){
-			this.currentModuleData.set('selectedDirectTuneStation',null);
-		}
+		this.currentDirectTuneData.set('selectedDirectTuneStation',null);
+		
 		this.directTune.pushObject( view.index  );
+		
 		this.setDirectTuneInterval();
 	},
 	
@@ -567,8 +647,8 @@ MFT.MediaController = Em.Object.create({
 			clearInterval(this.directTuneTimer);
 		}
 		this.directTuneTimer = setInterval(function(){
-		MFT.MediaController.resetDirectTune();
-		},4000);
+			MFT.MediaController.resetDirectTune();
+		},5000);
 	},
 	
 	/** Reset Direct tune*/
@@ -591,7 +671,15 @@ MFT.MediaController = Em.Object.create({
 		clearInterval(this.directTuneTimer);
 		this.set('directTuneFinished', false);
 		this.set('directKeypressed', false);
-		this.currentModuleData.set('selectedDirectTuneStation',this.directTune.toString().replace(/,/g,''));
+		if(!MFT.SiriusModel.active){
+			
+			this.currentDirectTuneData.set('selectedDirectTuneStation',this.directTune.toString().replace(/,/g,''));
+		}else{
+			//Select saved direct tune data from SiriusModel
+			this.currentDirectTuneData.set('selectedDirectTuneStation',Number(this.directTune.toString().replace(/,/g,'')) % 20);
+			// Dinamicaly sett current station number to sirius direct data
+			this.currentDirectTuneData.selectedDirectItem.set('channel','Channel '+this.directTune.toString().replace(/,/g,''));
+		}
 		this.set('directTuneSelected', true);
 		this.set('directTune', [] );
 	},
@@ -602,32 +690,72 @@ MFT.MediaController = Em.Object.create({
 		}else{
 			clearInterval(this.directTuneTimer);
 			this.set('directKeypressed', false);
-			if(this.currentModuleData.get('selectedDirectTuneStation') == null){
+			if(this.currentDirectTuneData.get('selectedDirectTuneStation') == null){
 				return this.currentModuleData.get('selectedItem').frequency;
 			}else{
-				return this.currentModuleData.get('selectedDirectItem').frequency;
+				return this.currentDirectTuneData.get('selectedDirectItem').frequency;
 			}
 		}
 	}.property('this.directTune.@each'),
 	/** Keys for direct tune component */
 	directTuneKeys: function() {
-		var i, a, b, keys = [];
-		
-		for ( i = 0; i < this.directTuneStations.length; i++ ) {
-			if ( this.compare( this.directTune, this.directTuneStations[i].slice(0, this.directTune.length) ) ) {
-				keys.push( Number( this.directTuneStations[i][ this.directTune.length ] ) );
+		if(!MFT.SiriusModel.active)
+		{
+				var i, a, b, keys = [];
 				
-				// Set true if find station	
-				if( this.directTune.length === this.directTuneStations[i].length ) {
+				for ( i = 0; i < this.directTuneStations.length; i++ ) {
+					if ( this.compare( this.directTune, this.directTuneStations[i].slice(0, this.directTune.length) ) ) {
+						keys.push( Number( this.directTuneStations[i][ this.directTune.length ] ) );
+						
+						// Set true if find station	
+						if( this.directTune.length === this.directTuneStations[i].length ) {
+							this.set('directTuneFinished', true);
+						}
+					}
+				}
+				return keys;
+		
+		}else
+		{
+			/************************ SIRIUS LOGIC ***********************/
+			if(this.directTune.length != 0){
+				// dont enable Enter button if Null selected
+				if(Number(this.directTune.toString().replace(/,/g,'')) != 0){
 					this.set('directTuneFinished', true);
 				}
 			}
+			
+			switch (this.directTune[0]){
+				case 0: {
+					return this.directTune.length === 3;	
+					break;
+				}
+				case 1: {
+					return this.directTune.length === 3;
+					break;
+				}
+				default: {
+					return this.directTune.length === 2;
+					break;
+				}
+			}
 		}
-		return keys;
 	}.property('this.directTune.@each','this.directTuneStations'),
 	
+	
+	disableZeroNum: function(){
+		if(this.directTune.length == 2 && 
+			Number(this.directTune.toString().replace(/,/g,'')) == 0)
+		{
+			return true;
+		}else{
+			return false;
+		}
+		console.log(232323)
+	}.property('this.directTune.@each'),
 	/** Helper function to compare stations for direct tune */
 	compare: function(tune, stations) {
+		
 		if ( tune.toString() === stations.toString() ) {
 			return true;
 		} else {

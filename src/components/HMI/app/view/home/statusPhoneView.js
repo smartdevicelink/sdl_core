@@ -32,7 +32,7 @@ MFT.StatusPhoneView = Em.ContainerView.extend({
 		
 		classNameBindings:	['MFT.States.home.active:visible'],
 		
-		content:			'Phone'
+		contentBinding:	    Ember.Binding.oneWay('MFT.locale.label.view_statusPhone_phone')
 	}),
 	
 	/** Phone status of call */

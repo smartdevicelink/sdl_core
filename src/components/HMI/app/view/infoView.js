@@ -10,14 +10,15 @@
  * @author		Gerashchenko Maksym
  */
  
-MFT.InfoView = Em.ContainerView.create({
+MFT.InfoView = Em.ContainerView.create( MFT.LoadableView, {
  	
  	elementId:	'info_view',
- 	
- 	classNames:	'block hidden',
- 
+ 	 
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.info.active:active_state','MFT.helpMode'],
+	classNameBindings: [
+		'MFT.helpMode',
+		'FFW.Backend.isNavigationEnabled::green_bg'	
+	],
 	
 	controllerBinding: Ember.Binding.oneWay('MFT.InfoController'),
 		
@@ -27,7 +28,7 @@ MFT.InfoView = Em.ContainerView.create({
 	],
 	
 	
-/** Left menu */
+	/** Left menu */
 	leftMenu: Em.ContainerView.extend({
 		elementId:	'info_leftMenu',
 		
@@ -53,6 +54,7 @@ MFT.InfoView = Em.ContainerView.create({
 				'alertsButton',
 				'calendarButton',
 				'appsButton',
+				'appLinkButton'
 			],
 		
 			servicesButton: MFT.Button.extend({
@@ -105,6 +107,18 @@ MFT.InfoView = Em.ContainerView.create({
 				classNames:			'menu-item lsp1_p',
 				classNameBindings:	 ['MFT.States.info.apps.active:info_active'],
 				textBinding:		   'MFT.locale.label.view_info_leftmenu_apps',
+				icon:				  'images/info/info_leftMenu_apps_ico.png',
+				action:				'onState',
+				target:				'MFT.InfoController',
+			}),
+			
+			appLinkButton: MFT.Button.extend({
+				elementId:			 'info_leftMenu_appLink',
+				goToState:   			 'nonMedia',	
+				classNames:			'menu-item lsp1_p',
+				classNameBindings:	 ['MFT.States.info.nonMedia.active:info_active'],
+				//textBinding:		   'AppLink',
+				text:					'NonMedia',
 				icon:				  'images/info/info_leftMenu_apps_ico.png',
 				action:				'onState',
 				target:				'MFT.InfoController',

@@ -11,10 +11,7 @@
  */
 
 MFT.SettingsSettingsSystemInstallApplicationsView = Em.ContainerView.create(MFT.LoadableView,{
-	classNameBindings:	['MFT.States.settings.settings.system.installApplications.active:active_state'],
-	classNames:		   ['hidden'],
 	elementId:			'settings_settings_system_installApplications',
-	stateObj: 	MFT.States.settings.settings.system.installApplications,
 	childViews:		   [
 							  'backButton',
 							  'topTitile',
@@ -47,7 +44,7 @@ MFT.SettingsSettingsSystemInstallApplicationsView = Em.ContainerView.create(MFT.
 				params:		{
 					className:  'button',
 					textBinding:	  'MFT.locale.label.view_settings_settings_system_installApplications_BeginSoftware',
-					arrow:	  true,
+					templateName:	  'arrow',
 					goToState:  'beginSoftwareInstallation',
 					action:	 'onChildState',
 					target:	 'MFT.SettingsController',
@@ -58,7 +55,7 @@ MFT.SettingsSettingsSystemInstallApplicationsView = Em.ContainerView.create(MFT.
 				params:		{
 					className:  'button',
 					textBinding:	  'MFT.locale.label.view_settings_settings_system_installApplications_ViewSoftware',
-					arrow:	  true,
+					templateName:	  'arrow',
 					goToState:  'viewSoftwareLicenses',
 					action:	 'onChildState',
 					target:	 'MFT.SettingsController',

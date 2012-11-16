@@ -12,16 +12,13 @@
 
 MFT.NavigationDestinationFavorites = Em.ContainerView.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.navigation.dest.favorites.active:active_state','MFT.helpMode',],
+	classNameBindings: ['MFT.helpMode'],
 	
 	elementId:		'view_navi_destination_favorites',
-	
-	classNames:	   ['hidden'],
-	
-	stateObj: MFT.States.navigation.dest.favorites,
-	
+		
 	childViews: [
 		'backButton',
+		'voiceButton',
 		'content',
 		'heading'
 	],
@@ -31,6 +28,12 @@ MFT.NavigationDestinationFavorites = Em.ContainerView.create(MFT.LoadableView,{
 		action:			  'back',
 		target:			  'MFT.States',	
 		icon:				'images/media/ico_back.png',	
+	}),
+		
+	voiceButton: MFT.Button.extend({
+		classNames:		  ['voiceButton','button'],		
+		icon:				'images/settings/ico_voice.png',	
+		disabled:			true
 	}),
 	
 	/** Upper title*/

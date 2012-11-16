@@ -12,16 +12,16 @@
 
 MFT.NavigationDestinationPOIView = Em.ContainerView.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.navigation.dest.POI.active:active_state','MFT.helpMode',],
+	classNameBindings: [
+						 'MFT.helpMode',
+						 'MFT.localization' 
+					   ],
 	
 	elementId:		'view_navi_destination_poi',
-	
-	classNames:	   ['hidden'],
-	
-	stateObj: MFT.States.navigation.dest.POI,
-	
+		
 	childViews: [
 		'backButton',
+		'voiceButton',
 		'content',
 		'heading'
 	],
@@ -31,6 +31,12 @@ MFT.NavigationDestinationPOIView = Em.ContainerView.create(MFT.LoadableView,{
 		action:			  'back',
 		target:			  'MFT.States',	
 		icon:				'images/media/ico_back.png',	
+	}),
+	
+	voiceButton: MFT.Button.extend({
+		classNames:		  ['voiceButton','button'],		
+		icon:				'images/settings/ico_voice.png',	
+		disabled:			true
 	}),
 	
 	/** Upper title*/

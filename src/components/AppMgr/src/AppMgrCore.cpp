@@ -94,13 +94,8 @@ AppMgrCore::~AppMgrCore()
     if(mQueueRPCBusObjectsIncoming)
         delete mQueueRPCBusObjectsIncoming;
 
-    if(!mLastAutoActivateId.empty())
-    {
-        if(!serializeToFile(mAutoActivateIdFileName, mLastAutoActivateId))
-        {
-            LOG4CPLUS_ERROR_EXT(mLogger, " AppMgrCore cannot serialize to a file!");
-        }
-    }
+    std::ofstream(mAutoActivateIdFileName, std::ios::trunc);
+
 	LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore destructed!");
 }
 
@@ -182,22 +177,54 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
 		{
 			LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
             AppLinkRPC::RegisterAppInterface_request * object = (AppLinkRPC::RegisterAppInterface_request*)mobileMsg;
+            const std::string& appName = object->get_appName();
             Application* app = core->getApplicationFromItemCheckNotNull(core->registerApplication( object, sessionID ));
             AppLinkRPC::RegisterAppInterface_response* response = new AppLinkRPC::RegisterAppInterface_response();
             response->setCorrelationID(object->getCorrelationID());
             response->setMessageType(AppLinkRPC::ALRPCMessage::RESPONSE);
             if(!app)
             {
-                LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been registered!");
+                LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< appName <<" hasn't been registered!");
                 response->set_success(false);
                 response->set_resultCode(AppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
                 MobileHandler::getInstance().sendRPCMessage(response, sessionID);
                 break;
             }
-
-            if(object->get_autoActivateID())
+            LOG4CPLUS_INFO_EXT(mLogger, " About to find auto-activate id in a map...");
+            std::string autoActivateIdFound = core->mAutoActivateIds.findAutoActivateIdAssignedToName(appName);
+            LOG4CPLUS_INFO_EXT(mLogger, " found something like this: "<<autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound);
+            if(!autoActivateIdFound.empty())
             {
-                response->set_autoActivateID(*object->get_autoActivateID());
+                LOG4CPLUS_INFO_EXT(mLogger, "Found already registered AutoActivateId"<<(autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound) << " assigned to app name "<< appName);
+                if(object->get_autoActivateID())
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "There is an AutoActivateId supplied withtin this RegisterAppInterface request: "<< *object->get_autoActivateID());
+                    if(*object->get_autoActivateID() != autoActivateIdFound)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been registered because its autoActivateId " <<*object->get_autoActivateID()<< " differs from the one specified before - " << autoActivateIdFound);
+                        break;
+                    }
+                }
+                else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been registered because its autoActivateId NULL differs from the one specified before - " << autoActivateIdFound);
+                    break;
+                }
+            }
+            else
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId has previously been assigned to app name "<< appName);
+                if(!object->get_autoActivateID())
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request - about to register an application "<< appName);
+                    const std::string& autoActivateId = core->mAutoActivateIds.addApplicationName(object->get_appName());
+                    response->set_autoActivateID(autoActivateId);
+                }
+                else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Application "<< object->get_appName() <<" hasn't been registered because it specified an autoActivateId "<<*object->get_autoActivateID()<<" while id hasn't yet been registered!");
+                    break;
+                }
             }
             response->set_buttonCapabilities(core->mButtonCapabilities.get());
             response->set_displayCapabilities(core->mDisplayCapabilities);
@@ -1026,6 +1053,17 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
+        case RPC2Communication::UI::Marshaller::METHOD_ONDRIVERDISTRACTION:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An OnDriverDistraction UI notification has been invoked");
+            RPC2Communication::UI::OnDriverDistraction* object = (RPC2Communication::UI::OnDriverDistraction*)msg;
+
+            AppLinkRPC::OnDriverDistraction* event = new AppLinkRPC::OnDriverDistraction();
+            event->set_state(object->get_state());
+
+            MobileHandler::getInstance().sendRPCMessage(event, 1);
+            return;
+        }
         case RPC2Communication::UI::Marshaller::METHOD_INVALID:
         default:
             LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message "<< msg->getMethod() <<" has been received!");
@@ -1185,6 +1223,11 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             AppLinkRPC::OnHMIStatus * hmiStatus = new AppLinkRPC::OnHMIStatus;
             hmiStatus->set_hmiLevel(AppLinkRPC::HMILevel::HMI_FULL);
 
+            core->mLastAutoActivateId = app->getAutoActivateID();
+            if(!core->serializeToFile(core->mAutoActivateIdFileName, core->mLastAutoActivateId))
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "Cannot serialize auto-activate id!");
+            }
 
             app->setApplicationHMIStatusLevel(AppLinkRPC::HMILevel::HMI_FULL);
             hmiStatus->set_audioStreamingState(app->getApplicationAudioStreamingState());
@@ -1351,7 +1394,7 @@ void AppMgrCore::setJsonHandler(JSONHandler* handler)
  */
 JSONHandler* AppMgrCore::getJsonHandler( ) const
 {
-    MobileHandler::getInstance().getJsonHandler();
+    return MobileHandler::getInstance().getJsonHandler();
 }
 
 /**

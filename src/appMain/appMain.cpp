@@ -214,7 +214,10 @@ int main(int argc, char** argv)
       jsonHandler.setProtocolHandler(pProtocolHandler);
       apptester.startSession(sessioncount);
       apptester.sendDataFromFile(argv[1]);
-      while(true);
+      while(true)
+        {
+            sleep(1);
+        }
     }
     /**********************************/
 

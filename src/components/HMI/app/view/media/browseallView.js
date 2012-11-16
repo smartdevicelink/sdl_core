@@ -14,19 +14,17 @@ MFT.BrowseAllView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	elementId: 'media_browseAll_view',
 	
-	classNameBindings: 	['MFT.States.media.browseAll.active:active_state','MFT.helpMode: help_blur'],
+	classNameBindings:['MFT.helpMode:helpmode_blur_text_light'],
+
 	/** View class*/
-	classNames: ['browse_view','hidden'],
-	
-	stateObj:MFT.States.media.browseall,
-	
-	root: MFT.States.media,
-	
+	classNames: ['browse_view'],
+		
 	/** Child views*/
 	childViews: [
 		'backButton',
 		'heading',
 		'list',
+		'helpblurbg'
 	],
 	
 	/** Button back to previous state*/
@@ -43,18 +41,14 @@ MFT.BrowseAllView = Em.ContainerView.create(MFT.LoadableView,{
 	heading: MFT.Label.extend({
 		elementId: 'media_browseall_heading_lable',
 		
-		classNameBindings: ['MFT.helpMode: hidden'],
-		
 		classNames: 'title',
 		
-		content: 'Browse Available Sources'
+		contentBinding: 'MFT.locale.label.view_media_usb_browse_browseAvailable'
 	}),
 	
 	/** List menu items of "Browse"*/
 	list: MFT.List.extend({
 		elementId: 'media_browseAll_list',
-		
-		classNameBindings: ['MFT.helpMode: hidden'],
 		
 		classNames: 	 'browseAlllist',
 		
@@ -64,8 +58,8 @@ MFT.BrowseAllView = Em.ContainerView.create(MFT.LoadableView,{
 				{
 					type:MFT.Button,
 					params:{
-						text:'SIRIUS Channel Guide',
-						arrow: true,
+						textBinding: 'MFT.locale.label.view_media_usb_browse_siriusChannel',
+						templateName: 'arrow',
 						icon: 'images/media/ico_sirius.png',
 						target: 'MFT.MediaController',
 						action: 'turnOnSiriusBrowse',
@@ -75,8 +69,8 @@ MFT.BrowseAllView = Em.ContainerView.create(MFT.LoadableView,{
 				{
 					type:MFT.Button,
 					params:{
-						text:'CD Track List',
-						arrow: true,
+						textBinding: 'MFT.locale.label.view_media_usb_browse_cdTrack',
+						templateName: 'arrow',
 						icon: 'images/media/ico_cd.png',
 						target: 'MFT.MediaController',
 						action: 'turnOnCDBrowse',
@@ -85,8 +79,8 @@ MFT.BrowseAllView = Em.ContainerView.create(MFT.LoadableView,{
 				},{
 					type:MFT.Button,
 					params:{
-						text:'USB Hard Disk Drive',
-						arrow: true,
+						textBinding: 'MFT.locale.label.view_media_usb_browse_usbHard',
+						templateName: 'arrow',
 						icon: 'images/media/ico_usb.png',
 						target: 'MFT.MediaController',
 						action: 'turnOnUSBBrowse',
@@ -95,8 +89,8 @@ MFT.BrowseAllView = Em.ContainerView.create(MFT.LoadableView,{
 				},{
 					type:MFT.Button,
 					params:{
-						text:'USB SD Disk Drive',
-						arrow: true,
+						textBinding: 'MFT.locale.label.view_media_usb_browse_usbSD',
+						templateName: 'arrow',
 						icon: 'images/media/ico_sd.png',
 						target: 'MFT.MediaController',
 						action: 'turnOnSDBrowse',
@@ -106,5 +100,10 @@ MFT.BrowseAllView = Em.ContainerView.create(MFT.LoadableView,{
 			],
 		
 		itemsOnPage:	4
+	}),
+	
+	helpblurbg: Em.View.create({
+		elementId: 'media_browseall_blur_bg'
 	})
+	
 });

@@ -12,14 +12,10 @@
 
 MFT.NavigationDestinationLatitudeLongitudeView = Em.ContainerView.create(MFT.LoadableView,{
 	/** Bind class for visual representation */
-	classNameBindings: ['MFT.States.navigation.dest.latitudeLongitude.active:active_state','MFT.helpMode',],
+	classNameBindings: ['MFT.helpMode'],
 	
 	elementId:		'view_navi_destination_latitudeLongitude',
-	
-	classNames:	   ['hidden'],
-	
-	stateObj: MFT.States.navigation.dest.latitudeLongitude,
-	
+		
 	childViews: [
 		'backButton',
 		'content'
