@@ -13,3 +13,45 @@
 	width: 600px;
 	height: 300px;
 }
+
+#info_nonMedia .app_title {
+	width: 390px;
+	padding: 15px;
+	top: 1px;
+	background-color: #393939;
+}
+
+#info_nonMedia .app_image {
+	top: 60px;
+}
+
+#info_nonMedia .app_fields {
+	left: 160px;
+	top: 60px;
+	width: 260px;
+}
+
+#info_nonMedia .app_fields .label {
+	position: relative;
+	border: 1px solid #393939;
+	padding: 10px;
+	margin-bottom: 5px;
+}
+
+#info_nonMedia .inner_menu {
+	left: 440px;
+	width: 160px;
+	border: 1px solid #393939;
+	border-bottom: none;
+}
+
+#info_nonMedia .inner_menu .ffw-button {
+	position: relative;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	line-height: 50px;
+}
+
+#info_nonMedia .inner_menu .ffw-button span {
+	margin-left: 20px;
+}

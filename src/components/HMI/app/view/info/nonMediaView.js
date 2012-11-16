@@ -24,11 +24,95 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 		classNames: ['inner_content'],
 		
 		childViews: [
-			'deviceName'
+			'deviceName',
+			'image',
+			'fields',
+			'innerMenu'
 		],
 		
 		deviceName: MFT.Label.extend({
+		
+			classNames: ['app_title'],
+			
 			contentBinding: 'controller.model.deviceName'
+		}),
+		
+		image: Em.View.extend({
+			
+			classNames: ['app_image'],
+			
+			template: Ember.Handlebars.compile(
+				'<img width="150px" src="images/media/mi-image.png">'
+			)
+		}),
+		
+		fields: Em.ContainerView.extend({
+			
+			classNames: ['app_fields'],
+			
+			childViews: [
+				'field1',
+				'field2',
+				'field3',
+				'field4'
+			],
+			
+			field1: MFT.Label.extend({
+				content: 'Field 1'
+			}),
+			
+			field2: MFT.Label.extend({
+				content: 'Field 2'
+			}),
+			
+			field3: MFT.Label.extend({
+				content: 'Field 3'
+			}),
+			
+			field4: MFT.Label.extend({
+				content: 'Field 4'
+			})
+		
+		}),
+		
+		innerMenu: Em.ContainerView.extend({
+			
+			classNames: ['inner_menu'],
+			
+			childViews: [
+				'optionsButton',
+				'softButton1',
+				'softButton2',
+				'softButton3',
+				'softButton4',
+				'softButton5'
+			],
+			
+			optionsButton: MFT.Button.extend({
+				text: 'Options',
+				
+				templateName: 'arrow'
+			}),
+			
+			softButton1: MFT.Button.extend({
+				text: 'Soft Button'
+			}),
+			
+			softButton2: MFT.Button.extend({
+				text: 'Soft Button'
+			}),
+			
+			softButton3: MFT.Button.extend({
+				text: 'Soft Button'
+			}),
+			
+			softButton4: MFT.Button.extend({
+				text: 'Soft Button'
+			}),
+			
+			softButton5: MFT.Button.extend({
+				text: 'Soft Button'
+			})
 		})
 	})
 });
