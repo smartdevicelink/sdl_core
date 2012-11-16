@@ -4,6 +4,8 @@
 namespace NsAppManager
 {
 
+log4cplus::Logger SyncPManager::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("SyncPManager"));
+
 /**
  * \brief Default class destructor
  */
@@ -18,6 +20,7 @@ SyncPManager::~SyncPManager()
  */
 void SyncPManager::setPData(const SyncPManager::PData &data)
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "Setting PData of length " << data.size() );
     mPData = data;
 }
 
@@ -27,6 +30,7 @@ void SyncPManager::setPData(const SyncPManager::PData &data)
  */
 const SyncPManager::PData& SyncPManager::getPData() const
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "Getting PData of length " << mPData.size() );
     return mPData;
 }
 
@@ -36,6 +40,7 @@ const SyncPManager::PData& SyncPManager::getPData() const
  */
 void SyncPManager::setRawData(const SyncPManager::RawData &data)
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "Setting raw data of length " << data.size() );
     mPData.clear();
     for(RawData::const_iterator it = data.begin(); it != data.end(); it++)
     {
@@ -43,6 +48,7 @@ void SyncPManager::setRawData(const SyncPManager::RawData &data)
         std::string pData = base64_encode((const unsigned char*)rawString.c_str(), rawString.length());
         mPData.push_back(pData);
     }
+    LOG4CPLUS_INFO_EXT(mLogger, "PData now is of mength length " << mPData.size() );
 }
 
 /**
@@ -57,6 +63,7 @@ SyncPManager::RawData SyncPManager::getRawData() const
         std::string rawString = base64_decode(*it);
         rawData.push_back(rawString);
     }
+    LOG4CPLUS_INFO_EXT(mLogger, "Getting raw data of length " << rawData.size() );
     return rawData;
 }
 
