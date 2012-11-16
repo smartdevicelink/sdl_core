@@ -1254,6 +1254,20 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             HMIHandler::getInstance().sendResponse(response);
             return;
         }
+        case RPC2Communication::AppLinkCore::Marshaller::METHOD_SENDDATA:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "SendData request has been received!");
+            RPC2Communication::AppLinkCore::SendData* object = static_cast<RPC2Communication::AppLinkCore::SendData*>(msg);
+            core->mSyncPManager.setRawData( object->get_data() );
+            AppLinkRPC::OnEncodedSyncPData* encodedNotification = new AppLinkRPC::OnEncodedSyncPData;
+            encodedNotification->set_data(core->mSyncPManager.getPData());
+            MobileHandler::getInstance().sendRPCMessage( encodedNotification, 1 );
+            RPC2Communication::AppLinkCore::SendDataResponse* response = new RPC2Communication::AppLinkCore::SendDataResponse;
+            response->setId(object->getId());
+            response->setResult(AppLinkRPC::Result::SUCCESS);
+            HMIHandler::getInstance().sendResponse(response);
+            return;
+        }
         case RPC2Communication::AppLinkCore::Marshaller::METHOD_INVALID:
         default:
             LOG4CPLUS_ERROR_EXT(mLogger, " Not AppLinkCore RPC message "<< msg->getMethod() <<" has been received!");
