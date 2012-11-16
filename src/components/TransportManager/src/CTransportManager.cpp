@@ -59,8 +59,12 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
     pthread_join(mApplicationCallbacksThread, 0);
     LOG4CPLUS_INFO_EXT(mLogger, "Application callbacks thread terminated");
 
+    pthread_mutex_lock(&mDataListenersMutex);
+    tDataCallbacksThreads dataThreads = tDataCallbacksThreads(mDataCallbacksThreads);
+    pthread_mutex_unlock(&mDataListenersMutex);
+    
     tDataCallbacksThreads::iterator threadsIterator;
-    for (threadsIterator = mDataCallbacksThreads.begin(); threadsIterator != mDataCallbacksThreads.end(); ++threadsIterator)
+    for (threadsIterator = dataThreads.begin(); threadsIterator != dataThreads.end(); ++threadsIterator)
     {
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, threadsIterator->first, "Waiting for thread stoping");
         stopDataCallbacksThread(threadsIterator->first);
