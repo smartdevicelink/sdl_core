@@ -4,21 +4,36 @@
 namespace NsAppManager
 {
 
+/**
+ * \brief Default class destructor
+ */
 SyncPManager::~SyncPManager()
 {
     mPData.clear();
 }
 
+/**
+ * \brief set base64-encoded PData
+ * \param data vector of strings of base64-encoded information
+ */
 void SyncPManager::setPData(const SyncPManager::PData &data)
 {
     mPData = data;
 }
 
+/**
+ * \brief get base64-encoded PData
+ * \return vector of strings of base64-encoded information
+ */
 const SyncPManager::PData& SyncPManager::getPData() const
 {
     return mPData;
 }
 
+/**
+ * \brief set raw string data
+ * \param data vector of strings
+ */
 void SyncPManager::setRawData(const SyncPManager::RawData &data)
 {
     mPData.clear();
@@ -30,6 +45,10 @@ void SyncPManager::setRawData(const SyncPManager::RawData &data)
     }
 }
 
+/**
+ * \brief set raw string data
+ * \return vector of strings
+ */
 SyncPManager::RawData SyncPManager::getRawData() const
 {
     RawData rawData;
@@ -41,10 +60,16 @@ SyncPManager::RawData SyncPManager::getRawData() const
     return rawData;
 }
 
+/**
+ * \brief Default class constructor
+ */
 SyncPManager::SyncPManager()
 {
 }
 
+/**
+ * \brief Copy constructor
+ */
 SyncPManager::SyncPManager(const SyncPManager &)
 {
 }
