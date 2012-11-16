@@ -31,7 +31,6 @@ ProtocolHandler::ProtocolHandler(IProtocolObserver *observer,
     }
     
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    LOG4CPLUS_INFO(mLogger, "   !!!!   ****    !!!!   ****    !!!!   >>>>FUCKYEA!!!<<<<< ProtocolHandler consturcted");
     srand(time(0) );
 }
 
@@ -690,10 +689,10 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
 void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    
-    LOG4CPLUS_INFO(mLogger, "   !!!!   ****    !!!!   ****    !!!!   >>>>FUCKYEA!!!<<<<< onFrameReceived(): DataSize: " << DataSize);
-    
-    //Temp solution for single connection 
+
+    LOG4CPLUS_INFO(mLogger, "onFrameReceived(): DataSize: " << DataSize<<", Data is null: "<<(Data == 0));
+
+    //Temp solution for single connection
     mConnectionHandle = ConnectionHandle;
     
     //@TODO check for ConnectionHandle.
