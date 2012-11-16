@@ -71,6 +71,22 @@ private:
      */
     SyncPManager(const SyncPManager&);
 
+    /**
+     * \brief serialize a string vector to the text file
+     * \param fileName name of the file to serialize to
+     * \param value a value to serialize
+     * \return success of an operation - true or false
+     */
+    bool serializeToFile(const std::string& fileName, const PData &value) const;
+
+    /**
+     * \brief deserialize a string vector from the text file
+     * \param fileName name of the file to deserialize from
+     * \param value a value to deserialize
+     * \return success of an operation - true or false
+     */
+    bool deserializeFromFile(const std::string &fileName, PData &value);
+
     PData mPData;
     static log4cplus::Logger mLogger;
 };

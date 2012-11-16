@@ -1,5 +1,7 @@
 #include "AppMgr/SyncPManager.h"
 #include "AppMgr/Base64.h"
+#include <iostream>
+#include <fstream>
 
 namespace NsAppManager
 {
@@ -79,6 +81,70 @@ SyncPManager::SyncPManager()
  */
 SyncPManager::SyncPManager(const SyncPManager &)
 {
+}
+
+/**
+ * \brief serialize a string vector to the text file
+ * \param fileName name of the file to serialize to
+ * \param value a value to serialize
+ * \return success of an operation - true or false
+ */
+bool SyncPManager::serializeToFile(const std::string &fileName, const PData &value) const
+{
+    if(fileName.empty())
+    {
+        LOG4CPLUS_ERROR_EXT(mLogger, " AppMgrCore cannot serialize to a file: a filename is empty!");
+        return false;
+    }
+    if(!value.empty())
+    {
+        std::ofstream file(fileName, std::ios::out | std::ios::trunc);
+        if(file.is_open())
+        {
+            for(PData::const_iterator it = value.begin(); it != value.end(); it++)
+            {
+                file << *it << std::endl;
+            }
+            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore successfully serialized a vector of size "<<value.size()<< " to a file "<<fileName);
+            file.close();
+            return true;
+        }
+        else
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot serialize to a file: error creating file!");
+            return false;
+        }
+    }
+    LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot serialize to a file: value is empty!");
+    return false;
+}
+
+/**
+ * \brief deserialize a string vector from the text file
+ * \param fileName name of the file to deserialize from
+ * \param value a value to deserialize
+ * \return success of an operation - true or false
+ */
+bool SyncPManager::deserializeFromFile(const std::string &fileName, PData &value)
+{
+    value.empty();
+    std::ifstream file(fileName);
+    if( file.is_open() )
+    {
+        if( file.good() )
+        {
+            for ( std::string line; getline(file, line); )
+            {
+                value.push_back(line);
+            }
+        }
+        file.close();
+    }
+    else
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot deserialize a file: probably file doesn't exist!");
+    }
+    return false;
 }
 
 }
