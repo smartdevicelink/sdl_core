@@ -2,6 +2,7 @@
 #include "AppMgr/Base64.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 namespace NsAppManager
 {
@@ -20,10 +21,15 @@ SyncPManager::~SyncPManager()
  * \brief set base64-encoded PData
  * \param data vector of strings of base64-encoded information
  */
-void SyncPManager::setPData(const SyncPManager::PData &data)
+void SyncPManager::setPData(const SyncPManager::PData &data, const std::string& appName, const int& methodId)
 {
     LOG4CPLUS_INFO_EXT(mLogger, "Setting PData of length " << data.size() );
     mPData = data;
+    std::stringstream stringStream((std::stringstream::in | std::stringstream::out));
+    stringStream << appName << "_"<<methodId;
+    std::string fileName;
+    stringStream >> fileName;
+    serializeToFile( fileName, mPData );
 }
 
 /**

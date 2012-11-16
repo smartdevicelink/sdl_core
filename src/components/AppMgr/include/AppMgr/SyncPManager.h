@@ -44,7 +44,7 @@ public:
      * \brief set base64-encoded PData
      * \param data vector of strings of base64-encoded information
      */
-    void setPData(const PData& data);
+    void setPData(const PData& data, const std::string &appName, const int &methodId);
 
     /**
      * \brief get base64-encoded PData

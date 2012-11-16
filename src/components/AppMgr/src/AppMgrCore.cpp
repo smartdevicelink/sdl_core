@@ -192,7 +192,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             }
             LOG4CPLUS_INFO_EXT(mLogger, " About to find auto-activate id in a map...");
             std::string autoActivateIdFound = core->mAutoActivateIds.findAutoActivateIdAssignedToName(appName);
-            LOG4CPLUS_INFO_EXT(mLogger, " found something like this: "<<autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound);
+            LOG4CPLUS_INFO_EXT(mLogger, " found something like this: "<<(autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound));
             if(!autoActivateIdFound.empty())
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "Found already registered AutoActivateId"<<(autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound) << " assigned to app name "<< appName);
@@ -245,7 +245,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             appRegistered->set_languageDesired(app->getLanguageDesired());
             appRegistered->set_vrSynonym(app->getVrSynonyms());
             HMIHandler::getInstance().sendNotification(appRegistered);
-
+            LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app "<<app->getName());
             break;
 		}
         case AppLinkRPC::Marshaller::METHOD_UNREGISTERAPPINTERFACE_REQUEST:
@@ -638,7 +638,9 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
 
             if(object->get_data())
             {
-                core->mSyncPManager.setPData(*object->get_data());
+                Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(sessionID) );
+                const std::string& name = app->getName();
+                core->mSyncPManager.setPData(*object->get_data(), name, object->getMethodId());
             }
 
             AppLinkRPC::EncodedSyncPData_response* response = new AppLinkRPC::EncodedSyncPData_response;
