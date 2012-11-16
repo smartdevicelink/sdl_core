@@ -282,17 +282,39 @@ void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnect
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameReceived called. DA: "<<DeviceAdapter<<", DataSize: "<<DataSize);
 
-    initializeFrameDataForConnection(ConnectionHandle);
+    //TODO: Currently all frames processed in one thread. In the future processing of them
+    //      must be moved to the thread, which sent callbacks for corresponded connection
 
-    SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameReceived, ConnectionHandle, Data, DataSize);
-    sendDataCallback(newCallback);
+    pthread_mutex_lock(&mDataListenersMutex);
+    SFrameDataForConnection *pFrameData = initializeFrameDataForConnection(ConnectionHandle);
+    pFrameData->appendFrameData(Data, DataSize);
+
+    uint8_t *pFramePacketData = 0;
+    size_t FramePacketSize = 0;
+
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Starting frame extraction");
+    while(true == pFrameData->extractFrame(pFramePacketData, FramePacketSize))
+    {
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Frame extracted. Size is: "<< FramePacketSize);
+        SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameReceived, ConnectionHandle, pFramePacketData, FramePacketSize);
+        sendDataCallback(newCallback);
+        delete pFramePacketData;
+        FramePacketSize = 0;
+    }
+
+    pthread_mutex_unlock(&mDataListenersMutex);
+
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameReceived processed");
 }
 
 void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted called. DA: "<<DeviceAdapter<<", FrameSequenceNumber: "<<FrameSequenceNumber <<", SendStatus: " <<SendStatus);
     SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameSendCompleted, ConnectionHandle, FrameSequenceNumber, SendStatus);
+
+    pthread_mutex_lock(&mDataListenersMutex);
     sendDataCallback(newCallback);
+    pthread_mutex_unlock(&mDataListenersMutex);
 }
 
 CTransportManager::SDeviceListenerCallback::SDeviceListenerCallback(CTransportManager::EDeviceListenerCallbackType CallbackType, const tDeviceList& DeviceList)
@@ -802,8 +824,6 @@ void CTransportManager::sendDataCallback(const CTransportManager::SDataListenerC
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, callback.mConnectionHandle, "Preparing callback of type: "<<callback.mCallbackType<<", to send");
 
-    pthread_mutex_lock(&mDataListenersMutex);
-
     tDataCallbacksConditionVariables::iterator conditionVarIterator = mDataCallbacksConditionVars.find(callback.mConnectionHandle);
 
     if(conditionVarIterator == mDataCallbacksConditionVars.end())
@@ -827,8 +847,6 @@ void CTransportManager::sendDataCallback(const CTransportManager::SDataListenerC
             pthread_cond_signal(conditionVar);
         }
     }
-
-    pthread_mutex_unlock(&mDataListenersMutex);
 }
 
 void CTransportManager::sendDeviceCallback(const CTransportManager::SDeviceListenerCallback& callback)
@@ -944,7 +962,7 @@ bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t * Data, si
     // Extracting frame from buffer
     Data = new uint8_t[requiredDataSize];
     memcpy(Data, mpDataBuffer, requiredDataSize);
-    DataSize = frameDataSize;
+    DataSize = requiredDataSize;
 
     // Shifting buffer
     mDataSize -= requiredDataSize;
@@ -953,21 +971,27 @@ bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t * Data, si
     return true;
 }
 
-void CTransportManager::initializeFrameDataForConnection(tConnectionHandle ConnectionHandle)
+CTransportManager::SFrameDataForConnection* CTransportManager::initializeFrameDataForConnection(tConnectionHandle ConnectionHandle)
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Initializing frame data");
-    pthread_mutex_lock(&mDataListenersMutex);
+
+    SFrameDataForConnection *pFrameData = 0;
 
     tFrameDataForConnectionMap::iterator frameDataIterator = mFrameDataForConnection.find(ConnectionHandle);
     if(frameDataIterator == mFrameDataForConnection.end())
     {
-        SFrameDataForConnection *pFrameData = new SFrameDataForConnection(ConnectionHandle);
+        pFrameData = new SFrameDataForConnection(ConnectionHandle);
         mFrameDataForConnection[ConnectionHandle] = pFrameData;
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "New frame data storage was created");
     }
+    else
+    {
+        pFrameData = frameDataIterator->second;
+    }
 
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Frame data was initialized");
-    pthread_mutex_unlock(&mDataListenersMutex);
+
+    return pFrameData;
 }
 
 void CTransportManager::destroyFrameDataForAllConnections()

@@ -569,6 +569,7 @@ namespace NsAppLink
             /**
              * @brief Sends data callback
              *
+             * @attention This function is not thread-safe
              * @param callback Callback to send
              * @return void
              **/
@@ -585,10 +586,12 @@ namespace NsAppLink
             /**
              * @brief Initializes frame data for connection if it was not initialized before
              *
+             * @attention This function is not thread-safe
+             *
              * @param ConnectionHandle Connection Handle
              * @return void
              **/
-            void initializeFrameDataForConnection(tConnectionHandle ConnectionHandle);
+            SFrameDataForConnection *initializeFrameDataForConnection(tConnectionHandle ConnectionHandle);
 
             /**
              * @brief Destroys all frame data for all connections
