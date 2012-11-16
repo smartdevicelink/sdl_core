@@ -1,5 +1,6 @@
 include_directories (
   ./include/
+  ../TransportManager/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/axisCore/include
   ../../thirdPartyLibs/axisCore/

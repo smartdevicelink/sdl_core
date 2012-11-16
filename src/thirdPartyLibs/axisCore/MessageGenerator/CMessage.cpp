@@ -75,7 +75,7 @@ void CMessage::generateInitialMessage(UInt8 serviceType)
 
    blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
 
-   mBluetoothHandler->dataReceived();
+   //mBluetoothHandler->dataReceived();
 }
 
 void CMessage::generateSingleMessage(UInt8 protocolVersion,
@@ -139,7 +139,7 @@ void CMessage::generateSingleMessage(UInt8 protocolVersion,
 
    blobQueue.push(Blob((UInt8*)sPacketData, offset + sDataSize, blobQueue.size()));
 
-   mBluetoothHandler->dataReceived();
+   //mBluetoothHandler->dataReceived();
 }
 
 void CMessage::generateFinalMessage(UInt8 protocolVersion,
@@ -196,7 +196,7 @@ void CMessage::generateFinalMessage(UInt8 protocolVersion,
 
   blobQueue.push(Blob((UInt8*)sPacketData, headerSize, blobQueue.size()));
 
-  mBluetoothHandler->dataReceived();
+  //mBluetoothHandler->dataReceived();
 }
 
 void CMessage::generateMultipleMessages(UInt8 protocolVersion,
@@ -323,7 +323,7 @@ void CMessage::generateMultipleMessages(UInt8 protocolVersion,
 
       blobQueue.push(Blob((UInt8*)sPacketData, headerSize + sDataSize, blobQueue.size()));
 
-      mBluetoothHandler->dataReceived();
+      //mBluetoothHandler->dataReceived();
    }
 }
 
@@ -481,14 +481,6 @@ void CMessage::releaseCurrentBlob(const Blob& blob)
 }
 
 CMessage::~CMessage()
-{}
-
-void CMessage::initBluetooth(IBluetoothHandler * pHandler)
-{
-    mBluetoothHandler = pHandler;
-}
-
-void CMessage::deinitBluetooth()
 {}
 
 const Blob CMessage::getBuffer()

@@ -1,8 +1,8 @@
 set(LIBRARIES
   AppMgr
   JSONHandler
-  TransportManager
   ProtocolHandler
+  TransportManager
   MessageBroker
   MessageBrokerClient
   MessageBrokerServer
@@ -32,7 +32,6 @@ include_directories (
 
 set (SOURCES
   appMain.cpp
-  CBTAdapter.cpp
   CAppTester.cpp
 )
 

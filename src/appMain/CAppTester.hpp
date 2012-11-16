@@ -15,8 +15,6 @@
 
 #include "Types.hpp"
 #include "Blob.hpp"
-#include "IBluetoothHandler.hpp"
-#include "BluetoothAPI.hpp"
 
 /**
  * \namespace NsApplicationTester
@@ -28,7 +26,7 @@ namespace NsApplicationTester
     * \class CBTAdapter
     * \brief Bluetooth adapter for AppLink
     */
-   class CAppTester: public Bluetooth::IBluetoothAPI
+   class CAppTester/*: public Bluetooth::IBluetoothAPI*/
    {
       public:
         /**
@@ -59,7 +57,7 @@ namespace NsApplicationTester
         * \brief inits BTAdapter. Gives pointer to ProtocolHandler.
         * \param pHandler pointer to ProtocolHandler.
         */
-        void initBluetooth(Bluetooth::IBluetoothHandler * pHandler);
+        //void initBluetooth(Bluetooth::IBluetoothHandler * pHandler);
  
         /**
         * \brief deinits BTAdapter.
@@ -90,7 +88,7 @@ namespace NsApplicationTester
                                        UInt8 sessionID,
                                        std::string payload);
 
-        Bluetooth::IBluetoothHandler * mpProtocolHandler;
+        //Bluetooth::IBluetoothHandler * mpProtocolHandler;
 
         std::queue<Blob> blobQueue;
    };

@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "TransportManager/ITransportManager.hpp"
+
 #include "ProtocolHandler.hpp"
 #include "ProtocolPacketHeader.hpp"
 #include "IProtocolObserver.hpp"
-#include "../../../appMain/CBTAdapter.hpp"
-#include "transport/bt/BluetoothAPI.hpp"
 
 namespace AxisCore
 {
@@ -15,23 +15,24 @@ namespace AxisCore
 Logger ProtocolHandler::mLogger = Logger::getInstance(LOG4CPLUS_TEXT("AxisCore.ProtocolHandler") );
 
 ProtocolHandler::ProtocolHandler(IProtocolObserver *observer,
-                                 Bluetooth::IBluetoothAPI *btAdapter,
+                                 NsAppLink::NsTransportManager::ITransportManager * transportManager,
                                  const UInt8 protocolVersion) :
+                NsAppLink::NsTransportManager::ITransportManagerDataListener(),
+                mConnectionHandle(NsAppLink::NsTransportManager::InvalidConnectionHandle),
                 mProtocolObserver(observer),
-                mBTAdapter(btAdapter),
+                mTransportManager(transportManager),
                 mProtocolVersion(protocolVersion),
                 mSessionIdCounter(1)
 {    
-    PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties") );
-    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-
-    srand(time(0) );
-    if (btAdapter)
+    //PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties") );
+    if (0 != mTransportManager)
     {
-        mBTReader.setBTAdapter(btAdapter);
-        mBTWriter.setBTAdapter(btAdapter);
-        btAdapter->initBluetooth(this);
+        mTransportManager->addDataListener(this);
     }
+    
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
+    LOG4CPLUS_INFO(mLogger, "   !!!!   ****    !!!!   ****    !!!!   >>>>FUCKYEA!!!<<<<< ProtocolHandler consturcted");
+    srand(time(0) );
 }
 
 ProtocolHandler::~ProtocolHandler()
@@ -77,7 +78,7 @@ ERROR_CODE ProtocolHandler::startSession(const UInt8 servType)
                                 0,
                                 0);
 
-    if (mBTWriter.write(header, 0) == ERR_OK)
+    if (ERR_OK == sendFrame(mConnectionHandle, header, 0))
         LOG4CPLUS_INFO(mLogger, "startSession() - OK");
     else
     {
@@ -122,7 +123,7 @@ ERROR_CODE ProtocolHandler::endSession(const UInt8 sessionID, const UInt32 hashC
                                     0,
                                     _hashCode);
 
-        if (mBTWriter.write(header, 0) == ERR_OK)
+        if (ERR_OK == sendFrame(mConnectionHandle, header, 0))
         {
             LOG4CPLUS_INFO(mLogger, "endSession() - OK\n");
             mHashCodes.erase(sessionID);
@@ -157,7 +158,7 @@ ERROR_CODE ProtocolHandler::sendSingleFrameMessage(const UInt8 sessionID,
                                 dataSize,
                                 mMessageCounters[sessionID]++);
 
-    if (mBTWriter.write(header, data) != ERR_OK)
+    if (ERR_OK != sendFrame(mConnectionHandle, header, data))
     {
         LOG4CPLUS_WARN(mLogger, "sendSingleFrame() - write failed");
         retVal = ERR_FAIL;
@@ -209,7 +210,7 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
     outDataFirstFrame[6] = numOfFrames >> 8;
     outDataFirstFrame[7] = numOfFrames;
 
-    if (mBTWriter.write(firstHeader, outDataFirstFrame) != ERR_OK)
+    if (ERR_OK != sendFrame(mConnectionHandle, firstHeader, outDataFirstFrame))
     {
         LOG4CPLUS_WARN(mLogger, "sendData() - write first frame FAIL");
         delete [] outDataFirstFrame;
@@ -238,7 +239,7 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
 
             memcpy(outDataFrame, data + (maxDataSize * i), maxDataSize);
 
-            if (mBTWriter.write(header, outDataFrame) != ERR_OK)
+            if (ERR_OK != sendFrame(mConnectionHandle, header, outDataFrame))
             {
                 LOG4CPLUS_WARN(mLogger, "sendData() - write consecutive frame FAIL");
                 retVal = ERR_FAIL;
@@ -260,7 +261,7 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
 
             memcpy(outDataFrame, data + (maxDataSize * i), lastDataSize);
 
-            if (mBTWriter.write(header, outDataFrame) != ERR_OK)
+            if (ERR_OK != sendFrame(mConnectionHandle, header, outDataFrame))
             {
                 LOG4CPLUS_WARN(mLogger, "sendData() - write last frame FAIL");
                 retVal = ERR_FAIL;
@@ -384,7 +385,7 @@ ERROR_CODE ProtocolHandler::sendStartSessionAck(const UInt8 sessionID)
                                 0,
                                 hashCode);
 
-    if (mBTWriter.write(header, 0) == ERR_OK)
+    if (ERR_OK == sendFrame(mConnectionHandle, header, 0))
         LOG4CPLUS_INFO(mLogger, "sendStartSessionAck() - BT write OK");
     else
     {
@@ -409,7 +410,7 @@ ERROR_CODE ProtocolHandler::sendEndSessionNAck(const UInt8 sessionID)
                                 0,
                                 0);
 
-    if (mBTWriter.write(header, 0) == ERR_OK)
+    if (ERR_OK == sendFrame(mConnectionHandle, header, 0))
         LOG4CPLUS_INFO(mLogger, "sendEndSessionNAck() - BT write OK");
     else
     {
@@ -686,32 +687,141 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
     return retVal;
 }
 
-/**
-  * Bluetooth Callbacks
-  */
-
-void ProtocolHandler::onError(BLUETOOTH_ERROR errCode)
+void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
+    
+    LOG4CPLUS_INFO(mLogger, "   !!!!   ****    !!!!   ****    !!!!   >>>>FUCKYEA!!!<<<<< onFrameReceived(): DataSize: " << DataSize);
+    
+    //Temp solution for single connection 
+    mConnectionHandle = ConnectionHandle;
+    
+    //@TODO check for ConnectionHandle.
+    //@TODO check for data size - crash is possible.
+    if ((0 != Data) && (0 != DataSize) && (MAXIMUM_FRAME_SIZE >= DataSize))
+    {        
+        ProtocolPacketHeader header;
+        
+        UInt8 offset = 0;
+        UInt8 firstByte = Data[offset];
+        offset++;
+        
+        header.version = firstByte >> 4u;
+        if (firstByte & 0x08u)
+        {
+            header.compress = true;
+        }
+        else
+        {
+            header.compress = false;
+        }
+        
+        header.frameType = firstByte & 0x07u;
+
+        header.serviceType = Data[offset++];        
+        header.frameData = Data[offset++];        
+        header.sessionID = Data[offset++];
+        
+        header.dataSize  = Data[offset++] << 24u;
+        header.dataSize |= Data[offset++] << 16u;
+        header.dataSize |= Data[offset++] << 8u;
+        header.dataSize |= Data[offset++];
+        
+        if (header.version == PROTOCOL_VERSION_2)
+        {
+            header.messageID  = Data[offset++] << 24u;
+            header.messageID |= Data[offset++] << 16u;
+            header.messageID |= Data[offset++] << 8u;
+            header.messageID |= Data[offset++];
+        }
+        else
+        {
+            header.messageID = 0u;
+        }
+        
+        const UInt32 dataPayloadSize = DataSize - offset;
+        
+        if (dataPayloadSize != header.dataSize)
+        {
+            LOG4CPLUS_ERROR(mLogger, "onFrameReceived() - EPIC FAIL: dataPayloadSize != header.dataSize");
+            return;
+        }
+        
+        UInt8 * data = 0;
+        if (dataPayloadSize != 0u)
+        {
+            data = new UInt8[DataSize - offset];
+            memcpy(data, Data + offset, dataPayloadSize);
+        }
+                
+        handleMessage(header, data);
+    }
+    else
+    {
+        LOG4CPLUS_WARN(mLogger, "onFrameReceived() - incorrect or NULL data");
+    }   
 }
 
-void ProtocolHandler::dataReceived()
+ERROR_CODE ProtocolHandler::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const ProtocolPacketHeader &header, const UInt8 *data)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    UInt32 dataSize = 0;
+    
+    if (NsAppLink::NsTransportManager::InvalidConnectionHandle == mConnectionHandle)
+    {
+        LOG4CPLUS_ERROR(mLogger, "sendFrame() - InvalidConnectionHandle - unable to send data");
+        return ERR_FAIL;
+    }
+    
+    UInt8 offset = 0;
+    UInt8 compress = 0x0;
+    UInt8 rawData[MAXIMUM_FRAME_SIZE];
+    if (header.compress)
+    {
+        compress = 0x1;
+    }
+    UInt8 firstByte = ( (header.version << 4) & 0xF0 )
+                      | ( (compress << 3) & 0x08)
+                      | (header.frameType & 0x07);
+         
+    rawData[offset++] = firstByte;
+    rawData[offset++] = header.serviceType;    
+    rawData[offset++] = header.frameData;    
+    rawData[offset++] = header.sessionID;
 
-    if (mBTAdapter)
-        dataSize = mBTAdapter->getBuffer().size();
+    rawData[offset++] = header.dataSize >> 24;
+    rawData[offset++] = header.dataSize >> 16;
+    rawData[offset++] = header.dataSize >> 8;
+    rawData[offset++] = header.dataSize;
+
+    if (header.version == PROTOCOL_VERSION_2)
+    {
+        rawData[offset++] = header.messageID >> 24;
+        rawData[offset++] = header.messageID >> 16;
+        rawData[offset++] = header.messageID >> 8;
+        rawData[offset++] = header.messageID;
+    }
+
+    if (data)
+    {
+        if ( (offset + header.dataSize) <= MAXIMUM_FRAME_SIZE)
+            memcpy(rawData + offset, data, header.dataSize);
+        else
+        {
+            LOG4CPLUS_WARN(mLogger, "sendFrame() - buffer is too small for writing");
+            return ERR_FAIL;
+        }
+    }
+
+    if (mTransportManager)
+    {
+        mTransportManager->sendFrame(ConnectionHandle, rawData, header.dataSize + offset);
+    }
     else
-        return;
-
-    UInt8 *data = new UInt8[dataSize];
-    ProtocolPacketHeader header;
-
-    if (mBTReader.read(header, data, dataSize) == ERR_OK)
-        handleMessage(header, data);
-    else
-        LOG4CPLUS_WARN(mLogger, "dataReceived() - error reading");
+    {
+        return ERR_FAIL;
+    }
+    
+    return ERR_OK;
 }
 
 } //namespace AxisCore
