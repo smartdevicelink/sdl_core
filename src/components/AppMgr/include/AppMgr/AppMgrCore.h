@@ -16,6 +16,7 @@
 #include "AppMgr/RequestMapping.h"
 #include "AppMgr/CapabilitesContainer.h"
 #include "AppMgr/AutoActivateIdMapping.h"
+#include "AppMgr/SyncPManager.h"
 
 namespace AppLinkRPC{
     class ALRPCMessage;
@@ -186,6 +187,7 @@ private:
     static const std::string mAutoActivateIdFileName;
 
     std::string      mLastAutoActivateId;
+    SyncPManager     mSyncPManager;
 
 	static log4cplus::Logger mLogger;
 };

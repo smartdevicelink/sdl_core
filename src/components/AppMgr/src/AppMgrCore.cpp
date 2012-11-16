@@ -631,6 +631,21 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             HMIHandler::getInstance().sendRequest(setTimer);
             break;
         }
+        case AppLinkRPC::Marshaller::METHOD_ENCODEDSYNCPDATA_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An EncodedSyncPData request has been invoked");
+            AppLinkRPC::EncodedSyncPData_request* object = (AppLinkRPC::EncodedSyncPData_request*)mobileMsg;
+
+            if(object->get_data())
+            {
+                core->mSyncPManager.setPData(*object->get_data());
+            }
+
+            AppLinkRPC::EncodedSyncPData_response* response = new AppLinkRPC::EncodedSyncPData_response;
+            response->set_success(true);
+            response->set_resultCode(AppLinkRPC::Result::SUCCESS);
+            break;
+        }
         case AppLinkRPC::Marshaller::METHOD_SHOW_RESPONSE:
         case AppLinkRPC::Marshaller::METHOD_SPEAK_RESPONSE:
         case AppLinkRPC::Marshaller::METHOD_SETGLOBALPROPERTIES_RESPONSE:
