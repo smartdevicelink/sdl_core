@@ -147,13 +147,13 @@ FFW.VR = FFW.RPCObserver.create({
 				"id"		: 	request.id,
 				"result"	:	{
 					"capabilities":{
-						"VrCapabilities "	: {"some command"},
+						"VrCapabilities": "Text",
 					},
 
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}
 			};
-			this.client.send(JSONMessage);
+			//this.client.send(JSONMessage);
 		}
 		*/
 		

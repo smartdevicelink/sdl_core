@@ -119,13 +119,13 @@ FFW.TTS = FFW.RPCObserver.create({
 				"id"		: 	request.id,
 				"result"	:	{
 					"capabilities":{
-						"SpeechCapabilities "	: "text"
+						"SpeechCapabilities": ["TEXT","SAPI_PHONEMES","LHPLUS_PHONEMES","PRE_RECORDED","SILENCE"]
 					},
 
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}
 			};
-			this.client.send(JSONMessage);
+			//this.client.send(JSONMessage);
 		}
 		*/
 	}

@@ -259,14 +259,60 @@ FFW.UI = FFW.RPCObserver.create({
 				"id"		: 	request.id,
 				"result"	:	{
 					"capabilities":{
-						"DisplayCapabilities"	: "CID",
-						"HmiZoneCapabilities"	: "FRONT"
+						"displayCapabilities"	: {
+							"displayType":	"GEN2_8_DMA",
+							"textFields":[{
+									"name":			"mainField1",
+									"characterSet":	"TYPE2SET",
+									"width": 1,
+									"rows": 1
+								},
+								{
+									"name":			"mainField2",
+									"characterSet":	"TYPE2SET",
+									"width": 1,
+									"rows": 1
+								},
+								{
+									"name":			"statusBar",
+									"characterSet":	"TYPE2SET",
+									"width": 1,
+									"rows": 1
+								},
+								{
+									"name":			"mediaClock",
+									"characterSet":	"TYPE2SET",
+									"width": 1,
+									"rows": 1
+								},
+								{
+									"name":			"mediaTrack",
+									"characterSet":	"TYPE2SET",
+									"width": 1,
+									"rows": 1
+								},
+								{
+									"name":			"alertText1",
+									"characterSet":	"TYPE2SET",
+									"width": 1,
+									"rows": 1
+								},
+								{
+									"name":			"alertText2",
+									"characterSet":	"TYPE2SET",
+									"width": 1,
+									"rows": 1
+								}],
+							},
+							"mediaClockFormats":["CLOCK1", "CLOCK2", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3"]
+						},
+						"hmiZoneCapabilities"	: ["FRONT","BACK"]
 					},
 
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				}
-			};
-			this.client.send(JSONMessage);
+				};
+
+			//this.client.send(JSONMessage);
 
 			resultCode = null;
 		}
