@@ -112,6 +112,8 @@ void * JSONHandler::waitForIncomingMessages( void * params )
             LOG4CPLUS_INFO( mLogger, "Incoming mobile message received." );
             std::string jsonMessage = handler -> mIncomingMessages.pop();
 
+            LOG4CPLUS_ERROR( mLogger, "Json string: "<< jsonMessage );
+
             AppLinkRPC::ALRPCMessage * currentMessage = AppLinkRPC::Marshaller::fromString( jsonMessage );
 
             if ( !currentMessage )
