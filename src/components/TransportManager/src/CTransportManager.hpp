@@ -20,8 +20,8 @@ namespace NsAppLink
         const uint8_t PROTOCOL_HEADER_V1_SIZE = 8;
         const uint8_t PROTOCOL_HEADER_V2_SIZE = 12;
 
-        const uint8_t PROTOCOL_VERSION_1 = 0x01;
-        const uint8_t PROTOCOL_VERSION_2 = 0x02;
+        const uint8_t PROTOCOL_VERSION_1 = 1;
+        const uint8_t PROTOCOL_VERSION_2 = 2;
 
         // Class definition
 
