@@ -1,3 +1,9 @@
+/**
+ * \file CommandMapping.h
+ * \brief Command mapping
+ * \author vsalo
+ */
+
 #ifndef COMMANDMAPPING_H
 #define COMMANDMAPPING_H
 
@@ -13,233 +19,233 @@ namespace log4cplus
 namespace NsAppManager
 {
 
-class RegistryItem;
-
-/**
- * \brief CommandType acts as command type enum representation that allows iterating over types in cycle and using types in comparison
- */
-class CommandType
-{
-public:
+    class RegistryItem;
 
     /**
-     * \brief command types
+     * \brief CommandType acts as command type enum representation that allows iterating over types in cycle and using types in comparison
      */
-    typedef enum
+    class CommandType
     {
-        UNDEFINED = -1,
-        UI        = 0,
-        FIRST     = UI,
-        VR        = 1,
-        TTS       = 2,
-        LAST      = TTS
-    } Type;
+    public:
+
+        /**
+         * \brief command types
+         */
+        typedef enum
+        {
+            UNDEFINED = -1,
+            UI        = 0,
+            FIRST     = UI,
+            VR        = 1,
+            TTS       = 2,
+            LAST      = TTS
+        } Type;
+
+        /**
+         * \brief Default constructor
+         */
+        CommandType();
+
+        /**
+         * \brief Copy constructor
+         */
+        CommandType(const CommandType& src);
+
+        /**
+         * \brief Class constructor
+         * \param type command type to create a class with
+         */
+        CommandType(const Type& type);
+
+        /**
+         * \brief comparison operator
+         * \param type of a command to compare with
+         * \return comparison result
+         */
+        bool operator==(const Type& type) const;
+
+        /**
+         * \brief comparison operator
+         * \param type of a command to compare with
+         * \return comparison result
+         */
+        bool operator==(const CommandType& type) const;
+
+        /**
+         * \brief comparison operator
+         * \param type of a command to compare with
+         * \return comparison result
+         */
+        bool operator<(const Type& type) const;
+
+        /**
+         * \brief comparison operator
+         * \param type of a command to compare with
+         * \return comparison result
+         */
+        bool operator<(const CommandType& type) const;
+
+        /**
+         * \brief comparison operator
+         * \param type of a command to compare with
+         * \return comparison result
+         */
+        bool operator>(const Type& type) const;
+
+        /**
+         * \brief comparison operator
+         * \param type of a command to compare with
+         * \return comparison result
+         */
+        bool operator>(const CommandType& type) const;
+
+        /**
+         * \brief comparison operator
+         * \param type of a command to compare with
+         * \return comparison result
+         */
+        bool operator!=(const Type& type) const;
+
+        /**
+         * \brief comparison operator
+         * \param type of a command to compare with
+         * \return comparison result
+         */
+        bool operator!=(const CommandType& type) const;
+
+        /**
+         * \brief pre-increment operator
+         * \return incremented value
+         */
+        CommandType& operator++ ();
+
+        /**
+         * \brief post-increment operator
+         * \return incremented value
+         */
+        CommandType operator++ (int);
+
+        /**
+         * \brief get command type
+         * \return command type
+         */
+        const Type& getType() const;
+
+    private:
+        Type mType;
+    };
 
     /**
-     * \brief Default constructor
+     * \brief mapping of command id to specific command type
      */
-    CommandType();
+    typedef std::tuple<unsigned int, CommandType> CommandKey;
 
     /**
-     * \brief Copy constructor
+     * \brief command-to-registered_app map
      */
-    CommandType(const CommandType& src);
+    typedef std::map<CommandKey, RegistryItem*> CommandMap;
 
     /**
-     * \brief Class constructor
-     * \param type command type to create a class with
+     * \brief command-to-registered_app map item
      */
-    CommandType(const Type& type);
+    typedef std::pair<CommandKey, RegistryItem*> CommandMapItem;
 
     /**
-     * \brief comparison operator
-     * \param type of a command to compare with
-     * \return comparison result
+     * \brief command types associated with command
      */
-    bool operator==(const Type& type) const;
+    typedef std::vector<CommandType> CommandTypes;
 
     /**
-     * \brief comparison operator
-     * \param type of a command to compare with
-     * \return comparison result
+     * \brief command_id-to-request_number map (command id is a key);
      */
-    bool operator==(const CommandType& type) const;
+    typedef std::map<unsigned int, unsigned int> RequestsAwaitingResponse;
 
     /**
-     * \brief comparison operator
-     * \param type of a command to compare with
-     * \return comparison result
+     * \brief command_id-to-request_number map item (command id is a key);
      */
-    bool operator<(const Type& type) const;
+    typedef std::pair<unsigned int, unsigned int> RequestAwaitingResponse;
 
     /**
-     * \brief comparison operator
-     * \param type of a command to compare with
-     * \return comparison result
+     * \brief CommandMapping acts as a mapping of command to registsred application that subscribed to them
      */
-    bool operator<(const CommandType& type) const;
+    class CommandMapping
+    {
+    public:
 
-    /**
-     * \brief comparison operator
-     * \param type of a command to compare with
-     * \return comparison result
-     */
-    bool operator>(const Type& type) const;
+        /**
+         * \brief Default class constructor
+         */
+        CommandMapping();
 
-    /**
-     * \brief comparison operator
-     * \param type of a command to compare with
-     * \return comparison result
-     */
-    bool operator>(const CommandType& type) const;
+        /**
+         * \brief add a command to a mapping
+         * \param commandId command id
+         * \param type command type
+         * \param app application to map a command to
+         */
+        void addCommand( unsigned int commandId, CommandType type, RegistryItem* app );
 
-    /**
-     * \brief comparison operator
-     * \param type of a command to compare with
-     * \return comparison result
-     */
-    bool operator!=(const Type& type) const;
+        /**
+         * \brief remove a command from a mapping
+         * \param commandId command id
+         * \param type a type of a command
+         */
+        void removeCommand(unsigned int commandId, CommandType type);
 
-    /**
-     * \brief comparison operator
-     * \param type of a command to compare with
-     * \return comparison result
-     */
-    bool operator!=(const CommandType& type) const;
+        /**
+         * \brief remove an application from a mapping
+         * \param app application to remove all associated commands from mapping
+         */
+        void removeItem( RegistryItem* app );
 
-    /**
-     * \brief pre-increment operator
-     * \return incremented value
-     */
-    CommandType& operator++ ();
+        /**
+         * \brief retrieve types associated with command id in current mapping
+         * \param commandId command id to search for types
+         * \param types input container of command types to be filled with result
+         */
+        void getTypes(unsigned int commandId, CommandTypes& types ) const;
 
-    /**
-     * \brief post-increment operator
-     * \return incremented value
-     */
-    CommandType operator++ (int);
+        /**
+         * \brief find a registry item subscribed to command
+         * \param commandId command id
+         * \param type command type
+         * \return RegistryItem instance
+         */
+        RegistryItem *findRegistryItemAssignedToCommand(unsigned int commandId, CommandType type) const;
 
-    /**
-     * \brief get command type
-     * \return command type
-     */
-    const Type& getType() const;
+        /**
+         * \brief get count of unresponsed requests associated with the given command id
+         * \param cmdId id of command we need to count unresponded requests for
+         * \return unresponded requests count
+         */
+        unsigned int getUnrespondedRequestCount(const unsigned int& cmdId) const;
 
-private:
-    Type mType;
-};
+        /**
+         * \brief increment count of unresponsed requests associated with the given command id
+         * \param cmdId id of command we need to increment unresponded request count for
+         * \return unresponded requests count after the operation
+         */
+        unsigned int incrementUnrespondedRequestCount(const unsigned int& cmdId);
 
-/**
- * \brief mapping of command id to specific command type
- */
-typedef std::tuple<unsigned int, CommandType> CommandKey;
+        /**
+         * \brief decrement count of unresponsed requests associated with the given command id
+         * \param cmdId id of command we need to decrement unresponded request count for
+         * \return unresponded requests count after the operation
+         */
+        unsigned int decrementUnrespondedRequestCount(const unsigned int& cmdId);
 
-/**
- * \brief command-to-registered_app map
- */
-typedef std::map<CommandKey, RegistryItem*> CommandMap;
+    private:
 
-/**
- * \brief command-to-registered_app map item
- */
-typedef std::pair<CommandKey, RegistryItem*> CommandMapItem;
+        /**
+         * \brief Copy constructor
+         */
+        CommandMapping(const CommandMapping&);
 
-/**
- * \brief command types associated with command
- */
-typedef std::vector<CommandType> CommandTypes;
-
-/**
- * \brief command_id-to-request_number map (command id is a key);
- */
-typedef std::map<unsigned int, unsigned int> RequestsAwaitingResponse;
-
-/**
- * \brief command_id-to-request_number map item (command id is a key);
- */
-typedef std::pair<unsigned int, unsigned int> RequestAwaitingResponse;
-
-/**
- * \brief CommandMapping acts as a mapping of command to registsred application that subscribed to them
- */
-class CommandMapping
-{
-public:
-
-    /**
-     * \brief Default class constructor
-     */
-    CommandMapping();
-
-    /**
-     * \brief add a command to a mapping
-     * \param commandId command id
-     * \param type command type
-     * \param app application to map a command to
-     */
-    void addCommand( unsigned int commandId, CommandType type, RegistryItem* app );
-
-    /**
-     * \brief remove a command from a mapping
-     * \param commandId command id
-     * \param type a type of a command
-     */
-    void removeCommand(unsigned int commandId, CommandType type);
-
-    /**
-     * \brief remove an application from a mapping
-     * \param app application to remove all associated commands from mapping
-     */
-    void removeItem( RegistryItem* app );
-
-    /**
-     * \brief retrieve types associated with command id in current mapping
-     * \param commandId command id to search for types
-     * \param types input container of command types to be filled with result
-     */
-    void getTypes(unsigned int commandId, CommandTypes& types ) const;
-
-    /**
-     * \brief find a registry item subscribed to command
-     * \param commandId command id
-     * \param type command type
-     * \return RegistryItem instance
-     */
-    RegistryItem *findRegistryItemAssignedToCommand(unsigned int commandId, CommandType type) const;
-
-    /**
-     * \brief get count of unresponsed requests associated with the given command id
-     * \param cmdId id of command we need to count unresponded requests for
-     * \return unresponded requests count
-     */
-    unsigned int getUnrespondedRequestCount(const unsigned int& cmdId) const;
-
-    /**
-     * \brief increment count of unresponsed requests associated with the given command id
-     * \param cmdId id of command we need to increment unresponded request count for
-     * \return unresponded requests count after the operation
-     */
-    unsigned int incrementUnrespondedRequestCount(const unsigned int& cmdId);
-
-    /**
-     * \brief decrement count of unresponsed requests associated with the given command id
-     * \param cmdId id of command we need to decrement unresponded request count for
-     * \return unresponded requests count after the operation
-     */
-    unsigned int decrementUnrespondedRequestCount(const unsigned int& cmdId);
-
-private:
-
-    /**
-     * \brief Copy constructor
-     */
-    CommandMapping(const CommandMapping&);
-
-    CommandType   mCommandType;
-    CommandMap    mCommandMapping;
-    RequestsAwaitingResponse mRequestsPerCommand;
-    static log4cplus::Logger mLogger;
-};
+        CommandType   mCommandType;
+        CommandMap    mCommandMapping;
+        RequestsAwaitingResponse mRequestsPerCommand;
+        static log4cplus::Logger mLogger;
+    };
 
 }
 

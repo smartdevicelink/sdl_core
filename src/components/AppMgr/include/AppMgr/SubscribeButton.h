@@ -1,3 +1,9 @@
+/**
+ * \file SubscribeButton.h
+ * \brief Button subscription
+ * \author vsalo
+ */
+
 #ifndef SUBSCRIBEBUTTON_H
 #define SUBSCRIBEBUTTON_H
 
@@ -11,30 +17,30 @@ class ButtonName;
 namespace NsAppManager
 {
 
-struct ButtonParams
-{
-    Message mMessage;
-};
-
-/**
- * \brief SubscribeButtonCmd acts as a concrete command implementation for button subscription
- */
-class SubscribeButtonCmd : public IAppCommand
-{
-public:
+    struct ButtonParams
+    {
+        Message mMessage;
+    };
 
     /**
-     * \brief Class constructor
-     * \param receiver a registry item associated with application that will execute command
-     * \param params parameters to executor
+     * \brief SubscribeButtonCmd acts as a concrete command implementation for button subscription
      */
-    SubscribeButtonCmd(const RegistryItem* receiver, const void* params);
+    class SubscribeButtonCmd : public IAppCommand
+    {
+    public:
 
-    /**
-     * \brief method to being called upon command execution, derived from IAppCommand
-     */
-	virtual void execute();
-};
+        /**
+         * \brief Class constructor
+         * \param receiver a registry item associated with application that will execute command
+         * \param params parameters to executor
+         */
+        SubscribeButtonCmd(const RegistryItem* receiver, const void* params);
+
+        /**
+         * \brief method to being called upon command execution, derived from IAppCommand
+         */
+        virtual void execute();
+    };
 
 }
 

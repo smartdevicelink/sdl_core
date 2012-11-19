@@ -1,8 +1,7 @@
-/*
- * AppMgrRegistry.h
- *
- *  Created on: Oct 4, 2012
- *      Author: vsalo
+/**
+ * \file AppMgrRegistry.h
+ * \brief Application manager registry
+ * \author vsalo
  */
 
 #ifndef APPMGRREGISTRY_H_

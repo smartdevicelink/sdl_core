@@ -1,8 +1,7 @@
-/*
- * Application.cpp
- *
- *  Created on: Oct 4, 2012
- *      Author: vsalo
+/**
+ * \file Application.cpp
+ * \brief Application metaphor
+ * \author vsalo
  */
 
 #include "AppMgr/Application.h"
@@ -24,7 +23,7 @@ Application::Application(const std::string& name , unsigned char sessionId)
     ,mSessionID(sessionId)
     ,mName(name)
 {
-    LOG4CPLUS_INFO_EXT(mLogger, " Created an application "<< name <<" for the session id "<<sessionId);
+    LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name << " for the session id " << sessionId);
 }
 
 /**
@@ -49,7 +48,7 @@ Application::Application( const Application& app )
  */
 Application::~Application( )
 {
-    LOG4CPLUS_INFO_EXT(mLogger, " Deleted an application "<< mName << " session id "<<mSessionID);
+    LOG4CPLUS_INFO_EXT(mLogger, " Deleted an application " << mName << " session id " << mSessionID);
 }
 
 /**

@@ -1,8 +1,7 @@
-/*
- * Application.h
- *
- *  Created on: Oct 4, 2012
- *      Author: vsalo
+/**
+ * \file Application.h
+ * \brief Application metaphor
+ * \author vsalo
  */
 
 #ifndef APPLICATION_H_

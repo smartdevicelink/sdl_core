@@ -1,3 +1,9 @@
+/**
+ * \file CapabilitiesContainer.h
+ * \brief Capabilities container
+ * \author vsalo
+ */
+
 #ifndef CAPABILITESCONTAINER_H
 #define CAPABILITESCONTAINER_H
 
@@ -16,51 +22,51 @@ namespace log4cplus
 namespace NsAppManager
 {
 
-/**
- * \brief CapabilitiesContainer acts as container of button capabilities
- */
-template<class DeviceCapabilities>
-class CapabilitiesContainer
-{
-public:
-
     /**
-     * \brief Capabilities container
+     * \brief CapabilitiesContainer acts as container of button capabilities
      */
-    typedef std::vector<DeviceCapabilities> Capabilities;
+    template<class DeviceCapabilities>
+    class CapabilitiesContainer
+    {
+    public:
 
-    /**
-     * \brief Default class constructor
-     */
-    CapabilitiesContainer();
+        /**
+         * \brief Capabilities container
+         */
+        typedef std::vector<DeviceCapabilities> Capabilities;
 
-    /**
-     * \brief Default class destructor
-     */
-    ~CapabilitiesContainer();
+        /**
+         * \brief Default class constructor
+         */
+        CapabilitiesContainer();
 
-    /**
-     * \brief set capabilities
-     * \param caps capabilities
-     */
-    void set(const Capabilities& caps );
+        /**
+         * \brief Default class destructor
+         */
+        ~CapabilitiesContainer();
 
-    /**
-     * \brief get capabilities
-     * \return capabilities
-     */
-    const Capabilities& get() const;
+        /**
+         * \brief set capabilities
+         * \param caps capabilities
+         */
+        void set(const Capabilities& caps );
 
-private:
+        /**
+         * \brief get capabilities
+         * \return capabilities
+         */
+        const Capabilities& get() const;
 
-    /**
-     * \brief Default class copy constructor
-     */
-    CapabilitiesContainer(const CapabilitiesContainer&);
+    private:
 
-    Capabilities mCapabilities;
-    static log4cplus::Logger mLogger;
-};
+        /**
+         * \brief Default class copy constructor
+         */
+        CapabilitiesContainer(const CapabilitiesContainer&);
+
+        Capabilities mCapabilities;
+        static log4cplus::Logger mLogger;
+    };
 
 }
 
