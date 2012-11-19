@@ -56,7 +56,7 @@ Application::~Application( )
  * \brief retrieve aplication HMI status level
  * \return HMI status level of application
  */
-const AppLinkRPC::HMILevel::HMILevelInternal& Application::getApplicationHMIStatusLevel( ) const
+const NsAppLinkRPC::HMILevel::HMILevelInternal& Application::getApplicationHMIStatusLevel( ) const
 {
 	return mHMIStatusLevel;
 }
@@ -65,7 +65,7 @@ const AppLinkRPC::HMILevel::HMILevelInternal& Application::getApplicationHMIStat
  * \brief Set application HMI status level
  * \param hmiLevel HMI status level of application
  */
-void Application::setApplicationHMIStatusLevel( const AppLinkRPC::HMILevel::HMILevelInternal& hmiLevel )
+void Application::setApplicationHMIStatusLevel( const NsAppLinkRPC::HMILevel::HMILevelInternal& hmiLevel )
 {
 	mHMIStatusLevel = hmiLevel;
 }
@@ -74,7 +74,7 @@ void Application::setApplicationHMIStatusLevel( const AppLinkRPC::HMILevel::HMIL
  * \brief retrieve application audio streaming state
  * \return application audio streaming state
  */
-const AppLinkRPC::AudioStreamingState& Application::getApplicationAudioStreamingState( ) const
+const NsAppLinkRPC::AudioStreamingState& Application::getApplicationAudioStreamingState( ) const
 {
 	return mAudioStreamingState;
 }
@@ -83,7 +83,7 @@ const AppLinkRPC::AudioStreamingState& Application::getApplicationAudioStreaming
  * \brief Set application audio streaming state
  * \param streamingState audio streaming state of application
  */
-void Application::setApplicationAudioStreamingState( const AppLinkRPC::AudioStreamingState& streamingState )
+void Application::setApplicationAudioStreamingState( const NsAppLinkRPC::AudioStreamingState& streamingState )
 {
 	mAudioStreamingState = streamingState;
 }
@@ -128,7 +128,7 @@ void Application::setIsMediaApplication(bool value)
  * \brief Set application desired languuage
  * \param value application desired language
  */
-void Application::setLanguageDesired(AppLinkRPC::Language value)
+void Application::setLanguageDesired(NsAppLinkRPC::Language value)
 {
 	mLanguageDesired = value;
 }
@@ -146,7 +146,7 @@ void Application::setAutoActivateID(const std::string& value)
  * \brief Set application sync message version
  * \param value application sync message version
  */
-void Application::setSyncMsgVersion(AppLinkRPC::SyncMsgVersion value)
+void Application::setSyncMsgVersion(NsAppLinkRPC::SyncMsgVersion value)
 {
     mSyncMsgVersion = value;
 }
@@ -164,7 +164,7 @@ void Application::setAppID(const std::string &value)
  * \brief Set application HMI desired display language
  * \param value application HMI desired display language
  */
-void Application::setHMIDisplayLanguageDesired(AppLinkRPC::Language value)
+void Application::setHMIDisplayLanguageDesired(NsAppLinkRPC::Language value)
 {
     mHMIDisplayLanguageDesired = value;
 }
@@ -209,7 +209,7 @@ bool Application::getIsMediaApplication( ) const
  * \brief retrieve application desired language
  * \return application desired language
  */
-const AppLinkRPC::Language& Application::getLanguageDesired( ) const
+const NsAppLinkRPC::Language& Application::getLanguageDesired( ) const
 {
 	return mLanguageDesired;
 }
@@ -227,7 +227,7 @@ const std::string& Application::getAutoActivateID( ) const
  * \brief retrieve application sync message version
  * \return application sync msg version
  */
-const AppLinkRPC::SyncMsgVersion& Application::getSyncMsgVersion( ) const
+const NsAppLinkRPC::SyncMsgVersion& Application::getSyncMsgVersion( ) const
 {
     return mSyncMsgVersion;
 }
@@ -245,7 +245,7 @@ const std::string &Application::getAppID() const
  * \brief retrieve application HMI desired display language
  * \return application HMI desired display language
  */
-const AppLinkRPC::Language &Application::getHMIDisplayLanguageDesired() const
+const NsAppLinkRPC::Language &Application::getHMIDisplayLanguageDesired() const
 {
     return mHMIDisplayLanguageDesired;
 }

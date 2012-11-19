@@ -18,13 +18,13 @@
 #include "AppMgr/AutoActivateIdMapping.h"
 #include "AppMgr/SyncPManager.h"
 
-namespace AppLinkRPC{
+namespace NsAppLinkRPC{
     class ALRPCMessage;
 }
 class JSONHandler;
 class JSONRPC2Handler;
 
-namespace AppLinkRPC
+namespace NsAppLinkRPC
 {
     class RegisterAppInterface_request;
 }
@@ -50,7 +50,7 @@ class Application;
 /**
  * \brief a connection between a mobile RPC message and a session
  */
-typedef std::pair<AppLinkRPC::ALRPCMessage*, unsigned char> Message;
+typedef std::pair<NsAppLinkRPC::ALRPCMessage*, unsigned char> Message;
 
 /**
  * \brief Core app manager class which acts as a core for application manager
@@ -76,7 +76,7 @@ public:
      * \param message a message to be pushed
      * \param sessionID an id of a session associated with the application which pushes a message
      */
-    void pushMobileRPCMessage(AppLinkRPC::ALRPCMessage * message , unsigned char sessionID);
+    void pushMobileRPCMessage(NsAppLinkRPC::ALRPCMessage * message , unsigned char sessionID);
 
     /**
      * \brief push HMI RPC2 message to a queue
@@ -145,7 +145,7 @@ private:
      * \param sessionID an id of the session which will be associated with the application
      * \return A instance of RegistryItem created for application
      */
-    const RegistryItem* registerApplication(AppLinkRPC::RegisterAppInterface_request *request , const unsigned char &sessionID);
+    const RegistryItem* registerApplication(NsAppLinkRPC::RegisterAppInterface_request *request , const unsigned char &sessionID);
 
     /**
      * \brief unregister an application associated with the given session
@@ -171,11 +171,11 @@ private:
     AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
     AppMgrCoreQueue<RPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
-    CapabilitiesContainer<AppLinkRPC::ButtonCapabilities> mButtonCapabilities;
-    AppLinkRPC::DisplayCapabilities mDisplayCapabilities;
-    CapabilitiesContainer<AppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilities;
-    CapabilitiesContainer<AppLinkRPC::VrCapabilities> mVrCapabilities;
-    CapabilitiesContainer<AppLinkRPC::SpeechCapabilities> mSpeechCapabilities;
+    CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities> mButtonCapabilities;
+    NsAppLinkRPC::DisplayCapabilities mDisplayCapabilities;
+    CapabilitiesContainer<NsAppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilities;
+    CapabilitiesContainer<NsAppLinkRPC::VrCapabilities> mVrCapabilities;
+    CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities> mSpeechCapabilities;
     ButtonMapping    mButtonsMapping;
     CommandMapping   mCommandMapping;
     MessageMapping   mMessageMapping;

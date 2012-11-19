@@ -81,7 +81,7 @@ void AppMgr::setJsonRPC2Handler(JSONRPC2Handler *handler)
  * \param message the received message
  * \param sessionID an id of a session associated with the application which sends message
  */
-void AppMgr::onMessageReceivedCallback(AppLinkRPC::ALRPCMessage * message , unsigned char sessionID)
+void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message , unsigned char sessionID)
 {
     if(!message)
     {

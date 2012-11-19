@@ -1,0 +1,70 @@
+%language=C++
+%struct-type
+%define lookup-function-name getPointer
+%define class-name Marshaller_intHash
+%omit-struct-type
+%readonly-tables
+%compare-strncmp
+%compare-lengths
+
+struct Marshaller::localHash
+{
+  const char *name;
+  unsigned int idx;
+  void* method;
+};
+
+%%
+AppLinkCore.ActivateApp,0,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateApp
+AppLinkCore.ActivateAppResponse,1,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse
+AppLinkCore.OnAppRegistered,2,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered
+AppLinkCore.OnAppUnregistered,3,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered
+AppLinkCore.SendData,4,&Marshaller::mNsRPC2Communication_AppLinkCore__SendData
+AppLinkCore.SendDataResponse,5,&Marshaller::mNsRPC2Communication_AppLinkCore__SendDataResponse
+Buttons.GetCapabilities,6,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilities
+Buttons.GetCapabilitiesResponse,7,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilitiesResponse
+Buttons.OnButtonEvent,8,&Marshaller::mNsRPC2Communication_Buttons__OnButtonEvent
+Buttons.OnButtonPress,9,&Marshaller::mNsRPC2Communication_Buttons__OnButtonPress
+TTS.GetCapabilities,10,&Marshaller::mNsRPC2Communication_TTS__GetCapabilities
+TTS.GetCapabilitiesResponse,11,&Marshaller::mNsRPC2Communication_TTS__GetCapabilitiesResponse
+TTS.Speak,12,&Marshaller::mNsRPC2Communication_TTS__Speak
+TTS.SpeakResponse,13,&Marshaller::mNsRPC2Communication_TTS__SpeakResponse
+UI.AddCommand,14,&Marshaller::mNsRPC2Communication_UI__AddCommand
+UI.AddCommandResponse,15,&Marshaller::mNsRPC2Communication_UI__AddCommandResponse
+UI.AddSubMenu,16,&Marshaller::mNsRPC2Communication_UI__AddSubMenu
+UI.AddSubMenuResponse,17,&Marshaller::mNsRPC2Communication_UI__AddSubMenuResponse
+UI.Alert,18,&Marshaller::mNsRPC2Communication_UI__Alert
+UI.AlertResponse,19,&Marshaller::mNsRPC2Communication_UI__AlertResponse
+UI.CreateInteractionChoiceSet,20,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSet
+UI.CreateInteractionChoiceSetResponse,21,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse
+UI.DeleteCommand,22,&Marshaller::mNsRPC2Communication_UI__DeleteCommand
+UI.DeleteCommandResponse,23,&Marshaller::mNsRPC2Communication_UI__DeleteCommandResponse
+UI.DeleteInteractionChoiceSet,24,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSet
+UI.DeleteInteractionChoiceSetResponse,25,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSetResponse
+UI.DeleteSubMenu,26,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenu
+UI.DeleteSubMenuResponse,27,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenuResponse
+UI.GetCapabilities,28,&Marshaller::mNsRPC2Communication_UI__GetCapabilities
+UI.GetCapabilitiesResponse,29,&Marshaller::mNsRPC2Communication_UI__GetCapabilitiesResponse
+UI.OnAppActivated,30,&Marshaller::mNsRPC2Communication_UI__OnAppActivated
+UI.OnAppDeactivated,31,&Marshaller::mNsRPC2Communication_UI__OnAppDeactivated
+UI.OnCommand,32,&Marshaller::mNsRPC2Communication_UI__OnCommand
+UI.OnDriverDistraction,33,&Marshaller::mNsRPC2Communication_UI__OnDriverDistraction
+UI.OnReady,34,&Marshaller::mNsRPC2Communication_UI__OnReady
+UI.OnSystemContext,35,&Marshaller::mNsRPC2Communication_UI__OnSystemContext
+UI.PerformInteraction,36,&Marshaller::mNsRPC2Communication_UI__PerformInteraction
+UI.PerformInteractionResponse,37,&Marshaller::mNsRPC2Communication_UI__PerformInteractionResponse
+UI.ResetGlobalProperties,38,&Marshaller::mNsRPC2Communication_UI__ResetGlobalProperties
+UI.ResetGlobalPropertiesResponse,39,&Marshaller::mNsRPC2Communication_UI__ResetGlobalPropertiesResponse
+UI.SetGlobalProperties,40,&Marshaller::mNsRPC2Communication_UI__SetGlobalProperties
+UI.SetGlobalPropertiesResponse,41,&Marshaller::mNsRPC2Communication_UI__SetGlobalPropertiesResponse
+UI.SetMediaClockTimer,42,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimer
+UI.SetMediaClockTimerResponse,43,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimerResponse
+UI.Show,44,&Marshaller::mNsRPC2Communication_UI__Show
+UI.ShowResponse,45,&Marshaller::mNsRPC2Communication_UI__ShowResponse
+VR.AddCommand,46,&Marshaller::mNsRPC2Communication_VR__AddCommand
+VR.AddCommandResponse,47,&Marshaller::mNsRPC2Communication_VR__AddCommandResponse
+VR.DeleteCommand,48,&Marshaller::mNsRPC2Communication_VR__DeleteCommand
+VR.DeleteCommandResponse,49,&Marshaller::mNsRPC2Communication_VR__DeleteCommandResponse
+VR.GetCapabilities,50,&Marshaller::mNsRPC2Communication_VR__GetCapabilities
+VR.GetCapabilitiesResponse,51,&Marshaller::mNsRPC2Communication_VR__GetCapabilitiesResponse
+VR.OnCommand,52,&Marshaller::mNsRPC2Communication_VR__OnCommand

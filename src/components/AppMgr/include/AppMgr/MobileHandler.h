@@ -8,7 +8,7 @@ namespace log4cplus
 class Logger;
 }
 
-namespace AppLinkRPC
+namespace NsAppLinkRPC
 {
 class ALRPCMessage;
 }
@@ -34,7 +34,7 @@ public:
      * \param message message to send
      * \param sessionId id of a session associated with application that sent the message
      */
-    void sendRPCMessage( const AppLinkRPC::ALRPCMessage * message, unsigned char sessionId );
+    void sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, unsigned char sessionId );
 
     /**
      * \brief set mobile Json handler

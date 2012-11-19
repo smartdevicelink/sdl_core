@@ -9,10 +9,10 @@
 #define ALRPCMESSAGE_INCLUDE
 
 /**
-  *\namespace AppLinkRPC
+  *\namespace NsAppLinkRPC
   *\brief Namespace for AppLink JSON protocol related functionality.
 */
-namespace AppLinkRPC
+namespace NsAppLinkRPC
 {
     /**
      * \class ALRPCMessage

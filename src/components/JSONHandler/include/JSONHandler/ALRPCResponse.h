@@ -12,10 +12,10 @@
 #include "ALRPCMessage.h"
 
 /**
-  *\namespace AppLinkRPC
+  *\namespace NsAppLinkRPC
   *\brief Namespace for AppLink JSON protocol related functionality.
 */
-namespace AppLinkRPC
+namespace NsAppLinkRPC
 {
     /**
      * \class ALRPCResponse

@@ -24,7 +24,7 @@ public:
      * when new AppLink Json message is received from Mobile Application.
      * \param message AppLink Json message
      */
-    virtual void onMessageReceivedCallback( AppLinkRPC::ALRPCMessage * message, unsigned char sessionID ) = 0;
+    virtual void onMessageReceivedCallback( NsAppLinkRPC::ALRPCMessage * message, unsigned char sessionID ) = 0;
 
 protected:
     /**

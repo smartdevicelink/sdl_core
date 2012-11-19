@@ -1,5 +1,5 @@
-#ifndef APPLINKRPC_ONBUTTONPRESS_INCLUDE
-#define APPLINKRPC_ONBUTTONPRESS_INCLUDE
+#ifndef NSAPPLINKRPC_ONBUTTONPRESS_INCLUDE
+#define NSAPPLINKRPC_ONBUTTONPRESS_INCLUDE
 
 
 #include "ButtonName.h"
@@ -11,12 +11,12 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Wed Nov  7 13:10:41 2012
+  generated at	Mon Nov 19 06:40:48 2012
   source stamp	Thu Oct 25 06:49:27 2012
   author	robok0der
 */
 
-namespace AppLinkRPC
+namespace NsAppLinkRPC
 {
 
 ///  Notifies application of LONG/SHORT press events for buttons to which the application is subscribed.

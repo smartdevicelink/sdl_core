@@ -44,25 +44,25 @@ public:
      * \brief Set application HMI status level
      * \param hmiLevel HMI status level of application
      */
-	void setApplicationHMIStatusLevel( const AppLinkRPC::HMILevel::HMILevelInternal& hmiLevel );
+	void setApplicationHMIStatusLevel( const NsAppLinkRPC::HMILevel::HMILevelInternal& hmiLevel );
 
     /**
      * \brief retrieve aplication HMI status level
      * \return HMI status level of application
      */
-	const AppLinkRPC::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
+	const NsAppLinkRPC::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
 
     /**
      * \brief Set application audio streaming state
      * \param streamingState audio streaming state of application
      */
-	void setApplicationAudioStreamingState( const AppLinkRPC::AudioStreamingState& hmiLevel );
+	void setApplicationAudioStreamingState( const NsAppLinkRPC::AudioStreamingState& hmiLevel );
 
     /**
      * \brief retrieve application audio streaming state
      * \return application audio streaming state
      */
-	const AppLinkRPC::AudioStreamingState& getApplicationAudioStreamingState( ) const;
+	const NsAppLinkRPC::AudioStreamingState& getApplicationAudioStreamingState( ) const;
 
     /**
      * \brief Set application NGN media screen app name
@@ -92,7 +92,7 @@ public:
      * \brief Set application desired languuage
      * \param value application desired language
      */
-	void setLanguageDesired(AppLinkRPC::Language value);
+	void setLanguageDesired(NsAppLinkRPC::Language value);
 
     /**
      * \brief Set application autoactivate ID
@@ -104,7 +104,7 @@ public:
      * \brief Set application sync message version
      * \param value application sync message version
      */
-	void setSyncMsgVersion(AppLinkRPC::SyncMsgVersion value);
+	void setSyncMsgVersion(NsAppLinkRPC::SyncMsgVersion value);
 
     /**
      * \brief Set application ID
@@ -116,7 +116,7 @@ public:
      * \brief Set application HMI desired display language
      * \param value application HMI desired display language
      */
-    void setHMIDisplayLanguageDesired( AppLinkRPC::Language value );
+    void setHMIDisplayLanguageDesired( NsAppLinkRPC::Language value );
 
     /**
      * \brief retrieve application NGN media screen application name
@@ -146,7 +146,7 @@ public:
      * \brief retrieve application desired language
      * \return application desired language
      */
-	const AppLinkRPC::Language& getLanguageDesired( ) const;
+	const NsAppLinkRPC::Language& getLanguageDesired( ) const;
 
     /**
      * \brief retrieve application auto-activate ID
@@ -158,7 +158,7 @@ public:
      * \brief retrieve application sync message version
      * \return application sync msg version
      */
-	const AppLinkRPC::SyncMsgVersion& getSyncMsgVersion( ) const;
+	const NsAppLinkRPC::SyncMsgVersion& getSyncMsgVersion( ) const;
 
     /**
      * \brief retrieve application ID
@@ -170,7 +170,7 @@ public:
      * \brief retrieve application HMI desired display language
      * \return application HMI desired display language
      */
-    const AppLinkRPC::Language& getHMIDisplayLanguageDesired( ) const;
+    const NsAppLinkRPC::Language& getHMIDisplayLanguageDesired( ) const;
 
     /**
      * \brief retrieve application session ID
@@ -197,13 +197,13 @@ private:
 	std::vector<std::string> mVrSynonyms;
 	bool m_bUsesVehicleData;
 	bool m_bIsMediaApplication;
-	AppLinkRPC::Language mLanguageDesired;
+	NsAppLinkRPC::Language mLanguageDesired;
 	std::string mAutoActivateID;
-	AppLinkRPC::SyncMsgVersion mSyncMsgVersion;
-	AppLinkRPC::HMILevel::HMILevelInternal mHMIStatusLevel;
-	AppLinkRPC::AudioStreamingState mAudioStreamingState;
+	NsAppLinkRPC::SyncMsgVersion mSyncMsgVersion;
+	NsAppLinkRPC::HMILevel::HMILevelInternal mHMIStatusLevel;
+	NsAppLinkRPC::AudioStreamingState mAudioStreamingState;
     std::string mAppID;
-    AppLinkRPC::Language mHMIDisplayLanguageDesired;
+    NsAppLinkRPC::Language mHMIDisplayLanguageDesired;
 
     static log4cplus::Logger mLogger;
 };

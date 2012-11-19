@@ -19,7 +19,7 @@ ButtonMapping::ButtonMapping()
  * \param buttonName button name
  * \param app application to map a button to
  */
-void ButtonMapping::addButton(const AppLinkRPC::ButtonName &buttonName, RegistryItem *app)
+void ButtonMapping::addButton(const NsAppLinkRPC::ButtonName &buttonName, RegistryItem *app)
 {
     if(!app)
     {
@@ -34,7 +34,7 @@ void ButtonMapping::addButton(const AppLinkRPC::ButtonName &buttonName, Registry
  * \brief remove a button from a mapping
  * \param buttonName button name
  */
-void ButtonMapping::removeButton(const AppLinkRPC::ButtonName &buttonName)
+void ButtonMapping::removeButton(const NsAppLinkRPC::ButtonName &buttonName)
 {
     mButtonsMapping.erase(buttonName);
 }
@@ -64,7 +64,7 @@ void ButtonMapping::removeItem(RegistryItem *app)
  * \param btnName button name
  * \return RegistryItem instance
  */
-RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const AppLinkRPC::ButtonName &btnName ) const
+RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const NsAppLinkRPC::ButtonName &btnName ) const
 {
     ButtonMap::const_iterator it = mButtonsMapping.find( btnName );
     if ( it != mButtonsMapping.end() )
@@ -97,7 +97,7 @@ ButtonMapping::ButtonMapping(const ButtonMapping &)
  * \param b2 button name 2
  * \return comparison result
  */
-bool Comparer::operator ()(const AppLinkRPC::ButtonName &b1, const AppLinkRPC::ButtonName &b2) const
+bool Comparer::operator ()(const NsAppLinkRPC::ButtonName &b1, const NsAppLinkRPC::ButtonName &b2) const
 {
     return b1.get() < b2.get();
 }

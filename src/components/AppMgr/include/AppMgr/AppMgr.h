@@ -45,7 +45,7 @@ public:
      * \param message the received message
      * \param sessionID an id of a session associated with the application which sends message
      */
-    virtual void onMessageReceivedCallback( AppLinkRPC::ALRPCMessage * message, unsigned char sessionID );
+    virtual void onMessageReceivedCallback( NsAppLinkRPC::ALRPCMessage * message, unsigned char sessionID );
 
     /**
      * \brief callback to proceed received RPC2 command
