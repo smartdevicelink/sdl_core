@@ -224,6 +224,10 @@ set (GENERATED_RPC_SOURCES
     ./src/RPC2ObjectsImpl/AppLinkCore/OnAppRegisteredMarshaller.cpp
     ./src/RPC2ObjectsImpl/AppLinkCore/OnAppUnregistered.cpp
     ./src/RPC2ObjectsImpl/AppLinkCore/OnAppUnregisteredMarshaller.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/SendData.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/SendDataMarshaller.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/SendDataResponse.cpp
+    ./src/RPC2ObjectsImpl/AppLinkCore/SendDataResponseMarshaller.cpp
     ./src/RPC2ObjectsImpl/Buttons/GetCapabilities.cpp
     ./src/RPC2ObjectsImpl/Buttons/GetCapabilitiesMarshaller.cpp
     ./src/RPC2ObjectsImpl/Buttons/GetCapabilitiesResponse.cpp

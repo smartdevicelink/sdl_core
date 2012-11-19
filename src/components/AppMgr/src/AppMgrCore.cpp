@@ -192,7 +192,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             }
             LOG4CPLUS_INFO_EXT(mLogger, " About to find auto-activate id in a map...");
             std::string autoActivateIdFound = core->mAutoActivateIds.findAutoActivateIdAssignedToName(appName);
-            LOG4CPLUS_INFO_EXT(mLogger, " found something like this: "<<autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound);
+            LOG4CPLUS_INFO_EXT(mLogger, " found something like this: "<<(autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound));
             if(!autoActivateIdFound.empty())
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "Found already registered AutoActivateId"<<(autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound) << " assigned to app name "<< appName);
@@ -245,7 +245,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             appRegistered->set_languageDesired(app->getLanguageDesired());
             appRegistered->set_vrSynonym(app->getVrSynonyms());
             HMIHandler::getInstance().sendNotification(appRegistered);
-
+            LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app "<<app->getName());
             break;
 		}
         case AppLinkRPC::Marshaller::METHOD_UNREGISTERAPPINTERFACE_REQUEST:
@@ -629,6 +629,23 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             }
             setTimer->set_updateMode(object->get_updateMode());
             HMIHandler::getInstance().sendRequest(setTimer);
+            break;
+        }
+        case AppLinkRPC::Marshaller::METHOD_ENCODEDSYNCPDATA_REQUEST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " An EncodedSyncPData request has been invoked");
+            AppLinkRPC::EncodedSyncPData_request* object = (AppLinkRPC::EncodedSyncPData_request*)mobileMsg;
+
+            if(object->get_data())
+            {
+                Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(sessionID) );
+                const std::string& name = app->getName();
+                core->mSyncPManager.setPData(*object->get_data(), name, object->getMethodId());
+            }
+
+            AppLinkRPC::EncodedSyncPData_response* response = new AppLinkRPC::EncodedSyncPData_response;
+            response->set_success(true);
+            response->set_resultCode(AppLinkRPC::Result::SUCCESS);
             break;
         }
         case AppLinkRPC::Marshaller::METHOD_SHOW_RESPONSE:
@@ -1234,6 +1251,20 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             hmiStatus->set_systemContext(AppLinkRPC::SystemContext::SYSCTXT_MENU);
             MobileHandler::getInstance().sendRPCMessage( hmiStatus, app->getSessionID() );
             RPC2Communication::AppLinkCore::ActivateAppResponse * response = new RPC2Communication::AppLinkCore::ActivateAppResponse;
+            response->setId(object->getId());
+            response->setResult(AppLinkRPC::Result::SUCCESS);
+            HMIHandler::getInstance().sendResponse(response);
+            return;
+        }
+        case RPC2Communication::AppLinkCore::Marshaller::METHOD_SENDDATA:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "SendData request has been received!");
+            RPC2Communication::AppLinkCore::SendData* object = static_cast<RPC2Communication::AppLinkCore::SendData*>(msg);
+            core->mSyncPManager.setRawData( object->get_data() );
+            AppLinkRPC::OnEncodedSyncPData* encodedNotification = new AppLinkRPC::OnEncodedSyncPData;
+            encodedNotification->set_data(core->mSyncPManager.getPData());
+            MobileHandler::getInstance().sendRPCMessage( encodedNotification, 1 );
+            RPC2Communication::AppLinkCore::SendDataResponse* response = new RPC2Communication::AppLinkCore::SendDataResponse;
             response->setId(object->getId());
             response->setResult(AppLinkRPC::Result::SUCCESS);
             HMIHandler::getInstance().sendResponse(response);

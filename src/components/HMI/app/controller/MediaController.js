@@ -393,7 +393,7 @@ MFT.MediaController = Em.Object.create({
 	/** Application */
 	turnOnApplink: function(){
 		
-		this.onPlayerEnter(MFT.ApplinkModel);
+		//this.onPlayerEnter(MFT.ApplinkModel);
 
 		// Exit form player or radio
 		this.onPlayerExit();
@@ -447,21 +447,20 @@ MFT.MediaController = Em.Object.create({
 
 	/** Applink Setter for Media Clock Timer */
 	applinkSetMediaClockTimer: function(params){
-		if(params.startTime){
-			MFT.ApplinkModel.showInfo.set('duration', params.startTime);
+		if(params.updateMode == "PAUSE"){
+			MFT.ApplinkModel.showInfo.set('pause', true);
+		}else if(params.updateMode == "RESUME"){
+			MFT.ApplinkModel.showInfo.set('pause', false);
+		}else{
+			MFT.ApplinkModel.showInfo.set('duration', params.startTime.hours*3600 + params.startTime.minutes*60 + params.startTime.seconds );
 		}
-		if(params.updateMode.COUNTUP){
+
+		if(params.updateMode == "COUNTUP"){
 			MFT.ApplinkModel.showInfo.set('countUp', true);
-		}
-		if(params.updateMode.COUNTDOWN){
+		}else if(params.updateMode == "COUNTDOWN"){
 			MFT.ApplinkModel.showInfo.set('countUp', false);
 		}
-		if(params.updateMode.PAUSE){
-			MFT.ApplinkModel.showInfo.set('pause', true);
-		}
-		if(params.updateMode.RESUME){
-			MFT.ApplinkModel.showInfo.set('pause', false);
-		}
+		
 	},
 	
 	optionsBack: function(){

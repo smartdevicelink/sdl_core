@@ -15,7 +15,8 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
 	elementId: 'info_nonMedia_options',
 	
 	childViews: [
-		'backButton'
+		'backButton',
+		'title'
 	],
 	
 	backButton: MFT.Button.extend({		
@@ -25,5 +26,11 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
 		
 		target:		'MFT.States',
 		action:		'back'
+	}),
+	
+	title: MFT.Label.extend({
+		classNames:	'options_title',
+		
+		content:	'Options'
 	})
 });

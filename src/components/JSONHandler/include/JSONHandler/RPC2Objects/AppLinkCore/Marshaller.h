@@ -15,6 +15,8 @@
 #include "../src/RPC2ObjectsImpl/AppLinkCore/ActivateAppResponseMarshaller.h"
 #include "../src/RPC2ObjectsImpl/AppLinkCore/OnAppRegisteredMarshaller.h"
 #include "../src/RPC2ObjectsImpl/AppLinkCore/OnAppUnregisteredMarshaller.h"
+#include "../src/RPC2ObjectsImpl/AppLinkCore/SendDataMarshaller.h"
+#include "../src/RPC2ObjectsImpl/AppLinkCore/SendDataResponseMarshaller.h"
 
 /*
   interface	RPC2Communication::AppLinkCore
@@ -39,7 +41,9 @@ namespace RPC2Communication
         METHOD_ACTIVATEAPP=0,
         METHOD_ACTIVATEAPPRESPONSE=1,
         METHOD_ONAPPREGISTERED=2,
-        METHOD_ONAPPUNREGISTERED=3
+        METHOD_ONAPPUNREGISTERED=3,
+        METHOD_SENDDATA=4,
+        METHOD_SENDDATARESPONSE=5
       };
 
 
@@ -98,6 +102,27 @@ namespace RPC2Communication
         return mOnAppUnregistered.toString(res);
       }
 
+// SendData
+      static bool fromString(const std::string& str, SendData& res)
+      {
+        return mSendData.fromString(str, res);
+      }
+
+      static std::string toString(const SendData& res)
+      {
+        return mSendData.toString(res);
+      }
+
+// SendDataResponse
+      static bool fromString(const std::string& str, SendDataResponse& res)
+      {
+        return mSendDataResponse.fromString(str, res);
+      }
+
+      static std::string toString(const SendDataResponse& res)
+      {
+        return mSendDataResponse.toString(res);
+      }
 
       struct localHash
       {
@@ -128,6 +153,8 @@ namespace RPC2Communication
       static ActivateAppResponseMarshaller mActivateAppResponse;
       static OnAppRegisteredMarshaller mOnAppRegistered;
       static OnAppUnregisteredMarshaller mOnAppUnregistered;
+      static SendDataMarshaller mSendData;
+      static SendDataResponseMarshaller mSendDataResponse;
 
     };
   }

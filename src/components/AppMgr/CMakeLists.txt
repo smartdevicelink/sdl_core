@@ -30,6 +30,8 @@ set (SOURCES
     ./src/MobileHandler.cpp
     ./src/RequestMapping.cpp
     ./src/AutoActivateIdMapping.cpp
+    ./src/SyncPManager.cpp
+    ./src/Base64.cpp
 )
 
 add_library("AppMgr" ${SOURCES})

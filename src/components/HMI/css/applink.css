@@ -3,8 +3,6 @@
  */
  
 #info_nonMedia {
-	width: 800px;
-	height: 480px;
 	z-index: 1001;
 }
 
@@ -72,4 +70,12 @@
 	width: 800px;
 	height: 480px;
 	background-color: #000;
+}
+
+#info_nonMedia_options .options_title {
+	top: 80px;
+	left: 100px;
+	width: 640px;
+	padding: 15px;
+	background-color: #393939;
 }

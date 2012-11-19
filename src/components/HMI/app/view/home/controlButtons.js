@@ -15,8 +15,40 @@ MFT.ControlButtons = Em.ContainerView.create({
 	elementId:		'app_controlButtons',
 
 	childViews: [
-		'buttonControls'
+		'buttonControls',
+		'infoTable'
 	],
+
+	infoTable: Em.ContainerView.extend({
+		elementId:	'infoTable',
+		
+		classNames:	'infoTable',
+
+		childViews: [
+			'globalPropertiesLabel',
+			'globalPropertiesData'
+		],
+
+		globalPropertiesLabel : MFT.Label.extend({
+
+			elementId:			'applinkGPLabel',
+
+			classNames:			'applinkGPLabel',
+
+			content:			'applinkGPLabel'
+		}),		
+
+		globalPropertiesData : MFT.Label.extend({
+
+			elementId:			'applinkGPData',
+
+			classNames:			'applinkGPData',
+
+			contentBinding:		'FFW.UI.globalPropertiesDefault.helpPrompt.0.text'
+			
+			//this.globalProperties.set('timeoutPrompt',
+		})
+	}),
 
 	buttonControls: Em.ContainerView.extend({
 		elementId:	'buttonControls',
