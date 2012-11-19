@@ -116,7 +116,7 @@ void * JSONHandler::waitForIncomingMessages( void * params )
             std::string jsonMessage = handler -> mIncomingMessages.pop();
 
             NsAppLinkRPC::ALRPCMessage * currentMessage = NsAppLinkRPC::Marshaller::fromString( jsonMessage );
-            LOG4CPLUS_EINFO mLogger, "Json string: "<< jsonMessage );
+            LOG4CPLUS_INFO( mLogger, "Json string: "<< jsonMessage );
 
 
             if ( !currentMessage )
