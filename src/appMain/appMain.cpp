@@ -14,7 +14,6 @@
 #include <signal.h>
 
 #include "appMain.hpp"
-#include "CBTAdapter.hpp"
 
 #include "ProtocolHandler.hpp"
 
@@ -35,6 +34,62 @@
 #include "Logger.hpp"
 
 #include "CAppTester.hpp"
+
+#include "TransportManager/ITransportManager.hpp"
+#include "TransportManager/ITransportManagerDeviceListener.hpp"
+
+class CTransportManagerListener : public NsAppLink::NsTransportManager::ITransportManagerDeviceListener
+{
+public:
+    
+    CTransportManagerListener(NsAppLink::NsTransportManager::ITransportManager * transportManager);
+    
+private:
+    
+    virtual void onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList& DeviceList);
+    
+    NsAppLink::NsTransportManager::ITransportManager * mTransportManager;
+};
+ 
+CTransportManagerListener::CTransportManagerListener(NsAppLink::NsTransportManager::ITransportManager* transportManager)
+: mTransportManager(transportManager)
+{
+}
+ 
+void CTransportManagerListener::onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList& DeviceList)
+{
+    if(DeviceList.empty())
+    {
+        printf("Device list is updated. No devices with AppLink service are available\n");
+    }
+    else
+    {
+        printf("Device list is updated. To connect to device enter device number and press Enter\n");
+        printf("If You don\'t want to connect to any device enter 0\n\n");
+
+        int i = 1;
+        for(NsAppLink::NsTransportManager::tDeviceList::const_iterator it = DeviceList.begin(); it != DeviceList.end(); it++)
+        {
+            NsAppLink::NsTransportManager::SDeviceInfo device = *it;
+            printf("%d: %s (%s)\n", i++, device.mUniqueDeviceId.c_str(), device.mUserFriendlyName.c_str());
+        }
+
+        std::cin >> i;
+
+        if ((0 < i) && (i <= DeviceList.size()))
+        {
+            NsAppLink::NsTransportManager::SDeviceInfo device = DeviceList[i-1];
+            printf("Performing connect to: %s (%s)\n", device.mUniqueDeviceId.c_str(), device.mUserFriendlyName.c_str());
+            mTransportManager->connectDevice(device.mDeviceHandle);
+        }
+        else
+        {
+            printf("If You don\'t want to connect to any device enter 0\n\n");
+        }
+
+    }
+}
+
 /**
  * \brief Entry point of the program.
  * \param argc number of argument
@@ -50,11 +105,15 @@ int main(int argc, char** argv)
     PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
     LOG4CPLUS_INFO(logger, " Application started!");
 
-    NsTransportLayer::CBTAdapter btadapter;
+    NsAppLink::NsTransportManager::ITransportManager * transportManager = NsAppLink::NsTransportManager::ITransportManager::create();
+    CTransportManagerListener tsl(transportManager);
+    transportManager->addDeviceListener(&tsl);
+    transportManager->run();
+    
 
     JSONHandler jsonHandler;
 
-    AxisCore::ProtocolHandler* pProtocolHandler = new AxisCore::ProtocolHandler(&jsonHandler, &btadapter, 1);
+    AxisCore::ProtocolHandler* pProtocolHandler = new AxisCore::ProtocolHandler(&jsonHandler, transportManager, 1);
 
     jsonHandler.setProtocolHandler(pProtocolHandler);
 
@@ -187,42 +246,9 @@ int main(int argc, char** argv)
         }
     }
     /**********************************/
-    /*** Check main function parameters***/
-    if (4 < argc)
-    {
-      LOG4CPLUS_ERROR(logger, "too many arguments");
-      if (0 != pid_hmi)
-      {
-        kill(pid_hmi, SIGQUIT);
-      }
-      return EXIT_SUCCESS;
-    } else if(1 < argc)
-    {
-      LOG4CPLUS_INFO(logger, "perform test");
-      int sessioncount = 1;
-      if (argc == 3)
-      {
-        sessioncount = atoi(argv[2]);
-        if (0 >= sessioncount)
-        {
-           sessioncount = 1;
-        }
-      }
-      NsApplicationTester::CAppTester apptester;
-      delete pProtocolHandler;
-      pProtocolHandler = new AxisCore::ProtocolHandler(&jsonHandler, &apptester, 1);
-      jsonHandler.setProtocolHandler(pProtocolHandler);
-      apptester.startSession(sessioncount);
-      apptester.sendDataFromFile(argv[1]);
-      while(true)
-        {
-            sleep(1);
-        }
-    }
-    /**********************************/
 
     /*** Start BT Devices Discovery***/
-
+/*
     std::vector<NsTransportLayer::CBTDevice> devicesFound;
     btadapter.scanDevices(devicesFound);
     if (0 < devicesFound.size())
@@ -262,9 +288,9 @@ int main(int argc, char** argv)
         }
         return EXIT_SUCCESS;
     }
-
+*/
     /*** Start SDP Discovery on device***/
-
+/*
     std::vector<int> portsRFCOMMFound;
     btadapter.startSDPDiscoveryOnDevice(discoveryDeviceAddr.c_str(), portsRFCOMMFound);
     if (0 < portsRFCOMMFound.size())
@@ -302,20 +328,28 @@ int main(int argc, char** argv)
         }
         return EXIT_SUCCESS;
     }
-
+*/
     /*** Start RFCOMM connection***/
-
+/*
     int sockID = btadapter.startRFCOMMConnection(discoveryDeviceAddr.c_str(), portRFCOMM);
 
     if (0 < sockID)
     {
         btadapter.processRFCOMM(sockID);
     }
+*/
 
+    transportManager->scanForNewDevices();
+    while(true)
+    {
+        sleep(100500);
+    }
+    
     if (0 != pid_hmi)
     {
       kill(pid_hmi, SIGQUIT);
     }
+
     return EXIT_SUCCESS;
 } 
 

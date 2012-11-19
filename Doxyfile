@@ -734,7 +734,8 @@ EXCLUDE_SYMLINKS       = NO
 # against the file with absolute path, so to exclude all test directories 
 # for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       = */src/thirdPartyLibs/logger/*
+EXCLUDE_PATTERNS       = */src/thirdPartyLibs/logger/* \
+                         */src/thirdPartyLibs/gmock-1.6.0/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names 
 # (namespaces, classes, functions, etc.) that should be excluded from the 

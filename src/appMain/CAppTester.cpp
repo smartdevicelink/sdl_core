@@ -3,8 +3,6 @@
  * \brief Bluetooth adapter for AppLink.
  * \author AKara
  */
-
-#include "CBTAdapter.hpp"
 #include "btinclude.h"
 #include <stdlib.h>
 #include "CAppTester.hpp"
@@ -13,8 +11,8 @@
 namespace NsApplicationTester
 {
 
-   CAppTester::CAppTester():
-   mpProtocolHandler(NULL)
+   CAppTester::CAppTester()/*:
+   mpProtocolHandler(NULL)*/
    {
    }
 
@@ -33,6 +31,7 @@ namespace NsApplicationTester
       ((UInt8*)sPacketData)[1] = 7;
       ((UInt8*)sPacketData)[2] = 1;
       blobQueue.push(Blob((UInt8*)sPacketData, 8, blobQueue.size()));
+/*
       if (NULL != mpProtocolHandler)
       {
          mpProtocolHandler->dataReceived();
@@ -51,7 +50,9 @@ namespace NsApplicationTester
             mpProtocolHandler->dataReceived();
          }
       }
+*/
       return count;
+      
    }
    
    int CAppTester::sendDataFromFile(const char * fileName)
@@ -149,9 +150,9 @@ namespace NsApplicationTester
 
      blobQueue.push(Blob((UInt8*)sPacketData, offset + sDataSize, blobQueue.size()));
 
-     mpProtocolHandler->dataReceived();
+     //mpProtocolHandler->dataReceived();
   }
-
+/*
   void CAppTester::initBluetooth(Bluetooth::IBluetoothHandler * pHandler)
   {
       printf("%s:%d CAppTester::initBluetooth()\n", __FILE__, __LINE__);
@@ -160,7 +161,7 @@ namespace NsApplicationTester
          mpProtocolHandler = pHandler;
       }
   }
-
+*/
   void CAppTester::deinitBluetooth()
   {
       printf("%s:%d CAppTester::deinitBluetooth()\n", __FILE__, __LINE__);

@@ -21,7 +21,15 @@ add_subdirectory(./src/components)
 add_subdirectory(./src/appMain)
 
 # Building tests
-add_subdirectory(./test/components)
+option(BUILD_TESTS "Possibility to build and run tests" OFF)
+if(BUILD_TESTS)
+    enable_testing()    
+    # Framework GoogleTest is also integrated together gmock
+    # and must not be added separately
+    add_subdirectory(./src/thirdPartyLibs/gmock-1.6.0)
+    add_subdirectory(./test)
+endif()
+
 
 # Building documentation
 

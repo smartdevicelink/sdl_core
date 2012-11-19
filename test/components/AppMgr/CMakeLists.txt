@@ -3,9 +3,9 @@ project (${PROJECT})
 
 set(LIBRARIES
   AppMgr
-  JSONHandler
-  #TransportManager
+  JSONHandler  
   ProtocolHandler
+  TransportManager
   MessageBroker
   MessageBrokerClient
   MessageBrokerServer
