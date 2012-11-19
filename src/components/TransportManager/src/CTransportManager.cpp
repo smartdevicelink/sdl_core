@@ -452,6 +452,7 @@ void CTransportManager::applicationCallbacksThread()
         if(mTerminateFlag)
         {
             LOG4CPLUS_INFO_EXT(mLogger, "Shutdown is on progress. Skipping callback processing.");
+            pthread_mutex_unlock(&mDeviceListenersMutex);
             break;
         }
 
