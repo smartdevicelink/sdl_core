@@ -1,5 +1,5 @@
 # --- TransportManager
-#add_subdirectory(./TransportManager)
+add_subdirectory(./TransportManager)
 
 # --- AppMgr
 add_subdirectory(./AppMgr)

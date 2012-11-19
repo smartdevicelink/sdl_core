@@ -1,0 +1,492 @@
+#ifndef __TRANSPORTMANAGER_CDEVICEADAPTER_HPP__
+#define __TRANSPORTMANAGER_CDEVICEADAPTER_HPP__
+
+#include <pthread.h>
+#include <queue>
+#include <time.h>
+
+#include "Logger.hpp"
+
+#include "IDeviceAdapter.hpp"
+
+#define LOG4CPLUS_ERROR_EXT_WITH_ERRNO(logger, message) LOG4CPLUS_ERROR_EXT(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
+
+namespace NsAppLink
+{
+    namespace NsTransportManager
+    {
+        class IDeviceAdapterListener;
+        class IHandleGenerator;
+
+        /**
+         * @brief Base class for device adapters.
+         **/
+        class CDeviceAdapter: public IDeviceAdapter
+        {
+        public:
+            /**
+             * @brief Constructor.
+             *
+             * @param Listener Listener for device adapter notifications.
+             * @param HandleGenerator Handle generator implementation.
+             **/
+            CDeviceAdapter(const char * LoggerName, IDeviceAdapterListener & Listener, IHandleGenerator & HandleGenerator);
+
+            /**
+             * @brief Destructor.
+             **/
+            virtual ~CDeviceAdapter(void);
+
+            /**
+             * @brief Run device adapter.
+             *
+             * Called from transport manager to start device adapter.
+             **/
+            virtual void run(void);
+
+            /**
+             * @brief Start scanning for new devices.
+             *
+             * List of new devices will be supplied in onDeviceListUpdated callback.
+             **/
+            virtual void scanForNewDevices(void);
+
+            /**
+             * @brief Connect to all applications discovered on device.
+             *
+             * @param DeviceHandle Handle of device to connect to.
+             **/
+            virtual void connectDevice(const tDeviceHandle DeviceHandle);
+
+            /**
+             * @brief Disconnect from all applications connected on device.
+             *
+             * @param DeviceHandle Handle of device to disconnect from.
+             **/
+            virtual void disconnectDevice(const tDeviceHandle DeviceHandle);
+
+            /**
+             * @brief Send frame.
+             *
+             * @param ConnectionHandle Connection handle.
+             * @param Data Frame data.
+             * @param DataSize Size of data in bytes.
+             *
+             * @return Frame sequence number. May be used to identify
+             *         this frame when send result callback is received.
+             **/
+            virtual int sendFrame(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize);
+
+        protected:
+            /**
+             * @brief Frame.
+             *
+             * Used to store data frames that must be sent to remote device.
+             **/
+            struct SFrame
+            {
+                /**
+                 * @brief Constructor.
+                 *
+                 * @param SequenceNumber Frame sequence number.
+                 * @param Data Frame data. SFrame stores a copy of this data,
+                 *             i.e. data may be freed after SFrame object is constructed.
+                 * @param DataSize Size of frame data in bytes.
+                 **/
+                SFrame(int SequenceNumber, const uint8_t * Data, const size_t DataSize);
+
+                /**
+                 * @brief Destructor.
+                 *
+                 * Frees stored frame data.
+                 **/
+                ~SFrame(void);
+
+                /**
+                 * @brief Frame sequence number.
+                 **/
+                int mSequenceNumber;
+
+                /**
+                 * @brief Frame data.
+                 **/
+                uint8_t * mData;
+
+                /**
+                 * @brief Frame data size in bytes.
+                 **/
+                size_t mDataSize;
+            };
+
+            /**
+             * @brief Frame queue.
+             **/
+            typedef std::queue<SFrame*> tFrameQueue;
+
+            /**
+             * @brief Internal structure describing device.
+             **/
+            struct SDevice
+            {
+                /**
+                 * @brief Constructor.
+                 *
+                 * @param Name User-friendly device name.
+                 **/
+                SDevice(const char * Name);
+
+                /**
+                 * @brief Destructor.
+                 **/
+                virtual ~SDevice(void);
+
+                /**
+                 * @brief Compare devices.
+                 *
+                 * This method checks whether two SDevice structures
+                 * refer to the same device.
+                 *
+                 * @param OtherDevice Device to compare with.
+                 *
+                 * @return true if devices are equal, false otherwise.
+                 **/
+                virtual bool isSameAs(const SDevice * OtherDevice) const;
+
+                /**
+                 * @brief Device user-friendly name.
+                 **/
+                std::string mName;
+
+                /**
+                 * @brief Unique device identifier across all devices.
+                 **/
+                std::string mUniqueDeviceId;
+
+                /**
+                 * @brief Flag indicating that device is connected.
+                 *
+                 * This flag is set by connectDevice and reset by disconnectDevice.
+                 * If device is connected service discovery is periodically performed on this
+                 * device. All newly discovered AppLink applications are automatically
+                 * connected and all connections for applications that are no longer
+                 * discoverable are disconnected.
+                 **/
+                bool mIsConnected;
+            };
+
+            /**
+             * @brief Vector of devices.
+             **/
+            typedef std::vector<SDevice *> tDeviceVector;
+
+            /**
+             * @brief Devices map.
+             **/
+            typedef std::map<tDeviceHandle, SDevice *> tDeviceMap;
+
+            /**
+             * @brief Application connection.
+             **/
+            struct SConnection
+            {
+                /**
+                 * @brief Constructor.
+                 *
+                 * @param DeviceHandle Device handle.
+                 **/
+                SConnection(const tDeviceHandle DeviceHandle);
+
+                /**
+                 * @brief Destructor.
+                 *
+                 * Clears map of frames to send.
+                 **/
+                virtual ~SConnection(void);
+
+                /**
+                 * @brief Compare connections.
+                 *
+                 * This method checks whether two SConnection structures
+                 * refer to the same connection.
+                 *
+                 * @param OtherConnection Connection to compare with.
+                 *
+                 * @return true if connections are equal, false otherwise.
+                 **/
+                virtual bool isSameAs(const SConnection * OtherConnection) const;
+
+                /**
+                 * @brief Device handle.
+                 **/
+                const tDeviceHandle mDeviceHandle;
+
+                /**
+                 * @brief Thread that handles connection.
+                 **/
+                pthread_t mConnectionThread;
+
+                /**
+                 * @brief File descriptors of notification pipe.
+                 *
+                 * Notification pipe is used to wake up connection thread
+                 * on external event (e.g. new data is available to send or
+                 * connection is requested to be terminated).
+                 *
+                 * mNotificationPipeFds[0] is a descriptor of the read end of the pipe
+                 * (the one that is used in poll() by connection thread) and
+                 * mNotificationPipeFds[1] is a descriptor of the write end of the pipe
+                 * (the one that is used in methods exposed to transport manager to
+                 * wake up connection thread when necessary).
+                 *
+                 * @note eventfd cannot be used instead of a pipe because it does not
+                 *       conform to POSIX (eventfd is Linux-specific).
+                 **/
+                int mNotificationPipeFds[2];
+
+                /**
+                 * @brief Descriptor of connection socket.
+                 **/
+                int mConnectionSocket;
+
+                /**
+                 * @brief Sequence number for next frame.
+                 **/
+                int mNextFrameSequenceNumber;
+
+                /**
+                 * @brief Frames that must be sent to remote device.
+                 **/
+                tFrameQueue mFramesToSend;
+
+                /**
+                 * @brief Terminate flag.
+                 *
+                 * This flag is set to notify connection thread that connection
+                 * must be closed and connection thread must be terminated.
+                 **/
+                bool mTerminateFlag;
+            };
+
+            /**
+             * @brief Parameters for starting connection thread.
+             **/
+            struct SConnectionThreadParameters
+            {
+                /**
+                 * @brief Constructor.
+                 *
+                 * @param DeviceAdapter Reference to device adapter.
+                 * @param ConnectionHandle Connection handle.
+                 **/
+                SConnectionThreadParameters(CDeviceAdapter & DeviceAdapter, tConnectionHandle ConnectionHandle);
+
+                /**
+                 * @brief Reference to device adapter.
+                 **/
+                CDeviceAdapter & mDeviceAdapter;
+
+                /**
+                 * @brief Connection handle.
+                 **/
+                tConnectionHandle mConnectionHandle;
+            };
+
+            /**
+             * @brief Wait until all device adapter threads are terminated.
+             *
+             * Every device adapter must call this method in destructor to wait
+             * for other threads to terminate before destroying device adapter.
+             **/
+            void waitForThreadsTermination(void);
+
+            /**
+             * @brief Start connection.
+             *
+             * Check if connection is not in connection map
+             * and if it's not, add it to map and start connection thread.
+             *
+             * @param Connection Connection to start.
+             *
+             * @return true if connection thread has been started, false otherwise.
+             **/
+            bool startConnection(SConnection * Connection);
+
+            /**
+             * @brief Stop connection.
+             *
+             * This method only initiates connection termination. It returns immediately
+             * without waiting for actual termination of the connection.
+             *
+             * @param ConnectionHandle Handle of connection to stop.
+            **/
+            void stopConnection(tConnectionHandle ConnectionHandle);
+
+            /**
+             * @brief Wait for device scan request.
+             *
+             * Wait until scanForNewDevices() is called or timeout
+             * expires.
+             *
+             * @param Timeout Timeout value in seconds.
+             *
+             * @return true if scanForNewDevices() has been called,
+             *         false if timeout expired.
+             **/
+            bool waitForDeviceScanRequest(const time_t Timeout);
+
+            /**
+             * @brief Handle communication.
+             *
+             * Handle communication for specified connection (send/receive data
+             * to/from connection socket).
+             *
+             * This method must be called from connection thread implementation
+             * when connection is established and connection socket descriptor
+             * is set for the connection.
+             *
+             * This methods returns when connection is terminated.
+             *
+             * @param ConnectionHandle Connection handle.
+             **/
+            void handleCommunication(const tConnectionHandle ConnectionHandle);
+
+            /**
+             * @brief Update client device list.
+             *
+             * This method is called when list of devices is changed to
+             * notify device adapter listener about new list of devices.
+             **/
+            void updateClientDeviceList(void);
+
+            /**
+             * @brief Create list of connections possible for specified device.
+             *
+             * This method is called from connectDevice(). Device adapter may implement
+             * this method to provide list of connections that must be running on
+             * connected device.
+             *
+             * @param DeviceHandle Device handle.
+             * @param ConnectionsList Reference to connections list that must be filled.
+             **/
+            virtual void createConnectionsListForDevice(const tDeviceHandle DeviceHandle, std::vector<SConnection*> & ConnectionsList);
+
+            /**
+             * @brief Device adapter main thread.
+             **/
+            virtual void mainThread(void) = 0;
+
+            /**
+             * @brief Connection thread.
+             *
+             * This method is responsible for establishing connection and communicating
+             * with remote device via specified connection. It must remove itself from
+             * connection map when connection is terminated before terminating connection thread.
+             *
+             * @param ConnectionHandle Connection handle.
+             **/
+            virtual void connectionThread(const tConnectionHandle ConnectionHandle) = 0;
+
+            /**
+             * @brief Connections map.
+             **/
+            typedef std::map<tConnectionHandle, SConnection *> tConnectionMap;
+
+            /**
+             * @brief Logger.
+             **/
+            const log4cplus::Logger mLogger;
+
+            /**
+             * @brief Listener for device adapter notifications.
+             **/
+            IDeviceAdapterListener & mListener;
+
+            /**
+             * @brief Handle generator implementation.
+             **/
+            IHandleGenerator & mHandleGenerator;
+
+            /**
+             * @brief Flag indicating that device scan was requested.
+             *
+             * This flag is set in scanForNewDevices and reset after requested
+             * device scan is completed.
+             **/
+            bool mDeviceScanRequested;
+
+            /**
+             * @brief Mutex restricting access to DeviceScanRequested flag.
+             **/
+            pthread_mutex_t mDeviceScanRequestedMutex;
+
+            /**
+             * @brief Conditional variable for signaling discovery thread about requested device scan.
+             **/
+            pthread_cond_t mDeviceScanRequestedCond;
+
+            /**
+             * @brief Map of device handle to device.
+             *
+             * This map contains all currently available bluetooth devices.
+             **/
+            tDeviceMap mDevices;
+
+            /**
+             * @brief Mutex restricting access to device map.
+             **/
+            mutable pthread_mutex_t mDevicesMutex;
+
+            /**
+             * @brief Map of connections.
+             **/
+            tConnectionMap mConnections;
+
+            /**
+             * @brief Mutex restricting access to connections map.
+             **/
+            mutable pthread_mutex_t mConnectionsMutex;
+
+            /**
+             * @brief Shutdown flag.
+             *
+             * This flag is set to true on shutdown to inform all device adapter
+             * threads that device adapter shutdown is in progress. After setting
+             * this flag device adapter waits until all its threads are terminated.
+             **/
+            bool mShutdownFlag;
+
+        private:
+            /**
+             * @brief Start routine for device adapter main thread.
+             *
+             * @param Data Must be pointer to CDeviceAdapter instance.
+             *
+             * @return Thread return value.
+             **/
+            static void * mainThreadStartRoutine(void * Data);
+
+            /**
+             * @brief Connection thread start routine.
+             *
+             * @param Data Must be pointer to SConnectionThreadParameters. Ownership
+             *             of connection thread parameters is passed to connection thread, i.e.
+             *             connection thread is responsible for freeing this object.
+             *
+             * @return Thread return value.
+             **/
+            static void * connectionThreadStartRoutine(void * Data);
+
+            /**
+             * @brief ID of device adapter main thread.
+             **/
+            pthread_t mMainThread;
+
+            /**
+             * @brief Flag indicating whether the device adapter main thread has been started successfully.
+             **/
+            bool mMainThreadStarted;
+        };
+    }
+}
+
+#endif
