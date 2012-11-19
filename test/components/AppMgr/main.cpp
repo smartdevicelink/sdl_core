@@ -9,11 +9,6 @@
 #include "JSONHandler/ALRPCResponse.h"
 #include "JSONHandler/ALRPCNotification.h"
 #include "JSONHandler/ALRPCObjects/Marshaller.h"
-#include "JSONHandler/RPC2Objects/UI/Marshaller.h"
-#include "JSONHandler/RPC2Objects/VR/Marshaller.h"
-#include "JSONHandler/RPC2Objects/TTS/Marshaller.h"
-#include "JSONHandler/RPC2Objects/Buttons/Marshaller.h"
-#include "JSONHandler/RPC2Objects/AppLinkCore/Marshaller.h"
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/RPC2Request.h"
 #include "JSONHandler/RPC2Response.h"
@@ -31,10 +26,10 @@ int basicWorkflow()
 {
     NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
 
-    AppLinkRPC::RegisterAppInterface_request* registerApp = new AppLinkRPC::RegisterAppInterface_request();
+    NsAppLinkRPC::RegisterAppInterface_request* registerApp = new NsAppLinkRPC::RegisterAppInterface_request();
     registerApp->set_appName("MyNewFuckingTestApp");
     registerApp->set_isMediaApplication(true);
-    registerApp->set_languageDesired(AppLinkRPC::Language::EN_US);
+    registerApp->set_languageDesired(NsAppLinkRPC::Language::EN_US);
     registerApp->set_ngnMediaScreenAppName("NgnMediaScreenAppName");
     registerApp->set_usesVehicleData(false);
     std::vector<std::string> vrSynonyms;
