@@ -145,7 +145,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * unregister component is RPC bus
 	 */
 	getAppList: function() {
-		this.getAppListRequestId = this.generateId();
+		this.getAppListRequestId = this.client.generateId();
 
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
@@ -154,7 +154,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"params":	{
 			}
 		};
-		this.send(JSONMessage);
+		this.client.send(JSONMessage);
 	},
 
 
@@ -173,6 +173,6 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"params"	:	{"appName":[MFT.ApplinkModel.showInfo.appName]}
 		};
 		this.client.send(JSONMessage);
-	},
+	}
 
 })

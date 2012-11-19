@@ -12,19 +12,31 @@
 	top: 0px;
 	left: 790px;
 }
+
+#driverDistractionControl.driverDistractionControl {
+	width: 302px;
+	height: 20px;
+	top: 423px;
+	left: 810px;
+}
+
+#driverDistractionControl .driverDistractionControlLabel{
+	left: 20px;
+}
+
 #infoTable.infoTable{
-	width: 270px;
-	height: 147px;
+	width: 337px;
+	height: 96px;
 	top: 308px;
-	left: 895px;
-	background-color: whiteSmoke;
-	color: black;
+	left: 801px;
+	background-color: #383737;
+	color: white;
 	border: 1px solid gray;
 }
 #infoTable .applinkGPLabel{
 	width: 125px;
 	border-right: 1px solid #14100F;
-	height: 148px;
+	height: 96px;
 }
 #infoTable .applinkGPData{
 	left: 130px;
@@ -145,8 +157,8 @@
 	background: url(../images/home/controlButtons/vr.png) no-repeat;
 	width: 89px;
 	height: 90px;
-	left: 10px;
-	top: 315px;
+	left: 234px;
+	top: 2px;
 	-webkit-transition: 0.2s;
 }
 #VRButton.pressed{

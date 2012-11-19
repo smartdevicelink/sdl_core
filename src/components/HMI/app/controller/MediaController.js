@@ -68,6 +68,25 @@ MFT.MediaController = Em.Object.create({
 
 	/** Current applink Perform Interaction Choise identificator*/
 	currentApplinkPerformInteractionChoiseId: null,
+
+	/*
+	 *	Driver Distraction State 
+	 *  may be "DD_OFF" or "DD_ON"
+ 	 */
+ 	eDriverDistractionState:{
+	    on : "DD_ON",
+	    off : "DD_OFF"
+	},
+
+	/*
+	 * Enumeraction that describes possible contexts
+	 * and app's HMI might be in.
+ 	 */
+ 	eSystemContext:{
+	    main:			"MAIN",
+	    VR:				"VRSESSION",
+	    application:	"MENU"
+	},
 	
 	/** Current Direct tune data*/
 	currentDirectTuneData: MFT.AmModel.directTunestations,
@@ -444,6 +463,31 @@ MFT.MediaController = Em.Object.create({
 			}
 		}
 	},
+
+	/** Applink Driver Distraction ON/OFF switcher */
+	selectdDriverDistraction: function(checked){
+		if(checked){
+			FFW.UI.onDriverDistraction( this.eDriverDistractionState.on );
+			MFT.DriverDistraction.activate();
+		}else{
+			FFW.UI.onDriverDistraction( this.eDriverDistractionState.off );
+			MFT.DriverDistraction.deactivate();
+		}
+	},
+
+	/** Applink SystemContext switcher */
+	onSystemContextSwitcher: function(systemContextValue){
+		FFW.UI.OnSystemContext(systemContextValue);
+	},
+
+	/** Calls Applink SystemContext switcher when turn On/Of Applink application */
+	onTurnOnApplinkApp: function(systemContextValue){
+		if(MFT.States.media.applink.active){
+            MFT.MediaController.onSystemContextSwitcher(MFT.MediaController.eSystemContext.application);
+		}else{
+            MFT.MediaController.onSystemContextSwitcher(MFT.MediaController.eSystemContext.main);
+		}
+	}.observes('MFT.States.media.applink.active'),
 
 	/** Applink Setter for Media Clock Timer */
 	applinkSetMediaClockTimer: function(params){

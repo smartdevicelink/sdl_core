@@ -16,7 +16,7 @@ MFT.VRPopUp = Em.ContainerView.create({
 
     classNames:         'VRPopUp hide',
 
-    classNameBindings:      ['VRActive:received'],
+    classNameBindings:      ['VRActive:active'],
 
     childViews: [
         'popUp',
@@ -66,12 +66,18 @@ MFT.VRPopUp = Em.ContainerView.create({
         classNames:         'popUp',
     }),
 
-    receiveMessage: function(){
+    activateVRPopUp: function(){
         var self = this;
         if(this.VRActive){
             this.set('VRActive', false);
+            if(MFT.States.media.applink.active){
+                MFT.MediaController.onSystemContextSwitcher(MFT.MediaController.eSystemContext.application);
+            }else{
+                MFT.MediaController.onSystemContextSwitcher(MFT.MediaController.eSystemContext.main);
+            }
         }else{
             this.set('VRActive', true);
+            MFT.MediaController.onSystemContextSwitcher(MFT.MediaController.eSystemContext.VR);
         }
     },
 

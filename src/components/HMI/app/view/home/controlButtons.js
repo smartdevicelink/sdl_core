@@ -16,6 +16,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 
 	childViews: [
 		'buttonControls',
+		'driverDistractionControl',
 		'infoTable'
 	],
 
@@ -47,6 +48,38 @@ MFT.ControlButtons = Em.ContainerView.create({
 			contentBinding:		'FFW.UI.globalPropertiesDefault.helpPrompt.0.text'
 			
 			//this.globalProperties.set('timeoutPrompt',
+		})
+	}),
+
+	driverDistractionControl: Em.ContainerView.extend({
+		elementId:	'driverDistractionControl',
+		
+		classNames:	'driverDistractionControl',
+
+		childViews: [
+			'driverDistractionLabel',
+			'driverDistractionCheckBox'
+		],
+
+		driverDistractionLabel : MFT.Label.extend({
+
+			elementId:			'driverDistractionControlLabel',
+
+			classNames:			'driverDistractionControlLabel',
+
+			content:			'Driver Distraction'
+		}),		
+
+		driverDistractionCheckBox : Em.Checkbox.extend({
+
+			elementId:			'driverDistractionControlCheckBox',
+
+			classNames:			'driverDistractionControlCheckBox',
+
+			onCheckBoxSelected:	function(){
+				MFT.MediaController.selectdDriverDistraction(this.checked);
+			}.observes('this.checked')
+
 		})
 	}),
 
@@ -430,7 +463,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:	'VRButton',
 			actionUp:		function(){
 				this._super();
-				MFT.VRPopUp.receiveMessage();
+				MFT.VRPopUp.activateVRPopUp();
 			}
 		}),
 	})
