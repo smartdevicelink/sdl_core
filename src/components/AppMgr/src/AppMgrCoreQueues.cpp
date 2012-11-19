@@ -52,6 +52,19 @@ AppMgrCoreQueue<QueueType>::~AppMgrCoreQueue()
             mThread->Stop();
         delete mThread;
     }
+
+    if( mQueue.size() > 0 )
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Emptying queue elements");
+        mMtx.Lock();
+        while( mQueue.size() > 0 )
+        {
+            mQueue.pop();
+        }
+        mMtx.Unlock();
+        LOG4CPLUS_INFO_EXT(mLogger, "Queue empty.");
+    }
+
     LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCoreQueues detructed!");
 }
 
