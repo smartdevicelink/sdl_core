@@ -31,9 +31,9 @@ struct Config
  */
 struct PacketHeaderBase
 {
-    uint8_t version:4;
-    bool compressionFlag:1;
     uint8_t frameType:3;
+    bool compressionFlag:1;
+    uint8_t version:4;
     uint8_t serviceType;
     uint8_t frameData; 
     uint8_t sessionId;
@@ -242,6 +242,7 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
 
     *pConfig = DefaultConfigValues;
 
+    
     while (true)
     {
         int option_index = 0;

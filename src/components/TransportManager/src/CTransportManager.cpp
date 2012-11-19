@@ -452,6 +452,7 @@ void CTransportManager::applicationCallbacksThread()
         if(mTerminateFlag)
         {
             LOG4CPLUS_INFO_EXT(mLogger, "Shutdown is on progress. Skipping callback processing.");
+            pthread_mutex_unlock(&mDeviceListenersMutex);
             break;
         }
 
@@ -931,7 +932,7 @@ CTransportManager::SFrameDataForConnection::SFrameDataForConnection(tConnectionH
 , mConnectionHandle(ConnectionHandle)
 , mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager")))
 {
-    mBufferSize = 512;
+    mBufferSize = 1536;
     mpDataBuffer = new uint8_t[mBufferSize];
 
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Initialized frame data for connection container");
@@ -962,7 +963,7 @@ void CTransportManager::SFrameDataForConnection::appendFrameData(const uint8_t* 
     {
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "Data cannot be appended to existing buffer. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize<<", DataSize: " << DataSize);
 
-        size_t newSize = mBufferSize * 3;
+        size_t newSize = mBufferSize + DataSize; //TODO Think about more correct buffer allocation
         uint8_t *newBuffer = new uint8_t[newSize];
 
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "New buffer allocated. Buffer size: "<<newSize<<", was: "<<mBufferSize);
