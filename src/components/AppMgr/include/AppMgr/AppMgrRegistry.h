@@ -84,6 +84,12 @@ public:
      */
     RegistryItem *getItem( unsigned char sessionID ) const;
 
+    /**
+     * \brief Returns registered applications list
+     * \return registered applications list
+     */
+    const Items &getItems() const;
+
 private:
 
     /**

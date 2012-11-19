@@ -96,6 +96,15 @@ RegistryItem *AppMgrRegistry::getItem(unsigned char sessionID) const
 }
 
 /**
+ * \brief Returns registered applications list
+ * \return registered applications list
+ */
+const AppMgrRegistry::Items &AppMgrRegistry::getItems() const
+{
+    return mRegistryItems;
+}
+
+/**
  * \brief Default class constructor
  */
 AppMgrRegistry::AppMgrRegistry( )
