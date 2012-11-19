@@ -248,6 +248,12 @@ void CTransportManager::onApplicationConnected(IDeviceAdapter * DeviceAdapter, c
 {
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "onApplicationConnected");
 
+    if(0 == DeviceAdapter)
+    {
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "ApplicationConnected received from invalid device adapter");
+        return;
+    }
+
     startDataCallbacksThread(ConnectionHandle);
 
     // Storing device adapter for that handle
@@ -268,6 +274,12 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
 {
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "onApplicationDisconnected");
 
+    if(0 == DeviceAdapter)
+    {
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "ApplicationDisconnected received from invalid device adapter");
+        return;
+    }
+
     stopDataCallbacksThread(ConnectionHandle);
 
     // Removing device adapter for that handle
@@ -285,6 +297,23 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
 void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameReceived called. DA: "<<DeviceAdapter<<", DataSize: "<<DataSize);
+
+    if(0 == DeviceAdapter)
+    {
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "onFrameReceived received from invalid device adapter");
+        return;
+    }
+
+    if(0 == Data)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived with empty data");
+        return;
+    }
+
+    if(0 == DataSize)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived with DataSize=0");
+    }
 
     //TODO: Currently all frames processed in one thread. In the future processing of them
     //      must be moved to the thread, which sent callbacks for corresponded connection
@@ -314,6 +343,13 @@ void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnect
 void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted called. DA: "<<DeviceAdapter<<", FrameSequenceNumber: "<<FrameSequenceNumber <<", SendStatus: " <<SendStatus);
+
+    if(0 == DeviceAdapter)
+    {
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted received from invalid device adapter");
+        return;
+    }
+    
     SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameSendCompleted, ConnectionHandle, FrameSequenceNumber, SendStatus);
 
     pthread_mutex_lock(&mDataListenersMutex);
