@@ -22,54 +22,55 @@ MFT.ApplinkModel = Em.Object.create({
 	/**
 	  * Array of Interaction Choises
 	  */
-	 interactionChoises:	new Array(),
+	interactionChoises:	new Array(),
 
 	/**
 	  * Array of menus in ApplinkOptionsSubMenuView
 	  */
-	 subMenuCommands:	new Array(),
+        subMenuCommands:	new Array(),
 
 	/**
 	  * Timer for Media Clock
 	  */
 	timer: null,
 
+	countUp:		true,
+	pause:			true,
+	maxTimeValue:		68400, // 19 hours
+
  	/**
 	  * Array of Interaction Choises
 	  */
 	showInfo: Em.Object.create({
-		field1:			'title',
-		field2:			'album',
-		mediaTrack:		'artist',
-		mediaClock:		"0:00",
+		field1:			'<field1>',
+		field2:			'<field2>',
+		field3:			'<field3>',
+		mediaClock:		"<mediaClock>",
 		appName:		"<App name>",
-		deviceName:		"Device name",
+		deviceName:		"<Device name>",
 		duration:		0,
 		currTime:		0,
-		countUp:		true,
-		pause:			true,
-		maxTimeValue:	68400 // 19 hours	
 	}),
 
 	startTimer: function(){
-		if(!this.showInfo.pause){
+		if(!this.pause){
 			this.timer = setInterval(function(){
-				MFT.ApplinkModel.showInfo.set('currTime', MFT.ApplinkModel.showInfo.currTime+1);
+				this.showInfo.set('currTime', this.showInfo.currTime+1);
 			}, 1000);
 		}else{
 			clearInterval(this.timer);
 		}
 	}.observes('this.showInfo.pause'),
 
-	setDuration: function(){
-		if(this.showInfo.countUp){
-			this.showInfo.set('mediaClock', Math.ceil((this.showInfo.duration + MFT.ApplinkModel.showInfo.currTime+1)/60)-1 + ":" + (this.showInfo.duration + this.showInfo.currTime) % 60 );
+	setDuration: function() {
+		if(this.countUp){
+			this.showInfo.set('mediaClock', Math.ceil((this.showInfo.duration + this.showInfo.currTime+1)/60)-1 + ":" + (this.showInfo.duration + this.showInfo.currTime) % 60 );
 		}else{
-			this.showInfo.set('mediaClock', Math.ceil((this.showInfo.duration - MFT.ApplinkModel.showInfo.currTime+1)/60)-1 + ":" + (this.showInfo.duration - this.showInfo.currTime) % 60 );
+			this.showInfo.set('mediaClock', Math.ceil((this.showInfo.duration - this.showInfo.currTime+1)/60)-1 + ":" + (this.showInfo.duration - this.showInfo.currTime) % 60 );
 		}
 	}.observes('this.showInfo.currTime'),
 
-	changeDuration: function(){
+	changeDuration: function() {
 		clearInterval(this.timer);
 		this.startTimer();
 	}.observes('this.showInfo.duration')

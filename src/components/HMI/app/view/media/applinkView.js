@@ -27,10 +27,10 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 			'{{#with view}}'+
 			'<div class="track-info">'+
 				'<div class="device">{{MFT.ApplinkModel.showInfo.deviceName}}</div>'+
-            	'<div class="divider_o"></div>'+
+		            	'<div class="divider_o"></div>'+
 				'<div class="title">{{MFT.ApplinkModel.showInfo.field1}}</div>'+
 				'<div class="album">{{MFT.ApplinkModel.showInfo.field2}}</div>'+
-				'<div class="artist" >{{MFT.ApplinkModel.showInfo.mediaTrack}}</div>'+
+				'<div class="artist">{{MFT.ApplinkModel.showInfo.field3}}</div>'+
 				'<div class="time">{{MFT.ApplinkModel.showInfo.mediaClock}}</div>'+
 //				'<div id="cd_logo" {{bindAttr class="MFT.CDModel.active:visible_display MFT.AppModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
 //				'<div id="usb_logo" {{bindAttr class="MFT.USBModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
