@@ -1266,6 +1266,22 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             HMIHandler::getInstance().sendResponse(response);
             return;
         }
+        case Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST:
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "GetAppList request has been received!");
+            NsRPC2Communication::AppLinkCore::GetAppListResponse* response = static_cast<NsRPC2Communication::AppLinkCore::GetAppListResponse*>(msg);
+            const AppMgrRegistry::Items& registeredApps = AppMgrRegistry::getInstance().getItems();
+            std::vector< NsAppLinkRPC::HMIApplication> hmiApps;
+            for(AppMgrRegistry::Items::const_iterator it = registeredApps.begin(); it != registeredApps.end(); it++)
+            {
+                NsAppLinkRPC::HMIApplication hmiApp;
+                hmiApp.set_appName(it->first);
+                hmiApp.set_ngnMediaScreenAppName(core->getApplicationFromItemCheckNotNull(it->second)->getNgnMediaScreenAppName());
+            }
+            response->set_appList(hmiApps);
+            HMIHandler::getInstance().sendResponse(response);
+            return;
+        }
         case Marshaller::METHOD_INVALID:
         default:
             LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message "<< msg->getMethod() <<" has been received!");
