@@ -58,9 +58,35 @@ CTransportManagerListener::CTransportManagerListener(NsAppLink::NsTransportManag
  
 void CTransportManagerListener::onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList& DeviceList)
 {
-    if (false == DeviceList.empty())
+    if(DeviceList.empty())
     {
-        mTransportManager->connectDevice(DeviceList[0].mDeviceHandle);
+        printf("Device list is updated. No devices with AppLink service are available\n");
+    }
+    else
+    {
+        printf("Device list is updated. To connect to device enter device number and press Enter\n");
+        printf("If You don\'t want to connect to any device enter 0\n\n");
+
+        int i = 1;
+        for(NsAppLink::NsTransportManager::tDeviceList::const_iterator it = DeviceList.begin(); it != DeviceList.end(); it++)
+        {
+            NsAppLink::NsTransportManager::SDeviceInfo device = *it;
+            printf("%d: %s (%s)\n", i++, device.mUniqueDeviceId.c_str(), device.mUserFriendlyName.c_str());
+        }
+
+        std::cin >> i;
+
+        if ((0 < i) && (i <= DeviceList.size()))
+        {
+            NsAppLink::NsTransportManager::SDeviceInfo device = DeviceList[i-1];
+            printf("Performing connect to: %s (%s)\n", device.mUniqueDeviceId.c_str(), device.mUserFriendlyName.c_str());
+            mTransportManager->connectDevice(device.mDeviceHandle);
+        }
+        else
+        {
+            printf("If You don\'t want to connect to any device enter 0\n\n");
+        }
+
     }
 }
 

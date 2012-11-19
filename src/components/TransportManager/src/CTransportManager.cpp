@@ -59,8 +59,12 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
     pthread_join(mApplicationCallbacksThread, 0);
     LOG4CPLUS_INFO_EXT(mLogger, "Application callbacks thread terminated");
 
+    pthread_mutex_lock(&mDataListenersMutex);
+    tDataCallbacksThreads dataThreads = tDataCallbacksThreads(mDataCallbacksThreads);
+    pthread_mutex_unlock(&mDataListenersMutex);
+    
     tDataCallbacksThreads::iterator threadsIterator;
-    for (threadsIterator = mDataCallbacksThreads.begin(); threadsIterator != mDataCallbacksThreads.end(); ++threadsIterator)
+    for (threadsIterator = dataThreads.begin(); threadsIterator != dataThreads.end(); ++threadsIterator)
     {
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, threadsIterator->first, "Waiting for thread stoping");
         stopDataCallbacksThread(threadsIterator->first);
@@ -244,6 +248,12 @@ void CTransportManager::onApplicationConnected(IDeviceAdapter * DeviceAdapter, c
 {
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "onApplicationConnected");
 
+    if(0 == DeviceAdapter)
+    {
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "ApplicationConnected received from invalid device adapter");
+        return;
+    }
+
     startDataCallbacksThread(ConnectionHandle);
 
     // Storing device adapter for that handle
@@ -264,6 +274,12 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
 {
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "onApplicationDisconnected");
 
+    if(0 == DeviceAdapter)
+    {
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "ApplicationDisconnected received from invalid device adapter");
+        return;
+    }
+
     stopDataCallbacksThread(ConnectionHandle);
 
     // Removing device adapter for that handle
@@ -281,6 +297,23 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
 void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameReceived called. DA: "<<DeviceAdapter<<", DataSize: "<<DataSize);
+
+    if(0 == DeviceAdapter)
+    {
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "onFrameReceived received from invalid device adapter");
+        return;
+    }
+
+    if(0 == Data)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived with empty data");
+        return;
+    }
+
+    if(0 == DataSize)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived with DataSize=0");
+    }
 
     //TODO: Currently all frames processed in one thread. In the future processing of them
     //      must be moved to the thread, which sent callbacks for corresponded connection
@@ -310,6 +343,13 @@ void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnect
 void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted called. DA: "<<DeviceAdapter<<", FrameSequenceNumber: "<<FrameSequenceNumber <<", SendStatus: " <<SendStatus);
+
+    if(0 == DeviceAdapter)
+    {
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted received from invalid device adapter");
+        return;
+    }
+    
     SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameSendCompleted, ConnectionHandle, FrameSequenceNumber, SendStatus);
 
     pthread_mutex_lock(&mDataListenersMutex);
@@ -448,6 +488,7 @@ void CTransportManager::applicationCallbacksThread()
         if(mTerminateFlag)
         {
             LOG4CPLUS_INFO_EXT(mLogger, "Shutdown is on progress. Skipping callback processing.");
+            pthread_mutex_unlock(&mDeviceListenersMutex);
             break;
         }
 
@@ -927,7 +968,7 @@ CTransportManager::SFrameDataForConnection::SFrameDataForConnection(tConnectionH
 , mConnectionHandle(ConnectionHandle)
 , mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager")))
 {
-    mBufferSize = 512;
+    mBufferSize = 1536;
     mpDataBuffer = new uint8_t[mBufferSize];
 
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Initialized frame data for connection container");
@@ -958,7 +999,7 @@ void CTransportManager::SFrameDataForConnection::appendFrameData(const uint8_t* 
     {
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "Data cannot be appended to existing buffer. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize<<", DataSize: " << DataSize);
 
-        size_t newSize = mBufferSize * 3;
+        size_t newSize = mBufferSize + DataSize; //TODO Think about more correct buffer allocation
         uint8_t *newBuffer = new uint8_t[newSize];
 
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "New buffer allocated. Buffer size: "<<newSize<<", was: "<<mBufferSize);

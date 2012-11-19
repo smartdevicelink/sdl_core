@@ -463,6 +463,7 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
 
     *pConfig = DefaultConfigValues;
 
+    
     while (true)
     {
         int option_index = 0;
