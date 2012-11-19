@@ -43,7 +43,7 @@ void JSONHandler::setRPCMessagesObserver( IRPCMessagesObserver * messagesObserve
     mMessagesObserver = messagesObserver;
 }
 
-void JSONHandler::sendRPCMessage( const AppLinkRPC::ALRPCMessage * message, unsigned char sessionId )
+void JSONHandler::sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, unsigned char sessionId )
 {
     LOG4CPLUS_INFO(mLogger, "An outgoing message has been received" );
     if ( message )
@@ -115,7 +115,7 @@ void * JSONHandler::waitForIncomingMessages( void * params )
             LOG4CPLUS_INFO( mLogger, "Incoming mobile message received." );
             std::string jsonMessage = handler -> mIncomingMessages.pop();
 
-            AppLinkRPC::ALRPCMessage * currentMessage = AppLinkRPC::Marshaller::fromString( jsonMessage );
+            NsAppLinkRPC::ALRPCMessage * currentMessage = NsAppLinkRPC::Marshaller::fromString( jsonMessage );
 
             if ( !currentMessage )
             {
@@ -147,10 +147,10 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
     {
         while ( ! handler -> mOutgoingMessages.empty() )
         {
-            const AppLinkRPC::ALRPCMessage * message = handler -> mOutgoingMessages.pop();
+            const NsAppLinkRPC::ALRPCMessage * message = handler -> mOutgoingMessages.pop();
             LOG4CPLUS_INFO( mLogger, "Outgoing mobile message " << message->getMethodId() << " received." );
 
-            std::string messageString = AppLinkRPC::Marshaller::toString( message );
+            std::string messageString = NsAppLinkRPC::Marshaller::toString( message );
 
             UInt8* pData;
             pData = new UInt8[messageString.length() + 1];

@@ -7,7 +7,7 @@
 
 #include "JSONHandler/RPC2Notification.h"
 
-using namespace RPC2Communication;
+using namespace NsRPC2Communication;
 
 RPC2Notification::RPC2Notification(void) :
 RPC2Command(NOTIFICATION)

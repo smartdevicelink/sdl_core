@@ -7,7 +7,7 @@
 
 #include "JSONHandler/RPC2Response.h"
 
-using namespace RPC2Communication;
+using namespace NsRPC2Communication;
 
 
 RPC2Response::RPC2Response() :

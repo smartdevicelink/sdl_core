@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/HmiZoneCapabilitiesMarshaller.inc gen/deep/pimpl/next/HmiZoneCapabilitiesMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.inc ./src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -15,7 +15,7 @@ class HmiZoneCapabilities_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,19 +25,19 @@ HmiZoneCapabilities_intHash::hash (register const char *str, register unsigned i
   return len;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 HmiZoneCapabilities_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  4,  5
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 18 "gen/deep/pimpl/next/HmiZoneCapabilitiesMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.gp"
       {"BACK",1},
-#line 17 "gen/deep/pimpl/next/HmiZoneCapabilitiesMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.gp"
       {"FRONT",0}
     };
 

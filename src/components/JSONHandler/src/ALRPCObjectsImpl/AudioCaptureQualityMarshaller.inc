@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/AudioCaptureQualityMarshaller.inc gen/deep/pimpl/next/AudioCaptureQualityMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.inc ./src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -15,7 +15,7 @@ class AudioCaptureQuality_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,19 +25,19 @@ AudioCaptureQuality_intHash::hash (register const char *str, register unsigned i
   return len;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 AudioCaptureQuality_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  4,  5
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 17 "gen/deep/pimpl/next/AudioCaptureQualityMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.gp"
       {"8KHZ",0},
-#line 18 "gen/deep/pimpl/next/AudioCaptureQualityMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.gp"
       {"16KHZ",1}
     };
 

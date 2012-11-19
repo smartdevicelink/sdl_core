@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/TBTStateMarshaller.inc gen/deep/pimpl/next/TBTStateMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/TBTStateMarshaller.inc ./src/ALRPCObjectsImpl/TBTStateMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -15,7 +15,7 @@ class TBTState_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,7 +25,7 @@ TBTState_intHash::hash (register const char *str, register unsigned int len)
   return len;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 TBTState_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
@@ -33,18 +33,18 @@ TBTState_intHash::getPointer (register const char *str, register unsigned int le
        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 13,
       14, 15,  0,  0,  0,  0, 20
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""},
-#line 19 "gen/deep/pimpl/next/TBTStateMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/TBTStateMarshaller.gp"
       {"ROUTE_REFUSED",2},
-#line 18 "gen/deep/pimpl/next/TBTStateMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/TBTStateMarshaller.gp"
       {"ROUTE_ACCEPTED",1},
-#line 20 "gen/deep/pimpl/next/TBTStateMarshaller.gp"
+#line 20 "./src/ALRPCObjectsImpl/TBTStateMarshaller.gp"
       {"ROUTE_CANCELLED",3},
       {""}, {""}, {""}, {""},
-#line 17 "gen/deep/pimpl/next/TBTStateMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/TBTStateMarshaller.gp"
       {"ROUTE_UPDATE_REQUEST",0}
     };
 

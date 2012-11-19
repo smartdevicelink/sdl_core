@@ -14,7 +14,7 @@ namespace log4cplus
 	class Logger;
 }
 
-namespace RPC2Communication
+namespace NsRPC2Communication
 {
     class RPC2Command;
 }
@@ -51,7 +51,7 @@ public:
      * \brief callback to proceed received RPC2 command
      * \param command the received command
      */
-    virtual void onCommandReceivedCallback( RPC2Communication::RPC2Command * command );
+    virtual void onCommandReceivedCallback( NsRPC2Communication::RPC2Command * command );
 
 	/**
 	 * \brief pure virtual method to process response.

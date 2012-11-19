@@ -9,7 +9,7 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Mon Nov 19 07:25:04 2012
+  generated at	Mon Nov 19 08:20:05 2012
   source stamp	Mon Nov 19 07:04:40 2012
   author	robok0der
 */
@@ -19,7 +19,7 @@ namespace NsRPC2Communication
   namespace AppLinkCore
   {
 
-    class SendData : public ::RPC2Communication::RPC2Request
+    class SendData : public ::NsRPC2Communication::RPC2Request
     {
     public:
     

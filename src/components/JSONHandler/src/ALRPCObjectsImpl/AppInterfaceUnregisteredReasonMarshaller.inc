@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.inc gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.inc ./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.gp  */
 /* Computed positions: -k'1' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -42,7 +42,7 @@ class AppInterfaceUnregisteredReason_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -80,7 +80,7 @@ AppInterfaceUnregisteredReason_intHash::hash (register const char *str, register
   return len + asso_values[(unsigned char)str[0]];
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 AppInterfaceUnregisteredReason_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
@@ -89,33 +89,33 @@ AppInterfaceUnregisteredReason_intHash::getPointer (register const char *str, re
        0, 15, 16, 17,  0,  0,  0, 16, 12,  0,  0,  0,  0,  0,
       28,  0,  0, 31
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 17 "gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.gp"
       {"USER_EXIT",0},
       {""}, {""},
-#line 25 "gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.gp"
+#line 25 "./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.gp"
       {"MASTER_RESET",8},
-#line 19 "gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.gp"
       {"BLUETOOTH_OFF",2},
       {""},
-#line 24 "gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.gp"
+#line 24 "./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.gp"
       {"LANGUAGE_CHANGE",7},
-#line 20 "gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.gp"
+#line 20 "./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.gp"
       {"USB_DISCONNECTED",3},
-#line 22 "gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.gp"
+#line 22 "./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.gp"
       {"TOO_MANY_REQUESTS",5},
       {""}, {""}, {""},
-#line 26 "gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.gp"
+#line 26 "./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.gp"
       {"FACTORY_DEFAULTS",9},
-#line 18 "gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.gp"
       {"IGNITION_OFF",1},
       {""}, {""}, {""}, {""}, {""},
-#line 23 "gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.gp"
+#line 23 "./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.gp"
       {"DRIVER_DISTRACTION_VIOLATION",6},
       {""}, {""},
-#line 21 "gen/deep/pimpl/next/AppInterfaceUnregisteredReasonMarshaller.gp"
+#line 21 "./src/ALRPCObjectsImpl/AppInterfaceUnregisteredReasonMarshaller.gp"
       {"REQUEST_WHILE_IN_NONE_HMI_LEVEL",4}
     };
 

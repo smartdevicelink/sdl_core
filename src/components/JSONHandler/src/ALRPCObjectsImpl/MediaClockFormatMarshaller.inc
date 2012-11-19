@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/MediaClockFormatMarshaller.inc gen/deep/pimpl/next/MediaClockFormatMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.inc ./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp  */
 /* Computed positions: -k'$' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -42,7 +42,7 @@ class MediaClockFormat_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -80,7 +80,7 @@ MediaClockFormat_intHash::hash (register const char *str, register unsigned int 
   return len + asso_values[(unsigned char)str[len - 1]];
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 MediaClockFormat_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
@@ -88,20 +88,20 @@ MediaClockFormat_intHash::getPointer (register const char *str, register unsigne
        0,  0,  0,  0,  0,  0,  6,  0,  0,  0, 10,  6, 10,  0,
        0, 10
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""},
-#line 18 "gen/deep/pimpl/next/MediaClockFormatMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
       {"CLOCK2",1},
       {""}, {""}, {""},
-#line 20 "gen/deep/pimpl/next/MediaClockFormatMarshaller.gp"
+#line 20 "./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
       {"CLOCKTEXT2",3},
-#line 17 "gen/deep/pimpl/next/MediaClockFormatMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
       {"CLOCK1",0},
-#line 21 "gen/deep/pimpl/next/MediaClockFormatMarshaller.gp"
+#line 21 "./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
       {"CLOCKTEXT3",4},
       {""}, {""},
-#line 19 "gen/deep/pimpl/next/MediaClockFormatMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
       {"CLOCKTEXT1",2}
     };
 

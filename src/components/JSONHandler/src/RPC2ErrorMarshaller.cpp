@@ -9,7 +9,7 @@
 #include <cstring>
 #include "JSONHandler/RPC2ErrorMarshaller.h"
 
-using namespace RPC2Communication;
+using namespace NsRPC2Communication;
 
 
 bool RPC2ErrorMarshaller::fromString(const std::string& s,RPC2Error& e)

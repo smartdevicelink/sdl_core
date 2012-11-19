@@ -24,7 +24,7 @@ public:
      *  when new RPC2Bus Json message is received from HMI.
      * \param command RPC2Bus Json message
      */
-    virtual void onCommandReceivedCallback( RPC2Communication::RPC2Command * command ) = 0;
+    virtual void onCommandReceivedCallback( NsRPC2Communication::RPC2Command * command ) = 0;
 
 protected:
     /**

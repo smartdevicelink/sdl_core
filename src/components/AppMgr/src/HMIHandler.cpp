@@ -37,7 +37,7 @@ void HMIHandler::setReadyState(bool ready)
  * \brief send notification via associated handler
  * \param command notification to send
  */
-void HMIHandler::sendNotification(const RPC2Communication::RPC2Notification *command)
+void HMIHandler::sendNotification(const NsRPC2Communication::RPC2Notification *command)
 {
     if(m_bHMIReady)
     {
@@ -57,7 +57,7 @@ void HMIHandler::sendNotification(const RPC2Communication::RPC2Notification *com
  * \brief send response via associated handler
  * \param command response to send
  */
-void HMIHandler::sendResponse(const RPC2Communication::RPC2Response *command)
+void HMIHandler::sendResponse(const NsRPC2Communication::RPC2Response *command)
 {
     if(m_bHMIReady)
     {
@@ -77,7 +77,7 @@ void HMIHandler::sendResponse(const RPC2Communication::RPC2Response *command)
  * \brief send request via associated handler
  * \param command request to send
  */
-void HMIHandler::sendRequest(const RPC2Communication::RPC2Request *command)
+void HMIHandler::sendRequest(const NsRPC2Communication::RPC2Request *command)
 {
     if(m_bHMIReady)
     {

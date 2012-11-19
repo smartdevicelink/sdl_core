@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/SystemContextMarshaller.inc gen/deep/pimpl/next/SystemContextMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/SystemContextMarshaller.inc ./src/ALRPCObjectsImpl/SystemContextMarshaller.gp  */
 /* Computed positions: -k'2' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -42,7 +42,7 @@ class SystemContext_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -80,22 +80,22 @@ SystemContext_intHash::hash (register const char *str, register unsigned int len
   return len + asso_values[(unsigned char)str[1]];
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 SystemContext_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  4,  4,  0,  0,  0,  9
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 19 "gen/deep/pimpl/next/SystemContextMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/SystemContextMarshaller.gp"
       {"MENU",2},
-#line 17 "gen/deep/pimpl/next/SystemContextMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/SystemContextMarshaller.gp"
       {"MAIN",0},
       {""}, {""}, {""},
-#line 18 "gen/deep/pimpl/next/SystemContextMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/SystemContextMarshaller.gp"
       {"VRSESSION",1}
     };
 

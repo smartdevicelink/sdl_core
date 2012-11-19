@@ -6,11 +6,7 @@
 
 
 #include "JSONHandler/JSONRPC2Handler.h"
-#include "JSONHandler/RPC2Objects/UI/Marshaller.h"
-#include "JSONHandler/RPC2Objects/TTS/Marshaller.h"
-#include "JSONHandler/RPC2Objects/VR/Marshaller.h"
-#include "JSONHandler/RPC2Objects/AppLinkCore/Marshaller.h"
-#include "JSONHandler/RPC2Objects/Buttons/Marshaller.h"
+#include "JSONHandler/RPC2Objects/Marshaller.h"
 
 log4cplus::Logger JSONRPC2Handler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONRPC2Handler"));
 
@@ -64,22 +60,17 @@ void JSONRPC2Handler::setRPC2CommandsObserver(
     mCommandsObserver = commandsObserver;
 }
 
-/*void JSONRPC2Handler::sendCommand( const RPC2Communication::RPC2Command * command )
-{
-    mCommandsToHMI.push( command );
-}*/
-
-void JSONRPC2Handler::sendNotification( const RPC2Communication::RPC2Notification * command )
+void JSONRPC2Handler::sendNotification( const NsRPC2Communication::RPC2Notification * command )
 {
     mNotificationsToHMI.push( command );
 }
     
-void JSONRPC2Handler::sendResponse( const RPC2Communication::RPC2Response * command )
+void JSONRPC2Handler::sendResponse( const NsRPC2Communication::RPC2Response * command )
 {
     mResponsesToHMI.push( command );
 }
     
-void JSONRPC2Handler::sendRequest( const RPC2Communication::RPC2Request * command )
+void JSONRPC2Handler::sendRequest( const NsRPC2Communication::RPC2Request * command )
 {
     mRequestsToHMI.push( command );
 }
@@ -98,24 +89,8 @@ void * JSONRPC2Handler::waitForCommandsFromHMI( void * params )
         {
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI: received command");
             Json::Value jsonMessage = handler -> mCommandsFromHMI.pop();
-            RPC2Communication::RPC2Command * currentCommand = RPC2Communication::UI::Marshaller::fromJSON( jsonMessage );
-            if ( !currentCommand )
-            {
-                currentCommand = RPC2Communication::TTS::Marshaller::fromJSON( jsonMessage );
-            }
-            if ( !currentCommand )
-            {
-                currentCommand = RPC2Communication::VR::Marshaller::fromJSON( jsonMessage );
-            }
-            if ( !currentCommand )
-            {
-                currentCommand = RPC2Communication::AppLinkCore::Marshaller::fromJSON( jsonMessage );
-            }
-            if ( !currentCommand )
-            {
-                currentCommand = RPC2Communication::Buttons::Marshaller::fromJSON( jsonMessage );
-            }
-
+            NsRPC2Communication::RPC2Command * currentCommand = NsRPC2Communication::Marshaller::fromJSON( jsonMessage );
+            
             if ( !currentCommand )
             {
                 LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
@@ -150,21 +125,9 @@ void * JSONRPC2Handler::waitForResponsesFromHMI( void * params )
         {            
             ResponseContainer response = handler -> mResponsesFromHMI.pop();
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI: received response " << response.methodName );
-            RPC2Communication::RPC2Command * currentCommand = RPC2Communication::UI::Marshaller::fromJSON( response.response );// response.methodName
+            NsRPC2Communication::RPC2Command * currentCommand = NsRPC2Communication::Marshaller::fromJSON( response.response );// response.methodName
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI: checked if UI message " << response.methodName );
-            if ( !currentCommand )
-            {
-                currentCommand = RPC2Communication::TTS::Marshaller::fromJSON( response.response );
-            }
-            if ( !currentCommand )
-            {
-                currentCommand = RPC2Communication::VR::Marshaller::fromJSON( response.response );
-            }
-            if ( !currentCommand )
-            {
-                currentCommand = RPC2Communication::AppLinkCore::Marshaller::fromJSON( response.response );
-            }
-
+            
             if ( !currentCommand )
             {
                 LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
@@ -196,22 +159,10 @@ void * JSONRPC2Handler::waitForResponsesToHMI( void * params )
     {
         while ( !handler -> mResponsesToHMI.empty() )
         {            
-            const RPC2Communication::RPC2Response * command = handler -> mResponsesToHMI.pop();
+            const NsRPC2Communication::RPC2Response * command = handler -> mResponsesToHMI.pop();
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: received command " << command->getId());
-            Json::Value commandJson = RPC2Communication::UI::Marshaller::toJSON( command );
-            if ( commandJson.isNull() )
-            {
-                commandJson = RPC2Communication::TTS::Marshaller::toJSON( command );
-            }
-            if ( commandJson.isNull() )
-            {
-                commandJson = RPC2Communication::VR::Marshaller::toJSON( command );
-            }
-            if ( commandJson.isNull() )
-            {
-                commandJson = RPC2Communication::AppLinkCore::Marshaller::toJSON( command );
-            }
-
+            Json::Value commandJson = NsRPC2Communication::Marshaller::toJSON( command );
+            
             if ( commandJson.isNull() )
             {
                 LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
@@ -243,21 +194,9 @@ void * JSONRPC2Handler::waitForRequestsToHMI( void * params )
         while ( !handler -> mRequestsToHMI.empty() )
         {
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: received command.");
-            const RPC2Communication::RPC2Command * command = handler -> mRequestsToHMI.pop();
-            Json::Value commandJson = RPC2Communication::UI::Marshaller::toJSON( command );
-            if ( commandJson.isNull() )
-            {
-                commandJson = RPC2Communication::TTS::Marshaller::toJSON( command );
-            }
-            if ( commandJson.isNull() )
-            {
-                commandJson = RPC2Communication::VR::Marshaller::toJSON( command );
-            }
-            if ( commandJson.isNull() )
-            {
-                commandJson = RPC2Communication::AppLinkCore::Marshaller::toJSON( command );
-            }
-
+            const NsRPC2Communication::RPC2Command * command = handler -> mRequestsToHMI.pop();
+            Json::Value commandJson = NsRPC2Communication::Marshaller::toJSON( command );
+            
             if ( commandJson.isNull() )
             {
                 LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );
@@ -289,21 +228,9 @@ void * JSONRPC2Handler::waitForNotificationsToHMI( void * params )
         while ( !handler -> mNotificationsToHMI.empty() )
         {
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: received command.");
-            const RPC2Communication::RPC2Command * command = handler -> mNotificationsToHMI.pop();
-            Json::Value commandJson = RPC2Communication::UI::Marshaller::toJSON( command );
-            if ( commandJson.isNull() )
-            {
-                commandJson = RPC2Communication::TTS::Marshaller::toJSON( command );
-            }
-            if ( commandJson.isNull() )
-            {
-                commandJson = RPC2Communication::VR::Marshaller::toJSON( command );
-            }
-            if ( commandJson.isNull() )
-            {
-                commandJson = RPC2Communication::AppLinkCore::Marshaller::toJSON( command );
-            }
-
+            const NsRPC2Communication::RPC2Command * command = handler -> mNotificationsToHMI.pop();
+            Json::Value commandJson = NsRPC2Communication::Marshaller::toJSON( command );
+            
             if ( commandJson.isNull() )
             {
                 LOG4CPLUS_ERROR( mLogger, "Invalid RPCBus message received." );

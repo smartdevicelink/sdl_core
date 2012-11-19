@@ -573,8 +573,8 @@ private:
   open(FO,mkpath(sprintf('%s%sMarshaller',$pimpl,$k),$sh)) or die;
   print FO header_h($k.'Marshaller');
   
-#  printf FO "#include <string>\n#include <json/json.h>\n\n#include \"PerfectHashTable.%s\"\n\n#include \"../%s.%s\"\n\n",$sh,$k,$sh;
-  printf FO "#include <string>\n#include <json/json.h>\n\n#include \"PerfectHashTable.%s\"\n\n#include \"%s/%s.%s\"\n\n",$sh,$p2i,$k,$sh;
+#  printf FO "#include <string>\n#include <jsoncpp/json.h>\n\n#include \"PerfectHashTable.%s\"\n\n#include \"../%s.%s\"\n\n",$sh,$k,$sh;
+  printf FO "#include <string>\n#include <jsoncpp/json.h>\n\n#include \"PerfectHashTable.%s\"\n\n#include \"%s/%s.%s\"\n\n",$sh,$p2i,$k,$sh;
 
   print FO $hat;
   printf FO "namespace %s\n{\n",$ns if $ns ne '';
@@ -1136,7 +1136,7 @@ bool #name#::set_All(const tUnion& t)
 
   print FO header_h($k.'Marshaller');
 
-  printf FO "#include <string>\n#include <json/json.h>\n\n#include \"PerfectHashTable.%s\"\n#include \"%s/%s.%s\"\n\n",
+  printf FO "#include <string>\n#include <jsoncpp/json.h>\n\n#include \"PerfectHashTable.%s\"\n#include \"%s/%s.%s\"\n\n",
         $sh,$p2i,$k,$sh;
 
   print FO $hat;
@@ -1933,7 +1933,7 @@ nxt:
 
   print FO header_h($k.'Marshaller');
 
-  printf FO "#include <string>\n#include <json/json.h>\n\n#include \"%s/%s.%s\"\n\n",
+  printf FO "#include <string>\n#include <jsoncpp/json.h>\n\n#include \"%s/%s.%s\"\n\n",
         $p2i,$k,$sh;
 
   print FO $hat;
@@ -2139,7 +2139,7 @@ for(my $i=0;$i<@table;$i++)
   printf FO "#include \"%s.%s\"\n",$_,$sh foreach sort keys %tps;
 
 #  printf FO "#include \"%s%s.hh\"\n\n",$libs,$mt;
-  printf FO "#include \"%s/%s.h\"\n\n",$i2l,$mt;
+  printf FO "#include \"%s/%s.hh\"\n\n",$i2l,$mt;
 
   print FO $hat;
 
@@ -2329,7 +2329,7 @@ nxt:
 
   print FO header_h($k.'Marshaller');
 
-  printf FO "#include <string>\n#include <json/json.h>\n\n#include \"%s/%s.%s\"\n\n",
+  printf FO "#include <string>\n#include <jsoncpp/json.h>\n\n#include \"%s/%s.%s\"\n\n",
         $p2i,$k,$sh;
 
   print FO $hat;
@@ -2504,7 +2504,7 @@ sub mkfuncname
 
 open(FO,mkpath($path.'Marshaller',$sh)) or die;
 print FO header_h('Marshaller');
-print FO "#include <string>\n#include <json/json.h>\n\n";
+print FO "#include <string>\n#include <jsoncpp/json.h>\n\n";
 
 foreach(@table)
 {
@@ -2757,7 +2757,7 @@ close FO;
 
 open(FO,mkpath($path.'RPC',$sh)) or die;
 print FO header_h('RPC');
-print FO "#include <string>\n#include <json/json.h>\n\n";
+print FO "#include <string>\n#include <jsoncpp/json.h>\n\n";
 
 printf FO "#include \"%s.%s\"\n",$_,$sh foreach sort keys %types;
 

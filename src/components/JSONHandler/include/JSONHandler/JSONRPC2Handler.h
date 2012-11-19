@@ -78,19 +78,19 @@ public:
      * \brief Sends notification to RPCBus.
      * \param command Json RPC2 notification to be sent to RPCBus.
      */
-    void sendNotification( const RPC2Communication::RPC2Notification * command );
+    void sendNotification( const NsRPC2Communication::RPC2Notification * command );
 
     /**
      * \brief Sends response to RPCBus.
      * \param command Json RPC2 response to be sent to RPCBus.
      */
-    void sendResponse( const RPC2Communication::RPC2Response * command );
+    void sendResponse( const NsRPC2Communication::RPC2Response * command );
 
     /**
      * \brief Sends request to RPCBus.
      * \param command Json RPC2 request to be sent to RPCBus.
      */
-    void sendRequest( const RPC2Communication::RPC2Request * command );
+    void sendRequest( const NsRPC2Communication::RPC2Request * command );
     /*End of methods for IRPC2CommandsObserver*/
 
 private:
@@ -179,19 +179,19 @@ private:
       *\brief Queue of requests to HMI.
       * \sa MessageQueue
     */
-    MessageQueue<const RPC2Communication::RPC2Request*> mRequestsToHMI;
+    MessageQueue<const NsRPC2Communication::RPC2Request*> mRequestsToHMI;
 
     /**
       *\brief Queue of responses to HMI.
       * \sa MessageQueue
     */
-    MessageQueue<const RPC2Communication::RPC2Response*> mResponsesToHMI;
+    MessageQueue<const NsRPC2Communication::RPC2Response*> mResponsesToHMI;
 
     /**
       *\brief Queue of notifications to HMI.
       * \sa MessageQueue
     */
-    MessageQueue<const RPC2Communication::RPC2Notification*> mNotificationsToHMI;
+    MessageQueue<const NsRPC2Communication::RPC2Notification*> mNotificationsToHMI;
 
     /**
       *\brief Thread for handling requests to HMI.

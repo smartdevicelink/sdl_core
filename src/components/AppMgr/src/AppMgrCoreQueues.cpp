@@ -115,7 +115,7 @@ void *AppMgrCoreQueue<QueueType>::handleQueue(void *pThis)
     }
 }
 
-template class AppMgrCoreQueue<RPC2Communication::RPC2Command*>;
+template class AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>;
 template class AppMgrCoreQueue<Message>;
 template class AppMgrCoreQueue<NsAppLinkRPC::ALRPCMessage*>;
 

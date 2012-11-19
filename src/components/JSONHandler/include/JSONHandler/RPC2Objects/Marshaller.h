@@ -66,12 +66,13 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/OnCommandMarshaller.h"
 
 /*
-  generated at	Mon Nov 19 07:25:04 2012
+  generated at	Mon Nov 19 08:20:05 2012
   source stamp	Mon Nov 19 07:04:40 2012
   author	robok0der
 */
 
-
+namespace NsRPC2Communication
+{
 class Marshaller
 {
 public:
@@ -138,11 +139,11 @@ public:
   Marshaller()			{}
   ~Marshaller()			{}
   
-  static ::RPC2Communication::RPC2Command* fromString(const std::string&);
-  static std::string toString(const ::RPC2Communication::RPC2Command* msg);
+  static ::NsRPC2Communication::RPC2Command* fromString(const std::string&);
+  static std::string toString(const ::NsRPC2Communication::RPC2Command* msg);
   
-  static ::RPC2Communication::RPC2Command* fromJSON(const Json::Value&);
-  static Json::Value toJSON(const ::RPC2Communication::RPC2Command* msg);
+  static ::NsRPC2Communication::RPC2Command* fromJSON(const Json::Value&);
+  static Json::Value toJSON(const ::NsRPC2Communication::RPC2Command* msg);
   
 protected:
 
@@ -739,9 +740,9 @@ protected:
   
 private:
   
-  static Json::Value Request2JSON(const ::RPC2Communication::RPC2Request* msg);
-  static Json::Value Response2JSON(const ::RPC2Communication::RPC2Response* msg);
-  static Json::Value Notification2JSON(const ::RPC2Communication::RPC2Notification* msg);
+  static Json::Value Request2JSON(const ::NsRPC2Communication::RPC2Request* msg);
+  static Json::Value Response2JSON(const ::NsRPC2Communication::RPC2Response* msg);
+  static Json::Value Notification2JSON(const ::NsRPC2Communication::RPC2Notification* msg);
   
   static const char* getName(Methods e)
   {
@@ -753,7 +754,7 @@ private:
   static const localHash mHashTable[53];
   friend class Marshaller_intHash;
   
-  static ::RPC2Communication::RPC2ErrorMarshaller mRPC2ErrorInternal;
+  static ::NsRPC2Communication::RPC2ErrorMarshaller mRPC2ErrorInternal;
 
   static NsRPC2Communication::AppLinkCore::ActivateAppMarshaller mNsRPC2Communication_AppLinkCore__ActivateApp;
   static NsRPC2Communication::AppLinkCore::ActivateAppResponseMarshaller mNsRPC2Communication_AppLinkCore__ActivateAppResponse;
@@ -810,5 +811,7 @@ private:
   static NsRPC2Communication::VR::OnCommandMarshaller mNsRPC2Communication_VR__OnCommand;
 
 };
+
+}
 
 #endif

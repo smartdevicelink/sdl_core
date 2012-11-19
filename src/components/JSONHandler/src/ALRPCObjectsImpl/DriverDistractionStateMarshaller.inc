@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/DriverDistractionStateMarshaller.inc gen/deep/pimpl/next/DriverDistractionStateMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.inc ./src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -15,7 +15,7 @@ class DriverDistractionState_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,19 +25,19 @@ DriverDistractionState_intHash::hash (register const char *str, register unsigne
   return len;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 DriverDistractionState_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  0,  5,  6
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""},
-#line 17 "gen/deep/pimpl/next/DriverDistractionStateMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.gp"
       {"DD_ON",0},
-#line 18 "gen/deep/pimpl/next/DriverDistractionStateMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.gp"
       {"DD_OFF",1}
     };
 

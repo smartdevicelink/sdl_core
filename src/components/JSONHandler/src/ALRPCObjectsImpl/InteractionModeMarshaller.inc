@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/InteractionModeMarshaller.inc gen/deep/pimpl/next/InteractionModeMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/InteractionModeMarshaller.inc ./src/ALRPCObjectsImpl/InteractionModeMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -15,7 +15,7 @@ class InteractionMode_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,23 +25,23 @@ InteractionMode_intHash::hash (register const char *str, register unsigned int l
   return len;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 InteractionMode_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  4,  0,  0,  7,  0,  0,  0, 11
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 19 "gen/deep/pimpl/next/InteractionModeMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/InteractionModeMarshaller.gp"
       {"BOTH",2},
       {""}, {""},
-#line 18 "gen/deep/pimpl/next/InteractionModeMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/InteractionModeMarshaller.gp"
       {"VR_ONLY",1},
       {""}, {""}, {""},
-#line 17 "gen/deep/pimpl/next/InteractionModeMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/InteractionModeMarshaller.gp"
       {"MANUAL_ONLY",0}
     };
 

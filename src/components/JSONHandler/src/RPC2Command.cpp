@@ -7,7 +7,7 @@
 
 #include "JSONHandler/RPC2Command.h"
 
-using namespace RPC2Communication;
+using namespace NsRPC2Communication;
 
 RPC2Command::RPC2Command( ) :
 mCommandType(UNDEFINED)

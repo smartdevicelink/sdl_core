@@ -13,10 +13,10 @@
 #include "RPC2Error.h"
 
 /**
-  *\namespace RPC2Communication
+  *\namespace NsRPC2Communication
   *\brief Namespace for communication with HMI.
 */
-namespace RPC2Communication
+namespace NsRPC2Communication
 {
     /**
      * \class RPC2ErrorMarshaller

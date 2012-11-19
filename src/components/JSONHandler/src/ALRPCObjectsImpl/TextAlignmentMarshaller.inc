@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/TextAlignmentMarshaller.inc gen/deep/pimpl/next/TextAlignmentMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/TextAlignmentMarshaller.inc ./src/ALRPCObjectsImpl/TextAlignmentMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -15,7 +15,7 @@ class TextAlignment_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,22 +25,22 @@ TextAlignment_intHash::hash (register const char *str, register unsigned int len
   return len;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 TextAlignment_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  0,  0,  0,  0,  8,  0,  0,  0, 12, 13
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 19 "gen/deep/pimpl/next/TextAlignmentMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/TextAlignmentMarshaller.gp"
       {"CENTERED",2},
       {""}, {""}, {""},
-#line 17 "gen/deep/pimpl/next/TextAlignmentMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/TextAlignmentMarshaller.gp"
       {"LEFT_ALIGNED",0},
-#line 18 "gen/deep/pimpl/next/TextAlignmentMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/TextAlignmentMarshaller.gp"
       {"RIGHT_ALIGNED",1}
     };
 

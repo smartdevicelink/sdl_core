@@ -3,7 +3,7 @@
 
 class JSONRPC2Handler;
 
-namespace RPC2Communication
+namespace NsRPC2Communication
 {
 class RPC2Notification;
 class RPC2Response;
@@ -41,19 +41,19 @@ public:
      * \brief send notification via associated handler
      * \param command notification to send
      */
-    void sendNotification( const RPC2Communication::RPC2Notification * command );
+    void sendNotification( const NsRPC2Communication::RPC2Notification * command );
 
     /**
      * \brief send response via associated handler
      * \param command response to send
      */
-    void sendResponse( const RPC2Communication::RPC2Response * command );
+    void sendResponse( const NsRPC2Communication::RPC2Response * command );
 
     /**
      * \brief send request via associated handler
      * \param command request to send
      */
-    void sendRequest( const RPC2Communication::RPC2Request * command );
+    void sendRequest( const NsRPC2Communication::RPC2Request * command );
 
     /**
      * \brief set Json RPC2 handler

@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/HMILevelMarshaller.inc gen/deep/pimpl/next/HMILevelMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/HMILevelMarshaller.inc ./src/ALRPCObjectsImpl/HMILevelMarshaller.gp  */
 /* Computed positions: -k'1' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -42,7 +42,7 @@ class HMILevel_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -80,25 +80,25 @@ HMILevel_intHash::hash (register const char *str, register unsigned int len)
   return len + asso_values[(unsigned char)str[0]];
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 HMILevel_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  4,  0,  0,  7,  0,  4, 10
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 20 "gen/deep/pimpl/next/HMILevelMarshaller.gp"
+#line 20 "./src/ALRPCObjectsImpl/HMILevelMarshaller.gp"
       {"NONE",3},
       {""}, {""},
-#line 18 "gen/deep/pimpl/next/HMILevelMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/HMILevelMarshaller.gp"
       {"LIMITED",1},
       {""},
-#line 17 "gen/deep/pimpl/next/HMILevelMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/HMILevelMarshaller.gp"
       {"FULL",0},
-#line 19 "gen/deep/pimpl/next/HMILevelMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/HMILevelMarshaller.gp"
       {"BACKGROUND",2}
     };
 

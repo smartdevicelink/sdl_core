@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/DisplayTypeMarshaller.inc gen/deep/pimpl/next/DisplayTypeMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/DisplayTypeMarshaller.inc ./src/ALRPCObjectsImpl/DisplayTypeMarshaller.gp  */
 /* Computed positions: -k'6,$' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -42,7 +42,7 @@ class DisplayType_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -92,7 +92,7 @@ DisplayType_intHash::hash (register const char *str, register unsigned int len)
   return hval + asso_values[(unsigned char)str[len - 1]];
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 DisplayType_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
@@ -100,29 +100,29 @@ DisplayType_intHash::getPointer (register const char *str, register unsigned int
        0,  0,  0,  3,  4,  5,  0,  0,  3,  4, 10,  0,  0,  0,
        4, 10,  0,  0,  0,  0,  5
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""},
-#line 20 "gen/deep/pimpl/next/DisplayTypeMarshaller.gp"
+#line 20 "./src/ALRPCObjectsImpl/DisplayTypeMarshaller.gp"
       {"NGN",3},
-#line 25 "gen/deep/pimpl/next/DisplayTypeMarshaller.gp"
+#line 25 "./src/ALRPCObjectsImpl/DisplayTypeMarshaller.gp"
       {"MFD5",8},
-#line 19 "gen/deep/pimpl/next/DisplayTypeMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/DisplayTypeMarshaller.gp"
       {"TYPE5",2},
       {""}, {""},
-#line 17 "gen/deep/pimpl/next/DisplayTypeMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/DisplayTypeMarshaller.gp"
       {"CID",0},
-#line 24 "gen/deep/pimpl/next/DisplayTypeMarshaller.gp"
+#line 24 "./src/ALRPCObjectsImpl/DisplayTypeMarshaller.gp"
       {"MFD4",7},
-#line 21 "gen/deep/pimpl/next/DisplayTypeMarshaller.gp"
+#line 21 "./src/ALRPCObjectsImpl/DisplayTypeMarshaller.gp"
       {"GEN2_8_DMA",4},
       {""}, {""}, {""},
-#line 23 "gen/deep/pimpl/next/DisplayTypeMarshaller.gp"
+#line 23 "./src/ALRPCObjectsImpl/DisplayTypeMarshaller.gp"
       {"MFD3",6},
-#line 22 "gen/deep/pimpl/next/DisplayTypeMarshaller.gp"
+#line 22 "./src/ALRPCObjectsImpl/DisplayTypeMarshaller.gp"
       {"GEN2_6_DMA",5},
       {""}, {""}, {""}, {""},
-#line 18 "gen/deep/pimpl/next/DisplayTypeMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/DisplayTypeMarshaller.gp"
       {"TYPE2",1}
     };
 

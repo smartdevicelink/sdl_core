@@ -52,7 +52,7 @@ AppMgrCore& AppMgrCore::getInstance( )
  */
 AppMgrCore::AppMgrCore()
     :mQueueRPCAppLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
-    ,mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<RPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
+    ,mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
 {
     std::ifstream file(mAutoActivateIdFileName);
     if( file.is_open() )
@@ -118,7 +118,7 @@ void AppMgrCore::pushMobileRPCMessage( NsAppLinkRPC::ALRPCMessage * message, uns
  * \brief push HMI RPC2 message to a queue
  * \param message a message to be pushed
  */
-void AppMgrCore::pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message )
+void AppMgrCore::pushRPC2CommunicationMessage( NsRPC2Communication::RPC2Command * message )
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " Returning a message from HMI...");
     if(!message)
@@ -235,7 +235,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             NsAppLinkRPC::OnHMIStatus* status = new NsAppLinkRPC::OnHMIStatus();
             status->set_hmiLevel(app->getApplicationHMIStatusLevel());
             MobileHandler::getInstance().sendRPCMessage(status, sessionID);
-            RPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new RPC2Communication::AppLinkCore::OnAppRegistered();
+            NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
             appRegistered->set_appName(app->getName());
             appRegistered->set_isMediaApplication(app->getIsMediaApplication());
             appRegistered->set_languageDesired(app->getLanguageDesired());
@@ -267,7 +267,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
             msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
             MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionID);
-            RPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new RPC2Communication::AppLinkCore::OnAppUnregistered();
+            NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
             appUnregistered->set_appName(appName);
             appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
             HMIHandler::getInstance().sendNotification(appUnregistered);
@@ -318,7 +318,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             LOG4CPLUS_INFO_EXT(mLogger, " A Show request has been invoked");
             LOG4CPLUS_INFO_EXT(mLogger, "message " << mobileMsg->getMethodId() );
             NsAppLinkRPC::Show_request* object = (NsAppLinkRPC::Show_request*)mobileMsg;
-            RPC2Communication::UI::Show* showRPC2Request = new RPC2Communication::UI::Show();
+            NsRPC2Communication::UI::Show* showRPC2Request = new NsRPC2Communication::UI::Show();
             showRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             LOG4CPLUS_INFO_EXT(mLogger, "showrpc2request created");
             if(object->get_mainField1())
@@ -351,7 +351,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Speak request has been invoked");
             NsAppLinkRPC::Speak_request* object = (NsAppLinkRPC::Speak_request*)mobileMsg;
-            RPC2Communication::TTS::Speak* speakRPC2Request = new RPC2Communication::TTS::Speak();
+            NsRPC2Communication::TTS::Speak* speakRPC2Request = new NsRPC2Communication::TTS::Speak();
             speakRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             speakRPC2Request->set_ttsChunks(object->get_ttsChunks());
             core->mMessageMapping.addMessage(speakRPC2Request->getId(), sessionID);
@@ -366,7 +366,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties request has been invoked");
             NsAppLinkRPC::SetGlobalProperties_request* object = (NsAppLinkRPC::SetGlobalProperties_request*)mobileMsg;
-            RPC2Communication::UI::SetGlobalProperties* setGPRPC2Request = new RPC2Communication::UI::SetGlobalProperties();
+            NsRPC2Communication::UI::SetGlobalProperties* setGPRPC2Request = new NsRPC2Communication::UI::SetGlobalProperties();
             setGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(setGPRPC2Request->getId(), sessionID);
             if(object->get_helpPrompt())
@@ -389,7 +389,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A ResetGlobalProperties request has been invoked");
             NsAppLinkRPC::ResetGlobalProperties_request* object = (NsAppLinkRPC::ResetGlobalProperties_request*)mobileMsg;
-            RPC2Communication::UI::ResetGlobalProperties* resetGPRPC2Request = new RPC2Communication::UI::ResetGlobalProperties();
+            NsRPC2Communication::UI::ResetGlobalProperties* resetGPRPC2Request = new NsRPC2Communication::UI::ResetGlobalProperties();
             resetGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(resetGPRPC2Request->getId(), sessionID);
             resetGPRPC2Request->set_properties(object->get_properties());
@@ -405,7 +405,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An Alert request has been invoked");
             NsAppLinkRPC::Alert_request* object = (NsAppLinkRPC::Alert_request*)mobileMsg;
-            RPC2Communication::UI::Alert* alert = new RPC2Communication::UI::Alert();
+            NsRPC2Communication::UI::Alert* alert = new NsRPC2Communication::UI::Alert();
             alert->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(alert->getId(), sessionID);
             if(object->get_alertText1())
@@ -454,7 +454,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             if(object->get_menuParams())
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand UI request has been invoked");
-                RPC2Communication::UI::AddCommand * addCmd = new RPC2Communication::UI::AddCommand();
+                NsRPC2Communication::UI::AddCommand * addCmd = new NsRPC2Communication::UI::AddCommand();
                 addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 CommandType cmdType = CommandType::UI;
                 const NsAppLinkRPC::MenuParams* menuParams = object->get_menuParams();
@@ -475,7 +475,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
             if(object->get_vrCommands())
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand VR request has been invoked");
-                RPC2Communication::VR::AddCommand * addCmd = new RPC2Communication::VR::AddCommand();
+                NsRPC2Communication::VR::AddCommand * addCmd = new NsRPC2Communication::VR::AddCommand();
                 addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 CommandType cmdType = CommandType::VR;
                 addCmd->set_vrCommands(*object->get_vrCommands());
@@ -503,7 +503,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                 if(cmdType == CommandType::UI)
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand UI request has been invoked");
-                    RPC2Communication::UI::DeleteCommand* deleteCmd = new RPC2Communication::UI::DeleteCommand();
+                    NsRPC2Communication::UI::DeleteCommand* deleteCmd = new NsRPC2Communication::UI::DeleteCommand();
                     deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
                     deleteCmd->set_cmdId(cmdId);
@@ -516,7 +516,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
                 else if(cmdType == CommandType::VR)
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand VR request has been invoked");
-                    RPC2Communication::VR::DeleteCommand* deleteCmd = new RPC2Communication::VR::DeleteCommand();
+                    NsRPC2Communication::VR::DeleteCommand* deleteCmd = new NsRPC2Communication::VR::DeleteCommand();
                     deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     core->mMessageMapping.addMessage(deleteCmd->getId(), sessionID);
                     deleteCmd->set_cmdId(cmdId);
@@ -532,7 +532,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
             NsAppLinkRPC::AddSubMenu_request* object = (NsAppLinkRPC::AddSubMenu_request*)mobileMsg;
-            RPC2Communication::UI::AddSubMenu* addSubMenu = new RPC2Communication::UI::AddSubMenu();
+            NsRPC2Communication::UI::AddSubMenu* addSubMenu = new NsRPC2Communication::UI::AddSubMenu();
             addSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(addSubMenu->getId(), sessionID);
             addSubMenu->set_menuId(object->get_menuID());
@@ -548,7 +548,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubmenu request has been invoked");
             NsAppLinkRPC::DeleteSubMenu_request* object = (NsAppLinkRPC::DeleteSubMenu_request*)mobileMsg;
-            RPC2Communication::UI::DeleteSubMenu* delSubMenu = new RPC2Communication::UI::DeleteSubMenu();
+            NsRPC2Communication::UI::DeleteSubMenu* delSubMenu = new NsRPC2Communication::UI::DeleteSubMenu();
             delSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(delSubMenu->getId(), sessionID);
             const unsigned int& menuId = object->get_menuID();
@@ -567,7 +567,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet request has been invoked");
             NsAppLinkRPC::CreateInteractionChoiceSet_request* object = (NsAppLinkRPC::CreateInteractionChoiceSet_request*)mobileMsg;
-            RPC2Communication::UI::CreateInteractionChoiceSet* createInteractionChoiceSet = new RPC2Communication::UI::CreateInteractionChoiceSet();
+            NsRPC2Communication::UI::CreateInteractionChoiceSet* createInteractionChoiceSet = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
             createInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(createInteractionChoiceSet->getId(), sessionID);
             createInteractionChoiceSet->set_choiceSet(object->get_choiceSet());
@@ -579,7 +579,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet request has been invoked");
             NsAppLinkRPC::DeleteInteractionChoiceSet_request* object = (NsAppLinkRPC::DeleteInteractionChoiceSet_request*)mobileMsg;
-            RPC2Communication::UI::DeleteInteractionChoiceSet* deleteInteractionChoiceSet = new RPC2Communication::UI::DeleteInteractionChoiceSet();
+            NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteInteractionChoiceSet = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
             deleteInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getId(), sessionID);
             deleteInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
@@ -590,7 +590,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction request has been invoked");
             NsAppLinkRPC::PerformInteraction_request* object = (NsAppLinkRPC::PerformInteraction_request*)mobileMsg;
-            RPC2Communication::UI::PerformInteraction* performInteraction = new RPC2Communication::UI::PerformInteraction();
+            NsRPC2Communication::UI::PerformInteraction* performInteraction = new NsRPC2Communication::UI::PerformInteraction();
             performInteraction->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(performInteraction->getId(), sessionID);
             if(object->get_helpPrompt())
@@ -616,7 +616,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
             NsAppLinkRPC::SetMediaClockTimer_request* object = (NsAppLinkRPC::SetMediaClockTimer_request*)mobileMsg;
-            RPC2Communication::UI::SetMediaClockTimer* setTimer = new RPC2Communication::UI::SetMediaClockTimer();
+            NsRPC2Communication::UI::SetMediaClockTimer* setTimer = new NsRPC2Communication::UI::SetMediaClockTimer();
             setTimer->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             core->mMessageMapping.addMessage(setTimer->getId(), sessionID);
             if(object->get_startTime())
@@ -682,7 +682,7 @@ void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
  * \param msg a message to be pushed
  * \param pThis a pointer to AppMgrCore class instance
  */
-void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg , void *pThis)
+void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* msg , void *pThis)
 {
     if(!msg)
     {
@@ -699,10 +699,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
     AppMgrCore* core = (AppMgrCore*)pThis;
 	switch(msg->getMethod())
 	{
-        case RPC2Communication::Buttons::Marshaller::METHOD_ONBUTTONEVENT:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonEvent notification has been invoked");
-            RPC2Communication::Buttons::OnButtonEvent * object = (RPC2Communication::Buttons::OnButtonEvent*)msg;
+            NsRPC2Communication::Buttons::OnButtonEvent * object = (NsRPC2Communication::Buttons::OnButtonEvent*)msg;
             const NsAppLinkRPC::ButtonName & name = object->get_name();
             Application* app = core->getApplicationFromItemCheckNotNull(core->mButtonsMapping.findRegistryItemSubscribedToButton(name));
             if(!app)
@@ -720,10 +720,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(event, sessionID);
             return;
         }
-        case RPC2Communication::Buttons::Marshaller::METHOD_ONBUTTONPRESS:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonPress notification has been invoked");
-            RPC2Communication::Buttons::OnButtonPress * object = (RPC2Communication::Buttons::OnButtonPress*)msg;
+            NsRPC2Communication::Buttons::OnButtonPress * object = (NsRPC2Communication::Buttons::OnButtonPress*)msg;
             const NsAppLinkRPC::ButtonName & name = object->get_name();
             Application* app = core->getApplicationFromItemCheckNotNull(core->mButtonsMapping.findRegistryItemSubscribedToButton(name));
             if(!app)
@@ -742,48 +742,41 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(event, sessionID);
             return;
         }        
-        case RPC2Communication::Buttons::Marshaller::METHOD_GETCAPABILITIESRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetButtonCapabilities response has been income");
-            RPC2Communication::Buttons::GetCapabilitiesResponse * btnCaps = (RPC2Communication::Buttons::GetCapabilitiesResponse*)msg;
+            NsRPC2Communication::Buttons::GetCapabilitiesResponse * btnCaps = (NsRPC2Communication::Buttons::GetCapabilitiesResponse*)msg;
             core->mButtonCapabilities.set( btnCaps->get_capabilities() );
             return;
         }
-		case RPC2Communication::Buttons::Marshaller::METHOD_INVALID:
-		default:
-			LOG4CPLUS_ERROR_EXT(mLogger, " Not Buttons RPC message "<< msg->getMethod() <<" has been received!");
-	}
-
-    switch(msg->getMethod())
-    {
-        case RPC2Communication::UI::Marshaller::METHOD_ONREADY:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONREADY:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnReady UI notification has been invoked");
             HMIHandler::getInstance().setReadyState(true);
 
-            RPC2Communication::UI::GetCapabilities* getUiCapsRequest = new RPC2Communication::UI::GetCapabilities();
+            NsRPC2Communication::UI::GetCapabilities* getUiCapsRequest = new NsRPC2Communication::UI::GetCapabilities();
             HMIHandler::getInstance().sendRequest(getUiCapsRequest);
-            RPC2Communication::VR::GetCapabilities* getVrCapsRequest = new RPC2Communication::VR::GetCapabilities();
+            NsRPC2Communication::VR::GetCapabilities* getVrCapsRequest = new NsRPC2Communication::VR::GetCapabilities();
             HMIHandler::getInstance().sendRequest(getVrCapsRequest);
-            RPC2Communication::TTS::GetCapabilities* getTtsCapsRequest = new RPC2Communication::TTS::GetCapabilities();
+            NsRPC2Communication::TTS::GetCapabilities* getTtsCapsRequest = new NsRPC2Communication::TTS::GetCapabilities();
             HMIHandler::getInstance().sendRequest(getTtsCapsRequest);
-            RPC2Communication::Buttons::GetCapabilities* getButtonsCapsRequest = new RPC2Communication::Buttons::GetCapabilities();
+            NsRPC2Communication::Buttons::GetCapabilities* getButtonsCapsRequest = new NsRPC2Communication::Buttons::GetCapabilities();
             HMIHandler::getInstance().sendRequest(getButtonsCapsRequest);
 
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_GETCAPABILITIESRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetUICapabilities response has been income");
-            RPC2Communication::UI::GetCapabilitiesResponse * uiCaps = (RPC2Communication::UI::GetCapabilitiesResponse*)msg;
+            NsRPC2Communication::UI::GetCapabilitiesResponse * uiCaps = (NsRPC2Communication::UI::GetCapabilitiesResponse*)msg;
             core->mDisplayCapabilities = uiCaps->get_displayCapabilities();
             core->mHmiZoneCapabilities.set( uiCaps->get_hmiZoneCapabilities() );
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_ONCOMMAND:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONCOMMAND:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand UI notification has been invoked");
-            RPC2Communication::UI::OnCommand* object = (RPC2Communication::UI::OnCommand*)msg;
+            NsRPC2Communication::UI::OnCommand* object = (NsRPC2Communication::UI::OnCommand*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_commandId(), CommandType::UI));
             if(!app)
             {
@@ -798,10 +791,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(event, sessionID);
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_SHOWRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SHOWRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Show response has been income");
-            RPC2Communication::UI::ShowResponse* object = (RPC2Communication::UI::ShowResponse*)msg;
+            NsRPC2Communication::UI::ShowResponse* object = (NsRPC2Communication::UI::ShowResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -819,10 +812,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_SETGLOBALPROPERTIESRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties response has been income");
-            RPC2Communication::UI::SetGlobalPropertiesResponse* object = (RPC2Communication::UI::SetGlobalPropertiesResponse*)msg;
+            NsRPC2Communication::UI::SetGlobalPropertiesResponse* object = (NsRPC2Communication::UI::SetGlobalPropertiesResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -841,10 +834,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_RESETGLOBALPROPERTIESRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A ResetGlobalProperties response has been income");
-            RPC2Communication::UI::ResetGlobalPropertiesResponse* object = (RPC2Communication::UI::ResetGlobalPropertiesResponse*)msg;
+            NsRPC2Communication::UI::ResetGlobalPropertiesResponse* object = (NsRPC2Communication::UI::ResetGlobalPropertiesResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -863,10 +856,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_ALERTRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ALERTRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An Alert response has been income");
-            RPC2Communication::UI::AlertResponse* object = (RPC2Communication::UI::AlertResponse*)msg;
+            NsRPC2Communication::UI::AlertResponse* object = (NsRPC2Communication::UI::AlertResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -883,10 +876,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_ADDCOMMANDRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ADDCOMMANDRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand UI response has been income");
-            RPC2Communication::UI::AddCommandResponse* object = (RPC2Communication::UI::AddCommandResponse*)msg;
+            NsRPC2Communication::UI::AddCommandResponse* object = (NsRPC2Communication::UI::AddCommandResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -910,10 +903,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
 
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_DELETECOMMANDRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETECOMMANDRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand UI response has been income");
-            RPC2Communication::UI::DeleteCommandResponse* object = (RPC2Communication::UI::DeleteCommandResponse*)msg;
+            NsRPC2Communication::UI::DeleteCommandResponse* object = (NsRPC2Communication::UI::DeleteCommandResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -938,10 +931,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
 
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_ADDSUBMENURESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ADDSUBMENURESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddSubMenu response has been income");
-            RPC2Communication::UI::AddSubMenuResponse* object = (RPC2Communication::UI::AddSubMenuResponse*)msg;
+            NsRPC2Communication::UI::AddSubMenuResponse* object = (NsRPC2Communication::UI::AddSubMenuResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -958,10 +951,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_DELETESUBMENURESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETESUBMENURESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubMenu response has been income");
-            RPC2Communication::UI::DeleteSubMenuResponse* object = (RPC2Communication::UI::DeleteSubMenuResponse*)msg;
+            NsRPC2Communication::UI::DeleteSubMenuResponse* object = (NsRPC2Communication::UI::DeleteSubMenuResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -978,10 +971,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_CREATEINTERACTIONCHOICESETRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__CREATEINTERACTIONCHOICESETRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet response has been income");
-            RPC2Communication::UI::CreateInteractionChoiceSetResponse* object = (RPC2Communication::UI::CreateInteractionChoiceSetResponse*)msg;
+            NsRPC2Communication::UI::CreateInteractionChoiceSetResponse* object = (NsRPC2Communication::UI::CreateInteractionChoiceSetResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -998,10 +991,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_DELETEINTERACTIONCHOICESETRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETEINTERACTIONCHOICESETRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet response has been income");
-            RPC2Communication::UI::DeleteInteractionChoiceSetResponse* object = (RPC2Communication::UI::DeleteInteractionChoiceSetResponse*)msg;
+            NsRPC2Communication::UI::DeleteInteractionChoiceSetResponse* object = (NsRPC2Communication::UI::DeleteInteractionChoiceSetResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -1018,10 +1011,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_PERFORMINTERACTIONRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTIONRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction response has been income");
-            RPC2Communication::UI::PerformInteractionResponse* object = (RPC2Communication::UI::PerformInteractionResponse*)msg;
+            NsRPC2Communication::UI::PerformInteractionResponse* object = (NsRPC2Communication::UI::PerformInteractionResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -1046,10 +1039,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_SETMEDIACLOCKTIMERRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETMEDIACLOCKTIMERRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer response has been income");
-            RPC2Communication::UI::SetMediaClockTimerResponse* object = (RPC2Communication::UI::SetMediaClockTimerResponse*)msg;
+            NsRPC2Communication::UI::SetMediaClockTimerResponse* object = (NsRPC2Communication::UI::SetMediaClockTimerResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -1066,10 +1059,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_ONDRIVERDISTRACTION:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONDRIVERDISTRACTION:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnDriverDistraction UI notification has been invoked");
-            RPC2Communication::UI::OnDriverDistraction* object = (RPC2Communication::UI::OnDriverDistraction*)msg;
+            NsRPC2Communication::UI::OnDriverDistraction* object = (NsRPC2Communication::UI::OnDriverDistraction*)msg;
 
             NsAppLinkRPC::OnDriverDistraction* event = new NsAppLinkRPC::OnDriverDistraction();
             event->set_state(object->get_state());
@@ -1077,24 +1070,17 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(event, 1);
             return;
         }
-        case RPC2Communication::UI::Marshaller::METHOD_INVALID:
-        default:
-            LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message "<< msg->getMethod() <<" has been received!");
-    }
-
-    switch(msg->getMethod())
-    {
-        case RPC2Communication::VR::Marshaller::METHOD_GETCAPABILITIESRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__GETCAPABILITIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetVRCapabilities response has been income");
-            RPC2Communication::VR::GetCapabilitiesResponse * vrCaps = (RPC2Communication::VR::GetCapabilitiesResponse*)msg;
+            NsRPC2Communication::VR::GetCapabilitiesResponse * vrCaps = (NsRPC2Communication::VR::GetCapabilitiesResponse*)msg;
             core->mVrCapabilities.set(vrCaps->get_capabilities());
             return;
         }
-        case RPC2Communication::VR::Marshaller::METHOD_ADDCOMMANDRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMANDRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand VR response has been income");
-            RPC2Communication::VR::AddCommandResponse* object = (RPC2Communication::VR::AddCommandResponse*)msg;
+            NsRPC2Communication::VR::AddCommandResponse* object = (NsRPC2Communication::VR::AddCommandResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -1118,10 +1104,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
 
             return;
         }
-        case RPC2Communication::VR::Marshaller::METHOD_DELETECOMMANDRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMANDRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand VR response has been income");
-            RPC2Communication::VR::DeleteCommandResponse* object = (RPC2Communication::VR::DeleteCommandResponse*)msg;
+            NsRPC2Communication::VR::DeleteCommandResponse* object = (NsRPC2Communication::VR::DeleteCommandResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -1145,10 +1131,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
 
             return;
         }
-        case RPC2Communication::VR::Marshaller::METHOD_ONCOMMAND:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ONCOMMAND:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand VR notification has been invoked");
-            RPC2Communication::VR::OnCommand* object = (RPC2Communication::VR::OnCommand*)msg;
+            NsRPC2Communication::VR::OnCommand* object = (NsRPC2Communication::VR::OnCommand*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_cmdID(), CommandType::VR));
             if(!app)
             {
@@ -1163,24 +1149,17 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(event, sessionID);
             return;
         }
-        case RPC2Communication::VR::Marshaller::METHOD_INVALID:
-        default:
-            LOG4CPLUS_ERROR_EXT(mLogger, " Not VR RPC message "<< msg->getMethod() <<" has been received!");
-    }
-
-    switch(msg->getMethod())
-    {
-        case RPC2Communication::TTS::Marshaller::METHOD_GETCAPABILITIESRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetTTSCapabilities response has been income");
-            RPC2Communication::TTS::GetCapabilitiesResponse * ttsCaps = (RPC2Communication::TTS::GetCapabilitiesResponse*)msg;
+            NsRPC2Communication::TTS::GetCapabilitiesResponse * ttsCaps = (NsRPC2Communication::TTS::GetCapabilitiesResponse*)msg;
             core->mSpeechCapabilities.set(ttsCaps->get_capabilities());
             return;
         }
-        case RPC2Communication::TTS::Marshaller::METHOD_SPEAKRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Speak response has been income");
-            RPC2Communication::TTS::SpeakResponse* object = (RPC2Communication::TTS::SpeakResponse*)msg;
+            NsRPC2Communication::TTS::SpeakResponse* object = (NsRPC2Communication::TTS::SpeakResponse*)msg;
             Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
             if(!app)
             {
@@ -1198,17 +1177,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case RPC2Communication::TTS::Marshaller::METHOD_INVALID:
-        default:
-            LOG4CPLUS_ERROR_EXT(mLogger, " Not TTS RPC message "<< msg->getMethod() <<" has been received!");
-    }
-
-    switch(msg->getMethod())
-    {
-        case RPC2Communication::AppLinkCore::Marshaller::METHOD_ONAPPUNREGISTERED:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPUNREGISTERED:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnAppUnregistered notification has been income");
-            RPC2Communication::AppLinkCore::OnAppUnregistered * object = (RPC2Communication::AppLinkCore::OnAppUnregistered*)msg;
+            NsRPC2Communication::AppLinkCore::OnAppUnregistered * object = (NsRPC2Communication::AppLinkCore::OnAppUnregistered*)msg;
             NsAppLinkRPC::OnAppInterfaceUnregistered* event = new NsAppLinkRPC::OnAppInterfaceUnregistered();
             if ( object->get_reason() )
             {
@@ -1217,10 +1189,10 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             MobileHandler::getInstance().sendRPCMessage(event, 1);//just temporarily!!!
             return;
         }        
-        case RPC2Communication::AppLinkCore::Marshaller::METHOD_ACTIVATEAPP:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPP:
         {
             LOG4CPLUS_INFO_EXT(mLogger, "ActivateApp has been received!");
-            RPC2Communication::AppLinkCore::ActivateApp* object = static_cast<RPC2Communication::AppLinkCore::ActivateApp*>(msg);
+            NsRPC2Communication::AppLinkCore::ActivateApp* object = static_cast<NsRPC2Communication::AppLinkCore::ActivateApp*>(msg);
             if ( !object )
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't cast object to ActivateApp type");
@@ -1246,29 +1218,29 @@ void AppMgrCore::handleBusRPCMessageIncoming(RPC2Communication::RPC2Command* msg
             hmiStatus->set_audioStreamingState(app->getApplicationAudioStreamingState());
             hmiStatus->set_systemContext(NsAppLinkRPC::SystemContext::SYSCTXT_MENU);
             MobileHandler::getInstance().sendRPCMessage( hmiStatus, app->getSessionID() );
-            RPC2Communication::AppLinkCore::ActivateAppResponse * response = new RPC2Communication::AppLinkCore::ActivateAppResponse;
+            NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
             response->setId(object->getId());
             response->setResult(NsAppLinkRPC::Result::SUCCESS);
             HMIHandler::getInstance().sendResponse(response);
             return;
         }
-        case RPC2Communication::AppLinkCore::Marshaller::METHOD_SENDDATA:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA:
         {
             LOG4CPLUS_INFO_EXT(mLogger, "SendData request has been received!");
-            RPC2Communication::AppLinkCore::SendData* object = static_cast<RPC2Communication::AppLinkCore::SendData*>(msg);
+            NsRPC2Communication::AppLinkCore::SendData* object = static_cast<NsRPC2Communication::AppLinkCore::SendData*>(msg);
             core->mSyncPManager.setRawData( object->get_data() );
             NsAppLinkRPC::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPC::OnEncodedSyncPData;
             encodedNotification->set_data(core->mSyncPManager.getPData());
             MobileHandler::getInstance().sendRPCMessage( encodedNotification, 1 );
-            RPC2Communication::AppLinkCore::SendDataResponse* response = new RPC2Communication::AppLinkCore::SendDataResponse;
+            NsRPC2Communication::AppLinkCore::SendDataResponse* response = new NsRPC2Communication::AppLinkCore::SendDataResponse;
             response->setId(object->getId());
             response->setResult(NsAppLinkRPC::Result::SUCCESS);
             HMIHandler::getInstance().sendResponse(response);
             return;
         }
-        case RPC2Communication::AppLinkCore::Marshaller::METHOD_INVALID:
+        case NsRPC2Communication::Marshaller::METHOD_INVALID:
         default:
-            LOG4CPLUS_ERROR_EXT(mLogger, " Not AppLinkCore RPC message "<< msg->getMethod() <<" has been received!");
+            LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message "<< msg->getMethod() <<" has been received!");
     }
 
     LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message "<< msg->getMethod() <<" has been invoked!");

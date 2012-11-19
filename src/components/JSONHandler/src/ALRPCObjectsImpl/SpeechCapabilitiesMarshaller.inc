@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/SpeechCapabilitiesMarshaller.inc gen/deep/pimpl/next/SpeechCapabilitiesMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.inc ./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -15,7 +15,7 @@ class SpeechCapabilities_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,7 +25,7 @@ SpeechCapabilities_intHash::hash (register const char *str, register unsigned in
   return len;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 SpeechCapabilities_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
@@ -33,21 +33,21 @@ SpeechCapabilities_intHash::getPointer (register const char *str, register unsig
        0,  0,  0,  0,  4,  0,  0,  7,  0,  0,  0,  0, 12, 13,
        0, 15
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 17 "gen/deep/pimpl/next/SpeechCapabilitiesMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
       {"TEXT",0},
       {""}, {""},
-#line 21 "gen/deep/pimpl/next/SpeechCapabilitiesMarshaller.gp"
+#line 21 "./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
       {"SILENCE",4},
       {""}, {""}, {""}, {""},
-#line 20 "gen/deep/pimpl/next/SpeechCapabilitiesMarshaller.gp"
+#line 20 "./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
       {"PRE_RECORDED",3},
-#line 18 "gen/deep/pimpl/next/SpeechCapabilitiesMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
       {"SAPI_PHONEMES",1},
       {""},
-#line 19 "gen/deep/pimpl/next/SpeechCapabilitiesMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
       {"LHPLUS_PHONEMES",2}
     };
 

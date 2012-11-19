@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/ButtonPressModeMarshaller.inc gen/deep/pimpl/next/ButtonPressModeMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/ButtonPressModeMarshaller.inc ./src/ALRPCObjectsImpl/ButtonPressModeMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -15,7 +15,7 @@ class ButtonPressMode_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,19 +25,19 @@ ButtonPressMode_intHash::hash (register const char *str, register unsigned int l
   return len;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 ButtonPressMode_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  4,  5
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 17 "gen/deep/pimpl/next/ButtonPressModeMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/ButtonPressModeMarshaller.gp"
       {"LONG",0},
-#line 18 "gen/deep/pimpl/next/ButtonPressModeMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/ButtonPressModeMarshaller.gp"
       {"SHORT",1}
     };
 

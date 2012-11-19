@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/VrCapabilitiesMarshaller.inc gen/deep/pimpl/next/VrCapabilitiesMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.inc ./src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -15,7 +15,7 @@ class VrCapabilities_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,17 +25,17 @@ VrCapabilities_intHash::hash (register const char *str, register unsigned int le
   return len;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 VrCapabilities_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  4
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 17 "gen/deep/pimpl/next/VrCapabilitiesMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.gp"
       {"Text",0}
     };
 

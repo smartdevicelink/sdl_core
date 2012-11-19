@@ -9,10 +9,10 @@
 #define RPC2COMMAND_CLASS
 
 /**
-  *\namespace RPC2Communication
+  *\namespace NsRPC2Communication
   *\brief Namespace for communication with HMI.
 */
-namespace RPC2Communication
+namespace NsRPC2Communication
 {
     /**
      * \class RPC2Command

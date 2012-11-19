@@ -8,10 +8,10 @@ namespace log4cplus
     class Logger;
 }
 
-#include "JSONHandler/RPC2Objects/Buttons/GetCapabilitiesResponse.h"
-#include "JSONHandler/RPC2Objects/UI/GetCapabilitiesResponse.h"
-#include "JSONHandler/RPC2Objects/VR/GetCapabilitiesResponse.h"
-#include "JSONHandler/RPC2Objects/TTS/GetCapabilitiesResponse.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/GetCapabilitiesResponse.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetCapabilitiesResponse.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/VR/GetCapabilitiesResponse.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/TTS/GetCapabilitiesResponse.h"
 
 namespace NsAppManager
 {

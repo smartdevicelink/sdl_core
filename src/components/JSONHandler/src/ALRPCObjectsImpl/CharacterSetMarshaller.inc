@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/CharacterSetMarshaller.inc gen/deep/pimpl/next/CharacterSetMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/CharacterSetMarshaller.inc ./src/ALRPCObjectsImpl/CharacterSetMarshaller.gp  */
 /* Computed positions: -k'4-5' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -42,7 +42,7 @@ class CharacterSet_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -80,24 +80,24 @@ CharacterSet_intHash::hash (register const char *str, register unsigned int len)
   return len + asso_values[(unsigned char)str[4]] + asso_values[(unsigned char)str[3]];
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 CharacterSet_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  0,  0,  0,  7,  8,  0,  0,  0,  7,  8
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 19 "gen/deep/pimpl/next/CharacterSetMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/CharacterSetMarshaller.gp"
       {"CID1SET",2},
-#line 18 "gen/deep/pimpl/next/CharacterSetMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/CharacterSetMarshaller.gp"
       {"TYPE5SET",1},
       {""}, {""}, {""},
-#line 20 "gen/deep/pimpl/next/CharacterSetMarshaller.gp"
+#line 20 "./src/ALRPCObjectsImpl/CharacterSetMarshaller.gp"
       {"CID2SET",3},
-#line 17 "gen/deep/pimpl/next/CharacterSetMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/CharacterSetMarshaller.gp"
       {"TYPE2SET",0}
     };
 

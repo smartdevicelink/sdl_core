@@ -58,12 +58,12 @@
 #include "../src/Marshaller.inc"
 
 /*
-  generated at	Mon Nov 19 07:25:04 2012
+  generated at	Mon Nov 19 08:20:05 2012
   source stamp	Mon Nov 19 07:04:40 2012
   author	robok0der
 */
 
-using namespace RPC2Communication;
+using namespace NsRPC2Communication;
 
 
 const Marshaller::Methods Marshaller::getIndex(const char* s)
@@ -428,7 +428,7 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
 }
 
 
-Json::Value Marshaller::Notification2JSON(const RPC2Communication::RPC2Notification* msg)
+Json::Value Marshaller::Notification2JSON(const NsRPC2Communication::RPC2Notification* msg)
 {
   Json::Value j=Json::Value(Json::nullValue);
   if(!msg) return j;
@@ -463,7 +463,7 @@ Json::Value Marshaller::Notification2JSON(const RPC2Communication::RPC2Notificat
 }
 
 
-Json::Value Marshaller::Request2JSON(const RPC2Communication::RPC2Request* msg)
+Json::Value Marshaller::Request2JSON(const NsRPC2Communication::RPC2Request* msg)
 {
   Json::Value j=Json::Value(Json::nullValue);
   if(!msg) return j;
@@ -517,7 +517,7 @@ Json::Value Marshaller::Request2JSON(const RPC2Communication::RPC2Request* msg)
 }
 
 
-Json::Value Marshaller::Response2JSON(const RPC2Communication::RPC2Response* msg)
+Json::Value Marshaller::Response2JSON(const NsRPC2Communication::RPC2Response* msg)
 {
   Json::Value j=Json::Value(Json::nullValue);
   if(!msg) return j;
@@ -653,7 +653,7 @@ const Marshaller::localHash Marshaller::mHashTable[53]=
 
 };
 
-RPC2Communication::RPC2ErrorMarshaller Marshaller::mRPC2ErrorInternal;
+NsRPC2Communication::RPC2ErrorMarshaller Marshaller::mRPC2ErrorInternal;
 
 NsRPC2Communication::AppLinkCore::ActivateAppMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__ActivateApp;
 NsRPC2Communication::AppLinkCore::ActivateAppResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse;

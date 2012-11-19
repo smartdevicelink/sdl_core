@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/UpdateModeMarshaller.inc gen/deep/pimpl/next/UpdateModeMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/UpdateModeMarshaller.inc ./src/ALRPCObjectsImpl/UpdateModeMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -15,7 +15,7 @@ class UpdateMode_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,24 +25,24 @@ UpdateMode_intHash::hash (register const char *str, register unsigned int len)
   return len;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 UpdateMode_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  0,  5,  6,  7,  0,  9
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""},
-#line 19 "gen/deep/pimpl/next/UpdateModeMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/UpdateModeMarshaller.gp"
       {"PAUSE",2},
-#line 20 "gen/deep/pimpl/next/UpdateModeMarshaller.gp"
+#line 20 "./src/ALRPCObjectsImpl/UpdateModeMarshaller.gp"
       {"RESUME",3},
-#line 17 "gen/deep/pimpl/next/UpdateModeMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/UpdateModeMarshaller.gp"
       {"COUNTUP",0},
       {""},
-#line 18 "gen/deep/pimpl/next/UpdateModeMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/UpdateModeMarshaller.gp"
       {"COUNTDOWN",1}
     };
 

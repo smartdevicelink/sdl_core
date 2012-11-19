@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/TextFieldNameMarshaller.inc gen/deep/pimpl/next/TextFieldNameMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/TextFieldNameMarshaller.inc ./src/ALRPCObjectsImpl/TextFieldNameMarshaller.gp  */
 /* Computed positions: -k'8,10' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -42,7 +42,7 @@ class TextFieldName_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -92,7 +92,7 @@ TextFieldName_intHash::hash (register const char *str, register unsigned int len
   return hval;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 TextFieldName_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
@@ -100,26 +100,26 @@ TextFieldName_intHash::getPointer (register const char *str, register unsigned i
        0,  0,  0,  0,  0,  0,  0,  0,  0,  9, 10,  0, 10,  0,
       10, 10,  0, 10,  0, 10
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 19 "gen/deep/pimpl/next/TextFieldNameMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/TextFieldNameMarshaller.gp"
       {"statusBar",2},
-#line 23 "gen/deep/pimpl/next/TextFieldNameMarshaller.gp"
+#line 23 "./src/ALRPCObjectsImpl/TextFieldNameMarshaller.gp"
       {"alertText2",6},
       {""},
-#line 22 "gen/deep/pimpl/next/TextFieldNameMarshaller.gp"
+#line 22 "./src/ALRPCObjectsImpl/TextFieldNameMarshaller.gp"
       {"alertText1",5},
       {""},
-#line 21 "gen/deep/pimpl/next/TextFieldNameMarshaller.gp"
+#line 21 "./src/ALRPCObjectsImpl/TextFieldNameMarshaller.gp"
       {"mediaTrack",4},
-#line 18 "gen/deep/pimpl/next/TextFieldNameMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/TextFieldNameMarshaller.gp"
       {"mainField2",1},
       {""},
-#line 17 "gen/deep/pimpl/next/TextFieldNameMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/TextFieldNameMarshaller.gp"
       {"mainField1",0},
       {""},
-#line 20 "gen/deep/pimpl/next/TextFieldNameMarshaller.gp"
+#line 20 "./src/ALRPCObjectsImpl/TextFieldNameMarshaller.gp"
       {"mediaClock",3}
     };
 

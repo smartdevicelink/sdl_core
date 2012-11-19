@@ -11,7 +11,7 @@ namespace log4cplus
     class Logger;
 }
 
-namespace RPC2Communication
+namespace NsRPC2Communication
 {
     class RPC2Command;
 }

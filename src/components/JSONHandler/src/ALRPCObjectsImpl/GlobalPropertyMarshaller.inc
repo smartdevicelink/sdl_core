@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/GlobalPropertyMarshaller.inc gen/deep/pimpl/next/GlobalPropertyMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/GlobalPropertyMarshaller.inc ./src/ALRPCObjectsImpl/GlobalPropertyMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -15,7 +15,7 @@ class GlobalProperty_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,21 +25,21 @@ GlobalProperty_intHash::hash (register const char *str, register unsigned int le
   return len;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 GlobalProperty_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 10,  0,  0, 13
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""},
-#line 17 "gen/deep/pimpl/next/GlobalPropertyMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/GlobalPropertyMarshaller.gp"
       {"HELPPROMPT",0},
       {""}, {""},
-#line 18 "gen/deep/pimpl/next/GlobalPropertyMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/GlobalPropertyMarshaller.gp"
       {"TIMEOUTPROMPT",1}
     };
 

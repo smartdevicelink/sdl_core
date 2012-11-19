@@ -7,7 +7,7 @@
 
 #include "JSONHandler/ALRPCMessage.h"
 
-using namespace AppLinkRPC;
+using namespace NsAppLinkRPC;
 
 ALRPCMessage::ALRPCMessage( unsigned int protocolVersion, MessageType messageType )
 :mProtocolVersion( protocolVersion)

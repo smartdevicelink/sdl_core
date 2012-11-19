@@ -7,7 +7,7 @@
 
 #include "JSONHandler/RPC2Error.h"
 
-using namespace RPC2Communication;
+using namespace NsRPC2Communication;
 
 RPC2Error::RPC2Error(void) :
 RPC2Command(ERROR)

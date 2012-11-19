@@ -96,7 +96,7 @@ void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message , un
  * \brief callback to proceed received RPC2 command
  * \param command the received command
  */
-void AppMgr::onCommandReceivedCallback(RPC2Communication::RPC2Command *command)
+void AppMgr::onCommandReceivedCallback(NsRPC2Communication::RPC2Command *command)
 {
     if(!command)
     {

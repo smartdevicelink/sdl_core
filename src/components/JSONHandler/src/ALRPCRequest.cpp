@@ -7,7 +7,7 @@
 
 #include "JSONHandler/ALRPCRequest.h"
 
-using namespace AppLinkRPC;
+using namespace NsAppLinkRPC;
 
 ALRPCRequest::ALRPCRequest( unsigned int protocolVersion ) :
 ALRPCMessage( protocolVersion, REQUEST ) 

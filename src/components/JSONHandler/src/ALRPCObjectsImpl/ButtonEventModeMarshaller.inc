@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/ButtonEventModeMarshaller.inc gen/deep/pimpl/next/ButtonEventModeMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/ButtonEventModeMarshaller.inc ./src/ALRPCObjectsImpl/ButtonEventModeMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -15,7 +15,7 @@ class ButtonEventMode_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline /*ARGSUSED*/
@@ -25,20 +25,20 @@ ButtonEventMode_intHash::hash (register const char *str, register unsigned int l
   return len;
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 ButtonEventMode_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  0,  0,  0,  0,  8,  0, 10
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 17 "gen/deep/pimpl/next/ButtonEventModeMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/ButtonEventModeMarshaller.gp"
       {"BUTTONUP",0},
       {""},
-#line 18 "gen/deep/pimpl/next/ButtonEventModeMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/ButtonEventModeMarshaller.gp"
       {"BUTTONDOWN",1}
     };
 

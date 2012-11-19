@@ -29,7 +29,7 @@ namespace NsAppLinkRPC
     class RegisterAppInterface_request;
 }
 
-namespace RPC2Communication
+namespace NsRPC2Communication
 {
 	class RPC2Command;
 }
@@ -82,7 +82,7 @@ public:
      * \brief push HMI RPC2 message to a queue
      * \param message a message to be pushed
      */
-	void pushRPC2CommunicationMessage( RPC2Communication::RPC2Command * message );
+	void pushRPC2CommunicationMessage( NsRPC2Communication::RPC2Command * message );
 
     /**
      * \brief method to execute threads.
@@ -137,7 +137,7 @@ private:
      * \param msg a message to be pushed
      * \param pThis a pointer to AppMgrCore class instance
      */
-    static void handleBusRPCMessageIncoming( RPC2Communication::RPC2Command* msg, void* pThis );
+    static void handleBusRPCMessageIncoming( NsRPC2Communication::RPC2Command* msg, void* pThis );
 
     /**
      * \brief Register an application
@@ -169,7 +169,7 @@ private:
     bool serializeToFile(const std::string& fileName, const std::string &value) const;
 
     AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
-    AppMgrCoreQueue<RPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
+    AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
     CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities> mButtonCapabilities;
     NsAppLinkRPC::DisplayCapabilities mDisplayCapabilities;

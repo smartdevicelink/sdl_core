@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=gen/deep/pimpl/next/LanguageMarshaller.inc gen/deep/pimpl/next/LanguageMarshaller.gp  */
+/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/LanguageMarshaller.inc ./src/ALRPCObjectsImpl/LanguageMarshaller.gp  */
 /* Computed positions: -k'2' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -42,7 +42,7 @@ class Language_intHash
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
 public:
-  static const struct AppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
+  static const struct NsAppLinkRPC::PerfectHashTable *getPointer (const char *str, unsigned int len);
 };
 
 inline unsigned int
@@ -80,21 +80,21 @@ Language_intHash::hash (register const char *str, register unsigned int len)
   return len + asso_values[(unsigned char)str[1]];
 }
 
-const struct AppLinkRPC::PerfectHashTable *
+const struct NsAppLinkRPC::PerfectHashTable *
 Language_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
        0,  0,  0,  0,  0,  5,  5,  5
     };
-  static const struct AppLinkRPC::PerfectHashTable wordlist[] =
+  static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""},
-#line 18 "gen/deep/pimpl/next/LanguageMarshaller.gp"
+#line 18 "./src/ALRPCObjectsImpl/LanguageMarshaller.gp"
       {"ES-MX",1},
-#line 19 "gen/deep/pimpl/next/LanguageMarshaller.gp"
+#line 19 "./src/ALRPCObjectsImpl/LanguageMarshaller.gp"
       {"FR-CA",2},
-#line 17 "gen/deep/pimpl/next/LanguageMarshaller.gp"
+#line 17 "./src/ALRPCObjectsImpl/LanguageMarshaller.gp"
       {"EN-US",0}
     };
 

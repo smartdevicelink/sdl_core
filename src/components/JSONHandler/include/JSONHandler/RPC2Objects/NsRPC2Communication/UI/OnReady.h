@@ -7,7 +7,7 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 07:25:04 2012
+  generated at	Mon Nov 19 08:20:05 2012
   source stamp	Mon Nov 19 07:04:40 2012
   author	robok0der
 */
@@ -17,7 +17,7 @@ namespace NsRPC2Communication
   namespace UI
   {
 
-    class OnReady : public ::RPC2Communication::RPC2Notification
+    class OnReady : public ::NsRPC2Communication::RPC2Notification
     {
     public:
     
