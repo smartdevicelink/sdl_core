@@ -53,30 +53,6 @@ public:
      */
     virtual void onCommandReceivedCallback( NsRPC2Communication::RPC2Command * command );
 
-	/**
-	 * \brief pure virtual method to process response.
-	 * \param method method name which has been called.
-	 * \param root JSON message.
-	 */
-	void processResponse(std::string method, Json::Value& root);
-	
-	/**
-	 * \brief pure virtual method to process request.
-	 * \param root JSON message.
-	 */
-	void processRequest(Json::Value& root);
-	
-	/**
-	 * \brief Process notification message.
-	 * \brief Notify subscribers about property change.
-	 * expected notification format example:
-	 * \code
-	 * {"jsonrpc": "2.0", "method": "<ComponentName>.<NotificationName>", "params": <list of params>}
-	 * \endcode
-	 * \param root JSON message.
-	 */
-	void processNotification(Json::Value& root);
-
     /**
      * \brief Sets Json mobile handler instance
      * \param handler Json mobile handler
@@ -114,7 +90,6 @@ private:
 	AppMgrRegistry& mAppMgrRegistry;
 	AppMgrCore& mAppMgrCore;
 
-	JSONHandler* mJSONHandler;
 	static log4cplus::Logger mLogger;
 };
 

@@ -25,7 +25,6 @@ AppMgr& AppMgr::getInstance( )
 AppMgr::AppMgr()
     :mAppMgrRegistry(AppMgrRegistry::getInstance())
 	,mAppMgrCore(AppMgrCore::getInstance())
-	,mJSONHandler(0)
 {
 	LOG4CPLUS_INFO_EXT(mLogger, " AppMgr constructed!");
 }
@@ -44,7 +43,6 @@ AppMgr::~AppMgr()
 AppMgr::AppMgr(const AppMgr &)
     :mAppMgrRegistry(AppMgrRegistry::getInstance())
     ,mAppMgrCore(AppMgrCore::getInstance())
-    ,mJSONHandler(0)
 {
 }
 
@@ -105,42 +103,6 @@ void AppMgr::onCommandReceivedCallback(NsRPC2Communication::RPC2Command *command
     }
     LOG4CPLUS_INFO_EXT(mLogger, " Message "<<command->getMethod()<<" received from HMI side");
     mAppMgrCore.pushRPC2CommunicationMessage(command);
-}
-
-/**
- * \brief method to process response.
- * \param method method name which has been called.
- * \param root JSON message.
- */
-void AppMgr::processResponse(std::string method, Json::Value& root)
-{
-	LOG4CPLUS_INFO_EXT(mLogger, " Processing a response to "<<method);
-    //mAppLinkInterface.processResponse(method, root);
-}
-
-/**
- * \brief method to process request.
- * \param root JSON message.
- */
-void AppMgr::processRequest(Json::Value& root)
-{
-	LOG4CPLUS_INFO_EXT(mLogger, " Processing a request");
-    //mAppLinkInterface.processRequest(root);
-}
-
-/**
- * \brief Process notification message.
- * \brief Notify subscribers about property change.
- * expected notification format example:
- * \code
- * {"jsonrpc": "2.0", "method": "<ComponentName>.<NotificationName>", "params": <list of params>}
- * \endcode
- * \param root JSON message.
- */
-void AppMgr::processNotification(Json::Value& root)
-{
-	LOG4CPLUS_INFO_EXT(mLogger, " Processing a notification");
-    //mAppLinkInterface.processNotification(root);
 }
 
 /**
