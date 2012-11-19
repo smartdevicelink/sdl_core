@@ -31,6 +31,9 @@ set (SOURCES_TEST_WITH_CORRECT_DEVICE_ADAPTER
     ./TransportManagerTestWithCorrectDeviceAdapter.cpp
 )
 
+# Sources for the TransportManager test with incorrect device adapter behavior
+set (SOURCES_TEST_WITH_INCORRECT_DEVICE_ADAPTER ./TransportManagerTestWithIncorrectDeviceAdapter.cpp)
+
 # Libraries seeems to be the same for all Transport Manager test
 set (LIBRARIES
     gtest
@@ -61,3 +64,8 @@ add_executable("test_TransportManagerTestWithCorrectDeviceAdapter" ${SOURCES_TES
 target_link_libraries("test_TransportManagerTestWithCorrectDeviceAdapter" ${LIBRARIES})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 add_test(test_TransportManagerTestWithCorrectDeviceAdapter test_TransportManagerTestWithCorrectDeviceAdapter)
+
+add_executable("test_TransportManagerTestWithIncorrectDeviceAdapter" ${SOURCES_TEST_WITH_INCORRECT_DEVICE_ADAPTER})
+target_link_libraries("test_TransportManagerTestWithIncorrectDeviceAdapter" ${LIBRARIES})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+add_test(test_TransportManagerTestWithIncorrectDeviceAdapter test_TransportManagerTestWithIncorrectDeviceAdapter)
