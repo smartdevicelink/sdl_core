@@ -126,8 +126,7 @@ int main(int argc, char** argv)
     jsonRPC2Handler.subscribeToNotifications();
 
     LOG4CPLUS_INFO(logger, "Start AppMgr threads!");
-    NsAppManager::AppMgrCore& appMgrCore = NsAppManager::AppMgrCore::getInstance();
-    appMgrCore.executeThreads();
+    appMgr.executeThreads();
 
     /**********************************/
     /*********** Start HMI ************/
