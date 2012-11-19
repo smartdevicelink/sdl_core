@@ -650,9 +650,9 @@ static void makePacketHeader(size_t version, PacketHeaderV1 *& phv1, PacketHeade
     pBase->version = version;
     pBase->compressionFlag = false;
     pBase->frameType = 1;
-    pBase->serviceType = 0x0F;
+    pBase->serviceType = 0x07;
     pBase->frameData = 0;
-    pBase->sessionId = 0;
+    pBase->sessionId = 1;
     //pBase->dataSize = uint32ToNetOrder(config.reportedDataSize);           // convert data size to network order 
  
     if (version == 2)
