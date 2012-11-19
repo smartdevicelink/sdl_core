@@ -13,6 +13,8 @@
 
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/ActivateAppMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/ActivateAppResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/GetAppListMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/GetAppListResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppRegisteredMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppUnregisteredMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/SendDataMarshaller.h"
@@ -66,13 +68,12 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/OnCommandMarshaller.h"
 
 /*
-  generated at	Mon Nov 19 08:20:05 2012
-  source stamp	Mon Nov 19 07:04:40 2012
+  generated at	Mon Nov 19 10:37:39 2012
+  source stamp	Mon Nov 19 10:17:20 2012
   author	robok0der
 */
 
-namespace NsRPC2Communication
-{
+
 class Marshaller
 {
 public:
@@ -82,6 +83,8 @@ public:
     METHOD_INVALID=-1,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPP,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPPRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST,
+    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLISTRESPONSE,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPREGISTERED,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPUNREGISTERED,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA,
@@ -167,6 +170,28 @@ protected:
   static std::string toString(const NsRPC2Communication::AppLinkCore::ActivateAppResponse& res)
   {
     return mNsRPC2Communication_AppLinkCore__ActivateAppResponse.toString(res);
+  }
+
+// NsRPC2Communication::AppLinkCore::GetAppList
+  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::GetAppList& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__GetAppList.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::AppLinkCore::GetAppList& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__GetAppList.toString(res);
+  }
+
+// NsRPC2Communication::AppLinkCore::GetAppListResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::GetAppListResponse& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__GetAppListResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::AppLinkCore::GetAppListResponse& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__GetAppListResponse.toString(res);
   }
 
 // NsRPC2Communication::AppLinkCore::OnAppRegistered
@@ -746,18 +771,20 @@ private:
   
   static const char* getName(Methods e)
   {
-    return (e>=0 && e<53) ? mHashTable[e].name : NULL;
+    return (e>=0 && e<55) ? mHashTable[e].name : NULL;
   }
   
   static const Methods getIndex(const char* s);
   
-  static const localHash mHashTable[53];
+  static const localHash mHashTable[55];
   friend class Marshaller_intHash;
   
   static ::NsRPC2Communication::RPC2ErrorMarshaller mRPC2ErrorInternal;
 
   static NsRPC2Communication::AppLinkCore::ActivateAppMarshaller mNsRPC2Communication_AppLinkCore__ActivateApp;
   static NsRPC2Communication::AppLinkCore::ActivateAppResponseMarshaller mNsRPC2Communication_AppLinkCore__ActivateAppResponse;
+  static NsRPC2Communication::AppLinkCore::GetAppListMarshaller mNsRPC2Communication_AppLinkCore__GetAppList;
+  static NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller mNsRPC2Communication_AppLinkCore__GetAppListResponse;
   static NsRPC2Communication::AppLinkCore::OnAppRegisteredMarshaller mNsRPC2Communication_AppLinkCore__OnAppRegistered;
   static NsRPC2Communication::AppLinkCore::OnAppUnregisteredMarshaller mNsRPC2Communication_AppLinkCore__OnAppUnregistered;
   static NsRPC2Communication::AppLinkCore::SendDataMarshaller mNsRPC2Communication_AppLinkCore__SendData;
@@ -811,7 +838,5 @@ private:
   static NsRPC2Communication::VR::OnCommandMarshaller mNsRPC2Communication_VR__OnCommand;
 
 };
-
-}
 
 #endif

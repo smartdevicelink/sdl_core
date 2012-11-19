@@ -245,6 +245,10 @@ set (GENERATED_RPC_SOURCES
     ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/GetCapabilitiesResponseMarshaller.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/OnCommand.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/OnCommandMarshaller.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetAppList.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetAppListResponse.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetAppListResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetAppListMarshaller.cpp
     ./src/RPC2ObjectsImpl/Marshaller.cpp
 )
 

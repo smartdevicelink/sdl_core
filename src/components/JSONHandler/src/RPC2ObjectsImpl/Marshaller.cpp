@@ -3,6 +3,8 @@
 
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/ActivateApp.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/ActivateAppResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetAppList.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetAppListResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppRegistered.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppUnregistered.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/SendData.h"
@@ -58,8 +60,8 @@
 #include "../src/Marshaller.inc"
 
 /*
-  generated at	Mon Nov 19 08:20:05 2012
-  source stamp	Mon Nov 19 07:04:40 2012
+  generated at	Mon Nov 19 10:37:39 2012
+  source stamp	Mon Nov 19 10:17:20 2012
   author	robok0der
 */
 
@@ -197,6 +199,11 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         NsRPC2Communication::AppLinkCore::ActivateApp *rv=new NsRPC2Communication::AppLinkCore::ActivateApp;
         return NsRPC2Communication::AppLinkCore::ActivateAppMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
+      case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST:
+      {
+        NsRPC2Communication::AppLinkCore::GetAppList *rv=new NsRPC2Communication::AppLinkCore::GetAppList;
+        return NsRPC2Communication::AppLinkCore::GetAppListMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
       case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA:
       {
         NsRPC2Communication::AppLinkCore::SendData *rv=new NsRPC2Communication::AppLinkCore::SendData;
@@ -319,6 +326,11 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
     {
       NsRPC2Communication::AppLinkCore::ActivateAppResponse *rv=new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
       return NsRPC2Communication::AppLinkCore::ActivateAppResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLISTRESPONSE:
+    {
+      NsRPC2Communication::AppLinkCore::GetAppListResponse *rv=new NsRPC2Communication::AppLinkCore::GetAppListResponse;
+      return NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATARESPONSE:
     {
@@ -471,6 +483,8 @@ Json::Value Marshaller::Request2JSON(const NsRPC2Communication::RPC2Request* msg
   {
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPP:
       return NsRPC2Communication::AppLinkCore::ActivateAppMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::ActivateApp*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST:
+      return NsRPC2Communication::AppLinkCore::GetAppListMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::GetAppList*>(msg));
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA:
       return NsRPC2Communication::AppLinkCore::SendDataMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::SendData*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIES:
@@ -525,6 +539,8 @@ Json::Value Marshaller::Response2JSON(const NsRPC2Communication::RPC2Response* m
   {
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPPRESPONSE:
       return NsRPC2Communication::AppLinkCore::ActivateAppResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::ActivateAppResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLISTRESPONSE:
+      return NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::GetAppListResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATARESPONSE:
       return NsRPC2Communication::AppLinkCore::SendDataResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::SendDataResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
@@ -595,61 +611,63 @@ Json::Value Marshaller::toJSON(const RPC2Command* msg)
 }
 
 
-const Marshaller::localHash Marshaller::mHashTable[53]=
+const Marshaller::localHash Marshaller::mHashTable[55]=
 {
   {"AppLinkCore.ActivateApp",0,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateApp},
   {"AppLinkCore.ActivateAppResponse",1,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse},
-  {"AppLinkCore.OnAppRegistered",2,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered},
-  {"AppLinkCore.OnAppUnregistered",3,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered},
-  {"AppLinkCore.SendData",4,&Marshaller::mNsRPC2Communication_AppLinkCore__SendData},
-  {"AppLinkCore.SendDataResponse",5,&Marshaller::mNsRPC2Communication_AppLinkCore__SendDataResponse},
-  {"Buttons.GetCapabilities",6,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilities},
-  {"Buttons.GetCapabilitiesResponse",7,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilitiesResponse},
-  {"Buttons.OnButtonEvent",8,&Marshaller::mNsRPC2Communication_Buttons__OnButtonEvent},
-  {"Buttons.OnButtonPress",9,&Marshaller::mNsRPC2Communication_Buttons__OnButtonPress},
-  {"TTS.GetCapabilities",10,&Marshaller::mNsRPC2Communication_TTS__GetCapabilities},
-  {"TTS.GetCapabilitiesResponse",11,&Marshaller::mNsRPC2Communication_TTS__GetCapabilitiesResponse},
-  {"TTS.Speak",12,&Marshaller::mNsRPC2Communication_TTS__Speak},
-  {"TTS.SpeakResponse",13,&Marshaller::mNsRPC2Communication_TTS__SpeakResponse},
-  {"UI.AddCommand",14,&Marshaller::mNsRPC2Communication_UI__AddCommand},
-  {"UI.AddCommandResponse",15,&Marshaller::mNsRPC2Communication_UI__AddCommandResponse},
-  {"UI.AddSubMenu",16,&Marshaller::mNsRPC2Communication_UI__AddSubMenu},
-  {"UI.AddSubMenuResponse",17,&Marshaller::mNsRPC2Communication_UI__AddSubMenuResponse},
-  {"UI.Alert",18,&Marshaller::mNsRPC2Communication_UI__Alert},
-  {"UI.AlertResponse",19,&Marshaller::mNsRPC2Communication_UI__AlertResponse},
-  {"UI.CreateInteractionChoiceSet",20,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSet},
-  {"UI.CreateInteractionChoiceSetResponse",21,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse},
-  {"UI.DeleteCommand",22,&Marshaller::mNsRPC2Communication_UI__DeleteCommand},
-  {"UI.DeleteCommandResponse",23,&Marshaller::mNsRPC2Communication_UI__DeleteCommandResponse},
-  {"UI.DeleteInteractionChoiceSet",24,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSet},
-  {"UI.DeleteInteractionChoiceSetResponse",25,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSetResponse},
-  {"UI.DeleteSubMenu",26,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenu},
-  {"UI.DeleteSubMenuResponse",27,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenuResponse},
-  {"UI.GetCapabilities",28,&Marshaller::mNsRPC2Communication_UI__GetCapabilities},
-  {"UI.GetCapabilitiesResponse",29,&Marshaller::mNsRPC2Communication_UI__GetCapabilitiesResponse},
-  {"UI.OnAppActivated",30,&Marshaller::mNsRPC2Communication_UI__OnAppActivated},
-  {"UI.OnAppDeactivated",31,&Marshaller::mNsRPC2Communication_UI__OnAppDeactivated},
-  {"UI.OnCommand",32,&Marshaller::mNsRPC2Communication_UI__OnCommand},
-  {"UI.OnDriverDistraction",33,&Marshaller::mNsRPC2Communication_UI__OnDriverDistraction},
-  {"UI.OnReady",34,&Marshaller::mNsRPC2Communication_UI__OnReady},
-  {"UI.OnSystemContext",35,&Marshaller::mNsRPC2Communication_UI__OnSystemContext},
-  {"UI.PerformInteraction",36,&Marshaller::mNsRPC2Communication_UI__PerformInteraction},
-  {"UI.PerformInteractionResponse",37,&Marshaller::mNsRPC2Communication_UI__PerformInteractionResponse},
-  {"UI.ResetGlobalProperties",38,&Marshaller::mNsRPC2Communication_UI__ResetGlobalProperties},
-  {"UI.ResetGlobalPropertiesResponse",39,&Marshaller::mNsRPC2Communication_UI__ResetGlobalPropertiesResponse},
-  {"UI.SetGlobalProperties",40,&Marshaller::mNsRPC2Communication_UI__SetGlobalProperties},
-  {"UI.SetGlobalPropertiesResponse",41,&Marshaller::mNsRPC2Communication_UI__SetGlobalPropertiesResponse},
-  {"UI.SetMediaClockTimer",42,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimer},
-  {"UI.SetMediaClockTimerResponse",43,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimerResponse},
-  {"UI.Show",44,&Marshaller::mNsRPC2Communication_UI__Show},
-  {"UI.ShowResponse",45,&Marshaller::mNsRPC2Communication_UI__ShowResponse},
-  {"VR.AddCommand",46,&Marshaller::mNsRPC2Communication_VR__AddCommand},
-  {"VR.AddCommandResponse",47,&Marshaller::mNsRPC2Communication_VR__AddCommandResponse},
-  {"VR.DeleteCommand",48,&Marshaller::mNsRPC2Communication_VR__DeleteCommand},
-  {"VR.DeleteCommandResponse",49,&Marshaller::mNsRPC2Communication_VR__DeleteCommandResponse},
-  {"VR.GetCapabilities",50,&Marshaller::mNsRPC2Communication_VR__GetCapabilities},
-  {"VR.GetCapabilitiesResponse",51,&Marshaller::mNsRPC2Communication_VR__GetCapabilitiesResponse},
-  {"VR.OnCommand",52,&Marshaller::mNsRPC2Communication_VR__OnCommand}
+  {"AppLinkCore.GetAppList",2,&Marshaller::mNsRPC2Communication_AppLinkCore__GetAppList},
+  {"AppLinkCore.GetAppListResponse",3,&Marshaller::mNsRPC2Communication_AppLinkCore__GetAppListResponse},
+  {"AppLinkCore.OnAppRegistered",4,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered},
+  {"AppLinkCore.OnAppUnregistered",5,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered},
+  {"AppLinkCore.SendData",6,&Marshaller::mNsRPC2Communication_AppLinkCore__SendData},
+  {"AppLinkCore.SendDataResponse",7,&Marshaller::mNsRPC2Communication_AppLinkCore__SendDataResponse},
+  {"Buttons.GetCapabilities",8,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilities},
+  {"Buttons.GetCapabilitiesResponse",9,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilitiesResponse},
+  {"Buttons.OnButtonEvent",10,&Marshaller::mNsRPC2Communication_Buttons__OnButtonEvent},
+  {"Buttons.OnButtonPress",11,&Marshaller::mNsRPC2Communication_Buttons__OnButtonPress},
+  {"TTS.GetCapabilities",12,&Marshaller::mNsRPC2Communication_TTS__GetCapabilities},
+  {"TTS.GetCapabilitiesResponse",13,&Marshaller::mNsRPC2Communication_TTS__GetCapabilitiesResponse},
+  {"TTS.Speak",14,&Marshaller::mNsRPC2Communication_TTS__Speak},
+  {"TTS.SpeakResponse",15,&Marshaller::mNsRPC2Communication_TTS__SpeakResponse},
+  {"UI.AddCommand",16,&Marshaller::mNsRPC2Communication_UI__AddCommand},
+  {"UI.AddCommandResponse",17,&Marshaller::mNsRPC2Communication_UI__AddCommandResponse},
+  {"UI.AddSubMenu",18,&Marshaller::mNsRPC2Communication_UI__AddSubMenu},
+  {"UI.AddSubMenuResponse",19,&Marshaller::mNsRPC2Communication_UI__AddSubMenuResponse},
+  {"UI.Alert",20,&Marshaller::mNsRPC2Communication_UI__Alert},
+  {"UI.AlertResponse",21,&Marshaller::mNsRPC2Communication_UI__AlertResponse},
+  {"UI.CreateInteractionChoiceSet",22,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSet},
+  {"UI.CreateInteractionChoiceSetResponse",23,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse},
+  {"UI.DeleteCommand",24,&Marshaller::mNsRPC2Communication_UI__DeleteCommand},
+  {"UI.DeleteCommandResponse",25,&Marshaller::mNsRPC2Communication_UI__DeleteCommandResponse},
+  {"UI.DeleteInteractionChoiceSet",26,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSet},
+  {"UI.DeleteInteractionChoiceSetResponse",27,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSetResponse},
+  {"UI.DeleteSubMenu",28,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenu},
+  {"UI.DeleteSubMenuResponse",29,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenuResponse},
+  {"UI.GetCapabilities",30,&Marshaller::mNsRPC2Communication_UI__GetCapabilities},
+  {"UI.GetCapabilitiesResponse",31,&Marshaller::mNsRPC2Communication_UI__GetCapabilitiesResponse},
+  {"UI.OnAppActivated",32,&Marshaller::mNsRPC2Communication_UI__OnAppActivated},
+  {"UI.OnAppDeactivated",33,&Marshaller::mNsRPC2Communication_UI__OnAppDeactivated},
+  {"UI.OnCommand",34,&Marshaller::mNsRPC2Communication_UI__OnCommand},
+  {"UI.OnDriverDistraction",35,&Marshaller::mNsRPC2Communication_UI__OnDriverDistraction},
+  {"UI.OnReady",36,&Marshaller::mNsRPC2Communication_UI__OnReady},
+  {"UI.OnSystemContext",37,&Marshaller::mNsRPC2Communication_UI__OnSystemContext},
+  {"UI.PerformInteraction",38,&Marshaller::mNsRPC2Communication_UI__PerformInteraction},
+  {"UI.PerformInteractionResponse",39,&Marshaller::mNsRPC2Communication_UI__PerformInteractionResponse},
+  {"UI.ResetGlobalProperties",40,&Marshaller::mNsRPC2Communication_UI__ResetGlobalProperties},
+  {"UI.ResetGlobalPropertiesResponse",41,&Marshaller::mNsRPC2Communication_UI__ResetGlobalPropertiesResponse},
+  {"UI.SetGlobalProperties",42,&Marshaller::mNsRPC2Communication_UI__SetGlobalProperties},
+  {"UI.SetGlobalPropertiesResponse",43,&Marshaller::mNsRPC2Communication_UI__SetGlobalPropertiesResponse},
+  {"UI.SetMediaClockTimer",44,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimer},
+  {"UI.SetMediaClockTimerResponse",45,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimerResponse},
+  {"UI.Show",46,&Marshaller::mNsRPC2Communication_UI__Show},
+  {"UI.ShowResponse",47,&Marshaller::mNsRPC2Communication_UI__ShowResponse},
+  {"VR.AddCommand",48,&Marshaller::mNsRPC2Communication_VR__AddCommand},
+  {"VR.AddCommandResponse",49,&Marshaller::mNsRPC2Communication_VR__AddCommandResponse},
+  {"VR.DeleteCommand",50,&Marshaller::mNsRPC2Communication_VR__DeleteCommand},
+  {"VR.DeleteCommandResponse",51,&Marshaller::mNsRPC2Communication_VR__DeleteCommandResponse},
+  {"VR.GetCapabilities",52,&Marshaller::mNsRPC2Communication_VR__GetCapabilities},
+  {"VR.GetCapabilitiesResponse",53,&Marshaller::mNsRPC2Communication_VR__GetCapabilitiesResponse},
+  {"VR.OnCommand",54,&Marshaller::mNsRPC2Communication_VR__OnCommand}
 
 };
 
@@ -657,6 +675,8 @@ NsRPC2Communication::RPC2ErrorMarshaller Marshaller::mRPC2ErrorInternal;
 
 NsRPC2Communication::AppLinkCore::ActivateAppMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__ActivateApp;
 NsRPC2Communication::AppLinkCore::ActivateAppResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse;
+NsRPC2Communication::AppLinkCore::GetAppListMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__GetAppList;
+NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__GetAppListResponse;
 NsRPC2Communication::AppLinkCore::OnAppRegisteredMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered;
 NsRPC2Communication::AppLinkCore::OnAppUnregisteredMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered;
 NsRPC2Communication::AppLinkCore::SendDataMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__SendData;
