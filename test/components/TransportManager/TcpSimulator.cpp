@@ -26,6 +26,7 @@ struct Config
     uint32_t actualDataSize;
     uint32_t reportedDataSize;
     std::string fileName;
+    bool bulk;
 };
 
 
@@ -80,7 +81,8 @@ const Config DefaultConfigValues =
     2,                              // Default protocol version
     32,                             // Default actual data size
     32,                             // Default reported data size
-    std::string("")                              // Default file name (no default)
+    std::string(""),                // Default file name (no default)
+    false
 };
 
 // -------------------------------------------------------------------------
@@ -234,7 +236,9 @@ private:
    CTranspMgrTcpClient& mTCPClient;
     
     
-public:    
+public:   
+    
+    static uint8_t INVALID_PROTOCOL_VERSION;
     /**
      * Default constructor
      */
@@ -243,6 +247,64 @@ public:
         , mPacketheaderV2(hV2)
         , mTCPClient(tcplCient)
     {}
+
+private:
+    
+    /**
+     * 
+     * @brief   got protocol version
+     */
+    uint8_t getProtocolVersion()
+    {
+        uint8_t protocolVersion = INVALID_PROTOCOL_VERSION; // invalid value
+        if (mPacketheaderV2) protocolVersion = 0x02;
+        else if (mPacketheaderV1) protocolVersion = 0x01;
+        return protocolVersion;
+    }
+    
+   
+public:
+    /**
+    * @brief    startSession
+    */
+   void startSession(bool bIsBulk)
+   {
+      printf("%s:%d CAppTester::startSession()\n", __FILE__, __LINE__);
+      
+      uint8_t protocolVersion = getProtocolVersion();
+      if (protocolVersion == INVALID_PROTOCOL_VERSION)
+      {
+          return;
+      }
+
+      printf("Start session (RPC Service)\n");
+      void* sPacketData = malloc(sizeof(PacketHeaderV2));
+      memset(sPacketData, 0, sizeof(PacketHeaderV2));
+      // TODO add version dependancy
+      ((uint8_t*)sPacketData)[0] = 16;
+      ((uint8_t*)sPacketData)[1] = 7;
+      ((uint8_t*)sPacketData)[2] = 1;
+      
+      if (protocolVersion == 0x01) sendData(sPacketData, sizeof(PacketHeaderV1));
+      else if (protocolVersion == 0x02) sendData(sPacketData, sizeof(PacketHeaderV2));
+      if (sPacketData) free(sPacketData);
+      
+      if (bIsBulk)
+      {
+         printf("Start session (Bulk Service)\n");
+         sPacketData = malloc(sizeof(PacketHeaderV2));
+         memset(sPacketData, 0, sizeof(PacketHeaderV2));
+         // TODO add version dependancy
+         ((uint8_t*)sPacketData)[0] = 16;
+         ((uint8_t*)sPacketData)[1] = 15;
+         ((uint8_t*)sPacketData)[2] = 1;
+         
+         if (protocolVersion == 0x01) sendData(sPacketData, sizeof(PacketHeaderV1));
+         else if (protocolVersion == 0x02) sendData(sPacketData, sizeof(PacketHeaderV2));
+         if (sPacketData) free(sPacketData);
+      }
+      
+   }
     
      /**
         * \brief Sends data from file to appLinkCore 
@@ -284,6 +346,7 @@ public:
             int32_t packet2SendLength = 0;
             packet2SendLength = generateSingleMessage(mPacketheaderV2, mPacketheaderV1, instr, packet2Send);
             sendData(packet2Send, packet2SendLength);
+            if (packet2Send) free (packet2Send);
             
             printf("packet2SendLength = %d \n", packet2SendLength);
             printf("packet2Send = %p \n", packet2Send);
@@ -413,6 +476,7 @@ private:
     }
 };
 
+uint8_t CAppTester::INVALID_PROTOCOL_VERSION = 0xff;
 
 // -------------------------------------------------------------------------
 
@@ -438,7 +502,9 @@ static void printUsage(const std::string &programName)
         
     std::cout << "-f, --file FILE                The name of the file whose content to be sent over TCP (if option is set '--actual-size' and '--reported-size' are ignored)" 
         << std::endl;
-        
+            
+     std::cout << "-b, --bulk                    Is bulk data" 
+        << std::endl;
 
     std::cout << "-h, --help                    Print this help" << std::endl << std::endl;
 }
@@ -458,6 +524,7 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
         {"actual-size", required_argument, 0, 'a'}, 
         {"reported-size", required_argument, 0, 'r'},
         {"file", required_argument, 0, 'f'},
+        {"bulk", required_argument, 0, 'b'},
         {0, 0, 0, 0}
     };
 
@@ -469,7 +536,7 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
         int option_index = 0;
         int c;
     
-        c = getopt_long(argc, argv, "hi:p:v:a:r:f:", long_options, &option_index);
+        c = getopt_long(argc, argv, "hi:p:v:a:r:f:b", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -544,6 +611,18 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
                 else
                 {
                     std::cout << "Error: file name is missing" << std::endl;
+                    result = false;
+                }
+                break;
+            case 'b':
+                if (optarg)
+                {
+                    int val = atoi(optarg);
+                    pConfig->bulk = (val == 0 ? false : true);
+                }
+                else
+                {
+                    std::cout << "Error: bulk is missing" << std::endl;
                     result = false;
                 }
                 break;
@@ -711,6 +790,7 @@ int main(int argc, char **argv)
         makePacketHeader(config.protocolVersion, phv1, phv2);
         
         CAppTester appTester(phv2, phv1, client);
+        appTester.startSession(config.bulk);
         appTester.sendDataFromFile(config.fileName.c_str());
     }
     
