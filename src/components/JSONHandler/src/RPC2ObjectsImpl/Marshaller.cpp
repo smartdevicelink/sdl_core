@@ -1,5 +1,5 @@
 #include <cstring>
-#include "Marshaller.h"
+#include "JSONHandler/RPC2Objects/Marshaller.h"
 
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/ActivateApp.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/ActivateAppResponse.h"
@@ -57,10 +57,10 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/GetCapabilitiesResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/OnCommand.h"
 
-#include "../src/Marshaller.inc"
+#include "../src/../src/RPC2ObjectsImpl/Marshaller.inc"
 
 /*
-  generated at	Mon Nov 19 10:37:39 2012
+  generated at	Mon Nov 19 12:18:27 2012
   source stamp	Mon Nov 19 10:17:20 2012
   author	robok0der
 */

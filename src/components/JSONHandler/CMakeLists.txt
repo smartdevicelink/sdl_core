@@ -142,6 +142,8 @@ set (GENERATED_SOURCES
     ./src/ALRPCObjectsImpl/UnsubscribeButton_responseMarshaller.cpp
     ./src/ALRPCObjectsImpl/UpdateModeMarshaller.cpp
     ./src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.cpp
+    ./src/ALRPCObjectsImpl/HMIApplication.cpp
+    ./src/ALRPCObjectsImpl/HMIApplicationMarshaller.cpp
 )
 
 set (GENERATED_RPC_SOURCES
@@ -236,6 +238,11 @@ set (GENERATED_RPC_SOURCES
     ./src/RPC2ObjectsImpl/NsRPC2Communication/Buttons/OnButtonEventMarshaller.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/Buttons/OnButtonPress.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/Buttons/OnButtonPressMarshaller.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/AddCommand.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/AddCommandMarshaller.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/AddCommandResponse.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/AddCommandResponseMarshaller.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/DeleteCommand.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/DeleteCommandMarshaller.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/DeleteCommandResponse.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/DeleteCommandResponseMarshaller.cpp
@@ -245,10 +252,22 @@ set (GENERATED_RPC_SOURCES
     ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/GetCapabilitiesResponseMarshaller.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/OnCommand.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/VR/OnCommandMarshaller.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/ActivateApp.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/ActivateAppMarshaller.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/ActivateAppResponse.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/ActivateAppResponseMarshaller.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetAppList.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetAppListMarshaller.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetAppListResponse.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetAppListResponseMarshaller.cpp
-    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetAppListMarshaller.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/OnAppRegistered.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/OnAppRegisteredMarshaller.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/OnAppUnregistered.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/OnAppUnregisteredMarshaller.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/SendData.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/SendDataMarshaller.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/SendDataResponse.cpp
+    ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/SendDataResponseMarshaller.cpp/
     ./src/RPC2ObjectsImpl/Marshaller.cpp
 )
 

@@ -699,7 +699,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
     AppMgrCore* core = (AppMgrCore*)pThis;
 	switch(msg->getMethod())
 	{
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonEvent notification has been invoked");
             NsRPC2Communication::Buttons::OnButtonEvent * object = (NsRPC2Communication::Buttons::OnButtonEvent*)msg;
@@ -720,7 +720,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(event, sessionID);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnButtonPress notification has been invoked");
             NsRPC2Communication::Buttons::OnButtonPress * object = (NsRPC2Communication::Buttons::OnButtonPress*)msg;
@@ -742,21 +742,21 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(event, sessionID);
             return;
         }        
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetButtonCapabilities response has been income");
             NsRPC2Communication::Buttons::GetCapabilitiesResponse * btnCaps = (NsRPC2Communication::Buttons::GetCapabilitiesResponse*)msg;
             core->mButtonCapabilities.set( btnCaps->get_capabilities() );
             return;
         }
-        case Marshaller::METHOD_INVALID:
+        case NsRPC2Communication::Marshaller::METHOD_INVALID:
 		default:
 			LOG4CPLUS_ERROR_EXT(mLogger, " Not Buttons RPC message "<< msg->getMethod() <<" has been received!");
 	}
 
     switch(msg->getMethod())
     {
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONREADY:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONREADY:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnReady UI notification has been invoked");
             HMIHandler::getInstance().setReadyState(true);
@@ -772,7 +772,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
 
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetUICapabilities response has been income");
             NsRPC2Communication::UI::GetCapabilitiesResponse * uiCaps = (NsRPC2Communication::UI::GetCapabilitiesResponse*)msg;
@@ -780,7 +780,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             core->mHmiZoneCapabilities.set( uiCaps->get_hmiZoneCapabilities() );
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONCOMMAND:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONCOMMAND:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand UI notification has been invoked");
             NsRPC2Communication::UI::OnCommand* object = (NsRPC2Communication::UI::OnCommand*)msg;
@@ -798,7 +798,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(event, sessionID);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SHOWRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SHOWRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Show response has been income");
             NsRPC2Communication::UI::ShowResponse* object = (NsRPC2Communication::UI::ShowResponse*)msg;
@@ -819,7 +819,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIESRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties response has been income");
             NsRPC2Communication::UI::SetGlobalPropertiesResponse* object = (NsRPC2Communication::UI::SetGlobalPropertiesResponse*)msg;
@@ -841,7 +841,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIESRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A ResetGlobalProperties response has been income");
             NsRPC2Communication::UI::ResetGlobalPropertiesResponse* object = (NsRPC2Communication::UI::ResetGlobalPropertiesResponse*)msg;
@@ -863,7 +863,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ALERTRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ALERTRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An Alert response has been income");
             NsRPC2Communication::UI::AlertResponse* object = (NsRPC2Communication::UI::AlertResponse*)msg;
@@ -883,7 +883,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ADDCOMMANDRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ADDCOMMANDRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand UI response has been income");
             NsRPC2Communication::UI::AddCommandResponse* object = (NsRPC2Communication::UI::AddCommandResponse*)msg;
@@ -910,7 +910,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
 
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETECOMMANDRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETECOMMANDRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand UI response has been income");
             NsRPC2Communication::UI::DeleteCommandResponse* object = (NsRPC2Communication::UI::DeleteCommandResponse*)msg;
@@ -938,7 +938,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
 
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ADDSUBMENURESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ADDSUBMENURESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddSubMenu response has been income");
             NsRPC2Communication::UI::AddSubMenuResponse* object = (NsRPC2Communication::UI::AddSubMenuResponse*)msg;
@@ -958,7 +958,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETESUBMENURESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETESUBMENURESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubMenu response has been income");
             NsRPC2Communication::UI::DeleteSubMenuResponse* object = (NsRPC2Communication::UI::DeleteSubMenuResponse*)msg;
@@ -978,7 +978,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__CREATEINTERACTIONCHOICESETRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__CREATEINTERACTIONCHOICESETRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet response has been income");
             NsRPC2Communication::UI::CreateInteractionChoiceSetResponse* object = (NsRPC2Communication::UI::CreateInteractionChoiceSetResponse*)msg;
@@ -998,7 +998,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETEINTERACTIONCHOICESETRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETEINTERACTIONCHOICESETRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet response has been income");
             NsRPC2Communication::UI::DeleteInteractionChoiceSetResponse* object = (NsRPC2Communication::UI::DeleteInteractionChoiceSetResponse*)msg;
@@ -1018,7 +1018,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTIONRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTIONRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction response has been income");
             NsRPC2Communication::UI::PerformInteractionResponse* object = (NsRPC2Communication::UI::PerformInteractionResponse*)msg;
@@ -1046,7 +1046,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETMEDIACLOCKTIMERRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETMEDIACLOCKTIMERRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer response has been income");
             NsRPC2Communication::UI::SetMediaClockTimerResponse* object = (NsRPC2Communication::UI::SetMediaClockTimerResponse*)msg;
@@ -1066,7 +1066,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONDRIVERDISTRACTION:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONDRIVERDISTRACTION:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnDriverDistraction UI notification has been invoked");
             NsRPC2Communication::UI::OnDriverDistraction* object = (NsRPC2Communication::UI::OnDriverDistraction*)msg;
@@ -1077,21 +1077,21 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(event, 1);
             return;
         }
-        case Marshaller::METHOD_INVALID:
+        case NsRPC2Communication::Marshaller::METHOD_INVALID:
         default:
             LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message "<< msg->getMethod() <<" has been received!");
     }
 
     switch(msg->getMethod())
     {
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_VR__GETCAPABILITIESRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__GETCAPABILITIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetVRCapabilities response has been income");
             NsRPC2Communication::VR::GetCapabilitiesResponse * vrCaps = (NsRPC2Communication::VR::GetCapabilitiesResponse*)msg;
             core->mVrCapabilities.set(vrCaps->get_capabilities());
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMANDRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMANDRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand VR response has been income");
             NsRPC2Communication::VR::AddCommandResponse* object = (NsRPC2Communication::VR::AddCommandResponse*)msg;
@@ -1118,7 +1118,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
 
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMANDRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMANDRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand VR response has been income");
             NsRPC2Communication::VR::DeleteCommandResponse* object = (NsRPC2Communication::VR::DeleteCommandResponse*)msg;
@@ -1145,7 +1145,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
 
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ONCOMMAND:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ONCOMMAND:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand VR notification has been invoked");
             NsRPC2Communication::VR::OnCommand* object = (NsRPC2Communication::VR::OnCommand*)msg;
@@ -1163,21 +1163,21 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(event, sessionID);
             return;
         }
-        case Marshaller::METHOD_INVALID:
+        case NsRPC2Communication::Marshaller::METHOD_INVALID:
         default:
             LOG4CPLUS_ERROR_EXT(mLogger, " Not VR RPC message "<< msg->getMethod() <<" has been received!");
     }
 
     switch(msg->getMethod())
     {
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIESRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIESRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A GetTTSCapabilities response has been income");
             NsRPC2Communication::TTS::GetCapabilitiesResponse * ttsCaps = (NsRPC2Communication::TTS::GetCapabilitiesResponse*)msg;
             core->mSpeechCapabilities.set(ttsCaps->get_capabilities());
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " A Speak response has been income");
             NsRPC2Communication::TTS::SpeakResponse* object = (NsRPC2Communication::TTS::SpeakResponse*)msg;
@@ -1198,14 +1198,14 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(response, sessionID);
             return;
         }
-        case Marshaller::METHOD_INVALID:
+        case NsRPC2Communication::Marshaller::METHOD_INVALID:
         default:
             LOG4CPLUS_ERROR_EXT(mLogger, " Not TTS RPC message "<< msg->getMethod() <<" has been received!");
     }
 
     switch(msg->getMethod())
     {
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPUNREGISTERED:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPUNREGISTERED:
         {
             LOG4CPLUS_INFO_EXT(mLogger, " An OnAppUnregistered notification has been income");
             NsRPC2Communication::AppLinkCore::OnAppUnregistered * object = (NsRPC2Communication::AppLinkCore::OnAppUnregistered*)msg;
@@ -1217,7 +1217,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             MobileHandler::getInstance().sendRPCMessage(event, 1);//just temporarily!!!
             return;
         }        
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPP:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPP:
         {
             LOG4CPLUS_INFO_EXT(mLogger, "ActivateApp has been received!");
             NsRPC2Communication::AppLinkCore::ActivateApp* object = static_cast<NsRPC2Communication::AppLinkCore::ActivateApp*>(msg);
@@ -1252,7 +1252,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             HMIHandler::getInstance().sendResponse(response);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA:
         {
             LOG4CPLUS_INFO_EXT(mLogger, "SendData request has been received!");
             NsRPC2Communication::AppLinkCore::SendData* object = static_cast<NsRPC2Communication::AppLinkCore::SendData*>(msg);
@@ -1266,7 +1266,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             HMIHandler::getInstance().sendResponse(response);
             return;
         }
-        case Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST:
+        case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST:
         {
             LOG4CPLUS_INFO_EXT(mLogger, "GetAppList request has been received!");
             NsRPC2Communication::AppLinkCore::GetAppListResponse* response = static_cast<NsRPC2Communication::AppLinkCore::GetAppListResponse*>(msg);
@@ -1282,7 +1282,7 @@ void AppMgrCore::handleBusRPCMessageIncoming(NsRPC2Communication::RPC2Command* m
             HMIHandler::getInstance().sendResponse(response);
             return;
         }
-        case Marshaller::METHOD_INVALID:
+        case NsRPC2Communication::Marshaller::METHOD_INVALID:
         default:
             LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message "<< msg->getMethod() <<" has been received!");
     }
