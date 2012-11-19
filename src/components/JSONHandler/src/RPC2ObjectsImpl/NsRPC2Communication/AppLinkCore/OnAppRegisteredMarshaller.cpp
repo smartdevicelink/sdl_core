@@ -1,12 +1,12 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/AppLinkCore/OnAppRegistered.h"
 #include "../src/ALRPCObjectsImpl/LanguageMarshaller.h"
 #include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
-#include "OnAppRegisteredMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppRegisteredMarshaller.h"
 
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Mon Nov 19 10:37:39 2012
+  generated at	Mon Nov 19 12:18:27 2012
   source stamp	Mon Nov 19 10:17:20 2012
   author	robok0der
 */

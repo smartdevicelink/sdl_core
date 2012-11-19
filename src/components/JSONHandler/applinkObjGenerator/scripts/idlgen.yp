@@ -267,7 +267,7 @@ sub args_parse
      if($t eq '-sh')   {  $config{'sh'}=shift @args; next; }
      if($t eq '-sc')   {  $config{'sc'}=shift @args; next; }
      if($t eq '-ee')   {  $config{'ee'}=1; next; }
-     if($t eq '-a')   {  $config{'abs'}=1; next; }
+#     if($t eq '-a')   {  $config{'abs'}=1; next; }
      if($t eq '-m')   {   $config{'mk'}=shift @args; next; }
 
      die 'unknown in command line '.$t;
@@ -380,8 +380,8 @@ $base=~s/\/\//\//;
 $base=~s/\/$//;
 $base.='/';
 
-$p2m=$config{'base'} if exists $config{'abs'};
-$p2m=~s/\/$//;$p2m=~s/\/\//\//;
+$p2m=sprintf "%s/%s/",$config{'base'},$config{'gen'};
+$p2m=~s/\/\//\//;$p2m=~s/\/$//;$p2m.='/';
 
 my %json=(
   'f' => 'Double',
@@ -425,10 +425,12 @@ foreach(sort keys %data)
   $pimpl=~s/\/$//;
   $pimpl.='/';
 
+=pod=
   $p2i=File::Spec->abs2rel($path,$pimpl);
   $i2p=File::Spec->abs2rel($pimpl,$path);
   $i2l=File::Spec->abs2rel($lib,$path);
-  $p2m=File::Spec->abs2rel($config{'base'},$pimpl);
+  
+#  $p2m=File::Spec->abs2rel(sprintf "%s/%s",$config{'base'},$config{'gen'},$pimpl) if not exists $config{'abs'};
 
   $i2a=File::Spec->abs2rel($config{'alrpc'},$path);
   $p2a=File::Spec->abs2rel($config{'alrpc'},$pimpl);
@@ -441,6 +443,17 @@ foreach(sort keys %data)
   $i2a=$config{'alrpc'} if exists $config{'abs'};
   $p2a=$config{'alrpc'} if exists $config{'abs'};
   $p2p=$config{'aimpl'} if exists $config{'abs'};
+=cut=
+  
+#  $p2m=File::Spec->abs2rel(sprintf "%s/%s",$config{'base'},$config{'gen'},$pimpl) if not exists $config{'abs'};
+
+  $p2i=$path;
+  $i2p=$pimpl;
+  $i2l=$lib;
+  $i2a=$config{'alrpc'};
+  $p2a=$config{'alrpc'};
+  $p2p=$config{'aimpl'};
+
 
   $p2i=~s/\/$//;$p2i=~s/\/\//\//;
   $i2p=~s/\/$//;$i2p=~s/\/\//\//;
@@ -448,6 +461,7 @@ foreach(sort keys %data)
   $i2a=~s/\/$//;$i2a=~s/\/\//\//;
   $p2a=~s/\/$//;$p2a=~s/\/\//\//;
   $p2p=~s/\/$//;$p2p=~s/\/\//\//;
+  $p2m=~s/\/$//;$p2m=~s/\/\//\//;
 
   interface($p);
 }
@@ -622,8 +636,8 @@ open(FO,mkpath($path.'RPC2',$sh)) or die;
 print FO printhat('RPC2',$prefix);
 #printf FO "#ifndef %s%s_INCLUDE\n#define %sRPC2_INCLUDE\n\n%s",$prefix,$prefix,$pragma;
 print FO "#include <string>\n#include <json/json.h>\n\n";
-printf FO "#include \"%s.%s\"\n",$_,$sh foreach @classes;
-printf FO "\n#include \"Marshaller.%s\"\n\n",$sh;
+printf FO "#include \"%s%s.%s\"\n",$path,$_,$sh foreach @classes;
+printf FO "\n#include \"%s/Marshaller.%s\"\n\n",$p2m,$sh;
 
 print FO $hat;
 print FO "\n#endif\n";
@@ -863,7 +877,7 @@ qq!  static Json::Value toJSON(const #& e);!;
   printf FO qq!#include "%s/ResultMarshaller.%s"\n!,$p2p,$sh;
 #  printf FO qq!#include "%s/Marshaller.%s"\n!,$i2a,$sh;
 
-  printf FO qq!#include "%sMarshaller.%s"\n!,$n,$sh;
+  printf FO qq!#include "%s%sMarshaller.%s"\n!,$pimpl,$n,$sh;
   print FO $hat;
   
   {
@@ -1274,9 +1288,13 @@ sub printhat2
   return sprintf "#ifndef %sMARSHALLER_INCLUDE\n#define %sMARSHALLER_INCLUDE\n\n%s",uc $p,uc $p,$pragma;
 }
 
+$path=sprintf "%s/%s",$config{'base'},$config{'gen'};
+$pimpl=sprintf "%s/%s",$config{'base'},$config{'pimpl'};
 
+$path=~s/\/\//\//g;$path=~s/\/$//g;$path.='/';
+$pimpl=~s/\/\//\//g;$pimpl=~s/\/$//g;$pimpl.='/';
 
-open(FO,mkpath($base.'Marshaller',$sh)) or die;
+open(FO,mkpath($path.'Marshaller',$sh)) or die;
 print FO printhat2 'Marshaller';
 #printf FO "#ifndef %sRPC2_INCLUDE\n#define %sRPC2_INCLUDE\n\n%s",$prefix,$prefix,$pragma;
 print FO "#include <string>\n#include <json/json.h>\n\n";
@@ -1289,7 +1307,7 @@ my $t=qq!#include "RPC2Error.h"\n#include "RPC2Notification.h"\n#include "RPC2Re
 
 
 my $i2l=File::Spec->abs2rel($lib,$base);
-$i2l=$lib if exists $config{'abs'};
+$i2l=$lib;
 $i2l=~s/\/$//;$i2l=~s/\/\//\//;
 
 $t=~s/ "/ "$i2l\//gs;
@@ -1300,7 +1318,7 @@ foreach(@gclasses)
 {
   my $pth=join('/',@{$_->[2]});
   $pth=sprintf "%s/%s/%s",$base,$config{'pimpl'},$pth;
-  $pth=File::Spec->abs2rel($pth,$base) if not exists $config{'abs'};
+#  $pth=File::Spec->abs2rel($pth,$base) if not exists $config{'abs'};
   $pth=~s/\/$//;$pth=~s/\/\//\//;
   
   printf FO "#include \"%s/%sMarshaller.%s\"\n",$pth,$_->[1],$sh;
@@ -1384,7 +1402,7 @@ print FO $nsket;
 print FO "\n#endif\n";
 close FO;
 
-open(FO,'>',$base.'/Marshaller.gp') or die;
+open(FO,'>',$pimpl.'/Marshaller.gp') or die;
 print FO qq!%language=C++\n%struct-type\n%define lookup-function-name getPointer\n%define class-name Marshaller_intHash\n!.
             qq!%omit-struct-type\n%readonly-tables\n%compare-strncmp\n%compare-lengths\n\nstruct Marshaller::localHash\n{\n!.
             qq!  const char *name;\n  unsigned int idx;\n  void* method;\n};\n\n%%\n!;
@@ -1403,13 +1421,13 @@ close FO;
 #**  my @g=split('::',$iface);
 #**  push @gclasses,[$iface,$_,\@g,$global{$prefix}];
 
-  open(FO,mkpath($base.'Marshaller',$sc)) or die;
+  open(FO,mkpath($pimpl.'Marshaller',$sc)) or die;
   print FO $pragma;
 #  print FO printhat $n;
 # check vector/string
   print FO "#include <cstring>\n";
 
-  printf FO qq!#include "Marshaller.%s"\n!,$sh;
+  printf FO qq!#include "%sMarshaller.%s"\n!,$path,$sh;
 
   print FO "\n";
 
@@ -1419,7 +1437,7 @@ foreach(@gclasses)
 {
   my $pth=join('/',@{$_->[2]});
   $pth=sprintf "%s/%s/%s",$base,$config{'gen'},$pth;
-  $pth=File::Spec->abs2rel($pth,$base) if not exists $config{'abs'};
+#  $pth=File::Spec->abs2rel($pth,$base) if not exists $config{'abs'};
   $pth=~s/\/$//;$pth=~s/\/\//\//;
   
   printf FO "#include \"%s/%s.%s\"\n",$pth,$_->[1],$sh;
@@ -1428,7 +1446,7 @@ foreach(@gclasses)
 
   print FO "\n";
   print FO $nsbra;
-  printf FO qq!#include "%sMarshaller.inc"\n!,$base;
+  printf FO qq!#include "%sMarshaller.inc"\n!,$pimpl;
   print FO $nsket;
 
   print FO $hat;
@@ -1583,7 +1601,7 @@ sub fold
   return $r;
 }
 
-if(exists $config{'mk'} and exists $config{'abs'})
+if(exists $config{'mk'})
 {
   open(FO,'>',$config{'mk'}) or die "cant create mk file ".$config{'mk'};
   my $prefix='XX';
