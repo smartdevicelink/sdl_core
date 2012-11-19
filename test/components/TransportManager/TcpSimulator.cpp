@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <getopt.h>
+#include <fstream>
 
 
 // -------------------------------------------------------------------------
@@ -23,17 +24,21 @@ struct Config
     int port;
     int protocolVersion;
     uint32_t actualDataSize;
-    uint32_t reportedDataSize;    
+    uint32_t reportedDataSize;
+    std::string fileName;
 };
 
+
+
 /**
+ * 
  * @brief The common part of the header for both protocol versions 
  */
 struct PacketHeaderBase
 {
-    uint8_t version:4;
-    bool compressionFlag:1;
     uint8_t frameType:3;
+    bool compressionFlag:1;
+    uint8_t version:4;
     uint8_t serviceType;
     uint8_t frameData; 
     uint8_t sessionId;
@@ -46,6 +51,8 @@ struct PacketHeaderBase
 struct PacketHeaderV1
 {
     PacketHeaderBase base;
+    
+    bool isValidVersion() const { return (base.version == 0x01); }
 
     // no additional fields
 };
@@ -58,6 +65,8 @@ struct PacketHeaderV2
     PacketHeaderBase base;
 
     uint32_t messageId;
+    
+    bool isValidVersion() const { return (base.version == 0x02); }
 };
 
 // -------------------------------------------------------------------------
@@ -71,9 +80,14 @@ const Config DefaultConfigValues =
     2,                              // Default protocol version
     32,                             // Default actual data size
     32,                             // Default reported data size
+    std::string("")                              // Default file name (no default)
 };
 
 // -------------------------------------------------------------------------
+
+
+
+
 
 /**
  * @brief The class incapsulates connection routines to the TCP socket of the Transport Manager
@@ -112,10 +126,17 @@ public:
      *  @brief dataSize Size of the buffer to send 
      */
     void send(const void *pData, size_t dataSize);
+    
+    /**
+     * @brief   check if socket connected
+     * @return  if socket conncted, TRUE; otherwise FALSE
+     */
+    inline bool isConnected() { return mIsConencted; }
         
 private:
     int mPort;
     std::string mIpAddress;
+    bool mIsConencted;
     
     int mSocketFd;                    // socket file descriptor
 };
@@ -125,6 +146,7 @@ private:
 CTranspMgrTcpClient::CTranspMgrTcpClient(const std::string ipAddress, const int port) 
     : mPort(port)
     , mIpAddress(ipAddress)
+    , mIsConencted(false)
     , mSocketFd(-1)
 {   
 }
@@ -167,6 +189,7 @@ void CTranspMgrTcpClient::connect()
     {
         throw new std::string("Error connecting\n");
     }
+    mIsConencted = true;
 }
 
 // ----------------------------------------------------------------------------
@@ -198,6 +221,199 @@ void CTranspMgrTcpClient::send(const void* pData, size_t dataSize)
     }
 }
 
+
+/**
+ * @brief   class providing paylod data for testing of appLinkCore via TCP(WiFi) link
+ * 
+ */
+class CAppTester
+{
+private:    
+   PacketHeaderV1* mPacketheaderV1;
+   PacketHeaderV2* mPacketheaderV2;
+   CTranspMgrTcpClient& mTCPClient;
+    
+    
+public:    
+    /**
+     * Default constructor
+     */
+    CAppTester(PacketHeaderV2 *hV2, PacketHeaderV1 *hV1, CTranspMgrTcpClient& tcplCient)
+        : mPacketheaderV1(hV1)
+        , mPacketheaderV2(hV2)
+        , mTCPClient(tcplCient)
+    {}
+    
+     /**
+        * \brief Sends data from file to appLinkCore 
+        * \param fileName name of file with json messages
+        * \return Error code (-1 in case of any errors)
+        */
+     // -------------------------------------------------------------------------
+    int sendDataFromFile(const char * fileName)
+    // -------------------------------------------------------------------------
+    {
+        using namespace std;
+        printf("%s:%d CAppTester::sendDataFromFile()\n", __FILE__, __LINE__);
+
+        ifstream file_str;
+        file_str.open (fileName);
+
+        if (!file_str.is_open())
+        {
+            printf("File wasn't opened!\n");
+            return -1;
+        }
+
+        int startpos = 0;
+        file_str.seekg(0, ios::end);
+        int length = file_str.tellg();
+        file_str.seekg(0, ios::beg);
+        printf("length = %d \n", length);
+        while (startpos < length)
+        {
+            char * raw_data = new char[length];
+            file_str.getline(raw_data, length);
+            printf("strlen = %ld \n", strlen(raw_data));
+            startpos += strlen(raw_data)+1;
+            std::string instr = std::string(raw_data, strlen(raw_data));
+            delete[] raw_data;
+            printf("Input string:\n %s\n", instr.c_str());
+            
+            void* packet2Send = 0;
+            int32_t packet2SendLength = 0;
+            packet2SendLength = generateSingleMessage(mPacketheaderV2, mPacketheaderV1, instr, packet2Send);
+            sendData(packet2Send, packet2SendLength);
+            
+            printf("packet2SendLength = %d \n", packet2SendLength);
+            printf("packet2Send = %p \n", packet2Send);
+        }
+        file_str.close();
+        return 0;
+    }
+ 
+ 
+private:
+    
+    /**
+     * @brief   send data (over tcp)
+     * 
+     * @param   data    data to send
+     * @param   length  data length
+     * 
+     */
+    // -------------------------------------------------------------------------
+    void sendData(const void *const data, const int length)
+    // -------------------------------------------------------------------------
+    {
+        if ((length > 0) && data != 0)
+        {
+            if (mTCPClient.isConnected() == false)
+            {
+                mTCPClient.connect();
+            }
+            mTCPClient.send(data, length);
+        }
+        else 
+        {
+            printf("\n CAppTester::sendData error: no data to send\n");
+        }
+    }
+
+private:    
+    /**
+     * @brief   generate single message (i.e. frameType will be forcible set to 0x1 Single Frame in PacketHeader)
+     * 
+     *          If both parameters are not 0, mesage will be generated for first parameter hv2
+     * @note    returned packet should be freed by invoker
+     * 
+     * @param   hv2         packet header pf protocol version 2. If value is 0, ignored
+     * @param   hv1         packet header pf protocol version 1. If value is 0, ignored
+     * @param   payload     payload data
+     * @param   resultData  generated data
+     * @return  length of generated packet 
+     */
+    // -------------------------------------------------------------------------
+    int32_t generateSingleMessage(const PacketHeaderV2 *hV2, const PacketHeaderV1 *hV1, const std::string payload, void *& resultData)
+    // -------------------------------------------------------------------------
+    {
+        if (hV2 == 0 && hV1 == 0)
+        {
+            printf("\n CAppTester::generateSingleMessage() error: null input parameters");
+            return 0;
+        }
+        
+        uint8_t protocolVersion = (hV2 != 0 ? 0x02 : 0x01);
+        if ((protocolVersion == 0x02) && (hV2->isValidVersion() == false))
+        {
+            printf("\n generateSingleMessage() error. Incorrect version of PacketHeaderV2");
+            return 0;
+        }
+        if ((protocolVersion == 0x01) && (hV1->isValidVersion() == false))
+        {
+            printf("\n generateSingleMessage() error. Incorrect version of PacketHeaderV1");
+            return 0;
+        }        
+        
+        PacketHeaderBase phb = ( (hV2 !=0 ) ? hV2->base : hV1->base );
+        
+        uint32_t headerSize = 8;
+        if (protocolVersion == 0x02)
+            headerSize = 12;
+
+        uint8_t sVersion        = protocolVersion;
+        uint8_t sCompressedFlag = phb.compressionFlag;
+        uint8_t sFrameType      = 0x01; //Single is set forcible over phb.frameType for this method
+        uint8_t sServiceType    = phb.serviceType;
+        uint8_t sFrameData      = phb.frameData; 
+        uint8_t sSessionID      = phb.sessionId;
+        uint32_t sDataSize      = payload.length();//' + 1; //
+        uint32_t sMessageID     = (protocolVersion == 0x02 ? hV2->messageId : 12345);
+
+        void* sPacketData = malloc(headerSize + sDataSize);
+
+        uint8_t firstByte = ( (sVersion << 4) & 0xF0 )
+                        | ( (sCompressedFlag << 3) & 0x08)
+                        | (sFrameType & 0x07);
+
+        uint32_t offset = 0;
+        memcpy((uint8_t*)sPacketData + offset++, &firstByte, 1);
+        memcpy((uint8_t*)sPacketData + offset++, &sServiceType, 1);
+        memcpy((uint8_t*)sPacketData + offset++, &sFrameData, 1);
+        memcpy((uint8_t*)sPacketData + offset++, &sSessionID, 1);
+
+        uint8_t tmp = sDataSize >> 24;
+        memcpy((uint8_t*)sPacketData + offset++, &tmp, 1);
+        tmp = sDataSize >> 16;
+        memcpy((uint8_t*)sPacketData + offset++, &tmp, 1);
+        tmp = sDataSize >> 8;
+        memcpy((uint8_t*)sPacketData + offset++, &tmp, 1);
+        tmp = sDataSize;
+        memcpy((uint8_t*)sPacketData + offset++, &tmp, 1);
+
+
+        if (protocolVersion == 0x02)
+        {
+            uint8_t tmp1 = sMessageID >> 24;
+            memcpy((uint8_t*)sPacketData + offset++, &tmp1, 1);
+            tmp1 = sMessageID >> 16;
+            memcpy((uint8_t*)sPacketData + offset++, &tmp1, 1);
+            tmp1 = sMessageID >> 8;
+            memcpy((uint8_t*)sPacketData + offset++, &tmp1, 1);
+            tmp1 = sMessageID;
+            memcpy((uint8_t*)sPacketData + offset++, &tmp1, 1);
+        }
+
+        memcpy((uint8_t*)sPacketData + offset, (void*)const_cast<char*>(payload.c_str()), sDataSize);
+
+        resultData = sPacketData;
+        printf("SINGLE MESSAGE GENERATED!\n");
+        
+        return (headerSize + sDataSize);
+    }
+};
+
+
 // -------------------------------------------------------------------------
 
 static void printUsage(const std::string &programName)
@@ -219,6 +435,10 @@ static void printUsage(const std::string &programName)
     
     std::cout << "-r, --reported-size SIZE      The size of the packet which is written in the packet header (Default: " 
         << DefaultConfigValues.reportedDataSize << ")" << std::endl;
+        
+    std::cout << "-f, --file FILE                The name of the file whose content to be sent over TCP (if option is set '--actual-size' and '--reported-size' are ignored)" 
+        << std::endl;
+        
 
     std::cout << "-h, --help                    Print this help" << std::endl << std::endl;
 }
@@ -235,8 +455,9 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
         {"ip", required_argument, 0, 'i'},
         {"port", required_argument, 0, 'p'},
         {"version", required_argument, 0, 'v'},
-        {"actual-size", required_argument, 0, 'a'},
+        {"actual-size", required_argument, 0, 'a'}, 
         {"reported-size", required_argument, 0, 'r'},
+        {"file", required_argument, 0, 'f'},
         {0, 0, 0, 0}
     };
 
@@ -247,7 +468,7 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
         int option_index = 0;
         int c;
     
-        c = getopt_long(argc, argv, "hi:p:v:a:r:", long_options, &option_index);
+        c = getopt_long(argc, argv, "hi:p:v:a:r:f:", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -310,6 +531,18 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
                 else 
                 {
                     std::cout << "Error: data size is missing" << std::endl;
+                    result = false;
+                }
+                break;
+            
+            case 'f':
+                if (optarg)
+                {
+                    pConfig->fileName = optarg;
+                }
+                else
+                {
+                    std::cout << "Error: file name is missing" << std::endl;
                     result = false;
                 }
                 break;
@@ -388,6 +621,54 @@ static uint8_t* makePacket(const Config &config, int &packetSize)
     return pBuff;
 }
 
+
+static void makePacketHeader(size_t version, PacketHeaderV1 *& phv1, PacketHeaderV2 *& phv2)
+{
+    uint8_t *pBuff = 0;
+    PacketHeaderBase *pBase;
+    size_t headerSize;
+    
+    phv1 = 0; phv2 = 0;
+
+    if (version == 1)
+    {
+        headerSize = sizeof(PacketHeaderV1);
+    }
+    else if (version == 2)
+    {
+        headerSize = sizeof(PacketHeaderV2);
+    }
+    else
+    {
+        throw new std::string("Unsupported protocol version");
+    }    
+
+    pBuff = new uint8_t[headerSize];
+    pBase = (PacketHeaderBase*)pBuff;
+
+    pBase->version = version;
+    pBase->compressionFlag = false;
+    pBase->frameType = 1;
+    pBase->serviceType = 0x0F;
+    pBase->frameData = 0;
+    pBase->sessionId = 0;
+    //pBase->dataSize = uint32ToNetOrder(config.reportedDataSize);           // convert data size to network order 
+ 
+    if (version == 2)
+    {
+        PacketHeaderV2 *pHeader = (PacketHeaderV2*)pBuff;
+
+        pHeader->messageId = 0;
+        
+        phv2 = pHeader;
+    }
+    else
+    {
+        phv1 = (PacketHeaderV1*)pBuff;
+    }
+   
+}
+
 // ----------------------------------------------------------------------------
 
 int main(int argc, char **argv)
@@ -403,22 +684,36 @@ int main(int argc, char **argv)
 
     CTranspMgrTcpClient client(config.ipAddress, config.port);
    
-    try
+    if (config.fileName.empty())
     {
-        pBuff = makePacket(config, /*out*/buffSize);
-        
-        client.connect();
+        try
+        {
+            pBuff = makePacket(config, /*out*/buffSize);
+            
+            client.connect();
 
-        client.send(pBuff, buffSize);    
+            client.send(pBuff, buffSize);    
 
-        std::cout << "The packet has been sent successfully" << std::endl;
+            std::cout << "The packet has been sent successfully" << std::endl;
+        }
+        catch (std::string *pError)
+        {
+            std::cout << *pError << std::endl;
+        }
+        delete pBuff;
     }
-    catch (std::string *pError)
+    else 
     {
-        std::cout << *pError << std::endl;
-    }
+        PacketHeaderV1* phv1;
+        PacketHeaderV2* phv2;
         
-    delete pBuff;
+        makePacketHeader(config.protocolVersion, phv1, phv2);
+        
+        CAppTester appTester(phv2, phv1, client);
+        appTester.sendDataFromFile(config.fileName.c_str());
+    }
+    
+        
 
     client.disconnect();
  
