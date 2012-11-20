@@ -5,7 +5,7 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
+  generated at	Tue Nov 20 13:32:23 2012
   source stamp	Mon Nov 19 10:17:20 2012
   author	robok0der
 */
@@ -56,7 +56,6 @@ Json::Value OnReadyMarshaller::toJSON(const OnReady& e)
 
   json["jsonrpc"]=Json::Value("2.0");
   json["method"]=Json::Value("UI.OnReady");
-  json["params"]=Json::Value(Json::objectValue);
 
   return json;
 }
@@ -69,11 +68,6 @@ bool OnReadyMarshaller::fromJSON(const Json::Value& json,OnReady& c)
     if(!json.isObject())  return false;
     if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return false;
     if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("UI.OnReady"))  return false;
-    if(!json.isMember("params")) return false;
-
-    Json::Value js=json["params"];
-    if(!js.isObject())  return false;
-
   }
   catch(...)
   {
