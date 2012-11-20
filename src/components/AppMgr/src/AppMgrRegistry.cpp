@@ -104,6 +104,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief cleans all the registry
+     */
+    void AppMgrRegistry::clear()
+    {
+        mRegistryItems.clear();
+    }
+
+    /**
      * \brief Default class constructor
      */
     AppMgrRegistry::AppMgrRegistry( )

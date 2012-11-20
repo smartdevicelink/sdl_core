@@ -89,6 +89,11 @@ public:
      */
     const Items &getItems() const;
 
+    /**
+     * \brief cleans all the registry
+     */
+    void clear( );
+
 private:
 
     /**
