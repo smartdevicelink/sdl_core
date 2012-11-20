@@ -178,6 +178,11 @@ namespace NsAppManager
         CommandMapping();
 
         /**
+         * \brief Default class destructor
+         */
+        ~CommandMapping();
+
+        /**
          * \brief add a command to a mapping
          * \param commandId command id
          * \param type command type
@@ -233,6 +238,16 @@ namespace NsAppManager
          * \return unresponded requests count after the operation
          */
         unsigned int decrementUnrespondedRequestCount(const unsigned int& cmdId);
+
+        /**
+         * \brief cleans all the items
+         */
+        void clear( );
+
+        /**
+         * \brief cleans all the requests awaiting response
+         */
+        void clearUnrespondedRequests( );
 
     private:
 

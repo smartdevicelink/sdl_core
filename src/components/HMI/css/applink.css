@@ -2,6 +2,39 @@
  * CSS for AppLink aplications
  */
  
+.ffw_list_menu {
+	left: 440px;
+	width: 158px;
+	border: 1px solid #393939;
+	overflow: hidden;
+}
+
+.ffw_list_menu .control {
+	z-index: 2000;
+	text-align: center;
+}
+
+.ffw_list_menu .ffw-button {
+	position: relative;
+	height: 49px;
+	border-bottom: 1px solid #393939;
+	line-height: 50px;
+}
+
+.ffw_list_menu .ffw-button span {
+	margin-left: 20px;
+}
+
+.ffw_list_menu .content {
+	position: relative;
+}
+
+.ffw_list_menu .ffw-button.hidden {
+	display: none;
+} 
+ 
+ 
+ 
 #info_nonMedia {
 	z-index: 1001;
 }
@@ -42,31 +75,8 @@
 	margin-bottom: 5px;
 }
 
-#info_nonMedia .inner_menu {
-	left: 440px;
-	width: 160px;
-	border: 1px solid #393939;
-	border-bottom: none;
-}
-
-#info_nonMedia .inner_menu .ffw-button {
-	position: relative;
-	height: 49px;
-	border-bottom: 1px solid #393939;
-	line-height: 50px;
-}
-
-#info_nonMedia .inner_menu .ffw-button span {
-	margin-left: 20px;
-}
-
-#info_nonMedia .inner_menu .ffw-button.hidden {
-	display: none;
-}
-
-
 #info_nonMedia_options {
-	z-index: 1001;
+	z-index: 10001;
 	width: 800px;
 	height: 480px;
 	background-color: #000;

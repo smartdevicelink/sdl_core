@@ -379,5 +379,35 @@ FFW.UI = FFW.RPCObserver.create({
 			"method"	:	"UI.OnReady"
 		};
 		this.client.send(JSONMessage);
-	}
+	},
+
+	/*
+	 * send notification when DriverDistraction PopUp is visible
+ 	 */	
+	onDriverDistraction: function(driverDistractionState) {
+		Em.Logger.log("FFW.UI.DriverDistraction");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"UI.OnDriverDistraction",
+			"params":	{"DriverDistractionState":	driverDistractionState}
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * Notifies if system context is changed
+ 	 */	
+	OnSystemContext: function(systemContextValue) {
+		Em.Logger.log("FFW.UI.OnSystemContext");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"UI.OnSystemContext",
+			"params":	{"SystemContext":	systemContextValue}
+		};
+		this.client.send(JSONMessage);
+	},
 })

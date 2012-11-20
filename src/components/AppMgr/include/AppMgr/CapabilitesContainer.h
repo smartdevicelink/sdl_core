@@ -57,6 +57,11 @@ namespace NsAppManager
          */
         const Capabilities& get() const;
 
+        /**
+         * \brief clearing underlying container
+         */
+        void clear();
+
     private:
 
         /**

@@ -45,6 +45,11 @@ namespace NsAppManager
         MenuMapping();
 
         /**
+         * \brief Default class destructor
+         */
+        ~MenuMapping();
+
+        /**
          * \brief add a command to a mapping
          * \param commandId command id
          * \param menuId menu id
@@ -76,6 +81,11 @@ namespace NsAppManager
          * \param commands commands residing within the given menu
          */
         void findCommandsAssignedToMenu(const unsigned int &menuId, MenuCommands& commands) const;
+
+        /**
+         * \brief cleans menu mapping
+         */
+        void clear( );
 
     private:
 

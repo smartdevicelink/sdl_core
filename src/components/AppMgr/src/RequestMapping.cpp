@@ -22,6 +22,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Default class destructor
+     */
+    RequestMapping::~RequestMapping()
+    {
+        clear();
+    }
+
+    /**
      * \brief add a message to a mapping
      * \param msgId message id
      * \param cmdId a request to map a message to
@@ -74,6 +82,14 @@ namespace NsAppManager
 
         LOG4CPLUS_ERROR_EXT(mLogger, " No commands assigned to a message " << msgId);
         return -1;
+    }
+
+    /**
+     * \brief cleans request mapping
+     */
+    void RequestMapping::clear()
+    {
+        mRequestMapping.clear();
     }
 
     /**

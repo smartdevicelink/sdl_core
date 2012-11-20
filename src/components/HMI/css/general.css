@@ -90,7 +90,32 @@ div {
 #TTSPopUp.received{
 	opacity: 1;
 }
+/* Diver Distraction PopUp */
+#driverDistraction.driverDistraction{
+	opacity: 0;
+	left: 200px;
+	width: 400px;
+	height: 200px;
+	z-index: 2;
+	top: 140px;
+	-webkit-transition: opacity 1s ease-in-out;
+	background-color: black;
+	border: #A6A6A6 solid 2px;
+	border-radius: 6px;
+}
 
+#driverDistraction.active{
+	opacity: 1;
+}
+
+#driverDistraction .driverDistractionText{
+	top: 84px;
+	left: 10px;
+	width: 374px;
+	height: 20px;
+	text-align: center;
+	font-size: 28px;
+}
 /* UI popUp*/
 
 #AlertPopUp.AlertPopUp{
@@ -101,7 +126,6 @@ div {
 	z-index: 2;
 	top: 140px;
 	-webkit-transition: opacity 1s ease-in-out;
-	pointer-events: none;
 	background-color: black;
 	border: #A6A6A6 solid 2px;
 	border-radius: 6px;
@@ -163,7 +187,7 @@ div {
 	height: 81px;
 }
 
-#VRPopUp.received{
+#VRPopUp.active{
 	opacity: 1;
 	visibility: visible;
 }

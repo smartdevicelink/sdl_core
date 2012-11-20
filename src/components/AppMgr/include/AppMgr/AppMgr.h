@@ -9,7 +9,6 @@
 
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/IRPC2CommandsObserver.h"
-#include "mb_controller.hpp"
 
 class JSONHandler;
 class ALRPCMessage;
@@ -92,9 +91,6 @@ namespace NsAppManager
          * \brief Default class constructor
          */
         AppMgr();
-
-        AppMgrRegistry& mAppMgrRegistry;
-        AppMgrCore& mAppMgrCore;
 
         static log4cplus::Logger mLogger;
     };
