@@ -19,6 +19,15 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 		'controlls',
 		'info'
 	],
+
+	/** Calls Applink SystemContext switcher when turn On/Of Applink application */
+	onTurnOnApplinkApp: function(systemContextValue){
+		if(MFT.States.media.applink.active){
+            MFT.MediaController.onSystemContextSwitcher(MFT.MediaController.eSystemContext.application);
+		}else{
+            MFT.MediaController.onSystemContextSwitcher(MFT.MediaController.eSystemContext.main);
+		}
+	}.observes('MFT.States.media.applink.active'),
 	
 	info: Em.View.extend({
 		elementId: 'app_view_info',

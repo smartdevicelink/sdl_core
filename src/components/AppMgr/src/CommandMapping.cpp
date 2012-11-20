@@ -21,6 +21,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Default class destructor
+     */
+    CommandMapping::~CommandMapping()
+    {
+        clear();
+    }
+
+    /**
      * \brief add a command to a mapping
      * \param commandId command id
      * \param type command type
@@ -189,6 +197,22 @@ namespace NsAppManager
         }
         LOG4CPLUS_INFO_EXT(mLogger, "No unresponded requests for command " << cmdId << " found! " );
         return 0;
+    }
+
+    /**
+     * \brief cleans all the items
+     */
+    void CommandMapping::clear()
+    {
+        mCommandMapping.clear();
+    }
+
+    /**
+     * \brief cleans all the requests awaiting response
+     */
+    void CommandMapping::clearUnrespondedRequests()
+    {
+        mRequestsPerCommand.clear();
     }
 
     /**

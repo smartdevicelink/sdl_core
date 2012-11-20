@@ -22,6 +22,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Default class destructor
+     */
+    AutoActivateIdMapping::~AutoActivateIdMapping()
+    {
+        mAutoActivateIds.clear();
+    }
+
+    /**
      * \brief add an application to a mapping
      * \param appName application to be added to mapping
      * \return auto-activate id assigned to an application

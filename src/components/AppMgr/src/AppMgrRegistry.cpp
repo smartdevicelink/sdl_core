@@ -104,6 +104,107 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Activates a registered app and deactivates currently active one
+     * \param item registered application to activate
+     * \return result success
+     */
+    bool AppMgrRegistry::activateApp(RegistryItem* item)
+    {
+        if(!item)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " Cannot activate null application!");
+            return false;
+        }
+
+        Application* app = item->getApplication();
+
+        return activateApp(app);
+    }
+
+    /**
+     * \brief Activates a registered app and deactivates currently active one
+     * \param item registered application to activate
+     * \return result success
+     */
+    bool AppMgrRegistry::activateApp(Application *app)
+    {
+        for(Items::iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
+        {
+            RegistryItem* item_ = it->second;
+            if(!item_)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " Item " << it->first << " is empty in registry!");
+                return false;
+            }
+            Application* app_ = item_->getApplication();
+            if(!app_)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application for the item " << it->first);
+                return false;
+            }
+            if(NsAppLinkRPC::HMILevel::HMI_FULL == app_->getApplicationHMIStatusLevel())
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " Deactivating application " << app_->getName());
+                app_->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_BACKGROUND);
+            }
+        }
+        if(!app)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " No application for the specified item!");
+            return false;
+        }
+        LOG4CPLUS_INFO_EXT(mLogger, " Activating application " << app->getName());
+        app->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
+        return true;
+    }
+
+    /**
+     * \brief Returns an application from the registry by application name
+     * \param name registered application name
+     * \return application, if the specified name found in a registry, NULL otherwise
+     */
+    Application *AppMgrRegistry::getApplication(const std::string &name) const
+    {
+        if(name.empty())
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " Cannot activate null application!");
+            return 0;
+        }
+        Items::const_iterator it = mRegistryItems.find(name);
+        if(it == mRegistryItems.end())
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " Application " << name << " not registered!");
+            return 0;
+        }
+        RegistryItem* item = it->second;
+        if(!item)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " Item " << it->first << " is empty in registry!");
+            return 0;
+        }
+        Application* app = item->getApplication();
+        if(!app)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " No application for the item " << it->first);
+            return 0;
+        }
+        if(app->getName() != name)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " Application name " << app->getName() << " doesn't match a one it is registered under - " << name);
+            return 0;
+        }
+        return app;
+    }
+
+    /**
+     * \brief cleans all the registry
+     */
+    void AppMgrRegistry::clear()
+    {
+        mRegistryItems.clear();
+    }
+
+    /**
      * \brief Default class constructor
      */
     AppMgrRegistry::AppMgrRegistry( )

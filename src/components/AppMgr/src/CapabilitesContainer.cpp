@@ -28,7 +28,7 @@ namespace NsAppManager
     template<class DeviceCapabilities>
     CapabilitiesContainer<DeviceCapabilities>::~CapabilitiesContainer()
     {
-        mCapabilities.clear();
+        clear();
     }
 
     /**
@@ -55,6 +55,15 @@ namespace NsAppManager
     const typename CapabilitiesContainer<DeviceCapabilities>::Capabilities& CapabilitiesContainer<DeviceCapabilities>::get() const
     {
         return mCapabilities;
+    }
+
+    /**
+     * \brief clearing underlying container
+     */
+    template<class DeviceCapabilities>
+    void CapabilitiesContainer<DeviceCapabilities>::clear()
+    {
+        mCapabilities.clear();
     }
 
     /**

@@ -1247,7 +1247,7 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "Cannot serialize auto-activate id!");
                 }
 
-                app->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
+                AppMgrRegistry::getInstance().activateApp(app);
                 hmiStatus->set_audioStreamingState(app->getApplicationAudioStreamingState());
                 hmiStatus->set_systemContext(NsAppLinkRPC::SystemContext::SYSCTXT_MENU);
                 MobileHandler::getInstance().sendRPCMessage( hmiStatus, app->getSessionID() );

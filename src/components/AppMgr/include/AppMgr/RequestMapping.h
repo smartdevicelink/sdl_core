@@ -39,6 +39,11 @@ namespace NsAppManager
         RequestMapping();
 
         /**
+         * \brief Default class destructor
+         */
+        ~RequestMapping();
+
+        /**
          * \brief add a message to a mapping
          * \param msgId message id
          * \param cmdId a request to map a message to
@@ -63,6 +68,11 @@ namespace NsAppManager
          * \return id of the request assigned to a message
          */
         unsigned int findRequestIdAssignedToMessage(int msgId) const;
+
+        /**
+         * \brief cleans request mapping
+         */
+        void clear( );
 
     private:
 

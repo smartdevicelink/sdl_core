@@ -22,6 +22,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Default class destructor
+     */
+    MessageMapping::~MessageMapping()
+    {
+        clear();
+    }
+
+    /**
      * \brief add a message to a mapping
      * \param msgId message id
      * \param app application to map a message to
@@ -106,6 +114,14 @@ namespace NsAppManager
         }
         LOG4CPLUS_INFO_EXT(mLogger, "Message " << msgId << " not found in subscribed." );
         return 0;
+    }
+
+    /**
+     * \brief cleans menu mapping
+     */
+    void MessageMapping::clear()
+    {
+        mMessageMapping.clear();
     }
 
     /**

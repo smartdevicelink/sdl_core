@@ -21,6 +21,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Default class destructor
+     */
+    ButtonMapping::~ButtonMapping()
+    {
+        clear();
+    }
+
+    /**
      * \brief add a button to a mapping
      * \param buttonName button name
      * \param app application to map a button to
@@ -63,6 +71,14 @@ namespace NsAppManager
                 mButtonsMapping.erase(it->first);
             }
         }
+    }
+
+    /**
+     * \brief cleans all the mapping
+     */
+    void ButtonMapping::clear()
+    {
+        mButtonsMapping.clear();
     }
 
     /**

@@ -20,6 +20,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Default class destructor
+     */
+    MenuMapping::~MenuMapping()
+    {
+        clear();
+    }
+
+    /**
      * \brief add a command to a mapping
      * \param commandId command id
      * \param menuId menu id
@@ -90,6 +98,14 @@ namespace NsAppManager
                 commands.push_back(it->first);
             }
         }
+    }
+
+    /**
+     * \brief cleans menu mapping
+     */
+    void MenuMapping::clear()
+    {
+        mMenuMapping.clear();
     }
 
     /**
