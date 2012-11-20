@@ -1303,6 +1303,7 @@ namespace NsAppManager
                     NsAppLinkRPC::HMIApplication hmiApp;
                     hmiApp.set_appName(it->first);
                     hmiApp.set_ngnMediaScreenAppName(core->getApplicationFromItemCheckNotNull(it->second)->getNgnMediaScreenAppName());
+                    hmiApps.push_back(hmiApp);
                 }
                 if(!hmiApps.empty())
                 {
