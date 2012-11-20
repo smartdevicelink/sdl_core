@@ -234,6 +234,16 @@ namespace NsAppManager
          */
         unsigned int decrementUnrespondedRequestCount(const unsigned int& cmdId);
 
+        /**
+         * \brief cleans all the items
+         */
+        void clear( );
+
+        /**
+         * \brief cleans all the requests awaiting response
+         */
+        void clearUnrespondedRequests( );
+
     private:
 
         /**

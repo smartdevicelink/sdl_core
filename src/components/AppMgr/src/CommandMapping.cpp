@@ -192,6 +192,22 @@ namespace NsAppManager
     }
 
     /**
+     * \brief cleans all the items
+     */
+    void CommandMapping::clear()
+    {
+        mCommandMapping.clear();
+    }
+
+    /**
+     * \brief cleans all the requests awaiting response
+     */
+    void CommandMapping::clearUnrespondedRequests()
+    {
+        mRequestsPerCommand.clear();
+    }
+
+    /**
      * \brief Copy constructor
      */
     CommandMapping::CommandMapping(const CommandMapping &)
