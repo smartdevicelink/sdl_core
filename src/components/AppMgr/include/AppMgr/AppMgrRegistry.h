@@ -97,6 +97,13 @@ namespace NsAppManager
         bool activateApp(RegistryItem* item);
 
         /**
+         * \brief Activates a registered app and deactivates currently active one
+         * \param item registered application to activate
+         * \return result success
+         */
+        bool activateApp(Application* app);
+
+        /**
          * \brief Returns an application from the registry by application name
          * \param name registered application name
          * \return application, if the specified name found in a registry, NULL otherwise

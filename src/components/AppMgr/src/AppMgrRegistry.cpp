@@ -115,6 +115,19 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " Cannot activate null application!");
             return false;
         }
+
+        Application* app = item->getApplication();
+
+        return activateApp(app);
+    }
+
+    /**
+     * \brief Activates a registered app and deactivates currently active one
+     * \param item registered application to activate
+     * \return result success
+     */
+    bool AppMgrRegistry::activateApp(Application *app)
+    {
         for(Items::iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
         {
             RegistryItem* item_ = it->second;
@@ -135,7 +148,6 @@ namespace NsAppManager
                 app_->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_BACKGROUND);
             }
         }
-        Application* app = item->getApplication();
         if(!app)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " No application for the specified item!");
