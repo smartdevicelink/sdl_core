@@ -69,6 +69,11 @@ namespace NsAppManager
         void removeItem( RegistryItem* app );
 
         /**
+         * \brief cleans all the mapping
+         */
+        void clear( );
+
+        /**
          * \brief find a registry item subscribed to button
          * \param btnName button name
          * \return RegistryItem instance
