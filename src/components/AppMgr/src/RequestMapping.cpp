@@ -22,6 +22,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Default class destructor
+     */
+    RequestMapping::~RequestMapping()
+    {
+        clear();
+    }
+
+    /**
      * \brief add a message to a mapping
      * \param msgId message id
      * \param cmdId a request to map a message to
