@@ -45,6 +45,11 @@ namespace NsAppManager
         MenuMapping();
 
         /**
+         * \brief Default class destructor
+         */
+        ~MenuMapping();
+
+        /**
          * \brief add a command to a mapping
          * \param commandId command id
          * \param menuId menu id
