@@ -32,11 +32,11 @@ MFT.ApplinkModel = Em.Object.create({
 	/**
 	  * Timer for Media Clock
 	  */
-	timer: null,
+	timer:			null,
 
 	countUp:		true,
 	pause:			true,
-	maxTimeValue:		68400, // 19 hours
+	maxTimeValue:	68400, // 19 hours
 
  	/**
 	  * Array of Interaction Choises

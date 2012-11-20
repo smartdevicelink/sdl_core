@@ -429,6 +429,11 @@ MFT.MediaController = Em.Object.create({
 
 	},
 
+	/** Create list of lapplications on info view */
+	onGetAppList: function(params){
+		MFT.InfoAppsView.AddApplication(params);
+	},
+
 	/** Applink Options */
 	turnOnApplinkOptions: function(el){
 		MFT.States.goToState('media.applink.applinkoptions');
@@ -479,15 +484,6 @@ MFT.MediaController = Em.Object.create({
 	onSystemContextSwitcher: function(systemContextValue){
 		FFW.UI.OnSystemContext(systemContextValue);
 	},
-
-	/** Calls Applink SystemContext switcher when turn On/Of Applink application */
-	onTurnOnApplinkApp: function(systemContextValue){
-		if(MFT.States.media.applink.active){
-            MFT.MediaController.onSystemContextSwitcher(MFT.MediaController.eSystemContext.application);
-		}else{
-            MFT.MediaController.onSystemContextSwitcher(MFT.MediaController.eSystemContext.main);
-		}
-	}.observes('MFT.States.media.applink.active'),
 
 	/** Applink Setter for Media Clock Timer */
 	applinkSetMediaClockTimer: function(params){
