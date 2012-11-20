@@ -307,14 +307,18 @@ namespace NsAppManager
             delete command; */
 
                 NsAppLinkRPC::SubscribeButton_request * object = (NsAppLinkRPC::SubscribeButton_request*)mobileMsg;
+                NsAppLinkRPC::SubscribeButton_response* response = new NsAppLinkRPC::SubscribeButton_response();
                 RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
                 if(!item)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, " Session " << sessionID << " hasn't been associated with application!");
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionID);
                     break;
                 }
                 core->mButtonsMapping.addButton( object->get_buttonName(), item );
-                NsAppLinkRPC::SubscribeButton_response* response = new NsAppLinkRPC::SubscribeButton_response();
+
                 response->setCorrelationID(object->getCorrelationID());
                 response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                 response->set_success(true);
