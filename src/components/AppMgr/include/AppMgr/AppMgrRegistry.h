@@ -15,100 +15,114 @@
 
 namespace log4cplus
 {
-	class Logger;
+    class Logger;
 }
 
 namespace NsAppManager
 {
-	
-/**
- * \brief AppMgrRegistry acts as a registry for applications registered on HMI
- */
-class AppMgrRegistry
-{
-public:
 
     /**
-     * \brief An application_name-registry_item map
+     * \brief AppMgrRegistry acts as a registry for applications registered on HMI
      */
-	typedef std::map<std::string, RegistryItem*> Items;
+    class AppMgrRegistry
+    {
+    public:
 
-    /**
-     * \brief An application_name-registry_item map item
-     */
-	typedef std::pair<std::string, RegistryItem*> Item;
-	
-    /**
-     * \brief Default class destructor
-     */
-	~AppMgrRegistry( );
+        /**
+         * \brief An application_name-registry_item map
+         */
+        typedef std::map<std::string, RegistryItem*> Items;
 
-    /**
-     * \brief Returning class instance
-     * \return class instance
-     */
-	static AppMgrRegistry& getInstance( );
+        /**
+         * \brief An application_name-registry_item map item
+         */
+        typedef std::pair<std::string, RegistryItem*> Item;
 
-    /**
-     * \brief register an application
-     * \param app application we are registering
-     * \return RegistryItem instance created for the application we've just registered
-     */
-    const RegistryItem* registerApplication(Application *app );
+        /**
+         * \brief Default class destructor
+         */
+        ~AppMgrRegistry( );
 
-    /**
-     * \brief unregister an application
-     * \param item a registry item associated with the aplication being unregistered
-     */
-	void unregisterApplication( RegistryItem* item  );
+        /**
+         * \brief Returning class instance
+         * \return class instance
+         */
+        static AppMgrRegistry& getInstance( );
 
-    /**
-     * \brief get registry item associated with the application
-     * \param app application we need to retrieve a registry tem for
-     * \return RegistryItem instance
-     */
-    RegistryItem *getItem( const Application* app ) const;
+        /**
+         * \brief register an application
+         * \param app application we are registering
+         * \return RegistryItem instance created for the application we've just registered
+         */
+        const RegistryItem* registerApplication(Application *app );
 
-    /**
-     * \brief get registry item associated with the application
-     * \param app a name of the application we need to retrieve a registry tem for
-     * \return RegistryItem instance
-     */
-    RegistryItem* getItem( const std::string& app ) const;
+        /**
+         * \brief unregister an application
+         * \param item a registry item associated with the aplication being unregistered
+         */
+        void unregisterApplication( RegistryItem* item  );
 
-    /**
-     * \brief get registry item associated with the application
-     * \param sessionID id of a session associated with the application we need to retrieve a registry item for
-     * \return RegistryItem instance
-     */
-    RegistryItem *getItem( unsigned char sessionID ) const;
+        /**
+         * \brief get registry item associated with the application
+         * \param app application we need to retrieve a registry tem for
+         * \return RegistryItem instance
+         */
+        RegistryItem *getItem( const Application* app ) const;
 
-    /**
-     * \brief Returns registered applications list
-     * \return registered applications list
-     */
-    const Items &getItems() const;
+        /**
+         * \brief get registry item associated with the application
+         * \param app a name of the application we need to retrieve a registry tem for
+         * \return RegistryItem instance
+         */
+        RegistryItem* getItem( const std::string& app ) const;
 
-    /**
-     * \brief cleans all the registry
-     */
-    void clear( );
+        /**
+         * \brief get registry item associated with the application
+         * \param sessionID id of a session associated with the application we need to retrieve a registry item for
+         * \return RegistryItem instance
+         */
+        RegistryItem *getItem( unsigned char sessionID ) const;
 
-private:
+        /**
+         * \brief Returns registered applications list
+         * \return registered applications list
+         */
+        const Items &getItems() const;
 
-    /**
-     * \brief Default class constructor
-     */
-	AppMgrRegistry( );
+        /**
+         * \brief Activates a registered app and deactivates currently active one
+         * \param item registered application to activate
+         * \return result success
+         */
+        bool activateApp(RegistryItem* item);
 
-    /**
-     * \brief Copy constructor
-     */
-    AppMgrRegistry( const AppMgrRegistry& );
+        /**
+         * \brief Returns an application from the registry by application name
+         * \param name registered application name
+         * \return application, if the specified name found in a registry, NULL otherwise
+         */
+        Application* getApplication( const std::string& name ) const;
 
-	Items mRegistryItems;
-	static log4cplus::Logger mLogger;
-};
+        /**
+         * \brief cleans all the registry
+         */
+        void clear( );
+
+    private:
+
+        /**
+         * \brief Default class constructor
+         */
+        AppMgrRegistry( );
+
+        /**
+         * \brief Copy constructor
+         */
+        AppMgrRegistry( const AppMgrRegistry& );
+
+        Items mRegistryItems;
+        static log4cplus::Logger mLogger;
+    };
 
 } // namespace NsAppManager
 
