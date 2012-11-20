@@ -37,6 +37,8 @@ MFT.ApplinkModel = Em.Object.create({
 	countUp:		true,
 	pause:			true,
 	maxTimeValue:	68400, // 19 hours
+	duration:		0,
+	currTime:		0,
 
  	/**
 	  * Array of Interaction Choises
@@ -47,15 +49,13 @@ MFT.ApplinkModel = Em.Object.create({
 		field3:			'<field3>',
 		mediaClock:		"<mediaClock>",
 		appName:		"<App name>",
-		deviceName:		"<Device name>",
-		duration:		0,
-		currTime:		0,
+		deviceName:		"<Device name>"
 	}),
 
 	startTimer: function(){
 		if(!this.pause){
 			this.timer = setInterval(function(){
-				this.showInfo.set('currTime', this.showInfo.currTime+1);
+				this.set('currTime', this.currTime+1);
 			}, 1000);
 		}else{
 			clearInterval(this.timer);
@@ -64,14 +64,14 @@ MFT.ApplinkModel = Em.Object.create({
 
 	setDuration: function() {
 		if(this.countUp){
-			this.showInfo.set('mediaClock', Math.ceil((this.showInfo.duration + this.showInfo.currTime+1)/60)-1 + ":" + (this.showInfo.duration + this.showInfo.currTime) % 60 );
+			this.showInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (this.duration + this.currTime) % 60 );
 		}else{
-			this.showInfo.set('mediaClock', Math.ceil((this.showInfo.duration - this.showInfo.currTime+1)/60)-1 + ":" + (this.showInfo.duration - this.showInfo.currTime) % 60 );
+			this.showInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (this.duration - this.currTime) % 60 );
 		}
-	}.observes('this.showInfo.currTime'),
+	}.observes('this.currTime'),
 
 	changeDuration: function() {
 		clearInterval(this.timer);
 		this.startTimer();
-	}.observes('this.showInfo.duration')
+	}.observes('this.duration')
 });

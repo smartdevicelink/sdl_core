@@ -64,10 +64,10 @@ div {
 	left: 500px;
 	width: 295px;
 	height: 100px;
-	background-color: rgba(165, 165, 165, 0.95);
+	background-color: black;
 	z-index: 1;
 	border-radius: 10PX;
-	box-shadow: 0px 0px 7px 5px rgba(165, 165, 165, 0.95);
+	border: #A6A6A6 solid 2px;
 	top: 8px;
 	-webkit-transition: opacity 1s ease-in-out;
 	pointer-events: none;
@@ -87,7 +87,7 @@ div {
 	height: 81px;
 }
 
-#TTSPopUp.received{
+#TTSPopUp.active{
 	opacity: 1;
 }
 /* Diver Distraction PopUp */
@@ -158,10 +158,9 @@ div {
 	left: 50px;
 	width: 700px;
 	height: 340px;
-	background-color: rgba(0, 0, 0, 0.95);
+	background-color: black;
 	z-index: 2;
 	border-radius: 10PX;
-	box-shadow: 0px 0px 7px 5px rgba(0, 0, 0, 0.95);
 	top: 70px;
 	-webkit-transition: opacity 1s ease-in-out;
 }

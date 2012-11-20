@@ -31,6 +31,13 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 		'listOfApplications'
 	],
 
+    init: function(){
+        /*
+         * Request, get List of applications
+         */
+        FFW.AppLinkCoreClient.getAppList();
+    },
+
         /** 
       * Function to add new command button to
       * Options screen

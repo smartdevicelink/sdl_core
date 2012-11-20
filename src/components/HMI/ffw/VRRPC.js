@@ -138,7 +138,7 @@ FFW.VR = FFW.RPCObserver.create({
 			};
 			this.client.send(JSONMessage);
 		}
-		/*
+
 		if (request.method == "VR.GetCapabilities") {
 
 			// send repsonse
@@ -153,9 +153,8 @@ FFW.VR = FFW.RPCObserver.create({
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}
 			};
-			//this.client.send(JSONMessage);
+			this.client.send(JSONMessage);
 		}
-		*/
 		
 	}
 })
