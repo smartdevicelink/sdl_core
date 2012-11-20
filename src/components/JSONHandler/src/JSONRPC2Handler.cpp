@@ -87,8 +87,8 @@ void * JSONRPC2Handler::waitForCommandsFromHMI( void * params )
     {
         while ( !handler -> mCommandsFromHMI.empty() )
         {
-            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI: received command");
             Json::Value jsonMessage = handler -> mCommandsFromHMI.pop();
+            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsFromHMI: received command: " << jsonMessage);
             NsRPC2Communication::RPC2Command * currentCommand = NsRPC2Communication::Marshaller::fromJSON( jsonMessage );
             
             if ( !currentCommand )
@@ -125,8 +125,7 @@ void * JSONRPC2Handler::waitForResponsesFromHMI( void * params )
         {            
             ResponseContainer response = handler -> mResponsesFromHMI.pop();
             LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI: received response " << response.methodName );
-            NsRPC2Communication::RPC2Command * currentCommand = NsRPC2Communication::Marshaller::fromJSON( response.response );// response.methodName
-            LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForResponsesFromHMI: checked if UI message " << response.methodName );
+            NsRPC2Communication::RPC2Command * currentCommand = NsRPC2Communication::Marshaller::fromJSON( response.response );
             
             if ( !currentCommand )
             {
