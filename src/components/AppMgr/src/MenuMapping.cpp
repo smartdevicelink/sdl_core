@@ -93,6 +93,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief cleans menu mapping
+     */
+    void MenuMapping::clear()
+    {
+        mMenuMapping.clear();
+    }
+
+    /**
      * \brief Copy constructor
      */
     MenuMapping::MenuMapping(const MenuMapping &)

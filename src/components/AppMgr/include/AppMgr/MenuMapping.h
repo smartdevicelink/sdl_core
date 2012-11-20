@@ -77,6 +77,11 @@ namespace NsAppManager
          */
         void findCommandsAssignedToMenu(const unsigned int &menuId, MenuCommands& commands) const;
 
+        /**
+         * \brief cleans menu mapping
+         */
+        void clear( );
+
     private:
 
         /**
