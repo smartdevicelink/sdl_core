@@ -268,14 +268,18 @@ namespace NsAppManager
 
                 NsAppLinkRPC::UnregisterAppInterface_request * object = (NsAppLinkRPC::UnregisterAppInterface_request*)mobileMsg;
                 Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionID));
+                NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, " No application has been associated with this registry item!");
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionID);
                     break;
                 }
                 std::string appName = app->getName();
                 core->unregisterApplication( sessionID );
-                NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
+
                 response->setCorrelationID(object->getCorrelationID());
                 response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                 response->set_success(true);
