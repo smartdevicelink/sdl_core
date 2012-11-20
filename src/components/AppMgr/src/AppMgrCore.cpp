@@ -468,10 +468,15 @@ namespace NsAppManager
             case NsAppLinkRPC::Marshaller::METHOD_ADDCOMMAND_REQUEST:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
+
                 RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
                 if(!item)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, " Session " << sessionID << " hasn't been associated with application!");
+                    NsAppLinkRPC::AddCommand_response* response = new NsAppLinkRPC::AddCommand_response();
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionID);
                     break;
                 }
                 NsAppLinkRPC::AddCommand_request* object = (NsAppLinkRPC::AddCommand_request*)mobileMsg;
