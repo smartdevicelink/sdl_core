@@ -31,7 +31,7 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 		'listOfApplications'
 	],
 
-    init: function(){
+    afterRender: function(){
         /*
          * Request, get List of applications
          */
@@ -44,18 +44,19 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
       */
     AddApplication: function( params ){
 
-        this.listOfApplications.items.push({
+        for(var i = 0; i < params.appList.length; i++){
+            this.listOfApplications.items.push({
                 type:       MFT.Button,
                 params:     {
                     action:         'turnOnApplink',
                     target:         'MFT.MediaController',
-                    text:           params.appName,
+                    text:           params.appList[i].appName,
                     className:      'scrollButtons button notpressed',
-                    icon:           params.icon,
-                    templateName:   'rightIcon'
+                    //icon:           params.icon,
+                    templateName:   'text'//'rightIcon'
                 }                                   
             });
-
+        }
         this.listOfApplications.list.refresh();
     },
 	
