@@ -662,17 +662,24 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An EncodedSyncPData request has been invoked");
                 NsAppLinkRPC::EncodedSyncPData_request* object = (NsAppLinkRPC::EncodedSyncPData_request*)mobileMsg;
+                NsAppLinkRPC::EncodedSyncPData_response* response = new NsAppLinkRPC::EncodedSyncPData_response;
 
                 if(object->get_data())
                 {
                     Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(sessionID) );
                     const std::string& name = app->getName();
                     core->mSyncPManager.setPData(*object->get_data(), name, object->getMethodId());
+                    response->set_success(true);
+                    response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
+                }
+                else
+                {
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
                 }
 
-                NsAppLinkRPC::EncodedSyncPData_response* response = new NsAppLinkRPC::EncodedSyncPData_response;
-                response->set_success(true);
-                response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
+                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_SHOW_RESPONSE:
