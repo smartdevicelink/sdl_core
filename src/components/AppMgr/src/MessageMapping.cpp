@@ -109,6 +109,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief cleans menu mapping
+     */
+    void MessageMapping::clear()
+    {
+        mMessageMapping.clear();
+    }
+
+    /**
      * \brief Copy constructor
      */
     MessageMapping::MessageMapping(const MessageMapping &)

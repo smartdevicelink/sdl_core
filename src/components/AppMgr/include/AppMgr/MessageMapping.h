@@ -74,6 +74,11 @@ namespace NsAppManager
          */
         RegistryItem *findRegistryItemAssignedToCommand(int msgId) const;
 
+        /**
+         * \brief cleans message mapping
+         */
+        void clear( );
+
     private:
 
         /**
