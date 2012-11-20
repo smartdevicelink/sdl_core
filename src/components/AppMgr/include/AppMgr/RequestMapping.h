@@ -64,6 +64,11 @@ namespace NsAppManager
          */
         unsigned int findRequestIdAssignedToMessage(int msgId) const;
 
+        /**
+         * \brief cleans request mapping
+         */
+        void clear( );
+
     private:
 
         /**

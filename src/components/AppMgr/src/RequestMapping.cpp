@@ -77,6 +77,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief cleans request mapping
+     */
+    void RequestMapping::clear()
+    {
+        mRequestMapping.clear();
+    }
+
+    /**
      * \brief Copy constructor
      */
     RequestMapping::RequestMapping(const RequestMapping &)
