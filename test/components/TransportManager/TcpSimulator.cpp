@@ -82,7 +82,7 @@ const Config DefaultConfigValues =
     32,                             // Default actual data size
     32,                             // Default reported data size
     std::string(""),                // Default file name (no default)
-    false
+    false                           // Default bulk
 };
 
 // -------------------------------------------------------------------------
@@ -189,7 +189,9 @@ void CTranspMgrTcpClient::connect()
     
     if (::connect(mSocketFd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0)
     {
-        throw new std::string("Error connecting\n");
+        //throw new std::string("Error connecting\n");
+        printf("\n WARNING: No TCP connection\n");
+        mIsConencted = false;
     }
     mIsConencted = true;
 }
@@ -223,6 +225,11 @@ void CTranspMgrTcpClient::send(const void* pData, size_t dataSize)
     }
 }
 
+/**
+ * function prototype. servicetype - is deafult value method.
+ * 
+ */
+static void makePacketHeader(size_t version, PacketHeaderV1 *& phv1, PacketHeaderV2 *& phv2, int8_t servicetype, int8_t sessionId);
 
 /**
  * @brief   class providing paylod data for testing of appLinkCore via TCP(WiFi) link
@@ -269,7 +276,7 @@ public:
     */
    void startSession(bool bIsBulk)
    {
-      printf("%s:%d CAppTester::startSession()\n", __FILE__, __LINE__);
+      printf("\n%s:%d CAppTester::startSession()\n", __FILE__, __LINE__);
       
       uint8_t protocolVersion = getProtocolVersion();
       if (protocolVersion == INVALID_PROTOCOL_VERSION)
@@ -277,33 +284,45 @@ public:
           return;
       }
 
-      printf("Start session (RPC Service)\n");
-      void* sPacketData = malloc(sizeof(PacketHeaderV2));
-      memset(sPacketData, 0, sizeof(PacketHeaderV2));
-      // TODO add version dependancy
-      ((uint8_t*)sPacketData)[0] = 16;
-      ((uint8_t*)sPacketData)[1] = 7;
-      ((uint8_t*)sPacketData)[2] = 1;
+      printf("Start session (RPC Service)  version = %d\n", protocolVersion);
       
-      if (protocolVersion == 0x01) sendData(sPacketData, sizeof(PacketHeaderV1));
-      else if (protocolVersion == 0x02) sendData(sPacketData, sizeof(PacketHeaderV2));
-      if (sPacketData) free(sPacketData);
+      
+      PacketHeaderV1* phv1;
+      PacketHeaderV2* phv2;
+      makePacketHeader(protocolVersion, phv1, phv2, 0x07/*service type*/, 0 /*session id*/);
+      
+      if (protocolVersion == 0x01) 
+      {
+          sendData(phv1, sizeof(PacketHeaderV1));
+          if (phv1) free(phv1);
+      }
+      else if (protocolVersion == 0x02)
+      {
+          sendData(phv2, sizeof(PacketHeaderV2));
+          if (phv2) free(phv2);
+      }
+
+      
+      
       
       if (bIsBulk)
       {
-         printf("Start session (Bulk Service)\n");
-         sPacketData = malloc(sizeof(PacketHeaderV2));
-         memset(sPacketData, 0, sizeof(PacketHeaderV2));
-         // TODO add version dependancy
-         ((uint8_t*)sPacketData)[0] = 16;
-         ((uint8_t*)sPacketData)[1] = 15;
-         ((uint8_t*)sPacketData)[2] = 1;
+         printf("Start session (Bulk Service)\n");        
          
-         if (protocolVersion == 0x01) sendData(sPacketData, sizeof(PacketHeaderV1));
-         else if (protocolVersion == 0x02) sendData(sPacketData, sizeof(PacketHeaderV2));
-         if (sPacketData) free(sPacketData);
+         makePacketHeader(protocolVersion, phv1, phv2, 0x0f, 0);
+         
+         if (protocolVersion == 0x01) 
+         {
+            sendData(phv1, sizeof(PacketHeaderV1));
+            if (phv1) free(phv1);
+         }
+         else if (protocolVersion == 0x02)
+         {
+            sendData(phv2, sizeof(PacketHeaderV2));
+            if (phv2) free(phv2);
+         }
       }
-      
+     
    }
     
      /**
@@ -368,9 +387,11 @@ private:
     // -------------------------------------------------------------------------
     void sendData(const void *const data, const int length)
     // -------------------------------------------------------------------------
-    {
+    {        
         if ((length > 0) && data != 0)
         {
+            if (length >= 3) 
+                    printf("sendData. length = %d, [0]=0x%.2x, [1]=0x%02.2x, [2]==0x%2.2x\n", length, *((const char *const)data), *((const char *const)data+1), *((const char *const)data+2));
             if (mTCPClient.isConnected() == false)
             {
                 mTCPClient.connect();
@@ -536,7 +557,7 @@ static bool initConfig(int argc, char **argv, Config *pConfig)
         int option_index = 0;
         int c;
     
-        c = getopt_long(argc, argv, "hi:p:v:a:r:f:b", long_options, &option_index);
+        c = getopt_long(argc, argv, "hi:p:v:a:r:f:b:", long_options, &option_index);
 
         if (c == -1)
             break;
@@ -702,7 +723,7 @@ static uint8_t* makePacket(const Config &config, int &packetSize)
 }
 
 
-static void makePacketHeader(size_t version, PacketHeaderV1 *& phv1, PacketHeaderV2 *& phv2)
+static void makePacketHeader(size_t version, PacketHeaderV1 *& phv1, PacketHeaderV2 *& phv2, int8_t servicetype = 0x07, int8_t sessionId = 1)
 {
     uint8_t *pBuff = 0;
     PacketHeaderBase *pBase;
@@ -728,11 +749,10 @@ static void makePacketHeader(size_t version, PacketHeaderV1 *& phv1, PacketHeade
 
     pBase->version = version;
     pBase->compressionFlag = false;
-    pBase->frameType = 1;
-    pBase->serviceType = 0x07;
-    pBase->frameData = 0;
-    pBase->sessionId = 1;
-    //pBase->dataSize = uint32ToNetOrder(config.reportedDataSize);           // convert data size to network order 
+    pBase->frameType = 0;
+    pBase->serviceType = servicetype;
+    pBase->frameData = 1;
+    pBase->sessionId = sessionId;
  
     if (version == 2)
     {
