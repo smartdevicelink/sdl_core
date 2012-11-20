@@ -21,6 +21,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Default class destructor
+     */
+    CommandMapping::~CommandMapping()
+    {
+        clear();
+    }
+
+    /**
      * \brief add a command to a mapping
      * \param commandId command id
      * \param type command type

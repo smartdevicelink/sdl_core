@@ -178,6 +178,11 @@ namespace NsAppManager
         CommandMapping();
 
         /**
+         * \brief Default class destructor
+         */
+        ~CommandMapping();
+
+        /**
          * \brief add a command to a mapping
          * \param commandId command id
          * \param type command type
