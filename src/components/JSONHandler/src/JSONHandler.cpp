@@ -43,7 +43,7 @@ void JSONHandler::setRPCMessagesObserver( IRPCMessagesObserver * messagesObserve
     mMessagesObserver = messagesObserver;
 }
 
-void JSONHandler::sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, unsigned char sessionId )
+void JSONHandler::sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, unsigned int connectionId, unsigned char sessionId )
 {
     LOG4CPLUS_INFO(mLogger, "An outgoing message has been received" );
     if ( message )
@@ -130,7 +130,8 @@ void * JSONHandler::waitForIncomingMessages( void * params )
                 LOG4CPLUS_ERROR( mLogger, "Cannot handle mobile message: MessageObserver doesn't exist." );
                 pthread_exit( 0 );
             }
-            handler -> mMessagesObserver -> onMessageReceivedCallback( currentMessage, handler -> mSessionID );
+            //TODO:connectionID
+            handler -> mMessagesObserver -> onMessageReceivedCallback( currentMessage, 1, handler -> mSessionID );
             LOG4CPLUS_INFO( mLogger, "Incoming mobile message handled." );
         }
         handler -> mIncomingMessages.wait();
