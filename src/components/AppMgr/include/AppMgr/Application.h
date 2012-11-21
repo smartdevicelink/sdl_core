@@ -30,9 +30,12 @@ class Application
 public:
 
     /**
-     * \brief Default class constructor
+     * \brief Class constructor
+     * \param name application name
+     * \param connectionId id of the connection associated with this application
+     * \param sessionId id of the session associated with this application
      */
-    Application( const std::string& name, unsigned char sessionId );
+    Application(const std::string& name, unsigned int connectionId, unsigned char sessionId );
 
     /**
      * \brief Default class destructor
@@ -178,6 +181,12 @@ public:
     unsigned char getSessionID() const;
 
     /**
+     * \brief retrieve application session ID
+     * \return application connection ID
+     */
+    unsigned char getConnectionID() const;
+
+    /**
      * \brief retrieve application name
      * \return application name
      */
@@ -192,6 +201,7 @@ private:
 	
     const std::string mName;
     const unsigned char mSessionID;
+    const unsigned int mConnectionID;
 	std::string mNgnMediaScreenAppName;
 	std::vector<std::string> mVrSynonyms;
 	bool m_bUsesVehicleData;

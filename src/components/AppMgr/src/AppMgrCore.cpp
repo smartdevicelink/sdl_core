@@ -1359,7 +1359,7 @@ namespace NsAppManager
         LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() << "!");
 
         const std::string& appName = request->get_appName();
-        Application* application = new Application( appName, sessionID );
+        Application* application = new Application( appName, 0, sessionID );//0-temp! Specify unsigned int connectionID instead!!!!
 
         bool isMediaApplication = request->get_isMediaApplication();
         const NsAppLinkRPC::Language& languageDesired = request->get_languageDesired();
