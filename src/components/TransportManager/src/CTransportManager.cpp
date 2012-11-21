@@ -415,13 +415,40 @@ void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnect
 
     if(0 == Data)
     {
-        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived with empty data");
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "onFrameReceived with empty data");
         return;
     }
 
     if(0 == DataSize)
     {
-        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived with DataSize=0");
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "onFrameReceived with DataSize=0");
+        return;
+    }
+
+    if(InvalidConnectionHandle == ConnectionHandle)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived received with invalid connection handle");
+        return;
+    }
+
+    pthread_mutex_lock(&mDevicesByAdapterMutex);
+    tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
+    if(devicesIterator == mDevicesByAdapter.end())
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived. Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+        pthread_mutex_unlock(&mDevicesByAdapterMutex);
+        return;
+    }
+    pthread_mutex_unlock(&mDevicesByAdapterMutex);
+
+    pthread_mutex_lock(&mDataListenersMutex);
+    bool bThreadExist = isThreadForConnectionHandleExist(ConnectionHandle);
+    pthread_mutex_unlock(&mDataListenersMutex);
+
+    if(false == bThreadExist)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived. Thread for connection does not exist");
+        return;
     }
 
     //TODO: Currently all frames processed in one thread. In the future processing of them
