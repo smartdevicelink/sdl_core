@@ -203,22 +203,10 @@ namespace NsAppManager
                     if(object->get_autoActivateID())
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, "There is an AutoActivateId supplied withtin this RegisterAppInterface request: " << *object->get_autoActivateID());
-                        if(*object->get_autoActivateID() != autoActivateIdFound)
-                        {
-                            LOG4CPLUS_ERROR_EXT(mLogger, " Application " << object->get_appName() << " hasn't been registered because its autoActivateId " << *object->get_autoActivateID() << " differs from the one specified before - " << autoActivateIdFound);
-                            response->set_success(false);
-                            response->set_resultCode(NsAppLinkRPC::Result::GENERIC_ERROR);
-                            MobileHandler::getInstance().sendRPCMessage(response, sessionID);
-                            break;
-                        }
                     }
                     else
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Application " << object->get_appName() << " hasn't been registered because its autoActivateId NULL differs from the one specified before - " << autoActivateIdFound);
-                        response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPC::Result::GENERIC_ERROR);
-                        MobileHandler::getInstance().sendRPCMessage(response, sessionID);
-                        break;
+                        LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " hasn't been registered because its autoActivateId NULL differs from the one specified before - " << autoActivateIdFound);
                     }
                 }
                 else
@@ -226,19 +214,27 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId has previously been assigned to app name " << appName);
                     if(!object->get_autoActivateID())
                     {
-                        LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request - about to register an application " << appName);
-                        const std::string& autoActivateId = core->mAutoActivateIds.addApplicationName(object->get_appName());
-                        response->set_autoActivateID(autoActivateId);
+                        LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request!");
                     }
                     else
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Application " << object->get_appName() << " hasn't been registered because it specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered!");
-                        response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPC::Result::GENERIC_ERROR);
-                        MobileHandler::getInstance().sendRPCMessage(response, sessionID);
-                        break;
+                        LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered!");
                     }
                 }
+
+                if(!object->get_autoActivateID())
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request - about to register an application " << appName << " with the generated one");
+                    const std::string& autoActivateId = core->mAutoActivateIds.addApplicationName(object->get_appName());
+                    response->set_autoActivateID(autoActivateId);
+                }
+                else
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered:");
+                    LOG4CPLUS_INFO_EXT(mLogger, " about to register with the supplies auto-activate id!");
+                    response->set_autoActivateID(*object->get_autoActivateID());
+                }
+
                 response->set_buttonCapabilities(core->mButtonCapabilities.get());
                 response->set_displayCapabilities(core->mDisplayCapabilities);
                 response->set_hmiZoneCapabilities(core->mHmiZoneCapabilities.get());
