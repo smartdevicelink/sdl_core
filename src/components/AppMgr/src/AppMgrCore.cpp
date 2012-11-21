@@ -101,7 +101,7 @@ namespace NsAppManager
      */
     void AppMgrCore::pushMobileRPCMessage( NsAppLinkRPC::ALRPCMessage * message, unsigned int connectionID, unsigned char sessionID )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Pushing mobile RPC message...");
+        LOG4CPLUS_INFO_EXT(mLogger, " Pushing mobile RPC message for connection id " << connectionID << " session id " << (uint)sessionID << "...");
         if(!message)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "Nothing to push! A null-ptr occured!");
@@ -110,7 +110,7 @@ namespace NsAppManager
 
         mQueueRPCAppLinkObjectsIncoming->pushMessage(Message(message, ApplicationUniqueID(connectionID, sessionID)));
 
-        LOG4CPLUS_INFO_EXT(mLogger, " Pushed mobile RPC message");
+        LOG4CPLUS_INFO_EXT(mLogger, " Pushed mobile RPC message for connection id " << connectionID << " session id " << (uint)sessionID);
     }
 
     /**
@@ -159,7 +159,7 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " No message associated with the connection " << connectionID << " session " << (uint)sessionID << " !");
             return;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message " << mobileMsg->getMethodId() << " has been received for the connection " << connectionID << " session id " << (uint)sessionID << "!");
+        LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message " << mobileMsg->getMethodId() << " has been received for the connection " << connectionID << " session id " << (uint)sessionID << " !");
         if(!pThis)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " pThis should point to an instance of AppMgrCore class");
@@ -758,7 +758,7 @@ namespace NsAppManager
 
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                 return;
             }
@@ -781,7 +781,7 @@ namespace NsAppManager
 
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                 return;
             }
@@ -838,7 +838,7 @@ namespace NsAppManager
 
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                 return;
             }
@@ -860,7 +860,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
@@ -883,7 +883,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
@@ -906,7 +906,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
@@ -927,7 +927,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
@@ -951,7 +951,7 @@ namespace NsAppManager
                     response->set_success(true);
                     response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                     core->mRequestMapping.removeRequest(object->getId());
-                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                     MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 }
 
@@ -980,7 +980,7 @@ namespace NsAppManager
                     response->set_success(true);
                     response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                     core->mRequestMapping.removeRequest(object->getId());
-                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                     MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 }
 
@@ -1005,7 +1005,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
@@ -1026,7 +1026,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
@@ -1047,7 +1047,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
@@ -1068,7 +1068,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
@@ -1097,7 +1097,7 @@ namespace NsAppManager
                 response->set_success(true);
                 response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                 core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
@@ -1118,7 +1118,7 @@ namespace NsAppManager
                 response->set_success(true);
                 response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                 core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
@@ -1167,7 +1167,7 @@ namespace NsAppManager
                     response->set_success(true);
                     response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                     core->mRequestMapping.removeRequest(object->getId());
-                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                     MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 }
 
@@ -1195,7 +1195,7 @@ namespace NsAppManager
                     response->set_success(true);
                     response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                     core->mRequestMapping.removeRequest(object->getId());
-                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                     MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 }
 
@@ -1218,7 +1218,7 @@ namespace NsAppManager
 
                 NsAppLinkRPC::OnCommand* event = new NsAppLinkRPC::OnCommand();
                 event->set_cmdID(object->get_cmdID());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                 return;
             }
@@ -1254,7 +1254,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
@@ -1377,11 +1377,11 @@ namespace NsAppManager
     {
         if(!request)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Null-request specified for session " << sessionID << "!");
+            LOG4CPLUS_ERROR_EXT(mLogger, "Null-request specified for connection id " << connectionID << " session id " << (uint)sessionID << "!");
             return 0;
         }
 
-        LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() << "!");
+        LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() << " for connection id " << connectionID << " session id " << (uint)sessionID);
 
         const std::string& appName = request->get_appName();
         Application* application = new Application( appName, connectionID, sessionID );
@@ -1430,6 +1430,7 @@ namespace NsAppManager
      */
     void AppMgrCore::unregisterApplication(const unsigned int& connectionID, const unsigned char &sessionID)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Trying to unregister an application for connection id " << connectionID << " session id " << (uint)sessionID);
         RegistryItem* item = AppMgrRegistry::getInstance().getItem(connectionID, sessionID);
         Application* app = getApplicationFromItemCheckNotNull( item );
         if(!app)

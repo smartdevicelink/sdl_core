@@ -258,7 +258,7 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " Trying to register a null-application!");
             return 0;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << app->getName() << " connection id " << app->getConnectionID() << " session id " << (uint)app->getSessionID());
+        LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << app->getName() << " session id " << app->getSessionID() << " connection id " << (uint)app->getConnectionID());
         mRegistryItems.insert(ItemsMapItem(ApplicationUniqueID(app->getConnectionID(), app->getSessionID()), new RegistryItem(app)));
         return mRegistryItems.find(ApplicationUniqueID(app->getConnectionID(), app->getSessionID()))->second;
     }
