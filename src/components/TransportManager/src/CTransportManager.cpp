@@ -334,6 +334,61 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
         return;
     }
 
+    if(InvalidConnectionHandle == ConnectionHandle)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "ApplicationDisconnected received with invalid connection handle");
+        return;
+    }
+
+    if(InvalidDeviceHandle == DisconnectedDevice.mDeviceHandle)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "ApplicationDisconnected received with invalid device handle: "<<DisconnectedDevice.mDeviceHandle);
+        return;
+    }
+
+    if(DeviceAdapter->getDeviceType() != DisconnectedDevice.mDeviceType)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "ApplicationDisconnected received but disconnected device type("<<DisconnectedDevice.mDeviceType<<") differs from device adapters type: "<<DeviceAdapter->getDeviceType());
+        return;
+    }
+
+    pthread_mutex_lock(&mDevicesByAdapterMutex);
+    tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
+    if(devicesIterator == mDevicesByAdapter.end())
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+        pthread_mutex_unlock(&mDevicesByAdapterMutex);
+        return;
+    }
+
+    tInternalDeviceList *pDevices = devicesIterator->second;
+    bool connectionHandleFound = false;
+    for(tInternalDeviceList::const_iterator deviceIterator = pDevices->begin(); deviceIterator != pDevices->end(); ++deviceIterator)
+    {
+        if(deviceIterator->mDeviceHandle == DisconnectedDevice.mDeviceHandle)
+        {
+            connectionHandleFound = true;
+        }
+    }
+
+    pthread_mutex_unlock(&mDevicesByAdapterMutex);
+
+    if(false == connectionHandleFound)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Disconnected device handle ("<<DisconnectedDevice.mDeviceHandle<<") was not found in devices list for adapter of type: "<<DeviceAdapter->getDeviceType());
+        return;
+    }
+
+    pthread_mutex_lock(&mDataListenersMutex);
+    bool bThreadExist = isThreadForConnectionHandleExist(ConnectionHandle);
+    pthread_mutex_unlock(&mDataListenersMutex);
+
+    if(false == bThreadExist)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Thread for connection does not exist");
+        return;
+    }
+
     stopDataCallbacksThread(ConnectionHandle);
 
     // Removing device adapter for that handle
