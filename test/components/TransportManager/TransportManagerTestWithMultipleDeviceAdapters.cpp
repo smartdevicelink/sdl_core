@@ -340,10 +340,6 @@ TEST(TransportManager, MultipleDeviceAdapters)
             {
                 TRY_LOCK_AND_FAIL_ON_TIMEOUT(callbacksMutex);
 
-                ::testing::ElementsAreArray<uint8_t>(frameData, sizeof(frameData));
-                ::testing::ElementsAreArray(frameData, sizeof(frameData));
-                ::testing::ElementsAreArray(frameData);
-
                 EXPECT_CALL(mockDataListener, onFrameReceived(mockDeviceAdapter.mMockConnectionHandle, ::testing::_, ::testing::_))
                     .With(::testing::Args<1, 2>(BuffersSame(frameData, sizeof(frameData))))
                     .Times(1)
