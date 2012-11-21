@@ -37,6 +37,9 @@ set (SOURCES_TEST_WITH_INCORRECT_DEVICE_ADAPTER ./TransportManagerTestWithIncorr
 # Sources for the TransportManager test with multiple device adapters
 set (SOURCES_TEST_WITH_MULTIPLE_DEVICE_ADAPTERS ./TransportManagerTestWithMultipleDeviceAdapters.cpp)
 
+# Sources for the TransportManager test with high data transfer rate
+set (SOURCES_TEST_WITH_HIGH_DATA_TRANSFER_RATE ./TransportManagerTestWithHighDataTransferRate.cpp)
+
 # Libraries seeems to be the same for all Transport Manager test
 set (LIBRARIES
     gtest
@@ -75,3 +78,7 @@ add_executable("test_TransportManagerTestWithMultipleDeviceAdapters" ${SOURCES_T
 target_link_libraries("test_TransportManagerTestWithMultipleDeviceAdapters" ${LIBRARIES})
 add_test(test_TransportManagerTestWithMultipleDeviceAdapters test_TransportManagerTestWithMultipleDeviceAdapters)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus_disabled.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable("test_TransportManagerTestWithHighDataTransferRate" ${SOURCES_TEST_WITH_HIGH_DATA_TRANSFER_RATE})
+target_link_libraries("test_TransportManagerTestWithHighDataTransferRate" ${LIBRARIES})
+add_test(test_TransportManagerTestWithMultipleDeviceAdapters test_TransportManagerTestWithHighDataTransferRate)

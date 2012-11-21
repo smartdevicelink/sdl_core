@@ -78,7 +78,7 @@ public:
      * to be serialized to Json message and sent to mobile App.
      * \param sessionId ID of the session the message was received within.
      */
-    void sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, unsigned char sessionId );   
+    void sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, unsigned int connectionId, unsigned char sessionId );   
     /*End of methods for IRPCMessagesObserver*/
        
 protected:
