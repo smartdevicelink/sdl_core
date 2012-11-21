@@ -79,6 +79,7 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
         removeDeviceAdapter((*di));
+        delete (*di);
     }
 
     LOG4CPLUS_INFO_EXT(mLogger, "All device adapters removed");
