@@ -10,7 +10,9 @@
 using namespace NsAppLink::NsTransportManager;
 
 
-
+//TODO Add shutdown flag checking inside function calls
+//TODO Fix potential crash due to not thread-safe access to shutdown flag
+//TODO Make function calls from transport manager client thread-safe
 
 NsAppLink::NsTransportManager::CTransportManager::CTransportManager(void):
 mDeviceAdapters(),
