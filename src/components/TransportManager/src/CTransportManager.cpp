@@ -485,6 +485,32 @@ void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tCo
         TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted received from invalid device adapter");
         return;
     }
+
+    if(InvalidConnectionHandle == ConnectionHandle)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted received with invalid connection handle");
+        return;
+    }
+
+    pthread_mutex_lock(&mDevicesByAdapterMutex);
+    tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
+    if(devicesIterator == mDevicesByAdapter.end())
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted. Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+        pthread_mutex_unlock(&mDevicesByAdapterMutex);
+        return;
+    }
+    pthread_mutex_unlock(&mDevicesByAdapterMutex);
+
+    pthread_mutex_lock(&mDataListenersMutex);
+    bool bThreadExist = isThreadForConnectionHandleExist(ConnectionHandle);
+    pthread_mutex_unlock(&mDataListenersMutex);
+
+    if(false == bThreadExist)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted. Thread for connection does not exist");
+        return;
+    }
     
     SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameSendCompleted, ConnectionHandle, FrameSequenceNumber, SendStatus);
 
