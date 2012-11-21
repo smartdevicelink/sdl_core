@@ -11,7 +11,9 @@
 #include "RegistryItem.h"
 
 #include <map>
+#include <tuple>
 #include <string>
+#include <vector>
 
 namespace log4cplus
 {
@@ -29,14 +31,24 @@ namespace NsAppManager
     public:
 
         /**
-         * \brief An application_name-registry_item map
+         * \brief An application unique id - combination of connection id and session id
          */
-        typedef std::map<std::string, RegistryItem*> Items;
+        typedef std::tuple<unsigned int, unsigned char> ApplicationUniqueID;
 
         /**
-         * \brief An application_name-registry_item map item
+         * \brief An application_id-registry_item map
          */
-        typedef std::pair<std::string, RegistryItem*> Item;
+        typedef std::map<ApplicationUniqueID, RegistryItem*> ItemsMap;
+
+        /**
+         * \brief An application_id-registry_item map item
+         */
+        typedef std::pair<ApplicationUniqueID, RegistryItem*> ItemsMapItem;
+
+        /**
+         * \brief RegistryItem vector
+         */
+        typedef std::vector<RegistryItem*> Items;
 
         /**
          * \brief Default class destructor
@@ -64,30 +76,30 @@ namespace NsAppManager
 
         /**
          * \brief get registry item associated with the application
-         * \param app application we need to retrieve a registry tem for
+         * \param app application we need to retrieve a registry item for
          * \return RegistryItem instance
          */
         RegistryItem *getItem( const Application* app ) const;
 
         /**
-         * \brief get registry item associated with the application
-         * \param app a name of the application we need to retrieve a registry tem for
-         * \return RegistryItem instance
+         * \brief get registry items associated with the application name
+         * \param appName a name of the application we need to retrieve a registry items for
+         * \return RegistryItem vector
          */
-        RegistryItem* getItem( const std::string& app ) const;
+        Items getItems(const std::string& appName ) const;
 
         /**
          * \brief get registry item associated with the application
-         * \param sessionID id of a session associated with the application we need to retrieve a registry item for
+         * \param connectionId id of the connection associated with the application we need to retrieve a registry item for
+         * \param sessionId id of the session associated with the application we need to retrieve a registry item for
          * \return RegistryItem instance
          */
-        RegistryItem *getItem( unsigned char sessionID ) const;
-
+        RegistryItem *getItem( unsigned int connectionId, unsigned char sessionId ) const;
         /**
          * \brief Returns registered applications list
          * \return registered applications list
          */
-        const Items &getItems() const;
+        const ItemsMap &getItems() const;
 
         /**
          * \brief Activates a registered app and deactivates currently active one
@@ -104,11 +116,12 @@ namespace NsAppManager
         bool activateApp(Application* app);
 
         /**
-         * \brief Returns an application from the registry by application name
-         * \param name registered application name
+         * \brief Returns an application from the registry by application connection id and session id
+         * \param connectionId id of the connection associated with the application we need to retrieve
+         * \param sessionId id of the session associated with the application we need to retrieve
          * \return application, if the specified name found in a registry, NULL otherwise
          */
-        Application* getApplication( const std::string& name ) const;
+        Application* getApplication( unsigned int connectionId, unsigned char sessionId ) const;
 
         /**
          * \brief cleans all the registry
@@ -127,7 +140,7 @@ namespace NsAppManager
          */
         AppMgrRegistry( const AppMgrRegistry& );
 
-        Items mRegistryItems;
+        ItemsMap mRegistryItems;
         static log4cplus::Logger mLogger;
     };
 

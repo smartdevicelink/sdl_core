@@ -13,14 +13,18 @@ namespace NsAppManager
 log4cplus::Logger Application::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("Application"));
 
 /**
- * \brief Default class constructor
+ * \brief Class constructor
+ * \param name application name
+ * \param connectionId id of the connection associated with this application
+ * \param sessionId id of the session associated with this application
  */
-Application::Application(const std::string& name , unsigned char sessionId)
+Application::Application(const std::string& name , unsigned int connectionId, unsigned char sessionId)
     :mNgnMediaScreenAppName("")
 	,m_bUsesVehicleData(false)
 	,m_bIsMediaApplication(false)
 	,mAutoActivateID("")
     ,mSessionID(sessionId)
+    ,mConnectionID(connectionId)
     ,mName(name)
 {
     LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name << " for the session id " << sessionId);
@@ -38,6 +42,7 @@ Application::Application( const Application& app )
 	,mLanguageDesired(app.getLanguageDesired())
 	,mHMIStatusLevel(app.getApplicationHMIStatusLevel())
 	,mSyncMsgVersion(app.getSyncMsgVersion())
+    ,mConnectionID(app.getConnectionID())
     ,mSessionID(app.getSessionID())
 {
 	mVrSynonyms = app.getVrSynonyms();
@@ -256,6 +261,15 @@ const NsAppLinkRPC::Language &Application::getHMIDisplayLanguageDesired() const
 unsigned char Application::getSessionID() const
 {
     return mSessionID;
+}
+
+/**
+ * \brief retrieve application session ID
+ * \return application connection ID
+ */
+unsigned char Application::getConnectionID() const
+{
+    return mConnectionID;
 }
 
 /**
