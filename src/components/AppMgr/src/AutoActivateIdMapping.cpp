@@ -130,6 +130,10 @@ namespace NsAppManager
             LOG4CPLUS_INFO_EXT(mLogger, "Nothing to find: a map is empty!" );
             return "";
         }
+        else
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Found " << mAutoActivateIds.size() << " elements in autoactivateid map");
+        }
         LOG4CPLUS_INFO_EXT(mLogger, "Searching for an auto-activate id for the application " << name );
         AutoActivateIDs::const_iterator it = mAutoActivateIds.find( name );
         if ( it != mAutoActivateIds.end() )

@@ -90,13 +90,13 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.AppLinkCoreClientRPC.onRPCResult");
 		this._super();
 
-		if (response.id = this.getAppListRequestId)
-		{	
-			MFT.MediaController.onGetAppList(response.params);
+		if (response.result.method == "AppLinkCore.GetAppListResponse")
+		{
+			MFT.ApplinkMediaController.onGetAppList(response.result);
 		}
 
-		if (response.id = this.activateAppRequestId)
-		{	
+		if (response.id == this.activateAppRequestId)
+		{
 			// 
 		}
 	 },
@@ -119,14 +119,14 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		if (notification.method == this.onAppRegisteredNotification)
 		{	
 			// add new app to the list
-			MFT.TTSPopUp.receiveMessage(notification.params.appName + " connected!");
+			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " connected!");
 			MFT.ApplinkModel.showInfo.set('appName', notification.params.appName);
 		}
 
 		if (notification.method == this.onAppUnregisteredNotification)
 		{	
 			//  remove app from list
-			MFT.TTSPopUp.receiveMessage(notification.params.appName + " disconnected!");
+			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " disconnected!");
 			MFT.ApplinkModel.showInfo.set('appName', "<No app>");
 		}
 	},
@@ -146,6 +146,8 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 */
 	getAppList: function() {
 		this.getAppListRequestId = this.client.generateId();
+
+		console.log('onGetAppList        ' + this.getAppListRequestId);
 
 		var JSONMessage = {
 			"jsonrpc":	"2.0",

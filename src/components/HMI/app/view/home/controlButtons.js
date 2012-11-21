@@ -77,7 +77,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:			'driverDistractionControlCheckBox',
 
 			onCheckBoxSelected:	function(){
-				MFT.MediaController.selectdDriverDistraction(this.checked);
+				MFT.ApplinkMediaController.selectdDriverDistraction(this.checked);
 			}.observes('this.checked')
 
 		})

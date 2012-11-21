@@ -110,7 +110,7 @@ FFW.TTS = FFW.RPCObserver.create({
 			this.client.send(JSONMessage);
 		}
 
-		/*
+		
 		if (request.method == "TTS.GetCapabilities") {
 
 			// send repsonse
@@ -125,8 +125,7 @@ FFW.TTS = FFW.RPCObserver.create({
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}
 			};
-			//this.client.send(JSONMessage);
+			this.client.send(JSONMessage);
 		}
-		*/
 	}
 })

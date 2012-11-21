@@ -189,7 +189,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.AddCommand") {
 			
-			MFT.MediaController.applinkAddCommand(request.params);
+			MFT.ApplinkMediaController.applinkAddCommand(request.params);
 
 			resultCode = "SUCCESS";
 
@@ -239,7 +239,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 			this.performInteractionRequestId = request.id;
 
-			MFT.MediaController.turnOnApplinkPerform(request.params);
+			MFT.ApplinkMediaController.turnOnApplinkPerform(request.params);
 			
 			resultCode = null;
 
@@ -247,10 +247,10 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.SetMediaClockTimer") {
 
-			resultCode = MFT.MediaController.applinkSetMediaClockTimer(request.params);
+			resultCode = MFT.ApplinkMediaController.applinkSetMediaClockTimer(request.params);
 
 		}
-		/*
+
 		if (request.method == "UI.GetCapabilities") {
 
 			// send repsonse
@@ -312,11 +312,10 @@ FFW.UI = FFW.RPCObserver.create({
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				};
 
-			//this.client.send(JSONMessage);
+			this.client.send(JSONMessage);
 
 			resultCode = null;
 		}
-		*/
 
 		if(resultCode){
 
