@@ -31,11 +31,6 @@ namespace NsAppManager
     public:
 
         /**
-         * \brief An application unique id - combination of connection id and session id
-         */
-        typedef std::tuple<unsigned int, unsigned char> ApplicationUniqueID;
-
-        /**
          * \brief An application_id-registry_item map
          */
         typedef std::map<ApplicationUniqueID, RegistryItem*> ItemsMap;

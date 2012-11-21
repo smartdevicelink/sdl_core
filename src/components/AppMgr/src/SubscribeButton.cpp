@@ -45,14 +45,16 @@ namespace NsAppManager
             return;
         }
         NsAppLinkRPC::SubscribeButton_request * object = (NsAppLinkRPC::SubscribeButton_request*)msg->first;
-        RegistryItem* item = AppMgrRegistry::getInstance().getItem(0, msg->second);//0-temp! Specify unsigned int connectionID instead!!!!
+        unsigned int connectionID = std::get<0>(msg->second);
+        unsigned char sessionID = std::get<1>(msg->second);
+        RegistryItem* item = AppMgrRegistry::getInstance().getItem(connectionID, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
         AppMgrCore::getInstance().mButtonsMapping.addButton( object->get_buttonName(), item );
         NsAppLinkRPC::SubscribeButton_response* response = new NsAppLinkRPC::SubscribeButton_response();
         response->setCorrelationID(object->getCorrelationID());
         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
         response->set_success(true);
         response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-        MobileHandler::getInstance().sendRPCMessage(response, 0, msg->second);//0-temp! Specify unsigned int connectionID instead!!!!
+        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
     }
 
 }
