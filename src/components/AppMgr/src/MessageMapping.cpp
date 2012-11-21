@@ -52,7 +52,7 @@ namespace NsAppManager
      */
     void MessageMapping::addMessage(int msgId, unsigned char sessionID)
     {
-        RegistryItem* app = AppMgrRegistry::getInstance().getItem(sessionID);
+        RegistryItem* app = AppMgrRegistry::getInstance().getItem(0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
         if(!app)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found by sessionId " << sessionID );

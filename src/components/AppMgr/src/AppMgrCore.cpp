@@ -174,7 +174,7 @@ namespace NsAppManager
                 NsAppLinkRPC::RegisterAppInterface_request * object = (NsAppLinkRPC::RegisterAppInterface_request*)mobileMsg;
                 NsAppLinkRPC::RegisterAppInterface_response* response = new NsAppLinkRPC::RegisterAppInterface_response();
                 const std::string& appName = object->get_appName();
-                if(AppMgrRegistry::getInstance().getItem(sessionID))
+                if(AppMgrRegistry::getInstance().getItem(0, sessionID))//0-temp! Specify unsigned int connectionID instead!!!!
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
                     response->set_success(false);
@@ -263,7 +263,7 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
 
                 NsAppLinkRPC::UnregisterAppInterface_request * object = (NsAppLinkRPC::UnregisterAppInterface_request*)mobileMsg;
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionID));
+                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(0, sessionID));//0-temp! Specify unsigned int connectionID instead!!!!
                 NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
                 if(!app)
                 {
@@ -304,7 +304,7 @@ namespace NsAppManager
 
                 NsAppLinkRPC::SubscribeButton_request * object = (NsAppLinkRPC::SubscribeButton_request*)mobileMsg;
                 NsAppLinkRPC::SubscribeButton_response* response = new NsAppLinkRPC::SubscribeButton_response();
-                RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
+                RegistryItem* item = AppMgrRegistry::getInstance().getItem(0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 if(!item)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, " Session " << sessionID << " hasn't been associated with application!");
@@ -465,7 +465,7 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
 
-                RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
+                RegistryItem* item = AppMgrRegistry::getInstance().getItem(0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 if(!item)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, " Session " << sessionID << " hasn't been associated with application!");
@@ -662,7 +662,7 @@ namespace NsAppManager
 
                 if(object->get_data())
                 {
-                    Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(sessionID) );
+                    Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(0, sessionID) );//0-temp! Specify unsigned int connectionID instead!!!!
                     const std::string& name = app->getName();
                     core->mSyncPManager.setPData(*object->get_data(), name, object->getMethodId());
                     response->set_success(true);
@@ -1266,8 +1266,12 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't cast object to ActivateApp type");
                     return;
                 }
+
+                //a silly workaround!!! Until the object starts supplying some sort of connection id + session id instead of just a name (there may me MORE than one app of the same name registered on HMI simultaneously)
                 const std::string& appName = object->get_appName();
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(appName));
+                AppMgrRegistry::Items items = AppMgrRegistry::getInstance().getItems(appName);
+                Application* app = core->getApplicationFromItemCheckNotNull(items[0]);
+
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -1312,12 +1316,12 @@ namespace NsAppManager
                 NsRPC2Communication::AppLinkCore::GetAppList* object = static_cast<NsRPC2Communication::AppLinkCore::GetAppList*>(msg);
                 NsRPC2Communication::AppLinkCore::GetAppListResponse* response = new NsRPC2Communication::AppLinkCore::GetAppListResponse;
                 response->setId(object->getId());
-                const AppMgrRegistry::Items& registeredApps = AppMgrRegistry::getInstance().getItems();
+                const AppMgrRegistry::ItemsMap& registeredApps = AppMgrRegistry::getInstance().getItems();
                 std::vector< NsAppLinkRPC::HMIApplication> hmiApps;
-                for(AppMgrRegistry::Items::const_iterator it = registeredApps.begin(); it != registeredApps.end(); it++)
+                for(AppMgrRegistry::ItemsMap::const_iterator it = registeredApps.begin(); it != registeredApps.end(); it++)
                 {
                     NsAppLinkRPC::HMIApplication hmiApp;
-                    hmiApp.set_appName(it->first);
+                    hmiApp.set_appName(core->getApplicationFromItemCheckNotNull(it->second)->getName());
                     hmiApp.set_ngnMediaScreenAppName(core->getApplicationFromItemCheckNotNull(it->second)->getNgnMediaScreenAppName());
                     hmiApps.push_back(hmiApp);
                 }
@@ -1404,7 +1408,7 @@ namespace NsAppManager
      */
     void AppMgrCore::unregisterApplication(const unsigned char &sessionID)
     {
-        RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionID);
+        RegistryItem* item = AppMgrRegistry::getInstance().getItem(0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
         Application* app = getApplicationFromItemCheckNotNull( item );
         if(!app)
         {
