@@ -52,7 +52,7 @@ namespace NsAppManager
         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
         response->set_success(true);
         response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-        MobileHandler::getInstance().sendRPCMessage(response, msg->second);
+        MobileHandler::getInstance().sendRPCMessage(response, 0, msg->second);//0-temp! Specify unsigned int connectionID instead!!!!
     }
 
 }

@@ -179,7 +179,7 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_REGISTERED_ALREADY);
-                    MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                     break;
                 }
 
@@ -191,7 +191,7 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                    MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                     break;
                 }
                 LOG4CPLUS_INFO_EXT(mLogger, " About to find auto-activate id in a map...");
@@ -244,11 +244,11 @@ namespace NsAppManager
                 response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
 
                 LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName() << " gets sent to a mobile side... ");
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
 
                 NsAppLinkRPC::OnHMIStatus* status = new NsAppLinkRPC::OnHMIStatus();
                 status->set_hmiLevel(app->getApplicationHMIStatusLevel());
-                MobileHandler::getInstance().sendRPCMessage(status, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(status, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
                 appRegistered->set_appName(app->getName());
                 appRegistered->set_isMediaApplication(app->getIsMediaApplication());
@@ -270,7 +270,7 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, " No application has been associated with this registry item!");
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                    MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                     break;
                 }
                 std::string appName = app->getName();
@@ -280,11 +280,11 @@ namespace NsAppManager
                 response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                 response->set_success(true);
                 response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
 
                 NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
                 msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
-                MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(msgUnregistered, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                 appUnregistered->set_appName(appName);
                 appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
@@ -310,7 +310,7 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, " Session " << sessionID << " hasn't been associated with application!");
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                    MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                     break;
                 }
                 core->mButtonsMapping.addButton( object->get_buttonName(), item );
@@ -319,7 +319,7 @@ namespace NsAppManager
                 response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                 response->set_success(true);
                 response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_UNSUBSCRIBEBUTTON_REQUEST:
@@ -332,7 +332,7 @@ namespace NsAppManager
                 response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                 response->set_success(true);
                 response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_SHOW_REQUEST:
@@ -381,7 +381,7 @@ namespace NsAppManager
                 NsAppLinkRPC::Speak_response * mobileResponse = new NsAppLinkRPC::Speak_response;
                 mobileResponse->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
                 mobileResponse->set_success(true);
-                MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(mobileResponse, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_SETGLOBALPROPERTIES_REQUEST:
@@ -404,7 +404,7 @@ namespace NsAppManager
                 NsAppLinkRPC::SetGlobalProperties_response * mobileResponse = new NsAppLinkRPC::SetGlobalProperties_response;
                 mobileResponse->set_success(true);
                 mobileResponse->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(mobileResponse, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_RESETGLOBALPROPERTIES_REQUEST:
@@ -420,7 +420,7 @@ namespace NsAppManager
                 NsAppLinkRPC::ResetGlobalProperties_response * mobileResponse = new NsAppLinkRPC::ResetGlobalProperties_response;
                 mobileResponse->set_success(true);
                 mobileResponse->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(mobileResponse, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_ALERT_REQUEST:
@@ -452,13 +452,13 @@ namespace NsAppManager
             case NsAppLinkRPC::Marshaller::METHOD_ONBUTTONPRESS:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "OnButtonPress Notification has been received.");
-                MobileHandler::getInstance().sendRPCMessage(mobileMsg, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(mobileMsg, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_ONCOMMAND:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "OnCommand Notification has been received.");
-                MobileHandler::getInstance().sendRPCMessage(mobileMsg, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(mobileMsg, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_ADDCOMMAND_REQUEST:
@@ -472,7 +472,7 @@ namespace NsAppManager
                     NsAppLinkRPC::AddCommand_response* response = new NsAppLinkRPC::AddCommand_response();
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                    MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                     break;
                 }
                 NsAppLinkRPC::AddCommand_request* object = (NsAppLinkRPC::AddCommand_request*)mobileMsg;
@@ -674,7 +674,7 @@ namespace NsAppManager
                     response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
                 }
 
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
 
                 break;
             }
@@ -700,7 +700,7 @@ namespace NsAppManager
             case NsAppLinkRPC::Marshaller::METHOD_UNREGISTERAPPINTERFACE_RESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A " << mobileMsg->getMethodId() << " response or notification has been invoked");
-                MobileHandler::getInstance().sendRPCMessage(mobileMsg, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(mobileMsg, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 break;
             }
 
@@ -711,7 +711,7 @@ namespace NsAppManager
                 NsAppLinkRPC::GenericResponse_response* response = new NsAppLinkRPC::GenericResponse_response();
                 response->set_success(false);
                 response->set_resultCode(NsAppLinkRPC::Result::UNSUPPORTED_REQUEST);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 break;
             }
         }
@@ -757,7 +757,7 @@ namespace NsAppManager
 
                 unsigned char sessionID = app->getSessionID();
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(event, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(event, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS:
@@ -779,7 +779,7 @@ namespace NsAppManager
 
                 unsigned char sessionID = app->getSessionID();
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(event, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(event, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
@@ -835,7 +835,7 @@ namespace NsAppManager
 
                 unsigned char sessionID = app->getSessionID();
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(event, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(event, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SHOWRESPONSE:
@@ -856,7 +856,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 core->mMessageMapping.removeMessage(object->getId());
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIESRESPONSE:
@@ -878,7 +878,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 core->mMessageMapping.removeMessage(object->getId());
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIESRESPONSE:
@@ -900,7 +900,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 core->mMessageMapping.removeMessage(object->getId());
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ALERTRESPONSE:
@@ -920,7 +920,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 core->mMessageMapping.removeMessage(object->getId());
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ADDCOMMANDRESPONSE:
@@ -943,7 +943,7 @@ namespace NsAppManager
                     response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                     core->mRequestMapping.removeRequest(object->getId());
                     LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                    MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 }
 
                 core->mMessageMapping.removeMessage(object->getId());
@@ -971,7 +971,7 @@ namespace NsAppManager
                     response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                     core->mRequestMapping.removeRequest(object->getId());
                     LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                    MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 }
 
                 core->mMessageMapping.removeMessage(object->getId());
@@ -995,7 +995,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 core->mMessageMapping.removeMessage(object->getId());
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETESUBMENURESPONSE:
@@ -1015,7 +1015,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 core->mMessageMapping.removeMessage(object->getId());
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__CREATEINTERACTIONCHOICESETRESPONSE:
@@ -1035,7 +1035,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 core->mMessageMapping.removeMessage(object->getId());
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETEINTERACTIONCHOICESETRESPONSE:
@@ -1055,7 +1055,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 core->mMessageMapping.removeMessage(object->getId());
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTIONRESPONSE:
@@ -1083,7 +1083,7 @@ namespace NsAppManager
                 response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                 core->mMessageMapping.removeMessage(object->getId());
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETMEDIACLOCKTIMERRESPONSE:
@@ -1103,7 +1103,7 @@ namespace NsAppManager
                 response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                 core->mMessageMapping.removeMessage(object->getId());
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONDRIVERDISTRACTION:
@@ -1114,7 +1114,7 @@ namespace NsAppManager
                 NsAppLinkRPC::OnDriverDistraction* event = new NsAppLinkRPC::OnDriverDistraction();
                 event->set_state(object->get_state());
 
-                MobileHandler::getInstance().sendRPCMessage(event, 1);
+                MobileHandler::getInstance().sendRPCMessage(event, 0, 1);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
@@ -1151,7 +1151,7 @@ namespace NsAppManager
                     response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                     core->mRequestMapping.removeRequest(object->getId());
                     LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                    MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 }
 
                 core->mMessageMapping.removeMessage(object->getId());
@@ -1178,7 +1178,7 @@ namespace NsAppManager
                     response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                     core->mRequestMapping.removeRequest(object->getId());
                     LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                    MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 }
 
                 core->mMessageMapping.removeMessage(object->getId());
@@ -1200,7 +1200,7 @@ namespace NsAppManager
                 NsAppLinkRPC::OnCommand* event = new NsAppLinkRPC::OnCommand();
                 event->set_cmdID(object->get_cmdID());
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(event, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(event, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
@@ -1235,7 +1235,7 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 core->mMessageMapping.removeMessage(object->getId());
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " session id " << sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, 0, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
@@ -1254,7 +1254,7 @@ namespace NsAppManager
                 {
                     event->set_reason(*object->get_reason());
                 }
-                MobileHandler::getInstance().sendRPCMessage(event, 1);//just temporarily!!!
+                MobileHandler::getInstance().sendRPCMessage(event, 0, 1);//just temporarily!!! //0-temp! Specify unsigned int connectionID instead!!!!
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPP:
@@ -1285,7 +1285,7 @@ namespace NsAppManager
                 AppMgrRegistry::getInstance().activateApp(app);
                 hmiStatus->set_audioStreamingState(app->getApplicationAudioStreamingState());
                 hmiStatus->set_systemContext(NsAppLinkRPC::SystemContext::SYSCTXT_MENU);
-                MobileHandler::getInstance().sendRPCMessage( hmiStatus, app->getSessionID() );
+                MobileHandler::getInstance().sendRPCMessage( hmiStatus, 0, app->getSessionID() );//0-temp! Specify unsigned int connectionID instead!!!!
                 NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
                 response->setId(object->getId());
                 response->setResult(NsAppLinkRPC::Result::SUCCESS);
@@ -1299,7 +1299,7 @@ namespace NsAppManager
                 core->mSyncPManager.setRawData( object->get_data() );
                 NsAppLinkRPC::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPC::OnEncodedSyncPData;
                 encodedNotification->set_data(core->mSyncPManager.getPData());
-                MobileHandler::getInstance().sendRPCMessage( encodedNotification, 1 );
+                MobileHandler::getInstance().sendRPCMessage( encodedNotification, 0, 1 );//0-temp! Specify unsigned int connectionID instead!!!!
                 NsRPC2Communication::AppLinkCore::SendDataResponse* response = new NsRPC2Communication::AppLinkCore::SendDataResponse;
                 response->setId(object->getId());
                 response->setResult(NsAppLinkRPC::Result::SUCCESS);
