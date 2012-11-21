@@ -17,8 +17,18 @@ MFT.ControlButtons = Em.ContainerView.create({
 	childViews: [
 		'buttonControls',
 		'driverDistractionControl',
-		'infoTable'
+		'infoTable',
+		'sendData'
 	],
+
+	/** Sending data from HMI for processing in ApplinkCore */
+	sendData: MFT.Button.create({
+		elementId:	'sendData',
+		classNames:	'sendData btnNotPressed',
+		action:		'SendData',
+		target:		'FFW.AppLinkCoreClient',
+		text:		'Send Data'
+	}),
 
 	infoTable: Em.ContainerView.extend({
 		elementId:	'infoTable',

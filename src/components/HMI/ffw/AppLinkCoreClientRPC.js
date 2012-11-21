@@ -34,7 +34,6 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	init: function() {
 	},
 
-
 	/*
    	 * connect to RPC bus
  	 */
@@ -58,8 +57,8 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		this._super();
 
 		// subscribe to notifications
-		this.onAppRegisteredSubscribeRequestId 			= this.client.subscribeToNotification(this.onAppRegisteredNotification);
-		this.onAppUnregisteredSubscribeRequestId 		= this.client.subscribeToNotification(this.onAppUnregisteredNotification);
+		this.onAppRegisteredSubscribeRequestId 		= this.client.subscribeToNotification(this.onAppRegisteredNotification);
+		this.onAppUnregisteredSubscribeRequestId 	= this.client.subscribeToNotification(this.onAppUnregisteredNotification);
 	},
 	
 	/*
@@ -70,8 +69,8 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		this._super();
 
 		// unsubscribe from notifications
-		this.onAppRegusteredUnsubscribeRequestId 		= this.client.unsubscribeFromNotification(this.onAppRegisteredNotification);
-		this.onAppUnregusteredUnsubscribeRequestId 		= this.client.unsubscribeFromNotification(this.onAppUnregisteredNotification);
+		this.onAppRegusteredUnsubscribeRequestId 	= this.client.unsubscribeFromNotification(this.onAppRegisteredNotification);
+		this.onAppUnregusteredUnsubscribeRequestId	= this.client.unsubscribeFromNotification(this.onAppUnregisteredNotification);
 	},
 
 	/*
@@ -121,6 +120,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			// add new app to the list
 			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " connected!");
 			MFT.ApplinkModel.showInfo.set('appName', notification.params.appName);
+			MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);
 		}
 
 		if (notification.method == this.onAppUnregisteredNotification)
@@ -128,6 +128,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			//  remove app from list
 			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " disconnected!");
 			MFT.ApplinkModel.showInfo.set('appName', "<No app>");
+			MFT.ApplinkMediaController.set('hideApplinkMediaButton', true);
 		}
 	},
 
@@ -159,6 +160,20 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		this.client.send(JSONMessage);
 	},
 
+    /** Sending data from HMI for processing in ApplinkCore */
+    SendData: function(){
+    	Em.Logger.log("FFW.ALCore.SendData");
+
+		// send request
+
+		var JSONMessage = {
+			"jsonrpc"	:	"2.0",
+			"id"		: 	this.client.idStart,
+			"method"	:	"AppLinkCore.SendData",
+			"params"	:	{"SendData": "Data for sending from HMI to Mobile application."}
+		};
+		this.client.send(JSONMessage);
+    },
 
 	/*
 	 * handle RPC requests here

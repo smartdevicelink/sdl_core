@@ -153,14 +153,14 @@ FFW.UI = FFW.RPCObserver.create({
 			MFT.ApplinkModel.showInfo.set('mediaClock', request.params.mediaClock);
 			MFT.ApplinkModel.showInfo.set('mediaTrack', request.params.mediaTrack);
 
-			resultCode = "SUCCESS";
+			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
 		
 		if (request.method == "UI.Alert") {
 
-			MFT.AlertPopUp.activate(request.params.AlertText1, request.params.AlertText2, request.params.duration, request.params.playTone);
+			MFT.AlertPopUp.AlertActive(request.params.AlertText1, request.params.AlertText2, request.params.duration, request.params.playTone);
 
-			resultCode = "SUCCESS";
+			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
 
 		if (request.method == "UI.SetGlobalProperties") {
@@ -172,7 +172,7 @@ FFW.UI = FFW.RPCObserver.create({
 			// TODO: please process as array 
 			this.globalProperties.set('timeoutPrompt', request.params.timeoutPrompt);
 
-			resultCode = "SUCCESS";
+			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
 		
 		if (request.method == "UI.ResetGlobalProperties") {
@@ -184,14 +184,14 @@ FFW.UI = FFW.RPCObserver.create({
 				MFT.TTSPopUp.receiveMessage("Reset property: " + reuqest.params[i]);
 			}
 
-			resultCode = "SUCCESS";
+			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
 
 		if (request.method == "UI.AddCommand") {
 			
 			MFT.ApplinkMediaController.applinkAddCommand(request.params);
 
-			resultCode = "SUCCESS";
+			this.sendUIResult("SUCCESS", request.id, request.method);
 
 		}
 
@@ -199,19 +199,21 @@ FFW.UI = FFW.RPCObserver.create({
 			
 			MFT.ApplinkOptionsView.DeleteCommand(request.params.cmdId);
 
-			resultCode = "SUCCESS";
+			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
 
 		if (request.method == "UI.AddSubMenu") {
 			
 			MFT.ApplinkOptionsView.AddSubMenu(request.params.menuId, request.params.menuName);
 
-			resultCode = "SUCCESS";
+			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
 
 		if (request.method == "UI.DeleteSubMenu") {
 
-			resultCode =  MFT.ApplinkOptionsView.DeleteSubMenu(request.params.menuId);
+			var resultCode =  MFT.ApplinkOptionsView.DeleteSubMenu(request.params.menuId);
+
+			this.sendUIResult(resultCode, request.id, request.method);
 
 		}
 
@@ -219,7 +221,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 			MFT.ApplinkModel.interactionChoises.push(request.params);
 
-			resultCode = "SUCCESS";
+			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
 
 		if (request.method == "UI.DeleteInteractionChoiceSet") {
@@ -231,7 +233,7 @@ FFW.UI = FFW.RPCObserver.create({
 				}
 			}
 
-			resultCode = "SUCCESS";
+			this.sendUIResult("SUCCESS", request.id, request.method);
 
 		}
 
@@ -240,15 +242,18 @@ FFW.UI = FFW.RPCObserver.create({
 			this.performInteractionRequestId = request.id;
 
 			MFT.ApplinkMediaController.turnOnApplinkPerform(request.params);
-			
-			resultCode = null;
 
 		}
 
 		if (request.method == "UI.SetMediaClockTimer") {
 
-			resultCode = MFT.ApplinkMediaController.applinkSetMediaClockTimer(request.params);
+			var resultCode = MFT.ApplinkMediaController.applinkSetMediaClockTimer(request.params);
 
+			this.sendUIResult(resultCode, request.id, request.method);
+		}
+
+		if (request.method == "UI.OnAppActivated") {
+			
 		}
 
 		if (request.method == "UI.GetCapabilities") {
@@ -313,36 +318,39 @@ FFW.UI = FFW.RPCObserver.create({
 				};
 
 			this.client.send(JSONMessage);
-
-			resultCode = null;
 		}
-
+	},
+	
+	/*
+	 * send response from onRPCRequest
+ 	 */	
+	sendUIResult: function(resultCode, id, method) {
+		
 		if(resultCode){
 
 			// send repsonse
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
+				"id"		: 	id,
 				"result":	{
 					"resultCode" : resultCode, //  type (enum) from AppLink protocol
-					"method" : request.method + "Response"
+					"method" : method + "Response"
 				}
 			};
 			this.client.send(JSONMessage);
 		}
 	},
-	
 
 	/*
 	 * send notification when command was triggered
  	 */	
-	onCommand: function(element) {
+	onCommand: function(commandId) {
 		Em.Logger.log("FFW.UI.onCommand");
 
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
 			"method"	:	"UI.OnCommand",
-			"params"	:	{"commandId":element.commandId, }
+			"params"	:	{"commandId":commandId, }
 		};
 		this.client.send(JSONMessage);
 	},
