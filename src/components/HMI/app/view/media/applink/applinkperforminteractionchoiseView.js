@@ -56,8 +56,8 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
                         this.listOfChoises.items.push({
                                 type:       MFT.Button,
                                 params:     {
-                                    action:                 'onChoosed',
-                                    target:                 'FFW.UI',
+                                    action:                 'onPerformInteractionChoosed',
+                                    target:                 'MFT.ApplinkMediaController',
                                     commandId:              MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID,
                                     text:                   MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
                                     className:              'rs-item',

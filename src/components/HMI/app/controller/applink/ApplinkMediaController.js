@@ -101,6 +101,12 @@ MFT.ApplinkMediaController = Em.Object.create({
         }
     },
 
+    /** Applink perform interaction action */
+    onPerformInteractionChoosed: function(element){
+        FFW.UI.onChoosed(element.commandId);
+        MFT.States.back();
+    },
+
     /** Applink SystemContext switcher */
     onSystemContextSwitcher: function(systemContextValue){
         FFW.UI.OnSystemContext(systemContextValue);
