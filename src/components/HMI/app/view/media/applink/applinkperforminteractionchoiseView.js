@@ -19,7 +19,8 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
 
     childViews:         [
                             'backButton',
-                            'listOfChoises'
+                            'listOfChoises',
+                            'initialText'
                         ],
 
     backButton: MFT.Button.extend({
@@ -29,6 +30,18 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
         icon:              'images/media/ico_back.png',
     }),
 
+    initialTextContent: '',
+
+    initialText:    MFT.Label.extend({
+
+        elementId:          'initialText',
+
+        classNames:         'initialText',
+
+        contentBinding:     'parentView.content'
+    }),
+
+
     /** Applink Sub Mennu activate handler */
     applinkPerformInteractionChoise: function(){
         if(MFT.States.media.applink.applinkperforminteractionchoise.active){
@@ -36,7 +49,7 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
         }
     }.observes('MFT.States.media.applink.applinkperforminteractionchoise.active'),
 
-    PerformInteraction: function( interactionChoiceSetIDList ){
+    PerformInteraction: function( interactionChoiceSetIDList, initialTextContent ){
 
         var count = this.listOfChoises.items.length;
         if(count > 0){

@@ -34,7 +34,7 @@ MFT.TTSPopUp = Em.ContainerView.create({
 		classNames:			'popUp',
 	}),
 
-	message : MFT.Label.extend({
+	message: MFT.Label.extend({
 
 		elementId:			'message',
 
