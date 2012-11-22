@@ -54,6 +54,37 @@ namespace NsAppManager
     }
 
     /**
+     * \brief get registry item associated with the HMI_FULL application
+     * \return Application instance
+     */
+    Application *AppMgrRegistry::getActiveItem() const
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Searching for the active registered application" );
+        for(ItemsMap::const_iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
+        {
+            RegistryItem* item = it->second;
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " Null-item found!");
+                break;
+            }
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "No application for the item!");
+                break;
+            }
+            if(NsAppLinkRPC::HMILevel::HMI_FULL == app->getApplicationHMIStatusLevel())
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID() << " is HMI_FULL");
+                return app;
+            }
+        }
+        LOG4CPLUS_ERROR_EXT(mLogger, " No active application found!");
+        return 0;
+    }
+
+    /**
      * \brief get registry items associated with the application name
      * \param appName a name of the application we need to retrieve a registry items for
      * \return RegistryItem vector

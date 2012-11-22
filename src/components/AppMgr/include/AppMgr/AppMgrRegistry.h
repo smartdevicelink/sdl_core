@@ -77,6 +77,12 @@ namespace NsAppManager
         RegistryItem *getItem( const Application* app ) const;
 
         /**
+         * \brief get registry item associated with the HMI_FULL application
+         * \return Application instance
+         */
+        Application *getActiveItem() const;
+
+        /**
          * \brief get registry items associated with the application name
          * \param appName a name of the application we need to retrieve a registry items for
          * \return RegistryItem vector

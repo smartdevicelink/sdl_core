@@ -60,10 +60,11 @@ namespace NsAppManager
                 std::getline( file, mLastAutoActivateId );
             }
             file.close();
+            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore deserialized a value " << mLastAutoActivateId << " from a file " << mAutoActivateIdFileName);
         }
         else
         {
-            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot deserialize a file: probably file doesn't exist!");
+            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot deserialize from a file " << mAutoActivateIdFileName << ": probably file doesn't exist!");
         }
 
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
@@ -87,8 +88,6 @@ namespace NsAppManager
             delete mQueueRPCAppLinkObjectsIncoming;
         if(mQueueRPCBusObjectsIncoming)
             delete mQueueRPCBusObjectsIncoming;
-
-        std::ofstream(mAutoActivateIdFileName, std::ios::trunc);
 
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore destructed!");
     }
@@ -1133,6 +1132,22 @@ namespace NsAppManager
                 MobileHandler::getInstance().sendRPCMessage(event, 0, 1);//0-temp! Specify unsigned int connectionID instead!!!! 1-also temp! Just no way to deduct an app here
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONSYSTEMCONTEXT:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " An OnSystemContext UI notification has been invoked");
+                NsRPC2Communication::UI::OnSystemContext* object = (NsRPC2Communication::UI::OnSystemContext*)msg;
+
+                Application* app = AppMgrRegistry::getInstance().getActiveItem();
+                app->setSystemContext(object->get_systemContext());
+
+                NsAppLinkRPC::OnHMIStatus* event = new NsAppLinkRPC::OnHMIStatus;
+                event->set_systemContext(object->get_systemContext());
+
+                unsigned char sessionID = app->getSessionID();
+                unsigned int connectionId = app->getConnectionID();
+                MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                return;
+            }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
                 LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
@@ -1484,14 +1499,16 @@ namespace NsAppManager
             {
                 file << value;
                 file.close();
+                LOG4CPLUS_INFO_EXT(mLogger, " Serialized a value " << value << " to a file " << fileName);
                 return true;
             }
             else
             {
-                LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot serialize to a file: error creating file!");
+                LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot serialize a value " << value << " to a file " << fileName << ": error creating file!");
                 return false;
             }
         }
+        LOG4CPLUS_ERROR_EXT(mLogger, " Cannot serialize an empty value to a file " << fileName << " !");
         return false;
     }
 

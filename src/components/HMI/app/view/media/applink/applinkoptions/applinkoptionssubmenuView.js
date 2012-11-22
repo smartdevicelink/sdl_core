@@ -55,7 +55,7 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
                     type:       MFT.Button,
                     params:     {
                         action:                 'onCommand',
-                        target:                 'FFW.UI',
+                        target:                 'MFT.ApplinkMediaController',
                         commandId:              MFT.ApplinkModel.subMenuCommands[i].cmdId,
                         text:                   MFT.ApplinkModel.subMenuCommands[i].menuParams.menuName,
                         parentID:               MFT.ApplinkModel.subMenuCommands[i].menuParams.parentID,
