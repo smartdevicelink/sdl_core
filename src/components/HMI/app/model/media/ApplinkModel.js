@@ -65,16 +65,15 @@ MFT.ApplinkModel = Em.Object.create({
 
 	setDuration: function() {
 		if(this.countUp){
-			this.currTime = 0;
 			this.showInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (this.duration + this.currTime) % 60 );
 		}else{
-			this.currTime = 0;
 			this.showInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (this.duration - this.currTime) % 60 );
 		}
 	}.observes('this.currTime'),
 
 	changeDuration: function() {
 		clearInterval(this.timer);
+		this.currTime = 0;
 		this.startTimer();
 	}.observes('this.duration')
 });

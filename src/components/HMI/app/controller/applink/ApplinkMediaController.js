@@ -113,6 +113,7 @@ MFT.ApplinkMediaController = Em.Object.create({
         }else if(params.updateMode == "RESUME"){
             MFT.ApplinkModel.set('pause', false);
         }else{
+            MFT.ApplinkModel.set('duration', 0);
             MFT.ApplinkModel.set('duration', params.startTime.hours*3600 + params.startTime.minutes*60 + params.startTime.seconds );
         }
 
@@ -122,6 +123,6 @@ MFT.ApplinkMediaController = Em.Object.create({
             MFT.ApplinkModel.set('countUp', false);
         }
         
-    },
+    }
 
 });
