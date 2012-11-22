@@ -399,7 +399,7 @@ FFW.UI = FFW.RPCObserver.create({
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
 			"method":	"UI.OnDriverDistraction",
-			"params":	{"DriverDistractionState":	driverDistractionState}
+			"params":	{"state":	driverDistractionState}
 		};
 		this.client.send(JSONMessage);
 	},
@@ -414,7 +414,7 @@ FFW.UI = FFW.RPCObserver.create({
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
 			"method":	"UI.OnSystemContext",
-			"params":	{"SystemContext":	systemContextValue}
+			"params":	{"systemContext":	systemContextValue}
 		};
 		this.client.send(JSONMessage);
 	},
