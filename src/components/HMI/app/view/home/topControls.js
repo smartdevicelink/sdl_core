@@ -25,14 +25,14 @@ MFT.TopControls = Em.ContainerView.extend({
 		
 		childViews: [
 			'clock',
-//			'vSeparator',
+			'vSeparator',
 			'toggleHelpButton',
 		],
 		
 		clock: Em.View.extend({
 			elementId:			'clock',
 			
-			classNameBindings: ['FLAGS.HELP_MODE:mcs'],
+			classNameBindings: ['FLAGS.HELP_MODE::mcs'],
 					
 			afterRender: function() {
 				MFT.SettingsController.getTime(new Date);
@@ -75,7 +75,7 @@ MFT.TopControls = Em.ContainerView.extend({
 		vSeparator: Em.View.extend({
 			elementId:	'top_controls_separator',
 			
-			classNameBindings: ['FLAGS.HELP_MODE:visible'],
+			classNameBindings: ['FLAGS.HELP_MODE::hidden'],
 			
 			classNames: 'help_dev'
 		}),
@@ -95,10 +95,7 @@ MFT.TopControls = Em.ContainerView.extend({
 			
 			/** Toggle Help mode */
 			actionDown: function(event) {
-				if ( FLAGS.HELP_MODE ) {
-					return;
-				}
-			
+
 				MFT.toggleProperty('helpMode');
 				
 				/** Switch off video player if active */
