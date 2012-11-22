@@ -99,7 +99,7 @@ namespace NsAppManager
      * \param connectionID id of a connection associated with application that sent the message
      * \param sessionID an id of a session associated with the application which pushes a message
      */
-    void AppMgrCore::pushMobileRPCMessage( NsAppLinkRPC::ALRPCMessage * message, unsigned int connectionID, unsigned char sessionID )
+    void AppMgrCore::pushMobileRPCMessage( NsAppLinkRPC::ALRPCMessage * message, int connectionID, unsigned char sessionID )
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Pushing mobile RPC message for connection id " << connectionID << " session id " << (uint)sessionID << "...");
         if(!message)

@@ -79,7 +79,7 @@ namespace NsAppManager
     * \param connectionID id of a connection associated with application that sent the message
     * \param sessionID an id of a session associated with the application which sends message
     */
-    void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message, unsigned int connectionID, unsigned char sessionID)
+    void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message, int connectionID, unsigned char sessionID)
     {
         if(!message)
         {

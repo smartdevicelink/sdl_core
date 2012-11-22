@@ -77,7 +77,7 @@ namespace NsAppManager
          * \param connectionID id of a connection associated with application that sent the message
          * \param sessionID an id of a session associated with the application which pushes a message
          */
-        void pushMobileRPCMessage(NsAppLinkRPC::ALRPCMessage * message , unsigned int connectionID, unsigned char sessionID);
+        void pushMobileRPCMessage(NsAppLinkRPC::ALRPCMessage * message , int connectionID, unsigned char sessionID);
 
         /**
          * \brief push HMI RPC2 message to a queue

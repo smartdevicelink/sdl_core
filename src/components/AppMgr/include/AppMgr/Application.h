@@ -26,7 +26,7 @@ namespace NsAppManager
     /**
      * \brief An application unique id - combination of connection id and session id
      */
-    typedef std::tuple<unsigned int, unsigned char> ApplicationUniqueID;
+    typedef std::tuple<int, unsigned char> ApplicationUniqueID;
 
     /**
      * \brief class Application acts as a metaphor for every mobile application being registered on HMI
