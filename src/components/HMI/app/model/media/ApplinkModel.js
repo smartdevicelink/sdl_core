@@ -35,7 +35,7 @@ MFT.ApplinkModel = Em.Object.create({
 	timer:			null,
 
 	countUp:		true,
-	pause:			true,
+	pause:			false,
 	maxTimeValue:	68400, // 19 hours
 	duration:		0,
 	currTime:		0,

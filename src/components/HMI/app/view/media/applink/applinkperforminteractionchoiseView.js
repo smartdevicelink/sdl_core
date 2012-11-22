@@ -32,7 +32,7 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
     /** Applink Sub Mennu activate handler */
     applinkPerformInteractionChoise: function(){
         if(MFT.States.media.applink.applinkperforminteractionchoise.active){
-            MFT.AppPerformInteractionChoise.PerformInteraction(MFT.MediaController.currentApplinkPerformInteractionChoiseId);
+            MFT.AppPerformInteractionChoise.PerformInteraction(MFT.ApplinkMediaController.currentApplinkPerformInteractionChoiseId);
         }
     }.observes('MFT.States.media.applink.applinkperforminteractionchoise.active'),
 
