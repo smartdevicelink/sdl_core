@@ -60,11 +60,11 @@ namespace NsAppManager
                 std::getline( file, mLastAutoActivateId );
             }
             file.close();
-            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore deserialized a value " << mLastAutoActivateId << " to a file " << mAutoActivateIdFileName);
+            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore deserialized a value " << mLastAutoActivateId << " from a file " << mAutoActivateIdFileName);
         }
         else
         {
-            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot deserialize a file: probably file doesn't exist!");
+            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot deserialize from a file " << mAutoActivateIdFileName << ": probably file doesn't exist!");
         }
 
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
