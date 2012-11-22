@@ -170,7 +170,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.SendData",
-			"params"	:	{"SendData": "Data for sending from HMI to Mobile application."}
+			"params"	:	{"data": ["Data for sending from HMI to Mobile application."]}
 		};
 		this.client.send(JSONMessage);
     },
