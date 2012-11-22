@@ -174,6 +174,15 @@ void Application::setHMIDisplayLanguageDesired(NsAppLinkRPC::Language value)
 }
 
 /**
+ * \brief set application system context
+ * \param application system context
+ */
+void Application::setSystemContext(NsAppLinkRPC::SystemContext value)
+{
+    mSystemContext = value;
+}
+
+/**
  * \brief retrieve application NGN media screen application name
  * \return application NGN media screen application name
  */
@@ -279,6 +288,15 @@ unsigned int Application::getConnectionID() const
 const std::string &Application::getName() const
 {
     return mName;
+}
+
+/**
+ * \brief retrieve application system context
+ * \return application system context
+ */
+const NsAppLinkRPC::SystemContext &Application::getSystemContext() const
+{
+    return mSystemContext;
 }
 
 }

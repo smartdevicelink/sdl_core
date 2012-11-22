@@ -11,6 +11,7 @@
 #include "JSONHandler/ALRPCObjects/SyncMsgVersion.h"
 #include "JSONHandler/ALRPCObjects/HMILevel.h"
 #include "JSONHandler/ALRPCObjects/AudioStreamingState.h"
+#include "JSONHandler/ALRPCObjects/SystemContext.h"
 #include <string>
 #include <vector>
 #include <tuple>
@@ -127,6 +128,12 @@ namespace NsAppManager
         void setHMIDisplayLanguageDesired( NsAppLinkRPC::Language value );
 
         /**
+         * \brief set application system context
+         * \param application system context
+         */
+        void setSystemContext( NsAppLinkRPC::SystemContext value );
+
+        /**
          * \brief retrieve application NGN media screen application name
          * \return application NGN media screen application name
          */
@@ -198,6 +205,12 @@ namespace NsAppManager
          */
         const std::string& getName() const;
 
+        /**
+         * \brief retrieve application system context
+         * \return application system context
+         */
+        const NsAppLinkRPC::SystemContext& getSystemContext() const;
+
     private:
 
         /**
@@ -219,6 +232,7 @@ namespace NsAppManager
         NsAppLinkRPC::AudioStreamingState mAudioStreamingState;
         std::string mAppID;
         NsAppLinkRPC::Language mHMIDisplayLanguageDesired;
+        NsAppLinkRPC::SystemContext mSystemContext;
 
         static log4cplus::Logger mLogger;
     };
