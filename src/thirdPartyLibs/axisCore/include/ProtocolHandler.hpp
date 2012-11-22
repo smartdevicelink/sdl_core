@@ -40,14 +40,14 @@ public:
      * Start Session
      * @param servType Service type
      */
-    ERROR_CODE startSession(const UInt8 servType);
+    RESULT_CODE startSession(const UInt8 servType);
 
     /**
      * End Session
      * @param sessionID Id of session
      * @param hashCode Hash code received in the Start Session ACK message
      */
-    ERROR_CODE endSession(const UInt8 sessionID, const UInt32 hashCode);
+    RESULT_CODE endSession(const UInt8 sessionID, const UInt32 hashCode);
 
     /**
      * Send Data
@@ -57,7 +57,7 @@ public:
      * @param data Data array
      * @param compress Compressing
      */
-    ERROR_CODE sendData(const UInt8 sessionID,
+    RESULT_CODE sendData(const UInt8 sessionID,
                         const UInt8 servType,
                         const UInt32 dataSize,
                         const UInt8 *data,
@@ -71,7 +71,7 @@ public:
      * @param receivedDataSize Received data size (bytes)
      * @param data Data array
      */
-    ERROR_CODE receiveData(const UInt8 sessionID,
+    RESULT_CODE receiveData(const UInt8 sessionID,
                            const UInt32 messageID,
                            const UInt8 servType,
                            const UInt32 receivedDataSize,
@@ -93,7 +93,7 @@ private:
      * @param header Message header
      * @param data Data array
      */
-    ERROR_CODE sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const ProtocolPacketHeader &header, const UInt8 *data);
+    RESULT_CODE sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const ProtocolPacketHeader &header, const UInt8 *data);
 
     enum State 
     {
@@ -101,17 +101,17 @@ private:
         HANDSHAKE_DONE
     };
 
-    ERROR_CODE sendStartSessionAck(const UInt8 sessionID);
-    ERROR_CODE sendEndSessionNAck(const UInt8 sessionID);
-    ERROR_CODE handleMessage(const ProtocolPacketHeader &header, UInt8 *data);
-    ERROR_CODE handleControlMessage(const ProtocolPacketHeader &header, UInt8 *data);
-    ERROR_CODE handleMultiFrameMessage(const ProtocolPacketHeader &header, UInt8 *data);
-    ERROR_CODE sendSingleFrameMessage(const UInt8 sessionID,
+    RESULT_CODE sendStartSessionAck(const UInt8 sessionID);
+    RESULT_CODE sendEndSessionNAck(const UInt8 sessionID);
+    RESULT_CODE handleMessage(const ProtocolPacketHeader &header, UInt8 *data);
+    RESULT_CODE handleControlMessage(const ProtocolPacketHeader &header, UInt8 *data);
+    RESULT_CODE handleMultiFrameMessage(const ProtocolPacketHeader &header, UInt8 *data);
+    RESULT_CODE sendSingleFrameMessage(const UInt8 sessionID,
                                       const UInt8 servType,
                                       const UInt32 dataSize,
                                       const UInt8 *data,
                                       const bool compress);
-    ERROR_CODE sendMultiFrameMessage(const UInt8 sessionID,
+    RESULT_CODE sendMultiFrameMessage(const UInt8 sessionID,
                                      const UInt8 servType,
                                      const UInt32 dataSize,
                                      const UInt8 *data,
