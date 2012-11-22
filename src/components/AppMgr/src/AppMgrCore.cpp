@@ -1138,6 +1138,11 @@ namespace NsAppManager
                 NsRPC2Communication::UI::OnSystemContext* object = (NsRPC2Communication::UI::OnSystemContext*)msg;
 
                 Application* app = AppMgrRegistry::getInstance().getActiveItem();
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " null-application found as an active item!");
+                    return;
+                }
                 app->setSystemContext(object->get_systemContext());
 
                 NsAppLinkRPC::OnHMIStatus* event = new NsAppLinkRPC::OnHMIStatus;
