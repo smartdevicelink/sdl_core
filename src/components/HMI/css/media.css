@@ -1021,6 +1021,19 @@
 	top: 55px;
 }
 
+#applink_view_container .list-content{
+	border: none;
+}
+
+#applink_view_container .list-item {
+	position: relative;
+	width: 100%;
+	height: 48px;
+	font-size: 20px;
+	line-height: 50px;
+	border: 1px solid #393939;
+}
+
 .track-info {
 	z-index: 199;
 	position: absolute;

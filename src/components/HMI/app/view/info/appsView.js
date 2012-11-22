@@ -16,12 +16,12 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	classNameBindings: ['MFT.helpMode',
 						'MFT.localization'],
-	
-	//classNames: ['hidden'],
-	
-	//stateObj: MFT.States.info.apps,
-	
-	
+
+    appsActive: function(){
+        if(MFT.States.info.apps.active == true){
+            FFW.AppLinkCoreClient.getAppList();
+        }
+    }.observes('MFT.States.info.apps.active'),
 
 	childViews: [
 		'vehicleHealthReport',
@@ -44,6 +44,7 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
       */
     AddApplication: function( params ){
 
+        this.listOfApplications.items = [];
         for(var i = 0; i < params.appList.length; i++){
             this.listOfApplications.items.push({
                 type:       MFT.Button,
@@ -53,7 +54,7 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
                     text:           params.appList[i].appName,
                     className:      'scrollButtons button notpressed',
                     //icon:           params.icon,
-                    templateName:   'text'//'rightIcon'
+                    templateName:   'text'
                 }                                   
             });
         }
@@ -109,7 +110,8 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 		//action:				'onState',
 		//target:				'MFT.SettingsController',
 		disabledBinding:	'MFT.helpMode',
-		onDown:				false
+		onDown:				false,
+        templateName:       'text'
 	}),
 
 	listOfApplications: MFT.List.extend({
