@@ -109,17 +109,17 @@ MFT.ApplinkMediaController = Em.Object.create({
     /** Applink Setter for Media Clock Timer */
     applinkSetMediaClockTimer: function(params){
         if(params.updateMode == "PAUSE"){
-            MFT.ApplinkModel.showInfo.set('pause', true);
+            MFT.ApplinkModel.set('pause', true);
         }else if(params.updateMode == "RESUME"){
-            MFT.ApplinkModel.showInfo.set('pause', false);
+            MFT.ApplinkModel.set('pause', false);
         }else{
-            MFT.ApplinkModel.showInfo.set('duration', params.startTime.hours*3600 + params.startTime.minutes*60 + params.startTime.seconds );
+            MFT.ApplinkModel.set('duration', params.startTime.hours*3600 + params.startTime.minutes*60 + params.startTime.seconds );
         }
 
         if(params.updateMode == "COUNTUP"){
-            MFT.ApplinkModel.showInfo.set('countUp', true);
+            MFT.ApplinkModel.set('countUp', true);
         }else if(params.updateMode == "COUNTDOWN"){
-            MFT.ApplinkModel.showInfo.set('countUp', false);
+            MFT.ApplinkModel.set('countUp', false);
         }
         
     },

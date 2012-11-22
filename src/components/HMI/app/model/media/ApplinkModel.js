@@ -27,7 +27,7 @@ MFT.ApplinkModel = Em.Object.create({
 	/**
 	  * Array of menus in ApplinkOptionsSubMenuView
 	  */
-        subMenuCommands:	new Array(),
+    subMenuCommands:	new Array(),
 
 	/**
 	  * Timer for Media Clock
@@ -47,25 +47,28 @@ MFT.ApplinkModel = Em.Object.create({
 		field1:			'<field1>',
 		field2:			'<field2>',
 		field3:			'<field3>',
-		mediaClock:		"<mediaClock>",
-		appName:		"<App name>",
-		deviceName:		"<Device name>"
+		mediaClock:		'<mediaClock>',
+		statusBar:		'<statusBar',
+		appName:		'<App name>',
+		deviceName:		'<Device name>'
 	}),
 
 	startTimer: function(){
 		if(!this.pause){
 			this.timer = setInterval(function(){
-				this.set('currTime', this.currTime+1);
+				MFT.ApplinkModel.set('currTime', MFT.ApplinkModel.currTime+1);
 			}, 1000);
 		}else{
 			clearInterval(this.timer);
 		}
-	}.observes('this.showInfo.pause'),
+	}.observes('this.pause'),
 
 	setDuration: function() {
 		if(this.countUp){
+			this.currTime = 0;
 			this.showInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (this.duration + this.currTime) % 60 );
 		}else{
+			this.currTime = 0;
 			this.showInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (this.duration - this.currTime) % 60 );
 		}
 	}.observes('this.currTime'),

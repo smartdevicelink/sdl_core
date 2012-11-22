@@ -118,6 +118,10 @@ MFT.MediaController = Em.Object.create({
 		if(MFT.BTModel.active){
 			MFT.BTModel.set('active',false);
 		}
+
+        if(MFT.ApplinkModel.active){
+        	MFT.ApplinkModel.set('active',false);
+        }
 	},
 	
 	/**  On player module enter event */
@@ -399,6 +403,7 @@ MFT.MediaController = Em.Object.create({
         if(this.directTuneSelected){
             this.set('directTuneSelected', false);
         }
+        FFW.AppLinkCoreClient.ActivateApp();
 
     },
 

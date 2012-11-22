@@ -151,7 +151,8 @@ FFW.UI = FFW.RPCObserver.create({
 			MFT.ApplinkModel.showInfo.set('field1', request.params.mainField1);
 			MFT.ApplinkModel.showInfo.set('field2', request.params.mainField2);
 			MFT.ApplinkModel.showInfo.set('mediaClock', request.params.mediaClock);
-			MFT.ApplinkModel.showInfo.set('mediaTrack', request.params.mediaTrack);
+			MFT.ApplinkModel.showInfo.set('field3', request.params.mediaTrack);
+			MFT.ApplinkModel.showInfo.set('statusBar', request.params.statusBar);
 
 			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
