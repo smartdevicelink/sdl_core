@@ -1,6 +1,7 @@
 #ifndef PROTOCOLHANDLER_CLASS
 #define PROTOCOLHANDLER_CLASS
 
+#include <map>
 #include "Utils/MessageQueue.h"
 
 namespace NsProtocolHandler
@@ -49,6 +50,8 @@ namespace NsProtocolHandler
           unsigned int * mData;
           unsigned int mDataSize;
         };
+
+        typedef std::multimap<unsigned char, ProtocolPacket *> PacketsMultimap;
         /**
          * @brief Processing frame received callbacks.
          *
@@ -89,7 +92,8 @@ namespace NsProtocolHandler
         pthread_t mHandleMessagesFromMobileApp;
         MessageQueue<const AppLinkRawMessage *> mMessagesToMobileApp;
         pthread_t mHandleMessagesToMobileApp;
-        MessageQueue<std::map<unsigned char, ProtocolPacket *>> mIncompleteMultiFrameMessages;
+        PacketsMultimap mIncompleteMultiFrameMessages;
+        unsigned char mSessionIdCounter;
     };
 }
 

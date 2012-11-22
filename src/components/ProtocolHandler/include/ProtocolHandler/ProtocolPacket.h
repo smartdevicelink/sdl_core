@@ -56,6 +56,8 @@ const unsigned char FIRST_FRAME_DATA_SIZE = 0x08;
 
         unsigned char * getPacket() const;
         unsigned int getPacketSize() const;
+
+        void appendData( unsigned char * chunkData, unsigned int chunkDataSize );
     
         unsigned char version;
         bool compress;
@@ -64,15 +66,18 @@ const unsigned char FIRST_FRAME_DATA_SIZE = 0x08;
         unsigned char frameData;
         unsigned char sessionID;
         unsigned int dataSize;
+        unsigned char * data;
         /**
           * MessageID is used only in protocol version 2
           */
         unsigned int messageID;
+        unsigned int totalDataBytes;
 
     private:
         mutable unsigned char * mHeader;
         unsigned int mSize;
-        
+        unsigned int mDataOffset; 
+        //TODO check multiframe message order?       
     };
 }
 

@@ -81,3 +81,12 @@ unsigned int ProtocolPacket::getPacketSize() const
     return mSize;
 }
 
+void ProtocolPacket::appendData( unsigned char * chunkData, 
+        unsigned int chunkDataSize )
+{
+    if ( mDataOffset + chunkDataSize <= totalDataBytes )
+    {
+        memcpy(data + mDataOffset, chunkData, chunkDataSize);
+        mDataOffset += chunkDataSize;
+    }
+}

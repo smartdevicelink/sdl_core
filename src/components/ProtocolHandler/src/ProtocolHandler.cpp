@@ -306,14 +306,52 @@ void ProtocolHandler::handleMessage( const ProtocolPacket& packet )
 }
 
 RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              const ProtocolPacket & packet )
+              ProtocolPacket * packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     if (header.frameType == FRAME_TYPE_FIRST)
     {
         LOG4CPLUS_INFO(mLogger, "handleMultiFrameMessage() - FRAME_TYPE_FIRST");
         
-        mIncompleteMultiFrameMessages[connectionHandle] = multiFrameMessage;
+        packet -> totalDataBytes = packet -> data[0] << 24;
+        packet -> totalDataBytes |= packet -> data[1] << 16;
+        packet -> totalDataBytes |= packet -> data[2] << 8;
+        packet -> totalDataBytes |= packet -> data[3];
+
+        mIncompleteMultiFrameMessages[connectionHandle] = packet;
+    }
+    else
+    {
+        LOG4CPLUS_INFO(mLogger, "handleMultiFrameMessage() - Consecutive frame");
+
+        pair<PacketsMultimap::iterator,PacketsMultimap::iterator> messagesFromConnection;
+
+        messagesFromConnection = mIncompleteMultiFrameMessages.equal_range( connectionHandle );
+
+        for ( PacketsMultimap::iterator it = messagesFromConnection.first;
+                it != messagesFromConnection.second;
+                ++it )
+        {
+            if ( it->second->sessionID == packet->sessionID )
+            {
+                it->second->appendData( packet -> data, packet -> dataSize );
+                
+                if ( packet -> frameData == FRAME_DATA_LAST_FRAME )
+                {
+                    if ( mProtocolObserver )
+                    {
+                        mProtocolObserver -> dataReceivedCallback(
+                            it->second->sessionID,
+                            it->second->messageID,
+                            packet->data,
+                            packet->totalDataBytes);
+                    }
+                    mIncompleteMultiFrameMessages.erase( it );
+                    break;
+                }
+            }
+        }
+
     }
 }
 
