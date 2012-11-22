@@ -33,8 +33,14 @@
   mkdir build
   Enter this folder:
   cd build
-  2. Create build configuration using cmake:
+  2. Create debug build configuration using cmake:
   cmake ../git_repo
   Make project:
   make
   Ready to use application will be in build/src/appMain/appLinkCore
+
+  2. If You want to build release configuration, run:
+  cmake -DCMAKE_BUILD_TYPE=Release ../git_repo
+  Make project:
+  make
+  Ready to use release application will be in build/src/appMain/appLinkCore
