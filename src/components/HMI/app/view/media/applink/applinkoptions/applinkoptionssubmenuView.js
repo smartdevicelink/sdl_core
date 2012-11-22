@@ -36,7 +36,7 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
         }
     }.observes('MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active'),
 
-    SubMenuActivate: function( menuId ){
+    SubMenuActivate: function( ){
 
         var count = this.listOfSubmenuButtons.items.length;
         if(count > 0){
@@ -49,7 +49,7 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
 
         count = MFT.ApplinkModel.subMenuCommands.length;
         for(var i = 0; i < count; i++){
-            if( menuId == MFT.ApplinkModel.subMenuCommands[i].menuParams.parentID ){
+            if( MFT.ApplinkMediaController.currentApplinkSubMenuid == MFT.ApplinkModel.subMenuCommands[i].menuParams.parentID ){
 
                 this.listOfSubmenuButtons.items.push({
                     type:       MFT.Button,

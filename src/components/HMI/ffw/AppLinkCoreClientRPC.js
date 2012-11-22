@@ -186,8 +186,8 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.client.idStart,
-			"method"	:	"AppLinkCore.activateApp",
-			"params"	:	{"appName":[MFT.ApplinkModel.showInfo.appName]}
+			"method"	:	"AppLinkCore.ActivateApp",
+			"params"	:	{"appName":MFT.ApplinkModel.showInfo.appName}
 		};
 		this.client.send(JSONMessage);
 	}
