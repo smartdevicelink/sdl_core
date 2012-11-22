@@ -6,7 +6,8 @@ namespace NsProtocolHandler
     class IProtocolObserver
     {
     public:    
-        virtual void onDataReceivedCallback(unsigned int sessionID, unsigned int dataSize, unsigned int * data) = 0;
+        //virtual void onDataReceivedCallback(unsigned int sessionID, unsigned int dataSize, unsigned int * data) = 0;
+        virtual void onDataReceivedCallback( AppLinkRawMessage * message ) = 0;
 
     protected:
         virtual ~IProtocolObserver() {}

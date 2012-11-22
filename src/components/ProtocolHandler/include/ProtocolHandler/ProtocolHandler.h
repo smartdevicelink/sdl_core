@@ -45,6 +45,7 @@ namespace NsProtocolHandler
     private:
         struct IncomingMessage
         {
+          NsAppLink::NsTransportManager::tConnectionHandle mConnectionHandle;
           unsigned int * mData;
           unsigned int mDataSize;
         };
@@ -56,13 +57,30 @@ namespace NsProtocolHandler
          * @param DataSize Size of data in bytes.
         **/
         virtual void onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize);
-      
-        /**
-         * Write data to device
-         * @param header Message header
-         * @param data Data array
-         */
-        RESULT_CODE sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const ProtocolPacketHeader &header, const UInt8 *data);
+        RESULT_CODE sendSingleFrameMessage(unsigned int connectionHandle,
+                                      const unsigned char sessionID,
+                                      const unsigned char servType,
+                                      const unsigned int dataSize,
+                                      const unsigned char *data,
+                                      const bool compress);
+        RESULT_CODE sendMultiFrameMessage(unsigned int connectionHandle,
+                                         const unsigned char sessionID,
+                                         const unsigned char servType,
+                                         const unsigned int dataSize,
+                                         const unsigned char *data,
+                                         const bool compress,
+                                         const unsigned int maxDataSize);
+        RESULT_CODE handleMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              const ProtocolPacket& packet );
+        RESULT_CODE handleMultiFrameMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              const ProtocolPacket & packet );
+        void handleControlMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              const ProtocolPacket & packet );
+        void sendStartSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              unsigned int protocolVersion,
+              unsigned char sessionID );
+        RESULT_CODE sendFrame( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              const ProtocolPacket & packet );
 
         static log4cplus::Logger mLogger;
         IProtocolObserver *mProtocolObserver;
@@ -71,6 +89,7 @@ namespace NsProtocolHandler
         pthread_t mHandleMessagesFromMobileApp;
         MessageQueue<const AppLinkRawMessage *> mMessagesToMobileApp;
         pthread_t mHandleMessagesToMobileApp;
+        MessageQueue<std::map<unsigned char, ProtocolPacket *>> mIncompleteMultiFrameMessages;
     };
 }
 
