@@ -17,8 +17,32 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 	/** View Components*/
 	childViews: [
 		'controlls',
-		'info'
+		'info',
+		'innerMenu'
 	],
+	
+	innerMenu: MFT.MenuList.extend({
+					
+		content: Em.ContainerView.extend({
+			
+			classNames: ['content'],
+			
+			attributeBindings: ['parentView.contentPositon:style'],
+			
+			childViews: [
+				'optionsButton'
+			],
+			
+			optionsButton: MFT.Button.extend({
+				text: 'Options',
+				
+				templateName: 'arrow',
+				
+				action:		'turnOnApplinkOptions',
+				target:		'MFT.ApplinkMediaController'
+			})
+		})
+	}),
 
 	/** Calls Applink SystemContext switcher when turn On/Of Applink application */
 	onTurnOnApplinkApp: function(systemContextValue){

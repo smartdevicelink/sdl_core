@@ -2769,7 +2769,7 @@
 #media_app_options_view{
 	width: 800px;
 	height: 480px;
-	z-index: 502;
+	z-index: 2002;
 	background: url(../images/media/bg.png) no-repeat;
 }
 
@@ -2904,61 +2904,11 @@
 	background-image: url(../images/media/bg.png);
 }
 
-#media_applink_soft_buttons_view .buttonsWrapper {
-	top: 70px;
-	left: 100px;
-	width: 600px;
-	height: 260px;
-	overflow: hidden;
+#applink_view_container .ffw_list_menu {
+	top: 90px;
+	left: 650px;
+	width: 140px;
 }
-
-#media_applink_soft_buttons_view .scrollButtons{
-	width: 550px;
-	float: left;
-	margin-right: 10px;
-	height: 51px;
-	font-size: 20px;
-	line-height: 50px;
-	border: 1px solid #393939;
-	border-bottom: none;
-	cursor: pointer;
-	background-image: url(../images/list/list_item_bg.png);
-	position: relative;
-}
-
-#media_applink_soft_buttons_view .scrollArrows{
-	height: 47px;
-	width: 47px;
-	border: #393939 1px solid;
-	border-radius: 2px;
-}
-
-#media_applink_soft_buttons_view .scrollArrowUp {
-	position: relative;
-}
-
-#media_applink_soft_buttons_view .scrollArrowDown {
-	bottom: 0;
-	right: 0;
-}
-
-#media_applink_soft_buttons_view .scrollBar {
-	float: right;
-	position: relative;
-	height: 260px;
-}
-
-#media_applink_soft_buttons_view .scroller {
-	position: relative;
-	height: 20px;
-	background: #555;
-	-webkit-transition: 0.4s ;
-}
-
-#media_applink_soft_buttons_view .rs-item {
-	width: 535px;
-}
-
 
 #media_rightmenu_topButton_applinkSoftButtons.media_rightmenu_topButton {
 	right: 4px;
