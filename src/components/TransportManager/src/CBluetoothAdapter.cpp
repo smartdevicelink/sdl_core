@@ -379,10 +379,11 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
 
         pthread_mutex_unlock(&mConnectionsMutex);
 
-        for (std::vector<tConnectionHandle>::const_iterator terminatingConnectionsIterator = connectionsToTerminate.begin(); terminatingConnectionsIterator != connectionsToTerminate.end(); ++terminatingConnectionsIterator)
+        // Connections termination temporary disabled because of instable SDP implementation in test Android application. Must be re-enabled in final release.
+        /*for (std::vector<tConnectionHandle>::const_iterator terminatingConnectionsIterator = connectionsToTerminate.begin(); terminatingConnectionsIterator != connectionsToTerminate.end(); ++terminatingConnectionsIterator)
         {
             stopConnection(*terminatingConnectionsIterator);
-        }
+        }*/
 
         for (std::set<std::pair<tDeviceHandle, uint8_t> >::const_iterator newConnectionsIterator = connectionsToEstablish.begin(); newConnectionsIterator != connectionsToEstablish.end(); ++newConnectionsIterator)
         {
