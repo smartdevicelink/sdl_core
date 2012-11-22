@@ -1488,11 +1488,11 @@ namespace NsAppManager
             }
             else
             {
-                LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot serialize to a file: error creating file!");
+                LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot serialize a value " << value << " to a file " << fileName << ": error creating file!");
                 return false;
             }
         }
-        LOG4CPLUS_ERROR_EXT(mLogger, " Cannot serialize a value " << value << " to a file " << fileName << " !");
+        LOG4CPLUS_ERROR_EXT(mLogger, " Cannot serialize an empty value to a file " << fileName << " !");
         return false;
     }
 
