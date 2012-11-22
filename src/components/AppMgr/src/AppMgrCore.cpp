@@ -1132,6 +1132,15 @@ namespace NsAppManager
                 MobileHandler::getInstance().sendRPCMessage(event, 0, 1);//0-temp! Specify unsigned int connectionID instead!!!! 1-also temp! Just no way to deduct an app here
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONSYSTEMCONTEXT:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " An OnSystemContext UI notification has been invoked");
+                NsRPC2Communication::UI::OnSystemContext* object = (NsRPC2Communication::UI::OnSystemContext*)msg;
+
+                //NsAppLinkRPC::
+
+                return;
+            }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
                 LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
