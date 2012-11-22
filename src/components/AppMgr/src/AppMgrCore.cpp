@@ -1310,6 +1310,11 @@ namespace NsAppManager
                 //a silly workaround!!! Until the object starts supplying some sort of connection id + session id instead of just a name (there may me MORE than one app of the same name registered on HMI simultaneously)
                 const std::string& appName = object->get_appName();
                 AppMgrRegistry::Items items = AppMgrRegistry::getInstance().getItems(appName);
+                if(items.empty())
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application with the name " << appName << " found!");
+                    return;
+                }
                 Application* app = core->getApplicationFromItemCheckNotNull(items[0]);
 
                 if(!app)
