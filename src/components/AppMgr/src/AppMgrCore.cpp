@@ -1137,8 +1137,15 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnSystemContext UI notification has been invoked");
                 NsRPC2Communication::UI::OnSystemContext* object = (NsRPC2Communication::UI::OnSystemContext*)msg;
 
-                //NsAppLinkRPC::
+                Application* app = AppMgrRegistry::getInstance().getActiveItem();
+                app->setSystemContext(object->get_systemContext());
 
+                NsAppLinkRPC::OnHMIStatus* event = new NsAppLinkRPC::OnHMIStatus;
+                event->set_systemContext(object->get_systemContext());
+
+                unsigned char sessionID = app->getSessionID();
+                unsigned int connectionId = app->getConnectionID();
+                MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
