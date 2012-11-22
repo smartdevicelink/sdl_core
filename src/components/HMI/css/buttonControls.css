@@ -130,7 +130,13 @@
 	left: 55px !important;
 	top: 55px !important;
 }
-#buttonControls .btnNotPressed{
+#app_controlButtons .sendData{
+	top: 252px !important;
+	left: 1049px !important;
+	width: 80px !important;
+	font-size: 16px !important;
+}
+#app_controlButtons .btnNotPressed{
 	width: 40px;
 	height: 40px;
 	left: 0px;

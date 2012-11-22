@@ -21,6 +21,11 @@ MFT.ApplinkMediaController = Em.Object.create({
     /** Current applink Perform Interaction Choise identificator*/
     currentApplinkPerformInteractionChoiseId: null,
 
+    /**
+     * Indicates Applink media application button
+     */
+    hideApplinkMediaButton: true,
+
     /*
      *  Driver Distraction State 
      *  may be "DD_OFF" or "DD_ON"
@@ -38,6 +43,11 @@ MFT.ApplinkMediaController = Em.Object.create({
         main:           "MAIN",
         VR:             "VRSESSION",
         application:    "MENU"
+    },
+
+    /** Call notification OnCommand on UIRPC */
+    onCommand: function(element){
+       FFW.UI.onCommand(element.commandId);
     },
 
     /** Create list of lapplications on info view */

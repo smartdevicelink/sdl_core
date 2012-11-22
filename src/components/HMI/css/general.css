@@ -103,10 +103,12 @@ div {
 	background-color: black;
 	border: #A6A6A6 solid 2px;
 	border-radius: 6px;
+	display: none;
 }
 
 #driverDistraction.active{
 	opacity: 1;
+	display: block;
 }
 
 #driverDistraction .driverDistractionText{
@@ -133,19 +135,27 @@ div {
 	display: none;
 }
 
-#AlertPopUp .message1{
-	top: 10px;
+#AlertPopUp .applicationName{
+	width: 380px;
 	left: 10px;
-	width: 374px;
-	height: 81px;
 	text-align: center;
 }
 
-#AlertPopUp .message2{
-	top: 40px;
+#AlertPopUp .message1{
+	top: 27px;
 	left: 10px;
 	width: 374px;
-	height: 81px;
+	height: 30px;
+	text-align: center;
+	font-size: 25px;
+	line-height: 30px;
+}
+
+#AlertPopUp .message2{
+	top: 70px;
+	left: 10px;
+	width: 374px;
+	height: 124px;
 	text-align: center;
 }
 

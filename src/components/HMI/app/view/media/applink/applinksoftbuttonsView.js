@@ -134,7 +134,7 @@ MFT.ApplinkSoftButtons = Em.ContainerView.create({
 			icon:			'images/media/active_arrow.png',
 			text:			'Options',
 			action:			'turnOnApplinkOptions',
-			target:			'MFT.MediaController'
+			target:			'MFT.ApplinkMediaController'
 		});
 
 		MFT.ApplinkSoftButtons.scrollWrapper.scroller.get('childViews').pushObject(button);

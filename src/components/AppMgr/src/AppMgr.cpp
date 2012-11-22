@@ -79,15 +79,15 @@ namespace NsAppManager
     * \param connectionID id of a connection associated with application that sent the message
     * \param sessionID an id of a session associated with the application which sends message
     */
-    void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message , unsigned int connectionID, unsigned char sessionID)
+    void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message, unsigned int connectionID, unsigned char sessionID)
     {
         if(!message)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Calling a function with null command! Session id " << sessionID);
+            LOG4CPLUS_ERROR_EXT(mLogger, " Calling a function with null command! Session id " << (uint)sessionID << " connection id " << connectionID);
             return;
         }
         LOG4CPLUS_INFO_EXT(mLogger, " Message " << message->getMethodId() << " received from mobile side");
-        AppMgrCore::getInstance().pushMobileRPCMessage( message, sessionID );
+        AppMgrCore::getInstance().pushMobileRPCMessage( message, connectionID, sessionID );
     }
 
     /**

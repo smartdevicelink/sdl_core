@@ -8,6 +8,7 @@
 #define APPMGR_H_
 
 #include <string>
+#include "AppMgr/Application.h"
 #include "AppMgr/ButtonMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/MessageMapping.h"
@@ -45,12 +46,11 @@ namespace NsAppManager
     class RegistryItem;
     template< class QueueType >
     class AppMgrCoreQueue;
-    class Application;
 
     /**
      * \brief a connection between a mobile RPC message and a session
      */
-    typedef std::pair<NsAppLinkRPC::ALRPCMessage*, unsigned char> Message;
+    typedef std::pair<NsAppLinkRPC::ALRPCMessage*, ApplicationUniqueID> Message;
 
     /**
      * \brief Core app manager class which acts as a core for application manager
@@ -74,9 +74,10 @@ namespace NsAppManager
         /**
          * \brief push mobile RPC message to a queue
          * \param message a message to be pushed
+         * \param connectionID id of a connection associated with application that sent the message
          * \param sessionID an id of a session associated with the application which pushes a message
          */
-        void pushMobileRPCMessage(NsAppLinkRPC::ALRPCMessage * message , unsigned char sessionID);
+        void pushMobileRPCMessage(NsAppLinkRPC::ALRPCMessage * message , unsigned int connectionID, unsigned char sessionID);
 
         /**
          * \brief push HMI RPC2 message to a queue
@@ -142,16 +143,18 @@ namespace NsAppManager
         /**
          * \brief Register an application
          * \param request a RegisterAppInterface request which is the source for application fields initial values
+         * \param connectionID id of the connection which will be associated with the application
          * \param sessionID an id of the session which will be associated with the application
          * \return A instance of RegistryItem created for application
          */
-        const RegistryItem* registerApplication(NsAppLinkRPC::RegisterAppInterface_request *request , const unsigned char &sessionID);
+        const RegistryItem* registerApplication(NsAppLinkRPC::RegisterAppInterface_request *request , const unsigned int &connectionID, const unsigned char &sessionID);
 
         /**
          * \brief unregister an application associated with the given session
+         * \param connectionID an id of the connection asociated with the application to be unregistered
          * \param sessionID an id of the session asociated with the application to be unregistered
          */
-        void unregisterApplication(const unsigned char &sessionID);
+        void unregisterApplication(const unsigned int &connectionID, const unsigned char &sessionID);
 
         /**
          * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
