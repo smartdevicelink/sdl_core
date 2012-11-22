@@ -235,6 +235,8 @@ namespace NsAppManager
                     response->set_autoActivateID(*object->get_autoActivateID());
                 }
 
+                app->setAutoActivateID(*response->get_autoActivateID());
+
                 response->set_buttonCapabilities(core->mButtonCapabilities.get());
                 response->set_displayCapabilities(core->mDisplayCapabilities);
                 response->set_hmiZoneCapabilities(core->mHmiZoneCapabilities.get());
