@@ -267,7 +267,7 @@ unsigned char Application::getSessionID() const
  * \brief retrieve application session ID
  * \return application connection ID
  */
-unsigned char Application::getConnectionID() const
+unsigned int Application::getConnectionID() const
 {
     return mConnectionID;
 }

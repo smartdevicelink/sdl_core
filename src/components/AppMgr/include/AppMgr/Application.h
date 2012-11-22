@@ -190,7 +190,7 @@ namespace NsAppManager
          * \brief retrieve application session ID
          * \return application connection ID
          */
-        unsigned char getConnectionID() const;
+        unsigned int getConnectionID() const;
 
         /**
          * \brief retrieve application name
