@@ -60,6 +60,7 @@ namespace NsAppManager
                 std::getline( file, mLastAutoActivateId );
             }
             file.close();
+            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore deserialized a value " << mLastAutoActivateId << " to a file " << mAutoActivateIdFileName);
         }
         else
         {
@@ -87,8 +88,6 @@ namespace NsAppManager
             delete mQueueRPCAppLinkObjectsIncoming;
         if(mQueueRPCBusObjectsIncoming)
             delete mQueueRPCBusObjectsIncoming;
-
-        std::ofstream(mAutoActivateIdFileName, std::ios::trunc);
 
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore destructed!");
     }
@@ -1484,6 +1483,7 @@ namespace NsAppManager
             {
                 file << value;
                 file.close();
+                LOG4CPLUS_INFO_EXT(mLogger, " Serialized a value " << value << " to a file " << fileName);
                 return true;
             }
             else
@@ -1492,6 +1492,7 @@ namespace NsAppManager
                 return false;
             }
         }
+        LOG4CPLUS_ERROR_EXT(mLogger, " Cannot serialize a value " << value << " to a file " << fileName << " !");
         return false;
     }
 
