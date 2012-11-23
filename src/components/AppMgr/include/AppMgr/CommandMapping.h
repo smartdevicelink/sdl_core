@@ -10,6 +10,7 @@
 #include <map>
 #include <tuple>
 #include <vector>
+#include <set>
 
 namespace log4cplus
 {
@@ -139,17 +140,7 @@ namespace NsAppManager
     /**
      * \brief mapping of command id to specific command type
      */
-    typedef std::tuple<unsigned int, CommandType> CommandKey;
-
-    /**
-     * \brief command-to-registered_app map
-     */
-    typedef std::map<CommandKey, RegistryItem*> CommandMap;
-
-    /**
-     * \brief command-to-registered_app map item
-     */
-    typedef std::pair<CommandKey, RegistryItem*> CommandMapItem;
+    typedef std::tuple<unsigned int, CommandType> Command;
 
     /**
      * \brief command types associated with command
@@ -159,7 +150,7 @@ namespace NsAppManager
     /**
      * \brief commands vector
      */
-    typedef std::vector<CommandKey> Commands;
+    typedef std::set<Command> Commands;
 
     /**
      * \brief command_id-to-request_number map (command id is a key);
@@ -192,9 +183,8 @@ namespace NsAppManager
          * \brief add a command to a mapping
          * \param commandId command id
          * \param type command type
-         * \param app application to map a command to
          */
-        void addCommand( unsigned int commandId, CommandType type, RegistryItem* app );
+        void addCommand( unsigned int commandId, CommandType type );
 
         /**
          * \brief remove a command from a mapping
@@ -204,12 +194,6 @@ namespace NsAppManager
         void removeCommand(unsigned int commandId, CommandType type);
 
         /**
-         * \brief remove an application from a mapping
-         * \param app application to remove all associated commands from mapping
-         */
-        void removeItem( RegistryItem* app );
-
-        /**
          * \brief retrieve types associated with command id in current mapping
          * \param commandId command id to search for types
          * \param types input container of command types to be filled with result
@@ -217,26 +201,10 @@ namespace NsAppManager
         void getTypes(unsigned int commandId, CommandTypes& types ) const;
 
         /**
-         * \brief find a registry item subscribed to command
-         * \param commandId command id
-         * \param type command type
-         * \return RegistryItem instance
+         * \brief get count of commands
+         * \return commands count
          */
-        RegistryItem *findRegistryItemAssignedToCommand(unsigned int commandId, CommandType type) const;
-
-        /**
-         * \brief find commands the registry item is subscribed to
-         * \param item a registry item in question
-         * \return CommandKey vector
-         */
-        Commands findCommandsAssignedToRegistryItem(const RegistryItem* item) const;
-
-        /**
-         * \brief find commands the application is subscribed to
-         * \param item a registry item in question
-         * \return CommandKey vector
-         */
-        Commands findCommandsAssignedToApplication(const Application *item) const;
+        size_type size() const;
 
         /**
          * \brief get count of unresponsed requests associated with the given command id
@@ -275,9 +243,7 @@ namespace NsAppManager
          * \brief Copy constructor
          */
         CommandMapping(const CommandMapping&);
-
-        CommandType   mCommandType;
-        CommandMap    mCommandMapping;
+        Commands mCommands;
         RequestsAwaitingResponse mRequestsPerCommand;
         static log4cplus::Logger mLogger;
     };

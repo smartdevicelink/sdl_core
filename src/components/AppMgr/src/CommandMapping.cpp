@@ -32,9 +32,8 @@ namespace NsAppManager
      * \brief add a command to a mapping
      * \param commandId command id
      * \param type command type
-     * \param app application to map a command to
      */
-    void CommandMapping::addCommand(unsigned int commandId, CommandType type, RegistryItem *app)
+    void CommandMapping::addCommand(unsigned int commandId, CommandType type)
     {
         if(!app)
         {
@@ -42,7 +41,7 @@ namespace NsAppManager
             return;
         }
         LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a command " << commandId << " type " << type.getType() << " in app " << app->getApplication()->getName() );
-        mCommandMapping.insert(CommandMapItem(CommandKey(commandId, type), app));
+        mCommands.insert(Commands(commandId, type));
     }
 
     /**
@@ -52,39 +51,7 @@ namespace NsAppManager
      */
     void CommandMapping::removeCommand(unsigned int commandId, CommandType type)
     {
-        mCommandMapping.erase(CommandKey(commandId, type));
-    }
-
-    /**
-     * \brief remove an application from a mapping
-     * \param app application to remove all associated commands from mapping
-     */
-    void CommandMapping::removeItem(RegistryItem *app)
-    {
-        if(!app)
-        {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Trying to remove a null item");
-            return;
-        }
-        if(!app->getApplication())
-        {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Trying to remove an item without an application");
-            return;
-        }
-        for(CommandMap::iterator it = mCommandMapping.begin(); it != mCommandMapping.end(); it++)
-        {
-            RegistryItem* registryItem = it->second;
-            if(registryItem->getApplication())
-            {
-                if(registryItem->getApplication()->getSessionID() == app->getApplication()->getSessionID())
-                {
-                    const CommandKey& cmdKey = it->first;
-                    mCommandMapping.erase(cmdKey);
-                    const unsigned int& commandId = std::get<0>(cmdKey);
-                    decrementUnrespondedRequestCount(commandId);
-                }
-            }
-        }
+        mCommands.erase(Command(commandId, type));
     }
 
     /**
@@ -97,8 +64,8 @@ namespace NsAppManager
         types.clear();
         for(CommandType type = CommandType::FIRST; type != CommandType::LAST; type++)
         {
-            CommandMap::const_iterator it = mCommandMapping.find( CommandKey(commandId, type) );
-            if ( it != mCommandMapping.end() )
+            Commands::const_iterator it = mCommands.find( Command(commandId, type) );
+            if ( it != mCommands.end() )
             {
                 types.push_back(type);
             }
@@ -106,65 +73,12 @@ namespace NsAppManager
     }
 
     /**
-     * \brief find a registry item subscribed to command
-     * \param commandId command id
-     * \param type command type
-     * \return RegistryItem instance
+     * \brief get count of commands
+     * \return commands count
      */
-    RegistryItem *CommandMapping::findRegistryItemAssignedToCommand(unsigned int commandId, CommandType type) const
+    size_type CommandMapping::size() const
     {
-        CommandMap::const_iterator it = mCommandMapping.find( CommandKey(commandId, type) );
-        if ( it != mCommandMapping.end() )
-        {
-            RegistryItem* registryItem = it->second;
-            if( registryItem )
-            {
-                if ( registryItem->getApplication() )
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, "An application " << registryItem->getApplication()->getName() << " is subscribed to a command " << commandId );
-                    return registryItem;
-                }
-                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!" );
-                return 0;
-            }
-            LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found!" );
-        }
-        LOG4CPLUS_INFO_EXT(mLogger, "Command " << commandId << " of type " <<type.getType() << " not found in subscribed." );
-        return 0;
-    }
-
-    /**
-     * \brief find commands the registry item is subscribed to
-     * \param item a registry item in question
-     * \return CommandKey vector
-     */
-    Commands CommandMapping::findCommandsAssignedToRegistryItem(const RegistryItem *item) const
-    {
-        Commands commands;
-        if(!item)
-        {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Cannot search using null param!");
-        }
-        else
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, "Searching for commands assigned to registry item");
-            for(CommandMap::const_iterator it = mCommandMapping.begin(); it != mCommandMapping.end(); it++)
-            {
-                const RegistryItem* found = it->second;
-                if( !found )
-                {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "null-registr item found in the mapping!");
-                    continue;
-                }
-                if( item == found )
-                {
-                    const CommandKey& key = it->first;
-                    commands.push_back(key);
-                    LOG4CPLUS_INFO_EXT(mLogger, "Found a command " << std::get<0>(key) << " of a type " << std::get<1>(key).getType() );
-                }
-            }
-        }
-        return commands;
+        mCommands.size();
     }
 
     /**
@@ -272,7 +186,7 @@ namespace NsAppManager
      */
     void CommandMapping::clear()
     {
-        mCommandMapping.clear();
+        mCommands.clear();
     }
 
     /**
