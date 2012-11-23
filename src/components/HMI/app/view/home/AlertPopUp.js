@@ -16,7 +16,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
 	classNames:			'AlertPopUp',
 
-	classNameBindings:		['received:AlertActive'],
+	classNameBindings:		['activate:AlertActive'],
 
 	childViews: [
 		'applicationName',
@@ -28,7 +28,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
 	content2:			'Text',
 
-	received: 			false,
+	activate: 			false,
 
 
 	applicationName :	MFT.Label.extend({
@@ -58,12 +58,12 @@ MFT.AlertPopUp = Em.ContainerView.create({
 		contentBinding:		'parentView.content2'
 	}),
 
-	activate: function(msg1, msg2, duration, playTone){
+	AlertActive: function(msg1, msg2, duration, playTone){
 		var self = this;
 
 		this.set('content1', msg1);
 		this.set('content2', msg2);
-		this.set('received', true);
-		setTimeout(function(){self.set('received', false);}, duration);
+		this.set('activate', true);
+		setTimeout(function(){self.set('activate', false);}, duration);
 	}
 });

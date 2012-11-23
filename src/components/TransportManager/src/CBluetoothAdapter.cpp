@@ -355,7 +355,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
 
                         if (appLinkRFCOMMChannels.end() == std::find(appLinkRFCOMMChannels.begin(), appLinkRFCOMMChannels.end(), connection->mRFCOMMChannel))
                         {
-                            LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (no AppLink service found on channel " << static_cast<uint32_t>(connection->mRFCOMMChannel) << ")");
+                            //LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (no AppLink service found on channel " << static_cast<uint32_t>(connection->mRFCOMMChannel) << ")");
 
                             connectionsToTerminate.push_back(connectionIterator->first);
                         }
@@ -379,10 +379,11 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
 
         pthread_mutex_unlock(&mConnectionsMutex);
 
-        for (std::vector<tConnectionHandle>::const_iterator terminatingConnectionsIterator = connectionsToTerminate.begin(); terminatingConnectionsIterator != connectionsToTerminate.end(); ++terminatingConnectionsIterator)
+        // Connections termination temporary disabled because of instable SDP implementation in test Android application. Must be re-enabled in final release.
+        /*for (std::vector<tConnectionHandle>::const_iterator terminatingConnectionsIterator = connectionsToTerminate.begin(); terminatingConnectionsIterator != connectionsToTerminate.end(); ++terminatingConnectionsIterator)
         {
             stopConnection(*terminatingConnectionsIterator);
-        }
+        }*/
 
         for (std::set<std::pair<tDeviceHandle, uint8_t> >::const_iterator newConnectionsIterator = connectionsToEstablish.begin(); newConnectionsIterator != connectionsToEstablish.end(); ++newConnectionsIterator)
         {

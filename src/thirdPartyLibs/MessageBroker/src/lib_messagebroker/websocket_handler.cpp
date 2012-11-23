@@ -54,28 +54,28 @@ namespace NsMessageBroker
          switch(payload) {
             case 126:
                {
-                  length = recBuffer[position++];
+                  length = (unsigned char)recBuffer[position++];
                   length <<=8;
-                  length |= recBuffer[position++];
+                  length |= (unsigned char)recBuffer[position++];
                   break;
                }
             case 127:
                {
-                  length = recBuffer[position++];
+                  length = (unsigned char)recBuffer[position++];
                   length <<=8;
-                  length |= recBuffer[position++];
+                  length |= (unsigned char)recBuffer[position++];
                   length <<=8;
-                  length |= recBuffer[position++];
+                  length |= (unsigned char)recBuffer[position++];
                   length <<=8;
-                  length |= recBuffer[position++];
+                  length |= (unsigned char)recBuffer[position++];
                   length <<=8;
-                  length |= recBuffer[position++];
+                  length |= (unsigned char)recBuffer[position++];
                   length <<=8;
-                  length |= recBuffer[position++];
+                  length |= (unsigned char)recBuffer[position++];
                   length <<=8;
-                  length |= recBuffer[position++];
+                  length |= (unsigned char)recBuffer[position++];
                   length <<=8;
-                  length |= recBuffer[position++];
+                  length |= (unsigned char)recBuffer[position++];
                   break;
                }
             default:

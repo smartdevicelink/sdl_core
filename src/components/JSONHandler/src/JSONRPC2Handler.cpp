@@ -52,6 +52,10 @@ void JSONRPC2Handler::subscribeToNotifications()
     subscribeTo( "UI.OnCommand" );
     subscribeTo( "VR.OnCommand" );
     subscribeTo( "UI.OnReady" );
+    subscribeTo( "UI.OnDriverDistraction" );
+    subscribeTo( "UI.OnSystemContext" );
+    subscribeTo( "UI.OnAppActivated" );
+    subscribeTo( "UI.OnAppDeactivated" );
 }
 
 void JSONRPC2Handler::setRPC2CommandsObserver( 

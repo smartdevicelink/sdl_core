@@ -39,7 +39,7 @@ public:
       * @param header Message header
       * @param data Data array
       */
-    ERROR_CODE addConsecutiveMessage(const ProtocolPacketHeader &header, UInt8 *data);
+    RESULT_CODE addConsecutiveMessage(const ProtocolPacketHeader &header, UInt8 *data);
 
 private:
     bool checkMultiFrameSubMessageOrder(const ProtocolPacketHeader &header);

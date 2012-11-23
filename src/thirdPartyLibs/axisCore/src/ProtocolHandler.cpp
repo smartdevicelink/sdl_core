@@ -60,10 +60,10 @@ ProtocolHandler::~ProtocolHandler()
     mIncompleteMultiFrameMessages.clear();
 }
 
-ERROR_CODE ProtocolHandler::startSession(const UInt8 servType)
+RESULT_CODE ProtocolHandler::startSession(const UInt8 servType)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    ERROR_CODE retVal = ERR_OK;
+    RESULT_CODE retVal = RESULT_OK;
 
     /**
       * Protocol Version always equals 1 in the start session header
@@ -77,21 +77,21 @@ ERROR_CODE ProtocolHandler::startSession(const UInt8 servType)
                                 0,
                                 0);
 
-    if (ERR_OK == sendFrame(mConnectionHandle, header, 0))
+    if (RESULT_OK == sendFrame(mConnectionHandle, header, 0))
         LOG4CPLUS_INFO(mLogger, "startSession() - OK");
     else
     {
         LOG4CPLUS_WARN(mLogger, "startSession() - FAIL");
-        retVal = ERR_FAIL;
+        retVal = RESULT_FAIL;
     }
 
     return retVal;
 }
 
-ERROR_CODE ProtocolHandler::endSession(const UInt8 sessionID, const UInt32 hashCode)
+RESULT_CODE ProtocolHandler::endSession(const UInt8 sessionID, const UInt32 hashCode)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    ERROR_CODE retVal = ERR_OK;
+    RESULT_CODE retVal = RESULT_OK;
 
     bool correctEndSession = false;
     UInt32 _hashCode = 0;
@@ -122,7 +122,7 @@ ERROR_CODE ProtocolHandler::endSession(const UInt8 sessionID, const UInt32 hashC
                                     0,
                                     _hashCode);
 
-        if (ERR_OK == sendFrame(mConnectionHandle, header, 0))
+        if (RESULT_OK == sendFrame(mConnectionHandle, header, 0))
         {
             LOG4CPLUS_INFO(mLogger, "endSession() - OK\n");
             mHashCodes.erase(sessionID);
@@ -130,23 +130,23 @@ ERROR_CODE ProtocolHandler::endSession(const UInt8 sessionID, const UInt32 hashC
         else
         {
             LOG4CPLUS_WARN(mLogger, "endSession() - FAIL");
-            retVal = ERR_FAIL;
+            retVal = RESULT_FAIL;
         }
     }
     else
-        retVal = ERR_FAIL;
+        retVal = RESULT_FAIL;
 
     return retVal;
 }
 
-ERROR_CODE ProtocolHandler::sendSingleFrameMessage(const UInt8 sessionID,
+RESULT_CODE ProtocolHandler::sendSingleFrameMessage(const UInt8 sessionID,
                                                    const UInt8 servType,
                                                    const UInt32 dataSize,
                                                    const UInt8 *data,
                                                    const bool compress)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    ERROR_CODE retVal = ERR_OK;
+    RESULT_CODE retVal = RESULT_OK;
 
     ProtocolPacketHeader header(mProtocolVersion,
                                 compress,
@@ -157,10 +157,10 @@ ERROR_CODE ProtocolHandler::sendSingleFrameMessage(const UInt8 sessionID,
                                 dataSize,
                                 mMessageCounters[sessionID]++);
 
-    if (ERR_OK != sendFrame(mConnectionHandle, header, data))
+    if (RESULT_OK != sendFrame(mConnectionHandle, header, data))
     {
         LOG4CPLUS_WARN(mLogger, "sendSingleFrame() - write failed");
-        retVal = ERR_FAIL;
+        retVal = RESULT_FAIL;
     }
     else
         LOG4CPLUS_INFO(mLogger, "sendSingleFrame() - write OK");
@@ -168,7 +168,7 @@ ERROR_CODE ProtocolHandler::sendSingleFrameMessage(const UInt8 sessionID,
     return retVal;
 }
 
-ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
+RESULT_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
                                                   const UInt8 servType,
                                                   const UInt32 dataSize,
                                                   const UInt8 *data,
@@ -176,7 +176,7 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
                                                   const UInt32 maxDataSize)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    ERROR_CODE retVal = ERR_OK;
+    RESULT_CODE retVal = RESULT_OK;
 
     int numOfFrames = 0;
     int lastDataSize = 0;
@@ -209,11 +209,11 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
     outDataFirstFrame[6] = numOfFrames >> 8;
     outDataFirstFrame[7] = numOfFrames;
 
-    if (ERR_OK != sendFrame(mConnectionHandle, firstHeader, outDataFirstFrame))
+    if (RESULT_OK != sendFrame(mConnectionHandle, firstHeader, outDataFirstFrame))
     {
         LOG4CPLUS_WARN(mLogger, "sendData() - write first frame FAIL");
         delete [] outDataFirstFrame;
-        return ERR_FAIL;
+        return RESULT_FAIL;
     }
     else
         LOG4CPLUS_INFO(mLogger, "sendData() - write first frame OK");
@@ -238,10 +238,10 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
 
             memcpy(outDataFrame, data + (maxDataSize * i), maxDataSize);
 
-            if (ERR_OK != sendFrame(mConnectionHandle, header, outDataFrame))
+            if (RESULT_OK != sendFrame(mConnectionHandle, header, outDataFrame))
             {
                 LOG4CPLUS_WARN(mLogger, "sendData() - write consecutive frame FAIL");
-                retVal = ERR_FAIL;
+                retVal = RESULT_FAIL;
                 break;
             }
             else
@@ -260,10 +260,10 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
 
             memcpy(outDataFrame, data + (maxDataSize * i), lastDataSize);
 
-            if (ERR_OK != sendFrame(mConnectionHandle, header, outDataFrame))
+            if (RESULT_OK != sendFrame(mConnectionHandle, header, outDataFrame))
             {
                 LOG4CPLUS_WARN(mLogger, "sendData() - write last frame FAIL");
-                retVal = ERR_FAIL;
+                retVal = RESULT_FAIL;
                 break;
             }
             else
@@ -276,24 +276,24 @@ ERROR_CODE ProtocolHandler::sendMultiFrameMessage(const UInt8 sessionID,
     return retVal;
 }
 
-ERROR_CODE ProtocolHandler::sendData(const UInt8 sessionID,
+RESULT_CODE ProtocolHandler::sendData(const UInt8 sessionID,
                                      const UInt8 servType,
                                      const UInt32 dataSize,
                                      const UInt8 *data,
                                      const bool compress)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    ERROR_CODE retVal = ERR_OK;
+    RESULT_CODE retVal = RESULT_OK;
 
     if (mSessionStates.count(sessionID) )
     {
         if (mSessionStates[sessionID] != HANDSHAKE_DONE)
-            retVal = ERR_FAIL;
+            retVal = RESULT_FAIL;
     }
     else
-        retVal = ERR_FAIL;
+        retVal = RESULT_FAIL;
 
-    if (retVal != ERR_FAIL)
+    if (retVal != RESULT_FAIL)
     {
         UInt32 maxDataSize = 0;
         if (mProtocolVersion == PROTOCOL_VERSION_1)
@@ -303,15 +303,15 @@ ERROR_CODE ProtocolHandler::sendData(const UInt8 sessionID,
 
         if (dataSize <= maxDataSize)
         {
-            if (sendSingleFrameMessage(sessionID, servType, dataSize, data, compress) != ERR_OK)
-                retVal = ERR_FAIL;
+            if (sendSingleFrameMessage(sessionID, servType, dataSize, data, compress) != RESULT_OK)
+                retVal = RESULT_FAIL;
         }
         else
         {
             if (sendMultiFrameMessage(sessionID, servType, dataSize, data, compress, maxDataSize)
-                    != ERR_OK)
+                    != RESULT_OK)
             {
-                retVal = ERR_FAIL;
+                retVal = RESULT_FAIL;
             }
         }
     }
@@ -319,14 +319,14 @@ ERROR_CODE ProtocolHandler::sendData(const UInt8 sessionID,
     return retVal;
 }
 
-ERROR_CODE ProtocolHandler::receiveData(const UInt8 sessionID,
+RESULT_CODE ProtocolHandler::receiveData(const UInt8 sessionID,
                                         const UInt32 messageID,
                                         const UInt8 servType,
                                         const UInt32 receivedDataSize,
                                         UInt8 *data)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    ERROR_CODE retVal = ERR_OK;
+    RESULT_CODE retVal = RESULT_OK;
 
     if (mToUpperLevelMessagesQueues.count(sessionID) )
     {
@@ -348,26 +348,26 @@ ERROR_CODE ProtocolHandler::receiveData(const UInt8 sessionID,
                         mToUpperLevelMessagesQueues[sessionID].pop();
                     }
                     else
-                        retVal = ERR_FAIL;
+                        retVal = RESULT_FAIL;
                 }
                 else
                 {
                     LOG4CPLUS_WARN(mLogger, "receiveData() - requested msg size != real Msg size");
-                    retVal = ERR_FAIL;
+                    retVal = RESULT_FAIL;
                 }
             }
             else
-                retVal = ERR_FAIL;
+                retVal = RESULT_FAIL;
         }
     }
 
     return retVal;
 }
 
-ERROR_CODE ProtocolHandler::sendStartSessionAck(const UInt8 sessionID)
+RESULT_CODE ProtocolHandler::sendStartSessionAck(const UInt8 sessionID)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    ERROR_CODE retVal = ERR_OK;
+    RESULT_CODE retVal = RESULT_OK;
 
     UInt32 hashCode = 0;
     if (mProtocolVersion == PROTOCOL_VERSION_2)
@@ -384,21 +384,21 @@ ERROR_CODE ProtocolHandler::sendStartSessionAck(const UInt8 sessionID)
                                 0,
                                 hashCode);
 
-    if (ERR_OK == sendFrame(mConnectionHandle, header, 0))
+    if (RESULT_OK == sendFrame(mConnectionHandle, header, 0))
         LOG4CPLUS_INFO(mLogger, "sendStartSessionAck() - BT write OK");
     else
     {
         LOG4CPLUS_ERROR(mLogger, "sendStartSessionAck() - BT write FAIL");
-        retVal = ERR_FAIL;
+        retVal = RESULT_FAIL;
     }
 
     return retVal;
 }
 
-ERROR_CODE ProtocolHandler::sendEndSessionNAck(const UInt8 sessionID)
+RESULT_CODE ProtocolHandler::sendEndSessionNAck(const UInt8 sessionID)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    ERROR_CODE retVal = ERR_OK;
+    RESULT_CODE retVal = RESULT_OK;
 
     ProtocolPacketHeader header(PROTOCOL_VERSION_2,
                                 COMPRESS_OFF,
@@ -409,21 +409,21 @@ ERROR_CODE ProtocolHandler::sendEndSessionNAck(const UInt8 sessionID)
                                 0,
                                 0);
 
-    if (ERR_OK == sendFrame(mConnectionHandle, header, 0))
+    if (RESULT_OK == sendFrame(mConnectionHandle, header, 0))
         LOG4CPLUS_INFO(mLogger, "sendEndSessionNAck() - BT write OK");
     else
     {
         LOG4CPLUS_ERROR(mLogger, "sendEndSessionNAck() - BT write FAIL");
-        retVal = ERR_FAIL;
+        retVal = RESULT_FAIL;
     }
 
     return retVal;
 }
 
-ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UInt8 *data)
+RESULT_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UInt8 *data)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    ERROR_CODE retVal = ERR_OK;
+    RESULT_CODE retVal = RESULT_OK;
 
     switch (header.frameType)
     {
@@ -431,10 +431,10 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
     {
         LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_CONTROL");
 
-        if (handleControlMessage(header, data) != ERR_OK)
+        if (handleControlMessage(header, data) != RESULT_OK)
         {
             LOG4CPLUS_WARN(mLogger, "handleMessage() - handleControlMessage FAIL");
-            retVal = ERR_FAIL;
+            retVal = RESULT_FAIL;
         }
         break;
     }
@@ -453,19 +453,19 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
                                                             header.messageID,
                                                             header.dataSize);
                 else
-                    retVal = ERR_FAIL;
+                    retVal = RESULT_FAIL;
             }
             else
             {
                 LOG4CPLUS_WARN(mLogger
                          , "handleMessage() - case FRAME_TYPE_SINGLE but HANDSHAKE_NOT_DONE");
-                retVal = ERR_FAIL;
+                retVal = RESULT_FAIL;
             }
         }
         else
         {
             LOG4CPLUS_WARN(mLogger, "handleMessage() - case FRAME_TYPE_SINGLE. unknown sessionID");
-            retVal = ERR_FAIL;
+            retVal = RESULT_FAIL;
         }
 
         break;
@@ -481,13 +481,13 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
             {
                 LOG4CPLUS_WARN(mLogger
                       , "handleMessage() - case FRAME_TYPE_FIRST but HANDSHAKE_NOT_DONE");
-                retVal = ERR_FAIL;
+                retVal = RESULT_FAIL;
             }
         }
         else
         {
             LOG4CPLUS_WARN(mLogger, "handleMessage() - case FRAME_TYPE_FIRST. unknown sessionID");
-            retVal = ERR_FAIL;
+            retVal = RESULT_FAIL;
         }
 
         break;
@@ -503,13 +503,13 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
             {
                 LOG4CPLUS_WARN(mLogger
                       , "handleMessage() - case FRAME_TYPE_CONSECUTIVE but HANDSHAKE_NOT_DONE");
-                retVal = ERR_FAIL;
+                retVal = RESULT_FAIL;
             }
         }
         else
         {
             LOG4CPLUS_WARN(mLogger, "handleMessage() - case FRAME_TYPE_CONSECUTIVE. unknown sessionID");
-            retVal = ERR_FAIL;
+            retVal = RESULT_FAIL;
         }
 
         break;
@@ -526,10 +526,10 @@ ERROR_CODE ProtocolHandler::handleMessage(const ProtocolPacketHeader &header, UI
     return retVal;
 }
 
-ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &header, UInt8 *data)
+RESULT_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &header, UInt8 *data)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    ERROR_CODE retVal = ERR_OK;
+    RESULT_CODE retVal = RESULT_OK;
 
     UInt8 currentSessionID = header.sessionID;
     if (mSessionStates.count(currentSessionID) && (header.frameData != FRAME_DATA_START_SESSION) )
@@ -549,7 +549,7 @@ ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &hea
                 if (mProtocolObserver)
                     mProtocolObserver->sessionStartedCallback(currentSessionID, header.messageID);
                 else
-                    retVal = ERR_FAIL;
+                    retVal = RESULT_FAIL;
             }
             else if (header.frameData == FRAME_DATA_START_SESSION_NACK)
                 LOG4CPLUS_INFO(mLogger, "handleControlMessage() - session rejected");
@@ -575,8 +575,8 @@ ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &hea
                     else
                     {
                         LOG4CPLUS_WARN(mLogger, "handleControlMessage() - incorrect hashCode");
-                        if (sendEndSessionNAck(header.sessionID) != ERR_OK)
-                            retVal = ERR_FAIL;
+                        if (sendEndSessionNAck(header.sessionID) != RESULT_OK)
+                            retVal = RESULT_FAIL;
                     }
                 }
                 else if ( (header.version == PROTOCOL_VERSION_1)
@@ -592,7 +592,7 @@ ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &hea
                     if (mProtocolObserver)
                         mProtocolObserver->sessionEndedCallback(currentSessionID);
                     else
-                        retVal = ERR_FAIL;
+                        retVal = RESULT_FAIL;
                 }
             }
             else
@@ -613,7 +613,7 @@ ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &hea
         if (header.frameData == FRAME_DATA_START_SESSION)
         {
             LOG4CPLUS_INFO(mLogger, "handleControlMessage() - FRAME_DATA_START_SESSION");
-            if (sendStartSessionAck(mSessionIdCounter) == ERR_OK)
+            if (sendStartSessionAck(mSessionIdCounter) == RESULT_OK)
             {
                 mSessionStates.insert(std::pair<UInt8, UInt8>(mSessionIdCounter, HANDSHAKE_DONE) );
 
@@ -623,7 +623,7 @@ ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &hea
                                                               , mHashCodes[mSessionIdCounter]);
                 }
                 else
-                    retVal = ERR_FAIL;
+                    retVal = RESULT_FAIL;
 
                 mSessionIdCounter++;
             }
@@ -633,11 +633,11 @@ ERROR_CODE ProtocolHandler::handleControlMessage(const ProtocolPacketHeader &hea
     return retVal;
 }
 
-ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &header
+RESULT_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &header
                                                   , UInt8 *data)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    ERROR_CODE retVal = ERR_OK;
+    RESULT_CODE retVal = RESULT_OK;
 
     if (header.frameType == FRAME_TYPE_FIRST)
     {
@@ -652,7 +652,7 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
         if (mIncompleteMultiFrameMessages.count(header.sessionID) )
         {
             if (mIncompleteMultiFrameMessages[header.sessionID]->addConsecutiveMessage(header, data)
-                    == ERR_OK)
+                    == RESULT_OK)
             {
                 LOG4CPLUS_INFO(mLogger, "handleMultiFrameMessage() - addConsecutiveMessage OK");
                 if (header.frameData == FRAME_DATA_LAST_FRAME)
@@ -667,19 +667,19 @@ ERROR_CODE ProtocolHandler::handleMultiFrameMessage(const ProtocolPacketHeader &
                                   , mToUpperLevelMessagesQueues[header.sessionID].front()
                                                                 ->getTotalDataBytes() );
                     else
-                        retVal = ERR_FAIL;
+                        retVal = RESULT_FAIL;
                 }
             }
             else
             {
                 LOG4CPLUS_WARN(mLogger, "handleMultiFrameMessage() - addConsecutiveMessage FAIL");
-                retVal = ERR_FAIL;
+                retVal = RESULT_FAIL;
             }
         }
         else
         {
             LOG4CPLUS_WARN(mLogger, "handleMultiFrameMessage() - no sessionID in incomplete messages");
-            retVal = ERR_FAIL;
+            retVal = RESULT_FAIL;
         }
     }
 
@@ -761,14 +761,14 @@ void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnection
     }   
 }
 
-ERROR_CODE ProtocolHandler::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const ProtocolPacketHeader &header, const UInt8 *data)
+RESULT_CODE ProtocolHandler::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const ProtocolPacketHeader &header, const UInt8 *data)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     
     if (NsAppLink::NsTransportManager::InvalidConnectionHandle == mConnectionHandle)
     {
         LOG4CPLUS_ERROR(mLogger, "sendFrame() - InvalidConnectionHandle - unable to send data");
-        return ERR_FAIL;
+        return RESULT_FAIL;
     }
     
     UInt8 offset = 0;
@@ -807,7 +807,7 @@ ERROR_CODE ProtocolHandler::sendFrame(NsAppLink::NsTransportManager::tConnection
         else
         {
             LOG4CPLUS_WARN(mLogger, "sendFrame() - buffer is too small for writing");
-            return ERR_FAIL;
+            return RESULT_FAIL;
         }
     }
 
@@ -817,10 +817,10 @@ ERROR_CODE ProtocolHandler::sendFrame(NsAppLink::NsTransportManager::tConnection
     }
     else
     {
-        return ERR_FAIL;
+        return RESULT_FAIL;
     }
     
-    return ERR_OK;
+    return RESULT_OK;
 }
 
 } //namespace AxisCore

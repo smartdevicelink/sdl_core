@@ -1,3 +1,9 @@
+/**
+ * \file MobileHandler.cpp
+ * \brief Mobile handler
+ * \author vsalo
+ */
+
 #include "AppMgr/MobileHandler.h"
 #include "JSONHandler/JSONHandler.h"
 #include "LoggerHelper.hpp"
@@ -5,76 +11,78 @@
 namespace NsAppManager
 {
 
-log4cplus::Logger MobileHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
+    log4cplus::Logger MobileHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
 
-/**
- * \brief Returning class instance
- * \return class instance
- */
-MobileHandler &MobileHandler::getInstance()
-{
-    static MobileHandler instance;
-    return instance;
-}
-
-/**
- * \brief send a message via associated handler
- * \param message message to send
- * \param sessionId id of a session associated with application that sent the message
- */
-void MobileHandler::sendRPCMessage(const NsAppLinkRPC::ALRPCMessage *message, unsigned char sessionId)
-{
-    if(mJSONHandler)
+    /**
+     * \brief Returning class instance
+     * \return class instance
+     */
+    MobileHandler &MobileHandler::getInstance()
     {
-        mJSONHandler->sendRPCMessage(message, sessionId);
+        static MobileHandler instance;
+        return instance;
     }
-    else
+
+    /**
+     * \brief send a message via associated handler
+     * \param message message to send
+     * \param connectionID id of a connection associated with application that sent the message
+     * \param sessionId id of a session associated with application that sent the message
+     */
+    void MobileHandler::sendRPCMessage(const NsAppLinkRPC::ALRPCMessage *message, unsigned int connectionID, unsigned char sessionId)
     {
-        LOG4CPLUS_ERROR_EXT(mLogger, " MobileHandler is null!");
+        if(mJSONHandler)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " Sending a message " << message->getMethodId() << " of the type " << message->getMessageType() << " with the connection id " << connectionID << " session id " << (uint)sessionId << " to a mobile side");
+            mJSONHandler->sendRPCMessage(message, connectionID, sessionId);
+        }
+        else
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " MobileHandler is null!");
+        }
     }
-}
 
-/**
- * \brief set mobile Json handler
- * \param handler mobile Json handler instance
- */
-void MobileHandler::setJsonHandler(JSONHandler *handler)
-{
-    if(!handler)
+    /**
+     * \brief set mobile Json handler
+     * \param handler mobile Json handler instance
+     */
+    void MobileHandler::setJsonHandler(JSONHandler *handler)
     {
-        LOG4CPLUS_ERROR_EXT(mLogger, "A null pointer is being assigned - is this the intent?");
-        return;
+        if(!handler)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "A null pointer is being assigned - is this the intent?");
+            return;
+        }
+        mJSONHandler = handler;
     }
-    mJSONHandler = handler;
-}
 
-/**
- * \brief get mobile Json handler
- * \return mobile Json handler instance
- */
-JSONHandler *MobileHandler::getJsonHandler() const
-{
-    if(!mJSONHandler)
+    /**
+     * \brief get mobile Json handler
+     * \return mobile Json handler instance
+     */
+    JSONHandler *MobileHandler::getJsonHandler() const
     {
-        LOG4CPLUS_ERROR_EXT(mLogger, "JSON Mobile handler hasn't yet been assigned, but an attempt to retrieve it has been made! Face a core dump soon...(((");
+        if(!mJSONHandler)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "JSON Mobile handler hasn't yet been assigned, but an attempt to retrieve it has been made! Face a core dump soon...(((");
+        }
+        return mJSONHandler;
     }
-    return mJSONHandler;
-}
 
-/**
- * \brief Default class constructor
- */
-MobileHandler::MobileHandler()
-    :mJSONHandler(0)
-{
-}
+    /**
+     * \brief Default class constructor
+     */
+    MobileHandler::MobileHandler()
+        :mJSONHandler(0)
+    {
+    }
 
-/**
- * \brief Copy constructor
- */
-MobileHandler::MobileHandler(const MobileHandler &)
-    :mJSONHandler(0)
-{
-}
+    /**
+     * \brief Copy constructor
+     */
+    MobileHandler::MobileHandler(const MobileHandler &)
+        :mJSONHandler(0)
+    {
+    }
 
 }

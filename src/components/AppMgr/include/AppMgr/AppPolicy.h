@@ -1,8 +1,7 @@
-/*
- * AppPolicy.h
- *
- *  Created on: Oct 5, 2012
- *      Author: vsalo
+/**
+ * \file AppPolicy.cpp
+ * \brief Application policy representation
+ * \author vsalo
  */
 
 #ifndef APPPOLICY_H_
@@ -12,52 +11,52 @@
 
 namespace log4cplus
 {
-	class Logger;
+    class Logger;
 }
 
 namespace NsAppManager
 {
-	
-/**
- * \brief AppPolicy acts as application behaviour modifier according to some rule
- */
-class AppPolicy
-{
-public:
 
     /**
-     * \brief Class constructor
-     * \param policy text representation
+     * \brief AppPolicy acts as application behaviour modifier according to some rule
      */
-	AppPolicy( const std::string& policy );
+    class AppPolicy
+    {
+    public:
 
-    /**
-     * \brief Default class destructor
-     */
-	~AppPolicy( );
+        /**
+         * \brief Class constructor
+         * \param policy text representation
+         */
+        AppPolicy( const std::string& policy );
 
-    /**
-     * \brief comparison operator
-     * \return comparison result
-     */
-	bool operator<(const AppPolicy& item2) const;
+        /**
+         * \brief Default class destructor
+         */
+        ~AppPolicy( );
 
-    /**
-     * \brief gets application policy text representation
-     * \return application policy test representation
-     */
-	const std::string& getPolicyHash() const;
+        /**
+         * \brief comparison operator
+         * \return comparison result
+         */
+        bool operator<(const AppPolicy& item2) const;
 
-private:
+        /**
+         * \brief gets application policy text representation
+         * \return application policy test representation
+         */
+        const std::string& getPolicyHash() const;
 
-    /**
-     * \brief Default class copy constructor
-     */
-    AppPolicy( const AppPolicy& );
+    private:
 
-	const std::string mPolicy;
-	static log4cplus::Logger mLogger;
-};
+        /**
+         * \brief Default class copy constructor
+         */
+        AppPolicy( const AppPolicy& );
+
+        const std::string mPolicy;
+        static log4cplus::Logger mLogger;
+    };
 
 } // namespace NsAppManager
 

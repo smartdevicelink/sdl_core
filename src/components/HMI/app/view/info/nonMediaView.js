@@ -75,56 +75,61 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 		
 		}),
 		
-		innerMenu: Em.ContainerView.extend({
-			
-			classNames: ['inner_menu'],
-			
-			childViews: [
-				'optionsButton',
-				'routeInfoButton',
-				'softButton1',
-				'softButton2',
-				'softButton3',
-				'softButton4',
-				'softButton5'
-			],
-			
-			optionsButton: MFT.Button.extend({
-				text: 'Options',
+		innerMenu: MFT.MenuList.extend({
+						
+			content: Em.ContainerView.extend({
 				
-				templateName: 'arrow',
+				classNames: ['content'],
 				
-				goToState:	'options',
-				action:		'onChildState',
-				target:		'MFT.InfoController'
-			}),
-			
-			routeInfoButton: MFT.Button.extend({
-				text: 'Route Info',
+				attributeBindings: ['parentView.contentPositon:style'],
 				
-				hidden:	true,
+				childViews: [
+					'optionsButton',
+					'routeInfoButton',
+					'softButton1',
+					'softButton2',
+					'softButton3',
+					'softButton4',
+					'softButton5'
+				],
 				
-				templateName: 'arrow'
-			}),
-			
-			softButton1: MFT.Button.extend({
-				text: 'Soft Button'
-			}),
-			
-			softButton2: MFT.Button.extend({
-				text: 'Soft Button'
-			}),
-			
-			softButton3: MFT.Button.extend({
-				text: 'Soft Button'
-			}),
-			
-			softButton4: MFT.Button.extend({
-				text: 'Soft Button'
-			}),
-			
-			softButton5: MFT.Button.extend({
-				text: 'Soft Button'
+				optionsButton: MFT.Button.extend({
+					text: 'Options',
+					
+					templateName: 'arrow',
+					
+					goToState:	'options',
+					action:		'onChildState',
+					target:		'MFT.InfoController'
+				}),
+				
+				routeInfoButton: MFT.Button.extend({
+					text: 'Route Info',
+					
+					//hidden:	true,
+					
+					templateName: 'arrow'
+				}),
+				
+				softButton1: MFT.Button.extend({
+					text: 'Soft Button 1'
+				}),
+				
+				softButton2: MFT.Button.extend({
+					text: 'Soft Button 2'
+				}),
+				
+				softButton3: MFT.Button.extend({
+					text: 'Soft Button 3'
+				}),
+				
+				softButton4: MFT.Button.extend({
+					text: 'Soft Button 4'
+				}),
+				
+				softButton5: MFT.Button.extend({
+					text: 'Soft Button 5'
+				})
 			})
 		})
 	})

@@ -77,7 +77,7 @@ MFT.ScrollBar = Em.ContainerView.extend({
 		} else {
 			return false;
 		}
-	}.property('currentPage'),
+	}.property('currentPage','pageCount'),
 	
 	/** Define scroll down button "disable" status */
 	sbDownButtonIsDisabled:function(){
@@ -86,7 +86,7 @@ MFT.ScrollBar = Em.ContainerView.extend({
 		} else {
 			return true;
 		}
-	}.property('currentPage'),
+	}.property('currentPage','pageCount'),
 	
 	attributeBindings: ['scrollbarBodyStyleAttributes:style'],
 		

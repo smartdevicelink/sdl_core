@@ -738,8 +738,14 @@
 	height: 50px;
 }
 
+#info_apps_list .list-item{
+	height: 48px !important;
+	border: 1px solid #393939;
+}
+
 #info_apps_list .list-content {
 	width: 279px;
+	border: none !important;
 }
 
 #info_apps .leftButtons {
@@ -750,7 +756,6 @@
 	font-size: 20px;
 	line-height: 50px;
 	border: 1px solid #393939;
-	border-bottom: none;
 	cursor: pointer;
 	left: 10px;
 }

@@ -16,20 +16,50 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	classNameBindings: ['MFT.helpMode',
 						'MFT.localization'],
-	
-	//classNames: ['hidden'],
-	
-	//stateObj: MFT.States.info.apps,
-	
-	
+
+    appsActive: function(){
+        if(MFT.States.info.apps.active == true){
+            FFW.AppLinkCoreClient.getAppList();
+        }
+    }.observes('MFT.States.info.apps.active'),
 
 	childViews: [
 		'vehicleHealthReport',
 		'Asist911',
 		'installButton',
 		'findNewApps', 
-		'listOfOptions'
+		'listOfApplications'
 	],
+
+    afterRender: function(){
+        /*
+         * Request, get List of applications
+         */
+        FFW.AppLinkCoreClient.getAppList();
+    },
+
+        /** 
+      * Function to add new command button to
+      * Options screen
+      */
+    AddApplication: function( params ){
+
+        this.listOfApplications.items = [];
+        for(var i = 0; i < params.appList.length; i++){
+            this.listOfApplications.items.push({
+                type:       MFT.Button,
+                params:     {
+                    action:         'turnOnApplink',
+                    target:         'MFT.MediaController',
+                    text:           params.appList[i].appName,
+                    className:      'scrollButtons button notpressed',
+                    //icon:           params.icon,
+                    templateName:   'text'
+                }                                   
+            });
+        }
+        this.listOfApplications.list.refresh();
+    },
 	
 	vehicleHealthReport:   MFT.Button.extend({
 		goToState:			'vehicle.healthReport',
@@ -80,94 +110,17 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 		//action:				'onState',
 		//target:				'MFT.SettingsController',
 		disabledBinding:	'MFT.helpMode',
-		onDown:				false
+		onDown:				false,
+        templateName:       'text'
 	}),
 
-	listOfOptions: MFT.List.extend({
+	listOfApplications: MFT.List.extend({
 
-        elementId:         'info_apps_list',
+        elementId:      'info_apps_list',
 
         itemsOnPage:    5,
                 
         /** Items */
-        items: [
-            {
-                type:       MFT.Button,
-                params:     {
-                    action:				MFT.InfoController.get('applicationList')[0].action,
-					target:				MFT.InfoController.get('applicationList')[0].target,
-                    text:				'Application',
-                    className:			'ffw-button list-item',
-                    templateName:       'text',
-                    onDown:				false
-                }                                   
-            },
-            {
-                type:       MFT.Button,
-                params:     {
-                    action:             MFT.InfoController.get('applicationList')[0].action,
-                    target:             MFT.InfoController.get('applicationList')[0].target,
-                    text:               'Application',
-                    className:          'ffw-button list-item',
-                    templateName:       'text',
-                    onDown:             false
-                }                                   
-            },
-            {
-                type:       MFT.Button,
-                params:     {
-                    action:             MFT.InfoController.get('applicationList')[0].action,
-                    target:             MFT.InfoController.get('applicationList')[0].target,
-                    text:               'Application',
-                    className:          'ffw-button list-item',
-                    templateName:       'text',
-                    onDown:             false
-                }                                   
-            },
-            {
-                type:       MFT.Button,
-                params:     {
-                    action:             MFT.InfoController.get('applicationList')[0].action,
-                    target:             MFT.InfoController.get('applicationList')[0].target,
-                    text:               'Application',
-                    className:          'ffw-button list-item',
-                    templateName:       'text',
-                    onDown:             false
-                }                                   
-            },
-            {
-                type:       MFT.Button,
-                params:     {
-                    action:             MFT.InfoController.get('applicationList')[0].action,
-                    target:             MFT.InfoController.get('applicationList')[0].target,
-                    text:               'Application',
-                    className:          'ffw-button list-item',
-                    templateName:       'text',
-                    onDown:             false
-                }                                   
-            },
-            {
-                type:       MFT.Button,
-                params:     {
-                    action:             MFT.InfoController.get('applicationList')[0].action,
-                    target:             MFT.InfoController.get('applicationList')[0].target,
-                    text:               'Application',
-                    className:          'ffw-button list-item',
-                    templateName:       'text',
-                    onDown:             false
-                }                                   
-            },
-            {
-                type:       MFT.Button,
-                params:     {
-                    action:             MFT.InfoController.get('applicationList')[0].action,
-                    target:             MFT.InfoController.get('applicationList')[0].target,
-                    text:               'Application',
-                    className:          'ffw-button list-item',
-                    templateName:       'text',
-                    onDown:             false
-                }                                   
-            }
-        ]
+        items:          new Array()
     })
 });

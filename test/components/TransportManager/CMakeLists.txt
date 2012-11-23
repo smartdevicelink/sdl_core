@@ -34,6 +34,12 @@ set (SOURCES_TEST_WITH_CORRECT_DEVICE_ADAPTER
 # Sources for the TransportManager test with incorrect device adapter behavior
 set (SOURCES_TEST_WITH_INCORRECT_DEVICE_ADAPTER ./TransportManagerTestWithIncorrectDeviceAdapter.cpp)
 
+# Sources for the TransportManager test with multiple device adapters
+set (SOURCES_TEST_WITH_MULTIPLE_DEVICE_ADAPTERS ./TransportManagerTestWithMultipleDeviceAdapters.cpp)
+
+# Sources for the TransportManager test with high data transfer rate
+set (SOURCES_TEST_WITH_HIGH_DATA_TRANSFER_RATE ./TransportManagerTestWithHighDataTransferRate.cpp)
+
 # Libraries seeems to be the same for all Transport Manager test
 set (LIBRARIES
     gtest
@@ -62,10 +68,17 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_C
 
 add_executable("test_TransportManagerTestWithCorrectDeviceAdapter" ${SOURCES_TEST_WITH_CORRECT_DEVICE_ADAPTER})
 target_link_libraries("test_TransportManagerTestWithCorrectDeviceAdapter" ${LIBRARIES})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 add_test(test_TransportManagerTestWithCorrectDeviceAdapter test_TransportManagerTestWithCorrectDeviceAdapter)
 
 add_executable("test_TransportManagerTestWithIncorrectDeviceAdapter" ${SOURCES_TEST_WITH_INCORRECT_DEVICE_ADAPTER})
 target_link_libraries("test_TransportManagerTestWithIncorrectDeviceAdapter" ${LIBRARIES})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 add_test(test_TransportManagerTestWithIncorrectDeviceAdapter test_TransportManagerTestWithIncorrectDeviceAdapter)
+
+add_executable("test_TransportManagerTestWithMultipleDeviceAdapters" ${SOURCES_TEST_WITH_MULTIPLE_DEVICE_ADAPTERS})
+target_link_libraries("test_TransportManagerTestWithMultipleDeviceAdapters" ${LIBRARIES})
+add_test(test_TransportManagerTestWithMultipleDeviceAdapters test_TransportManagerTestWithMultipleDeviceAdapters)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus_disabled.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable("test_TransportManagerTestWithHighDataTransferRate" ${SOURCES_TEST_WITH_HIGH_DATA_TRANSFER_RATE})
+target_link_libraries("test_TransportManagerTestWithHighDataTransferRate" ${LIBRARIES})
+add_test(test_TransportManagerTestWithHighDataTransferRate test_TransportManagerTestWithHighDataTransferRate)

@@ -34,15 +34,15 @@ MFT = Em.Application.create({
 	debugText: 'debug&nbsp;mode',
  	
 	init: function() {
-        Em.Logger.log('MFT: Application init!');
+	        Em.Logger.log('MFT: Application init!');
         
-        FFW.Buttons.connect();
-        FFW.TTS.connect();
-        FFW.VR.connect();
-        FFW.AppLinkCoreClient.connect();
-        FFW.UI.connect();
+        	FFW.Buttons.connect();
+	        FFW.TTS.connect();
+	        FFW.VR.connect();
+	        FFW.AppLinkCoreClient.connect();
+        	FFW.UI.connect();
 
-        this._super();
+	        this._super();
 	},
 	 	  	
   	/** Application ready event */
