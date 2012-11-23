@@ -55,7 +55,7 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
                     menuId:                 menuId,
                     text:                   menuName,
                     className:              'rs-item',
-                    templateName:           'text'
+                    templateName:           'arrow'
                 }                                   
             });
 
