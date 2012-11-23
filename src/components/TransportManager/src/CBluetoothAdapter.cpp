@@ -355,7 +355,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
 
                         if (appLinkRFCOMMChannels.end() == std::find(appLinkRFCOMMChannels.begin(), appLinkRFCOMMChannels.end(), connection->mRFCOMMChannel))
                         {
-                            LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (no AppLink service found on channel " << static_cast<uint32_t>(connection->mRFCOMMChannel) << ")");
+                            //LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (no AppLink service found on channel " << static_cast<uint32_t>(connection->mRFCOMMChannel) << ")");
 
                             connectionsToTerminate.push_back(connectionIterator->first);
                         }
