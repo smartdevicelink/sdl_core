@@ -49,6 +49,15 @@ namespace NsAppManager
     }
 
     /**
+     * \brief get count of items
+     * \return items count
+     */
+    size_type MenuMapping::size() const
+    {
+        return mMenuMapping.size();
+    }
+
+    /**
      * \brief remove an application from a mapping
      * \param menuId id of a menu to remove all commands mapping from
      */
@@ -82,7 +91,7 @@ namespace NsAppManager
     }
 
     /**
-     * \brief find a registry item subscribed to command
+     * \brief find commands within a menu
      * \param menuId menu id
      * \param commands commands residing within the given menu
      */

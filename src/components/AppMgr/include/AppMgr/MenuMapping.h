@@ -63,6 +63,12 @@ namespace NsAppManager
         void removeCommand(const unsigned int& commandId);
 
         /**
+         * \brief get count of items
+         * \return items count
+         */
+        size_type size() const;
+
+        /**
          * \brief remove an application from a mapping
          * \param menuId id of a menu to remove all commands mapping from
          */
@@ -76,7 +82,7 @@ namespace NsAppManager
         unsigned int findMenuAssignedToCommand(const unsigned int &commandId) const;
 
         /**
-         * \brief find a registry item subscribed to command
+         * \brief find commands within a menu
          * \param menuId menu id
          * \param commands commands residing within the given menu
          */
