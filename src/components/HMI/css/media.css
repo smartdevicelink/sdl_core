@@ -3021,7 +3021,7 @@
 #media_app_sub_menu_view.media_app_sub_menu_view {
 	width: 800px;
 	height: 480px;
-	z-index: 503;
+	z-index: 1000;
 	background: url(../images/media/bg.png) no-repeat;
 }
 
