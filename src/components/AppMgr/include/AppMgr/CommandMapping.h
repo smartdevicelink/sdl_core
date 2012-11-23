@@ -20,6 +20,7 @@ namespace NsAppManager
 {
 
     class RegistryItem;
+    class Application;
 
     /**
      * \brief CommandType acts as command type enum representation that allows iterating over types in cycle and using types in comparison
@@ -156,6 +157,11 @@ namespace NsAppManager
     typedef std::vector<CommandType> CommandTypes;
 
     /**
+     * \brief commands vector
+     */
+    typedef std::vector<CommandKey> Commands;
+
+    /**
      * \brief command_id-to-request_number map (command id is a key);
      */
     typedef std::map<unsigned int, unsigned int> RequestsAwaitingResponse;
@@ -217,6 +223,20 @@ namespace NsAppManager
          * \return RegistryItem instance
          */
         RegistryItem *findRegistryItemAssignedToCommand(unsigned int commandId, CommandType type) const;
+
+        /**
+         * \brief find commands the registry item is subscribed to
+         * \param item a registry item in question
+         * \return CommandKey vector
+         */
+        Commands findCommandsAssignedToRegistryItem(const RegistryItem* item) const;
+
+        /**
+         * \brief find commands the application is subscribed to
+         * \param item a registry item in question
+         * \return CommandKey vector
+         */
+        Commands findCommandsAssignedToApplication(const Application *item) const;
 
         /**
          * \brief get count of unresponsed requests associated with the given command id

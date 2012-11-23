@@ -134,6 +134,74 @@ namespace NsAppManager
     }
 
     /**
+     * \brief find commands the registry item is subscribed to
+     * \param item a registry item in question
+     * \return CommandKey vector
+     */
+    Commands CommandMapping::findCommandsAssignedToRegistryItem(const RegistryItem *item) const
+    {
+        Commands commands;
+        if(!item)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "Cannot search using null param!");
+        }
+        else
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Searching for commands assigned to registry item");
+            for(CommandMap::const_iterator it = mCommandMapping.begin(); it != mCommandMapping.end(); it++)
+            {
+                const RegistryItem* found = it->second;
+                if( !found )
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "null-registr item found in the mapping!");
+                    continue;
+                }
+                if( item == found )
+                {
+                    const CommandKey& key = it->first;
+                    commands.push_back(key);
+                    LOG4CPLUS_INFO_EXT(mLogger, "Found a command " << std::get<0>(key) << " of a type " << std::get<1>(key).getType() );
+                }
+            }
+        }
+        return commands;
+    }
+
+    /**
+     * \brief find commands the application is subscribed to
+     * \param item a registry item in question
+     * \return CommandKey vector
+     */
+    Commands CommandMapping::findCommandsAssignedToApplication(const Application *item) const
+    {
+        Commands commands;
+        if(!item)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "Cannot search using null param!");
+        }
+        else
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Searching for commands assigned to application " << item->getName() << " connection id " << item->getConnectionID() << " session id " << (uint)item->getSessionID());
+            for(CommandMap::const_iterator it = mCommandMapping.begin(); it != mCommandMapping.end(); it++)
+            {
+                const RegistryItem* found = it->second;
+                if( !found )
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "null-registr item found in the mapping!");
+                    continue;
+                }
+                if( item == found->getApplication() )
+                {
+                    const CommandKey& key = it->first;
+                    commands.push_back(key);
+                    LOG4CPLUS_INFO_EXT(mLogger, "Found a command " << std::get<0>(key) << " of a type " << std::get<1>(key).getType() );
+                }
+            }
+        }
+        return commands;
+    }
+
+    /**
      * \brief get count of unresponsed requests associated with the given command id
      * \param cmdId id of command we need to count unresponded requests for
      * \return unresponded requests count
