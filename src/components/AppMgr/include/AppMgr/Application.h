@@ -12,9 +12,11 @@
 #include "JSONHandler/ALRPCObjects/HMILevel.h"
 #include "JSONHandler/ALRPCObjects/AudioStreamingState.h"
 #include "JSONHandler/ALRPCObjects/SystemContext.h"
+#include "AppMgr/CommandMapping.h"
 #include <string>
 #include <vector>
 #include <tuple>
+#include <map>
 
 namespace log4cplus
 {
@@ -28,6 +30,21 @@ namespace NsAppManager
      * \brief An application unique id - combination of connection id and session id
      */
     typedef std::tuple<int, unsigned char> ApplicationUniqueID;
+
+    /**
+     * \brief mapping of command id to specific command type
+     */
+    typedef std::tuple<unsigned int, CommandType> ApplicationCommand;
+
+    /**
+     * \brief Commands available to each menu
+     */
+    typedef std::vector<ApplicationCommand> ApplicationCommands;
+
+    /**
+     * \brief An application menu id - commands vector mapping (manu id as a key)
+     */
+    typedef std::map<unsigned int, ApplicationCommands> ApplicationMenus;
 
     /**
      * \brief class Application acts as a metaphor for every mobile application being registered on HMI
@@ -48,6 +65,13 @@ namespace NsAppManager
          * \brief Default class destructor
          */
         virtual ~Application( );
+
+        /**
+         * \brief operator ==
+         * \param item the item to compare with
+         * \return comparison result
+         */
+        bool operator==(const Application& item) const;
 
         /**
          * \brief Set application HMI status level
@@ -233,6 +257,7 @@ namespace NsAppManager
         std::string mAppID;
         NsAppLinkRPC::Language mHMIDisplayLanguageDesired;
         NsAppLinkRPC::SystemContext mSystemContext;
+        ApplicationMenus mMenus;
 
         static log4cplus::Logger mLogger;
     };

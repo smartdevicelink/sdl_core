@@ -57,6 +57,17 @@ namespace NsAppManager
     }
 
     /**
+     * \brief operator ==
+     * \param item the item to compare with
+     * \return comparison result
+     */
+    bool Application::operator ==(const Application &item) const
+    {
+        return this->getSessionID() == item.getSessionID()
+            && this->getConnectionID() == item.getConnectionID();
+    }
+
+    /**
      * \brief retrieve aplication HMI status level
      * \return HMI status level of application
      */
