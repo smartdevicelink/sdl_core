@@ -26,6 +26,16 @@ MFT.ApplinkMediaController = Em.Object.create({
      */
     hideApplinkMediaButton: true,
 
+    /**
+      * Text for label on Perform Interaction screen
+      */
+    performInteractionInitialText: '',
+
+    /**
+      * Text for label on Perform Interaction screen
+      */
+    subMenuLabel: '',
+
     /*
      *  Driver Distraction State 
      *  may be "DD_OFF" or "DD_ON"
@@ -63,17 +73,19 @@ MFT.ApplinkMediaController = Em.Object.create({
     /** Switching on Applink Sub Mennu */
     turnOnApplinkSubMenu: function(el){
         this.set('currentApplinkSubMenuid', el.menuId);
+        this.set('subMenuLabel', el.text);
         MFT.States.goToState('media.applink.applinkoptions.applinkoptionssubmenu');
     },
 
     /** Switching on Applink Perform Interaction Choise */
     turnOnApplinkPerform: function(el){
+        this.set('performInteractionInitialText', el.initialText);
         if(MFT.States.media.applink.applinkperforminteractionchoise.active){
             MFT.AppPerformInteractionChoise.PerformInteraction(el.interactionChoiceSetIDList);
         }else{
             this.set('currentApplinkPerformInteractionChoiseId', el.interactionChoiceSetIDList);
+            MFT.States.goToState('media.applink.applinkperforminteractionchoise');
         }
-        MFT.States.goToState('media.applink.applinkperforminteractionchoise');
     },
 
     /** Applink AddCommand handler */

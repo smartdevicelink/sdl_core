@@ -20,8 +20,8 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
 	/** View Components*/
     childViews:         [
                             'backButton',
-                            //'buttonsWrapper'
-                            'listOfOptions'
+                            'listOfOptions',
+                            'optionsLabel'
                         ],
 
     /** Button to return to previous view*/
@@ -30,6 +30,15 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
         action:            'back',
         target:            'MFT.States',  
         icon:              'images/media/ico_back.png',   
+    }),
+
+    optionsLabel:    MFT.Label.extend({
+
+        elementId:          'optionsLabel',
+
+        classNames:         'optionsLabel',
+
+        content:            'Options'
     }),
 
     /** 

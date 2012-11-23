@@ -2754,7 +2754,7 @@
 #media_app_perform_interaction_view{
 	width: 800px;
 	height: 480px;
-	z-index: 502;
+	z-index: 1000;
 	background: url(../images/media/bg.png) no-repeat;
 }
 
@@ -2773,6 +2773,15 @@
 	border-radius: 2px;
 	left: 100px;
 	top: 154px;
+}
+
+#media_app_perform_interaction_view .initialText{
+	top: 80px;
+	left: 75px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
 }
 
 #media_app_perform_interaction_view .list-content{
@@ -2801,6 +2810,15 @@
 	border-radius: 2px;
 	left: 100px;
 	top: 154px;
+}
+
+#media_app_options_view .optionsLabel{
+	top: 80px;
+	left: 75px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
 }
 
 #media_app_options_view .list-content{
@@ -3005,4 +3023,17 @@
 	height: 480px;
 	z-index: 503;
 	background: url(../images/media/bg.png) no-repeat;
+}
+
+#media_app_sub_menu_view .optionsSubMenuLabel{
+	top: 80px;
+	left: 75px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
+
+#applink_view_container .ffw-button span{
+	padding-left: 20px;
 }

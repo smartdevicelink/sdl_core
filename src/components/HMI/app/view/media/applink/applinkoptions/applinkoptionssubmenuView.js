@@ -19,7 +19,8 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
 
     childViews:         [
                             'backButton',
-                            'listOfSubmenuButtons'
+                            'listOfSubmenuButtons',
+                            'optionsSubMenuLabel'
                         ],
 
     backButton: MFT.Button.extend({
@@ -27,6 +28,15 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
         action:            'back',
         target:            'MFT.States',   
         icon:              'images/media/ico_back.png',   
+    }),
+
+    optionsSubMenuLabel:    MFT.Label.extend({
+
+        elementId:          'optionsSubMenuLabel',
+
+        classNames:         'optionsSubMenuLabel',
+
+        contentBinding:     'MFT.ApplinkMediaController.subMenuLabel'
     }),
 
     /** Applink Sub Mennu activate handler */
