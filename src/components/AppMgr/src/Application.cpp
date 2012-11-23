@@ -310,4 +310,111 @@ namespace NsAppManager
         return mSystemContext;
     }
 
+    /**
+     * \brief add a command to a menu
+     * \param commandId command id
+     * \param menuId menu id
+     */
+    void Application::addMenuCommand(const unsigned int &commandId, const unsigned int &menuId)
+    {
+        mMenus.addCommand(commandId, menuId);
+    }
+
+    /**
+     * \brief remove a command from a menu(s)
+     * \param commandId command id
+     */
+    void Application::removeMenuCommand(const unsigned int &commandId)
+    {
+        mMenus.removeCommand(commandId);
+    }
+
+    /**
+     * \brief find commands within a menu
+     * \param menuId menu id
+     * \param commands commands residing within the given menu
+     */
+    void Application::findMenuCommands(const unsigned int &menuId, MenuCommands &commands) const
+    {
+        mMenus.findCommandsAssignedToMenu(menuId, commands);
+    }
+
+    /**
+     * \brief get count of items
+     * \return items count
+     */
+    size_type Application::getMenusCount() const
+    {
+        mMenus.size();
+    }
+
+    /**
+     * \brief add a command to an application
+     * \param commandId command id
+     * \param type command type
+     */
+    void Application::addCommand(unsigned int commandId, CommandType type)
+    {
+        mCommands.addCommand(commandId, type);
+    }
+
+    /**
+     * \brief remove a command from application
+     * \param commandId command id
+     * \param type a type of a command
+     */
+    void Application::removeCommand(unsigned int commandId, CommandType type)
+    {
+        mCommands.removeCommand(commandId, type);
+    }
+
+    /**
+     * \brief get count of items
+     * \return items count
+     */
+    size_type Application::getCommandsCount() const
+    {
+        mCommands.size();
+    }
+
+    /**
+     * \brief retrieve types associated with command id in current application
+     * \param commandId command id to search for types
+     * \param types input container of command types to be filled with result
+     */
+    void Application::getTypes(unsigned int commandId, CommandTypes &types) const
+    {
+        mCommands.getTypes(commandId, types);
+    }
+
+    /**
+     * \brief get count of unresponsed requests associated with the given command id
+     * \param cmdId id of command we need to count unresponded requests for
+     * \return unresponded requests count
+     */
+    unsigned int Application::getUnrespondedRequestCount(const unsigned int &cmdId) const
+    {
+        return mCommands.getUnrespondedRequestCount(cmdId);
+    }
+
+    /**
+     * \brief increment count of unresponsed requests associated with the given command id
+     * \param cmdId id of command we need to increment unresponded request count for
+     * \return unresponded requests count after the operation
+     */
+    unsigned int Application::incrementUnrespondedRequestCount(const unsigned int &cmdId)
+    {
+        return mCommands.incrementUnrespondedRequestCount(cmdId);
+    }
+
+    /**
+     * \brief decrement count of unresponsed requests associated with the given command id
+     * \param cmdId id of command we need to decrement unresponded request count for
+     * \return unresponded requests count after the operation
+     */
+    unsigned int Application::decrementUnrespondedRequestCount(const unsigned int &cmdId)
+    {
+        return mCommands.decrementUnrespondedRequestCount(cmdId);
+    }
+
 }

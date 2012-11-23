@@ -12,6 +12,7 @@
 #include "JSONHandler/ALRPCObjects/HMILevel.h"
 #include "JSONHandler/ALRPCObjects/AudioStreamingState.h"
 #include "JSONHandler/ALRPCObjects/SystemContext.h"
+#include "AppMgr/MenuMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include <string>
 #include <vector>
@@ -30,21 +31,6 @@ namespace NsAppManager
      * \brief An application unique id - combination of connection id and session id
      */
     typedef std::tuple<int, unsigned char> ApplicationUniqueID;
-
-    /**
-     * \brief mapping of command id to specific command type
-     */
-    typedef std::tuple<unsigned int, CommandType> ApplicationCommand;
-
-    /**
-     * \brief Commands available to each menu
-     */
-    typedef std::vector<ApplicationCommand> ApplicationCommands;
-
-    /**
-     * \brief An application menu id - commands vector mapping (manu id as a key)
-     */
-    typedef std::map<unsigned int, ApplicationCommands> ApplicationMenus;
 
     /**
      * \brief class Application acts as a metaphor for every mobile application being registered on HMI
@@ -235,6 +221,80 @@ namespace NsAppManager
          */
         const NsAppLinkRPC::SystemContext& getSystemContext() const;
 
+        /**
+         * \brief add a command to a menu
+         * \param commandId command id
+         * \param menuId menu id
+         */
+        void addMenuCommand(const unsigned int &commandId, const unsigned int &menuId );
+
+        /**
+         * \brief remove a command from a menu(s)
+         * \param commandId command id
+         */
+        void removeMenuCommand(const unsigned int& commandId);
+
+        /**
+         * \brief find commands within a menu
+         * \param menuId menu id
+         * \param commands commands residing within the given menu
+         */
+        void findMenuCommands(const unsigned int &menuId, MenuCommands& commands) const;
+
+        /**
+         * \brief get count of items
+         * \return items count
+         */
+        size_type getMenusCount() const;
+
+        /**
+         * \brief add a command to an application
+         * \param commandId command id
+         * \param type command type
+         */
+        void addCommand( unsigned int commandId, CommandType type );
+
+        /**
+         * \brief remove a command from application
+         * \param commandId command id
+         * \param type a type of a command
+         */
+        void removeCommand(unsigned int commandId, CommandType type);
+
+        /**
+         * \brief get count of items
+         * \return items count
+         */
+        size_type getCommandsCount() const;
+
+        /**
+         * \brief retrieve types associated with command id in current application
+         * \param commandId command id to search for types
+         * \param types input container of command types to be filled with result
+         */
+        void getTypes(unsigned int commandId, CommandTypes& types ) const;
+
+        /**
+         * \brief get count of unresponsed requests associated with the given command id
+         * \param cmdId id of command we need to count unresponded requests for
+         * \return unresponded requests count
+         */
+        unsigned int getUnrespondedRequestCount(const unsigned int& cmdId) const;
+
+        /**
+         * \brief increment count of unresponsed requests associated with the given command id
+         * \param cmdId id of command we need to increment unresponded request count for
+         * \return unresponded requests count after the operation
+         */
+        unsigned int incrementUnrespondedRequestCount(const unsigned int& cmdId);
+
+        /**
+         * \brief decrement count of unresponsed requests associated with the given command id
+         * \param cmdId id of command we need to decrement unresponded request count for
+         * \return unresponded requests count after the operation
+         */
+        unsigned int decrementUnrespondedRequestCount(const unsigned int& cmdId);
+
     private:
 
         /**
@@ -257,7 +317,8 @@ namespace NsAppManager
         std::string mAppID;
         NsAppLinkRPC::Language mHMIDisplayLanguageDesired;
         NsAppLinkRPC::SystemContext mSystemContext;
-        ApplicationMenus mMenus;
+        MenuMapping mMenus;
+        CommandMapping   mCommands;
 
         static log4cplus::Logger mLogger;
     };
