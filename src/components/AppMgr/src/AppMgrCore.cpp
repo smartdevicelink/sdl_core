@@ -235,7 +235,31 @@ namespace NsAppManager
                     response->set_autoActivateID(*object->get_autoActivateID());
                 }
 
+                NsAppLinkRPC::OnHMIStatus* status = new NsAppLinkRPC::OnHMIStatus();
                 app->setAutoActivateID(*response->get_autoActivateID());
+                if(app->getAutoActivateID() == core->mLastAutoActivateId)
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " Application's auto-activate id match the one from the last active application - " << core->mLastAutoActivateId);
+                    if(!AppMgrRegistry::getInstance().getActiveItem())
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, " No currently active items found - activating an app!");
+                        AppMgrRegistry::getInstance().activateApp(app);
+                        status->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
+                    }
+                    else
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, " There is an active item, so we do nothing");
+                    }
+                }
+                else
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " Application's auto-activate id " << app->getAutoActivateID() << " doesn't match the one from the last active application - " << core->mLastAutoActivateId);
+                }
+
+                status->set_hmiLevel(app->getApplicationHMIStatusLevel());
+                status->set_audioStreamingState(app->getApplicationAudioStreamingState());
+                status->set_systemContext(app->getSystemContext());
+                MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
 
                 response->set_buttonCapabilities(core->mButtonCapabilities.get());
                 response->set_displayCapabilities(core->mDisplayCapabilities);
@@ -248,9 +272,6 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName() << " gets sent to a mobile side... ");
                 MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
 
-                NsAppLinkRPC::OnHMIStatus* status = new NsAppLinkRPC::OnHMIStatus();
-                status->set_hmiLevel(app->getApplicationHMIStatusLevel());
-                MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
                 NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
                 appRegistered->set_appName(app->getName());
                 appRegistered->set_isMediaApplication(app->getIsMediaApplication());
@@ -1324,8 +1345,6 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
-                NsAppLinkRPC::OnHMIStatus * hmiStatus = new NsAppLinkRPC::OnHMIStatus;
-                hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
 
                 core->mLastAutoActivateId = app->getAutoActivateID();
                 if(!core->serializeToFile(core->mAutoActivateIdFileName, core->mLastAutoActivateId))
@@ -1334,8 +1353,42 @@ namespace NsAppManager
                 }
 
                 AppMgrRegistry::getInstance().activateApp(app);
+
+                Commands currentCommands = core->mCommandMapping.findCommandsAssignedToRegistryItem(items[0]);
+                LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's commands from HMI due to a new application activation");
+                for(Commands::iterator it = currentCommands.begin(); it != currentCommands.end(); it++)
+                {
+                    const CommandKey& key = *it;
+                    const CommandType& type = std::get<1>(key);
+                    unsigned int cmdId = std::get<0>(key);
+                    NsRPC2Communication::RPC2Request* deleteCmd = 0;
+                    if(type == CommandType::UI)
+                    {
+                        deleteCmd = new NsRPC2Communication::UI::DeleteCommand();
+                    }
+                    else if(type == CommandType::VR)
+                    {
+                        deleteCmd = new NsRPC2Communication::VR::DeleteCommand();
+                    }
+                    else
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An unindentified command type - " << type.getType());
+                        continue;
+                    }
+                    deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    ((NsRPC2Communication::UI::DeleteCommand*)deleteCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
+                    unsigned char sessionID = app->getSessionID();
+                    unsigned int connectionID = app->getConnectionID();
+                    core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+
+                    HMIHandler::getInstance().sendRequest(deleteCmd);
+                }
+                LOG4CPLUS_INFO_EXT(mLogger, "Current app's commands removed!");
+
+                NsAppLinkRPC::OnHMIStatus * hmiStatus = new NsAppLinkRPC::OnHMIStatus;
+                hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
                 hmiStatus->set_audioStreamingState(app->getApplicationAudioStreamingState());
-                hmiStatus->set_systemContext(NsAppLinkRPC::SystemContext::SYSCTXT_MENU);
+                hmiStatus->set_systemContext(app->getSystemContext());
                 MobileHandler::getInstance().sendRPCMessage( hmiStatus, app->getConnectionID(), app->getSessionID() );
                 NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
                 response->setId(object->getId());
@@ -1446,6 +1499,7 @@ namespace NsAppManager
         application->setSyncMsgVersion(syncMsgVersion);
 
         application->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_NONE);
+        application->setSystemContext(NsAppLinkRPC::SystemContext::SYSCTXT_MAIN);
         LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
         return AppMgrRegistry::getInstance().registerApplication( application );
     }
