@@ -60,6 +60,16 @@ namespace NsAppManager
     }
 
     /**
+     * \brief operator ==
+     * \param item the item to compare with
+     * \return comparison result
+     */
+    bool RegistryItem::operator ==(const RegistryItem &item) const
+    {
+        return this->getApplication() == item.getApplication();
+    }
+
+    /**
      * \brief register application policy
      * \param hash policy text representation
      * \return app policy instance

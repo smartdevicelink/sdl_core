@@ -40,6 +40,13 @@ namespace NsAppManager
         virtual ~RegistryItem( );
 
         /**
+         * \brief operator ==
+         * \param item the item to compare with
+         * \return comparison result
+         */
+        bool operator==(const RegistryItem& item) const;
+
+        /**
          * \brief register application policy
          * \param hash policy text representation
          * \return app policy instance
