@@ -32,12 +32,12 @@ namespace NsAppManager
      * \brief add a command to a mapping
      * \param commandId command id
      * \param type command type
-     * \param menuParams menu params if applicable
+     * \param params VR or UI params supplied with the AddCommand request
      */
-    void CommandMapping::addCommand(unsigned int commandId, const CommandType& type, NsAppLinkRPC::MenuParams* menuParams)
+    void CommandMapping::addCommand(unsigned int commandId, const CommandType& type, CommandParams params)
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a command " << commandId << " type " << type.getType() );
-        mCommands.insert(Command(CommandBase( commandId, type ), menuParams ));
+        mCommands.insert(Command(CommandBase( commandId, type ), params ));
     }
 
     /**

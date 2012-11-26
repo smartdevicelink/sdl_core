@@ -140,14 +140,23 @@ namespace NsAppManager
     };
 
     /**
+     * \brief Acts as a wrapper of command UI or VR params
+     */
+    union CommandParams
+    {
+        const NsAppLinkRPC::MenuParams* menuParams;
+        const std::vector<std::string>* vrCommands;
+    };
+
+    /**
      * \brief mapping of command id to specific command type
      */
     typedef std::tuple<unsigned int, CommandType> CommandBase;
 
     /**
-     * \brief mapping of command base to menu params if applicable
+     * \brief mapping of command base to params
      */
-    typedef std::pair<CommandBase, NsAppLinkRPC::MenuParams*> Command;
+    typedef std::pair<CommandBase, CommandParams> Command;
 
     /**
      * \brief command types associated with command
@@ -157,7 +166,7 @@ namespace NsAppManager
     /**
      * \brief commands vector
      */
-    typedef std::map<CommandBase, NsAppLinkRPC::MenuParams*> Commands;
+    typedef std::map<CommandBase, CommandParams> Commands;
 
     /**
      * \brief command_id-to-request_number map (command id is a key);
@@ -190,9 +199,9 @@ namespace NsAppManager
          * \brief add a command to a mapping
          * \param commandId command id
          * \param type command type
-         * \param menuParams menu params if applicable
+         * \param params VR or UI params supplied with the AddCommand request
          */
-        void addCommand(unsigned int commandId, const CommandType &type , NsAppLinkRPC::MenuParams *menuParams=0);
+        void addCommand(unsigned int commandId, const CommandType &type , CommandParams params);
 
         /**
          * \brief remove a command from a mapping
