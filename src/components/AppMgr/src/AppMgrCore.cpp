@@ -626,9 +626,8 @@ namespace NsAppManager
                 core->mMessageMapping.addMessage(delSubMenu->getId(), connectionID, sessionID);
                 const unsigned int& menuId = object->get_menuID();
                 delSubMenu->set_menuId(menuId);
-                MenuCommands menuCommands;
-                app->findMenuCommands(menuId, menuCommands);
-                for(MenuCommands::iterator it = menuCommands.begin(); it != menuCommands.end(); it++)
+                const MenuCommands& menuCommands = app->findMenuCommands(menuId);
+                for(MenuCommands::const_iterator it = menuCommands.begin(); it != menuCommands.end(); it++)
                 {
                     app->removeCommand(*it, CommandType::UI);
                     app->removeMenuCommand(*it);
