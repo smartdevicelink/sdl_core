@@ -518,7 +518,10 @@ namespace NsAppManager
                         app->addMenuCommand(cmdId, menuId);
                     }
                     core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
-                    app->addCommand(cmdId, cmdType);
+
+                    CommandParams params;
+                    params.menuParams = menuParams;
+                    app->addCommand(cmdId, cmdType, params);
                     app->incrementUnrespondedRequestCount(cmdId);
                     core->mRequestMapping.addMessage(addCmd->getId(), cmdId);
                     HMIHandler::getInstance().sendRequest(addCmd);
@@ -533,7 +536,9 @@ namespace NsAppManager
                     addCmd->set_vrCommands(*object->get_vrCommands());
                     addCmd->set_cmdId(cmdId);
                     core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
-                    app->addCommand(cmdId, cmdType);
+                    CommandParams params;
+                    params.vrCommands = object->get_vrCommands();
+                    app->addCommand(cmdId, cmdType, params);
                     app->incrementUnrespondedRequestCount(cmdId);
                     core->mRequestMapping.addMessage(addCmd->getId(), cmdId);
                     HMIHandler::getInstance().sendRequest(addCmd);
@@ -1360,8 +1365,8 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application with the name " << appName << " found!");
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(items[0]);
 
+                Application* app = core->getApplicationFromItemCheckNotNull(items[0]);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -1374,38 +1379,86 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "Cannot serialize auto-activate id!");
                 }
 
+                Application* currentApp = AppMgrRegistry::getInstance().getActiveItem();
+                if(currentApp)
+                {
+                    const Commands& currentCommands = currentApp->getAllCommands();
+                    LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's commands from HMI due to a new application activation");
+                    for(Commands::const_iterator it = currentCommands.begin(); it != currentCommands.end(); it++)
+                    {
+                        const Command& key = *it;
+                        const CommandParams& params = key.second;
+                        const CommandBase& base = key.first;
+                        const CommandType& type = std::get<1>(base);
+                        unsigned int cmdId = std::get<0>(base);
+                        NsRPC2Communication::RPC2Request* deleteCmd = 0;
+                        if(type == CommandType::UI)
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "Removing UI command");
+                            deleteCmd = new NsRPC2Communication::UI::DeleteCommand();
+                        }
+                        else if(type == CommandType::VR)
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "Removing VR command");
+                            deleteCmd = new NsRPC2Communication::VR::DeleteCommand();
+                        }
+                        else
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, "An unindentified command type - " << type.getType());
+                            continue;
+                        }
+                        deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        ((NsRPC2Communication::UI::DeleteCommand*)deleteCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
+                        unsigned char sessionID = app->getSessionID();
+                        unsigned int connectionID = app->getConnectionID();
+                        core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+
+                        HMIHandler::getInstance().sendRequest(deleteCmd);
+                    }
+                    LOG4CPLUS_INFO_EXT(mLogger, "Current app's commands removed!");
+                }
+                else
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "No application is currently active");
+                }
+
                 AppMgrRegistry::getInstance().activateApp(app);
 
-                Commands currentCommands = app->getAllCommands();
-                LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's commands from HMI due to a new application activation");
-                for(Commands::iterator it = currentCommands.begin(); it != currentCommands.end(); it++)
+                const Commands& newCommands = app->getAllCommands();
+                for(Commands::const_iterator it = newCommands.begin(); it != newCommands.end(); it++)
                 {
                     const Command& key = *it;
-                    const CommandType& type = std::get<1>(key);
-                    unsigned int cmdId = std::get<0>(key);
-                    NsRPC2Communication::RPC2Request* deleteCmd = 0;
+                    const CommandParams& params = key.second;
+                    const NsAppLinkRPC::MenuParams* menuParams = params.menuParams;
+                    const CommandBase& base = key.first;
+                    const CommandType& type = std::get<1>(base);
+                    unsigned int cmdId = std::get<0>(base);
+
+                    NsRPC2Communication::RPC2Request* addCmd = 0;
                     if(type == CommandType::UI)
                     {
-                        deleteCmd = new NsRPC2Communication::UI::DeleteCommand();
+                        LOG4CPLUS_INFO_EXT(mLogger, "Adding UI command");
+                        addCmd = new NsRPC2Communication::UI::AddCommand();
                     }
                     else if(type == CommandType::VR)
                     {
-                        deleteCmd = new NsRPC2Communication::VR::DeleteCommand();
+                        LOG4CPLUS_INFO_EXT(mLogger, "Adding VR command");
+                        addCmd = new NsRPC2Communication::VR::AddCommand();
                     }
                     else
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An unindentified command type - " << type.getType());
                         continue;
                     }
-                    deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    ((NsRPC2Communication::UI::DeleteCommand*)deleteCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
+                    addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
+                    ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_menuParams(*menuParams);
                     unsigned char sessionID = app->getSessionID();
                     unsigned int connectionID = app->getConnectionID();
-                    core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
 
-                    HMIHandler::getInstance().sendRequest(deleteCmd);
+                    HMIHandler::getInstance().sendRequest(addCmd);
                 }
-                LOG4CPLUS_INFO_EXT(mLogger, "Current app's commands removed!");
 
                 NsAppLinkRPC::OnHMIStatus * hmiStatus = new NsAppLinkRPC::OnHMIStatus;
                 hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
