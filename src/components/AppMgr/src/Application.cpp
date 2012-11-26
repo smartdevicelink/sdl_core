@@ -340,6 +340,26 @@ namespace NsAppManager
     }
 
     /**
+     * \brief add a menu item to the application
+     * \param menuId menu id
+     * \param menuName menu item name
+     * \param position menu item position within the parent menu
+     */
+    void Application::addMenu(const unsigned int &menuId, const std::string &menuName, const unsigned int *position)
+    {
+        mMenus.addItem(menuId, menuName, position);
+    }
+
+    /**
+     * \brief remove a menu item from the application
+     * \param menuId menu id
+     */
+    void Application::removeMenu(const unsigned int &menuId)
+    {
+        mMenus.removeItem(menuId);
+    }
+
+    /**
      * \brief gets all application menus
      * \return application menus
      */

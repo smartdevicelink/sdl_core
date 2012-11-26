@@ -244,6 +244,20 @@ namespace NsAppManager
         MenuCommands findMenuCommands(const unsigned int &menuId) const;
 
         /**
+         * \brief add a menu item to the application
+         * \param menuId menu id
+         * \param menuName menu item name
+         * \param position menu item position within the parent menu
+         */
+        void addMenu(const unsigned int &menuId, const std::string& menuName, const unsigned int* position=0);
+
+        /**
+         * \brief remove a menu item from the application
+         * \param menuId menu id
+         */
+        void removeMenu(const unsigned int& menuId);
+
+        /**
          * \brief gets all application menus
          * \return application menus
          */
