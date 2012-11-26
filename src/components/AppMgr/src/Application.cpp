@@ -332,11 +332,11 @@ namespace NsAppManager
     /**
      * \brief find commands within a menu
      * \param menuId menu id
-     * \param commands commands residing within the given menu
+     * \return commands residing within the given menu
      */
-    void Application::findMenuCommands(const unsigned int &menuId, MenuCommands &commands) const
+    MenuCommands Application::findMenuCommands(const unsigned int &menuId) const
     {
-        mMenus.findCommandsAssignedToMenu(menuId, commands);
+        return mMenus.findCommandsAssignedToMenu(menuId);
     }
 
     /**

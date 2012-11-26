@@ -238,9 +238,9 @@ namespace NsAppManager
         /**
          * \brief find commands within a menu
          * \param menuId menu id
-         * \param commands commands residing within the given menu
+         * \return commands residing within the given menu
          */
-        void findMenuCommands(const unsigned int &menuId, MenuCommands& commands) const;
+        MenuCommands findMenuCommands(const unsigned int &menuId) const;
 
         /**
          * \brief get count of items
