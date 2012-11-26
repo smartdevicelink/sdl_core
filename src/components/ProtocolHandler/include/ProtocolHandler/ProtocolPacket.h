@@ -17,6 +17,7 @@ const unsigned char FRAME_TYPE_FIRST = 0x02;
 const unsigned char FRAME_TYPE_CONSECUTIVE = 0x03;
 
 const unsigned char SERVICE_TYPE_RPC = 0x07;
+const unsigned char SERVICE_TYPE_BULK = 0x0F;
 
 /**
  * If FRAME_TYPE_CONTROL :
@@ -26,7 +27,7 @@ const unsigned char FRAME_DATA_START_SESSION = 0x01;
 const unsigned char FRAME_DATA_START_SESSION_ACK = 0x02;
 const unsigned char FRAME_DATA_START_SESSION_NACK = 0x03;
 const unsigned char FRAME_DATA_END_SESSION = 0x04;
-const unsigned char FRAME_DATA_END_SESSION_NACK = 0x05;
+const unsigned char FRAME_DATA_END_SESSION_NACK = 0x05; //Assumption
 
 const unsigned char FRAME_DATA_MAX_VALUE = 0xFF;
 
@@ -39,10 +40,38 @@ const unsigned char FRAME_DATA_LAST_FRAME = 0x00;
 
 const unsigned char FIRST_FRAME_DATA_SIZE = 0x08;
 
+    struct ProtocolHeader
+    {
+        ProtocolHeader() :
+            version('1');
+        unsigned char version;
+        bool compress;
+        unsigned char frameType;
+        unsigned char serviceType;
+        unsigned char frameData;
+        unsigned char sessionID;
+        unsigned int dataSize;
+        /**
+          * MessageID is used only in protocol version 2
+          */
+        unsigned int messageId;
+    };
+
+    struct ProtocolData
+    {
+        unsigned char * data;
+        unsigned int totalDataBytes;
+        unsigned int dataOffset;
+    };
+
     class ProtocolPacket
     {
     public:
-        ProtocolPacket(unsigned char version,
+        ProtocolPacket();
+        ~ProtocolPacket();
+
+        /*Serialization*/
+        RESULT_CODE serializePacket(unsigned char version,
                              bool compress,
                              unsigned char frameType,
                              unsigned char serviceType,
@@ -51,33 +80,36 @@ const unsigned char FIRST_FRAME_DATA_SIZE = 0x08;
                              unsigned int dataSize,
                              unsigned int messageID,
                              const unsigned char * data = 0);
-        ProtocolPacket();
-        ~ProtocolPacket();
-
+        void setData( const unsigned char * data,
+                        unsigned int dataSize );
+        RESULT_CODE appendData( unsigned char * chunkData, 
+                            unsigned int chunkDataSize );
         unsigned char * getPacket() const;
         unsigned int getPacketSize() const;
+        /*End of Serialization*/
 
-        void appendData( unsigned char * chunkData, unsigned int chunkDataSize );
-    
-        unsigned char version;
-        bool compress;
-        unsigned char frameType;
-        unsigned char serviceType;
-        unsigned char frameData;
-        unsigned char sessionID;
-        unsigned int dataSize;
-        unsigned char * data;
-        /**
-          * MessageID is used only in protocol version 2
-          */
-        unsigned int messageID;
-        unsigned int totalDataBytes;
+        /*Deserialization*/
+        RESULT_CODE deserializePacket();
+        void pushConsecutiveFrame();
+        unsigned char getVersion() const;
+        bool getIfCompress() const;
+        unsigned char getFrameType() const;
+        unsigned char getServiceType() const;
+        unsigned char getFrameData() const;
+        unsigned char getSessionId() const;
+        unsigned int getDataSize() const;
+        unsigned int getMessageId() const;
+        /*End of Deserialization*/         
 
     private:
-        mutable unsigned char * mHeader;
-        unsigned int mSize;
-        unsigned int mDataOffset; 
-        //TODO check multiframe message order?       
+        unsigned char * mPacket;
+        unsigned int mTotalPacketSize;
+
+        unsigned char * mHeader;
+        unsigned int mHeaderSize;
+         
+        ProtocolHeader mPacketHeader;
+        ProtocolData mPacketData;
     };
 }
 

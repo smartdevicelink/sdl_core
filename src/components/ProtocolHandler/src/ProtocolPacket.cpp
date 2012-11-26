@@ -2,6 +2,8 @@
 
 using namespace NsProtocolHandler;
 
+
+
 ProtocolPacket::ProtocolPacket() :
 mHeader( 0 )
 ,mSize( 0 )
