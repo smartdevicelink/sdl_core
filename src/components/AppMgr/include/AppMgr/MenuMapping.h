@@ -85,9 +85,9 @@ namespace NsAppManager
         /**
          * \brief find commands within a menu
          * \param menuId menu id
-         * \param commands commands residing within the given menu
+         * \return commands residing within the given menu
          */
-        void findCommandsAssignedToMenu(const unsigned int &menuId, MenuCommands& commands) const;
+        MenuCommands findCommandsAssignedToMenu(const unsigned int &menuId) const;
 
         /**
          * \brief cleans menu mapping
