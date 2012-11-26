@@ -14,6 +14,7 @@
 #include "JSONHandler/ALRPCObjects/SystemContext.h"
 #include "AppMgr/MenuMapping.h"
 #include "AppMgr/CommandMapping.h"
+#include "AppMgr/AppMenus.h"
 #include <string>
 #include <vector>
 #include <tuple>
@@ -243,10 +244,22 @@ namespace NsAppManager
         MenuCommands findMenuCommands(const unsigned int &menuId) const;
 
         /**
+         * \brief gets all application menus
+         * \return application menus
+         */
+        MenuItems getAllMenus() const;
+
+        /**
          * \brief get count of items
          * \return items count
          */
         size_t getMenusCount() const;
+
+        /**
+         * \brief get count of items
+         * \return items count
+         */
+        size_t getMenuCommandsCount() const;
 
         /**
          * \brief add a command to an application
@@ -332,8 +345,9 @@ namespace NsAppManager
         std::string mAppID;
         NsAppLinkRPC::Language mHMIDisplayLanguageDesired;
         NsAppLinkRPC::SystemContext mSystemContext;
-        MenuMapping mMenus;
-        CommandMapping   mCommands;
+        MenuMapping mMenuMapping;
+        CommandMapping   mCommandMapping;
+        AppMenus mMenus;
 
         static log4cplus::Logger mLogger;
     };

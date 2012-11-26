@@ -317,7 +317,7 @@ namespace NsAppManager
      */
     void Application::addMenuCommand(const unsigned int &commandId, const unsigned int &menuId)
     {
-        mMenus.addCommand(commandId, menuId);
+        mMenuMapping.addCommand(commandId, menuId);
     }
 
     /**
@@ -326,7 +326,7 @@ namespace NsAppManager
      */
     void Application::removeMenuCommand(const unsigned int &commandId)
     {
-        mMenus.removeCommand(commandId);
+        mMenuMapping.removeCommand(commandId);
     }
 
     /**
@@ -336,7 +336,16 @@ namespace NsAppManager
      */
     MenuCommands Application::findMenuCommands(const unsigned int &menuId) const
     {
-        return mMenus.findCommandsAssignedToMenu(menuId);
+        return mMenuMapping.findCommandsAssignedToMenu(menuId);
+    }
+
+    /**
+     * \brief gets all application menus
+     * \return application menus
+     */
+    MenuItems Application::getAllMenus() const
+    {
+        return mMenus.getAllMenuItems();
     }
 
     /**
@@ -349,6 +358,15 @@ namespace NsAppManager
     }
 
     /**
+     * \brief get count of items
+     * \return items count
+     */
+    size_t Application::getMenuCommandsCount() const
+    {
+        return mMenuMapping.size();
+    }
+
+    /**
      * \brief add a command to an application
      * \param commandId command id
      * \param type command type
@@ -356,7 +374,7 @@ namespace NsAppManager
      */
     void Application::addCommand(unsigned int commandId, CommandType type, CommandParams params)
     {
-        mCommands.addCommand(commandId, type, params);
+        mCommandMapping.addCommand(commandId, type, params);
     }
 
     /**
@@ -366,7 +384,7 @@ namespace NsAppManager
      */
     void Application::removeCommand(unsigned int commandId, CommandType type)
     {
-        mCommands.removeCommand(commandId, type);
+        mCommandMapping.removeCommand(commandId, type);
     }
 
     /**
@@ -376,7 +394,7 @@ namespace NsAppManager
      */
     Commands Application::findCommands(unsigned int commandId) const
     {
-        return mCommands.findCommands(commandId);
+        return mCommandMapping.findCommands(commandId);
     }
 
     /**
@@ -385,7 +403,7 @@ namespace NsAppManager
      */
     Commands Application::getAllCommands() const
     {
-        return mCommands.getAllCommands();
+        return mCommandMapping.getAllCommands();
     }
 
     /**
@@ -394,7 +412,7 @@ namespace NsAppManager
      */
     size_t Application::getCommandsCount() const
     {
-        return mCommands.size();
+        return mCommandMapping.size();
     }
 
     /**
@@ -404,7 +422,7 @@ namespace NsAppManager
      */
     void Application::getTypes(unsigned int commandId, CommandTypes &types) const
     {
-        mCommands.getTypes(commandId, types);
+        mCommandMapping.getTypes(commandId, types);
     }
 
     /**
@@ -414,7 +432,7 @@ namespace NsAppManager
      */
     unsigned int Application::getUnrespondedRequestCount(const unsigned int &cmdId) const
     {
-        return mCommands.getUnrespondedRequestCount(cmdId);
+        return mCommandMapping.getUnrespondedRequestCount(cmdId);
     }
 
     /**
@@ -424,7 +442,7 @@ namespace NsAppManager
      */
     unsigned int Application::incrementUnrespondedRequestCount(const unsigned int &cmdId)
     {
-        return mCommands.incrementUnrespondedRequestCount(cmdId);
+        return mCommandMapping.incrementUnrespondedRequestCount(cmdId);
     }
 
     /**
@@ -434,7 +452,7 @@ namespace NsAppManager
      */
     unsigned int Application::decrementUnrespondedRequestCount(const unsigned int &cmdId)
     {
-        return mCommands.decrementUnrespondedRequestCount(cmdId);
+        return mCommandMapping.decrementUnrespondedRequestCount(cmdId);
     }
 
 }
