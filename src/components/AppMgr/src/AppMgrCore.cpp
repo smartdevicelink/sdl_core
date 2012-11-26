@@ -1416,6 +1416,22 @@ namespace NsAppManager
                         HMIHandler::getInstance().sendRequest(deleteCmd);
                     }
                     LOG4CPLUS_INFO_EXT(mLogger, "Current app's commands removed!");
+
+                    const MenuItems& currentMenus = currentApp->getAllMenus();
+                    LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's menus from HMI due to a new application activation");
+                    for(MenuItems::const_iterator it = currentMenus.begin(); it != currentMenus.end(); it++)
+                    {
+                        const unsigned int& menuId = it->first;
+                        NsRPC2Communication::UI::DeleteSubMenu* deleteCmd = new NsRPC2Communication::UI::DeleteSubMenu();
+                        deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        deleteCmd->set_menuId(menuId);
+                        unsigned char sessionID = app->getSessionID();
+                        unsigned int connectionID = app->getConnectionID();
+                        core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+
+                        HMIHandler::getInstance().sendRequest(deleteCmd);
+                    }
+                    LOG4CPLUS_INFO_EXT(mLogger, "Current app's menus removed!");
                 }
                 else
                 {
