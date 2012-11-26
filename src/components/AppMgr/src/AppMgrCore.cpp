@@ -599,6 +599,17 @@ namespace NsAppManager
             case NsAppLinkRPC::Marshaller::METHOD_ADDSUBMENU_REQUEST:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
+                Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                    NsAppLinkRPC::AddSubMenu_response* response = new NsAppLinkRPC::AddSubMenu_response();
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
+                }
+
                 NsAppLinkRPC::AddSubMenu_request* object = (NsAppLinkRPC::AddSubMenu_request*)mobileMsg;
                 NsRPC2Communication::UI::AddSubMenu* addSubMenu = new NsRPC2Communication::UI::AddSubMenu();
                 addSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
@@ -609,6 +620,7 @@ namespace NsAppManager
                 {
                     addSubMenu->set_position(*object->get_position());
                 }
+                app->addMenu(object->get_menuID(), object->get_menuName(), object->get_position());
                 HMIHandler::getInstance().sendRequest(addSubMenu);
                 break;
             }
@@ -637,6 +649,7 @@ namespace NsAppManager
                     app->removeCommand(*it, CommandType::UI);
                     app->removeMenuCommand(*it);
                 }
+                app->removeMenu(menuId);
                 HMIHandler::getInstance().sendRequest(delSubMenu);
                 break;
             }
