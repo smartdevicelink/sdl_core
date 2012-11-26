@@ -252,8 +252,9 @@ namespace NsAppManager
          * \brief add a command to an application
          * \param commandId command id
          * \param type command type
+         * \param params VR or UI params supplied with the AddCommand request
          */
-        void addCommand( unsigned int commandId, CommandType type );
+        void addCommand(unsigned int commandId, CommandType type , CommandParams params);
 
         /**
          * \brief remove a command from application

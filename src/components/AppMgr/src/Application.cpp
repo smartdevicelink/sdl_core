@@ -352,10 +352,11 @@ namespace NsAppManager
      * \brief add a command to an application
      * \param commandId command id
      * \param type command type
+     * \param params VR or UI params supplied with the AddCommand request
      */
-    void Application::addCommand(unsigned int commandId, CommandType type)
+    void Application::addCommand(unsigned int commandId, CommandType type, CommandParams params)
     {
-        mCommands.addCommand(commandId, type);
+        mCommands.addCommand(commandId, type, params);
     }
 
     /**
