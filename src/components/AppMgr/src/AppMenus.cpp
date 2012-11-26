@@ -43,6 +43,15 @@ namespace NsAppManager
     }
 
     /**
+     * \brief gets all menu items
+     * \return menu items
+     */
+    MenuItems AppMenus::getAllMenuItems() const
+    {
+        return mMenuItems;
+    }
+
+    /**
      * \brief get count of commands
      * \return commands count
      */

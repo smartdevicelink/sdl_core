@@ -58,6 +58,12 @@ namespace NsAppManager
         void removeItem(const unsigned int& menuId);
 
         /**
+         * \brief gets all menu items
+         * \return menu items
+         */
+        MenuItems getAllMenuItems() const;
+
+        /**
          * \brief get count of commands
          * \return commands count
          */
