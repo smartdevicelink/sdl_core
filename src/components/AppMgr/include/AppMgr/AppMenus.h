@@ -49,7 +49,7 @@ namespace NsAppManager
          * \param menuName menu item name
          * \param position menu item position within the parent menu
          */
-        void addItem(const unsigned int& menuId, const std::string& menuName, const unsigned int* position=0);
+        void addItem(const unsigned int& menuId, const std::string& menuName, const unsigned int* position);
 
         /**
          * \brief remove a menu item from a mapping
