@@ -33,15 +33,10 @@ namespace NsAppManager
      * \param commandId command id
      * \param type command type
      */
-    void CommandMapping::addCommand(unsigned int commandId, CommandType type)
+    void CommandMapping::addCommand(unsigned int commandId, const CommandType& type)
     {
-        if(!app)
-        {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Adding a command to a null registry item");
-            return;
-        }
-        LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a command " << commandId << " type " << type.getType() << " in app " << app->getApplication()->getName() );
-        mCommands.insert(Commands(commandId, type));
+        LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a command " << commandId << " type " << type.getType() );
+        mCommands.insert(Command(commandId, type));
     }
 
     /**
@@ -49,9 +44,48 @@ namespace NsAppManager
      * \param commandId command id
      * \param type a type of a command
      */
-    void CommandMapping::removeCommand(unsigned int commandId, CommandType type)
+    void CommandMapping::removeCommand(unsigned int commandId, const CommandType& type)
     {
         mCommands.erase(Command(commandId, type));
+    }
+
+    /**
+     * \brief finds commands in mapping
+     * \param commandId command id
+     * \return true if found, false if not
+     */
+    bool CommandMapping::findCommand(unsigned int commandId, const CommandType& type) const
+    {
+        return ( mCommands.find(Command(commandId, type)) != mCommands.end() );
+    }
+
+    /**
+     * \brief finds commands in mapping
+     * \param commandId command id
+     * \return commands list
+     */
+    Commands CommandMapping::findCommands(unsigned int commandId) const
+    {
+        Commands cmds;
+        for(Commands::const_iterator it = mCommands.begin(); it != mCommands.end(); it++)
+        {
+            const Command& cmd = *it;
+            const unsigned int& cmdId = std::get<0>(cmd);
+            if(cmdId == commandId)
+            {
+                cmds.insert(cmd);
+            }
+        }
+        return cmds;
+    }
+
+    /**
+     * \brief gets all commands
+     * \return commands
+     */
+    Commands CommandMapping::getAllCommands() const
+    {
+        return mCommands;
     }
 
     /**
@@ -76,43 +110,9 @@ namespace NsAppManager
      * \brief get count of commands
      * \return commands count
      */
-    size_type CommandMapping::size() const
+    size_t CommandMapping::size() const
     {
-        mCommands.size();
-    }
-
-    /**
-     * \brief find commands the application is subscribed to
-     * \param item a registry item in question
-     * \return CommandKey vector
-     */
-    Commands CommandMapping::findCommandsAssignedToApplication(const Application *item) const
-    {
-        Commands commands;
-        if(!item)
-        {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Cannot search using null param!");
-        }
-        else
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, "Searching for commands assigned to application " << item->getName() << " connection id " << item->getConnectionID() << " session id " << (uint)item->getSessionID());
-            for(CommandMap::const_iterator it = mCommandMapping.begin(); it != mCommandMapping.end(); it++)
-            {
-                const RegistryItem* found = it->second;
-                if( !found )
-                {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "null-registr item found in the mapping!");
-                    continue;
-                }
-                if( item == found->getApplication() )
-                {
-                    const CommandKey& key = it->first;
-                    commands.push_back(key);
-                    LOG4CPLUS_INFO_EXT(mLogger, "Found a command " << std::get<0>(key) << " of a type " << std::get<1>(key).getType() );
-                }
-            }
-        }
-        return commands;
+       return  mCommands.size();
     }
 
     /**

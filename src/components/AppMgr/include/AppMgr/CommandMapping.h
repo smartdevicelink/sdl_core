@@ -11,6 +11,7 @@
 #include <tuple>
 #include <vector>
 #include <set>
+#include <cstddef>
 
 namespace log4cplus
 {
@@ -184,14 +185,34 @@ namespace NsAppManager
          * \param commandId command id
          * \param type command type
          */
-        void addCommand( unsigned int commandId, CommandType type );
+        void addCommand(unsigned int commandId, const CommandType &type );
 
         /**
          * \brief remove a command from a mapping
          * \param commandId command id
          * \param type a type of a command
          */
-        void removeCommand(unsigned int commandId, CommandType type);
+        void removeCommand(unsigned int commandId, const CommandType &type);
+
+        /**
+         * \brief finds commands in mapping
+         * \param commandId command id
+         * \return true if found, false if not
+         */
+        bool findCommand(unsigned int commandId, const CommandType &type) const;
+
+        /**
+         * \brief finds commands in mapping
+         * \param commandId command id
+         * \return commands list
+         */
+        Commands findCommands(unsigned int commandId) const;
+
+        /**
+         * \brief gets all commands
+         * \return commands
+         */
+        Commands getAllCommands() const;
 
         /**
          * \brief retrieve types associated with command id in current mapping
@@ -204,7 +225,7 @@ namespace NsAppManager
          * \brief get count of commands
          * \return commands count
          */
-        size_type size() const;
+        size_t size() const;
 
         /**
          * \brief get count of unresponsed requests associated with the given command id
