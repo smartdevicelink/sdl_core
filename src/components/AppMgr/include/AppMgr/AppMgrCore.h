@@ -10,9 +10,7 @@
 #include <string>
 #include "AppMgr/Application.h"
 #include "AppMgr/ButtonMapping.h"
-#include "AppMgr/CommandMapping.h"
 #include "AppMgr/MessageMapping.h"
-#include "AppMgr/MenuMapping.h"
 #include "AppMgr/RequestMapping.h"
 #include "AppMgr/CapabilitesContainer.h"
 #include "AppMgr/AutoActivateIdMapping.h"
@@ -180,9 +178,7 @@ namespace NsAppManager
         CapabilitiesContainer<NsAppLinkRPC::VrCapabilities> mVrCapabilities;
         CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities> mSpeechCapabilities;
         ButtonMapping    mButtonsMapping;
-        CommandMapping   mCommandMapping;
         MessageMapping   mMessageMapping;
-        MenuMapping      mMenuMapping;
         RequestMapping   mRequestMapping;
 
         AutoActivateIdMapping  mAutoActivateIds;

@@ -28,6 +28,7 @@
 #include "LoggerHelper.hpp"
 #include <iostream>
 #include <fstream>
+#include <cstddef>
 
 namespace NsAppManager
 {
@@ -290,7 +291,7 @@ namespace NsAppManager
                 NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
                 if(!app)
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, " No application has been associated with this registry item!");
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
                     MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
@@ -330,7 +331,7 @@ namespace NsAppManager
                 RegistryItem* item = AppMgrRegistry::getInstance().getItem(connectionID, sessionID);
                 if(!item)
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, " Session " << sessionID << " hasn't been associated with application!");
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
                     MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
@@ -488,10 +489,10 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
 
-                RegistryItem* item = AppMgrRegistry::getInstance().getItem(connectionID, sessionID);
-                if(!item)
+                Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                if(!app)
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, " Session " << sessionID << " hasn't been associated with application!");
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
                     NsAppLinkRPC::AddCommand_response* response = new NsAppLinkRPC::AddCommand_response();
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
@@ -501,6 +502,7 @@ namespace NsAppManager
                 NsAppLinkRPC::AddCommand_request* object = (NsAppLinkRPC::AddCommand_request*)mobileMsg;
 
                 const unsigned int& cmdId = object->get_cmdID();
+
                 if(object->get_menuParams())
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand UI request has been invoked");
@@ -513,11 +515,11 @@ namespace NsAppManager
                     if(menuParams->get_parentID())
                     {
                         const unsigned int& menuId = *menuParams->get_parentID();
-                        core->mMenuMapping.addCommand(cmdId, menuId);
+                        app->addMenuCommand(cmdId, menuId);
                     }
                     core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
-                    core->mCommandMapping.addCommand(cmdId, cmdType, item);
-                    core->mCommandMapping.incrementUnrespondedRequestCount(cmdId);
+                    app->addCommand(cmdId, cmdType);
+                    app->incrementUnrespondedRequestCount(cmdId);
                     core->mRequestMapping.addMessage(addCmd->getId(), cmdId);
                     HMIHandler::getInstance().sendRequest(addCmd);
 
@@ -531,8 +533,8 @@ namespace NsAppManager
                     addCmd->set_vrCommands(*object->get_vrCommands());
                     addCmd->set_cmdId(cmdId);
                     core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
-                    core->mCommandMapping.addCommand(cmdId, cmdType, item);
-                    core->mCommandMapping.incrementUnrespondedRequestCount(cmdId);
+                    app->addCommand(cmdId, cmdType);
+                    app->incrementUnrespondedRequestCount(cmdId);
                     core->mRequestMapping.addMessage(addCmd->getId(), cmdId);
                     HMIHandler::getInstance().sendRequest(addCmd);
                 }
@@ -542,10 +544,21 @@ namespace NsAppManager
             case NsAppLinkRPC::Marshaller::METHOD_DELETECOMMAND_REQUEST:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
+                Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                    NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response();
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
+                }
+
                 NsAppLinkRPC::DeleteCommand_request* object = (NsAppLinkRPC::DeleteCommand_request*)mobileMsg;
 
                 CommandTypes cmdTypes;
-                core->mCommandMapping.getTypes(object->get_cmdID(), cmdTypes);
+                app->getTypes(object->get_cmdID(), cmdTypes);
                 const unsigned int& cmdId = object->get_cmdID();
                 for(CommandTypes::iterator it = cmdTypes.begin(); it != cmdTypes.end(); it++)
                 {
@@ -557,9 +570,9 @@ namespace NsAppManager
                         deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                         core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
                         deleteCmd->set_cmdId(cmdId);
-                        core->mCommandMapping.removeCommand(cmdId, cmdType);
-                        core->mCommandMapping.incrementUnrespondedRequestCount(cmdId);
-                        core->mMenuMapping.removeCommand(cmdId);
+                        app->removeCommand(cmdId, cmdType);
+                        app->incrementUnrespondedRequestCount(cmdId);
+                        app->removeMenuCommand(cmdId);
                         core->mRequestMapping.addMessage(deleteCmd->getId(), cmdId);
                         HMIHandler::getInstance().sendRequest(deleteCmd);
                     }
@@ -570,8 +583,8 @@ namespace NsAppManager
                         deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                         core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
                         deleteCmd->set_cmdId(cmdId);
-                        core->mCommandMapping.removeCommand(cmdId, cmdType);
-                        core->mCommandMapping.incrementUnrespondedRequestCount(cmdId);
+                        app->removeCommand(cmdId, cmdType);
+                        app->incrementUnrespondedRequestCount(cmdId);
                         core->mRequestMapping.addMessage(deleteCmd->getId(), cmdId);
                         HMIHandler::getInstance().sendRequest(deleteCmd);
                     }
@@ -598,17 +611,27 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubmenu request has been invoked");
                 NsAppLinkRPC::DeleteSubMenu_request* object = (NsAppLinkRPC::DeleteSubMenu_request*)mobileMsg;
+                Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                    NsAppLinkRPC::DeleteSubMenu_response* response = new NsAppLinkRPC::DeleteSubMenu_response;
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
+                }
                 NsRPC2Communication::UI::DeleteSubMenu* delSubMenu = new NsRPC2Communication::UI::DeleteSubMenu();
                 delSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 core->mMessageMapping.addMessage(delSubMenu->getId(), connectionID, sessionID);
                 const unsigned int& menuId = object->get_menuID();
                 delSubMenu->set_menuId(menuId);
                 MenuCommands menuCommands;
-                core->mMenuMapping.findCommandsAssignedToMenu(menuId, menuCommands);
+                app->findMenuCommands(menuId, menuCommands);
                 for(MenuCommands::iterator it = menuCommands.begin(); it != menuCommands.end(); it++)
                 {
-                    core->mCommandMapping.removeCommand(*it, CommandType::UI);
-                    core->mMenuMapping.removeCommand(*it);
+                    app->removeCommand(*it, CommandType::UI);
+                    app->removeMenuCommand(*it);
                 }
                 HMIHandler::getInstance().sendRequest(delSubMenu);
                 break;
@@ -849,7 +872,7 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand UI notification has been invoked");
                 NsRPC2Communication::UI::OnCommand* object = (NsRPC2Communication::UI::OnCommand*)msg;
-                Application* app = core->getApplicationFromItemCheckNotNull(core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_commandId(), CommandType::UI));
+                Application* app = AppMgrRegistry::getInstance().getApplicationByCommand(object->get_commandId());
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -966,8 +989,8 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(object->getId());
-                core->mCommandMapping.decrementUnrespondedRequestCount(cmdId);
-                if(core->mCommandMapping.getUnrespondedRequestCount(cmdId) == 0)
+                app->decrementUnrespondedRequestCount(cmdId);
+                if(app->getUnrespondedRequestCount(cmdId) == 0)
                 {
                     NsAppLinkRPC::AddCommand_response* response = new NsAppLinkRPC::AddCommand_response();
                     response->set_success(true);
@@ -995,8 +1018,8 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(object->getId());
-                core->mCommandMapping.decrementUnrespondedRequestCount(cmdId);
-                if(core->mCommandMapping.getUnrespondedRequestCount(cmdId) == 0)
+                app->decrementUnrespondedRequestCount(cmdId);
+                if(app->getUnrespondedRequestCount(cmdId) == 0)
                 {
                     NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response();
                     response->set_success(true);
@@ -1203,8 +1226,8 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(object->getId());
-                core->mCommandMapping.decrementUnrespondedRequestCount(cmdId);
-                if(core->mCommandMapping.getUnrespondedRequestCount(cmdId) == 0)
+                app->decrementUnrespondedRequestCount(cmdId);
+                if(app->getUnrespondedRequestCount(cmdId) == 0)
                 {
                     NsAppLinkRPC::AddCommand_response* response = new NsAppLinkRPC::AddCommand_response();
                     response->set_success(true);
@@ -1231,8 +1254,8 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(object->getId());
-                core->mCommandMapping.decrementUnrespondedRequestCount(cmdId);
-                if(core->mCommandMapping.getUnrespondedRequestCount(cmdId) == 0)
+                app->decrementUnrespondedRequestCount(cmdId);
+                if(app->getUnrespondedRequestCount(cmdId) == 0)
                 {
                     NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response();
                     response->set_success(true);
@@ -1250,7 +1273,7 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand VR notification has been invoked");
                 NsRPC2Communication::VR::OnCommand* object = (NsRPC2Communication::VR::OnCommand*)msg;
-                Application* app = core->getApplicationFromItemCheckNotNull(core->mCommandMapping.findRegistryItemAssignedToCommand(object->get_cmdID(), CommandType::VR));
+                Application* app = AppMgrRegistry::getInstance().getApplicationByCommand(object->get_cmdID());
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -1354,11 +1377,11 @@ namespace NsAppManager
 
                 AppMgrRegistry::getInstance().activateApp(app);
 
-                Commands currentCommands = core->mCommandMapping.findCommandsAssignedToRegistryItem(items[0]);
+                Commands currentCommands = app->getAllCommands();
                 LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's commands from HMI due to a new application activation");
                 for(Commands::iterator it = currentCommands.begin(); it != currentCommands.end(); it++)
                 {
-                    const CommandKey& key = *it;
+                    const Command& key = *it;
                     const CommandType& type = std::get<1>(key);
                     unsigned int cmdId = std::get<0>(key);
                     NsRPC2Communication::RPC2Request* deleteCmd = 0;
@@ -1523,7 +1546,6 @@ namespace NsAppManager
         const std::string& appName = app->getName();
         LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName << " connection id " << connectionID << " session id " << (uint)sessionID << "!");
         mButtonsMapping.removeItem(item);
-        mCommandMapping.removeItem(item);
         mMessageMapping.removeItem(item);
         AppMgrRegistry::getInstance().unregisterApplication(item);
         LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName << " connection id " << connectionID << " session id " << (uint)sessionID << "!");
