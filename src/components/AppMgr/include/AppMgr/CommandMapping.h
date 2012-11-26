@@ -12,6 +12,7 @@
 #include <vector>
 #include <set>
 #include <cstddef>
+#include "JSONHandler/ALRPCObjects/MenuParams.h"
 
 namespace log4cplus
 {
@@ -141,7 +142,12 @@ namespace NsAppManager
     /**
      * \brief mapping of command id to specific command type
      */
-    typedef std::tuple<unsigned int, CommandType> Command;
+    typedef std::tuple<unsigned int, CommandType> CommandBase;
+
+    /**
+     * \brief mapping of command base to menu params if applicable
+     */
+    typedef std::pair<CommandBase, NsAppLinkRPC::MenuParams*> Command;
 
     /**
      * \brief command types associated with command
@@ -151,7 +157,7 @@ namespace NsAppManager
     /**
      * \brief commands vector
      */
-    typedef std::set<Command> Commands;
+    typedef std::map<CommandBase, NsAppLinkRPC::MenuParams*> Commands;
 
     /**
      * \brief command_id-to-request_number map (command id is a key);
@@ -164,7 +170,7 @@ namespace NsAppManager
     typedef std::pair<unsigned int, unsigned int> RequestAwaitingResponse;
 
     /**
-     * \brief CommandMapping acts as a mapping of command to registsred application that subscribed to them
+     * \brief CommandMapping acts as a mapping of command to const NsAppLinkRPC::MenuParams that are contained in some of them
      */
     class CommandMapping
     {
@@ -184,8 +190,9 @@ namespace NsAppManager
          * \brief add a command to a mapping
          * \param commandId command id
          * \param type command type
+         * \param menuParams menu params if applicable
          */
-        void addCommand(unsigned int commandId, const CommandType &type );
+        void addCommand(unsigned int commandId, const CommandType &type , NsAppLinkRPC::MenuParams *menuParams=0);
 
         /**
          * \brief remove a command from a mapping

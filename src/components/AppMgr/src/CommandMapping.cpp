@@ -32,11 +32,12 @@ namespace NsAppManager
      * \brief add a command to a mapping
      * \param commandId command id
      * \param type command type
+     * \param menuParams menu params if applicable
      */
-    void CommandMapping::addCommand(unsigned int commandId, const CommandType& type)
+    void CommandMapping::addCommand(unsigned int commandId, const CommandType& type, NsAppLinkRPC::MenuParams* menuParams)
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to a command " << commandId << " type " << type.getType() );
-        mCommands.insert(Command(commandId, type));
+        mCommands.insert(Command(CommandBase( commandId, type ), menuParams ));
     }
 
     /**
@@ -46,7 +47,7 @@ namespace NsAppManager
      */
     void CommandMapping::removeCommand(unsigned int commandId, const CommandType& type)
     {
-        mCommands.erase(Command(commandId, type));
+        mCommands.erase(CommandBase(commandId, type));
     }
 
     /**
@@ -56,7 +57,7 @@ namespace NsAppManager
      */
     bool CommandMapping::findCommand(unsigned int commandId, const CommandType& type) const
     {
-        return ( mCommands.find(Command(commandId, type)) != mCommands.end() );
+        return ( mCommands.find(CommandBase(commandId, type)) != mCommands.end() );
     }
 
     /**
@@ -70,7 +71,8 @@ namespace NsAppManager
         for(Commands::const_iterator it = mCommands.begin(); it != mCommands.end(); it++)
         {
             const Command& cmd = *it;
-            const unsigned int& cmdId = std::get<0>(cmd);
+            const CommandBase& base = cmd.first;
+            const unsigned int& cmdId = std::get<0>(base);
             if(cmdId == commandId)
             {
                 cmds.insert(cmd);
@@ -98,7 +100,7 @@ namespace NsAppManager
         types.clear();
         for(CommandType type = CommandType::FIRST; type != CommandType::LAST; type++)
         {
-            Commands::const_iterator it = mCommands.find( Command(commandId, type) );
+            Commands::const_iterator it = mCommands.find( CommandBase(commandId, type) );
             if ( it != mCommands.end() )
             {
                 types.push_back(type);
