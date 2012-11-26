@@ -9,6 +9,7 @@
 
 #include <map>
 #include <vector>
+#include <cstddef>
 
 namespace log4cplus
 {
@@ -66,7 +67,7 @@ namespace NsAppManager
          * \brief get count of items
          * \return items count
          */
-        size_type size() const;
+        size_t size() const;
 
         /**
          * \brief remove an application from a mapping

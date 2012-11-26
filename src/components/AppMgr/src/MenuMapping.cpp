@@ -52,7 +52,7 @@ namespace NsAppManager
      * \brief get count of items
      * \return items count
      */
-    size_type MenuMapping::size() const
+    size_t MenuMapping::size() const
     {
         return mMenuMapping.size();
     }
