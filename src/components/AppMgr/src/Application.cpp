@@ -343,9 +343,9 @@ namespace NsAppManager
      * \brief get count of items
      * \return items count
      */
-    size_type Application::getMenusCount() const
+    size_t Application::getMenusCount() const
     {
-        mMenus.size();
+        return mMenus.size();
     }
 
     /**
@@ -369,12 +369,31 @@ namespace NsAppManager
     }
 
     /**
+     * \brief finds commands in application
+     * \param commandId command id
+     * \return command list
+     */
+    Commands Application::findCommands(unsigned int commandId) const
+    {
+        return mCommands.findCommands(commandId);
+    }
+
+    /**
+     * \brief gets all application commands
+     * \return application commands
+     */
+    Commands Application::getAllCommands() const
+    {
+        return mCommands.getAllCommands();
+    }
+
+    /**
      * \brief get count of items
      * \return items count
      */
-    size_type Application::getCommandsCount() const
+    size_t Application::getCommandsCount() const
     {
-        mCommands.size();
+        return mCommands.size();
     }
 
     /**

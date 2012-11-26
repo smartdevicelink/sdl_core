@@ -18,6 +18,7 @@
 #include <vector>
 #include <tuple>
 #include <map>
+#include <cstddef>
 
 namespace log4cplus
 {
@@ -245,7 +246,7 @@ namespace NsAppManager
          * \brief get count of items
          * \return items count
          */
-        size_type getMenusCount() const;
+        size_t getMenusCount() const;
 
         /**
          * \brief add a command to an application
@@ -262,10 +263,23 @@ namespace NsAppManager
         void removeCommand(unsigned int commandId, CommandType type);
 
         /**
+         * \brief finds commands in application
+         * \param commandId command id
+         * \return command list
+         */
+        Commands findCommands(unsigned int commandId) const;
+
+        /**
+         * \brief gets all application commands
+         * \return application commands
+         */
+        Commands getAllCommands() const;
+
+        /**
          * \brief get count of items
          * \return items count
          */
-        size_type getCommandsCount() const;
+        size_t getCommandsCount() const;
 
         /**
          * \brief retrieve types associated with command id in current application
