@@ -1,7 +1,10 @@
 #include "AppMgr/AppMenus.h"
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
+    log4cplus::Logger AppMenus::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMenus"));
+
     /**
      * \brief Default class constructor
      */
@@ -25,6 +28,7 @@ namespace NsAppManager
      */
     void AppMenus::addItem(const unsigned int &menuId, const std::string &menuName, const unsigned int *position)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Adding a menu item " << menuId << " name " << menuName );
         mMenuItems.insert(MenuItem(menuId, MenuValue(menuName, position)));
     }
 
@@ -34,6 +38,7 @@ namespace NsAppManager
      */
     void AppMenus::removeItem(const unsigned int &menuId)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Deleting a menu item " << menuId );
         mMenuItems.erase(menuId);
     }
 

@@ -4,6 +4,11 @@
 #include <map>
 #include <string>
 
+namespace log4cplus
+{
+    class Logger;
+}
+
 namespace NsAppManager
 {
     /**
@@ -71,6 +76,7 @@ namespace NsAppManager
         AppMenus(const AppMenus&);
 
         MenuItems mMenuItems;
+        static log4cplus::Logger mLogger;
     };
 
 }
