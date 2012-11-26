@@ -64,13 +64,13 @@ div {
 	left: 500px;
 	width: 295px;
 	height: 100px;
-	background-color: rgba(165, 165, 165, 0.95);
+	background-color: black;
 	z-index: 1;
 	border-radius: 10PX;
-	box-shadow: 0px 0px 7px 5px rgba(165, 165, 165, 0.95);
+	border: #A6A6A6 solid 2px;
 	top: 8px;
 	-webkit-transition: opacity 1s ease-in-out;
-	pointer-events: none;
+	display: none;
 }
 
 #TTSPopUp .popUp{
@@ -87,10 +87,38 @@ div {
 	height: 81px;
 }
 
-#TTSPopUp.received{
+#TTSPopUp.active{
 	opacity: 1;
+	display: block;
+}
+/* Diver Distraction PopUp */
+#driverDistraction.driverDistraction{
+	opacity: 0;
+	left: 200px;
+	width: 400px;
+	height: 200px;
+	z-index: 2;
+	top: 140px;
+	-webkit-transition: opacity 1s ease-in-out;
+	background-color: black;
+	border: #A6A6A6 solid 2px;
+	border-radius: 6px;
+	display: none;
 }
 
+#driverDistraction.active{
+	opacity: 1;
+	display: block;
+}
+
+#driverDistraction .driverDistractionText{
+	top: 84px;
+	left: 10px;
+	width: 374px;
+	height: 20px;
+	text-align: center;
+	font-size: 28px;
+}
 /* UI popUp*/
 
 #AlertPopUp.AlertPopUp{
@@ -101,30 +129,39 @@ div {
 	z-index: 2;
 	top: 140px;
 	-webkit-transition: opacity 1s ease-in-out;
-	pointer-events: none;
 	background-color: black;
 	border: #A6A6A6 solid 2px;
 	border-radius: 6px;
+	display: none;
 }
 
-#AlertPopUp .message1{
-	top: 10px;
+#AlertPopUp .applicationName{
+	width: 380px;
 	left: 10px;
-	width: 374px;
-	height: 81px;
 	text-align: center;
 }
 
-#AlertPopUp .message2{
-	top: 40px;
+#AlertPopUp .message1{
+	top: 27px;
 	left: 10px;
 	width: 374px;
-	height: 81px;
+	height: 30px;
+	text-align: center;
+	font-size: 25px;
+	line-height: 30px;
+}
+
+#AlertPopUp .message2{
+	top: 70px;
+	left: 10px;
+	width: 374px;
+	height: 124px;
 	text-align: center;
 }
 
 #AlertPopUp.AlertActive{
 	opacity: 1;
+	display: block;
 }
 
 /* VR popUp*/
@@ -134,12 +171,12 @@ div {
 	left: 50px;
 	width: 700px;
 	height: 340px;
-	background-color: rgba(0, 0, 0, 0.95);
+	background-color: black;
 	z-index: 2;
 	border-radius: 10PX;
-	box-shadow: 0px 0px 7px 5px rgba(0, 0, 0, 0.95);
 	top: 70px;
 	-webkit-transition: opacity 1s ease-in-out;
+	display: none;
 }
 
 #VRPopUp .popUp{
@@ -163,9 +200,9 @@ div {
 	height: 81px;
 }
 
-#VRPopUp.received{
+#VRPopUp.active{
 	opacity: 1;
-	visibility: visible;
+	display: block;
 }
 
 

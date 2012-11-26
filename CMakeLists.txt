@@ -3,9 +3,12 @@ cmake_minimum_required(VERSION 2.8)
 set (PROJECT appLinkCore)
 project (${PROJECT})
 
+# Please do not change compiler/linker flags if You do not know how particular
+# flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-set(CMAKE_CXX_FLAGS "-O0 -g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized")
+set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized")
+set(CMAKE_CXX_FLAGS_RELEASE "-s") #It will be appended to CMAKE_CXX_FLAGS in release
 
 option( BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 

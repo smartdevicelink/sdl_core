@@ -10,7 +10,9 @@
 using namespace NsAppLink::NsTransportManager;
 
 
-
+//TODO Add shutdown flag checking inside function calls
+//TODO Fix potential crash due to not thread-safe access to shutdown flag
+//TODO Make function calls from transport manager client thread-safe
 
 NsAppLink::NsTransportManager::CTransportManager::CTransportManager(void):
 mDeviceAdapters(),
@@ -79,6 +81,7 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
         removeDeviceAdapter((*di));
+        delete (*di);
     }
 
     LOG4CPLUS_INFO_EXT(mLogger, "All device adapters removed");
@@ -226,6 +229,7 @@ void CTransportManager::onDeviceListUpdated(IDeviceAdapter * DeviceAdapter, cons
         if(devicesIterator == mDevicesByAdapter.end())
         {
             LOG4CPLUS_WARN_EXT(mLogger, "Invalid adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+            pthread_mutex_unlock(&mDevicesByAdapterMutex);
         }
         else
         {
@@ -251,6 +255,56 @@ void CTransportManager::onApplicationConnected(IDeviceAdapter * DeviceAdapter, c
     if(0 == DeviceAdapter)
     {
         TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "ApplicationConnected received from invalid device adapter");
+        return;
+    }
+
+    if(InvalidConnectionHandle == ConnectionHandle)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "ApplicationConnected received with invalid connection handle");
+        return;
+    }
+
+    if(InvalidDeviceHandle == ConnectedDevice.mDeviceHandle)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "ApplicationConnected received with invalid device handle: "<<ConnectedDevice.mDeviceHandle);
+        return;
+    }
+
+    if(DeviceAdapter->getDeviceType() != ConnectedDevice.mDeviceType)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "ApplicationConnected received but connected device type("<<ConnectedDevice.mDeviceType<<") differs from device adapters type: "<<DeviceAdapter->getDeviceType());
+        return;
+    }
+
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Before mDevicesByAdapterMutex mutex lock");
+    
+    pthread_mutex_lock(&mDevicesByAdapterMutex);
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Right after mDevicesByAdapterMutex mutex lock");
+    tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
+    if(devicesIterator == mDevicesByAdapter.end())
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+        pthread_mutex_unlock(&mDevicesByAdapterMutex);
+        return;
+    }
+
+    tInternalDeviceList *pDevices = devicesIterator->second;
+    bool connectionHandleFound = false;
+    for(tInternalDeviceList::const_iterator deviceIterator = pDevices->begin(); deviceIterator != pDevices->end(); ++deviceIterator)
+    {
+        if(deviceIterator->mDeviceHandle == ConnectedDevice.mDeviceHandle)
+        {
+            connectionHandleFound = true;
+        }
+    }
+
+    pthread_mutex_unlock(&mDevicesByAdapterMutex);
+
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "After mDevicesByAdapterMutex mutex unlock");
+
+    if(false == connectionHandleFound)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Connected device handle ("<<ConnectedDevice.mDeviceHandle<<") was not found in devices list for adapter of type: "<<DeviceAdapter->getDeviceType());
         return;
     }
 
@@ -280,6 +334,61 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
         return;
     }
 
+    if(InvalidConnectionHandle == ConnectionHandle)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "ApplicationDisconnected received with invalid connection handle");
+        return;
+    }
+
+    if(InvalidDeviceHandle == DisconnectedDevice.mDeviceHandle)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "ApplicationDisconnected received with invalid device handle: "<<DisconnectedDevice.mDeviceHandle);
+        return;
+    }
+
+    if(DeviceAdapter->getDeviceType() != DisconnectedDevice.mDeviceType)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "ApplicationDisconnected received but disconnected device type("<<DisconnectedDevice.mDeviceType<<") differs from device adapters type: "<<DeviceAdapter->getDeviceType());
+        return;
+    }
+
+    pthread_mutex_lock(&mDevicesByAdapterMutex);
+    tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
+    if(devicesIterator == mDevicesByAdapter.end())
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+        pthread_mutex_unlock(&mDevicesByAdapterMutex);
+        return;
+    }
+
+    tInternalDeviceList *pDevices = devicesIterator->second;
+    bool connectionHandleFound = false;
+    for(tInternalDeviceList::const_iterator deviceIterator = pDevices->begin(); deviceIterator != pDevices->end(); ++deviceIterator)
+    {
+        if(deviceIterator->mDeviceHandle == DisconnectedDevice.mDeviceHandle)
+        {
+            connectionHandleFound = true;
+        }
+    }
+
+    pthread_mutex_unlock(&mDevicesByAdapterMutex);
+
+    if(false == connectionHandleFound)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Disconnected device handle ("<<DisconnectedDevice.mDeviceHandle<<") was not found in devices list for adapter of type: "<<DeviceAdapter->getDeviceType());
+        return;
+    }
+
+    pthread_mutex_lock(&mDataListenersMutex);
+    bool bThreadExist = isThreadForConnectionHandleExist(ConnectionHandle);
+    pthread_mutex_unlock(&mDataListenersMutex);
+
+    if(false == bThreadExist)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Thread for connection does not exist");
+        return;
+    }
+
     stopDataCallbacksThread(ConnectionHandle);
 
     // Removing device adapter for that handle
@@ -306,13 +415,40 @@ void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnect
 
     if(0 == Data)
     {
-        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived with empty data");
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "onFrameReceived with empty data");
         return;
     }
 
     if(0 == DataSize)
     {
-        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived with DataSize=0");
+        TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "onFrameReceived with DataSize=0");
+        return;
+    }
+
+    if(InvalidConnectionHandle == ConnectionHandle)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived received with invalid connection handle");
+        return;
+    }
+
+    pthread_mutex_lock(&mDevicesByAdapterMutex);
+    tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
+    if(devicesIterator == mDevicesByAdapter.end())
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived. Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+        pthread_mutex_unlock(&mDevicesByAdapterMutex);
+        return;
+    }
+    pthread_mutex_unlock(&mDevicesByAdapterMutex);
+
+    pthread_mutex_lock(&mDataListenersMutex);
+    bool bThreadExist = isThreadForConnectionHandleExist(ConnectionHandle);
+    pthread_mutex_unlock(&mDataListenersMutex);
+
+    if(false == bThreadExist)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived. Thread for connection does not exist");
+        return;
     }
 
     //TODO: Currently all frames processed in one thread. In the future processing of them
@@ -347,6 +483,32 @@ void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tCo
     if(0 == DeviceAdapter)
     {
         TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted received from invalid device adapter");
+        return;
+    }
+
+    if(InvalidConnectionHandle == ConnectionHandle)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted received with invalid connection handle");
+        return;
+    }
+
+    pthread_mutex_lock(&mDevicesByAdapterMutex);
+    tDevicesByAdapterMap::iterator devicesIterator = mDevicesByAdapter.find(DeviceAdapter);
+    if(devicesIterator == mDevicesByAdapter.end())
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted. Invalid device adapter initialization. No devices vector available for adapter: "<<DeviceAdapter->getDeviceType());
+        pthread_mutex_unlock(&mDevicesByAdapterMutex);
+        return;
+    }
+    pthread_mutex_unlock(&mDevicesByAdapterMutex);
+
+    pthread_mutex_lock(&mDataListenersMutex);
+    bool bThreadExist = isThreadForConnectionHandleExist(ConnectionHandle);
+    pthread_mutex_unlock(&mDataListenersMutex);
+
+    if(false == bThreadExist)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted. Thread for connection does not exist");
         return;
     }
     
@@ -888,6 +1050,8 @@ void CTransportManager::connectDisconnectDevice(const tDeviceHandle DeviceHandle
 
     pthread_mutex_lock(&mDevicesByAdapterMutex);
 
+    IDeviceAdapter* pDeviceAdapterToCall = 0;
+
     for(deviceAdaptersIterator = mDevicesByAdapter.begin(); deviceAdaptersIterator != mDevicesByAdapter.end(); ++deviceAdaptersIterator)
     {
         IDeviceAdapter* pDeviceAdapter = deviceAdaptersIterator->first;
@@ -902,22 +1066,29 @@ void CTransportManager::connectDisconnectDevice(const tDeviceHandle DeviceHandle
             if(devicesInAdapterIterator->mDeviceHandle == DeviceHandle)
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "DeviceHandle relates to adapter: "<<pDeviceAdapter->getDeviceType());
-
-                if(Connect)
-                {
-                    pDeviceAdapter->connectDevice(DeviceHandle);
-                }
-                else
-                {
-                    pDeviceAdapter->disconnectDevice(DeviceHandle);
-                }
+                pDeviceAdapterToCall = pDeviceAdapter;
             }
         }
     }
 
-    LOG4CPLUS_INFO_EXT(mLogger, (Connect?"CONNECT":"DISCONNECT")<<" operation performed on device with handle: " << DeviceHandle);
-
     pthread_mutex_unlock(&mDevicesByAdapterMutex);
+
+    if(0 != pDeviceAdapterToCall)
+    {
+        if(Connect)
+        {
+            pDeviceAdapterToCall->connectDevice(DeviceHandle);
+        }
+        else
+        {
+            pDeviceAdapterToCall->disconnectDevice(DeviceHandle);
+        }
+        LOG4CPLUS_INFO_EXT(mLogger, (Connect?"CONNECT":"DISCONNECT")<<" operation performed on device with handle: " << DeviceHandle);
+    }
+    else
+    {
+        LOG4CPLUS_WARN_EXT(mLogger, (Connect?"CONNECT":"DISCONNECT")<<" operation was not performed. Device handle was not found on any device: " << DeviceHandle);
+    }
 }
 
 void CTransportManager::sendDataCallback(const CTransportManager::SDataListenerCallback& callback)

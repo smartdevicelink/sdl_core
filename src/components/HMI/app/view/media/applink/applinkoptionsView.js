@@ -20,8 +20,8 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
 	/** View Components*/
     childViews:         [
                             'backButton',
-                            //'buttonsWrapper'
-                            'listOfOptions'
+                            'listOfOptions',
+                            'optionsLabel'
                         ],
 
     /** Button to return to previous view*/
@@ -30,6 +30,15 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
         action:            'back',
         target:            'MFT.States',  
         icon:              'images/media/ico_back.png',   
+    }),
+
+    optionsLabel:    MFT.Label.extend({
+
+        elementId:          'optionsLabel',
+
+        classNames:         'optionsLabel',
+
+        content:            'Options'
     }),
 
     /** 
@@ -42,11 +51,11 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
                 type:       MFT.Button,
                 params:     {
                     action:                 'turnOnApplinkSubMenu',
-                    target:                 'MFT.MediaController',
+                    target:                 'MFT.ApplinkMediaController',
                     menuId:                 menuId,
                     text:                   menuName,
                     className:              'rs-item',
-                    templateName:           'text'
+                    templateName:           'arrow'
                 }                                   
             });
 
@@ -63,7 +72,7 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
                 type:       MFT.Button,
                 params:     {
                     action:                 'onCommand',
-                    target:                 'FFW.UI',
+                    target:                 'MFT.ApplinkMediaController',
                     commandId:              commandId,
                     text:                   params.menuName,
                     className:              'rs-item',

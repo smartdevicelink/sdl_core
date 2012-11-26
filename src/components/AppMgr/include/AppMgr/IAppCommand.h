@@ -1,3 +1,9 @@
+/**
+ * \file IAppCommand.h
+ * \brief IAppCommand interface
+ * \author vsalo
+ */
+
 #ifndef IAPPCOMMAND_H
 #define IAPPCOMMAND_H
 
@@ -10,51 +16,51 @@ namespace log4cplus
 
 namespace NsAppManager
 {
-	
-/**
- * \brief IAppCommand acts as interface for concrete commands
- */
-class IAppCommand
-{
-    friend class AppMgrCore;
-public:
 
     /**
-     * \brief Class constructor
-     * \param receiver a registry item associated with application that will execute command
-     * \param params command params
+     * \brief IAppCommand acts as interface for concrete commands
      */
-    IAppCommand(const RegistryItem* receiver, const void* params);
+    class IAppCommand
+    {
+        friend class AppMgrCore;
+    public:
 
-    /**
-     * \brief Default destructor
-     */
-	virtual ~IAppCommand();
+        /**
+         * \brief Class constructor
+         * \param receiver a registry item associated with application that will execute command
+         * \param params command params
+         */
+        IAppCommand(const RegistryItem* receiver, const void* params);
 
-    /**
-     * \brief virtual method to being called upon command execution, must be overriden
-     */
-	virtual void execute()=0;
-	
-protected:
+        /**
+         * \brief Default destructor
+         */
+        virtual ~IAppCommand();
 
-    /**
-     * \brief Class constructor
-     * \param receiver a registry item associated with application that will execute command
-     */
-    IAppCommand(const RegistryItem* receiver);
+        /**
+         * \brief virtual method to being called upon command execution, must be overriden
+         */
+        virtual void execute()=0;
 
-    const RegistryItem* mReceiver;
-    const void* mParams;
-    static log4cplus::Logger mLogger;
+    protected:
 
-private:
+        /**
+         * \brief Class constructor
+         * \param receiver a registry item associated with application that will execute command
+         */
+        IAppCommand(const RegistryItem* receiver);
 
-    /**
-     * \brief Copy constructor
-     */
-    IAppCommand(const IAppCommand&);
-};
+        const RegistryItem* mReceiver;
+        const void* mParams;
+        static log4cplus::Logger mLogger;
+
+    private:
+
+        /**
+         * \brief Copy constructor
+         */
+        IAppCommand(const IAppCommand&);
+    };
 
 }
 

@@ -1,3 +1,9 @@
+/**
+ * \file AppMgrCoreQueues.h
+ * \brief Application manager queues
+ * \author vsalo
+ */
+
 #ifndef APPMGRCOREQUEUES_H
 #define APPMGRCOREQUEUES_H
 
@@ -19,64 +25,64 @@ namespace NsRPC2Communication
 namespace NsAppManager
 {
 
-/**
- * \brief AppMgrCore queue acts as a container for various messages that need to be parsed/handled in different threads
- * \class QueueType type of queue elements
- */
-template< class QueueType >
-class AppMgrCoreQueue
-{
-public:
     /**
-     * \brief Callback function
-     * \param QueueType type of queue elements
-     * \param pThis pointer to an instance of the class the callback is being called of
+     * \brief AppMgrCore queue acts as a container for various messages that need to be parsed/handled in different threads
+     * \class QueueType type of queue elements
      */
-    typedef void (*HandlerCallback)( QueueType, void* );
+    template< class QueueType >
+    class AppMgrCoreQueue
+    {
+    public:
+        /**
+         * \brief Callback function
+         * \param QueueType type of queue elements
+         * \param pThis pointer to an instance of the class the callback is being called of
+         */
+        typedef void (*HandlerCallback)( QueueType, void* );
 
-    /**
-     * \brief Class constructor
-     * \param cbFn callback function for a handler thread
-     * \param pThis pointer to an instance of the class the cbFn is being called of
-     */
-    AppMgrCoreQueue(HandlerCallback cbFn, void *pThis);
+        /**
+         * \brief Class constructor
+         * \param cbFn callback function for a handler thread
+         * \param pThis pointer to an instance of the class the cbFn is being called of
+         */
+        AppMgrCoreQueue(HandlerCallback cbFn, void *pThis);
 
-    /**
-     * \brief Default destructor
-     */
-    virtual ~AppMgrCoreQueue();
+        /**
+         * \brief Default destructor
+         */
+        virtual ~AppMgrCoreQueue();
 
-    /**
-     * \brief execute inner threads
-     */
-    void executeThreads();
+        /**
+         * \brief execute inner threads
+         */
+        void executeThreads();
 
-    /**
-     * \brief push a message to a queue
-     * \param message a message being pushed
-     */
-    void pushMessage(QueueType message);
+        /**
+         * \brief push a message to a queue
+         * \param message a message being pushed
+         */
+        void pushMessage(QueueType message);
 
-private:
+    private:
 
-    /**
-     * \brief Default copy constructor
-     */
-    AppMgrCoreQueue( const AppMgrCoreQueue& );
+        /**
+         * \brief Default copy constructor
+         */
+        AppMgrCoreQueue( const AppMgrCoreQueue& );
 
-    /**
-     * \brief handle a queue
-     * \param pThis a pointer to an instance of the class the callback function is being called of
-     */
-    void* handleQueue(void* pThis);
+        /**
+         * \brief handle a queue
+         * \param pThis a pointer to an instance of the class the callback function is being called of
+         */
+        void* handleQueue(void* pThis);
 
-    std::queue< QueueType > mQueue;
-    System::Mutex mMtx;
-    System::BinarySemaphore mBinarySemaphore;
-    System::Thread* mThread;
-    HandlerCallback mCallbackFn;
-    static log4cplus::Logger mLogger;
-};
+        std::queue< QueueType > mQueue;
+        System::Mutex mMtx;
+        System::BinarySemaphore mBinarySemaphore;
+        System::Thread* mThread;
+        HandlerCallback mCallbackFn;
+        static log4cplus::Logger mLogger;
+    };
 
 }
 

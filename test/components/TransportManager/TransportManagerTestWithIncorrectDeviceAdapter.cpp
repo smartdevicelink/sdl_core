@@ -44,13 +44,13 @@ namespace test
                 class TestTransportManager: public NsAppLink::NsTransportManager::CTransportManager
                 {
                 public:
-                    TestTransportManager(MockDeviceAdapter & DeviceAdapter);
+                    TestTransportManager(MockDeviceAdapter * DeviceAdapter);
                     ~TestTransportManager(void);
                 protected:
                     virtual void initializeDeviceAdapters(void);
 
                 private:
-                    MockDeviceAdapter & mMockDeviceAdapter;
+                    MockDeviceAdapter * mMockDeviceAdapter;
                 };
             }
         }
@@ -62,7 +62,7 @@ NsAppLink::NsTransportManager::EDeviceType test::components::TransportManger::In
     return NsAppLink::NsTransportManager::DeviceBluetooth;
 }
 
-test::components::TransportManger::IncorrectDeviceAdapterTest::TestTransportManager::TestTransportManager(test::components::TransportManger::IncorrectDeviceAdapterTest::MockDeviceAdapter& DeviceAdapter):
+test::components::TransportManger::IncorrectDeviceAdapterTest::TestTransportManager::TestTransportManager(test::components::TransportManger::IncorrectDeviceAdapterTest::MockDeviceAdapter* DeviceAdapter):
 CTransportManager(),
 mMockDeviceAdapter(DeviceAdapter)
 {
@@ -74,17 +74,17 @@ test::components::TransportManger::IncorrectDeviceAdapterTest::TestTransportMana
 
 void test::components::TransportManger::IncorrectDeviceAdapterTest::TestTransportManager::initializeDeviceAdapters(void)
 {
-    addDeviceAdapter(&mMockDeviceAdapter);
+    addDeviceAdapter(mMockDeviceAdapter);
 }
 
 TEST(TransportManager, IncorrectDeviceAdapter)
 {
-    test::components::TransportManger::IncorrectDeviceAdapterTest::MockDeviceAdapter mockDeviceAdapter;
+    test::components::TransportManger::IncorrectDeviceAdapterTest::MockDeviceAdapter* mockDeviceAdapter = new test::components::TransportManger::IncorrectDeviceAdapterTest::MockDeviceAdapter();
     test::components::TransportManger::IncorrectDeviceAdapterTest::MockDataListener mockDataListener;
     test::components::TransportManger::IncorrectDeviceAdapterTest::MockDeviceListener mockDeviceListener;
     test::components::TransportManger::IncorrectDeviceAdapterTest::TestTransportManager transportManager(mockDeviceAdapter);
 
-    EXPECT_CALL(mockDeviceAdapter, run()).Times(1);
+    EXPECT_CALL(*mockDeviceAdapter, run()).Times(1);
 
     transportManager.run();
 
@@ -114,53 +114,53 @@ TEST(TransportManager, IncorrectDeviceAdapter)
     EXPECT_CALL(mockDataListener, onFrameReceived(::testing::_, ::testing::_, ::testing::_)).Times(0);
     EXPECT_CALL(mockDataListener, onFrameSendCompleted(::testing::_, ::testing::_, ::testing::_)).Times(0);
 
-    transportManager.onFrameReceived(&mockDeviceAdapter, validConnectionHandle, 0, 5);
+    transportManager.onFrameReceived(mockDeviceAdapter, validConnectionHandle, 0, 5);
 
-    transportManager.onFrameReceived(&mockDeviceAdapter, validConnectionHandle, validFrameData, 0);
+    transportManager.onFrameReceived(mockDeviceAdapter, validConnectionHandle, validFrameData, 0);
 
-    transportManager.onFrameReceived(&mockDeviceAdapter, validConnectionHandle, validFrameData, sizeof(validFrameData));
+    transportManager.onFrameReceived(mockDeviceAdapter, validConnectionHandle, validFrameData, sizeof(validFrameData));
 
-    transportManager.onFrameSendCompleted(&mockDeviceAdapter, validConnectionHandle, 20, NsAppLink::NsTransportManager::SendStatusOK);
+    transportManager.onFrameSendCompleted(mockDeviceAdapter, validConnectionHandle, 20, NsAppLink::NsTransportManager::SendStatusOK);
 
-    transportManager.onApplicationDisconnected(&mockDeviceAdapter, deviceInfo, validConnectionHandle);
+    transportManager.onApplicationDisconnected(mockDeviceAdapter, deviceInfo, validConnectionHandle);
 
-    transportManager.onApplicationConnected(&mockDeviceAdapter, deviceInfo, validConnectionHandle);
+    transportManager.onApplicationConnected(mockDeviceAdapter, deviceInfo, validConnectionHandle);
 
     EXPECT_CALL(mockDeviceListener, onDeviceListUpdated(::testing::ContainerEq(deviceList))).Times(1).RetiresOnSaturation();
-    transportManager.onDeviceListUpdated(&mockDeviceAdapter, internalDeviceList);
+    transportManager.onDeviceListUpdated(mockDeviceAdapter, internalDeviceList);
 
-    transportManager.onApplicationDisconnected(&mockDeviceAdapter, deviceInfo, validConnectionHandle);
+    transportManager.onApplicationDisconnected(mockDeviceAdapter, deviceInfo, validConnectionHandle);
 
     EXPECT_CALL(mockDeviceListener, onApplicationConnected(::testing::Eq(deviceInfo), validConnectionHandle)).Times(1).RetiresOnSaturation();
-    transportManager.onApplicationConnected(&mockDeviceAdapter, deviceInfo, validConnectionHandle);
+    transportManager.onApplicationConnected(mockDeviceAdapter, deviceInfo, validConnectionHandle);
 
-    transportManager.onFrameReceived(&mockDeviceAdapter, validConnectionHandle, 0, 5);
+    transportManager.onFrameReceived(mockDeviceAdapter, validConnectionHandle, 0, 5);
 
-    transportManager.onFrameReceived(&mockDeviceAdapter, validConnectionHandle, validFrameData, 0);
+    transportManager.onFrameReceived(mockDeviceAdapter, validConnectionHandle, validFrameData, 0);
 
     EXPECT_CALL(mockDataListener, onFrameReceived(validConnectionHandle, ::testing::_, sizeof(validFrameData))).Times(1).RetiresOnSaturation();
-    transportManager.onFrameReceived(&mockDeviceAdapter, validConnectionHandle, validFrameData, sizeof(validFrameData));
+    transportManager.onFrameReceived(mockDeviceAdapter, validConnectionHandle, validFrameData, sizeof(validFrameData));
 
-    transportManager.onFrameReceived(&mockDeviceAdapter, validConnectionHandle, invalidFrameData, sizeof(invalidFrameData));
+    transportManager.onFrameReceived(mockDeviceAdapter, validConnectionHandle, invalidFrameData, sizeof(invalidFrameData));
 
-    transportManager.onFrameSendCompleted(&mockDeviceAdapter, validConnectionHandle, 20, NsAppLink::NsTransportManager::SendStatusOK);
+    transportManager.onFrameSendCompleted(mockDeviceAdapter, validConnectionHandle, 20, NsAppLink::NsTransportManager::SendStatusOK);
 
     int frameSequenceNumber = transportManager.sendFrame(validConnectionHandle, validFrameData, sizeof(validFrameData));
     EXPECT_CALL(mockDataListener, onFrameSendCompleted(validConnectionHandle, frameSequenceNumber, NsAppLink::NsTransportManager::SendStatusOK)).Times(1).RetiresOnSaturation();
-    transportManager.onFrameSendCompleted(&mockDeviceAdapter, validConnectionHandle, frameSequenceNumber, NsAppLink::NsTransportManager::SendStatusOK);
+    transportManager.onFrameSendCompleted(mockDeviceAdapter, validConnectionHandle, frameSequenceNumber, NsAppLink::NsTransportManager::SendStatusOK);
 
     EXPECT_CALL(mockDeviceListener, onApplicationDisconnected(::testing::Eq(deviceInfo), validConnectionHandle)).Times(1).RetiresOnSaturation();
-    transportManager.onApplicationDisconnected(&mockDeviceAdapter, deviceInfo, validConnectionHandle);
+    transportManager.onApplicationDisconnected(mockDeviceAdapter, deviceInfo, validConnectionHandle);
 
-    transportManager.onApplicationDisconnected(&mockDeviceAdapter, deviceInfo, validConnectionHandle);
+    transportManager.onApplicationDisconnected(mockDeviceAdapter, deviceInfo, validConnectionHandle);
 
     deviceList.clear();
     internalDeviceList.clear();
 
     EXPECT_CALL(mockDeviceListener, onDeviceListUpdated(::testing::ContainerEq(deviceList))).Times(1).RetiresOnSaturation();
-    transportManager.onDeviceListUpdated(&mockDeviceAdapter, internalDeviceList);
+    transportManager.onDeviceListUpdated(mockDeviceAdapter, internalDeviceList);
 
-    transportManager.onApplicationConnected(&mockDeviceAdapter, deviceInfo, validConnectionHandle);
+    transportManager.onApplicationConnected(mockDeviceAdapter, deviceInfo, validConnectionHandle);
 
     sleep(1);
 }

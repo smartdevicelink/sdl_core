@@ -94,24 +94,24 @@ typedef long long Int64;
    ePlainData = 2
 };*/
 
-enum ERROR_CODE
+enum RESULT_CODE
 {
-   ERR_OK                     = 1,
-   ERR_FAIL                   = 2,
-   ERR_NUMBER_BUSY            = 3,
-   ERR_CONNECTION_LOST        = 4,
-   ERR_DISCONNECTED           = 5,
-   ERR_NOTFOUND               = 6,
-   ERR_TIMEOUT                = 7,
-   ERR_WRONG_SEQUENCE         = 8,
-   ERR_AGAIN                  = 9,
-   ERR_WRONG_FRAME_SEQUENCE   = 10,
-   ERR_IN_PROGRESS            = 11,
-   ERR_REASSIGN               = 12,
-   ERR_XML_PARSING            = 13,
-   ERR_RESEND_ACK             = 14,
-   ERR_DEFERRED               = 15,
-   ERR_UNKNOWN                = 255
+   RESULT_OK                     = 1,
+   RESULT_FAIL                   = 2,
+   RESULT_NUMBER_BUSY            = 3,
+   RESULT_CONNECTION_LOST        = 4,
+   RESULT_DISCONNECTED           = 5,
+   RESULT_NOTFOUND               = 6,
+   RESULT_TIMEOUT                = 7,
+   RESULT_WRONG_SEQUENCE         = 8,
+   RESULT_AGAIN                  = 9,
+   RESULT_WRONG_FRAME_SEQUENCE   = 10,
+   RESULT_IN_PROGRESS            = 11,
+   RESULT_REASSIGN               = 12,
+   RESULT_XML_PARSING            = 13,
+   RESULT_RESEND_ACK             = 14,
+   RESULT_DEFERRED               = 15,
+   RESULT_UNKNOWN                = 255
 };
 /**
  * List of available types of carriers

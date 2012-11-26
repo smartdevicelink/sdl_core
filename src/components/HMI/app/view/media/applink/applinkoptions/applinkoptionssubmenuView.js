@@ -19,7 +19,8 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
 
     childViews:         [
                             'backButton',
-                            'listOfSubmenuButtons'
+                            'listOfSubmenuButtons',
+                            'optionsSubMenuLabel'
                         ],
 
     backButton: MFT.Button.extend({
@@ -29,6 +30,15 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
         icon:              'images/media/ico_back.png',   
     }),
 
+    optionsSubMenuLabel:    MFT.Label.extend({
+
+        elementId:          'optionsSubMenuLabel',
+
+        classNames:         'optionsSubMenuLabel',
+
+        contentBinding:     'MFT.ApplinkMediaController.subMenuLabel'
+    }),
+
     /** Applink Sub Mennu activate handler */
     applinkSubMenuActivate: function(){
         if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
@@ -36,7 +46,7 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
         }
     }.observes('MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active'),
 
-    SubMenuActivate: function( menuId ){
+    SubMenuActivate: function( ){
 
         var count = this.listOfSubmenuButtons.items.length;
         if(count > 0){
@@ -49,13 +59,13 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
 
         count = MFT.ApplinkModel.subMenuCommands.length;
         for(var i = 0; i < count; i++){
-            if( menuId == MFT.ApplinkModel.subMenuCommands[i].menuParams.parentID ){
+            if( MFT.ApplinkMediaController.currentApplinkSubMenuid == MFT.ApplinkModel.subMenuCommands[i].menuParams.parentID ){
 
                 this.listOfSubmenuButtons.items.push({
                     type:       MFT.Button,
                     params:     {
                         action:                 'onCommand',
-                        target:                 'FFW.UI',
+                        target:                 'MFT.ApplinkMediaController',
                         commandId:              MFT.ApplinkModel.subMenuCommands[i].cmdId,
                         text:                   MFT.ApplinkModel.subMenuCommands[i].menuParams.menuName,
                         parentID:               MFT.ApplinkModel.subMenuCommands[i].menuParams.parentID,

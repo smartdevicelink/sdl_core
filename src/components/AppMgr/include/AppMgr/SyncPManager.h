@@ -1,3 +1,9 @@
+/**
+ * \file SyncPManager.h
+ * \brief SyncP manager
+ * \author vsalo
+ */
+
 #ifndef SYNCPMANAGER_H
 #define SYNCPMANAGER_H
 

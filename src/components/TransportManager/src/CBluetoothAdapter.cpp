@@ -175,7 +175,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
                         LOG4CPLUS_INFO_EXT(mLogger, "hci_inquiry: found " << numberOfDevices << " devices");
 
                         for (int i = 0; i < numberOfDevices; ++i)
-                        {                            
+                        {
                             tRFCOMMChannelVector appLinkRFCOMMChannels;
                             discoverAppLinkRFCOMMChannels(inquiryInfoList[i].bdaddr, appLinkRFCOMMChannels);
 
@@ -298,7 +298,6 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
             updateClientDeviceList();
         }
 
-        std::vector<tConnectionHandle> connectionsToTerminate;
         std::set<std::pair<tDeviceHandle, uint8_t> > connectionsToEstablish;
 
         for (tDeviceMap::const_iterator newDeviceIterator = newDevices.begin(); newDeviceIterator != newDevices.end(); ++newDeviceIterator)
@@ -325,50 +324,11 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
 
             if (0 != connection)
             {
-                tDeviceMap::const_iterator newDeviceIterator = newDevices.find(connection->mDeviceHandle);
+                const std::pair<tDeviceHandle, uint8_t> newConnection(connection->mDeviceHandle, connection->mRFCOMMChannel);
 
-                if (newDevices.end() == newDeviceIterator)
+                if (connectionsToEstablish.find(newConnection) != connectionsToEstablish.end())
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (device " << connection->mDeviceHandle << " is lost)");
-
-                    connectionsToTerminate.push_back(connectionIterator->first);
-                }
-                else
-                {
-                    const SBluetoothDevice * newDevice = dynamic_cast<const SBluetoothDevice*>(newDeviceIterator->second);
-
-                    if (0 == newDevice)
-                    {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated because device is null");
-
-                        connectionsToTerminate.push_back(connectionIterator->first);
-                    }
-                    else if (false == newDevice->mIsConnected)
-                    {
-                        LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (device " << connection->mDeviceHandle << " is not connected)");
-
-                        connectionsToTerminate.push_back(connectionIterator->first);
-                    }
-                    else
-                    {
-                        const tRFCOMMChannelVector & appLinkRFCOMMChannels = newDevice->mAppLinkRFCOMMChannels;
-
-                        if (appLinkRFCOMMChannels.end() == std::find(appLinkRFCOMMChannels.begin(), appLinkRFCOMMChannels.end(), connection->mRFCOMMChannel))
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "Connection " << connectionIterator->first << " must be terminated (no AppLink service found on channel " << static_cast<uint32_t>(connection->mRFCOMMChannel) << ")");
-
-                            connectionsToTerminate.push_back(connectionIterator->first);
-                        }
-                        else
-                        {
-                            const std::pair<tDeviceHandle, uint8_t> newConnection(connection->mDeviceHandle, connection->mRFCOMMChannel);
-
-                            if (connectionsToEstablish.find(newConnection) != connectionsToEstablish.end())
-                            {
-                                connectionsToEstablish.erase(newConnection);
-                            }
-                        }
-                    }
+                    connectionsToEstablish.erase(newConnection);
                 }
             }
             else
@@ -378,11 +338,6 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
         }
 
         pthread_mutex_unlock(&mConnectionsMutex);
-
-        for (std::vector<tConnectionHandle>::const_iterator terminatingConnectionsIterator = connectionsToTerminate.begin(); terminatingConnectionsIterator != connectionsToTerminate.end(); ++terminatingConnectionsIterator)
-        {
-            stopConnection(*terminatingConnectionsIterator);
-        }
 
         for (std::set<std::pair<tDeviceHandle, uint8_t> >::const_iterator newConnectionsIterator = connectionsToEstablish.begin(); newConnectionsIterator != connectionsToEstablish.end(); ++newConnectionsIterator)
         {

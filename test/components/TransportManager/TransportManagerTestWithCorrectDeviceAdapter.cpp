@@ -240,11 +240,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
         virtual ~TestTransportManager(void )
         {
-            if(0 != mpDeviceAdapter)
-            {
-                delete mpDeviceAdapter;
-                mpDeviceAdapter = 0;
-            }
+
         }
 
         virtual void initializeDeviceAdapters()

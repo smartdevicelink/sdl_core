@@ -36,11 +36,18 @@ MFT.List = Em.ContainerView.extend({
 	listScrollingAttributes: '',
 	
 	/** Count of items in menu*/
+	/*
 	listCount: function(){
 		if( this.items ) {
 			return this.items.length;
 		}
 	}.property('items.@each.type'),
+	*/
+	listCount: function(){
+		//console.log(this.get('this.list.childViews.length'));
+			return this.get('this.list.childViews.length');
+	}.property('this.list.childViews.length'),
+	
 	
 	/**Pages count*/
 	pageCount: function(){

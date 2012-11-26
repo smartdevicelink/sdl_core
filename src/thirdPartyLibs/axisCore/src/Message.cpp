@@ -45,9 +45,9 @@ Message::~Message()
     delete [] mData;
 }
 
-ERROR_CODE Message::addConsecutiveMessage(const ProtocolPacketHeader &header, UInt8 *data)
+RESULT_CODE Message::addConsecutiveMessage(const ProtocolPacketHeader &header, UInt8 *data)
 {
-    ERROR_CODE retVal = ERR_OK;
+    RESULT_CODE retVal = RESULT_OK;
 
     if (mIsMultiFrame)
     {
@@ -60,13 +60,13 @@ ERROR_CODE Message::addConsecutiveMessage(const ProtocolPacketHeader &header, UI
                 mDataOffset += header.dataSize;
             }
             else
-                retVal = ERR_FAIL;
+                retVal = RESULT_FAIL;
         }
         else
-           retVal = ERR_FAIL;
+           retVal = RESULT_FAIL;
     }
     else
-        retVal = ERR_FAIL;
+        retVal = RESULT_FAIL;
 
     return retVal;
 }

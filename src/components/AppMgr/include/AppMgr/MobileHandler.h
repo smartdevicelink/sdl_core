@@ -1,3 +1,9 @@
+/**
+ * \file MobileHandler.h
+ * \brief Mobile handler
+ * \author vsalo
+ */
+
 #ifndef MOBILEHANDLER_H
 #define MOBILEHANDLER_H
 
@@ -5,65 +11,66 @@ class JSONHandler;
 
 namespace log4cplus
 {
-class Logger;
+    class Logger;
 }
 
 namespace NsAppLinkRPC
 {
-class ALRPCMessage;
+    class ALRPCMessage;
 }
 
 namespace NsAppManager
 {
 
-/**
- * \brief MobileHandler acts as wrapper for mobile JSON handler
- */
-class MobileHandler
-{
-public:
-
     /**
-     * \brief Returning class instance
-     * \return class instance
+     * \brief MobileHandler acts as wrapper for mobile JSON handler
      */
-    static MobileHandler &getInstance();
+    class MobileHandler
+    {
+    public:
 
-    /**
-     * \brief send a message via associated handler
-     * \param message message to send
-     * \param sessionId id of a session associated with application that sent the message
-     */
-    void sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, unsigned char sessionId );
+        /**
+         * \brief Returning class instance
+         * \return class instance
+         */
+        static MobileHandler &getInstance();
 
-    /**
-     * \brief set mobile Json handler
-     * \param handler mobile Json handler instance
-     */
-    void setJsonHandler(JSONHandler* handler);
+        /**
+         * \brief send a message via associated handler
+         * \param message message to send
+         * \param connectionID id of a connection associated with application that sent the message
+         * \param sessionId id of a session associated with application that sent the message
+         */
+        void sendRPCMessage(const NsAppLinkRPC::ALRPCMessage * message, unsigned int connectionID, unsigned char sessionId );
 
-    /**
-     * \brief get mobile Json handler
-     * \return mobile Json handler instance
-     */
-    JSONHandler* getJsonHandler( ) const;
+        /**
+         * \brief set mobile Json handler
+         * \param handler mobile Json handler instance
+         */
+        void setJsonHandler(JSONHandler* handler);
 
-private:
+        /**
+         * \brief get mobile Json handler
+         * \return mobile Json handler instance
+         */
+        JSONHandler* getJsonHandler( ) const;
 
-    /**
-     * \brief Default class constructor
-     */
-    MobileHandler();
+    private:
 
-    /**
-     * \brief Copy constructor
-     */
-    MobileHandler(const MobileHandler&);
+        /**
+         * \brief Default class constructor
+         */
+        MobileHandler();
 
-    JSONHandler* mJSONHandler;
+        /**
+         * \brief Copy constructor
+         */
+        MobileHandler(const MobileHandler&);
 
-    static log4cplus::Logger mLogger;
-};
+        JSONHandler* mJSONHandler;
+
+        static log4cplus::Logger mLogger;
+    };
 
 }
 

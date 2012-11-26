@@ -1,14 +1,14 @@
-/*
- * AppMgr.h
- *
- *  Created on: Oct 4, 2012
- *      Author: vsalo
+/**
+ * \file AppMgrCore.h
+ * \brief App manager core functionality
+ * \author vsalo
  */
 
 #ifndef APPMGR_H_
 #define APPMGR_H_
 
 #include <string>
+#include "AppMgr/Application.h"
 #include "AppMgr/ButtonMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/MessageMapping.h"
@@ -18,7 +18,8 @@
 #include "AppMgr/AutoActivateIdMapping.h"
 #include "AppMgr/SyncPManager.h"
 
-namespace NsAppLinkRPC{
+namespace NsAppLinkRPC
+{
     class ALRPCMessage;
 }
 class JSONHandler;
@@ -31,166 +32,168 @@ namespace NsAppLinkRPC
 
 namespace NsRPC2Communication
 {
-	class RPC2Command;
+    class RPC2Command;
 }
 
 namespace log4cplus
 {
-	class Logger;
+    class Logger;
 }
 
 namespace NsAppManager
 {
 
-class RegistryItem;
-template< class QueueType >
-class AppMgrCoreQueue;
-class Application;
-
-/**
- * \brief a connection between a mobile RPC message and a session
- */
-typedef std::pair<NsAppLinkRPC::ALRPCMessage*, unsigned char> Message;
-
-/**
- * \brief Core app manager class which acts as a core for application manager
- */
-class AppMgrCore
-{
-    friend class SubscribeButtonCmd;
-public:
+    class RegistryItem;
+    template< class QueueType >
+    class AppMgrCoreQueue;
 
     /**
-     * \brief Default class destructor
+     * \brief a connection between a mobile RPC message and a session
      */
-	virtual ~AppMgrCore();
+    typedef std::pair<NsAppLinkRPC::ALRPCMessage*, ApplicationUniqueID> Message;
 
     /**
-     * \brief Returning class instance
-     * \return class instance
+     * \brief Core app manager class which acts as a core for application manager
      */
-	static AppMgrCore& getInstance();
+    class AppMgrCore
+    {
+        friend class SubscribeButtonCmd;
+    public:
 
-    /**
-     * \brief push mobile RPC message to a queue
-     * \param message a message to be pushed
-     * \param sessionID an id of a session associated with the application which pushes a message
-     */
-    void pushMobileRPCMessage(NsAppLinkRPC::ALRPCMessage * message , unsigned char sessionID);
+        /**
+         * \brief Default class destructor
+         */
+        virtual ~AppMgrCore();
 
-    /**
-     * \brief push HMI RPC2 message to a queue
-     * \param message a message to be pushed
-     */
-	void pushRPC2CommunicationMessage( NsRPC2Communication::RPC2Command * message );
+        /**
+         * \brief Returning class instance
+         * \return class instance
+         */
+        static AppMgrCore& getInstance();
 
-    /**
-     * \brief method to execute threads.
-     */
-	void executeThreads();
+        /**
+         * \brief push mobile RPC message to a queue
+         * \param message a message to be pushed
+         * \param connectionID id of a connection associated with application that sent the message
+         * \param sessionID an id of a session associated with the application which pushes a message
+         */
+        void pushMobileRPCMessage(NsAppLinkRPC::ALRPCMessage * message , int connectionID, unsigned char sessionID);
 
-    /**
-     * \brief set Json mobile handler
-     * \param handler a handler instance
-     */
-	void setJsonHandler(JSONHandler* handler);
+        /**
+         * \brief push HMI RPC2 message to a queue
+         * \param message a message to be pushed
+         */
+        void pushRPC2CommunicationMessage( NsRPC2Communication::RPC2Command * message );
 
-    /**
-     * \brief get Json mobile handler
-     * \return JSONHandler instance
-     */
-	JSONHandler* getJsonHandler( ) const;
+        /**
+         * \brief method to execute threads.
+         */
+        void executeThreads();
 
-    /**
-     * \brief set Json RPC2 handler
-     * \param handler a handler instance
-     */
-    void setJsonRPC2Handler(JSONRPC2Handler* handler);
+        /**
+         * \brief set Json mobile handler
+         * \param handler a handler instance
+         */
+        void setJsonHandler(JSONHandler* handler);
 
-    /**
-     * \brief get Json RPC2 handler
-     * \return JSONRPC2Handler instance
-     */
-    JSONRPC2Handler* getJsonRPC2Handler( ) const;
+        /**
+         * \brief get Json mobile handler
+         * \return JSONHandler instance
+         */
+        JSONHandler* getJsonHandler( ) const;
 
-private:
+        /**
+         * \brief set Json RPC2 handler
+         * \param handler a handler instance
+         */
+        void setJsonRPC2Handler(JSONRPC2Handler* handler);
 
-    /**
-     * \brief Default class constructor
-     */
-	AppMgrCore();
+        /**
+         * \brief get Json RPC2 handler
+         * \return JSONRPC2Handler instance
+         */
+        JSONRPC2Handler* getJsonRPC2Handler( ) const;
 
-    /**
-     * \brief Copy constructor
-     */
-    AppMgrCore(const AppMgrCore&);
+    private:
 
-    /**
-     * \brief mobile RPC message handler
-     * \param mesage a message to be handled
-     * \param pThis a pointer to AppMgrCore class instance
-     */
-    static void handleMobileRPCMessage(Message message, void* pThis);
+        /**
+         * \brief Default class constructor
+         */
+        AppMgrCore();
 
-    /**
-     * \brief push HMI RPC2 message to a queue
-     * \param msg a message to be pushed
-     * \param pThis a pointer to AppMgrCore class instance
-     */
-    static void handleBusRPCMessageIncoming( NsRPC2Communication::RPC2Command* msg, void* pThis );
+        /**
+         * \brief Copy constructor
+         */
+        AppMgrCore(const AppMgrCore&);
 
-    /**
-     * \brief Register an application
-     * \param request a RegisterAppInterface request which is the source for application fields initial values
-     * \param sessionID an id of the session which will be associated with the application
-     * \return A instance of RegistryItem created for application
-     */
-    const RegistryItem* registerApplication(NsAppLinkRPC::RegisterAppInterface_request *request , const unsigned char &sessionID);
+        /**
+         * \brief mobile RPC message handler
+         * \param mesage a message to be handled
+         * \param pThis a pointer to AppMgrCore class instance
+         */
+        static void handleMobileRPCMessage(Message message, void* pThis);
 
-    /**
-     * \brief unregister an application associated with the given session
-     * \param sessionID an id of the session asociated with the application to be unregistered
-     */
-    void unregisterApplication(const unsigned char &sessionID);
+        /**
+         * \brief push HMI RPC2 message to a queue
+         * \param msg a message to be pushed
+         * \param pThis a pointer to AppMgrCore class instance
+         */
+        static void handleBusRPCMessageIncoming( NsRPC2Communication::RPC2Command* msg, void* pThis );
 
-    /**
-     * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
-     * \param item a RegistryItem from which to retrieve an app pointer
-     * \return Application instance retrieved from item
-     */
-    Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
+        /**
+         * \brief Register an application
+         * \param request a RegisterAppInterface request which is the source for application fields initial values
+         * \param connectionID id of the connection which will be associated with the application
+         * \param sessionID an id of the session which will be associated with the application
+         * \return A instance of RegistryItem created for application
+         */
+        const RegistryItem* registerApplication(NsAppLinkRPC::RegisterAppInterface_request *request , const unsigned int &connectionID, const unsigned char &sessionID);
 
-    /**
-     * \brief serialize a string value to the text file
-     * \param fileName name of the file to serialize to
-     * \param value a value to serialize
-     * \return success of an operation - true or false
-     */
-    bool serializeToFile(const std::string& fileName, const std::string &value) const;
+        /**
+         * \brief unregister an application associated with the given session
+         * \param connectionID an id of the connection asociated with the application to be unregistered
+         * \param sessionID an id of the session asociated with the application to be unregistered
+         */
+        void unregisterApplication(const unsigned int &connectionID, const unsigned char &sessionID);
 
-    AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
-    AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
+        /**
+         * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
+         * \param item a RegistryItem from which to retrieve an app pointer
+         * \return Application instance retrieved from item
+         */
+        Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
 
-    CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities> mButtonCapabilities;
-    NsAppLinkRPC::DisplayCapabilities mDisplayCapabilities;
-    CapabilitiesContainer<NsAppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilities;
-    CapabilitiesContainer<NsAppLinkRPC::VrCapabilities> mVrCapabilities;
-    CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities> mSpeechCapabilities;
-    ButtonMapping    mButtonsMapping;
-    CommandMapping   mCommandMapping;
-    MessageMapping   mMessageMapping;
-    MenuMapping      mMenuMapping;
-    RequestMapping   mRequestMapping;
+        /**
+         * \brief serialize a string value to the text file
+         * \param fileName name of the file to serialize to
+         * \param value a value to serialize
+         * \return success of an operation - true or false
+         */
+        bool serializeToFile(const std::string& fileName, const std::string &value) const;
 
-    AutoActivateIdMapping  mAutoActivateIds;
+        AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
+        AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
-    static const std::string mAutoActivateIdFileName;
+        CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities> mButtonCapabilities;
+        NsAppLinkRPC::DisplayCapabilities mDisplayCapabilities;
+        CapabilitiesContainer<NsAppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilities;
+        CapabilitiesContainer<NsAppLinkRPC::VrCapabilities> mVrCapabilities;
+        CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities> mSpeechCapabilities;
+        ButtonMapping    mButtonsMapping;
+        CommandMapping   mCommandMapping;
+        MessageMapping   mMessageMapping;
+        MenuMapping      mMenuMapping;
+        RequestMapping   mRequestMapping;
 
-    std::string      mLastAutoActivateId;
-    SyncPManager     mSyncPManager;
+        AutoActivateIdMapping  mAutoActivateIds;
 
-	static log4cplus::Logger mLogger;
-};
+        static const std::string mAutoActivateIdFileName;
+
+        std::string      mLastAutoActivateId;
+        SyncPManager     mSyncPManager;
+
+        static log4cplus::Logger mLogger;
+    };
 
 } // namespace NsAppManager
 

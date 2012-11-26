@@ -1,3 +1,9 @@
+/**
+ * \file MessageMapping.h
+ * \brief Message mapping
+ * \author vsalo
+ */
+
 #ifndef MESSAGEMAPPING_H
 #define MESSAGEMAPPING_H
 
@@ -11,73 +17,84 @@ namespace log4cplus
 namespace NsAppManager
 {
 
-class RegistryItem;
-
-/**
- * \brief message-to-registered_app map
- */
-typedef std::map<int, RegistryItem*> MessageMap;
-
-/**
- * \brief message-to-registered_app map item
- */
-typedef std::pair<int, RegistryItem*> MessageMapItem;
-
-/**
- * \brief MessageMapping acts as a mapping of messages to registered application which subscribes to them
- */
-class MessageMapping
-{
-public:
+    class RegistryItem;
 
     /**
-     * \brief Default class constructor
+     * \brief message-to-registered_app map
      */
-    MessageMapping();
+    typedef std::map<int, RegistryItem*> MessageMap;
 
     /**
-     * \brief add a message to a mapping
-     * \param msgId message id
-     * \param app application to map a message to
+     * \brief message-to-registered_app map item
      */
-    void addMessage( int msgId, RegistryItem* app );
+    typedef std::pair<int, RegistryItem*> MessageMapItem;
 
     /**
-     * \brief add a message to a mapping
-     * \param msgId message id
-     * \param sessionID session to map appropriate application with message
+     * \brief MessageMapping acts as a mapping of messages to registered application which subscribes to them
      */
-    void addMessage( int msgId, unsigned char sessionID );
+    class MessageMapping
+    {
+    public:
 
-    /**
-     * \brief remove a message from a mapping
-     * \param msgId message id
-     */
-    void removeMessage(int msgId);
+        /**
+         * \brief Default class constructor
+         */
+        MessageMapping();
 
-    /**
-     * \brief remove an application from a mapping
-     * \param app application to remove all associated messages from mapping
-     */
-    void removeItem( RegistryItem* app );
+        /**
+         * \brief Default class destructor
+         */
+        ~MessageMapping();
 
-    /**
-     * \brief find a registry item subscribed to message
-     * \param msgId message id
-     * \return RegistryItem instance
-     */
-    RegistryItem *findRegistryItemAssignedToCommand(int msgId) const;
+        /**
+         * \brief add a message to a mapping
+         * \param msgId message id
+         * \param app application to map a message to
+         */
+        void addMessage( int msgId, RegistryItem* app );
 
-private:
+        /**
+         * \brief add a message to a mapping
+         * \param msgId message id
+         * \param connectionID connection to map appropriate application with message
+         * \param sessionID session to map appropriate application with message
+         */
+        void addMessage(int msgId, unsigned int connectionID, unsigned char sessionID );
 
-    /**
-     * \brief Copy constructor
-     */
-    MessageMapping(const MessageMapping&);
+        /**
+         * \brief remove a message from a mapping
+         * \param msgId message id
+         */
+        void removeMessage(int msgId);
 
-    MessageMap    mMessageMapping;
-    static log4cplus::Logger mLogger;
-};
+        /**
+         * \brief remove an application from a mapping
+         * \param app application to remove all associated messages from mapping
+         */
+        void removeItem( RegistryItem* app );
+
+        /**
+         * \brief find a registry item subscribed to message
+         * \param msgId message id
+         * \return RegistryItem instance
+         */
+        RegistryItem *findRegistryItemAssignedToCommand(int msgId) const;
+
+        /**
+         * \brief cleans message mapping
+         */
+        void clear( );
+
+    private:
+
+        /**
+         * \brief Copy constructor
+         */
+        MessageMapping(const MessageMapping&);
+
+        MessageMap    mMessageMapping;
+        static log4cplus::Logger mLogger;
+    };
 
 }
 

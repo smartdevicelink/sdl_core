@@ -19,7 +19,8 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
 
     childViews:         [
                             'backButton',
-                            'listOfChoises'
+                            'listOfChoises',
+                            'initialText'
                         ],
 
     backButton: MFT.Button.extend({
@@ -29,10 +30,20 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
         icon:              'images/media/ico_back.png',
     }),
 
+    initialText:    MFT.Label.extend({
+
+        elementId:          'initialText',
+
+        classNames:         'initialText',
+
+        contentBinding:     'MFT.ApplinkMediaController.performInteractionInitialText'
+    }),
+
+
     /** Applink Sub Mennu activate handler */
     applinkPerformInteractionChoise: function(){
         if(MFT.States.media.applink.applinkperforminteractionchoise.active){
-            MFT.AppPerformInteractionChoise.PerformInteraction(MFT.MediaController.currentApplinkPerformInteractionChoiseId);
+            MFT.AppPerformInteractionChoise.PerformInteraction(MFT.ApplinkMediaController.currentApplinkPerformInteractionChoiseId);
         }
     }.observes('MFT.States.media.applink.applinkperforminteractionchoise.active'),
 
@@ -56,8 +67,8 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
                         this.listOfChoises.items.push({
                                 type:       MFT.Button,
                                 params:     {
-                                    action:                 'onChoosed',
-                                    target:                 'FFW.UI',
+                                    action:                 'onPerformInteractionChoosed',
+                                    target:                 'MFT.ApplinkMediaController',
                                     commandId:              MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID,
                                     text:                   MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
                                     className:              'rs-item',

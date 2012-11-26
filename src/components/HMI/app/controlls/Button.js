@@ -146,6 +146,10 @@ MFT.Button = Em.View.extend(Ember.TargetActionSupport, {
 			'<span>{{view.text}}</span>'
 		),
 		
+		icon: Em.Handlebars.compile(
+			'<img class="ico" {{bindAttr src="view.icon"}} />'
+		),
+		
 		rightText: Em.Handlebars.compile(
 			'<img class="ico" {{bindAttr src="view.icon"}} />'+
 			'<span>{{view.text}}</span>'+

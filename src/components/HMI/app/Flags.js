@@ -52,7 +52,7 @@ FLAGS = Em.Object.create({
 	 *  Extended logging only for debug and development 
 	 *  !!! MUST BE false for release build !!! 
 	 */
-  	DEBUG_MODE:				false,
+  	DEBUG_MODE:			false,
 
 	/** hide mouse cursor from screen */
 	APP_HIDE_MOUSE_CURSOR:		false,
@@ -62,6 +62,12 @@ FLAGS = Em.Object.create({
 	 *  to be disabled until v2.1, in version v2.1 this feature will be released to end user
 	 */
 	MCS_ENABLED:			false,
+
+  	/** 
+	 *  show MCS screen in settings -> vehicle menu 
+	 *  to be disabled until v2.1, in version v2.1 this feature will be released to end user
+	 */
+	HELP_MODE:			false,
 
   	/** 
 	 *  Emulate CAN network for Multi Contour Seat
