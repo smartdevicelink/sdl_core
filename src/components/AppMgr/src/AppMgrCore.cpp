@@ -1440,7 +1440,32 @@ namespace NsAppManager
 
                 AppMgrRegistry::getInstance().activateApp(app);
 
+                const MenuItems& newMenus = app->getAllMenus();
+                LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's menus to HMI due to a new application activation");
+                for(MenuItems::const_iterator it = newMenus.begin(); it != newMenus.end(); it++)
+                {
+                    const unsigned int& menuId = it->first;
+                    const MenuValue& menuVal = it->second;
+                    const std::string& menuName = menuVal.first;
+                    const unsigned int* position = menuVal.second;
+                    NsRPC2Communication::UI::AddSubMenu* addCmd = new NsRPC2Communication::UI::AddSubMenu();
+                    addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    addCmd->set_menuId(menuId);
+                    addCmd->set_menuName(menuName);
+                    if(position)
+                    {
+                        addCmd->set_position(*position);
+                    }
+                    unsigned char sessionID = app->getSessionID();
+                    unsigned int connectionID = app->getConnectionID();
+                    core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
+
+                    HMIHandler::getInstance().sendRequest(addCmd);
+                }
+                LOG4CPLUS_INFO_EXT(mLogger, "New app's menus added!");
+
                 const Commands& newCommands = app->getAllCommands();
+                LOG4CPLUS_INFO_EXT(mLogger, "Adding a new application's commands to HMI due to a new application activation");
                 for(Commands::const_iterator it = newCommands.begin(); it != newCommands.end(); it++)
                 {
                     const Command& key = *it;
@@ -1475,6 +1500,7 @@ namespace NsAppManager
 
                     HMIHandler::getInstance().sendRequest(addCmd);
                 }
+                LOG4CPLUS_INFO_EXT(mLogger, "New app's commands added!");
 
                 NsAppLinkRPC::OnHMIStatus * hmiStatus = new NsAppLinkRPC::OnHMIStatus;
                 hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
