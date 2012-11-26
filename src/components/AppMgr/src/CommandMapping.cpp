@@ -47,6 +47,7 @@ namespace NsAppManager
      */
     void CommandMapping::removeCommand(unsigned int commandId, const CommandType& type)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Deleting a command " << commandId << " type " << type.getType() );
         mCommands.erase(CommandBase(commandId, type));
     }
 
