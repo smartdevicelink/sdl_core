@@ -1,7 +1,10 @@
 #include "AppMgr/AppChoiceSets.h"
+#include "LoggerHelper.hpp"
 
 namespace NsAppManager
 {
+    log4cplus::Logger AppChoiceSets::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppChoiceSets"));
+
     /**
      * \brief Default class constructor
      */
@@ -24,6 +27,7 @@ namespace NsAppManager
      */
     void AppChoiceSets::addItem(const unsigned int &choiceSetId, const ChoiceSet &choiceSet)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Adding an interaction choice set item " << choiceSetId );
         mChoiceSets.insert(ChoiceSetItem(choiceSetId, choiceSet));
     }
 
@@ -33,6 +37,7 @@ namespace NsAppManager
      */
     void AppChoiceSets::removeItem(const unsigned int &choiceSetId)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Deleting an interaction choice set item " << choiceSetId );
         mChoiceSets.erase(choiceSetId);
     }
 

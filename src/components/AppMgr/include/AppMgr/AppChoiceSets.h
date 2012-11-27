@@ -6,6 +6,11 @@
 #include <string>
 #include <map>
 
+namespace log4cplus
+{
+    class Logger;
+}
+
 namespace NsAppManager
 {
     /**
@@ -78,6 +83,7 @@ namespace NsAppManager
         AppChoiceSets(const AppChoiceSets&);
 
         ChoiceSetItems mChoiceSets;
+        static log4cplus::Logger mLogger;
     };
 
 }
