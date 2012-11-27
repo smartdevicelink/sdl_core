@@ -338,9 +338,9 @@ namespace NsAppManager
         /**
          * \brief retrieve types associated with command id in current application
          * \param commandId command id to search for types
-         * \param types input container of command types to be filled with result
+         * \return input container of command types to be filled with result
          */
-        void getTypes(unsigned int commandId, CommandTypes& types ) const;
+        CommandTypes getCommandTypes(unsigned int commandId) const;
 
         /**
          * \brief get count of unresponsed requests associated with the given command id

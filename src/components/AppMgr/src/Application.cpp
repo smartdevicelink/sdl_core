@@ -475,11 +475,11 @@ namespace NsAppManager
     /**
      * \brief retrieve types associated with command id in current application
      * \param commandId command id to search for types
-     * \param types input container of command types to be filled with result
+     * \return input container of command types to be filled with result
      */
-    void Application::getTypes(unsigned int commandId, CommandTypes &types) const
+    CommandTypes Application::getCommandTypes(unsigned int commandId) const
     {
-        mCommandMapping.getTypes(commandId, types);
+        return mCommandMapping.getTypes(commandId);
     }
 
     /**
