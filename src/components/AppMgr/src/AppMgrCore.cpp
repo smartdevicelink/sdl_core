@@ -643,26 +643,28 @@ namespace NsAppManager
                 const unsigned int& menuId = object->get_menuID();
                 delSubMenu->set_menuId(menuId);
                 const MenuCommands& menuCommands = app->findMenuCommands(menuId);
+                LOG4CPLUS_INFO_EXT(mLogger, " A given menu has " << menuCommands.size() << " UI commands - about to delete 'em!");
                 for(MenuCommands::const_iterator it = menuCommands.begin(); it != menuCommands.end(); it++)
                 {
-                    NsRPC2Communication::UI::DeleteCommand* delCmd = new NsRPC2Communication::UI::DeleteCommand();
-                    delCmd->set_cmdId(*it);
-                    delCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(delCmd->getId(), connectionID, sessionID);
-                    core->mRequestMapping.addMessage(delCmd->getId(), *it);
-                    HMIHandler::getInstance().sendRequest(delCmd);
+                    LOG4CPLUS_INFO_EXT(mLogger, " Deleting command with id " << *it);
+                    NsRPC2Communication::UI::DeleteCommand* delUiCmd = new NsRPC2Communication::UI::DeleteCommand();
+                    delUiCmd->set_cmdId(*it);
+                    delUiCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    core->mMessageMapping.addMessage(delUiCmd->getId(), connectionID, sessionID);
+                    core->mRequestMapping.addMessage(delUiCmd->getId(), *it);
+                    HMIHandler::getInstance().sendRequest(delUiCmd);
                     const CommandTypes& types = app->getCommandTypes(*it);
                     for(CommandTypes::const_iterator it2 = types.begin(); it2 != types.end(); it2++)
                     {
                         const CommandType& type = *it2;
                         if(type == CommandType::VR)
                         {
-                            LOG4CPLUS_INFO_EXT(mLogger, " A given command has VR counterpart attached to: deleting it also!");
-                            NsRPC2Communication::VR::DeleteCommand* delCmd = new NsRPC2Communication::VR::DeleteCommand();
-                            delCmd->set_cmdId(*it);
-                            core->mMessageMapping.addMessage(delCmd->getId(), connectionID, sessionID);
-                            core->mRequestMapping.addMessage(delCmd->getId(), *it);
-                            HMIHandler::getInstance().sendRequest(delCmd);
+                            LOG4CPLUS_INFO_EXT(mLogger, " A given command id " << *it << " has VR counterpart attached to: deleting it also!");
+                            NsRPC2Communication::VR::DeleteCommand* delVrCmd = new NsRPC2Communication::VR::DeleteCommand();
+                            delVrCmd->set_cmdId(*it);
+                            core->mMessageMapping.addMessage(delVrCmd->getId(), connectionID, sessionID);
+                            core->mRequestMapping.addMessage(delVrCmd->getId(), *it);
+                            HMIHandler::getInstance().sendRequest(delVrCmd);
                         }
                     }
                     app->removeCommand(*it, CommandType::UI);
