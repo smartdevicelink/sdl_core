@@ -42,6 +42,7 @@ set (SOURCES
         hmiEmulator/TTSRPC.cpp
         hmiEmulator/UIRPC.cpp
         hmiEmulator/VRRPC.cpp
+        hmiEmulator/RPC.cpp
     )
 
 if( NOT CMAKE_BUILD_TYPE )
