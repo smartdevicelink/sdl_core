@@ -57,7 +57,8 @@ Show(string(500) * mainField1,
     string(500) *mediaTrack,
     Image * graphic, // Image struct determining whether static or dynamic image to display in app
     SoftButton * softButtons[0:8], // App defined SoftButtons
-    string(500) * customPresets[0:6] // App labeled on-screen presets (i.e. GEN2)
+    string(500) * customPresets[0:6], // App labeled on-screen presets (i.e. GEN2)
+    int appId
     -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -75,7 +76,8 @@ Alert(
   TTSChunk * ttsChunks[1:100],
   unsigned int(3000:10000) * duration,
   bool * playTone,
-  SoftButton * softButtons[0:4] // App defined SoftButtons
+  SoftButton * softButtons[0:4], // App defined SoftButtons
+  int appId
   -> 
   unsigned int (2000000000) * tryAgainTime  // Amount of time (in seconds) that an app must wait before resending an alert.
 );  // return value is provided in corresponding response object, id of request and response should be equal
@@ -90,7 +92,8 @@ Alert(
 AddCommand(
   unsigned int (2000000000) cmdId,  // cmdID from addCommand request in AppLink protocol
   MenuParams menuParams,   //data type from AppLink protocol specification
-  Image * cmdIcon // Image struct determining whether static or dynamic icon
+  Image * cmdIcon, // Image struct determining whether static or dynamic icon
+  int appId
   -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -101,7 +104,8 @@ AddCommand(
    *  result code
    */ 
 DeleteCommand(
-  unsigned int (2000000000) cmdId  // cmdID from addCommand request in AppLink protocol
+  unsigned int (2000000000) cmdId,  // cmdID from addCommand request in AppLink protocol
+  int appId
   -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
 
@@ -116,7 +120,8 @@ DeleteCommand(
 AddSubMenu(
   unsigned int (2000000000) menuId,
   unsigned int (1000) * position,
-  string(500) menuName
+  string(500) menuName,
+  int appId
   -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -128,7 +133,8 @@ AddSubMenu(
    *  result code
    */ 
 DeleteSubMenu(
-  unsigned int (2000000000) menuId
+  unsigned int (2000000000) menuId,
+  int appId
   -> );  //// return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -142,7 +148,8 @@ DeleteSubMenu(
    */ 
 CreateInteractionChoiceSet(
   unsigned int (2000000000) interactionChoiceSetID,
-  Choice choiceSet[1:100]   // data type from AppLink protocol specification
+  Choice choiceSet[1:100],   // data type from AppLink protocol specification
+  int appId
   -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -155,7 +162,8 @@ CreateInteractionChoiceSet(
    *  result code
    */ 
 DeleteInteractionChoiceSet(
-  unsigned int(2000000000) interactionChoiceSetID
+  unsigned int(2000000000) interactionChoiceSetID,
+  int appId
   -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -176,7 +184,8 @@ PerformInteraction(
   TTSChunk * helpPrompt[1:100], //data type from AppLink protocol specification
   TTSChunk * timeoutPrompt[1:100], // data type from AppLink protocol specification
   unsigned int (5000:100000) * timeout, //in milliseconds
-  VrHelpItem * vrHelp[1:100] // Ability to send suggested VR Help Items to display on-screen during Perform Interaction
+  VrHelpItem * vrHelp[1:100], // Ability to send suggested VR Help Items to display on-screen during Perform Interaction
+  int appId
   -> 
   unsigned int (2000000000) * choiceID, // ID of the choice that was selected in response to PerformInteraction
   TriggerSource * triggerSource //data type from AppLink protocol specification
@@ -194,7 +203,8 @@ PerformInteraction(
    */ 
 SetMediaClockTimer(
   StartTime * startTime, // data type from AppLink protocol specification
-  UpdateMode updateMode  // data type from AppLink protocol specification
+  UpdateMode updateMode,  // data type from AppLink protocol specification
+  int appId
   -> );// return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -211,7 +221,8 @@ SetGlobalProperties(
   TTSChunk * helpPrompt[1:100], // data type from AppLink protocol specification
   TTSChunk * timeoutPrompt[1:100], // data type from AppLink protocol specification
   string(500) * vrHelpTitle, // VR Help Title text 
-  VrHelpItem * vrHelp[1:100] // VR Help Items
+  VrHelpItem * vrHelp[1:100], // VR Help Items
+  int appId
   -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -225,14 +236,16 @@ SetGlobalProperties(
    *  result code
    */ 
 ResetGlobalProperties(
-  GlobalProperty properties[1:100] // enum, data type from AppLink protocol specification
+  GlobalProperty properties[1:100], // enum, data type from AppLink protocol specification
+  int appId
   -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
    * @descr Notifies AppLink core about command trigerred by UI
    */
 notification  OnCommand (
-  unsigned int (2000000000) commandId // id of triggered command
+  unsigned int (2000000000) commandId, // id of triggered command
+  int appId
   );
 
 
@@ -242,7 +255,8 @@ notification  OnCommand (
    * @descr Notifies if system context is changed
    */
 notification OnSystemContext(
-  SystemContext systemContext
+  SystemContext systemContext,
+  int appId
   );
 
 /*
@@ -267,7 +281,8 @@ GetCapabilities(
    *  
    */
 notification OnDriverDistraction(
-    DriverDistractionState state // data type from AppLink protocol specification
+    DriverDistractionState state, // data type from AppLink protocol specification
+    int appId
   );
 
 /*
@@ -286,7 +301,8 @@ notification OnReady(
    *  
    */
 ChangeLanguageRegistration(
-  Language hmiDisplayLanguage; //  data type from AppLink protocol specification
+  Language hmiDisplayLanguage, //  data type from AppLink protocol specification
+  int appId
   ->
 );
 /*
@@ -295,7 +311,8 @@ ChangeLanguageRegistration(
    *  
    */
 SetAppIcon(
-  string(500) syncFileName; // path to file to be used as app icon
+  string(500) syncFileName, // path to file to be used as app icon
+  int appId
   ->
 );
 
@@ -306,7 +323,8 @@ SetAppIcon(
    *  
    */
 notification OnLanguageChange(
-  Language hmiDisplayLanguage; //  data type from AppLink protocol specification
+  Language hmiDisplayLanguage, //  data type from AppLink protocol specification
+  int appId
 );
 
 }
@@ -355,7 +373,8 @@ GetCapabilities(
      */ 
 AddCommand(
     unsigned int (2000000000) cmdId, // cmdID from addCommand request in AppLink protocol
-    string (99) vrCommands [1:100] //An array of strings to be used as VR sysnonyms for this command
+    string (99) vrCommands [1:100], //An array of strings to be used as VR sysnonyms for this command
+    int appId
     -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -366,14 +385,16 @@ AddCommand(
      *  result code
      */ 
 DeleteCommand(
-    unsigned int (2000000000) cmdId // cmdID from addCommand request in AppLink protocol
+    unsigned int (2000000000) cmdId, // cmdID from addCommand request in AppLink protocol
+    int appId
     -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
      * @descr Notifies AppLink core about command trigerred by VR
      */
 notification OnCommand(
-    unsigned int (2000000000) cmdID // id of triggered command
+    unsigned int (2000000000) cmdID, // id of triggered command
+    int appId
     );
 
   /*
@@ -383,7 +404,8 @@ notification OnCommand(
    *  
    */
 ChangeLanguageRegistration(
-  Language language; //  data type from AppLink protocol specification
+  Language language, //  data type from AppLink protocol specification
+  int appId
   ->
 );
 /*
@@ -393,7 +415,8 @@ ChangeLanguageRegistration(
    *  
    */
 notification OnLanguageChange(
-  Language language; //  data type from AppLink protocol specification
+  Language language, //  data type from AppLink protocol specification
+  int appId
 );
 }
 
@@ -440,7 +463,8 @@ GetCapabilities(
      *      result code of execution
      */ 
 Speak(
-    TTSChunk ttsChunks [1:100] // data type from AppLink protocol specification
+    TTSChunk ttsChunks [1:100], // data type from AppLink protocol specification
+    int appId
     -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
  /*
@@ -450,7 +474,8 @@ Speak(
    *  
    */
 ChangeLanguageRegistration(
-  Language language; //  data type from AppLink protocol specification
+  Language language, //  data type from AppLink protocol specification
+  int appId
   ->
 );
 /*
@@ -460,7 +485,8 @@ ChangeLanguageRegistration(
    *  
    */
 notification OnLanguageChange(
-  Language language; //  data type from AppLink protocol specification
+  Language language, //  data type from AppLink protocol specification
+  int appId
 );
 }
 
@@ -565,7 +591,8 @@ GetAppList(
      *  
      */ 
 ActivateApp(
-    string(100) appName 
+    string(100) appName ,
+    int appId
     -> // return value is provided in corresponding response object, id of request and response should be equal
 );
 
@@ -579,7 +606,8 @@ ActivateApp(
      *  
      */ 
 DeactivateApp(
-    string(100) appName 
+    string(100) appName ,
+    int appId
     -> // return value is provided in corresponding response object, id of request and response should be equal
 );
 
@@ -592,7 +620,8 @@ DeactivateApp(
      *  
      */
 SendData(
-  string data[1:100]
+  string data[1:100],
+  int appId
   -> //return value is provided in corresponding response object, id of request and response should be equal
 );
 
@@ -608,7 +637,8 @@ notification OnAppRegistered(
     Language languageDesired,  // language for VR and TTS
     Language hmiDisplayLanguageDesired, // language for UI
     TTSChunk * ttsName[1:100], // TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green". Meant to overcome any failing on speech engine in properly pronouncing, understanding app name
-    AppType * appType[1:100] // List of all applicable app types stating which classifications to be given to the app
+    AppType * appType[1:100], // List of all applicable app types stating which classifications to be given to the app
+    int appId
 );
 
 /*
@@ -616,7 +646,8 @@ notification OnAppRegistered(
      */
 notification OnAppUnregistered(
     string(100) appName,
-    AppInterfaceUnregisteredReason * reason  // data type from AppLink protocol specification
+    AppInterfaceUnregisteredReason * reason,  // data type from AppLink protocol specification
+    int appId
 );
 }
 
