@@ -39,26 +39,26 @@ namespace NsHMIEmulator
         /**
         * \brief Destructor.
         */
-        ~RPC();
+        virtual ~RPC();
 
         /**
         * \brief process request.
         * \param root JSON message.
         */
-        void processRequest(Json::Value& root);
+        virtual void processRequest(Json::Value& root);
 
         /**
         * \brief process notification.
         * \param root JSON message.
         */
-        void processNotification(Json::Value& root);
+        virtual void processNotification(Json::Value& root);
 
         /**
         * \brief process response.
         * \param method method name which has been called.
         * \param root JSON message.
         */
-        void processResponse(std::string method, Json::Value& root);
+        virtual void processResponse(std::string method, Json::Value& root);
 
         /**
          * \brief Callback function which is called by JSONRPC2Handler
