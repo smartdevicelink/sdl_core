@@ -657,11 +657,22 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet request has been invoked");
                 NsAppLinkRPC::CreateInteractionChoiceSet_request* object = (NsAppLinkRPC::CreateInteractionChoiceSet_request*)mobileMsg;
+                Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                    NsAppLinkRPC::CreateInteractionChoiceSet_response* response = new NsAppLinkRPC::CreateInteractionChoiceSet_response;
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
+                }
                 NsRPC2Communication::UI::CreateInteractionChoiceSet* createInteractionChoiceSet = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
                 createInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 core->mMessageMapping.addMessage(createInteractionChoiceSet->getId(), connectionID, sessionID);
                 createInteractionChoiceSet->set_choiceSet(object->get_choiceSet());
                 createInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
+                app->addChoiceSet(object->get_interactionChoiceSetID(), object->get_choiceSet());
                 HMIHandler::getInstance().sendRequest(createInteractionChoiceSet);
                 break;
             }
@@ -669,10 +680,21 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet request has been invoked");
                 NsAppLinkRPC::DeleteInteractionChoiceSet_request* object = (NsAppLinkRPC::DeleteInteractionChoiceSet_request*)mobileMsg;
+                Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                    NsAppLinkRPC::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPC::DeleteInteractionChoiceSet_response;
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
+                }
                 NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteInteractionChoiceSet = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
                 deleteInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getId(), connectionID, sessionID);
                 deleteInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
+                app->removeChoiceSet(object->get_interactionChoiceSetID());
                 HMIHandler::getInstance().sendRequest(deleteInteractionChoiceSet);
                 break;
             }
