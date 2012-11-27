@@ -49,10 +49,15 @@ envelope "JSON-RPC 2.0";
    */ 
 Show(string(500) * mainField1,
     string(500) * mainField2, 
+    string(500) * mainField3,
+    string(500) * mainField4,
     TextAlignment * alignment,  //data type from AppLink protocol specification  
     string(500) * statusBar,
     string(500) *mediaClock, 
-    string(500) *mediaTrack  
+    string(500) *mediaTrack,
+    Image * graphic, // Image struct determining whether static or dynamic image to display in app
+    SoftButton * softButtons[0:8], // App defined SoftButtons
+    string(500) * customPresets[0:6] // App labeled on-screen presets (i.e. GEN2)
     -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -66,9 +71,14 @@ Show(string(500) * mainField1,
 Alert(
   string(500) * AlertText1,
   string(500) * AlertText2,
+  string(500) * alertText3,
+  TTSChunk * ttsChunks[1:100],
   unsigned int(3000:10000) * duration,
-  bool * playTone
-  -> );  // return value is provided in corresponding response object, id of request and response should be equal
+  bool * playTone,
+  SoftButton * softButtons[0:4] // App defined SoftButtons
+  -> 
+  unsigned int (2000000000) * tryAgainTime  // Amount of time (in seconds) that an app must wait before resending an alert.
+);  // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
    * @descr 
@@ -79,7 +89,8 @@ Alert(
    */ 
 AddCommand(
   unsigned int (2000000000) cmdId,  // cmdID from addCommand request in AppLink protocol
-  MenuParams menuParams   //data type from AppLink protocol specification
+  MenuParams menuParams,   //data type from AppLink protocol specification
+  Image * cmdIcon // Image struct determining whether static or dynamic icon
   -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -164,7 +175,8 @@ PerformInteraction(
   unsigned int (2000000000)  interactionChoiceSetIDList[1:100],// List of interaction choice set IDs to use with an interaction
   TTSChunk * helpPrompt[1:100], //data type from AppLink protocol specification
   TTSChunk * timeoutPrompt[1:100], // data type from AppLink protocol specification
-  unsigned int (5000:100000) * timeout //in milliseconds
+  unsigned int (5000:100000) * timeout, //in milliseconds
+  VrHelpItem * vrHelp[1:100] // Ability to send suggested VR Help Items to display on-screen during Perform Interaction
   -> 
   unsigned int (2000000000) * choiceID, // ID of the choice that was selected in response to PerformInteraction
   TriggerSource * triggerSource //data type from AppLink protocol specification
@@ -197,7 +209,9 @@ SetMediaClockTimer(
    */ 
 SetGlobalProperties(
   TTSChunk * helpPrompt[1:100], // data type from AppLink protocol specification
-  TTSChunk * timeoutPrompt[1:100] // data type from AppLink protocol specification
+  TTSChunk * timeoutPrompt[1:100], // data type from AppLink protocol specification
+  string(500) * vrHelpTitle, // VR Help Title text 
+  VrHelpItem * vrHelp[1:100] // VR Help Items
   -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
@@ -221,19 +235,6 @@ notification  OnCommand (
   unsigned int (2000000000) commandId // id of triggered command
   );
 
-/*
-   * @descr Notifies AppLink if application is activated (switched from background to foreground) by UI
-   */
-notification OnAppActivated(
-  string(100) appName
-);
-
-/*
-   * @descr Notifies AppLink if application is deactivated (switched from background to foreground )
-   */
-notification OnAppDeactivated(
-  string(100) appName
-);
 
 // TODO: not sure  if it is correct place for this method
   // TODO: what's about VR session in progress?
@@ -255,7 +256,8 @@ notification OnSystemContext(
 GetCapabilities(
   ->
   DisplayCapabilities displayCapabilities, // data type from AppLink protocol specification
-  HmiZoneCapabilities hmiZoneCapabilities[1:100] // data type from AppLink protocol specification
+  HmiZoneCapabilities hmiZoneCapabilities[1:100], // data type from AppLink protocol specification
+  SoftButtonCapabilities * softButtonCapabilities[1:100] // If returned, the platform supports on-screen SoftButtons
   );
 
 /*
@@ -276,7 +278,39 @@ notification OnDriverDistraction(
    */
 notification OnReady(
 );
+
+/*
+  * @descr 
+   *      Request from AppLink to HMI to change display language for app.
+   *  to user.
+   *  
+   */
+ChangeLanguageRegistration(
+  Language hmiDisplayLanguage; //  data type from AppLink protocol specification
+  ->
+);
+/*
+  * @descr 
+   *      Used to set existing local file on SYNC as the app's icon.
+   *  
+   */
+SetAppIcon(
+  string(500) syncFileName; // path to file to be used as app icon
+  ->
+);
+
+/*
+  * @descr 
+   *      Notification from HMI to AppLink about change of display language for app.
+   *  to user.
+   *  
+   */
+notification OnLanguageChange(
+  Language hmiDisplayLanguage; //  data type from AppLink protocol specification
+);
+
 }
+
 
  interface NsRPC2Communication::VR
  {
@@ -341,7 +375,28 @@ DeleteCommand(
 notification OnCommand(
     unsigned int (2000000000) cmdID // id of triggered command
     );
+
+  /*
+  * @descr 
+   *      Request from AppLink to HMI to change language for app.
+   *  to user.
+   *  
+   */
+ChangeLanguageRegistration(
+  Language language; //  data type from AppLink protocol specification
+  ->
+);
+/*
+  * @descr 
+   *      Notification from HMI to AppLink about change of  language for app.
+   *  to user.
+   *  
+   */
+notification OnLanguageChange(
+  Language language; //  data type from AppLink protocol specification
+);
 }
+
 
 interface NsRPC2Communication::TTS
 {
@@ -387,7 +442,28 @@ GetCapabilities(
 Speak(
     TTSChunk ttsChunks [1:100] // data type from AppLink protocol specification
     -> ); // return value is provided in corresponding response object, id of request and response should be equal
+
+ /*
+  * @descr 
+   *      Request from AppLink to HMI to change language for app.
+   *  to user.
+   *  
+   */
+ChangeLanguageRegistration(
+  Language language; //  data type from AppLink protocol specification
+  ->
+);
+/*
+  * @descr 
+   *      Notification from HMI to AppLink about change of  language for app.
+   *  to user.
+   *  
+   */
+notification OnLanguageChange(
+  Language language; //  data type from AppLink protocol specification
+);
 }
+
 
 interface NsRPC2Communication::Buttons
 {
@@ -421,7 +497,8 @@ envelope "JSON-RPC 2.0";
      */
 GetCapabilities(
     ->
-    ButtonCapabilities capabilities[1:100] // data type from AppLink protocol specification
+    ButtonCapabilities capabilities[1:100], // data type from AppLink protocol specification
+    PresetBankCapabilities * presetBankCapabilities // If returned, the platform supports custom on-screen Presets
 );
 
 /*
@@ -429,7 +506,8 @@ GetCapabilities(
      */
 notification OnButtonEvent(
     ButtonName name,  // data type from AppLink protocol specification
-    ButtonEventMode mode  // data type from AppLink protocol specification
+    ButtonEventMode mode,  // data type from AppLink protocol specification
+    unsigned int (65536) * customButtonID // If ButtonName is “CUSTOM_BUTTON", this references the integer ID passed by a custom button. (e.g. softButtonName)
 );
 
 /*
@@ -437,7 +515,8 @@ notification OnButtonEvent(
      */
 notification OnButtonPress(
     ButtonName name,  // data type from AppLink protocol specification
-    ButtonPressMode mode  // data type from AppLink protocol specification
+    ButtonPressMode mode,  // data type from AppLink protocol specification
+    string (500) * customButtonName // If ButtonName is “CUSTOM_BUTTON", this references the string passed by a custom button. (e.g. softButtonName)
 );
 }
 
@@ -492,6 +571,20 @@ ActivateApp(
 
 /*
      * @descr 
+     *      Deactivate app 
+     *  Usually invoked by UI component when user chooses non-mobile application on HMI
+     *  
+     * @returns
+     *      result
+     *  
+     */ 
+DeactivateApp(
+    string(100) appName 
+    -> // return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+     * @descr 
      *      Send some data from HMI to AppManager.
      *  
      * @returns
@@ -512,7 +605,10 @@ notification OnAppRegistered(
     string deviceName,
     string(40) * vrSynonym[1:100], // sysnonyms assossiated with app to start it
     bool isMediaApplication,
-    Language languageDesired  // data type from AppLink protocol specification
+    Language languageDesired,  // language for VR and TTS
+    Language hmiDisplayLanguageDesired, // language for UI
+    TTSChunk * ttsName[1:100], // TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green". Meant to overcome any failing on speech engine in properly pronouncing, understanding app name
+    AppType * appType[1:100] // List of all applicable app types stating which classifications to be given to the app
 );
 
 /*
@@ -521,6 +617,17 @@ notification OnAppRegistered(
 notification OnAppUnregistered(
     string(100) appName,
     AppInterfaceUnregisteredReason * reason  // data type from AppLink protocol specification
+);
+}
+
+interface NsRPC2Communication::VehicleInfo
+{
+ /*
+     * @descr Request from ApplinkCore to HMI to get info about the vehicle.
+     */ 
+GetVehicleType(
+  ->
+  VehicleType vehicleType // manufacturer, model, year etc of the vehicle.
 );
 }
 
