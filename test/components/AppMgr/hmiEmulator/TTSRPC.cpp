@@ -8,10 +8,16 @@
 
 #include "MBDebugHelper.h" 
 
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/TTS/GetCapabilities.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/TTS/GetCapabilitiesResponse.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/TTS/RPC2.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/TTS/Speak.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/TTS/SpeakResponse.h"
+
 namespace NsHMIEmulator
 {
   TTSRPC::TTSRPC(const std::string& address, unsigned short port):
-CMessageBrokerController(address, port, std::string("TTS"))
+RPC(address, port, std::string("TTS"))
   {
   }
 
@@ -59,6 +65,15 @@ CMessageBrokerController(address, port, std::string("TTS"))
     DBG_MSG(("TTSRPC::processResponse()\n"));
     root=root;//to prevent compiler warning
     method=method;//to prevent compiler warning
+  }
+
+  /**
+   * \brief Callback function which is called by JSONRPC2Handler
+   *  when new RPC2Bus Json message is received from HMI.
+   * \param command RPC2Bus Json message
+   */
+  void TTSRPC::onCommandReceivedCallback(NsRPC2Communication::RPC2Command *command)
+  {
   }
 
 } /* namespace NsHMIEmulator */
