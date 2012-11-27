@@ -34,6 +34,7 @@ set (SOURCES
     ./src/SyncPManager.cpp
     ./src/Base64.cpp
     ./src/AppMenus.cpp
+    ./src/AppChoiceSets.cpp
 )
 
 add_library("AppMgr" ${SOURCES})
