@@ -8,10 +8,19 @@
 
 #include "MBDebugHelper.h" 
 
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/VR/AddCommand.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/VR/AddCommandResponse.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/VR/DeleteCommand.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/VR/DeleteCommandResponse.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/VR/GetCapabilities.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/VR/GetCapabilitiesResponse.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/VR/OnCommand.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/VR/RPC2.h"
+
 namespace NsHMIEmulator
 {
   VRRPC::VRRPC(const std::string& address, unsigned short port):
-CMessageBrokerController(address, port, std::string("VR"))
+RPC(address, port, std::string("VR"))
   {
   }
 
@@ -59,6 +68,15 @@ CMessageBrokerController(address, port, std::string("VR"))
     DBG_MSG(("VRRPC::processResponse()\n"));
     root=root;//to prevent compiler warning
     method=method;//to prevent compiler warning
+  }
+
+  /**
+   * \brief Callback function which is called by JSONRPC2Handler
+   *  when new RPC2Bus Json message is received from HMI.
+   * \param command RPC2Bus Json message
+   */
+  void VRRPC::onCommandReceivedCallback(NsRPC2Communication::RPC2Command *command)
+  {
   }
 
 } /* namespace NsHMIEmulator */
