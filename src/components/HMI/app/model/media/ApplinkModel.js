@@ -29,6 +29,11 @@ MFT.ApplinkModel = Em.Object.create({
 	  */
     subMenuCommands:	new Array(),
 
+    /**
+	  * Array of commands for VR
+	  */
+    voiceRecognitionCommands:	new Array(),
+
 	/**
 	  * Timer for Media Clock
 	  */

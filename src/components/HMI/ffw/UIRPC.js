@@ -190,7 +190,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.AddCommand") {
 			
-			MFT.ApplinkMediaController.applinkAddCommand(request.params);
+			MFT.ApplinkMediaController.onApplinkAddCommand(request.params);
 
 			this.sendUIResult("SUCCESS", request.id, request.method);
 
@@ -198,21 +198,23 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.DeleteCommand") {
 			
-			MFT.ApplinkOptionsView.DeleteCommand(request.params.cmdId);
+			//MFT.ApplinkOptionsView.DeleteCommand(request.params.cmdId);
+			MFT.ApplinkMediaController.onApplinkDeleteCommand(request.params.cmdId);
 
 			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
 
 		if (request.method == "UI.AddSubMenu") {
 			
-			MFT.ApplinkOptionsView.AddSubMenu(request.params.menuId, request.params.menuName);
+			//MFT.ApplinkOptionsView.AddSubMenu(request.params.menuId, request.params.menuName);
+			MFT.ApplinkMediaController.onApplinkAddSubMenu(request.params.menuId, request.params.menuName);
 
 			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
 
 		if (request.method == "UI.DeleteSubMenu") {
 
-			var resultCode =  MFT.ApplinkOptionsView.DeleteSubMenu(request.params.menuId);
+			var resultCode =  MFT.ApplinkMediaController.onApplinkDeleteSubMenu(request.params.menuId);
 
 			this.sendUIResult(resultCode, request.id, request.method);
 
@@ -220,19 +222,17 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.CreateInteractionChoiceSet") {
 
-			MFT.ApplinkModel.interactionChoises.push(request.params);
+			MFT.ApplinkMediaController.onApplinkCreateInteractionChoise(request.params);
 
 			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
 
 		if (request.method == "UI.DeleteInteractionChoiceSet") {
 
-			for(var val in MFT.ApplinkModel.interactionChoises){
-				if(MFT.ApplinkModel.interactionChoises[val].interactionChoiceSetID == request.params.interactionChoiceSetID ){
-					MFT.ApplinkModel.interactionChoises.splice(val, 1);
-					break;
-				}
-			}
+			MFT.ApplinkMediaController.onApplinkDeleteInteractionChoise(request.params.interactionChoiceSetID);
+
+
+			
 
 			this.sendUIResult("SUCCESS", request.id, request.method);
 
