@@ -8,10 +8,16 @@
 
 #include "MBDebugHelper.h" 
 
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/GetCapabilities.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/GetCapabilitiesResponse.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/OnButtonEvent.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/OnButtonPress.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/RPC2.h"
+
 namespace NsHMIEmulator
 {
   ButtonsRPC::ButtonsRPC(const std::string& address, unsigned short port):
-CMessageBrokerController(address, port, std::string("Buttons"))
+RPC(address, port, std::string("Buttons"))
   {
   }
 
@@ -59,6 +65,15 @@ CMessageBrokerController(address, port, std::string("Buttons"))
     DBG_MSG(("ButtonsRPC::processResponse()\n"));
     root=root;//to prevent compiler warning
     method=method;//to prevent compiler warning
+  }
+
+  /**
+   * \brief Callback function which is called by JSONRPC2Handler
+   *  when new RPC2Bus Json message is received from HMI.
+   * \param command RPC2Bus Json message
+   */
+  void ButtonsRPC::onCommandReceivedCallback(NsRPC2Communication::RPC2Command *command)
+  {
   }
 
 } /* namespace NsHMIEmulator */
