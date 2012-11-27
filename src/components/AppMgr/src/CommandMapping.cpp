@@ -94,11 +94,11 @@ namespace NsAppManager
     /**
      * \brief retrieve types associated with command id in current mapping
      * \param commandId command id to search for types
-     * \param types input container of command types to be filled with result
+     * \return input container of command types to be filled with result
      */
-    void CommandMapping::getTypes( unsigned int commandId, CommandTypes& types ) const
+    CommandTypes CommandMapping::getTypes( unsigned int commandId ) const
     {
-        types.clear();
+        CommandTypes types;
         for(CommandType type = CommandType::FIRST; type != CommandType::LAST; type++)
         {
             Commands::const_iterator it = mCommands.find( CommandBase(commandId, type) );
@@ -107,6 +107,7 @@ namespace NsAppManager
                 types.push_back(type);
             }
         }
+        return types;
     }
 
     /**
