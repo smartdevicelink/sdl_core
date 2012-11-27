@@ -59,10 +59,10 @@ void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConne
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
-    unsigned char versionF = PROTOCOL_VERSION_1;
+    unsigned char versionFlag = PROTOCOL_VERSION_1;
     if (2 == protocolVersion)
     {
-        versionF = PROTOCOL_VERSION_2;
+        versionFlag = PROTOCOL_VERSION_2;
     }
 
     UInt32 hashCode = 0;
@@ -71,7 +71,7 @@ void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConne
 
     mHashCodes[sessionID] = hashCode;
 
-    ProtocolPacket packet(versionF,
+    ProtocolPacket packet(versionFlag,
                                 COMPRESS_OFF,
                                 FRAME_TYPE_CONTROL,
                                 SERVICE_TYPE_RPC,
@@ -242,81 +242,65 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(unsigned int connectionHandle
     return retVal;
 }
 
-void ProtocolHandler::handleMessage( const ProtocolPacket& packet )
+void ProtocolHandler::handleMessage( ProtocolPacket & packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
-    switch (header.frameType)
+    switch (packet.getFrameType())
     {
-    case FRAME_TYPE_CONTROL:
-    {
-        LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_CONTROL");
-
-        handleControlMessage( packet );
-        break;
-    }
-    case FRAME_TYPE_SINGLE:
-    {
-        LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_SINGLE");
-        
-        AppLinkRawMessage * rawMessage = new AppLinkRawMessage( connectionHandle,
-                                    packet.sessionID,
-                                    packet.version,
-                                    packet.data,
-                                    packet.dataSize);
-
-        if (mProtocolObserver)
-            mProtocolObserver->dataReceivedCallback(rawMessage);
-
-        break;
-    }
-    case FRAME_TYPE_FIRST:
-    case FRAME_TYPE_CONSECUTIVE:
-    {
-        LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_CONSECUTIVE");
-        if (mSessionStates.count(header.sessionID) )
+        case FRAME_TYPE_CONTROL:
         {
-            if (mSessionStates[header.sessionID] == HANDSHAKE_DONE)
-                handleMultiFrameMessage(header, data);
-            else
-            {
-                LOG4CPLUS_WARN(mLogger
-                      , "handleMessage() - case FRAME_TYPE_CONSECUTIVE but HANDSHAKE_NOT_DONE");
-                retVal = ERR_FAIL;
-            }
+            LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_CONTROL");
+
+            handleControlMessage( packet );
+            break;
         }
-        else
+        case FRAME_TYPE_SINGLE:
         {
-            LOG4CPLUS_WARN(mLogger, "handleMessage() - case FRAME_TYPE_CONSECUTIVE. unknown sessionID");
-            retVal = ERR_FAIL;
+            LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_SINGLE");
+            
+            AppLinkRawMessage * rawMessage = new AppLinkRawMessage( connectionHandle,
+                                        packet.getSessionID(),
+                                        packet.getVersion(),
+                                        packet.getData(),
+                                        packet.getDataSize());
+
+            if (mProtocolObserver)
+                mProtocolObserver->dataReceivedCallback(rawMessage);
+
+            break;
         }
+        case FRAME_TYPE_FIRST:
+        case FRAME_TYPE_CONSECUTIVE:
+        {
+            LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_CONSECUTIVE");
 
-        break;
+            handleMultiFrameMessage( connectionHandle, packet);            
+            break;
+        }
+        default:
+        {
+            LOG4CPLUS_WARN(mLogger, "handleMessage() - case default!!!");
+        }
     }
-    default:
-    {
-        LOG4CPLUS_WARN(mLogger, "handleMessage() - case default!!!");
-    }
-    }
-
-    delete [] data;
-    data = NULL;
 
     return retVal;
 }
 
 RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              ProtocolPacket * packet )
+              ProtocolPacket & packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    if (header.frameType == FRAME_TYPE_FIRST)
+    if (packet.getFrameType() == FRAME_TYPE_FIRST)
     {
         LOG4CPLUS_INFO(mLogger, "handleMultiFrameMessage() - FRAME_TYPE_FIRST");
         
-        packet -> totalDataBytes = packet -> data[0] << 24;
-        packet -> totalDataBytes |= packet -> data[1] << 16;
-        packet -> totalDataBytes |= packet -> data[2] << 8;
-        packet -> totalDataBytes |= packet -> data[3];
+        unsigned int totalDataBytes = packet.getData[0] << 24;
+        totalDataBytes |= packet.getData[1] << 16;
+        totalDataBytes |= packet.getData[2] << 8;
+        totalDataBytes |= packet.getData[3];
+
+        packet.setTotalDataBytes()
 
         mIncompleteMultiFrameMessages[connectionHandle] = packet;
     }
@@ -360,13 +344,13 @@ void ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager::tConn
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
-    unsigned char currentSessionID = packet.sessionID;
+    unsigned char currentSessionID = packet.getSessionID();
     
-    if (header.frameData == FRAME_DATA_END_SESSION)
+    if (packet.getFrameData() == FRAME_DATA_END_SESSION)
     {
         LOG4CPLUS_INFO(mLogger, "handleControlMessage() - FRAME_DATA_END_SESSION");
         bool correctEndSession = false;
-        if (header.version == PROTOCOL_VERSION_2)
+        if (packet.getVersion() == PROTOCOL_VERSION_2)
         {
             /*if (header.messageID == mHashCodes[header.sessionID])
                 correctEndSession = true;
@@ -377,7 +361,7 @@ void ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager::tConn
                     retVal = ERR_FAIL;
             }*/
         }
-        else if ( (header.version == PROTOCOL_VERSION_1) )
+        else if ( (packet.getVersion() == PROTOCOL_VERSION_1) )
         {
             correctEndSession = true;
         }
@@ -389,7 +373,7 @@ void ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager::tConn
                 mProtocolObserver->sessionEndedCallback(currentSessionID);
         }
     }
-    if (header.frameData == FRAME_DATA_START_SESSION)
+    if (packet.getFrameData() == FRAME_DATA_START_SESSION)
     {
         LOG4CPLUS_INFO(mLogger, "handleControlMessage() - FRAME_DATA_START_SESSION");
         if (sendStartSessionAck(connectionHandle, 1, mSessionIdCounter) == RESULT_OK)
@@ -425,61 +409,14 @@ void * ProtocolHandler::handleMessagesFromMobileApp( void * params )
             if ((0 != message.mData) && (0 != message.mDataSize) && (MAXIMUM_FRAME_SIZE >= message.mDataSize))
             {        
                 ProtocolPacket packet;
-                
-                UInt8 offset = 0;
-                UInt8 firstByte = message.mData[offset];
-                offset++;
-                
-                packet.version = firstByte >> 4u;
-                if (firstByte & 0x08u)
+                if ( packet.deserializePacket( message.mData, message.mDataSize ) == RESULT_FAIL )
                 {
-                    packet.compress = true;
+                    LOG4CPLUS_ERROR(mLogger, "Failed to parse received message.");
                 }
-                else
+                else 
                 {
-                    packet.compress = false;
+                    handleMessage(packet);
                 }
-                
-                packet.frameType = firstByte & 0x07u;
-
-                packet.serviceType = message.mData[offset++];        
-                packet.frameData = message.mData[offset++];        
-                packet.sessionID = message.mData[offset++];
-                
-                packet.dataSize  = message.mData[offset++] << 24u;
-                packet.dataSize |= message.mData[offset++] << 16u;
-                packet.dataSize |= message.mData[offset++] << 8u;
-                packet.dataSize |= message.mData[offset++];
-                
-                if (packet.version == PROTOCOL_VERSION_2)
-                {
-                    packet.messageID  = message.mData[offset++] << 24u;
-                    packet.messageID |= message.mData[offset++] << 16u;
-                    packet.messageID |= message.mData[offset++] << 8u;
-                    packet.messageID |= message.mData[offset++];
-                }
-                else
-                {
-                    packet.messageID = 0u;
-                }
-                
-                const UInt32 dataPayloadSize = message.mDataSize - offset;
-                
-                if (dataPayloadSize != packet.dataSize)
-                {
-                    LOG4CPLUS_ERROR(mLogger, "handleMessagesFromMobileApp() - EPIC FAIL: dataPayloadSize != packet.dataSize");
-                    return;
-                }
-                
-                UInt8 * data = 0;
-                if (dataPayloadSize != 0u)
-                {
-                    data = new UInt8[message.mDataSize - offset];
-                    memcpy(data, message.mData + offset, dataPayloadSize);
-                }
-                packet.data = data;
-                        
-                handleMessage(packet);
             }
             else
             {

@@ -60,6 +60,7 @@ namespace NsProtocolHandler
          * @param DataSize Size of data in bytes.
         **/
         virtual void onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize);
+        
         RESULT_CODE sendSingleFrameMessage(unsigned int connectionHandle,
                                       const unsigned char sessionID,
                                       const unsigned char servType,
@@ -73,17 +74,19 @@ namespace NsProtocolHandler
                                          const unsigned char *data,
                                          const bool compress,
                                          const unsigned int maxDataSize);
-        RESULT_CODE handleMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              const ProtocolPacket& packet );
-        RESULT_CODE handleMultiFrameMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              const ProtocolPacket & packet );
-        void handleControlMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              const ProtocolPacket & packet );
         void sendStartSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned int protocolVersion,
               unsigned char sessionID );
         RESULT_CODE sendFrame( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
               const ProtocolPacket & packet );
+
+        RESULT_CODE handleMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              ProtocolPacket& packet );
+        RESULT_CODE handleMultiFrameMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              ProtocolPacket & packet );
+        void handleControlMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              const ProtocolPacket & packet );
+        
 
         static log4cplus::Logger mLogger;
         IProtocolObserver *mProtocolObserver;

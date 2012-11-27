@@ -1,5 +1,5 @@
-#ifndef PROTOCOLPACKETHEADER_CLASS
-#define PROTOCOLPACKETHEADER_CLASS
+#ifndef PROTOCOLPACKET_CLASS
+#define PROTOCOLPACKET_CLASS
 
 namespace NsProtocolHandler
 {
@@ -43,7 +43,16 @@ const unsigned char FIRST_FRAME_DATA_SIZE = 0x08;
     struct ProtocolHeader
     {
         ProtocolHeader() :
-            version('1');
+            version(0x00),
+            compress(0x00),
+            frameType(0x00),
+            serviceType(0x00),
+            frameData(0x00),
+            sessionID(0x00),
+            dataSize(0x00),
+            messageId(0x00)
+        {}
+
         unsigned char version;
         bool compress;
         unsigned char frameType;
@@ -59,9 +68,14 @@ const unsigned char FIRST_FRAME_DATA_SIZE = 0x08;
 
     struct ProtocolData
     {
+        ProtocolData() :
+            data(0),
+            totalDataBytes(0x00),
+            dataOffset(0x00)
+        {}
+
         unsigned char * data;
         unsigned int totalDataBytes;
-        unsigned int dataOffset;
     };
 
     class ProtocolPacket
@@ -80,8 +94,6 @@ const unsigned char FIRST_FRAME_DATA_SIZE = 0x08;
                              unsigned int dataSize,
                              unsigned int messageID,
                              const unsigned char * data = 0);
-        void setData( const unsigned char * data,
-                        unsigned int dataSize );
         RESULT_CODE appendData( unsigned char * chunkData, 
                             unsigned int chunkDataSize );
         unsigned char * getPacket() const;
@@ -89,7 +101,7 @@ const unsigned char FIRST_FRAME_DATA_SIZE = 0x08;
         /*End of Serialization*/
 
         /*Deserialization*/
-        RESULT_CODE deserializePacket();
+        RESULT_CODE deserializePacket(unsigned int message, unsigned int messageSize);
         void pushConsecutiveFrame();
         unsigned char getVersion() const;
         bool getIfCompress() const;
@@ -99,6 +111,8 @@ const unsigned char FIRST_FRAME_DATA_SIZE = 0x08;
         unsigned char getSessionId() const;
         unsigned int getDataSize() const;
         unsigned int getMessageId() const;
+        unsigned char * getData() const;
+        void setTotalDataBytes(unsigned int dataBytes);
         /*End of Deserialization*/         
 
     private:
@@ -110,7 +124,10 @@ const unsigned char FIRST_FRAME_DATA_SIZE = 0x08;
          
         ProtocolHeader mPacketHeader;
         ProtocolData mPacketData;
+
+
+        unsigned int mDataOffset;
     };
 }
 
-#endif // PROTOCOLPACKETHEADER_CLASS
+#endif // PROTOCOLPACKET_CLASS
