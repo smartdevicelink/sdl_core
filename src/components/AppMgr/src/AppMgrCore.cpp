@@ -562,8 +562,7 @@ namespace NsAppManager
 
                 NsAppLinkRPC::DeleteCommand_request* object = (NsAppLinkRPC::DeleteCommand_request*)mobileMsg;
 
-                CommandTypes cmdTypes;
-                app->getTypes(object->get_cmdID(), cmdTypes);
+                CommandTypes cmdTypes = app->getCommandTypes(object->get_cmdID());
                 const unsigned int& cmdId = object->get_cmdID();
                 for(CommandTypes::iterator it = cmdTypes.begin(); it != cmdTypes.end(); it++)
                 {
@@ -646,6 +645,26 @@ namespace NsAppManager
                 const MenuCommands& menuCommands = app->findMenuCommands(menuId);
                 for(MenuCommands::const_iterator it = menuCommands.begin(); it != menuCommands.end(); it++)
                 {
+                    NsRPC2Communication::UI::DeleteCommand* delCmd = new NsRPC2Communication::UI::DeleteCommand();
+                    delCmd->set_cmdId(*it);
+                    delCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    core->mMessageMapping.addMessage(delCmd->getId(), connectionID, sessionID);
+                    core->mRequestMapping.addMessage(delCmd->getId(), *it);
+                    HMIHandler::getInstance().sendRequest(delCmd);
+                    const CommandTypes& types = app->getCommandTypes(*it);
+                    for(CommandTypes::const_iterator it2 = types.begin(); it2 != types.end(); it2++)
+                    {
+                        const CommandType& type = *it2;
+                        if(type == CommandType::VR)
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, " A given command has VR counterpart attached to: deleting it also!");
+                            NsRPC2Communication::VR::DeleteCommand* delCmd = new NsRPC2Communication::VR::DeleteCommand();
+                            delCmd->set_cmdId(*it);
+                            core->mMessageMapping.addMessage(delCmd->getId(), connectionID, sessionID);
+                            core->mRequestMapping.addMessage(delCmd->getId(), *it);
+                            HMIHandler::getInstance().sendRequest(delCmd);
+                        }
+                    }
                     app->removeCommand(*it, CommandType::UI);
                     app->removeMenuCommand(*it);
                 }
@@ -727,16 +746,27 @@ namespace NsAppManager
             case NsAppLinkRPC::Marshaller::METHOD_SETMEDIACLOCKTIMER_REQUEST:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
-                NsAppLinkRPC::SetMediaClockTimer_request* object = (NsAppLinkRPC::SetMediaClockTimer_request*)mobileMsg;
-                NsRPC2Communication::UI::SetMediaClockTimer* setTimer = new NsRPC2Communication::UI::SetMediaClockTimer();
-                setTimer->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                core->mMessageMapping.addMessage(setTimer->getId(), connectionID, sessionID);
-                if(object->get_startTime())
+                switch(mobileMsg->getProtocolVersion())
                 {
-                    setTimer->set_startTime(*object->get_startTime());
+                    case 1:
+                    {
+                        NsAppLinkRPC::SetMediaClockTimer_request* object = (NsAppLinkRPC::SetMediaClockTimer_request*)mobileMsg;
+                        NsRPC2Communication::UI::SetMediaClockTimer* setTimer = new NsRPC2Communication::UI::SetMediaClockTimer();
+                        setTimer->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        core->mMessageMapping.addMessage(setTimer->getId(), connectionID, sessionID);
+                        if(object->get_startTime())
+                        {
+                            setTimer->set_startTime(*object->get_startTime());
+                        }
+                        setTimer->set_updateMode(object->get_updateMode());
+                        HMIHandler::getInstance().sendRequest(setTimer);
+                        break;
+                    }
+                    case 2:
+                    {
+                        break;
+                    }
                 }
-                setTimer->set_updateMode(object->get_updateMode());
-                HMIHandler::getInstance().sendRequest(setTimer);
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_ENCODEDSYNCPDATA_REQUEST:
