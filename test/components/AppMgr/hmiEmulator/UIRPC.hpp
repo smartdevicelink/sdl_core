@@ -7,10 +7,7 @@
 
 #include <iostream>
 
-#include "json/json.h"
-
-#include "mb_controller.hpp"
-#include "CMessageBroker.hpp"
+#include "RPC.h"
 
 /**
  * \namespace NsHMIEmulator
@@ -19,11 +16,11 @@
 namespace NsHMIEmulator
 {
   /**
-  * \class UIRPC
+  * \class UIRPC
   * \brief MessageBroker Controller.
   */
 
-  class UIRPC : public NsMessageBroker::CMessageBrokerController
+  class UIRPC : public RPC
   {
   public:
     /**
@@ -36,26 +33,32 @@ namespace NsHMIEmulator
     /**
     * \brief Destructor.
     */
-    ~UIRPC();
+    virtual ~UIRPC();
 
     /**
     * \brief process request.
     * \param root JSON message.
     */
-    void processRequest(Json::Value& root);
+    virtual void processRequest(Json::Value& root);
 
     /**
     * \brief process notification.
     * \param root JSON message.
     */
-    void processNotification(Json::Value& root);
+    virtual void processNotification(Json::Value& root);
 
     /**
     * \brief process response.
     * \param method method name which has been called.
     * \param root JSON message.
     */
-    void processResponse(std::string method, Json::Value& root);
-  private:
+    virtual void processResponse(std::string method, Json::Value& root);
+
+    /**
+     * \brief Callback function which is called by JSONRPC2Handler
+     *  when new RPC2Bus Json message is received from HMI.
+     * \param command RPC2Bus Json message
+     */
+    virtual void onCommandReceivedCallback( NsRPC2Communication::RPC2Command * command );
   };
 }/* namespace NsHMIEmulator */
