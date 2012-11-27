@@ -27,7 +27,8 @@ RPC(address, port, std::string("Buttons"))
 
   void ButtonsRPC::processRequest(Json::Value& root)
   {
-    DBG_MSG(("ButtonsRPC::processRequest()\n"));
+      RPC::processRequest(root);
+ /*   DBG_MSG(("ButtonsRPC::processRequest()\n"));
     if (getControllersName() == getDestinationComponentName(root))
     {
       Json::Value response;
@@ -51,20 +52,22 @@ RPC(address, port, std::string("Buttons"))
     } else
     {
       DBG_MSG_ERROR(("Wrong message destination!\n"));
-    }
+    }*/
   }
 
   void ButtonsRPC::processNotification(Json::Value& root)
   {
-    DBG_MSG(("ButtonsRPC::processNotification()\n"));
-    root=root;//to prevent compiler warning
+      RPC::processNotification(root);
+/*    DBG_MSG(("ButtonsRPC::processNotification()\n"));
+    root=root;//to prevent compiler warning*/
   }
 
   void ButtonsRPC::processResponse(std::string method, Json::Value& root)
   {
-    DBG_MSG(("ButtonsRPC::processResponse()\n"));
+      RPC::processResponse(method, root);
+/*    DBG_MSG(("ButtonsRPC::processResponse()\n"));
     root=root;//to prevent compiler warning
-    method=method;//to prevent compiler warning
+    method=method;//to prevent compiler warning*/
   }
 
   /**

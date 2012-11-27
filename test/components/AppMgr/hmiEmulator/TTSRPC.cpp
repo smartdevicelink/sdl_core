@@ -27,7 +27,8 @@ RPC(address, port, std::string("TTS"))
 
   void TTSRPC::processRequest(Json::Value& root)
   {
-    DBG_MSG(("TTSRPC::processRequest()\n"));
+      RPC::processRequest(root);
+ /*   DBG_MSG(("TTSRPC::processRequest()\n"));
     if (getControllersName() == getDestinationComponentName(root))
     {
       Json::Value response;
@@ -51,20 +52,22 @@ RPC(address, port, std::string("TTS"))
     } else
     {
       DBG_MSG_ERROR(("Wrong message destination!\n"));
-    }
+    }*/
   }
 
   void TTSRPC::processNotification(Json::Value& root)
   {
-    DBG_MSG(("TTSRPC::processNotification()\n"));
-    root=root;//to prevent compiler warning
+      RPC::processNotification(root);
+/*    DBG_MSG(("TTSRPC::processNotification()\n"));
+    root=root;//to prevent compiler warning*/
   }
 
   void TTSRPC::processResponse(std::string method, Json::Value& root)
   {
-    DBG_MSG(("TTSRPC::processResponse()\n"));
+      RPC::processResponse(method, root);
+ /*   DBG_MSG(("TTSRPC::processResponse()\n"));
     root=root;//to prevent compiler warning
-    method=method;//to prevent compiler warning
+    method=method;//to prevent compiler warning*/
   }
 
   /**

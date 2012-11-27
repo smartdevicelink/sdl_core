@@ -30,7 +30,8 @@ RPC(address, port, std::string("VR"))
 
   void VRRPC::processRequest(Json::Value& root)
   {
-    DBG_MSG(("VRRPC::processRequest()\n"));
+      RPC::processRequest(root);
+/*    DBG_MSG(("VRRPC::processRequest()\n"));
     if (getControllersName() == getDestinationComponentName(root))
     {
       Json::Value response;
@@ -54,20 +55,22 @@ RPC(address, port, std::string("VR"))
     } else
     {
       DBG_MSG_ERROR(("Wrong message destination!\n"));
-    }
+    }*/
   }
 
   void VRRPC::processNotification(Json::Value& root)
   {
-    DBG_MSG(("VRRPC::processNotification()\n"));
-    root=root;//to prevent compiler warning
+      RPC::processNotification(root);
+/*    DBG_MSG(("VRRPC::processNotification()\n"));
+    root=root;//to prevent compiler warning*/
   }
 
   void VRRPC::processResponse(std::string method, Json::Value& root)
   {
-    DBG_MSG(("VRRPC::processResponse()\n"));
+      RPC::processResponse(method, root);
+/*    DBG_MSG(("VRRPC::processResponse()\n"));
     root=root;//to prevent compiler warning
-    method=method;//to prevent compiler warning
+    method=method;//to prevent compiler warning*/
   }
 
   /**

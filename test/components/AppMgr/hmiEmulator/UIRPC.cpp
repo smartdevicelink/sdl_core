@@ -55,7 +55,8 @@ RPC(address, port, std::string("UI"))
 
   void UIRPC::processRequest(Json::Value& root)
   {
-    DBG_MSG(("UIRPC::processRequest()\n"));
+      RPC::processRequest(root);
+ /*   DBG_MSG(("UIRPC::processRequest()\n"));
     if (getControllersName() == getDestinationComponentName(root))
     {
       Json::Value response;
@@ -79,20 +80,22 @@ RPC(address, port, std::string("UI"))
     } else
     {
       DBG_MSG_ERROR(("Wrong message destination!\n"));
-    }
+    }*/
   }
 
   void UIRPC::processNotification(Json::Value& root)
   {
-    DBG_MSG(("UIRPC::processNotification()\n"));
-    root=root;//to prevent compiler warning
+      RPC::processNotification(root);
+/*    DBG_MSG(("UIRPC::processNotification()\n"));
+    root=root;//to prevent compiler warning*/
   }
 
   void UIRPC::processResponse(std::string method, Json::Value& root)
   {
-    DBG_MSG(("UIRPC::processResponse()\n"));
+      RPC::processResponse(method, root);
+/*    DBG_MSG(("UIRPC::processResponse()\n"));
     root=root;//to prevent compiler warning
-    method=method;//to prevent compiler warning
+    method=method;//to prevent compiler warning*/
   }
 
   /**
