@@ -1491,6 +1491,24 @@ namespace NsAppManager
 
                 AppMgrRegistry::getInstance().activateApp(app);
 
+                const ChoiceSetItems& newChoiceSets = app->getAllChoiceSets();
+                LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
+                for(ChoiceSetItems::const_iterator it = newChoiceSets.begin(); it != newChoiceSets.end(); it++)
+                {
+                    const unsigned int& choiceSetId = it->first;
+                    const ChoiceSet& choiceSet = it->second;
+                    NsRPC2Communication::UI::CreateInteractionChoiceSet* addCmd = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
+                    addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    addCmd->set_interactionChoiceSetID(choiceSetId);
+                    addCmd->set_choiceSet(choiceSet);
+                    unsigned char sessionID = app->getSessionID();
+                    unsigned int connectionID = app->getConnectionID();
+                    core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
+
+                    HMIHandler::getInstance().sendRequest(addCmd);
+                }
+                LOG4CPLUS_INFO_EXT(mLogger, "New app's interaction choice sets added!");
+
                 const MenuItems& newMenus = app->getAllMenus();
                 LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's menus to HMI due to a new application activation");
                 for(MenuItems::const_iterator it = newMenus.begin(); it != newMenus.end(); it++)
