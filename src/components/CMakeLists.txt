@@ -6,3 +6,6 @@ add_subdirectory(./AppMgr)
 
 # --- JSONHandler
 add_subdirectory(./JSONHandler)
+
+# --- connectionHandler
+add_subdirectory(./connectionHandler)
