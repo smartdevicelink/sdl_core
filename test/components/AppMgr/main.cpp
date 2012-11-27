@@ -72,7 +72,7 @@ int main()
     LOG4CPLUS_INFO_EXT(logger, "Start AppMgr threads!");
     appMgr.executeThreads();
 
-    //============START MASSAGEBROKER===========//
+    //============START MESSAGEBROKER===========//
     NsMessageBroker::CMessageBroker *pMessageBroker = NsMessageBroker::CMessageBroker::getInstance();
     if (!pMessageBroker)
     {
