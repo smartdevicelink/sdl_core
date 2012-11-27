@@ -236,6 +236,40 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Gets an application assigned to a command
+     * \param cmdId a command
+     * \return an application assigned to a command
+     */
+    Application *AppMgrRegistry::getApplicationByCommand(const unsigned int &cmdId) const
+    {
+        for(ItemsMap::const_iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
+        {
+            RegistryItem* item = it->second;
+            if(!item)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " Item " << item << " is empty in registry!");
+                continue;
+            }
+            Application* app = item->getApplication();
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " No application for the item " << item);
+                continue;
+            }
+            if(app->getCommandsCount())
+            {
+                const Commands& cmds = app->findCommands(cmdId);
+                if(!cmds.empty())
+                {
+                    return app;
+                }
+            }
+        }
+        LOG4CPLUS_ERROR_EXT(mLogger, " No applications found for the command " << cmdId);
+        return 0;
+    }
+
+    /**
      * \brief cleans all the registry
      */
     void AppMgrRegistry::clear()

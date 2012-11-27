@@ -96,6 +96,7 @@ namespace NsAppManager
          * \return RegistryItem instance
          */
         RegistryItem *getItem( unsigned int connectionId, unsigned char sessionId ) const;
+
         /**
          * \brief Returns registered applications list
          * \return registered applications list
@@ -123,6 +124,13 @@ namespace NsAppManager
          * \return application, if the specified name found in a registry, NULL otherwise
          */
         Application* getApplication( unsigned int connectionId, unsigned char sessionId ) const;
+
+        /**
+         * \brief Gets an application assigned to a command
+         * \param cmdId a command
+         * \return an application assigned to a command
+         */
+        Application* getApplicationByCommand( const unsigned int& cmdId ) const;
 
         /**
          * \brief cleans all the registry

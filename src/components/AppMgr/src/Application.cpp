@@ -57,6 +57,17 @@ namespace NsAppManager
     }
 
     /**
+     * \brief operator ==
+     * \param item the item to compare with
+     * \return comparison result
+     */
+    bool Application::operator ==(const Application &item) const
+    {
+        return this->getSessionID() == item.getSessionID()
+            && this->getConnectionID() == item.getConnectionID();
+    }
+
+    /**
      * \brief retrieve aplication HMI status level
      * \return HMI status level of application
      */
@@ -297,6 +308,208 @@ namespace NsAppManager
     const NsAppLinkRPC::SystemContext &Application::getSystemContext() const
     {
         return mSystemContext;
+    }
+
+    /**
+     * \brief add an interaction choice set item to the application
+     * \param choiceSetId interaction choice set id
+     * \param choiceSet interaction choice set
+     */
+    void Application::addChoiceSet(const unsigned int &choiceSetId, const ChoiceSet &choiceSet)
+    {
+        mChoiceSets.addItem(choiceSetId, choiceSet);
+    }
+
+    /**
+     * \brief remove an interaction choice set from the application
+     * \param choiceSetId interaction choice set id
+     */
+    void Application::removeChoiceSet(const unsigned int &choiceSetId)
+    {
+        mChoiceSets.removeItem(choiceSetId);
+    }
+
+    /**
+     * \brief gets all interaction choice set items
+     * \return interaction choice set items
+     */
+    ChoiceSetItems Application::getAllChoiceSets() const
+    {
+        return mChoiceSets.getAllChoiceSets();
+    }
+
+    /**
+     * \brief get count of interaction choice sets
+     * \return interaction choice sets count
+     */
+    size_t Application::getChoiceSetsCount() const
+    {
+        return mChoiceSets.size();
+    }
+
+    /**
+     * \brief add a command to a menu
+     * \param commandId command id
+     * \param menuId menu id
+     */
+    void Application::addMenuCommand(const unsigned int &commandId, const unsigned int &menuId)
+    {
+        mMenuMapping.addCommand(commandId, menuId);
+    }
+
+    /**
+     * \brief remove a command from a menu(s)
+     * \param commandId command id
+     */
+    void Application::removeMenuCommand(const unsigned int &commandId)
+    {
+        mMenuMapping.removeCommand(commandId);
+    }
+
+    /**
+     * \brief find commands within a menu
+     * \param menuId menu id
+     * \return commands residing within the given menu
+     */
+    MenuCommands Application::findMenuCommands(const unsigned int &menuId) const
+    {
+        return mMenuMapping.findCommandsAssignedToMenu(menuId);
+    }
+
+    /**
+     * \brief add a menu item to the application
+     * \param menuId menu id
+     * \param menuName menu item name
+     * \param position menu item position within the parent menu
+     */
+    void Application::addMenu(const unsigned int &menuId, const std::string &menuName, const unsigned int *position)
+    {
+        mMenus.addItem(menuId, menuName, position);
+    }
+
+    /**
+     * \brief remove a menu item from the application
+     * \param menuId menu id
+     */
+    void Application::removeMenu(const unsigned int &menuId)
+    {
+        mMenus.removeItem(menuId);
+    }
+
+    /**
+     * \brief gets all application menus
+     * \return application menus
+     */
+    MenuItems Application::getAllMenus() const
+    {
+        return mMenus.getAllMenuItems();
+    }
+
+    /**
+     * \brief get count of items
+     * \return items count
+     */
+    size_t Application::getMenusCount() const
+    {
+        return mMenus.size();
+    }
+
+    /**
+     * \brief get count of items
+     * \return items count
+     */
+    size_t Application::getMenuCommandsCount() const
+    {
+        return mMenuMapping.size();
+    }
+
+    /**
+     * \brief add a command to an application
+     * \param commandId command id
+     * \param type command type
+     * \param params VR or UI params supplied with the AddCommand request
+     */
+    void Application::addCommand(unsigned int commandId, CommandType type, CommandParams params)
+    {
+        mCommandMapping.addCommand(commandId, type, params);
+    }
+
+    /**
+     * \brief remove a command from application
+     * \param commandId command id
+     * \param type a type of a command
+     */
+    void Application::removeCommand(unsigned int commandId, CommandType type)
+    {
+        mCommandMapping.removeCommand(commandId, type);
+    }
+
+    /**
+     * \brief finds commands in application
+     * \param commandId command id
+     * \return command list
+     */
+    Commands Application::findCommands(unsigned int commandId) const
+    {
+        return mCommandMapping.findCommands(commandId);
+    }
+
+    /**
+     * \brief gets all application commands
+     * \return application commands
+     */
+    Commands Application::getAllCommands() const
+    {
+        return mCommandMapping.getAllCommands();
+    }
+
+    /**
+     * \brief get count of items
+     * \return items count
+     */
+    size_t Application::getCommandsCount() const
+    {
+        return mCommandMapping.size();
+    }
+
+    /**
+     * \brief retrieve types associated with command id in current application
+     * \param commandId command id to search for types
+     * \param types input container of command types to be filled with result
+     */
+    void Application::getTypes(unsigned int commandId, CommandTypes &types) const
+    {
+        mCommandMapping.getTypes(commandId, types);
+    }
+
+    /**
+     * \brief get count of unresponsed requests associated with the given command id
+     * \param cmdId id of command we need to count unresponded requests for
+     * \return unresponded requests count
+     */
+    unsigned int Application::getUnrespondedRequestCount(const unsigned int &cmdId) const
+    {
+        return mCommandMapping.getUnrespondedRequestCount(cmdId);
+    }
+
+    /**
+     * \brief increment count of unresponsed requests associated with the given command id
+     * \param cmdId id of command we need to increment unresponded request count for
+     * \return unresponded requests count after the operation
+     */
+    unsigned int Application::incrementUnrespondedRequestCount(const unsigned int &cmdId)
+    {
+        return mCommandMapping.incrementUnrespondedRequestCount(cmdId);
+    }
+
+    /**
+     * \brief decrement count of unresponsed requests associated with the given command id
+     * \param cmdId id of command we need to decrement unresponded request count for
+     * \return unresponded requests count after the operation
+     */
+    unsigned int Application::decrementUnrespondedRequestCount(const unsigned int &cmdId)
+    {
+        return mCommandMapping.decrementUnrespondedRequestCount(cmdId);
     }
 
 }

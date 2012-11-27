@@ -49,16 +49,24 @@ namespace NsAppManager
     }
 
     /**
+     * \brief get count of items
+     * \return items count
+     */
+    size_t MenuMapping::size() const
+    {
+        return mMenuMapping.size();
+    }
+
+    /**
      * \brief remove an application from a mapping
      * \param menuId id of a menu to remove all commands mapping from
      */
     void MenuMapping::removeMenu(const unsigned int& menuId)
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Removing a menu " << menuId );
-        MenuCommands commands;
-        findCommandsAssignedToMenu(menuId, commands);
+        const MenuCommands& commands = findCommandsAssignedToMenu(menuId);
 
-        for(MenuCommands::iterator it = commands.begin(); it != commands.end(); it++)
+        for(MenuCommands::const_iterator it = commands.begin(); it != commands.end(); it++)
         {
             mMenuMapping.erase(*it);
         }
@@ -82,14 +90,14 @@ namespace NsAppManager
     }
 
     /**
-     * \brief find a registry item subscribed to command
+     * \brief find commands within a menu
      * \param menuId menu id
-     * \param commands commands residing within the given menu
+     * \return commands residing within the given menu
      */
-    void MenuMapping::findCommandsAssignedToMenu(const unsigned int& menuId, MenuCommands &commands) const
+    MenuCommands MenuMapping::findCommandsAssignedToMenu(const unsigned int& menuId) const
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Finding a command list associated with a menu " << menuId );
-        commands.clear();
+        MenuCommands commands;
         for(MenuMap::const_iterator it = mMenuMapping.begin(); it != mMenuMapping.end(); it++)
         {
             const unsigned int& menuIdFound = it->second;
@@ -98,6 +106,7 @@ namespace NsAppManager
                 commands.push_back(it->first);
             }
         }
+        return commands;
     }
 
     /**
