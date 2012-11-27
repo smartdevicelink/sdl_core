@@ -52,6 +52,9 @@ CMessageBrokerController(address, port, std::string("AppLinkCoreClient"))
   {
     DBG_MSG(("AppLinkCoreClientRPC::processNotification()\n"));
     root=root;//to prevent compiler warning
+    Json::FastWriter m_recieverWriter;
+    std::string receivedNotification = m_recieverWriter.write(root);
+    //receivedNotification cotains pure JSON string
   }
 
   void AppLinkCoreClientRPC::processResponse(std::string method, Json::Value& root)
