@@ -1467,6 +1467,22 @@ namespace NsAppManager
                         HMIHandler::getInstance().sendRequest(deleteCmd);
                     }
                     LOG4CPLUS_INFO_EXT(mLogger, "Current app's menus removed!");
+
+                    const ChoiceSetItems& currentChoiceSets = currentApp->getAllChoiceSets();
+                    LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's interaction choice sets from HMI due to a new application activation");
+                    for(ChoiceSetItems::const_iterator it = currentChoiceSets.begin(); it != currentChoiceSets.end(); it++)
+                    {
+                        const unsigned int& choiceSetId = it->first;
+                        NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteCmd = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
+                        deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        deleteCmd->set_interactionChoiceSetID(choiceSetId);
+                        unsigned char sessionID = app->getSessionID();
+                        unsigned int connectionID = app->getConnectionID();
+                        core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+
+                        HMIHandler::getInstance().sendRequest(deleteCmd);
+                    }
+                    LOG4CPLUS_INFO_EXT(mLogger, "Current app's interaction choice sets removed!");
                 }
                 else
                 {
