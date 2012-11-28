@@ -2102,15 +2102,15 @@ for(my $i=0;$i<@table;$i++)
 
   my @tp;
 
+  $ls=[] if not ref $ls;
   foreach(@$ls)
   {
-    my $v=$_;
-    my $z=prepare_field($v->{'name'},$v);
-    die sprintf "unknown type %s in %s",$v->{'name'},$k if not defined $z;
-    $z->{'desc'}=$v->{'description'} if exists $v->{'description'};
-    push @tp,$z;
+     my $v=$_;
+     my $z=prepare_field($v->{'name'},$v);
+     die sprintf "unknown type %s in %s",$v->{'name'},$k if not defined $z;
+     $z->{'desc'}=$v->{'description'} if exists $v->{'description'};
+     push @tp,$z;
   }
-
   my %tps;
   my $isstr=0;
   my $isarr=0;
