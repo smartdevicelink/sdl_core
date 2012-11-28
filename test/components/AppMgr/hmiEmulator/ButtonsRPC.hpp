@@ -58,7 +58,7 @@ namespace NsHMIEmulator
      * \brief Callback function which is called upon a new message from mobile side arrival
      * \param command RPC2Bus Json message
      */
-    virtual void messageReceivedFromDeviceCallback( NsRPC2Communication::RPC2Command * command );
+    virtual void messageReceivedFromDeviceCallback(NsRPC2Communication::RPC2Command * msg );
 
   };
 }/* namespace NsHMIEmulator */
