@@ -43,6 +43,8 @@ set (SOURCES
         hmiEmulator/UIRPC.cpp
         hmiEmulator/VRRPC.cpp
         hmiEmulator/RPC.cpp
+        hmiEmulator/ResourceContainer.cpp
+        hmiEmulator/Application.cpp
         mobileEmulator/ALRPC.cpp
     )
 
