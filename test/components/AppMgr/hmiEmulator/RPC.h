@@ -8,7 +8,6 @@
 #include "mb_controller.hpp"
 #include "CMessageBroker.hpp"
 #include "LoggerHelper.hpp"
-#include "JSONHandler/IRPC2CommandsObserver.h"
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/RPC2Response.h"
@@ -72,12 +71,6 @@ namespace NsHMIEmulator
          */
         virtual void sendRPC2MessageToMobileSide(NsRPC2Communication::RPC2Command * command);
 
-        /**
-         * \brief Sets pointer to instance of the class implementing RPC handling (App Manager).
-         * \param commandsObserver Pointer to implementation of IRPC2CommandsObserver.
-         */
-        virtual void setRPC2CommandsObserver( IRPC2CommandsObserver * commandsObserver );
-
     protected:
         /**
          * \struct ResponseContainer
@@ -98,13 +91,6 @@ namespace NsHMIEmulator
         };
 
         static log4cplus::Logger mLogger;
-
-    private:
-
-        /**
-          *\brief Points on instance of class implementing RPC handling (Application Manager).
-        */
-        IRPC2CommandsObserver*  mCommandsObserver;
     };
 }
 

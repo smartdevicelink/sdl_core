@@ -84,28 +84,13 @@ namespace NsHMIEmulator
     }
 
     /**
-     * \brief Sets pointer to instance of the class implementing RPC handling (App Manager).
-     * \param commandsObserver Pointer to implementation of IRPC2CommandsObserver.
-     */
-    void RPC::setRPC2CommandsObserver( IRPC2CommandsObserver * commandsObserver )
-    {
-        mCommandsObserver = commandsObserver;
-    }
-
-    /**
      * \brief send a message to a mobile side via applinkcore
      * \param command Pointer to base class of AppLink Json object
      */
     void RPC::sendRPC2MessageToMobileSide(NsRPC2Communication::RPC2Command *command)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Sending to the mobile side a message " << command->getMethod());
-        if(mCommandsObserver)
-        {
-            mCommandsObserver->onCommandReceivedCallback( command );
-        }
-        else
-        {
-            LOG4CPLUS_ERROR_EXT( mLogger, "Invalid (null) pointer to IRPC2CommandsObserver retreived!" );
-        }
+        Json::Value message = NsRPC2Communication::Marshaller::toJSON(command);
+        sendJsonMessage(message);
     }
 }
