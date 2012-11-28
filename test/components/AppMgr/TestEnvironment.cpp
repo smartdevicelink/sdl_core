@@ -20,7 +20,7 @@ namespace NsTest
      */
     void TestEnvironment::sendToHmi(NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Sending to HMI a message " << message->getMethodId() << " connection " << connectionId << " session " << sessionId);
+        LOG4CPLUS_INFO_EXT(mLogger, " Sending to HMI a message " << message->getMethodId() << " connection " << connectionId << " session " << (uint)sessionId);
         getRPCMessageObserver()->onMessageReceivedCallback( message, connectionId, sessionId );
     }
 
@@ -32,7 +32,7 @@ namespace NsTest
      */
     void TestEnvironment::messageReceivedFromHmiCallback(const NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Received from HMI a message " << message->getMethodId() << " connection " << connectionId << " session " << sessionId);
+        LOG4CPLUS_INFO_EXT(mLogger, " Received from HMI a message " << message->getMethodId() << " connection " << connectionId << " session " << (uint)sessionId);
         if(mOnMobileMessageReceivedCallback)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " Calling a callback function...");
