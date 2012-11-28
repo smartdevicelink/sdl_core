@@ -34,6 +34,11 @@
 
 Logger logger = Logger::getInstance(LOG4CPLUS_TEXT("testAppMgr"));
 
+void OnMobileMessageReceived(const NsAppLinkRPC::ALRPCMessage* msg, int connectionId, unsigned char sessionId)
+{
+    LOG4CPLUS_INFO_EXT(logger, " Mobile RPC message received: message " << msg->getMethodId() << " connection " << connectionId << " session " << (uint)sessionId);
+}
+
 int basicWorkflow()
 {
     NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
@@ -63,6 +68,8 @@ int main()
     NsTest::TestEnvironment jsonHandler;
 
     NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
+
+    jsonHandler.registerMobileMessageReceivedCallback(OnMobileMessageReceived);
 
     jsonHandler.setRPCMessagesObserver(&appMgr);
 
