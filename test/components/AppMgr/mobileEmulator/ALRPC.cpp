@@ -58,4 +58,39 @@ namespace NsMobileEmulator
         return mMessagesObserver;
     }
 
+    /**
+     * \brief A stub function - created to hide the parent class' one
+     * \param protocolHandler Pointer to Protocol layer handler.
+     */
+    void ALRPC::setProtocolHandler(AxisCore::ProtocolHandler *protocolHandler)
+    {
+    }
+
+    /**
+     * \brief A stub function - created to hide the parent class' one
+     * \param sessionID ID of started session
+     * \param hashCode Hash Code of the started session to use in finishing the session.
+     */
+    void ALRPC::sessionStartedCallback(const UInt8 sessionID, const UInt32 hashCode)
+    {
+    }
+
+    /**
+     * \brief A stub function - created to hide the parent class' one
+     * \param sessionID ID of ended session.
+     */
+    void ALRPC::sessionEndedCallback(const UInt8 sessionID)
+    {
+    }
+
+    /**
+     * \brief A stub function - created to hide the parent class' one
+     * \param sessionID ID of session in which message was received.
+     * \param messageID ID of received message.
+     * \param dataSize Size of received message in bytes.
+     */
+    void ALRPC::dataReceivedCallback(const UInt8 sessionID, const UInt32 messageID, const UInt32 dataSize)
+    {
+    }
+
 }
