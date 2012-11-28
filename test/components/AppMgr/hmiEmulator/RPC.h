@@ -8,11 +8,13 @@
 #include "mb_controller.hpp"
 #include "CMessageBroker.hpp"
 #include "LoggerHelper.hpp"
+#include "ResourceContainer.h"
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Request.h"
 #include "JSONHandler/RPC2Objects/Marshaller.h"
+#include "JSONHandler/ALRPCObjects/Result.h"
 
 /**
  * \namespace NsHMIEmulator
