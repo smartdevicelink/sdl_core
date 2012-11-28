@@ -10,5 +10,5 @@ add_subdirectory(./JSONHandler)
 # --- ProtocolHandler
 add_subdirectory(./ProtocolHandler)
 
-# --- connectionHandler
-add_subdirectory(./connectionHandler)
+# --- ConnectionHandler
+add_subdirectory(./ConnectionHandler)

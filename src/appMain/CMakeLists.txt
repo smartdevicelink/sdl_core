@@ -29,7 +29,6 @@ include_directories (
 
 set (SOURCES
   appMain.cpp
-  CAppTester.cpp
 )
 
 if( NOT CMAKE_BUILD_TYPE )

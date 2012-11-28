@@ -1,9 +1,7 @@
 include_directories (
   ./include/
   ../TransportManager/include/
-  ../TransportManager/include/TransportManager
-  ../ProtocolHandler/include/ProtocolHandler
-  ../connectionHandler/include/connectionHandler
+  ../ProtocolHandler/include/
   ../../thirdPartyLibs/logger/include
   ../../thirdPartyLibs/logger/log4cplus-1.1.0/include
   ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
@@ -11,7 +9,7 @@ include_directories (
 
 set (SOURCES
     ./src/CConnectionHandler.cpp
-    ./src/CConnectionHandlerObserver.cpp
+    ./src/CConnection.cpp
 )
 
 add_library("connectionHandler" ${SOURCES})

@@ -8,8 +8,7 @@
 
 #include "Logger.hpp"
 
-#include "CConnectionHandler.hpp"
-//#include "SDeviceInfo.hpp"
+#include "ConnectionHandler/CConnectionHandler.hpp"
 
 /**
  * \namespace NsConnectionHandler
@@ -43,6 +42,30 @@ namespace NsConnectionHandler
     void CConnectionHandler::onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection)
     {
         
+    }
+
+    void onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+                                           unsigned char sessionId)
+    {
+
+    }
+    
+    void onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+                                           unsigned char sessionId)
+    {
+
+    }
+    
+    int keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+                                           unsigned char sessionId)
+    {
+        return 0;
+    }
+    
+    void pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle, 
+                                           unsigned char & sessionId)
+    {
+
     }
 
 }/* namespace NsConnectionHandler */
