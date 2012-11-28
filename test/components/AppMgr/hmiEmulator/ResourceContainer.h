@@ -6,6 +6,12 @@
 #include <tuple>
 #include <map>
 
+#include "JSONHandler/ALRPCObjects/ButtonCapabilities.h"
+#include "JSONHandler/ALRPCObjects/DisplayCapabilities.h"
+#include "JSONHandler/ALRPCObjects/HmiZoneCapabilities.h"
+#include "JSONHandler/ALRPCObjects/VrCapabilities.h"
+#include "JSONHandler/ALRPCObjects/SpeechCapabilities.h"
+
 /**
  * \namespace NsHMIEmulator
  * \brief HMIEmulator related functions.
@@ -15,6 +21,26 @@ namespace NsHMIEmulator
     typedef std::map<std::string, Application*> RegisteredApplications;
 
     typedef std::pair<std::string, Application*> RegisteredApplication;
+
+    /**
+     * \brief ButtonCapabilities container
+     */
+    typedef std::vector<NsAppLinkRPC::ButtonCapabilities> ButtonCapabilities;
+
+    /**
+     * \brief HmiZoneCapabilities container
+     */
+    typedef std::vector<NsAppLinkRPC::HmiZoneCapabilities> HmiZoneCapabilities;
+
+    /**
+     * \brief VrCapabilities container
+     */
+    typedef std::vector<NsAppLinkRPC::VrCapabilities> VrCapabilities;
+
+    /**
+     * \brief SpeechCapabilities container
+     */
+    typedef std::vector<NsAppLinkRPC::SpeechCapabilities> SpeechCapabilities;
 
     /**
      * \brief The ResourceContainer class acts as a container of all HMI
@@ -61,6 +87,36 @@ namespace NsHMIEmulator
          */
         Application* getActiveApplication();
 
+        /**
+         * \brief gets button capabilities
+         * \return button capabilities
+         */
+        const ButtonCapabilities& getButtonCapabilities() const;
+
+        /**
+         * \brief gets TTS capabilities
+         * \return TTS capabilities
+         */
+        const SpeechCapabilities& getTtsCapabilities() const;
+
+        /**
+         * \brief gets display capabilities
+         * \return display capabilities
+         */
+        const NsAppLinkRPC::DisplayCapabilities& getDisplayCapabilities() const;
+
+        /**
+         * \brief gets HMI zone capabilities
+         * \return HMI zone capabilities
+         */
+        const HmiZoneCapabilities& getHmiZoneCapabilities() const;
+
+        /**
+         * \brief gets VR capabilities
+         * \return VR capabilities
+         */
+        const VrCapabilities& getVrCapabilities() const;
+
     private:
         /**
          * \brief Default class constructor
@@ -73,6 +129,11 @@ namespace NsHMIEmulator
         ResourceContainer(const ResourceContainer&);
 
         RegisteredApplications mApplications;
+        ButtonCapabilities mButtonCapabilities;
+        NsAppLinkRPC::DisplayCapabilities mDisplayCapabilities;
+        HmiZoneCapabilities mHmiZoneCapabilities;
+        VrCapabilities mVrCapabilities;
+        SpeechCapabilities mSpeechCapabilities;
 
         std::string mActiveApplication;
     };

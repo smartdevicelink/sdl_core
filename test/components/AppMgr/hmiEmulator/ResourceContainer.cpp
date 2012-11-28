@@ -77,6 +77,51 @@ namespace NsHMIEmulator
     }
 
     /**
+     * \brief gets button capabilities
+     * \return button capabilities
+     */
+    const ButtonCapabilities &ResourceContainer::getButtonCapabilities() const
+    {
+        return mButtonCapabilities;
+    }
+
+    /**
+     * \brief gets TTS capabilities
+     * \return TTS capabilities
+     */
+    const SpeechCapabilities &ResourceContainer::getTtsCapabilities() const
+    {
+        return mSpeechCapabilities;
+    }
+
+    /**
+     * \brief gets display capabilities
+     * \return display capabilities
+     */
+    const NsAppLinkRPC::DisplayCapabilities &ResourceContainer::getDisplayCapabilities() const
+    {
+        return mDisplayCapabilities;
+    }
+
+    /**
+     * \brief gets HMI zone capabilities
+     * \return HMI zone capabilities
+     */
+    const HmiZoneCapabilities &ResourceContainer::getHmiZoneCapabilities() const
+    {
+        return mHmiZoneCapabilities;
+    }
+
+    /**
+     * \brief gets VR capabilities
+     * \return VR capabilities
+     */
+    const VrCapabilities &ResourceContainer::getVrCapabilities() const
+    {
+        return mVrCapabilities;
+    }
+
+    /**
      * \brief Default class constructor
      */
     ResourceContainer::ResourceContainer()
