@@ -55,11 +55,10 @@ namespace NsHMIEmulator
     virtual void processResponse(std::string method, Json::Value& root);
 
     /**
-     * \brief Callback function which is called by JSONRPC2Handler
-     *  when new RPC2Bus Json message is received from HMI.
+     * \brief Callback function which is called upon a new message from mobile side arrival
      * \param command RPC2Bus Json message
      */
-    virtual void onCommandReceivedCallback( NsRPC2Communication::RPC2Command * command );
+    virtual void messageReceivedFromDeviceCallback( NsRPC2Communication::RPC2Command * command );
 
   };
 }/* namespace NsHMIEmulator */

@@ -99,11 +99,10 @@ RPC(address, port, std::string("UI"))
   }
 
   /**
-   * \brief Callback function which is called by JSONRPC2Handler
-   *  when new RPC2Bus Json message is received from HMI.
+   * \brief Callback function which is called upon a new message from mobile side arrival
    * \param command RPC2Bus Json message
    */
-  void UIRPC::onCommandReceivedCallback(NsRPC2Communication::RPC2Command *command)
+  void UIRPC::messageReceivedFromDeviceCallback(NsRPC2Communication::RPC2Command *command)
   {
   }
 
