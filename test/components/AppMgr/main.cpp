@@ -53,7 +53,7 @@ int basicWorkflow(NsTest::TestEnvironment& jsonHandler)
     vrSynonyms.push_back("zxczczcxzc");
     registerApp->set_vrSynonyms(vrSynonyms);
 
-    jsonHandler.sendRPCMessage(registerApp, 0, 0);
+    jsonHandler.sendRPCMessageToHmi(registerApp, 0, 0);
 
     return EXIT_SUCCESS;
 }
