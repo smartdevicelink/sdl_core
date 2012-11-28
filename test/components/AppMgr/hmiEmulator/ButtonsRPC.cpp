@@ -92,6 +92,7 @@ RPC(address, port, std::string("Buttons"))
               NsRPC2Communication::Buttons::GetCapabilitiesResponse * response = new NsRPC2Communication::Buttons::GetCapabilitiesResponse;
               response->set_capabilities(rc.getButtonCapabilities());
               response->setId(btnCaps->getId());
+              response->setResult(NsAppLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
 
               return;
