@@ -3,6 +3,13 @@
 namespace NsTest
 {
     /**
+     * \brief Constructor
+     */
+    TestEnvironment::TestEnvironment()
+    {
+    }
+
+    /**
      * \brief Sets pointer to instance of the class implementing RPC handling (Application Manager).
      * \param messagesObserver Pointer to object of the class implementing IRPCMessagesObserver
      * \sa IRPCMessagesObserver
@@ -18,7 +25,7 @@ namespace NsTest
      * \param connectionId ID of the connection the message was received within.
      * \param sessionId ID of the session the message was received within.
      */
-    void TestEnvironment::sendToHmi(NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId)
+    void TestEnvironment::sendRPCMessage(NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Sending to HMI a message " << message->getMethodId() << " connection " << connectionId << " session " << (uint)sessionId);
         getRPCMessageObserver()->onMessageReceivedCallback( message, connectionId, sessionId );
@@ -51,6 +58,13 @@ namespace NsTest
     void TestEnvironment::registerMobileMessageReceivedCallback(OnMobileMessageReceived cbFn)
     {
         mOnMobileMessageReceivedCallback = cbFn;
+    }
+
+    /**
+     * \brief CopyConstructor
+     */
+    TestEnvironment::TestEnvironment(const TestEnvironment &)
+    {
     }
 
 }

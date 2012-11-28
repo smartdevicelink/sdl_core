@@ -15,6 +15,11 @@ namespace NsTest
     public:
 
         /**
+         * \brief Constructor
+         */
+        TestEnvironment();
+
+        /**
          * \brief Sets pointer to instance of the class implementing RPC handling (Application Manager).
          * \param messagesObserver Pointer to object of the class implementing IRPCMessagesObserver
          * \sa IRPCMessagesObserver
@@ -27,7 +32,7 @@ namespace NsTest
          * \param connectionId ID of the connection the message was received within.
          * \param sessionId ID of the session the message was received within.
          */
-        void sendToHmi(NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId );
+        virtual void sendRPCMessage(NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId );
 
         /**
          * \brief Gets invoked upon a mobile RPC message gets received from HMI
@@ -44,6 +49,11 @@ namespace NsTest
         void registerMobileMessageReceivedCallback(OnMobileMessageReceived cbFn);
 
     private:
+
+        /**
+         * \brief CopyConstructor
+         */
+        TestEnvironment(const TestEnvironment&);
 
         OnMobileMessageReceived mOnMobileMessageReceivedCallback;
     };
