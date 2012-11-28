@@ -2139,7 +2139,7 @@ for(my $i=0;$i<@table;$i++)
   printf FO "#include \"%s.%s\"\n",$_,$sh foreach sort keys %tps;
 
 #  printf FO "#include \"%s%s.hh\"\n\n",$libs,$mt;
-  printf FO "#include \"%s/%s.hh\"\n\n",$i2l,$mt;
+  printf FO "#include \"%s/%s.h\"\n\n",$i2l,$mt;
 
   print FO $hat;
 
