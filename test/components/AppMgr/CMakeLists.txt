@@ -32,17 +32,18 @@ include_directories (../../../src/components/AppMgr/include/
                      ../../../src/thirdPartyLibs/logger/include/
                      ../../../src/thirdPartyLibs/logger/log4cplus-1.1.0/include
                      ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
-                     ./hmiEmulator
                     )
 
 set (SOURCES
         main.cpp
+        TestEnvironment.cpp
         hmiEmulator/AppLinkCoreClientRPC.cpp
         hmiEmulator/ButtonsRPC.cpp
         hmiEmulator/TTSRPC.cpp
         hmiEmulator/UIRPC.cpp
         hmiEmulator/VRRPC.cpp
         hmiEmulator/RPC.cpp
+        mobileEmulator/ALRPC.cpp
     )
 
 if( NOT CMAKE_BUILD_TYPE )
