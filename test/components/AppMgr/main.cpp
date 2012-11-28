@@ -39,10 +39,8 @@ void OnMobileMessageReceived(const NsAppLinkRPC::ALRPCMessage* msg, int connecti
     LOG4CPLUS_INFO_EXT(logger, " Mobile RPC message received: message " << msg->getMethodId() << " connection " << connectionId << " session " << (uint)sessionId);
 }
 
-int basicWorkflow()
+int basicWorkflow(NsTest::TestEnvironment& jsonHandler)
 {
-    NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
-
     NsAppLinkRPC::RegisterAppInterface_request* registerApp = new NsAppLinkRPC::RegisterAppInterface_request();
     registerApp->set_appName("MyNewFuckingTestApp");
     registerApp->set_isMediaApplication(true);
@@ -55,7 +53,7 @@ int basicWorkflow()
     vrSynonyms.push_back("zxczczcxzc");
     registerApp->set_vrSynonyms(vrSynonyms);
 
-    appMgr.onMessageReceivedCallback(registerApp, 0, 0);
+    jsonHandler.sendRPCMessage(registerApp, 0, 0);
 
     return EXIT_SUCCESS;
 }
@@ -192,7 +190,8 @@ int main()
     th8.Start(false);
     vRRPC.registerController(5);
     //==========================================//
-    basicWorkflow();
+
+    basicWorkflow(jsonHandler);
 
     for(;;)
     {
