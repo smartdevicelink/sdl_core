@@ -13,6 +13,7 @@ ALRPCMessage::ALRPCMessage( unsigned int protocolVersion, MessageType messageTyp
 :mProtocolVersion( protocolVersion)
 ,mMessageType( messageType )
 ,mMethodId(-1)
+,mBinaryData( 0 )
 {
 }
 
@@ -20,10 +21,17 @@ ALRPCMessage::ALRPCMessage( unsigned int protocolVersion, MessageType messageTyp
 :mProtocolVersion( protocolVersion )
 ,mMessageType( messageType )
 ,mMethodId( methodId )
+,mBinaryData( 0 )
 {}
 
 ALRPCMessage::~ALRPCMessage()
-{}
+{
+    if ( mBinaryData )
+    {
+        delete mBinaryData;
+        mBinaryData = 0;
+    }
+}
 
 unsigned int ALRPCMessage::getProtocolVersion() const
 {
@@ -53,4 +61,18 @@ void ALRPCMessage::setMessageType( ALRPCMessage::MessageType messageType )
 void ALRPCMessage::setMethodId( int methodId )
 {
     mMethodId = methodId;
+}
+
+void ALRPCMessage::setBinaryData( const std::vector<unsigned char> & binaryData )
+{
+    if ( mBinaryData )
+    {
+        delete mBinaryData;
+    }
+    mBinaryData = new std::vector<unsigned char> (binaryData);
+}
+
+const std::vector<unsigned char> * ALRPCMessage::getBinaryData() const
+{
+    return mBinaryData;
 }

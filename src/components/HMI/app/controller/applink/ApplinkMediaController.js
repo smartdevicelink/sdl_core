@@ -87,9 +87,111 @@ MFT.ApplinkMediaController = Em.Object.create({
             MFT.States.goToState('media.applink.applinkperforminteractionchoise');
         }
     },
+    
+    /** Add sub menu to options view */
+    onApplinkAddSubMenu: function(menuId, menuName){
+
+        MFT.ApplinkOptionsView.AddSubMenu(menuId, menuName);
+
+    },
+
+
+    /** Delete sub menu from options view */
+    onApplinkDeleteSubMenu: function(menuId){
+
+        if( (menuId == this.currentApplinkSubMenuid) && MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
+            MFT.States.back();
+        }
+
+       return MFT.ApplinkOptionsView.DeleteSubMenu(menuId);
+
+    },
+
+    /** Add command to VRPopUp list */
+    onApplinkVRAddCommand: function(cmdId, vrCommands){
+        for(var j = 0; j < vrCommands.length; j++){
+            MFT.ApplinkModel.voiceRecognitionCommands.push({
+                type:       MFT.Button,
+                params:     {
+                    action:                 'onPerformInteractionChoosed',
+                    target:                 'MFT.ApplinkMediaController',
+                    commandId:              cmdId,
+                    text:                   vrCommands[j],
+                    className:              'rs-item',
+                    templateName:           'text'
+                }                                   
+            });
+        }
+
+        MFT.VRPopUp.showVRCommands();
+
+    },
+
+    /** Delete command from VRPopUp list */
+    onApplinkVRDeleteCommand: function(commandId){
+        
+        var count = MFT.ApplinkModel.voiceRecognitionCommands.length;
+        
+        for(var i = count-1; i >= 0; i--){
+            if(MFT.ApplinkModel.voiceRecognitionCommands[i].params.commandId == commandId){
+                MFT.ApplinkModel.voiceRecognitionCommands.splice(i, 1);
+            }
+        }
+
+        MFT.VRPopUp.showVRCommands();
+
+    },
+
+    /** Delete all commands in sub menu from VR */
+    onApplinkCreateInteractionChoise: function(params){
+        MFT.ApplinkModel.interactionChoises.push(params);
+        
+        for(var i = 0; i<params.choiceSet.length; i++){
+            for(var j = 0; j<params.choiceSet[i].vrCommands.length; j++){
+                MFT.ApplinkModel.voiceRecognitionCommands.push({
+                    type:       MFT.Button,
+                    params:     {
+                        action:                 'onPerformInteractionChoosed',
+                        target:                 'MFT.ApplinkMediaController',
+                        choiceID:               params.choiceSet[i].choiceID,
+                        interactionChoiceSetID: params.interactionChoiceSetID,
+                        text:                   params.choiceSet[i].vrCommands[j],
+                        className:              'rs-item',
+                        templateName:           'text'
+                    }                                   
+                });
+            }
+        }
+
+        MFT.VRPopUp.showVRCommands();
+    },
+
+    /** Delete all commands in sub menu from VR */
+    onApplinkDeleteInteractionChoise: function(choiseSetID){
+
+        if( (choiseSetID == this.currentApplinkPerformInteractionChoiseId) && MFT.States.media.applink.applinkperforminteractionchoise.active){
+            MFT.States.back();
+        }
+
+        for(var val in MFT.ApplinkModel.interactionChoises){
+            if(MFT.ApplinkModel.interactionChoises[val].interactionChoiceSetID == choiseSetID){
+                MFT.ApplinkModel.interactionChoises.splice(val, 1);
+                break;
+            }
+        }
+
+        var count = MFT.ApplinkModel.voiceRecognitionCommands.length;
+        for(var i = count-1; i >= 0; i--){
+            if(MFT.ApplinkModel.voiceRecognitionCommands[i].params.interactionChoiceSetID == choiseSetID){
+                MFT.ApplinkModel.voiceRecognitionCommands.splice(i, 1);
+            }
+        }
+
+        MFT.VRPopUp.showVRCommands();
+    },
 
     /** Applink AddCommand handler */
-    applinkAddCommand: function(params){
+    onApplinkAddCommand: function(params){
         if( params.menuParams.parentID == 0 ){
             MFT.ApplinkOptionsView.AddCommand(params.cmdId, params.menuParams);
         }else{
@@ -100,6 +202,13 @@ MFT.ApplinkMediaController = Em.Object.create({
                 MFT.ApplinkModel.subMenuCommands.push(params);
             }
         }
+    },
+
+    /** Applink DeleteCommand handler */
+    onApplinkDeleteCommand: function(cmdId){
+
+        MFT.ApplinkOptionsView.DeleteCommand(cmdId);
+
     },
 
     /** Applink Driver Distraction ON/OFF switcher */

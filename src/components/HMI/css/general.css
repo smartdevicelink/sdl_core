@@ -206,17 +206,48 @@ div {
 }
 
 
-#VRPopUp .list {
+#VRPopUp .list{
 	position: absolute;
 	width: 629px;
 	height: 251px;
 	border-radius: 2px;
-	left: 36px;
-	top: 54px;
+	left: 35px;
+	top: 70px;
+}
+
+#VRPopUp .list-content{
+	border: none;
+}
+
+#VRPopUp .list-item {
+	position: relative;
+	width: 100%;
+	height: 48px;
+	font-size: 20px;
+	line-height: 50px;
+	border: 1px solid #393939;
 }
 
 #VRPopUp .list-content{
 	width: 578px;
+}
+
+#VRPopUp .VRLabel{
+	top: 10px;
+	width: 560px;
+	left: 10px;
+	height: 20px;
+	padding: 15px;
+	background: #393939;
+}
+
+#VRPopUp .VRImage{
+	right: 25px;
+	width: 50px;
+	height: 50px;
+	top: 10px;
+	background: url(../images/home/controlButtons/vrImage.png) no-repeat;
+	background-size: contain;
 }
 
 /*WRAPER FOR CONTENT VIEW*/

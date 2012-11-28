@@ -20,44 +20,29 @@ MFT.VRPopUp = Em.ContainerView.create({
 
     childViews: [
         'popUp',
+        'VRLabel',
+        'VRImage',
         'listOfCommands'
     ],
 
+
+    VRImage : Em.View.extend({
+
+        elementId:          'VRImage',
+
+        classNames:         'VRImage',
+    }),
+
+    VRLabel:    MFT.Label.extend({
+
+        elementId:      'VRLabel',
+
+        classNames:     'VRLabel',
+
+        content:        'Speak the command'
+    }),
+
     VRActive:           false,
-
-    AddCommand: function( commandId, vrCommands){
-
-        for(var i=0;i<vrCommands.length;i++){
-
-            this.listOfCommands.items.push({
-                type:       MFT.Button,
-                params:     {
-                    action:                 'onCommand',
-                    target:                 'FFW.VR',
-                    commandId:              commandId,
-                    text:                   vrCommands[i],
-                    className:              'rs-item',
-                    templateName:           'text'
-                }                                   
-            });
-        }
-
-        this.listOfCommands.list.refresh();
-
-    },
-
-    DeleteCommand: function(commandId){
-
-      var count = this.listOfCommands.items.length;
-        for(var i = count-1; i >= 0; i--){
-            if(this.listOfCommands.items[i].params.commandId == commandId){
-                this.listOfCommands.deleteItem(i);
-            }
-        }
-
-        this.listOfCommands.list.refresh();
-
-    },
 
     popUp : Em.View.extend({
 
@@ -78,6 +63,14 @@ MFT.VRPopUp = Em.ContainerView.create({
         }else{
             this.set('VRActive', true);
             MFT.ApplinkMediaController.onSystemContextSwitcher(MFT.ApplinkMediaController.eSystemContext.VR);
+            this.showVRCommands();
+        }
+    },
+
+    showVRCommands: function(){
+        if(this.VRActive){
+            this.listOfCommands.items =  MFT.ApplinkModel.voiceRecognitionCommands.slice();
+            this.listOfCommands.list.refresh();
         }
     },
 
