@@ -73,9 +73,6 @@ int main()
 
     appMgr.setJsonHandler(&jsonHandler);
 
-    LOG4CPLUS_INFO_EXT(logger, "Start AppMgr threads!");
-    appMgr.executeThreads();
-
     //============START MESSAGEBROKER===========//
     NsMessageBroker::CMessageBroker *pMessageBroker = NsMessageBroker::CMessageBroker::getInstance();
     if (!pMessageBroker)
@@ -190,6 +187,9 @@ int main()
     th8.Start(false);
     vRRPC.registerController(5);
     //==========================================//
+
+    LOG4CPLUS_INFO_EXT(logger, "Start AppMgr threads!");
+    appMgr.executeThreads();
 
     basicWorkflow(jsonHandler);
 
