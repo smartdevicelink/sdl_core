@@ -74,13 +74,52 @@ RPC(address, port, std::string("TTS"))
    * \brief Callback function which is called upon a new message from mobile side arrival
    * \param command RPC2Bus Json message
    */
-  void TTSRPC::messageReceivedFromDeviceCallback(NsRPC2Communication::RPC2Command *command)
+  void TTSRPC::messageReceivedFromDeviceCallback(NsRPC2Communication::RPC2Command *msg)
   {
-      if(!command)
+      if(!msg)
       {
           LOG4CPLUS_ERROR_EXT(mLogger, "null-command!" );
           return;
       }
+
+      ResourceContainer& rc = ResourceContainer::getInstance();
+      switch(msg->getMethod())
+      {
+          case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIES:
+          {
+              LOG4CPLUS_INFO_EXT(mLogger, " A GetTTSCapabilities request has been income");
+              NsRPC2Communication::TTS::GetCapabilities * ttsCaps = (NsRPC2Communication::TTS::GetCapabilities*)msg;
+              NsRPC2Communication::TTS::GetCapabilitiesResponse * response = new NsRPC2Communication::TTS::GetCapabilitiesResponse;
+              response->set_capabilities(rc.getTtsCapabilities());
+              response->setId(ttsCaps->getId());
+              sendRPC2MessageToMobileSide(response);
+              return;
+          }
+          case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__SPEAK:
+          {
+              LOG4CPLUS_INFO_EXT(mLogger, " A Speak request has been income");
+              NsRPC2Communication::TTS::Speak* object = (NsRPC2Communication::TTS::Speak*)msg;
+              LOG4CPLUS_INFO_EXT(mLogger, " Speaking: ");
+
+              const std::vector<NsAppLinkRPC::TTSChunk>& tts = object->get_ttsChunks();
+              for(std::vector<NsAppLinkRPC::TTSChunk>::const_iterator it = tts.begin(); it != tts.end(); it++)
+              {
+                  const NsAppLinkRPC::TTSChunk& chunk = *it;
+                  LOG4CPLUS_INFO_EXT(mLogger, chunk.get_text());
+              }
+              LOG4CPLUS_INFO_EXT(mLogger, " Speech finished!");
+
+              NsRPC2Communication::TTS::SpeakResponse* response = new NsRPC2Communication::TTS::SpeakResponse;
+              response->setId(object->getId());
+              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              sendRPC2MessageToMobileSide(response);
+              return;
+          }
+          case NsRPC2Communication::Marshaller::METHOD_INVALID:
+          default:
+              LOG4CPLUS_ERROR_EXT(mLogger, " Not TTS RPC message " << msg->getMethod() << " has been received!");
+      }
+
   }
 
 } /* namespace NsHMIEmulator */
