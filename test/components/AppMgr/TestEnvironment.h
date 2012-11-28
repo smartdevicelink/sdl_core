@@ -5,6 +5,8 @@
 
 namespace NsTest
 {
+    typedef void (*OnMobileMessageReceived)(const NsAppLinkRPC::ALRPCMessage*, int, unsigned char);
+
     /**
      * \brief The TestEnvironment class acts as a main spot of sending/receiving mobile RPC messages
      */
@@ -34,6 +36,16 @@ namespace NsTest
          * \param sessionId ID of the session the message was received within.
          */
         virtual void messageReceivedFromHmiCallback( const NsAppLinkRPC::ALRPCMessage * message, int connectionId, unsigned char sessionId );
+
+        /**
+         * \brief Register a callback function to be called upon a new mobile message from HMI arrival
+         * \param cbFn callback function
+         */
+        void registerMobileMessageReceivedCallback(OnMobileMessageReceived cbFn);
+
+    private:
+
+        OnMobileMessageReceived mOnMobileMessageReceivedCallback;
     };
 
 }

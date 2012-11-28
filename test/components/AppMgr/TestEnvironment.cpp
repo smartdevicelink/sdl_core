@@ -33,6 +33,24 @@ namespace NsTest
     void TestEnvironment::messageReceivedFromHmiCallback(const NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Received from HMI a message " << message->getMethodId() << " connection " << connectionId << " session " << sessionId);
+        if(mOnMobileMessageReceivedCallback)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, " Calling a callback function...");
+            mOnMobileMessageReceivedCallback(message, connectionId, sessionId);
+        }
+        else
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " Callback function not set!");
+        }
+    }
+
+    /**
+     * \brief Register a callback function to be called upon a new mobile message from HMI arrival
+     * \param cbFn callback function
+     */
+    void TestEnvironment::registerMobileMessageReceivedCallback(OnMobileMessageReceived cbFn)
+    {
+        mOnMobileMessageReceivedCallback = cbFn;
     }
 
 }
