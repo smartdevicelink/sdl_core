@@ -13,6 +13,7 @@ using namespace NsAppLink::NsTransportManager;
 //TODO Add shutdown flag checking inside function calls
 //TODO Fix potential crash due to not thread-safe access to shutdown flag
 //TODO Make function calls from transport manager client thread-safe
+//TODO Check all structures for copy constructor and operators implementation
 
 NsAppLink::NsTransportManager::CTransportManager::CTransportManager(void):
 mDeviceAdapters(),
@@ -882,7 +883,7 @@ void CTransportManager::stopConnection(const tConnectionHandle ConnectionHandle)
     SConnectionInfo* connectionInfo = getConnection(ConnectionHandle);
     if(0 == connectionInfo)
     {
-        pthread_mutex_unlock(&mDataListenersMutex);
+        //pthread_mutex_unlock(&mDataListenersMutex);
         return;
     }
     else
