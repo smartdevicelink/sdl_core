@@ -13,8 +13,8 @@
 #include <vector>
 #include <queue>
 
-#include "Types.hpp"
-#include "Blob.hpp"
+//#include "Types.hpp"
+//#include "Blob.hpp"
 
 /**
  * \namespace NsApplicationTester

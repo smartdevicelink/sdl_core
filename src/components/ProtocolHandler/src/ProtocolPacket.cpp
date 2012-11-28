@@ -1,3 +1,4 @@
+#include <memory.h>
 #include "ProtocolHandler/ProtocolPacket.h"
 
 using namespace NsProtocolHandler;
@@ -7,6 +8,30 @@ mPacket( 0 )
 ,mTotalPacketSize( 0 )
 ,mDataOffset( 0 )
 {}
+
+ProtocolPacket::ProtocolPacket(unsigned char version,
+                             bool compress,
+                             unsigned char frameType,
+                             unsigned char serviceType,
+                             unsigned char frameData,
+                             unsigned char sessionID,
+                             unsigned int dataSize,
+                             unsigned int messageID,
+                             const unsigned char * data) :
+mPacket( 0 )
+,mTotalPacketSize( 0 )
+,mDataOffset( 0 )
+{
+    serializePacket(version,
+                    compress,
+                    frameType,
+                    serviceType,
+                    frameData,
+                    sessionID,
+                    dataSize,
+                    messageID,
+                    data);
+}
 
 ProtocolPacket::~ProtocolPacket()
 {
@@ -95,9 +120,9 @@ unsigned int ProtocolPacket::getPacketSize() const
 RESULT_CODE ProtocolPacket::appendData( unsigned char * chunkData, 
                     unsigned int chunkDataSize )
 {
-    if ( mDataOffset + chunkDataSize <= totalDataBytes )
+    if ( mDataOffset + chunkDataSize <= mPacketData.totalDataBytes )
     {
-        memcpy(data + mDataOffset, chunkData, chunkDataSize);
+        memcpy(mPacketData.data + mDataOffset, chunkData, chunkDataSize);
         mDataOffset += chunkDataSize;
         return RESULT_OK;
     }
@@ -106,7 +131,7 @@ RESULT_CODE ProtocolPacket::appendData( unsigned char * chunkData,
 /*End of Serialization*/
 
 /*Deserialization*/
-RESULT_CODE ProtocolPacket::deserializePacket(unsigned int message, unsigned int messageSize)
+RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char * message, unsigned int messageSize)
 {
     unsigned char offset = 0;
     unsigned char firstByte = message[offset];
@@ -135,14 +160,14 @@ RESULT_CODE ProtocolPacket::deserializePacket(unsigned int message, unsigned int
     
     if (mPacketHeader.version == PROTOCOL_VERSION_2)
     {
-        mPacketHeader.messageID  = message[offset++] << 24u;
-        mPacketHeader.messageID |= message[offset++] << 16u;
-        mPacketHeader.messageID |= message[offset++] << 8u;
-        mPacketHeader.messageID |= message[offset++];
+        mPacketHeader.messageId  = message[offset++] << 24u;
+        mPacketHeader.messageId |= message[offset++] << 16u;
+        mPacketHeader.messageId |= message[offset++] << 8u;
+        mPacketHeader.messageId |= message[offset++];
     }
     else
     {
-        mPacketHeader.messageID = 0u;
+        mPacketHeader.messageId = 0u;
     }
     
     const unsigned int dataPayloadSize = messageSize - offset;
@@ -201,7 +226,7 @@ unsigned int ProtocolPacket::getDataSize() const
 
 unsigned int ProtocolPacket::getMessageId() const
 {
-    return mPacketHeader.messageID;
+    return mPacketHeader.messageId;
 }
 
 unsigned char * ProtocolPacket::getData() const

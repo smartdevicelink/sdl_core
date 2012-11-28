@@ -15,15 +15,12 @@ set(LIBRARIES
 
 include_directories (
   ./
-  ../thirdPartyLibs/axisCore/utils/misc
-  ../thirdPartyLibs/axisCore/include
-  ../thirdPartyLibs/axisCore/src
-  ../thirdPartyLibs/axisCore/
-  ../thirdPartyLibs/axisCore/transport/bt
+  ../components/ProtocolHandler/include/
   ../thirdPartyLibs/jsoncpp/include/
   ../components/JSONHandler/include
   ../components/AppMgr/include
   ../components/TransportManager/include
+  ../components/Utils/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/logger/include
   ../thirdPartyLibs/logger/log4cplus-1.1.0/include

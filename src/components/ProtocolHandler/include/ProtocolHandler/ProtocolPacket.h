@@ -101,6 +101,15 @@ struct ProtocolData
     {
     public:
         ProtocolPacket();
+        ProtocolPacket(unsigned char version,
+                             bool compress,
+                             unsigned char frameType,
+                             unsigned char serviceType,
+                             unsigned char frameData,
+                             unsigned char sessionID,
+                             unsigned int dataSize,
+                             unsigned int messageID,
+                             const unsigned char * data = 0);
         ~ProtocolPacket();
 
         /*Serialization*/
@@ -120,7 +129,7 @@ struct ProtocolData
         /*End of Serialization*/
 
         /*Deserialization*/
-        RESULT_CODE deserializePacket(unsigned int message, unsigned int messageSize);
+        RESULT_CODE deserializePacket(const unsigned char * message, unsigned int messageSize);
         void pushConsecutiveFrame();
         unsigned char getVersion() const;
         bool getIfCompress() const;

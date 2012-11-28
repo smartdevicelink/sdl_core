@@ -21,7 +21,7 @@ AppLinkRawMessage::~AppLinkRawMessage()
     }
 }
 
-unsigned int AppLinkRawMessage::getConnectionKey() const
+int AppLinkRawMessage::getConnectionKey() const
 {
     return mConnectionKey;
 }

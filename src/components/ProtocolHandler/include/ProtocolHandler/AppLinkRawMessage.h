@@ -12,7 +12,7 @@ namespace NsProtocolHandler
                             unsigned int dataSize);
         ~AppLinkRawMessage();
 
-        unsigned int getConnectionKey() const;
+        int getConnectionKey() const;
         unsigned char * getData() const;
         unsigned int getDataSize() const;
         unsigned int getProtocolVersion() const;

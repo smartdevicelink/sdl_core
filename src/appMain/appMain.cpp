@@ -15,7 +15,7 @@
 
 #include "appMain.hpp"
 
-#include "ProtocolHandler.hpp"
+#include "ProtocolHandler/ProtocolHandler.h"
 
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"

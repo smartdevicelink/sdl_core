@@ -6,8 +6,7 @@ namespace NsProtocolHandler
     class ISessionObserver
     {
     public:
-        virtual void onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
-                                               unsigned char sessionId) = 0;
+        virtual void onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle) = 0;
         virtual void onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
                                                unsigned char sessionId) = 0;
         virtual int keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 

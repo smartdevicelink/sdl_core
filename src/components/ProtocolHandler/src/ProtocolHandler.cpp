@@ -1,31 +1,165 @@
 #include <pthread.h>
 #include <signal.h>
+#include <memory.h>
+#include "TransportManager/ITransportManager.hpp"
+#include "ProtocolHandler/ISessionObserver.h"
+#include "ProtocolHandler/IProtocolObserver.h"
 #include "ProtocolHandler/ProtocolHandler.h"
 
 using namespace NsProtocolHandler;
 
 log4cplus::Logger ProtocolHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ProtocolHandler"));
 
-ProtocolHandler::ProtocolHandler(IProtocolObserver *observer,
-                    NsAppLink::NsTransportManager::ITransportManager * transportManager) :
- mProtocolObserver( observer )
+ProtocolHandler::ProtocolHandler( NsAppLink::NsTransportManager::ITransportManager * transportManager ) :
+ mProtocolObserver( 0 )
+,mSessionObserver( 0 )
 ,mTransportManager( transportManager )
 {
     pthread_create( &mHandleMessagesFromMobileApp, NULL, &ProtocolHandler::handleMessagesFromMobileApp, (void *)this );
     pthread_create( &mHandleMessagesToMobileApp, NULL, &ProtocolHandler::handleMessagesToMobileApp, (void *)this );
 }
 
-
 ProtocolHandler::~ProtocolHandler()
 {
     pthread_kill( mHandleMessagesFromMobileApp, 1 );
     pthread_kill( mHandleMessagesToMobileApp, 1 );
     mProtocolObserver = 0;
+    mSessionObserver = 0;
     mTransportManager = 0;
 }
 
-RESULT_CODE ProtocolHandler::endSession(unsigned int sessionID, unsigned int hashCode)
+void ProtocolHandler::setProtocolObserver( IProtocolObserver * observer )
 {
+    if ( !observer )
+    {
+        LOG4CPLUS_ERROR(mLogger, "Invalid (NULL) pointer to IProtocolObserver.");
+        return;
+    }
+
+    mProtocolObserver = observer;
+}
+        
+void ProtocolHandler::setSessionObserver( ISessionObserver * observer )
+{
+    if ( !observer )
+    {
+        LOG4CPLUS_ERROR(mLogger, "Invalid (NULL) pointer to ISessionObserver.");
+        return;
+    }
+
+    mSessionObserver = observer;
+}
+
+void ProtocolHandler::sendEndSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              unsigned int sessionID, 
+              unsigned int hashCode )
+{
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
+
+    unsigned char versionFlag = PROTOCOL_VERSION_1;
+    if (0 != hashCode)
+    {
+        versionFlag = PROTOCOL_VERSION_2;
+    }
+
+    ProtocolPacket packet(versionFlag,
+                                COMPRESS_OFF,
+                                FRAME_TYPE_CONTROL,
+                                SERVICE_TYPE_RPC,
+                                FRAME_DATA_END_SESSION,
+                                sessionID,
+                                0,
+                                hashCode);
+
+    if (RESULT_OK == sendFrame(connectionHandle, packet))
+    {
+        LOG4CPLUS_INFO(mLogger, "sendStartSessionAck() - BT write OK");
+    }
+    else
+    {
+        LOG4CPLUS_ERROR(mLogger, "sendStartSessionAck() - BT write FAIL");
+    }
+}
+        
+void ProtocolHandler::sendEndSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              unsigned int sessionID )
+{
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
+
+    ProtocolPacket packet(PROTOCOL_VERSION_2,
+                                COMPRESS_OFF,
+                                FRAME_TYPE_CONTROL,
+                                SERVICE_TYPE_RPC,
+                                FRAME_DATA_END_SESSION_NACK,
+                                sessionID,
+                                0,
+                                0);
+
+    if (RESULT_OK == sendFrame(connectionHandle, packet))
+    {
+        LOG4CPLUS_INFO(mLogger, "sendStartSessionAck() - BT write OK");
+    }
+    else
+    {
+        LOG4CPLUS_ERROR(mLogger, "sendStartSessionAck() - BT write FAIL");
+    }
+}
+
+void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              unsigned char sessionID,
+              unsigned int hashCode )
+{
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
+
+    unsigned char versionFlag = PROTOCOL_VERSION_1;
+    if (0 != hashCode)
+    {
+        versionFlag = PROTOCOL_VERSION_2;
+    }
+
+    ProtocolPacket packet(versionFlag,
+                                COMPRESS_OFF,
+                                FRAME_TYPE_CONTROL,
+                                SERVICE_TYPE_RPC,
+                                FRAME_DATA_START_SESSION_ACK,
+                                sessionID,
+                                0,
+                                hashCode);
+
+    if (RESULT_OK == sendFrame(connectionHandle, packet))
+    {
+        LOG4CPLUS_INFO(mLogger, "sendStartSessionAck() - BT write OK");
+    }
+    else
+    {
+        LOG4CPLUS_ERROR(mLogger, "sendStartSessionAck() - BT write FAIL");
+    }
+}
+
+void ProtocolHandler::sendStartSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              unsigned char sessionID )
+{
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
+
+    unsigned char versionFlag = PROTOCOL_VERSION_1;
+    
+    ProtocolPacket packet(versionFlag,
+                                COMPRESS_OFF,
+                                FRAME_TYPE_CONTROL,
+                                SERVICE_TYPE_RPC,
+                                FRAME_DATA_START_SESSION_NACK,
+                                sessionID,
+                                0,
+                                0);
+
+    if (RESULT_OK == sendFrame(connectionHandle, packet))
+    {
+        LOG4CPLUS_INFO(mLogger, "sendStartSessionAck() - BT write OK");
+    }
+    else
+    {
+        LOG4CPLUS_ERROR(mLogger, "sendStartSessionAck() - BT write FAIL");
+    }
 
 }
 
@@ -39,62 +173,24 @@ void ProtocolHandler::sendData(const AppLinkRawMessage * message)
     mMessagesToMobileApp.push(message);    
 }
 
-
-virtual void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
     const uint8_t * data, size_t dataSize)
 {
     if (connectionHandle && dataSize > 0 && data )
     {
         IncomingMessage message;
-        message.data = data;
-        message.dataSize = dataSize;
-        message.connectionHandle = connectionHandle;
-        mIncomingMessages.push( message );
+        message.mData = data;
+        message.mDataSize = dataSize;
+        message.mConnectionHandle = connectionHandle;
+        mMessagesFromMobileApp.push( message );
     }
     else 
     {
-        LOG4CPLUS_ERROR( mLogger, "Invalid incoming message received in ProtocolHandler." );
+        LOG4CPLUS_ERROR( mLogger, "Invalid incoming message received in ProtocolHandler from Transport Manager." );
     }
 }
 
-void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle,
-              unsigned int protocolVersion,
-              unsigned char sessionID )
-{
-    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-
-    unsigned char versionFlag = PROTOCOL_VERSION_1;
-    if (2 == protocolVersion)
-    {
-        versionFlag = PROTOCOL_VERSION_2;
-    }
-
-    UInt32 hashCode = 0;
-    if (mProtocolVersion == PROTOCOL_VERSION_2)
-        hashCode = rand() % 0xFFFFFFFF;
-
-    mHashCodes[sessionID] = hashCode;
-
-    ProtocolPacket packet(versionFlag,
-                                COMPRESS_OFF,
-                                FRAME_TYPE_CONTROL,
-                                SERVICE_TYPE_RPC,
-                                FRAME_DATA_START_SESSION_ACK,
-                                sessionID,
-                                0,
-                                hashCode);
-
-    if (RESULT_OK == sendFrame(mConnectionHandle, packet))
-    {
-        LOG4CPLUS_INFO(mLogger, "sendStartSessionAck() - BT write OK");
-    }
-    else
-    {
-        LOG4CPLUS_ERROR(mLogger, "sendStartSessionAck() - BT write FAIL");
-    }
-}
-
-RESULT_CODE ProtocolHandler::sendFrame( NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle,
+RESULT_CODE ProtocolHandler::sendFrame( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
         const ProtocolPacket & packet )
 {
     if ( !packet.getPacket() )
@@ -109,20 +205,20 @@ RESULT_CODE ProtocolHandler::sendFrame( NsAppLink::NsTransportManager::tConnecti
     }
     else
     {
-        LOG4CPLUS_WARNING(mLogger, "No Transport Manager found.");
+        LOG4CPLUS_WARN(mLogger, "No Transport Manager found.");
         return RESULT_FAIL;
     }
 
     return RESULT_OK;
 }
 
-RESULT_CODE ProtocolHandler::sendSingleFrameMessage(unsigned int connectionHandle,
-                                      unsigned char sessionID,
+RESULT_CODE ProtocolHandler::sendSingleFrameMessage(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+                                      const unsigned char sessionID,
                                       unsigned int protocolVersion,
-                                      unsigned char servType,
-                                      unsigned int dataSize,
+                                      const unsigned char servType,
+                                      const unsigned int dataSize,
                                       const unsigned char *data,
-                                      bool compress)
+                                      const bool compress)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
@@ -145,7 +241,7 @@ RESULT_CODE ProtocolHandler::sendSingleFrameMessage(unsigned int connectionHandl
     return sendFrame( connectionHandle, packet );   
 }
         
-RESULT_CODE ProtocolHandler::sendMultiFrameMessage(unsigned int connectionHandle,
+RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
                                          const unsigned char sessionID,
                                          unsigned int protocolVersion,
                                          const unsigned char servType,
@@ -246,31 +342,39 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(unsigned int connectionHandle
     return retVal;
 }
 
-void ProtocolHandler::handleMessage( ProtocolPacket & packet )
+RESULT_CODE ProtocolHandler::handleMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+                    ProtocolPacket * packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
-    switch (packet.getFrameType())
+    switch (packet -> getFrameType())
     {
         case FRAME_TYPE_CONTROL:
         {
             LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_CONTROL");
 
-            handleControlMessage( packet );
-            break;
+            return handleControlMessage( connectionHandle, packet );
         }
         case FRAME_TYPE_SINGLE:
         {
             LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_SINGLE");
+
+            if ( !mSessionObserver )
+            {
+                LOG4CPLUS_ERROR(mLogger, "Cannot handle message from Transport Manager: ISessionObserver doesn't exist.");
+                return RESULT_FAIL;
+            }
+
+            int connectionKey = mSessionObserver -> keyFromPair( connectionHandle,
+                                        packet -> getSessionId() );
             
-            AppLinkRawMessage * rawMessage = new AppLinkRawMessage( connectionHandle,
-                                        packet.getSessionID(),
-                                        packet.getVersion(),
-                                        packet.getData(),
-                                        packet.getDataSize());
+            AppLinkRawMessage * rawMessage = new AppLinkRawMessage( connectionKey,
+                                        packet -> getVersion(),
+                                        packet -> getData(),
+                                        packet -> getDataSize() );
 
             if (mProtocolObserver)
-                mProtocolObserver->dataReceivedCallback(rawMessage);
+                mProtocolObserver->onDataReceivedCallback(rawMessage);
 
             break;
         }
@@ -279,8 +383,7 @@ void ProtocolHandler::handleMessage( ProtocolPacket & packet )
         {
             LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_CONSECUTIVE");
 
-            handleMultiFrameMessage( connectionHandle, packet);            
-            break;
+            return handleMultiFrameMessage( connectionHandle, packet ); 
         }
         default:
         {
@@ -288,109 +391,105 @@ void ProtocolHandler::handleMessage( ProtocolPacket & packet )
         }
     }
 
-    return retVal;
+    return RESULT_OK;
 }
 
 RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              ProtocolPacket & packet )
+              ProtocolPacket * packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-    if (packet.getFrameType() == FRAME_TYPE_FIRST)
+
+    if ( !mSessionObserver )
+    {
+        LOG4CPLUS_ERROR(mLogger, "No ISessionObserver set.");
+        return RESULT_FAIL;
+    }
+
+    int key = mSessionObserver->keyFromPair(connectionHandle, packet -> getSessionId());
+
+    if (packet -> getFrameType() == FRAME_TYPE_FIRST)
     {
         LOG4CPLUS_INFO(mLogger, "handleMultiFrameMessage() - FRAME_TYPE_FIRST");
         
-        unsigned int totalDataBytes = packet.getData[0] << 24;
-        totalDataBytes |= packet.getData[1] << 16;
-        totalDataBytes |= packet.getData[2] << 8;
-        totalDataBytes |= packet.getData[3];
+        //const unsigned char * data = packet -> getData();
+        unsigned int totalDataBytes = packet -> getData()[0] << 24;
+        totalDataBytes |= packet -> getData()[1] << 16;
+        totalDataBytes |= packet -> getData()[2] << 8;
+        totalDataBytes |= packet -> getData()[3];
 
-        packet.setTotalDataBytes()
+        packet -> setTotalDataBytes( totalDataBytes );
 
-        mIncompleteMultiFrameMessages[connectionHandle] = packet;
+        mIncompleteMultiFrameMessages[key] = packet;
     }
     else
     {
         LOG4CPLUS_INFO(mLogger, "handleMultiFrameMessage() - Consecutive frame");
 
-        pair<PacketsMultimap::iterator,PacketsMultimap::iterator> messagesFromConnection;
+        std::map<int, ProtocolPacket*>::iterator it = mIncompleteMultiFrameMessages.find(key);
 
-        messagesFromConnection = mIncompleteMultiFrameMessages.equal_range( connectionHandle );
-
-        for ( PacketsMultimap::iterator it = messagesFromConnection.first;
-                it != messagesFromConnection.second;
-                ++it )
+        if ( it == mIncompleteMultiFrameMessages.end() )
         {
-            if ( it->second->sessionID == packet->sessionID )
-            {
-                it->second->appendData( packet -> data, packet -> dataSize );
+            LOG4CPLUS_ERROR(mLogger, "Frame of multiframe message for non-existing session id");
+            return RESULT_FAIL;
+        }
+
+        if ( it->second->appendData( packet -> getData(), packet -> getDataSize() ) != RESULT_OK )
+        {
+            LOG4CPLUS_ERROR(mLogger, "Failed to append frame for multiframe message.");
+            return RESULT_FAIL;
+        }
                 
-                if ( packet -> frameData == FRAME_DATA_LAST_FRAME )
-                {
-                    if ( mProtocolObserver )
-                    {
-                        mProtocolObserver -> dataReceivedCallback(
-                            it->second->sessionID,
-                            it->second->messageID,
-                            packet->data,
-                            packet->totalDataBytes);
-                    }
-                    mIncompleteMultiFrameMessages.erase( it );
-                    break;
-                }
+        if ( packet -> getFrameData() == FRAME_DATA_LAST_FRAME )
+        {
+            if ( !mProtocolObserver )
+            {
+                LOG4CPLUS_ERROR(mLogger, "Cannot handle multiframe message: no IProtocolObserver is set.");
+                return RESULT_FAIL;
             }
+
+            AppLinkRawMessage * rawMessage = new AppLinkRawMessage( key,
+                                        packet -> getVersion(),
+                                        packet -> getData(),
+                                        packet -> getDataSize() );
+
+            mProtocolObserver -> onDataReceivedCallback( rawMessage );
+
+            mIncompleteMultiFrameMessages.erase( it );
         }
 
     }
+
+    return RESULT_OK;
 }
 
-void ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle,
-              const ProtocolPacket & packet )
+RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+              const ProtocolPacket * packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
-    unsigned char currentSessionID = packet.getSessionID();
+    if ( !mSessionObserver )
+    {
+        LOG4CPLUS_ERROR(mLogger, "ISessionObserver is not set.");
+        return RESULT_FAIL;
+    }
     
-    if (packet.getFrameData() == FRAME_DATA_END_SESSION)
+    if (packet -> getFrameData() == FRAME_DATA_END_SESSION)
     {
         LOG4CPLUS_INFO(mLogger, "handleControlMessage() - FRAME_DATA_END_SESSION");
-        bool correctEndSession = false;
-        if (packet.getVersion() == PROTOCOL_VERSION_2)
-        {
-            /*if (header.messageID == mHashCodes[header.sessionID])
-                correctEndSession = true;
-            else
-            {
-                LOG4CPLUS_WARN(mLogger, "handleControlMessage() - incorrect hashCode");
-                if (sendEndSessionNAck(header.sessionID) != ERR_OK)
-                    retVal = ERR_FAIL;
-            }*/
-        }
-        else if ( (packet.getVersion() == PROTOCOL_VERSION_1) )
-        {
-            correctEndSession = true;
-        }
 
-        if (correctEndSession)
-        {
-            mHashCodes.erase(currentSessionID);
-            if (mProtocolObserver)
-                mProtocolObserver->sessionEndedCallback(currentSessionID);
-        }
+        unsigned char currentSessionID = packet -> getSessionId();
+
+        mSessionObserver -> onSessionEndedCallback( connectionHandle, currentSessionID );
     }
-    if (packet.getFrameData() == FRAME_DATA_START_SESSION)
+
+    if (packet -> getFrameData() == FRAME_DATA_START_SESSION)
     {
         LOG4CPLUS_INFO(mLogger, "handleControlMessage() - FRAME_DATA_START_SESSION");
-        if (sendStartSessionAck(connectionHandle, 1, mSessionIdCounter) == RESULT_OK)
-        {
-            if (mProtocolObserver)
-            {
-                mProtocolObserver->sessionStartedCallback(mSessionIdCounter
-                                                          , mHashCodes[mSessionIdCounter]);
-            }
 
-            mSessionIdCounter++;
-        }
+        mSessionObserver -> onSessionStartedCallback( connectionHandle );
     }
+
+    return RESULT_OK;
 }
 
 void * ProtocolHandler::handleMessagesFromMobileApp( void * params )
@@ -412,14 +511,15 @@ void * ProtocolHandler::handleMessagesFromMobileApp( void * params )
             //@TODO check for data size - crash is possible.
             if ((0 != message.mData) && (0 != message.mDataSize) && (MAXIMUM_FRAME_SIZE >= message.mDataSize))
             {        
-                ProtocolPacket packet;
-                if ( packet.deserializePacket( message.mData, message.mDataSize ) == RESULT_FAIL )
+                ProtocolPacket * packet = new ProtocolPacket;
+                if ( packet -> deserializePacket( message.mData, message.mDataSize ) == RESULT_FAIL )
                 {
                     LOG4CPLUS_ERROR(mLogger, "Failed to parse received message.");
+                    delete packet;
                 }
                 else 
                 {
-                    handleMessage(packet);
+                    handler -> handleMessage( message.mConnectionHandle, packet );
                 }
             }
             else
@@ -447,8 +547,7 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
         while ( ! handler -> mMessagesToMobileApp.empty() )
         {
             const AppLinkRawMessage * message = handler -> mMessagesToMobileApp.pop();
-            LOG4CPLUS_INFO_EXT(mLogger, "Message to mobile app: connection " << message->getConnectionID()
-                    << "; sessionID: " << message->getSessionID() 
+            LOG4CPLUS_INFO_EXT(mLogger, "Message to mobile app: connection " << message->getConnectionKey()
                     << "; dataSize: " << message->getDataSize() );
 
             unsigned int maxDataSize = 0;
@@ -457,10 +556,21 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
             else if ( PROTOCOL_VERSION_2 == message -> getProtocolVersion() )
                 maxDataSize = MAXIMUM_FRAME_SIZE - PROTOCOL_HEADER_V2_SIZE;
 
+            NsAppLink::NsTransportManager::tConnectionHandle connectionHandle = 0;
+            unsigned char sessionID = 0;
+
+            if ( !handler -> mSessionObserver )
+            {
+                LOG4CPLUS_ERROR(mLogger, "Cannot handle message to mobile app: ISessionObserver doesn't exist.");
+                pthread_exit(0);
+            }
+            handler -> mSessionObserver -> pairFromKey( message->getConnectionKey(), connectionHandle, sessionID );
+
             if ( message -> getDataSize() <= maxDataSize )
             {
-                if (sendSingleFrameMessage(message -> getConnectionID(),
-                                            message -> getSessionID(), 
+                if (handler -> sendSingleFrameMessage(connectionHandle,
+                                            sessionID, 
+                                            message -> getProtocolVersion(),
                                             SERVICE_TYPE_RPC, 
                                             message -> getDataSize(), 
                                             message -> getData(), 
@@ -471,8 +581,9 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
             }
             else
             {
-                if (sendMultiFrameMessage(message -> getConnectionID(),
-                                            message -> getSessionID(), 
+                if (handler -> sendMultiFrameMessage(connectionHandle,
+                                            sessionID,
+                                            message -> getProtocolVersion(),
                                             SERVICE_TYPE_RPC, 
                                             message -> getDataSize(), 
                                             message -> getData(), 
