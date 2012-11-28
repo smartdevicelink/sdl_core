@@ -10,22 +10,12 @@ namespace NsTest
     }
 
     /**
-     * \brief Sets pointer to instance of the class implementing RPC handling (Application Manager).
-     * \param messagesObserver Pointer to object of the class implementing IRPCMessagesObserver
-     * \sa IRPCMessagesObserver
-     */
-    void TestEnvironment::setRPCMessagesObserver(IRPCMessagesObserver *messagesObserver)
-    {
-        NsMobileEmulator::ALRPC::setRPCMessagesObserver(messagesObserver);
-    }
-
-    /**
      * \brief send a message to HMI via applinkcore
      * \param message Pointer to base class of AppLink Json object
      * \param connectionId ID of the connection the message was received within.
      * \param sessionId ID of the session the message was received within.
      */
-    void TestEnvironment::sendRPCMessage(NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId)
+    void TestEnvironment::sendRPCMessageToHmi(NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Sending to HMI a message " << message->getMethodId() << " connection " << connectionId << " session " << (uint)sessionId);
         getRPCMessageObserver()->onMessageReceivedCallback( message, connectionId, sessionId );
