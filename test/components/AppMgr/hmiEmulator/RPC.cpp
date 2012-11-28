@@ -89,6 +89,11 @@ namespace NsHMIEmulator
      */
     void RPC::sendRPC2MessageToMobileSide(NsRPC2Communication::RPC2Command *command)
     {
+        if(!command)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "null-command!" );
+            return;
+        }
         LOG4CPLUS_INFO_EXT(mLogger, " Sending to the mobile side a message " << command->getMethod());
         Json::Value message = NsRPC2Communication::Marshaller::toJSON(command);
         sendJsonMessage(message);

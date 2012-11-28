@@ -79,6 +79,11 @@ RPC(address, port, std::string("VR"))
    */
   void VRRPC::messageReceivedFromDeviceCallback(NsRPC2Communication::RPC2Command *command)
   {
+      if(!command)
+      {
+          LOG4CPLUS_ERROR_EXT(mLogger, "null-command!" );
+          return;
+      }
   }
 
 } /* namespace NsHMIEmulator */
