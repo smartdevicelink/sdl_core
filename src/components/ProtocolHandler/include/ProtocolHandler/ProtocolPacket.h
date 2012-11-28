@@ -40,43 +40,62 @@ const unsigned char FRAME_DATA_LAST_FRAME = 0x00;
 
 const unsigned char FIRST_FRAME_DATA_SIZE = 0x08;
 
-    struct ProtocolHeader
-    {
-        ProtocolHeader() :
-            version(0x00),
-            compress(0x00),
-            frameType(0x00),
-            serviceType(0x00),
-            frameData(0x00),
-            sessionID(0x00),
-            dataSize(0x00),
-            messageId(0x00)
-        {}
+enum RESULT_CODE
+{
+   RESULT_OK                     = 1,
+   RESULT_FAIL                   = 2,
+   RESULT_NUMBER_BUSY            = 3,
+   RESULT_CONNECTION_LOST        = 4,
+   RESULT_DISCONNECTED           = 5,
+   RESULT_NOTFOUND               = 6,
+   RESULT_TIMEOUT                = 7,
+   RESULT_WRONG_SEQUENCE         = 8,
+   RESULT_AGAIN                  = 9,
+   RESULT_WRONG_FRAME_SEQUENCE   = 10,
+   RESULT_IN_PROGRESS            = 11,
+   RESULT_REASSIGN               = 12,
+   RESULT_XML_PARSING            = 13,
+   RESULT_RESEND_ACK             = 14,
+   RESULT_DEFRERRED               = 15,
+   RESULT_UNKNOWN                = 255
+};
 
-        unsigned char version;
-        bool compress;
-        unsigned char frameType;
-        unsigned char serviceType;
-        unsigned char frameData;
-        unsigned char sessionID;
-        unsigned int dataSize;
-        /**
-          * MessageID is used only in protocol version 2
-          */
-        unsigned int messageId;
-    };
+struct ProtocolHeader
+{
+    ProtocolHeader() :
+        version(0x00),
+        compress(0x00),
+        frameType(0x00),
+        serviceType(0x00),
+        frameData(0x00),
+        sessionID(0x00),
+        dataSize(0x00),
+        messageId(0x00)
+    {}
 
-    struct ProtocolData
-    {
-        ProtocolData() :
-            data(0),
-            totalDataBytes(0x00),
-            dataOffset(0x00)
-        {}
+    unsigned char version;
+    bool compress;
+    unsigned char frameType;
+    unsigned char serviceType;
+    unsigned char frameData;
+    unsigned char sessionID;
+    unsigned int dataSize;
+    /**
+      * MessageID is used only in protocol version 2
+      */
+    unsigned int messageId;
+};
 
-        unsigned char * data;
-        unsigned int totalDataBytes;
-    };
+struct ProtocolData
+{
+    ProtocolData() :
+        data(0),
+        totalDataBytes(0x00)
+    {}
+
+    unsigned char * data;
+    unsigned int totalDataBytes;
+};
 
     class ProtocolPacket
     {

@@ -1,12 +1,12 @@
 #include "ProtocolHandler/AppLinkRawMessage.h"
 
-AppLinkRawMessage::AppLinkRawMessage(unsigned int connectionID,
-                            unsigned int sessionID,
+using namespace NsProtocolHandler;
+
+AppLinkRawMessage::AppLinkRawMessage(int connectionKey,
                             unsigned int protocolVersion,
-                            unsigned int * data,
+                            unsigned char * data,
                             unsigned int dataSize) : 
- mConnectionID( connectionID )
-,mSessionID( sessionID )
+ mConnectionKey( connectionKey )
 ,mProtocolVersion( protocolVersion )
 ,mData( data )
 ,mDataSize( dataSize )
@@ -21,17 +21,12 @@ AppLinkRawMessage::~AppLinkRawMessage()
     }
 }
 
-unsigned int AppLinkRawMessage::getConnectionID() const
+unsigned int AppLinkRawMessage::getConnectionKey() const
 {
-    return mConnectionID;
+    return mConnectionKey;
 }
         
-unsigned int AppLinkRawMessage::getSessionID() const
-{
-    return mSessionID;
-}
-        
-unsigned int * AppLinkRawMessage::getData() const
+unsigned char * AppLinkRawMessage::getData() const
 {
     return mData;
 }

@@ -12,8 +12,14 @@
 #include "JSONHandler/MessageQueue.h"
 #include "JSONHandler/ALRPCMessage.h"
 #include "JSONHandler/IRPCMessagesObserver.h"
-#include "IProtocolObserver.hpp"
-#include "ProtocolHandler.hpp"
+#include "ProtocolHandler/AppLinkRawMessage.h"
+#include "ProtocolHandler/IProtocolObserver.h"
+#include "ProtocolHandler/ProtocolHandler.h"
+
+const unsigned char RPC_REQUEST = 0x0;
+const unsigned char RPC_RESPONSE = 0x1;
+const unsigned char RPC_NOTIFICATION = 0x2;
+const unsigned char RPC_UNKNOWN = 0xF;
 
 /**
  * \class JSONHandler
@@ -21,14 +27,14 @@
  * Receives AppLink Json message from Protocol layer, creates corresponding object and sends it to Application Manager.
  * Receives AppLink message object from Application manager, serializes it into Json string and sends to Protocol Layer.
 */
-class JSONHandler : public AxisCore::IProtocolObserver
+class JSONHandler : public NsProtocolHandler::IProtocolObserver
 {
 public:
     /**
      * \brief Constructor
      * \param protocolHandler Pointer to Protocol Layer handler for message exchange.
     */
-    JSONHandler( AxisCore::ProtocolHandler * protocolHandler = 0 );
+    JSONHandler( NsProtocolHandler::ProtocolHandler * protocolHandler = 0 );
 
     /**
      * \brief Destructor
@@ -40,28 +46,13 @@ public:
      * \brief Sets pointer for Protocol layer handler for message exchange.
      * \param protocolHandler Pointer to Protocol layer handler.
      */
-    void setProtocolHandler( AxisCore::ProtocolHandler * protocolHandler );
-
-    /**
-     * \brief Callback for Protocol layer handler to notify of session start.
-     * \param sessionID ID of started session
-     * \param hashCode Hash Code of the started session to use in finishing the session.
-     */
-    void sessionStartedCallback(const UInt8 sessionID, const UInt32 hashCode);
-
-    /**
-     * \brief Callback for Protocol layer handler to notify of session end.
-     * \param sessionID ID of ended session.
-     */
-    void sessionEndedCallback(const UInt8 sessionID);
+    void setProtocolHandler( NsProtocolHandler::ProtocolHandler * protocolHandler );
 
     /**
      * \brief Callback for Protocol layer handler to notify of message received.
-     * \param sessionID ID of session in which message was received.
-     * \param messageID ID of received message.
-     * \param dataSize Size of received message in bytes.
+     * \param message Object containing received data, size of it and connection key.
      */
-    void dataReceivedCallback(const UInt8 sessionID, const UInt32 messageID, const UInt32 dataSize);
+    void onDataReceivedCallback( const NsProtocolHandler::AppLinkRawMessage * message );
     /*end of methods from IProtocolObserver*/
 
     /*Methods for IRPCMessagesObserver*/
@@ -101,6 +92,12 @@ protected:
      * \return Json string cleared from empty spaces.
      */
     std::string clearEmptySpaces( const std::string & input );
+
+    NsAppLinkRPC::ALRPCMessage * handleIncomingMessageProtocolV1(
+            const NsProtocolHandler::AppLinkRawMessage * message );
+
+    NsAppLinkRPC::ALRPCMessage * handleIncomingMessageProtocolV2(
+            const NsProtocolHandler::AppLinkRawMessage * message );
     
 private:
     /**
@@ -117,20 +114,15 @@ private:
     /**
       *\brief Points on instance of Protocol layer handler for message exchange.
     */
-    AxisCore::ProtocolHandler *         mProtocolHandler;
+    NsProtocolHandler::ProtocolHandler *         mProtocolHandler;
 
-    /**
-      *\brief Current session ID
-      * TODO: to be removed: sessionID's are going to be chained with messages.
-    */
-    UInt8                                     mSessionID;
     /* End IProtocolObserver data */
 
     /**
       *\brief Queue of messages from Mobile Application.
       *\sa MessageQueue
     */
-    MessageQueue<std::string>          mIncomingMessages;
+    MessageQueue<const NsProtocolHandler::AppLinkRawMessage*>          mIncomingMessages;
 
     /**
       *\brief Thread for handling messages from Mobile Application.

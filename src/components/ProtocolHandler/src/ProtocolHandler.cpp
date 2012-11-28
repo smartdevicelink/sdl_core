@@ -1,4 +1,8 @@
+#include <pthread.h>
+#include <signal.h>
 #include "ProtocolHandler/ProtocolHandler.h"
+
+using namespace NsProtocolHandler;
 
 log4cplus::Logger ProtocolHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ProtocolHandler"));
 

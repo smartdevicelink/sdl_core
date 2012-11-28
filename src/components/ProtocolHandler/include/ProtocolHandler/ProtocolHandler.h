@@ -2,31 +2,15 @@
 #define PROTOCOLHANDLER_CLASS
 
 #include <map>
+#include "Logger.hpp"
 #include "Utils/MessageQueue.h"
+#include "ProtocolHandler/AppLinkRawMessage.h"
+#include "ProtocolHandler/ProtocolPacket.h"
+#include "TransportManager/ITransportManagerDataListener.hpp"
 
 namespace NsProtocolHandler
 {
-    class IProtocolObserver;
-
-    enum RESULT_CODE
-    {
-       RESULT_OK                     = 1,
-       RESULT_FAIL                   = 2,
-       RESULT_NUMBER_BUSY            = 3,
-       RESULT_CONNECTION_LOST        = 4,
-       RESULT_DISCONNECTED           = 5,
-       RESULT_NOTFOUND               = 6,
-       RESULT_TIMEOUT                = 7,
-       RESULT_WRONG_SEQUENCE         = 8,
-       RESULT_AGAIN                  = 9,
-       RESULT_WRONG_FRAME_SEQUENCE   = 10,
-       RESULT_IN_PROGRESS            = 11,
-       RESULT_REASSIGN               = 12,
-       RESULT_XML_PARSING            = 13,
-       RESULT_RESEND_ACK             = 14,
-       RESULT_DEFRERRED               = 15,
-       RESULT_UNKNOWN                = 255
-    };
+    class IProtocolObserver;    
 
     class ProtocolHandler : public NsAppLink::NsTransportManager::ITransportManagerDataListener
     {

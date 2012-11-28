@@ -10,4 +10,4 @@ add_subdirectory(./jsoncpp)
 add_subdirectory(./MessageBroker)
 
 # --- axisCode
-add_subdirectory(./axisCore)
+#add_subdirectory(./axisCore)

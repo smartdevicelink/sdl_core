@@ -18,7 +18,7 @@
 
 log4cplus::Logger JSONHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONHandler"));
 
-JSONHandler::JSONHandler( AxisCore::ProtocolHandler * protocolHandler ) :
+JSONHandler::JSONHandler( NsProtocolHandler::ProtocolHandler * protocolHandler ) :
 mProtocolHandler( protocolHandler )
 {
     pthread_create( &mWaitForIncomingMessagesThread, NULL, &JSONHandler::waitForIncomingMessages, (void *)this );
@@ -52,42 +52,17 @@ void JSONHandler::sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, un
     } 
 }
 /*End of methods for IRPCMessagesObserver*/
-
-/*Methods from IProtocolObserver*/
-void JSONHandler::setProtocolHandler( AxisCore::ProtocolHandler * protocolHandler )
+void JSONHandler::onDataReceivedCallback( const NsProtocolHandler::AppLinkRawMessage * message )
 {
-    mProtocolHandler = protocolHandler;
-}
-
-void JSONHandler::sessionStartedCallback(const UInt8 sessionID, const UInt32 hashCode)
-{
-    mSessionID = sessionID;
-}
-
-void JSONHandler::sessionEndedCallback(const UInt8 sessionID)
-{}
-
-void JSONHandler::dataReceivedCallback(const UInt8 sessionID, const UInt32 messageID, const UInt32 dataSize)
-{
-    LOG4CPLUS_INFO( mLogger, "Received message from mobile App." );
-    UInt8 *data = new UInt8[dataSize+1];
-    memset(data, 0, dataSize+1);
-
-    if ( !mProtocolHandler )
+    if ( !message )
     {
-        LOG4CPLUS_ERROR( mLogger, "Cannot receive message: ProtocolHandler doesn't exist." );
-        return; 
+        LOG4CPLUS_ERROR(mLogger, "Received invalid message from ProtocolHandler.");
+        return;
     }
-    mProtocolHandler -> receiveData(sessionID, messageID, AxisCore::SERVICE_TYPE_RPC, dataSize, data);
 
-    LOG4CPLUS_INFO( mLogger, "Mobile message size is " << dataSize << "; sessionID is " << sessionID );
+    LOG4CPLUS_INFO( mLogger, "Received message from mobile App: " << message->getData() << " of size " << message->getDataSize());
 
-    std::string str = std::string( (const char*)data, dataSize);
-    std::string receivedString = clearEmptySpaces( str );
-
-    delete[] data;
-
-    mIncomingMessages.push( receivedString );
+    mIncomingMessages.push( message );
 }
 /*end of methods from IProtocolObserver*/
 
@@ -113,11 +88,23 @@ void * JSONHandler::waitForIncomingMessages( void * params )
         while ( ! handler -> mIncomingMessages.empty() )
         {
             LOG4CPLUS_INFO( mLogger, "Incoming mobile message received." );
-            std::string jsonMessage = handler -> mIncomingMessages.pop();
+            const NsProtocolHandler::AppLinkRawMessage * message = handler -> mIncomingMessages.pop();
 
-            NsAppLinkRPC::ALRPCMessage * currentMessage = NsAppLinkRPC::Marshaller::fromString( jsonMessage );
-            LOG4CPLUS_INFO( mLogger, "Json string: "<< jsonMessage );
+            NsAppLinkRPC::ALRPCMessage * currentMessage = 0;
 
+            if ( message -> getProtocolVersion() == 1 )
+            {
+                currentMessage = handler -> handleIncomingMessageProtocolV1( message );
+            }
+            else if ( message -> getProtocolVersion() == 2 )
+            {
+                currentMessage = handler -> handleIncomingMessageProtocolV2( message );
+            }
+            else
+            {
+                LOG4CPLUS_WARN(mLogger, "Message of wrong protocol version received.");
+                continue;
+            }
 
             if ( !currentMessage )
             {
@@ -130,11 +117,81 @@ void * JSONHandler::waitForIncomingMessages( void * params )
                 LOG4CPLUS_ERROR( mLogger, "Cannot handle mobile message: MessageObserver doesn't exist." );
                 pthread_exit( 0 );
             }
-            handler -> mMessagesObserver -> onMessageReceivedCallback( currentMessage, handler -> mSessionID );
+            handler -> mMessagesObserver -> onMessageReceivedCallback( currentMessage, message -> getConnectionKey() );
             LOG4CPLUS_INFO( mLogger, "Incoming mobile message handled." );
         }
         handler -> mIncomingMessages.wait();
     }
+}
+
+NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV1( const NsProtocolHandler::AppLinkRawMessage * message )
+{
+    std::string jsonMessage = std::string( (const char*)message->getData(), message->getDataSize());
+
+    if ( jsonMessage.length() == 0 )
+    {
+        LOG4CPLUS_ERROR(mLogger, "Received invalid json packet.");
+        return 0;
+    }
+
+    std::string jsonCleanMessage = clearEmptySpaces( jsonMessage );
+
+    return NsAppLinkRPC::Marshaller::fromString( jsonCleanMessage );
+}
+
+NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV2( const NsProtocolHandler::AppLinkRawMessage * message )
+{
+    unsigned char * receivedData = message->getData();
+    unsigned char offset = 0;
+    unsigned char firstByte = receivedData[offset++];
+
+    int rpcType = -1;
+    unsigned char rpcTypeFlag = firstByte >> 4u;
+    switch( rpcTypeFlag )
+    {
+        case RPC_REQUEST:
+            rpcType = 0;
+            break;
+        case RPC_RESPONSE:
+            rpcType = 1;
+            break;
+        case RPC_NOTIFICATION:
+            rpcType = 2;
+            break;
+    }
+
+    unsigned int functionId = firstByte >> 8u;
+    functionId <<= 24u;
+    functionId |= receivedData[offset++] << 16u;
+    functionId |= receivedData[offset++] << 8u;
+    functionId |= receivedData[offset++];
+
+    unsigned int correlationId = receivedData[offset++] << 24u;
+    correlationId |= receivedData[offset++] << 16u;
+    correlationId |= receivedData[offset++] << 8u;
+    correlationId |= receivedData[offset++];
+
+    unsigned int jsonSize = receivedData[offset++] << 24u;
+    jsonSize |= receivedData[offset++] << 16u;
+    jsonSize |= receivedData[offset++] << 8u;
+    jsonSize |= receivedData[offset++];
+
+    if ( jsonSize > message->getDataSize() )
+    {
+        LOG4CPLUS_ERROR(mLogger, "Received invalid json packet header.");
+        return 0;
+    }
+
+    std::string jsonMessage = std::string( (const char*)receivedData + offset, jsonSize );
+    if ( jsonMessage.length() == 0 )
+    {
+        LOG4CPLUS_ERROR(mLogger, "Received invalid json packet.");
+        return 0;
+    }
+
+    std::string jsonCleanMessage = clearEmptySpaces( jsonMessage );
+
+    return NsAppLinkRPC::Marshaller::fromString( jsonCleanMessage );
 }
 
 void * JSONHandler::waitForOutgoingMessages( void * params )
@@ -154,7 +211,7 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
 
             std::string messageString = NsAppLinkRPC::Marshaller::toString( message );
 
-            UInt8* pData;
+            /*UInt8* pData;
             pData = new UInt8[messageString.length() + 1];
             memcpy (pData, messageString.c_str(), messageString.length() + 1);
 
@@ -163,8 +220,8 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
                 LOG4CPLUS_ERROR( mLogger, "Cannot handle mobile message: ProtocolHandler doesn't exist." );
                 pthread_exit( 0 );
             }
-            handler -> mProtocolHandler -> sendData( handler -> mSessionID,  AxisCore::SERVICE_TYPE_RPC, 
-                    messageString.size() + 1, pData, false );
+            handler -> mProtocolHandler -> sendData( handler -> mSessionID,  NsProtocolHandler::SERVICE_TYPE_RPC, 
+                    messageString.size() + 1, pData, false );*/
 
             delete message;
             LOG4CPLUS_INFO( mLogger, "Outgoing mobile message handled." );

@@ -1,12 +1,11 @@
 include_directories (
     ./include/
     ../JSONHandler/include/
-  ../TransportManager/include/
+  ../TransportManager/include/  
+  ../ProtocolHandler/include/
+  ../Utils/include/
     ../../thirdPartyLibs/MessageBroker/include/
     ../../thirdPartyLibs/jsoncpp/include/
-    ../../thirdPartyLibs/axisCore/
-    ../../thirdPartyLibs/axisCore/include/
-    ../../thirdPartyLibs/axisCore/src/
     ../../thirdPartyLibs/logger/include/
     ../../thirdPartyLibs/logger/log4cplus-1.1.0/include/
     ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
