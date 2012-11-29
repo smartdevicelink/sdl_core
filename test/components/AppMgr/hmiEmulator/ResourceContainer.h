@@ -15,6 +15,7 @@
 #include "JSONHandler/ALRPCObjects/GlobalProperty.h"
 #include "JSONHandler/ALRPCObjects/TTSChunk.h"
 #include "JSONHandler/ALRPCObjects/MenuParams.h"
+#include "JSONHandler/ALRPCObjects/Choice.h"
 
 /**
  * \namespace NsHMIEmulator
@@ -68,6 +69,11 @@ namespace NsHMIEmulator
     typedef std::vector<NsAppLinkRPC::GlobalProperty> GlobalProperties;
 
     /**
+     * \brief ChoiceSet container
+     */
+    typedef std::vector<NsAppLinkRPC::Choice> ChoiceSet;
+
+    /**
      * \brief A command_id - menu_params mapping (command id is a key)
      */
     typedef std::map<unsigned int, NsAppLinkRPC::MenuParams> Commands;
@@ -91,6 +97,16 @@ namespace NsHMIEmulator
      * \brief A menu item id - MenuItemBase mapping item
      */
     typedef std::pair<unsigned int, MenuItemBase> MenuItem;
+
+    /**
+     * \brief An interaction choice set id - InteractionChoiceSet mapping item
+     */
+    typedef std::map<unsigned int, ChoiceSet> InteractionChoiceSet;
+
+    /**
+     * \brief An interaction choice set id - InteractionChoiceSet mapping
+     */
+    typedef std::pair<unsigned int, ChoiceSet> InteractionChoiceSetItem;
 
     /**
      * \brief The ResourceContainer class acts as a container of all HMI
@@ -177,6 +193,26 @@ namespace NsHMIEmulator
          * \return menu item
          */
         const MenuItem& findMenuItem(const unsigned int& id);
+
+        /**
+         * \brief add an interaction choice set to a list of registered interaction choice sets
+         * \param id
+         * \param set
+         */
+        void addInteractionChoiceSet(const unsigned int& id, const ChoiceSet& set);
+
+        /**
+         * \brief remove an interaction choice set from a list of registered interaction choice sets
+         * \param id
+         */
+        void removeInteractionChoiceSet(const unsigned int& id);
+
+        /**
+         * \brief finds an interaction choice set in a registered interaction choice sets list
+         * \param id
+         * \return interaction choice set
+         */
+        ChoiceSet findInteractionChoiceSet(const unsigned int& id);
 
         /**
          * \brief gets button capabilities
@@ -266,6 +302,7 @@ namespace NsHMIEmulator
         GlobalProperties mGlobalProperties;
         Commands mCommands;
         Menu mMenuItems;
+        InteractionChoiceSet mInteractionChoiceSet;
 
         std::string mActiveApplication;
     };

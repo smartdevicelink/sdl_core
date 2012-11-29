@@ -136,6 +136,40 @@ namespace NsHMIEmulator
     }
 
     /**
+     * \brief add an interaction choice set to a list of registered interaction choice sets
+     * \param id
+     * \param set
+     */
+    void ResourceContainer::addInteractionChoiceSet(const unsigned int &id, const ChoiceSet &set)
+    {
+        mInteractionChoiceSet.insert(InteractionChoiceSetItem(id, set));
+    }
+
+    /**
+     * \brief remove an interaction choice set from a list of registered interaction choice sets
+     * \param id
+     */
+    void ResourceContainer::removeInteractionChoiceSet(const unsigned int &id)
+    {
+        mInteractionChoiceSet.erase(id);
+    }
+
+    /**
+     * \brief finds an interaction choice set in a registered interaction choice sets list
+     * \param id
+     * \return interaction choice set
+     */
+    ChoiceSet ResourceContainer::findInteractionChoiceSet(const unsigned int &id)
+    {
+        const InteractionChoiceSetItem& item = mInteractionChoiceSet.find(id);
+        if(item != mInteractionChoiceSet.end())
+        {
+            return item.second;
+        }
+        return ChoiceSet; //an empty container
+    }
+
+    /**
      * \brief gets button capabilities
      * \return button capabilities
      */
