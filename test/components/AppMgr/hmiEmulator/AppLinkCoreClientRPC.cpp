@@ -93,12 +93,74 @@ RPC(address, port, std::string("AppLinkCoreClient"))
   }
 
   /**
-   * \brief Callback function which is called by JSONRPC2Handler
-   *  when new RPC2Bus Json message is received from HMI.
+   * \brief Callback function which is called upon a new message from mobile side arrival
    * \param command RPC2Bus Json message
    */
-  void AppLinkCoreClientRPC::onCommandReceivedCallback(NsRPC2Communication::RPC2Command *command)
+  void AppLinkCoreClientRPC::messageReceivedFromDeviceCallback(NsRPC2Communication::RPC2Command *msg)
   {
+      if(!msg)
+      {
+          LOG4CPLUS_ERROR_EXT(mLogger, "null-command!" );
+          return;
+      }
+
+      ResourceContainer& rc = ResourceContainer::getInstance();
+      switch(msg->getMethod())
+      {
+          case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPREGISTERED:
+          {
+              LOG4CPLUS_INFO_EXT(mLogger, " An OnAppRegistered notification has been income");
+              NsRPC2Communication::AppLinkCore::OnAppRegistered * object = (NsRPC2Communication::AppLinkCore::OnAppRegistered*)msg;
+              Application* app = new Application(object->get_appName());
+              app->setDeviceName(object->get_deviceName());
+              app->setIcon(object->get_appIcon());
+              app->setIsMedia(object->get_isMediaApplication());
+              app->setLanguageDesired(object->get_languageDesired());
+              if(object->get_vrSynonym())
+              {
+                  app->setVrSynonyms(*object->get_vrSynonym());
+              }
+              rc.addApplication(app->getName(), app);
+              return;
+          }
+          case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPUNREGISTERED:
+          {
+              LOG4CPLUS_INFO_EXT(mLogger, " An OnAppUnregistered notification has been income");
+              NsRPC2Communication::AppLinkCore::OnAppUnregistered * object = (NsRPC2Communication::AppLinkCore::OnAppUnregistered*)msg;
+              rc.removeApplication(object->get_appName());
+              return;
+          }
+          case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPPRESPONSE:
+          {
+              LOG4CPLUS_INFO_EXT(mLogger, "ActivateApp response has been received!");
+              NsRPC2Communication::AppLinkCore::ActivateAppResponse* object = static_cast<NsRPC2Communication::AppLinkCore::ActivateAppResponse*>(msg);
+              if ( !object )
+              {
+                  LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't cast object to ActivateApp type");
+                  return;
+              }
+              LOG4CPLUS_INFO_EXT(mLogger, "Result " << object->getResult());
+              return;
+          }
+          case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATARESPONSE:
+          {
+              LOG4CPLUS_INFO_EXT(mLogger, "SendData response has been received!");
+              NsRPC2Communication::AppLinkCore::SendDataResponse* object = static_cast<NsRPC2Communication::AppLinkCore::SendDataResponse*>(msg);
+              LOG4CPLUS_INFO_EXT(mLogger, "Result " << object->getResult());
+              return;
+          }
+          case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLISTRESPONSE:
+          {
+              LOG4CPLUS_INFO_EXT(mLogger, "GetAppList response has been received!");
+              NsRPC2Communication::AppLinkCore::GetAppListResponse* object = static_cast<NsRPC2Communication::AppLinkCore::GetAppListResponse*>(msg);
+              LOG4CPLUS_INFO_EXT(mLogger, "Found " << object->get_appList().size() << " applications!");
+              return;
+          }
+          case NsRPC2Communication::Marshaller::METHOD_INVALID:
+          default:
+              LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message " << msg->getMethod() << " has been received!");
+      }
+
   }
 
 } /* namespace NsHMIEmulator */
