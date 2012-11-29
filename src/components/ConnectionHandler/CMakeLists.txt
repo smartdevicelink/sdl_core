@@ -10,6 +10,7 @@ include_directories (
 set (SOURCES
     ./src/CConnectionHandler.cpp
     ./src/CConnection.cpp
+    ./src/CDevice.cpp
 )
 
 add_library("connectionHandler" ${SOURCES})

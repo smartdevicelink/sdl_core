@@ -9,6 +9,8 @@
 
 #include "Logger.hpp"
 
+#include "ConnectionHandler/CDevice.hpp"
+
 /**
  * \namespace NsConnectionHandler
  * \brief AppLink ConnectionHandler namespace.
@@ -31,28 +33,13 @@ namespace NsConnectionHandler
          *
          * \param DeviceList New list of available devices.
          **/
-        virtual void onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList & DeviceList);
-
-        /**
-         * \brief Application connected.
-         *
-         * \param ConnectedDevice DeviceInfo of connected device.
-         * \param Connection Connection handle.
-         **/
-        virtual void onApplicationConnected(const NsAppLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection);
-
-        /**
-         * \brief Application disconnected.
-         *
-         * \param DisconnectedDevice DeviceInfo of disconnected device.
-         * \param Connection Connection handle.
-         **/
-        virtual void onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection);
+        virtual void onDeviceListUpdated(const NsConnectionHandler::tDeviceList & DeviceList) = 0;
 
         virtual void onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
-                                               unsigned char sessionId);
+                                               unsigned char sessionId) = 0;
 
         virtual void onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+                                               unsigned char sessionId) = 0;
 
     protected:
         /**

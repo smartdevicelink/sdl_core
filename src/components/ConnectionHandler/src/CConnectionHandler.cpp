@@ -19,7 +19,14 @@ namespace NsConnectionHandler
 
     log4cplus::Logger CConnectionHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ConnectionHandler"));
 
-    CConnectionHandler::CConnectionHandler()
+    CConnectionHandler* CConnectionHandler::getInstance()
+    {
+        static CConnectionHandler instance;
+        return &instance;
+    }
+
+    CConnectionHandler::CConnectionHandler():
+    mpConnectionHandlerObserver(NULL)
     {
 
     }
@@ -29,8 +36,20 @@ namespace NsConnectionHandler
         
     }
 
+    void CConnectionHandler::setConnectionHandlerObserver(IConnectionHandlerObserver * observer)
+    {
+        LOG4CPLUS_INFO( mLogger, "CConnectionHandler::setConnectionHandlerObserver()" );
+        mpConnectionHandlerObserver = observer;
+    }
+
     void CConnectionHandler::onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList & DeviceList)
     {
+        LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onDeviceListUpdated()" );
+        NsAppLink::NsTransportManager::tDeviceList::const_iterator it_in;
+        for (it_in = DeviceList.begin(); it_in != DeviceList.end(); it_in++)
+        {
+
+        }
 
     }
 
@@ -44,8 +63,7 @@ namespace NsConnectionHandler
         
     }
 
-    void onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
-                                           unsigned char sessionId)
+    void onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle)
     {
 
     }
