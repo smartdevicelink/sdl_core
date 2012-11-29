@@ -213,7 +213,7 @@ MFT.ApplinkMediaController = Em.Object.create({
                 MFT.ApplinkModel.voiceRecognitionCommands.push({
                     type:       MFT.Button,
                     params:     {
-                        action:                 'onPerformInteractionChoosed',
+                        action:                 'onVRPerformInteractionChoosed',
                         target:                 'MFT.ApplinkMediaController',
                         choiceID:               params.choiceSet[i].choiceID,
                         interactionChoiceSetID: params.interactionChoiceSetID,

@@ -166,7 +166,7 @@ FFW.VR = FFW.RPCObserver.create({
 
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
-			"method":	"UI.OnChoise",
+			"method":	"VR.OnChoise",
 			"params":	{"choiceID":	commandId}
 		};
 

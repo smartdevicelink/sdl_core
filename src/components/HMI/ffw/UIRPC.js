@@ -17,7 +17,14 @@ FFW.UI = FFW.RPCObserver.create({
  	 */		
 	 client:		FFW.RPCClient.create({ componentName: "UI" }),
 
-	 /*
+
+	onVRChoiseSubscribeRequestId:		-1,
+	onVRChoiseUnsubscribeRequestId:		-1,
+
+	// const
+	onVRChoiseNotification:		"VR.OnChoise",
+
+	/*
 	 *	id for request Perform Interaction 
  	 */
  	 performInteractionRequestId: -1,
@@ -91,6 +98,9 @@ FFW.UI = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.UI.onRPCRegistered");
 		this._super();
 
+		// subscribe to notifications
+		this.onVRChoiseSubscribeRequestId 	= this.client.subscribeToNotification(this.onVRChoiseNotification);
+
  		// notify other components that UI is ready 
 		//  main purpose is to nitofy ALCore
 		this.onReady();
@@ -98,10 +108,13 @@ FFW.UI = FFW.RPCObserver.create({
 	
 	/*
      * Client is unregistered - no more requests
- 	 */	
+ 	 */
 	onRPCUnregistered: function () {
 		Em.Logger.log("FFW.UI.onRPCUnregistered");
 		this._super();
+
+		// unsubscribe from notifications
+		this.onVRChoiseUnsubscribeRequestId 	= this.client.unsubscribeFromNotification(this.onVRChoiseNotification);
 	},
 
 	/*
@@ -115,7 +128,7 @@ FFW.UI = FFW.RPCObserver.create({
      * when result is received from RPC component this function is called
 	 * It is the propriate place to check results of reuqest execution
 	 * Please use previously store reuqestID to determine to which request repsonse belongs to
- 	 */	
+ 	 */
 	onRPCResult: function(response) {
 		Em.Logger.log("FFW.UI.onRPCResult");
 		this._super();
@@ -123,7 +136,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 	/*
 	 * handle RPC erros here
- 	 */	
+ 	 */
 	onRPCError: function(error) {
 		Em.Logger.log("FFW.UI.onRPCError");
 		this._super();
@@ -131,15 +144,20 @@ FFW.UI = FFW.RPCObserver.create({
 
 	/*
 	 * handle RPC notifications here 
- 	 */	
+ 	 */
 	onRPCNotification: function(notification) {
 		Em.Logger.log("FFW.UI.onRPCNotification");
 		this._super();
+
+		if (notification.method == this.onVRChoiseNotification)
+		{
+			this.onChoosed(notification.params.choiceID);
+		}
 	},
 
 	/*
 	 * handle RPC requests here
- 	 */	
+ 	 */
 	onRPCRequest: function(request) {
 		Em.Logger.log("FFW.UI.onRPCRequest");
 		this._super();
@@ -250,10 +268,6 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.OnAppActivated") {
 			//
-		}
-
-		if (request.method == "UI.OnChoise") {
-			this.onChoosed(request.params.choiceID);
 		}
 
 		if (request.method == "UI.GetCapabilities") {
