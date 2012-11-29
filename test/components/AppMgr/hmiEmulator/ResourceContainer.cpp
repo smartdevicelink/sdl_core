@@ -24,7 +24,7 @@ namespace NsHMIEmulator
      */
     void ResourceContainer::addApplication(const std::string &name, Application *app)
     {
-        mApplications.insert(Application(name, app));
+        mApplications.insert(RegisteredApplication(name, app));
     }
 
     /**
@@ -41,9 +41,14 @@ namespace NsHMIEmulator
      * \param name
      * \return application
      */
-    Application *ResourceContainer::findApplication(const std::string &name)
+    Application *ResourceContainer::findApplication(const std::string &name) const
     {
-        return mApplications.find(name);
+        RegisteredApplications::const_iterator it = mApplications.find(name);
+        if(it != mApplications.end())
+        {
+            return it->second;
+        }
+        return 0;
     }
 
     /**
@@ -81,18 +86,18 @@ namespace NsHMIEmulator
      * \param id
      * \param menuParams
      */
-    void ResourceContainer::addCommand(const unsigned int &id, const NsAppLinkRPC::MenuParams &menuParams)
+    void ResourceContainer::addUiCommand(const unsigned int &id, const NsAppLinkRPC::MenuParams &menuParams)
     {
-        mCommands.insert(Command(id, menuParams));
+        mUiCommands.insert(UICommand(id, menuParams));
     }
 
     /**
      * \brief remove a command from a list of registered commands
      * \param id
      */
-    void ResourceContainer::removeCommand(const unsigned int &id)
+    void ResourceContainer::removeUiCommand(const unsigned int &id)
     {
-        mCommands.erase(id);
+        mUiCommands.erase(id);
     }
 
     /**
@@ -100,9 +105,48 @@ namespace NsHMIEmulator
      * \param id
      * \return command
      */
-    const Command &ResourceContainer::findCommand(const unsigned int &id)
+    const NsAppLinkRPC::MenuParams* ResourceContainer::findUiCommand(const unsigned int &id) const
     {
-        return mCommands.find(id);
+        UICommands::const_iterator it = mUiCommands.find(id);
+        if(it != mUiCommands.end())
+        {
+            return &it->second;
+        }
+        return 0; //empty container
+    }
+
+    /**
+     * \brief add a command to a list of registered commands
+     * \param id
+     * \param vrCommands
+     */
+    void ResourceContainer::addVrCommand(const unsigned int &id, const VrCommandsBase &vrCommands)
+    {
+        mVrCommands.insert(VrCommand(id, vrCommands));
+    }
+
+    /**
+     * \brief remove a command from a list of registered commands
+     * \param id
+     */
+    void ResourceContainer::removeVrCommand(const unsigned int &id)
+    {
+        mVrCommands.erase(id);
+    }
+
+    /**
+     * \brief finds a command in a registered commands list
+     * \param id
+     * \return command
+     */
+    VrCommandsBase ResourceContainer::findVrCommand(const unsigned int &id) const
+    {
+        VrCommands::const_iterator it = mVrCommands.find(id);
+        if(it != mVrCommands.end())
+        {
+            return it->second;
+        }
+        return VrCommandsBase(); //empty container
     }
 
     /**
@@ -137,7 +181,7 @@ namespace NsHMIEmulator
         {
             return it->second;
         }
-        return MenuItemBase; //an empty container
+        return MenuItemBase(); //an empty container
     }
 
     /**
@@ -171,7 +215,7 @@ namespace NsHMIEmulator
         {
             return it->second;
         }
-        return ChoiceSet; //an empty container
+        return ChoiceSet(); //an empty container
     }
 
     /**

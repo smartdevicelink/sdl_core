@@ -82,14 +82,29 @@ namespace NsHMIEmulator
     typedef std::vector<NsAppLinkRPC::Choice> ChoiceSet;
 
     /**
+     * \brief VrCommands container
+     */
+    typedef std::vector<std::string> VrCommandsBase;
+
+    /**
      * \brief A command_id - menu_params mapping (command id is a key)
      */
-    typedef std::map<unsigned int, NsAppLinkRPC::MenuParams> Commands;
+    typedef std::map<unsigned int, NsAppLinkRPC::MenuParams> UICommands;
 
     /**
      * \brief A command_id - menu_params mapping item (command id is a key)
      */
-    typedef std::pair<unsigned int, NsAppLinkRPC::MenuParams> Command;
+    typedef std::pair<unsigned int, NsAppLinkRPC::MenuParams> UICommand;
+
+    /**
+     * \brief A command_id - VR commands mapping (command id is a key)
+     */
+    typedef std::map<unsigned int, VrCommandsBase> VrCommands;
+
+    /**
+     * \brief A command_id - VR commands mapping item (command id is a key)
+     */
+    typedef std::pair<unsigned int, VrCommandsBase> VrCommand;
 
     /**
      * \brief A menu item name - menu item position mapping item
@@ -146,7 +161,7 @@ namespace NsHMIEmulator
          * \param name
          * \return application
          */
-        Application* findApplication(const std::string& name);
+        Application* findApplication(const std::string& name) const;
 
         /**
          * \brief sets which app is HMI_FULL
@@ -166,20 +181,40 @@ namespace NsHMIEmulator
          * \param id
          * \param menuParams
          */
-        void addCommand(const unsigned int& id, const NsAppLinkRPC::MenuParams& menuParams);
+        void addUiCommand(const unsigned int& id, const NsAppLinkRPC::MenuParams& menuParams);
 
         /**
          * \brief remove a command from a list of registered commands
          * \param id
          */
-        void removeCommand(const unsigned int& id);
+        void removeUiCommand(const unsigned int& id);
 
         /**
          * \brief finds a command in a registered commands list
          * \param id
          * \return command
          */
-        const Command& findCommand(const unsigned int& id);
+        const NsAppLinkRPC::MenuParams *findUiCommand(const unsigned int& id) const;
+
+        /**
+         * \brief add a command to a list of registered commands
+         * \param id
+         * \param vrCommands
+         */
+        void addVrCommand(const unsigned int& id, const VrCommandsBase& vrCommands);
+
+        /**
+         * \brief remove a command from a list of registered commands
+         * \param id
+         */
+        void removeVrCommand(const unsigned int& id);
+
+        /**
+         * \brief finds a command in a registered commands list
+         * \param id
+         * \return command
+         */
+        VrCommandsBase findVrCommand(const unsigned int& id) const;
 
         /**
          * \brief add a menu item to a list of registered menu items
@@ -332,7 +367,8 @@ namespace NsHMIEmulator
         HelpPrompt mHelpPrompt;
         TimeoutPrompt mTimeoutPrompt;
         GlobalProperties mGlobalProperties;
-        Commands mCommands;
+        UICommands mUiCommands;
+        VrCommands mVrCommands;
         Menu mMenuItems;
         InteractionChoiceSet mInteractionChoiceSet;
         NsAppLinkRPC::StartTime mStartTime;
