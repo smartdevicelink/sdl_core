@@ -48,9 +48,18 @@ namespace NsConnectionHandler
         NsAppLink::NsTransportManager::tDeviceList::const_iterator it_in;
         for (it_in = DeviceList.begin(); it_in != DeviceList.end(); it_in++)
         {
-
+            tDeviceListIterator it;
+            it = mDeviceList.find((*it_in).mDeviceHandle);
+            if (it == mDeviceList.end())
+            {
+                LOG4CPLUS_INFO( mLogger, "Add new device" << (*it_in).mUserFriendlyName << " Handler: " << (*it_in).mDeviceHandle);
+                mDeviceList.insert(tDeviceList::value_type((*it_in).mDeviceHandle, CDevice((*it_in).mDeviceHandle, (*it_in).mUserFriendlyName)));
+            }
         }
-
+        if (0 != mpConnectionHandlerObserver)
+        {
+            mpConnectionHandlerObserver->onDeviceListUpdated(mDeviceList);
+        }
     }
 
     void CConnectionHandler::onApplicationConnected(const NsAppLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection)
@@ -63,15 +72,16 @@ namespace NsConnectionHandler
         
     }
 
-    void onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle)
+    int onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle)
     {
-
+        return 0;
     }
     
-    void onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
-                                           unsigned char sessionId)
+    int onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+                                               unsigned char sessionId,
+                                               unsigned int hashCode)
     {
-
+        return 0;
     }
     
     int keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 

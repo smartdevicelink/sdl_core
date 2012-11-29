@@ -16,10 +16,22 @@
  */ 
 namespace NsConnectionHandler
 {
+
     /**
-    * \class CConnection
-    * \brief Connection class
-    */
+     * \brief Type for ConnectionHandle
+     */
+    typedef int tConnectionHandle;
+
+    /**
+     * \brief Type for Connections map
+     * Key is ConnectionHandle which is uniq
+     */
+    typedef std::vector<unsigned char> tSessionList;
+
+    /**
+     * \class CConnection
+     * \brief Connection class
+     */
     class CConnection
     {
     public:
@@ -33,13 +45,44 @@ namespace NsConnectionHandler
          */
         ~CConnection();
 
-
-    private:
         /**
-          *\brief For logging.
-        */
+         * \brief Returns device handle
+         * \return DeviceHandle
+         */
+         tConnectionHandle getConnectionHandle();
+    private:
+
+        /**
+         * \brief Current connection handle.
+         */
+          tConnectionHandle mConnectionHandle;
+        /**
+         * \brief Counter to generate session id's.
+         */
+        unsigned char mSessionIDCounter;
+
+        /**
+         * \brief Counter to generate session id's.
+         */
+        tSessionList mSessionList;
+
+        /**
+         * \brief For logging.
+         */
         static log4cplus::Logger mLogger;
     };
+
+    /**
+     * \brief Type for Connections map
+     * Key is ConnectionHandle which is uniq
+     */
+    typedef std::map<int, CConnection> tConnectionList;
+
+    /**
+     * \brief Type for Connections map iterator
+     */
+    typedef std::map<int, CConnection>::iterator tConnectionListIterator;
+
 }/* namespace NsConnectionHandler */
 
 #endif /* CONNECTION_H */

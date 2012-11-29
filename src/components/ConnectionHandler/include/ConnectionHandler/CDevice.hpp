@@ -43,28 +43,30 @@ namespace NsConnectionHandler
 
         /**
          * \brief Returns device handle
+         * \return DeviceHandle
          */
         tDeviceHandle getDeviceHandle() const;
 
         /**
          * \brief Returns user frendly device name
+         * \return UserFriendlyName
          */
         std::string getUserFriendlyName() const;
 
     private:
         /**
-        * \brief Uniq device handle.
-        **/
+         * \brief Uniq device handle.
+         */
         tDeviceHandle mDeviceHandle;
 
         /**
-        * \brief User-friendly device name.
-        **/
+         * \brief User-friendly device name.
+         */
         std::string mUserFriendlyName;
 
         /**
-          *\brief For logging.
-        */
+         * \brief For logging.
+         */
         static log4cplus::Logger mLogger;
     };
 
@@ -75,6 +77,7 @@ namespace NsConnectionHandler
 
     /**
      * \brief Type for Devices map iterator
+     * Key is DeviceHandle which is uniq
      */
     typedef std::map<int, CDevice>::iterator tDeviceListIterator;
 

@@ -17,7 +17,8 @@ namespace NsConnectionHandler
 
     log4cplus::Logger CConnection::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ConnectionHandler"));
 
-    CConnection::CConnection()
+    CConnection::CConnection():
+    mSessionIDCounter(0)
     {
 
     }

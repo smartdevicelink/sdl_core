@@ -17,6 +17,7 @@
 #include "ProtocolHandler/ISessionObserver.h"
 #include "ConnectionHandler/IConnectionHandlerObserver.hpp"
 #include "ConnectionHandler/CDevice.hpp"
+#include "ConnectionHandler/CConnection.hpp"
 
 /**
  * \namespace NsConnectionHandler
@@ -74,10 +75,11 @@ namespace NsConnectionHandler
          **/
         virtual void onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection);
 
-        virtual void onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle);
+        virtual int onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle);
 
-        virtual void onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
-                                               unsigned char sessionId);
+        virtual int onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+                                               unsigned char sessionId,
+                                               unsigned int hashCode);
 
         virtual int keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
                                                unsigned char sessionId);
@@ -105,6 +107,11 @@ namespace NsConnectionHandler
          * \brief List of devices
          */
         tDeviceList mDeviceList;
+
+        /**
+         * \brief List of connections
+         */
+        tConnectionList mConnectionList;
 
         /**
           *\brief For logging.
