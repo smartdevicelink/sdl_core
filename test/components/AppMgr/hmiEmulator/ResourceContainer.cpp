@@ -122,6 +122,42 @@ namespace NsHMIEmulator
     }
 
     /**
+     * \brief sets help prompt
+     * \param help help prompt
+     */
+    void ResourceContainer::setHelpPrompt(const HelpPrompt &help)
+    {
+        mHelpPrompt = help;
+    }
+
+    /**
+     * \brief gets help prompt
+     * \return help prompt
+     */
+    const HelpPrompt &ResourceContainer::getHelpPrompt() const
+    {
+        return mHelpPrompt;
+    }
+
+    /**
+     * \brief sets timeout prompt
+     * \param timeout timeout prompt
+     */
+    void ResourceContainer::setTimeoutPrompt(const TimeoutPrompt &timeout)
+    {
+        mTimeoutPrompt = timeout;
+    }
+
+    /**
+     * \brief gets timeout prompt
+     * \return timeout prompt
+     */
+    const TimeoutPrompt &ResourceContainer::getTimeoutPrompt() const
+    {
+        return mTimeoutPrompt;
+    }
+
+    /**
      * \brief Default class constructor
      */
     ResourceContainer::ResourceContainer()

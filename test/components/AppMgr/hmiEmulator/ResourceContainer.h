@@ -11,6 +11,8 @@
 #include "JSONHandler/ALRPCObjects/HmiZoneCapabilities.h"
 #include "JSONHandler/ALRPCObjects/VrCapabilities.h"
 #include "JSONHandler/ALRPCObjects/SpeechCapabilities.h"
+#include "JSONHandler/ALRPCObjects/GlobalProperty.h"
+#include "JSONHandler/ALRPCObjects/TTSChunk.h"
 
 /**
  * \namespace NsHMIEmulator
@@ -41,6 +43,16 @@ namespace NsHMIEmulator
      * \brief SpeechCapabilities container
      */
     typedef std::vector<NsAppLinkRPC::SpeechCapabilities> SpeechCapabilities;
+
+    /**
+     * \brief HelpPrompt container
+     */
+    typedef std::vector<NsAppLinkRPC::TTSChunk> HelpPrompt;
+
+    /**
+     * \brief TimeoutPrompt container
+     */
+    typedef std::vector<NsAppLinkRPC::TTSChunk> TimeoutPrompt;
 
     /**
      * \brief The ResourceContainer class acts as a container of all HMI
@@ -117,6 +129,30 @@ namespace NsHMIEmulator
          */
         const VrCapabilities& getVrCapabilities() const;
 
+        /**
+         * \brief sets help prompt
+         * \param help help prompt
+         */
+        void setHelpPrompt(const HelpPrompt& help);
+
+        /**
+         * \brief gets help prompt
+         * \return help prompt
+         */
+        const HelpPrompt& getHelpPrompt() const;
+
+        /**
+         * \brief sets timeout prompt
+         * \param timeout timeout prompt
+         */
+        void setTimeoutPrompt(const TimeoutPrompt& timeout);
+
+        /**
+         * \brief gets timeout prompt
+         * \return timeout prompt
+         */
+        const TimeoutPrompt& getTimeoutPrompt() const;
+
     private:
         /**
          * \brief Default class constructor
@@ -134,6 +170,8 @@ namespace NsHMIEmulator
         HmiZoneCapabilities mHmiZoneCapabilities;
         VrCapabilities mVrCapabilities;
         SpeechCapabilities mSpeechCapabilities;
+        HelpPrompt mHelpPrompt;
+        TimeoutPrompt mTimeoutPrompt;
 
         std::string mActiveApplication;
     };
