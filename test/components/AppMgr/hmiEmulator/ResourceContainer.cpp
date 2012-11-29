@@ -6,6 +6,7 @@
  */
 namespace NsHMIEmulator
 {
+    log4cplus::Logger ResourceContainer::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("testAppMgr"));
 
     /**
      * \brief Returning class instance
@@ -24,6 +25,7 @@ namespace NsHMIEmulator
      */
     void ResourceContainer::addApplication(const std::string &name, Application *app)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Adding an app " << name);
         mApplications.insert(RegisteredApplication(name, app));
     }
 
@@ -33,6 +35,7 @@ namespace NsHMIEmulator
      */
     void ResourceContainer::removeApplication(const std::string &name)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Removing an app " << name);
         mApplications.erase(name);
     }
 
@@ -48,6 +51,7 @@ namespace NsHMIEmulator
         {
             return it->second;
         }
+        LOG4CPLUS_ERROR_EXT(mLogger, "Cannot find an app!" << name);
         return 0;
     }
 
@@ -58,13 +62,14 @@ namespace NsHMIEmulator
      */
     Application *ResourceContainer::setActiveApplication(const std::string &name)
     {
-
+        LOG4CPLUS_INFO_EXT(mLogger, "Activating an app!" << name);
         Application* app = findApplication(name);
         if(app)
         {
             mActiveApplication = name;
             return app;
         }
+        LOG4CPLUS_ERROR_EXT(mLogger, "Activation of app " << name << " failed: app not found");
         return 0;
     }
 
@@ -78,6 +83,7 @@ namespace NsHMIEmulator
         {
             return findApplication(mActiveApplication);
         }
+        LOG4CPLUS_ERROR_EXT(mLogger, "No application is active!");
         return 0;
     }
 
@@ -88,6 +94,7 @@ namespace NsHMIEmulator
      */
     void ResourceContainer::addUiCommand(const unsigned int &id, const NsAppLinkRPC::MenuParams &menuParams)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Adding UI command " << id);
         mUiCommands.insert(UICommand(id, menuParams));
     }
 
@@ -97,6 +104,7 @@ namespace NsHMIEmulator
      */
     void ResourceContainer::removeUiCommand(const unsigned int &id)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Removing UI command " << id);
         mUiCommands.erase(id);
     }
 
@@ -112,6 +120,7 @@ namespace NsHMIEmulator
         {
             return &it->second;
         }
+        LOG4CPLUS_ERROR_EXT(mLogger, "Cannot find UI command " << id);
         return 0; //empty container
     }
 
@@ -122,6 +131,7 @@ namespace NsHMIEmulator
      */
     void ResourceContainer::addVrCommand(const unsigned int &id, const VrCommandsBase &vrCommands)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Adding VR command " << id);
         mVrCommands.insert(VrCommand(id, vrCommands));
     }
 
@@ -131,6 +141,7 @@ namespace NsHMIEmulator
      */
     void ResourceContainer::removeVrCommand(const unsigned int &id)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Removing VR command " << id);
         mVrCommands.erase(id);
     }
 
@@ -146,6 +157,7 @@ namespace NsHMIEmulator
         {
             return it->second;
         }
+        LOG4CPLUS_ERROR_EXT(mLogger, "Cannot find VR command " << id);
         return VrCommandsBase(); //empty container
     }
 
@@ -157,6 +169,7 @@ namespace NsHMIEmulator
      */
     void ResourceContainer::addMenuItem(const unsigned int &id, const std::string &name, unsigned int position)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Adding menu item " << id << " with name " << name << " at position " << position);
         mMenuItems.insert(MenuItem(id, MenuItemBase(name, position)));
     }
 
@@ -166,6 +179,7 @@ namespace NsHMIEmulator
      */
     void ResourceContainer::removeMenuItem(const unsigned int &id)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Deleting menu item " << id);
         mMenuItems.erase(id);
     }
 
@@ -181,6 +195,7 @@ namespace NsHMIEmulator
         {
             return it->second;
         }
+        LOG4CPLUS_ERROR_EXT(mLogger, "Cannot find menu item " << id);
         return MenuItemBase(); //an empty container
     }
 
@@ -191,6 +206,7 @@ namespace NsHMIEmulator
      */
     void ResourceContainer::addInteractionChoiceSet(const unsigned int &id, const ChoiceSet &set)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Adding interaction choice set " << id);
         mInteractionChoiceSet.insert(InteractionChoiceSetItem(id, set));
     }
 
@@ -200,6 +216,7 @@ namespace NsHMIEmulator
      */
     void ResourceContainer::removeInteractionChoiceSet(const unsigned int &id)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, "Deleting interaction choice set " << id);
         mInteractionChoiceSet.erase(id);
     }
 
@@ -215,6 +232,7 @@ namespace NsHMIEmulator
         {
             return it->second;
         }
+        LOG4CPLUS_ERROR_EXT(mLogger, "Cannot find interaction choice set " << id);
         return ChoiceSet(); //an empty container
     }
 

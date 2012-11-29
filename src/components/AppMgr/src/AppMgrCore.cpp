@@ -298,6 +298,8 @@ namespace NsAppManager
                     break;
                 }
                 std::string appName = app->getName();
+
+                core->removeAppFromHmi(app, connectionID, sessionID);
                 core->unregisterApplication( connectionID, sessionID );
 
                 response->setCorrelationID(object->getCorrelationID());
@@ -1242,11 +1244,18 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnDriverDistraction UI notification has been invoked");
                 NsRPC2Communication::UI::OnDriverDistraction* object = (NsRPC2Communication::UI::OnDriverDistraction*)msg;
-
+                Application* app = AppMgrRegistry::getInstance().getActiveItem();
+                if(!app)
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "No currently active application found");
+                    return;
+                }
+                unsigned char sessionID = app->getSessionID();
+                unsigned int connectionId = app->getConnectionID();
                 NsAppLinkRPC::OnDriverDistraction* event = new NsAppLinkRPC::OnDriverDistraction();
                 event->set_state(object->get_state());
 
-                MobileHandler::getInstance().sendRPCMessage(event, 0, 1);//0-temp! Specify unsigned int connectionID instead!!!! 1-also temp! Just no way to deduct an app here
+                MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONSYSTEMCONTEXT:
@@ -1449,72 +1458,8 @@ namespace NsAppManager
                 Application* currentApp = AppMgrRegistry::getInstance().getActiveItem();
                 if(currentApp)
                 {
-                    const Commands& currentCommands = currentApp->getAllCommands();
-                    LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's commands from HMI due to a new application activation");
-                    for(Commands::const_iterator it = currentCommands.begin(); it != currentCommands.end(); it++)
-                    {
-                        const Command& key = *it;
-                        const CommandParams& params = key.second;
-                        const CommandBase& base = key.first;
-                        const CommandType& type = std::get<1>(base);
-                        unsigned int cmdId = std::get<0>(base);
-                        NsRPC2Communication::RPC2Request* deleteCmd = 0;
-                        if(type == CommandType::UI)
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "Removing UI command");
-                            deleteCmd = new NsRPC2Communication::UI::DeleteCommand();
-                        }
-                        else if(type == CommandType::VR)
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "Removing VR command");
-                            deleteCmd = new NsRPC2Communication::VR::DeleteCommand();
-                        }
-                        else
-                        {
-                            LOG4CPLUS_ERROR_EXT(mLogger, "An unindentified command type - " << type.getType());
-                            continue;
-                        }
-                        deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                        ((NsRPC2Communication::UI::DeleteCommand*)deleteCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionID = app->getConnectionID();
-                        core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
-
-                        HMIHandler::getInstance().sendRequest(deleteCmd);
-                    }
-                    LOG4CPLUS_INFO_EXT(mLogger, "Current app's commands removed!");
-
-                    const MenuItems& currentMenus = currentApp->getAllMenus();
-                    LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's menus from HMI due to a new application activation");
-                    for(MenuItems::const_iterator it = currentMenus.begin(); it != currentMenus.end(); it++)
-                    {
-                        const unsigned int& menuId = it->first;
-                        NsRPC2Communication::UI::DeleteSubMenu* deleteCmd = new NsRPC2Communication::UI::DeleteSubMenu();
-                        deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                        deleteCmd->set_menuId(menuId);
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionID = app->getConnectionID();
-                        core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
-
-                        HMIHandler::getInstance().sendRequest(deleteCmd);
-                    }
-                    LOG4CPLUS_INFO_EXT(mLogger, "Current app's menus removed!");
-
-                    const ChoiceSetItems& currentChoiceSets = currentApp->getAllChoiceSets();
-                    LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's interaction choice sets from HMI due to a new application activation");
-                    for(ChoiceSetItems::const_iterator it = currentChoiceSets.begin(); it != currentChoiceSets.end(); it++)
-                    {
-                        const unsigned int& choiceSetId = it->first;
-                        NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteCmd = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
-                        deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                        deleteCmd->set_interactionChoiceSetID(choiceSetId);
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionID = app->getConnectionID();
-                        core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
-
-                        HMIHandler::getInstance().sendRequest(deleteCmd);
-                    }
-                    LOG4CPLUS_INFO_EXT(mLogger, "Current app's interaction choice sets removed!");
+                    LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application - about to remove it from HMI first");
+                    core->removeAppFromHmi(currentApp, app->getConnectionID(), app->getSessionID());
                 }
                 else
                 {
@@ -1744,6 +1689,76 @@ namespace NsAppManager
         mMessageMapping.removeItem(item);
         AppMgrRegistry::getInstance().unregisterApplication(item);
         LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName << " connection id " << connectionID << " session id " << (uint)sessionID << "!");
+    }
+
+    /**
+     * \brief Remove all app components from HMI
+     * \param currentApp app which components to be removed
+     * \param connectionID connection id
+     * \param sessionID session id
+     */
+    void AppMgrCore::removeAppFromHmi(Application* currentApp, const unsigned int &connectionID, const unsigned char &sessionID)
+    {
+        const Commands& currentCommands = currentApp->getAllCommands();
+        LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's commands from HMI");
+        for(Commands::const_iterator it = currentCommands.begin(); it != currentCommands.end(); it++)
+        {
+            const Command& key = *it;
+            const CommandParams& params = key.second;
+            const CommandBase& base = key.first;
+            const CommandType& type = std::get<1>(base);
+            unsigned int cmdId = std::get<0>(base);
+            NsRPC2Communication::RPC2Request* deleteCmd = 0;
+            if(type == CommandType::UI)
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "Removing UI command");
+                deleteCmd = new NsRPC2Communication::UI::DeleteCommand();
+            }
+            else if(type == CommandType::VR)
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "Removing VR command");
+                deleteCmd = new NsRPC2Communication::VR::DeleteCommand();
+            }
+            else
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "An unindentified command type - " << type.getType());
+                continue;
+            }
+            deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+            ((NsRPC2Communication::UI::DeleteCommand*)deleteCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
+            mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+
+            HMIHandler::getInstance().sendRequest(deleteCmd);
+        }
+        LOG4CPLUS_INFO_EXT(mLogger, "Current app's commands removed!");
+
+        const MenuItems& currentMenus = currentApp->getAllMenus();
+        LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's menus from HMI");
+        for(MenuItems::const_iterator it = currentMenus.begin(); it != currentMenus.end(); it++)
+        {
+            const unsigned int& menuId = it->first;
+            NsRPC2Communication::UI::DeleteSubMenu* deleteCmd = new NsRPC2Communication::UI::DeleteSubMenu();
+            deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+            deleteCmd->set_menuId(menuId);
+            mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+
+            HMIHandler::getInstance().sendRequest(deleteCmd);
+        }
+        LOG4CPLUS_INFO_EXT(mLogger, "Current app's menus removed!");
+
+        const ChoiceSetItems& currentChoiceSets = currentApp->getAllChoiceSets();
+        LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's interaction choice sets from HMI");
+        for(ChoiceSetItems::const_iterator it = currentChoiceSets.begin(); it != currentChoiceSets.end(); it++)
+        {
+            const unsigned int& choiceSetId = it->first;
+            NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteCmd = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
+            deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+            deleteCmd->set_interactionChoiceSetID(choiceSetId);
+            mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+
+            HMIHandler::getInstance().sendRequest(deleteCmd);
+        }
+        LOG4CPLUS_INFO_EXT(mLogger, "Current app's interaction choice sets removed!");
     }
 
     /**

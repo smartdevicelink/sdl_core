@@ -155,6 +155,14 @@ namespace NsAppManager
         void unregisterApplication(const unsigned int &connectionID, const unsigned char &sessionID);
 
         /**
+         * \brief Remove all app components from HMI
+         * \param currentApp app which components to be removed
+         * \param connectionID connection id
+         * \param sessionID session id
+         */
+        void removeAppFromHmi(Application* currentApp, const unsigned int& connectionID, const unsigned char &sessionID);
+
+        /**
          * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
          * \param item a RegistryItem from which to retrieve an app pointer
          * \return Application instance retrieved from item
