@@ -26,6 +26,7 @@ class JSONRPC2Handler;
 namespace NsAppLinkRPC
 {
     class RegisterAppInterface_request;
+    class OnDriverDistraction;
 }
 
 namespace NsRPC2Communication
@@ -188,6 +189,8 @@ namespace NsAppManager
         ButtonMapping    mButtonsMapping;
         MessageMapping   mMessageMapping;
         RequestMapping   mRequestMapping;
+
+        NsAppLinkRPC::OnDriverDistraction* mDriverDistraction;
 
         AutoActivateIdMapping  mAutoActivateIds;
 

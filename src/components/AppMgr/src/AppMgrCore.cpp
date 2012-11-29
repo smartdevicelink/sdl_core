@@ -52,6 +52,7 @@ namespace NsAppManager
     AppMgrCore::AppMgrCore()
         :mQueueRPCAppLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
         ,mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
+        ,mDriverDistraction(0)
     {
         std::ifstream file(mAutoActivateIdFileName);
         if( file.is_open() )
@@ -77,6 +78,7 @@ namespace NsAppManager
     AppMgrCore::AppMgrCore(const AppMgrCore &)
         :mQueueRPCAppLinkObjectsIncoming(0)
         ,mQueueRPCBusObjectsIncoming(0)
+        ,mDriverDistraction(0)
     {
     }
 
@@ -89,6 +91,8 @@ namespace NsAppManager
             delete mQueueRPCAppLinkObjectsIncoming;
         if(mQueueRPCBusObjectsIncoming)
             delete mQueueRPCBusObjectsIncoming;
+        if(mDriverDistraction)
+            delete mDriverDistraction;
 
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore destructed!");
     }
@@ -1254,7 +1258,7 @@ namespace NsAppManager
                 unsigned int connectionId = app->getConnectionID();
                 NsAppLinkRPC::OnDriverDistraction* event = new NsAppLinkRPC::OnDriverDistraction();
                 event->set_state(object->get_state());
-
+                core->mDriverDistraction = event;
                 MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                 return;
             }
@@ -1467,6 +1471,8 @@ namespace NsAppManager
                 }
 
                 AppMgrRegistry::getInstance().activateApp(app);
+                unsigned char sessionID = app->getSessionID();
+                unsigned int connectionID = app->getConnectionID();
 
                 const ChoiceSetItems& newChoiceSets = app->getAllChoiceSets();
                 LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
@@ -1478,8 +1484,7 @@ namespace NsAppManager
                     addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     addCmd->set_interactionChoiceSetID(choiceSetId);
                     addCmd->set_choiceSet(choiceSet);
-                    unsigned char sessionID = app->getSessionID();
-                    unsigned int connectionID = app->getConnectionID();
+
                     core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
 
                     HMIHandler::getInstance().sendRequest(addCmd);
@@ -1502,8 +1507,7 @@ namespace NsAppManager
                     {
                         addCmd->set_position(*position);
                     }
-                    unsigned char sessionID = app->getSessionID();
-                    unsigned int connectionID = app->getConnectionID();
+
                     core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
 
                     HMIHandler::getInstance().sendRequest(addCmd);
@@ -1540,19 +1544,23 @@ namespace NsAppManager
                     addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
                     ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_menuParams(*menuParams);
-                    unsigned char sessionID = app->getSessionID();
-                    unsigned int connectionID = app->getConnectionID();
+
                     core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
 
                     HMIHandler::getInstance().sendRequest(addCmd);
                 }
                 LOG4CPLUS_INFO_EXT(mLogger, "New app's commands added!");
 
+                if(core->mDriverDistraction)
+                {
+                    MobileHandler::getInstance().sendRPCMessage(core->mDriverDistraction, connectionID, sessionID);
+                }
+
                 NsAppLinkRPC::OnHMIStatus * hmiStatus = new NsAppLinkRPC::OnHMIStatus;
                 hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
                 hmiStatus->set_audioStreamingState(app->getApplicationAudioStreamingState());
                 hmiStatus->set_systemContext(app->getSystemContext());
-                MobileHandler::getInstance().sendRPCMessage( hmiStatus, app->getConnectionID(), app->getSessionID() );
+                MobileHandler::getInstance().sendRPCMessage( hmiStatus, connectionID, sessionID );
                 NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
                 response->setId(object->getId());
                 response->setResult(NsAppLinkRPC::Result::SUCCESS);
