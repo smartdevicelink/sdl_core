@@ -16,6 +16,9 @@
 #include "JSONHandler/ALRPCObjects/TTSChunk.h"
 #include "JSONHandler/ALRPCObjects/MenuParams.h"
 #include "JSONHandler/ALRPCObjects/Choice.h"
+#include "JSONHandler/ALRPCObjects/MediaClockFormat.h"
+#include "JSONHandler/ALRPCObjects/StartTime.h"
+#include "JSONHandler/ALRPCObjects/UpdateMode.h"
 
 /**
  * \namespace NsHMIEmulator
@@ -62,6 +65,11 @@ namespace NsHMIEmulator
      * \brief TimeoutPrompt container
      */
     typedef std::vector<NsAppLinkRPC::TTSChunk> TimeoutPrompt;
+
+    /**
+     * \brief InitialPrompt container
+     */
+    typedef std::vector<NsAppLinkRPC::TTSChunk> InitialPrompt;
 
     /**
      * \brief GlobalProperties container
@@ -280,6 +288,30 @@ namespace NsHMIEmulator
          */
         const GlobalProperties& getGlobalProperties() const;
 
+        /**
+         * \brief sets timer start time
+         * \param time timer start time
+         */
+        void setStartTime(const NsAppLinkRPC::StartTime& time);
+
+        /**
+         * \brief gets timer start time
+         * \return timer start time
+         */
+        const NsAppLinkRPC::StartTime& getStartTime() const;
+
+        /**
+         * \brief sets timer update mode
+         * \param mode timer update mode
+         */
+        void setTimerUpdateMode(const NsAppLinkRPC::UpdateMode& mode);
+
+        /**
+         * \brief gets timer update mode
+         * \return timer update mode
+         */
+        const NsAppLinkRPC::UpdateMode& getTimerUpdateMode() const;
+
     private:
         /**
          * \brief Default class constructor
@@ -303,7 +335,8 @@ namespace NsHMIEmulator
         Commands mCommands;
         Menu mMenuItems;
         InteractionChoiceSet mInteractionChoiceSet;
-
+        NsAppLinkRPC::StartTime mStartTime;
+        NsAppLinkRPC::UpdateMode mUpdateMode;
         std::string mActiveApplication;
     };
 }

@@ -274,6 +274,42 @@ namespace NsHMIEmulator
     }
 
     /**
+     * \brief sets timer start time
+     * \param time timer start time
+     */
+    void ResourceContainer::setStartTime(const NsAppLinkRPC::StartTime &time)
+    {
+        mStartTime = time;
+    }
+
+    /**
+     * \brief gets timer start time
+     * \return timer start time
+     */
+    const NsAppLinkRPC::StartTime &ResourceContainer::getStartTime() const
+    {
+        return mStartTime;
+    }
+
+    /**
+     * \brief sets timer update mode
+     * \param mode timer update mode
+     */
+    void ResourceContainer::setTimerUpdateMode(const NsAppLinkRPC::UpdateMode &mode)
+    {
+        mUpdateMode = mode;
+    }
+
+    /**
+     * \brief gets timer update mode
+     * \return timer update mode
+     */
+    const NsAppLinkRPC::UpdateMode &ResourceContainer::getTimerUpdateMode() const
+    {
+        return mUpdateMode;
+    }
+
+    /**
      * \brief Default class constructor
      */
     ResourceContainer::ResourceContainer()
