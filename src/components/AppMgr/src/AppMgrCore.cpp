@@ -298,6 +298,8 @@ namespace NsAppManager
                     break;
                 }
                 std::string appName = app->getName();
+
+                core->removeAppFromHmi(app, connectionID, sessionID);
                 core->unregisterApplication( connectionID, sessionID );
 
                 response->setCorrelationID(object->getCorrelationID());
