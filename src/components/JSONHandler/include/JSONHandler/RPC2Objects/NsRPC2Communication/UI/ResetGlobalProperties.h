@@ -9,8 +9,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -35,10 +35,14 @@ namespace NsRPC2Communication
 // getters
       const std::vector< NsAppLinkRPC::GlobalProperty>& get_properties(void);
 
+      int get_appId(void);
+
 
 // setters
 /// 1 <= size <= 100
       bool set_properties(const std::vector< NsAppLinkRPC::GlobalProperty>& properties);
+
+      bool set_appId(int appId);
 
 
     private:
@@ -46,6 +50,7 @@ namespace NsRPC2Communication
       friend class ResetGlobalPropertiesMarshaller;
 
       std::vector< NsAppLinkRPC::GlobalProperty> properties;
+      int appId;
 
     };
   }

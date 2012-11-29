@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.inc ./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.inc ../src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -36,18 +36,18 @@ SpeechCapabilities_intHash::getPointer (register const char *str, register unsig
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 17 "./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
       {"TEXT",0},
       {""}, {""},
-#line 21 "./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
+#line 21 "../src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
       {"SILENCE",4},
       {""}, {""}, {""}, {""},
-#line 20 "./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
+#line 20 "../src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
       {"PRE_RECORDED",3},
-#line 18 "./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
       {"SAPI_PHONEMES",1},
       {""},
-#line 19 "./src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
+#line 19 "../src/ALRPCObjectsImpl/SpeechCapabilitiesMarshaller.gp"
       {"LHPLUS_PHONEMES",2}
     };
 

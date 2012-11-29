@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -16,17 +16,21 @@ GetCapabilitiesResponse& GetCapabilitiesResponse::operator =(const GetCapabiliti
 {
   displayCapabilities=c.displayCapabilities;
   hmiZoneCapabilities=c.hmiZoneCapabilities;
+  if(softButtonCapabilities)  delete softButtonCapabilities;
+  softButtonCapabilities= c.softButtonCapabilities ? new std::vector<NsAppLinkRPC::SoftButtonCapabilities>(c.softButtonCapabilities[0]) : 0;
   return *this;
 }
 
 
 GetCapabilitiesResponse::~GetCapabilitiesResponse(void)
 {
+  if(softButtonCapabilities)  delete softButtonCapabilities;
 }
 
 
 GetCapabilitiesResponse::GetCapabilitiesResponse(void) : 
-  RPC2Response(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE)
+  RPC2Response(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE),
+  softButtonCapabilities(0)
 {
 }
 
@@ -57,6 +61,24 @@ bool GetCapabilitiesResponse::set_hmiZoneCapabilities(const std::vector< NsAppLi
 {
   hmiZoneCapabilities=hmiZoneCapabilities_;
   return true;
+}
+
+const std::vector< NsAppLinkRPC::SoftButtonCapabilities>* GetCapabilitiesResponse::get_softButtonCapabilities(void)
+{
+  return softButtonCapabilities;
+}
+
+bool GetCapabilitiesResponse::set_softButtonCapabilities(const std::vector< NsAppLinkRPC::SoftButtonCapabilities>& softButtonCapabilities_)
+{
+  if(softButtonCapabilities)  delete softButtonCapabilities;
+  softButtonCapabilities=new std::vector< NsAppLinkRPC::SoftButtonCapabilities>(softButtonCapabilities_);
+  return true;
+}
+
+void GetCapabilitiesResponse::reset_softButtonCapabilities(void)
+{
+  if(softButtonCapabilities)  delete softButtonCapabilities;
+  softButtonCapabilities=0;
 }
 
 bool GetCapabilitiesResponse::checkIntegrity(void)

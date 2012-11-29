@@ -1,13 +1,15 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/Show.h"
 #include "../src/ALRPCObjectsImpl/TextAlignmentMarshaller.h"
+#include "../src/ALRPCObjectsImpl/ImageMarshaller.h"
+#include "../src/ALRPCObjectsImpl/SoftButtonMarshaller.h"
 #include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ShowMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -49,6 +51,10 @@ bool ShowMarshaller::checkIntegrityConst(const Show& s)
 
   if(s.mainField2 && (s.mainField2[0].length()>500))  return false;
 
+  if(s.mainField3 && (s.mainField3[0].length()>500))  return false;
+
+  if(s.mainField4 && (s.mainField4[0].length()>500))  return false;
+
   if(s.alignment && (!NsAppLinkRPC::TextAlignmentMarshaller::checkIntegrityConst(s.alignment[0])))  return false;
 
   if(s.statusBar && (s.statusBar[0].length()>500))  return false;
@@ -56,6 +62,26 @@ bool ShowMarshaller::checkIntegrityConst(const Show& s)
   if(s.mediaClock && (s.mediaClock[0].length()>500))  return false;
 
   if(s.mediaTrack && (s.mediaTrack[0].length()>500))  return false;
+
+  if(s.graphic && (!NsAppLinkRPC::ImageMarshaller::checkIntegrityConst(s.graphic[0])))  return false;
+
+  if(s.softButtons)
+  {
+    unsigned int i=s.softButtons[0].size();
+    if(i<0)  return false;
+    if(i>8)  return false;
+  }
+
+  if(s.customPresets)
+  {
+    unsigned int i=s.customPresets[0].size();
+    if(i<0)  return false;
+    if(i>6)  return false;
+    while(i--)
+    {
+      if(s.customPresets[0][i].length()>500)  return false;
+    }
+  }
 
   return true;
 }
@@ -76,6 +102,10 @@ Json::Value ShowMarshaller::toJSON(const Show& e)
     json["params"]["mainField1"]=Json::Value(e.mainField1[0]);;
   if(e.mainField2)
     json["params"]["mainField2"]=Json::Value(e.mainField2[0]);;
+  if(e.mainField3)
+    json["params"]["mainField3"]=Json::Value(e.mainField3[0]);;
+  if(e.mainField4)
+    json["params"]["mainField4"]=Json::Value(e.mainField4[0]);;
   if(e.alignment)
     json["params"]["alignment"]=NsAppLinkRPC::TextAlignmentMarshaller::toJSON(e.alignment[0]);;
   if(e.statusBar)
@@ -84,6 +114,29 @@ Json::Value ShowMarshaller::toJSON(const Show& e)
     json["params"]["mediaClock"]=Json::Value(e.mediaClock[0]);;
   if(e.mediaTrack)
     json["params"]["mediaTrack"]=Json::Value(e.mediaTrack[0]);;
+  if(e.graphic)
+    json["params"]["graphic"]=NsAppLinkRPC::ImageMarshaller::toJSON(e.graphic[0]);;
+  if(e.softButtons)
+  {
+    unsigned int i=e.softButtons[0].size();
+    Json::Value j=Json::Value(Json::arrayValue);
+    j.resize(i);
+    while(i--)
+      j[i]=NsAppLinkRPC::SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
+
+    json["params"]["softButtons"]=j;
+  }
+  if(e.customPresets)
+  {
+    unsigned int i=e.customPresets[0].size();
+    Json::Value j=Json::Value(Json::arrayValue);
+    j.resize(i);
+    while(i--)
+      j[i]=Json::Value(e.customPresets[0][i]);
+
+    json["params"]["customPresets"]=j;
+  }
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -121,6 +174,28 @@ bool ShowMarshaller::fromJSON(const Json::Value& json,Show& c)
       c.mainField2=new std::string();
       c.mainField2[0]=js["mainField2"].asString();
       if(c.mainField2[0].length()>500)  return false;
+
+    }
+
+    if(c.mainField3)  delete c.mainField3;
+    c.mainField3=0;
+    if(js.isMember("mainField3"))
+    {
+      if(!js["mainField3"].isString())  return false;
+      c.mainField3=new std::string();
+      c.mainField3[0]=js["mainField3"].asString();
+      if(c.mainField3[0].length()>500)  return false;
+
+    }
+
+    if(c.mainField4)  delete c.mainField4;
+    c.mainField4=0;
+    if(js.isMember("mainField4"))
+    {
+      if(!js["mainField4"].isString())  return false;
+      c.mainField4=new std::string();
+      c.mainField4[0]=js["mainField4"].asString();
+      if(c.mainField4[0].length()>500)  return false;
 
     }
 
@@ -165,6 +240,57 @@ bool ShowMarshaller::fromJSON(const Json::Value& json,Show& c)
 
     }
 
+    if(c.graphic)  delete c.graphic;
+    c.graphic=0;
+    if(js.isMember("graphic"))
+    {
+      c.graphic=new NsAppLinkRPC::Image();
+      if(!NsAppLinkRPC::ImageMarshaller::fromJSON(js["graphic"],c.graphic[0]))  return false;
+    }
+
+    if(c.softButtons)  delete c.softButtons;
+    c.softButtons=0;
+    if(js.isMember("softButtons"))
+    {
+      if(!js["softButtons"].isArray()) return false;
+      unsigned int i=js["softButtons"].size();
+      if(i<0)  return false;
+      if(i>8)  return false;
+
+      c.softButtons=new std::vector<NsAppLinkRPC::SoftButton>();
+      c.softButtons->resize(js["softButtons"].size());
+
+      while(i--)
+        if(!NsAppLinkRPC::SoftButtonMarshaller::fromJSON(js["softButtons"][i],c.softButtons[0][i]))  return false;
+    }
+
+
+    if(c.customPresets)  delete c.customPresets;
+    c.customPresets=0;
+    if(js.isMember("customPresets"))
+    {
+      if(!js["customPresets"].isArray()) return false;
+      unsigned int i=js["customPresets"].size();
+      if(i<0)  return false;
+      if(i>6)  return false;
+
+      c.customPresets=new std::vector<std::string>();
+      c.customPresets->resize(js["customPresets"].size());
+
+      while(i--)
+      {
+        if(!js["customPresets"][i].isString())
+          return false;
+
+        c.customPresets[0][i]=js["customPresets"][i].asString();
+        if(c.customPresets[0][i].length()>500)  return false;
+      }
+    }
+
+
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

@@ -7,8 +7,8 @@
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -50,6 +50,8 @@ bool OnButtonEventMarshaller::checkIntegrityConst(const OnButtonEvent& s)
 
   if(!NsAppLinkRPC::ButtonEventModeMarshaller::checkIntegrityConst(s.mode))  return false;
 
+  if(s.customButtonID && (s.customButtonID[0]>65536))  return false;
+
   return true;
 }
 
@@ -66,6 +68,8 @@ Json::Value OnButtonEventMarshaller::toJSON(const OnButtonEvent& e)
 
   json["params"]["name"]=NsAppLinkRPC::ButtonNameMarshaller::toJSON(e.name);;
   json["params"]["mode"]=NsAppLinkRPC::ButtonEventModeMarshaller::toJSON(e.mode);;
+  if(e.customButtonID)
+    json["params"]["customButtonID"]=Json::Value(e.customButtonID[0]);;
   return json;
 }
 
@@ -85,6 +89,17 @@ bool OnButtonEventMarshaller::fromJSON(const Json::Value& json,OnButtonEvent& c)
     if(!js.isMember("name") || !NsAppLinkRPC::ButtonNameMarshaller::fromJSON(js["name"],c.name))  return false;
 
     if(!js.isMember("mode") || !NsAppLinkRPC::ButtonEventModeMarshaller::fromJSON(js["mode"],c.mode))  return false;
+
+    if(c.customButtonID)  delete c.customButtonID;
+    c.customButtonID=0;
+    if(js.isMember("customButtonID"))
+    {
+      if(!js["customButtonID"].isInt())  return false;
+      c.customButtonID=new unsigned int();
+      c.customButtonID[0]=js["customButtonID"].asInt();
+      if(c.customButtonID[0]>65536)  return false;
+
+    }
 
   }
   catch(...)

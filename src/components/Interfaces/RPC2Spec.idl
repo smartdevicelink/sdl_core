@@ -327,13 +327,38 @@ notification OnLanguageChange(
   int appId
 );
 
+/*
+  * @descr 
+   *      Request from HMI to AppLink to get the list of devices.
+   *  
+   */
 GetDeviceList(
   ->
   string deviceList [1:100]
 );
 
+/*
+  * @descr 
+   *      Notification from AppLink to HMI about changes in device list.
+   *  
+   */
 notification OnDeviceListUpdated(
   string deviceList [1:100]
+);
+
+/*
+  * @descr 
+   *      Request from AppLink to HMI to show slider. Returns position.
+   *  
+   */
+Slider(
+  unsigned int (2:26) numTicks,
+  unsigned int (1:16) position,
+  string (500) sliderHeader,
+  string (500) * sliderFooter[1:26],
+  unsigned int (65535) timeout
+  ->
+  unsigned int (1:26) sliderPosition
 );
 
 }

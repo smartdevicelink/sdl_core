@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/TextAlignmentMarshaller.inc ./src/ALRPCObjectsImpl/TextAlignmentMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/TextAlignmentMarshaller.inc ../src/ALRPCObjectsImpl/TextAlignmentMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -35,12 +35,12 @@ TextAlignment_intHash::getPointer (register const char *str, register unsigned i
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 19 "./src/ALRPCObjectsImpl/TextAlignmentMarshaller.gp"
+#line 19 "../src/ALRPCObjectsImpl/TextAlignmentMarshaller.gp"
       {"CENTERED",2},
       {""}, {""}, {""},
-#line 17 "./src/ALRPCObjectsImpl/TextAlignmentMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/TextAlignmentMarshaller.gp"
       {"LEFT_ALIGNED",0},
-#line 18 "./src/ALRPCObjectsImpl/TextAlignmentMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/TextAlignmentMarshaller.gp"
       {"RIGHT_ALIGNED",1}
     };
 

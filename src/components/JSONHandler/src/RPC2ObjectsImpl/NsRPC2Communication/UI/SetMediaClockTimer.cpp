@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -17,6 +17,7 @@ SetMediaClockTimer& SetMediaClockTimer::operator =(const SetMediaClockTimer& c)
   if(startTime)  delete startTime;
   startTime= c.startTime ? new NsAppLinkRPC::StartTime(c.startTime[0]) : 0;
   updateMode=c.updateMode;
+  appId=c.appId;
   return *this;
 }
 
@@ -66,6 +67,17 @@ const NsAppLinkRPC::UpdateMode& SetMediaClockTimer::get_updateMode(void)
 bool SetMediaClockTimer::set_updateMode(const NsAppLinkRPC::UpdateMode& updateMode_)
 {
   updateMode=updateMode_;
+  return true;
+}
+
+int SetMediaClockTimer::get_appId(void)
+{
+  return appId;
+}
+
+bool SetMediaClockTimer::set_appId(int appId_)
+{
+  appId=appId_;
   return true;
 }
 

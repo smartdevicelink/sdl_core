@@ -5,8 +5,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -62,6 +62,7 @@ Json::Value ActivateAppMarshaller::toJSON(const ActivateApp& e)
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
   json["params"]["appName"]=Json::Value(e.appName);;
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -84,6 +85,9 @@ bool ActivateAppMarshaller::fromJSON(const Json::Value& json,ActivateApp& c)
     c.appName=js["appName"].asString();
     if(c.appName.length()>100)  return false;
 
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

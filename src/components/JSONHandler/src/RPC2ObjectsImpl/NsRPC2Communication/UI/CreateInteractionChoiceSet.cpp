@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -16,6 +16,7 @@ CreateInteractionChoiceSet& CreateInteractionChoiceSet::operator =(const CreateI
 {
   interactionChoiceSetID=c.interactionChoiceSetID;
   choiceSet=c.choiceSet;
+  appId=c.appId;
   return *this;
 }
 
@@ -56,6 +57,17 @@ const std::vector< NsAppLinkRPC::Choice>& CreateInteractionChoiceSet::get_choice
 bool CreateInteractionChoiceSet::set_choiceSet(const std::vector< NsAppLinkRPC::Choice>& choiceSet_)
 {
   choiceSet=choiceSet_;
+  return true;
+}
+
+int CreateInteractionChoiceSet::get_appId(void)
+{
+  return appId;
+}
+
+bool CreateInteractionChoiceSet::set_appId(int appId_)
+{
+  appId=appId_;
   return true;
 }
 

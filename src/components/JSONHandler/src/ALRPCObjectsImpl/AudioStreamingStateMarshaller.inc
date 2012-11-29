@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/AudioStreamingStateMarshaller.inc ./src/ALRPCObjectsImpl/AudioStreamingStateMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/AudioStreamingStateMarshaller.inc ../src/ALRPCObjectsImpl/AudioStreamingStateMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -35,10 +35,10 @@ AudioStreamingState_intHash::getPointer (register const char *str, register unsi
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 17 "./src/ALRPCObjectsImpl/AudioStreamingStateMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/AudioStreamingStateMarshaller.gp"
       {"AUDIBLE",0},
       {""}, {""}, {""},
-#line 18 "./src/ALRPCObjectsImpl/AudioStreamingStateMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/AudioStreamingStateMarshaller.gp"
       {"NOT_AUDIBLE",1}
     };
 

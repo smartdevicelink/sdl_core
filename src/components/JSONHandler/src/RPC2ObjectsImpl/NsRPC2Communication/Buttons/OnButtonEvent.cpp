@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -16,17 +16,21 @@ OnButtonEvent& OnButtonEvent::operator =(const OnButtonEvent& c)
 {
   name=c.name;
   mode=c.mode;
+  if(customButtonID)  delete customButtonID;
+  customButtonID= c.customButtonID ? new unsigned int(c.customButtonID[0]) : 0;
   return *this;
 }
 
 
 OnButtonEvent::~OnButtonEvent(void)
 {
+  if(customButtonID)  delete customButtonID;
 }
 
 
 OnButtonEvent::OnButtonEvent(void) : 
-  RPC2Notification(Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT)
+  RPC2Notification(Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT),
+  customButtonID(0)
 {
 }
 
@@ -57,6 +61,24 @@ bool OnButtonEvent::set_mode(const NsAppLinkRPC::ButtonEventMode& mode_)
 {
   mode=mode_;
   return true;
+}
+
+const unsigned int* OnButtonEvent::get_customButtonID(void)
+{
+  return customButtonID;
+}
+
+bool OnButtonEvent::set_customButtonID(const unsigned int& customButtonID_)
+{
+  if(customButtonID)  delete customButtonID;
+  customButtonID=new unsigned int(customButtonID_);
+  return true;
+}
+
+void OnButtonEvent::reset_customButtonID(void)
+{
+  if(customButtonID)  delete customButtonID;
+  customButtonID=0;
 }
 
 bool OnButtonEvent::checkIntegrity(void)

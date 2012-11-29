@@ -1,14 +1,15 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/SetGlobalProperties.h"
 #include "../src/ALRPCObjectsImpl/TTSChunkMarshaller.h"
 #include "../src/ALRPCObjectsImpl/TTSChunkMarshaller.h"
+#include "../src/ALRPCObjectsImpl/VrHelpItemMarshaller.h"
 #include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetGlobalPropertiesMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -60,6 +61,15 @@ bool SetGlobalPropertiesMarshaller::checkIntegrityConst(const SetGlobalPropertie
     if(i>100)  return false;
   }
 
+  if(s.vrHelpTitle && (s.vrHelpTitle[0].length()>500))  return false;
+
+  if(s.vrHelp)
+  {
+    unsigned int i=s.vrHelp[0].size();
+    if(i<1)  return false;
+    if(i>100)  return false;
+  }
+
   return true;
 }
 
@@ -95,6 +105,19 @@ Json::Value SetGlobalPropertiesMarshaller::toJSON(const SetGlobalProperties& e)
 
     json["params"]["timeoutPrompt"]=j;
   }
+  if(e.vrHelpTitle)
+    json["params"]["vrHelpTitle"]=Json::Value(e.vrHelpTitle[0]);;
+  if(e.vrHelp)
+  {
+    unsigned int i=e.vrHelp[0].size();
+    Json::Value j=Json::Value(Json::arrayValue);
+    j.resize(i);
+    while(i--)
+      j[i]=NsAppLinkRPC::VrHelpItemMarshaller::toJSON(e.vrHelp[0][i]);
+
+    json["params"]["vrHelp"]=j;
+  }
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -147,6 +170,37 @@ bool SetGlobalPropertiesMarshaller::fromJSON(const Json::Value& json,SetGlobalPr
     }
 
 
+    if(c.vrHelpTitle)  delete c.vrHelpTitle;
+    c.vrHelpTitle=0;
+    if(js.isMember("vrHelpTitle"))
+    {
+      if(!js["vrHelpTitle"].isString())  return false;
+      c.vrHelpTitle=new std::string();
+      c.vrHelpTitle[0]=js["vrHelpTitle"].asString();
+      if(c.vrHelpTitle[0].length()>500)  return false;
+
+    }
+
+    if(c.vrHelp)  delete c.vrHelp;
+    c.vrHelp=0;
+    if(js.isMember("vrHelp"))
+    {
+      if(!js["vrHelp"].isArray()) return false;
+      unsigned int i=js["vrHelp"].size();
+      if(i<1)  return false;
+      if(i>100)  return false;
+
+      c.vrHelp=new std::vector<NsAppLinkRPC::VrHelpItem>();
+      c.vrHelp->resize(js["vrHelp"].size());
+
+      while(i--)
+        if(!NsAppLinkRPC::VrHelpItemMarshaller::fromJSON(js["vrHelp"][i],c.vrHelp[0][i]))  return false;
+    }
+
+
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

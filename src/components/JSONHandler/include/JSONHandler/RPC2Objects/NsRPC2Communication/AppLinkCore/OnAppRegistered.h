@@ -6,12 +6,15 @@
 #include "JSONHandler/RPC2Notification.h"
 
 #include "../include/JSONHandler/ALRPCObjects/Language.h"
+#include "../include/JSONHandler/ALRPCObjects/Language.h"
+#include "../include/JSONHandler/ALRPCObjects/TTSChunk.h"
+#include "../include/JSONHandler/ALRPCObjects/AppType.h"
 
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -45,6 +48,12 @@ namespace NsRPC2Communication
 
       const NsAppLinkRPC::Language& get_languageDesired(void);
 
+      const NsAppLinkRPC::Language& get_hmiDisplayLanguageDesired(void);
+
+      const std::vector< NsAppLinkRPC::TTSChunk>* get_ttsName(void);
+      const std::vector< NsAppLinkRPC::AppType>* get_appType(void);
+      int get_appId(void);
+
 
 // setters
 /// appName <= 100
@@ -63,6 +72,20 @@ namespace NsRPC2Communication
 
       bool set_languageDesired(const NsAppLinkRPC::Language& languageDesired);
 
+      bool set_hmiDisplayLanguageDesired(const NsAppLinkRPC::Language& hmiDisplayLanguageDesired);
+
+/// 1 <= size <= 100
+      bool set_ttsName(const std::vector< NsAppLinkRPC::TTSChunk>& ttsName);
+
+      void reset_ttsName(void);
+
+/// 1 <= size <= 100
+      bool set_appType(const std::vector< NsAppLinkRPC::AppType>& appType);
+
+      void reset_appType(void);
+
+      bool set_appId(int appId);
+
 
     private:
 
@@ -74,6 +97,10 @@ namespace NsRPC2Communication
       std::vector< std::string>* vrSynonym;
       bool isMediaApplication;
       NsAppLinkRPC::Language languageDesired;
+      NsAppLinkRPC::Language hmiDisplayLanguageDesired;
+      std::vector< NsAppLinkRPC::TTSChunk>* ttsName;
+      std::vector< NsAppLinkRPC::AppType>* appType;
+      int appId;
 
     };
   }

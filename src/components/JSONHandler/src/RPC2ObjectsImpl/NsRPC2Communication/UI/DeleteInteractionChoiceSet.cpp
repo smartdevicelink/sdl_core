@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -15,6 +15,7 @@ using namespace NsRPC2Communication::UI;
 DeleteInteractionChoiceSet& DeleteInteractionChoiceSet::operator =(const DeleteInteractionChoiceSet& c)
 {
   interactionChoiceSetID=c.interactionChoiceSetID;
+  appId=c.appId;
   return *this;
 }
 
@@ -44,6 +45,17 @@ unsigned int DeleteInteractionChoiceSet::get_interactionChoiceSetID(void)
 bool DeleteInteractionChoiceSet::set_interactionChoiceSetID(unsigned int interactionChoiceSetID_)
 {
   interactionChoiceSetID=interactionChoiceSetID_;
+  return true;
+}
+
+int DeleteInteractionChoiceSet::get_appId(void)
+{
+  return appId;
+}
+
+bool DeleteInteractionChoiceSet::set_appId(int appId_)
+{
+  appId=appId_;
   return true;
 }
 

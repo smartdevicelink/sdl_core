@@ -1,12 +1,14 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/Alert.h"
+#include "../src/ALRPCObjectsImpl/TTSChunkMarshaller.h"
+#include "../src/ALRPCObjectsImpl/SoftButtonMarshaller.h"
 #include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AlertMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -48,7 +50,23 @@ bool AlertMarshaller::checkIntegrityConst(const Alert& s)
 
   if(s.AlertText2 && (s.AlertText2[0].length()>500))  return false;
 
+  if(s.alertText3 && (s.alertText3[0].length()>500))  return false;
+
+  if(s.ttsChunks)
+  {
+    unsigned int i=s.ttsChunks[0].size();
+    if(i<1)  return false;
+    if(i>100)  return false;
+  }
+
   if(s.duration && (s.duration[0]<3000 || s.duration[0]>10000))  return false;
+
+  if(s.softButtons)
+  {
+    unsigned int i=s.softButtons[0].size();
+    if(i<0)  return false;
+    if(i>4)  return false;
+  }
 
   return true;
 }
@@ -69,10 +87,33 @@ Json::Value AlertMarshaller::toJSON(const Alert& e)
     json["params"]["AlertText1"]=Json::Value(e.AlertText1[0]);;
   if(e.AlertText2)
     json["params"]["AlertText2"]=Json::Value(e.AlertText2[0]);;
+  if(e.alertText3)
+    json["params"]["alertText3"]=Json::Value(e.alertText3[0]);;
+  if(e.ttsChunks)
+  {
+    unsigned int i=e.ttsChunks[0].size();
+    Json::Value j=Json::Value(Json::arrayValue);
+    j.resize(i);
+    while(i--)
+      j[i]=NsAppLinkRPC::TTSChunkMarshaller::toJSON(e.ttsChunks[0][i]);
+
+    json["params"]["ttsChunks"]=j;
+  }
   if(e.duration)
     json["params"]["duration"]=Json::Value(e.duration[0]);;
   if(e.playTone)
     json["params"]["playTone"]=Json::Value(e.playTone[0]);;
+  if(e.softButtons)
+  {
+    unsigned int i=e.softButtons[0].size();
+    Json::Value j=Json::Value(Json::arrayValue);
+    j.resize(i);
+    while(i--)
+      j[i]=NsAppLinkRPC::SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
+
+    json["params"]["softButtons"]=j;
+  }
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -113,6 +154,34 @@ bool AlertMarshaller::fromJSON(const Json::Value& json,Alert& c)
 
     }
 
+    if(c.alertText3)  delete c.alertText3;
+    c.alertText3=0;
+    if(js.isMember("alertText3"))
+    {
+      if(!js["alertText3"].isString())  return false;
+      c.alertText3=new std::string();
+      c.alertText3[0]=js["alertText3"].asString();
+      if(c.alertText3[0].length()>500)  return false;
+
+    }
+
+    if(c.ttsChunks)  delete c.ttsChunks;
+    c.ttsChunks=0;
+    if(js.isMember("ttsChunks"))
+    {
+      if(!js["ttsChunks"].isArray()) return false;
+      unsigned int i=js["ttsChunks"].size();
+      if(i<1)  return false;
+      if(i>100)  return false;
+
+      c.ttsChunks=new std::vector<NsAppLinkRPC::TTSChunk>();
+      c.ttsChunks->resize(js["ttsChunks"].size());
+
+      while(i--)
+        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["ttsChunks"][i],c.ttsChunks[0][i]))  return false;
+    }
+
+
     if(c.duration)  delete c.duration;
     c.duration=0;
     if(js.isMember("duration"))
@@ -134,6 +203,26 @@ bool AlertMarshaller::fromJSON(const Json::Value& json,Alert& c)
       
     }
 
+    if(c.softButtons)  delete c.softButtons;
+    c.softButtons=0;
+    if(js.isMember("softButtons"))
+    {
+      if(!js["softButtons"].isArray()) return false;
+      unsigned int i=js["softButtons"].size();
+      if(i<0)  return false;
+      if(i>4)  return false;
+
+      c.softButtons=new std::vector<NsAppLinkRPC::SoftButton>();
+      c.softButtons->resize(js["softButtons"].size());
+
+      while(i--)
+        if(!NsAppLinkRPC::SoftButtonMarshaller::fromJSON(js["softButtons"][i],c.softButtons[0][i]))  return false;
+    }
+
+
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

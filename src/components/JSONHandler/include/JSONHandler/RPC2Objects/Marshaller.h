@@ -13,6 +13,8 @@
 
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/ActivateAppMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/ActivateAppResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/DeactivateAppMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/DeactivateAppResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/GetAppListMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/GetAppListResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppRegisteredMarshaller.h"
@@ -23,8 +25,11 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/GetCapabilitiesResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/OnButtonEventMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/OnButtonPressMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/ChangeLanguageRegistrationMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/ChangeLanguageRegistrationResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/GetCapabilitiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/GetCapabilitiesResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/OnLanguageChangeMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/SpeakMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/SpeakResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AddCommandMarshaller.h"
@@ -33,6 +38,8 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AddSubMenuResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AlertMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AlertResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ChangeLanguageRegistrationMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ChangeLanguageRegistrationResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/CreateInteractionChoiceSetMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/CreateInteractionChoiceSetResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/DeleteCommandMarshaller.h"
@@ -43,35 +50,47 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/DeleteSubMenuResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetCapabilitiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetCapabilitiesResponseMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnAppActivatedMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnAppDeactivatedMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetDeviceListMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetDeviceListResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnCommandMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnDeviceListUpdatedMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnDriverDistractionMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnLanguageChangeMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnReadyMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnSystemContextMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/PerformInteractionMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/PerformInteractionResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ResetGlobalPropertiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ResetGlobalPropertiesResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetAppIconMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetAppIconResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetGlobalPropertiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetGlobalPropertiesResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetMediaClockTimerMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetMediaClockTimerResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ShowMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ShowResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SliderMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SliderResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/AddCommandMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/AddCommandResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/ChangeLanguageRegistrationMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/ChangeLanguageRegistrationResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/DeleteCommandMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/DeleteCommandResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/GetCapabilitiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/GetCapabilitiesResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/OnCommandMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/OnLanguageChangeMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetVehicleTypeMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetVehicleTypeResponseMarshaller.h"
 
 /*
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
+
 namespace NsRPC2Communication
 {
 
@@ -84,6 +103,8 @@ public:
     METHOD_INVALID=-1,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPP,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPPRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__DEACTIVATEAPP,
+    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__DEACTIVATEAPPRESPONSE,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLISTRESPONSE,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPREGISTERED,
@@ -94,8 +115,11 @@ public:
     METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE,
     METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT,
     METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS,
+    METHOD_NSRPC2COMMUNICATION_TTS__CHANGELANGUAGEREGISTRATION,
+    METHOD_NSRPC2COMMUNICATION_TTS__CHANGELANGUAGEREGISTRATIONRESPONSE,
     METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIES,
     METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIESRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_TTS__ONLANGUAGECHANGE,
     METHOD_NSRPC2COMMUNICATION_TTS__SPEAK,
     METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__ADDCOMMAND,
@@ -104,6 +128,8 @@ public:
     METHOD_NSRPC2COMMUNICATION_UI__ADDSUBMENURESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__ALERT,
     METHOD_NSRPC2COMMUNICATION_UI__ALERTRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_UI__CHANGELANGUAGEREGISTRATION,
+    METHOD_NSRPC2COMMUNICATION_UI__CHANGELANGUAGEREGISTRATIONRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__CREATEINTERACTIONCHOICESET,
     METHOD_NSRPC2COMMUNICATION_UI__CREATEINTERACTIONCHOICESETRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__DELETECOMMAND,
@@ -114,29 +140,40 @@ public:
     METHOD_NSRPC2COMMUNICATION_UI__DELETESUBMENURESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIES,
     METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE,
-    METHOD_NSRPC2COMMUNICATION_UI__ONAPPACTIVATED,
-    METHOD_NSRPC2COMMUNICATION_UI__ONAPPDEACTIVATED,
+    METHOD_NSRPC2COMMUNICATION_UI__GETDEVICELIST,
+    METHOD_NSRPC2COMMUNICATION_UI__GETDEVICELISTRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__ONCOMMAND,
+    METHOD_NSRPC2COMMUNICATION_UI__ONDEVICELISTUPDATED,
     METHOD_NSRPC2COMMUNICATION_UI__ONDRIVERDISTRACTION,
+    METHOD_NSRPC2COMMUNICATION_UI__ONLANGUAGECHANGE,
     METHOD_NSRPC2COMMUNICATION_UI__ONREADY,
     METHOD_NSRPC2COMMUNICATION_UI__ONSYSTEMCONTEXT,
     METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTION,
     METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTIONRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIES,
     METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIESRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_UI__SETAPPICON,
+    METHOD_NSRPC2COMMUNICATION_UI__SETAPPICONRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIES,
     METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIESRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__SETMEDIACLOCKTIMER,
     METHOD_NSRPC2COMMUNICATION_UI__SETMEDIACLOCKTIMERRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__SHOW,
     METHOD_NSRPC2COMMUNICATION_UI__SHOWRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_UI__SLIDER,
+    METHOD_NSRPC2COMMUNICATION_UI__SLIDERRESPONSE,
     METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMAND,
     METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMANDRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_VR__CHANGELANGUAGEREGISTRATION,
+    METHOD_NSRPC2COMMUNICATION_VR__CHANGELANGUAGEREGISTRATIONRESPONSE,
     METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMAND,
     METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMANDRESPONSE,
     METHOD_NSRPC2COMMUNICATION_VR__GETCAPABILITIES,
     METHOD_NSRPC2COMMUNICATION_VR__GETCAPABILITIESRESPONSE,
-    METHOD_NSRPC2COMMUNICATION_VR__ONCOMMAND
+    METHOD_NSRPC2COMMUNICATION_VR__ONCOMMAND,
+    METHOD_NSRPC2COMMUNICATION_VR__ONLANGUAGECHANGE,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLETYPE,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLETYPERESPONSE
   };
 
 
@@ -171,6 +208,28 @@ protected:
   static std::string toString(const NsRPC2Communication::AppLinkCore::ActivateAppResponse& res)
   {
     return mNsRPC2Communication_AppLinkCore__ActivateAppResponse.toString(res);
+  }
+
+// NsRPC2Communication::AppLinkCore::DeactivateApp
+  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::DeactivateApp& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__DeactivateApp.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::AppLinkCore::DeactivateApp& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__DeactivateApp.toString(res);
+  }
+
+// NsRPC2Communication::AppLinkCore::DeactivateAppResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::DeactivateAppResponse& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__DeactivateAppResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::AppLinkCore::DeactivateAppResponse& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__DeactivateAppResponse.toString(res);
   }
 
 // NsRPC2Communication::AppLinkCore::GetAppList
@@ -283,6 +342,28 @@ protected:
     return mNsRPC2Communication_Buttons__OnButtonPress.toString(res);
   }
 
+// NsRPC2Communication::TTS::ChangeLanguageRegistration
+  static bool fromString(const std::string& str, NsRPC2Communication::TTS::ChangeLanguageRegistration& res)
+  {
+    return mNsRPC2Communication_TTS__ChangeLanguageRegistration.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::TTS::ChangeLanguageRegistration& res)
+  {
+    return mNsRPC2Communication_TTS__ChangeLanguageRegistration.toString(res);
+  }
+
+// NsRPC2Communication::TTS::ChangeLanguageRegistrationResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::TTS::ChangeLanguageRegistrationResponse& res)
+  {
+    return mNsRPC2Communication_TTS__ChangeLanguageRegistrationResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::TTS::ChangeLanguageRegistrationResponse& res)
+  {
+    return mNsRPC2Communication_TTS__ChangeLanguageRegistrationResponse.toString(res);
+  }
+
 // NsRPC2Communication::TTS::GetCapabilities
   static bool fromString(const std::string& str, NsRPC2Communication::TTS::GetCapabilities& res)
   {
@@ -303,6 +384,17 @@ protected:
   static std::string toString(const NsRPC2Communication::TTS::GetCapabilitiesResponse& res)
   {
     return mNsRPC2Communication_TTS__GetCapabilitiesResponse.toString(res);
+  }
+
+// NsRPC2Communication::TTS::OnLanguageChange
+  static bool fromString(const std::string& str, NsRPC2Communication::TTS::OnLanguageChange& res)
+  {
+    return mNsRPC2Communication_TTS__OnLanguageChange.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::TTS::OnLanguageChange& res)
+  {
+    return mNsRPC2Communication_TTS__OnLanguageChange.toString(res);
   }
 
 // NsRPC2Communication::TTS::Speak
@@ -391,6 +483,28 @@ protected:
   static std::string toString(const NsRPC2Communication::UI::AlertResponse& res)
   {
     return mNsRPC2Communication_UI__AlertResponse.toString(res);
+  }
+
+// NsRPC2Communication::UI::ChangeLanguageRegistration
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::ChangeLanguageRegistration& res)
+  {
+    return mNsRPC2Communication_UI__ChangeLanguageRegistration.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::ChangeLanguageRegistration& res)
+  {
+    return mNsRPC2Communication_UI__ChangeLanguageRegistration.toString(res);
+  }
+
+// NsRPC2Communication::UI::ChangeLanguageRegistrationResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::ChangeLanguageRegistrationResponse& res)
+  {
+    return mNsRPC2Communication_UI__ChangeLanguageRegistrationResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::ChangeLanguageRegistrationResponse& res)
+  {
+    return mNsRPC2Communication_UI__ChangeLanguageRegistrationResponse.toString(res);
   }
 
 // NsRPC2Communication::UI::CreateInteractionChoiceSet
@@ -503,26 +617,26 @@ protected:
     return mNsRPC2Communication_UI__GetCapabilitiesResponse.toString(res);
   }
 
-// NsRPC2Communication::UI::OnAppActivated
-  static bool fromString(const std::string& str, NsRPC2Communication::UI::OnAppActivated& res)
+// NsRPC2Communication::UI::GetDeviceList
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::GetDeviceList& res)
   {
-    return mNsRPC2Communication_UI__OnAppActivated.fromString(str, res);
+    return mNsRPC2Communication_UI__GetDeviceList.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::UI::OnAppActivated& res)
+  static std::string toString(const NsRPC2Communication::UI::GetDeviceList& res)
   {
-    return mNsRPC2Communication_UI__OnAppActivated.toString(res);
+    return mNsRPC2Communication_UI__GetDeviceList.toString(res);
   }
 
-// NsRPC2Communication::UI::OnAppDeactivated
-  static bool fromString(const std::string& str, NsRPC2Communication::UI::OnAppDeactivated& res)
+// NsRPC2Communication::UI::GetDeviceListResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::GetDeviceListResponse& res)
   {
-    return mNsRPC2Communication_UI__OnAppDeactivated.fromString(str, res);
+    return mNsRPC2Communication_UI__GetDeviceListResponse.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::UI::OnAppDeactivated& res)
+  static std::string toString(const NsRPC2Communication::UI::GetDeviceListResponse& res)
   {
-    return mNsRPC2Communication_UI__OnAppDeactivated.toString(res);
+    return mNsRPC2Communication_UI__GetDeviceListResponse.toString(res);
   }
 
 // NsRPC2Communication::UI::OnCommand
@@ -536,6 +650,17 @@ protected:
     return mNsRPC2Communication_UI__OnCommand.toString(res);
   }
 
+// NsRPC2Communication::UI::OnDeviceListUpdated
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::OnDeviceListUpdated& res)
+  {
+    return mNsRPC2Communication_UI__OnDeviceListUpdated.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::OnDeviceListUpdated& res)
+  {
+    return mNsRPC2Communication_UI__OnDeviceListUpdated.toString(res);
+  }
+
 // NsRPC2Communication::UI::OnDriverDistraction
   static bool fromString(const std::string& str, NsRPC2Communication::UI::OnDriverDistraction& res)
   {
@@ -545,6 +670,17 @@ protected:
   static std::string toString(const NsRPC2Communication::UI::OnDriverDistraction& res)
   {
     return mNsRPC2Communication_UI__OnDriverDistraction.toString(res);
+  }
+
+// NsRPC2Communication::UI::OnLanguageChange
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::OnLanguageChange& res)
+  {
+    return mNsRPC2Communication_UI__OnLanguageChange.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::OnLanguageChange& res)
+  {
+    return mNsRPC2Communication_UI__OnLanguageChange.toString(res);
   }
 
 // NsRPC2Communication::UI::OnReady
@@ -613,6 +749,28 @@ protected:
     return mNsRPC2Communication_UI__ResetGlobalPropertiesResponse.toString(res);
   }
 
+// NsRPC2Communication::UI::SetAppIcon
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::SetAppIcon& res)
+  {
+    return mNsRPC2Communication_UI__SetAppIcon.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::SetAppIcon& res)
+  {
+    return mNsRPC2Communication_UI__SetAppIcon.toString(res);
+  }
+
+// NsRPC2Communication::UI::SetAppIconResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::SetAppIconResponse& res)
+  {
+    return mNsRPC2Communication_UI__SetAppIconResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::SetAppIconResponse& res)
+  {
+    return mNsRPC2Communication_UI__SetAppIconResponse.toString(res);
+  }
+
 // NsRPC2Communication::UI::SetGlobalProperties
   static bool fromString(const std::string& str, NsRPC2Communication::UI::SetGlobalProperties& res)
   {
@@ -679,6 +837,28 @@ protected:
     return mNsRPC2Communication_UI__ShowResponse.toString(res);
   }
 
+// NsRPC2Communication::UI::Slider
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::Slider& res)
+  {
+    return mNsRPC2Communication_UI__Slider.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::Slider& res)
+  {
+    return mNsRPC2Communication_UI__Slider.toString(res);
+  }
+
+// NsRPC2Communication::UI::SliderResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::SliderResponse& res)
+  {
+    return mNsRPC2Communication_UI__SliderResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::SliderResponse& res)
+  {
+    return mNsRPC2Communication_UI__SliderResponse.toString(res);
+  }
+
 // NsRPC2Communication::VR::AddCommand
   static bool fromString(const std::string& str, NsRPC2Communication::VR::AddCommand& res)
   {
@@ -699,6 +879,28 @@ protected:
   static std::string toString(const NsRPC2Communication::VR::AddCommandResponse& res)
   {
     return mNsRPC2Communication_VR__AddCommandResponse.toString(res);
+  }
+
+// NsRPC2Communication::VR::ChangeLanguageRegistration
+  static bool fromString(const std::string& str, NsRPC2Communication::VR::ChangeLanguageRegistration& res)
+  {
+    return mNsRPC2Communication_VR__ChangeLanguageRegistration.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VR::ChangeLanguageRegistration& res)
+  {
+    return mNsRPC2Communication_VR__ChangeLanguageRegistration.toString(res);
+  }
+
+// NsRPC2Communication::VR::ChangeLanguageRegistrationResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::VR::ChangeLanguageRegistrationResponse& res)
+  {
+    return mNsRPC2Communication_VR__ChangeLanguageRegistrationResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VR::ChangeLanguageRegistrationResponse& res)
+  {
+    return mNsRPC2Communication_VR__ChangeLanguageRegistrationResponse.toString(res);
   }
 
 // NsRPC2Communication::VR::DeleteCommand
@@ -756,6 +958,39 @@ protected:
     return mNsRPC2Communication_VR__OnCommand.toString(res);
   }
 
+// NsRPC2Communication::VR::OnLanguageChange
+  static bool fromString(const std::string& str, NsRPC2Communication::VR::OnLanguageChange& res)
+  {
+    return mNsRPC2Communication_VR__OnLanguageChange.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VR::OnLanguageChange& res)
+  {
+    return mNsRPC2Communication_VR__OnLanguageChange.toString(res);
+  }
+
+// NsRPC2Communication::VehicleInfo::GetVehicleType
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::GetVehicleType& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__GetVehicleType.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::GetVehicleType& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__GetVehicleType.toString(res);
+  }
+
+// NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse.toString(res);
+  }
+
 
   struct localHash
   {
@@ -772,18 +1007,20 @@ private:
   
   static const char* getName(Methods e)
   {
-    return (e>=0 && e<55) ? mHashTable[e].name : NULL;
+    return (e>=0 && e<73) ? mHashTable[e].name : NULL;
   }
   
   static const Methods getIndex(const char* s);
   
-  static const localHash mHashTable[55];
+  static const localHash mHashTable[73];
   friend class Marshaller_intHash;
   
   static ::NsRPC2Communication::RPC2ErrorMarshaller mRPC2ErrorInternal;
 
   static NsRPC2Communication::AppLinkCore::ActivateAppMarshaller mNsRPC2Communication_AppLinkCore__ActivateApp;
   static NsRPC2Communication::AppLinkCore::ActivateAppResponseMarshaller mNsRPC2Communication_AppLinkCore__ActivateAppResponse;
+  static NsRPC2Communication::AppLinkCore::DeactivateAppMarshaller mNsRPC2Communication_AppLinkCore__DeactivateApp;
+  static NsRPC2Communication::AppLinkCore::DeactivateAppResponseMarshaller mNsRPC2Communication_AppLinkCore__DeactivateAppResponse;
   static NsRPC2Communication::AppLinkCore::GetAppListMarshaller mNsRPC2Communication_AppLinkCore__GetAppList;
   static NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller mNsRPC2Communication_AppLinkCore__GetAppListResponse;
   static NsRPC2Communication::AppLinkCore::OnAppRegisteredMarshaller mNsRPC2Communication_AppLinkCore__OnAppRegistered;
@@ -794,8 +1031,11 @@ private:
   static NsRPC2Communication::Buttons::GetCapabilitiesResponseMarshaller mNsRPC2Communication_Buttons__GetCapabilitiesResponse;
   static NsRPC2Communication::Buttons::OnButtonEventMarshaller mNsRPC2Communication_Buttons__OnButtonEvent;
   static NsRPC2Communication::Buttons::OnButtonPressMarshaller mNsRPC2Communication_Buttons__OnButtonPress;
+  static NsRPC2Communication::TTS::ChangeLanguageRegistrationMarshaller mNsRPC2Communication_TTS__ChangeLanguageRegistration;
+  static NsRPC2Communication::TTS::ChangeLanguageRegistrationResponseMarshaller mNsRPC2Communication_TTS__ChangeLanguageRegistrationResponse;
   static NsRPC2Communication::TTS::GetCapabilitiesMarshaller mNsRPC2Communication_TTS__GetCapabilities;
   static NsRPC2Communication::TTS::GetCapabilitiesResponseMarshaller mNsRPC2Communication_TTS__GetCapabilitiesResponse;
+  static NsRPC2Communication::TTS::OnLanguageChangeMarshaller mNsRPC2Communication_TTS__OnLanguageChange;
   static NsRPC2Communication::TTS::SpeakMarshaller mNsRPC2Communication_TTS__Speak;
   static NsRPC2Communication::TTS::SpeakResponseMarshaller mNsRPC2Communication_TTS__SpeakResponse;
   static NsRPC2Communication::UI::AddCommandMarshaller mNsRPC2Communication_UI__AddCommand;
@@ -804,6 +1044,8 @@ private:
   static NsRPC2Communication::UI::AddSubMenuResponseMarshaller mNsRPC2Communication_UI__AddSubMenuResponse;
   static NsRPC2Communication::UI::AlertMarshaller mNsRPC2Communication_UI__Alert;
   static NsRPC2Communication::UI::AlertResponseMarshaller mNsRPC2Communication_UI__AlertResponse;
+  static NsRPC2Communication::UI::ChangeLanguageRegistrationMarshaller mNsRPC2Communication_UI__ChangeLanguageRegistration;
+  static NsRPC2Communication::UI::ChangeLanguageRegistrationResponseMarshaller mNsRPC2Communication_UI__ChangeLanguageRegistrationResponse;
   static NsRPC2Communication::UI::CreateInteractionChoiceSetMarshaller mNsRPC2Communication_UI__CreateInteractionChoiceSet;
   static NsRPC2Communication::UI::CreateInteractionChoiceSetResponseMarshaller mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse;
   static NsRPC2Communication::UI::DeleteCommandMarshaller mNsRPC2Communication_UI__DeleteCommand;
@@ -814,29 +1056,40 @@ private:
   static NsRPC2Communication::UI::DeleteSubMenuResponseMarshaller mNsRPC2Communication_UI__DeleteSubMenuResponse;
   static NsRPC2Communication::UI::GetCapabilitiesMarshaller mNsRPC2Communication_UI__GetCapabilities;
   static NsRPC2Communication::UI::GetCapabilitiesResponseMarshaller mNsRPC2Communication_UI__GetCapabilitiesResponse;
-  static NsRPC2Communication::UI::OnAppActivatedMarshaller mNsRPC2Communication_UI__OnAppActivated;
-  static NsRPC2Communication::UI::OnAppDeactivatedMarshaller mNsRPC2Communication_UI__OnAppDeactivated;
+  static NsRPC2Communication::UI::GetDeviceListMarshaller mNsRPC2Communication_UI__GetDeviceList;
+  static NsRPC2Communication::UI::GetDeviceListResponseMarshaller mNsRPC2Communication_UI__GetDeviceListResponse;
   static NsRPC2Communication::UI::OnCommandMarshaller mNsRPC2Communication_UI__OnCommand;
+  static NsRPC2Communication::UI::OnDeviceListUpdatedMarshaller mNsRPC2Communication_UI__OnDeviceListUpdated;
   static NsRPC2Communication::UI::OnDriverDistractionMarshaller mNsRPC2Communication_UI__OnDriverDistraction;
+  static NsRPC2Communication::UI::OnLanguageChangeMarshaller mNsRPC2Communication_UI__OnLanguageChange;
   static NsRPC2Communication::UI::OnReadyMarshaller mNsRPC2Communication_UI__OnReady;
   static NsRPC2Communication::UI::OnSystemContextMarshaller mNsRPC2Communication_UI__OnSystemContext;
   static NsRPC2Communication::UI::PerformInteractionMarshaller mNsRPC2Communication_UI__PerformInteraction;
   static NsRPC2Communication::UI::PerformInteractionResponseMarshaller mNsRPC2Communication_UI__PerformInteractionResponse;
   static NsRPC2Communication::UI::ResetGlobalPropertiesMarshaller mNsRPC2Communication_UI__ResetGlobalProperties;
   static NsRPC2Communication::UI::ResetGlobalPropertiesResponseMarshaller mNsRPC2Communication_UI__ResetGlobalPropertiesResponse;
+  static NsRPC2Communication::UI::SetAppIconMarshaller mNsRPC2Communication_UI__SetAppIcon;
+  static NsRPC2Communication::UI::SetAppIconResponseMarshaller mNsRPC2Communication_UI__SetAppIconResponse;
   static NsRPC2Communication::UI::SetGlobalPropertiesMarshaller mNsRPC2Communication_UI__SetGlobalProperties;
   static NsRPC2Communication::UI::SetGlobalPropertiesResponseMarshaller mNsRPC2Communication_UI__SetGlobalPropertiesResponse;
   static NsRPC2Communication::UI::SetMediaClockTimerMarshaller mNsRPC2Communication_UI__SetMediaClockTimer;
   static NsRPC2Communication::UI::SetMediaClockTimerResponseMarshaller mNsRPC2Communication_UI__SetMediaClockTimerResponse;
   static NsRPC2Communication::UI::ShowMarshaller mNsRPC2Communication_UI__Show;
   static NsRPC2Communication::UI::ShowResponseMarshaller mNsRPC2Communication_UI__ShowResponse;
+  static NsRPC2Communication::UI::SliderMarshaller mNsRPC2Communication_UI__Slider;
+  static NsRPC2Communication::UI::SliderResponseMarshaller mNsRPC2Communication_UI__SliderResponse;
   static NsRPC2Communication::VR::AddCommandMarshaller mNsRPC2Communication_VR__AddCommand;
   static NsRPC2Communication::VR::AddCommandResponseMarshaller mNsRPC2Communication_VR__AddCommandResponse;
+  static NsRPC2Communication::VR::ChangeLanguageRegistrationMarshaller mNsRPC2Communication_VR__ChangeLanguageRegistration;
+  static NsRPC2Communication::VR::ChangeLanguageRegistrationResponseMarshaller mNsRPC2Communication_VR__ChangeLanguageRegistrationResponse;
   static NsRPC2Communication::VR::DeleteCommandMarshaller mNsRPC2Communication_VR__DeleteCommand;
   static NsRPC2Communication::VR::DeleteCommandResponseMarshaller mNsRPC2Communication_VR__DeleteCommandResponse;
   static NsRPC2Communication::VR::GetCapabilitiesMarshaller mNsRPC2Communication_VR__GetCapabilities;
   static NsRPC2Communication::VR::GetCapabilitiesResponseMarshaller mNsRPC2Communication_VR__GetCapabilitiesResponse;
   static NsRPC2Communication::VR::OnCommandMarshaller mNsRPC2Communication_VR__OnCommand;
+  static NsRPC2Communication::VR::OnLanguageChangeMarshaller mNsRPC2Communication_VR__OnLanguageChange;
+  static NsRPC2Communication::VehicleInfo::GetVehicleTypeMarshaller mNsRPC2Communication_VehicleInfo__GetVehicleType;
+  static NsRPC2Communication::VehicleInfo::GetVehicleTypeResponseMarshaller mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse;
 
 };
 

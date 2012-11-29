@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -24,6 +24,9 @@ PerformInteraction& PerformInteraction::operator =(const PerformInteraction& c)
   timeoutPrompt= c.timeoutPrompt ? new std::vector<NsAppLinkRPC::TTSChunk>(c.timeoutPrompt[0]) : 0;
   if(timeout)  delete timeout;
   timeout= c.timeout ? new unsigned int(c.timeout[0]) : 0;
+  if(vrHelp)  delete vrHelp;
+  vrHelp= c.vrHelp ? new std::vector<NsAppLinkRPC::VrHelpItem>(c.vrHelp[0]) : 0;
+  appId=c.appId;
   return *this;
 }
 
@@ -33,6 +36,7 @@ PerformInteraction::~PerformInteraction(void)
   if(helpPrompt)  delete helpPrompt;
   if(timeoutPrompt)  delete timeoutPrompt;
   if(timeout)  delete timeout;
+  if(vrHelp)  delete vrHelp;
 }
 
 
@@ -40,7 +44,8 @@ PerformInteraction::PerformInteraction(void) :
   RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTION),
   helpPrompt(0),
   timeoutPrompt(0),
-  timeout(0)
+  timeout(0),
+  vrHelp(0)
 {
 }
 
@@ -147,6 +152,35 @@ void PerformInteraction::reset_timeout(void)
 {
   if(timeout)  delete timeout;
   timeout=0;
+}
+
+const std::vector< NsAppLinkRPC::VrHelpItem>* PerformInteraction::get_vrHelp(void)
+{
+  return vrHelp;
+}
+
+bool PerformInteraction::set_vrHelp(const std::vector< NsAppLinkRPC::VrHelpItem>& vrHelp_)
+{
+  if(vrHelp)  delete vrHelp;
+  vrHelp=new std::vector< NsAppLinkRPC::VrHelpItem>(vrHelp_);
+  return true;
+}
+
+void PerformInteraction::reset_vrHelp(void)
+{
+  if(vrHelp)  delete vrHelp;
+  vrHelp=0;
+}
+
+int PerformInteraction::get_appId(void)
+{
+  return appId;
+}
+
+bool PerformInteraction::set_appId(int appId_)
+{
+  appId=appId_;
+  return true;
 }
 
 bool PerformInteraction::checkIntegrity(void)

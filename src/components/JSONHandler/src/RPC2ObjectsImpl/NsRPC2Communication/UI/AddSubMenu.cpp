@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -18,6 +18,7 @@ AddSubMenu& AddSubMenu::operator =(const AddSubMenu& c)
   if(position)  delete position;
   position= c.position ? new unsigned int(c.position[0]) : 0;
   menuName=c.menuName;
+  appId=c.appId;
   return *this;
 }
 
@@ -78,6 +79,17 @@ const std::string& AddSubMenu::get_menuName(void)
 bool AddSubMenu::set_menuName(const std::string& menuName_)
 {
   menuName=menuName_;
+  return true;
+}
+
+int AddSubMenu::get_appId(void)
+{
+  return appId;
+}
+
+bool AddSubMenu::set_appId(int appId_)
+{
+  appId=appId_;
   return true;
 }
 

@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::VR
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -15,6 +15,7 @@ using namespace NsRPC2Communication::VR;
 OnCommand& OnCommand::operator =(const OnCommand& c)
 {
   cmdID=c.cmdID;
+  appId=c.appId;
   return *this;
 }
 
@@ -44,6 +45,17 @@ unsigned int OnCommand::get_cmdID(void)
 bool OnCommand::set_cmdID(unsigned int cmdID_)
 {
   cmdID=cmdID_;
+  return true;
+}
+
+int OnCommand::get_appId(void)
+{
+  return appId;
+}
+
+bool OnCommand::set_appId(int appId_)
+{
+  appId=appId_;
   return true;
 }
 

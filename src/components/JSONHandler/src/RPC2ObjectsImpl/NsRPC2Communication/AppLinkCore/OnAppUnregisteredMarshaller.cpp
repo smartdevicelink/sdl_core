@@ -6,8 +6,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -66,6 +66,7 @@ Json::Value OnAppUnregisteredMarshaller::toJSON(const OnAppUnregistered& e)
   json["params"]["appName"]=Json::Value(e.appName);;
   if(e.reason)
     json["params"]["reason"]=NsAppLinkRPC::AppInterfaceUnregisteredReasonMarshaller::toJSON(e.reason[0]);;
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -94,6 +95,9 @@ bool OnAppUnregisteredMarshaller::fromJSON(const Json::Value& json,OnAppUnregist
       if(!NsAppLinkRPC::AppInterfaceUnregisteredReasonMarshaller::fromJSON(js["reason"],c.reason[0]))  return false;
     }
 
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

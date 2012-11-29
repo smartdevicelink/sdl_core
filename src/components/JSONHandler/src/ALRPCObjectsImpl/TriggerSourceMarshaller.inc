@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/TriggerSourceMarshaller.inc ./src/ALRPCObjectsImpl/TriggerSourceMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/TriggerSourceMarshaller.inc ../src/ALRPCObjectsImpl/TriggerSourceMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -35,10 +35,10 @@ TriggerSource_intHash::getPointer (register const char *str, register unsigned i
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""},
-#line 18 "./src/ALRPCObjectsImpl/TriggerSourceMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/TriggerSourceMarshaller.gp"
       {"VR",1},
       {""},
-#line 17 "./src/ALRPCObjectsImpl/TriggerSourceMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/TriggerSourceMarshaller.gp"
       {"MENU",0}
     };
 

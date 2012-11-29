@@ -4,15 +4,15 @@
 #include "ButtonNameMarshaller.h"
 #include "ButtonPressModeMarshaller.h"
 
-#define PROTOCOL_VERSION	1
+#define PROTOCOL_VERSION	42
 
 
 /*
   interface	Ford Sync RAPI
-  version	1.2
-  date		2011-05-17
-  generated at	Mon Nov 19 10:37:06 2012
-  source stamp	Mon Nov 19 10:35:56 2012
+  version	1.2 / 2.0O
+  date		2011-05-17 / 2012-11-02
+  generated at	Thu Nov 29 14:49:08 2012
+  source stamp	Thu Nov 29 06:50:10 2012
   author	robok0der
 */
 

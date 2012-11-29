@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.inc ./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/MediaClockFormatMarshaller.inc ../src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp  */
 /* Computed positions: -k'$' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -91,17 +91,17 @@ MediaClockFormat_intHash::getPointer (register const char *str, register unsigne
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""},
-#line 18 "./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
       {"CLOCK2",1},
       {""}, {""}, {""},
-#line 20 "./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
+#line 20 "../src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
       {"CLOCKTEXT2",3},
-#line 17 "./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
       {"CLOCK1",0},
-#line 21 "./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
+#line 21 "../src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
       {"CLOCKTEXT3",4},
       {""}, {""},
-#line 19 "./src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
+#line 19 "../src/ALRPCObjectsImpl/MediaClockFormatMarshaller.gp"
       {"CLOCKTEXT1",2}
     };
 

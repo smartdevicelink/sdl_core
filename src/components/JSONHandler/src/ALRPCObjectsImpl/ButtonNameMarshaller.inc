@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/ButtonNameMarshaller.inc ./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/ButtonNameMarshaller.inc ../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp  */
 /* Computed positions: -k'8' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -106,39 +106,39 @@ ButtonName_intHash::getPointer (register const char *str, register unsigned int 
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""},
-#line 17 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"OK",0},
       {""}, {""}, {""},
-#line 20 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 20 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"TUNEUP",3},
       {""},
-#line 18 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"SEEKLEFT",1},
-#line 19 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 19 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"SEEKRIGHT",2},
-#line 23 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 23 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"PRESET_1",6},
-#line 26 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 26 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"PRESET_4",9},
-#line 29 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 29 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"PRESET_7",12},
-#line 21 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 21 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"TUNEDOWN",4},
       {""},
-#line 22 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 22 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"PRESET_0",5},
-#line 25 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 25 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"PRESET_3",8},
-#line 28 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 28 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"PRESET_6",11},
-#line 31 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 31 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"PRESET_9",14},
       {""}, {""},
-#line 24 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 24 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"PRESET_2",7},
-#line 27 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 27 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"PRESET_5",10},
-#line 30 "./src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
+#line 30 "../src/ALRPCObjectsImpl/ButtonNameMarshaller.gp"
       {"PRESET_8",13}
     };
 

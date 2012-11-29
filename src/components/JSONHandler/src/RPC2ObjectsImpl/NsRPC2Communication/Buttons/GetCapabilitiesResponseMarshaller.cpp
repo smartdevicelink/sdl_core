@@ -1,13 +1,14 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/GetCapabilitiesResponse.h"
 #include "../src/ALRPCObjectsImpl/ButtonCapabilitiesMarshaller.h"
+#include "../src/ALRPCObjectsImpl/PresetBankCapabilitiesMarshaller.h"
 #include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/GetCapabilitiesResponseMarshaller.h"
 
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -51,6 +52,8 @@ bool GetCapabilitiesResponseMarshaller::checkIntegrityConst(const GetCapabilitie
     if(i>100)  return false;
   }
 
+  if(s.presetBankCapabilities && (!NsAppLinkRPC::PresetBankCapabilitiesMarshaller::checkIntegrityConst(s.presetBankCapabilities[0])))  return false;
+
   return true;
 }
 
@@ -77,6 +80,8 @@ Json::Value GetCapabilitiesResponseMarshaller::toJSON(const GetCapabilitiesRespo
 
     json["result"]["capabilities"]=j;
   }
+  if(e.presetBankCapabilities)
+    json["result"]["presetBankCapabilities"]=NsAppLinkRPC::PresetBankCapabilitiesMarshaller::toJSON(e.presetBankCapabilities[0]);;
   return json;
 }
 
@@ -111,6 +116,14 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
       while(i--)
         if(!NsAppLinkRPC::ButtonCapabilitiesMarshaller::fromJSON(js["capabilities"][i],c.capabilities[i]))  return false;
       c.capabilities=z;
+    }
+
+    if(c.presetBankCapabilities)  delete c.presetBankCapabilities;
+    c.presetBankCapabilities=0;
+    if(js.isMember("presetBankCapabilities"))
+    {
+      c.presetBankCapabilities=new NsAppLinkRPC::PresetBankCapabilities();
+      if(!NsAppLinkRPC::PresetBankCapabilitiesMarshaller::fromJSON(js["presetBankCapabilities"],c.presetBankCapabilities[0]))  return false;
     }
 
   }

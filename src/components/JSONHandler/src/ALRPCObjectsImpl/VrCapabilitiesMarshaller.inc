@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.inc ./src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.inc ../src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -35,7 +35,7 @@ VrCapabilities_intHash::getPointer (register const char *str, register unsigned 
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 17 "./src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/VrCapabilitiesMarshaller.gp"
       {"Text",0}
     };
 

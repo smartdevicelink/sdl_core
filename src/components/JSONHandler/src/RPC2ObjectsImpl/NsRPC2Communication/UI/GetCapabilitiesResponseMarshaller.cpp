@@ -1,14 +1,15 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetCapabilitiesResponse.h"
 #include "../src/ALRPCObjectsImpl/DisplayCapabilitiesMarshaller.h"
 #include "../src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.h"
+#include "../src/ALRPCObjectsImpl/SoftButtonCapabilitiesMarshaller.h"
 #include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetCapabilitiesResponseMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -54,6 +55,13 @@ bool GetCapabilitiesResponseMarshaller::checkIntegrityConst(const GetCapabilitie
     if(i>100)  return false;
   }
 
+  if(s.softButtonCapabilities)
+  {
+    unsigned int i=s.softButtonCapabilities[0].size();
+    if(i<1)  return false;
+    if(i>100)  return false;
+  }
+
   return true;
 }
 
@@ -80,6 +88,16 @@ Json::Value GetCapabilitiesResponseMarshaller::toJSON(const GetCapabilitiesRespo
       j[i]=NsAppLinkRPC::HmiZoneCapabilitiesMarshaller::toJSON(e.hmiZoneCapabilities[i]);
 
     json["result"]["hmiZoneCapabilities"]=j;
+  }
+  if(e.softButtonCapabilities)
+  {
+    unsigned int i=e.softButtonCapabilities[0].size();
+    Json::Value j=Json::Value(Json::arrayValue);
+    j.resize(i);
+    while(i--)
+      j[i]=NsAppLinkRPC::SoftButtonCapabilitiesMarshaller::toJSON(e.softButtonCapabilities[0][i]);
+
+    json["result"]["softButtonCapabilities"]=j;
   }
   return json;
 }
@@ -118,6 +136,23 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
         if(!NsAppLinkRPC::HmiZoneCapabilitiesMarshaller::fromJSON(js["hmiZoneCapabilities"][i],c.hmiZoneCapabilities[i]))  return false;
       c.hmiZoneCapabilities=z;
     }
+
+    if(c.softButtonCapabilities)  delete c.softButtonCapabilities;
+    c.softButtonCapabilities=0;
+    if(js.isMember("softButtonCapabilities"))
+    {
+      if(!js["softButtonCapabilities"].isArray()) return false;
+      unsigned int i=js["softButtonCapabilities"].size();
+      if(i<1)  return false;
+      if(i>100)  return false;
+
+      c.softButtonCapabilities=new std::vector<NsAppLinkRPC::SoftButtonCapabilities>();
+      c.softButtonCapabilities->resize(js["softButtonCapabilities"].size());
+
+      while(i--)
+        if(!NsAppLinkRPC::SoftButtonCapabilitiesMarshaller::fromJSON(js["softButtonCapabilities"][i],c.softButtonCapabilities[0][i]))  return false;
+    }
+
 
   }
   catch(...)

@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/ButtonPressModeMarshaller.inc ./src/ALRPCObjectsImpl/ButtonPressModeMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/ButtonPressModeMarshaller.inc ../src/ALRPCObjectsImpl/ButtonPressModeMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -35,9 +35,9 @@ ButtonPressMode_intHash::getPointer (register const char *str, register unsigned
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 17 "./src/ALRPCObjectsImpl/ButtonPressModeMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/ButtonPressModeMarshaller.gp"
       {"LONG",0},
-#line 18 "./src/ALRPCObjectsImpl/ButtonPressModeMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/ButtonPressModeMarshaller.gp"
       {"SHORT",1}
     };
 

@@ -9,8 +9,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -36,6 +36,8 @@ namespace NsRPC2Communication
       const std::string& get_appName(void);
 
       const NsAppLinkRPC::AppInterfaceUnregisteredReason* get_reason(void);
+      int get_appId(void);
+
 
 // setters
 /// appName <= 100
@@ -45,6 +47,8 @@ namespace NsRPC2Communication
 
       void reset_reason(void);
 
+      bool set_appId(int appId);
+
 
     private:
 
@@ -52,6 +56,7 @@ namespace NsRPC2Communication
 
       std::string appName;
       NsAppLinkRPC::AppInterfaceUnregisteredReason* reason;
+      int appId;
 
     };
   }

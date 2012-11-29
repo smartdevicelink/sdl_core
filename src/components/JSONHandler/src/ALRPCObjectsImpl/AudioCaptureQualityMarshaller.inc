@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.inc ./src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.inc ../src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -35,9 +35,9 @@ AudioCaptureQuality_intHash::getPointer (register const char *str, register unsi
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 17 "./src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.gp"
       {"8KHZ",0},
-#line 18 "./src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/AudioCaptureQualityMarshaller.gp"
       {"16KHZ",1}
     };
 

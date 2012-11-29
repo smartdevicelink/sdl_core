@@ -1,13 +1,14 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/AddCommand.h"
 #include "../src/ALRPCObjectsImpl/MenuParamsMarshaller.h"
+#include "../src/ALRPCObjectsImpl/ImageMarshaller.h"
 #include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AddCommandMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -49,6 +50,8 @@ bool AddCommandMarshaller::checkIntegrityConst(const AddCommand& s)
 
   if(!NsAppLinkRPC::MenuParamsMarshaller::checkIntegrityConst(s.menuParams))  return false;
 
+  if(s.cmdIcon && (!NsAppLinkRPC::ImageMarshaller::checkIntegrityConst(s.cmdIcon[0])))  return false;
+
   return true;
 }
 
@@ -66,6 +69,9 @@ Json::Value AddCommandMarshaller::toJSON(const AddCommand& e)
   json["params"]=Json::Value(Json::objectValue);
   json["params"]["cmdId"]=Json::Value(e.cmdId);;
   json["params"]["menuParams"]=NsAppLinkRPC::MenuParamsMarshaller::toJSON(e.menuParams);;
+  if(e.cmdIcon)
+    json["params"]["cmdIcon"]=NsAppLinkRPC::ImageMarshaller::toJSON(e.cmdIcon[0]);;
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -90,6 +96,17 @@ bool AddCommandMarshaller::fromJSON(const Json::Value& json,AddCommand& c)
 
     if(!js.isMember("menuParams") || !NsAppLinkRPC::MenuParamsMarshaller::fromJSON(js["menuParams"],c.menuParams))  return false;
 
+    if(c.cmdIcon)  delete c.cmdIcon;
+    c.cmdIcon=0;
+    if(js.isMember("cmdIcon"))
+    {
+      c.cmdIcon=new NsAppLinkRPC::Image();
+      if(!NsAppLinkRPC::ImageMarshaller::fromJSON(js["cmdIcon"],c.cmdIcon[0]))  return false;
+    }
+
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

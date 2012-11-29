@@ -9,8 +9,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -36,6 +36,8 @@ namespace NsRPC2Communication
       const NsAppLinkRPC::StartTime* get_startTime(void);
       const NsAppLinkRPC::UpdateMode& get_updateMode(void);
 
+      int get_appId(void);
+
 
 // setters
       bool set_startTime(const NsAppLinkRPC::StartTime& startTime);
@@ -44,6 +46,8 @@ namespace NsRPC2Communication
 
       bool set_updateMode(const NsAppLinkRPC::UpdateMode& updateMode);
 
+      bool set_appId(int appId);
+
 
     private:
 
@@ -51,6 +55,7 @@ namespace NsRPC2Communication
 
       NsAppLinkRPC::StartTime* startTime;
       NsAppLinkRPC::UpdateMode updateMode;
+      int appId;
 
     };
   }

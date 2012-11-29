@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -16,17 +16,21 @@ OnButtonPress& OnButtonPress::operator =(const OnButtonPress& c)
 {
   name=c.name;
   mode=c.mode;
+  if(customButtonName)  delete customButtonName;
+  customButtonName= c.customButtonName ? new std::string(c.customButtonName[0]) : 0;
   return *this;
 }
 
 
 OnButtonPress::~OnButtonPress(void)
 {
+  if(customButtonName)  delete customButtonName;
 }
 
 
 OnButtonPress::OnButtonPress(void) : 
-  RPC2Notification(Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS)
+  RPC2Notification(Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS),
+  customButtonName(0)
 {
 }
 
@@ -57,6 +61,24 @@ bool OnButtonPress::set_mode(const NsAppLinkRPC::ButtonPressMode& mode_)
 {
   mode=mode_;
   return true;
+}
+
+const std::string* OnButtonPress::get_customButtonName(void)
+{
+  return customButtonName;
+}
+
+bool OnButtonPress::set_customButtonName(const std::string& customButtonName_)
+{
+  if(customButtonName)  delete customButtonName;
+  customButtonName=new std::string(customButtonName_);
+  return true;
+}
+
+void OnButtonPress::reset_customButtonName(void)
+{
+  if(customButtonName)  delete customButtonName;
+  customButtonName=0;
 }
 
 bool OnButtonPress::checkIntegrity(void)

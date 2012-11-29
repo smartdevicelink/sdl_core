@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/CharacterSetMarshaller.inc ./src/ALRPCObjectsImpl/CharacterSetMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/CharacterSetMarshaller.inc ../src/ALRPCObjectsImpl/CharacterSetMarshaller.gp  */
 /* Computed positions: -k'4-5' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -90,14 +90,14 @@ CharacterSet_intHash::getPointer (register const char *str, register unsigned in
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 19 "./src/ALRPCObjectsImpl/CharacterSetMarshaller.gp"
+#line 19 "../src/ALRPCObjectsImpl/CharacterSetMarshaller.gp"
       {"CID1SET",2},
-#line 18 "./src/ALRPCObjectsImpl/CharacterSetMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/CharacterSetMarshaller.gp"
       {"TYPE5SET",1},
       {""}, {""}, {""},
-#line 20 "./src/ALRPCObjectsImpl/CharacterSetMarshaller.gp"
+#line 20 "../src/ALRPCObjectsImpl/CharacterSetMarshaller.gp"
       {"CID2SET",3},
-#line 17 "./src/ALRPCObjectsImpl/CharacterSetMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/CharacterSetMarshaller.gp"
       {"TYPE2SET",0}
     };
 

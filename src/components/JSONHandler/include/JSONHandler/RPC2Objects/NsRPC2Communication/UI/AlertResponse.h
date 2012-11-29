@@ -7,8 +7,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Nov 20 13:32:23 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -30,11 +30,21 @@ namespace NsRPC2Communication
     
       bool checkIntegrity(void);
     
+// getters
+      const unsigned int* get_tryAgainTime(void);
+
+// setters
+/// tryAgainTime <= 2000000000
+      bool set_tryAgainTime(const unsigned int& tryAgainTime);
+
+      void reset_tryAgainTime(void);
+
 
     private:
 
       friend class AlertResponseMarshaller;
 
+      unsigned int* tryAgainTime;
 
     };
   }
