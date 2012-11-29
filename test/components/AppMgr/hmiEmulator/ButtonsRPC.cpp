@@ -71,12 +71,37 @@ RPC(address, port, std::string("Buttons"))
   }
 
   /**
-   * \brief Callback function which is called by JSONRPC2Handler
-   *  when new RPC2Bus Json message is received from HMI.
+   * \brief Callback function which is called upon a new message from mobile side arrival
    * \param command RPC2Bus Json message
    */
-  void ButtonsRPC::onCommandReceivedCallback(NsRPC2Communication::RPC2Command *command)
+  void ButtonsRPC::messageReceivedFromDeviceCallback(NsRPC2Communication::RPC2Command *msg)
   {
+      if(!msg)
+      {
+          LOG4CPLUS_ERROR_EXT(mLogger, "null-command!" );
+          return;
+      }
+
+      ResourceContainer& rc = ResourceContainer::getInstance();
+      switch(msg->getMethod())
+      {
+          case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIES:
+          {
+              LOG4CPLUS_INFO_EXT(mLogger, " A GetButtonCapabilities request has been income");
+              NsRPC2Communication::Buttons::GetCapabilities * btnCaps = (NsRPC2Communication::Buttons::GetCapabilities*)msg;
+              NsRPC2Communication::Buttons::GetCapabilitiesResponse * response = new NsRPC2Communication::Buttons::GetCapabilitiesResponse;
+              response->set_capabilities(rc.getButtonCapabilities());
+              response->setId(btnCaps->getId());
+              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              sendRPC2MessageToMobileSide(response);
+
+              return;
+          }
+          case NsRPC2Communication::Marshaller::METHOD_INVALID:
+          default:
+              LOG4CPLUS_ERROR_EXT(mLogger, " Not Buttons RPC message " << msg->getMethod() << " has been received!");
+      }
+
   }
 
 } /* namespace NsHMIEmulator */

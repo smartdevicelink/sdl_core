@@ -8,12 +8,13 @@
 #include "mb_controller.hpp"
 #include "CMessageBroker.hpp"
 #include "LoggerHelper.hpp"
-#include "JSONHandler/IRPC2CommandsObserver.h"
+#include "ResourceContainer.h"
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Request.h"
 #include "JSONHandler/RPC2Objects/Marshaller.h"
+#include "JSONHandler/ALRPCObjects/Result.h"
 
 /**
  * \namespace NsHMIEmulator
@@ -25,7 +26,7 @@ namespace NsHMIEmulator
     * \class RPC
     * \brief MessageBroker Controller.
     */
-    class RPC : public NsMessageBroker::CMessageBrokerController, public IRPC2CommandsObserver
+    class RPC : public NsMessageBroker::CMessageBrokerController
     {
 
     public:
@@ -61,11 +62,16 @@ namespace NsHMIEmulator
         virtual void processResponse(std::string method, Json::Value& root);
 
         /**
-         * \brief Callback function which is called by JSONRPC2Handler
-         *  when new RPC2Bus Json message is received from HMI.
+         * \brief Callback function which is called upon a new message from mobile side arrival
          * \param command RPC2Bus Json message
          */
-        virtual void onCommandReceivedCallback( NsRPC2Communication::RPC2Command * command ) = 0;
+        virtual void messageReceivedFromDeviceCallback( NsRPC2Communication::RPC2Command * command ) = 0;
+
+        /**
+         * \brief send a message to a mobile side via applinkcore
+         * \param command Pointer to base class of AppLink Json object
+         */
+        virtual void sendRPC2MessageToMobileSide(NsRPC2Communication::RPC2Command * command);
 
     protected:
         /**
