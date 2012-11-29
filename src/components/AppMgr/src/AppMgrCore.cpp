@@ -1242,11 +1242,18 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnDriverDistraction UI notification has been invoked");
                 NsRPC2Communication::UI::OnDriverDistraction* object = (NsRPC2Communication::UI::OnDriverDistraction*)msg;
-
+                Application* app = AppMgrRegistry::getInstance().getActiveItem();
+                if(!app)
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "No currently active application found");
+                    return;
+                }
+                unsigned char sessionID = app->getSessionID();
+                unsigned int connectionId = app->getConnectionID();
                 NsAppLinkRPC::OnDriverDistraction* event = new NsAppLinkRPC::OnDriverDistraction();
                 event->set_state(object->get_state());
 
-                MobileHandler::getInstance().sendRPCMessage(event, 0, 1);//0-temp! Specify unsigned int connectionID instead!!!! 1-also temp! Just no way to deduct an app here
+                MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONSYSTEMCONTEXT:
