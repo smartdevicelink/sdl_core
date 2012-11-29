@@ -93,13 +93,17 @@ namespace NsConnectionHandler
     int CConnectionHandler::keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
                                            unsigned char sessionId)
     {
-        return 0;
+        int key = connectionHandle|(sessionId << 16);
+        LOG4CPLUS_INFO( mLogger, "Key for ConnectionHandle:" << connectionHandle << " Session:" << sessionId << "is:" << key );
+        return key;
     }
     
     void CConnectionHandler::pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle, 
                                            unsigned char & sessionId)
     {
-
+        connectionHandle = key & 0xFF00FFFF;
+        sessionId = key >> 16;
+        LOG4CPLUS_INFO( mLogger, "ConnectionHandle:" << connectionHandle << " Session:" << sessionId << " for key:" << key );
     }
 
 }/* namespace NsConnectionHandler */
