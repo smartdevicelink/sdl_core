@@ -1,4 +1,5 @@
 #include "RPC.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/OnReady.h"
 
 namespace NsHMIEmulator
 {
@@ -12,6 +13,9 @@ namespace NsHMIEmulator
     RPC::RPC(const std::string &address, unsigned short port, const std::string &name)
         :CMessageBrokerController(address, port, name)
     {
+        ResourceContainer::getInstance(); //fill-in all container values before sending OnReady message;
+        NsRPC2Communication::UI::OnReady* ready = new NsRPC2Communication::UI::OnReady;
+        sendRPC2MessageToMobileSide(ready);
     }
 
     /**
