@@ -20,21 +20,31 @@ MFT.ApplinkController = Em.Object.create({
 	
 	},
 	
+	/** 
+	 * List of Applink application models
+	 *
+	 * @type object
+	 */
+	applicationModels: {
+		0:	'ApplinkModel',
+		1:	'ApplinkNonMediaModel'
+	},
+	
 	/**
 	 * Register application
 	 * @desc ...
 	 *
 	 * @param applicationId: Number
-	 * @param applicationType: ?
+	 * @param applicationType: Number
 	 */
 	registerApplication: function( applicationId, applicationType ) {
 		if ( this.registeredApps[ applicationId ] ) {
-			Em.Logger.error('Application ['+ applicationId +'] already registered!');
+			//Em.Logger.error('Application ['+ applicationId +'] already registered!');
 			return;
 		}
 		
 		this.registeredApps[ applicationId ] = applicationType;
-		Em.Logger.log('Application ['+ applicationId +'] registered!');
+		//Em.Logger.log('Application ['+ applicationId +'] registered!');
 	},
 	
 	/**
@@ -48,13 +58,13 @@ MFT.ApplinkController = Em.Object.create({
 	},
 	
 	/**
-	 * Get application type
+	 * Get application model
 	 * @desc ...
 	 *
 	 * @param applicationId: Number
-	 * @return ?
+	 * @return Object Model
 	 */
-	getApplicationType: function( applicationId ) {
-		return this.registeredApps[ applicationId ];
+	getApplicationModel: function( applicationId ) {
+		return MFT[ this.applicationModels[ this.registeredApps[ applicationId ] ] ];
 	}
 });

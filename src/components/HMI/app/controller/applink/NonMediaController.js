@@ -13,6 +13,6 @@
 MFT.NonMediaController = Em.Object.create({
 	
 	// Model binding
-	modelBinding: 'MFT.NonMedia'
+	modelBinding: 'MFT.ApplinkNonMediaModel'
 
 });
