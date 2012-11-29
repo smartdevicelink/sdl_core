@@ -77,13 +77,54 @@ RPC(address, port, std::string("VR"))
    * \brief Callback function which is called upon a new message from mobile side arrival
    * \param command RPC2Bus Json message
    */
-  void VRRPC::messageReceivedFromDeviceCallback(NsRPC2Communication::RPC2Command *command)
+  void VRRPC::messageReceivedFromDeviceCallback(NsRPC2Communication::RPC2Command *msg)
   {
-      if(!command)
+      if(!msg)
       {
           LOG4CPLUS_ERROR_EXT(mLogger, "null-command!" );
           return;
       }
+
+      ResourceContainer& rc = ResourceContainer::getInstance();
+      switch(msg->getMethod())
+      {
+          case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__GETCAPABILITIES:
+          {
+              LOG4CPLUS_INFO_EXT(mLogger, " A GetVRCapabilities request has been income");
+              NsRPC2Communication::VR::GetCapabilities * vrCaps = (NsRPC2Communication::VR::GetCapabilities*)msg;
+              NsRPC2Communication::VR::GetCapabilitiesResponse * response = new NsRPC2Communication::VR::GetCapabilitiesResponse;
+              response->set_capabilities(rc.getVrCapabilities());
+              response->setId(vrCaps->getId());
+              sendRPC2MessageToMobileSide(response);
+              return;
+          }
+          case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMAND:
+          {
+              LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand VR request has been income");
+              NsRPC2Communication::VR::AddCommand* object = (NsRPC2Communication::VR::AddCommand*)msg;
+              rc.addVrCommand( object->get_cmdId(), object->get_vrCommands() );
+              NsRPC2Communication::VR::AddCommandResponse* response = new NsRPC2Communication::VR::AddCommandResponse;
+              response->setId(object->getId());
+              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              sendRPC2MessageToMobileSide(response);
+              return;
+          }
+          case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMANDRESPONSE:
+          {
+              LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand VR request has been income");
+              NsRPC2Communication::VR::DeleteCommand* object = (NsRPC2Communication::VR::DeleteCommand*)msg;
+              rc.removeVrCommand(object->get_cmdId());
+              NsRPC2Communication::VR::DeleteCommandResponse* response = new NsRPC2Communication::VR::DeleteCommandResponse;
+              response->setId(object->getId());
+              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              sendRPC2MessageToMobileSide(response);
+              return;
+          }
+          case NsRPC2Communication::Marshaller::METHOD_INVALID:
+          default:
+              LOG4CPLUS_ERROR_EXT(mLogger, " Not VR RPC message " << msg->getMethod() << " has been received!");
+      }
+
   }
 
 } /* namespace NsHMIEmulator */
