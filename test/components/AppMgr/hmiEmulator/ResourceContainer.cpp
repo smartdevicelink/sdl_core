@@ -77,6 +77,65 @@ namespace NsHMIEmulator
     }
 
     /**
+     * \brief add a command to a list of registered commands
+     * \param id
+     * \param menuParams
+     */
+    void ResourceContainer::addCommand(const unsigned int &id, const NsAppLinkRPC::MenuParams &menuParams)
+    {
+        mCommands.insert(Command(id, menuParams));
+    }
+
+    /**
+     * \brief remove a command from a list of registered commands
+     * \param id
+     */
+    void ResourceContainer::removeCommand(const unsigned int &id)
+    {
+        mCommands.erase(id);
+    }
+
+    /**
+     * \brief finds a command in a registered commands list
+     * \param id
+     * \return command
+     */
+    const Command &ResourceContainer::findCommand(const unsigned int &id)
+    {
+        return mCommands.find(id);
+    }
+
+    /**
+     * \brief add a menu item to a list of registered menu items
+     * \param id
+     * \param name
+     * \param position
+     */
+    void ResourceContainer::addMenuItem(const unsigned int &id, const std::string &name, unsigned int position)
+    {
+        mMenuItems.insert(MenuItem(id, MenuItemBase(name, position)));
+    }
+
+    /**
+     * \brief remove a menu item from a list of registered menu items
+     * \param id
+     */
+    void ResourceContainer::removeMenuItem(const unsigned int &id)
+    {
+        mMenuItems.erase(id);
+    }
+
+    /**
+     * \brief finds a menu item in a registered menu items list
+     * \param id
+     * \return menu item
+     */
+    const MenuItem &ResourceContainer::findMenuItem(const unsigned int &id)
+    {
+        return mMenuItems.find(id);
+    }
+
+    /**
      * \brief gets button capabilities
      * \return button capabilities
      */
@@ -155,6 +214,24 @@ namespace NsHMIEmulator
     const TimeoutPrompt &ResourceContainer::getTimeoutPrompt() const
     {
         return mTimeoutPrompt;
+    }
+
+    /**
+     * \brief sets global properties
+     * \param properties global properties
+     */
+    void ResourceContainer::setGlobalProperties(const GlobalProperties &properties)
+    {
+        mGlobalProperties = properties;
+    }
+
+    /**
+     * \brief gets global properties
+     * \return global properties
+     */
+    const GlobalProperties &ResourceContainer::getGlobalProperties() const
+    {
+        return mGlobalProperties;
     }
 
     /**

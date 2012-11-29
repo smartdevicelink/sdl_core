@@ -5,6 +5,7 @@
 #include <string>
 #include <tuple>
 #include <map>
+#include <vector>
 
 #include "JSONHandler/ALRPCObjects/ButtonCapabilities.h"
 #include "JSONHandler/ALRPCObjects/DisplayCapabilities.h"
@@ -13,6 +14,7 @@
 #include "JSONHandler/ALRPCObjects/SpeechCapabilities.h"
 #include "JSONHandler/ALRPCObjects/GlobalProperty.h"
 #include "JSONHandler/ALRPCObjects/TTSChunk.h"
+#include "JSONHandler/ALRPCObjects/MenuParams.h"
 
 /**
  * \namespace NsHMIEmulator
@@ -20,8 +22,14 @@
  */
 namespace NsHMIEmulator
 {
+    /**
+     * \brief RegisteredApplications container
+     */
     typedef std::map<std::string, Application*> RegisteredApplications;
 
+    /**
+     * \brief RegisteredApplications container item
+     */
     typedef std::pair<std::string, Application*> RegisteredApplication;
 
     /**
@@ -55,6 +63,36 @@ namespace NsHMIEmulator
     typedef std::vector<NsAppLinkRPC::TTSChunk> TimeoutPrompt;
 
     /**
+     * \brief GlobalProperties container
+     */
+    typedef std::vector<NsAppLinkRPC::GlobalProperty> GlobalProperties;
+
+    /**
+     * \brief A command_id - menu_params mapping (command id is a key)
+     */
+    typedef std::map<unsigned int, NsAppLinkRPC::MenuParams> Commands;
+
+    /**
+     * \brief A command_id - menu_params mapping item (command id is a key)
+     */
+    typedef std::pair<unsigned int, NsAppLinkRPC::MenuParams> Command;
+
+    /**
+     * \brief A menu item name - menu item position mapping item
+     */
+    typedef std::pair<std::string, unsigned int> MenuItemBase;
+
+    /**
+     * \brief A menu item id - MenuItemBase mapping
+     */
+    typedef std::map<unsigned int, MenuItemBase> Menu;
+
+    /**
+     * \brief A menu item id - MenuItemBase mapping item
+     */
+    typedef std::pair<unsigned int, MenuItemBase> MenuItem;
+
+    /**
      * \brief The ResourceContainer class acts as a container of all HMI
      */
     class ResourceContainer
@@ -80,7 +118,7 @@ namespace NsHMIEmulator
         void removeApplication(const std::string& name);
 
         /**
-         * \brief fings an app in a registered apps list
+         * \brief finds an app in a registered apps list
          * \param name
          * \return application
          */
@@ -98,6 +136,47 @@ namespace NsHMIEmulator
          * \return an active app
          */
         Application* getActiveApplication();
+
+        /**
+         * \brief add a command to a list of registered commands
+         * \param id
+         * \param menuParams
+         */
+        void addCommand(const unsigned int& id, const NsAppLinkRPC::MenuParams& menuParams);
+
+        /**
+         * \brief remove a command from a list of registered commands
+         * \param id
+         */
+        void removeCommand(const unsigned int& id);
+
+        /**
+         * \brief finds a command in a registered commands list
+         * \param id
+         * \return command
+         */
+        const Command& findCommand(const unsigned int& id);
+
+        /**
+         * \brief add a menu item to a list of registered menu items
+         * \param id
+         * \param name
+         * \param position
+         */
+        void addMenuItem(const unsigned int& id, const std::string& name, unsigned int position=-1);
+
+        /**
+         * \brief remove a menu item from a list of registered menu items
+         * \param id
+         */
+        void removeMenuItem(const unsigned int& id);
+
+        /**
+         * \brief finds a menu item in a registered menu items list
+         * \param id
+         * \return menu item
+         */
+        const MenuItem& findMenuItem(const unsigned int& id);
 
         /**
          * \brief gets button capabilities
@@ -153,6 +232,18 @@ namespace NsHMIEmulator
          */
         const TimeoutPrompt& getTimeoutPrompt() const;
 
+        /**
+         * \brief sets global properties
+         * \param properties global properties
+         */
+        void setGlobalProperties(const GlobalProperties& properties);
+
+        /**
+         * \brief gets global properties
+         * \return global properties
+         */
+        const GlobalProperties& getGlobalProperties() const;
+
     private:
         /**
          * \brief Default class constructor
@@ -172,6 +263,9 @@ namespace NsHMIEmulator
         SpeechCapabilities mSpeechCapabilities;
         HelpPrompt mHelpPrompt;
         TimeoutPrompt mTimeoutPrompt;
+        GlobalProperties mGlobalProperties;
+        Commands mCommands;
+        Menu mMenuItems;
 
         std::string mActiveApplication;
     };
