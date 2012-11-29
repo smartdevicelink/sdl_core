@@ -130,9 +130,14 @@ namespace NsHMIEmulator
      * \param id
      * \return menu item
      */
-    const MenuItem &ResourceContainer::findMenuItem(const unsigned int &id)
+    MenuItemBase ResourceContainer::findMenuItem(const unsigned int &id)
     {
-        return mMenuItems.find(id);
+        Menu::const_iterator it = mMenuItems.find(id);
+        if(it != mMenuItems.end())
+        {
+            return it->second;
+        }
+        return MenuItemBase; //an empty container
     }
 
     /**
@@ -161,10 +166,10 @@ namespace NsHMIEmulator
      */
     ChoiceSet ResourceContainer::findInteractionChoiceSet(const unsigned int &id)
     {
-        const InteractionChoiceSetItem& item = mInteractionChoiceSet.find(id);
-        if(item != mInteractionChoiceSet.end())
+        InteractionChoiceSet::const_iterator it = mInteractionChoiceSet.find(id);
+        if(it != mInteractionChoiceSet.end())
         {
-            return item.second;
+            return it->second;
         }
         return ChoiceSet; //an empty container
     }

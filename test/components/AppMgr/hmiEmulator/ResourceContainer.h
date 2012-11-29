@@ -192,7 +192,7 @@ namespace NsHMIEmulator
          * \param id
          * \return menu item
          */
-        const MenuItem& findMenuItem(const unsigned int& id);
+        MenuItemBase findMenuItem(const unsigned int& id);
 
         /**
          * \brief add an interaction choice set to a list of registered interaction choice sets
