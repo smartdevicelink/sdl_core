@@ -221,7 +221,7 @@ RPC(address, port, std::string("UI"))
           {
               LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand UI request has been income");
               NsRPC2Communication::UI::AddCommand* object = (NsRPC2Communication::UI::AddCommand*)msg;
-              rc.addCommand( object->get_cmdId(), object->get_menuParams() );
+              rc.addUiCommand( object->get_cmdId(), object->get_menuParams() );
               NsRPC2Communication::UI::AddCommandResponse* response = new NsRPC2Communication::UI::AddCommandResponse;
               response->setId(object->getId());
               response->setResult(NsAppLinkRPC::Result::SUCCESS);
@@ -232,7 +232,7 @@ RPC(address, port, std::string("UI"))
           {
               LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand UI request has been income");
               NsRPC2Communication::UI::DeleteCommand* object = (NsRPC2Communication::UI::DeleteCommand*)msg;
-              rc.removeCommand(object->get_cmdId());
+              rc.removeUiCommand(object->get_cmdId());
               NsRPC2Communication::UI::DeleteCommandResponse* response = new NsRPC2Communication::UI::DeleteCommandResponse;
               response->setId(object->getId());
               response->setResult(NsAppLinkRPC::Result::SUCCESS);
