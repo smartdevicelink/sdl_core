@@ -52,6 +52,16 @@ void JSONHandler::sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, un
     } 
 }
 /*End of methods for IRPCMessagesObserver*/
+void JSONHandler::setProtocolHandler( NsProtocolHandler::ProtocolHandler * protocolHandler )
+{
+    if ( !protocolHandler )
+    {
+        LOG4CPLUS_ERROR(mLogger, "Invalid (null) pointer to ProtocolHandler.");
+        return;
+    }
+    mProtocolHandler = protocolHandler;
+}
+
 void JSONHandler::onDataReceivedCallback( const NsProtocolHandler::AppLinkRawMessage * message )
 {
     if ( !message )

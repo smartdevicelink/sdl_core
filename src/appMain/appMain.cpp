@@ -19,6 +19,7 @@
 
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"
+#include "ConnectionHandler/CConnectionHandler.hpp"
 
 #include "AppMgr/AppMgr.h"
 #include "AppMgr/AppMgrCore.h"
@@ -113,7 +114,15 @@ int main(int argc, char** argv)
 
     NsProtocolHandler::ProtocolHandler* pProtocolHandler = new NsProtocolHandler::ProtocolHandler(transportManager);
 
-//    jsonHandler.setProtocolHandler(pProtocolHandler);
+    pProtocolHandler -> setProtocolObserver( &jsonHandler );
+
+    transportManager -> addDataListener( pProtocolHandler );
+    
+    jsonHandler.setProtocolHandler(pProtocolHandler);
+
+    NsConnectionHandler::CConnectionHandler * connectionHandler = NsConnectionHandler::CConnectionHandler::getInstance();
+
+    pProtocolHandler -> setSessionObserver( connectionHandler );
 
     NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
 

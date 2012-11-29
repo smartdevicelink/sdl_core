@@ -2,6 +2,7 @@ set(LIBRARIES
   AppMgr
   JSONHandler
   ProtocolHandler
+  connectionHandler
   TransportManager
   MessageBroker
   MessageBrokerClient
@@ -21,6 +22,7 @@ include_directories (
   ../components/AppMgr/include
   ../components/TransportManager/include
   ../components/Utils/include/
+  ../components/ConnectionHandler/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/logger/include
   ../thirdPartyLibs/logger/log4cplus-1.1.0/include

@@ -15,6 +15,7 @@ ProtocolHandler::ProtocolHandler( NsAppLink::NsTransportManager::ITransportManag
 ,mSessionObserver( 0 )
 ,mTransportManager( transportManager )
 {
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     pthread_create( &mHandleMessagesFromMobileApp, NULL, &ProtocolHandler::handleMessagesFromMobileApp, (void *)this );
     pthread_create( &mHandleMessagesToMobileApp, NULL, &ProtocolHandler::handleMessagesToMobileApp, (void *)this );
 }
@@ -30,6 +31,7 @@ ProtocolHandler::~ProtocolHandler()
 
 void ProtocolHandler::setProtocolObserver( IProtocolObserver * observer )
 {
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     if ( !observer )
     {
         LOG4CPLUS_ERROR(mLogger, "Invalid (NULL) pointer to IProtocolObserver.");
@@ -165,6 +167,7 @@ void ProtocolHandler::sendStartSessionNAck( NsAppLink::NsTransportManager::tConn
 
 void ProtocolHandler::sendData(const AppLinkRawMessage * message)
 {
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     if ( !message )
     {
         LOG4CPLUS_ERROR(mLogger, "Invalid message for sending to mobile app is received.");
@@ -176,6 +179,7 @@ void ProtocolHandler::sendData(const AppLinkRawMessage * message)
 void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
     const uint8_t * data, size_t dataSize)
 {
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     if (connectionHandle && dataSize > 0 && data )
     {
         IncomingMessage message;
@@ -193,6 +197,7 @@ void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnection
 RESULT_CODE ProtocolHandler::sendFrame( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
         const ProtocolPacket & packet )
 {
+    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     if ( !packet.getPacket() )
     {
         LOG4CPLUS_ERROR(mLogger, "Failed to create packet.");
@@ -479,14 +484,28 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager
 
         unsigned char currentSessionID = packet -> getSessionId();
 
-        mSessionObserver -> onSessionEndedCallback( connectionHandle, currentSessionID );
+        unsigned int hashCode = 0;
+        if ( packet -> getVersion() == 2 )
+        {
+            hashCode = packet -> getMessageId();
+        }
+
+        int sesionHashCode = mSessionObserver -> onSessionEndedCallback( connectionHandle, currentSessionID, hashCode );
+        if ( -1 != sesionHashCode )
+        {
+            sendEndSessionAck(connectionHandle, currentSessionID, sesionHashCode);            
+        }
     }
 
     if (packet -> getFrameData() == FRAME_DATA_START_SESSION)
     {
         LOG4CPLUS_INFO(mLogger, "handleControlMessage() - FRAME_DATA_START_SESSION");
 
-        mSessionObserver -> onSessionStartedCallback( connectionHandle );
+        int sessionId = mSessionObserver -> onSessionStartedCallback( connectionHandle );
+        if ( -1 != sessionId )
+        {
+            sendStartSessionAck(connectionHandle, sessionId, mSessionObserver -> keyFromPair(connectionHandle, sessionId));
+        }
     }
 
     return RESULT_OK;
