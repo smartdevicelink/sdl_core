@@ -9,10 +9,14 @@
 #ifndef CONNECTIONHANDLER_H 
 #define CONNECTIONHANDLER_H 
 
+#include <map>
+
 #include "Logger.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 #include "TransportManager/SDeviceInfo.hpp"
 #include "ProtocolHandler/ISessionObserver.h"
+#include "ConnectionHandler/IConnectionHandlerObserver.hpp"
+#include "ConnectionHandler/CDevice.hpp"
 
 /**
  * \namespace NsConnectionHandler
@@ -37,6 +41,13 @@ namespace NsConnectionHandler
          * \brief Destructor
          */
         ~CConnectionHandler();
+
+        /**
+         * \brief Sets observer pointer for ConnectionHandler.
+         * \param observer Pointer to observer object.
+         **/
+        void setConnectionHandlerObserver(IConnectionHandlerObserver * observer);
+
         /**
          * \brief Available devices list updated.
          *
@@ -63,8 +74,7 @@ namespace NsConnectionHandler
          **/
         virtual void onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection);
 
-        virtual void onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
-                                               unsigned char sessionId);
+        virtual void onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle);
 
         virtual void onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
                                                unsigned char sessionId);
@@ -85,6 +95,16 @@ namespace NsConnectionHandler
          * \brief Copy constructor
          */
         CConnectionHandler(const CConnectionHandler&);
+
+        /**
+         * \brief Pointer to observer
+         */
+        IConnectionHandlerObserver* mpConnectionHandlerObserver;
+
+        /**
+         * \brief List of devices
+         */
+        tDeviceList mDeviceList;
 
         /**
           *\brief For logging.
