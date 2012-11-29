@@ -67,9 +67,10 @@ namespace NsConnectionHandler
         tDeviceListIterator it = mDeviceList.find(ConnectedDevice.mDeviceHandle);
         if (it == mDeviceList.end())
         {
-            LOG4CPLUS_INFO( mLogger, "Unknown device!");
+            LOG4CPLUS_ERROR( mLogger, "Unknown device!");
         }
-        ConnectedDevice.mDeviceHandle;
+        LOG4CPLUS_INFO( mLogger, "Add Connection:" << Connection << "to the list." );
+        mConnectionList.insert(tConnectionList::value_type(Connection, CConnection(Connection, ConnectedDevice.mDeviceHandle)));
     }
 
     void CConnectionHandler::onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection)
