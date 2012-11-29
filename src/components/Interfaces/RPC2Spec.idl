@@ -327,6 +327,15 @@ notification OnLanguageChange(
   int appId
 );
 
+GetDeviceList(
+  ->
+  string deviceList [1:100]
+);
+
+notification OnDeviceListUpdated(
+  string deviceList [1:100]
+);
+
 }
 
 
@@ -653,13 +662,18 @@ notification OnAppUnregistered(
 
 interface NsRPC2Communication::VehicleInfo
 {
+version "1.2";
+
+//using AppLinkRPC;
+
+prefix "AppLinkCore.";
  /*
      * @descr Request from ApplinkCore to HMI to get info about the vehicle.
      */ 
 GetVehicleType(
-  ->
-  VehicleType vehicleType // manufacturer, model, year etc of the vehicle.
-);
+    ->
+    VehicleType vehicleType // manufacturer, model, year etc of the vehicle.
+  );
 }
 
 
