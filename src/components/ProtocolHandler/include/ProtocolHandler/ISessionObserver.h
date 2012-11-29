@@ -8,7 +8,8 @@ namespace NsProtocolHandler
     public:
         virtual int onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle) = 0;
         virtual int onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
-                                               unsigned char sessionId) = 0;
+                                               unsigned char sessionId,
+                                               unsigned int hashCode) = 0;
         virtual int keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
                                                unsigned char sessionId) = 0;
         virtual void pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle, 
