@@ -80,7 +80,24 @@ namespace NsConnectionHandler
 
     int CConnectionHandler::onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle)
     {
-        return 0;
+        LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onSessionStartedCallback()" );
+        int newSessionID = -1;
+        tConnectionListIterator it = mConnectionList.find(connectionHandle);
+        if (it == mConnectionList.end())
+        {
+            LOG4CPLUS_ERROR( mLogger, "Unknown connection!");
+        } else
+        {
+            newSessionID = (it->second).addNewSession();
+            if (0 > newSessionID)
+            {
+                LOG4CPLUS_ERROR( mLogger, "Not possible to start session!");
+            } else
+            {
+                LOG4CPLUS_INFO( mLogger, "New session ID:" << newSessionID );
+            }
+        }
+        return newSessionID;
     }
     
     int CConnectionHandler::onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 

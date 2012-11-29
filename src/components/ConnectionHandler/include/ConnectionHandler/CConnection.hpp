@@ -50,13 +50,19 @@ namespace NsConnectionHandler
          * \brief Returns device handle
          * \return DeviceHandle
          */
-         tConnectionHandle getConnectionHandle();
+        tConnectionHandle getConnectionHandle();
 
         /**
          * \brief Returns connection device handle
          * \return ConnectionDeviceHandle
          */
-         tDeviceHandle getConnectionDeviceHandle();
+        tDeviceHandle getConnectionDeviceHandle();
+
+        /**
+         * \brief Adds session to connection
+         * \return sessionID or -1 in case of issues
+         */
+        int addNewSession();
     private:
 
         /**
