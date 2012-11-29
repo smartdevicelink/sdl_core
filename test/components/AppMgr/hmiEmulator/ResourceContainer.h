@@ -19,6 +19,7 @@
 #include "JSONHandler/ALRPCObjects/MediaClockFormat.h"
 #include "JSONHandler/ALRPCObjects/StartTime.h"
 #include "JSONHandler/ALRPCObjects/UpdateMode.h"
+#include "LoggerHelper.hpp"
 
 /**
  * \namespace NsHMIEmulator
@@ -374,6 +375,8 @@ namespace NsHMIEmulator
         NsAppLinkRPC::StartTime mStartTime;
         NsAppLinkRPC::UpdateMode mUpdateMode;
         std::string mActiveApplication;
+
+        static log4cplus::Logger mLogger;
     };
 }
 
