@@ -405,6 +405,10 @@ MFT.MediaController = Em.Object.create({
         }
         FFW.AppLinkCoreClient.ActivateApp();
 
+        /* Show Applink application in media left menu */
+		MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);
+		MFT.MediaController.listDown();
+
     },
 
 	optionsBack: function(){

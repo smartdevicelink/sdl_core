@@ -156,5 +156,20 @@ FFW.VR = FFW.RPCObserver.create({
 			this.client.send(JSONMessage);
 		}
 		
-	}
+	},
+
+	/*
+	 * send notification when command was triggered from VR
+ 	 */	
+	onChoise: function(commandId) {
+		Em.Logger.log("FFW.VR.PerformInteractionResponse");
+
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"UI.OnChoise",
+			"params":	{"choiceID":	commandId}
+		};
+
+		this.client.send(JSONMessage);
+	},
 })

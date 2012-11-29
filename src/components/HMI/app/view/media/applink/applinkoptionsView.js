@@ -41,92 +41,12 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
         content:            'Options'
     }),
 
-    /** 
-      * Function to add new command button to
-      * right menu in applinkView screen
-      */
-    AddSubMenu: function( menuId, menuName ){
 
-        this.listOfOptions.items.push({
-                type:       MFT.Button,
-                params:     {
-                    action:                 'turnOnApplinkSubMenu',
-                    target:                 'MFT.ApplinkMediaController',
-                    menuId:                 menuId,
-                    text:                   menuName,
-                    className:              'rs-item',
-                    templateName:           'arrow'
-                }                                   
-            });
-
-        this.listOfOptions.list.refresh();
-    },
-
-    /** 
-      * Function to add new command button to
-      * Options screen
-      */
-    AddCommand: function( commandId, params){
-
-        this.listOfOptions.items.push({
-                type:       MFT.Button,
-                params:     {
-                    action:                 'onCommand',
-                    target:                 'MFT.ApplinkMediaController',
-                    commandId:              commandId,
-                    text:                   params.menuName,
-                    className:              'rs-item',
-                    templateName:           'text'
-                }                                   
-            });
-
-        this.listOfOptions.list.refresh();
-    },
-
-    DeleteCommand: function(commandId){
-
-        var deleted = false;
-            count = this.listOfOptions.items.length;
-        for(var i = count-1; i >= 0; i--){
-            if(this.listOfOptions.items[i].params.commandId == commandId){
-                this.listOfOptions.deleteItem(i);
-                deleted = true;
-            }
+    showOptionsList: function(){
+        if( MFT.States.media.applink.applinkoptions.active ){
+            this.listOfOptions.items =  MFT.ApplinkModel.optionsCommands.slice();
+            this.listOfOptions.list.refresh();
         }
-        if(!deleted){
-            count = MFT.ApplinkModel.subMenuCommands.length;
-            for(var i = count-1; i >= 0; i--){
-                if(MFT.ApplinkModel.subMenuCommands[i].cmdId == commandId){
-                   MFT.ApplinkModel.subMenuCommands.splice(i, 1);
-                }
-            }
-        }
-
-        this.listOfOptions.list.refresh();
-
-    },
-
-    /** 
-      * Function to delete command button from
-      * right menu in applinkView screen
-      */
-    DeleteSubMenu: function(menuId){
-
-        var deleted = false;
-            count = this.listOfOptions.items.length;
-        for(var i = count-1; i >= 0; i--){
-            if(this.listOfOptions.items[i].params.menuId == menuId){
-                this.listOfOptions.deleteItem(i);
-                deleted = true;
-            }
-        }
-        if(deleted){
-            return "SUCCESS";
-        }else{
-            return "INVALID_DATA";
-        }
-
-        this.listOfOptions.list.refresh();
     },
 
     /**

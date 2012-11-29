@@ -13,6 +13,8 @@
 MFT.ApplinkModel = Em.Object.create({
 	
 	active: false,
+
+	applinkConnectionStatus: true,
 	
 	/** App Player*/
 	init: function(){
@@ -22,17 +24,27 @@ MFT.ApplinkModel = Em.Object.create({
 	/**
 	  * Array of Interaction Choises
 	  */
-	interactionChoises:	new Array(),
+	interactionChoises:			new Array(),
+
+	/**
+	  * Array of commands in ApplinkOptionsView
+	  */
+    optionsCommands:			new Array(),
 
 	/**
 	  * Array of menus in ApplinkOptionsSubMenuView
 	  */
-    subMenuCommands:	new Array(),
+    subMenuCommands:			new Array(),
 
     /**
 	  * Array of commands for VR
 	  */
     voiceRecognitionCommands:	new Array(),
+
+    /**
+	  * Array of active applications
+	  */
+    applicationsList:			new Array(),
 
 	/**
 	  * Timer for Media Clock
@@ -57,6 +69,39 @@ MFT.ApplinkModel = Em.Object.create({
 		appName:		'<App name>',
 		deviceName:		'<Device name>'
 	}),
+	
+
+	onGetAppList: function( params ){
+ 		
+		this.applicationsList.splice(0, this.applicationsList.length);
+		for(var i = 0; i < params.appList.length; i++){
+            this.applicationsList.push({
+                type:       MFT.Button,
+                params:     {
+                    action:         'turnOnApplink',
+                    target:         'MFT.MediaController',
+                    text:           params.appList[i].appName,
+                    className:      'scrollButtons button notpressed',
+                    icon:           params.icon,
+                    templateName:   'rightIcon'
+                }                                   
+            });
+        }
+        MFT.InfoAppsView.ShowAppList();
+
+    },
+
+    /**
+	  * Calls when websocket connection is closed
+      */
+	onApplicationDisconected: function(){
+		this.set('applinkConnectionStatus', false);
+		this.interactionChoises 		= [];
+		this.subMenuCommands 			= [];
+		this.voiceRecognitionCommands	= [];
+		this.applicationsList			= [];
+
+	},
 
 	startTimer: function(){
 		if(!this.pause){

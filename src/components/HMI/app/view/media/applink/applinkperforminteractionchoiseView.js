@@ -47,6 +47,13 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
         }
     }.observes('MFT.States.media.applink.applinkperforminteractionchoise.active'),
 
+    showPerformInteraction: function(){
+        if(MFT.States.media.applink.applinkperforminteractionchoise.active){
+            this.listOfChoises.items =  MFT.ApplinkModel.voiceRecognitionCommands.slice();
+            this.listOfChoises.list.refresh();
+        }
+    },
+
     PerformInteraction: function( interactionChoiceSetIDList ){
 
         var count = this.listOfChoises.items.length;
@@ -69,7 +76,7 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
                                 params:     {
                                     action:                 'onPerformInteractionChoosed',
                                     target:                 'MFT.ApplinkMediaController',
-                                    commandId:              MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID,
+                                    choiceID:               MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID,
                                     text:                   MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
                                     className:              'rs-item',
                                     templateName:           'text'
