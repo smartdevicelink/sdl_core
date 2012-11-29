@@ -48,8 +48,7 @@ namespace NsConnectionHandler
         NsAppLink::NsTransportManager::tDeviceList::const_iterator it_in;
         for (it_in = DeviceList.begin(); it_in != DeviceList.end(); it_in++)
         {
-            tDeviceListIterator it;
-            it = mDeviceList.find((*it_in).mDeviceHandle);
+            tDeviceListIterator it = mDeviceList.find((*it_in).mDeviceHandle);
             if (it == mDeviceList.end())
             {
                 LOG4CPLUS_INFO( mLogger, "Add new device" << (*it_in).mUserFriendlyName << " Handler: " << (*it_in).mDeviceHandle);
@@ -64,7 +63,13 @@ namespace NsConnectionHandler
 
     void CConnectionHandler::onApplicationConnected(const NsAppLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection)
     {
-
+        LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onApplicationConnected()" );
+        tDeviceListIterator it = mDeviceList.find(ConnectedDevice.mDeviceHandle);
+        if (it == mDeviceList.end())
+        {
+            LOG4CPLUS_INFO( mLogger, "Unknown device!");
+        }
+        ConnectedDevice.mDeviceHandle;
     }
 
     void CConnectionHandler::onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection)
@@ -72,25 +77,25 @@ namespace NsConnectionHandler
         
     }
 
-    int onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle)
+    int CConnectionHandler::onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle)
     {
         return 0;
     }
     
-    int onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+    int CConnectionHandler::onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
                                                unsigned char sessionId,
                                                unsigned int hashCode)
     {
         return 0;
     }
     
-    int keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+    int CConnectionHandler::keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
                                            unsigned char sessionId)
     {
         return 0;
     }
     
-    void pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle, 
+    void CConnectionHandler::pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle, 
                                            unsigned char & sessionId)
     {
 

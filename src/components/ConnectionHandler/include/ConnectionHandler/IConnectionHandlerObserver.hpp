@@ -10,6 +10,7 @@
 #include "Logger.hpp"
 
 #include "ConnectionHandler/CDevice.hpp"
+#include "ConnectionHandler/CConnection.hpp"
 
 /**
  * \namespace NsConnectionHandler
@@ -35,10 +36,10 @@ namespace NsConnectionHandler
          **/
         virtual void onDeviceListUpdated(const NsConnectionHandler::tDeviceList & DeviceList) = 0;
 
-        virtual void onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+        virtual void onSessionStartedCallback(NsConnectionHandler::tConnectionHandle connectionHandle, 
                                                unsigned char sessionId) = 0;
 
-        virtual void onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+        virtual void onSessionEndedCallback(NsConnectionHandler::tConnectionHandle connectionHandle, 
                                                unsigned char sessionId) = 0;
 
     protected:

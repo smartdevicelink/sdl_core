@@ -9,6 +9,7 @@
 #define CONNECTION_H 
 
 #include "Logger.hpp"
+#include "ConnectionHandler/CDevice.hpp"
 
 /**
  * \namespace NsConnectionHandler
@@ -38,7 +39,7 @@ namespace NsConnectionHandler
         /**
          * \brief Class constructor
          */
-        CConnection();
+        CConnection(tConnectionHandle aConnectionHandle, tDeviceHandle aConnectionDeviceHandle);
 
         /**
          * \brief Destructor
@@ -50,12 +51,24 @@ namespace NsConnectionHandler
          * \return DeviceHandle
          */
          tConnectionHandle getConnectionHandle();
+
+        /**
+         * \brief Returns connection device handle
+         * \return ConnectionDeviceHandle
+         */
+         tDeviceHandle getConnectionDeviceHandle();
     private:
 
         /**
          * \brief Current connection handle.
          */
           tConnectionHandle mConnectionHandle;
+
+        /**
+         * \brief DeviceHandle of this connection.
+         */
+          tDeviceHandle mConnectionDeviceHandle;
+
         /**
          * \brief Counter to generate session id's.
          */
