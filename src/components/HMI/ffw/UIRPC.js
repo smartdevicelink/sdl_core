@@ -197,17 +197,15 @@ FFW.UI = FFW.RPCObserver.create({
 		}
 
 		if (request.method == "UI.DeleteCommand") {
-			
-			//MFT.ApplinkOptionsView.DeleteCommand(request.params.cmdId);
-			MFT.ApplinkMediaController.onApplinkDeleteCommand(request.params.cmdId);
+
+			MFT.ApplinkMediaController.onApplinkOptionsDeleteCommand(request.params.cmdId);
 
 			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
 
 		if (request.method == "UI.AddSubMenu") {
-			
-			//MFT.ApplinkOptionsView.AddSubMenu(request.params.menuId, request.params.menuName);
-			MFT.ApplinkMediaController.onApplinkAddSubMenu(request.params.menuId, request.params.menuName);
+
+			MFT.ApplinkMediaController.onApplinkAddSubMenu(request.params.menuId, request.params);
 
 			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
@@ -231,9 +229,6 @@ FFW.UI = FFW.RPCObserver.create({
 
 			MFT.ApplinkMediaController.onApplinkDeleteInteractionChoise(request.params.interactionChoiceSetID);
 
-
-			
-
 			this.sendUIResult("SUCCESS", request.id, request.method);
 
 		}
@@ -254,7 +249,11 @@ FFW.UI = FFW.RPCObserver.create({
 		}
 
 		if (request.method == "UI.OnAppActivated") {
-			
+			//
+		}
+
+		if (request.method == "UI.OnChoise") {
+			this.onChoosed(request.params.choiceID);
 		}
 
 		if (request.method == "UI.GetCapabilities") {

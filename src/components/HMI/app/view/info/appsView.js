@@ -38,27 +38,15 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
         FFW.AppLinkCoreClient.getAppList();
     },
 
-        /** 
-      * Function to add new command button to
-      * Options screen
+    /** 
+      * Function to add application to application list
       */
-    AddApplication: function( params ){
+    ShowAppList: function( ){
 
-        this.listOfApplications.items = [];
-        for(var i = 0; i < params.appList.length; i++){
-            this.listOfApplications.items.push({
-                type:       MFT.Button,
-                params:     {
-                    action:         'turnOnApplink',
-                    target:         'MFT.MediaController',
-                    text:           params.appList[i].appName,
-                    className:      'scrollButtons button notpressed',
-                    //icon:           params.icon,
-                    templateName:   'text'
-                }                                   
-            });
-        }
+        this.listOfApplications.items = MFT.ApplinkModel.applicationsList.slice();
+
         this.listOfApplications.list.refresh();
+
     },
 	
 	vehicleHealthReport:   MFT.Button.extend({
