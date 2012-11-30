@@ -17,10 +17,11 @@ MFT.MenuList = Em.ContainerView.extend({
 	 *
 	 * @param commandId: Number
 	 */
-	addItem: function( commandId ) {
+	addItem: function( commandId, params ) {
 		this.get('content.childViews').pushObject( 
 			MFT.Button.create({
-				text:		'Button',
+				text:		params.text,
+				icon:		params.image,
 				commandId:	commandId
 			})
 		);
