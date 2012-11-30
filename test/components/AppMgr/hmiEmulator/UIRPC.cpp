@@ -24,8 +24,6 @@
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/DeleteSubMenuResponse.h"
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetCapabilities.h"
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetCapabilitiesResponse.h"
-#include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/OnAppActivated.h"
-#include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/OnAppDeactivated.h"
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/OnCommand.h"
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/OnDriverDistraction.h"
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/OnSystemContext.h"
