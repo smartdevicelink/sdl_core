@@ -782,25 +782,51 @@ namespace NsAppManager
             case NsAppLinkRPC::Marshaller::METHOD_ENCODEDSYNCPDATA_REQUEST:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An EncodedSyncPData request has been invoked");
-                NsAppLinkRPC::EncodedSyncPData_request* object = (NsAppLinkRPC::EncodedSyncPData_request*)mobileMsg;
-                NsAppLinkRPC::EncodedSyncPData_response* response = new NsAppLinkRPC::EncodedSyncPData_response;
 
-                if(object->get_data())
+                switch(mobileMsg->getProtocolVersion())
                 {
-                    Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(connectionID, sessionID) );
-                    const std::string& name = app->getName();
-                    core->mSyncPManager.setPData(*object->get_data(), name, object->getMethodId());
-                    response->set_success(true);
-                    response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                }
-                else
-                {
-                    response->set_success(false);
-                    response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
-                }
+                    case 1:
+                    {
+                        NsAppLinkRPC::EncodedSyncPData_request* object = (NsAppLinkRPC::EncodedSyncPData_request*)mobileMsg;
+                        NsAppLinkRPC::EncodedSyncPData_response* response = new NsAppLinkRPC::EncodedSyncPData_response;
+                        if(object->get_data())
+                        {
+                            Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(connectionID, sessionID) );
+                            const std::string& name = app->getName();
+                            core->mSyncPManager.setPData(*object->get_data(), name, object->getMethodId());
+                            response->set_success(true);
+                            response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
+                        }
+                        else
+                        {
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                        }
 
-                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    }
+                    case 2:
+                    {
+                        NsAppLinkRPC::EncodedSyncPData_v2_request* object = (NsAppLinkRPC::EncodedSyncPData_v2_request*)mobileMsg;
+                        NsAppLinkRPC::EncodedSyncPData_v2_response* response = new NsAppLinkRPC::EncodedSyncPData_v2_response;
+                        if(object->get_data())
+                        {
+                            Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(connectionID, sessionID) );
+                            const std::string& name = app->getName();
+                            core->mSyncPManager.setPData(*object->get_data(), name, object->getMethodId());
+                            response->set_success(true);
+                            response->set_resultCode(NsAppLinkRPC::Result_v2::SUCCESS);
+                        }
+                        else
+                        {
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPC::Result_v2::INVALID_DATA);
+                        }
 
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
+                }
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_SHOW_RESPONSE:
