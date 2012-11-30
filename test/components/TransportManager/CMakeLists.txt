@@ -40,6 +40,9 @@ set (SOURCES_TEST_WITH_MULTIPLE_DEVICE_ADAPTERS ./TransportManagerTestWithMultip
 # Sources for the TransportManager test with high data transfer rate
 set (SOURCES_TEST_WITH_HIGH_DATA_TRANSFER_RATE ./TransportManagerTestWithHighDataTransferRate.cpp)
 
+# Source for the TransportManager test with multi threaded client
+set (SOURCES_TEST_WITH_MULTI_THREADED_CLIENT ./TransportManagerTestWithMultiThreadedClient.cpp)
+
 # Libraries seeems to be the same for all Transport Manager test
 set (LIBRARIES
     gtest
@@ -82,3 +85,10 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus_disabled.properties DESTINATION 
 add_executable("test_TransportManagerTestWithHighDataTransferRate" ${SOURCES_TEST_WITH_HIGH_DATA_TRANSFER_RATE})
 target_link_libraries("test_TransportManagerTestWithHighDataTransferRate" ${LIBRARIES})
 add_test(test_TransportManagerTestWithHighDataTransferRate test_TransportManagerTestWithHighDataTransferRate)
+
+add_executable("test_TransportManagerTestWithMultiThreadedClient" ${SOURCES_TEST_WITH_MULTI_THREADED_CLIENT})
+target_link_libraries("test_TransportManagerTestWithMultiThreadedClient" ${LIBRARIES})
+add_test(test_TransportManagerTestWithMultiThreadedClient test_TransportManagerTestWithMultiThreadedClient)
+
+
+
