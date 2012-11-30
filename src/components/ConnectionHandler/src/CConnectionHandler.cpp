@@ -27,7 +27,7 @@ namespace NsConnectionHandler
 
     CConnectionHandler::CConnectionHandler():
     mpConnectionHandlerObserver(NULL),
-    mTransportManager(NULL)
+    mpTransportManager(NULL)
     {
 
     }
@@ -40,6 +40,11 @@ namespace NsConnectionHandler
     void CConnectionHandler::setConnectionHandlerObserver(IConnectionHandlerObserver * observer)
     {
         LOG4CPLUS_INFO( mLogger, "CConnectionHandler::setConnectionHandlerObserver()" );
+        if ( !observer )
+        {
+            LOG4CPLUS_ERROR(mLogger, "Null pointer to observer.");
+            return;
+        }
         mpConnectionHandlerObserver = observer;
     }
 
@@ -54,9 +59,9 @@ namespace NsConnectionHandler
             {
                 LOG4CPLUS_INFO( mLogger, "Add new device" << (*it_in).mUserFriendlyName << " Handler: " << (*it_in).mDeviceHandle);
                 mDeviceList.insert(tDeviceList::value_type((*it_in).mDeviceHandle, CDevice((*it_in).mDeviceHandle, (*it_in).mUserFriendlyName)));
-                if ( mTransportManager )
+                if ( mpTransportManager )
                 {
-                    mTransportManager -> connectDevice((*it_in).mDeviceHandle);
+                    mpTransportManager -> connectDevice((*it_in).mDeviceHandle);
                 }
             }
         }
@@ -130,12 +135,22 @@ namespace NsConnectionHandler
 
     void CConnectionHandler::setTransportManager( NsAppLink::NsTransportManager::ITransportManager * transportManager )
     {
+        LOG4CPLUS_INFO( mLogger, "CConnectionHandler::setTransportManager()" );
         if ( !transportManager )
         {
             LOG4CPLUS_ERROR(mLogger, "Null pointer to TransportManager.");
             return;
         }
-        mTransportManager = transportManager;
+        mpTransportManager = transportManager;
     }
-
+    void CConnectionHandler::startDevicesDiscovery()
+    {
+        LOG4CPLUS_INFO( mLogger, "CConnectionHandler::startDevicesDiscovery()" );
+        if (NULL == mpTransportManager)
+        {
+            LOG4CPLUS_ERROR(mLogger, "Null pointer to TransportManager.");
+            return;
+        }
+        mpTransportManager->scanForNewDevices();
+    }
 }/* namespace NsConnectionHandler */
