@@ -155,8 +155,9 @@ namespace NsAppManager
      */
     void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
     {
-        unsigned int connectionID = std::get<0>(message.second);
-        unsigned char sessionID = std::get<1>(message.second);
+        const unsigned int& connectionID = std::get<0>(message.second);
+        const unsigned char& sessionID = std::get<1>(message.second);
+
         NsAppLinkRPC::ALRPCMessage* mobileMsg = message.first;
         if(!mobileMsg)
         {
@@ -170,6 +171,7 @@ namespace NsAppManager
             return;
         }
         AppMgrCore* core = (AppMgrCore*)pThis;
+        const unsigned int& protocolVersion = mobileMsg->getProtocolVersion();
 
         switch(mobileMsg->getMethodId())
         {
@@ -188,7 +190,7 @@ namespace NsAppManager
                     break;
                 }
 
-                Application* app = core->getApplicationFromItemCheckNotNull(core->registerApplication( object, connectionID, sessionID ));
+                Application* app = core->getApplicationFromItemCheckNotNull(core->registerApplication( object, connectionID, sessionID, protocolVersion ));
                 response->setCorrelationID(object->getCorrelationID());
                 response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                 if(!app)
@@ -1622,9 +1624,10 @@ namespace NsAppManager
      * \param request a RegisterAppInterface request which is the source for application fields initial values
      * \param connectionID id of the connection which will be associated with the application
      * \param sessionID an id of the session which will be associated with the application
+     * \param protocolVersion protocol version number
      * \return A instance of RegistryItem created for application
      */
-    const RegistryItem* AppMgrCore::registerApplication( NsAppLinkRPC::RegisterAppInterface_request * request, const unsigned int& connectionID, const unsigned char& sessionID )
+    const RegistryItem* AppMgrCore::registerApplication( NsAppLinkRPC::RegisterAppInterface_request * request, const unsigned int& connectionID, const unsigned char& sessionID, const unsigned int& protocolVersion )
     {
         if(!request)
         {
@@ -1635,7 +1638,7 @@ namespace NsAppManager
         LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() << " for connection id " << connectionID << " session id " << (uint)sessionID);
 
         const std::string& appName = request->get_appName();
-        Application* application = new Application( appName, connectionID, sessionID );
+        Application* application = new Application( appName, connectionID, sessionID, protocolVersion );
 
         bool isMediaApplication = request->get_isMediaApplication();
         const NsAppLinkRPC::Language& languageDesired = request->get_languageDesired();

@@ -144,9 +144,10 @@ namespace NsAppManager
          * \param request a RegisterAppInterface request which is the source for application fields initial values
          * \param connectionID id of the connection which will be associated with the application
          * \param sessionID an id of the session which will be associated with the application
+         * \param protocolVersion protocol version number
          * \return A instance of RegistryItem created for application
          */
-        const RegistryItem* registerApplication(NsAppLinkRPC::RegisterAppInterface_request *request , const unsigned int &connectionID, const unsigned char &sessionID);
+        const RegistryItem* registerApplication(NsAppLinkRPC::RegisterAppInterface_request *request , const unsigned int &connectionID, const unsigned char &sessionID, const unsigned int& protocolVersion);
 
         /**
          * \brief unregister an application associated with the given session
