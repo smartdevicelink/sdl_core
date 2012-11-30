@@ -1301,10 +1301,25 @@ namespace NsAppManager
                 }
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
-                NsAppLinkRPC::OnDriverDistraction* event = new NsAppLinkRPC::OnDriverDistraction();
-                event->set_state(object->get_state());
-                core->mDriverDistraction = event;
-                MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+            //    switch(app->getProtocolVersion())
+            //    {
+                //    case 1:
+                //    {
+                        NsAppLinkRPC::OnDriverDistraction* event = new NsAppLinkRPC::OnDriverDistraction();
+                        event->set_state(object->get_state());
+                        core->mDriverDistraction = event;
+                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        break;
+                //    }
+                //    case 2:
+                //    {
+                //        NsAppLinkRPC::OnDriverDistraction* event = new NsAppLinkRPC::OnDriverDistraction();
+                //        event->set_state(object->get_state());
+                //        core->mDriverDistraction = event;
+                //        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                //        break;
+                //    }
+            //    }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONSYSTEMCONTEXT:
