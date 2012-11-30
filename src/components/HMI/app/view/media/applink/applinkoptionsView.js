@@ -24,6 +24,11 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
                             'optionsLabel'
                         ],
 
+    /** Applink Sub Mennu activate handler */
+    applinkOptionsActivate: function(){
+        this.showOptionsList();
+    }.observes('MFT.States.media.applink.applinkoptions.active'),
+
     /** Button to return to previous view*/
     backButton: MFT.Button.extend({
         classNames:        ['backButton','button'],     
@@ -44,7 +49,7 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
 
     showOptionsList: function(){
         if( MFT.States.media.applink.applinkoptions.active ){
-            this.listOfOptions.items =  MFT.ApplinkModel.optionsCommands.slice();
+            this.listOfOptions.items =  MFT.ApplinkMediaModel.optionsCommands.slice();
             this.listOfOptions.list.refresh();
         }
     },

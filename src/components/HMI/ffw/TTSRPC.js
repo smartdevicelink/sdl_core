@@ -93,11 +93,7 @@ FFW.TTS = FFW.RPCObserver.create({
 		
 		if (request.method == "TTS.Speak") {
 
-			var message = '';
-			for(var i = 0; i < request.params.ttsChunks.length; i++){
-				message += request.params.ttsChunks[i].text + '\n';
-			}
-			MFT.TTSPopUp.ActivateTTS(message);
+			MFT.ApplinkMediaController.onApplinkTTSSpeak(request.params);
 
 			// send repsonse
 			var JSONMessage = {

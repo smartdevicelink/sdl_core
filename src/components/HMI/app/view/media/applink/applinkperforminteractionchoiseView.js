@@ -49,7 +49,7 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
 
     showPerformInteraction: function(){
         if(MFT.States.media.applink.applinkperforminteractionchoise.active){
-            this.listOfChoises.items =  MFT.ApplinkModel.voiceRecognitionCommands.slice();
+            this.listOfChoises.items =  MFT.ApplinkMediaModel.voiceRecognitionCommands.slice();
             this.listOfChoises.list.refresh();
         }
     },
@@ -65,19 +65,19 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
 
         for(var IDList = 0; IDList< interactionChoiceSetIDList.length; IDList++){
 
-            for(var ChoisesVal = 0; ChoisesVal < MFT.ApplinkModel.interactionChoises.length; ChoisesVal++){
+            for(var ChoisesVal = 0; ChoisesVal < MFT.ApplinkMediaModel.interactionChoises.length; ChoisesVal++){
 
-                if( interactionChoiceSetIDList[IDList] == MFT.ApplinkModel.interactionChoises[ChoisesVal].interactionChoiceSetID ){
+                if( interactionChoiceSetIDList[IDList] == MFT.ApplinkMediaModel.interactionChoises[ChoisesVal].interactionChoiceSetID ){
                     
-                    for(var ChoiseSet = 0; ChoiseSet < MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet.length; ChoiseSet++){
+                    for(var ChoiseSet = 0; ChoiseSet < MFT.ApplinkMediaModel.interactionChoises[ChoisesVal].choiceSet.length; ChoiseSet++){
 
                         this.listOfChoises.items.push({
                                 type:       MFT.Button,
                                 params:     {
                                     action:                 'onPerformInteractionChoosed',
                                     target:                 'MFT.ApplinkMediaController',
-                                    choiceID:               MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID,
-                                    text:                   MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
+                                    choiceID:               MFT.ApplinkMediaModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID,
+                                    text:                   MFT.ApplinkMediaModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
                                     className:              'rs-item',
                                     templateName:           'text'
                                 }                                   

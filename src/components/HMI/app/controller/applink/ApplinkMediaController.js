@@ -1,19 +1,18 @@
 /**
  * @name MFT.ApplinkMediaController
  * 
- * @desc Applink NonMedia Controller logic
+ * @desc Applink Media Controller logic
  * 
  * @category    Controller
  * @filesource  app/controller/applink/ApplinkMediaController.js
  * @version     1.0
  *
- * @author      Andriy Melnik
- */
+ * @author      Andriy Melnyk
 
 MFT.ApplinkMediaController = Em.Object.create({
     
     // Model binding
-    modelBinding: 'MFT.ApplinkModel',
+    modelBinding: 'MFT.ApplinkMediaModel',
 
     /** Current applink Sub Menu identificator*/
     currentApplinkSubMenuid: null,
@@ -70,6 +69,11 @@ MFT.ApplinkMediaController = Em.Object.create({
         MFT.States.goToState('media.applink.applinkoptions');
     },
 
+    /** Switching on Applink Slider */
+    turnOnApplinkSlider: function(el){
+        MFT.States.goToState('media.applink.applinkslider');
+    },
+
     /** Switching on Applink Sub Mennu */
     turnOnApplinkSubMenu: function(el){
         this.set('currentApplinkSubMenuid', el.menuId);
@@ -91,7 +95,7 @@ MFT.ApplinkMediaController = Em.Object.create({
     /** Add command to Options list */
     onApplinkOptionsAddCommand: function( commandId, params ){
 
-        MFT.ApplinkModel.optionsCommands.push({
+        MFT.ApplinkMediaModel.optionsCommands.push({
             type:       MFT.Button,
             params:     {
                 action:                 'onCommand',
@@ -111,18 +115,18 @@ MFT.ApplinkMediaController = Em.Object.create({
     onApplinkOptionsDeleteCommand: function(commandId){
 
         var deleted = false;
-            count = MFT.ApplinkModel.optionsCommands.length;
+            count = MFT.ApplinkMediaModel.optionsCommands.length;
         for(var i = count-1; i >= 0; i--){
-            if(MFT.ApplinkModel.optionsCommands[i].params.commandId == commandId){
-                MFT.ApplinkModel.optionsCommands.splice(i, 1);
+            if(MFT.ApplinkMediaModel.optionsCommands[i].params.commandId == commandId){
+                MFT.ApplinkMediaModel.optionsCommands.splice(i, 1);
                 deleted = true;
             }
         }
         if(!deleted){
-            count = MFT.ApplinkModel.subMenuCommands.length;
+            count = MFT.ApplinkMediaModel.subMenuCommands.length;
             for(var i = count-1; i >= 0; i--){
-                if(MFT.ApplinkModel.subMenuCommands[i].cmdId == commandId){
-                   MFT.ApplinkModel.subMenuCommands.splice(i, 1);
+                if(MFT.ApplinkMediaModel.subMenuCommands[i].cmdId == commandId){
+                   MFT.ApplinkMediaModel.subMenuCommands.splice(i, 1);
                 }
             }
         }
@@ -133,7 +137,7 @@ MFT.ApplinkMediaController = Em.Object.create({
     /** Add subMenu button to Options list */
     onApplinkAddSubMenu: function( menuId, params ){
 
-        MFT.ApplinkModel.optionsCommands.push({
+        MFT.ApplinkMediaModel.optionsCommands.push({
             type:       MFT.Button,
             params:     {
                 action:                 'turnOnApplinkSubMenu',
@@ -151,11 +155,15 @@ MFT.ApplinkMediaController = Em.Object.create({
     /** Delete subMenu button from Options list */
     onApplinkDeleteSubMenu: function(menuId){
 
+        if(MFT.ApplinkMediaController.currentApplinkSubMenuid == menuId){
+            MFT.States.back();
+        }
+
         var deleted = false;
-            count = MFT.ApplinkModel.optionsCommands.length;
+            count = MFT.ApplinkMediaModel.optionsCommands.length;
         for(var i = count-1; i >= 0; i--){
-            if(MFT.ApplinkModel.optionsCommands[i].params.menuId == menuId){
-                MFT.ApplinkModel.optionsCommands.splice(i, 1);
+            if(MFT.ApplinkMediaModel.optionsCommands[i].params.menuId == menuId){
+                MFT.ApplinkMediaModel.optionsCommands.splice(i, 1);
                 deleted = true;
             }
         }
@@ -172,7 +180,7 @@ MFT.ApplinkMediaController = Em.Object.create({
     /** Add command to VRPopUp list */
     onApplinkVRAddCommand: function(cmdId, vrCommands){
         for(var j = 0; j < vrCommands.length; j++){
-            MFT.ApplinkModel.voiceRecognitionCommands.push({
+            MFT.ApplinkMediaModel.voiceRecognitionCommands.push({
                 type:       MFT.Button,
                 params:     {
                     action:                 'onCommand',
@@ -192,11 +200,11 @@ MFT.ApplinkMediaController = Em.Object.create({
     /** Delete command from VRPopUp list */
     onApplinkVRDeleteCommand: function(commandId){
         
-        var count = MFT.ApplinkModel.voiceRecognitionCommands.length;
+        var count = MFT.ApplinkMediaModel.voiceRecognitionCommands.length;
         
         for(var i = count-1; i >= 0; i--){
-            if(MFT.ApplinkModel.voiceRecognitionCommands[i].params.commandId == commandId){
-                MFT.ApplinkModel.voiceRecognitionCommands.splice(i, 1);
+            if(MFT.ApplinkMediaModel.voiceRecognitionCommands[i].params.commandId == commandId){
+                MFT.ApplinkMediaModel.voiceRecognitionCommands.splice(i, 1);
             }
         }
 
@@ -206,11 +214,11 @@ MFT.ApplinkMediaController = Em.Object.create({
 
     /** Delete all commands in sub menu from VR */
     onApplinkCreateInteractionChoise: function(params){
-        MFT.ApplinkModel.interactionChoises.push(params);
+        MFT.ApplinkMediaModel.interactionChoises.push(params);
         
         for(var i = 0; i<params.choiceSet.length; i++){
             for(var j = 0; j<params.choiceSet[i].vrCommands.length; j++){
-                MFT.ApplinkModel.voiceRecognitionCommands.push({
+                MFT.ApplinkMediaModel.voiceRecognitionCommands.push({
                     type:       MFT.Button,
                     params:     {
                         action:                 'onVRPerformInteractionChoosed',
@@ -235,17 +243,17 @@ MFT.ApplinkMediaController = Em.Object.create({
             MFT.States.back();
         }
 
-        for(var val in MFT.ApplinkModel.interactionChoises){
-            if(MFT.ApplinkModel.interactionChoises[val].interactionChoiceSetID == choiseSetID){
-                MFT.ApplinkModel.interactionChoises.splice(val, 1);
+        for(var val in MFT.ApplinkMediaModel.interactionChoises){
+            if(MFT.ApplinkMediaModel.interactionChoises[val].interactionChoiceSetID == choiseSetID){
+                MFT.ApplinkMediaModel.interactionChoises.splice(val, 1);
                 break;
             }
         }
 
-        var count = MFT.ApplinkModel.voiceRecognitionCommands.length;
+        var count = MFT.ApplinkMediaModel.voiceRecognitionCommands.length;
         for(var i = count-1; i >= 0; i--){
-            if(MFT.ApplinkModel.voiceRecognitionCommands[i].params.interactionChoiceSetID == choiseSetID){
-                MFT.ApplinkModel.voiceRecognitionCommands.splice(i, 1);
+            if(MFT.ApplinkMediaModel.voiceRecognitionCommands[i].params.interactionChoiceSetID == choiseSetID){
+                MFT.ApplinkMediaModel.voiceRecognitionCommands.splice(i, 1);
             }
         }
 
@@ -261,6 +269,7 @@ MFT.ApplinkMediaController = Em.Object.create({
             if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
                 MFT.ApplinkOptionsSubMenuView.SubMenuActivate(MFT.MediaController.currentApplinkSubMenuid);
             }
+
         }
     },
 
@@ -306,21 +315,49 @@ MFT.ApplinkMediaController = Em.Object.create({
     applinkSetMediaClockTimer: function(params){
 
         if(params.updateMode == "COUNTUP"){
-            MFT.ApplinkModel.set('countUp', true);
+            MFT.ApplinkMediaModel.set('countUp', true);
         }else if(params.updateMode == "COUNTDOWN"){
-            MFT.ApplinkModel.set('countUp', false);
+            MFT.ApplinkMediaModel.set('countUp', false);
         }
 
         if(params.updateMode == "PAUSE"){
-            MFT.ApplinkModel.set('pause', true);
+            MFT.ApplinkMediaModel.set('pause', true);
         }else if(params.updateMode == "RESUME"){
-            MFT.ApplinkModel.set('pause', false);
+            MFT.ApplinkMediaModel.set('pause', false);
         }else{
-            MFT.ApplinkModel.set('duration', 0);
-            MFT.ApplinkModel.set('duration', params.startTime.hours*3600 + params.startTime.minutes*60 + params.startTime.seconds );
-            MFT.ApplinkModel.set('pause', false);
+            MFT.ApplinkMediaModel.set('duration', 0);
+            MFT.ApplinkMediaModel.set('duration', params.startTime.hours*3600 + params.startTime.minutes*60 + params.startTime.seconds );
+            MFT.ApplinkMediaModel.set('pause', false);
         }
         
+    },
+
+    /** Applink Slider activation */
+    onApplinkSlider: function(params){
+        this.turnOnApplinkSlider();
+    },
+
+    /** Applink TTS Speak handler */
+    onApplinkTTSSpeak: function(params){
+        var message = '';
+        for(var i = 0; i < params.ttsChunks.length; i++){
+            message += params.ttsChunks[i].text + '\n';
+        }
+        MFT.TTSPopUp.ActivateTTS(message);
+    },
+
+    /** Applin UI Alert handler */
+    onApplinkUIAlert: function(params){
+        MFT.AlertPopUp.AlertActive(params.AlertText1, params.AlertText2, params.duration, params.playTone);
+    },
+
+    /** Applin UI Show handler */
+    onApplinkUIShow: function(params){
+        MFT.ApplinkMediaModel.showInfo.set('field1', params.mainField1);
+        MFT.ApplinkMediaModel.showInfo.set('field2', params.mainField2);
+        MFT.ApplinkMediaModel.showInfo.set('mediaClock', params.mediaClock);
+        MFT.ApplinkMediaModel.showInfo.set('field3', params.mediaTrack);
+        MFT.ApplinkMediaModel.showInfo.set('statusBar', params.statusBar);
     }
 
 });

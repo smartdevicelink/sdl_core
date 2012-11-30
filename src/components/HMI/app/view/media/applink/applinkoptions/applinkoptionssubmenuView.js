@@ -43,6 +43,8 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
     applinkSubMenuActivate: function(){
         if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
             MFT.ApplinkOptionsSubMenuView.SubMenuActivate(MFT.MediaController.currentApplinkSubMenuid);
+        }else{
+            MFT.ApplinkMediaController.set('currentApplinkSubMenuid', null);
         }
     }.observes('MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active'),
 
@@ -57,18 +59,18 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
 
         this.listOfSubmenuButtons.list.refresh();
 
-        count = MFT.ApplinkModel.subMenuCommands.length;
+        count = MFT.ApplinkMediaModel.subMenuCommands.length;
         for(var i = 0; i < count; i++){
-            if( MFT.ApplinkMediaController.currentApplinkSubMenuid == MFT.ApplinkModel.subMenuCommands[i].menuParams.parentID ){
+            if( MFT.ApplinkMediaController.currentApplinkSubMenuid == MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.parentID ){
 
                 this.listOfSubmenuButtons.items.push({
                     type:       MFT.Button,
                     params:     {
                         action:                 'onCommand',
                         target:                 'MFT.ApplinkMediaController',
-                        commandId:              MFT.ApplinkModel.subMenuCommands[i].cmdId,
-                        text:                   MFT.ApplinkModel.subMenuCommands[i].menuParams.menuName,
-                        parentID:               MFT.ApplinkModel.subMenuCommands[i].menuParams.parentID,
+                        commandId:              MFT.ApplinkMediaModel.subMenuCommands[i].cmdId,
+                        text:                   MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.menuName,
+                        parentID:               MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.parentID,
                         className:              'rs-item',
                         templateName:           'text'
                     }                                   

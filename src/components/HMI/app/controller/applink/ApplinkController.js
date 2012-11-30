@@ -26,7 +26,7 @@ MFT.ApplinkController = Em.Object.create({
 	 * @type object
 	 */
 	applicationModels: {
-		0:	'ApplinkModel',
+		0:	'ApplinkMediaModel',
 		1:	'ApplinkNonMediaModel'
 	},
 	

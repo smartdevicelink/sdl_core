@@ -1,16 +1,16 @@
 /**
- * @name MFT.SDModel
+ * @name MFT.ApplinkMediaModel
  * 
- * @desc SD Media data model
+ * @desc Applink data model
  * 
  * @category	Model
- * @filesource	app/model/media/SDModel.js
+ * @filesource	app/model/media/ApplinkMediaModel.js
  * @version		2.0
  *
- * @author		Igor Zhavoronkin
+ * @author		Andriy Melnik
  */
 
-MFT.ApplinkModel = Em.Object.create({
+MFT.ApplinkMediaModel = Em.Object.create({
 	
 	active: false,
 
@@ -20,6 +20,11 @@ MFT.ApplinkModel = Em.Object.create({
 	init: function(){
 		this._super();
 	},
+
+	/**
+	  * RangedValue for Slider
+	  */
+	applinkSliderContent:		MFT.RangedValue.create({range: 10, value:3, cycle: false, minValue: 0}),
 	
 	/**
 	  * Array of Interaction Choises
@@ -106,7 +111,7 @@ MFT.ApplinkModel = Em.Object.create({
 	startTimer: function(){
 		if(!this.pause){
 			this.timer = setInterval(function(){
-				MFT.ApplinkModel.set('currTime', MFT.ApplinkModel.currTime+1);
+				MFT.ApplinkMediaModel.set('currTime', MFT.ApplinkMediaModel.currTime+1);
 			}, 1000);
 		}else{
 			clearInterval(this.timer);

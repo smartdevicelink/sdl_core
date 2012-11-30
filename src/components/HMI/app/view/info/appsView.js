@@ -43,7 +43,7 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
       */
     ShowAppList: function( ){
 
-        this.listOfApplications.items = MFT.ApplinkModel.applicationsList.slice();
+        this.listOfApplications.items = MFT.ApplinkMediaModel.applicationsList.slice();
 
         this.listOfApplications.list.refresh();
 

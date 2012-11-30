@@ -69,7 +69,7 @@ MFT.VRPopUp = Em.ContainerView.create({
 
     showVRCommands: function(){
         if(this.VRActive){
-            this.listOfCommands.items =  MFT.ApplinkModel.voiceRecognitionCommands.slice();
+            this.listOfCommands.items =  MFT.ApplinkMediaModel.voiceRecognitionCommands.slice();
             this.listOfCommands.list.refresh();
         }
     },

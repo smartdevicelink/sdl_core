@@ -1,13 +1,13 @@
 /**
- * @name MFT.RightMenuView
+ * @name MFT.ApplinkSoftButtons
  * 
- * @desc Media  Right Menu visual representation
+ * @desc Applink Soft Buttons visual representation
  * 
  * @category	View
- * @filesource	app/view/media/MFT.RightMenuView.js
+ * @filesource	app/view/media/MFT.ApplinkSoftButtons.js
  * @version		2.0
  *
- * @author		Igor Zhavoronkin
+ * @author		Andriy Melnik
  */
 MFT.ApplinkSoftButtons = Em.ContainerView.create({
 	/** View ID */

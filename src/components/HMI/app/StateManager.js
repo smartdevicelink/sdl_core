@@ -334,7 +334,10 @@ var StateManager = Em.StateManager.extend({
 
 				applinkoptionssubmenu: Em.State.create({
 				})
-			})
+			}),
+
+			applinkslider: Em.State.create({
+			})			
 
 		}),
 

@@ -2751,6 +2751,32 @@
 	left: 165px;
 }
 
+/* Applink Slider*/
+#media_applink_slider_view{
+	width: 800px;
+	height: 480px;
+	z-index: 1000;
+	background: url(../images/media/bg.png) no-repeat;
+}
+
+#media_applink_slider_view .backButton {
+	top: 80px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+#media_applink_slider_view .initialText{
+	top: 80px;
+	left: 75px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
+
+/* Applink Perform Interaction Choise */
 #media_app_perform_interaction_view{
 	width: 800px;
 	height: 480px;
@@ -2788,6 +2814,7 @@
 	width: 578px;
 }
 
+/* Applink Media Options */
 #media_app_options_view{
 	width: 800px;
 	height: 480px;

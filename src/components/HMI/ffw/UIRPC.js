@@ -166,18 +166,14 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.Show") {
 
-			MFT.ApplinkModel.showInfo.set('field1', request.params.mainField1);
-			MFT.ApplinkModel.showInfo.set('field2', request.params.mainField2);
-			MFT.ApplinkModel.showInfo.set('mediaClock', request.params.mediaClock);
-			MFT.ApplinkModel.showInfo.set('field3', request.params.mediaTrack);
-			MFT.ApplinkModel.showInfo.set('statusBar', request.params.statusBar);
+			MFT.ApplinkMediaController.onApplinkUIShow(request.params);
 
 			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
 		
 		if (request.method == "UI.Alert") {
 
-			MFT.AlertPopUp.AlertActive(request.params.AlertText1, request.params.AlertText2, request.params.duration, request.params.playTone);
+			MFT.ApplinkMediaController.onApplinkUIAlert(request.params);
 
 			this.sendUIResult("SUCCESS", request.id, request.method);
 		}
@@ -199,7 +195,7 @@ FFW.UI = FFW.RPCObserver.create({
 			// reset all requested properties
 			for (var i=0;i<request.params.length;i++)
 			{
-			        this.resetProperties(reuqest.params[i]);
+			    this.resetProperties(reuqest.params[i]);
 				MFT.TTSPopUp.receiveMessage("Reset property: " + reuqest.params[i]);
 			}
 
@@ -268,6 +264,14 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (request.method == "UI.OnAppActivated") {
 			//
+		}
+
+		if (request.method == "UI.Slider") {
+
+			MFT.ApplinkMediaController.onApplinkSlider(request.params);
+
+			this.sendUIResult("SUCCESS", request.id, request.method);
+
 		}
 
 		if (request.method == "UI.GetCapabilities") {

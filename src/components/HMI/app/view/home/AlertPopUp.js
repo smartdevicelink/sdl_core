@@ -37,7 +37,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
 		classNames:			'applicationName',
 
-		contentBinding:		'MFT.ApplinkModel.showInfo.appName'
+		contentBinding:		'MFT.ApplinkMediaModel.showInfo.appName'
 	}),
 
 	message1 : MFT.Label.extend({
