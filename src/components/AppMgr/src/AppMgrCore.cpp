@@ -804,6 +804,7 @@ namespace NsAppManager
                         }
 
                         MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
                     }
                     case 2:
                     {
@@ -859,10 +860,26 @@ namespace NsAppManager
             default:
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message " << mobileMsg->getMethodId() << " has been received!");
-                NsAppLinkRPC::GenericResponse_response* response = new NsAppLinkRPC::GenericResponse_response();
-                response->set_success(false);
-                response->set_resultCode(NsAppLinkRPC::Result::UNSUPPORTED_REQUEST);
-                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+
+                switch(mobileMsg->getProtocolVersion())
+                {
+                    case 1:
+                    {
+                        NsAppLinkRPC::GenericResponse_response* response = new NsAppLinkRPC::GenericResponse_response();
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::UNSUPPORTED_REQUEST);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
+                    case 2:
+                    {
+                        NsAppLinkRPC::GenericResponse_v2_response* response = new NsAppLinkRPC::GenericResponse_v2_response();
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result_v2::UNSUPPORTED_REQUEST);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
+                }
                 break;
             }
         }
