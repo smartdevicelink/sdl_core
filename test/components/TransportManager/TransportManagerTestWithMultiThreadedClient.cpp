@@ -8,6 +8,8 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <vector>
+#include <map>
 
 using ::testing::_;
 using ::testing::Invoke;
@@ -35,10 +37,11 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
         static const tConnectionHandle ConnectionHandle = 666;
 
-        static const int BaseSequenceNumber = 123;
-        static const int NumberOfThreads    = 256;
-        static const int NumberOfFramesPerThread   = 64;
+        static const int BaseSequenceNumber = 1;
+        static const int NumberOfThreads    = 513;
+        static const int NumberOfFramesPerThread = 51;
         static const int TotalNumberOfFrames = NumberOfThreads * NumberOfFramesPerThread;
+        static const int FrameSize = 3243;
     }
 
     // ---------------- TEST CLASSES ---------------- //
@@ -54,7 +57,10 @@ namespace test { namespace components { namespace TransportManager { namespace T
         : mListener(Listener)
         , mHandleGenerator(HandleGenerator)
         , mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManagerTest")))
+        , mSequenceNumber(Data::BaseSequenceNumber)
+        , mSequenceNumberMutex()
         {
+            pthread_mutex_init(&mSequenceNumberMutex, 0);
         }
 
         virtual EDeviceType getDeviceType(void ) const
@@ -69,7 +75,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
         void doScanForNewDevices()
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "-------------- Scanning new devices -----------------");
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- Scanning new devices -----------------");
             SInternalDeviceInfo deviceInfo;
             deviceInfo.mDeviceHandle = Data::DeviceHandle;
             deviceInfo.mUniqueDeviceId = Data::UniqueDeviceId;
@@ -78,13 +84,13 @@ namespace test { namespace components { namespace TransportManager { namespace T
             tInternalDeviceList list;
             list.push_back(deviceInfo);
 
-            LOG4CPLUS_INFO_EXT(mLogger, "-------------- Sending device list update -----------------");
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- Sending device list update -----------------");
             mListener.onDeviceListUpdated(this, list);
         }
 
         void doConnectDevice(const tDeviceHandle DeviceHandle)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "-------------- Connecting device -----------------");
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- Connecting device -----------------");
             // Application connect
 
             SDeviceInfo deviceInfo;
@@ -92,34 +98,39 @@ namespace test { namespace components { namespace TransportManager { namespace T
             deviceInfo.mUniqueDeviceId = Data::UniqueDeviceId;
             deviceInfo.mUserFriendlyName = Data::UserFriendlyName;
 
-            LOG4CPLUS_INFO_EXT(mLogger, "-------------- Sending ApplicationConnected -----------------");
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- Sending ApplicationConnected -----------------");
             mListener.onApplicationConnected(this, deviceInfo, Data::ConnectionHandle);
         }
 
         int doSendFrame(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "-------------- doSendFrame called. Sending FrameSendCompleted -----------------");
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- doSendFrame called -----------------");
+            
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- Sending frame back to TransportManager. DataSize: " << DataSize << "--------------");
             
             // Loop back. Each recevied frame is sent back.
             mListener.onFrameReceived(this, ConnectionHandle, Data, DataSize);
             
-            // TODO: start the sequence number from some well known point and increment it each time
-            // so it can be check later          
+            pthread_mutex_lock(&mSequenceNumberMutex);
+            mSequenceNumber++;
+            pthread_mutex_unlock(&mSequenceNumberMutex);
             
-            mListener.onFrameSendCompleted(this, Data::ConnectionHandle, Data::BaseSequenceNumber, SendStatusOK);
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- Calling onFrameSendCompleted. Seq Number: " << mSequenceNumber << "--------------");
             
-            return Data::BaseSequenceNumber;
+            mListener.onFrameSendCompleted(this, Data::ConnectionHandle, mSequenceNumber, SendStatusOK);
+            
+            return mSequenceNumber;
         }
 
         void doDisconnectDevice(const tDeviceHandle DeviceHandle)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "-------------- doDisconnectDevice -----------------");
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- doDisconnectDevice -----------------");
             SDeviceInfo deviceInfo;
             deviceInfo.mDeviceHandle = Data::DeviceHandle;
             deviceInfo.mUniqueDeviceId = Data::UniqueDeviceId;
             deviceInfo.mUserFriendlyName = Data::UserFriendlyName;
 
-            LOG4CPLUS_INFO_EXT(mLogger, "-------------- sending ApplicationDisconnected -----------------");
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- sending ApplicationDisconnected -----------------");
             mListener.onApplicationDisconnected(this, deviceInfo, Data::ConnectionHandle);
         }
 
@@ -127,6 +138,8 @@ namespace test { namespace components { namespace TransportManager { namespace T
         IDeviceAdapterListener & mListener;
         IHandleGenerator & mHandleGenerator;
         Logger mLogger;
+        int mSequenceNumber;
+        pthread_mutex_t mSequenceNumberMutex;
     };
 
     /**
@@ -136,14 +149,23 @@ namespace test { namespace components { namespace TransportManager { namespace T
                                      , public ITransportManagerDeviceListener
     {
     public:
+        
         MockTransportManagerClient(ITransportManager & TransportManager)
         : mTransportManager(TransportManager)
         , mDeviceList()
         , mFrameSequenceNumber(-1)
         , mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManagerTest")))
+        , mThreads()
+        , mSendFrameMap()
+        , mFrameReceivedNumberMutex()
+        , mFrameSendCompletedMutex()
+        , mNumberOfReceivedFrames(0)
+        , mNumberOfCompletelySentFrames(0)
         {
-            
+            pthread_mutex_init(&mFrameReceivedNumberMutex, 0);
+            pthread_mutex_init(&mFrameSendCompletedMutex, 0);
         }
+        
         MOCK_METHOD2(onApplicationConnected, void(const SDeviceInfo& ConnectedDevice, const tConnectionHandle Connection));
         MOCK_METHOD2(onApplicationDisconnected, void(const SDeviceInfo& DisconnectedDevice, const tConnectionHandle Connection));
         MOCK_METHOD1(onDeviceListUpdated, void(const tDeviceList& DeviceList));
@@ -152,7 +174,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
         void doDeviceListUpdated(const tDeviceList& DeviceList)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "-------------- doDeviceListUpdated -----------------");
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- doDeviceListUpdated -----------------");
             mDeviceList = DeviceList;
 
             tDeviceList::const_iterator device;
@@ -164,48 +186,113 @@ namespace test { namespace components { namespace TransportManager { namespace T
         
         void doApplicationConnected(const SDeviceInfo& ConnectedDevice, const tConnectionHandle Connection)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "-------------- doApplicationConnected -----------------");
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- doApplicationConnected -----------------");
             
-            // TODO: Start multiple threads and send data
-            // mTransportManager.sendFrame(Connection, /* some data */, /* data size */);
+            for (int i = 0; i < Data::NumberOfThreads; ++i)
+            {
+                pthread_t thread;
+                pthread_create(&thread, NULL, &threadSendFrames, static_cast<void*>(this));
+                mThreads.push_back(thread);
+            }
         }
 
         void doFrameSendCompleted(tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "-------------- doFrameSendCompleted -----------------");
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- doFrameSendCompleted -----------------");
             
-            // TODO: Check if the correct is sent (optional)
+            pthread_mutex_lock(&mFrameSendCompletedMutex);
             
-            /*
-            tDeviceList::const_iterator device;
-            for(device = mDeviceList.begin(); device != mDeviceList.end(); ++device)
-            {
-                mTransportManager.disconnectDevice(device->mDeviceHandle);
-            }
-            */
+            mNumberOfCompletelySentFrames++;
+            
+            uint8_t *pData = mSendFrameMap[FrameSequenceNumber];
+            
+            delete pData;
+            mSendFrameMap.erase(FrameSequenceNumber);
+            
+            pthread_mutex_unlock(&mFrameSendCompletedMutex);
+            
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- Number of completely sent frames: " 
+                << mNumberOfCompletelySentFrames << " -----------------");
         }
         
         void doFrameReceived(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "-------------- doFrameReceived -----------------");
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- doFrameReceived -----------------");
             
-            // TODO: Check if the correct frame is received
+            pthread_mutex_lock(&mFrameReceivedNumberMutex);
             
-            // when all frames are received disconnectDevice
-            /*
+            mNumberOfReceivedFrames++;
+            
+            pthread_mutex_unlock(&mFrameReceivedNumberMutex);
+            
+            LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- Number of received frames: " << mNumberOfReceivedFrames << " -----------------");
+        }
+        
+        void disconnectAllDevices(void)
+        {
             tDeviceList::const_iterator device;
+            
             for(device = mDeviceList.begin(); device != mDeviceList.end(); ++device)
             {
                 mTransportManager.disconnectDevice(device->mDeviceHandle);
-            }
-            */
+            }     
+            
+            ASSERT_EQ(mNumberOfCompletelySentFrames, Data::TotalNumberOfFrames) << "Wrong number of send frame confirmation";
+            ASSERT_EQ(mNumberOfReceivedFrames, Data::TotalNumberOfFrames) << "Wrong number of received frames";
         }
+        
+        void waitForAllThreads(void)
+        {
+            for (int i = 0; i < Data::NumberOfThreads; ++i)
+            {
+                pthread_join(mThreads[i], NULL);
+            }
+        }
+        
+    private:
+        
+        static void* threadSendFrames(void* Data)
+        {
+            MockTransportManagerClient *pTMClient = static_cast<MockTransportManagerClient*>(Data);
+         
+            LOG4CPLUS_INFO_EXT(pTMClient->mLogger, "\n-------------- Frame Send Thread Started -----------------");
+            
+            for (int i = 0; i < Data::NumberOfFramesPerThread; ++i)
+            {
+                uint8_t *pFrameData = new uint8_t[Data::FrameSize];
+                uint32_t dataSize = Data::FrameSize - 12;   // minus header size
+                
+                // make a valid packet
+                pFrameData[0] = 0x22;       // version 2
+                pFrameData[1] = 0x0F;   
+                pFrameData[2] = 0x00;   
+                pFrameData[3] = 0x00;   
+                pFrameData[4] = (dataSize>>24) & 0xFF;
+                pFrameData[5] = (dataSize>>16) & 0xFF;
+                pFrameData[6] = (dataSize>> 8) & 0xFF;
+                pFrameData[7] = (dataSize>> 0) & 0xFF;
+                
+                int sequence = pTMClient->mTransportManager.sendFrame(Data::ConnectionHandle, pFrameData, Data::FrameSize);
+                
+                pTMClient->mSendFrameMap[sequence] = pFrameData;
+            }
+            
+            return 0;
+        }
+      
 
     protected:
         ITransportManager & mTransportManager;
         tDeviceList mDeviceList;
         int mFrameSequenceNumber;
         Logger mLogger;
+        
+        std::vector<pthread_t> mThreads; 
+        std::map<int, uint8_t*> mSendFrameMap;
+        pthread_mutex_t mFrameReceivedNumberMutex;
+        pthread_mutex_t mFrameSendCompletedMutex;
+        int mNumberOfReceivedFrames;
+        int mNumberOfCompletelySentFrames;
     };
 
     /**
@@ -267,7 +354,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
     {
         Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManagerTest"));
 
-        LOG4CPLUS_INFO_EXT(logger, "*************************** Starting test *****************************");
+        LOG4CPLUS_INFO_EXT(logger, "\n*************************** Starting test *****************************");
         // All expectations must be sequenced
         //InSequence dummy;
 
@@ -295,7 +382,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
             .WillOnce(Invoke(&tmClient, &MockTransportManagerClient::doApplicationConnected))
         ;
 
-        EXPECT_CALL(tmClient, onFrameReceived(Data::ConnectionHandle, _, _))
+        EXPECT_CALL(tmClient, onFrameReceived(Data::ConnectionHandle, _, Data::FrameSize))
             .Times(Data::TotalNumberOfFrames)
             .WillRepeatedly(Invoke(&tmClient, &MockTransportManagerClient::doFrameReceived))
         ;
@@ -309,24 +396,32 @@ namespace test { namespace components { namespace TransportManager { namespace T
             .Times(1)
         ;
 
-
-
         // Running test
 
         pTm->addDataListener(&tmClient);
         pTm->addDeviceListener(&tmClient); 
 
-        LOG4CPLUS_INFO_EXT(logger, "*************************** Calling RUN *****************************");
+        LOG4CPLUS_INFO_EXT(logger, "\n*************************** Calling RUN *****************************");
         pTm->run();
 
         sleep(1);
 
-        LOG4CPLUS_INFO_EXT(logger, "*************************** Calling SCAN FOR DEVICES *****************************");
+        LOG4CPLUS_INFO_EXT(logger, "\n*************************** Calling SCAN FOR DEVICES *****************************");
         pTm->scanForNewDevices();
+        
+        sleep(1);
 
-        sleep(2);
+        LOG4CPLUS_INFO_EXT(logger, "\n******************* Waiting for all client thread to finish ********************");
+        tmClient.waitForAllThreads();
+        
+        sleep(1);
+        
+        LOG4CPLUS_INFO_EXT(logger, "\n******************* Disconnecting all devices ********************");
+        tmClient.disconnectAllDevices();
+        
+        sleep(1);
 
-        LOG4CPLUS_INFO_EXT(logger, "*************************** Deleting TM and shutting down *****************************");
+        LOG4CPLUS_INFO_EXT(logger, "\n*************************** Deleting TM and shutting down *****************************");
 
         // Shutdown transport manager
         delete pTm;
