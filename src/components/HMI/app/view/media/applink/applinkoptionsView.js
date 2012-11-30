@@ -24,11 +24,6 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
                             'optionsLabel'
                         ],
 
-    /** Applink Sub Mennu activate handler */
-    applinkOptionsActivate: function(){
-        this.showOptionsList();
-    }.observes('MFT.States.media.applink.applinkoptions.active'),
-
     /** Button to return to previous view*/
     backButton: MFT.Button.extend({
         classNames:        ['backButton','button'],     
@@ -46,12 +41,49 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
         content:            'Options'
     }),
 
+    AddCommand: function( commandId, params ){
 
-    showOptionsList: function(){
-        if( MFT.States.media.applink.applinkoptions.active ){
-            this.listOfOptions.items =  MFT.ApplinkMediaModel.optionsCommands.slice();
-            this.listOfOptions.list.refresh();
-        }
+        this.get('listOfOptions.list.childViews').pushObject(
+            MFT.Button.create({
+                action:                 'onCommand',
+                target:                 'MFT.ApplinkMediaController',
+                commandId:              commandId,
+                text:                   params.menuName,
+                classNames:             'list-item',
+                templateName:           'text'
+            })
+        );
+
+    },
+
+    DeleteCommand: function( commandId ){
+
+        this.get('listOfOptions.list.childViews').removeObjects(
+            this.get('listOfOptions.list.childViews').filterProperty( 'commandId' , commandId )
+        );
+
+    },
+
+    AddSubMenu: function( menuId, params ){
+
+        this.get('listOfOptions.list.childViews').pushObject(
+            MFT.Button.create({
+                action:                 'turnOnApplinkSubMenu',
+                target:                 'MFT.ApplinkMediaController',
+                menuId:                 menuId,
+                text:                   params.menuName,
+                classNames:             'list-item',
+                templateName:           'arrow'
+            })
+        );
+
+    },
+
+    DeleteSubMenu: function( menuId ){
+
+        this.get('listOfOptions.list.childViews').removeObjects(
+            this.get('listOfOptions.list.childViews').filterProperty( 'menuId' , menuId )
+        );
     },
 
     /**

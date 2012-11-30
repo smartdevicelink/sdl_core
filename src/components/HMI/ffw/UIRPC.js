@@ -164,178 +164,193 @@ FFW.UI = FFW.RPCObserver.create({
 
 		var resultCode = null;
 
-		if (request.method == "UI.Show") {
+		switch (request.method) {
+		    case "UI.Show":{
 
-			MFT.ApplinkMediaController.onApplinkUIShow(request.params);
+				MFT.ApplinkController.getApplicationModel(1).onApplinkUIShow(request.params);
 
-			this.sendUIResult("SUCCESS", request.id, request.method);
-		}
-		
-		if (request.method == "UI.Alert") {
+				this.sendUIResult("SUCCESS", request.id, request.method);
 
-			MFT.ApplinkMediaController.onApplinkUIAlert(request.params);
+		    	break;
+		    }
+		    case "UI.Alert":{
 
-			this.sendUIResult("SUCCESS", request.id, request.method);
-		}
+				MFT.ApplinkController.getApplicationModel(1).onApplinkUIAlert(request.params);
 
-		if (request.method == "UI.SetGlobalProperties") {
+				this.sendUIResult("SUCCESS", request.id, request.method);
 
-			MFT.TTSPopUp.receiveMessage("Set global properties");
+		    	break;
+		    }
+		    case "UI.SetGlobalProperties":{
+			    MFT.TTSPopUp.receiveMessage("Set global properties");
 
-			// TODO: please process as array 
-			this.globalProperties.set('helpPrompt', request.params.helpPrompt);
-			// TODO: please process as array 
-			this.globalProperties.set('timeoutPrompt', request.params.timeoutPrompt);
+				// TODO: please process as array 
+				this.globalProperties.set('helpPrompt', request.params.helpPrompt);
+				// TODO: please process as array 
+				this.globalProperties.set('timeoutPrompt', request.params.timeoutPrompt);
 
-			this.sendUIResult("SUCCESS", request.id, request.method);
-		}
-		
-		if (request.method == "UI.ResetGlobalProperties") {
-			
-			// reset all requested properties
-			for (var i=0;i<request.params.length;i++)
-			{
-			    this.resetProperties(reuqest.params[i]);
-				MFT.TTSPopUp.receiveMessage("Reset property: " + reuqest.params[i]);
+				this.sendUIResult("SUCCESS", request.id, request.method);
+		      	
+		      	break;
+		    }
+		    case "UI.ResetGlobalProperties":{
+
+			    // reset all requested properties
+				for (var i=0;i<request.params.length;i++)
+				{
+				    this.resetProperties(reuqest.params[i]);
+					MFT.TTSPopUp.receiveMessage("Reset property: " + reuqest.params[i]);
+				}
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
+			    
+			    break;
 			}
+		    case "UI.AddCommand":{
 
-			this.sendUIResult("SUCCESS", request.id, request.method);
-		}
+			    MFT.ApplinkController.getApplicationModel(1).onApplinkAddCommand(request.params);
 
-		if (request.method == "UI.AddCommand") {
-			
-			MFT.ApplinkMediaController.onApplinkAddCommand(request.params);
+				this.sendUIResult("SUCCESS", request.id, request.method);
 
-			this.sendUIResult("SUCCESS", request.id, request.method);
+		    	break;
+		    }
+		    case "UI.DeleteCommand":{
 
-		}
+				MFT.ApplinkController.getApplicationModel(1).onApplinkOptionsDeleteCommand(request.params.cmdId);
 
-		if (request.method == "UI.DeleteCommand") {
+				this.sendUIResult("SUCCESS", request.id, request.method);
+				
+				break;
+			}
+		    case "UI.AddSubMenu":{
 
-			MFT.ApplinkMediaController.onApplinkOptionsDeleteCommand(request.params.cmdId);
+				MFT.ApplinkController.getApplicationModel(1).onApplinkAddSubMenu(request.params.menuId, request.params);
 
-			this.sendUIResult("SUCCESS", request.id, request.method);
-		}
+				this.sendUIResult("SUCCESS", request.id, request.method);
+		    
+		    	break;
+		    }
+		    case "UI.DeleteSubMenu":{
 
-		if (request.method == "UI.AddSubMenu") {
+				var resultCode =  MFT.ApplinkController.getApplicationModel(1).onApplinkDeleteSubMenu(request.params.menuId);
 
-			MFT.ApplinkMediaController.onApplinkAddSubMenu(request.params.menuId, request.params);
+				this.sendUIResult(resultCode, request.id, request.method);
+		    	
+		    	break;
+		    }
+		    case "UI.CreateInteractionChoiceSet":{
 
-			this.sendUIResult("SUCCESS", request.id, request.method);
-		}
+				MFT.ApplinkController.getApplicationModel(1).onApplinkCreateInteractionChoise(request.params);
 
-		if (request.method == "UI.DeleteSubMenu") {
+				this.sendUIResult("SUCCESS", request.id, request.method);
+		    	
+		    	break;
+		    }
+		    case "UI.DeleteInteractionChoiceSet":{
 
-			var resultCode =  MFT.ApplinkMediaController.onApplinkDeleteSubMenu(request.params.menuId);
+				MFT.ApplinkController.getApplicationModel(1).onApplinkDeleteInteractionChoise(request.params.interactionChoiceSetID);
 
-			this.sendUIResult(resultCode, request.id, request.method);
+				this.sendUIResult("SUCCESS", request.id, request.method);
+		    	
+		    	break;
+		    }
+		    case "UI.PerformInteraction":{
 
-		}
+				this.performInteractionRequestId = request.id;
 
-		if (request.method == "UI.CreateInteractionChoiceSet") {
+				MFT.ApplinkController.getApplicationModel(1).turnOnApplinkPerform(request.params);
+		    	
+		    	break;
+		    }
+		    case "UI.SetMediaClockTimer":{
 
-			MFT.ApplinkMediaController.onApplinkCreateInteractionChoise(request.params);
+				var resultCode = MFT.ApplinkController.getApplicationModel(1).applinkSetMediaClockTimer(request.params);
 
-			this.sendUIResult("SUCCESS", request.id, request.method);
-		}
+				this.sendUIResult(resultCode, request.id, request.method);
+		    	
+		    	break;
+		    }
+		    case "UI.OnAppActivated":{
+		    
+		    	break;
+		    }
+		    case "UI.Slider":{
 
-		if (request.method == "UI.DeleteInteractionChoiceSet") {
+				MFT.ApplinkController.getApplicationModel(1).onApplinkSlider(request.params);
 
-			MFT.ApplinkMediaController.onApplinkDeleteInteractionChoise(request.params.interactionChoiceSetID);
-
-			this.sendUIResult("SUCCESS", request.id, request.method);
-
-		}
-
-		if (request.method == "UI.PerformInteraction") {
-
-			this.performInteractionRequestId = request.id;
-
-			MFT.ApplinkMediaController.turnOnApplinkPerform(request.params);
-
-		}
-
-		if (request.method == "UI.SetMediaClockTimer") {
-
-			var resultCode = MFT.ApplinkMediaController.applinkSetMediaClockTimer(request.params);
-
-			this.sendUIResult(resultCode, request.id, request.method);
-		}
-
-		if (request.method == "UI.OnAppActivated") {
-			//
-		}
-
-		if (request.method == "UI.Slider") {
-
-			MFT.ApplinkMediaController.onApplinkSlider(request.params);
-
-			this.sendUIResult("SUCCESS", request.id, request.method);
-
-		}
-
-		if (request.method == "UI.GetCapabilities") {
-
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result"	:	{
-					"capabilities":{
-						"displayCapabilities"	: {
-							"displayType":	"GEN2_8_DMA",
-							"textFields":[{
-									"name":			"mainField1",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
+				this.sendUIResult("SUCCESS", request.id, request.method);
+		    
+		    	break;
+		    }
+		    case  "UI.GetCapabilities":{
+				// send repsonse
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result"	:	{
+						"capabilities":{
+							"displayCapabilities"	: {
+								"displayType":	"GEN2_8_DMA",
+								"textFields":[{
+										"name":			"mainField1",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									},
+									{
+										"name":			"mainField2",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									},
+									{
+										"name":			"statusBar",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									},
+									{
+										"name":			"mediaClock",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									},
+									{
+										"name":			"mediaTrack",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									},
+									{
+										"name":			"alertText1",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									},
+									{
+										"name":			"alertText2",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									}],
 								},
-								{
-									"name":			"mainField2",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
-								},
-								{
-									"name":			"statusBar",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
-								},
-								{
-									"name":			"mediaClock",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
-								},
-								{
-									"name":			"mediaTrack",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
-								},
-								{
-									"name":			"alertText1",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
-								},
-								{
-									"name":			"alertText2",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
-								}],
+								"mediaClockFormats":["CLOCK1", "CLOCK2", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3"]
 							},
-							"mediaClockFormats":["CLOCK1", "CLOCK2", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3"]
+							"hmiZoneCapabilities"	: ["FRONT","BACK"]
 						},
-						"hmiZoneCapabilities"	: ["FRONT","BACK"]
-					},
 
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				};
+						"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+					};
 
-			this.client.send(JSONMessage);
+				this.client.send(JSONMessage);
+		    	
+		    	break;
+		    }
+		   	
+		   	default:{
+		      	//statements_def
+		      	break;
+		    }
 		}
 	},
 	

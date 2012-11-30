@@ -51,6 +51,59 @@ MFT.VRPopUp = Em.ContainerView.create({
         classNames:         'popUp',
     }),
 
+   AddCommand: function( commandId, vrCommands ){
+
+        for(var j = 0; j < vrCommands.length; j++){
+            this.get('listOfCommands.list.childViews').pushObject(
+                MFT.Button.create({
+                    action:                 'onCommand',
+                    target:                 'MFT.ApplinkMediaController',
+                    commandId:              commandId,
+                    text:                   vrCommands[j],
+                    classNames:             'list-item',
+                    templateName:           'text'
+                })
+            );
+        }
+
+    },
+
+    DeleteCommand: function( commandId ){
+
+        this.get('listOfCommands.list.childViews').removeObjects(
+            this.get('listOfCommands.list.childViews').filterProperty( 'commandId' , commandId )
+        );
+
+    },
+
+    CreateInteractionChoise: function( params ){
+
+        for(var i = 0; i<params.choiceSet.length; i++){
+            for(var j = 0; j<params.choiceSet[i].vrCommands.length; j++){
+                this.get('listOfCommands.list.childViews').pushObject(
+                    MFT.Button.create({
+                        action:                 'onVRPerformInteractionChoosed',
+                        target:                 'MFT.ApplinkMediaController',
+                        choiceID:               params.choiceSet[i].choiceID,
+                        interactionChoiceSetID: params.interactionChoiceSetID,
+                        text:                   params.choiceSet[i].vrCommands[j],
+                        classNames:             'list-item',
+                        templateName:           'text'
+                    })                                   
+                );
+            }
+        }
+
+    },
+
+    DeleteInteractionChoise: function( choiseSetID ){
+
+        this.get('listOfCommands.list.childViews').removeObjects(
+            this.get('listOfCommands.list.childViews').filterProperty( 'interactionChoiceSetID' , choiseSetID )
+        );
+
+    },
+
     activateVRPopUp: function(){
         var self = this;
         if(this.VRActive){
@@ -63,14 +116,6 @@ MFT.VRPopUp = Em.ContainerView.create({
         }else{
             this.set('VRActive', true);
             MFT.ApplinkMediaController.onSystemContextSwitcher(MFT.ApplinkMediaController.eSystemContext.VR);
-            this.showVRCommands();
-        }
-    },
-
-    showVRCommands: function(){
-        if(this.VRActive){
-            this.listOfCommands.items =  MFT.ApplinkMediaModel.voiceRecognitionCommands.slice();
-            this.listOfCommands.list.refresh();
         }
     },
 
