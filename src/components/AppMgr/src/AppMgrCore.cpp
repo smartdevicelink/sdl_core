@@ -756,14 +756,15 @@ namespace NsAppManager
             case NsAppLinkRPC::Marshaller::METHOD_SETMEDIACLOCKTIMER_REQUEST:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
+                NsRPC2Communication::UI::SetMediaClockTimer* setTimer = new NsRPC2Communication::UI::SetMediaClockTimer();
+                setTimer->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                core->mMessageMapping.addMessage(setTimer->getId(), connectionID, sessionID);
+
                 switch(mobileMsg->getProtocolVersion())
                 {
                     case 1:
                     {
                         NsAppLinkRPC::SetMediaClockTimer_request* object = (NsAppLinkRPC::SetMediaClockTimer_request*)mobileMsg;
-                        NsRPC2Communication::UI::SetMediaClockTimer* setTimer = new NsRPC2Communication::UI::SetMediaClockTimer();
-                        setTimer->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                        core->mMessageMapping.addMessage(setTimer->getId(), connectionID, sessionID);
                         if(object->get_startTime())
                         {
                             setTimer->set_startTime(*object->get_startTime());
@@ -774,9 +775,25 @@ namespace NsAppManager
                     }
                     case 2:
                     {
+                        NsAppLinkRPC::SetMediaClockTimer_v2_request* object = (NsAppLinkRPC::SetMediaClockTimer_v2_request*)mobileMsg;
+                        if(object->get_startTime())
+                        {
+                            NsAppLinkRPC::StartTime startTime;
+                            const NsAppLinkRPC::StartTime_v2& startTimeV2 = *object->get_startTime();
+                            startTime.set_hours(startTimeV2.get_hours());
+                            startTime.set_minutes(startTimeV2.get_minutes());
+                            startTime.set_seconds(startTimeV2.get_seconds());
+                            setTimer->set_startTime(startTime);
+                        }
+                        const NsAppLinkRPC::UpdateMode_v2& updateModeV2 = *object->get_updateMode();
+                        NsAppLinkRPC::UpdateMode updateMode;
+                        updateMode.set((NsAppLinkRPC::UpdateMode::UpdateModeInternal)updateModeV2.get());
+                        setTimer->set_updateMode(updateMode);
                         break;
                     }
                 }
+
+                HMIHandler::getInstance().sendRequest(setTimer);
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_ENCODEDSYNCPDATA_REQUEST:
