@@ -7,7 +7,7 @@
  * @filesource  app/controller/applink/ApplinkMediaController.js
  * @version     1.0
  *
- * @author      Artem Petrosyan
+ * @author      Andriy Melnik
  */
 
 MFT.ApplinkMediaController = Em.Object.create({
@@ -257,11 +257,9 @@ MFT.ApplinkMediaController = Em.Object.create({
         if( params.menuParams.parentID == 0 ){
             this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams);
         }else{
+        	MFT.ApplinkModel.subMenuCommands.push(params);
             if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
-                MFT.ApplinkModel.subMenuCommands.push(params);
                 MFT.ApplinkOptionsSubMenuView.SubMenuActivate(MFT.MediaController.currentApplinkSubMenuid);
-            }else{
-                MFT.ApplinkModel.subMenuCommands.push(params);
             }
         }
     },
