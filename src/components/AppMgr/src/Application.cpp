@@ -17,8 +17,9 @@ namespace NsAppManager
      * \param name application name
      * \param connectionId id of the connection associated with this application
      * \param sessionId id of the session associated with this application
+     * \param protocolVersion protocol version number
      */
-    Application::Application(const std::string& name , unsigned int connectionId, unsigned char sessionId)
+    Application::Application(const std::string& name , const unsigned int &connectionId, const unsigned char &sessionId, const unsigned int& protocolVersion)
         :mNgnMediaScreenAppName("")
         ,m_bUsesVehicleData(false)
         ,m_bIsMediaApplication(false)
@@ -26,6 +27,7 @@ namespace NsAppManager
         ,mSessionID(sessionId)
         ,mConnectionID(connectionId)
         ,mName(name)
+        ,mProtocolVersion(protocolVersion)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name << " for the connection id " << connectionId << " session id " << (uint)sessionId);
     }
@@ -44,6 +46,7 @@ namespace NsAppManager
         ,mSyncMsgVersion(app.getSyncMsgVersion())
         ,mConnectionID(app.getConnectionID())
         ,mSessionID(app.getSessionID())
+        ,mProtocolVersion(app.getProtocolVersion())
     {
         mVrSynonyms = app.getVrSynonyms();
     }
@@ -278,7 +281,7 @@ namespace NsAppManager
      * \brief retrieve application session ID
      * \return application session ID
      */
-    unsigned char Application::getSessionID() const
+    const unsigned char &Application::getSessionID() const
     {
         return mSessionID;
     }
@@ -287,9 +290,18 @@ namespace NsAppManager
      * \brief retrieve application session ID
      * \return application connection ID
      */
-    unsigned int Application::getConnectionID() const
+    const unsigned int &Application::getConnectionID() const
     {
         return mConnectionID;
+    }
+
+    /**
+     * \brief retrieve application protocol version number
+     * \return application protocol version number
+     */
+    const unsigned int &Application::getProtocolVersion() const
+    {
+        return mProtocolVersion;
     }
 
     /**

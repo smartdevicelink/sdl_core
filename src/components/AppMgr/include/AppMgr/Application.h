@@ -47,8 +47,9 @@ namespace NsAppManager
          * \param name application name
          * \param connectionId id of the connection associated with this application
          * \param sessionId id of the session associated with this application
+         * \param protocolVersion protocol version number
          */
-        Application(const std::string& name, unsigned int connectionId, unsigned char sessionId );
+        Application(const std::string& name, const unsigned int& connectionId, const unsigned char& sessionId, const unsigned int& protocolVersion );
 
         /**
          * \brief Default class destructor
@@ -204,13 +205,19 @@ namespace NsAppManager
          * \brief retrieve application session ID
          * \return application session ID
          */
-        unsigned char getSessionID() const;
+        const unsigned char& getSessionID() const;
 
         /**
          * \brief retrieve application session ID
          * \return application connection ID
          */
-        unsigned int getConnectionID() const;
+        const unsigned int& getConnectionID() const;
+
+        /**
+         * \brief retrieve application protocol version number
+         * \return application protocol version number
+         */
+        const unsigned int& getProtocolVersion() const;
 
         /**
          * \brief retrieve application name
@@ -373,6 +380,7 @@ namespace NsAppManager
         const std::string mName;
         const unsigned char mSessionID;
         const unsigned int mConnectionID;
+        const unsigned int mProtocolVersion;
         std::string mNgnMediaScreenAppName;
         std::vector<std::string> mVrSynonyms;
         bool m_bUsesVehicleData;
