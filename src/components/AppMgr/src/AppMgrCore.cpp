@@ -1281,12 +1281,29 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
 
-                NsAppLinkRPC::SetMediaClockTimer_response* response = new NsAppLinkRPC::SetMediaClockTimer_response();
-                response->set_success(true);
-                response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
-                core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                switch(app->getProtocolVersion())
+                {
+                    case 1:
+                    {
+                        NsAppLinkRPC::SetMediaClockTimer_response* response = new NsAppLinkRPC::SetMediaClockTimer_response();
+                        response->set_success(true);
+                        response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
+                        core->mMessageMapping.removeMessage(object->getId());
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        break;
+                    }
+                    case 2:
+                    {
+                        NsAppLinkRPC::SetMediaClockTimer_v2_response* response = new NsAppLinkRPC::SetMediaClockTimer_v2_response();
+                        response->set_success(true);
+                        response->set_resultCode(static_cast<NsAppLinkRPC::Result_v2::Result_v2Internal>(object->getResult()));
+                        core->mMessageMapping.removeMessage(object->getId());
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        break;
+                    }
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONDRIVERDISTRACTION:
