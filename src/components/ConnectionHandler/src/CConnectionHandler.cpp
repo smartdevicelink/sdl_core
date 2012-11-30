@@ -26,7 +26,8 @@ namespace NsConnectionHandler
     }
 
     CConnectionHandler::CConnectionHandler():
-    mpConnectionHandlerObserver(NULL)
+    mpConnectionHandlerObserver(NULL),
+    mTransportManager(NULL)
     {
 
     }
@@ -53,6 +54,10 @@ namespace NsConnectionHandler
             {
                 LOG4CPLUS_INFO( mLogger, "Add new device" << (*it_in).mUserFriendlyName << " Handler: " << (*it_in).mDeviceHandle);
                 mDeviceList.insert(tDeviceList::value_type((*it_in).mDeviceHandle, CDevice((*it_in).mDeviceHandle, (*it_in).mUserFriendlyName)));
+                if ( mTransportManager )
+                {
+                    mTransportManager -> connectDevice((*it_in).mDeviceHandle);
+                }
             }
         }
         if (0 != mpConnectionHandlerObserver)
@@ -121,6 +126,16 @@ namespace NsConnectionHandler
         connectionHandle = key & 0xFF00FFFF;
         sessionId = key >> 16;
         LOG4CPLUS_INFO( mLogger, "ConnectionHandle:" << connectionHandle << " Session:" << sessionId << " for key:" << key );
+    }
+
+    void CConnectionHandler::setTransportManager( NsAppLink::NsTransportManager::ITransportManager * transportManager )
+    {
+        if ( !transportManager )
+        {
+            LOG4CPLUS_ERROR(mLogger, "Null pointer to TransportManager.");
+            return;
+        }
+        mTransportManager = transportManager;
     }
 
 }/* namespace NsConnectionHandler */

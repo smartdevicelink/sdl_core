@@ -87,6 +87,8 @@ namespace NsConnectionHandler
         virtual void pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle, 
                                                unsigned char & sessionId);
 
+        void setTransportManager( NsAppLink::NsTransportManager::ITransportManager * transportManager );
+
     private:
         /**
          * \brief Default class constructor
@@ -117,6 +119,10 @@ namespace NsConnectionHandler
           *\brief For logging.
         */
         static log4cplus::Logger mLogger;
+
+        NsAppLink::NsTransportManager::ITransportManager * mTransportManager;
+
+
     };
 }/* namespace NsConnectionHandler */
 

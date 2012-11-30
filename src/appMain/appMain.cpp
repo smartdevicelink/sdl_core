@@ -106,8 +106,7 @@ int main(int argc, char** argv)
 
     NsAppLink::NsTransportManager::ITransportManager * transportManager = NsAppLink::NsTransportManager::ITransportManager::create();
     CTransportManagerListener tsl(transportManager);
-    transportManager->addDeviceListener(&tsl);
-    transportManager->run();
+    
     
 
     JSONHandler jsonHandler;
@@ -123,6 +122,11 @@ int main(int argc, char** argv)
     NsConnectionHandler::CConnectionHandler * connectionHandler = NsConnectionHandler::CConnectionHandler::getInstance();
 
     pProtocolHandler -> setSessionObserver( connectionHandler );
+
+    connectionHandler -> setTransportManager( transportManager );
+
+    transportManager->addDeviceListener(connectionHandler);
+    transportManager->run();
 
     NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
 
