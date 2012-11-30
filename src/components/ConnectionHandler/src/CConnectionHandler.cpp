@@ -105,6 +105,13 @@ namespace NsConnectionHandler
             } else
             {
                 LOG4CPLUS_INFO( mLogger, "New session ID:" << newSessionID );
+                if (0 != mpConnectionHandlerObserver)
+                {
+                    int sessionKey = keyFromPair(connectionHandle, newSessionID);
+                    mpConnectionHandlerObserver->onSessionStartedCallback((it->second).getConnectionDeviceHandle()
+                                                                         , sessionKey);
+                }
+
             }
         }
         return newSessionID;

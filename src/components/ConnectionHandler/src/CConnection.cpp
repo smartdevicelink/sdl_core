@@ -40,4 +40,14 @@ namespace NsConnectionHandler
         }
         return result;
     }
+
+    tConnectionHandle CConnection::getConnectionHandle()
+    {
+        return mConnectionHandle;
+    }
+
+    tDeviceHandle CConnection::getConnectionDeviceHandle()
+    {
+        return mConnectionDeviceHandle;
+    }
 }/* namespace NsConnectionHandler */
