@@ -867,7 +867,7 @@ namespace NsAppManager
                     {
                         NsAppLinkRPC::GenericResponse_response* response = new NsAppLinkRPC::GenericResponse_response();
                         response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPC::Result::UNSUPPORTED_REQUEST);
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
                         MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
                         break;
                     }
@@ -875,7 +875,7 @@ namespace NsAppManager
                     {
                         NsAppLinkRPC::GenericResponse_v2_response* response = new NsAppLinkRPC::GenericResponse_v2_response();
                         response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPC::Result_v2::UNSUPPORTED_REQUEST);
+                        response->set_resultCode(NsAppLinkRPC::Result_v2::INVALID_DATA);
                         MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
                         break;
                     }
