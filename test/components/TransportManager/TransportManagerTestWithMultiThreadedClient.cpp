@@ -38,10 +38,10 @@ namespace test { namespace components { namespace TransportManager { namespace T
         static const tConnectionHandle ConnectionHandle = 666;
 
         static const int BaseSequenceNumber = 1;
-        static const int NumberOfThreads    = 513;
-        static const int NumberOfFramesPerThread = 51;
+        static const int NumberOfThreads    = 213;
+        static const int NumberOfFramesPerThread = 53;
         static const int TotalNumberOfFrames = NumberOfThreads * NumberOfFramesPerThread;
-        static const int FrameSize = 3243;
+        static const int FrameSize = 323;
     }
 
     // ---------------- TEST CLASSES ---------------- //
@@ -274,7 +274,9 @@ namespace test { namespace components { namespace TransportManager { namespace T
                 
                 int sequence = pTMClient->mTransportManager.sendFrame(Data::ConnectionHandle, pFrameData, Data::FrameSize);
                 
+                pthread_mutex_lock(&pTMClient->mFrameSendCompletedMutex);
                 pTMClient->mSendFrameMap[sequence] = pFrameData;
+                pthread_mutex_unlock(&pTMClient->mFrameSendCompletedMutex);
             }
             
             return 0;
