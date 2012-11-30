@@ -1,5 +1,43 @@
+/**
+ * @name MFT.MenuList
+ * 
+ * @desc
+ * 
+ * @category	Controlls
+ * @filesource	app/controlls/MenuList.js
+ * @version		2.0
+ *
+ * @author		Artem Petrosyan
+ */
+
 MFT.MenuList = Em.ContainerView.extend({
+
+	/**
+	 * Add new item to container
+	 *
+	 * @param commandId: Number
+	 */
+	addItem: function( commandId ) {
+		this.get('content.childViews').pushObject( 
+			MFT.Button.create({
+				text:		'Button',
+				commandId:	commandId
+			})
+		);
+	},
 	
+	/**
+	 * Delete item from container
+	 * by command ID
+	 *
+	 * @param commandId: Number
+	 */
+	deleteItem: function( commandId ) {
+		this.get('content.childViews').removeObjects(
+			this.get('content.childViews').filterProperty( 'commandId' , commandId )
+		);
+	},
+
 	classNames: ['ffw_list_menu'],
 	
 	attributeBindings: ['elementHeight:style'],

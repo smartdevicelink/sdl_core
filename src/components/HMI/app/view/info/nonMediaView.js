@@ -85,12 +85,12 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 				
 				childViews: [
 					'optionsButton',
-					'routeInfoButton',
-					'softButton1',
-					'softButton2',
-					'softButton3',
-					'softButton4',
-					'softButton5'
+					'routeInfoButton'
+					//'softButton1',
+					//'softButton2',
+					//'softButton3',
+					//'softButton4',
+					//'softButton5'
 				],
 				
 				optionsButton: MFT.Button.extend({
