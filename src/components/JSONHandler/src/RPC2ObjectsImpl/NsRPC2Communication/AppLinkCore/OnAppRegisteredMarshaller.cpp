@@ -1,13 +1,16 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/AppLinkCore/OnAppRegistered.h"
 #include "../src/ALRPCObjectsImpl/LanguageMarshaller.h"
+#include "../src/ALRPCObjectsImpl/LanguageMarshaller.h"
+#include "../src/ALRPCObjectsImpl/TTSChunkMarshaller.h"
+#include "../src/ALRPCObjectsImpl/AppTypeMarshaller.h"
 #include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppRegisteredMarshaller.h"
 
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -60,6 +63,22 @@ bool OnAppRegisteredMarshaller::checkIntegrityConst(const OnAppRegistered& s)
 
   if(!NsAppLinkRPC::LanguageMarshaller::checkIntegrityConst(s.languageDesired))  return false;
 
+  if(!NsAppLinkRPC::LanguageMarshaller::checkIntegrityConst(s.hmiDisplayLanguageDesired))  return false;
+
+  if(s.ttsName)
+  {
+    unsigned int i=s.ttsName[0].size();
+    if(i<1)  return false;
+    if(i>100)  return false;
+  }
+
+  if(s.appType)
+  {
+    unsigned int i=s.appType[0].size();
+    if(i<1)  return false;
+    if(i>100)  return false;
+  }
+
   return true;
 }
 
@@ -89,6 +108,28 @@ Json::Value OnAppRegisteredMarshaller::toJSON(const OnAppRegistered& e)
   }
   json["params"]["isMediaApplication"]=Json::Value(e.isMediaApplication);;
   json["params"]["languageDesired"]=NsAppLinkRPC::LanguageMarshaller::toJSON(e.languageDesired);;
+  json["params"]["hmiDisplayLanguageDesired"]=NsAppLinkRPC::LanguageMarshaller::toJSON(e.hmiDisplayLanguageDesired);;
+  if(e.ttsName)
+  {
+    unsigned int i=e.ttsName[0].size();
+    Json::Value j=Json::Value(Json::arrayValue);
+    j.resize(i);
+    while(i--)
+      j[i]=NsAppLinkRPC::TTSChunkMarshaller::toJSON(e.ttsName[0][i]);
+
+    json["params"]["ttsName"]=j;
+  }
+  if(e.appType)
+  {
+    unsigned int i=e.appType[0].size();
+    Json::Value j=Json::Value(Json::arrayValue);
+    j.resize(i);
+    while(i--)
+      j[i]=NsAppLinkRPC::AppTypeMarshaller::toJSON(e.appType[0][i]);
+
+    json["params"]["appType"]=j;
+  }
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -143,6 +184,45 @@ bool OnAppRegisteredMarshaller::fromJSON(const Json::Value& json,OnAppRegistered
     
     if(!js.isMember("languageDesired") || !NsAppLinkRPC::LanguageMarshaller::fromJSON(js["languageDesired"],c.languageDesired))  return false;
 
+    if(!js.isMember("hmiDisplayLanguageDesired") || !NsAppLinkRPC::LanguageMarshaller::fromJSON(js["hmiDisplayLanguageDesired"],c.hmiDisplayLanguageDesired))  return false;
+
+    if(c.ttsName)  delete c.ttsName;
+    c.ttsName=0;
+    if(js.isMember("ttsName"))
+    {
+      if(!js["ttsName"].isArray()) return false;
+      unsigned int i=js["ttsName"].size();
+      if(i<1)  return false;
+      if(i>100)  return false;
+
+      c.ttsName=new std::vector<NsAppLinkRPC::TTSChunk>();
+      c.ttsName->resize(js["ttsName"].size());
+
+      while(i--)
+        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["ttsName"][i],c.ttsName[0][i]))  return false;
+    }
+
+
+    if(c.appType)  delete c.appType;
+    c.appType=0;
+    if(js.isMember("appType"))
+    {
+      if(!js["appType"].isArray()) return false;
+      unsigned int i=js["appType"].size();
+      if(i<1)  return false;
+      if(i>100)  return false;
+
+      c.appType=new std::vector<NsAppLinkRPC::AppType>();
+      c.appType->resize(js["appType"].size());
+
+      while(i--)
+        if(!NsAppLinkRPC::AppTypeMarshaller::fromJSON(js["appType"][i],c.appType[0][i]))  return false;
+    }
+
+
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

@@ -5,8 +5,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -69,6 +69,7 @@ Json::Value AddSubMenuMarshaller::toJSON(const AddSubMenu& e)
   if(e.position)
     json["params"]["position"]=Json::Value(e.position[0]);;
   json["params"]["menuName"]=Json::Value(e.menuName);;
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -106,6 +107,9 @@ bool AddSubMenuMarshaller::fromJSON(const Json::Value& json,AddSubMenu& c)
     c.menuName=js["menuName"].asString();
     if(c.menuName.length()>500)  return false;
 
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

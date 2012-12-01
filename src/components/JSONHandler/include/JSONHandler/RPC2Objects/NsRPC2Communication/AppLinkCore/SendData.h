@@ -9,8 +9,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -35,10 +35,14 @@ namespace NsRPC2Communication
 // getters
       const std::vector< std::string>& get_data(void);
 
+      int get_appId(void);
+
 
 // setters
 /// 1 <= size <= 100
       bool set_data(const std::vector< std::string>& data);
+
+      bool set_appId(int appId);
 
 
     private:
@@ -46,6 +50,7 @@ namespace NsRPC2Communication
       friend class SendDataMarshaller;
 
       std::vector< std::string> data;
+      int appId;
 
     };
   }

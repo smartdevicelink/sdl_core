@@ -20,8 +20,8 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
 	/** View Components*/
     childViews:         [
                             'backButton',
-                            //'buttonsWrapper'
-                            'listOfOptions'
+                            'listOfOptions',
+                            'optionsLabel'
                         ],
 
     /** Button to return to previous view*/
@@ -32,92 +32,58 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
         icon:              'images/media/ico_back.png',   
     }),
 
-    /** 
-      * Function to add new command button to
-      * right menu in applinkView screen
-      */
-    AddSubMenu: function( menuId, menuName ){
+    optionsLabel:    MFT.Label.extend({
 
-        this.listOfOptions.items.push({
-                type:       MFT.Button,
-                params:     {
-                    action:                 'turnOnApplinkSubMenu',
-                    target:                 'MFT.MediaController',
-                    menuId:                 menuId,
-                    text:                   menuName,
-                    className:              'rs-item',
-                    templateName:           'text'
-                }                                   
-            });
+        elementId:          'optionsLabel',
 
-        this.listOfOptions.list.refresh();
-    },
+        classNames:         'optionsLabel',
 
-    /** 
-      * Function to add new command button to
-      * Options screen
-      */
-    AddCommand: function( commandId, params){
+        content:            'Options'
+    }),
 
-        this.listOfOptions.items.push({
-                type:       MFT.Button,
-                params:     {
-                    action:                 'onCommand',
-                    target:                 'FFW.UI',
-                    commandId:              commandId,
-                    text:                   params.menuName,
-                    className:              'rs-item',
-                    templateName:           'text'
-                }                                   
-            });
+    AddCommand: function( commandId, params ){
 
-        this.listOfOptions.list.refresh();
-    },
-
-    DeleteCommand: function(commandId){
-
-        var deleted = false;
-            count = this.listOfOptions.items.length;
-        for(var i = count-1; i >= 0; i--){
-            if(this.listOfOptions.items[i].params.commandId == commandId){
-                this.listOfOptions.deleteItem(i);
-                deleted = true;
-            }
-        }
-        if(!deleted){
-            count = MFT.ApplinkModel.subMenuCommands.length;
-            for(var i = count-1; i >= 0; i--){
-                if(MFT.ApplinkModel.subMenuCommands[i].cmdId == commandId){
-                   MFT.ApplinkModel.subMenuCommands.splice(i, 1);
-                }
-            }
-        }
-
-        this.listOfOptions.list.refresh();
+        this.get('listOfOptions.list.childViews').pushObject(
+            MFT.Button.create({
+                action:                 'onCommand',
+                target:                 'MFT.ApplinkMediaController',
+                commandId:              commandId,
+                text:                   params.menuName,
+                classNames:             'list-item',
+                templateName:           'text'
+            })
+        );
 
     },
 
-    /** 
-      * Function to delete command button from
-      * right menu in applinkView screen
-      */
-    DeleteSubMenu: function(menuId){
+    DeleteCommand: function( commandId ){
 
-        var deleted = false;
-            count = this.listOfOptions.items.length;
-        for(var i = count-1; i >= 0; i--){
-            if(this.listOfOptions.items[i].params.menuId == menuId){
-                this.listOfOptions.deleteItem(i);
-                deleted = true;
-            }
-        }
-        if(deleted){
-            return "SUCCESS";
-        }else{
-            return "INVALID_DATA";
-        }
+        this.get('listOfOptions.list.childViews').removeObjects(
+            this.get('listOfOptions.list.childViews').filterProperty( 'commandId' , commandId )
+        );
 
-        this.listOfOptions.list.refresh();
+    },
+
+    AddSubMenu: function( menuId, params ){
+
+        this.get('listOfOptions.list.childViews').pushObject(
+            MFT.Button.create({
+                action:                 'turnOnApplinkSubMenu',
+                target:                 'MFT.ApplinkMediaController',
+                menuId:                 menuId,
+                text:                   params.menuName,
+                classNames:             'list-item',
+                templateName:           'arrow'
+            })
+        );
+
+    },
+
+    DeleteSubMenu: function( menuId ){
+
+        this.get('listOfOptions.list.childViews').removeObjects(
+            this.get('listOfOptions.list.childViews').filterProperty( 'menuId' , menuId )
+        );
     },
 
     /**

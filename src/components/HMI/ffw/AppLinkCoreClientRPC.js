@@ -34,7 +34,6 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	init: function() {
 	},
 
-
 	/*
    	 * connect to RPC bus
  	 */
@@ -58,8 +57,8 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		this._super();
 
 		// subscribe to notifications
-		this.onAppRegisteredSubscribeRequestId 			= this.client.subscribeToNotification(this.onAppRegisteredNotification);
-		this.onAppUnregisteredSubscribeRequestId 		= this.client.subscribeToNotification(this.onAppUnregisteredNotification);
+		this.onAppRegisteredSubscribeRequestId 		= this.client.subscribeToNotification(this.onAppRegisteredNotification);
+		this.onAppUnregisteredSubscribeRequestId 	= this.client.subscribeToNotification(this.onAppUnregisteredNotification);
 	},
 	
 	/*
@@ -70,15 +69,15 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		this._super();
 
 		// unsubscribe from notifications
-		this.onAppRegusteredUnsubscribeRequestId 		= this.client.unsubscribeFromNotification(this.onAppRegisteredNotification);
-		this.onAppUnregusteredUnsubscribeRequestId 		= this.client.unsubscribeFromNotification(this.onAppUnregisteredNotification);
+		this.onAppRegusteredUnsubscribeRequestId 	= this.client.unsubscribeFromNotification(this.onAppRegisteredNotification);
+		this.onAppUnregusteredUnsubscribeRequestId	= this.client.unsubscribeFromNotification(this.onAppUnregisteredNotification);
 	},
 
 	/*
 	 * Client disconnected.
 	 */
 	onRPCDisconnected: function() {
-
+		MFT.ApplinkMediaModel.onApplicationDisconected();
 	},
 
 	/*
@@ -90,13 +89,15 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.AppLinkCoreClientRPC.onRPCResult");
 		this._super();
 
-		if (response.id = this.getAppListRequestId)
-		{	
-			// 
+		if (response.result.method == "AppLinkCore.GetAppListResponse")
+		{
+			if(MFT.States.info.active){
+				MFT.ApplinkMediaModel.onGetAppList(response.result);
+			}
 		}
 
-		if (response.id = this.activateAppRequestId)
-		{	
+		if (response.id == this.activateAppRequestId)
+		{
 			// 
 		}
 	 },
@@ -119,15 +120,17 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		if (notification.method == this.onAppRegisteredNotification)
 		{	
 			// add new app to the list
-			MFT.TTSPopUp.receiveMessage(notification.params.appName + " connected!");
-			MFT.ApplinkModel.showInfo.set('appName', notification.params.appName);
+			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " connected!");
+			MFT.ApplinkMediaModel.showInfo.set('appName', notification.params.appName);
+			this.getAppList();
 		}
 
 		if (notification.method == this.onAppUnregisteredNotification)
 		{	
 			//  remove app from list
-			MFT.TTSPopUp.receiveMessage(notification.params.appName + " disconnected!");
-			MFT.ApplinkModel.showInfo.set('appName', "<No app>");
+			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " disconnected!");
+			MFT.ApplinkMediaModel.showInfo.set('appName', "<No app>");
+			MFT.ApplinkMediaController.set('hideApplinkMediaButton', true);
 		}
 	},
 
@@ -145,7 +148,9 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * unregister component is RPC bus
 	 */
 	getAppList: function() {
-		this.getAppListRequestId = this.generateId();
+		this.getAppListRequestId = this.client.generateId();
+
+		console.log('onGetAppList        ' + this.getAppListRequestId);
 
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
@@ -154,9 +159,23 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"params":	{
 			}
 		};
-		this.send(JSONMessage);
+		this.client.send(JSONMessage);
 	},
 
+    /** Sending data from HMI for processing in ApplinkCore */
+    SendData: function(){
+    	Em.Logger.log("FFW.ALCore.SendData");
+
+		// send request
+
+		var JSONMessage = {
+			"jsonrpc"	:	"2.0",
+			"id"		: 	this.client.idStart,
+			"method"	:	"AppLinkCore.SendData",
+			"params"	:	{"data": ["Data for sending from HMI to Mobile application."]}
+		};
+		this.client.send(JSONMessage);
+    },
 
 	/*
 	 * handle RPC requests here
@@ -169,10 +188,10 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.client.idStart,
-			"method"	:	"AppLinkCore.activateApp",
-			"params"	:	{"appName":[MFT.ApplinkModel.showInfo.appName]}
+			"method"	:	"AppLinkCore.ActivateApp",
+			"params"	:	{"appName":MFT.ApplinkMediaModel.showInfo.appName}
 		};
 		this.client.send(JSONMessage);
-	},
+	}
 
 })

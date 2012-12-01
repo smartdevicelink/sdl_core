@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -18,6 +18,10 @@ Show& Show::operator =(const Show& c)
   mainField1= c.mainField1 ? new std::string(c.mainField1[0]) : 0;
   if(mainField2)  delete mainField2;
   mainField2= c.mainField2 ? new std::string(c.mainField2[0]) : 0;
+  if(mainField3)  delete mainField3;
+  mainField3= c.mainField3 ? new std::string(c.mainField3[0]) : 0;
+  if(mainField4)  delete mainField4;
+  mainField4= c.mainField4 ? new std::string(c.mainField4[0]) : 0;
   if(alignment)  delete alignment;
   alignment= c.alignment ? new NsAppLinkRPC::TextAlignment(c.alignment[0]) : 0;
   if(statusBar)  delete statusBar;
@@ -26,6 +30,13 @@ Show& Show::operator =(const Show& c)
   mediaClock= c.mediaClock ? new std::string(c.mediaClock[0]) : 0;
   if(mediaTrack)  delete mediaTrack;
   mediaTrack= c.mediaTrack ? new std::string(c.mediaTrack[0]) : 0;
+  if(graphic)  delete graphic;
+  graphic= c.graphic ? new NsAppLinkRPC::Image(c.graphic[0]) : 0;
+  if(softButtons)  delete softButtons;
+  softButtons= c.softButtons ? new std::vector<NsAppLinkRPC::SoftButton>(c.softButtons[0]) : 0;
+  if(customPresets)  delete customPresets;
+  customPresets= c.customPresets ? new std::vector<std::string>(c.customPresets[0]) : 0;
+  appId=c.appId;
   return *this;
 }
 
@@ -34,10 +45,15 @@ Show::~Show(void)
 {
   if(mainField1)  delete mainField1;
   if(mainField2)  delete mainField2;
+  if(mainField3)  delete mainField3;
+  if(mainField4)  delete mainField4;
   if(alignment)  delete alignment;
   if(statusBar)  delete statusBar;
   if(mediaClock)  delete mediaClock;
   if(mediaTrack)  delete mediaTrack;
+  if(graphic)  delete graphic;
+  if(softButtons)  delete softButtons;
+  if(customPresets)  delete customPresets;
 }
 
 
@@ -45,10 +61,15 @@ Show::Show(void) :
   RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SHOW),
   mainField1(0),
   mainField2(0),
+  mainField3(0),
+  mainField4(0),
   alignment(0),
   statusBar(0),
   mediaClock(0),
-  mediaTrack(0)
+  mediaTrack(0),
+  graphic(0),
+  softButtons(0),
+  customPresets(0)
 {
 }
 
@@ -93,6 +114,42 @@ void Show::reset_mainField2(void)
 {
   if(mainField2)  delete mainField2;
   mainField2=0;
+}
+
+const std::string* Show::get_mainField3(void)
+{
+  return mainField3;
+}
+
+bool Show::set_mainField3(const std::string& mainField3_)
+{
+  if(mainField3)  delete mainField3;
+  mainField3=new std::string(mainField3_);
+  return true;
+}
+
+void Show::reset_mainField3(void)
+{
+  if(mainField3)  delete mainField3;
+  mainField3=0;
+}
+
+const std::string* Show::get_mainField4(void)
+{
+  return mainField4;
+}
+
+bool Show::set_mainField4(const std::string& mainField4_)
+{
+  if(mainField4)  delete mainField4;
+  mainField4=new std::string(mainField4_);
+  return true;
+}
+
+void Show::reset_mainField4(void)
+{
+  if(mainField4)  delete mainField4;
+  mainField4=0;
 }
 
 const NsAppLinkRPC::TextAlignment* Show::get_alignment(void)
@@ -165,6 +222,71 @@ void Show::reset_mediaTrack(void)
 {
   if(mediaTrack)  delete mediaTrack;
   mediaTrack=0;
+}
+
+const NsAppLinkRPC::Image* Show::get_graphic(void)
+{
+  return graphic;
+}
+
+bool Show::set_graphic(const NsAppLinkRPC::Image& graphic_)
+{
+  if(graphic)  delete graphic;
+  graphic=new NsAppLinkRPC::Image(graphic_);
+  return true;
+}
+
+void Show::reset_graphic(void)
+{
+  if(graphic)  delete graphic;
+  graphic=0;
+}
+
+const std::vector< NsAppLinkRPC::SoftButton>* Show::get_softButtons(void)
+{
+  return softButtons;
+}
+
+bool Show::set_softButtons(const std::vector< NsAppLinkRPC::SoftButton>& softButtons_)
+{
+  if(softButtons)  delete softButtons;
+  softButtons=new std::vector< NsAppLinkRPC::SoftButton>(softButtons_);
+  return true;
+}
+
+void Show::reset_softButtons(void)
+{
+  if(softButtons)  delete softButtons;
+  softButtons=0;
+}
+
+const std::vector< std::string>* Show::get_customPresets(void)
+{
+  return customPresets;
+}
+
+bool Show::set_customPresets(const std::vector< std::string>& customPresets_)
+{
+  if(customPresets)  delete customPresets;
+  customPresets=new std::vector< std::string>(customPresets_);
+  return true;
+}
+
+void Show::reset_customPresets(void)
+{
+  if(customPresets)  delete customPresets;
+  customPresets=0;
+}
+
+int Show::get_appId(void)
+{
+  return appId;
+}
+
+bool Show::set_appId(int appId_)
+{
+  appId=appId_;
+  return true;
 }
 
 bool Show::checkIntegrity(void)

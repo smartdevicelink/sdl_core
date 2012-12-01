@@ -9,8 +9,8 @@
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -37,11 +37,17 @@ namespace NsRPC2Communication
 
       const NsAppLinkRPC::ButtonEventMode& get_mode(void);
 
+      const unsigned int* get_customButtonID(void);
 
 // setters
       bool set_name(const NsAppLinkRPC::ButtonName& name);
 
       bool set_mode(const NsAppLinkRPC::ButtonEventMode& mode);
+
+/// customButtonID <= 65536
+      bool set_customButtonID(const unsigned int& customButtonID);
+
+      void reset_customButtonID(void);
 
 
     private:
@@ -50,6 +56,7 @@ namespace NsRPC2Communication
 
       NsAppLinkRPC::ButtonName name;
       NsAppLinkRPC::ButtonEventMode mode;
+      unsigned int* customButtonID;
 
     };
   }

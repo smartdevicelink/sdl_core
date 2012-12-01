@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/InteractionModeMarshaller.inc ./src/ALRPCObjectsImpl/InteractionModeMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/InteractionModeMarshaller.inc ../src/ALRPCObjectsImpl/InteractionModeMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -35,13 +35,13 @@ InteractionMode_intHash::getPointer (register const char *str, register unsigned
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 19 "./src/ALRPCObjectsImpl/InteractionModeMarshaller.gp"
+#line 19 "../src/ALRPCObjectsImpl/InteractionModeMarshaller.gp"
       {"BOTH",2},
       {""}, {""},
-#line 18 "./src/ALRPCObjectsImpl/InteractionModeMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/InteractionModeMarshaller.gp"
       {"VR_ONLY",1},
       {""}, {""}, {""},
-#line 17 "./src/ALRPCObjectsImpl/InteractionModeMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/InteractionModeMarshaller.gp"
       {"MANUAL_ONLY",0}
     };
 

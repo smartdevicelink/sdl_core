@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/TBTStateMarshaller.inc ./src/ALRPCObjectsImpl/TBTStateMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/TBTStateMarshaller.inc ../src/ALRPCObjectsImpl/TBTStateMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -37,14 +37,14 @@ TBTState_intHash::getPointer (register const char *str, register unsigned int le
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""},
-#line 19 "./src/ALRPCObjectsImpl/TBTStateMarshaller.gp"
+#line 19 "../src/ALRPCObjectsImpl/TBTStateMarshaller.gp"
       {"ROUTE_REFUSED",2},
-#line 18 "./src/ALRPCObjectsImpl/TBTStateMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/TBTStateMarshaller.gp"
       {"ROUTE_ACCEPTED",1},
-#line 20 "./src/ALRPCObjectsImpl/TBTStateMarshaller.gp"
+#line 20 "../src/ALRPCObjectsImpl/TBTStateMarshaller.gp"
       {"ROUTE_CANCELLED",3},
       {""}, {""}, {""}, {""},
-#line 17 "./src/ALRPCObjectsImpl/TBTStateMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/TBTStateMarshaller.gp"
       {"ROUTE_UPDATE_REQUEST",0}
     };
 

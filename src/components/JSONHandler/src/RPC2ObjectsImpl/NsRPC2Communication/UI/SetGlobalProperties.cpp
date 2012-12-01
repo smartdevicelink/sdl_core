@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -18,6 +18,11 @@ SetGlobalProperties& SetGlobalProperties::operator =(const SetGlobalProperties& 
   helpPrompt= c.helpPrompt ? new std::vector<NsAppLinkRPC::TTSChunk>(c.helpPrompt[0]) : 0;
   if(timeoutPrompt)  delete timeoutPrompt;
   timeoutPrompt= c.timeoutPrompt ? new std::vector<NsAppLinkRPC::TTSChunk>(c.timeoutPrompt[0]) : 0;
+  if(vrHelpTitle)  delete vrHelpTitle;
+  vrHelpTitle= c.vrHelpTitle ? new std::string(c.vrHelpTitle[0]) : 0;
+  if(vrHelp)  delete vrHelp;
+  vrHelp= c.vrHelp ? new std::vector<NsAppLinkRPC::VrHelpItem>(c.vrHelp[0]) : 0;
+  appId=c.appId;
   return *this;
 }
 
@@ -26,13 +31,17 @@ SetGlobalProperties::~SetGlobalProperties(void)
 {
   if(helpPrompt)  delete helpPrompt;
   if(timeoutPrompt)  delete timeoutPrompt;
+  if(vrHelpTitle)  delete vrHelpTitle;
+  if(vrHelp)  delete vrHelp;
 }
 
 
 SetGlobalProperties::SetGlobalProperties(void) : 
   RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIES),
   helpPrompt(0),
-  timeoutPrompt(0)
+  timeoutPrompt(0),
+  vrHelpTitle(0),
+  vrHelp(0)
 {
 }
 
@@ -77,6 +86,53 @@ void SetGlobalProperties::reset_timeoutPrompt(void)
 {
   if(timeoutPrompt)  delete timeoutPrompt;
   timeoutPrompt=0;
+}
+
+const std::string* SetGlobalProperties::get_vrHelpTitle(void)
+{
+  return vrHelpTitle;
+}
+
+bool SetGlobalProperties::set_vrHelpTitle(const std::string& vrHelpTitle_)
+{
+  if(vrHelpTitle)  delete vrHelpTitle;
+  vrHelpTitle=new std::string(vrHelpTitle_);
+  return true;
+}
+
+void SetGlobalProperties::reset_vrHelpTitle(void)
+{
+  if(vrHelpTitle)  delete vrHelpTitle;
+  vrHelpTitle=0;
+}
+
+const std::vector< NsAppLinkRPC::VrHelpItem>* SetGlobalProperties::get_vrHelp(void)
+{
+  return vrHelp;
+}
+
+bool SetGlobalProperties::set_vrHelp(const std::vector< NsAppLinkRPC::VrHelpItem>& vrHelp_)
+{
+  if(vrHelp)  delete vrHelp;
+  vrHelp=new std::vector< NsAppLinkRPC::VrHelpItem>(vrHelp_);
+  return true;
+}
+
+void SetGlobalProperties::reset_vrHelp(void)
+{
+  if(vrHelp)  delete vrHelp;
+  vrHelp=0;
+}
+
+int SetGlobalProperties::get_appId(void)
+{
+  return appId;
+}
+
+bool SetGlobalProperties::set_appId(int appId_)
+{
+  appId=appId_;
+  return true;
 }
 
 bool SetGlobalProperties::checkIntegrity(void)

@@ -42,6 +42,11 @@ namespace NsAppManager
         MessageMapping();
 
         /**
+         * \brief Default class destructor
+         */
+        ~MessageMapping();
+
+        /**
          * \brief add a message to a mapping
          * \param msgId message id
          * \param app application to map a message to
@@ -51,9 +56,10 @@ namespace NsAppManager
         /**
          * \brief add a message to a mapping
          * \param msgId message id
+         * \param connectionID connection to map appropriate application with message
          * \param sessionID session to map appropriate application with message
          */
-        void addMessage( int msgId, unsigned char sessionID );
+        void addMessage(int msgId, unsigned int connectionID, unsigned char sessionID );
 
         /**
          * \brief remove a message from a mapping
@@ -73,6 +79,11 @@ namespace NsAppManager
          * \return RegistryItem instance
          */
         RegistryItem *findRegistryItemAssignedToCommand(int msgId) const;
+
+        /**
+         * \brief cleans message mapping
+         */
+        void clear( );
 
     private:
 

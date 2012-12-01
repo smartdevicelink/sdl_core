@@ -50,6 +50,11 @@ namespace NsAppManager
         ButtonMapping();
 
         /**
+         * \brief Default class destructor
+         */
+        ~ButtonMapping();
+
+        /**
          * \brief add a button to a mapping
          * \param buttonName button name
          * \param app application to map a button to
@@ -67,6 +72,11 @@ namespace NsAppManager
          * \param app application to remove all associated buttons from mapping
          */
         void removeItem( RegistryItem* app );
+
+        /**
+         * \brief cleans all the mapping
+         */
+        void clear( );
 
         /**
          * \brief find a registry item subscribed to button

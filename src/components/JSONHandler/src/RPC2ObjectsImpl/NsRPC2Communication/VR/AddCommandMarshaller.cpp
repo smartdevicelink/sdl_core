@@ -5,8 +5,8 @@
 /*
   interface	NsRPC2Communication::VR
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -81,6 +81,7 @@ Json::Value AddCommandMarshaller::toJSON(const AddCommand& e)
 
     json["params"]["vrCommands"]=j;
   }
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -122,6 +123,9 @@ bool AddCommandMarshaller::fromJSON(const Json::Value& json,AddCommand& c)
     }
 
 
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

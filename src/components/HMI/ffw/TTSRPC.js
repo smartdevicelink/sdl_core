@@ -93,11 +93,7 @@ FFW.TTS = FFW.RPCObserver.create({
 		
 		if (request.method == "TTS.Speak") {
 
-			var message = '';
-			for(var i = 0; i < request.params.ttsChunks.length; i++){
-				message += request.params.ttsChunks[i].text + '\n';
-			}
-			MFT.TTSPopUp.receiveMessage(message);
+			MFT.ApplinkMediaModel.onApplinkTTSSpeak(request.params);
 
 			// send repsonse
 			var JSONMessage = {
@@ -110,7 +106,7 @@ FFW.TTS = FFW.RPCObserver.create({
 			this.client.send(JSONMessage);
 		}
 
-		/*
+		
 		if (request.method == "TTS.GetCapabilities") {
 
 			// send repsonse
@@ -125,8 +121,7 @@ FFW.TTS = FFW.RPCObserver.create({
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}
 			};
-			//this.client.send(JSONMessage);
+			this.client.send(JSONMessage);
 		}
-		*/
 	}
 })

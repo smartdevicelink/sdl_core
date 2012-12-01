@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/SystemContextMarshaller.inc ./src/ALRPCObjectsImpl/SystemContextMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/SystemContextMarshaller.inc ../src/ALRPCObjectsImpl/SystemContextMarshaller.gp  */
 /* Computed positions: -k'2' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -90,12 +90,12 @@ SystemContext_intHash::getPointer (register const char *str, register unsigned i
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 19 "./src/ALRPCObjectsImpl/SystemContextMarshaller.gp"
+#line 19 "../src/ALRPCObjectsImpl/SystemContextMarshaller.gp"
       {"MENU",2},
-#line 17 "./src/ALRPCObjectsImpl/SystemContextMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/SystemContextMarshaller.gp"
       {"MAIN",0},
       {""}, {""}, {""},
-#line 18 "./src/ALRPCObjectsImpl/SystemContextMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/SystemContextMarshaller.gp"
       {"VRSESSION",1}
     };
 

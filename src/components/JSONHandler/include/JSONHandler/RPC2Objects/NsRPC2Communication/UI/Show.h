@@ -2,15 +2,18 @@
 #define NSRPC2COMMUNICATION_UI_SHOW_INCLUDE
 
 #include <string>
+#include <vector>
 #include "JSONHandler/RPC2Request.h"
 
 #include "../include/JSONHandler/ALRPCObjects/TextAlignment.h"
+#include "../include/JSONHandler/ALRPCObjects/Image.h"
+#include "../include/JSONHandler/ALRPCObjects/SoftButton.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -35,10 +38,17 @@ namespace NsRPC2Communication
 // getters
       const std::string* get_mainField1(void);
       const std::string* get_mainField2(void);
+      const std::string* get_mainField3(void);
+      const std::string* get_mainField4(void);
       const NsAppLinkRPC::TextAlignment* get_alignment(void);
       const std::string* get_statusBar(void);
       const std::string* get_mediaClock(void);
       const std::string* get_mediaTrack(void);
+      const NsAppLinkRPC::Image* get_graphic(void);
+      const std::vector< NsAppLinkRPC::SoftButton>* get_softButtons(void);
+      const std::vector< std::string>* get_customPresets(void);
+      int get_appId(void);
+
 
 // setters
 /// mainField1 <= 500
@@ -50,6 +60,16 @@ namespace NsRPC2Communication
       bool set_mainField2(const std::string& mainField2);
 
       void reset_mainField2(void);
+
+/// mainField3 <= 500
+      bool set_mainField3(const std::string& mainField3);
+
+      void reset_mainField3(void);
+
+/// mainField4 <= 500
+      bool set_mainField4(const std::string& mainField4);
+
+      void reset_mainField4(void);
 
       bool set_alignment(const NsAppLinkRPC::TextAlignment& alignment);
 
@@ -70,6 +90,22 @@ namespace NsRPC2Communication
 
       void reset_mediaTrack(void);
 
+      bool set_graphic(const NsAppLinkRPC::Image& graphic);
+
+      void reset_graphic(void);
+
+/// 0 <= size <= 8
+      bool set_softButtons(const std::vector< NsAppLinkRPC::SoftButton>& softButtons);
+
+      void reset_softButtons(void);
+
+/// customPresets[] <= 500 ; 0 <= size <= 6
+      bool set_customPresets(const std::vector< std::string>& customPresets);
+
+      void reset_customPresets(void);
+
+      bool set_appId(int appId);
+
 
     private:
 
@@ -77,10 +113,16 @@ namespace NsRPC2Communication
 
       std::string* mainField1;
       std::string* mainField2;
+      std::string* mainField3;
+      std::string* mainField4;
       NsAppLinkRPC::TextAlignment* alignment;
       std::string* statusBar;
       std::string* mediaClock;
       std::string* mediaTrack;
+      NsAppLinkRPC::Image* graphic;
+      std::vector< NsAppLinkRPC::SoftButton>* softButtons;
+      std::vector< std::string>* customPresets;
+      int appId;
 
     };
   }

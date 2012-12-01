@@ -22,6 +22,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Default class destructor
+     */
+    MessageMapping::~MessageMapping()
+    {
+        clear();
+    }
+
+    /**
      * \brief add a message to a mapping
      * \param msgId message id
      * \param app application to map a message to
@@ -40,14 +48,15 @@ namespace NsAppManager
     /**
      * \brief add a message to a mapping
      * \param msgId message id
+     * \param connectionID connection to map appropriate application with message
      * \param sessionID session to map appropriate application with message
      */
-    void MessageMapping::addMessage(int msgId, unsigned char sessionID)
+    void MessageMapping::addMessage(int msgId, unsigned int connectionID, unsigned char sessionID)
     {
-        RegistryItem* app = AppMgrRegistry::getInstance().getItem(sessionID);
+        RegistryItem* app = AppMgrRegistry::getInstance().getItem(connectionID, sessionID);
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found by sessionId " << sessionID );
+            LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found by connection id " << connectionID << " session id " << (uint)sessionID );
             return;
         }
         LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to a message " << msgId << " in app " << app->getApplication()->getName() );
@@ -106,6 +115,14 @@ namespace NsAppManager
         }
         LOG4CPLUS_INFO_EXT(mLogger, "Message " << msgId << " not found in subscribed." );
         return 0;
+    }
+
+    /**
+     * \brief cleans menu mapping
+     */
+    void MessageMapping::clear()
+    {
+        mMessageMapping.clear();
     }
 
     /**

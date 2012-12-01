@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -15,6 +15,7 @@ using namespace NsRPC2Communication::UI;
 OnSystemContext& OnSystemContext::operator =(const OnSystemContext& c)
 {
   systemContext=c.systemContext;
+  appId=c.appId;
   return *this;
 }
 
@@ -44,6 +45,17 @@ const NsAppLinkRPC::SystemContext& OnSystemContext::get_systemContext(void)
 bool OnSystemContext::set_systemContext(const NsAppLinkRPC::SystemContext& systemContext_)
 {
   systemContext=systemContext_;
+  return true;
+}
+
+int OnSystemContext::get_appId(void)
+{
+  return appId;
+}
+
+bool OnSystemContext::set_appId(int appId_)
+{
+  appId=appId_;
   return true;
 }
 

@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/UpdateModeMarshaller.inc ./src/ALRPCObjectsImpl/UpdateModeMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/UpdateModeMarshaller.inc ../src/ALRPCObjectsImpl/UpdateModeMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -35,14 +35,14 @@ UpdateMode_intHash::getPointer (register const char *str, register unsigned int 
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""},
-#line 19 "./src/ALRPCObjectsImpl/UpdateModeMarshaller.gp"
+#line 19 "../src/ALRPCObjectsImpl/UpdateModeMarshaller.gp"
       {"PAUSE",2},
-#line 20 "./src/ALRPCObjectsImpl/UpdateModeMarshaller.gp"
+#line 20 "../src/ALRPCObjectsImpl/UpdateModeMarshaller.gp"
       {"RESUME",3},
-#line 17 "./src/ALRPCObjectsImpl/UpdateModeMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/UpdateModeMarshaller.gp"
       {"COUNTUP",0},
       {""},
-#line 18 "./src/ALRPCObjectsImpl/UpdateModeMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/UpdateModeMarshaller.gp"
       {"COUNTDOWN",1}
     };
 

@@ -16,7 +16,7 @@ MFT.TTSPopUp = Em.ContainerView.create({
 
 	classNames:			'TTSPopUp',
 
-	classNameBindings:		['received'],
+	classNameBindings:		['active'],
 
 	childViews: [
 		'popUp',
@@ -25,7 +25,7 @@ MFT.TTSPopUp = Em.ContainerView.create({
 
 	content:			'Messaage',
 
-	received: 			false,
+	active: 			false,
 
 	popUp : Em.View.extend({
 
@@ -34,7 +34,7 @@ MFT.TTSPopUp = Em.ContainerView.create({
 		classNames:			'popUp',
 	}),
 
-	message : MFT.Label.extend({
+	message: MFT.Label.extend({
 
 		elementId:			'message',
 
@@ -43,11 +43,11 @@ MFT.TTSPopUp = Em.ContainerView.create({
 		contentBinding:		'parentView.content'
 	}),
 
-	receiveMessage: function(msg){
+	ActivateTTS: function(msg){
 		var self = this;
 
 		this.set('content', msg);
-		this.set('received', true);
-		setTimeout(function(){self.set('received', false);}, 10000);
+		this.set('active', true);
+		setTimeout(function(){self.set('active', false);}, 10000);
 	}
 });

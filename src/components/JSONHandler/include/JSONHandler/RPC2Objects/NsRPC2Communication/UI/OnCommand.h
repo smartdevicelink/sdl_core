@@ -7,8 +7,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -33,10 +33,14 @@ namespace NsRPC2Communication
 // getters
       unsigned int get_commandId(void);
 
+      int get_appId(void);
+
 
 // setters
 /// commandId <= 2000000000
       bool set_commandId(unsigned int commandId);
+
+      bool set_appId(int appId);
 
 
     private:
@@ -44,6 +48,7 @@ namespace NsRPC2Communication
       friend class OnCommandMarshaller;
 
       unsigned int commandId;
+      int appId;
 
     };
   }

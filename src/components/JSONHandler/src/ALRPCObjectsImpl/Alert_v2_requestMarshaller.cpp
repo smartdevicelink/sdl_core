@@ -1,0 +1,235 @@
+#include "../include/JSONHandler/ALRPCObjects/Alert_v2_request.h"
+#include "SoftButtonMarshaller.h"
+#include "TTSChunk_v2Marshaller.h"
+
+#include "Alert_v2_requestMarshaller.h"
+
+
+/*
+  interface	Ford Sync RAPI
+  version	1.2 / 2.0O
+  date		2011-05-17 / 2012-11-02
+  generated at	Thu Nov 29 14:49:08 2012
+  source stamp	Thu Nov 29 06:50:10 2012
+  author	robok0der
+*/
+
+using namespace NsAppLinkRPC;
+
+
+bool Alert_v2_requestMarshaller::checkIntegrity(Alert_v2_request& s)
+{
+  return checkIntegrityConst(s);
+}
+
+
+bool Alert_v2_requestMarshaller::fromString(const std::string& s,Alert_v2_request& e)
+{
+  try
+  {
+    Json::Reader reader;
+    Json::Value json;
+    if(!reader.parse(s,json,false))  return false;
+    if(!fromJSON(json,e))  return false;
+  }
+  catch(...)
+  {
+    return false;
+  }
+  return true;
+}
+
+
+const std::string Alert_v2_requestMarshaller::toString(const Alert_v2_request& e)
+{
+  Json::FastWriter writer;
+  return checkIntegrityConst(e) ? writer.write(toJSON(e)) : "";
+}
+
+
+bool Alert_v2_requestMarshaller::checkIntegrityConst(const Alert_v2_request& s)
+{
+  if(s.alertText1 && s.alertText1->length()>500)  return false;
+  if(s.alertText2 && s.alertText2->length()>500)  return false;
+  if(s.alertText3 && s.alertText3->length()>500)  return false;
+  if(s.ttsChunks)
+  {
+    unsigned int i=s.ttsChunks[0].size();
+    if(i>100 || i<1)  return false;
+    while(i--)
+    {
+    if(!TTSChunk_v2Marshaller::checkIntegrityConst(s.ttsChunks[0][i]))   return false;
+    }
+  }
+  if(s.duration && *s.duration>10000)  return false;
+  if(s.duration && *s.duration<3000)  return false;
+  if(s.softButtons)
+  {
+    unsigned int i=s.softButtons[0].size();
+    if(i>4 || i<0)  return false;
+    while(i--)
+    {
+    if(!SoftButtonMarshaller::checkIntegrityConst(s.softButtons[0][i]))   return false;
+    }
+  }
+  return true;
+}
+
+Json::Value Alert_v2_requestMarshaller::toJSON(const Alert_v2_request& e)
+{
+  Json::Value json(Json::objectValue);
+  if(!checkIntegrityConst(e))
+    return Json::Value(Json::nullValue);
+
+  json["request"]=Json::Value(Json::objectValue);
+  json["request"]["name"]=Json::Value("Alert_v2");
+  json["request"]["correlationID"]=Json::Value(e.getCorrelationID());
+
+  Json::Value j=Json::Value(Json::objectValue);
+
+  if(e.alertText1)
+    j["alertText1"]=Json::Value(*e.alertText1);
+
+  if(e.alertText2)
+    j["alertText2"]=Json::Value(*e.alertText2);
+
+  if(e.alertText3)
+    j["alertText3"]=Json::Value(*e.alertText3);
+
+  if(e.ttsChunks)
+  {
+    unsigned int sz=e.ttsChunks->size();
+    j["ttsChunks"]=Json::Value(Json::arrayValue);
+    j["ttsChunks"].resize(sz);
+    for(unsigned int i=0;i<sz;i++)
+      j["ttsChunks"][i]=TTSChunk_v2Marshaller::toJSON(e.ttsChunks[0][i]);
+  }
+
+  if(e.duration)
+    j["duration"]=Json::Value(*e.duration);
+
+  if(e.playTone)
+    j["playTone"]=Json::Value(*e.playTone);
+
+  if(e.softButtons)
+  {
+    unsigned int sz=e.softButtons->size();
+    j["softButtons"]=Json::Value(Json::arrayValue);
+    j["softButtons"].resize(sz);
+    for(unsigned int i=0;i<sz;i++)
+      j["softButtons"][i]=SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
+  }
+
+  json["request"]["parameters"]=j;
+  return json;
+}
+
+
+bool Alert_v2_requestMarshaller::fromJSON(const Json::Value& js,Alert_v2_request& c)
+{
+  if(c.alertText1)  delete c.alertText1;
+  c.alertText1=0;
+
+  if(c.alertText2)  delete c.alertText2;
+  c.alertText2=0;
+
+  if(c.alertText3)  delete c.alertText3;
+  c.alertText3=0;
+
+  if(c.ttsChunks)  delete c.ttsChunks;
+  c.ttsChunks=0;
+
+  if(c.duration)  delete c.duration;
+  c.duration=0;
+
+  if(c.playTone)  delete c.playTone;
+  c.playTone=0;
+
+  if(c.softButtons)  delete c.softButtons;
+  c.softButtons=0;
+
+  try
+  {
+    if(!js.isObject())  return false;
+
+    if(!js.isMember("request"))  return false;
+
+    if(!js["request"].isObject())  return false;
+    const Json::Value& j2=js["request"];
+
+    if(!j2.isMember("name") || !j2["name"].isString() || j2["name"].asString().compare("Alert_v2"))  return false;
+    if(!j2.isMember("correlationID") || !j2["correlationID"].isInt())  return false;
+    c.setCorrelationID(j2["correlationID"].asInt());
+
+    if(!j2.isMember("parameters"))  return false;
+    const Json::Value& json=j2["parameters"];
+    if(!json.isObject())  return false;
+    if(json.isMember("alertText1"))
+    {
+      const Json::Value& j=json["alertText1"];
+      if(!j.isString())  return false;
+      c.alertText1=new std::string(j.asString());
+    }
+    if(json.isMember("alertText2"))
+    {
+      const Json::Value& j=json["alertText2"];
+      if(!j.isString())  return false;
+      c.alertText2=new std::string(j.asString());
+    }
+    if(json.isMember("alertText3"))
+    {
+      const Json::Value& j=json["alertText3"];
+      if(!j.isString())  return false;
+      c.alertText3=new std::string(j.asString());
+    }
+    if(json.isMember("ttsChunks"))
+    {
+      const Json::Value& j=json["ttsChunks"];
+      if(!j.isArray())  return false;
+      c.ttsChunks=new std::vector<TTSChunk_v2>();
+      c.ttsChunks->resize(j.size());
+      for(unsigned int i=0;i<j.size();i++)
+      {
+        TTSChunk_v2 t;
+        if(!TTSChunk_v2Marshaller::fromJSON(j[i],t))
+          return false;
+        c.ttsChunks[0][i]=t;
+      }
+
+    }
+    if(json.isMember("duration"))
+    {
+      const Json::Value& j=json["duration"];
+      if(!j.isInt())  return false;
+      c.duration=new unsigned int(j.asInt());
+    }
+    if(json.isMember("playTone"))
+    {
+      const Json::Value& j=json["playTone"];
+      if(!j.isBool())  return false;
+      c.playTone=new bool(j.asBool());
+    }
+    if(json.isMember("softButtons"))
+    {
+      const Json::Value& j=json["softButtons"];
+      if(!j.isArray())  return false;
+      c.softButtons=new std::vector<SoftButton>();
+      c.softButtons->resize(j.size());
+      for(unsigned int i=0;i<j.size();i++)
+      {
+        SoftButton t;
+        if(!SoftButtonMarshaller::fromJSON(j[i],t))
+          return false;
+        c.softButtons[0][i]=t;
+      }
+
+    }
+
+  }
+  catch(...)
+  {
+    return false;
+  }
+  return checkIntegrity(c);
+}
+

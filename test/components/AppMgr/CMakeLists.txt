@@ -36,6 +36,16 @@ include_directories (../../../src/components/AppMgr/include/
 
 set (SOURCES
         main.cpp
+        TestEnvironment.cpp
+        hmiEmulator/AppLinkCoreClientRPC.cpp
+        hmiEmulator/ButtonsRPC.cpp
+        hmiEmulator/TTSRPC.cpp
+        hmiEmulator/UIRPC.cpp
+        hmiEmulator/VRRPC.cpp
+        hmiEmulator/RPC.cpp
+        hmiEmulator/ResourceContainer.cpp
+        hmiEmulator/Application.cpp
+        mobileEmulator/ALRPC.cpp
     )
 
 if( NOT CMAKE_BUILD_TYPE )

@@ -1,6 +1,7 @@
 #ifndef NSRPC2COMMUNICATION_BUTTONS_ONBUTTONPRESS_INCLUDE
 #define NSRPC2COMMUNICATION_BUTTONS_ONBUTTONPRESS_INCLUDE
 
+#include <string>
 #include "JSONHandler/RPC2Notification.h"
 
 #include "../include/JSONHandler/ALRPCObjects/ButtonName.h"
@@ -9,8 +10,8 @@
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -37,11 +38,17 @@ namespace NsRPC2Communication
 
       const NsAppLinkRPC::ButtonPressMode& get_mode(void);
 
+      const std::string* get_customButtonName(void);
 
 // setters
       bool set_name(const NsAppLinkRPC::ButtonName& name);
 
       bool set_mode(const NsAppLinkRPC::ButtonPressMode& mode);
+
+/// customButtonName <= 500
+      bool set_customButtonName(const std::string& customButtonName);
+
+      void reset_customButtonName(void);
 
 
     private:
@@ -50,6 +57,7 @@ namespace NsRPC2Communication
 
       NsAppLinkRPC::ButtonName name;
       NsAppLinkRPC::ButtonPressMode mode;
+      std::string* customButtonName;
 
     };
   }

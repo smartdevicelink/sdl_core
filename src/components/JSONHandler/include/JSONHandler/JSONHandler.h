@@ -69,7 +69,7 @@ public:
      * to be serialized to Json message and sent to mobile App.
      * \param sessionId ID of the session the message was received within.
      */
-    void sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, unsigned char sessionId );   
+    void sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, int connectionKey );   
     /*End of methods for IRPCMessagesObserver*/
        
 protected:
@@ -133,7 +133,7 @@ private:
       *\brief Queue of messages to Mobile Application.
       *\sa MessageQueue
     */
-    MessageQueue<const NsAppLinkRPC::ALRPCMessage*>    mOutgoingMessages;
+    MessageQueue<std::pair<int,const NsAppLinkRPC::ALRPCMessage*>>    mOutgoingMessages;
 
     /**
       *\brief Thread for handling messages to Mobile Application.

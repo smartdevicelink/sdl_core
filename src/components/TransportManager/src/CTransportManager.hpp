@@ -377,6 +377,7 @@ namespace NsAppLink
 
             /**
              * @brief Incapsulates frame data for each connection
+             * @todo implement copy constructor and 
              **/
             struct SFrameDataForConnection
             {
@@ -458,39 +459,92 @@ namespace NsAppLink
             };
 
             /**
-             * @brief Map for storing Data Callbacks threads.
-             **/
-            typedef std::map<tConnectionHandle, pthread_t> tDataCallbacksThreads;
-
-            /**
              * @brief Vector for storing Data Callbacks.
              **/
             typedef std::vector<SDataListenerCallback> tDataCallbacksVector;
 
             /**
-             * @brief Map for storing callbacks for each connection handle
+             * @brief Struct for storing information, related to single connection
              **/
-            typedef std::map<tConnectionHandle, tDataCallbacksVector*> tDataCallbacks;
+            struct SConnectionInfo
+            {
+                /**
+                 * @brief Constructor.
+                 *
+                 * @param ConnectionHandle Connection handle.
+                 * @param DeviceAdapter Device adapter
+                 **/
+                SConnectionInfo(const tConnectionHandle ConnectionHandle, IDeviceAdapter & DeviceAdapter);
+
+                /**
+                 * @brief Copy constructor
+                 *
+                 * @param other Reference to object to be copied
+                 **/
+                SConnectionInfo(const SConnectionInfo& other);
+
+                /**
+                 * @brief Comparison operator.
+                 *
+                 * @param i_other Reference to the object to be compared with
+                 * @return bool
+                 **/
+                bool operator==( const SConnectionInfo& i_other ) const;
+
+                /**
+                 * @brief Destructor
+                 *
+                 **/
+                virtual ~SConnectionInfo();
+
+                /**
+                 * @brief Connection handle, associated with connection information
+                 **/
+                const tConnectionHandle mConnectionHandle;
+
+                /**
+                 * @brief Terminate flag.
+                 *
+                 * This flag is set to notify connection thread that connection
+                 * must be closed and connection thread must be terminated.
+                 **/
+                bool mTerminateFlag;
+
+                /**
+                 * @brief Callbacks for sending
+                 **/
+                tDataCallbacksVector mDataCallbacksVector;
+
+                /**
+                 * @brief Thread handle
+                 **/
+                pthread_t mConnectionThread;
+
+                /**
+                 * @brief Condition variable. Used for waiting for callbacks data
+                 **/
+                pthread_cond_t mConditionVar;
+
+                /**
+                 * @brief Device adapter, which opened connection
+                 **/
+                IDeviceAdapter& mpDeviceAdapter;
+
+                /**
+                 * @brief Frame data
+                 **/
+                SFrameDataForConnection mFrameData;
+            };
 
             /**
-             * @brief Map for storing condition variables for each connection handle
+             * @brief Connections map
              **/
-            typedef std::map<tConnectionHandle, pthread_cond_t*> tDataCallbacksConditionVariables;
+            typedef std::map<tConnectionHandle, SConnectionInfo*> tConnectionsMap;
 
             /**
              * @brief Map for storing available devices for each device adapter
              **/
             typedef std::map<IDeviceAdapter*, tInternalDeviceList*> tDevicesByAdapterMap;
-
-            /**
-             * @brief Map for storing device adapters which are responsible for handling single Connection Handle
-             **/
-            typedef std::map<tConnectionHandle, IDeviceAdapter*> tDeviceAdaptersByConnectionHandleMap;
-
-            /**
-             * @brief Map for storing and processing frame data for each connection
-             **/
-            typedef std::map<tConnectionHandle, SFrameDataForConnection*> tFrameDataForConnectionMap;
 
             /**
              * @brief Start routine for Application-related callbacks.
@@ -548,7 +602,7 @@ namespace NsAppLink
              * @param ConnectionHandle Connection Handle
              * @return bool
              **/
-            void startDataCallbacksThread(const tConnectionHandle ConnectionHandle);
+            void startConnection(const tConnectionHandle ConnectionHandle, IDeviceAdapter& DeviceAdapter);
 
             /**
              * @brief Stops thread for data-related callbacks for given connection handle
@@ -557,7 +611,7 @@ namespace NsAppLink
              * @return void
              * @warning terminate flag must be set to true before calling this function
              **/
-            void stopDataCallbacksThread(const tConnectionHandle ConnectionHandle);
+            void stopConnection(const tConnectionHandle ConnectionHandle);
 
             /**
              * @brief Check thread existence for given ConnectionHandle
@@ -567,7 +621,15 @@ namespace NsAppLink
              *
              * @attention This function is not thread safe
              **/
-            bool isThreadForConnectionHandleExist(const tConnectionHandle ConnectionHandle);
+            bool isConnectionAvailable(const tConnectionHandle ConnectionHandle);
+
+            /**
+             * @brief Returns connection information by Connection Handle
+             *
+             * @param ConnectionHandle Connection handle
+             * @return SConnectionInfo*
+             **/
+            SConnectionInfo* getConnection(const tConnectionHandle ConnectionHandle);
 
             /**
              * @brief Adds new device adapter
@@ -627,23 +689,6 @@ namespace NsAppLink
              * @return void
              **/
             void sendDeviceCallback(const SDeviceListenerCallback& callback);
-
-            /**
-             * @brief Initializes frame data for connection if it was not initialized before
-             *
-             * @attention This function is not thread-safe
-             *
-             * @param ConnectionHandle Connection Handle
-             * @return void
-             **/
-            SFrameDataForConnection *initializeFrameDataForConnection(tConnectionHandle ConnectionHandle);
-
-            /**
-             * @brief Destroys all frame data for all connections
-             *
-             * @return void
-             **/
-            void destroyFrameDataForAllConnections();
 
             /**
              * @brief Device adapters.
@@ -722,21 +767,6 @@ namespace NsAppLink
             bool mTerminateFlag;
 
             /**
-             * @brief Data callbacks for each connection handle
-             **/
-            tDataCallbacks mDataListenersCallbacks;
-
-            /**
-             * @brief Threads for sending data callbacks for each connection handle
-             **/
-            tDataCallbacksThreads mDataCallbacksThreads;
-
-            /**
-             * @brief Condition variables for each connection handle
-             **/
-            tDataCallbacksConditionVariables mDataCallbacksConditionVars;
-
-            /**
              * @brief Devices for each adapter
              **/
             tDevicesByAdapterMap mDevicesByAdapter;
@@ -747,19 +777,9 @@ namespace NsAppLink
             mutable pthread_mutex_t mDevicesByAdapterMutex;
 
             /**
-             * @brief Map for storing device adapters which are responsible for handling single Connection Handle
+             * @brief Connections
              **/
-            tDeviceAdaptersByConnectionHandleMap mDeviceAdaptersByConnectionHandle;
-
-            /**
-             * @brief Mutex restricting access to device adapters which are responsible for handling single Connection Handle
-             **/
-            mutable pthread_mutex_t mDeviceAdaptersByConnectionHandleMutex;
-
-            /**
-             * @brief Map for storing and processing frame data for each connection
-             **/
-            tFrameDataForConnectionMap mFrameDataForConnection;
+            tConnectionsMap mConnections;
         };
     }
 }

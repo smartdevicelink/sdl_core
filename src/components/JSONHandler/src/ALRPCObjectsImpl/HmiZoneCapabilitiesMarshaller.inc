@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.inc ./src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.inc ../src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -35,9 +35,9 @@ HmiZoneCapabilities_intHash::getPointer (register const char *str, register unsi
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""},
-#line 18 "./src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.gp"
       {"BACK",1},
-#line 17 "./src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/HmiZoneCapabilitiesMarshaller.gp"
       {"FRONT",0}
     };
 

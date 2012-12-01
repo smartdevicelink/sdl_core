@@ -6,8 +6,8 @@
 /*
   interface	NsRPC2Communication::TTS
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -75,6 +75,7 @@ Json::Value SpeakMarshaller::toJSON(const Speak& e)
 
     json["params"]["ttsChunks"]=j;
   }
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -104,6 +105,9 @@ bool SpeakMarshaller::fromJSON(const Json::Value& json,Speak& c)
       c.ttsChunks=z;
     }
 
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

@@ -240,11 +240,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
         virtual ~TestTransportManager(void )
         {
-            if(0 != mpDeviceAdapter)
-            {
-                delete mpDeviceAdapter;
-                mpDeviceAdapter = 0;
-            }
+
         }
 
         virtual void initializeDeviceAdapters()
@@ -344,7 +340,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
         LOG4CPLUS_INFO_EXT(logger, "*************************** Calling SCAN FOR DEVICES *****************************");
         pTm->scanForNewDevices();
 
-        sleep(10);
+        sleep(2);
 
         LOG4CPLUS_INFO_EXT(logger, "*************************** Deleting TM and shutting down *****************************");
 

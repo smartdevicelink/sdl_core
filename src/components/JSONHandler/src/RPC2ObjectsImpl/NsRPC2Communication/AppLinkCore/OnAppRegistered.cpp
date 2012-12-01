@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -21,6 +21,12 @@ OnAppRegistered& OnAppRegistered::operator =(const OnAppRegistered& c)
   vrSynonym= c.vrSynonym ? new std::vector<std::string>(c.vrSynonym[0]) : 0;
   isMediaApplication=c.isMediaApplication;
   languageDesired=c.languageDesired;
+  hmiDisplayLanguageDesired=c.hmiDisplayLanguageDesired;
+  if(ttsName)  delete ttsName;
+  ttsName= c.ttsName ? new std::vector<NsAppLinkRPC::TTSChunk>(c.ttsName[0]) : 0;
+  if(appType)  delete appType;
+  appType= c.appType ? new std::vector<NsAppLinkRPC::AppType>(c.appType[0]) : 0;
+  appId=c.appId;
   return *this;
 }
 
@@ -28,12 +34,16 @@ OnAppRegistered& OnAppRegistered::operator =(const OnAppRegistered& c)
 OnAppRegistered::~OnAppRegistered(void)
 {
   if(vrSynonym)  delete vrSynonym;
+  if(ttsName)  delete ttsName;
+  if(appType)  delete appType;
 }
 
 
 OnAppRegistered::OnAppRegistered(void) : 
   RPC2Notification(Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPREGISTERED),
-  vrSynonym(0)
+  vrSynonym(0),
+  ttsName(0),
+  appType(0)
 {
 }
 
@@ -114,6 +124,64 @@ const NsAppLinkRPC::Language& OnAppRegistered::get_languageDesired(void)
 bool OnAppRegistered::set_languageDesired(const NsAppLinkRPC::Language& languageDesired_)
 {
   languageDesired=languageDesired_;
+  return true;
+}
+
+const NsAppLinkRPC::Language& OnAppRegistered::get_hmiDisplayLanguageDesired(void)
+{
+  return hmiDisplayLanguageDesired;
+}
+
+bool OnAppRegistered::set_hmiDisplayLanguageDesired(const NsAppLinkRPC::Language& hmiDisplayLanguageDesired_)
+{
+  hmiDisplayLanguageDesired=hmiDisplayLanguageDesired_;
+  return true;
+}
+
+const std::vector< NsAppLinkRPC::TTSChunk>* OnAppRegistered::get_ttsName(void)
+{
+  return ttsName;
+}
+
+bool OnAppRegistered::set_ttsName(const std::vector< NsAppLinkRPC::TTSChunk>& ttsName_)
+{
+  if(ttsName)  delete ttsName;
+  ttsName=new std::vector< NsAppLinkRPC::TTSChunk>(ttsName_);
+  return true;
+}
+
+void OnAppRegistered::reset_ttsName(void)
+{
+  if(ttsName)  delete ttsName;
+  ttsName=0;
+}
+
+const std::vector< NsAppLinkRPC::AppType>* OnAppRegistered::get_appType(void)
+{
+  return appType;
+}
+
+bool OnAppRegistered::set_appType(const std::vector< NsAppLinkRPC::AppType>& appType_)
+{
+  if(appType)  delete appType;
+  appType=new std::vector< NsAppLinkRPC::AppType>(appType_);
+  return true;
+}
+
+void OnAppRegistered::reset_appType(void)
+{
+  if(appType)  delete appType;
+  appType=0;
+}
+
+int OnAppRegistered::get_appId(void)
+{
+  return appId;
+}
+
+bool OnAppRegistered::set_appId(int appId_)
+{
+  appId=appId_;
   return true;
 }
 

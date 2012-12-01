@@ -8,6 +8,8 @@
 #ifndef ALRPCMESSAGE_INCLUDE
 #define ALRPCMESSAGE_INCLUDE
 
+#include <vector>
+
 /**
   *\namespace NsAppLinkRPC
   *\brief Namespace for AppLink JSON protocol related functionality.
@@ -75,7 +77,19 @@ namespace NsAppLinkRPC
         /**
          * \brief setter for id of RPC.
         */
-        virtual void setMethodId(int packetID );
+        virtual void setMethodId( int packetID );
+
+        /**
+         * \brief setter of binary data
+         * \param binaryData Vector of binary.
+         */
+        virtual void setBinaryData( const std::vector<unsigned char> & binaryData );
+
+        /**
+         * \brief Getter of binary data
+         * \return Pointer to binary data or NULL if doesn't exist.
+         */
+        virtual const std::vector<unsigned char> * getBinaryData() const;
 
     private:
         /**
@@ -94,6 +108,11 @@ namespace NsAppLinkRPC
          * function name + "_" + MessageType+ "Id"
         */
         int mMethodId;   
+
+        /**
+          *\brief Array of binary data if it exists
+        */
+        std::vector<unsigned char> * mBinaryData;
     };
 
 }

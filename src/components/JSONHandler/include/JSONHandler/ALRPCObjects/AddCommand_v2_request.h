@@ -1,0 +1,82 @@
+#ifndef NSAPPLINKRPC_ADDCOMMAND_V2_REQUEST_INCLUDE
+#define NSAPPLINKRPC_ADDCOMMAND_V2_REQUEST_INCLUDE
+
+#include <vector>
+#include <string>
+
+#include "Image.h"
+#include "MenuParams_v2.h"
+#include "JSONHandler/ALRPCRequest.h"
+
+
+/*
+  interface	Ford Sync RAPI
+  version	1.2 / 2.0O
+  date		2011-05-17 / 2012-11-02
+  generated at	Thu Nov 29 14:49:08 2012
+  source stamp	Thu Nov 29 06:50:10 2012
+  author	robok0der
+*/
+
+namespace NsAppLinkRPC
+{
+
+/**
+     Adds a command to the in application menu.
+     Either menuParams or vrCommands must be provided.
+*/
+
+  class AddCommand_v2_request : public ALRPCRequest
+  {
+  public:
+  
+    AddCommand_v2_request(const AddCommand_v2_request& c);
+    AddCommand_v2_request(void);
+    
+    virtual ~AddCommand_v2_request(void);
+  
+    AddCommand_v2_request& operator =(const AddCommand_v2_request&);
+  
+    bool checkIntegrity(void);
+
+    const unsigned int* get_cmdID(void) const;
+    const MenuParams_v2* get_menuParams(void) const;
+    const std::vector<std::string>* get_vrCommands(void) const;
+    const Image* get_cmdIcon(void) const;
+
+    void reset_cmdID(void);
+    bool set_cmdID(unsigned int cmdID_);
+    void reset_menuParams(void);
+    bool set_menuParams(const MenuParams_v2& menuParams_);
+    void reset_vrCommands(void);
+    bool set_vrCommands(const std::vector<std::string>& vrCommands_);
+    void reset_cmdIcon(void);
+    bool set_cmdIcon(const Image& cmdIcon_);
+
+  private:
+  
+    friend class AddCommand_v2_requestMarshaller;
+
+
+///  unique ID of the command to add.
+      unsigned int* cmdID;	//!<  (0,2000000000)
+
+///  Optional sub value containing menu parameters
+      MenuParams_v2* menuParams;
+
+/**
+     An array of strings to be used as VR synonyms for this command.
+     If this array is provided, it may not be empty.
+*/
+      std::vector<std::string>* vrCommands;	//!<   [%s..%s] (99)
+
+/**
+     Image struct determining whether static or dynamic icon.
+     If omitted on supported displays, no (or the default if applicable) icon shall be displayed.
+*/
+      Image* cmdIcon;
+  };
+
+}
+
+#endif

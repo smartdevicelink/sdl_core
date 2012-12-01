@@ -1,10 +1,10 @@
 /**
- * @name MFT.MediaPlayerView
+ * @name MFT.applinkView
  * 
- * @desc Media Player module visual representation
+ * @desc Applink Media application module visual representation
  * 
  * @category	View
- * @filesource	app/view/media/appView.js
+ * @filesource	app/view/media/applinkView.js
  * @version		2.0
  *
  * @author		Melnik Andriy
@@ -17,8 +17,48 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 	/** View Components*/
 	childViews: [
 		'controlls',
-		'info'
+		'info',
+		'innerMenu'
 	],
+
+	showSoftButtonsList: function(){
+        if( MFT.States.media.applink.applinkoptions.active ){
+            this.listOfOptions.items =  MFT.ApplinkMediaModel.optionsCommands.slice();
+            this.listOfOptions.list.refresh();
+        }
+    },
+	
+	innerMenu: MFT.MenuList.extend({
+					
+		content: Em.ContainerView.extend({
+			
+			classNames: ['content'],
+			
+			attributeBindings: ['parentView.contentPositon:style'],
+			
+			childViews: [
+				'optionsButton'
+			],
+
+			optionsButton: MFT.Button.extend({
+				text: 'Options',
+				
+				templateName: 'arrow',
+				
+				action:		'turnOnApplinkOptions',
+				target:		'MFT.ApplinkMediaController'
+			})
+		})
+	}),
+
+	/** Calls Applink SystemContext switcher when turn On/Of Applink application */
+	onTurnOnApplinkApp: function(systemContextValue){
+		if(MFT.States.media.applink.active){
+            MFT.ApplinkMediaController.onSystemContextSwitcher(MFT.ApplinkMediaController.eSystemContext.application);
+		}else{
+            MFT.ApplinkMediaController.onSystemContextSwitcher(MFT.ApplinkMediaController.eSystemContext.main);
+		}
+	}.observes('MFT.States.media.applink.active'),
 	
 	info: Em.View.extend({
 		elementId: 'app_view_info',
@@ -26,12 +66,12 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 		template: Em.Handlebars.compile(
 			'{{#with view}}'+
 			'<div class="track-info">'+
-				'<div class="device">{{MFT.ApplinkModel.showInfo.deviceName}}</div>'+
+				'<div class="device">{{MFT.ApplinkMediaModel.showInfo.deviceName}}</div>'+
 		            	'<div class="divider_o"></div>'+
-				'<div class="title">{{MFT.ApplinkModel.showInfo.field1}}</div>'+
-				'<div class="album">{{MFT.ApplinkModel.showInfo.field2}}</div>'+
-				'<div class="artist">{{MFT.ApplinkModel.showInfo.field3}}</div>'+
-				'<div class="time">{{MFT.ApplinkModel.showInfo.mediaClock}}</div>'+
+				'<div class="title">{{MFT.ApplinkMediaModel.showInfo.field1}}</div>'+
+				'<div class="album">{{MFT.ApplinkMediaModel.showInfo.field2}}</div>'+
+				'<div class="artist">{{MFT.ApplinkMediaModel.showInfo.field3}}</div>'+
+				'<div class="time">{{MFT.ApplinkMediaModel.showInfo.mediaClock}}</div>'+
 //				'<div id="cd_logo" {{bindAttr class="MFT.CDModel.active:visible_display MFT.AppModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
 //				'<div id="usb_logo" {{bindAttr class="MFT.USBModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
 			'</div>'+

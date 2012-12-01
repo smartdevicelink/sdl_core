@@ -8,8 +8,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -34,10 +34,14 @@ namespace NsRPC2Communication
 // getters
       const std::string& get_appName(void);
 
+      int get_appId(void);
+
 
 // setters
 /// appName <= 100
       bool set_appName(const std::string& appName);
+
+      bool set_appId(int appId);
 
 
     private:
@@ -45,6 +49,7 @@ namespace NsRPC2Communication
       friend class ActivateAppMarshaller;
 
       std::string appName;
+      int appId;
 
     };
   }

@@ -8,8 +8,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -37,6 +37,8 @@ namespace NsRPC2Communication
       const unsigned int* get_position(void);
       const std::string& get_menuName(void);
 
+      int get_appId(void);
+
 
 // setters
 /// menuId <= 2000000000
@@ -50,6 +52,8 @@ namespace NsRPC2Communication
 /// menuName <= 500
       bool set_menuName(const std::string& menuName);
 
+      bool set_appId(int appId);
+
 
     private:
 
@@ -58,6 +62,7 @@ namespace NsRPC2Communication
       unsigned int menuId;
       unsigned int* position;
       std::string menuName;
+      int appId;
 
     };
   }

@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/ButtonEventModeMarshaller.inc ./src/ALRPCObjectsImpl/ButtonEventModeMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/ButtonEventModeMarshaller.inc ../src/ALRPCObjectsImpl/ButtonEventModeMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -35,10 +35,10 @@ ButtonEventMode_intHash::getPointer (register const char *str, register unsigned
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 17 "./src/ALRPCObjectsImpl/ButtonEventModeMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/ButtonEventModeMarshaller.gp"
       {"BUTTONUP",0},
       {""},
-#line 18 "./src/ALRPCObjectsImpl/ButtonEventModeMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/ButtonEventModeMarshaller.gp"
       {"BUTTONDOWN",1}
     };
 

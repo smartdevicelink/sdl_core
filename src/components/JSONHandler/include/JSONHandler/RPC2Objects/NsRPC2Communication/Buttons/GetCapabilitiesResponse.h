@@ -5,12 +5,13 @@
 #include "JSONHandler/RPC2Response.h"
 
 #include "../include/JSONHandler/ALRPCObjects/ButtonCapabilities.h"
+#include "../include/JSONHandler/ALRPCObjects/PresetBankCapabilities.h"
 
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -35,10 +36,15 @@ namespace NsRPC2Communication
 // getters
       const std::vector< NsAppLinkRPC::ButtonCapabilities>& get_capabilities(void);
 
+      const NsAppLinkRPC::PresetBankCapabilities* get_presetBankCapabilities(void);
 
 // setters
 /// 1 <= size <= 100
       bool set_capabilities(const std::vector< NsAppLinkRPC::ButtonCapabilities>& capabilities);
+
+      bool set_presetBankCapabilities(const NsAppLinkRPC::PresetBankCapabilities& presetBankCapabilities);
+
+      void reset_presetBankCapabilities(void);
 
 
     private:
@@ -46,6 +52,7 @@ namespace NsRPC2Communication
       friend class GetCapabilitiesResponseMarshaller;
 
       std::vector< NsAppLinkRPC::ButtonCapabilities> capabilities;
+      NsAppLinkRPC::PresetBankCapabilities* presetBankCapabilities;
 
     };
   }

@@ -62,12 +62,6 @@ MFT.MediaController = Em.Object.create({
 	radioDataArray : [MFT.AmModel],
 	
 	playerDataArray : [MFT.CDModel],
-
-	/** Current applink Sub Menu identificator*/
-	currentApplinkSubMenuid: null,
-
-	/** Current applink Perform Interaction Choise identificator*/
-	currentApplinkPerformInteractionChoiseId: null,
 	
 	/** Current Direct tune data*/
 	currentDirectTuneData: MFT.AmModel.directTunestations,
@@ -124,6 +118,10 @@ MFT.MediaController = Em.Object.create({
 		if(MFT.BTModel.active){
 			MFT.BTModel.set('active',false);
 		}
+
+        if(MFT.ApplinkMediaModel.active){
+        	MFT.ApplinkMediaModel.set('active',false);
+        }
 	},
 	
 	/**  On player module enter event */
@@ -389,80 +387,30 @@ MFT.MediaController = Em.Object.create({
 	turnOnOptions: function(){
 		MFT.States.goToState('media.options');
 	},
-	
-	/** Application */
-	turnOnApplink: function(){
-		
-		//this.onPlayerEnter(MFT.ApplinkModel);
 
-		// Exit form player or radio
-		this.onPlayerExit();
-		this.onRadioExit();
-		// Set Applink Data active
-		MFT.ApplinkModel.set('active',true);
-		// Go to Applink state
-		MFT.States.goToState('media.applink');
-		// hide directTune
-		this.offDirectTune();
-		if(this.directTuneSelected){
-			this.set('directTuneSelected', false);
-		}
+    /** Switching on Application */
+    turnOnApplink: function(){
 
-	},
+        // Exit form player or radio
+        this.onPlayerExit();
+        this.onRadioExit();
+        // Set Applink Data active
+        MFT.ApplinkMediaModel.set('active',true);
+        // Go to Applink state
+        MFT.States.goToState('media.applink');
+        // hide directTune
+        this.offDirectTune();
+        if(this.directTuneSelected){
+            this.set('directTuneSelected', false);
+        }
+        FFW.AppLinkCoreClient.ActivateApp();
 
-	/** Applink Options */
-	turnOnApplinkOptions: function(el){
-		MFT.States.goToState('media.applink.applinkoptions');
-	},
+        /* Show Applink application in media left menu */
+		MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);
+		MFT.MediaController.listDown();
 
-	/** Applink Sub Mennu */
-	turnOnApplinkSubMenu: function(el){
-		this.set('currentApplinkSubMenuid', el.menuId);
-		MFT.States.goToState('media.applink.applinkoptions.applinkoptionssubmenu');
-	},
+    },
 
-	/** Applink Perform Interaction Choise */
-	turnOnApplinkPerform: function(el){
-		if(MFT.States.media.applink.applinkperforminteractionchoise.active){
-			MFT.AppPerformInteractionChoise.PerformInteraction(el.interactionChoiceSetIDList);
-		}else{
-			this.set('currentApplinkPerformInteractionChoiseId', el.interactionChoiceSetIDList);
-		}
-		MFT.States.goToState('media.applink.applinkperforminteractionchoise');
-	},
-
-	/** Applink AddCommand handler */
-	applinkAddCommand: function(params){
-		if( params.menuParams.parentID == 0 ){
-			MFT.ApplinkOptionsView.AddCommand(params.cmdId, params.menuParams);
-		}else{
-			if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
-				MFT.ApplinkModel.subMenuCommands.push(params);
-				MFT.ApplinkOptionsSubMenuView.SubMenuActivate(MFT.MediaController.currentApplinkSubMenuid);
-			}else{
-				MFT.ApplinkModel.subMenuCommands.push(params);
-			}
-		}
-	},
-
-	/** Applink Setter for Media Clock Timer */
-	applinkSetMediaClockTimer: function(params){
-		if(params.updateMode == "PAUSE"){
-			MFT.ApplinkModel.showInfo.set('pause', true);
-		}else if(params.updateMode == "RESUME"){
-			MFT.ApplinkModel.showInfo.set('pause', false);
-		}else{
-			MFT.ApplinkModel.showInfo.set('duration', params.startTime.hours*3600 + params.startTime.minutes*60 + params.startTime.seconds );
-		}
-
-		if(params.updateMode == "COUNTUP"){
-			MFT.ApplinkModel.showInfo.set('countUp', true);
-		}else if(params.updateMode == "COUNTDOWN"){
-			MFT.ApplinkModel.showInfo.set('countUp', false);
-		}
-		
-	},
-	
 	optionsBack: function(){
 		if(MFT.AmModel.active || MFT.FmModel.active || MFT.SiriusModel.active){
 			MFT.States.goToState('media.radio');

@@ -5,8 +5,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -62,6 +62,7 @@ Json::Value DeleteSubMenuMarshaller::toJSON(const DeleteSubMenu& e)
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
   json["params"]["menuId"]=Json::Value(e.menuId);;
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -84,6 +85,9 @@ bool DeleteSubMenuMarshaller::fromJSON(const Json::Value& json,DeleteSubMenu& c)
     c.menuId=js["menuId"].asInt();
     if(c.menuId>2000000000)  return false;
 
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

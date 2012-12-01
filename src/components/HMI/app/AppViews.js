@@ -34,6 +34,7 @@ MFT.AppViews = Em.ContainerView.extend({
 		MFT.TTSPopUp,
 		MFT.AlertPopUp,
 		MFT.VRPopUp,
+		MFT.DriverDistraction,
 		//MFT.PlayerControllsView,
 		//MFT.VideoErrorPopupView,
 		MFT.ControlButtons,
@@ -55,12 +56,12 @@ MFT.AppViews = Em.ContainerView.extend({
 		this._super();
 		
 		//Em.Logger.log('MFT Rendered!');
-		if ( FLAGS.MCS_ENABLED ) {
-			WarningOkButtonView.appLoaded();
-		} else {
+		//if ( FLAGS.MCS_ENABLED ) {
+		//	WarningOkButtonView.appLoaded();
+		//} else {
 			FFW.Backend.notifyAppLoaded();
 			MFT.set('appReady',true);
-		}
+		//}
 		
 		// preload other views
 		//FFW.AppendScript.pushScript('phone');

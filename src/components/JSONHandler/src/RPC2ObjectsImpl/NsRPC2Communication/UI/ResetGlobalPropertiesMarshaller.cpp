@@ -6,8 +6,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -75,6 +75,7 @@ Json::Value ResetGlobalPropertiesMarshaller::toJSON(const ResetGlobalProperties&
 
     json["params"]["properties"]=j;
   }
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -104,6 +105,9 @@ bool ResetGlobalPropertiesMarshaller::fromJSON(const Json::Value& json,ResetGlob
       c.properties=z;
     }
 
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

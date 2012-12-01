@@ -607,11 +607,11 @@ if(@nss)
 
 #my $ind= @nss ?  ('  ' x scalar @nss) : '';
 my $ind= @nss ?  '  ' x @nss : '';
-my $using; #="using namespace RPC2Communication;\n";
+my $using; #="using namespace NsRPC2Communication;\n";
 #$using.=sprintf "using namespace %s;\n",$nsa if $nsa ne '';
 $using.=sprintf "using namespace %s;\n",join('::',@nss) if @nss;
 
-my $using2; #="using namespace RPC2Communication;\n";
+my $using2; #="using namespace NsRPC2Communication;\n";
 $using2.=sprintf "using namespace %s;\n",join('::',@nss) if @nss;
 
 my $nsap='';
@@ -919,10 +919,13 @@ qq!  static Json::Value toJSON(const #& e);!;
   printf FO qq~Json::Value %sMarshaller::toJSON(const %s& e)\n{\n  Json::Value json(Json::objectValue);\n~.
 qq~  if(!checkIntegrityConst(e))\n    return Json::Value(Json::nullValue);\n\n~,$n,$n;
 
-  printf FO qq~  json["jsonrpc"]=Json::Value("2.0");\n  json["method"]=Json::Value("%s%s");\n  json["params"]=Json::Value(Json::objectValue);\n\n~,
-            $global{'prefix'},$n if $f->[2] == 0;
+  my $pr;
+  $pr=qq~  json["params"]=Json::Value(Json::objectValue);\n~ if @args;
+
+  printf FO qq~  json["jsonrpc"]=Json::Value("2.0");\n  json["method"]=Json::Value("%s%s");\n%s\n~,
+            $global{'prefix'},$n,$pr if $f->[2] == 0;
   printf FO qq~  json["jsonrpc"]=Json::Value("2.0");\n  json["method"]=Json::Value("%s%s");\n\n~.
-qq~  json["id"]=Json::Value(e.getId());\n  json["params"]=Json::Value(Json::objectValue);\n~,$global{'prefix'},$n if $f->[2] == 1;
+qq~  json["id"]=Json::Value(e.getId());\n%s~,$global{'prefix'},$n,$pr if $f->[2] == 1;
   printf FO qq~  json["jsonrpc"]=Json::Value("2.0");\n  json["id"]=Json::Value(e.getId());\n  json["result"]=Json::Value(Json::objectValue);\n~.
 qq~  ~.$nsap.qq~Result r(static_cast<~.$nsap.qq~Result::ResultInternal>(e.getResult()));\n  json["result"]["resultCode"]=~.$nsap.qq~ResultMarshaller::toJSON(r);\n~.
 qq~  json["result"]["method"]=Json::Value("%s%s");\n\n~,$global{'prefix'},$n if $f->[2] == 2;
@@ -958,15 +961,17 @@ qq~    if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["json
 
   if($f->[2]==0)	#notify
   {
-    printf FO qq~    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("%s%s"))  return false;\n~.
-qq~    if(!json.isMember("params")) return false;\n\n    Json::Value js=json["params"];\n    if(!js.isObject())  return false;\n\n~,$global{'prefix'},$n;
+    printf FO qq~    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("%s%s"))  return false;\n~,$global{'prefix'},$n;
+    print FO
+qq~    if(!json.isMember("params")) return false;\n\n    Json::Value js=json["params"];\n    if(!js.isObject())  return false;\n\n~ if @args;
 
   }
   elsif($f->[2]==1)	#request
   {
     printf FO qq~    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("%s%s"))  return false;\n~.
-qq~    if(!json.isMember("id") || !json["id"].isInt()) return false;\n    c.setId(json["id"].asInt());\n\n~.
-qq~    if(!json.isMember("params")) return false;\n\n    Json::Value js=json["params"];\n    if(!js.isObject())  return false;\n~,$global{'prefix'},$n;
+qq~    if(!json.isMember("id") || !json["id"].isInt()) return false;\n    c.setId(json["id"].asInt());\n\n~,$global{'prefix'},$n;
+    print FO
+qq~    if(!json.isMember("params")) return false;\n\n    Json::Value js=json["params"];\n    if(!js.isObject())  return false;\n~ if @args;
 
   }
   elsif($f->[2]==2)	#response
@@ -1248,11 +1253,11 @@ $l=sprintf
   close FO;
 }
 
-#################################################################### code common for all interfaces
 
 }
 
-######################################################################################3
+#################################################################### code common for all interfaces
+
 $ns=$config{'ns'};
 
 my $nsbra='';
@@ -1299,9 +1304,6 @@ print FO printhat2 'Marshaller';
 #printf FO "#ifndef %sRPC2_INCLUDE\n#define %sRPC2_INCLUDE\n\n%s",$prefix,$prefix,$pragma;
 print FO "#include <string>\n#include <json/json.h>\n\n";
 
-#print FO qq!#include "../RPC2Error.h"\n#include "../RPC2Notification.h"\n#include "../RPC2Request.h"\n#include "../RPC2Response.h"\n!;
-#print FO qq!\n#include "../RPC2ErrorMarshaller.h"\n\n!;
-
 my $t=qq!#include "RPC2Error.h"\n#include "RPC2Notification.h"\n#include "RPC2Request.h"\n#include "RPC2Response.h"\n!.
       qq!\n#include "RPC2ErrorMarshaller.h"\n\n!;
 
@@ -1346,8 +1348,8 @@ $t=qq!\nMarshaller()\t\t\t{}\n~Marshaller()\t\t\t{}\n\nstatic ::NsRPC2Communicat
    qq!static ::NsRPC2Communication::RPC2Command* fromJSON(const Json::Value&);\nstatic Json::Value toJSON(const ::NsRPC2Communication::RPC2Command* msg);!.
    qq!\n\nprotected:!;
    
-#   qq!static std::string toString(const ::RPC2Communication::RPC2Command* msg);\n\nprotected:\n\n!.
-#   qq!static ::RPC2Communication::RPC2Command* fromJSON(const Json::Value&);\nstatic Json::Value toJSON(const ::RPC2Communication::RPC2Command* msg);!;
+#   qq!static std::string toString(const ::NsRPC2Communication::RPC2Command* msg);\n\nprotected:\n\n!.
+#   qq!static ::NsRPC2Communication::RPC2Command* fromJSON(const Json::Value&);\nstatic Json::Value toJSON(const ::NsRPC2Communication::RPC2Command* msg);!;
 
 $t=~s/\n/\n$ind  /gs;
 $t=~s/  protected:/protected:/g;

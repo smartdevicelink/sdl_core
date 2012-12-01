@@ -10,6 +10,9 @@
 #include <map>
 #include <tuple>
 #include <vector>
+#include <set>
+#include <cstddef>
+#include "JSONHandler/ALRPCObjects/MenuParams.h"
 
 namespace log4cplus
 {
@@ -20,6 +23,7 @@ namespace NsAppManager
 {
 
     class RegistryItem;
+    class Application;
 
     /**
      * \brief CommandType acts as command type enum representation that allows iterating over types in cycle and using types in comparison
@@ -136,24 +140,33 @@ namespace NsAppManager
     };
 
     /**
+     * \brief Acts as a wrapper of command UI or VR params
+     */
+    union CommandParams
+    {
+        const NsAppLinkRPC::MenuParams* menuParams;
+        const std::vector<std::string>* vrCommands;
+    };
+
+    /**
      * \brief mapping of command id to specific command type
      */
-    typedef std::tuple<unsigned int, CommandType> CommandKey;
+    typedef std::tuple<unsigned int, CommandType> CommandBase;
 
     /**
-     * \brief command-to-registered_app map
+     * \brief mapping of command base to params
      */
-    typedef std::map<CommandKey, RegistryItem*> CommandMap;
-
-    /**
-     * \brief command-to-registered_app map item
-     */
-    typedef std::pair<CommandKey, RegistryItem*> CommandMapItem;
+    typedef std::pair<CommandBase, CommandParams> Command;
 
     /**
      * \brief command types associated with command
      */
     typedef std::vector<CommandType> CommandTypes;
+
+    /**
+     * \brief commands vector
+     */
+    typedef std::map<CommandBase, CommandParams> Commands;
 
     /**
      * \brief command_id-to-request_number map (command id is a key);
@@ -166,7 +179,7 @@ namespace NsAppManager
     typedef std::pair<unsigned int, unsigned int> RequestAwaitingResponse;
 
     /**
-     * \brief CommandMapping acts as a mapping of command to registsred application that subscribed to them
+     * \brief CommandMapping acts as a mapping of command to const NsAppLinkRPC::MenuParams that are contained in some of them
      */
     class CommandMapping
     {
@@ -178,40 +191,57 @@ namespace NsAppManager
         CommandMapping();
 
         /**
+         * \brief Default class destructor
+         */
+        ~CommandMapping();
+
+        /**
          * \brief add a command to a mapping
          * \param commandId command id
          * \param type command type
-         * \param app application to map a command to
+         * \param params VR or UI params supplied with the AddCommand request
          */
-        void addCommand( unsigned int commandId, CommandType type, RegistryItem* app );
+        void addCommand(unsigned int commandId, const CommandType &type , CommandParams params);
 
         /**
          * \brief remove a command from a mapping
          * \param commandId command id
          * \param type a type of a command
          */
-        void removeCommand(unsigned int commandId, CommandType type);
+        void removeCommand(unsigned int commandId, const CommandType &type);
 
         /**
-         * \brief remove an application from a mapping
-         * \param app application to remove all associated commands from mapping
+         * \brief finds commands in mapping
+         * \param commandId command id
+         * \return true if found, false if not
          */
-        void removeItem( RegistryItem* app );
+        bool findCommand(unsigned int commandId, const CommandType &type) const;
+
+        /**
+         * \brief finds commands in mapping
+         * \param commandId command id
+         * \return commands list
+         */
+        Commands findCommands(unsigned int commandId) const;
+
+        /**
+         * \brief gets all commands
+         * \return commands
+         */
+        Commands getAllCommands() const;
 
         /**
          * \brief retrieve types associated with command id in current mapping
          * \param commandId command id to search for types
-         * \param types input container of command types to be filled with result
+         * \return input container of command types to be filled with result
          */
-        void getTypes(unsigned int commandId, CommandTypes& types ) const;
+        CommandTypes getTypes(unsigned int commandId) const;
 
         /**
-         * \brief find a registry item subscribed to command
-         * \param commandId command id
-         * \param type command type
-         * \return RegistryItem instance
+         * \brief get count of commands
+         * \return commands count
          */
-        RegistryItem *findRegistryItemAssignedToCommand(unsigned int commandId, CommandType type) const;
+        size_t size() const;
 
         /**
          * \brief get count of unresponsed requests associated with the given command id
@@ -234,15 +264,23 @@ namespace NsAppManager
          */
         unsigned int decrementUnrespondedRequestCount(const unsigned int& cmdId);
 
+        /**
+         * \brief cleans all the items
+         */
+        void clear( );
+
+        /**
+         * \brief cleans all the requests awaiting response
+         */
+        void clearUnrespondedRequests( );
+
     private:
 
         /**
          * \brief Copy constructor
          */
         CommandMapping(const CommandMapping&);
-
-        CommandType   mCommandType;
-        CommandMap    mCommandMapping;
+        Commands mCommands;
         RequestsAwaitingResponse mRequestsPerCommand;
         static log4cplus::Logger mLogger;
     };

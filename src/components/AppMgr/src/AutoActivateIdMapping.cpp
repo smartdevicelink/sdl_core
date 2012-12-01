@@ -22,6 +22,14 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Default class destructor
+     */
+    AutoActivateIdMapping::~AutoActivateIdMapping()
+    {
+        mAutoActivateIds.clear();
+    }
+
+    /**
      * \brief add an application to a mapping
      * \param appName application to be added to mapping
      * \return auto-activate id assigned to an application
@@ -121,6 +129,10 @@ namespace NsAppManager
         {
             LOG4CPLUS_INFO_EXT(mLogger, "Nothing to find: a map is empty!" );
             return "";
+        }
+        else
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Found " << mAutoActivateIds.size() << " elements in autoactivateid map");
         }
         LOG4CPLUS_INFO_EXT(mLogger, "Searching for an auto-activate id for the application " << name );
         AutoActivateIDs::const_iterator it = mAutoActivateIds.find( name );

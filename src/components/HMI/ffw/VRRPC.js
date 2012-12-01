@@ -109,7 +109,7 @@ FFW.VR = FFW.RPCObserver.create({
 
 		if (request.method == "VR.AddCommand") {
 			
-			MFT.VRPopUp.AddCommand(request.params.cmdId, request.params.vrCommands);
+			MFT.ApplinkMediaModel.onApplinkVRAddCommand(request.params.cmdId, request.params.vrCommands);
 
 			// send repsonse
 			var JSONMessage = {
@@ -124,8 +124,8 @@ FFW.VR = FFW.RPCObserver.create({
 		}
 
 		if (request.method == "VR.DeleteCommand") {
-			
-			MFT.VRPopUp.DeleteCommand(request.params.cmdId);
+
+			MFT.ApplinkMediaModel.onApplinkVRDeleteCommand(request.params.cmdId);
 
 			// send repsonse
 			var JSONMessage = {
@@ -138,7 +138,7 @@ FFW.VR = FFW.RPCObserver.create({
 			};
 			this.client.send(JSONMessage);
 		}
-		/*
+
 		if (request.method == "VR.GetCapabilities") {
 
 			// send repsonse
@@ -153,9 +153,23 @@ FFW.VR = FFW.RPCObserver.create({
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}
 			};
-			//this.client.send(JSONMessage);
+			this.client.send(JSONMessage);
 		}
-		*/
 		
-	}
+	},
+
+	/*
+	 * send notification when command was triggered from VR
+ 	 */	
+	onChoise: function(commandId) {
+		Em.Logger.log("FFW.VR.PerformInteractionResponse");
+
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"VR.OnChoise",
+			"params":	{"choiceID":	commandId}
+		};
+
+		this.client.send(JSONMessage);
+	},
 })

@@ -5,8 +5,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -44,6 +44,8 @@ const std::string AlertResponseMarshaller::toString(const AlertResponse& e)
 
 bool AlertResponseMarshaller::checkIntegrityConst(const AlertResponse& s)
 {
+  if(s.tryAgainTime && (s.tryAgainTime[0]>2000000000))  return false;
+
   return true;
 }
 
@@ -61,6 +63,8 @@ Json::Value AlertResponseMarshaller::toJSON(const AlertResponse& e)
   json["result"]["resultCode"]=NsAppLinkRPC::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("UI.AlertResponse");
 
+  if(e.tryAgainTime)
+    json["result"]["tryAgainTime"]=Json::Value(e.tryAgainTime[0]);;
   return json;
 }
 
@@ -86,6 +90,17 @@ bool AlertResponseMarshaller::fromJSON(const Json::Value& json,AlertResponse& c)
 
     if(!NsAppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
+    if(c.tryAgainTime)  delete c.tryAgainTime;
+    c.tryAgainTime=0;
+    if(js.isMember("tryAgainTime"))
+    {
+      if(!js["tryAgainTime"].isInt())  return false;
+      c.tryAgainTime=new unsigned int();
+      c.tryAgainTime[0]=js["tryAgainTime"].asInt();
+      if(c.tryAgainTime[0]>2000000000)  return false;
+
+    }
+
   }
   catch(...)
   {

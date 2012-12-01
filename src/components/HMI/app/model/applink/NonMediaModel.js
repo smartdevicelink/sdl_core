@@ -1,16 +1,16 @@
 /**
- * @name MFT.SDModel
+ * @name MFT.ApplinkNonMediaModel
  * 
  * @desc Data model for Applink NonMedia application
  * 
  * @category	Model
- * @filesource	app/model/applink/NonMedia.js
+ * @filesource	app/model/applink/ApplinkNonMediaModel.js
  * @version		1.0
  *
  * @author		Artem Petrosyan
  */
 
-MFT.NonMedia = Em.Object.create({
+MFT.ApplinkNonMediaModel = Em.Object.create({
 	
 	
 	deviceName: '<deviceName>',

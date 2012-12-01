@@ -5,11 +5,8 @@
  */
 
 #include "AppMgr/AppMgr.h"
-#include "JSONHandler/JSONHandler.h"
 #include "AppMgr/AppMgrCore.h"
-#include "AppMgr/AppMgrRegistry.h"
 #include "LoggerHelper.hpp"
-#include "JSONHandler/ALRPCMessage.h"
 
 namespace NsAppManager
 {
@@ -29,8 +26,6 @@ namespace NsAppManager
     * \brief Default class constructor
     */
     AppMgr::AppMgr()
-        :mAppMgrRegistry(AppMgrRegistry::getInstance())
-        ,mAppMgrCore(AppMgrCore::getInstance())
     {
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgr constructed!");
     }
@@ -47,8 +42,6 @@ namespace NsAppManager
     * \brief Copy constructor
     */
     AppMgr::AppMgr(const AppMgr &)
-        :mAppMgrRegistry(AppMgrRegistry::getInstance())
-        ,mAppMgrCore(AppMgrCore::getInstance())
     {
     }
 
@@ -63,7 +56,7 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " Setting null handler!");
             return;
         }
-        mAppMgrCore.setJsonHandler( handler );
+        AppMgrCore::getInstance().setJsonHandler( handler );
     }
 
     /**
@@ -77,23 +70,26 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " Setting null handler!");
             return;
         }
-        mAppMgrCore.setJsonRPC2Handler( handler );
+        AppMgrCore::getInstance().setJsonRPC2Handler( handler );
     }
 
     /**
     * \brief callback to proceed received mobile message
     * \param message the received message
+    * \param connectionID id of a connection associated with application that sent the message
     * \param sessionID an id of a session associated with the application which sends message
     */
-    void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message , unsigned char sessionID)
+    void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message, int connectionKey)
     {
+        unsigned char sessionID = connectionKey;
+        int connectionID = 1;
         if(!message)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Calling a function with null command! Session id " << sessionID);
+            LOG4CPLUS_ERROR_EXT(mLogger, " Calling a function with null command! Session id " << (uint)sessionID << " connection id " << connectionID);
             return;
         }
         LOG4CPLUS_INFO_EXT(mLogger, " Message " << message->getMethodId() << " received from mobile side");
-        mAppMgrCore.pushMobileRPCMessage( message, sessionID );
+        AppMgrCore::getInstance().pushMobileRPCMessage( message, connectionID, sessionID );
     }
 
     /**
@@ -108,7 +104,7 @@ namespace NsAppManager
             return;
         }
         LOG4CPLUS_INFO_EXT(mLogger, " Message " << command->getMethod() << " received from HMI side");
-        mAppMgrCore.pushRPC2CommunicationMessage(command);
+        AppMgrCore::getInstance().pushRPC2CommunicationMessage(command);
     }
 
     /**
@@ -118,7 +114,7 @@ namespace NsAppManager
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Threads are being started!");
 
-        mAppMgrCore.executeThreads();
+        AppMgrCore::getInstance().executeThreads();
 
         LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
     }

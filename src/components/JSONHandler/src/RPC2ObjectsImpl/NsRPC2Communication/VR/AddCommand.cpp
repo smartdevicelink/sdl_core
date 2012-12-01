@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::VR
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -16,6 +16,7 @@ AddCommand& AddCommand::operator =(const AddCommand& c)
 {
   cmdId=c.cmdId;
   vrCommands=c.vrCommands;
+  appId=c.appId;
   return *this;
 }
 
@@ -56,6 +57,17 @@ const std::vector< std::string>& AddCommand::get_vrCommands(void)
 bool AddCommand::set_vrCommands(const std::vector< std::string>& vrCommands_)
 {
   vrCommands=vrCommands_;
+  return true;
+}
+
+int AddCommand::get_appId(void)
+{
+  return appId;
+}
+
+bool AddCommand::set_appId(int appId_)
+{
+  appId=appId_;
   return true;
 }
 

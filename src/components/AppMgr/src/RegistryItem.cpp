@@ -40,9 +40,9 @@ namespace NsAppManager
      */
     RegistryItem::~RegistryItem( )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " RegistryItem destroyed for the application " << mApplication?mApplication->getName():"NULL!");
         if(mApplication)
         {
+            LOG4CPLUS_INFO_EXT(mLogger, " Destroying RegistryItem for the application " << mApplication->getName() << " connection id " << mApplication->getConnectionID() << " session id " << (uint)mApplication->getSessionID() << " ...");
             delete mApplication;
             mApplication = 0;
         }
@@ -56,6 +56,17 @@ namespace NsAppManager
         }
 
         mAppPolicies.clear();
+        LOG4CPLUS_INFO_EXT(mLogger, " Registry item was destroyed!");
+    }
+
+    /**
+     * \brief operator ==
+     * \param item the item to compare with
+     * \return comparison result
+     */
+    bool RegistryItem::operator ==(const RegistryItem &item) const
+    {
+        return this->getApplication() == item.getApplication();
     }
 
     /**

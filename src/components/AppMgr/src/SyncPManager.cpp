@@ -36,6 +36,7 @@ namespace NsAppManager
         std::string fileName;
         stringStream >> fileName;
         serializeToFile( fileName, mPData );
+        LOG4CPLUS_INFO_EXT(mLogger, "PData of length " << data.size() << " serialized to file " << fileName );
     }
 
     /**
@@ -151,6 +152,7 @@ namespace NsAppManager
                 }
             }
             file.close();
+            LOG4CPLUS_INFO_EXT(mLogger, "PData of length " << value.size() << " deserialized from file " << fileName );
         }
         else
         {

@@ -5,8 +5,8 @@
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -58,7 +58,6 @@ Json::Value GetCapabilitiesMarshaller::toJSON(const GetCapabilities& e)
   json["method"]=Json::Value("Buttons.GetCapabilities");
 
   json["id"]=Json::Value(e.getId());
-  json["params"]=Json::Value(Json::objectValue);
   return json;
 }
 
@@ -73,10 +72,6 @@ bool GetCapabilitiesMarshaller::fromJSON(const Json::Value& json,GetCapabilities
     if(!json.isMember("id") || !json["id"].isInt()) return false;
     c.setId(json["id"].asInt());
 
-    if(!json.isMember("params")) return false;
-
-    Json::Value js=json["params"];
-    if(!js.isObject())  return false;
   }
   catch(...)
   {

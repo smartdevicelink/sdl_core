@@ -1,10 +1,12 @@
 *.a
 #*.cmake
 bin
+build
 CMakeFiles
 *-prefix
 Makefile
 CMakeCache.txt
+CMakeLists.txt.user
 install_manifest.txt
 *.o
 *.lo

@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/GlobalPropertyMarshaller.inc ./src/ALRPCObjectsImpl/GlobalPropertyMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/GlobalPropertyMarshaller.inc ../src/ALRPCObjectsImpl/GlobalPropertyMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -36,10 +36,10 @@ GlobalProperty_intHash::getPointer (register const char *str, register unsigned 
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""},
-#line 17 "./src/ALRPCObjectsImpl/GlobalPropertyMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/GlobalPropertyMarshaller.gp"
       {"HELPPROMPT",0},
       {""}, {""},
-#line 18 "./src/ALRPCObjectsImpl/GlobalPropertyMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/GlobalPropertyMarshaller.gp"
       {"TIMEOUTPROMPT",1}
     };
 

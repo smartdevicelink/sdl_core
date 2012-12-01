@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.inc ./src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.inc ../src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -35,9 +35,9 @@ DriverDistractionState_intHash::getPointer (register const char *str, register u
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""},
-#line 17 "./src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.gp"
       {"DD_ON",0},
-#line 18 "./src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/DriverDistractionStateMarshaller.gp"
       {"DD_OFF",1}
     };
 

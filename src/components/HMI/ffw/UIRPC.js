@@ -17,7 +17,14 @@ FFW.UI = FFW.RPCObserver.create({
  	 */		
 	 client:		FFW.RPCClient.create({ componentName: "UI" }),
 
-	 /*
+
+	onVRChoiseSubscribeRequestId:		-1,
+	onVRChoiseUnsubscribeRequestId:		-1,
+
+	// const
+	onVRChoiseNotification:		"VR.OnChoise",
+
+	/*
 	 *	id for request Perform Interaction 
  	 */
  	 performInteractionRequestId: -1,
@@ -91,6 +98,9 @@ FFW.UI = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.UI.onRPCRegistered");
 		this._super();
 
+		// subscribe to notifications
+		this.onVRChoiseSubscribeRequestId 	= this.client.subscribeToNotification(this.onVRChoiseNotification);
+
  		// notify other components that UI is ready 
 		//  main purpose is to nitofy ALCore
 		this.onReady();
@@ -98,10 +108,13 @@ FFW.UI = FFW.RPCObserver.create({
 	
 	/*
      * Client is unregistered - no more requests
- 	 */	
+ 	 */
 	onRPCUnregistered: function () {
 		Em.Logger.log("FFW.UI.onRPCUnregistered");
 		this._super();
+
+		// unsubscribe from notifications
+		this.onVRChoiseUnsubscribeRequestId 	= this.client.unsubscribeFromNotification(this.onVRChoiseNotification);
 	},
 
 	/*
@@ -115,7 +128,7 @@ FFW.UI = FFW.RPCObserver.create({
      * when result is received from RPC component this function is called
 	 * It is the propriate place to check results of reuqest execution
 	 * Please use previously store reuqestID to determine to which request repsonse belongs to
- 	 */	
+ 	 */
 	onRPCResult: function(response) {
 		Em.Logger.log("FFW.UI.onRPCResult");
 		this._super();
@@ -123,7 +136,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 	/*
 	 * handle RPC erros here
- 	 */	
+ 	 */
 	onRPCError: function(error) {
 		Em.Logger.log("FFW.UI.onRPCError");
 		this._super();
@@ -131,219 +144,246 @@ FFW.UI = FFW.RPCObserver.create({
 
 	/*
 	 * handle RPC notifications here 
- 	 */	
+ 	 */
 	onRPCNotification: function(notification) {
 		Em.Logger.log("FFW.UI.onRPCNotification");
 		this._super();
+
+		if (notification.method == this.onVRChoiseNotification)
+		{
+			this.onChoosed(notification.params.choiceID);
+		}
 	},
 
 	/*
 	 * handle RPC requests here
- 	 */	
+ 	 */
 	onRPCRequest: function(request) {
 		Em.Logger.log("FFW.UI.onRPCRequest");
 		this._super();
 
 		var resultCode = null;
 
-		if (request.method == "UI.Show") {
+		switch (request.method) {
+		    case "UI.Show":{
 
-			MFT.ApplinkModel.showInfo.set('field1', request.params.mainField1);
-			MFT.ApplinkModel.showInfo.set('field2', request.params.mainField2);
-			MFT.ApplinkModel.showInfo.set('mediaClock', request.params.mediaClock);
-			MFT.ApplinkModel.showInfo.set('mediaTrack', request.params.mediaTrack);
+				MFT.ApplinkController.getApplicationModel(1).onApplinkUIShow(request.params);
 
-			resultCode = "SUCCESS";
-		}
-		
-		if (request.method == "UI.Alert") {
+				this.sendUIResult("SUCCESS", request.id, request.method);
 
-			MFT.AlertPopUp.activate(request.params.AlertText1, request.params.AlertText2, request.params.duration, request.params.playTone);
+		    	break;
+		    }
+		    case "UI.Alert":{
 
-			resultCode = "SUCCESS";
-		}
+				MFT.ApplinkController.getApplicationModel(1).onApplinkUIAlert(request.params);
 
-		if (request.method == "UI.SetGlobalProperties") {
+				this.sendUIResult("SUCCESS", request.id, request.method);
 
-			MFT.TTSPopUp.receiveMessage("Set global properties");
+		    	break;
+		    }
+		    case "UI.SetGlobalProperties":{
+			    MFT.TTSPopUp.receiveMessage("Set global properties");
 
-			// TODO: please process as array 
-			this.globalProperties.set('helpPrompt', request.params.helpPrompt);
-			// TODO: please process as array 
-			this.globalProperties.set('timeoutPrompt', request.params.timeoutPrompt);
+				// TODO: please process as array 
+				this.globalProperties.set('helpPrompt', request.params.helpPrompt);
+				// TODO: please process as array 
+				this.globalProperties.set('timeoutPrompt', request.params.timeoutPrompt);
 
-			resultCode = "SUCCESS";
-		}
-		
-		if (request.method == "UI.ResetGlobalProperties") {
-			
-			// reset all requested properties
-			for (var i=0;i<request.params.length;i++)
-			{
-			        this.resetProperties(reuqest.params[i]);
-				MFT.TTSPopUp.receiveMessage("Reset property: " + reuqest.params[i]);
-			}
+				this.sendUIResult("SUCCESS", request.id, request.method);
+		      	
+		      	break;
+		    }
+		    case "UI.ResetGlobalProperties":{
 
-			resultCode = "SUCCESS";
-		}
-
-		if (request.method == "UI.AddCommand") {
-			
-			MFT.MediaController.applinkAddCommand(request.params);
-
-			resultCode = "SUCCESS";
-
-		}
-
-		if (request.method == "UI.DeleteCommand") {
-			
-			MFT.ApplinkOptionsView.DeleteCommand(request.params.cmdId);
-
-			resultCode = "SUCCESS";
-		}
-
-		if (request.method == "UI.AddSubMenu") {
-			
-			MFT.ApplinkOptionsView.AddSubMenu(request.params.menuId, request.params.menuName);
-
-			resultCode = "SUCCESS";
-		}
-
-		if (request.method == "UI.DeleteSubMenu") {
-
-			resultCode =  MFT.ApplinkOptionsView.DeleteSubMenu(request.params.menuId);
-
-		}
-
-		if (request.method == "UI.CreateInteractionChoiceSet") {
-
-			MFT.ApplinkModel.interactionChoises.push(request.params);
-
-			resultCode = "SUCCESS";
-		}
-
-		if (request.method == "UI.DeleteInteractionChoiceSet") {
-
-			for(var val in MFT.ApplinkModel.interactionChoises){
-				if(MFT.ApplinkModel.interactionChoises[val].interactionChoiceSetID == request.params.interactionChoiceSetID ){
-					MFT.ApplinkModel.interactionChoises.splice(val, 1);
-					break;
+			    // reset all requested properties
+				for (var i=0;i<request.params.length;i++)
+				{
+				    this.resetProperties(reuqest.params[i]);
+					MFT.TTSPopUp.receiveMessage("Reset property: " + reuqest.params[i]);
 				}
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
+			    
+			    break;
 			}
+		    case "UI.AddCommand":{
 
-			resultCode = "SUCCESS";
+			    MFT.ApplinkController.getApplicationModel(1).onApplinkAddCommand(request.params);
 
-		}
+				this.sendUIResult("SUCCESS", request.id, request.method);
 
-		if (request.method == "UI.PerformInteraction") {
+		    	break;
+		    }
+		    case "UI.DeleteCommand":{
 
-			this.performInteractionRequestId = request.id;
+				MFT.ApplinkController.getApplicationModel(1).onApplinkOptionsDeleteCommand(request.params.cmdId);
 
-			MFT.MediaController.turnOnApplinkPerform(request.params);
-			
-			resultCode = null;
+				this.sendUIResult("SUCCESS", request.id, request.method);
+				
+				break;
+			}
+		    case "UI.AddSubMenu":{
 
-		}
+				MFT.ApplinkController.getApplicationModel(1).onApplinkAddSubMenu(request.params.menuId, request.params);
 
-		if (request.method == "UI.SetMediaClockTimer") {
+				this.sendUIResult("SUCCESS", request.id, request.method);
+		    
+		    	break;
+		    }
+		    case "UI.DeleteSubMenu":{
 
-			resultCode = MFT.MediaController.applinkSetMediaClockTimer(request.params);
+				var resultCode =  MFT.ApplinkController.getApplicationModel(1).onApplinkDeleteSubMenu(request.params.menuId);
 
-		}
-		/*
-		if (request.method == "UI.GetCapabilities") {
+				this.sendUIResult(resultCode, request.id, request.method);
+		    	
+		    	break;
+		    }
+		    case "UI.CreateInteractionChoiceSet":{
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result"	:	{
-					"capabilities":{
-						"displayCapabilities"	: {
-							"displayType":	"GEN2_8_DMA",
-							"textFields":[{
-									"name":			"mainField1",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
+				MFT.ApplinkController.getApplicationModel(1).onApplinkCreateInteractionChoise(request.params);
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
+		    	
+		    	break;
+		    }
+		    case "UI.DeleteInteractionChoiceSet":{
+
+				MFT.ApplinkController.getApplicationModel(1).onApplinkDeleteInteractionChoise(request.params.interactionChoiceSetID);
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
+		    	
+		    	break;
+		    }
+		    case "UI.PerformInteraction":{
+
+				this.performInteractionRequestId = request.id;
+
+				MFT.ApplinkController.getApplicationModel(1).turnOnApplinkPerform(request.params);
+		    	
+		    	break;
+		    }
+		    case "UI.SetMediaClockTimer":{
+
+				var resultCode = MFT.ApplinkController.getApplicationModel(1).applinkSetMediaClockTimer(request.params);
+
+				this.sendUIResult(resultCode, request.id, request.method);
+		    	
+		    	break;
+		    }
+		    case "UI.OnAppActivated":{
+		    
+		    	break;
+		    }
+		    case "UI.Slider":{
+
+				MFT.ApplinkController.getApplicationModel(1).onApplinkSlider(request.params);
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
+		    
+		    	break;
+		    }
+		    case  "UI.GetCapabilities":{
+				// send repsonse
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result"	:	{
+						"capabilities":{
+							"displayCapabilities"	: {
+								"displayType":	"GEN2_8_DMA",
+								"textFields":[{
+										"name":			"mainField1",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									},
+									{
+										"name":			"mainField2",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									},
+									{
+										"name":			"statusBar",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									},
+									{
+										"name":			"mediaClock",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									},
+									{
+										"name":			"mediaTrack",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									},
+									{
+										"name":			"alertText1",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									},
+									{
+										"name":			"alertText2",
+										"characterSet":	"TYPE2SET",
+										"width": 1,
+										"rows": 1
+									}],
 								},
-								{
-									"name":			"mainField2",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
-								},
-								{
-									"name":			"statusBar",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
-								},
-								{
-									"name":			"mediaClock",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
-								},
-								{
-									"name":			"mediaTrack",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
-								},
-								{
-									"name":			"alertText1",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
-								},
-								{
-									"name":			"alertText2",
-									"characterSet":	"TYPE2SET",
-									"width": 1,
-									"rows": 1
-								}],
+								"mediaClockFormats":["CLOCK1", "CLOCK2", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3"]
 							},
-							"mediaClockFormats":["CLOCK1", "CLOCK2", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3"]
+							"hmiZoneCapabilities"	: ["FRONT","BACK"]
 						},
-						"hmiZoneCapabilities"	: ["FRONT","BACK"]
-					},
 
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				};
+						"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+					};
 
-			//this.client.send(JSONMessage);
-
-			resultCode = null;
+				this.client.send(JSONMessage);
+		    	
+		    	break;
+		    }
+		   	
+		   	default:{
+		      	//statements_def
+		      	break;
+		    }
 		}
-		*/
-
+	},
+	
+	/*
+	 * send response from onRPCRequest
+ 	 */	
+	sendUIResult: function(resultCode, id, method) {
+		
 		if(resultCode){
 
 			// send repsonse
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
+				"id"		: 	id,
 				"result":	{
 					"resultCode" : resultCode, //  type (enum) from AppLink protocol
-					"method" : request.method + "Response"
+					"method" : method + "Response"
 				}
 			};
 			this.client.send(JSONMessage);
 		}
 	},
-	
 
 	/*
 	 * send notification when command was triggered
  	 */	
-	onCommand: function(element) {
+	onCommand: function(commandId) {
 		Em.Logger.log("FFW.UI.onCommand");
 
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
 			"method"	:	"UI.OnCommand",
-			"params"	:	{"commandId":element.commandId, }
+			"params"	:	{"commandId":commandId, }
 		};
 		this.client.send(JSONMessage);
 	},
@@ -379,5 +419,35 @@ FFW.UI = FFW.RPCObserver.create({
 			"method"	:	"UI.OnReady"
 		};
 		this.client.send(JSONMessage);
-	}
+	},
+
+	/*
+	 * send notification when DriverDistraction PopUp is visible
+ 	 */	
+	onDriverDistraction: function(driverDistractionState) {
+		Em.Logger.log("FFW.UI.DriverDistraction");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"UI.OnDriverDistraction",
+			"params":	{"state":	driverDistractionState}
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * Notifies if system context is changed
+ 	 */	
+	OnSystemContext: function(systemContextValue) {
+		Em.Logger.log("FFW.UI.OnSystemContext");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"UI.OnSystemContext",
+			"params":	{"systemContext":	systemContextValue}
+		};
+		this.client.send(JSONMessage);
+	},
 })

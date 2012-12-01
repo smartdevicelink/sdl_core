@@ -4,7 +4,7 @@
 
 * OS and Hardware
   =========
-  Ubuntu 12.04.1 LTS OS on the PC with USB-dongle
+  Ubuntu 12.04.1 LTS 32-bit OS on the PC with USB-dongle
   Application has been tested using 2 types of USB-dongle:
   D-Link DBT-122
   STLab B-121mini
@@ -34,8 +34,7 @@
   ./appLinkCore
   Application starts to search devices and starts HMI in cromium-browser.
   In case HMI has not been started please start web-based HMI manually in browser opening src/components/HMI/index.html.
+  AppLinkCore is searching Bluetooth devices with a correspondibg service.
   Select the device from a list.
-  Application starts SDP request.
-  Select port.
   Application opens port and starts communication.
 

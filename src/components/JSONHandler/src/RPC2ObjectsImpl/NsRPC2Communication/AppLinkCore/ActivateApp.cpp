@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -15,6 +15,7 @@ using namespace NsRPC2Communication::AppLinkCore;
 ActivateApp& ActivateApp::operator =(const ActivateApp& c)
 {
   appName=c.appName;
+  appId=c.appId;
   return *this;
 }
 
@@ -44,6 +45,17 @@ const std::string& ActivateApp::get_appName(void)
 bool ActivateApp::set_appName(const std::string& appName_)
 {
   appName=appName_;
+  return true;
+}
+
+int ActivateApp::get_appId(void)
+{
+  return appId;
+}
+
+bool ActivateApp::set_appId(int appId_)
+{
+  appId=appId_;
   return true;
 }
 

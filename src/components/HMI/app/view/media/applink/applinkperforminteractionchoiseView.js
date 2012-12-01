@@ -19,7 +19,8 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
 
     childViews:         [
                             'backButton',
-                            'listOfChoises'
+                            'listOfChoises',
+                            'initialText'
                         ],
 
     backButton: MFT.Button.extend({
@@ -29,12 +30,29 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
         icon:              'images/media/ico_back.png',
     }),
 
+    initialText:    MFT.Label.extend({
+
+        elementId:          'initialText',
+
+        classNames:         'initialText',
+
+        contentBinding:     'MFT.ApplinkMediaController.performInteractionInitialText'
+    }),
+
+
     /** Applink Sub Mennu activate handler */
     applinkPerformInteractionChoise: function(){
         if(MFT.States.media.applink.applinkperforminteractionchoise.active){
-            MFT.AppPerformInteractionChoise.PerformInteraction(MFT.MediaController.currentApplinkPerformInteractionChoiseId);
+            MFT.AppPerformInteractionChoise.PerformInteraction(MFT.ApplinkMediaModel.currentApplinkPerformInteractionChoiseId);
         }
     }.observes('MFT.States.media.applink.applinkperforminteractionchoise.active'),
+
+    showPerformInteraction: function(){
+        if(MFT.States.media.applink.applinkperforminteractionchoise.active){
+            this.listOfChoises.items =  MFT.ApplinkMediaModel.voiceRecognitionCommands.slice();
+            this.listOfChoises.list.refresh();
+        }
+    },
 
     PerformInteraction: function( interactionChoiceSetIDList ){
 
@@ -47,19 +65,19 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
 
         for(var IDList = 0; IDList< interactionChoiceSetIDList.length; IDList++){
 
-            for(var ChoisesVal = 0; ChoisesVal < MFT.ApplinkModel.interactionChoises.length; ChoisesVal++){
+            for(var ChoisesVal = 0; ChoisesVal < MFT.ApplinkMediaModel.interactionChoises.length; ChoisesVal++){
 
-                if( interactionChoiceSetIDList[IDList] == MFT.ApplinkModel.interactionChoises[ChoisesVal].interactionChoiceSetID ){
+                if( interactionChoiceSetIDList[IDList] == MFT.ApplinkMediaModel.interactionChoises[ChoisesVal].interactionChoiceSetID ){
                     
-                    for(var ChoiseSet = 0; ChoiseSet < MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet.length; ChoiseSet++){
+                    for(var ChoiseSet = 0; ChoiseSet < MFT.ApplinkMediaModel.interactionChoises[ChoisesVal].choiceSet.length; ChoiseSet++){
 
                         this.listOfChoises.items.push({
                                 type:       MFT.Button,
                                 params:     {
-                                    action:                 'onChoosed',
-                                    target:                 'FFW.UI',
-                                    commandId:              MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID,
-                                    text:                   MFT.ApplinkModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
+                                    action:                 'onPerformInteractionChoosed',
+                                    target:                 'MFT.ApplinkMediaController',
+                                    choiceID:               MFT.ApplinkMediaModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID,
+                                    text:                   MFT.ApplinkMediaModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
                                     className:              'rs-item',
                                     templateName:           'text'
                                 }                                   

@@ -38,9 +38,10 @@ namespace NsAppManager
         /**
          * \brief send a message via associated handler
          * \param message message to send
+         * \param connectionID id of a connection associated with application that sent the message
          * \param sessionId id of a session associated with application that sent the message
          */
-        void sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, unsigned char sessionId );
+        void sendRPCMessage(const NsAppLinkRPC::ALRPCMessage * message, unsigned int connectionID, unsigned char sessionId );
 
         /**
          * \brief set mobile Json handler

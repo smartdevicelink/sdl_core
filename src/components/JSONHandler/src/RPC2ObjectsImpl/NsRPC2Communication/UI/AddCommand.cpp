@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -16,17 +16,22 @@ AddCommand& AddCommand::operator =(const AddCommand& c)
 {
   cmdId=c.cmdId;
   menuParams=c.menuParams;
+  if(cmdIcon)  delete cmdIcon;
+  cmdIcon= c.cmdIcon ? new NsAppLinkRPC::Image(c.cmdIcon[0]) : 0;
+  appId=c.appId;
   return *this;
 }
 
 
 AddCommand::~AddCommand(void)
 {
+  if(cmdIcon)  delete cmdIcon;
 }
 
 
 AddCommand::AddCommand(void) : 
-  RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ADDCOMMAND)
+  RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ADDCOMMAND),
+  cmdIcon(0)
 {
 }
 
@@ -56,6 +61,35 @@ const NsAppLinkRPC::MenuParams& AddCommand::get_menuParams(void)
 bool AddCommand::set_menuParams(const NsAppLinkRPC::MenuParams& menuParams_)
 {
   menuParams=menuParams_;
+  return true;
+}
+
+const NsAppLinkRPC::Image* AddCommand::get_cmdIcon(void)
+{
+  return cmdIcon;
+}
+
+bool AddCommand::set_cmdIcon(const NsAppLinkRPC::Image& cmdIcon_)
+{
+  if(cmdIcon)  delete cmdIcon;
+  cmdIcon=new NsAppLinkRPC::Image(cmdIcon_);
+  return true;
+}
+
+void AddCommand::reset_cmdIcon(void)
+{
+  if(cmdIcon)  delete cmdIcon;
+  cmdIcon=0;
+}
+
+int AddCommand::get_appId(void)
+{
+  return appId;
+}
+
+bool AddCommand::set_appId(int appId_)
+{
+  appId=appId_;
   return true;
 }
 

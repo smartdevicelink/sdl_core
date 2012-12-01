@@ -43,12 +43,12 @@ void JSONHandler::setRPCMessagesObserver( IRPCMessagesObserver * messagesObserve
     mMessagesObserver = messagesObserver;
 }
 
-void JSONHandler::sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, unsigned char sessionId )
+void JSONHandler::sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, int connectionKey )
 {
     LOG4CPLUS_INFO(mLogger, "An outgoing message has been received" );
     if ( message )
     {
-        mOutgoingMessages.push( message );
+        mOutgoingMessages.push( std::make_pair( connectionKey, message ));
     } 
 }
 /*End of methods for IRPCMessagesObserver*/
@@ -129,7 +129,9 @@ void * JSONHandler::waitForIncomingMessages( void * params )
                 LOG4CPLUS_ERROR( mLogger, "Cannot handle mobile message: MessageObserver doesn't exist." );
                 pthread_exit( 0 );
             }
+
             handler -> mMessagesObserver -> onMessageReceivedCallback( currentMessage, message -> getConnectionKey() );
+
             LOG4CPLUS_INFO( mLogger, "Incoming mobile message handled." );
         }
         handler -> mIncomingMessages.wait();
@@ -234,24 +236,33 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
     {
         while ( ! handler -> mOutgoingMessages.empty() )
         {
-            const NsAppLinkRPC::ALRPCMessage * message = handler -> mOutgoingMessages.pop();
+            std::pair<int,const NsAppLinkRPC::ALRPCMessage *> messagePair = handler -> mOutgoingMessages.pop();
+            const NsAppLinkRPC::ALRPCMessage *  message = messagePair.second;
             LOG4CPLUS_INFO( mLogger, "Outgoing mobile message " << message->getMethodId() << " received." );
 
             std::string messageString = NsAppLinkRPC::Marshaller::toString( message );
 
-            sendData(const AppLinkRawMessage * message);
+            if ( messageString.length() == 0 )
+            {
+                LOG4CPLUS_ERROR(mLogger, "Failed to serialize ALRPCMessage object.");
+                continue;
+            }
 
-            /*UInt8* pData;
-            pData = new UInt8[messageString.length() + 1];
-            memcpy (pData, messageString.c_str(), messageString.length() + 1);
+            unsigned char * rawMessage = new unsigned char[messageString.length() + 1];
+            memcpy( rawMessage, messageString.c_str(), messageString.length() +1 );
+
+            NsProtocolHandler::AppLinkRawMessage * msgToProtocolHandler = new NsProtocolHandler::AppLinkRawMessage(
+                        messagePair.first,
+                        message -> getProtocolVersion(),
+                        rawMessage,
+                        messageString.length() + 1);
 
             if ( !handler -> mProtocolHandler )
             {
                 LOG4CPLUS_ERROR( mLogger, "Cannot handle mobile message: ProtocolHandler doesn't exist." );
                 pthread_exit( 0 );
             }
-            handler -> mProtocolHandler -> sendData( handler -> mSessionID,  NsProtocolHandler::SERVICE_TYPE_RPC, 
-                    messageString.size() + 1, pData, false );*/
+            handler -> mProtocolHandler -> sendData( msgToProtocolHandler );
 
             delete message;
             LOG4CPLUS_INFO( mLogger, "Outgoing mobile message handled." );

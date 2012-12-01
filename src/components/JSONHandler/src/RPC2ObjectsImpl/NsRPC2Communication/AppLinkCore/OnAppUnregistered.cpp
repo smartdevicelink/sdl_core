@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -17,6 +17,7 @@ OnAppUnregistered& OnAppUnregistered::operator =(const OnAppUnregistered& c)
   appName=c.appName;
   if(reason)  delete reason;
   reason= c.reason ? new NsAppLinkRPC::AppInterfaceUnregisteredReason(c.reason[0]) : 0;
+  appId=c.appId;
   return *this;
 }
 
@@ -67,6 +68,17 @@ void OnAppUnregistered::reset_reason(void)
 {
   if(reason)  delete reason;
   reason=0;
+}
+
+int OnAppUnregistered::get_appId(void)
+{
+  return appId;
+}
+
+bool OnAppUnregistered::set_appId(int appId_)
+{
+  appId=appId_;
+  return true;
 }
 
 bool OnAppUnregistered::checkIntegrity(void)

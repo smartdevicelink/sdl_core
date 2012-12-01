@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/LanguageMarshaller.inc ./src/ALRPCObjectsImpl/LanguageMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/LanguageMarshaller.inc ../src/ALRPCObjectsImpl/LanguageMarshaller.gp  */
 /* Computed positions: -k'2' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -90,11 +90,11 @@ Language_intHash::getPointer (register const char *str, register unsigned int le
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""},
-#line 18 "./src/ALRPCObjectsImpl/LanguageMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/LanguageMarshaller.gp"
       {"ES-MX",1},
-#line 19 "./src/ALRPCObjectsImpl/LanguageMarshaller.gp"
+#line 19 "../src/ALRPCObjectsImpl/LanguageMarshaller.gp"
       {"FR-CA",2},
-#line 17 "./src/ALRPCObjectsImpl/LanguageMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/LanguageMarshaller.gp"
       {"EN-US",0}
     };
 

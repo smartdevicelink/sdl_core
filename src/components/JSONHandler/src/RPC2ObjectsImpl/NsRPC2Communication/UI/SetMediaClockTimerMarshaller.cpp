@@ -7,8 +7,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Mon Nov 19 12:18:27 2012
-  source stamp	Mon Nov 19 10:17:20 2012
+  generated at	Thu Nov 29 14:32:09 2012
+  source stamp	Thu Nov 29 14:32:05 2012
   author	robok0der
 */
 
@@ -68,6 +68,7 @@ Json::Value SetMediaClockTimerMarshaller::toJSON(const SetMediaClockTimer& e)
   if(e.startTime)
     json["params"]["startTime"]=NsAppLinkRPC::StartTimeMarshaller::toJSON(e.startTime[0]);;
   json["params"]["updateMode"]=NsAppLinkRPC::UpdateModeMarshaller::toJSON(e.updateMode);;
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -96,6 +97,9 @@ bool SetMediaClockTimerMarshaller::fromJSON(const Json::Value& json,SetMediaCloc
 
     if(!js.isMember("updateMode") || !NsAppLinkRPC::UpdateModeMarshaller::fromJSON(js["updateMode"],c.updateMode))  return false;
 
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

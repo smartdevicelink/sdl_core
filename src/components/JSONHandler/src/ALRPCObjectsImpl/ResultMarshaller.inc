@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=./src/ALRPCObjectsImpl/ResultMarshaller.inc ./src/ALRPCObjectsImpl/ResultMarshaller.gp  */
+/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/ResultMarshaller.inc ../src/ALRPCObjectsImpl/ResultMarshaller.gp  */
 /* Computed positions: -k'1,13' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -114,53 +114,53 @@ Result_intHash::getPointer (register const char *str, register unsigned int len)
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""},
-#line 29 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 29 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"IN_USE",12},
-#line 33 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 33 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"IGNORED",16},
-#line 31 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 31 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"REJECTED",14},
       {""},
-#line 22 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 22 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"INVALID_ID",5},
       {""},
-#line 18 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 18 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"INVALID_DATA",1},
-#line 36 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 36 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"GENERIC_ERROR",19},
-#line 27 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 27 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"WRONG_LANGUAGE",10},
       {""}, {""},
-#line 32 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 32 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"ABORTED",15},
-#line 20 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 20 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"OUT_OF_MEMORY",3},
-#line 19 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 19 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"UNSUPPORTED_REQUEST",2},
       {""},
-#line 24 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 24 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"TOO_MANY_APPLICATIONS",7},
-#line 17 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 17 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"SUCCESS",0},
-#line 34 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 34 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"UNSUPPORTED_BUTTON",17},
-#line 26 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 26 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"UNSUPPORTED_VERSION",9},
-#line 21 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 21 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"TOO_MANY_PENDING_REQUESTS",4},
       {""}, {""}, {""},
-#line 23 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 23 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"DUPLICATE_NAME",6},
       {""}, {""}, {""},
-#line 30 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 30 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"SUBSCRIBED_ALREADY",13},
-#line 35 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 35 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"FILE_NOT_FOUND",18},
       {""},
-#line 28 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 28 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"APPLICATION_NOT_REGISTERED",11},
       {""}, {""}, {""},
-#line 25 "./src/ALRPCObjectsImpl/ResultMarshaller.gp"
+#line 25 "../src/ALRPCObjectsImpl/ResultMarshaller.gp"
       {"APPLICATION_REGISTERED_ALREADY",8}
     };
 
