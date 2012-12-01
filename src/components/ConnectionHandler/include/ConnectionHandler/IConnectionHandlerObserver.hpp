@@ -36,11 +36,10 @@ namespace NsConnectionHandler
          **/
         virtual void onDeviceListUpdated(const NsConnectionHandler::tDeviceList & DeviceList) = 0;
 
-        virtual void onSessionStartedCallback(NsConnectionHandler::tConnectionHandle connectionHandle, 
-                                               unsigned char sessionId) = 0;
+        virtual void onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, 
+                                               int sessionKey) = 0;
 
-        virtual void onSessionEndedCallback(NsConnectionHandler::tConnectionHandle connectionHandle, 
-                                               unsigned char sessionId) = 0;
+        virtual void onSessionEndedCallback(int sessionKey) = 0;
 
     protected:
         /**

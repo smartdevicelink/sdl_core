@@ -89,6 +89,8 @@ namespace NsConnectionHandler
 
         void setTransportManager( NsAppLink::NsTransportManager::ITransportManager * transportManager );
 
+        void startDevicesDiscovery();
+
     private:
         /**
          * \brief Default class constructor
@@ -106,6 +108,11 @@ namespace NsConnectionHandler
         IConnectionHandlerObserver* mpConnectionHandlerObserver;
 
         /**
+         * \brief Pointer to TransportManager
+         */
+        NsAppLink::NsTransportManager::ITransportManager * mpTransportManager;
+
+        /**
          * \brief List of devices
          */
         tDeviceList mDeviceList;
@@ -119,10 +126,6 @@ namespace NsConnectionHandler
           *\brief For logging.
         */
         static log4cplus::Logger mLogger;
-
-        NsAppLink::NsTransportManager::ITransportManager * mTransportManager;
-
-
     };
 }/* namespace NsConnectionHandler */
 
