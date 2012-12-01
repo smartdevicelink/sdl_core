@@ -43,7 +43,7 @@ namespace NsProtocolHandler
         struct IncomingMessage
         {
           NsAppLink::NsTransportManager::tConnectionHandle mConnectionHandle;
-          const unsigned char * mData;
+          unsigned char * mData;
           unsigned int mDataSize;
         };
 
@@ -88,7 +88,7 @@ namespace NsProtocolHandler
         ISessionObserver * mSessionObserver;
         NsAppLink::NsTransportManager::ITransportManager * mTransportManager;
 
-        MessageQueue<IncomingMessage> mMessagesFromMobileApp;
+        MessageQueue<IncomingMessage *> mMessagesFromMobileApp;
         pthread_t mHandleMessagesFromMobileApp;
         MessageQueue<const AppLinkRawMessage *> mMessagesToMobileApp;
         pthread_t mHandleMessagesToMobileApp;

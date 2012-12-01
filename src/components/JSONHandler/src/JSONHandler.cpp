@@ -102,6 +102,8 @@ void * JSONHandler::waitForIncomingMessages( void * params )
 
             NsAppLinkRPC::ALRPCMessage * currentMessage = 0;
 
+            LOG4CPLUS_INFO_EXT(mLogger, "Message of protocol version " << message -> getProtocolVersion());
+
             if ( message -> getProtocolVersion() == 1 )
             {
                 currentMessage = handler -> handleIncomingMessageProtocolV1( message );
@@ -169,22 +171,30 @@ NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV2( const
             rpcType = 2;
             break;
     }
+    LOG4CPLUS_INFO_EXT(mLogger, "RPC Type of the message is " << rpcType << " from flag " << rpcTypeFlag);
 
     unsigned int functionId = firstByte >> 8u;
+
     functionId <<= 24u;
     functionId |= receivedData[offset++] << 16u;
     functionId |= receivedData[offset++] << 8u;
     functionId |= receivedData[offset++];
+
+    LOG4CPLUS_INFO_EXT(mLogger, "FunctionId is " << functionId);
 
     unsigned int correlationId = receivedData[offset++] << 24u;
     correlationId |= receivedData[offset++] << 16u;
     correlationId |= receivedData[offset++] << 8u;
     correlationId |= receivedData[offset++];
 
+    LOG4CPLUS_INFO_EXT(mLogger, "Correlation id " << correlationId);
+
     unsigned int jsonSize = receivedData[offset++] << 24u;
     jsonSize |= receivedData[offset++] << 16u;
     jsonSize |= receivedData[offset++] << 8u;
     jsonSize |= receivedData[offset++];
+
+    LOG4CPLUS_INFO_EXT(mLogger, "Json size is " << jsonSize);
 
     if ( jsonSize > message->getDataSize() )
     {
@@ -201,7 +211,15 @@ NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV2( const
 
     std::string jsonCleanMessage = clearEmptySpaces( jsonMessage );
 
-    return NsAppLinkRPC::Marshaller::fromString( jsonCleanMessage );
+    NsAppLinkRPC::ALRPCMessage * messageObject = NsAppLinkRPC::Marshaller::fromString( jsonCleanMessage );
+
+    if ( message -> getDataSize() > offset + jsonSize )
+    {
+        unsigned int binarySize = message->getDataSize() - offset - jsonSize;
+        std::vector<unsigned char> binaryData( receivedData+offset+jsonSize, receivedData + binarySize -1 );
+        //messageObject -> setBinaryData( binaryData );
+    }
+    return messageObject;
 }
 
 void * JSONHandler::waitForOutgoingMessages( void * params )
@@ -220,6 +238,8 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
             LOG4CPLUS_INFO( mLogger, "Outgoing mobile message " << message->getMethodId() << " received." );
 
             std::string messageString = NsAppLinkRPC::Marshaller::toString( message );
+
+            sendData(const AppLinkRawMessage * message);
 
             /*UInt8* pData;
             pData = new UInt8[messageString.length() + 1];

@@ -1,6 +1,8 @@
 #include <memory.h>
 #include "ProtocolHandler/ProtocolPacket.h"
 
+#include <iostream>
+
 using namespace NsProtocolHandler;
 
 ProtocolPacket::ProtocolPacket() :
@@ -87,12 +89,14 @@ RESULT_CODE ProtocolPacket::serializePacket(unsigned char version,
         mPacket[offset++] = messageID;
     }
 
+    mTotalPacketSize = offset;
+
     if (data)
     {
         if ( (offset + dataSize) <= MAXIMUM_FRAME_SIZE)
         {
             memcpy(mPacket + offset, data, dataSize);
-            mTotalPacketSize = offset + dataSize;
+            mTotalPacketSize += dataSize;
         }            
         else
         {
@@ -138,6 +142,10 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char * message, uns
     offset++;
     
     mPacketHeader.version = firstByte >> 4u;
+
+    //std::cout << "ProtocolPacket::deserializePacket: version " << mPacketHeader.version << std::endl;
+    //std::cout.flush();
+
     if (firstByte & 0x08u)
     {
         mPacketHeader.compress = true;
@@ -149,14 +157,23 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char * message, uns
     
     mPacketHeader.frameType = firstByte & 0x07u;
 
+    //std::cout << "ProtocolPacket::deserializePacket: frameType " << mPacketHeader.frameType << std::endl;
+    //std::cout.flush();
+
     mPacketHeader.serviceType = message[offset++];        
     mPacketHeader.frameData = message[offset++];        
     mPacketHeader.sessionID = message[offset++];
+
+    //std::cout << "ProtocolPacket::deserializePacket: sessionID " << mPacketHeader.sessionID << std::endl;
+    //std::cout.flush();
     
     mPacketHeader.dataSize  = message[offset++] << 24u;
     mPacketHeader.dataSize |= message[offset++] << 16u;
     mPacketHeader.dataSize |= message[offset++] << 8u;
     mPacketHeader.dataSize |= message[offset++];
+
+    //std::cout << "ProtocolPacket::deserializePacket: dataSize " << mPacketHeader.dataSize << std::endl;
+    //std::cout.flush();
     
     if (mPacketHeader.version == PROTOCOL_VERSION_2)
     {
@@ -171,6 +188,9 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char * message, uns
     }
     
     const unsigned int dataPayloadSize = messageSize - offset;
+
+    //std::cout << "ProtocolPacket::deserializePacket: dataPayloadSize " << dataPayloadSize << std::endl;
+    //std::cout.flush();
     
     if (dataPayloadSize != mPacketHeader.dataSize)
     {        
@@ -180,9 +200,13 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char * message, uns
     unsigned char * data = 0;
     if (dataPayloadSize != 0u)
     {
-        unsigned char * data = new unsigned char[messageSize - offset];
+        data = new unsigned char[messageSize - offset];
         memcpy(data, message + offset, dataPayloadSize);
     }
+
+    //std::cout << "ProtocolPacket::deserializePacket: data " << (int)data << std::endl;
+    //std::cout.flush();
+
     mPacketData.data = data;
     mPacketData.totalDataBytes = dataPayloadSize;
     return RESULT_OK;

@@ -35,8 +35,8 @@ namespace NsConnectionHandler
         int result = -1;
         if (255 > mSessionIDCounter)
         {
-            mSessionList.push_back(mSessionIDCounter);
-            result = mSessionIDCounter++;
+            mSessionList.push_back(++mSessionIDCounter);
+            result = mSessionIDCounter;
         }
         return result;
     }

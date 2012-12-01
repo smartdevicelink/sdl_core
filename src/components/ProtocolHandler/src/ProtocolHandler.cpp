@@ -114,10 +114,10 @@ void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConne
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
     unsigned char versionFlag = PROTOCOL_VERSION_1;
-    if (0 != hashCode)
+    /*if (0 != hashCode)
     {
         versionFlag = PROTOCOL_VERSION_2;
-    }
+    }*/
 
     ProtocolPacket packet(versionFlag,
                                 COMPRESS_OFF,
@@ -182,10 +182,12 @@ void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnection
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     if (connectionHandle && dataSize > 0 && data )
     {
-        IncomingMessage message;
-        message.mData = data;
-        message.mDataSize = dataSize;
-        message.mConnectionHandle = connectionHandle;
+        LOG4CPLUS_INFO_EXT(mLogger, "Received from TM " << data << "; size " << dataSize);
+        IncomingMessage  * message = new IncomingMessage;
+        message -> mData = new unsigned char[dataSize];
+        memcpy(message -> mData, data, dataSize);
+        message -> mDataSize = dataSize;
+        message -> mConnectionHandle = connectionHandle;
         mMessagesFromMobileApp.push( message );
     }
     else 
@@ -203,6 +205,8 @@ RESULT_CODE ProtocolHandler::sendFrame( NsAppLink::NsTransportManager::tConnecti
         LOG4CPLUS_ERROR(mLogger, "Failed to create packet.");
         return RESULT_FAIL;
     }
+
+    LOG4CPLUS_INFO_EXT( mLogger, "Packet to be sent: " << packet.getPacket() << " of size: " << packet.getPacketSize());
 
     if (mTransportManager)
     {
@@ -362,7 +366,7 @@ RESULT_CODE ProtocolHandler::handleMessage( NsAppLink::NsTransportManager::tConn
         }
         case FRAME_TYPE_SINGLE:
         {
-            LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_SINGLE");
+            LOG4CPLUS_INFO(mLogger, "FRAME_TYPE_SINGLE: of size " << packet->getDataSize() << ";message " << (int)packet -> getData());
 
             if ( !mSessionObserver )
             {
@@ -500,6 +504,7 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager
     if (packet -> getFrameData() == FRAME_DATA_START_SESSION)
     {
         LOG4CPLUS_INFO(mLogger, "handleControlMessage() - FRAME_DATA_START_SESSION");
+        LOG4CPLUS_INFO_EXT(mLogger, "Version 2 " << (packet -> getVersion() == PROTOCOL_VERSION_2));
 
         int sessionId = mSessionObserver -> onSessionStartedCallback( connectionHandle );
         if ( -1 != sessionId )
@@ -523,28 +528,32 @@ void * ProtocolHandler::handleMessagesFromMobileApp( void * params )
     {
         while( ! handler -> mMessagesFromMobileApp.empty() )
         {
-            IncomingMessage message = handler -> mMessagesFromMobileApp.pop();
-            LOG4CPLUS_INFO_EXT(mLogger, "Message from mobile app received of size " << message.mDataSize );
+            IncomingMessage * message = handler -> mMessagesFromMobileApp.pop();
+            LOG4CPLUS_INFO_EXT(mLogger, "Message " << message -> mData << " from mobile app received of size " << message -> mDataSize );
 
             //@TODO check for ConnectionHandle.
             //@TODO check for data size - crash is possible.
-            if ((0 != message.mData) && (0 != message.mDataSize) && (MAXIMUM_FRAME_SIZE >= message.mDataSize))
+            if ((0 != message -> mData) && (0 != message -> mDataSize) && (MAXIMUM_FRAME_SIZE >= message -> mDataSize))
             {        
                 ProtocolPacket * packet = new ProtocolPacket;
-                if ( packet -> deserializePacket( message.mData, message.mDataSize ) == RESULT_FAIL )
+                LOG4CPLUS_INFO_EXT(mLogger ,"Data: " << (int)packet -> getData());
+                if ( packet -> deserializePacket( message -> mData, message -> mDataSize ) == RESULT_FAIL )
                 {
                     LOG4CPLUS_ERROR(mLogger, "Failed to parse received message.");
                     delete packet;
                 }
                 else 
                 {
-                    handler -> handleMessage( message.mConnectionHandle, packet );
+                    LOG4CPLUS_INFO_EXT(mLogger, "Packet: dataSize " << packet -> getDataSize());
+                    handler -> handleMessage( message -> mConnectionHandle, packet );
                 }
             }
             else
             {
                 LOG4CPLUS_WARN(mLogger, "handleMessagesFromMobileApp() - incorrect or NULL data");
             }
+
+            delete message;
         }
         handler -> mMessagesFromMobileApp.wait();
     }
