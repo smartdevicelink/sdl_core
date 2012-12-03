@@ -8,8 +8,8 @@
 #include "IHandleGenerator.hpp"
 #include "CDeviceAdapter.hpp"
 
-NsAppLink::NsTransportManager::CDeviceAdapter::SFrame::SFrame(int SequenceNumber, const uint8_t* Data, const size_t DataSize):
-mSequenceNumber(SequenceNumber),
+NsAppLink::NsTransportManager::CDeviceAdapter::SFrame::SFrame(int UserData, const uint8_t* Data, const size_t DataSize):
+mUserData(UserData),
 mData(0),
 mDataSize(0)
 {
@@ -55,7 +55,6 @@ mDeviceHandle(DeviceHandle),
 mConnectionThread(),
 mNotificationPipeFds(),
 mConnectionSocket(-1),
-mNextFrameSequenceNumber(0),
 mFramesToSend(),
 mTerminateFlag(false)
 {
@@ -278,10 +277,8 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::disconnectDevice(const NsApp
     }
 }
 
-int NsAppLink::NsTransportManager::CDeviceAdapter::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
+void NsAppLink::NsTransportManager::CDeviceAdapter::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData)
 {
-    int frameSequenceNumber = -1;
-
     if (0u == DataSize)
     {
         LOG4CPLUS_WARN_EXT(mLogger, "DataSize=0");
@@ -306,9 +303,7 @@ int NsAppLink::NsTransportManager::CDeviceAdapter::sendFrame(NsAppLink::NsTransp
 
             if (0 != connection)
             {
-                frameSequenceNumber = connection->mNextFrameSequenceNumber++;
-
-                connection->mFramesToSend.push(new SFrame(frameSequenceNumber, Data, DataSize));
+                connection->mFramesToSend.push(new SFrame(UserData, Data, DataSize));
 
                 if (-1 != connection->mNotificationPipeFds[1])
                 {
@@ -323,8 +318,6 @@ int NsAppLink::NsTransportManager::CDeviceAdapter::sendFrame(NsAppLink::NsTransp
 
         pthread_mutex_unlock(&mConnectionsMutex);
     }
-
-    return frameSequenceNumber;
 }
 
 void NsAppLink::NsTransportManager::CDeviceAdapter::waitForThreadsTermination(void)
@@ -704,14 +697,11 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::handleCommunication(const Ns
 
                                             for (; false == framesToSend.empty(); framesToSend.pop())
                                             {
-                                                int frameSequenceNumber = -1;
                                                 SFrame * frame = framesToSend.front();
                                                 ESendStatus frameSendStatus = SendStatusUnknownError;
 
                                                 if (0 != frame)
                                                 {
-                                                    frameSequenceNumber = frame->mSequenceNumber;
-
                                                     if ((0 != frame->mData) &&
                                                         (0u != frame->mDataSize))
                                                     {
@@ -725,11 +715,11 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::handleCommunication(const Ns
                                                         {
                                                             if (bytesSent >= 0)
                                                             {
-                                                                LOG4CPLUS_ERROR_EXT(mLogger, "Sent " << bytesSent << " bytes while " << frame->mDataSize << " had been requested for connection " << ConnectionHandle << " frame " << frameSequenceNumber);
+                                                                LOG4CPLUS_ERROR_EXT(mLogger, "Sent " << bytesSent << " bytes while " << frame->mDataSize << " had been requested for connection " << ConnectionHandle);
                                                             }
                                                             else
                                                             {
-                                                                LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Send failed for connection " << ConnectionHandle << " frame " << frameSequenceNumber);
+                                                                LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Send failed for connection " << ConnectionHandle);
                                                             }
 
                                                             frameSendStatus = SendStatusFailed;
@@ -737,7 +727,7 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::handleCommunication(const Ns
                                                     }
                                                     else
                                                     {
-                                                        LOG4CPLUS_ERROR_EXT(mLogger, "Frame data is invalid for connection " << ConnectionHandle << " frame " << frameSequenceNumber);
+                                                        LOG4CPLUS_ERROR_EXT(mLogger, "Frame data is invalid for connection " << ConnectionHandle);
 
                                                         frameSendStatus = SendStatusInternalError;
                                                     }
@@ -746,12 +736,12 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::handleCommunication(const Ns
                                                 }
                                                 else
                                                 {
-                                                    LOG4CPLUS_ERROR_EXT(mLogger, "Frame data is null for connection " << ConnectionHandle << " frame " << frameSequenceNumber);
+                                                    LOG4CPLUS_ERROR_EXT(mLogger, "Frame data is null for connection " << ConnectionHandle);
 
                                                     frameSendStatus = SendStatusInternalError;
                                                 }
 
-                                                mListener.onFrameSendCompleted(this, ConnectionHandle, frameSequenceNumber, frameSendStatus);
+                                                mListener.onFrameSendCompleted(this, ConnectionHandle, frame->mUserData, frameSendStatus);
                                             }
                                         }
                                     }

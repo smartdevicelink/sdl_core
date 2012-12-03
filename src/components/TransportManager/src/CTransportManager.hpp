@@ -106,11 +106,9 @@ namespace NsAppLink
              * @param ConnectionHandle Connection handle.
              * @param Data Frame payload data.
              * @param DataSize Size of data in bytes.
-             *
-             * @return Frame sequence number. May be used to identify
-             *         this frame when send result callback is received.
+             * @param UserData Any user data. Will be returned as is in ITransportManagerDataListener::onFrameSendCompleted
              **/
-            virtual int sendFrame(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize);
+            virtual void sendFrame(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, const int UserData);
 
             /**
              * @brief Generate new device handle.
@@ -178,10 +176,10 @@ namespace NsAppLink
              *
              * @param DeviceAdapter Calling device adapter.
              * @param ConnectionHandle Connection handle.
-             * @param FrameSequenceNumber Sequence numbere of frame that was previously returned by ITransportManager::sendFrame.
+             * @param UserData User data that was previously passed to ITransportManager::sendFrame.
              * @param SendStatus Result status.
              **/
-            virtual void onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus);
+            virtual void onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, int UserData, ESendStatus SendStatus);
 
         protected:
 
@@ -294,10 +292,10 @@ namespace NsAppLink
                  *
                  * @param CallbackType Type of the callback
                  * @param ConnectionHandle Connection handle
-                 * @param FrameSequenceNumber Sequence Number
+                 * @param UserData User data
                  * @param SendStatus Status of operation
                  **/
-                SDataListenerCallback(EDataListenerCallbackType CallbackType, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus);
+                SDataListenerCallback(EDataListenerCallbackType CallbackType, tConnectionHandle ConnectionHandle, int UserData, ESendStatus SendStatus);
 
                 /**
                  * @brief Copy constructor
@@ -341,9 +339,9 @@ namespace NsAppLink
                 size_t mDataSize;
 
                 /**
-                 * @brief Sequence number
+                 * @brief User data
                  **/
-                int mFrameSequenceNumber;
+                int mUserData;
 
                 /**
                  * @brief Operation status

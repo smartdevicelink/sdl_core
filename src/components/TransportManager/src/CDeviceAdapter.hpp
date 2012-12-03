@@ -69,13 +69,11 @@ namespace NsAppLink
              * @brief Send frame.
              *
              * @param ConnectionHandle Connection handle.
-             * @param Data Frame data.
+             * @param Data Frame payload data.
              * @param DataSize Size of data in bytes.
-             *
-             * @return Frame sequence number. May be used to identify
-             *         this frame when send result callback is received.
+             * @param UserData Any user data.
              **/
-            virtual int sendFrame(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize);
+            virtual void sendFrame(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData);
 
         protected:
             /**
@@ -88,12 +86,12 @@ namespace NsAppLink
                 /**
                  * @brief Constructor.
                  *
-                 * @param SequenceNumber Frame sequence number.
+                 * @param UserData User data
                  * @param Data Frame data. SFrame stores a copy of this data,
                  *             i.e. data may be freed after SFrame object is constructed.
                  * @param DataSize Size of frame data in bytes.
                  **/
-                SFrame(int SequenceNumber, const uint8_t * Data, const size_t DataSize);
+                SFrame(int UserData, const uint8_t * Data, const size_t DataSize);
 
                 /**
                  * @brief Destructor.
@@ -103,9 +101,9 @@ namespace NsAppLink
                 ~SFrame(void);
 
                 /**
-                 * @brief Frame sequence number.
+                 * @brief User data
                  **/
-                int mSequenceNumber;
+                int mUserData;
 
                 /**
                  * @brief Frame data.
@@ -247,11 +245,6 @@ namespace NsAppLink
                  * @brief Descriptor of connection socket.
                  **/
                 int mConnectionSocket;
-
-                /**
-                 * @brief Sequence number for next frame.
-                 **/
-                int mNextFrameSequenceNumber;
 
                 /**
                  * @brief Frames that must be sent to remote device.
