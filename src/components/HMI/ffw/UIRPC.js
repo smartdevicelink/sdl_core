@@ -16,7 +16,9 @@ FFW.UI = FFW.RPCObserver.create({
 	 *	access to basic RPC functionality
  	 */		
 	 client:		FFW.RPCClient.create({ componentName: "UI" }),
-
+	
+	// temp var for debug
+	appId:	2,
 
 	onVRChoiseSubscribeRequestId:		-1,
 	onVRChoiseUnsubscribeRequestId:		-1,
@@ -167,7 +169,7 @@ FFW.UI = FFW.RPCObserver.create({
 		switch (request.method) {
 		    case "UI.Show":{
 
-				MFT.ApplinkController.getApplicationModel(1).onApplinkUIShow(request.params);
+				MFT.ApplinkController.getApplicationModel(this.appId).onApplinkUIShow(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 
@@ -175,7 +177,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.Alert":{
 
-				MFT.ApplinkController.getApplicationModel(1).onApplinkUIAlert(request.params);
+				MFT.ApplinkController.getApplicationModel(this.appId).onApplinkUIAlert(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 
@@ -208,7 +210,7 @@ FFW.UI = FFW.RPCObserver.create({
 			}
 		    case "UI.AddCommand":{
 
-			    MFT.ApplinkController.getApplicationModel(1).onApplinkAddCommand(request.params);
+			    MFT.ApplinkController.getApplicationModel(this.appId).onApplinkAddCommand(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 
@@ -216,7 +218,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.DeleteCommand":{
 
-				MFT.ApplinkController.getApplicationModel(1).onApplinkOptionsDeleteCommand(request.params.cmdId);
+				MFT.ApplinkController.getApplicationModel(this.appId).onApplinkOptionsDeleteCommand(request.params.cmdId);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 				
@@ -224,7 +226,7 @@ FFW.UI = FFW.RPCObserver.create({
 			}
 		    case "UI.AddSubMenu":{
 
-				MFT.ApplinkController.getApplicationModel(1).onApplinkAddSubMenu(request.params.menuId, request.params);
+				MFT.ApplinkController.getApplicationModel(this.appId).onApplinkAddSubMenu(request.params.menuId, request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 		    
@@ -232,7 +234,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.DeleteSubMenu":{
 
-				var resultCode =  MFT.ApplinkController.getApplicationModel(1).onApplinkDeleteSubMenu(request.params.menuId);
+				var resultCode =  MFT.ApplinkController.getApplicationModel(this.appId).onApplinkDeleteSubMenu(request.params.menuId);
 
 				this.sendUIResult(resultCode, request.id, request.method);
 		    	
@@ -240,7 +242,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.CreateInteractionChoiceSet":{
 
-				MFT.ApplinkController.getApplicationModel(1).onApplinkCreateInteractionChoise(request.params);
+				MFT.ApplinkController.getApplicationModel(this.appId).onApplinkCreateInteractionChoise(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 		    	
@@ -248,7 +250,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.DeleteInteractionChoiceSet":{
 
-				MFT.ApplinkController.getApplicationModel(1).onApplinkDeleteInteractionChoise(request.params.interactionChoiceSetID);
+				MFT.ApplinkController.getApplicationModel(this.appId).onApplinkDeleteInteractionChoise(request.params.interactionChoiceSetID);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 		    	
@@ -258,13 +260,13 @@ FFW.UI = FFW.RPCObserver.create({
 
 				this.performInteractionRequestId = request.id;
 
-				MFT.ApplinkController.getApplicationModel(1).turnOnApplinkPerform(request.params);
+				MFT.ApplinkController.getApplicationModel(this.appId).turnOnApplinkPerform(request.params);
 		    	
 		    	break;
 		    }
 		    case "UI.SetMediaClockTimer":{
 
-				var resultCode = MFT.ApplinkController.getApplicationModel(1).applinkSetMediaClockTimer(request.params);
+				var resultCode = MFT.ApplinkController.getApplicationModel(this.appId).applinkSetMediaClockTimer(request.params);
 
 				this.sendUIResult(resultCode, request.id, request.method);
 		    	
@@ -276,7 +278,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.Slider":{
 
-				MFT.ApplinkController.getApplicationModel(1).onApplinkSlider(request.params);
+				MFT.ApplinkController.getApplicationModel(this.appId).onApplinkSlider(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 		    
