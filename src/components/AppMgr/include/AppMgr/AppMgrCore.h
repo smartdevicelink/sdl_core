@@ -15,6 +15,7 @@
 #include "AppMgr/CapabilitesContainer.h"
 #include "AppMgr/AutoActivateIdMapping.h"
 #include "AppMgr/SyncPManager.h"
+#include "JSONHandler/ALRPCObjects/DisplayCapabilities_v2.h"
 
 namespace NsAppLinkRPC
 {
@@ -27,6 +28,7 @@ namespace NsAppLinkRPC
 {
     class RegisterAppInterface_request;
     class OnDriverDistraction;
+    class ALRPCRequest;
 }
 
 namespace NsRPC2Communication
@@ -144,10 +146,9 @@ namespace NsAppManager
          * \param request a RegisterAppInterface request which is the source for application fields initial values
          * \param connectionID id of the connection which will be associated with the application
          * \param sessionID an id of the session which will be associated with the application
-         * \param protocolVersion protocol version number
          * \return A instance of RegistryItem created for application
          */
-        const RegistryItem* registerApplication(NsAppLinkRPC::RegisterAppInterface_request *request , const unsigned int &connectionID, const unsigned char &sessionID, const unsigned int& protocolVersion);
+        const RegistryItem* registerApplication(NsAppLinkRPC::ALRPCRequest *request , const unsigned int &connectionID, const unsigned char &sessionID);
 
         /**
          * \brief unregister an application associated with the given session
@@ -182,11 +183,15 @@ namespace NsAppManager
         AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
         AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
-        CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities> mButtonCapabilities;
-        NsAppLinkRPC::DisplayCapabilities mDisplayCapabilities;
+        CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities> mButtonCapabilitiesV1;
+        CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities_v2> mButtonCapabilitiesV2;
+        NsAppLinkRPC::DisplayCapabilities mDisplayCapabilitiesV1;
+        NsAppLinkRPC::DisplayCapabilities_v2 mDisplayCapabilitiesV2;
         CapabilitiesContainer<NsAppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilities;
-        CapabilitiesContainer<NsAppLinkRPC::VrCapabilities> mVrCapabilities;
-        CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities> mSpeechCapabilities;
+        CapabilitiesContainer<NsAppLinkRPC::VrCapabilities> mVrCapabilitiesV1;
+        CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities> mSpeechCapabilitiesV1;
+        CapabilitiesContainer<NsAppLinkRPC::VrCapabilities_v2> mVrCapabilitiesV2;
+        CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities_v2> mSpeechCapabilitiesV2;
         ButtonMapping    mButtonsMapping;
         MessageMapping   mMessageMapping;
         RequestMapping   mRequestMapping;
