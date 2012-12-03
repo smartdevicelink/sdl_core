@@ -71,10 +71,10 @@ namespace NsAppLink
              * @brief Frame send completed callback.
              *
              * @param ConnectionHandle Connection handle.
-             * @param FrameSequenceNumber Sequence numbere of frame that was previously returned by ITransportManager::sendFrame.
+             * @param UserData User data that was previously passed to ITransportManager::sendFrame.
              * @param SendStatus Result status.
              **/
-            virtual void onFrameSendCompleted(tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus);
+            virtual void onFrameSendCompleted(tConnectionHandle ConnectionHandle, int UserData, ESendStatus SendStatus);
         };
     }
 }
