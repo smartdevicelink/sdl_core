@@ -17,7 +17,7 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
 	childViews: [
 		'backButton',
 		'title',
-		'list'
+		'listOfOptions'
 	],
 	
 	backButton: MFT.Button.extend({		
@@ -35,7 +35,22 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
 		content:	'Options'
 	}),
 	
-	list: MFT.List.extend({
+	AddCommand: function( commandId, params ){
+
+        this.get('listOfOptions.list.childViews').pushObject(
+            MFT.Button.create({
+                action:                 'onCommand',
+                target:                 'MFT.ApplinkMediaController',
+                commandId:              commandId,
+                text:                   params.menuName,
+                classNames:             'list-item',
+                templateName:           'text'
+            })
+        );
+
+    },
+	
+	listOfOptions: MFT.List.extend({
 		
 		elementId:	'info_nonMedia_options_list',
 		
