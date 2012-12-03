@@ -37,7 +37,7 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
 	
 	AddCommand: function( commandId, params ){
 
-        this.get('listOfOptions.list.childViews').pushObject(
+        this.get('listOfOptions.list.childViews').insertAt(0,
             MFT.Button.create({
                 action:                 'onCommand',
                 target:                 'MFT.ApplinkMediaController',
@@ -48,6 +48,36 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
             })
         );
 
+    },
+    
+    DeleteCommand: function( commandId ){
+
+        this.get('listOfOptions.list.childViews').removeObjects(
+            this.get('listOfOptions.list.childViews').filterProperty( 'commandId' , commandId )
+        );
+
+    },
+    
+    AddSubMenu: function( menuId, params ){
+
+        this.get('listOfOptions.list.childViews').pushObject(0,
+            MFT.Button.create({
+                action:                 'turnOnApplinkSubMenu',
+                target:                 'MFT.ApplinkMediaController',
+                menuId:                 menuId,
+                text:                   params.menuName,
+                classNames:             'list-item',
+                templateName:           'arrow'
+            })
+        );
+
+    },
+
+    DeleteSubMenu: function( menuId ){
+
+        this.get('listOfOptions.list.childViews').removeObjects(
+            this.get('listOfOptions.list.childViews').filterProperty( 'menuId' , menuId )
+        );
     },
 	
 	listOfOptions: MFT.List.extend({
@@ -61,12 +91,24 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
 				type:	MFT.Button,
 			
 				params:		{
+					templateName:	'text',
+				
+					text:	'Exit',
+									
+					action:		'back',
+					target:		'MFT.States'
+				}
+			},
+			{
+				type:	MFT.Button,
+			
+				params:		{
 					templateName:	'arrow',
 				
-					text:	'Submenu Test',
+					text:	'Device Information',
 									
-					action:		'turnOnApplinkSubMenu',
-					target:		'MFT.NonMediaController'
+					//action:		'back',
+					//target:		'MFT.States'
 				}
 			}
 		]
