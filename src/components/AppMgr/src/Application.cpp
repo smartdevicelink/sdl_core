@@ -17,9 +17,9 @@ namespace NsAppManager
      * \param name application name
      * \param connectionId id of the connection associated with this application
      * \param sessionId id of the session associated with this application
-     * \param protocolVersion protocol version number
+     * \param protocolVersion protocol version
      */
-    Application::Application(const std::string& name , const unsigned int &connectionId, const unsigned char &sessionId, const unsigned int& protocolVersion)
+    Application::Application(const std::string& name , unsigned int connectionId, unsigned char sessionId, unsigned int protocolVersion)
         :mNgnMediaScreenAppName("")
         ,m_bUsesVehicleData(false)
         ,m_bIsMediaApplication(false)
@@ -296,8 +296,8 @@ namespace NsAppManager
     }
 
     /**
-     * \brief retrieve application protocol version number
-     * \return application protocol version number
+     * \brief retrieve application protocol version
+     * \return application protocol version
      */
     const unsigned int &Application::getProtocolVersion() const
     {

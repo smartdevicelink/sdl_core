@@ -30,14 +30,14 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 		'findNewApps', 
 		'listOfApplications'
 	],
-
+/*
     afterRender: function(){
         /*
          * Request, get List of applications
          */
-        FFW.AppLinkCoreClient.getAppList();
+       /* FFW.AppLinkCoreClient.getAppList();
     },
-
+*/
     /** 
       * Function to add application to application list
       */

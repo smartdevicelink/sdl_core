@@ -47,9 +47,9 @@ namespace NsAppManager
          * \param name application name
          * \param connectionId id of the connection associated with this application
          * \param sessionId id of the session associated with this application
-         * \param protocolVersion protocol version number
+         * \param protocolVersion protocol version
          */
-        Application(const std::string& name, const unsigned int& connectionId, const unsigned char& sessionId, const unsigned int& protocolVersion );
+        Application(const std::string& name, unsigned int connectionId, unsigned char sessionId, unsigned int protocolVersion );
 
         /**
          * \brief Default class destructor
@@ -214,8 +214,8 @@ namespace NsAppManager
         const unsigned int& getConnectionID() const;
 
         /**
-         * \brief retrieve application protocol version number
-         * \return application protocol version number
+         * \brief retrieve application protocol version
+         * \return application protocol version
          */
         const unsigned int& getProtocolVersion() const;
 

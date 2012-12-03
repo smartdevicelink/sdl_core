@@ -90,6 +90,31 @@
 	background-color: #393939;
 }
 
+#info_nonMedia_options .list{
+	width: 669px;
+	height: 251px;
+	border-radius: 2px;
+	left: 100px;
+	top: 150px;
+}
+
+#info_nonMedia_options .list-content{
+	width: 610px;
+}
+
+#info_nonMedia_options .list-content span{
+	margin-left: 15px;
+}
+
+#info_nonMedia_options_submenu {
+	z-index: 11000;
+	width: 800px;
+	height: 480px;
+	background-color: black;
+	top: 0px;
+	left: 0px;
+}
+
 
  #media_applink_slider_view .control {
 	 width: 238px;

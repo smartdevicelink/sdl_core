@@ -127,6 +127,9 @@ var StateManager = Em.StateManager.extend({
 			
 			options: Em.State.create({
 				
+				subMenu: Em.State.create({
+				
+				})
 			})
 		})
 	}),
