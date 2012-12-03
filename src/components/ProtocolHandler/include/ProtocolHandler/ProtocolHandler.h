@@ -60,8 +60,19 @@ namespace NsProtocolHandler
          * @param Data Received frame payload data.
          * @param DataSize Size of data in bytes.
         **/
-        virtual void onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize);
-        
+        virtual void onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+            const uint8_t * data, size_t dataSize);
+
+        /**
+         * @brief Frame send completed callback.
+         *
+         * @param ConnectionHandle Connection handle.
+         * @param UserData User data that was previously passed to ITransportManager::sendFrame.
+         * @param SendStatus Result status.
+         **/
+        virtual void onFrameSendCompleted(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+            int userData, NsAppLink::NsTransportManager::ESendStatus sendStatus);
+    
         RESULT_CODE sendSingleFrameMessage(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
                                       const unsigned char sessionID,
                                       unsigned int protocolVersion,

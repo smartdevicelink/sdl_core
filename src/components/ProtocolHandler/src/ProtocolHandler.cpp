@@ -191,6 +191,15 @@ void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnection
     }
 }
 
+void ProtocolHandler::onFrameSendCompleted(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+            int userData, NsAppLink::NsTransportManager::ESendStatus sendStatus)
+{
+    if ( NsAppLink::NsTransportManager::SendStatusOK != sendStatus )
+    {
+        LOG4CPLUS_ERROR(mLogger, "Failed to send frame with number " << userData);
+    }
+}
+
 RESULT_CODE ProtocolHandler::sendFrame( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
         const ProtocolPacket & packet )
 {
@@ -205,7 +214,7 @@ RESULT_CODE ProtocolHandler::sendFrame( NsAppLink::NsTransportManager::tConnecti
 
     if (mTransportManager)
     {
-        mTransportManager->sendFrame(connectionHandle, packet.getPacket(), packet.getPacketSize() );
+        mTransportManager->sendFrame(connectionHandle, packet.getPacket(), packet.getPacketSize(), static_cast<int>(packet.getFrameData()) );
     }
     else
     {
