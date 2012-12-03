@@ -18,7 +18,7 @@ namespace test
                 {
                 public:
                     MOCK_METHOD3(onFrameReceived, void(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize));
-                    MOCK_METHOD3(onFrameSendCompleted, void(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, int FrameSequenceNumber, NsAppLink::NsTransportManager::ESendStatus SendStatus));
+                    MOCK_METHOD3(onFrameSendCompleted, void(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, int UserData, NsAppLink::NsTransportManager::ESendStatus SendStatus));
                 };
 
                 class MockDeviceListener: public NsAppLink::NsTransportManager::ITransportManagerDeviceListener
@@ -38,7 +38,7 @@ namespace test
                     MOCK_METHOD1(disconnectDevice, void (const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle));
                     MOCK_METHOD0(run, void());
                     MOCK_METHOD0(scanForNewDevices, void());
-                    MOCK_METHOD3(sendFrame, int(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize));
+                    MOCK_METHOD4(sendFrame, void(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData));
                 };
 
                 class TestTransportManager: public NsAppLink::NsTransportManager::CTransportManager
@@ -145,9 +145,10 @@ TEST(TransportManager, IncorrectDeviceAdapter)
 
     transportManager.onFrameSendCompleted(mockDeviceAdapter, validConnectionHandle, 20, NsAppLink::NsTransportManager::SendStatusOK);
 
-    int frameSequenceNumber = transportManager.sendFrame(validConnectionHandle, validFrameData, sizeof(validFrameData));
-    EXPECT_CALL(mockDataListener, onFrameSendCompleted(validConnectionHandle, frameSequenceNumber, NsAppLink::NsTransportManager::SendStatusOK)).Times(1).RetiresOnSaturation();
-    transportManager.onFrameSendCompleted(mockDeviceAdapter, validConnectionHandle, frameSequenceNumber, NsAppLink::NsTransportManager::SendStatusOK);
+    int userData = 123;
+    transportManager.sendFrame(validConnectionHandle, validFrameData, sizeof(validFrameData), userData);
+    EXPECT_CALL(mockDataListener, onFrameSendCompleted(validConnectionHandle, userData, NsAppLink::NsTransportManager::SendStatusOK)).Times(1).RetiresOnSaturation();
+    transportManager.onFrameSendCompleted(mockDeviceAdapter, validConnectionHandle, userData, NsAppLink::NsTransportManager::SendStatusOK);
 
     EXPECT_CALL(mockDeviceListener, onApplicationDisconnected(::testing::Eq(deviceInfo), validConnectionHandle)).Times(1).RetiresOnSaturation();
     transportManager.onApplicationDisconnected(mockDeviceAdapter, deviceInfo, validConnectionHandle);
