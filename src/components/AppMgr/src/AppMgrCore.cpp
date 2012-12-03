@@ -1954,10 +1954,12 @@ namespace NsAppManager
                 if(registerRequest->get_appID())
                 {
                     const std::string& appId = *registerRequest->get_appID();
+                    application->setAppID(appId);
                 }
                 if( registerRequest->get_appType() )
                 {
                     const std::vector<NsAppLinkRPC::AppType>& appType = *registerRequest->get_appType();
+                    application->setAppType(appType);
                 }
                 bool isMediaApplication = registerRequest->get_isMediaApplication();
                 if(registerRequest->get_languageDesired())
