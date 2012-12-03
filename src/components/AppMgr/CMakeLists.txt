@@ -17,6 +17,8 @@ set (SOURCES
     ./src/AppMgr.cpp
     ./src/AppMgrRegistry.cpp
     ./src/Application.cpp
+    ./src/Application_v1.cpp
+    ./src/Application_v2.cpp
     ./src/AppMgrCore.cpp
     ./src/AppMgrCoreQueues.cpp
     ./src/AppPolicy.cpp

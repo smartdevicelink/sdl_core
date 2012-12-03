@@ -7,11 +7,8 @@
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
 
-#include "JSONHandler/ALRPCObjects/Language.h"
 #include "JSONHandler/ALRPCObjects/SyncMsgVersion.h"
 #include "JSONHandler/ALRPCObjects/HMILevel.h"
-#include "JSONHandler/ALRPCObjects/AudioStreamingState.h"
-#include "JSONHandler/ALRPCObjects/SystemContext.h"
 #include "AppMgr/MenuMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/AppMenus.h"
@@ -76,18 +73,6 @@ namespace NsAppManager
         const NsAppLinkRPC::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
 
         /**
-         * \brief Set application audio streaming state
-         * \param streamingState audio streaming state of application
-         */
-        void setApplicationAudioStreamingState( const NsAppLinkRPC::AudioStreamingState& hmiLevel );
-
-        /**
-         * \brief retrieve application audio streaming state
-         * \return application audio streaming state
-         */
-        const NsAppLinkRPC::AudioStreamingState& getApplicationAudioStreamingState( ) const;
-
-        /**
          * \brief Set application NGN media screen app name
          * \param value application NGN media screen app name
          */
@@ -100,22 +85,10 @@ namespace NsAppManager
         void setVrSynonyms(const std::vector<std::string>& value);
 
         /**
-         * \brief Set application usage of vehicle data
-         * \param value does the application use vehicle data
-         */
-        void setUsesVehicleData(bool value);
-
-        /**
          * \brief Set if the application is a media application
          * \param value is the application a media application
          */
         void setIsMediaApplication(bool value);
-
-        /**
-         * \brief Set application desired languuage
-         * \param value application desired language
-         */
-        void setLanguageDesired(NsAppLinkRPC::Language value);
 
         /**
          * \brief Set application autoactivate ID
@@ -130,24 +103,6 @@ namespace NsAppManager
         void setSyncMsgVersion(NsAppLinkRPC::SyncMsgVersion value);
 
         /**
-         * \brief Set application ID
-         * \param value application ID
-         */
-        void setAppID( const std::string& value );
-
-        /**
-         * \brief Set application HMI desired display language
-         * \param value application HMI desired display language
-         */
-        void setHMIDisplayLanguageDesired( NsAppLinkRPC::Language value );
-
-        /**
-         * \brief set application system context
-         * \param application system context
-         */
-        void setSystemContext( NsAppLinkRPC::SystemContext value );
-
-        /**
          * \brief retrieve application NGN media screen application name
          * \return application NGN media screen application name
          */
@@ -160,22 +115,10 @@ namespace NsAppManager
         const std::vector<std::string>& getVrSynonyms( ) const;
 
         /**
-         * \brief retrieve does the application use vehicle data
-         * \return does the application use vehicle data
-         */
-        bool getUsesVehicleData( ) const;
-
-        /**
          * \brief retrieve is the application a media application
          * \return is the application a media application
          */
         bool getIsMediaApplication( ) const;
-
-        /**
-         * \brief retrieve application desired language
-         * \return application desired language
-         */
-        const NsAppLinkRPC::Language& getLanguageDesired( ) const;
 
         /**
          * \brief retrieve application auto-activate ID
@@ -188,18 +131,6 @@ namespace NsAppManager
          * \return application sync msg version
          */
         const NsAppLinkRPC::SyncMsgVersion& getSyncMsgVersion( ) const;
-
-        /**
-         * \brief retrieve application ID
-         * \return application ID
-         */
-        const std::string& getAppID( ) const;
-
-        /**
-         * \brief retrieve application HMI desired display language
-         * \return application HMI desired display language
-         */
-        const NsAppLinkRPC::Language& getHMIDisplayLanguageDesired( ) const;
 
         /**
          * \brief retrieve application session ID
@@ -224,12 +155,6 @@ namespace NsAppManager
          * \return application name
          */
         const std::string& getName() const;
-
-        /**
-         * \brief retrieve application system context
-         * \return application system context
-         */
-        const NsAppLinkRPC::SystemContext& getSystemContext() const;
 
         /**
          * \brief add an interaction choice set item to the application
@@ -370,7 +295,8 @@ namespace NsAppManager
          */
         unsigned int decrementUnrespondedRequestCount(const unsigned int& cmdId);
 
-    private:
+    protected:
+        static log4cplus::Logger mLogger;
 
         /**
          * \brief Copy constructor
@@ -383,22 +309,15 @@ namespace NsAppManager
         const unsigned int mProtocolVersion;
         std::string mNgnMediaScreenAppName;
         std::vector<std::string> mVrSynonyms;
-        bool m_bUsesVehicleData;
         bool m_bIsMediaApplication;
-        NsAppLinkRPC::Language mLanguageDesired;
         std::string mAutoActivateID;
         NsAppLinkRPC::SyncMsgVersion mSyncMsgVersion;
         NsAppLinkRPC::HMILevel::HMILevelInternal mHMIStatusLevel;
-        NsAppLinkRPC::AudioStreamingState mAudioStreamingState;
         std::string mAppID;
-        NsAppLinkRPC::Language mHMIDisplayLanguageDesired;
-        NsAppLinkRPC::SystemContext mSystemContext;
         MenuMapping mMenuMapping;
         CommandMapping   mCommandMapping;
         AppMenus mMenus;
         AppChoiceSets mChoiceSets;
-
-        static log4cplus::Logger mLogger;
     };
 
 } // namespace NsAppManager
