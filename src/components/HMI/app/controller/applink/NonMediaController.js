@@ -13,6 +13,14 @@
 MFT.NonMediaController = Em.Object.create({
 	
 	// Model binding
-	modelBinding: 'MFT.ApplinkNonMediaModel'
+	modelBinding: 'MFT.ApplinkNonMediaModel',
+	
+	
+	// Switching on Applink Sub Mennu
+	turnOnApplinkSubMenu: function(el){
+		//this.set('currentApplinkSubMenuid', el.menuId);
+		//this.set('subMenuLabel', el.text);
+		MFT.States.goToState('info.nonMedia.options.subMenu');
+	}
 
 });

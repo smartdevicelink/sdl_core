@@ -37,8 +37,23 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
 	
 	list: MFT.List.extend({
 		
+		elementId:	'info_nonMedia_options_list',
+		
 		itemsOnPage:    5,
 		
-		items: []
+		items: [
+			{
+				type:	MFT.Button,
+			
+				params:		{
+					templateName:	'arrow',
+				
+					text:	'Submenu Test',
+									
+					action:		'turnOnApplinkSubMenu',
+					target:		'MFT.NonMediaController'
+				}
+			}
+		]
 	})
 });

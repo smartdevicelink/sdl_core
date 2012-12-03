@@ -1,10 +1,10 @@
 /**
- * @name MFT.InfoNonMediaOptions
+ * @name MFT.InfoNonMediaOptionsSubMenu
  * 
  * @desc NonMedia application visual representation
  * 
  * @category	View
- * @filesource	app/view/info/nonMedia/InfoNonMediaOptions.js
+ * @filesource	app/view/info/nonMedia/options/subMenuView.js
  * @version		1.0
  *
  * @author		Artem Petrosyan
@@ -37,8 +37,20 @@ MFT.InfoNonMediaOptionsSubMenu = Em.ContainerView.create( MFT.LoadableView, {
 	
 	list: MFT.List.extend({
 		
+		elementId:	'info_nonMedia_options_submenu_list',
+		
 		itemsOnPage:    5,
 		
-		items: []
+		items: [
+			{
+				type:	MFT.Button,
+			
+				params:		{
+					templateName:	'text',
+				
+					text:	'Test'
+				}
+			}	
+		]
 	})
 });
