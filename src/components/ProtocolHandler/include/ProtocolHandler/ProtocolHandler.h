@@ -24,14 +24,20 @@ namespace NsProtocolHandler
 
         void sendEndSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned int sessionID, 
-              unsigned int hashCode = 0 );
+              unsigned char protocolVersion,
+              unsigned int hashCode = 0,
+              unsigned char serviceType = SERVICE_TYPE_RPC);
         void sendEndSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              unsigned int sessionID );
+              unsigned int sessionID,
+              unsigned char serviceType = SERVICE_TYPE_RPC );
         void sendStartSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned char sessionID,
-              unsigned int hashCode = 0 );
+              unsigned char protocolVersion,
+              unsigned int hashCode = 0,
+              unsigned char serviceType = SERVICE_TYPE_RPC );
         void sendStartSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              unsigned char sessionID );
+              unsigned char sessionID,
+              unsigned char serviceType = SERVICE_TYPE_RPC );
 
         void sendData(const AppLinkRawMessage * message);
     

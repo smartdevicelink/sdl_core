@@ -128,7 +128,7 @@ namespace NsConnectionHandler
                                            unsigned char sessionId)
     {
         int key = connectionHandle|(sessionId << 16);
-        LOG4CPLUS_INFO( mLogger, "Key for ConnectionHandle:" << connectionHandle << " Session:" << sessionId << "is:" << key );
+        LOG4CPLUS_INFO( mLogger, "Key for ConnectionHandle:" << connectionHandle << " Session:" << sessionId << " is: " << key );
         return key;
     }
     

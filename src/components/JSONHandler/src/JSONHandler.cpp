@@ -124,6 +124,8 @@ void * JSONHandler::waitForIncomingMessages( void * params )
                 continue;
             }
 
+            currentMessage -> setProtocolVersion( message -> getProtocolVersion() );
+
             if ( !handler -> mMessagesObserver )
             {
                 LOG4CPLUS_ERROR( mLogger, "Cannot handle mobile message: MessageObserver doesn't exist." );
@@ -253,7 +255,7 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
 
             NsProtocolHandler::AppLinkRawMessage * msgToProtocolHandler = new NsProtocolHandler::AppLinkRawMessage(
                         messagePair.first,
-                        message -> getProtocolVersion(),
+                        1,//message -> getProtocolVersion(),
                         rawMessage,
                         messageString.length() + 1);
 
@@ -262,6 +264,7 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
                 LOG4CPLUS_ERROR( mLogger, "Cannot handle mobile message: ProtocolHandler doesn't exist." );
                 pthread_exit( 0 );
             }
+            LOG4CPLUS_INFO_EXT(mLogger, "Sending to ProtocolHandler: " << rawMessage << " of size " << messageString.length() + 1);
             handler -> mProtocolHandler -> sendData( msgToProtocolHandler );
 
             delete message;

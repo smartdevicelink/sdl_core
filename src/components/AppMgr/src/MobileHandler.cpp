@@ -34,7 +34,8 @@ namespace NsAppManager
         if(mJSONHandler)
         {
             LOG4CPLUS_INFO_EXT(mLogger, " Sending a message " << message->getMethodId() << " of the type " << message->getMessageType() << " with the connection id " << connectionID << " session id " << (uint)sessionId << " to a mobile side");
-            mJSONHandler->sendRPCMessage(message, sessionId);
+            int key = connectionID|(sessionId << 16);
+            mJSONHandler->sendRPCMessage(message, key);
         }
         else
         {

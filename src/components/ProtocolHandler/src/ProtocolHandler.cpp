@@ -53,21 +53,17 @@ void ProtocolHandler::setSessionObserver( ISessionObserver * observer )
 }
 
 void ProtocolHandler::sendEndSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              unsigned int sessionID, 
-              unsigned int hashCode )
+              unsigned int sessionID,
+              unsigned char protocolVersion, 
+              unsigned int hashCode,
+              unsigned char serviceType )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
-    unsigned char versionFlag = PROTOCOL_VERSION_1;
-    if (0 != hashCode)
-    {
-        versionFlag = PROTOCOL_VERSION_2;
-    }
-
-    ProtocolPacket packet(versionFlag,
+    ProtocolPacket packet(protocolVersion,
                                 COMPRESS_OFF,
                                 FRAME_TYPE_CONTROL,
-                                SERVICE_TYPE_RPC,
+                                serviceType,
                                 FRAME_DATA_END_SESSION,
                                 sessionID,
                                 0,
@@ -84,14 +80,15 @@ void ProtocolHandler::sendEndSessionAck( NsAppLink::NsTransportManager::tConnect
 }
         
 void ProtocolHandler::sendEndSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              unsigned int sessionID )
+              unsigned int sessionID,
+              unsigned char serviceType )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
     ProtocolPacket packet(PROTOCOL_VERSION_2,
                                 COMPRESS_OFF,
                                 FRAME_TYPE_CONTROL,
-                                SERVICE_TYPE_RPC,
+                                serviceType,
                                 FRAME_DATA_END_SESSION_NACK,
                                 sessionID,
                                 0,
@@ -109,20 +106,16 @@ void ProtocolHandler::sendEndSessionNAck( NsAppLink::NsTransportManager::tConnec
 
 void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned char sessionID,
-              unsigned int hashCode )
+              unsigned char protocolVersion,
+              unsigned int hashCode,
+              unsigned char serviceType )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
-    unsigned char versionFlag = PROTOCOL_VERSION_1;
-    /*if (0 != hashCode)
-    {
-        versionFlag = PROTOCOL_VERSION_2;
-    }*/
-
-    ProtocolPacket packet(versionFlag,
+    ProtocolPacket packet(protocolVersion,
                                 COMPRESS_OFF,
                                 FRAME_TYPE_CONTROL,
-                                SERVICE_TYPE_RPC,
+                                serviceType,
                                 FRAME_DATA_START_SESSION_ACK,
                                 sessionID,
                                 0,
@@ -130,7 +123,8 @@ void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConne
 
     if (RESULT_OK == sendFrame(connectionHandle, packet))
     {
-        LOG4CPLUS_INFO(mLogger, "sendStartSessionAck() - BT write OK");
+        LOG4CPLUS_INFO(mLogger, "sendStartSessionAck() for connection " << connectionHandle
+                            << " for serviceType " << serviceType << " sessionID " << sessionID);
     }
     else
     {
@@ -139,7 +133,8 @@ void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConne
 }
 
 void ProtocolHandler::sendStartSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              unsigned char sessionID )
+              unsigned char sessionID,
+              unsigned char serviceType )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
@@ -148,7 +143,7 @@ void ProtocolHandler::sendStartSessionNAck( NsAppLink::NsTransportManager::tConn
     ProtocolPacket packet(versionFlag,
                                 COMPRESS_OFF,
                                 FRAME_TYPE_CONTROL,
-                                SERVICE_TYPE_RPC,
+                                serviceType,
                                 FRAME_DATA_START_SESSION_NACK,
                                 sessionID,
                                 0,
@@ -262,6 +257,8 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     RESULT_CODE retVal = RESULT_OK;
 
+    LOG4CPLUS_INFO_EXT(mLogger, " data size " << dataSize << " maxDataSize " << maxDataSize);
+
     unsigned char versionF = PROTOCOL_VERSION_1;
     if (2 == protocolVersion)
     {
@@ -278,6 +275,8 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager
     }
     else
         numOfFrames = dataSize / maxDataSize;
+
+    LOG4CPLUS_INFO_EXT(mLogger, "Data size " << dataSize << " of " << numOfFrames << " frames with last frame " << lastDataSize);
 
     unsigned char *outDataFirstFrame = new unsigned char[FIRST_FRAME_DATA_SIZE];
     outDataFirstFrame[0] = dataSize >> 24;
@@ -301,6 +300,8 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager
                                      outDataFirstFrame);  
 
     retVal = sendFrame( connectionHandle, firstPacket );
+
+    LOG4CPLUS_INFO_EXT(mLogger, "First frame is sent.");
 
     delete [] outDataFirstFrame;
 
@@ -414,6 +415,8 @@ RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportMana
         return RESULT_FAIL;
     }
 
+    LOG4CPLUS_INFO_EXT(mLogger, "Packet " << packet << "; sessionID " << packet -> getSessionId());
+
     int key = mSessionObserver->keyFromPair(connectionHandle, packet -> getSessionId());
 
     if (packet -> getFrameType() == FRAME_TYPE_FIRST)
@@ -497,7 +500,8 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager
         int sesionHashCode = mSessionObserver -> onSessionEndedCallback( connectionHandle, currentSessionID, hashCode );
         if ( -1 != sesionHashCode )
         {
-            sendEndSessionAck(connectionHandle, currentSessionID, sesionHashCode);            
+            sendEndSessionAck(connectionHandle, currentSessionID, 
+                    packet -> getVersion(), sesionHashCode, packet -> getServiceType());            
         }
     }
 
@@ -509,7 +513,10 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager
         int sessionId = mSessionObserver -> onSessionStartedCallback( connectionHandle );
         if ( -1 != sessionId )
         {
-            sendStartSessionAck(connectionHandle, sessionId, mSessionObserver -> keyFromPair(connectionHandle, sessionId));
+            sendStartSessionAck(connectionHandle, sessionId,
+                    packet -> getVersion(),
+                    mSessionObserver -> keyFromPair(connectionHandle, sessionId),
+                    packet -> getServiceType());
         }
     }
 
@@ -576,7 +583,7 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
         {
             const AppLinkRawMessage * message = handler -> mMessagesToMobileApp.pop();
             LOG4CPLUS_INFO_EXT(mLogger, "Message to mobile app: connection " << message->getConnectionKey()
-                    << "; dataSize: " << message->getDataSize() );
+                    << "; dataSize: " << message->getDataSize() << " ; protocolVersion " << message -> getProtocolVersion());
 
             unsigned int maxDataSize = 0;
             if ( PROTOCOL_VERSION_1 == message -> getProtocolVersion() )
@@ -609,6 +616,7 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
             }
             else
             {
+                LOG4CPLUS_INFO_EXT(mLogger, "Message will be sent in multiple frames; max size is " << maxDataSize);
                 if (handler -> sendMultiFrameMessage(connectionHandle,
                                             sessionID,
                                             message -> getProtocolVersion(),
