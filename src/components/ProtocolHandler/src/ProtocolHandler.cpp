@@ -88,7 +88,7 @@ void ProtocolHandler::sendEndSessionNAck( NsAppLink::NsTransportManager::tConnec
     ProtocolPacket packet(PROTOCOL_VERSION_2,
                                 COMPRESS_OFF,
                                 FRAME_TYPE_CONTROL,
-                                serviceType,
+                                0x0,
                                 FRAME_DATA_END_SESSION_NACK,
                                 sessionID,
                                 0,
@@ -296,7 +296,7 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager
                                      0,
                                      sessionID,
                                      FIRST_FRAME_DATA_SIZE,
-                                     mMessageCounters[sessionID],
+                                     mMessageCounters[sessionID]++,
                                      outDataFirstFrame);  
 
     retVal = sendFrame( connectionHandle, firstPacket );
@@ -340,7 +340,7 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager
                                         0x0,
                                         sessionID,
                                         lastDataSize,
-                                        mMessageCounters[sessionID]++,
+                                        mMessageCounters[sessionID],
                                         outDataFrame);            
 
             retVal = sendFrame( connectionHandle, packet );
@@ -503,6 +503,11 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager
             sendEndSessionAck(connectionHandle, currentSessionID, 
                     packet -> getVersion(), sesionHashCode, packet -> getServiceType());            
         }
+        else
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Refused to end session " << packet -> getServiceType() << " type.");
+            sendEndSessionNAck(connectionHandle, currentSessionID, packet -> getServiceType());
+        }
     }
 
     if (packet -> getFrameData() == FRAME_DATA_START_SESSION)
@@ -517,6 +522,11 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager
                     packet -> getVersion(),
                     mSessionObserver -> keyFromPair(connectionHandle, sessionId),
                     packet -> getServiceType());
+        }
+        else
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Refused to create session " << packet -> getServiceType() << " type.");
+            sendStartSessionNAck(connectionHandle, 0x0, packet -> getServiceType());
         }
     }
 
@@ -620,7 +630,7 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
                 if (handler -> sendMultiFrameMessage(connectionHandle,
                                             sessionID,
                                             message -> getProtocolVersion(),
-                                            SERVICE_TYPE_RPC, 
+                                            SERVICE_TYPE_BULK, // TODO : check if this is correct assumption
                                             message -> getDataSize(), 
                                             message -> getData(), 
                                             false,
