@@ -5,9 +5,15 @@
 #include "JSONHandler/ALRPCObjects/AudioStreamingState_v2.h"
 #include "JSONHandler/ALRPCObjects/SystemContext_v2.h"
 #include "JSONHandler/ALRPCObjects/Language_v2.h"
+#include "JSONHandler/ALRPCObjects/AppType.h"
 
 namespace NsAppManager
 {
+    /**
+     * \brief Application types
+     */
+    typedef std::vector<NsAppLinkRPC::AppType> AppTypes;
+
     /**
      * \brief class Application acts as a metaphor for every mobile application of protocol v2 being registered on HMI
      */
@@ -83,10 +89,22 @@ namespace NsAppManager
         void setApplicationAudioStreamingState( const NsAppLinkRPC::AudioStreamingState_v2& hmiLevel );
 
         /**
-         * \brief retrieve application audio streaming state
+         * \brief retreive application audio streaming state
          * \return application audio streaming state
          */
         const NsAppLinkRPC::AudioStreamingState_v2& getApplicationAudioStreamingState( ) const;
+
+        /**
+         * \brief Set application type
+         * \param appType application type
+         */
+        void setAppType(const AppTypes& appType);
+
+        /**
+         * \brief retreive application type
+         * \param appId application type
+         */
+        const AppTypes& getAppType() const;
 
     private:
 
@@ -99,6 +117,9 @@ namespace NsAppManager
         NsAppLinkRPC::AudioStreamingState_v2 mAudioStreamingState;
         NsAppLinkRPC::Language_v2 mHMIDisplayLanguageDesired;
         NsAppLinkRPC::SystemContext_v2 mSystemContext;
+
+        std::string mAppID;
+        AppTypes mAppType;
     };
 }
 

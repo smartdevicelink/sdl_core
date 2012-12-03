@@ -26,7 +26,6 @@ namespace log4cplus
 
 namespace NsAppManager
 {
-
     /**
      * \brief An application unique id - combination of connection id and session id
      */
@@ -313,7 +312,6 @@ namespace NsAppManager
         std::string mAutoActivateID;
         NsAppLinkRPC::SyncMsgVersion mSyncMsgVersion;
         NsAppLinkRPC::HMILevel::HMILevelInternal mHMIStatusLevel;
-        std::string mAppID;
         MenuMapping mMenuMapping;
         CommandMapping   mCommandMapping;
         AppMenus mMenus;

@@ -121,4 +121,22 @@ namespace NsAppManager
     {
         mSystemContext = value;
     }
+
+    /**
+     * \brief Set application type
+     * \param appType application type
+     */
+    void Application_v2::setAppType(const AppTypes &appType)
+    {
+        mAppType = appType;
+    }
+
+    /**
+     * \brief retreive application type
+     * \param appId application type
+     */
+    const AppTypes &Application_v2::getAppType() const
+    {
+        return mAppType;
+    }
 }
