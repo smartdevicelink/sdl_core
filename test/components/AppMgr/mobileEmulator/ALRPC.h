@@ -73,7 +73,7 @@ namespace NsMobileEmulator
          * \brief A stub function - created to hide the parent class' one
          * \param protocolHandler Pointer to Protocol layer handler.
          */
-        void setProtocolHandler( AxisCore::ProtocolHandler * protocolHandler );
+        void setProtocolHandler( NsProtocolHandler::ProtocolHandler * protocolHandler );
 
         /**
          * \brief A stub function - created to hide the parent class' one
