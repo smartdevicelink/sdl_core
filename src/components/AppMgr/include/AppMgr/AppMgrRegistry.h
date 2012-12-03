@@ -7,7 +7,8 @@
 #ifndef APPMGRREGISTRY_H_
 #define APPMGRREGISTRY_H_
 
-#include "Application.h"
+#include "Application_v1.h"
+#include "Application_v2.h"
 #include "RegistryItem.h"
 
 #include <map>
