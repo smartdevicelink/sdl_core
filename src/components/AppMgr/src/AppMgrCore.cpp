@@ -280,6 +280,8 @@ namespace NsAppManager
                         response->set_hmiZoneCapabilities(core->mHmiZoneCapabilities.get());
                         response->set_speechCapabilities(core->mSpeechCapabilitiesV1.get());
                         response->set_vrCapabilities(core->mVrCapabilitiesV1.get());
+                        response->set_language(app->getLanguageDesired());
+                        response->set_syncMsgVersion(app->getSyncMsgVersion());
                         response->set_success(true);
                         response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
 
@@ -291,6 +293,7 @@ namespace NsAppManager
                         appRegistered->set_isMediaApplication(app->getIsMediaApplication());
                         appRegistered->set_languageDesired(app->getLanguageDesired());
                         appRegistered->set_vrSynonym(app->getVrSynonyms());
+                        appRegistered->set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
                         HMIHandler::getInstance().sendNotification(appRegistered);
                         LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                         break;
@@ -391,8 +394,11 @@ namespace NsAppManager
                         response->set_buttonCapabilities(core->mButtonCapabilitiesV2.get());
                         response->set_displayCapabilities(core->mDisplayCapabilitiesV2);
                         response->set_hmiZoneCapabilities(core->mHmiZoneCapabilities.get());
+                        response->set_hmiDisplayLanguage(app->getHMIDisplayLanguageDesired());
+                        response->set_language(app->getLanguageDesired());
                         response->set_speechCapabilities(core->mSpeechCapabilitiesV2.get());
                         response->set_vrCapabilities(core->mVrCapabilitiesV2.get());
+                        response->set_syncMsgVersion(app->getSyncMsgVersion());
                         response->set_success(true);
                         response->set_resultCode(NsAppLinkRPC::Result_v2::SUCCESS);
 
@@ -406,6 +412,13 @@ namespace NsAppManager
                         NsAppLinkRPC::Language languageDesiredV1;
                         languageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)languageDesired.get());
                         appRegistered->set_languageDesired(languageDesiredV1);
+                        appRegistered->set_vrSynonym(app->getVrSynonyms());
+            //            appRegistered->set_appId(app->getAppID());
+                        appRegistered->set_appType(app->getAppType());
+                        const NsAppLinkRPC::Language_v2& hmiLanguageDesired = app->getHMIDisplayLanguageDesired();
+                        NsAppLinkRPC::Language hmiLanguageDesiredV1;
+                        hmiLanguageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)hmiLanguageDesired.get());
+                        appRegistered->set_hmiDisplayLanguageDesired(hmiLanguageDesiredV1);
                         appRegistered->set_vrSynonym(app->getVrSynonyms());
                         HMIHandler::getInstance().sendNotification(appRegistered);
                         LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
