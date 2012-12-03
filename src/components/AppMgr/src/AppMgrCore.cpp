@@ -419,35 +419,75 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
 
-                NsAppLinkRPC::UnregisterAppInterface_request * object = (NsAppLinkRPC::UnregisterAppInterface_request*)mobileMsg;
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
-                NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
-                if(!app)
+                switch(protocolVersion)
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
-                    response->set_success(false);
-                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                    break;
+                    case 1:
+                    {
+                        NsAppLinkRPC::UnregisterAppInterface_request * object = (NsAppLinkRPC::UnregisterAppInterface_request*)mobileMsg;
+                        Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                        NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
+                        if(!app)
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                            break;
+                        }
+                        std::string appName = app->getName();
+
+                        core->removeAppFromHmi(app, connectionID, sessionID);
+                        core->unregisterApplication( connectionID, sessionID );
+
+                        response->setCorrelationID(object->getCorrelationID());
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(true);
+                        response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+
+                        NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
+                        msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
+                        MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
+                        NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
+                        appUnregistered->set_appName(appName);
+                        appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
+                        HMIHandler::getInstance().sendNotification(appUnregistered);
+                        break;
+                    }
+                    case 2:
+                    {
+                        NsAppLinkRPC::UnregisterAppInterface_v2_request * object = (NsAppLinkRPC::UnregisterAppInterface_v2_request*)mobileMsg;
+                        Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                        NsAppLinkRPC::UnregisterAppInterface_v2_response* response = new NsAppLinkRPC::UnregisterAppInterface_v2_response();
+                        if(!app)
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPC::Result_v2::APPLICATION_NOT_REGISTERED);
+                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                            break;
+                        }
+                        std::string appName = app->getName();
+
+                        core->removeAppFromHmi(app, connectionID, sessionID);
+                        core->unregisterApplication( connectionID, sessionID );
+
+                        response->setCorrelationID(object->getCorrelationID());
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(true);
+                        response->set_resultCode(NsAppLinkRPC::Result_v2::SUCCESS);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+
+                        NsAppLinkRPC::OnAppInterfaceUnregistered_v2* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered_v2();
+                        msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason_v2(NsAppLinkRPC::AppInterfaceUnregisteredReason_v2::USER_EXIT));
+                        MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
+                        NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
+                        appUnregistered->set_appName(appName);
+                        appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason((NsAppLinkRPC::AppInterfaceUnregisteredReason::AppInterfaceUnregisteredReasonInternal)NsAppLinkRPC::AppInterfaceUnregisteredReason_v2::USER_EXIT));
+                        HMIHandler::getInstance().sendNotification(appUnregistered);
+                        break;
+                    }
                 }
-                std::string appName = app->getName();
-
-                core->removeAppFromHmi(app, connectionID, sessionID);
-                core->unregisterApplication( connectionID, sessionID );
-
-                response->setCorrelationID(object->getCorrelationID());
-                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
-                response->set_success(true);
-                response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-
-                NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
-                msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
-                MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
-                NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
-                appUnregistered->set_appName(appName);
-                appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
-                HMIHandler::getInstance().sendNotification(appUnregistered);
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_SUBSCRIBEBUTTON_REQUEST:
