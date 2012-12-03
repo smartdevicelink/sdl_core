@@ -1,0 +1,5 @@
+/*! \page components_transportmanager_use_cases High-Level Use Cases to Test Component
+
+This page contains set of high-level use-cases which can be used for testing of Transport Manager functionallity.
+
+*/

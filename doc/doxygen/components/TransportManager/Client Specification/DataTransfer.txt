@@ -1,0 +1,5 @@
+/*! \page components_transportmanager_client_data_transfer Data Transfer
+
+One of the main purposes of Transport Manager is send data to the connections and get data from them.
+
+*/
