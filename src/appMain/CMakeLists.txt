@@ -2,6 +2,7 @@ set(LIBRARIES
   AppMgr
   JSONHandler
   ProtocolHandler
+  connectionHandler
   TransportManager
   MessageBroker
   MessageBrokerClient
@@ -15,15 +16,13 @@ set(LIBRARIES
 
 include_directories (
   ./
-  ../thirdPartyLibs/axisCore/utils/misc
-  ../thirdPartyLibs/axisCore/include
-  ../thirdPartyLibs/axisCore/src
-  ../thirdPartyLibs/axisCore/
-  ../thirdPartyLibs/axisCore/transport/bt
+  ../components/ProtocolHandler/include/
   ../thirdPartyLibs/jsoncpp/include/
   ../components/JSONHandler/include
   ../components/AppMgr/include
   ../components/TransportManager/include
+  ../components/Utils/include/
+  ../components/ConnectionHandler/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/logger/include
   ../thirdPartyLibs/logger/log4cplus-1.1.0/include
@@ -32,7 +31,6 @@ include_directories (
 
 set (SOURCES
   appMain.cpp
-  CAppTester.cpp
 )
 
 if( NOT CMAKE_BUILD_TYPE )

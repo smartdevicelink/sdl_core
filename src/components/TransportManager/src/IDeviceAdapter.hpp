@@ -63,13 +63,11 @@ namespace NsAppLink
              * @brief Send frame.
              *
              * @param ConnectionHandle Connection handle.
-             * @param Data Frame data.
+             * @param Data Frame payload data.
              * @param DataSize Size of data in bytes.
-             *
-             * @return Frame sequence number. May be used to identify
-             *         this frame when send result callback is received.
+             * @param UserData Any user data. Will be returned as is in ITransportManagerDataListener::onFrameSendCompleted
              **/
-            virtual int sendFrame(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize) = 0;
+            virtual void sendFrame(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData) = 0;
         };
     }
 }

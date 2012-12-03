@@ -79,8 +79,10 @@ namespace NsAppManager
     * \param connectionID id of a connection associated with application that sent the message
     * \param sessionID an id of a session associated with the application which sends message
     */
-    void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message, int connectionID, unsigned char sessionID)
+    void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message, int connectionKey)
     {
+        int connectionID = connectionKey & 0xFF00FFFF;
+        unsigned char sessionID = connectionKey >> 16;
         if(!message)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " Calling a function with null command! Session id " << (uint)sessionID << " connection id " << connectionID);

@@ -15,10 +15,11 @@
 
 #include "appMain.hpp"
 
-#include "ProtocolHandler.hpp"
+#include "ProtocolHandler/ProtocolHandler.h"
 
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"
+#include "ConnectionHandler/CConnectionHandler.hpp"
 
 #include "AppMgr/AppMgr.h"
 #include "AppMgr/AppMgrCore.h"
@@ -32,8 +33,6 @@
 #include "system.h"
 
 #include "Logger.hpp"
-
-#include "CAppTester.hpp"
 
 #include "TransportManager/ITransportManager.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
@@ -107,15 +106,27 @@ int main(int argc, char** argv)
 
     NsAppLink::NsTransportManager::ITransportManager * transportManager = NsAppLink::NsTransportManager::ITransportManager::create();
     CTransportManagerListener tsl(transportManager);
-    transportManager->addDeviceListener(&tsl);
-    transportManager->run();
+    
     
 
     JSONHandler jsonHandler;
 
-    AxisCore::ProtocolHandler* pProtocolHandler = new AxisCore::ProtocolHandler(&jsonHandler, transportManager, 1);
+    NsProtocolHandler::ProtocolHandler* pProtocolHandler = new NsProtocolHandler::ProtocolHandler(transportManager);
 
+    pProtocolHandler -> setProtocolObserver( &jsonHandler );
+
+    transportManager -> addDataListener( pProtocolHandler );
+    
     jsonHandler.setProtocolHandler(pProtocolHandler);
+
+    NsConnectionHandler::CConnectionHandler * connectionHandler = NsConnectionHandler::CConnectionHandler::getInstance();
+
+    pProtocolHandler -> setSessionObserver( connectionHandler );
+
+    connectionHandler -> setTransportManager( transportManager );
+
+    transportManager->addDeviceListener(connectionHandler);
+    transportManager->run();
 
     NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
 
@@ -245,98 +256,6 @@ int main(int argc, char** argv)
         }
     }
     /**********************************/
-
-    /*** Start BT Devices Discovery***/
-/*
-    std::vector<NsTransportLayer::CBTDevice> devicesFound;
-    btadapter.scanDevices(devicesFound);
-    if (0 < devicesFound.size())
-    {
-        LOG4CPLUS_INFO(logger, "Found " << devicesFound.size() << " devices.");
-        printf("Please make your choice, 0 for exit:\n");
-        printf("\n");
-    } else
-    {
-        LOG4CPLUS_FATAL(logger, "No any devices found!");
-        if (0 != pid_hmi)
-        {
-          kill(pid_hmi, SIGQUIT);
-        }
-        return EXIT_SUCCESS;
-    }
-
-    std::vector<NsTransportLayer::CBTDevice>::iterator it;
-    int i = 1;
-    for(it = devicesFound.begin(); it != devicesFound.end(); it++)
-    {
-        NsTransportLayer::CBTDevice device = *it;
-        printf("%d: %s %s\n", i++, device.getDeviceAddr().c_str(), device.getDeviceName().c_str());
-    }
-
-    std::cin >> i;
-    std::string discoveryDeviceAddr = "";
-    if ((0 < i) && (i <= devicesFound.size()))
-    {
-        discoveryDeviceAddr = devicesFound[i-1].getDeviceAddr();
-    } else
-    {
-        LOG4CPLUS_INFO(logger, "Exit!");
-        if (0 != pid_hmi)
-        {
-          kill(pid_hmi, SIGQUIT);
-        }
-        return EXIT_SUCCESS;
-    }
-*/
-    /*** Start SDP Discovery on device***/
-/*
-    std::vector<int> portsRFCOMMFound;
-    btadapter.startSDPDiscoveryOnDevice(discoveryDeviceAddr.c_str(), portsRFCOMMFound);
-    if (0 < portsRFCOMMFound.size())
-    {
-        printf("Found %d ports on %s device\n", portsRFCOMMFound.size(), discoveryDeviceAddr.c_str());
-        printf("Please make your choice, 0 for exit:\n");
-    } else
-    {
-        LOG4CPLUS_FATAL(logger, "No any ports discovered!");
-        if (0 != pid_hmi)
-        {
-          kill(pid_hmi, SIGQUIT);
-        }
-        return EXIT_SUCCESS;
-    }
-
-    std::vector<int>::iterator itr;
-    int j = 1;
-    for(itr = portsRFCOMMFound.begin(); itr != portsRFCOMMFound.end(); itr++)
-    {
-        printf("%d: %d \n", j++, *itr);
-    }
-
-    std::cin >> j;
-    int portRFCOMM = 0;
-    if ((0 < j) && (j <= portsRFCOMMFound.size()))
-    {
-        portRFCOMM = portsRFCOMMFound[j-1];
-    } else
-    {
-        LOG4CPLUS_INFO(logger, "Exit!");
-        if (0 != pid_hmi)
-        {
-          kill(pid_hmi, SIGQUIT);
-        }
-        return EXIT_SUCCESS;
-    }
-*/
-    /*** Start RFCOMM connection***/
-/*
-    int sockID = btadapter.startRFCOMMConnection(discoveryDeviceAddr.c_str(), portRFCOMM);
-
-    if (0 < sockID)
-    {
-        btadapter.processRFCOMM(sockID);
-    }
-*/
 
     transportManager->scanForNewDevices();
     while(true)

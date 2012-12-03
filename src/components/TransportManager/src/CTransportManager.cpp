@@ -160,29 +160,26 @@ void NsAppLink::NsTransportManager::CTransportManager::removeDeviceListener(NsAp
     pthread_mutex_unlock(&mDeviceListenersMutex);
 }
 
-int NsAppLink::NsTransportManager::CTransportManager::sendFrame(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize)
+void NsAppLink::NsTransportManager::CTransportManager::sendFrame(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize, const int UserData)
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "sendFrame called. DataSize: "<<DataSize);
 
     // TODO Add incomming parameters checking
-    int result = -1;
 
     // Searching device adapter
     pthread_mutex_lock(&mDataListenersMutex);
     SConnectionInfo* connectionInfo = getConnection(ConnectionHandle);
     pthread_mutex_unlock(&mDataListenersMutex);
-    
+
     if(0 != connectionInfo)
     {
         TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Device adapter found (type: "<<connectionInfo->mpDeviceAdapter.getDeviceType()<<"). Sending frame to it");
-        result = connectionInfo->mpDeviceAdapter.sendFrame(ConnectionHandle, Data, DataSize);
+        connectionInfo->mpDeviceAdapter.sendFrame(ConnectionHandle, Data, DataSize, UserData);
     }
     else
     {
         TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Device adapter that handles Connection Handle was not found");
     }
-
-    return result;
 }
 
 NsAppLink::NsTransportManager::tDeviceHandle NsAppLink::NsTransportManager::CTransportManager::generateNewDeviceHandle(void)
@@ -462,9 +459,9 @@ void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnect
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameReceived processed");
 }
 
-void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
+void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tConnectionHandle ConnectionHandle, int UserData, ESendStatus SendStatus)
 {
-    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted called. DA: "<<DeviceAdapter<<", FrameSequenceNumber: "<<FrameSequenceNumber <<", SendStatus: " <<SendStatus);
+    TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "onFrameSendCompleted called. DA: "<<DeviceAdapter<<", UserData: "<<UserData <<", SendStatus: " <<SendStatus);
 
     if(0 == DeviceAdapter)
     {
@@ -503,7 +500,7 @@ void CTransportManager::onFrameSendCompleted(IDeviceAdapter * DeviceAdapter, tCo
 
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Connection is available. Preparing callback");
 
-    SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameSendCompleted, ConnectionHandle, FrameSequenceNumber, SendStatus);
+    SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameSendCompleted, ConnectionHandle, UserData, SendStatus);
 
     pthread_mutex_lock(&mDataListenersMutex);
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Sending callback");
@@ -552,7 +549,7 @@ CTransportManager::SDataListenerCallback::SDataListenerCallback(CTransportManage
 , mConnectionHandle(ConnectionHandle)
 , mData(0)
 , mDataSize(DataSize)
-, mFrameSequenceNumber(-1)
+, mUserData()
 , mSendStatus(NsAppLink::NsTransportManager::SendStatusUnknownError)
 {
     if ((0 != Data) &&
@@ -567,12 +564,12 @@ CTransportManager::SDataListenerCallback::SDataListenerCallback(CTransportManage
     }
 }
 
-CTransportManager::SDataListenerCallback::SDataListenerCallback(CTransportManager::EDataListenerCallbackType CallbackType, tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
+CTransportManager::SDataListenerCallback::SDataListenerCallback(CTransportManager::EDataListenerCallbackType CallbackType, tConnectionHandle ConnectionHandle, int UserData, ESendStatus SendStatus)
 : mCallbackType(CallbackType)
 , mConnectionHandle(ConnectionHandle)
 , mData(0)
 , mDataSize(0)
-, mFrameSequenceNumber(FrameSequenceNumber)
+, mUserData(UserData)
 , mSendStatus(SendStatus)
 {
 
@@ -583,7 +580,7 @@ NsAppLink::NsTransportManager::CTransportManager::SDataListenerCallback::SDataLi
 , mConnectionHandle(other.mConnectionHandle)
 , mData(0)
 , mDataSize(other.mDataSize)
-, mFrameSequenceNumber(other.mFrameSequenceNumber)
+, mUserData(other.mUserData)
 , mSendStatus(other.mSendStatus)
 {
     if ((0 != other.mData) &&
@@ -604,7 +601,7 @@ bool NsAppLink::NsTransportManager::CTransportManager::SDataListenerCallback::op
     return ( (mCallbackType == i_other.mCallbackType)
           && (mConnectionHandle == i_other.mConnectionHandle)
           && (mDataSize == i_other.mDataSize)
-          && (mFrameSequenceNumber == i_other.mFrameSequenceNumber)
+          && (mUserData == i_other.mUserData)
           && (mSendStatus == i_other.mSendStatus)
           && (0 == memcmp(mData, i_other.mData, i_other.mDataSize)));
 }
@@ -773,8 +770,8 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
                         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Callback onFrameReceived on listener #" << dataListenerIndex << " was called. DataSize: " << callbackIterator->mDataSize);
                         break;
                     case CTransportManager::DataListenerCallbackType_FrameSendCompleted:
-                        (*dataListenersIterator)->onFrameSendCompleted(callbackIterator->mConnectionHandle, callbackIterator->mFrameSequenceNumber, callbackIterator->mSendStatus);
-                        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Callback onFrameReceived on listener #" << dataListenerIndex << " was called. FrameSequenceNumber: " << callbackIterator->mFrameSequenceNumber<<", SendStatus: "<<callbackIterator->mSendStatus);
+                        (*dataListenersIterator)->onFrameSendCompleted(callbackIterator->mConnectionHandle, callbackIterator->mUserData, callbackIterator->mSendStatus);
+                        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Callback onFrameReceived on listener #" << dataListenerIndex << " was called. UserData: " << callbackIterator->mUserData<<", SendStatus: "<<callbackIterator->mSendStatus);
                         break;
                     default:
                         TM_CH_LOG4CPLUS_ERROR_EXT(mLogger, ConnectionHandle, "Unknown callback type: " << (*callbackIterator).mCallbackType);

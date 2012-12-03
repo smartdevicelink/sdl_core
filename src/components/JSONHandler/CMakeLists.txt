@@ -1,10 +1,9 @@
 include_directories (
   ./include/
   ../TransportManager/include/
+  ../ProtocolHandler/include/
+  ../Utils/include/
   ../../thirdPartyLibs/jsoncpp/include/
-  ../../thirdPartyLibs/axisCore/include
-  ../../thirdPartyLibs/axisCore/
-  ../../thirdPartyLibs/axisCore/src
   ../../thirdPartyLibs/MessageBroker/include   
   ../../thirdPartyLibs/logger/include
   ../../thirdPartyLibs/logger/log4cplus-1.1.0/include

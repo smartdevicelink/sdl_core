@@ -35,7 +35,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
         static const tConnectionHandle ConnectionHandle = 666;
 
-        static const int SequenceNumber = 123;
+        static const int UserData = 123;
     }
 
     // ---------------- TEST CLASSES ---------------- //
@@ -62,7 +62,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
         MOCK_METHOD1(disconnectDevice, void (const tDeviceHandle DeviceHandle));
         MOCK_METHOD0(run, void());
         MOCK_METHOD0(scanForNewDevices, void());
-        MOCK_METHOD3(sendFrame, int(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize));
+        MOCK_METHOD4(sendFrame, void(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize, int UserData));
 
         void doScanForNewDevices()
         {
@@ -141,11 +141,10 @@ namespace test { namespace components { namespace TransportManager { namespace T
             mListener.onFrameReceived(this, Data::ConnectionHandle, pSendBuff, static_cast<size_t>(100));
         }
 
-        int doSendFrame(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize)
+        void doSendFrame(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize, const int UserData)
         {
             LOG4CPLUS_INFO_EXT(mLogger, "-------------- doSendFrame called. Sending FrameSendCompleted -----------------");
-            mListener.onFrameSendCompleted(this, Data::ConnectionHandle, Data::SequenceNumber, SendStatusOK);
-            return Data::SequenceNumber;
+            mListener.onFrameSendCompleted(this, Data::ConnectionHandle, Data::UserData, SendStatusOK);
         }
 
         void doDisconnectDevice(const tDeviceHandle DeviceHandle)
@@ -176,7 +175,6 @@ namespace test { namespace components { namespace TransportManager { namespace T
         MockTransportManagerClient(ITransportManager & TransportManager)
         : mTransportManager(TransportManager)
         , mDeviceList()
-        , mFrameSequenceNumber(-1)
         , mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManagerTest")))
         {
             
@@ -185,7 +183,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
         MOCK_METHOD2(onApplicationDisconnected, void(const SDeviceInfo& DisconnectedDevice, const tConnectionHandle Connection));
         MOCK_METHOD1(onDeviceListUpdated, void(const tDeviceList& DeviceList));
         MOCK_METHOD3(onFrameReceived, void(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize));
-        MOCK_METHOD3(onFrameSendCompleted, void(tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus));
+        MOCK_METHOD3(onFrameSendCompleted, void(tConnectionHandle ConnectionHandle, int UserData, ESendStatus SendStatus));
 
         void doDeviceListUpdated(const tDeviceList& DeviceList)
         {
@@ -204,10 +202,10 @@ namespace test { namespace components { namespace TransportManager { namespace T
             LOG4CPLUS_INFO_EXT(mLogger, "-------------- doFrameReceived -----------------");
             // Sending frame
             uint8_t data[512]={1};
-            mFrameSequenceNumber = mTransportManager.sendFrame(ConnectionHandle, data, 512);
+            mTransportManager.sendFrame(ConnectionHandle, data, 512, Data::UserData);
         }
 
-        void doFrameSendCompleted(tConnectionHandle ConnectionHandle, int FrameSequenceNumber, ESendStatus SendStatus)
+        void doFrameSendCompleted(tConnectionHandle ConnectionHandle, int UserData, ESendStatus SendStatus)
         {
             LOG4CPLUS_INFO_EXT(mLogger, "-------------- doFrameSendCompleted -----------------");
 
@@ -221,7 +219,6 @@ namespace test { namespace components { namespace TransportManager { namespace T
     protected:
         ITransportManager & mTransportManager;
         tDeviceList mDeviceList;
-        int mFrameSequenceNumber;
         Logger mLogger;
     };
 
@@ -259,7 +256,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
                 .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doConnectDevice))
             ;
 
-            EXPECT_CALL(*mpDeviceAdapter, sendFrame(Data::ConnectionHandle, _, 512))
+            EXPECT_CALL(*mpDeviceAdapter, sendFrame(Data::ConnectionHandle, _, 512, Data::UserData))
                 .Times(1)
                 .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doSendFrame))
             ;
@@ -316,7 +313,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
             .WillOnce(Invoke(&tmClient, &MockTransportManagerClient::doFrameReceived))
         ;
 
-        EXPECT_CALL(tmClient, onFrameSendCompleted(Data::ConnectionHandle, Data::SequenceNumber, SendStatusOK))
+        EXPECT_CALL(tmClient, onFrameSendCompleted(Data::ConnectionHandle, Data::UserData, SendStatusOK))
             .Times(1)
             .WillOnce(Invoke(&tmClient, &MockTransportManagerClient::doFrameSendCompleted))
         ;

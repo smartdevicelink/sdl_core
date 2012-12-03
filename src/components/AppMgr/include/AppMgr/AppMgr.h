@@ -51,7 +51,7 @@ namespace NsAppManager
          * \param connectionID id of a connection associated with application that sent the message
          * \param sessionID an id of a session associated with the application which sends message
          */
-        virtual void onMessageReceivedCallback( NsAppLinkRPC::ALRPCMessage * message, int connectionID, unsigned char sessionID );
+        virtual void onMessageReceivedCallback( NsAppLinkRPC::ALRPCMessage * message, int connectionKey );
 
         /**
          * \brief callback to proceed received RPC2 command
