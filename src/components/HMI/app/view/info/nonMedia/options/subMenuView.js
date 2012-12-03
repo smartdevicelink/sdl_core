@@ -10,9 +10,9 @@
  * @author		Artem Petrosyan
  */
 
-MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
+MFT.InfoNonMediaOptionsSubMenu = Em.ContainerView.create( MFT.LoadableView, {
 	
-	elementId: 'info_nonMedia_options',
+	elementId: 'info_nonMedia_options_submenu',
 	
 	childViews: [
 		'backButton',
@@ -32,7 +32,7 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
 	title: MFT.Label.extend({
 		classNames:	'options_title',
 		
-		content:	'Options'
+		content:	'Submenu'
 	}),
 	
 	list: MFT.List.extend({
