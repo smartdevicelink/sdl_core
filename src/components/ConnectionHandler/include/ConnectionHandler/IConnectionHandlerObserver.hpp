@@ -19,7 +19,7 @@
 namespace NsConnectionHandler
 {
     /**
-    * \class IConnectionHandlerObserver
+    * \class IConnectionHandlerObserver
     * \brief IConnectionHandlerObserver class
     */
     class IConnectionHandlerObserver
@@ -45,7 +45,7 @@ namespace NsConnectionHandler
         /**
          * \brief Destructor
          */
-        ~IConnectionHandlerObserver();
+        virtual ~IConnectionHandlerObserver() {};
     };
 }/* namespace NsConnectionHandler */
 

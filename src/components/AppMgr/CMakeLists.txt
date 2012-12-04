@@ -1,9 +1,10 @@
 include_directories (
     ./include/
     ../JSONHandler/include/
-  ../TransportManager/include/  
-  ../ProtocolHandler/include/
-  ../Utils/include/
+    ../ConnectionHandler/include/
+    ../ProtocolHandler/include/
+    ../TransportManager/include/
+    ../Utils/include/
     ../../thirdPartyLibs/MessageBroker/include/
     ../../thirdPartyLibs/jsoncpp/include/
     ../../thirdPartyLibs/logger/include/
@@ -30,6 +31,7 @@ set (SOURCES
     ./src/CapabilitesContainer.cpp
     ./src/HMIHandler.cpp
     ./src/MobileHandler.cpp
+    ./src/ConnectionHandler.cpp
     ./src/RequestMapping.cpp
     ./src/AutoActivateIdMapping.cpp
     ./src/SyncPManager.cpp

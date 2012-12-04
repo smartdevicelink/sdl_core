@@ -41,6 +41,11 @@ namespace log4cplus
     class Logger;
 }
 
+namespace NsConnectionHandler
+{
+    class CConnectionHandler;
+}
+
 namespace NsAppManager
 {
 
@@ -114,6 +119,18 @@ namespace NsAppManager
          * \return JSONRPC2Handler instance
          */
         JSONRPC2Handler* getJsonRPC2Handler( ) const;
+
+        /**
+         * \brief Sets connection handler instance
+         * \param handler connection handler
+         */
+        void setConnectionHandler(NsConnectionHandler::CConnectionHandler* handler);
+
+        /**
+         * \brief Gets connection handler instance
+         * \return connection handler
+         */
+        NsConnectionHandler::CConnectionHandler* getConnectionHandler( ) const;
 
     private:
 
