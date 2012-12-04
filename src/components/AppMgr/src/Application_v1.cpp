@@ -8,9 +8,10 @@ namespace NsAppManager
      * \param name application name
      * \param connectionId id of the connection associated with this application
      * \param sessionId id of the session associated with this application
+     * \param appId application id
      */
-    Application_v1::Application_v1(const std::string& name , unsigned int connectionId, unsigned char sessionId)
-        :Application(name, connectionId, sessionId, 1)
+    Application_v1::Application_v1(const std::string& name , unsigned int connectionId, unsigned char sessionId, int appId)
+        :Application(name, connectionId, sessionId, appId, 1)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name << " for the connection id " << connectionId << " session id " << (uint)sessionId);
     }

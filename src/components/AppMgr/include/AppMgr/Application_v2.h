@@ -26,8 +26,9 @@ namespace NsAppManager
          * \param name application name
          * \param connectionId id of the connection associated with this application
          * \param sessionId id of the session associated with this application
+         * \param appId application id
          */
-        Application_v2(const std::string& name, unsigned int connectionId, unsigned char sessionId );
+        Application_v2(const std::string& name, unsigned int connectionId, unsigned char sessionId, int appId );
 
         /**
          * \brief Default class destructor
@@ -38,13 +39,13 @@ namespace NsAppManager
          * \brief Set application ID
          * \param value application ID
          */
-        void setAppID( const std::string& value );
+   //     void setAppID( const std::string& value );
 
         /**
          * \brief retrieve application ID
          * \return application ID
          */
-        const std::string& getAppID( ) const;
+    //    const std::string& getAppID( ) const;
 
         /**
          * \brief Set application desired languuage
@@ -118,7 +119,7 @@ namespace NsAppManager
         NsAppLinkRPC::Language_v2 mHMIDisplayLanguageDesired;
         NsAppLinkRPC::SystemContext_v2 mSystemContext;
 
-        std::string mAppID;
+   //     std::string mAppID;
         AppTypes mAppType;
     };
 }

@@ -17,9 +17,10 @@ namespace NsAppManager
      * \param name application name
      * \param connectionId id of the connection associated with this application
      * \param sessionId id of the session associated with this application
+     * \param appId application id
      * \param protocolVersion protocol version
      */
-    Application::Application(const std::string& name , unsigned int connectionId, unsigned char sessionId, unsigned int protocolVersion)
+    Application::Application(const std::string& name , unsigned int connectionId, unsigned char sessionId, int appId, unsigned int protocolVersion)
         :mNgnMediaScreenAppName("")
         ,m_bIsMediaApplication(false)
         ,mAutoActivateID("")
@@ -27,6 +28,7 @@ namespace NsAppManager
         ,mConnectionID(connectionId)
         ,mName(name)
         ,mProtocolVersion(protocolVersion)
+        ,mAppID(appId)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name << " for the connection id " << connectionId << " session id " << (uint)sessionId);
     }
@@ -44,6 +46,7 @@ namespace NsAppManager
         ,mConnectionID(app.getConnectionID())
         ,mSessionID(app.getSessionID())
         ,mProtocolVersion(app.getProtocolVersion())
+        ,mAppID(app.getAppID())
     {
         mVrSynonyms = app.getVrSynonyms();
     }
@@ -209,6 +212,15 @@ namespace NsAppManager
     const std::string &Application::getName() const
     {
         return mName;
+    }
+
+    /**
+     * \brief retrieve application ID
+     * \return application ID
+     */
+    const int &Application::getAppID() const
+    {
+        return mAppID;
     }
 
     /**
