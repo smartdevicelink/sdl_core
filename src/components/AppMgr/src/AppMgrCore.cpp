@@ -484,6 +484,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
                         NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                         appUnregistered->set_appName(appName);
+                        appUnregistered->set_appId(app->getAppID());
                         appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
                         HMIHandler::getInstance().sendNotification(appUnregistered);
                         break;
@@ -517,6 +518,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
                         NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                         appUnregistered->set_appName(appName);
+                        appUnregistered->set_appId(app->getAppID());
                         appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason((NsAppLinkRPC::AppInterfaceUnregisteredReason::AppInterfaceUnregisteredReasonInternal)NsAppLinkRPC::AppInterfaceUnregisteredReason_v2::USER_EXIT));
                         HMIHandler::getInstance().sendNotification(appUnregistered);
                         break;
