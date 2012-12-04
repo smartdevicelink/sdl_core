@@ -5,7 +5,7 @@
  */
 
 #include "AppMgr/ConnectionHandler.h"
-#include "ConnectionHandler/CConnectionHandler.hpp"
+#include "ConnectionHandler/IDevicesDiscoveryStarter.hpp"
 #include "LoggerHelper.hpp"
 
 namespace NsAppManager
@@ -26,7 +26,7 @@ namespace NsAppManager
      * \brief Sets connection handler instance
      * \param handler connection handler
      */
-    void ConnectionHandler::setConnectionHandler(NsConnectionHandler::CConnectionHandler *handler)
+    void ConnectionHandler::setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler)
     {
         if(!handler)
         {
@@ -40,7 +40,7 @@ namespace NsAppManager
      * \brief Gets connection handler instance
      * \return connection handler
      */
-    NsConnectionHandler::CConnectionHandler *ConnectionHandler::getConnectionHandler() const
+    NsConnectionHandler::IDevicesDiscoveryStarter *ConnectionHandler::getConnectionHandler() const
     {
         if(!mConnectionHandler)
         {

@@ -77,7 +77,7 @@ namespace NsAppManager
      * \brief Sets connection handler instance
      * \param handler connection handler
      */
-    void AppMgr::setConnectionHandler(NsConnectionHandler::CConnectionHandler *handler)
+    void AppMgr::setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler)
     {
         if(!handler)
         {

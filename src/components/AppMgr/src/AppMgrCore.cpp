@@ -31,7 +31,6 @@
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/ALRPCObjects/AppType.h"
-#include "ConnectionHandler/CConnectionHandler.hpp"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 #include <iostream>
@@ -2502,7 +2501,7 @@ namespace NsAppManager
      * \brief Sets connection handler instance
      * \param handler connection handler
      */
-    void AppMgrCore::setConnectionHandler(NsConnectionHandler::CConnectionHandler *handler)
+    void AppMgrCore::setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler)
     {
         if(!handler)
         {
@@ -2516,7 +2515,7 @@ namespace NsAppManager
      * \brief Gets connection handler instance
      * \return connection handler
      */
-    NsConnectionHandler::CConnectionHandler *AppMgrCore::getConnectionHandler() const
+    NsConnectionHandler::IDevicesDiscoveryStarter *AppMgrCore::getConnectionHandler() const
     {
         return ConnectionHandler::getInstance().getConnectionHandler();
     }

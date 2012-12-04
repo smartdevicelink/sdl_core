@@ -27,7 +27,7 @@ namespace NsRPC2Communication
 
 namespace NsConnectionHandler
 {
-    class CConnectionHandler;
+    class IDevicesDiscoveryStarter;
 }
 
 namespace NsAppManager
@@ -101,7 +101,7 @@ namespace NsAppManager
          * \brief Sets connection handler instance
          * \param handler connection handler
          */
-        void setConnectionHandler(NsConnectionHandler::CConnectionHandler* handler);
+        void setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler);
 
         /**
          * \brief method to execute threads.
