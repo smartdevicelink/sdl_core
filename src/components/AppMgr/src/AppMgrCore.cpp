@@ -1811,7 +1811,7 @@ namespace NsAppManager
                 MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SLIDER:
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SLIDERRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A Slider response has been income");
                 NsRPC2Communication::UI::SliderResponse* uiResponse = (NsRPC2Communication::UI::SliderResponse*)msg;
