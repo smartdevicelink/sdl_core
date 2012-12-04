@@ -182,13 +182,13 @@ FFW.Buttons = FFW.RPCObserver.create({
 							"shortPressAvailable"	: true,
 							"longPressAvailable"	: true,
 							"upDownAvailable"		: true
-						}/*,
+						},
 						{
 							"name"					: "TUNEDOWN",
 							"shortPressAvailable"	: true,
 							"longPressAvailable"	: true,
 							"upDownAvailable"		: true
-						}*/
+						}
 					],
 					"presetBankCapabilities": {"onScreenPresetsAvailable": true},
 

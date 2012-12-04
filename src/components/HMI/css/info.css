@@ -685,6 +685,47 @@
 .help-mode #info_calendar .today span {
 	text-shadow: 0 0 3px #999 !important;
 }
+
+/******************* For Info.DeviceList *******************/
+#info_view .info_apps_deviceList_view{
+	background: black;
+	width: 800px;
+	height: 480px;
+	z-index: 201;
+}
+
+
+#info_apps_deviceList_view .backButton {
+	top: 80px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+#info_apps_deviceList_view .list{
+	position: absolute;
+	width: 629px;
+	height: 251px;
+	border-radius: 2px;
+	left: 100px;
+	top: 154px;
+}
+
+#info_apps_deviceList_view .deviceListLabel{
+	top: 80px;
+	left: 75px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
+
+#info_apps_deviceList_view .list-content{
+	width: 578px;
+	border: none;
+}
+
 /******************* For Info.Apps menu*******************/
 #info_apps {
 	position: absolute;
@@ -726,7 +767,6 @@
 	margin-top: 5px;
 	width: 554px;
 }
-
 
 #info_apps .list {
 	width: 629px;
@@ -774,6 +814,10 @@
 
 #info_apps .findNewApps{
 	top: 226px;
+}
+
+#info_apps .getDeviceList{
+	top: 278px;
 }
 
 #info_apps .list{

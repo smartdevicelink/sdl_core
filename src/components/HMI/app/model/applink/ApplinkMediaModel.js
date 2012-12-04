@@ -46,6 +46,11 @@ MFT.ApplinkMediaModel = Em.Object.create({
 	  */
     applicationsList:			new Array(),
 
+    /**
+      * Array of connected devices
+      */
+    devicesList:            new Array(),
+
 	/**
 	  * Timer for Media Clock
 	  */
@@ -116,6 +121,26 @@ MFT.ApplinkMediaModel = Em.Object.create({
             });
         }
         MFT.InfoAppsView.ShowAppList();
+
+    },
+
+    onGetDeviceList: function( params ){
+        
+        this.devicesList.splice(0, this.devicesList.length);
+        for(var i = 0; i < params.deviceList.length; i++){
+            this.devicesList.push({
+                type:       MFT.Button,
+                params:     {
+                    action:         'turnOnApplink',
+                    target:         'MFT.MediaController',
+                    text:           params.deviceList[i].appName,
+                    className:      'scrollButtons button notpressed',
+                    icon:           params.icon,
+                    templateName:   'rightIcon'
+                }                                   
+            });
+        }
+        MFT.DeviceLilstView.ShowDeviceList();
 
     },
 
@@ -322,7 +347,20 @@ MFT.ApplinkMediaModel = Em.Object.create({
 
     /** Applink Slider activation */
     onApplinkSlider: function(params){
-        this.turnOnApplinkSlider();
+
+/*
+unsigned int (2:26) numTicks,
+  unsigned int (1:16) position,
+  string (500) sliderHeader,
+  string (500) * sliderFooter[1:26],
+  unsigned int (65535) timeout
+  ->
+  unsigned int (1:26) sliderPosition
+  */
+
+
+        MFT.ApplinkMediaController.turnOnApplinkSlider();
+
     },
 
     /** Applink TTS Speak handler */

@@ -85,7 +85,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                 //action:     'onDecrease',
                 //target:     'MFT.MCSController',
 
-                timer:      FLAGS.MCS_EMULATE_CAN ? 200 : 0,
+                //timer:      FLAGS.MCS_EMULATE_CAN ? 200 : 0,
                 /*
                 actionUp:   function() {
                     if(!this._parentView._parentView.get('disabled')) {

@@ -822,6 +822,7 @@ MFT.eng = {
 	view_info_apps_vehicle_VehicleHealthReport: 'Vehicle Health Report',
 	view_info_apps_vehicle_InstallApplicationsUp: 'Install Applications/Up',
 	view_info_apps_vehicle_FindNewApplications: 'Find New Apps',
+	view_info_apps_vehicle_GetDeviceList: 'Change Devices',
 	view_info_apps_911Assist_header: '911 Assist',
 	view_info_apps_911Assist_incase: 'In Case of Emergency (ICE) Speed Dial',
 	view_info_apps_911Assist_on: 'On',
