@@ -126,10 +126,11 @@ namespace NsAppManager
      * Called when device scanning initiated with scanForNewDevices
      * is completed.
      *
-     * \param DeviceList New list of available devices.
+     * \param deviceList New list of available devices.
      **/
-    void AppMgr::onDeviceListUpdated(const NsConnectionHandler::tDeviceList &DeviceList)
+    void AppMgr::onDeviceListUpdated(const NsConnectionHandler::tDeviceList &deviceList)
     {
+        AppMgrCore::getInstance().setDeviceList(deviceList);
     }
 
     /**

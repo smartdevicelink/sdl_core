@@ -68,9 +68,9 @@ namespace NsAppManager
          * Called when device scanning initiated with scanForNewDevices
          * is completed.
          *
-         * \param DeviceList New list of available devices.
+         * \param deviceList New list of available devices.
          **/
-        virtual void onDeviceListUpdated(const NsConnectionHandler::tDeviceList & DeviceList);
+        virtual void onDeviceListUpdated(const NsConnectionHandler::tDeviceList & deviceList);
 
         /**
          * \brief callback which is called upon session starting
