@@ -193,6 +193,14 @@ namespace NsAppManager
         }
         AppMgrCore* core = (AppMgrCore*)pThis;
         const unsigned int& protocolVersion = mobileMsg->getProtocolVersion();
+        const NsConnectionHandler::tDeviceHandle& currentDeviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(appId);
+        const NsConnectionHandler::CDevice* currentDevice = core->mDeviceList.findDeviceByHandle(currentDeviceHandle);
+        if(!currentDevice)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " Cannot retreive current device name for the message with connection " << connectionID << " session " << (uint)sessionID << " !");
+            return;
+        }
+        const std::string& currentDeviceName = currentDevice->getUserFriendlyName();
 
         switch(mobileMsg->getMethodId())
         {
@@ -315,6 +323,7 @@ namespace NsAppManager
                         appRegistered->set_languageDesired(app->getLanguageDesired());
                         appRegistered->set_vrSynonym(app->getVrSynonyms());
                         appRegistered->set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
+                        appRegistered->set_deviceName(currentDeviceName);
                         HMIHandler::getInstance().sendNotification(appRegistered);
                         LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                         break;
@@ -441,6 +450,7 @@ namespace NsAppManager
                         hmiLanguageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)hmiLanguageDesired.get());
                         appRegistered->set_hmiDisplayLanguageDesired(hmiLanguageDesiredV1);
                         appRegistered->set_vrSynonym(app->getVrSynonyms());
+                        appRegistered->set_deviceName(currentDeviceName);
                         HMIHandler::getInstance().sendNotification(appRegistered);
                         LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                         break;
