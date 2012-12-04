@@ -18,6 +18,9 @@ set(LIBRARIES
 
 include_directories (../../../src/components/AppMgr/include/
                      ../../../src/components/JSONHandler/include/
+                     ../../../src/components/TransportManager/include/
+                     ../../../src/components/ProtocolHandler/include/
+                     ../../../src/components/Utils/include/
                      ../../../src/thirdPartyLibs/MessageBroker/include/
                      ../../../src/thirdPartyLibs/axisCore/utils/misc
                      ../../../src/thirdPartyLibs/axisCore/include

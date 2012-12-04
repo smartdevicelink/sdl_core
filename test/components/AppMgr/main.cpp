@@ -1,6 +1,5 @@
 #include "AppMgr/AppMgr.h"
 #include "LoggerHelper.hpp"
-#include "ProtocolHandler.hpp"
 
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"

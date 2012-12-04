@@ -17,6 +17,7 @@
 #include "AppMgr/SubscribeButton.h"
 #include "AppMgr/HMIHandler.h"
 #include "AppMgr/MobileHandler.h"
+#include "AppMgr/ConnectionHandler.h"
 #include "JSONHandler/ALRPCMessage.h"
 #include "JSONHandler/ALRPCRequest.h"
 #include "JSONHandler/ALRPCResponse.h"
@@ -29,6 +30,8 @@
 #include "JSONHandler/RPC2Request.h"
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
+#include "JSONHandler/ALRPCObjects/AppType.h"
+#include "ConnectionHandler/CConnectionHandler.hpp"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 #include <iostream>
@@ -196,149 +199,328 @@ namespace NsAppManager
             case NsAppLinkRPC::Marshaller::METHOD_REGISTERAPPINTERFACE_REQUEST:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
-                NsAppLinkRPC::RegisterAppInterface_request * object = (NsAppLinkRPC::RegisterAppInterface_request*)mobileMsg;
-                NsAppLinkRPC::RegisterAppInterface_response* response = new NsAppLinkRPC::RegisterAppInterface_response();
-                const std::string& appName = object->get_appName();
-                if(AppMgrRegistry::getInstance().getItem(connectionID, sessionID))
-                {
-                    LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
-                    response->set_success(false);
-                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_REGISTERED_ALREADY);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                    break;
-                }
 
-                Application* app = core->getApplicationFromItemCheckNotNull(core->registerApplication( object, connectionID, sessionID, protocolVersion ));
-                response->setCorrelationID(object->getCorrelationID());
-                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
-                if(!app)
+                switch(protocolVersion)
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
-                    response->set_success(false);
-                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                    break;
-                }
-                LOG4CPLUS_INFO_EXT(mLogger, " About to find auto-activate id in a map...");
-                std::string autoActivateIdFound = core->mAutoActivateIds.findAutoActivateIdAssignedToName(appName);
-                LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " is found in a map with auto activate id " << autoActivateIdFound);
-                if(!autoActivateIdFound.empty())
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, "Found already registered AutoActivateId" << (autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound) << " assigned to app name " << appName);
-                    if(object->get_autoActivateID())
+                    case 1:
                     {
-                        LOG4CPLUS_INFO_EXT(mLogger, "There is an AutoActivateId supplied withtin this RegisterAppInterface request: " << *object->get_autoActivateID());
+                        NsAppLinkRPC::RegisterAppInterface_request * object = (NsAppLinkRPC::RegisterAppInterface_request*)mobileMsg;
+                        NsAppLinkRPC::RegisterAppInterface_response* response = new NsAppLinkRPC::RegisterAppInterface_response();
+                        const std::string& appName = object->get_appName();
+
+                        if(AppMgrRegistry::getInstance().getItem(connectionID, sessionID))
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_REGISTERED_ALREADY);
+                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                            break;
+                        }
+
+                        Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, connectionID, sessionID ));
+                        response->setCorrelationID(object->getCorrelationID());
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        if(!app)
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                            break;
+                        }
+                        LOG4CPLUS_INFO_EXT(mLogger, " About to find auto-activate id in a map...");
+                        std::string autoActivateIdFound = core->mAutoActivateIds.findAutoActivateIdAssignedToName(appName);
+                        LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " is found in a map with auto activate id " << autoActivateIdFound);
+                        if(!autoActivateIdFound.empty())
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "Found already registered AutoActivateId" << (autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound) << " assigned to app name " << appName);
+                            if(object->get_autoActivateID())
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, "There is an AutoActivateId supplied withtin this RegisterAppInterface request: " << *object->get_autoActivateID());
+                            }
+                            else
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " hasn't been registered because its autoActivateId NULL differs from the one specified before - " << autoActivateIdFound);
+                            }
+                        }
+                        else
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId has previously been assigned to app name " << appName);
+                            if(!object->get_autoActivateID())
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request!");
+                            }
+                            else
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered!");
+                            }
+                        }
+
+                        if(!object->get_autoActivateID())
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request - about to register an application " << appName << " with the generated one");
+                            const std::string& autoActivateId = core->mAutoActivateIds.addApplicationName(object->get_appName());
+                            response->set_autoActivateID(autoActivateId);
+                        }
+                        else
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered:");
+                            LOG4CPLUS_INFO_EXT(mLogger, " about to register with the supplies auto-activate id!");
+                            response->set_autoActivateID(*object->get_autoActivateID());
+                        }
+
+                        NsAppLinkRPC::OnHMIStatus* status = new NsAppLinkRPC::OnHMIStatus();
+                        app->setAutoActivateID(*response->get_autoActivateID());
+                        if(app->getAutoActivateID() == core->mLastAutoActivateId)
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, " Application's auto-activate id match the one from the last active application - " << core->mLastAutoActivateId);
+                            if(!AppMgrRegistry::getInstance().getActiveItem())
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, " No currently active items found - activating an app!");
+                                AppMgrRegistry::getInstance().activateApp(app);
+                                status->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
+                            }
+                            else
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, " There is an active item, so we do nothing");
+                            }
+                        }
+                        else
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, " Application's auto-activate id " << app->getAutoActivateID() << " doesn't match the one from the last active application - " << core->mLastAutoActivateId);
+                        }
+
+                        status->set_hmiLevel(app->getApplicationHMIStatusLevel());
+                        status->set_audioStreamingState(app->getApplicationAudioStreamingState());
+                        status->set_systemContext(app->getSystemContext());
+                        MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
+
+                        response->set_buttonCapabilities(core->mButtonCapabilitiesV1.get());
+                        response->set_displayCapabilities(core->mDisplayCapabilitiesV1);
+                        response->set_hmiZoneCapabilities(core->mHmiZoneCapabilities.get());
+                        response->set_speechCapabilities(core->mSpeechCapabilitiesV1.get());
+                        response->set_vrCapabilities(core->mVrCapabilitiesV1.get());
+                        response->set_language(app->getLanguageDesired());
+                        response->set_syncMsgVersion(app->getSyncMsgVersion());
+                        response->set_success(true);
+                        response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
+
+                        LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName() << " gets sent to a mobile side... ");
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+
+                        NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
+                        appRegistered->set_appName(app->getName());
+                        appRegistered->set_isMediaApplication(app->getIsMediaApplication());
+                        appRegistered->set_languageDesired(app->getLanguageDesired());
+                        appRegistered->set_vrSynonym(app->getVrSynonyms());
+                        appRegistered->set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
+                        HMIHandler::getInstance().sendNotification(appRegistered);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
+                        break;
                     }
-                    else
+                    case 2:
                     {
-                        LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " hasn't been registered because its autoActivateId NULL differs from the one specified before - " << autoActivateIdFound);
+                        NsAppLinkRPC::RegisterAppInterface_v2_request * object = (NsAppLinkRPC::RegisterAppInterface_v2_request*)mobileMsg;
+                        NsAppLinkRPC::RegisterAppInterface_v2_response* response = new NsAppLinkRPC::RegisterAppInterface_v2_response();
+                        const std::string& appName = object->get_appName();
+
+                        if(AppMgrRegistry::getInstance().getItem(connectionID, sessionID))
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPC::Result_v2::APPLICATION_REGISTERED_ALREADY);
+                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                            break;
+                        }
+
+                        Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, connectionID, sessionID ));
+                        response->setCorrelationID(object->getCorrelationID());
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        if(!app)
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPC::Result_v2::APPLICATION_NOT_REGISTERED);
+                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                            break;
+                        }
+       /*                 LOG4CPLUS_INFO_EXT(mLogger, " About to find auto-activate id in a map...");
+                        std::string autoActivateIdFound = core->mAutoActivateIds.findAutoActivateIdAssignedToName(appName);
+                        LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " is found in a map with auto activate id " << autoActivateIdFound);
+                        if(!autoActivateIdFound.empty())
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "Found already registered AutoActivateId" << (autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound) << " assigned to app name " << appName);
+                            if(object->get_autoActivateID())
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, "There is an AutoActivateId supplied withtin this RegisterAppInterface request: " << *object->get_autoActivateID());
+                            }
+                            else
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " hasn't been registered because its autoActivateId NULL differs from the one specified before - " << autoActivateIdFound);
+                            }
+                        }
+                        else
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId has previously been assigned to app name " << appName);
+                            if(!object->get_autoActivateID())
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request!");
+                            }
+                            else
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered!");
+                            }
+                        }
+
+                        if(!object->get_autoActivateID())
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request - about to register an application " << appName << " with the generated one");
+                            const std::string& autoActivateId = core->mAutoActivateIds.addApplicationName(object->get_appName());
+                            response->set_autoActivateID(autoActivateId);
+                        }
+                        else
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered:");
+                            LOG4CPLUS_INFO_EXT(mLogger, " about to register with the supplies auto-activate id!");
+                            response->set_autoActivateID(*object->get_autoActivateID());
+                        }
+*/
+                        NsAppLinkRPC::OnHMIStatus_v2* status = new NsAppLinkRPC::OnHMIStatus_v2();
+/*                        app->setAutoActivateID(*response->get_autoActivateID());
+                        if(app->getAutoActivateID() == core->mLastAutoActivateId)
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, " Application's auto-activate id match the one from the last active application - " << core->mLastAutoActivateId);
+                            if(!AppMgrRegistry::getInstance().getActiveItem())
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, " No currently active items found - activating an app!");
+                                AppMgrRegistry::getInstance().activateApp(app);
+                                status->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
+                            }
+                            else
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, " There is an active item, so we do nothing");
+                            }
+                        }
+                        else
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, " Application's auto-activate id " << app->getAutoActivateID() << " doesn't match the one from the last active application - " << core->mLastAutoActivateId);
+                        }
+*/
+                        status->set_hmiLevel(app->getApplicationHMIStatusLevel());
+                        status->set_audioStreamingState(app->getApplicationAudioStreamingState());
+                        status->set_systemContext(app->getSystemContext());
+                        MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
+
+                        response->set_buttonCapabilities(core->mButtonCapabilitiesV2.get());
+                        response->set_displayCapabilities(core->mDisplayCapabilitiesV2);
+                        response->set_hmiZoneCapabilities(core->mHmiZoneCapabilities.get());
+                        response->set_hmiDisplayLanguage(app->getHMIDisplayLanguageDesired());
+                        response->set_language(app->getLanguageDesired());
+                        response->set_speechCapabilities(core->mSpeechCapabilitiesV2.get());
+                        response->set_vrCapabilities(core->mVrCapabilitiesV2.get());
+                        response->set_syncMsgVersion(app->getSyncMsgVersion());
+                        response->set_success(true);
+                        response->set_resultCode(NsAppLinkRPC::Result_v2::SUCCESS);
+
+                        LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName() << " gets sent to a mobile side... ");
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+
+                        NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
+                        appRegistered->set_appName(app->getName());
+                        appRegistered->set_isMediaApplication(app->getIsMediaApplication());
+                        const NsAppLinkRPC::Language_v2& languageDesired = app->getLanguageDesired();
+                        NsAppLinkRPC::Language languageDesiredV1;
+                        languageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)languageDesired.get());
+                        appRegistered->set_languageDesired(languageDesiredV1);
+                        appRegistered->set_vrSynonym(app->getVrSynonyms());
+            //            appRegistered->set_appId(app->getAppID());
+                        appRegistered->set_appType(app->getAppType());
+                        const NsAppLinkRPC::Language_v2& hmiLanguageDesired = app->getHMIDisplayLanguageDesired();
+                        NsAppLinkRPC::Language hmiLanguageDesiredV1;
+                        hmiLanguageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)hmiLanguageDesired.get());
+                        appRegistered->set_hmiDisplayLanguageDesired(hmiLanguageDesiredV1);
+                        appRegistered->set_vrSynonym(app->getVrSynonyms());
+                        HMIHandler::getInstance().sendNotification(appRegistered);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
+                        break;
                     }
                 }
-                else
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId has previously been assigned to app name " << appName);
-                    if(!object->get_autoActivateID())
-                    {
-                        LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request!");
-                    }
-                    else
-                    {
-                        LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered!");
-                    }
-                }
 
-                if(!object->get_autoActivateID())
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request - about to register an application " << appName << " with the generated one");
-                    const std::string& autoActivateId = core->mAutoActivateIds.addApplicationName(object->get_appName());
-                    response->set_autoActivateID(autoActivateId);
-                }
-                else
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered:");
-                    LOG4CPLUS_INFO_EXT(mLogger, " about to register with the supplies auto-activate id!");
-                    response->set_autoActivateID(*object->get_autoActivateID());
-                }
-
-                NsAppLinkRPC::OnHMIStatus* status = new NsAppLinkRPC::OnHMIStatus();
-                app->setAutoActivateID(*response->get_autoActivateID());
-                if(app->getAutoActivateID() == core->mLastAutoActivateId)
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, " Application's auto-activate id match the one from the last active application - " << core->mLastAutoActivateId);
-                    if(!AppMgrRegistry::getInstance().getActiveItem())
-                    {
-                        LOG4CPLUS_INFO_EXT(mLogger, " No currently active items found - activating an app!");
-                        AppMgrRegistry::getInstance().activateApp(app);
-                        status->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
-                    }
-                    else
-                    {
-                        LOG4CPLUS_INFO_EXT(mLogger, " There is an active item, so we do nothing");
-                    }
-                }
-                else
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, " Application's auto-activate id " << app->getAutoActivateID() << " doesn't match the one from the last active application - " << core->mLastAutoActivateId);
-                }
-
-                status->set_hmiLevel(app->getApplicationHMIStatusLevel());
-                status->set_audioStreamingState(app->getApplicationAudioStreamingState());
-                status->set_systemContext(app->getSystemContext());
-                MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
-
-                response->set_buttonCapabilities(core->mButtonCapabilities.get());
-                response->set_displayCapabilities(core->mDisplayCapabilities);
-                response->set_hmiZoneCapabilities(core->mHmiZoneCapabilities.get());
-                response->set_speechCapabilities(core->mSpeechCapabilities.get());
-                response->set_vrCapabilities(core->mVrCapabilities.get());
-                response->set_success(true);
-                response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-
-                LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName() << " gets sent to a mobile side... ");
-                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-
-                NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
-                appRegistered->set_appName(app->getName());
-                appRegistered->set_isMediaApplication(app->getIsMediaApplication());
-                appRegistered->set_languageDesired(app->getLanguageDesired());
-                appRegistered->set_vrSynonym(app->getVrSynonyms());
-                HMIHandler::getInstance().sendNotification(appRegistered);
-                LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_UNREGISTERAPPINTERFACE_REQUEST:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
 
-                NsAppLinkRPC::UnregisterAppInterface_request * object = (NsAppLinkRPC::UnregisterAppInterface_request*)mobileMsg;
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
-                NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
-                if(!app)
+                switch(protocolVersion)
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
-                    response->set_success(false);
-                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                    break;
+                    case 1:
+                    {
+                        NsAppLinkRPC::UnregisterAppInterface_request * object = (NsAppLinkRPC::UnregisterAppInterface_request*)mobileMsg;
+                        Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                        NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
+                        if(!app)
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                            break;
+                        }
+                        std::string appName = app->getName();
+
+                        core->removeAppFromHmi(app, connectionID, sessionID);
+                        core->unregisterApplication( connectionID, sessionID );
+
+                        response->setCorrelationID(object->getCorrelationID());
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(true);
+                        response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+
+                        NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
+                        msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
+                        MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
+                        NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
+                        appUnregistered->set_appName(appName);
+                        appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
+                        HMIHandler::getInstance().sendNotification(appUnregistered);
+                        break;
+                    }
+                    case 2:
+                    {
+                        NsAppLinkRPC::UnregisterAppInterface_v2_request * object = (NsAppLinkRPC::UnregisterAppInterface_v2_request*)mobileMsg;
+                        Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                        NsAppLinkRPC::UnregisterAppInterface_v2_response* response = new NsAppLinkRPC::UnregisterAppInterface_v2_response();
+                        if(!app)
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPC::Result_v2::APPLICATION_NOT_REGISTERED);
+                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                            break;
+                        }
+                        std::string appName = app->getName();
+
+                        core->removeAppFromHmi(app, connectionID, sessionID);
+                        core->unregisterApplication( connectionID, sessionID );
+
+                        response->setCorrelationID(object->getCorrelationID());
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(true);
+                        response->set_resultCode(NsAppLinkRPC::Result_v2::SUCCESS);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+
+                        NsAppLinkRPC::OnAppInterfaceUnregistered_v2* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered_v2();
+                        msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason_v2(NsAppLinkRPC::AppInterfaceUnregisteredReason_v2::USER_EXIT));
+                        MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
+                        NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
+                        appUnregistered->set_appName(appName);
+                        appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason((NsAppLinkRPC::AppInterfaceUnregisteredReason::AppInterfaceUnregisteredReasonInternal)NsAppLinkRPC::AppInterfaceUnregisteredReason_v2::USER_EXIT));
+                        HMIHandler::getInstance().sendNotification(appUnregistered);
+                        break;
+                    }
                 }
-                std::string appName = app->getName();
-
-                core->removeAppFromHmi(app, connectionID, sessionID);
-                core->unregisterApplication( connectionID, sessionID );
-
-                response->setCorrelationID(object->getCorrelationID());
-                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
-                response->set_success(true);
-                response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-
-                NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
-                msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
-                MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
-                NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
-                appUnregistered->set_appName(appName);
-                appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
-                HMIHandler::getInstance().sendNotification(appUnregistered);
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_SUBSCRIBEBUTTON_REQUEST:
@@ -1186,7 +1368,8 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetButtonCapabilities response has been income");
                 NsRPC2Communication::Buttons::GetCapabilitiesResponse * btnCaps = (NsRPC2Communication::Buttons::GetCapabilitiesResponse*)msg;
-                core->mButtonCapabilities.set( btnCaps->get_capabilities() );
+                core->mButtonCapabilitiesV1.set( btnCaps->get_capabilities() );
+                core->mButtonCapabilitiesV2.set( *((std::vector< NsAppLinkRPC::ButtonCapabilities_v2>*)&btnCaps->get_capabilities()) );
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
@@ -1216,7 +1399,8 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetUICapabilities response has been income");
                 NsRPC2Communication::UI::GetCapabilitiesResponse * uiCaps = (NsRPC2Communication::UI::GetCapabilitiesResponse*)msg;
-                core->mDisplayCapabilities = uiCaps->get_displayCapabilities();
+                core->mDisplayCapabilitiesV1 = uiCaps->get_displayCapabilities();
+                core->mDisplayCapabilitiesV2 = (*(NsAppLinkRPC::DisplayCapabilities_v2*)&uiCaps->get_displayCapabilities());
                 core->mHmiZoneCapabilities.set( uiCaps->get_hmiZoneCapabilities() );
                 return;
             }
@@ -1580,7 +1764,24 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, " null-application found as an active item!");
                     return;
                 }
-                app->setSystemContext(object->get_systemContext());
+                switch(app->getProtocolVersion())
+                {
+                    case 1:
+                    {
+                        Application_v1* appv1 = (Application_v1*)app;
+                        appv1->setSystemContext(object->get_systemContext());
+                        break;
+                    }
+                    case 2:
+                    {
+                        Application_v2* appv2 = (Application_v2*)app;
+                        NsAppLinkRPC::SystemContext_v2 ctx2;
+                        const NsAppLinkRPC::SystemContext& ctx = object->get_systemContext();
+                        ctx2.set((NsAppLinkRPC::SystemContext_v2::SystemContext_v2Internal)ctx.get());
+                        appv2->setSystemContext(ctx2);
+                        break;
+                    }
+                }
 
                 NsAppLinkRPC::OnHMIStatus* event = new NsAppLinkRPC::OnHMIStatus;
                 event->set_systemContext(object->get_systemContext());
@@ -1627,7 +1828,8 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetVRCapabilities response has been income");
                 NsRPC2Communication::VR::GetCapabilitiesResponse * vrCaps = (NsRPC2Communication::VR::GetCapabilitiesResponse*)msg;
-                core->mVrCapabilities.set(vrCaps->get_capabilities());
+                core->mVrCapabilitiesV1.set(vrCaps->get_capabilities());
+                core->mVrCapabilitiesV2.set(*((std::vector< NsAppLinkRPC::VrCapabilities_v2>*)&vrCaps->get_capabilities()));
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMANDRESPONSE:
@@ -1716,7 +1918,8 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetTTSCapabilities response has been income");
                 NsRPC2Communication::TTS::GetCapabilitiesResponse * ttsCaps = (NsRPC2Communication::TTS::GetCapabilitiesResponse*)msg;
-                core->mSpeechCapabilities.set(ttsCaps->get_capabilities());
+                core->mSpeechCapabilitiesV1.set(ttsCaps->get_capabilities());
+                core->mSpeechCapabilitiesV2.set(*((std::vector< NsAppLinkRPC::SpeechCapabilities_v2>*)&ttsCaps->get_capabilities()));
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE:
@@ -1889,15 +2092,37 @@ namespace NsAppManager
                     MobileHandler::getInstance().sendRPCMessage(core->mDriverDistraction, connectionID, sessionID);
                 }
 
-                NsAppLinkRPC::OnHMIStatus * hmiStatus = new NsAppLinkRPC::OnHMIStatus;
-                hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
-                hmiStatus->set_audioStreamingState(app->getApplicationAudioStreamingState());
-                hmiStatus->set_systemContext(app->getSystemContext());
-                MobileHandler::getInstance().sendRPCMessage( hmiStatus, connectionID, sessionID );
-                NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
-                response->setId(object->getId());
-                response->setResult(NsAppLinkRPC::Result::SUCCESS);
-                HMIHandler::getInstance().sendResponse(response);
+                switch(app->getProtocolVersion())
+                {
+                    case 1:
+                    {
+                        Application_v1* appv1 = (Application_v1*)app;
+                        NsAppLinkRPC::OnHMIStatus * hmiStatus = new NsAppLinkRPC::OnHMIStatus;
+                        hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
+                        hmiStatus->set_audioStreamingState(appv1->getApplicationAudioStreamingState());
+                        hmiStatus->set_systemContext(appv1->getSystemContext());
+                        MobileHandler::getInstance().sendRPCMessage( hmiStatus, connectionID, sessionID );
+                        NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
+                        response->setId(object->getId());
+                        response->setResult(NsAppLinkRPC::Result::SUCCESS);
+                        HMIHandler::getInstance().sendResponse(response);
+                        break;
+                    }
+                    case 2:
+                    {
+                        Application_v2* appv2 = (Application_v2*)app;
+                        NsAppLinkRPC::OnHMIStatus_v2 * hmiStatus = new NsAppLinkRPC::OnHMIStatus_v2;
+                        hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
+                        hmiStatus->set_audioStreamingState(appv2->getApplicationAudioStreamingState());
+                        hmiStatus->set_systemContext(appv2->getSystemContext());
+                        MobileHandler::getInstance().sendRPCMessage( hmiStatus, connectionID, sessionID );
+                        NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
+                        response->setId(object->getId());
+                        response->setResult(NsAppLinkRPC::Result_v2::SUCCESS);
+                        HMIHandler::getInstance().sendResponse(response);
+                        break;
+                    }
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA:
@@ -1955,10 +2180,9 @@ namespace NsAppManager
      * \param request a RegisterAppInterface request which is the source for application fields initial values
      * \param connectionID id of the connection which will be associated with the application
      * \param sessionID an id of the session which will be associated with the application
-     * \param protocolVersion protocol version number
      * \return A instance of RegistryItem created for application
      */
-    const RegistryItem* AppMgrCore::registerApplication( NsAppLinkRPC::RegisterAppInterface_request * request, const unsigned int& connectionID, const unsigned char& sessionID, const unsigned int& protocolVersion )
+    const RegistryItem* AppMgrCore::registerApplication(NsAppLinkRPC::ALRPCRequest * request, const unsigned int& connectionID, const unsigned char& sessionID)
     {
         if(!request)
         {
@@ -1966,47 +2190,120 @@ namespace NsAppManager
             return 0;
         }
 
-        LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << request->get_appName() << " for connection id " << connectionID << " session id " << (uint)sessionID);
+        const unsigned int& protocolVersion = request->getProtocolVersion();
+        const std::string& appName = ((NsAppLinkRPC::RegisterAppInterface_request*)request)->get_appName();
 
-        const std::string& appName = request->get_appName();
-        Application* application = new Application( appName, connectionID, sessionID, protocolVersion );
-
-        bool isMediaApplication = request->get_isMediaApplication();
-        const NsAppLinkRPC::Language& languageDesired = request->get_languageDesired();
-        const NsAppLinkRPC::SyncMsgVersion& syncMsgVersion = request->get_syncMsgVersion();
-
-        if ( request -> get_ngnMediaScreenAppName() )
+        switch(protocolVersion)
         {
-            const std::string& ngnMediaScreenAppName = *request->get_ngnMediaScreenAppName();
-            application->setNgnMediaScreenAppName(ngnMediaScreenAppName);
+            case 2:
+            {
+                Application_v2* application = new Application_v2( appName, connectionID, sessionID );
+                if(!application)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "Cannot register application " << appName << " connection " << connectionID << " session " << (uint)sessionID << " protocol version " << protocolVersion << " !");
+                    return 0;
+                }
+
+                NsAppLinkRPC::RegisterAppInterface_v2_request* registerRequest = (NsAppLinkRPC::RegisterAppInterface_v2_request*) request;
+                if(registerRequest->get_appID())
+                {
+                    const std::string& appId = *registerRequest->get_appID();
+                    application->setAppID(appId);
+                }
+                if( registerRequest->get_appType() )
+                {
+                    const std::vector<NsAppLinkRPC::AppType>& appType = *registerRequest->get_appType();
+                    application->setAppType(appType);
+                }
+                bool isMediaApplication = registerRequest->get_isMediaApplication();
+                if(registerRequest->get_languageDesired())
+                {
+                    const NsAppLinkRPC::Language_v2& languageDesired = *registerRequest->get_languageDesired();
+                    application->setLanguageDesired(languageDesired);
+                }
+                const NsAppLinkRPC::SyncMsgVersion& syncMsgVersion = registerRequest->get_syncMsgVersion();
+
+                if ( registerRequest -> get_ngnMediaScreenAppName() )
+                {
+                    const std::string& ngnMediaScreenAppName = *registerRequest->get_ngnMediaScreenAppName();
+                    application->setNgnMediaScreenAppName(ngnMediaScreenAppName);
+                }
+
+                if ( registerRequest -> get_vrSynonyms() )
+                {
+                    const std::vector<std::string>& vrSynonyms = *registerRequest->get_vrSynonyms();
+                    application->setVrSynonyms(vrSynonyms);
+                }
+
+/*                if ( registerRequest-> get_autoActivateID() )
+                {
+                    const std::string& autoActivateID = *registerRequest->get_autoActivateID();
+                    application->setAutoActivateID(autoActivateID);
+                }
+*/
+                application->setIsMediaApplication(isMediaApplication);
+                application->setSyncMsgVersion(syncMsgVersion);
+                application->setSystemContext(NsAppLinkRPC::SystemContext_v2::SYSCTXT_MAIN);
+
+                application->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_NONE);
+
+                LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
+                return AppMgrRegistry::getInstance().registerApplication( application );
+            }
+            case 1:
+            {
+                Application_v1* application = new Application_v1( appName, connectionID, sessionID );
+                if(!application)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "Cannot register application " << appName << " connection " << connectionID << " session " << (uint)sessionID << " protocol version " << protocolVersion << " !");
+                    return 0;
+                }
+
+                NsAppLinkRPC::RegisterAppInterface_request* registerRequest = (NsAppLinkRPC::RegisterAppInterface_request*) request;
+                bool isMediaApplication = registerRequest->get_isMediaApplication();
+                const NsAppLinkRPC::Language& languageDesired = registerRequest->get_languageDesired();
+                const NsAppLinkRPC::SyncMsgVersion& syncMsgVersion = registerRequest->get_syncMsgVersion();
+
+                if ( registerRequest -> get_ngnMediaScreenAppName() )
+                {
+                    const std::string& ngnMediaScreenAppName = *registerRequest->get_ngnMediaScreenAppName();
+                    application->setNgnMediaScreenAppName(ngnMediaScreenAppName);
+                }
+
+                if ( registerRequest -> get_vrSynonyms() )
+                {
+                    const std::vector<std::string>& vrSynonyms = *registerRequest->get_vrSynonyms();
+                    application->setVrSynonyms(vrSynonyms);
+                }
+
+                if ( registerRequest -> get_usesVehicleData() )
+                {
+                    bool usesVehicleData = registerRequest->get_usesVehicleData();
+                    application->setUsesVehicleData(usesVehicleData);
+                }
+
+                if ( registerRequest-> get_autoActivateID() )
+                {
+                    const std::string& autoActivateID = *registerRequest->get_autoActivateID();
+                    application->setAutoActivateID(autoActivateID);
+                }
+
+                application->setIsMediaApplication(isMediaApplication);
+                application->setLanguageDesired(languageDesired);
+                application->setSyncMsgVersion(syncMsgVersion);
+                application->setSystemContext(NsAppLinkRPC::SystemContext::SYSCTXT_MAIN);
+
+                application->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_NONE);
+
+                LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
+                return AppMgrRegistry::getInstance().registerApplication( application );
+            }
+            default:
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, "Unsupported protocol version number " << protocolVersion << " !");
+                return 0;
+            }
         }
-
-        if ( request -> get_vrSynonyms() )
-        {
-            const std::vector<std::string>& vrSynonyms = *request->get_vrSynonyms();
-            application->setVrSynonyms(vrSynonyms);
-        }
-
-        if ( request -> get_usesVehicleData() )
-        {
-            bool usesVehicleData = request->get_usesVehicleData();
-            application->setUsesVehicleData(usesVehicleData);
-        }
-
-        if ( request-> get_autoActivateID() )
-        {
-            const std::string& autoActivateID = *request->get_autoActivateID();
-            application->setAutoActivateID(autoActivateID);
-        }
-
-        application->setIsMediaApplication(isMediaApplication);
-        application->setLanguageDesired(languageDesired);
-        application->setSyncMsgVersion(syncMsgVersion);
-
-        application->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_NONE);
-        application->setSystemContext(NsAppLinkRPC::SystemContext::SYSCTXT_MAIN);
-        LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
-        return AppMgrRegistry::getInstance().registerApplication( application );
     }
 
     /**
@@ -2196,6 +2493,29 @@ namespace NsAppManager
     JSONRPC2Handler *AppMgrCore::getJsonRPC2Handler() const
     {
         return HMIHandler::getInstance().getJsonRPC2Handler();
+    }
+
+    /**
+     * \brief Sets connection handler instance
+     * \param handler connection handler
+     */
+    void AppMgrCore::setConnectionHandler(NsConnectionHandler::CConnectionHandler *handler)
+    {
+        if(!handler)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "A null pointer is being assigned - is this the intent?");
+            return;
+        }
+        ConnectionHandler::getInstance().setConnectionHandler(handler);
+    }
+
+    /**
+     * \brief Gets connection handler instance
+     * \return connection handler
+     */
+    NsConnectionHandler::CConnectionHandler *AppMgrCore::getConnectionHandler() const
+    {
+        return ConnectionHandler::getInstance().getConnectionHandler();
     }
 
 }
