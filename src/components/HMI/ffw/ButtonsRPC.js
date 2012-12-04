@@ -39,7 +39,7 @@ FFW.Buttons = FFW.RPCObserver.create({
      * Client is registered - we can send request starting from this point of time
  	 */	
 	onRPCRegistered: function () {
-		Em.Logger.log("FFW.ButtonsBackend.onRPCRegistered");
+		Em.Logger.log("FFW.Buttons.onRPCRegistered");
 		this._super();
 	},
 	
@@ -47,7 +47,7 @@ FFW.Buttons = FFW.RPCObserver.create({
      * Client is unregistered - no more requests
  	 */	
 	onRPCUnregistered: function () {
-		Em.Logger.log("FFW.ButtonsBackend.onRPCUnregistered");
+		Em.Logger.log("FFW.Buttons.onRPCUnregistered");
 		this._super();
 	},
 
@@ -64,7 +64,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 	 * Please use previously store reuqestID to determine to which request repsonse belongs to
  	 */	
 	onRPCResult: function(response) {
-		Em.Logger.log("FFW.ButtonsBackend.onRPCResult");
+		Em.Logger.log("FFW.Buttons.onRPCResult");
 		this._super();
 	 },
 	
@@ -72,7 +72,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 	 * handle RPC erros here
  	 */	
 	onRPCError: function(error) {
-		Em.Logger.log("FFW.ButtonsBackend.onRPCError");
+		Em.Logger.log("FFW.Buttons.onRPCError");
 		this._super();
 	},
 
@@ -80,7 +80,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 	 * handle RPC notifications here 
  	 */	
 	onRPCNotification: function(notification) {
-		Em.Logger.log("FFW.ButtonsBackend.onRPCNotification");
+		Em.Logger.log("FFW.Buttons.onRPCNotification");
 		this._super();
 	},
 	
@@ -88,7 +88,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 	 * handle RPC requests here
  	 */	
 	onRPCRequest: function(request) {
-		Em.Logger.log("FFW.ButtonsBackend.onRPCRequest");
+		Em.Logger.log("FFW.Buttons.onRPCRequest");
 		this._super();
 
 		if (request.method == "Buttons.GetCapabilities") {
@@ -98,96 +98,99 @@ FFW.Buttons = FFW.RPCObserver.create({
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
 				"result"	:	{
-					"capabilities":{
-						"name"					: "PRESET_0",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "PRESET_1",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "PRESET_2",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "PRESET_3",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "PRESET_4",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "PRESET_5",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "PRESET_6",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "PRESET_7",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "PRESET_8",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "PRESET_9",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "OK",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "SEEKLEFT",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "SEEKRIGHT",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "TUNEUP",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
-					"capabilities":{
-						"name"					: "TUNEDOWN",
-						"shortPressAvailable"	: true,
-						"longPressAvailable"	: true,
-						"upDownAvailable"		: true,
-					},
+					"capabilities":[
+						{
+							"name"					: "PRESET_0",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "PRESET_1",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "PRESET_2",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "PRESET_3",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "PRESET_4",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "PRESET_5",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "PRESET_6",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "PRESET_7",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "PRESET_8",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "PRESET_9",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "OK",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "SEEKLEFT",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "SEEKRIGHT",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						},
+						{
+							"name"					: "TUNEUP",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						}/*,
+						{
+							"name"					: "TUNEDOWN",
+							"shortPressAvailable"	: true,
+							"longPressAvailable"	: true,
+							"upDownAvailable"		: true
+						}*/
+					],
+					"presetBankCapabilities": {"onScreenPresetsAvailable": true},
 
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}

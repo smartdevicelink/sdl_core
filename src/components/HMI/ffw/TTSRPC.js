@@ -114,9 +114,7 @@ FFW.TTS = FFW.RPCObserver.create({
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
 				"result"	:	{
-					"capabilities":{
-						"SpeechCapabilities": ["TEXT","SAPI_PHONEMES","LHPLUS_PHONEMES","PRE_RECORDED","SILENCE"]
-					},
+					"capabilities":["TEXT"],
 
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}

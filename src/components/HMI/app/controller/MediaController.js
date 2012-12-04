@@ -391,6 +391,8 @@ MFT.MediaController = Em.Object.create({
     /** Switching on Application */
     turnOnApplink: function(element){
 
+		MFT.ApplinkController.getApplicationModel(1).showInfo.set('appName', element.text);
+
         // Exit form player or radio
         this.onPlayerExit();
         this.onRadioExit();
@@ -408,9 +410,6 @@ MFT.MediaController = Em.Object.create({
         /* Show Applink application in media left menu */
 		MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);
 		MFT.MediaController.listDown();
-
-		
-		MFT.ApplinkController.getApplicationModel(1).showInfo.set('appName', element.text);
 
     },
 
