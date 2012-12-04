@@ -1104,11 +1104,11 @@ namespace NsAppManager
                                                     AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
 
                             const std::string& name = app->getName();
-                            const std::string& id = app->getAppID();
+                            const int& id = app->getAppID();
 
                             char path[FILENAME_MAX];
                             memset(path, 0, FILENAME_MAX);
-                            snprintf(path, FILENAME_MAX - 1, "%s_%s/%s", name.c_str(), id.c_str(), syncFileName->c_str());
+                            snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName->c_str());
                             std::ofstream file(path, std::ios_base::binary);
                             if (file.is_open())
                             {
@@ -1160,11 +1160,11 @@ namespace NsAppManager
                                 AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
 
                     const std::string& name = app->getName();
-                    const std::string& id = app->getAppID();
+                    const int& id = app->getAppID();
                     
                     char path[FILENAME_MAX];
                     memset(path, 0, FILENAME_MAX);
-                    snprintf(path, FILENAME_MAX - 1, "%s_%s/%s", name.c_str(), id.c_str(), syncFileName->c_str());
+                    snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName->c_str());
                     if(remove(path) != 0)
                     {
                         response->set_success(false);
@@ -1202,11 +1202,11 @@ namespace NsAppManager
                                 AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
 
                 const std::string& name = app->getName();
-                const std::string& id = app->getAppID();
+                const int& id = app->getAppID();
                 
                 char path[FILENAME_MAX];
                 memset(path, 0, FILENAME_MAX);
-                snprintf(path, FILENAME_MAX - 1, "%s_%s/", name.c_str(), id.c_str());
+                snprintf(path, FILENAME_MAX - 1, "%s_%d/", name.c_str(), id);
 
                 DIR* dir = NULL;
                 struct dirent* dirElement = NULL;
@@ -2194,12 +2194,13 @@ namespace NsAppManager
 
         const unsigned int& protocolVersion = request->getProtocolVersion();
         const std::string& appName = ((NsAppLinkRPC::RegisterAppInterface_request*)request)->get_appName();
+        int appId = connectionID|(sessionID << 16);
 
         switch(protocolVersion)
         {
             case 2:
             {
-                Application_v2* application = new Application_v2( appName, connectionID, sessionID );
+                Application_v2* application = new Application_v2( appName, connectionID, sessionID, appId );
                 if(!application)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "Cannot register application " << appName << " connection " << connectionID << " session " << (uint)sessionID << " protocol version " << protocolVersion << " !");
@@ -2207,12 +2208,12 @@ namespace NsAppManager
                 }
 
                 NsAppLinkRPC::RegisterAppInterface_v2_request* registerRequest = (NsAppLinkRPC::RegisterAppInterface_v2_request*) request;
-                if(registerRequest->get_appID())
+       /*         if(registerRequest->get_appID())
                 {
                     const std::string& appId = *registerRequest->get_appID();
                     application->setAppID(appId);
                 }
-                if( registerRequest->get_appType() )
+        */        if( registerRequest->get_appType() )
                 {
                     const std::vector<NsAppLinkRPC::AppType>& appType = *registerRequest->get_appType();
                     application->setAppType(appType);
@@ -2254,7 +2255,7 @@ namespace NsAppManager
             }
             case 1:
             {
-                Application_v1* application = new Application_v1( appName, connectionID, sessionID );
+                Application_v1* application = new Application_v1( appName, connectionID, sessionID, appId );
                 if(!application)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "Cannot register application " << appName << " connection " << connectionID << " session " << (uint)sessionID << " protocol version " << protocolVersion << " !");
