@@ -1393,6 +1393,8 @@ namespace NsAppManager
                 NsRPC2Communication::Buttons::GetCapabilities* getButtonsCapsRequest = new NsRPC2Communication::Buttons::GetCapabilities();
                 HMIHandler::getInstance().sendRequest(getButtonsCapsRequest);
 
+                ConnectionHandler::getInstance().startDevicesDiscovery();
+
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE:

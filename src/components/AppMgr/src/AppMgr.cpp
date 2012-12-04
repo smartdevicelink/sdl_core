@@ -90,8 +90,7 @@ namespace NsAppManager
     /**
     * \brief callback to proceed received mobile message
     * \param message the received message
-    * \param connectionID id of a connection associated with application that sent the message
-    * \param sessionID an id of a session associated with the application which sends message
+    * \param connectionKey key of a connection associated with application that sent the message
     */
     void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message, int connectionKey)
     {
