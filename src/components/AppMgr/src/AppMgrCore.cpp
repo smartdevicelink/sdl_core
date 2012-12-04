@@ -12,6 +12,7 @@
 #include "AppMgr/SubscribeButton.h"
 #include "AppMgr/HMIHandler.h"
 #include "AppMgr/MobileHandler.h"
+#include "AppMgr/ConnectionHandler.h"
 #include "JSONHandler/ALRPCMessage.h"
 #include "JSONHandler/ALRPCRequest.h"
 #include "JSONHandler/ALRPCResponse.h"
@@ -25,6 +26,7 @@
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/ALRPCObjects/AppType.h"
+#include "ConnectionHandler/CConnectionHandler.hpp"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 #include <iostream>
@@ -2252,6 +2254,29 @@ namespace NsAppManager
     JSONRPC2Handler *AppMgrCore::getJsonRPC2Handler() const
     {
         return HMIHandler::getInstance().getJsonRPC2Handler();
+    }
+
+    /**
+     * \brief Sets connection handler instance
+     * \param handler connection handler
+     */
+    void AppMgrCore::setConnectionHandler(NsConnectionHandler::CConnectionHandler *handler)
+    {
+        if(!handler)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "A null pointer is being assigned - is this the intent?");
+            return;
+        }
+        ConnectionHandler::getInstance().setConnectionHandler(handler);
+    }
+
+    /**
+     * \brief Gets connection handler instance
+     * \return connection handler
+     */
+    NsConnectionHandler::CConnectionHandler *AppMgrCore::getConnectionHandler() const
+    {
+        return ConnectionHandler::getInstance().getConnectionHandler();
     }
 
 }
