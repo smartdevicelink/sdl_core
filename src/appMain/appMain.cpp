@@ -195,6 +195,8 @@ int main(int argc, char** argv)
     jsonRPC2Handler.registerController();
     jsonRPC2Handler.subscribeToNotifications();
 
+    appMgr.setConnectionHandler(connectionHandler);
+
     LOG4CPLUS_INFO(logger, "Start AppMgr threads!");
     appMgr.executeThreads();
 
