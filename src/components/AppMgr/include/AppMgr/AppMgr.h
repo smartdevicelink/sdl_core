@@ -27,7 +27,7 @@ namespace NsRPC2Communication
 
 namespace NsConnectionHandler
 {
-    class CConnectionHandler;
+    class IDevicesDiscoveryStarter;
 }
 
 namespace NsAppManager
@@ -52,8 +52,7 @@ namespace NsAppManager
         /**
          * \brief callback to proceed received mobile message
          * \param message the received message
-         * \param connectionID id of a connection associated with application that sent the message
-         * \param sessionID an id of a session associated with the application which sends message
+         * \param connectionKey key of a connection associated with application that sent the message
          */
         virtual void onMessageReceivedCallback( NsAppLinkRPC::ALRPCMessage * message, int connectionKey );
 
@@ -69,9 +68,9 @@ namespace NsAppManager
          * Called when device scanning initiated with scanForNewDevices
          * is completed.
          *
-         * \param DeviceList New list of available devices.
+         * \param deviceList New list of available devices.
          **/
-        virtual void onDeviceListUpdated(const NsConnectionHandler::tDeviceList & DeviceList);
+        virtual void onDeviceListUpdated(const NsConnectionHandler::tDeviceList & deviceList);
 
         /**
          * \brief callback which is called upon session starting
@@ -102,7 +101,7 @@ namespace NsAppManager
          * \brief Sets connection handler instance
          * \param handler connection handler
          */
-        void setConnectionHandler(NsConnectionHandler::CConnectionHandler* handler);
+        void setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler);
 
         /**
          * \brief method to execute threads.

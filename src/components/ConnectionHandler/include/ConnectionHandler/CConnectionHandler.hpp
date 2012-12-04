@@ -18,6 +18,7 @@
 #include "ConnectionHandler/IConnectionHandlerObserver.hpp"
 #include "ConnectionHandler/CDevice.hpp"
 #include "ConnectionHandler/CConnection.hpp"
+#include "ConnectionHandler/IDevicesDiscoveryStarter.hpp"
 
 /**
  * \namespace NsConnectionHandler
@@ -29,7 +30,7 @@ namespace NsConnectionHandler
     * \class CConnectionHandler
     * \brief AppLink ConnectionHandler main class
     */
-    class CConnectionHandler: public NsAppLink::NsTransportManager::ITransportManagerDeviceListener, public NsProtocolHandler::ISessionObserver
+    class CConnectionHandler: public NsAppLink::NsTransportManager::ITransportManagerDeviceListener, public NsProtocolHandler::ISessionObserver, public IDevicesDiscoveryStarter
     {
     public:
         /**
@@ -89,7 +90,7 @@ namespace NsConnectionHandler
 
         void setTransportManager( NsAppLink::NsTransportManager::ITransportManager * transportManager );
 
-        void startDevicesDiscovery();
+        virtual void startDevicesDiscovery();
 
     private:
         /**

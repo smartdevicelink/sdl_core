@@ -77,7 +77,7 @@ namespace NsAppManager
      * \brief Sets connection handler instance
      * \param handler connection handler
      */
-    void AppMgr::setConnectionHandler(NsConnectionHandler::CConnectionHandler *handler)
+    void AppMgr::setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler)
     {
         if(!handler)
         {
@@ -90,8 +90,7 @@ namespace NsAppManager
     /**
     * \brief callback to proceed received mobile message
     * \param message the received message
-    * \param connectionID id of a connection associated with application that sent the message
-    * \param sessionID an id of a session associated with the application which sends message
+    * \param connectionKey key of a connection associated with application that sent the message
     */
     void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message, int connectionKey)
     {
@@ -127,10 +126,11 @@ namespace NsAppManager
      * Called when device scanning initiated with scanForNewDevices
      * is completed.
      *
-     * \param DeviceList New list of available devices.
+     * \param deviceList New list of available devices.
      **/
-    void AppMgr::onDeviceListUpdated(const NsConnectionHandler::tDeviceList &DeviceList)
+    void AppMgr::onDeviceListUpdated(const NsConnectionHandler::tDeviceList &deviceList)
     {
+        AppMgrCore::getInstance().setDeviceList(deviceList);
     }
 
     /**
