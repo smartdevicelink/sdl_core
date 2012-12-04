@@ -1,0 +1,43 @@
+#ifndef NSAPPLINKRPCV1_SYSTEMCONTEXT_INCLUDE
+#define NSAPPLINKRPCV1_SYSTEMCONTEXT_INCLUDE
+
+
+/*
+  interface	Ford Sync RAPI
+  version	1.2
+  date		2011-05-17
+  generated at	Tue Dec  4 14:55:10 2012
+  source stamp	Tue Dec  4 14:21:32 2012
+  author	robok0der
+*/
+
+namespace NsAppLinkRPCV1
+{
+
+///  Enumeraction that describes possible contexts and app's HMI might be in.
+
+  class SystemContext
+  {
+  public:
+    enum SystemContextInternal
+    {
+      INVALID_ENUM=-1,
+      SYSCTXT_MAIN=0,
+      SYSCTXT_VRSESSION=1,
+      SYSCTXT_MENU=2
+    };
+  
+    SystemContext() : mInternal(INVALID_ENUM)				{}
+    SystemContext(SystemContextInternal e) : mInternal(e)		{}
+  
+    SystemContextInternal get(void) const	{ return mInternal; }
+    void set(SystemContextInternal e)		{ mInternal=e; }
+  
+  private:
+    SystemContextInternal mInternal;
+    friend class SystemContextMarshaller;
+  };
+  
+}
+
+#endif

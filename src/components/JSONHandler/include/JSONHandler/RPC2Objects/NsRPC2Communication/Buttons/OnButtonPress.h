@@ -4,14 +4,14 @@
 #include <string>
 #include "JSONHandler/RPC2Notification.h"
 
-#include "../include/JSONHandler/ALRPCObjects/ButtonName.h"
-#include "../include/JSONHandler/ALRPCObjects/ButtonPressMode.h"
+#include "../include/JSONHandler/ALRPCObjects/V1/ButtonName.h"
+#include "../include/JSONHandler/ALRPCObjects/V1/ButtonPressMode.h"
 
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 15:06:30 2012
+  source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
 

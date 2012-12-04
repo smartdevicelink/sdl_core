@@ -12,7 +12,7 @@
 #include <vector>
 #include <set>
 #include <cstddef>
-#include "JSONHandler/ALRPCObjects/MenuParams.h"
+#include "JSONHandler/ALRPCObjects/V1/MenuParams.h"
 
 namespace log4cplus
 {

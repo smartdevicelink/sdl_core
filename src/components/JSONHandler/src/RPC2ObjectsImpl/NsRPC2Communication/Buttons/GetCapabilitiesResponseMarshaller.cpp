@@ -1,14 +1,14 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/GetCapabilitiesResponse.h"
-#include "../src/ALRPCObjectsImpl/ButtonCapabilitiesMarshaller.h"
-#include "../src/ALRPCObjectsImpl/PresetBankCapabilitiesMarshaller.h"
-#include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/ButtonCapabilitiesMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/PresetBankCapabilitiesMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/GetCapabilitiesResponseMarshaller.h"
 
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 15:06:30 2012
+  source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
 

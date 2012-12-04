@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::VehicleInfo
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 15:06:30 2012
+  source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
 

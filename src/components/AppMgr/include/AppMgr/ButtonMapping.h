@@ -8,7 +8,7 @@
 #define BUTTONMAPPING_H
 
 #include <map>
-#include "JSONHandler/ALRPCObjects/ButtonName.h"
+#include "JSONHandler/ALRPCObjects/V1/ButtonName.h"
 
 namespace log4cplus
 {
