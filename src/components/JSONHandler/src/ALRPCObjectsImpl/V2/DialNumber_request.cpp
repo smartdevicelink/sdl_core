@@ -9,7 +9,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -21,7 +21,7 @@ DialNumber_request::~DialNumber_request(void)
 }
 
 
-DialNumber_request::DialNumber_request(const DialNumber_request& c) : ALRPC2Message(c)
+DialNumber_request::DialNumber_request(const DialNumber_request& c) : NsAppLinkRPC::ALRPCMessage(c)
 {
   *this=c;
 }
@@ -33,7 +33,7 @@ bool DialNumber_request::checkIntegrity(void)
 }
 
 
-DialNumber_request::DialNumber_request(void) : ALRPC2Message(PROTOCOL_VERSION)
+DialNumber_request::DialNumber_request(void) : NsAppLinkRPC::ALRPCMessage(PROTOCOL_VERSION)
 {
 }
 

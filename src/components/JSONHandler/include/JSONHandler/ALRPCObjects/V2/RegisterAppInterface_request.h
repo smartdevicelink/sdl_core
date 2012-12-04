@@ -8,14 +8,14 @@
 #include "Language.h"
 #include "SyncMsgVersion.h"
 #include "TTSChunk.h"
-#include "JSONHandler/ALRPC2Message.hh"
+#include "JSONHandler/ALRPCMessage.h"
 
 
 /*
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -28,7 +28,7 @@ namespace NsAppLinkRPCV2
      Before registerAppInterface no other commands will be accepted/executed.
 */
 
-  class RegisterAppInterface_request : public ALRPC2Message
+  class RegisterAppInterface_request : public NsAppLinkRPC::ALRPCMessage
   {
   public:
   

@@ -2,9 +2,9 @@
 #define APPLICATION_V1_H
 
 #include "AppMgr/Application.h"
-#include "JSONHandler/ALRPCObjects/AudioStreamingState.h"
-#include "JSONHandler/ALRPCObjects/SystemContext.h"
-#include "JSONHandler/ALRPCObjects/Language.h"
+#include "JSONHandler/ALRPCObjects/V1/AudioStreamingState.h"
+#include "JSONHandler/ALRPCObjects/V1/SystemContext.h"
+#include "JSONHandler/ALRPCObjects/V1/Language.h"
 
 namespace NsAppManager
 {

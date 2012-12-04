@@ -94,7 +94,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -102,9 +102,9 @@
 using namespace NsAppLinkRPCV2;
 
 
-ALRPC2Message* Marshaller::fromString(const std::string& s,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt)
+NsAppLinkRPC::ALRPCMessage* Marshaller::fromString(const std::string& s,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt)
 {
-  ALRPC2Message* rv=0;
+  NsAppLinkRPC::ALRPCMessage* rv=0;
   try
   {
     Json::Reader reader;
@@ -120,7 +120,7 @@ ALRPC2Message* Marshaller::fromString(const std::string& s,FunctionID::FunctionI
   return rv;
 }
 
-std::string Marshaller::toString(const ALRPC2Message* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt)
+std::string Marshaller::toString(const NsAppLinkRPC::ALRPCMessage* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt)
 {
   if(!msg)  return "";
 
@@ -134,7 +134,7 @@ std::string Marshaller::toString(const ALRPC2Message* msg,FunctionID::FunctionID
 }
 
 
-ALRPC2Message* Marshaller::fromJSON(const Json::Value& json,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt)
+NsAppLinkRPC::ALRPCMessage* Marshaller::fromJSON(const Json::Value& json,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt)
 {
   if(!json.isObject())  return NULL;
   Json::Value j=Json::Value(Json::nullValue);
@@ -968,7 +968,7 @@ ALRPC2Message* Marshaller::fromJSON(const Json::Value& json,FunctionID::Function
   return NULL;
 }
 
-Json::Value Marshaller::toJSON(const ALRPC2Message* msg, FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt)
+Json::Value Marshaller::toJSON(const NsAppLinkRPC::ALRPCMessage* msg, FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt)
 {
   Json::Value j=toJSONparam(msg,fid,mt);
   Json::Value rv=Json::Value(Json::nullValue);
@@ -981,7 +981,7 @@ Json::Value Marshaller::toJSON(const ALRPC2Message* msg, FunctionID::FunctionIDI
 }
 
 
-Json::Value Marshaller::toJSONparam(const ALRPC2Message* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt)
+Json::Value Marshaller::toJSONparam(const NsAppLinkRPC::ALRPCMessage* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt)
 {
   Json::Value j=Json::Value(Json::nullValue);
   if(!msg) return j;

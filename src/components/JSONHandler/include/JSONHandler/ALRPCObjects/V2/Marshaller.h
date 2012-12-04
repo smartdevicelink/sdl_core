@@ -2,12 +2,12 @@
 #define NSAPPLINKRPCV2_MARSHALLER_INCLUDE
 
 #include <string>
-#include <jsoncpp/json.h>
+#include <json/json.h>
 
 #include "FunctionID.h"
 #include "messageType.h"
 
-#include "JSONHandler/ALRPC2Message.hh"
+#include "JSONHandler/ALRPCMessage.h"
 #include "../src/ALRPCObjectsImpl/V2/RegisterAppInterface_requestMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/RegisterAppInterface_responseMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/UnregisterAppInterface_requestMarshaller.h"
@@ -101,7 +101,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -115,12 +115,12 @@ namespace NsAppLinkRPCV2
     Marshaller()					{}
     ~Marshaller()					{}
     
-    static ALRPC2Message* fromString(const std::string&,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
-    static std::string toString(const ALRPC2Message* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
+    static NsAppLinkRPC::ALRPCMessage* fromString(const std::string&,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
+    static std::string toString(const NsAppLinkRPC::ALRPCMessage* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
   
   protected:
-    static ALRPC2Message* fromJSON(const Json::Value&,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
-    static Json::Value toJSON(const ALRPC2Message* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
+    static NsAppLinkRPC::ALRPCMessage* fromJSON(const Json::Value&,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
+    static Json::Value toJSON(const NsAppLinkRPC::ALRPCMessage* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
 
 // RegisterAppInterface_request
     static bool fromString(const std::string& str, RegisterAppInterface_request& res)
@@ -1169,7 +1169,7 @@ namespace NsAppLinkRPCV2
 
 private:
 
-    static Json::Value toJSONparam(const ALRPC2Message* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
+    static Json::Value toJSONparam(const NsAppLinkRPC::ALRPCMessage* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
   };
 
 }

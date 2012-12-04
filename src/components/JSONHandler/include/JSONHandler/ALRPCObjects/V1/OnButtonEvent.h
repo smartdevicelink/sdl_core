@@ -1,5 +1,5 @@
-#ifndef NSAPPLINKRPCV1_ONBUTTONEVENT_INCLUDE
-#define NSAPPLINKRPCV1_ONBUTTONEVENT_INCLUDE
+#ifndef NSAPPLINKRPC_ONBUTTONEVENT_INCLUDE
+#define NSAPPLINKRPC_ONBUTTONEVENT_INCLUDE
 
 
 #include "ButtonEventMode.h"
@@ -11,12 +11,12 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Dec  4 14:55:10 2012
+  generated at	Tue Dec  4 16:02:39 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
 
-namespace NsAppLinkRPCV1
+namespace NsAppLinkRPC
 {
 
 ///  Notifies application of UP/DOWN events for buttons to which the application is subscribed.

@@ -8,12 +8,12 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Dec  4 14:55:10 2012
+  generated at	Tue Dec  4 16:02:39 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
 
-using namespace NsAppLinkRPCV1;
+using namespace NsAppLinkRPC;
 
 
 bool SyncMsgVersionMarshaller::checkIntegrity(SyncMsgVersion& s)

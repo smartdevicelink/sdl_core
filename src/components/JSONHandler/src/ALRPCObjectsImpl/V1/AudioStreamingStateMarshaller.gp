@@ -7,7 +7,7 @@
 %compare-strncmp
 %compare-lengths
 
-struct NsAppLinkRPCV1::PerfectHashTable
+struct NsAppLinkRPC::PerfectHashTable
 {
   const char *name;
   unsigned int idx;

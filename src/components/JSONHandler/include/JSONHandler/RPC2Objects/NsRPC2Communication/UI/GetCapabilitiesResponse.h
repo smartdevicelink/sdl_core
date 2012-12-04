@@ -6,13 +6,13 @@
 
 #include "../include/JSONHandler/ALRPCObjects/V1/DisplayCapabilities.h"
 #include "../include/JSONHandler/ALRPCObjects/V1/HmiZoneCapabilities.h"
-#include "../include/JSONHandler/ALRPCObjects/V1/SoftButtonCapabilities.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/SoftButtonCapabilities.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 15:06:30 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -39,7 +39,7 @@ namespace NsRPC2Communication
 
       const std::vector< NsAppLinkRPC::HmiZoneCapabilities>& get_hmiZoneCapabilities(void);
 
-      const std::vector< NsAppLinkRPC::SoftButtonCapabilities>* get_softButtonCapabilities(void);
+      const std::vector< NsAppLinkRPCV2::SoftButtonCapabilities>* get_softButtonCapabilities(void);
 
 // setters
       bool set_displayCapabilities(const NsAppLinkRPC::DisplayCapabilities& displayCapabilities);
@@ -48,7 +48,7 @@ namespace NsRPC2Communication
       bool set_hmiZoneCapabilities(const std::vector< NsAppLinkRPC::HmiZoneCapabilities>& hmiZoneCapabilities);
 
 /// 1 <= size <= 100
-      bool set_softButtonCapabilities(const std::vector< NsAppLinkRPC::SoftButtonCapabilities>& softButtonCapabilities);
+      bool set_softButtonCapabilities(const std::vector< NsAppLinkRPCV2::SoftButtonCapabilities>& softButtonCapabilities);
 
       void reset_softButtonCapabilities(void);
 
@@ -59,7 +59,7 @@ namespace NsRPC2Communication
 
       NsAppLinkRPC::DisplayCapabilities displayCapabilities;
       std::vector< NsAppLinkRPC::HmiZoneCapabilities> hmiZoneCapabilities;
-      std::vector< NsAppLinkRPC::SoftButtonCapabilities>* softButtonCapabilities;
+      std::vector< NsAppLinkRPCV2::SoftButtonCapabilities>* softButtonCapabilities;
 
     };
   }

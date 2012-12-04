@@ -22,10 +22,8 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/DeleteSubMenuResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetCapabilities.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetCapabilitiesResponse.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetDeviceList.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetDeviceListResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnCommand.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnDeviceListUpdated.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnDeviceChosen.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnDriverDistraction.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnLanguageChange.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnReady.h"
@@ -51,8 +49,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 15:06:30 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 

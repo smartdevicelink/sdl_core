@@ -13,7 +13,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -49,7 +49,7 @@ RegisterAppInterface_request::~RegisterAppInterface_request(void)
 }
 
 
-RegisterAppInterface_request::RegisterAppInterface_request(const RegisterAppInterface_request& c) : ALRPC2Message(c)
+RegisterAppInterface_request::RegisterAppInterface_request(const RegisterAppInterface_request& c) : NsAppLinkRPC::ALRPCMessage(c)
 {
   *this=c;
 }
@@ -61,7 +61,7 @@ bool RegisterAppInterface_request::checkIntegrity(void)
 }
 
 
-RegisterAppInterface_request::RegisterAppInterface_request(void) : ALRPC2Message(PROTOCOL_VERSION),
+RegisterAppInterface_request::RegisterAppInterface_request(void) : NsAppLinkRPC::ALRPCMessage(PROTOCOL_VERSION),
       ttsName(0),
     ngnMediaScreenAppName(0),
     vrSynonyms(0),

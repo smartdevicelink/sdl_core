@@ -1,7 +1,7 @@
 #ifndef PERFECTHASHTABLE_INCLUDE
 #define PERFECTHASHTABLE_INCLUDE
 
-namespace NsAppLinkRPCV1
+namespace NsAppLinkRPC
 {
   struct PerfectHashTable
   {

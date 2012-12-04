@@ -4,13 +4,13 @@
 #include "JSONHandler/RPC2Request.h"
 
 #include "../include/JSONHandler/ALRPCObjects/V1/MenuParams.h"
-#include "../include/JSONHandler/ALRPCObjects/V1/Image.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/Image.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 15:06:30 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -37,7 +37,7 @@ namespace NsRPC2Communication
 
       const NsAppLinkRPC::MenuParams& get_menuParams(void);
 
-      const NsAppLinkRPC::Image* get_cmdIcon(void);
+      const NsAppLinkRPCV2::Image* get_cmdIcon(void);
       int get_appId(void);
 
 
@@ -47,7 +47,7 @@ namespace NsRPC2Communication
 
       bool set_menuParams(const NsAppLinkRPC::MenuParams& menuParams);
 
-      bool set_cmdIcon(const NsAppLinkRPC::Image& cmdIcon);
+      bool set_cmdIcon(const NsAppLinkRPCV2::Image& cmdIcon);
 
       void reset_cmdIcon(void);
 
@@ -60,7 +60,7 @@ namespace NsRPC2Communication
 
       unsigned int cmdId;
       NsAppLinkRPC::MenuParams menuParams;
-      NsAppLinkRPC::Image* cmdIcon;
+      NsAppLinkRPCV2::Image* cmdIcon;
       int appId;
 
     };

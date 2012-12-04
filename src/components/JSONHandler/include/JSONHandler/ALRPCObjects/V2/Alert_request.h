@@ -6,14 +6,14 @@
 
 #include "SoftButton.h"
 #include "TTSChunk.h"
-#include "JSONHandler/ALRPC2Message.hh"
+#include "JSONHandler/ALRPCMessage.h"
 
 
 /*
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -23,7 +23,7 @@ namespace NsAppLinkRPCV2
 
 ///  Shows an alert which typically consists of text-to-speech message and text on the display. At least either alertText1, alertText2 or TTSChunks need to be provided.
 
-  class Alert_request : public ALRPC2Message
+  class Alert_request : public NsAppLinkRPC::ALRPCMessage
   {
   public:
   

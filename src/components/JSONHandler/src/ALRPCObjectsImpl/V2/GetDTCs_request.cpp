@@ -9,7 +9,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -31,7 +31,7 @@ GetDTCs_request::~GetDTCs_request(void)
 }
 
 
-GetDTCs_request::GetDTCs_request(const GetDTCs_request& c) : ALRPC2Message(c)
+GetDTCs_request::GetDTCs_request(const GetDTCs_request& c) : NsAppLinkRPC::ALRPCMessage(c)
 {
   *this=c;
 }
@@ -43,7 +43,7 @@ bool GetDTCs_request::checkIntegrity(void)
 }
 
 
-GetDTCs_request::GetDTCs_request(void) : ALRPC2Message(PROTOCOL_VERSION),
+GetDTCs_request::GetDTCs_request(void) : NsAppLinkRPC::ALRPCMessage(PROTOCOL_VERSION),
       encrypted(0)
 {
 }

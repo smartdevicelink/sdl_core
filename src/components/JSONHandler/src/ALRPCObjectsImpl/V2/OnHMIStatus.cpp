@@ -12,7 +12,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -24,7 +24,7 @@ OnHMIStatus::~OnHMIStatus(void)
 }
 
 
-OnHMIStatus::OnHMIStatus(const OnHMIStatus& c) : ALRPC2Message(c)
+OnHMIStatus::OnHMIStatus(const OnHMIStatus& c) : NsAppLinkRPC::ALRPCMessage(c)
 {
   *this=c;
 }
@@ -36,7 +36,7 @@ bool OnHMIStatus::checkIntegrity(void)
 }
 
 
-OnHMIStatus::OnHMIStatus(void) : ALRPC2Message(PROTOCOL_VERSION)
+OnHMIStatus::OnHMIStatus(void) : NsAppLinkRPC::ALRPCMessage(PROTOCOL_VERSION)
 {
 }
 

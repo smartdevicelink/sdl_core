@@ -4,14 +4,14 @@
 #include <vector>
 
 #include "GlobalProperty.h"
-#include "JSONHandler/ALRPC2Message.hh"
+#include "JSONHandler/ALRPCMessage.h"
 
 
 /*
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -21,7 +21,7 @@ namespace NsAppLinkRPCV2
 
 ///  Allows resetting global properties.
 
-  class ResetGlobalProperties_request : public ALRPC2Message
+  class ResetGlobalProperties_request : public NsAppLinkRPC::ALRPCMessage
   {
   public:
   

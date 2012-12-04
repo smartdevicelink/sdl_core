@@ -55,7 +55,7 @@ namespace NsAppManager
      * \brief retrieve application desired language
      * \return application desired language
      */
-    const NsAppLinkRPC::Language_v2& Application_v2::getLanguageDesired( ) const
+    const NsAppLinkRPCV2::Language& Application_v2::getLanguageDesired( ) const
     {
         return mLanguageDesired;
     }
@@ -64,7 +64,7 @@ namespace NsAppManager
      * \brief Set application desired languuage
      * \param value application desired language
      */
-    void Application_v2::setLanguageDesired(NsAppLinkRPC::Language_v2 value)
+    void Application_v2::setLanguageDesired(NsAppLinkRPCV2::Language value)
     {
         mLanguageDesired = value;
     }
@@ -73,7 +73,7 @@ namespace NsAppManager
      * \brief retrieve application HMI desired display language
      * \return application HMI desired display language
      */
-    const NsAppLinkRPC::Language_v2 &Application_v2::getHMIDisplayLanguageDesired() const
+    const NsAppLinkRPCV2::Language &Application_v2::getHMIDisplayLanguageDesired() const
     {
         return mHMIDisplayLanguageDesired;
     }
@@ -82,7 +82,7 @@ namespace NsAppManager
      * \brief Set application HMI desired display language
      * \param value application HMI desired display language
      */
-    void Application_v2::setHMIDisplayLanguageDesired(NsAppLinkRPC::Language_v2 value)
+    void Application_v2::setHMIDisplayLanguageDesired(NsAppLinkRPCV2::Language value)
     {
         mHMIDisplayLanguageDesired = value;
     }
@@ -91,7 +91,7 @@ namespace NsAppManager
      * \brief retrieve application audio streaming state
      * \return application audio streaming state
      */
-    const NsAppLinkRPC::AudioStreamingState_v2& Application_v2::getApplicationAudioStreamingState( ) const
+    const NsAppLinkRPCV2::AudioStreamingState& Application_v2::getApplicationAudioStreamingState( ) const
     {
         return mAudioStreamingState;
     }
@@ -100,7 +100,7 @@ namespace NsAppManager
      * \brief Set application audio streaming state
      * \param streamingState audio streaming state of application
      */
-    void Application_v2::setApplicationAudioStreamingState( const NsAppLinkRPC::AudioStreamingState_v2& streamingState )
+    void Application_v2::setApplicationAudioStreamingState( const NsAppLinkRPCV2::AudioStreamingState& streamingState )
     {
         mAudioStreamingState = streamingState;
     }
@@ -109,7 +109,7 @@ namespace NsAppManager
      * \brief retrieve application system context
      * \return application system context
      */
-    const NsAppLinkRPC::SystemContext_v2 &Application_v2::getSystemContext() const
+    const NsAppLinkRPCV2::SystemContext &Application_v2::getSystemContext() const
     {
         return mSystemContext;
     }
@@ -118,7 +118,7 @@ namespace NsAppManager
      * \brief set application system context
      * \param application system context
      */
-    void Application_v2::setSystemContext(NsAppLinkRPC::SystemContext_v2 value)
+    void Application_v2::setSystemContext(NsAppLinkRPCV2::SystemContext value)
     {
         mSystemContext = value;
     }

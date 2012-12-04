@@ -1,5 +1,5 @@
-#ifndef NSAPPLINKRPCV1_DELETEINTERACTIONCHOICESET_RESPONSEMARSHALLER_INCLUDE
-#define NSAPPLINKRPCV1_DELETEINTERACTIONCHOICESET_RESPONSEMARSHALLER_INCLUDE
+#ifndef NSAPPLINKRPC_DELETEINTERACTIONCHOICESET_RESPONSEMARSHALLER_INCLUDE
+#define NSAPPLINKRPC_DELETEINTERACTIONCHOICESET_RESPONSEMARSHALLER_INCLUDE
 
 #include <string>
 #include <json/json.h>
@@ -11,12 +11,12 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Dec  4 14:55:10 2012
+  generated at	Tue Dec  4 16:02:39 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
 
-namespace NsAppLinkRPCV1
+namespace NsAppLinkRPC
 {
 
   struct DeleteInteractionChoiceSet_responseMarshaller

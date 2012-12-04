@@ -1,5 +1,5 @@
-#ifndef NSAPPLINKRPCV1_TTSCHUNK_INCLUDE
-#define NSAPPLINKRPCV1_TTSCHUNK_INCLUDE
+#ifndef NSAPPLINKRPC_TTSCHUNK_INCLUDE
+#define NSAPPLINKRPC_TTSCHUNK_INCLUDE
 
 #include <string>
 
@@ -10,13 +10,13 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Dec  4 14:55:10 2012
+  generated at	Tue Dec  4 16:02:39 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
 
 
-namespace NsAppLinkRPCV1
+namespace NsAppLinkRPC
 {
 
 ///  A TTS chunk, that consists of the text/phonemes to speak and the type (like text or SAPI)

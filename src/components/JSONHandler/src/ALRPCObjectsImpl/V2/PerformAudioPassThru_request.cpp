@@ -13,7 +13,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -42,7 +42,7 @@ PerformAudioPassThru_request::~PerformAudioPassThru_request(void)
 }
 
 
-PerformAudioPassThru_request::PerformAudioPassThru_request(const PerformAudioPassThru_request& c) : ALRPC2Message(c)
+PerformAudioPassThru_request::PerformAudioPassThru_request(const PerformAudioPassThru_request& c) : NsAppLinkRPC::ALRPCMessage(c)
 {
   *this=c;
 }
@@ -54,7 +54,7 @@ bool PerformAudioPassThru_request::checkIntegrity(void)
 }
 
 
-PerformAudioPassThru_request::PerformAudioPassThru_request(void) : ALRPC2Message(PROTOCOL_VERSION),
+PerformAudioPassThru_request::PerformAudioPassThru_request(void) : NsAppLinkRPC::ALRPCMessage(PROTOCOL_VERSION),
       audioPassThruDisplayText1(0),
     audioPassThruDisplayText2(0)
 {

@@ -11,7 +11,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -39,7 +39,7 @@ AddCommand_request::~AddCommand_request(void)
 }
 
 
-AddCommand_request::AddCommand_request(const AddCommand_request& c) : ALRPC2Message(c)
+AddCommand_request::AddCommand_request(const AddCommand_request& c) : NsAppLinkRPC::ALRPCMessage(c)
 {
   *this=c;
 }
@@ -51,7 +51,7 @@ bool AddCommand_request::checkIntegrity(void)
 }
 
 
-AddCommand_request::AddCommand_request(void) : ALRPC2Message(PROTOCOL_VERSION),
+AddCommand_request::AddCommand_request(void) : NsAppLinkRPC::ALRPCMessage(PROTOCOL_VERSION),
       menuParams(0),
     vrCommands(0),
     cmdIcon(0)

@@ -9,7 +9,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -21,7 +21,7 @@ UnregisterAppInterface_request::~UnregisterAppInterface_request(void)
 }
 
 
-UnregisterAppInterface_request::UnregisterAppInterface_request(const UnregisterAppInterface_request& c) : ALRPC2Message(c)
+UnregisterAppInterface_request::UnregisterAppInterface_request(const UnregisterAppInterface_request& c) : NsAppLinkRPC::ALRPCMessage(c)
 {
   *this=c;
 }
@@ -33,7 +33,7 @@ bool UnregisterAppInterface_request::checkIntegrity(void)
 }
 
 
-UnregisterAppInterface_request::UnregisterAppInterface_request(void) : ALRPC2Message(PROTOCOL_VERSION)
+UnregisterAppInterface_request::UnregisterAppInterface_request(void) : NsAppLinkRPC::ALRPCMessage(PROTOCOL_VERSION)
 {
 }
 

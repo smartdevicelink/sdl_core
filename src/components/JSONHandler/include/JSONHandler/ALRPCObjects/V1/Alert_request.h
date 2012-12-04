@@ -1,5 +1,5 @@
-#ifndef NSAPPLINKRPCV1_ALERT_REQUEST_INCLUDE
-#define NSAPPLINKRPCV1_ALERT_REQUEST_INCLUDE
+#ifndef NSAPPLINKRPC_ALERT_REQUEST_INCLUDE
+#define NSAPPLINKRPC_ALERT_REQUEST_INCLUDE
 
 #include <vector>
 #include <string>
@@ -12,12 +12,12 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Dec  4 14:55:10 2012
+  generated at	Tue Dec  4 16:02:39 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
 
-namespace NsAppLinkRPCV1
+namespace NsAppLinkRPC
 {
 
 ///  Shows an alert which typically consists of text-to-speech message and text on the display. At least either alertText1, alertText2 or TTSChunks need to be provided.

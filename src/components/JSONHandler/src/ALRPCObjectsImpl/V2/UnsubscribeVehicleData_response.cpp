@@ -11,7 +11,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -37,7 +37,7 @@ UnsubscribeVehicleData_response::~UnsubscribeVehicleData_response(void)
 }
 
 
-UnsubscribeVehicleData_response::UnsubscribeVehicleData_response(const UnsubscribeVehicleData_response& c) : ALRPC2Message(c)
+UnsubscribeVehicleData_response::UnsubscribeVehicleData_response(const UnsubscribeVehicleData_response& c) : NsAppLinkRPC::ALRPCMessage(c)
 {
   *this=c;
 }
@@ -49,7 +49,7 @@ bool UnsubscribeVehicleData_response::checkIntegrity(void)
 }
 
 
-UnsubscribeVehicleData_response::UnsubscribeVehicleData_response(void) : ALRPC2Message(PROTOCOL_VERSION),
+UnsubscribeVehicleData_response::UnsubscribeVehicleData_response(void) : NsAppLinkRPC::ALRPCMessage(PROTOCOL_VERSION),
       info(0),
     dataResult(0)
 {

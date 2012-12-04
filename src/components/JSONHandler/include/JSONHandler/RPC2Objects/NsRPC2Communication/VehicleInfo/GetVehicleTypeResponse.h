@@ -3,13 +3,13 @@
 
 #include "JSONHandler/RPC2Response.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/VehicleType.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/VehicleType.h"
 
 /*
   interface	NsRPC2Communication::VehicleInfo
   version	1.2
-  generated at	Tue Dec  4 15:06:30 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -32,18 +32,18 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const NsAppLinkRPC::VehicleType& get_vehicleType(void);
+      const NsAppLinkRPCV2::VehicleType& get_vehicleType(void);
 
 
 // setters
-      bool set_vehicleType(const NsAppLinkRPC::VehicleType& vehicleType);
+      bool set_vehicleType(const NsAppLinkRPCV2::VehicleType& vehicleType);
 
 
     private:
 
       friend class GetVehicleTypeResponseMarshaller;
 
-      NsAppLinkRPC::VehicleType vehicleType;
+      NsAppLinkRPCV2::VehicleType vehicleType;
 
     };
   }

@@ -22,7 +22,8 @@
 #include "JSONHandler/ALRPCRequest.h"
 #include "JSONHandler/ALRPCResponse.h"
 #include "JSONHandler/ALRPCNotification.h"
-#include "JSONHandler/ALRPCObjects/Marshaller.h"
+#include "JSONHandler/ALRPCObjects/V1/Marshaller.h"
+#include "JSONHandler/ALRPCObjects/V2/Marshaller.h"
 #include "JSONHandler/JSONHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"
 #include "JSONHandler/RPC2Objects/Marshaller.h"
@@ -30,7 +31,7 @@
 #include "JSONHandler/RPC2Request.h"
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
-#include "JSONHandler/ALRPCObjects/AppType.h"
+#include "JSONHandler/ALRPCObjects/V2/AppType.h"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 #include <iostream>

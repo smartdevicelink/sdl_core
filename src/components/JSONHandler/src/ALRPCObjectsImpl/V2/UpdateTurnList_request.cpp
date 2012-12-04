@@ -11,7 +11,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -23,7 +23,7 @@ UpdateTurnList_request::~UpdateTurnList_request(void)
 }
 
 
-UpdateTurnList_request::UpdateTurnList_request(const UpdateTurnList_request& c) : ALRPC2Message(c)
+UpdateTurnList_request::UpdateTurnList_request(const UpdateTurnList_request& c) : NsAppLinkRPC::ALRPCMessage(c)
 {
   *this=c;
 }
@@ -35,7 +35,7 @@ bool UpdateTurnList_request::checkIntegrity(void)
 }
 
 
-UpdateTurnList_request::UpdateTurnList_request(void) : ALRPC2Message(PROTOCOL_VERSION)
+UpdateTurnList_request::UpdateTurnList_request(void) : NsAppLinkRPC::ALRPCMessage(PROTOCOL_VERSION)
 {
 }
 

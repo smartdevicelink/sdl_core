@@ -10,7 +10,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -35,7 +35,7 @@ ScrollableMessage_request::~ScrollableMessage_request(void)
 }
 
 
-ScrollableMessage_request::ScrollableMessage_request(const ScrollableMessage_request& c) : ALRPC2Message(c)
+ScrollableMessage_request::ScrollableMessage_request(const ScrollableMessage_request& c) : NsAppLinkRPC::ALRPCMessage(c)
 {
   *this=c;
 }
@@ -47,7 +47,7 @@ bool ScrollableMessage_request::checkIntegrity(void)
 }
 
 
-ScrollableMessage_request::ScrollableMessage_request(void) : ALRPC2Message(PROTOCOL_VERSION),
+ScrollableMessage_request::ScrollableMessage_request(void) : NsAppLinkRPC::ALRPCMessage(PROTOCOL_VERSION),
       timeout(0),
     softButtons(0)
 {

@@ -10,7 +10,7 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 14:30:13 2012
+  generated at	Tue Dec  4 17:03:13 2012
   source stamp	Tue Dec  4 14:21:32 2012
   author	robok0der
 */
@@ -22,7 +22,7 @@ GetVehicleData_request::~GetVehicleData_request(void)
 }
 
 
-GetVehicleData_request::GetVehicleData_request(const GetVehicleData_request& c) : ALRPC2Message(c)
+GetVehicleData_request::GetVehicleData_request(const GetVehicleData_request& c) : NsAppLinkRPC::ALRPCMessage(c)
 {
   *this=c;
 }
@@ -34,7 +34,7 @@ bool GetVehicleData_request::checkIntegrity(void)
 }
 
 
-GetVehicleData_request::GetVehicleData_request(void) : ALRPC2Message(PROTOCOL_VERSION)
+GetVehicleData_request::GetVehicleData_request(void) : NsAppLinkRPC::ALRPCMessage(PROTOCOL_VERSION)
 {
 }
 
