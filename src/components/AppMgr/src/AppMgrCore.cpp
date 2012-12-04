@@ -177,6 +177,7 @@ namespace NsAppManager
     {
         const unsigned int& connectionID = std::get<0>(message.second);
         const unsigned char& sessionID = std::get<1>(message.second);
+        int appId = connectionID|(sessionID << 16);
 
         NsAppLinkRPC::ALRPCMessage* mobileMsg = message.first;
         if(!mobileMsg)
@@ -309,6 +310,7 @@ namespace NsAppManager
 
                         NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
                         appRegistered->set_appName(app->getName());
+                        appRegistered->set_appId(app->getAppID());
                         appRegistered->set_isMediaApplication(app->getIsMediaApplication());
                         appRegistered->set_languageDesired(app->getLanguageDesired());
                         appRegistered->set_vrSynonym(app->getVrSynonyms());
@@ -432,7 +434,7 @@ namespace NsAppManager
                         languageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)languageDesired.get());
                         appRegistered->set_languageDesired(languageDesiredV1);
                         appRegistered->set_vrSynonym(app->getVrSynonyms());
-            //            appRegistered->set_appId(app->getAppID());
+                        appRegistered->set_appId(app->getAppID());
                         appRegistered->set_appType(app->getAppType());
                         const NsAppLinkRPC::Language_v2& hmiLanguageDesired = app->getHMIDisplayLanguageDesired();
                         NsAppLinkRPC::Language hmiLanguageDesiredV1;
