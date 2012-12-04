@@ -45,6 +45,12 @@ namespace NsAppManager
          */
         const NsConnectionHandler::tDeviceList& getDeviceList() const;
 
+        /**
+         * \brief get count of items
+         * \return items count
+         */
+        size_t size() const;
+
     private:
 
         /**

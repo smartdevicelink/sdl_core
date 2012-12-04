@@ -43,6 +43,15 @@ namespace NsAppManager
     }
 
     /**
+     * \brief get count of items
+     * \return items count
+     */
+    size_t DeviceList::size() const
+    {
+        return mDeviceList.size();
+    }
+
+    /**
      * \brief Copy constructor
      */
     DeviceList::DeviceList(const DeviceList &)
