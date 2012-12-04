@@ -52,6 +52,22 @@ namespace NsAppManager
     }
 
     /**
+     * \brief find device associated with the given handle
+     * \param handle device handle
+     * \return device associated with the given handle
+     */
+    const NsConnectionHandler::CDevice* DeviceList::findDeviceByHandle(const NsConnectionHandler::tDeviceHandle &handle) const
+    {
+        NsConnectionHandler::tDeviceList::const_iterator it = mDeviceList.find(handle);
+        if(it != mDeviceList.end())
+        {
+            return &it->second;
+        }
+        LOG4CPLUS_INFO_EXT(mLogger, "Device " << handle << " not found in subscribed." );
+        return 0;
+    }
+
+    /**
      * \brief Copy constructor
      */
     DeviceList::DeviceList(const DeviceList &)

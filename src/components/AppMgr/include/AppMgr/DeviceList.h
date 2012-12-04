@@ -51,6 +51,13 @@ namespace NsAppManager
          */
         size_t size() const;
 
+        /**
+         * \brief find device associated with the given handle
+         * \param handle device handle
+         * \return device associated with the given handle
+         */
+        const NsConnectionHandler::CDevice *findDeviceByHandle(const NsConnectionHandler::tDeviceHandle& handle) const;
+
     private:
 
         /**
