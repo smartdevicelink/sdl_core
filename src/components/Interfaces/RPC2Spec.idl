@@ -255,8 +255,7 @@ notification  OnCommand (
    * @descr Notifies if system context is changed
    */
 notification OnSystemContext(
-  SystemContext systemContext,
-  int appId
+  SystemContext systemContext
   );
 
 /*

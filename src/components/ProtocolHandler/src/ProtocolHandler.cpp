@@ -376,7 +376,7 @@ RESULT_CODE ProtocolHandler::handleMessage( NsAppLink::NsTransportManager::tConn
         }
         case FRAME_TYPE_SINGLE:
         {
-            LOG4CPLUS_INFO(mLogger, "FRAME_TYPE_SINGLE: of size " << packet->getDataSize() << ";message " << (int)packet -> getData());
+            LOG4CPLUS_INFO(mLogger, "FRAME_TYPE_SINGLE: of size " << packet->getDataSize() << ";message " << packet -> getData());
 
             if ( !mSessionObserver )
             {
@@ -562,7 +562,7 @@ void * ProtocolHandler::handleMessagesFromMobileApp( void * params )
             if ((0 != message -> mData) && (0 != message -> mDataSize) && (MAXIMUM_FRAME_SIZE >= message -> mDataSize))
             {        
                 ProtocolPacket * packet = new ProtocolPacket;
-                LOG4CPLUS_INFO_EXT(mLogger ,"Data: " << (int)packet -> getData());
+                LOG4CPLUS_INFO_EXT(mLogger ,"Data: " << packet -> getData());
                 if ( packet -> deserializePacket( message -> mData, message -> mDataSize ) == RESULT_FAIL )
                 {
                     LOG4CPLUS_ERROR(mLogger, "Failed to parse received message.");
