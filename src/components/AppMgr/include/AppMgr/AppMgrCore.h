@@ -15,6 +15,7 @@
 #include "AppMgr/CapabilitesContainer.h"
 #include "AppMgr/AutoActivateIdMapping.h"
 #include "AppMgr/SyncPManager.h"
+#include "AppMgr/DeviceList.h"
 #include "JSONHandler/ALRPCObjects/DisplayCapabilities_v2.h"
 
 namespace NsAppLinkRPC
@@ -132,6 +133,18 @@ namespace NsAppManager
          */
         NsConnectionHandler::IDevicesDiscoveryStarter* getConnectionHandler( ) const;
 
+        /**
+         * \brief set device list
+         * \param deviceList device list
+         */
+        void setDeviceList( const NsConnectionHandler::tDeviceList& deviceList );
+
+        /**
+         * \brief get device list
+         * \return device list
+         */
+        const NsConnectionHandler::tDeviceList& getDeviceList() const;
+
     private:
 
         /**
@@ -212,6 +225,7 @@ namespace NsAppManager
         ButtonMapping    mButtonsMapping;
         MessageMapping   mMessageMapping;
         RequestMapping   mRequestMapping;
+        DeviceList       mDeviceList;
 
         NsAppLinkRPC::OnDriverDistraction* mDriverDistraction;
 

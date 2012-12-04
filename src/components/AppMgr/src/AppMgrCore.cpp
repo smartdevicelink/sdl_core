@@ -2542,4 +2542,22 @@ namespace NsAppManager
         return ConnectionHandler::getInstance().getConnectionHandler();
     }
 
+    /**
+     * \brief set device list
+     * \param deviceList device list
+     */
+    void AppMgrCore::setDeviceList(const NsConnectionHandler::tDeviceList &deviceList)
+    {
+        mDeviceList.setDeviceList(deviceList);
+    }
+
+    /**
+     * \brief get device list
+     * \return device list
+     */
+    const NsConnectionHandler::tDeviceList &AppMgrCore::getDeviceList() const
+    {
+        return mDeviceList.getDeviceList();
+    }
+
 }
