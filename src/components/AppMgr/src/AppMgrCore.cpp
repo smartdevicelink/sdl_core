@@ -1837,23 +1837,6 @@ namespace NsAppManager
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETDEVICELIST:
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " A GetDeviceList request has been income");
-                NsRPC2Communication::UI::GetDeviceList* getDevList = (NsRPC2Communication::UI::GetDeviceList*)msg;
-                NsRPC2Communication::UI::GetDeviceListResponse* response = new NsRPC2Communication::UI::GetDeviceListResponse;
-                response->setId(getDevList->getId());
-                DeviceNamesList list;
-                const NsConnectionHandler::tDeviceList& devList = core->mDeviceList.getDeviceList();
-                for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
-                {
-                    const NsConnectionHandler::CDevice& device = it->second;
-                    list.push_back(device.getUserFriendlyName());
-                }
-                response->set_deviceList(list);
-                HMIHandler::getInstance().sendResponse(response);
-                return;
-            }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
                 LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
@@ -2204,6 +2187,23 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendResponse(response);
                 return;
             }
+      /*      case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELIST:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A GetDeviceList request has been income");
+                NsRPC2Communication::AppLinkCore::GetDeviceList* getDevList = (NsRPC2Communication::AppLinkCore::GetDeviceList*)msg;
+                NsRPC2Communication::AppLinkCore::GetDeviceListResponse* response = new NsRPC2Communication::AppLinkCore::GetDeviceListResponse;
+                response->setId(getDevList->getId());
+                DeviceNamesList list;
+                const NsConnectionHandler::tDeviceList& devList = core->mDeviceList.getDeviceList();
+                for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
+                {
+                    const NsConnectionHandler::CDevice& device = it->second;
+                    list.push_back(device.getUserFriendlyName());
+                }
+                response->set_deviceList(list);
+                HMIHandler::getInstance().sendResponse(response);
+                return;
+            }*/
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
                 LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message " << msg->getMethod() << " has been received!");
@@ -2575,6 +2575,25 @@ namespace NsAppManager
     const NsConnectionHandler::tDeviceList &AppMgrCore::getDeviceList() const
     {
         return mDeviceList.getDeviceList();
+    }
+
+    /**
+     * \brief add a device to a mapping
+     * \param sessionKey session/connection key
+     * \param device device handler
+     */
+    void AppMgrCore::addDevice(const int &sessionKey, const NsConnectionHandler::tDeviceHandle &device)
+    {
+        mDeviceHandler.addDevice(sessionKey, device);
+    }
+
+    /**
+     * \brief remove a device from a mapping
+     * \param sessionKey session/connection key
+     */
+    void AppMgrCore::removeDevice(const int &sessionKey)
+    {
+        mDeviceHandler.removeDevice(sessionKey);
     }
 
 }

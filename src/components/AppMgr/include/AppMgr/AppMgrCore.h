@@ -16,6 +16,7 @@
 #include "AppMgr/AutoActivateIdMapping.h"
 #include "AppMgr/SyncPManager.h"
 #include "AppMgr/DeviceList.h"
+#include "AppMgr/DeviceHandler.h"
 #include "JSONHandler/ALRPCObjects/DisplayCapabilities_v2.h"
 
 namespace NsAppLinkRPC
@@ -150,6 +151,19 @@ namespace NsAppManager
          */
         const NsConnectionHandler::tDeviceList& getDeviceList() const;
 
+        /**
+         * \brief add a device to a mapping
+         * \param sessionKey session/connection key
+         * \param device device handler
+         */
+        void addDevice( const int& sessionKey, const NsConnectionHandler::tDeviceHandle& device );
+
+        /**
+         * \brief remove a device from a mapping
+         * \param sessionKey session/connection key
+         */
+        void removeDevice(const int& sessionKey);
+
     private:
 
         /**
@@ -231,6 +245,7 @@ namespace NsAppManager
         MessageMapping   mMessageMapping;
         RequestMapping   mRequestMapping;
         DeviceList       mDeviceList;
+        DeviceHandler    mDeviceHandler;
 
         NsAppLinkRPC::OnDriverDistraction* mDriverDistraction;
 
