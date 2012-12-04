@@ -74,6 +74,20 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Sets connection handler instance
+     * \param handler connection handler
+     */
+    void AppMgr::setConnectionHandler(NsConnectionHandler::CConnectionHandler *handler)
+    {
+        if(!handler)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " Setting null handler!");
+            return;
+        }
+        AppMgrCore::getInstance().setConnectionHandler( handler );
+    }
+
+    /**
     * \brief callback to proceed received mobile message
     * \param message the received message
     * \param connectionID id of a connection associated with application that sent the message
@@ -105,6 +119,35 @@ namespace NsAppManager
         }
         LOG4CPLUS_INFO_EXT(mLogger, " Message " << command->getMethod() << " received from HMI side");
         AppMgrCore::getInstance().pushRPC2CommunicationMessage(command);
+    }
+
+    /**
+     * \brief Available devices list updated.
+     *
+     * Called when device scanning initiated with scanForNewDevices
+     * is completed.
+     *
+     * \param DeviceList New list of available devices.
+     **/
+    void AppMgr::onDeviceListUpdated(const NsConnectionHandler::tDeviceList &DeviceList)
+    {
+    }
+
+    /**
+     * \brief callback which is called upon session starting
+     * \param deviceHandle
+     * \param sessionKey
+     */
+    void AppMgr::onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey)
+    {
+    }
+
+    /**
+     * \brief callback which is called upon session ending
+     * \param sessionKey
+     */
+    void AppMgr::onSessionEndedCallback(int sessionKey)
+    {
     }
 
     /**

@@ -9,6 +9,7 @@
 
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/IRPC2CommandsObserver.h"
+#include "ConnectionHandler/IConnectionHandlerObserver.hpp"
 
 class JSONHandler;
 class ALRPCMessage;
@@ -24,18 +25,21 @@ namespace NsRPC2Communication
     class RPC2Command;
 }
 
+namespace NsConnectionHandler
+{
+    class CConnectionHandler;
+}
+
 namespace NsAppManager
 {
-
     class AppMgrRegistry;
     class AppMgrCore;
     class AppFactory;
 
-
     /**
     * \brief a main app manager class which acts like container for other classes
     */
-    class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver
+    class AppMgr: public IRPCMessagesObserver, public IRPC2CommandsObserver, public NsConnectionHandler::IConnectionHandlerObserver
     {
     public:
 
@@ -60,6 +64,29 @@ namespace NsAppManager
         virtual void onCommandReceivedCallback( NsRPC2Communication::RPC2Command * command );
 
         /**
+         * \brief Available devices list updated.
+         *
+         * Called when device scanning initiated with scanForNewDevices
+         * is completed.
+         *
+         * \param DeviceList New list of available devices.
+         **/
+        virtual void onDeviceListUpdated(const NsConnectionHandler::tDeviceList & DeviceList);
+
+        /**
+         * \brief callback which is called upon session starting
+         * \param deviceHandle
+         * \param sessionKey
+         */
+        virtual void onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey);
+
+        /**
+         * \brief callback which is called upon session ending
+         * \param sessionKey
+         */
+        virtual void onSessionEndedCallback(int sessionKey);
+
+        /**
          * \brief Sets Json mobile handler instance
          * \param handler Json mobile handler
          */
@@ -70,6 +97,12 @@ namespace NsAppManager
          * \param handler Json RPC2 handler
          */
         void setJsonRPC2Handler(JSONRPC2Handler* handler);
+
+        /**
+         * \brief Sets connection handler instance
+         * \param handler connection handler
+         */
+        void setConnectionHandler(NsConnectionHandler::CConnectionHandler* handler);
 
         /**
          * \brief method to execute threads.
