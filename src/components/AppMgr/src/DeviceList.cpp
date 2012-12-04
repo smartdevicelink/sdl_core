@@ -8,6 +8,8 @@
 
 namespace NsAppManager
 {
+    log4cplus::Logger DeviceList::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("DeviceList"));
+
     /**
      * \brief Default class constructor
      */

@@ -9,6 +9,11 @@
 
 #include "ConnectionHandler/CDevice.hpp"
 
+namespace log4cplus
+{
+    class Logger;
+}
+
 namespace NsAppManager
 {
     /**
@@ -48,6 +53,7 @@ namespace NsAppManager
         DeviceList(const DeviceList&);
 
         NsConnectionHandler::tDeviceList mDeviceList;
+        static log4cplus::Logger mLogger;
     };
 }
 
