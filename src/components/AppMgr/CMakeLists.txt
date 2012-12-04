@@ -38,6 +38,7 @@ set (SOURCES
     ./src/Base64.cpp
     ./src/AppMenus.cpp
     ./src/AppChoiceSets.cpp
+    ./src/DeviceList.cpp
 )
 
 add_library("AppMgr" ${SOURCES})
