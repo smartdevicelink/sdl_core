@@ -9,9 +9,10 @@ namespace NsAppManager
      * \param connectionId id of the connection associated with this application
      * \param sessionId id of the session associated with this application
      * \param protocolVersion protocol version
+     * \param appId application id
      */
-    Application_v2::Application_v2(const std::string& name , unsigned int connectionId, unsigned char sessionId)
-        :Application(name, connectionId, sessionId, 2)
+    Application_v2::Application_v2(const std::string& name , unsigned int connectionId, unsigned char sessionId, int appId)
+        :Application(name, connectionId, sessionId, appId, 2)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name << " for the connection id " << connectionId << " session id " << (uint)sessionId);
     }
@@ -36,20 +37,20 @@ namespace NsAppManager
      * \brief retrieve application ID
      * \return application ID
      */
-    const std::string &Application_v2::getAppID() const
+ /*   const std::string &Application_v2::getAppID() const
     {
         return mAppID;
     }
-
+*/
     /**
      * \brief Set application ID
      * \param value application ID
      */
-    void Application_v2::setAppID(const std::string &value)
+ /*   void Application_v2::setAppID(const std::string &value)
     {
         mAppID = value;
     }
-
+*/
     /**
      * \brief retrieve application desired language
      * \return application desired language

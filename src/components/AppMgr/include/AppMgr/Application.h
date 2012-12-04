@@ -43,9 +43,10 @@ namespace NsAppManager
          * \param name application name
          * \param connectionId id of the connection associated with this application
          * \param sessionId id of the session associated with this application
+         * \param appId application id
          * \param protocolVersion protocol version
          */
-        Application(const std::string& name, unsigned int connectionId, unsigned char sessionId, unsigned int protocolVersion );
+        Application(const std::string& name, unsigned int connectionId, unsigned char sessionId, int appId, unsigned int protocolVersion);
 
         /**
          * \brief Default class destructor
@@ -154,6 +155,12 @@ namespace NsAppManager
          * \return application name
          */
         const std::string& getName() const;
+
+        /**
+         * \brief retrieve application ID
+         * \return application ID
+         */
+        const int& getAppID( ) const;
 
         /**
          * \brief add an interaction choice set item to the application
@@ -306,6 +313,7 @@ namespace NsAppManager
         const unsigned char mSessionID;
         const unsigned int mConnectionID;
         const unsigned int mProtocolVersion;
+        const int mAppID;
         std::string mNgnMediaScreenAppName;
         std::vector<std::string> mVrSynonyms;
         bool m_bIsMediaApplication;

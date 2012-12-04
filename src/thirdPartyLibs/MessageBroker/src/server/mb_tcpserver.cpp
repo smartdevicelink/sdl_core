@@ -8,6 +8,7 @@
 #include <cerrno>
 #include <iostream>
 #include <algorithm>
+#include <assert.h>
 
 #include "MBDebugHelper.h"
 
@@ -61,15 +62,16 @@ namespace NsMessageBroker
    bool TcpServer::Recv(int fd)
    {
       ssize_t nb = -1;
-      char buf[1500];
+      char buf[RECV_BUFFER_LENGTH];
 
-      nb = recv(fd, buf, sizeof(buf), 0);
-
+      nb = recv(fd, buf, MAX_RECV_DATA, 0);
+      DBG_MSG(("Received from %d: %s, length: %d\n", fd, msg.c_str(), nb));
       if(nb > 0)
       {
          if (isWebSocket(fd))
          {
             mWebSocketHandler.parseWebSocketData(buf, (unsigned int&)nb);
+            assert(nb < RECV_BUFFER_LENGTH);
          }
          std::string msg = std::string(buf, nb);
          DBG_MSG(("Received from %d: %s, length: %d\n", fd, msg.c_str(), nb));

@@ -86,9 +86,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus_disabled.properties DESTINATION 
 #target_link_libraries("test_TransportManagerTestWithHighDataTransferRate" ${LIBRARIES})
 #add_test(test_TransportManagerTestWithHighDataTransferRate test_TransportManagerTestWithHighDataTransferRate)
 
-#add_executable("test_TransportManagerTestWithMultiThreadedClient" ${SOURCES_TEST_WITH_MULTI_THREADED_CLIENT})
-#target_link_libraries("test_TransportManagerTestWithMultiThreadedClient" ${LIBRARIES})
-#add_test(test_TransportManagerTestWithMultiThreadedClient test_TransportManagerTestWithMultiThreadedClient)
-
-
+add_executable("test_TransportManagerTestWithMultiThreadedClient" ${SOURCES_TEST_WITH_MULTI_THREADED_CLIENT})
+target_link_libraries("test_TransportManagerTestWithMultiThreadedClient" ${LIBRARIES})
+add_test(test_TransportManagerTestWithMultiThreadedClient test_TransportManagerTestWithMultiThreadedClient)
 

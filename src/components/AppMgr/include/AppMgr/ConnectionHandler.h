@@ -1,9 +1,16 @@
-#ifndef CONNECTIONHANDLER_H
-#define CONNECTIONHANDLER_H
+/**
+ * \file ConnectionHandler.h
+ * \brief connection handler
+ * \author vsalo
+ */
+
+#ifndef APPCONNECTIONHANDLER_H
+#define APPCONNECTIONHANDLER_H
+
 
 namespace NsConnectionHandler
 {
-    class CConnectionHandler;
+    class IDevicesDiscoveryStarter;
 }
 
 namespace log4cplus
@@ -29,13 +36,18 @@ namespace NsAppManager
          * \brief Sets connection handler instance
          * \param handler connection handler
          */
-        void setConnectionHandler(NsConnectionHandler::CConnectionHandler* handler);
+        void setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler);
 
         /**
          * \brief Gets connection handler instance
          * \return connection handler
          */
-        NsConnectionHandler::CConnectionHandler* getConnectionHandler( ) const;
+        NsConnectionHandler::IDevicesDiscoveryStarter *getConnectionHandler( ) const;
+
+        /**
+         * \brief Start device discovery
+         */
+        void startDevicesDiscovery();
 
     private:
 
@@ -49,10 +61,10 @@ namespace NsAppManager
          */
         ConnectionHandler(const ConnectionHandler&);
 
-        NsConnectionHandler::CConnectionHandler* mConnectionHandler;
+        NsConnectionHandler::IDevicesDiscoveryStarter* mConnectionHandler;
         static log4cplus::Logger mLogger;
     };
 
 }
 
-#endif // CONNECTIONHANDLER_H
+#endif // APPCONNECTIONHANDLER_H

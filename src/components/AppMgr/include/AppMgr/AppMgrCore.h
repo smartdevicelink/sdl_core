@@ -15,6 +15,7 @@
 #include "AppMgr/CapabilitesContainer.h"
 #include "AppMgr/AutoActivateIdMapping.h"
 #include "AppMgr/SyncPManager.h"
+#include "AppMgr/DeviceList.h"
 #include "JSONHandler/ALRPCObjects/DisplayCapabilities_v2.h"
 
 namespace NsAppLinkRPC
@@ -43,7 +44,7 @@ namespace log4cplus
 
 namespace NsConnectionHandler
 {
-    class CConnectionHandler;
+    class IDevicesDiscoveryStarter;
 }
 
 namespace NsAppManager
@@ -57,6 +58,11 @@ namespace NsAppManager
      * \brief a connection between a mobile RPC message and a session
      */
     typedef std::pair<NsAppLinkRPC::ALRPCMessage*, ApplicationUniqueID> Message;
+
+    /**
+     * \brief a list of device names
+     */
+    typedef std::vector<std::string> DeviceNamesList;
 
     /**
      * \brief Core app manager class which acts as a core for application manager
@@ -124,13 +130,25 @@ namespace NsAppManager
          * \brief Sets connection handler instance
          * \param handler connection handler
          */
-        void setConnectionHandler(NsConnectionHandler::CConnectionHandler* handler);
+        void setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter* handler);
 
         /**
          * \brief Gets connection handler instance
          * \return connection handler
          */
-        NsConnectionHandler::CConnectionHandler* getConnectionHandler( ) const;
+        NsConnectionHandler::IDevicesDiscoveryStarter* getConnectionHandler( ) const;
+
+        /**
+         * \brief set device list
+         * \param deviceList device list
+         */
+        void setDeviceList( const NsConnectionHandler::tDeviceList& deviceList );
+
+        /**
+         * \brief get device list
+         * \return device list
+         */
+        const NsConnectionHandler::tDeviceList& getDeviceList() const;
 
     private:
 
@@ -212,6 +230,7 @@ namespace NsAppManager
         ButtonMapping    mButtonsMapping;
         MessageMapping   mMessageMapping;
         RequestMapping   mRequestMapping;
+        DeviceList       mDeviceList;
 
         NsAppLinkRPC::OnDriverDistraction* mDriverDistraction;
 

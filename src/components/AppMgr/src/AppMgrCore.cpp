@@ -31,7 +31,6 @@
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/ALRPCObjects/AppType.h"
-#include "ConnectionHandler/CConnectionHandler.hpp"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 #include <iostream>
@@ -178,6 +177,7 @@ namespace NsAppManager
     {
         const unsigned int& connectionID = std::get<0>(message.second);
         const unsigned char& sessionID = std::get<1>(message.second);
+        int appId = connectionID|(sessionID << 16);
 
         NsAppLinkRPC::ALRPCMessage* mobileMsg = message.first;
         if(!mobileMsg)
@@ -310,6 +310,7 @@ namespace NsAppManager
 
                         NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
                         appRegistered->set_appName(app->getName());
+                        appRegistered->set_appId(app->getAppID());
                         appRegistered->set_isMediaApplication(app->getIsMediaApplication());
                         appRegistered->set_languageDesired(app->getLanguageDesired());
                         appRegistered->set_vrSynonym(app->getVrSynonyms());
@@ -433,7 +434,7 @@ namespace NsAppManager
                         languageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)languageDesired.get());
                         appRegistered->set_languageDesired(languageDesiredV1);
                         appRegistered->set_vrSynonym(app->getVrSynonyms());
-            //            appRegistered->set_appId(app->getAppID());
+                        appRegistered->set_appId(app->getAppID());
                         appRegistered->set_appType(app->getAppType());
                         const NsAppLinkRPC::Language_v2& hmiLanguageDesired = app->getHMIDisplayLanguageDesired();
                         NsAppLinkRPC::Language hmiLanguageDesiredV1;
@@ -483,6 +484,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
                         NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                         appUnregistered->set_appName(appName);
+                        appUnregistered->set_appId(app->getAppID());
                         appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
                         HMIHandler::getInstance().sendNotification(appUnregistered);
                         break;
@@ -516,6 +518,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
                         NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                         appUnregistered->set_appName(appName);
+                        appUnregistered->set_appId(app->getAppID());
                         appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason((NsAppLinkRPC::AppInterfaceUnregisteredReason::AppInterfaceUnregisteredReasonInternal)NsAppLinkRPC::AppInterfaceUnregisteredReason_v2::USER_EXIT));
                         HMIHandler::getInstance().sendNotification(appUnregistered);
                         break;
@@ -596,6 +599,7 @@ namespace NsAppManager
                 {
                     showRPC2Request->set_alignment(*object->get_alignment());
                 }
+                showRPC2Request->set_appId(appId);
                 LOG4CPLUS_INFO_EXT(mLogger, "Show request almost handled" );
                 core->mMessageMapping.addMessage(showRPC2Request->getId(), connectionID, sessionID);
                 HMIHandler::getInstance().sendRequest(showRPC2Request);
@@ -608,6 +612,7 @@ namespace NsAppManager
                 NsRPC2Communication::TTS::Speak* speakRPC2Request = new NsRPC2Communication::TTS::Speak();
                 speakRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 speakRPC2Request->set_ttsChunks(object->get_ttsChunks());
+                speakRPC2Request->set_appId(appId);
                 core->mMessageMapping.addMessage(speakRPC2Request->getId(), connectionID, sessionID);
                 HMIHandler::getInstance().sendRequest(speakRPC2Request);
                 NsAppLinkRPC::Speak_response * mobileResponse = new NsAppLinkRPC::Speak_response;
@@ -632,6 +637,8 @@ namespace NsAppManager
                 {
                     setGPRPC2Request->set_timeoutPrompt(*object->get_timeoutPrompt());
                 }
+
+                setGPRPC2Request->set_appId(appId);
                 HMIHandler::getInstance().sendRequest(setGPRPC2Request);
                 NsAppLinkRPC::SetGlobalProperties_response * mobileResponse = new NsAppLinkRPC::SetGlobalProperties_response;
                 mobileResponse->set_success(true);
@@ -647,7 +654,7 @@ namespace NsAppManager
                 resetGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 core->mMessageMapping.addMessage(resetGPRPC2Request->getId(), connectionID, sessionID);
                 resetGPRPC2Request->set_properties(object->get_properties());
-
+                resetGPRPC2Request->set_appId(appId);
                 HMIHandler::getInstance().sendRequest(resetGPRPC2Request);
                 NsAppLinkRPC::ResetGlobalProperties_response * mobileResponse = new NsAppLinkRPC::ResetGlobalProperties_response;
                 mobileResponse->set_success(true);
@@ -678,6 +685,7 @@ namespace NsAppManager
                 {
                     alert->set_playTone(*object->get_playTone());
                 }
+                alert->set_appId(appId);
                 HMIHandler::getInstance().sendRequest(alert);
                 break;
             }
@@ -720,6 +728,7 @@ namespace NsAppManager
                     const NsAppLinkRPC::MenuParams* menuParams = object->get_menuParams();
                     addCmd->set_menuParams(*menuParams);
                     addCmd->set_cmdId(cmdId);
+                    addCmd->set_appId(app->getAppID());
                     if(menuParams->get_parentID())
                     {
                         const unsigned int& menuId = *menuParams->get_parentID();
@@ -743,6 +752,7 @@ namespace NsAppManager
                     CommandType cmdType = CommandType::VR;
                     addCmd->set_vrCommands(*object->get_vrCommands());
                     addCmd->set_cmdId(cmdId);
+                    addCmd->set_appId(app->getAppID());
                     core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
                     CommandParams params;
                     params.vrCommands = object->get_vrCommands();
@@ -780,6 +790,7 @@ namespace NsAppManager
                         LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand UI request has been invoked");
                         NsRPC2Communication::UI::DeleteCommand* deleteCmd = new NsRPC2Communication::UI::DeleteCommand();
                         deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        deleteCmd->set_appId(app->getAppID());
                         core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
                         deleteCmd->set_cmdId(cmdId);
                         app->removeCommand(cmdId, cmdType);
@@ -795,6 +806,7 @@ namespace NsAppManager
                         deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                         core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
                         deleteCmd->set_cmdId(cmdId);
+                        deleteCmd->set_appId(app->getAppID());
                         app->removeCommand(cmdId, cmdType);
                         app->incrementUnrespondedRequestCount(cmdId);
                         core->mRequestMapping.addMessage(deleteCmd->getId(), cmdId);
@@ -827,6 +839,7 @@ namespace NsAppManager
                 {
                     addSubMenu->set_position(*object->get_position());
                 }
+                addSubMenu->set_appId(app->getAppID());
                 app->addMenu(object->get_menuID(), object->get_menuName(), object->get_position());
                 HMIHandler::getInstance().sendRequest(addSubMenu);
                 break;
@@ -850,6 +863,7 @@ namespace NsAppManager
                 core->mMessageMapping.addMessage(delSubMenu->getId(), connectionID, sessionID);
                 const unsigned int& menuId = object->get_menuID();
                 delSubMenu->set_menuId(menuId);
+                delSubMenu->set_appId(app->getAppID());
                 const MenuCommands& menuCommands = app->findMenuCommands(menuId);
                 LOG4CPLUS_INFO_EXT(mLogger, " A given menu has " << menuCommands.size() << " UI commands - about to delete 'em!");
                 for(MenuCommands::const_iterator it = menuCommands.begin(); it != menuCommands.end(); it++)
@@ -858,6 +872,7 @@ namespace NsAppManager
                     NsRPC2Communication::UI::DeleteCommand* delUiCmd = new NsRPC2Communication::UI::DeleteCommand();
                     delUiCmd->set_cmdId(*it);
                     delUiCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    delUiCmd->set_appId(app->getAppID());
                     core->mMessageMapping.addMessage(delUiCmd->getId(), connectionID, sessionID);
                     core->mRequestMapping.addMessage(delUiCmd->getId(), *it);
                     HMIHandler::getInstance().sendRequest(delUiCmd);
@@ -870,6 +885,7 @@ namespace NsAppManager
                             LOG4CPLUS_INFO_EXT(mLogger, " A given command id " << *it << " has VR counterpart attached to: deleting it also!");
                             NsRPC2Communication::VR::DeleteCommand* delVrCmd = new NsRPC2Communication::VR::DeleteCommand();
                             delVrCmd->set_cmdId(*it);
+                            delVrCmd->set_appId(app->getAppID());
                             core->mMessageMapping.addMessage(delVrCmd->getId(), connectionID, sessionID);
                             core->mRequestMapping.addMessage(delVrCmd->getId(), *it);
                             HMIHandler::getInstance().sendRequest(delVrCmd);
@@ -901,6 +917,7 @@ namespace NsAppManager
                 core->mMessageMapping.addMessage(createInteractionChoiceSet->getId(), connectionID, sessionID);
                 createInteractionChoiceSet->set_choiceSet(object->get_choiceSet());
                 createInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
+                createInteractionChoiceSet->set_appId(app->getAppID());
                 app->addChoiceSet(object->get_interactionChoiceSetID(), object->get_choiceSet());
                 HMIHandler::getInstance().sendRequest(createInteractionChoiceSet);
                 break;
@@ -923,6 +940,7 @@ namespace NsAppManager
                 deleteInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getId(), connectionID, sessionID);
                 deleteInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
+                deleteInteractionChoiceSet->set_appId(app->getAppID());
                 app->removeChoiceSet(object->get_interactionChoiceSetID());
                 HMIHandler::getInstance().sendRequest(deleteInteractionChoiceSet);
                 break;
@@ -950,6 +968,7 @@ namespace NsAppManager
                 {
                     performInteraction->set_timeoutPrompt(*object->get_timeoutPrompt());
                 }
+                performInteraction->set_appId(appId);
                 HMIHandler::getInstance().sendRequest(performInteraction);
                 break;
             }
@@ -958,6 +977,7 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
                 NsRPC2Communication::UI::SetMediaClockTimer* setTimer = new NsRPC2Communication::UI::SetMediaClockTimer();
                 setTimer->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                setTimer->set_appId(appId);
                 core->mMessageMapping.addMessage(setTimer->getId(), connectionID, sessionID);
 
                 switch(mobileMsg->getProtocolVersion())
@@ -989,11 +1009,10 @@ namespace NsAppManager
                         NsAppLinkRPC::UpdateMode updateMode;
                         updateMode.set((NsAppLinkRPC::UpdateMode::UpdateModeInternal)updateModeV2.get());
                         setTimer->set_updateMode(updateMode);
+                        HMIHandler::getInstance().sendRequest(setTimer);
                         break;
                     }
                 }
-
-                HMIHandler::getInstance().sendRequest(setTimer);
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_ENCODEDSYNCPDATA_REQUEST:
@@ -1104,11 +1123,11 @@ namespace NsAppManager
                                                     AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
 
                             const std::string& name = app->getName();
-                            const std::string& id = app->getAppID();
+                            const int& id = app->getAppID();
 
                             char path[FILENAME_MAX];
                             memset(path, 0, FILENAME_MAX);
-                            snprintf(path, FILENAME_MAX - 1, "%s_%s/%s", name.c_str(), id.c_str(), syncFileName->c_str());
+                            snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName->c_str());
                             std::ofstream file(path, std::ios_base::binary);
                             if (file.is_open())
                             {
@@ -1160,11 +1179,11 @@ namespace NsAppManager
                                 AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
 
                     const std::string& name = app->getName();
-                    const std::string& id = app->getAppID();
+                    const int& id = app->getAppID();
                     
                     char path[FILENAME_MAX];
                     memset(path, 0, FILENAME_MAX);
-                    snprintf(path, FILENAME_MAX - 1, "%s_%s/%s", name.c_str(), id.c_str(), syncFileName->c_str());
+                    snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName->c_str());
                     if(remove(path) != 0)
                     {
                         response->set_success(false);
@@ -1202,11 +1221,11 @@ namespace NsAppManager
                                 AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
 
                 const std::string& name = app->getName();
-                const std::string& id = app->getAppID();
+                const int& id = app->getAppID();
                 
                 char path[FILENAME_MAX];
                 memset(path, 0, FILENAME_MAX);
-                snprintf(path, FILENAME_MAX - 1, "%s_%s/", name.c_str(), id.c_str());
+                snprintf(path, FILENAME_MAX - 1, "%s_%d/", name.c_str(), id);
 
                 DIR* dir = NULL;
                 struct dirent* dirElement = NULL;
@@ -1263,7 +1282,6 @@ namespace NsAppManager
 
                 slider->set_position(request->get_position());
                 slider->set_timeout(request->get_timeout());
-
                 HMIHandler::getInstance().sendRequest(slider);
                 break;
             }
@@ -1392,6 +1410,8 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendRequest(getTtsCapsRequest);
                 NsRPC2Communication::Buttons::GetCapabilities* getButtonsCapsRequest = new NsRPC2Communication::Buttons::GetCapabilities();
                 HMIHandler::getInstance().sendRequest(getButtonsCapsRequest);
+
+                ConnectionHandler::getInstance().startDevicesDiscovery();
 
                 return;
             }
@@ -1817,6 +1837,23 @@ namespace NsAppManager
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETDEVICELIST:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A GetDeviceList request has been income");
+                NsRPC2Communication::UI::GetDeviceList* getDevList = (NsRPC2Communication::UI::GetDeviceList*)msg;
+                NsRPC2Communication::UI::GetDeviceListResponse* response = new NsRPC2Communication::UI::GetDeviceListResponse;
+                response->setId(getDevList->getId());
+                DeviceNamesList list;
+                const NsConnectionHandler::tDeviceList& devList = core->mDeviceList.getDeviceList();
+                for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
+                {
+                    const NsConnectionHandler::CDevice& device = it->second;
+                    list.push_back(device.getUserFriendlyName());
+                }
+                response->set_deviceList(list);
+                HMIHandler::getInstance().sendResponse(response);
+                return;
+            }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
                 LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
@@ -2020,7 +2057,7 @@ namespace NsAppManager
                     addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     addCmd->set_interactionChoiceSetID(choiceSetId);
                     addCmd->set_choiceSet(choiceSet);
-
+                    addCmd->set_appId(app->getAppID());
                     core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
 
                     HMIHandler::getInstance().sendRequest(addCmd);
@@ -2043,7 +2080,7 @@ namespace NsAppManager
                     {
                         addCmd->set_position(*position);
                     }
-
+                    addCmd->set_appId(app->getAppID());
                     core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
 
                     HMIHandler::getInstance().sendRequest(addCmd);
@@ -2080,7 +2117,7 @@ namespace NsAppManager
                     addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
                     ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_menuParams(*menuParams);
-
+                    ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_appId(app->getAppID());
                     core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
 
                     HMIHandler::getInstance().sendRequest(addCmd);
@@ -2192,12 +2229,13 @@ namespace NsAppManager
 
         const unsigned int& protocolVersion = request->getProtocolVersion();
         const std::string& appName = ((NsAppLinkRPC::RegisterAppInterface_request*)request)->get_appName();
+        int appId = connectionID|(sessionID << 16);
 
         switch(protocolVersion)
         {
             case 2:
             {
-                Application_v2* application = new Application_v2( appName, connectionID, sessionID );
+                Application_v2* application = new Application_v2( appName, connectionID, sessionID, appId );
                 if(!application)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "Cannot register application " << appName << " connection " << connectionID << " session " << (uint)sessionID << " protocol version " << protocolVersion << " !");
@@ -2205,12 +2243,12 @@ namespace NsAppManager
                 }
 
                 NsAppLinkRPC::RegisterAppInterface_v2_request* registerRequest = (NsAppLinkRPC::RegisterAppInterface_v2_request*) request;
-                if(registerRequest->get_appID())
+       /*         if(registerRequest->get_appID())
                 {
                     const std::string& appId = *registerRequest->get_appID();
                     application->setAppID(appId);
                 }
-                if( registerRequest->get_appType() )
+        */        if( registerRequest->get_appType() )
                 {
                     const std::vector<NsAppLinkRPC::AppType>& appType = *registerRequest->get_appType();
                     application->setAppType(appType);
@@ -2252,7 +2290,7 @@ namespace NsAppManager
             }
             case 1:
             {
-                Application_v1* application = new Application_v1( appName, connectionID, sessionID );
+                Application_v1* application = new Application_v1( appName, connectionID, sessionID, appId );
                 if(!application)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "Cannot register application " << appName << " connection " << connectionID << " session " << (uint)sessionID << " protocol version " << protocolVersion << " !");
@@ -2365,6 +2403,7 @@ namespace NsAppManager
             }
             deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             ((NsRPC2Communication::UI::DeleteCommand*)deleteCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
+            ((NsRPC2Communication::UI::DeleteCommand*)deleteCmd)->set_appId(currentApp->getAppID());
             mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
 
             HMIHandler::getInstance().sendRequest(deleteCmd);
@@ -2379,6 +2418,7 @@ namespace NsAppManager
             NsRPC2Communication::UI::DeleteSubMenu* deleteCmd = new NsRPC2Communication::UI::DeleteSubMenu();
             deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             deleteCmd->set_menuId(menuId);
+            deleteCmd->set_appId(currentApp->getAppID());
             mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
 
             HMIHandler::getInstance().sendRequest(deleteCmd);
@@ -2393,6 +2433,7 @@ namespace NsAppManager
             NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteCmd = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
             deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             deleteCmd->set_interactionChoiceSetID(choiceSetId);
+            deleteCmd->set_appId(currentApp->getAppID());
             mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
 
             HMIHandler::getInstance().sendRequest(deleteCmd);
@@ -2499,7 +2540,7 @@ namespace NsAppManager
      * \brief Sets connection handler instance
      * \param handler connection handler
      */
-    void AppMgrCore::setConnectionHandler(NsConnectionHandler::CConnectionHandler *handler)
+    void AppMgrCore::setConnectionHandler(NsConnectionHandler::IDevicesDiscoveryStarter *handler)
     {
         if(!handler)
         {
@@ -2513,9 +2554,27 @@ namespace NsAppManager
      * \brief Gets connection handler instance
      * \return connection handler
      */
-    NsConnectionHandler::CConnectionHandler *AppMgrCore::getConnectionHandler() const
+    NsConnectionHandler::IDevicesDiscoveryStarter *AppMgrCore::getConnectionHandler() const
     {
         return ConnectionHandler::getInstance().getConnectionHandler();
+    }
+
+    /**
+     * \brief set device list
+     * \param deviceList device list
+     */
+    void AppMgrCore::setDeviceList(const NsConnectionHandler::tDeviceList &deviceList)
+    {
+        mDeviceList.setDeviceList(deviceList);
+    }
+
+    /**
+     * \brief get device list
+     * \return device list
+     */
+    const NsConnectionHandler::tDeviceList &AppMgrCore::getDeviceList() const
+    {
+        return mDeviceList.getDeviceList();
     }
 
 }
