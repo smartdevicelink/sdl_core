@@ -60,6 +60,11 @@ namespace NsAppManager
     typedef std::pair<NsAppLinkRPC::ALRPCMessage*, ApplicationUniqueID> Message;
 
     /**
+     * \brief a list of device names
+     */
+    typedef std::vector<std::string> DeviceNamesList;
+
+    /**
      * \brief Core app manager class which acts as a core for application manager
      */
     class AppMgrCore

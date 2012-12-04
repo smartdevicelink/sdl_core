@@ -1837,6 +1837,23 @@ namespace NsAppManager
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETDEVICELIST:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A GetDeviceList request has been income");
+                NsRPC2Communication::UI::GetDeviceList* getDevList = (NsRPC2Communication::UI::GetDeviceList*)msg;
+                NsRPC2Communication::UI::GetDeviceListResponse* response = new NsRPC2Communication::UI::GetDeviceListResponse;
+                response->setId(getDevList->getId());
+                DeviceNamesList list;
+                const NsConnectionHandler::tDeviceList& devList = core->mDeviceList.getDeviceList();
+                for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
+                {
+                    const NsConnectionHandler::CDevice& device = it->second;
+                    list.push_back(device.getUserFriendlyName());
+                }
+                response->set_deviceList(list);
+                HMIHandler::getInstance().sendResponse(response);
+                return;
+            }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
                 LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
