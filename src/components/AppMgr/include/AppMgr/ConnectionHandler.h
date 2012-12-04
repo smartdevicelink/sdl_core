@@ -1,5 +1,12 @@
-#ifndef CONNECTIONHANDLER_H
-#define CONNECTIONHANDLER_H
+/**
+ * \file ConnectionHandler.h
+ * \brief connection handler
+ * \author vsalo
+ */
+
+#ifndef APPCONNECTIONHANDLER_H
+#define APPCONNECTIONHANDLER_H
+
 
 namespace NsConnectionHandler
 {
@@ -37,6 +44,11 @@ namespace NsAppManager
          */
         NsConnectionHandler::CConnectionHandler* getConnectionHandler( ) const;
 
+        /**
+         * \brief Start device discovery
+         */
+        void startDevicesDiscovery();
+
     private:
 
         /**
@@ -55,4 +67,4 @@ namespace NsAppManager
 
 }
 
-#endif // CONNECTIONHANDLER_H
+#endif // APPCONNECTIONHANDLER_H

@@ -1,4 +1,11 @@
+/**
+ * \file ConnectionHandler.cpp
+ * \brief connection handler
+ * \author vsalo
+ */
+
 #include "AppMgr/ConnectionHandler.h"
+#include "ConnectionHandler/CConnectionHandler.hpp"
 #include "LoggerHelper.hpp"
 
 namespace NsAppManager
@@ -40,6 +47,19 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, "Connection handler hasn't yet been assigned, but an attempt to retrieve it has been made! Face a core dump soon...(((");
         }
         return mConnectionHandler;
+    }
+
+    /**
+     * \brief Start device discovery
+     */
+    void ConnectionHandler::startDevicesDiscovery()
+    {
+        if(!mConnectionHandler)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
+            return;
+        }
+        mConnectionHandler->startDevicesDiscovery();
     }
 
     /**
