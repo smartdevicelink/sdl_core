@@ -23,7 +23,6 @@ namespace NsAppManager
     Application::Application(const std::string& name , unsigned int connectionId, unsigned char sessionId, int appId, unsigned int protocolVersion)
         :mNgnMediaScreenAppName("")
         ,m_bIsMediaApplication(false)
-        ,mAutoActivateID("")
         ,mSessionID(sessionId)
         ,mConnectionID(connectionId)
         ,mName(name)
@@ -40,7 +39,6 @@ namespace NsAppManager
         :mNgnMediaScreenAppName(app.getNgnMediaScreenAppName())
         ,mName(app.getName())
         ,m_bIsMediaApplication(app.getIsMediaApplication())
-        ,mAutoActivateID(app.getAutoActivateID())
         ,mHMIStatusLevel(app.getApplicationHMIStatusLevel())
         ,mSyncMsgVersion(app.getSyncMsgVersion())
         ,mConnectionID(app.getConnectionID())
@@ -116,15 +114,6 @@ namespace NsAppManager
     }
 
     /**
-     * \brief Set application autoactivate ID
-     * \param value application autoactivate ID
-     */
-    void Application::setAutoActivateID(const std::string& value)
-    {
-        mAutoActivateID = value;
-    }
-
-    /**
      * \brief Set application sync message version
      * \param value application sync message version
      */
@@ -158,15 +147,6 @@ namespace NsAppManager
     bool Application::getIsMediaApplication( ) const
     {
         return m_bIsMediaApplication;
-    }
-
-    /**
-     * \brief retrieve application auto-activate ID
-     * \return application auto-activate ID
-     */
-    const std::string& Application::getAutoActivateID( ) const
-    {
-        return mAutoActivateID;
     }
 
     /**

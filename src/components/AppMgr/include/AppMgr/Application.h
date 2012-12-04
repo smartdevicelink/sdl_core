@@ -91,12 +91,6 @@ namespace NsAppManager
         void setIsMediaApplication(bool value);
 
         /**
-         * \brief Set application autoactivate ID
-         * \param value application autoactivate ID
-         */
-        void setAutoActivateID(const std::string& value);
-
-        /**
          * \brief Set application sync message version
          * \param value application sync message version
          */
@@ -119,12 +113,6 @@ namespace NsAppManager
          * \return is the application a media application
          */
         bool getIsMediaApplication( ) const;
-
-        /**
-         * \brief retrieve application auto-activate ID
-         * \return application auto-activate ID
-         */
-        const std::string& getAutoActivateID( ) const;
 
         /**
          * \brief retrieve application sync message version
@@ -317,7 +305,6 @@ namespace NsAppManager
         std::string mNgnMediaScreenAppName;
         std::vector<std::string> mVrSynonyms;
         bool m_bIsMediaApplication;
-        std::string mAutoActivateID;
         NsAppLinkRPC::SyncMsgVersion mSyncMsgVersion;
         NsAppLinkRPC::HMILevel::HMILevelInternal mHMIStatusLevel;
         MenuMapping mMenuMapping;

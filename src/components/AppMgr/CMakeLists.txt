@@ -33,7 +33,6 @@ set (SOURCES
     ./src/MobileHandler.cpp
     ./src/ConnectionHandler.cpp
     ./src/RequestMapping.cpp
-    ./src/AutoActivateIdMapping.cpp
     ./src/SyncPManager.cpp
     ./src/Base64.cpp
     ./src/AppMenus.cpp

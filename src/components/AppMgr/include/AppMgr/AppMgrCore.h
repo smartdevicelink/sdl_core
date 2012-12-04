@@ -13,7 +13,6 @@
 #include "AppMgr/MessageMapping.h"
 #include "AppMgr/RequestMapping.h"
 #include "AppMgr/CapabilitesContainer.h"
-#include "AppMgr/AutoActivateIdMapping.h"
 #include "AppMgr/SyncPManager.h"
 #include "AppMgr/DeviceList.h"
 #include "AppMgr/DeviceHandler.h"
@@ -249,11 +248,6 @@ namespace NsAppManager
 
         NsAppLinkRPC::OnDriverDistraction* mDriverDistraction;
 
-        AutoActivateIdMapping  mAutoActivateIds;
-
-        static const std::string mAutoActivateIdFileName;
-
-        std::string      mLastAutoActivateId;
         SyncPManager     mSyncPManager;
 
         static log4cplus::Logger mLogger;

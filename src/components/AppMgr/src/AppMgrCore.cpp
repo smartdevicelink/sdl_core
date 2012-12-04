@@ -52,9 +52,7 @@ namespace {
 
 namespace NsAppManager
 {
-
     log4cplus::Logger AppMgrCore::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
-    const std::string AppMgrCore::mAutoActivateIdFileName = "autoActivateId";
 
     /**
      * \brief Returning class instance
@@ -74,21 +72,6 @@ namespace NsAppManager
         ,mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
         ,mDriverDistraction(0)
     {
-        std::ifstream file(mAutoActivateIdFileName);
-        if( file.is_open() )
-        {
-            if( file.good() )
-            {
-                std::getline( file, mLastAutoActivateId );
-            }
-            file.close();
-            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore deserialized a value " << mLastAutoActivateId << " from a file " << mAutoActivateIdFileName);
-        }
-        else
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot deserialize from a file " << mAutoActivateIdFileName << ": probably file doesn't exist!");
-        }
-
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
     }
 
@@ -236,68 +219,8 @@ namespace NsAppManager
                             MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
                             break;
                         }
-                        LOG4CPLUS_INFO_EXT(mLogger, " About to find auto-activate id in a map...");
-                        std::string autoActivateIdFound = core->mAutoActivateIds.findAutoActivateIdAssignedToName(appName);
-                        LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " is found in a map with auto activate id " << autoActivateIdFound);
-                        if(!autoActivateIdFound.empty())
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "Found already registered AutoActivateId" << (autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound) << " assigned to app name " << appName);
-                            if(object->get_autoActivateID())
-                            {
-                                LOG4CPLUS_INFO_EXT(mLogger, "There is an AutoActivateId supplied withtin this RegisterAppInterface request: " << *object->get_autoActivateID());
-                            }
-                            else
-                            {
-                                LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " hasn't been registered because its autoActivateId NULL differs from the one specified before - " << autoActivateIdFound);
-                            }
-                        }
-                        else
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId has previously been assigned to app name " << appName);
-                            if(!object->get_autoActivateID())
-                            {
-                                LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request!");
-                            }
-                            else
-                            {
-                                LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered!");
-                            }
-                        }
-
-                        if(!object->get_autoActivateID())
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request - about to register an application " << appName << " with the generated one");
-                            const std::string& autoActivateId = core->mAutoActivateIds.addApplicationName(object->get_appName());
-                            response->set_autoActivateID(autoActivateId);
-                        }
-                        else
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered:");
-                            LOG4CPLUS_INFO_EXT(mLogger, " about to register with the supplies auto-activate id!");
-                            response->set_autoActivateID(*object->get_autoActivateID());
-                        }
 
                         NsAppLinkRPC::OnHMIStatus* status = new NsAppLinkRPC::OnHMIStatus();
-                        app->setAutoActivateID(*response->get_autoActivateID());
-                        if(app->getAutoActivateID() == core->mLastAutoActivateId)
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, " Application's auto-activate id match the one from the last active application - " << core->mLastAutoActivateId);
-                            if(!AppMgrRegistry::getInstance().getActiveItem())
-                            {
-                                LOG4CPLUS_INFO_EXT(mLogger, " No currently active items found - activating an app!");
-                                AppMgrRegistry::getInstance().activateApp(app);
-                                status->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
-                            }
-                            else
-                            {
-                                LOG4CPLUS_INFO_EXT(mLogger, " There is an active item, so we do nothing");
-                            }
-                        }
-                        else
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, " Application's auto-activate id " << app->getAutoActivateID() << " doesn't match the one from the last active application - " << core->mLastAutoActivateId);
-                        }
-
                         status->set_hmiLevel(app->getApplicationHMIStatusLevel());
                         status->set_audioStreamingState(app->getApplicationAudioStreamingState());
                         status->set_systemContext(app->getSystemContext());
@@ -354,68 +277,8 @@ namespace NsAppManager
                             MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
                             break;
                         }
-       /*                 LOG4CPLUS_INFO_EXT(mLogger, " About to find auto-activate id in a map...");
-                        std::string autoActivateIdFound = core->mAutoActivateIds.findAutoActivateIdAssignedToName(appName);
-                        LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " is found in a map with auto activate id " << autoActivateIdFound);
-                        if(!autoActivateIdFound.empty())
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "Found already registered AutoActivateId" << (autoActivateIdFound.empty() ? "EMPTY" : autoActivateIdFound) << " assigned to app name " << appName);
-                            if(object->get_autoActivateID())
-                            {
-                                LOG4CPLUS_INFO_EXT(mLogger, "There is an AutoActivateId supplied withtin this RegisterAppInterface request: " << *object->get_autoActivateID());
-                            }
-                            else
-                            {
-                                LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " hasn't been registered because its autoActivateId NULL differs from the one specified before - " << autoActivateIdFound);
-                            }
-                        }
-                        else
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId has previously been assigned to app name " << appName);
-                            if(!object->get_autoActivateID())
-                            {
-                                LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request!");
-                            }
-                            else
-                            {
-                                LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered!");
-                            }
-                        }
 
-                        if(!object->get_autoActivateID())
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "No AutoActivateId supplied within this RegisterAppInterface request - about to register an application " << appName << " with the generated one");
-                            const std::string& autoActivateId = core->mAutoActivateIds.addApplicationName(object->get_appName());
-                            response->set_autoActivateID(autoActivateId);
-                        }
-                        else
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, " Application " << object->get_appName() << " specified an autoActivateId " << *object->get_autoActivateID() << " while id hasn't yet been registered:");
-                            LOG4CPLUS_INFO_EXT(mLogger, " about to register with the supplies auto-activate id!");
-                            response->set_autoActivateID(*object->get_autoActivateID());
-                        }
-*/
                         NsAppLinkRPC::OnHMIStatus_v2* status = new NsAppLinkRPC::OnHMIStatus_v2();
-/*                        app->setAutoActivateID(*response->get_autoActivateID());
-                        if(app->getAutoActivateID() == core->mLastAutoActivateId)
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, " Application's auto-activate id match the one from the last active application - " << core->mLastAutoActivateId);
-                            if(!AppMgrRegistry::getInstance().getActiveItem())
-                            {
-                                LOG4CPLUS_INFO_EXT(mLogger, " No currently active items found - activating an app!");
-                                AppMgrRegistry::getInstance().activateApp(app);
-                                status->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
-                            }
-                            else
-                            {
-                                LOG4CPLUS_INFO_EXT(mLogger, " There is an active item, so we do nothing");
-                            }
-                        }
-                        else
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, " Application's auto-activate id " << app->getAutoActivateID() << " doesn't match the one from the last active application - " << core->mLastAutoActivateId);
-                        }
-*/
                         status->set_hmiLevel(app->getApplicationHMIStatusLevel());
                         status->set_audioStreamingState(app->getApplicationAudioStreamingState());
                         status->set_systemContext(app->getSystemContext());
@@ -2019,12 +1882,6 @@ namespace NsAppManager
                     return;
                 }
 
-                core->mLastAutoActivateId = app->getAutoActivateID();
-                if(!core->serializeToFile(core->mAutoActivateIdFileName, core->mLastAutoActivateId))
-                {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "Cannot serialize auto-activate id!");
-                }
-
                 Application* currentApp = AppMgrRegistry::getInstance().getActiveItem();
                 if(currentApp)
                 {
@@ -2283,12 +2140,6 @@ namespace NsAppManager
                     application->setVrSynonyms(vrSynonyms);
                 }
 
-/*                if ( registerRequest-> get_autoActivateID() )
-                {
-                    const std::string& autoActivateID = *registerRequest->get_autoActivateID();
-                    application->setAutoActivateID(autoActivateID);
-                }
-*/
                 application->setIsMediaApplication(isMediaApplication);
                 application->setSyncMsgVersion(syncMsgVersion);
                 application->setSystemContext(NsAppLinkRPC::SystemContext_v2::SYSCTXT_MAIN);
@@ -2328,12 +2179,6 @@ namespace NsAppManager
                 {
                     bool usesVehicleData = registerRequest->get_usesVehicleData();
                     application->setUsesVehicleData(usesVehicleData);
-                }
-
-                if ( registerRequest-> get_autoActivateID() )
-                {
-                    const std::string& autoActivateID = *registerRequest->get_autoActivateID();
-                    application->setAutoActivateID(autoActivateID);
                 }
 
                 application->setIsMediaApplication(isMediaApplication);
