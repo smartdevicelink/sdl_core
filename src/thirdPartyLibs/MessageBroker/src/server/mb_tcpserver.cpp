@@ -8,6 +8,7 @@
 #include <cerrno>
 #include <iostream>
 #include <algorithm>
+#include <assert.h>
 
 #include "MBDebugHelper.h"
 
