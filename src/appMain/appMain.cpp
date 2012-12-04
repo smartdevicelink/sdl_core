@@ -259,7 +259,7 @@ int main(int argc, char** argv)
     }
     /**********************************/
 
-    transportManager->scanForNewDevices();
+//    transportManager->scanForNewDevices();
     while(true)
     {
         sleep(100500);
