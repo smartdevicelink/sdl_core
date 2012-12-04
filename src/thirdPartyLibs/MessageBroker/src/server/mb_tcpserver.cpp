@@ -71,7 +71,7 @@ namespace NsMessageBroker
          if (isWebSocket(fd))
          {
             mWebSocketHandler.parseWebSocketData(buf, (unsigned int&)nb);
-            assert(nb > RECV_BUFFER_LENGTH);
+            assert(nb < RECV_BUFFER_LENGTH);
          }
          std::string msg = std::string(buf, nb);
          DBG_MSG(("Received from %d: %s, length: %d\n", fd, msg.c_str(), nb));
