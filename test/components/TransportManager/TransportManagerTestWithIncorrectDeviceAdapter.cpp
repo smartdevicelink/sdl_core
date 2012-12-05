@@ -143,6 +143,8 @@ TEST(TransportManager, IncorrectDeviceAdapter)
 
     transportManager.onFrameReceived(mockDeviceAdapter, validConnectionHandle, invalidFrameData, sizeof(invalidFrameData));
 
+    // Frame result is now expected even if we do not send any frame before
+    EXPECT_CALL(mockDataListener, onFrameSendCompleted(validConnectionHandle, 20, NsAppLink::NsTransportManager::SendStatusOK)).Times(1).RetiresOnSaturation();
     transportManager.onFrameSendCompleted(mockDeviceAdapter, validConnectionHandle, 20, NsAppLink::NsTransportManager::SendStatusOK);
 
     int userData = 123;
@@ -150,11 +152,14 @@ TEST(TransportManager, IncorrectDeviceAdapter)
     EXPECT_CALL(mockDataListener, onFrameSendCompleted(validConnectionHandle, userData, NsAppLink::NsTransportManager::SendStatusOK)).Times(1).RetiresOnSaturation();
     transportManager.onFrameSendCompleted(mockDeviceAdapter, validConnectionHandle, userData, NsAppLink::NsTransportManager::SendStatusOK);
 
+    sleep(1); //We must wait for sending previous callbacks while applicationDisconnect can shutdown connection thread
+    
     EXPECT_CALL(mockDeviceListener, onApplicationDisconnected(::testing::Eq(deviceInfo), validConnectionHandle)).Times(1).RetiresOnSaturation();
     transportManager.onApplicationDisconnected(mockDeviceAdapter, deviceInfo, validConnectionHandle);
 
     transportManager.onApplicationDisconnected(mockDeviceAdapter, deviceInfo, validConnectionHandle);
 
+    
     deviceList.clear();
     internalDeviceList.clear();
 
@@ -163,6 +168,7 @@ TEST(TransportManager, IncorrectDeviceAdapter)
 
     transportManager.onApplicationConnected(mockDeviceAdapter, deviceInfo, validConnectionHandle);
 
+    //sleep(2); return;
     sleep(1);
 }
 
