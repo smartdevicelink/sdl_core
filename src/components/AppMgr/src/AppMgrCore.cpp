@@ -292,6 +292,7 @@ namespace NsAppManager
                         response->set_speechCapabilities(core->mSpeechCapabilitiesV2.get());
                         response->set_vrCapabilities(core->mVrCapabilitiesV2.get());
                         response->set_syncMsgVersion(app->getSyncMsgVersion());
+                        response->set_softButtonCapabilities(core->mSoftButtonCapabilities.get());
                         response->set_success(true);
                         response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
 
@@ -1284,6 +1285,10 @@ namespace NsAppManager
                 core->mDisplayCapabilitiesV2 = (*(NsAppLinkRPCV2::DisplayCapabilities*)&uiCaps->get_displayCapabilities());
                 core->mHmiZoneCapabilitiesV1.set( uiCaps->get_hmiZoneCapabilities() );
                 core->mHmiZoneCapabilitiesV2.set( *(std::vector<NsAppLinkRPCV2::HmiZoneCapabilities>*)&uiCaps->get_hmiZoneCapabilities() );
+                if(uiCaps->get_softButtonCapabilities())
+                {
+                    core->mSoftButtonCapabilities.set(*uiCaps->get_softButtonCapabilities());
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONCOMMAND:

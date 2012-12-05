@@ -241,6 +241,7 @@ namespace NsAppManager
         CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities> mSpeechCapabilitiesV1;
         CapabilitiesContainer<NsAppLinkRPCV2::VrCapabilities> mVrCapabilitiesV2;
         CapabilitiesContainer<NsAppLinkRPCV2::SpeechCapabilities> mSpeechCapabilitiesV2;
+        CapabilitiesContainer<NsAppLinkRPCV2::SoftButtonCapabilities> mSoftButtonCapabilities;
         ButtonMapping    mButtonsMapping;
         MessageMapping   mMessageMapping;
         RequestMapping   mRequestMapping;
