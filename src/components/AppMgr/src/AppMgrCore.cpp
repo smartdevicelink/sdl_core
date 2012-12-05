@@ -2055,6 +2055,15 @@ namespace NsAppManager
                     const NsConnectionHandler::CDevice& device = it->second;
                     list.push_back(device.getUserFriendlyName());
                 }
+                if ( list.empty() )
+                {
+                    list.push_back("");
+                    response->setResult(NsAppLinkRPC::Result::GENERIC_ERROR);
+                }
+                else
+                {
+                    response->setResult(NsAppLinkRPC::Result::SUCCESS);
+                }
                 response->set_deviceList(list);
                 HMIHandler::getInstance().sendResponse(response);
                 return;
