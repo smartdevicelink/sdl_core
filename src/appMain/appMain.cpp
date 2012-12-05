@@ -132,6 +132,8 @@ int main(int argc, char** argv)
 
     jsonHandler.setRPCMessagesObserver(&appMgr);
 
+    connectionHandler -> setConnectionHandlerObserver(&appMgr);
+
     appMgr.setJsonHandler(&jsonHandler);
 
     NsMessageBroker::CMessageBroker *pMessageBroker = NsMessageBroker::CMessageBroker::getInstance();
