@@ -952,7 +952,7 @@ namespace NsAppManager
             case NsAppLinkRPC::Marshaller::METHOD_PERFORMINTERACTION_RESPONSE:
             case NsAppLinkRPC::Marshaller::METHOD_SETMEDIACLOCKTIMER_RESPONSE:
             case NsAppLinkRPC::Marshaller::METHOD_UNREGISTERAPPINTERFACE_RESPONSE:
-            case NsAppLinkRPCV2::Marshaller::METHOD_PUTFILE_RESPONSE:
+            /*case NsAppLinkRPCV2::Marshaller::METHOD_PUTFILE_RESPONSE:
             case NsAppLinkRPCV2::Marshaller::METHOD_DELETEFILE_RESPONSE:
             case NsAppLinkRPCV2::Marshaller::METHOD_LISTFILES_RESPONSE:
             case NsAppLinkRPCV2::Marshaller::METHOD_SLIDER_RESPONSE:
@@ -1144,7 +1144,7 @@ namespace NsAppManager
                 slider->set_timeout(request->get_timeout());
                 HMIHandler::getInstance().sendRequest(slider);
                 break;
-            }
+            }*/
 
             case NsAppLinkRPC::Marshaller::METHOD_INVALID:
             default:

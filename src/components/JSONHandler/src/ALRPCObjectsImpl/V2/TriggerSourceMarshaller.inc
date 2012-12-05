@@ -10,6 +10,9 @@
 #define MAX_HASH_VALUE 4
 /* maximum key range = 3, duplicates = 0 */
 
+namespace NsAppLinkRPCV2
+{
+
 class TriggerSource_intHash
 {
 private:
@@ -56,4 +59,6 @@ TriggerSource_intHash::getPointer (register const char *str, register unsigned i
           }
     }
   return 0;
+}
+
 }

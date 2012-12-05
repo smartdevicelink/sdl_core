@@ -9,7 +9,8 @@
 #define MIN_HASH_VALUE 7
 #define MAX_HASH_VALUE 11
 /* maximum key range = 5, duplicates = 0 */
-
+namespace NsAppLinkRPCV2
+{
 class AudioStreamingState_intHash
 {
 private:
@@ -58,4 +59,5 @@ AudioStreamingState_intHash::getPointer (register const char *str, register unsi
           }
     }
   return 0;
+}
 }

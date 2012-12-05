@@ -10,6 +10,9 @@
 #define MAX_HASH_VALUE 5
 /* maximum key range = 2, duplicates = 0 */
 
+namespace NsAppLinkRPCV2
+{
+
 class HmiZoneCapabilities_intHash
 {
 private:
@@ -55,4 +58,6 @@ HmiZoneCapabilities_intHash::getPointer (register const char *str, register unsi
           }
     }
   return 0;
+}
+
 }

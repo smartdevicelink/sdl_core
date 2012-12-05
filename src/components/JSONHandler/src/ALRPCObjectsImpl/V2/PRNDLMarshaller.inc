@@ -29,6 +29,9 @@
 #error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
 #endif
 
+namespace NsAppLinkRPCV2
+{
+
 
 #define TOTAL_KEYWORDS 14
 #define MIN_WORD_LENGTH 4
@@ -143,4 +146,6 @@ PRNDL_intHash::getPointer (register const char *str, register unsigned int len)
           }
     }
   return 0;
+}
+
 }

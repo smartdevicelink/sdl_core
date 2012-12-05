@@ -58,29 +58,10 @@ set (GENERATED_SOURCES1
 ./src/ALRPCObjectsImpl/V1/EncodedSyncPData_requestMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/EncodedSyncPData_response.cpp
 ./src/ALRPCObjectsImpl/V1/EncodedSyncPData_responseMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/GenericResponse_response.cpp
-./src/ALRPCObjectsImpl/V1/GenericResponse_responseMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/GlobalPropertyMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/HMIApplication.cpp
 ./src/ALRPCObjectsImpl/V1/HMIApplicationMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/HMILevelMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/HmiZoneCapabilitiesMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/InteractionModeMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/LanguageMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/Marshaller.cpp
-./src/ALRPCObjectsImpl/V1/MediaClockFormatMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/MenuParams.cpp
-./src/ALRPCObjectsImpl/V1/MenuParamsMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/OnAppInterfaceUnregistered.cpp
-./src/ALRPCObjectsImpl/V1/OnAppInterfaceUnregisteredMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/OnButtonEvent.cpp
-./src/ALRPCObjectsImpl/V1/OnButtonEventMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/OnButtonPress.cpp
-./src/ALRPCObjectsImpl/V1/OnButtonPressMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/OnCommand.cpp
-./src/ALRPCObjectsImpl/V1/OnCommandMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/OnDriverDistraction.cpp
-./src/ALRPCObjectsImpl/V1/OnDriverDistractionMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/OnEncodedSyncPData.cpp
 ./src/ALRPCObjectsImpl/V1/OnEncodedSyncPDataMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/OnHMIStatus.cpp
@@ -225,8 +206,6 @@ set (GENERATED_SOURCES6
 ./src/ALRPCObjectsImpl/V2/EndAudioPassThru_responseMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/FileTypeMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/FunctionIDMarshaller.cpp
-./src/ALRPCObjectsImpl/V2/GenericResponse_response.cpp
-./src/ALRPCObjectsImpl/V2/GenericResponse_responseMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/GetDTCs_request.cpp
 ./src/ALRPCObjectsImpl/V2/GetDTCs_requestMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/GetDTCs_response.cpp
@@ -238,15 +217,12 @@ set (GENERATED_SOURCES6
 ./src/ALRPCObjectsImpl/V2/GlobalPropertyMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/GPSData.cpp
 ./src/ALRPCObjectsImpl/V2/GPSDataMarshaller.cpp
-./src/ALRPCObjectsImpl/V2/HMILevelMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/HMIPermissions.cpp
 ./src/ALRPCObjectsImpl/V2/HMIPermissionsMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/HmiZoneCapabilitiesMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/Image.cpp
 ./src/ALRPCObjectsImpl/V2/ImageMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/ImageTypeMarshaller.cpp
-./src/ALRPCObjectsImpl/V2/InteractionModeMarshaller.cpp
-./src/ALRPCObjectsImpl/V2/LanguageMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/ListFiles_request.cpp
 ./src/ALRPCObjectsImpl/V2/ListFiles_requestMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/ListFiles_response.cpp
@@ -264,18 +240,13 @@ set (GENERATED_SOURCES6
 ./src/ALRPCObjectsImpl/V2/OnButtonEventMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/OnButtonPress.cpp
 ./src/ALRPCObjectsImpl/V2/OnButtonPressMarshaller.cpp
-./src/ALRPCObjectsImpl/V2/OnCommand.cpp
+
 )
 set (GENERATED_SOURCES4
-./src/ALRPCObjectsImpl/V2/OnCommandMarshaller.cpp
-./src/ALRPCObjectsImpl/V2/OnDriverDistraction.cpp
-./src/ALRPCObjectsImpl/V2/OnDriverDistractionMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/OnEncodedSyncPData.cpp
 ./src/ALRPCObjectsImpl/V2/OnEncodedSyncPDataMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/OnHMIStatus.cpp
 ./src/ALRPCObjectsImpl/V2/OnHMIStatusMarshaller.cpp
-./src/ALRPCObjectsImpl/V2/OnLanguageChange.cpp
-./src/ALRPCObjectsImpl/V2/OnLanguageChangeMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/OnPermissionsChange.cpp
 ./src/ALRPCObjectsImpl/V2/OnPermissionsChangeMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/OnTBTClientState.cpp
@@ -388,8 +359,6 @@ set (GENERATED_SOURCES4
 ./src/ALRPCObjectsImpl/V2/TTSChunk.cpp
 ./src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/Turn.cpp
-)
-set (GENERATED_SOURCES5
 ./src/ALRPCObjectsImpl/V2/TurnMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/UnregisterAppInterface_request.cpp
 ./src/ALRPCObjectsImpl/V2/UnregisterAppInterface_requestMarshaller.cpp
@@ -417,6 +386,27 @@ set (GENERATED_SOURCES5
 ./src/ALRPCObjectsImpl/V2/VrCapabilitiesMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/VrHelpItem.cpp
 ./src/ALRPCObjectsImpl/V2/VrHelpItemMarshaller.cpp
+)
+set (GENERATED_SOURCES5
+)
+
+set (GENERATED_SOURCES7
+./src/ALRPCObjectsImpl/V1/OnAppInterfaceUnregistered.cpp
+./src/ALRPCObjectsImpl/V1/OnAppInterfaceUnregisteredMarshaller.cpp
+./src/ALRPCObjectsImpl/V1/MenuParams.cpp
+./src/ALRPCObjectsImpl/V1/MenuParamsMarshaller.cpp
+./src/ALRPCObjectsImpl/V1/GenericResponse_response.cpp
+./src/ALRPCObjectsImpl/V1/GenericResponse_responseMarshaller.cpp
+./src/ALRPCObjectsImpl/V1/OnButtonEvent.cpp
+./src/ALRPCObjectsImpl/V1/OnButtonEventMarshaller.cpp
+./src/ALRPCObjectsImpl/V1/OnButtonPress.cpp
+./src/ALRPCObjectsImpl/V1/OnButtonPressMarshaller.cpp
+./src/ALRPCObjectsImpl/V1/OnCommand.cpp
+./src/ALRPCObjectsImpl/V1/OnCommandMarshaller.cpp
+./src/ALRPCObjectsImpl/V1/OnDriverDistraction.cpp
+./src/ALRPCObjectsImpl/V1/OnDriverDistractionMarshaller.cpp
+./src/ALRPCObjectsImpl/V1/MediaClockFormatMarshaller.cpp
+./src/ALRPCObjectsImpl/V1/HMILevelMarshaller.cpp
 )
 
 set (GENERATED_RPC_SOURCES
@@ -458,6 +448,8 @@ set (GENERATED_RPC_SOURCES
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetCapabilitiesResponseMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnCommand.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnCommandMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnDeviceChosen.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnDeviceChosenMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnDriverDistraction.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnDriverDistractionMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnLanguageChange.cpp
@@ -593,4 +585,19 @@ add_library("JSONHandler" ${SOURCES}
         ${GENERATED_SOURCES4}
         ${GENERATED_SOURCES5}
         ${GENERATED_SOURCES6}
-        ${GENERATED_RPC_SOURCES})
+        ${GENERATED_SOURCES7}
+        ${GENERATED_RPC_SOURCES}
+./src/ALRPCObjectsImpl/V2/OnDriverDistraction.cpp
+./src/ALRPCObjectsImpl/V2/OnDriverDistractionMarshaller.cpp
+./src/ALRPCObjectsImpl/V2/OnCommand.cpp
+./src/ALRPCObjectsImpl/V2/OnCommandMarshaller.cpp
+./src/ALRPCObjectsImpl/V2/OnLanguageChange.cpp
+./src/ALRPCObjectsImpl/V2/OnLanguageChangeMarshaller.cpp
+./src/ALRPCObjectsImpl/V2/GenericResponse_response.cpp
+./src/ALRPCObjectsImpl/V2/GenericResponse_responseMarshaller.cpp
+./src/ALRPCObjectsImpl/V1/InteractionModeMarshaller.cpp
+./src/ALRPCObjectsImpl/V1/LanguageMarshaller.cpp
+./src/ALRPCObjectsImpl/V2/HMILevelMarshaller.cpp
+./src/ALRPCObjectsImpl/V2/LanguageMarshaller.cpp
+./src/ALRPCObjectsImpl/V2/InteractionModeMarshaller.cpp
+./src/ALRPCObjectsImpl/V1/Marshaller.cpp)

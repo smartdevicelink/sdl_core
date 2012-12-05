@@ -10,6 +10,9 @@
 #define MAX_HASH_VALUE 7
 /* maximum key range = 2, duplicates = 0 */
 
+namespace NsAppLinkRPCV2
+{
+
 class ImageType_intHash
 {
 private:
@@ -55,4 +58,6 @@ ImageType_intHash::getPointer (register const char *str, register unsigned int l
           }
     }
   return 0;
+}
+
 }

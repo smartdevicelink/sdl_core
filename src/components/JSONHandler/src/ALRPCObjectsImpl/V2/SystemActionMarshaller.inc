@@ -10,6 +10,9 @@
 #define MAX_HASH_VALUE 14
 /* maximum key range = 4, duplicates = 0 */
 
+namespace NsAppLinkRPCV2
+{
+
 class SystemAction_intHash
 {
 private:
@@ -60,4 +63,6 @@ SystemAction_intHash::getPointer (register const char *str, register unsigned in
           }
     }
   return 0;
+}
+
 }

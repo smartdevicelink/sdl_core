@@ -10,6 +10,9 @@
 #define MAX_HASH_VALUE 5
 /* maximum key range = 4, duplicates = 0 */
 
+namespace NsAppLinkRPCV2
+{
+
 class TirePressureTellTale_intHash
 {
 private:
@@ -58,4 +61,6 @@ TirePressureTellTale_intHash::getPointer (register const char *str, register uns
           }
     }
   return 0;
+}
+
 }

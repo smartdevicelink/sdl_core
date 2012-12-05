@@ -10,6 +10,9 @@
 #define MAX_HASH_VALUE 13
 /* maximum key range = 6, duplicates = 0 */
 
+namespace NsAppLinkRPCV2
+{
+
 class TextAlignment_intHash
 {
 private:
@@ -58,4 +61,6 @@ TextAlignment_intHash::getPointer (register const char *str, register unsigned i
           }
     }
   return 0;
+}
+
 }
