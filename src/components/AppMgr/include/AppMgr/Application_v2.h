@@ -8,6 +8,7 @@
 #include "JSONHandler/ALRPCObjects/V2/AppType.h"
 #include "JSONHandler/ALRPCObjects/V2/HMILevel.h"
 #include "JSONHandler/ALRPCObjects/V2/SyncMsgVersion.h"
+#include "JSONHandler/ALRPCObjects/V2/TTSChunk.h"
 
 namespace NsAppManager
 {
@@ -15,6 +16,11 @@ namespace NsAppManager
      * \brief Application types
      */
     typedef std::vector<NsAppLinkRPCV2::AppType> AppTypes;
+
+    /**
+     * \brief TTS name
+     */
+    typedef std::vector<NsAppLinkRPCV2::TTSChunk> TTSName;
 
     /**
      * \brief class Application acts as a metaphor for every mobile application of protocol v2 being registered on HMI
@@ -133,6 +139,18 @@ namespace NsAppManager
          */
         const NsAppLinkRPCV2::SyncMsgVersion& getSyncMsgVersion( ) const;
 
+        /**
+         * \brief Set application text-to-speech name
+         * \param value application text-to-speech name
+         */
+        void setTtsName(const TTSName& value);
+
+        /**
+         * \brief retrieve application text-to-speech name
+         * \return application text-to-speech name
+         */
+        const TTSName& getTtsName( ) const;
+
     private:
 
         /**
@@ -149,6 +167,7 @@ namespace NsAppManager
 
    //     std::string mAppID;
         AppTypes mAppType;
+        TTSName mTtsName;
     };
 }
 
