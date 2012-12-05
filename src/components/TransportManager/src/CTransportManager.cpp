@@ -14,6 +14,7 @@ using namespace NsAppLink::NsTransportManager;
 //TODO Fix potential crash due to not thread-safe access to shutdown flag
 //TODO Make function calls from transport manager client thread-safe
 //TODO Check all structures for copy constructor and operators implementation
+//TODO Move AppConnected/Disconnected callbacks calling to ConnectionThread
 
 NsAppLink::NsTransportManager::CTransportManager::CTransportManager(void):
 mDeviceAdapters(),
@@ -367,22 +368,30 @@ void CTransportManager::onApplicationDisconnected(IDeviceAdapter* DeviceAdapter,
     }
 
     pthread_mutex_lock(&mDataListenersMutex);
-    bool bConnectionExist = isConnectionAvailable(ConnectionHandle);
+    SConnectionInfo* pConnection = getConnection(ConnectionHandle);
     pthread_mutex_unlock(&mDataListenersMutex);
 
-    if(false == bConnectionExist)
+    if(0 == pConnection)
     {
         TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "Thread for connection does not exist");
         return;
     }
 
     pthread_mutex_lock(&mDataListenersMutex);
-    stopConnection(ConnectionHandle);
-    pthread_mutex_unlock(&mDataListenersMutex);
+    if(true == pConnection->mTerminateFlag)
+    {
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Connection is already in shutdown state.");
+        pthread_mutex_unlock(&mDataListenersMutex);
+    }
+    else
+    {
+        stopConnection(ConnectionHandle);
+        pthread_mutex_unlock(&mDataListenersMutex);
 
-    // Sending callback
-    SDeviceListenerCallback cb(CTransportManager::DeviceListenerCallbackType_ApplicationDisconnected, DisconnectedDevice, ConnectionHandle);
-    sendDeviceCallback(cb);
+        // Sending callback
+        SDeviceListenerCallback cb(CTransportManager::DeviceListenerCallbackType_ApplicationDisconnected, DisconnectedDevice, ConnectionHandle);
+        sendDeviceCallback(cb);
+    }
 
     TM_CH_LOG4CPLUS_TRACE_EXT(mLogger, ConnectionHandle, "END of onApplicationDisconnected");
 }
@@ -790,6 +799,7 @@ void CTransportManager::dataCallbacksThread(const tConnectionHandle ConnectionHa
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Terminating connection thread");
 
     // Deleting data associated with connection handle
+    delete connectionInfo;
     mConnections.erase(ConnectionHandle);
     pthread_mutex_unlock(&mDataListenersMutex);
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Connection thread terminated");
