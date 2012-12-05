@@ -39,8 +39,6 @@ namespace NsAppManager
         :mNgnMediaScreenAppName(app.getNgnMediaScreenAppName())
         ,mName(app.getName())
         ,m_bIsMediaApplication(app.getIsMediaApplication())
-        ,mHMIStatusLevel(app.getApplicationHMIStatusLevel())
-        ,mSyncMsgVersion(app.getSyncMsgVersion())
         ,mConnectionID(app.getConnectionID())
         ,mSessionID(app.getSessionID())
         ,mProtocolVersion(app.getProtocolVersion())
@@ -66,24 +64,6 @@ namespace NsAppManager
     {
         return this->getSessionID() == item.getSessionID()
             && this->getConnectionID() == item.getConnectionID();
-    }
-
-    /**
-     * \brief retrieve aplication HMI status level
-     * \return HMI status level of application
-     */
-    const NsAppLinkRPC::HMILevel::HMILevelInternal& Application::getApplicationHMIStatusLevel( ) const
-    {
-        return mHMIStatusLevel;
-    }
-
-    /**
-     * \brief Set application HMI status level
-     * \param hmiLevel HMI status level of application
-     */
-    void Application::setApplicationHMIStatusLevel( const NsAppLinkRPC::HMILevel::HMILevelInternal& hmiLevel )
-    {
-        mHMIStatusLevel = hmiLevel;
     }
 
     /**
@@ -114,15 +94,6 @@ namespace NsAppManager
     }
 
     /**
-     * \brief Set application sync message version
-     * \param value application sync message version
-     */
-    void Application::setSyncMsgVersion(NsAppLinkRPC::SyncMsgVersion value)
-    {
-        mSyncMsgVersion = value;
-    }
-
-    /**
      * \brief retrieve application NGN media screen application name
      * \return application NGN media screen application name
      */
@@ -147,15 +118,6 @@ namespace NsAppManager
     bool Application::getIsMediaApplication( ) const
     {
         return m_bIsMediaApplication;
-    }
-
-    /**
-     * \brief retrieve application sync message version
-     * \return application sync msg version
-     */
-    const NsAppLinkRPC::SyncMsgVersion& Application::getSyncMsgVersion( ) const
-    {
-        return mSyncMsgVersion;
     }
 
     /**

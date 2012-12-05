@@ -7,8 +7,6 @@
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
 
-#include "JSONHandler/ALRPCObjects/V1/SyncMsgVersion.h"
-#include "JSONHandler/ALRPCObjects/V1/HMILevel.h"
 #include "AppMgr/MenuMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/AppMenus.h"
@@ -61,18 +59,6 @@ namespace NsAppManager
         bool operator==(const Application& item) const;
 
         /**
-         * \brief Set application HMI status level
-         * \param hmiLevel HMI status level of application
-         */
-        void setApplicationHMIStatusLevel( const NsAppLinkRPC::HMILevel::HMILevelInternal& hmiLevel );
-
-        /**
-         * \brief retrieve aplication HMI status level
-         * \return HMI status level of application
-         */
-        const NsAppLinkRPC::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
-
-        /**
          * \brief Set application NGN media screen app name
          * \param value application NGN media screen app name
          */
@@ -91,12 +77,6 @@ namespace NsAppManager
         void setIsMediaApplication(bool value);
 
         /**
-         * \brief Set application sync message version
-         * \param value application sync message version
-         */
-        void setSyncMsgVersion(NsAppLinkRPC::SyncMsgVersion value);
-
-        /**
          * \brief retrieve application NGN media screen application name
          * \return application NGN media screen application name
          */
@@ -113,12 +93,6 @@ namespace NsAppManager
          * \return is the application a media application
          */
         bool getIsMediaApplication( ) const;
-
-        /**
-         * \brief retrieve application sync message version
-         * \return application sync msg version
-         */
-        const NsAppLinkRPC::SyncMsgVersion& getSyncMsgVersion( ) const;
 
         /**
          * \brief retrieve application session ID
@@ -305,8 +279,6 @@ namespace NsAppManager
         std::string mNgnMediaScreenAppName;
         std::vector<std::string> mVrSynonyms;
         bool m_bIsMediaApplication;
-        NsAppLinkRPC::SyncMsgVersion mSyncMsgVersion;
-        NsAppLinkRPC::HMILevel::HMILevelInternal mHMIStatusLevel;
         MenuMapping mMenuMapping;
         CommandMapping   mCommandMapping;
         AppMenus mMenus;
