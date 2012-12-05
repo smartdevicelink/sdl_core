@@ -196,7 +196,7 @@ namespace NsAppManager
          * \param sessionID an id of the session which will be associated with the application
          * \return A instance of RegistryItem created for application
          */
-        const RegistryItem* registerApplication(NsAppLinkRPC::ALRPCRequest *request , const unsigned int &connectionID, const unsigned char &sessionID);
+        const RegistryItem* registerApplication(NsAppLinkRPC::ALRPCMessage *request , const unsigned int &connectionID, const unsigned char &sessionID);
 
         /**
          * \brief unregister an application associated with the given session
@@ -232,10 +232,11 @@ namespace NsAppManager
         AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
         CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities> mButtonCapabilitiesV1;
-        CapabilitiesContainer<NsAppLinkRPCV2::PresetBankCapabilities> mButtonCapabilitiesV2;
+        CapabilitiesContainer<NsAppLinkRPCV2::ButtonCapabilities> mButtonCapabilitiesV2;
         NsAppLinkRPC::DisplayCapabilities mDisplayCapabilitiesV1;
         NsAppLinkRPCV2::DisplayCapabilities mDisplayCapabilitiesV2;
-        CapabilitiesContainer<NsAppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilities;
+        CapabilitiesContainer<NsAppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilitiesV1;
+        CapabilitiesContainer<NsAppLinkRPCV2::HmiZoneCapabilities> mHmiZoneCapabilitiesV2;
         CapabilitiesContainer<NsAppLinkRPC::VrCapabilities> mVrCapabilitiesV1;
         CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities> mSpeechCapabilitiesV1;
         CapabilitiesContainer<NsAppLinkRPCV2::VrCapabilities> mVrCapabilitiesV2;
