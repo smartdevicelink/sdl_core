@@ -65,9 +65,7 @@ add_test(test_TransportManagerHandleGenerators test_TransportManagerHandleGenera
 add_executable("test_TransportManagerTCPSimulator" ${SOURCES_TCP_SIMULATOR})
 # It doesn't require any additional libraries at the moment
 
-#add_executable("test_TransportManagerDraftTest" ${SOURCES_DRAFT_TEST})
-#target_link_libraries("test_TransportManagerDraftTest" ${LIBRARIES})
-#file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable("test_TransportManagerTestWithCorrectDeviceAdapter" ${SOURCES_TEST_WITH_CORRECT_DEVICE_ADAPTER})
 target_link_libraries("test_TransportManagerTestWithCorrectDeviceAdapter" ${LIBRARIES})
