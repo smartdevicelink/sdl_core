@@ -2069,6 +2069,7 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendResponse(response);
                 return;
             }
+
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
                 LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message " << msg->getMethod() << " has been received!");
@@ -2422,6 +2423,21 @@ namespace NsAppManager
     void AppMgrCore::setDeviceList(const NsConnectionHandler::tDeviceList &deviceList)
     {
         mDeviceList.setDeviceList(deviceList);
+        NsRPC2Communication::AppLinkCore::OnDeviceListUpdated* deviceListUpdated = new NsRPC2Communication::AppLinkCore::OnDeviceListUpdated;
+        DeviceNamesList list;
+        const NsConnectionHandler::tDeviceList& devList = mDeviceList.getDeviceList();
+        for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
+        {
+            const NsConnectionHandler::CDevice& device = it->second;
+            list.push_back(device.getUserFriendlyName());
+        }
+        if ( list.empty() )
+        {
+            list.push_back("");
+        }
+
+        deviceListUpdated->set_deviceList(list);
+        HMIHandler::getInstance().sendNotification(deviceListUpdated);
     }
 
     /**
