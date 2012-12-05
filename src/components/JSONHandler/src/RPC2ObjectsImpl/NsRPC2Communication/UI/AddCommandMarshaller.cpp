@@ -1,14 +1,14 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/AddCommand.h"
-#include "../src/ALRPCObjectsImpl/MenuParamsMarshaller.h"
-#include "../src/ALRPCObjectsImpl/ImageMarshaller.h"
-#include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/MenuParamsMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ImageMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AddCommandMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -50,7 +50,7 @@ bool AddCommandMarshaller::checkIntegrityConst(const AddCommand& s)
 
   if(!NsAppLinkRPC::MenuParamsMarshaller::checkIntegrityConst(s.menuParams))  return false;
 
-  if(s.cmdIcon && (!NsAppLinkRPC::ImageMarshaller::checkIntegrityConst(s.cmdIcon[0])))  return false;
+  if(s.cmdIcon && (!NsAppLinkRPCV2::ImageMarshaller::checkIntegrityConst(s.cmdIcon[0])))  return false;
 
   return true;
 }
@@ -70,7 +70,7 @@ Json::Value AddCommandMarshaller::toJSON(const AddCommand& e)
   json["params"]["cmdId"]=Json::Value(e.cmdId);;
   json["params"]["menuParams"]=NsAppLinkRPC::MenuParamsMarshaller::toJSON(e.menuParams);;
   if(e.cmdIcon)
-    json["params"]["cmdIcon"]=NsAppLinkRPC::ImageMarshaller::toJSON(e.cmdIcon[0]);;
+    json["params"]["cmdIcon"]=NsAppLinkRPCV2::ImageMarshaller::toJSON(e.cmdIcon[0]);;
   json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
@@ -100,8 +100,8 @@ bool AddCommandMarshaller::fromJSON(const Json::Value& json,AddCommand& c)
     c.cmdIcon=0;
     if(js.isMember("cmdIcon"))
     {
-      c.cmdIcon=new NsAppLinkRPC::Image();
-      if(!NsAppLinkRPC::ImageMarshaller::fromJSON(js["cmdIcon"],c.cmdIcon[0]))  return false;
+      c.cmdIcon=new NsAppLinkRPCV2::Image();
+      if(!NsAppLinkRPCV2::ImageMarshaller::fromJSON(js["cmdIcon"],c.cmdIcon[0]))  return false;
     }
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;

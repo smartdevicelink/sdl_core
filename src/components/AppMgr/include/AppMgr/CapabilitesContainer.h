@@ -18,9 +18,11 @@ namespace log4cplus
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetCapabilitiesResponse.h"
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/VR/GetCapabilitiesResponse.h"
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/TTS/GetCapabilitiesResponse.h"
-#include "JSONHandler/ALRPCObjects/ButtonCapabilities_v2.h"
-#include "JSONHandler/ALRPCObjects/SpeechCapabilities_v2.h"
-#include "JSONHandler/ALRPCObjects/VrCapabilities_v2.h"
+#include "JSONHandler/ALRPCObjects/V2/ButtonCapabilities.h"
+#include "JSONHandler/ALRPCObjects/V2/PresetBankCapabilities.h"
+#include "JSONHandler/ALRPCObjects/V2/SpeechCapabilities.h"
+#include "JSONHandler/ALRPCObjects/V2/VrCapabilities.h"
+#include "JSONHandler/ALRPCObjects/V2/HmiZoneCapabilities.h"
 
 namespace NsAppManager
 {

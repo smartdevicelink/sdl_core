@@ -2,9 +2,11 @@
 #define APPLICATION_V1_H
 
 #include "AppMgr/Application.h"
-#include "JSONHandler/ALRPCObjects/AudioStreamingState.h"
-#include "JSONHandler/ALRPCObjects/SystemContext.h"
-#include "JSONHandler/ALRPCObjects/Language.h"
+#include "JSONHandler/ALRPCObjects/V1/AudioStreamingState.h"
+#include "JSONHandler/ALRPCObjects/V1/SystemContext.h"
+#include "JSONHandler/ALRPCObjects/V1/Language.h"
+#include "JSONHandler/ALRPCObjects/V1/SyncMsgVersion.h"
+#include "JSONHandler/ALRPCObjects/V1/HMILevel.h"
 
 namespace NsAppManager
 {
@@ -89,6 +91,30 @@ namespace NsAppManager
          */
         const NsAppLinkRPC::AudioStreamingState& getApplicationAudioStreamingState( ) const;
 
+        /**
+         * \brief Set application HMI status level
+         * \param hmiLevel HMI status level of application
+         */
+        void setApplicationHMIStatusLevel( const NsAppLinkRPC::HMILevel::HMILevelInternal& hmiLevel );
+
+        /**
+         * \brief retrieve aplication HMI status level
+         * \return HMI status level of application
+         */
+        const NsAppLinkRPC::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
+
+        /**
+         * \brief Set application sync message version
+         * \param value application sync message version
+         */
+        void setSyncMsgVersion(NsAppLinkRPC::SyncMsgVersion value);
+
+        /**
+         * \brief retrieve application sync message version
+         * \return application sync msg version
+         */
+        const NsAppLinkRPC::SyncMsgVersion& getSyncMsgVersion( ) const;
+
     private:
 
         /**
@@ -100,6 +126,8 @@ namespace NsAppManager
         NsAppLinkRPC::AudioStreamingState mAudioStreamingState;
         NsAppLinkRPC::Language mHMIDisplayLanguageDesired;
         NsAppLinkRPC::SystemContext mSystemContext;
+        NsAppLinkRPC::HMILevel::HMILevelInternal mHMIStatusLevel;
+        NsAppLinkRPC::SyncMsgVersion mSyncMsgVersion;
         bool m_bUsesVehicleData;
     };
 }

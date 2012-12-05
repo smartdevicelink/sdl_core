@@ -17,8 +17,11 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/DeactivateAppResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/GetAppListMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/GetAppListResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/GetDeviceListMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/GetDeviceListResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppRegisteredMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppUnregisteredMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnDeviceListUpdatedMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/SendDataMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/SendDataResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/GetCapabilitiesMarshaller.h"
@@ -50,10 +53,8 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/DeleteSubMenuResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetCapabilitiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetCapabilitiesResponseMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetDeviceListMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetDeviceListResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnCommandMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnDeviceListUpdatedMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnDeviceChosenMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnDriverDistractionMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnLanguageChangeMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnReadyMarshaller.h"
@@ -86,11 +87,10 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetVehicleTypeResponseMarshaller.h"
 
 /*
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
-
 namespace NsRPC2Communication
 {
 
@@ -107,8 +107,11 @@ public:
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__DEACTIVATEAPPRESPONSE,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLISTRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELIST,
+    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELISTRESPONSE,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPREGISTERED,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPUNREGISTERED,
+    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONDEVICELISTUPDATED,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA,
     METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATARESPONSE,
     METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIES,
@@ -140,10 +143,8 @@ public:
     METHOD_NSRPC2COMMUNICATION_UI__DELETESUBMENURESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIES,
     METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE,
-    METHOD_NSRPC2COMMUNICATION_UI__GETDEVICELIST,
-    METHOD_NSRPC2COMMUNICATION_UI__GETDEVICELISTRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__ONCOMMAND,
-    METHOD_NSRPC2COMMUNICATION_UI__ONDEVICELISTUPDATED,
+    METHOD_NSRPC2COMMUNICATION_UI__ONDEVICECHOSEN,
     METHOD_NSRPC2COMMUNICATION_UI__ONDRIVERDISTRACTION,
     METHOD_NSRPC2COMMUNICATION_UI__ONLANGUAGECHANGE,
     METHOD_NSRPC2COMMUNICATION_UI__ONREADY,
@@ -254,6 +255,28 @@ protected:
     return mNsRPC2Communication_AppLinkCore__GetAppListResponse.toString(res);
   }
 
+// NsRPC2Communication::AppLinkCore::GetDeviceList
+  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::GetDeviceList& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__GetDeviceList.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::AppLinkCore::GetDeviceList& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__GetDeviceList.toString(res);
+  }
+
+// NsRPC2Communication::AppLinkCore::GetDeviceListResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::GetDeviceListResponse& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__GetDeviceListResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::AppLinkCore::GetDeviceListResponse& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__GetDeviceListResponse.toString(res);
+  }
+
 // NsRPC2Communication::AppLinkCore::OnAppRegistered
   static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::OnAppRegistered& res)
   {
@@ -274,6 +297,17 @@ protected:
   static std::string toString(const NsRPC2Communication::AppLinkCore::OnAppUnregistered& res)
   {
     return mNsRPC2Communication_AppLinkCore__OnAppUnregistered.toString(res);
+  }
+
+// NsRPC2Communication::AppLinkCore::OnDeviceListUpdated
+  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::OnDeviceListUpdated& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::AppLinkCore::OnDeviceListUpdated& res)
+  {
+    return mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated.toString(res);
   }
 
 // NsRPC2Communication::AppLinkCore::SendData
@@ -617,28 +651,6 @@ protected:
     return mNsRPC2Communication_UI__GetCapabilitiesResponse.toString(res);
   }
 
-// NsRPC2Communication::UI::GetDeviceList
-  static bool fromString(const std::string& str, NsRPC2Communication::UI::GetDeviceList& res)
-  {
-    return mNsRPC2Communication_UI__GetDeviceList.fromString(str, res);
-  }
-  
-  static std::string toString(const NsRPC2Communication::UI::GetDeviceList& res)
-  {
-    return mNsRPC2Communication_UI__GetDeviceList.toString(res);
-  }
-
-// NsRPC2Communication::UI::GetDeviceListResponse
-  static bool fromString(const std::string& str, NsRPC2Communication::UI::GetDeviceListResponse& res)
-  {
-    return mNsRPC2Communication_UI__GetDeviceListResponse.fromString(str, res);
-  }
-  
-  static std::string toString(const NsRPC2Communication::UI::GetDeviceListResponse& res)
-  {
-    return mNsRPC2Communication_UI__GetDeviceListResponse.toString(res);
-  }
-
 // NsRPC2Communication::UI::OnCommand
   static bool fromString(const std::string& str, NsRPC2Communication::UI::OnCommand& res)
   {
@@ -650,15 +662,15 @@ protected:
     return mNsRPC2Communication_UI__OnCommand.toString(res);
   }
 
-// NsRPC2Communication::UI::OnDeviceListUpdated
-  static bool fromString(const std::string& str, NsRPC2Communication::UI::OnDeviceListUpdated& res)
+// NsRPC2Communication::UI::OnDeviceChosen
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::OnDeviceChosen& res)
   {
-    return mNsRPC2Communication_UI__OnDeviceListUpdated.fromString(str, res);
+    return mNsRPC2Communication_UI__OnDeviceChosen.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::UI::OnDeviceListUpdated& res)
+  static std::string toString(const NsRPC2Communication::UI::OnDeviceChosen& res)
   {
-    return mNsRPC2Communication_UI__OnDeviceListUpdated.toString(res);
+    return mNsRPC2Communication_UI__OnDeviceChosen.toString(res);
   }
 
 // NsRPC2Communication::UI::OnDriverDistraction
@@ -1007,12 +1019,12 @@ private:
   
   static const char* getName(Methods e)
   {
-    return (e>=0 && e<73) ? mHashTable[e].name : NULL;
+    return (e>=0 && e<74) ? mHashTable[e].name : NULL;
   }
   
   static const Methods getIndex(const char* s);
   
-  static const localHash mHashTable[73];
+  static const localHash mHashTable[74];
   friend class Marshaller_intHash;
   
   static ::NsRPC2Communication::RPC2ErrorMarshaller mRPC2ErrorInternal;
@@ -1023,8 +1035,11 @@ private:
   static NsRPC2Communication::AppLinkCore::DeactivateAppResponseMarshaller mNsRPC2Communication_AppLinkCore__DeactivateAppResponse;
   static NsRPC2Communication::AppLinkCore::GetAppListMarshaller mNsRPC2Communication_AppLinkCore__GetAppList;
   static NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller mNsRPC2Communication_AppLinkCore__GetAppListResponse;
+  static NsRPC2Communication::AppLinkCore::GetDeviceListMarshaller mNsRPC2Communication_AppLinkCore__GetDeviceList;
+  static NsRPC2Communication::AppLinkCore::GetDeviceListResponseMarshaller mNsRPC2Communication_AppLinkCore__GetDeviceListResponse;
   static NsRPC2Communication::AppLinkCore::OnAppRegisteredMarshaller mNsRPC2Communication_AppLinkCore__OnAppRegistered;
   static NsRPC2Communication::AppLinkCore::OnAppUnregisteredMarshaller mNsRPC2Communication_AppLinkCore__OnAppUnregistered;
+  static NsRPC2Communication::AppLinkCore::OnDeviceListUpdatedMarshaller mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated;
   static NsRPC2Communication::AppLinkCore::SendDataMarshaller mNsRPC2Communication_AppLinkCore__SendData;
   static NsRPC2Communication::AppLinkCore::SendDataResponseMarshaller mNsRPC2Communication_AppLinkCore__SendDataResponse;
   static NsRPC2Communication::Buttons::GetCapabilitiesMarshaller mNsRPC2Communication_Buttons__GetCapabilities;
@@ -1056,10 +1071,8 @@ private:
   static NsRPC2Communication::UI::DeleteSubMenuResponseMarshaller mNsRPC2Communication_UI__DeleteSubMenuResponse;
   static NsRPC2Communication::UI::GetCapabilitiesMarshaller mNsRPC2Communication_UI__GetCapabilities;
   static NsRPC2Communication::UI::GetCapabilitiesResponseMarshaller mNsRPC2Communication_UI__GetCapabilitiesResponse;
-  static NsRPC2Communication::UI::GetDeviceListMarshaller mNsRPC2Communication_UI__GetDeviceList;
-  static NsRPC2Communication::UI::GetDeviceListResponseMarshaller mNsRPC2Communication_UI__GetDeviceListResponse;
   static NsRPC2Communication::UI::OnCommandMarshaller mNsRPC2Communication_UI__OnCommand;
-  static NsRPC2Communication::UI::OnDeviceListUpdatedMarshaller mNsRPC2Communication_UI__OnDeviceListUpdated;
+  static NsRPC2Communication::UI::OnDeviceChosenMarshaller mNsRPC2Communication_UI__OnDeviceChosen;
   static NsRPC2Communication::UI::OnDriverDistractionMarshaller mNsRPC2Communication_UI__OnDriverDistraction;
   static NsRPC2Communication::UI::OnLanguageChangeMarshaller mNsRPC2Communication_UI__OnLanguageChange;
   static NsRPC2Communication::UI::OnReadyMarshaller mNsRPC2Communication_UI__OnReady;

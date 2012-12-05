@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::VehicleInfo
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -36,12 +36,12 @@ GetVehicleTypeResponse::GetVehicleTypeResponse(const GetVehicleTypeResponse& c) 
 }
 
 
-const NsAppLinkRPC::VehicleType& GetVehicleTypeResponse::get_vehicleType(void)
+const NsAppLinkRPCV2::VehicleType& GetVehicleTypeResponse::get_vehicleType(void)
 {
   return vehicleType;
 }
 
-bool GetVehicleTypeResponse::set_vehicleType(const NsAppLinkRPC::VehicleType& vehicleType_)
+bool GetVehicleTypeResponse::set_vehicleType(const NsAppLinkRPCV2::VehicleType& vehicleType_)
 {
   vehicleType=vehicleType_;
   return true;

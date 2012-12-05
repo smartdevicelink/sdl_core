@@ -5,15 +5,15 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/TextAlignment.h"
-#include "../include/JSONHandler/ALRPCObjects/Image.h"
-#include "../include/JSONHandler/ALRPCObjects/SoftButton.h"
+#include "../include/JSONHandler/ALRPCObjects/V1/TextAlignment.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/Image.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/SoftButton.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -44,8 +44,8 @@ namespace NsRPC2Communication
       const std::string* get_statusBar(void);
       const std::string* get_mediaClock(void);
       const std::string* get_mediaTrack(void);
-      const NsAppLinkRPC::Image* get_graphic(void);
-      const std::vector< NsAppLinkRPC::SoftButton>* get_softButtons(void);
+      const NsAppLinkRPCV2::Image* get_graphic(void);
+      const std::vector< NsAppLinkRPCV2::SoftButton>* get_softButtons(void);
       const std::vector< std::string>* get_customPresets(void);
       int get_appId(void);
 
@@ -90,12 +90,12 @@ namespace NsRPC2Communication
 
       void reset_mediaTrack(void);
 
-      bool set_graphic(const NsAppLinkRPC::Image& graphic);
+      bool set_graphic(const NsAppLinkRPCV2::Image& graphic);
 
       void reset_graphic(void);
 
 /// 0 <= size <= 8
-      bool set_softButtons(const std::vector< NsAppLinkRPC::SoftButton>& softButtons);
+      bool set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons);
 
       void reset_softButtons(void);
 
@@ -119,8 +119,8 @@ namespace NsRPC2Communication
       std::string* statusBar;
       std::string* mediaClock;
       std::string* mediaTrack;
-      NsAppLinkRPC::Image* graphic;
-      std::vector< NsAppLinkRPC::SoftButton>* softButtons;
+      NsAppLinkRPCV2::Image* graphic;
+      std::vector< NsAppLinkRPCV2::SoftButton>* softButtons;
       std::vector< std::string>* customPresets;
       int appId;
 

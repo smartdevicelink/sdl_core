@@ -7,8 +7,11 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/DeactivateAppResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetAppList.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetAppListResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetDeviceList.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetDeviceListResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppRegistered.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppUnregistered.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnDeviceListUpdated.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/SendData.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/SendDataResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Buttons/GetCapabilities.h"
@@ -40,10 +43,8 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/DeleteSubMenuResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetCapabilities.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetCapabilitiesResponse.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetDeviceList.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetDeviceListResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnCommand.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnDeviceListUpdated.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnDeviceChosen.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnDriverDistraction.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnLanguageChange.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnReady.h"
@@ -78,8 +79,8 @@
 #include "../src/../src/RPC2ObjectsImpl/Marshaller.inc"
 
 /*
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -154,6 +155,11 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         NsRPC2Communication::AppLinkCore::OnAppUnregistered *rv=new NsRPC2Communication::AppLinkCore::OnAppUnregistered;
         return NsRPC2Communication::AppLinkCore::OnAppUnregisteredMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
+      case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONDEVICELISTUPDATED:
+      {
+        NsRPC2Communication::AppLinkCore::OnDeviceListUpdated *rv=new NsRPC2Communication::AppLinkCore::OnDeviceListUpdated;
+        return NsRPC2Communication::AppLinkCore::OnDeviceListUpdatedMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
       case METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT:
       {
         NsRPC2Communication::Buttons::OnButtonEvent *rv=new NsRPC2Communication::Buttons::OnButtonEvent;
@@ -174,10 +180,10 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         NsRPC2Communication::UI::OnCommand *rv=new NsRPC2Communication::UI::OnCommand;
         return NsRPC2Communication::UI::OnCommandMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
-      case METHOD_NSRPC2COMMUNICATION_UI__ONDEVICELISTUPDATED:
+      case METHOD_NSRPC2COMMUNICATION_UI__ONDEVICECHOSEN:
       {
-        NsRPC2Communication::UI::OnDeviceListUpdated *rv=new NsRPC2Communication::UI::OnDeviceListUpdated;
-        return NsRPC2Communication::UI::OnDeviceListUpdatedMarshaller::fromJSON(json,*rv) ? rv : 0;
+        NsRPC2Communication::UI::OnDeviceChosen *rv=new NsRPC2Communication::UI::OnDeviceChosen;
+        return NsRPC2Communication::UI::OnDeviceChosenMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       case METHOD_NSRPC2COMMUNICATION_UI__ONDRIVERDISTRACTION:
       {
@@ -236,6 +242,11 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       {
         NsRPC2Communication::AppLinkCore::GetAppList *rv=new NsRPC2Communication::AppLinkCore::GetAppList;
         return NsRPC2Communication::AppLinkCore::GetAppListMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELIST:
+      {
+        NsRPC2Communication::AppLinkCore::GetDeviceList *rv=new NsRPC2Communication::AppLinkCore::GetDeviceList;
+        return NsRPC2Communication::AppLinkCore::GetDeviceListMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA:
       {
@@ -306,11 +317,6 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       {
         NsRPC2Communication::UI::GetCapabilities *rv=new NsRPC2Communication::UI::GetCapabilities;
         return NsRPC2Communication::UI::GetCapabilitiesMarshaller::fromJSON(json,*rv) ? rv : 0;
-      }
-      case METHOD_NSRPC2COMMUNICATION_UI__GETDEVICELIST:
-      {
-        NsRPC2Communication::UI::GetDeviceList *rv=new NsRPC2Communication::UI::GetDeviceList;
-        return NsRPC2Communication::UI::GetDeviceListMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       case METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTION:
       {
@@ -405,6 +411,11 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       NsRPC2Communication::AppLinkCore::GetAppListResponse *rv=new NsRPC2Communication::AppLinkCore::GetAppListResponse;
       return NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
+    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELISTRESPONSE:
+    {
+      NsRPC2Communication::AppLinkCore::GetDeviceListResponse *rv=new NsRPC2Communication::AppLinkCore::GetDeviceListResponse;
+      return NsRPC2Communication::AppLinkCore::GetDeviceListResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATARESPONSE:
     {
       NsRPC2Communication::AppLinkCore::SendDataResponse *rv=new NsRPC2Communication::AppLinkCore::SendDataResponse;
@@ -474,11 +485,6 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
     {
       NsRPC2Communication::UI::GetCapabilitiesResponse *rv=new NsRPC2Communication::UI::GetCapabilitiesResponse;
       return NsRPC2Communication::UI::GetCapabilitiesResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
-    }
-    case METHOD_NSRPC2COMMUNICATION_UI__GETDEVICELISTRESPONSE:
-    {
-      NsRPC2Communication::UI::GetDeviceListResponse *rv=new NsRPC2Communication::UI::GetDeviceListResponse;
-      return NsRPC2Communication::UI::GetDeviceListResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
     case METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTIONRESPONSE:
     {
@@ -559,6 +565,8 @@ Json::Value Marshaller::Notification2JSON(const NsRPC2Communication::RPC2Notific
       return NsRPC2Communication::AppLinkCore::OnAppRegisteredMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::OnAppRegistered*>(msg));
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPUNREGISTERED:
       return NsRPC2Communication::AppLinkCore::OnAppUnregisteredMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::OnAppUnregistered*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONDEVICELISTUPDATED:
+      return NsRPC2Communication::AppLinkCore::OnDeviceListUpdatedMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::OnDeviceListUpdated*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT:
       return NsRPC2Communication::Buttons::OnButtonEventMarshaller::toJSON(*static_cast<const NsRPC2Communication::Buttons::OnButtonEvent*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS:
@@ -567,8 +575,8 @@ Json::Value Marshaller::Notification2JSON(const NsRPC2Communication::RPC2Notific
       return NsRPC2Communication::TTS::OnLanguageChangeMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::OnLanguageChange*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__ONCOMMAND:
       return NsRPC2Communication::UI::OnCommandMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::OnCommand*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_UI__ONDEVICELISTUPDATED:
-      return NsRPC2Communication::UI::OnDeviceListUpdatedMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::OnDeviceListUpdated*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_UI__ONDEVICECHOSEN:
+      return NsRPC2Communication::UI::OnDeviceChosenMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::OnDeviceChosen*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__ONDRIVERDISTRACTION:
       return NsRPC2Communication::UI::OnDriverDistractionMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::OnDriverDistraction*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__ONLANGUAGECHANGE:
@@ -599,6 +607,8 @@ Json::Value Marshaller::Request2JSON(const NsRPC2Communication::RPC2Request* msg
       return NsRPC2Communication::AppLinkCore::DeactivateAppMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::DeactivateApp*>(msg));
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST:
       return NsRPC2Communication::AppLinkCore::GetAppListMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::GetAppList*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELIST:
+      return NsRPC2Communication::AppLinkCore::GetDeviceListMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::GetDeviceList*>(msg));
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA:
       return NsRPC2Communication::AppLinkCore::SendDataMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::SendData*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIES:
@@ -627,8 +637,6 @@ Json::Value Marshaller::Request2JSON(const NsRPC2Communication::RPC2Request* msg
       return NsRPC2Communication::UI::DeleteSubMenuMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::DeleteSubMenu*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIES:
       return NsRPC2Communication::UI::GetCapabilitiesMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::GetCapabilities*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_UI__GETDEVICELIST:
-      return NsRPC2Communication::UI::GetDeviceListMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::GetDeviceList*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTION:
       return NsRPC2Communication::UI::PerformInteractionMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::PerformInteraction*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIES:
@@ -671,6 +679,8 @@ Json::Value Marshaller::Response2JSON(const NsRPC2Communication::RPC2Response* m
       return NsRPC2Communication::AppLinkCore::DeactivateAppResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::DeactivateAppResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLISTRESPONSE:
       return NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::GetAppListResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELISTRESPONSE:
+      return NsRPC2Communication::AppLinkCore::GetDeviceListResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::GetDeviceListResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATARESPONSE:
       return NsRPC2Communication::AppLinkCore::SendDataResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::SendDataResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
@@ -699,8 +709,6 @@ Json::Value Marshaller::Response2JSON(const NsRPC2Communication::RPC2Response* m
       return NsRPC2Communication::UI::DeleteSubMenuResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::DeleteSubMenuResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE:
       return NsRPC2Communication::UI::GetCapabilitiesResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::GetCapabilitiesResponse*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_UI__GETDEVICELISTRESPONSE:
-      return NsRPC2Communication::UI::GetDeviceListResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::GetDeviceListResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTIONRESPONSE:
       return NsRPC2Communication::UI::PerformInteractionResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::PerformInteractionResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIESRESPONSE:
@@ -755,7 +763,7 @@ Json::Value Marshaller::toJSON(const RPC2Command* msg)
 }
 
 
-const Marshaller::localHash Marshaller::mHashTable[73]=
+const Marshaller::localHash Marshaller::mHashTable[74]=
 {
   {"AppLinkCore.ActivateApp",0,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateApp},
   {"AppLinkCore.ActivateAppResponse",1,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse},
@@ -763,73 +771,74 @@ const Marshaller::localHash Marshaller::mHashTable[73]=
   {"AppLinkCore.DeactivateAppResponse",3,&Marshaller::mNsRPC2Communication_AppLinkCore__DeactivateAppResponse},
   {"AppLinkCore.GetAppList",4,&Marshaller::mNsRPC2Communication_AppLinkCore__GetAppList},
   {"AppLinkCore.GetAppListResponse",5,&Marshaller::mNsRPC2Communication_AppLinkCore__GetAppListResponse},
-  {"AppLinkCore.OnAppRegistered",6,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered},
-  {"AppLinkCore.OnAppUnregistered",7,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered},
-  {"AppLinkCore.SendData",8,&Marshaller::mNsRPC2Communication_AppLinkCore__SendData},
-  {"AppLinkCore.SendDataResponse",9,&Marshaller::mNsRPC2Communication_AppLinkCore__SendDataResponse},
-  {"Buttons.GetCapabilities",10,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilities},
-  {"Buttons.GetCapabilitiesResponse",11,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilitiesResponse},
-  {"Buttons.OnButtonEvent",12,&Marshaller::mNsRPC2Communication_Buttons__OnButtonEvent},
-  {"Buttons.OnButtonPress",13,&Marshaller::mNsRPC2Communication_Buttons__OnButtonPress},
-  {"TTS.ChangeLanguageRegistration",14,&Marshaller::mNsRPC2Communication_TTS__ChangeLanguageRegistration},
-  {"TTS.ChangeLanguageRegistrationResponse",15,&Marshaller::mNsRPC2Communication_TTS__ChangeLanguageRegistrationResponse},
-  {"TTS.GetCapabilities",16,&Marshaller::mNsRPC2Communication_TTS__GetCapabilities},
-  {"TTS.GetCapabilitiesResponse",17,&Marshaller::mNsRPC2Communication_TTS__GetCapabilitiesResponse},
-  {"TTS.OnLanguageChange",18,&Marshaller::mNsRPC2Communication_TTS__OnLanguageChange},
-  {"TTS.Speak",19,&Marshaller::mNsRPC2Communication_TTS__Speak},
-  {"TTS.SpeakResponse",20,&Marshaller::mNsRPC2Communication_TTS__SpeakResponse},
-  {"UI.AddCommand",21,&Marshaller::mNsRPC2Communication_UI__AddCommand},
-  {"UI.AddCommandResponse",22,&Marshaller::mNsRPC2Communication_UI__AddCommandResponse},
-  {"UI.AddSubMenu",23,&Marshaller::mNsRPC2Communication_UI__AddSubMenu},
-  {"UI.AddSubMenuResponse",24,&Marshaller::mNsRPC2Communication_UI__AddSubMenuResponse},
-  {"UI.Alert",25,&Marshaller::mNsRPC2Communication_UI__Alert},
-  {"UI.AlertResponse",26,&Marshaller::mNsRPC2Communication_UI__AlertResponse},
-  {"UI.ChangeLanguageRegistration",27,&Marshaller::mNsRPC2Communication_UI__ChangeLanguageRegistration},
-  {"UI.ChangeLanguageRegistrationResponse",28,&Marshaller::mNsRPC2Communication_UI__ChangeLanguageRegistrationResponse},
-  {"UI.CreateInteractionChoiceSet",29,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSet},
-  {"UI.CreateInteractionChoiceSetResponse",30,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse},
-  {"UI.DeleteCommand",31,&Marshaller::mNsRPC2Communication_UI__DeleteCommand},
-  {"UI.DeleteCommandResponse",32,&Marshaller::mNsRPC2Communication_UI__DeleteCommandResponse},
-  {"UI.DeleteInteractionChoiceSet",33,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSet},
-  {"UI.DeleteInteractionChoiceSetResponse",34,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSetResponse},
-  {"UI.DeleteSubMenu",35,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenu},
-  {"UI.DeleteSubMenuResponse",36,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenuResponse},
-  {"UI.GetCapabilities",37,&Marshaller::mNsRPC2Communication_UI__GetCapabilities},
-  {"UI.GetCapabilitiesResponse",38,&Marshaller::mNsRPC2Communication_UI__GetCapabilitiesResponse},
-  {"UI.GetDeviceList",39,&Marshaller::mNsRPC2Communication_UI__GetDeviceList},
-  {"UI.GetDeviceListResponse",40,&Marshaller::mNsRPC2Communication_UI__GetDeviceListResponse},
-  {"UI.OnCommand",41,&Marshaller::mNsRPC2Communication_UI__OnCommand},
-  {"UI.OnDeviceListUpdated",42,&Marshaller::mNsRPC2Communication_UI__OnDeviceListUpdated},
-  {"UI.OnDriverDistraction",43,&Marshaller::mNsRPC2Communication_UI__OnDriverDistraction},
-  {"UI.OnLanguageChange",44,&Marshaller::mNsRPC2Communication_UI__OnLanguageChange},
-  {"UI.OnReady",45,&Marshaller::mNsRPC2Communication_UI__OnReady},
-  {"UI.OnSystemContext",46,&Marshaller::mNsRPC2Communication_UI__OnSystemContext},
-  {"UI.PerformInteraction",47,&Marshaller::mNsRPC2Communication_UI__PerformInteraction},
-  {"UI.PerformInteractionResponse",48,&Marshaller::mNsRPC2Communication_UI__PerformInteractionResponse},
-  {"UI.ResetGlobalProperties",49,&Marshaller::mNsRPC2Communication_UI__ResetGlobalProperties},
-  {"UI.ResetGlobalPropertiesResponse",50,&Marshaller::mNsRPC2Communication_UI__ResetGlobalPropertiesResponse},
-  {"UI.SetAppIcon",51,&Marshaller::mNsRPC2Communication_UI__SetAppIcon},
-  {"UI.SetAppIconResponse",52,&Marshaller::mNsRPC2Communication_UI__SetAppIconResponse},
-  {"UI.SetGlobalProperties",53,&Marshaller::mNsRPC2Communication_UI__SetGlobalProperties},
-  {"UI.SetGlobalPropertiesResponse",54,&Marshaller::mNsRPC2Communication_UI__SetGlobalPropertiesResponse},
-  {"UI.SetMediaClockTimer",55,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimer},
-  {"UI.SetMediaClockTimerResponse",56,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimerResponse},
-  {"UI.Show",57,&Marshaller::mNsRPC2Communication_UI__Show},
-  {"UI.ShowResponse",58,&Marshaller::mNsRPC2Communication_UI__ShowResponse},
-  {"UI.Slider",59,&Marshaller::mNsRPC2Communication_UI__Slider},
-  {"UI.SliderResponse",60,&Marshaller::mNsRPC2Communication_UI__SliderResponse},
-  {"VR.AddCommand",61,&Marshaller::mNsRPC2Communication_VR__AddCommand},
-  {"VR.AddCommandResponse",62,&Marshaller::mNsRPC2Communication_VR__AddCommandResponse},
-  {"VR.ChangeLanguageRegistration",63,&Marshaller::mNsRPC2Communication_VR__ChangeLanguageRegistration},
-  {"VR.ChangeLanguageRegistrationResponse",64,&Marshaller::mNsRPC2Communication_VR__ChangeLanguageRegistrationResponse},
-  {"VR.DeleteCommand",65,&Marshaller::mNsRPC2Communication_VR__DeleteCommand},
-  {"VR.DeleteCommandResponse",66,&Marshaller::mNsRPC2Communication_VR__DeleteCommandResponse},
-  {"VR.GetCapabilities",67,&Marshaller::mNsRPC2Communication_VR__GetCapabilities},
-  {"VR.GetCapabilitiesResponse",68,&Marshaller::mNsRPC2Communication_VR__GetCapabilitiesResponse},
-  {"VR.OnCommand",69,&Marshaller::mNsRPC2Communication_VR__OnCommand},
-  {"VR.OnLanguageChange",70,&Marshaller::mNsRPC2Communication_VR__OnLanguageChange},
-  {"AppLinkCore.GetVehicleType",71,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleType},
-  {"AppLinkCore.GetVehicleTypeResponse",72,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse}
+  {"AppLinkCore.GetDeviceList",6,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceList},
+  {"AppLinkCore.GetDeviceListResponse",7,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceListResponse},
+  {"AppLinkCore.OnAppRegistered",8,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered},
+  {"AppLinkCore.OnAppUnregistered",9,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered},
+  {"AppLinkCore.OnDeviceListUpdated",10,&Marshaller::mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated},
+  {"AppLinkCore.SendData",11,&Marshaller::mNsRPC2Communication_AppLinkCore__SendData},
+  {"AppLinkCore.SendDataResponse",12,&Marshaller::mNsRPC2Communication_AppLinkCore__SendDataResponse},
+  {"Buttons.GetCapabilities",13,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilities},
+  {"Buttons.GetCapabilitiesResponse",14,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilitiesResponse},
+  {"Buttons.OnButtonEvent",15,&Marshaller::mNsRPC2Communication_Buttons__OnButtonEvent},
+  {"Buttons.OnButtonPress",16,&Marshaller::mNsRPC2Communication_Buttons__OnButtonPress},
+  {"TTS.ChangeLanguageRegistration",17,&Marshaller::mNsRPC2Communication_TTS__ChangeLanguageRegistration},
+  {"TTS.ChangeLanguageRegistrationResponse",18,&Marshaller::mNsRPC2Communication_TTS__ChangeLanguageRegistrationResponse},
+  {"TTS.GetCapabilities",19,&Marshaller::mNsRPC2Communication_TTS__GetCapabilities},
+  {"TTS.GetCapabilitiesResponse",20,&Marshaller::mNsRPC2Communication_TTS__GetCapabilitiesResponse},
+  {"TTS.OnLanguageChange",21,&Marshaller::mNsRPC2Communication_TTS__OnLanguageChange},
+  {"TTS.Speak",22,&Marshaller::mNsRPC2Communication_TTS__Speak},
+  {"TTS.SpeakResponse",23,&Marshaller::mNsRPC2Communication_TTS__SpeakResponse},
+  {"UI.AddCommand",24,&Marshaller::mNsRPC2Communication_UI__AddCommand},
+  {"UI.AddCommandResponse",25,&Marshaller::mNsRPC2Communication_UI__AddCommandResponse},
+  {"UI.AddSubMenu",26,&Marshaller::mNsRPC2Communication_UI__AddSubMenu},
+  {"UI.AddSubMenuResponse",27,&Marshaller::mNsRPC2Communication_UI__AddSubMenuResponse},
+  {"UI.Alert",28,&Marshaller::mNsRPC2Communication_UI__Alert},
+  {"UI.AlertResponse",29,&Marshaller::mNsRPC2Communication_UI__AlertResponse},
+  {"UI.ChangeLanguageRegistration",30,&Marshaller::mNsRPC2Communication_UI__ChangeLanguageRegistration},
+  {"UI.ChangeLanguageRegistrationResponse",31,&Marshaller::mNsRPC2Communication_UI__ChangeLanguageRegistrationResponse},
+  {"UI.CreateInteractionChoiceSet",32,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSet},
+  {"UI.CreateInteractionChoiceSetResponse",33,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse},
+  {"UI.DeleteCommand",34,&Marshaller::mNsRPC2Communication_UI__DeleteCommand},
+  {"UI.DeleteCommandResponse",35,&Marshaller::mNsRPC2Communication_UI__DeleteCommandResponse},
+  {"UI.DeleteInteractionChoiceSet",36,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSet},
+  {"UI.DeleteInteractionChoiceSetResponse",37,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSetResponse},
+  {"UI.DeleteSubMenu",38,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenu},
+  {"UI.DeleteSubMenuResponse",39,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenuResponse},
+  {"UI.GetCapabilities",40,&Marshaller::mNsRPC2Communication_UI__GetCapabilities},
+  {"UI.GetCapabilitiesResponse",41,&Marshaller::mNsRPC2Communication_UI__GetCapabilitiesResponse},
+  {"UI.OnCommand",42,&Marshaller::mNsRPC2Communication_UI__OnCommand},
+  {"UI.OnDeviceChosen",43,&Marshaller::mNsRPC2Communication_UI__OnDeviceChosen},
+  {"UI.OnDriverDistraction",44,&Marshaller::mNsRPC2Communication_UI__OnDriverDistraction},
+  {"UI.OnLanguageChange",45,&Marshaller::mNsRPC2Communication_UI__OnLanguageChange},
+  {"UI.OnReady",46,&Marshaller::mNsRPC2Communication_UI__OnReady},
+  {"UI.OnSystemContext",47,&Marshaller::mNsRPC2Communication_UI__OnSystemContext},
+  {"UI.PerformInteraction",48,&Marshaller::mNsRPC2Communication_UI__PerformInteraction},
+  {"UI.PerformInteractionResponse",49,&Marshaller::mNsRPC2Communication_UI__PerformInteractionResponse},
+  {"UI.ResetGlobalProperties",50,&Marshaller::mNsRPC2Communication_UI__ResetGlobalProperties},
+  {"UI.ResetGlobalPropertiesResponse",51,&Marshaller::mNsRPC2Communication_UI__ResetGlobalPropertiesResponse},
+  {"UI.SetAppIcon",52,&Marshaller::mNsRPC2Communication_UI__SetAppIcon},
+  {"UI.SetAppIconResponse",53,&Marshaller::mNsRPC2Communication_UI__SetAppIconResponse},
+  {"UI.SetGlobalProperties",54,&Marshaller::mNsRPC2Communication_UI__SetGlobalProperties},
+  {"UI.SetGlobalPropertiesResponse",55,&Marshaller::mNsRPC2Communication_UI__SetGlobalPropertiesResponse},
+  {"UI.SetMediaClockTimer",56,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimer},
+  {"UI.SetMediaClockTimerResponse",57,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimerResponse},
+  {"UI.Show",58,&Marshaller::mNsRPC2Communication_UI__Show},
+  {"UI.ShowResponse",59,&Marshaller::mNsRPC2Communication_UI__ShowResponse},
+  {"UI.Slider",60,&Marshaller::mNsRPC2Communication_UI__Slider},
+  {"UI.SliderResponse",61,&Marshaller::mNsRPC2Communication_UI__SliderResponse},
+  {"VR.AddCommand",62,&Marshaller::mNsRPC2Communication_VR__AddCommand},
+  {"VR.AddCommandResponse",63,&Marshaller::mNsRPC2Communication_VR__AddCommandResponse},
+  {"VR.ChangeLanguageRegistration",64,&Marshaller::mNsRPC2Communication_VR__ChangeLanguageRegistration},
+  {"VR.ChangeLanguageRegistrationResponse",65,&Marshaller::mNsRPC2Communication_VR__ChangeLanguageRegistrationResponse},
+  {"VR.DeleteCommand",66,&Marshaller::mNsRPC2Communication_VR__DeleteCommand},
+  {"VR.DeleteCommandResponse",67,&Marshaller::mNsRPC2Communication_VR__DeleteCommandResponse},
+  {"VR.GetCapabilities",68,&Marshaller::mNsRPC2Communication_VR__GetCapabilities},
+  {"VR.GetCapabilitiesResponse",69,&Marshaller::mNsRPC2Communication_VR__GetCapabilitiesResponse},
+  {"VR.OnCommand",70,&Marshaller::mNsRPC2Communication_VR__OnCommand},
+  {"VR.OnLanguageChange",71,&Marshaller::mNsRPC2Communication_VR__OnLanguageChange},
+  {"AppLinkCore.GetVehicleType",72,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleType},
+  {"AppLinkCore.GetVehicleTypeResponse",73,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse}
 
 };
 
@@ -841,8 +850,11 @@ NsRPC2Communication::AppLinkCore::DeactivateAppMarshaller Marshaller::mNsRPC2Com
 NsRPC2Communication::AppLinkCore::DeactivateAppResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__DeactivateAppResponse;
 NsRPC2Communication::AppLinkCore::GetAppListMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__GetAppList;
 NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__GetAppListResponse;
+NsRPC2Communication::AppLinkCore::GetDeviceListMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceList;
+NsRPC2Communication::AppLinkCore::GetDeviceListResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceListResponse;
 NsRPC2Communication::AppLinkCore::OnAppRegisteredMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered;
 NsRPC2Communication::AppLinkCore::OnAppUnregisteredMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered;
+NsRPC2Communication::AppLinkCore::OnDeviceListUpdatedMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated;
 NsRPC2Communication::AppLinkCore::SendDataMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__SendData;
 NsRPC2Communication::AppLinkCore::SendDataResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__SendDataResponse;
 NsRPC2Communication::Buttons::GetCapabilitiesMarshaller Marshaller::mNsRPC2Communication_Buttons__GetCapabilities;
@@ -874,10 +886,8 @@ NsRPC2Communication::UI::DeleteSubMenuMarshaller Marshaller::mNsRPC2Communicatio
 NsRPC2Communication::UI::DeleteSubMenuResponseMarshaller Marshaller::mNsRPC2Communication_UI__DeleteSubMenuResponse;
 NsRPC2Communication::UI::GetCapabilitiesMarshaller Marshaller::mNsRPC2Communication_UI__GetCapabilities;
 NsRPC2Communication::UI::GetCapabilitiesResponseMarshaller Marshaller::mNsRPC2Communication_UI__GetCapabilitiesResponse;
-NsRPC2Communication::UI::GetDeviceListMarshaller Marshaller::mNsRPC2Communication_UI__GetDeviceList;
-NsRPC2Communication::UI::GetDeviceListResponseMarshaller Marshaller::mNsRPC2Communication_UI__GetDeviceListResponse;
 NsRPC2Communication::UI::OnCommandMarshaller Marshaller::mNsRPC2Communication_UI__OnCommand;
-NsRPC2Communication::UI::OnDeviceListUpdatedMarshaller Marshaller::mNsRPC2Communication_UI__OnDeviceListUpdated;
+NsRPC2Communication::UI::OnDeviceChosenMarshaller Marshaller::mNsRPC2Communication_UI__OnDeviceChosen;
 NsRPC2Communication::UI::OnDriverDistractionMarshaller Marshaller::mNsRPC2Communication_UI__OnDriverDistraction;
 NsRPC2Communication::UI::OnLanguageChangeMarshaller Marshaller::mNsRPC2Communication_UI__OnLanguageChange;
 NsRPC2Communication::UI::OnReadyMarshaller Marshaller::mNsRPC2Communication_UI__OnReady;

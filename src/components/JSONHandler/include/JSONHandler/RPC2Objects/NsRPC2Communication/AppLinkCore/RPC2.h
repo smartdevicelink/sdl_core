@@ -10,8 +10,11 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/DeactivateAppResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetAppList.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetAppListResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetDeviceList.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetDeviceListResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppRegistered.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppUnregistered.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnDeviceListUpdated.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/SendData.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/SendDataResponse.h"
 
@@ -21,8 +24,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
