@@ -456,4 +456,19 @@ FFW.UI = FFW.RPCObserver.create({
 		};
 		this.client.send(JSONMessage);
 	},
+
+	/*
+	 * Notifies if application was activated
+ 	 */	
+	OnAppActivated: function( appName ) {
+		Em.Logger.log("FFW.UI.OnAppActivated");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"UI.OnAppActivated",
+			"params":	{"appName":	appName}
+		};
+		this.client.send(JSONMessage);
+	}
 })

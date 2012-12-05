@@ -27,8 +27,8 @@ MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
     /** Button to return to previous view*/
     backButton: MFT.Button.extend({
         classNames:        ['backButton','button'],     
-        action:            'back',
-        target:            'MFT.States',  
+        action:            'turnChangeDeviceViewBack',
+        target:            'MFT.ApplinkController',  
         icon:              'images/media/ico_back.png',   
     }),
 

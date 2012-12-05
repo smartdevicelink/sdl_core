@@ -114,6 +114,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
                     action:         'turnOnApplink',
                     target:         'MFT.MediaController',
                     text:           params.appList[i].appName,
+                    appName:        params.appList[i].appName,
                     className:      'scrollButtons button notpressed',
                     icon:           params.icon,
                     templateName:   'rightIcon'
@@ -360,6 +361,7 @@ unsigned int (2:26) numTicks,
 
 
         MFT.ApplinkMediaController.turnOnApplinkSlider();
+        MFT.ApplinkSliderView.activate();
 
     },
 

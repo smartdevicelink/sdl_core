@@ -17,13 +17,13 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
  	 */		
 	 client:		FFW.RPCClient.create({ componentName: "AppLinkCoreClient" }),
 
-	getAppListRequestId: 					-1,
+	getAppListRequestId: 						-1,
 	getDeviceListRequestId: 					-1,
-	activateAppRequestId: 					-1,
+	activateAppRequestId: 						-1,
 	onAppRegisteredSubscribeRequestId:			-1,
-	onAppUnregisteredSubscribeRequestId:			-1,
-	onAppRegisteredUnsubscribeRequestId:			-1,
-	onAppUnregisteredUnsubscribeRequestId:			-1,
+	onAppUnregisteredSubscribeRequestId:		-1,
+	onAppRegisteredUnsubscribeRequestId:		-1,
+	onAppUnregisteredUnsubscribeRequestId:		-1,
 
 	// const
 	onAppRegisteredNotification:		"AppLinkCore.OnAppRegistered",
@@ -158,8 +158,6 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	getAppList: function() {
 		this.getAppListRequestId = this.client.generateId();
 
-		console.log('onGetAppList        ' + this.getAppListRequestId);
-
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
 			"id": 		this.getAppListRequestId,
@@ -175,8 +173,6 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 */
 	getDeviceList: function() {
 		this.getDeviceListRequestId = this.client.generateId();
-
-		console.log('onGetDeviceList        ' + this.getDeviceListRequestId);
 
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
