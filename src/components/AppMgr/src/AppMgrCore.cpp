@@ -314,6 +314,7 @@ namespace NsAppManager
                         appRegistered->set_hmiDisplayLanguageDesired(hmiLanguageDesiredV1);
                         appRegistered->set_vrSynonym(app->getVrSynonyms());
                         appRegistered->set_deviceName(currentDeviceName);
+                        appRegistered->set_ttsName(*(std::vector<NsAppLinkRPC::TTSChunk>*)&app->getTtsName());
                         HMIHandler::getInstance().sendNotification(appRegistered);
                         LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                         break;
@@ -2138,6 +2139,11 @@ namespace NsAppManager
                 application->setIsMediaApplication(isMediaApplication);
                 application->setSyncMsgVersion(syncMsgVersion);
                 application->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);
+
+                if(registerRequest->get_ttsName())
+                {
+                    application->setTtsName(*registerRequest->get_ttsName());
+                }
 
                 application->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_NONE);
 
