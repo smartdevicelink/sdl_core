@@ -140,4 +140,40 @@ namespace NsAppManager
     {
         return mAppType;
     }
+
+    /**
+     * \brief retrieve aplication HMI status level
+     * \return HMI status level of application
+     */
+    const NsAppLinkRPCV2::HMILevel::HMILevelInternal& Application_v2::getApplicationHMIStatusLevel( ) const
+    {
+        return mHMIStatusLevel;
+    }
+
+    /**
+     * \brief Set application HMI status level
+     * \param hmiLevel HMI status level of application
+     */
+    void Application_v2::setApplicationHMIStatusLevel( const NsAppLinkRPCV2::HMILevel::HMILevelInternal& hmiLevel )
+    {
+        mHMIStatusLevel = hmiLevel;
+    }
+
+    /**
+     * \brief retrieve application sync message version
+     * \return application sync msg version
+     */
+    const NsAppLinkRPCV2::SyncMsgVersion& Application_v2::getSyncMsgVersion( ) const
+    {
+        return mSyncMsgVersion;
+    }
+
+    /**
+     * \brief Set application sync message version
+     * \param value application sync message version
+     */
+    void Application_v2::setSyncMsgVersion(NsAppLinkRPCV2::SyncMsgVersion value)
+    {
+        mSyncMsgVersion = value;
+    }
 }

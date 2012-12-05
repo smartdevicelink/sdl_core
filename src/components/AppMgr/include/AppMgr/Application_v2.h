@@ -6,6 +6,8 @@
 #include "JSONHandler/ALRPCObjects/V2/SystemContext.h"
 #include "JSONHandler/ALRPCObjects/V2/Language.h"
 #include "JSONHandler/ALRPCObjects/V2/AppType.h"
+#include "JSONHandler/ALRPCObjects/V2/HMILevel.h"
+#include "JSONHandler/ALRPCObjects/V2/SyncMsgVersion.h"
 
 namespace NsAppManager
 {
@@ -107,6 +109,30 @@ namespace NsAppManager
          */
         const AppTypes& getAppType() const;
 
+        /**
+         * \brief Set application HMI status level
+         * \param hmiLevel HMI status level of application
+         */
+        void setApplicationHMIStatusLevel( const NsAppLinkRPCV2::HMILevel::HMILevelInternal& hmiLevel );
+
+        /**
+         * \brief retrieve aplication HMI status level
+         * \return HMI status level of application
+         */
+        const NsAppLinkRPCV2::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
+
+        /**
+         * \brief Set application sync message version
+         * \param value application sync message version
+         */
+        void setSyncMsgVersion(NsAppLinkRPCV2::SyncMsgVersion value);
+
+        /**
+         * \brief retrieve application sync message version
+         * \return application sync msg version
+         */
+        const NsAppLinkRPCV2::SyncMsgVersion& getSyncMsgVersion( ) const;
+
     private:
 
         /**
@@ -118,6 +144,8 @@ namespace NsAppManager
         NsAppLinkRPCV2::AudioStreamingState mAudioStreamingState;
         NsAppLinkRPCV2::Language mHMIDisplayLanguageDesired;
         NsAppLinkRPCV2::SystemContext mSystemContext;
+        NsAppLinkRPCV2::HMILevel::HMILevelInternal mHMIStatusLevel;
+        NsAppLinkRPCV2::SyncMsgVersion mSyncMsgVersion;
 
    //     std::string mAppID;
         AppTypes mAppType;
