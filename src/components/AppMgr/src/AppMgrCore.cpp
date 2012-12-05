@@ -2042,7 +2042,7 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendResponse(response);
                 return;
             }
-      /*      case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELIST:
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELIST:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetDeviceList request has been income");
                 NsRPC2Communication::AppLinkCore::GetDeviceList* getDevList = (NsRPC2Communication::AppLinkCore::GetDeviceList*)msg;
@@ -2058,7 +2058,7 @@ namespace NsAppManager
                 response->set_deviceList(list);
                 HMIHandler::getInstance().sendResponse(response);
                 return;
-            }*/
+            }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
                 LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message " << msg->getMethod() << " has been received!");
