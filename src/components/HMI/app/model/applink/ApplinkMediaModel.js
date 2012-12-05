@@ -46,6 +46,11 @@ MFT.ApplinkMediaModel = Em.Object.create({
 	  */
     applicationsList:			new Array(),
 
+    /**
+      * Array of connected devices
+      */
+    devicesList:            new Array(),
+
 	/**
 	  * Timer for Media Clock
 	  */
@@ -73,7 +78,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
 	currTime:		0,
 
  	/**
-	  * Array of Interaction Choises
+	  * Info data
 	  */
 	showInfo: Em.Object.create({
 		field1:			'<field1>',
@@ -84,7 +89,20 @@ MFT.ApplinkMediaModel = Em.Object.create({
 		appName:		'<App name>',
 		deviceName:		'<Device name>'
 	}),
-	
+
+    /**
+      * Info data
+      */
+    alertInfo: Em.Object.create({
+        text1:          '<text1>',
+        text2:          '<text2>',
+        text3:          '<text3>',
+        ttsChunks:      null,
+        duration:       0,
+        playTone:       null,
+        softButtons:    null,
+        tryAgainTime:   0
+    }),
 
 	onGetAppList: function( params ){
  		
@@ -96,6 +114,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
                     action:         'turnOnApplink',
                     target:         'MFT.MediaController',
                     text:           params.appList[i].appName,
+                    appName:        params.appList[i].appName,
                     className:      'scrollButtons button notpressed',
                     icon:           params.icon,
                     templateName:   'rightIcon'
@@ -104,6 +123,26 @@ MFT.ApplinkMediaModel = Em.Object.create({
         }
         MFT.InfoAppsView.ShowAppList();
 
+    },
+
+    onGetDeviceList: function( params ){
+        if ("SUCCESS" == params.resultCode) {
+        this.devicesList.splice(0, this.devicesList.length);
+        for(var i = 0; i < params.deviceList.length; i++){
+            this.devicesList.push({
+                type:       MFT.Button,
+                params:     {
+                    action:         'turnOnApplink',
+                    target:         'MFT.MediaController',
+                    text:           params.deviceList[i].appName,
+                    className:      'scrollButtons button notpressed',
+                    icon:           params.icon,
+                    templateName:   'rightIcon'
+                }                                   
+            });
+        }
+        MFT.DeviceLilstView.ShowDeviceList();
+    }
     },
 
     /**
@@ -121,7 +160,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
 	startTimer: function(){
 		if(!this.pause){
 			this.timer = setInterval(function(){
-				MFT.ApplinkMediaModel.set('currTime', MFT.ApplinkMediaModel.currTime+1);
+				this.set('currTime', this.currTime+1);
 			}, 1000);
 		}else{
 			clearInterval(this.timer);
@@ -154,10 +193,10 @@ MFT.ApplinkMediaModel = Em.Object.create({
 
         MFT.ApplinkOptionsView.DeleteCommand( commandId );
 
-        var  count = MFT.ApplinkMediaModel.subMenuCommands.length;
+        var  count = this.subMenuCommands.length;
         for(var i = count-1; i >= 0; i--){
-            if(MFT.ApplinkMediaModel.subMenuCommands[i].cmdId == commandId){
-               MFT.ApplinkMediaModel.subMenuCommands.splice(i, 1);
+            if(this.subMenuCommands[i].cmdId == commandId){
+               this.subMenuCommands.splice(i, 1);
             }
         }
     },
@@ -165,7 +204,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
     /** Add subMenu button to Options list */
     onApplinkAddSubMenu: function( menuId, params ){
 
-        MFT.ApplinkOptionsView.AddSubMenu( menuId, params );
+        MFT.ApplinkOptionsView.AddSubMenu( menuId, params.menuName, params.position );
 
     },
 
@@ -196,7 +235,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
     /** Delete all commands in sub menu from VR */
     onApplinkCreateInteractionChoise: function(params){
 
-        MFT.ApplinkMediaModel.interactionChoises.push(params);
+        this.interactionChoises.push(params);
 
         MFT.VRPopUp.CreateInteractionChoise(params);
 
@@ -209,9 +248,9 @@ MFT.ApplinkMediaModel = Em.Object.create({
             MFT.States.back();
         }
 
-        for(var val in MFT.ApplinkMediaModel.interactionChoises){
-            if(MFT.ApplinkMediaModel.interactionChoises[val].interactionChoiceSetID == choiseSetID){
-                MFT.ApplinkMediaModel.interactionChoises.splice(val, 1);
+        for(var val in this.interactionChoises){
+            if(this.interactionChoises[val].interactionChoiceSetID == choiseSetID){
+                this.interactionChoises.splice(val, 1);
                 break;
             }
         }
@@ -223,33 +262,35 @@ MFT.ApplinkMediaModel = Em.Object.create({
     /** Applink AddCommand handler */
     onApplinkAddCommand: function(params){
         if( params.menuParams.parentID == 0 ){
-            this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams);
+            this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams, params.cmdIcon);
         }else{
-            MFT.ApplinkMediaModel.subMenuCommands.push(params);
+            this.subMenuCommands.push(params);
             if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
                 MFT.ApplinkOptionsSubMenuView.SubMenuActivate(MFT.MediaController.currentApplinkSubMenuid);
             }
 
         }
+
+        // appId
     },
 
     /** Applink Setter for Media Clock Timer */
     applinkSetMediaClockTimer: function(params){
 
         if(params.updateMode == "COUNTUP"){
-            MFT.ApplinkMediaModel.set('countUp', true);
+            this.set('countUp', true);
         }else if(params.updateMode == "COUNTDOWN"){
-            MFT.ApplinkMediaModel.set('countUp', false);
+            this.set('countUp', false);
         }
 
         if(params.updateMode == "PAUSE"){
-            MFT.ApplinkMediaModel.set('pause', true);
+            this.set('pause', true);
         }else if(params.updateMode == "RESUME"){
-            MFT.ApplinkMediaModel.set('pause', false);
+            this.set('pause', false);
         }else{
-            MFT.ApplinkMediaModel.set('duration', 0);
-            MFT.ApplinkMediaModel.set('duration', params.startTime.hours*3600 + params.startTime.minutes*60 + params.startTime.seconds );
-            MFT.ApplinkMediaModel.set('pause', false);
+            this.set('duration', 0);
+            this.set('duration', params.startTime.hours*3600 + params.startTime.minutes*60 + params.startTime.seconds );
+            this.set('pause', false);
         }
         
     },
@@ -257,6 +298,24 @@ MFT.ApplinkMediaModel = Em.Object.create({
     /** Switching on Applink Perform Interaction Choise */
     turnOnApplinkPerform: function(params){
         this.set('performInteractionInitialText', params.initialText);
+
+/*
+    TTSChunk initialPrompt[1:100], //data type from AppLink protocol specification
+    InteractionMode interactionMode, // data type from AppLink protocol specification
+    unsigned int (2000000000)  interactionChoiceSetIDList[1:100],// List of interaction choice set IDs to use with an interaction
+    TTSChunk * helpPrompt[1:100], //data type from AppLink protocol specification
+    TTSChunk * timeoutPrompt[1:100], // data type from AppLink protocol specification
+    unsigned int (5000:100000) * timeout, //in milliseconds
+    VrHelpItem * vrHelp[1:100], // Ability to send suggested VR Help Items to display on-screen during Perform Interaction
+    int appId
+    -> 
+    unsigned int (2000000000) * choiceID, // ID of the choice that was selected in response to PerformInteraction
+    TriggerSource * triggerSource //data type from AppLink protocol specification
+
+*/
+
+
+
         if(MFT.States.media.applink.applinkperforminteractionchoise.active){
             MFT.AppPerformInteractionChoise.PerformInteraction(params.interactionChoiceSetIDList);
         }else{
@@ -272,16 +331,38 @@ MFT.ApplinkMediaModel = Em.Object.create({
 
     /** Applin UI Show handler */
     onApplinkUIShow: function(params){
-        MFT.ApplinkMediaModel.showInfo.set('field1', params.mainField1);
-        MFT.ApplinkMediaModel.showInfo.set('field2', params.mainField2);
-        MFT.ApplinkMediaModel.showInfo.set('mediaClock', params.mediaClock);
-        MFT.ApplinkMediaModel.showInfo.set('field3', params.mediaTrack);
-        MFT.ApplinkMediaModel.showInfo.set('statusBar', params.statusBar);
+        this.showInfo.set('field1',        params.mainField1);
+        this.showInfo.set('field2',        params.mainField2);
+        this.showInfo.set('field3',        params.mainField3);
+        this.showInfo.set('field4',        params.mainField4);
+        this.showInfo.set('alignment',     params.alignment);
+        this.showInfo.set('statusBar',     params.statusBar);
+        this.showInfo.set('mediaClock',    params.mediaClock);
+        this.showInfo.set('mediaTrack',    params.mediaTrack);
+        this.showInfo.set('image',         params.graphic);
+        this.showInfo.set('softButtons',   params.softButtons);        
+        this.showInfo.set('customPresets', params.customPresets);
+
+        // appId
     },
 
     /** Applink Slider activation */
     onApplinkSlider: function(params){
-        this.turnOnApplinkSlider();
+
+/*
+unsigned int (2:26) numTicks,
+  unsigned int (1:16) position,
+  string (500) sliderHeader,
+  string (500) * sliderFooter[1:26],
+  unsigned int (65535) timeout
+  ->
+  unsigned int (1:26) sliderPosition
+  */
+
+
+        MFT.ApplinkMediaController.turnOnApplinkSlider();
+        MFT.ApplinkSliderView.activate();
+
     },
 
     /** Applink TTS Speak handler */
@@ -295,6 +376,19 @@ MFT.ApplinkMediaModel = Em.Object.create({
 
     /** Applin UI Alert handler */
     onApplinkUIAlert: function(params){
-        MFT.AlertPopUp.AlertActive(params.AlertText1, params.AlertText2, params.duration, params.playTone);
+
+        this.alertInfo.set('text1', params.AlertText1);
+        this.alertInfo.set('text2', params.AlertText2);
+        this.alertInfo.set('text3', params.alertText3);
+        this.alertInfo.set('ttsChunks', params.ttsChunks );
+        this.alertInfo.set('duration', params.duration );
+        this.alertInfo.set('playTone', params.playTone );
+        this.alertInfo.set('softButtons', params.softButtons );
+        this.alertInfo.set('tryAgainTime', params.tryAgainTime );
+
+        // appId
+
+        MFT.AlertPopUp.AlertActive();
+
     }
 });

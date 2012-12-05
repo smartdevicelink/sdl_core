@@ -66,6 +66,13 @@ MFT.ApplinkMediaController = Em.Object.create({
         MFT.States.goToState('media.applink.applinkoptions.applinkoptionssubmenu');
     },
 
+    /** Switching on Application */
+    turnOnApplink: function(appName){
+       
+        MFT.ApplinkController.getApplicationModel(1).showInfo.set('appName', appName);
+        FFW.AppLinkCoreClient.ActivateApp();
+        
+    },
 
     /** Applink Driver Distraction ON/OFF switcher */
     selectdDriverDistraction: function(checked){

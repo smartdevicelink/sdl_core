@@ -67,5 +67,21 @@ MFT.ApplinkController = Em.Object.create({
 	 */
 	getApplicationModel: function( applicationId ) {
 		return MFT[ this.applicationModels[ this.registeredApps[ applicationId ] ] ];
+	},
+
+	/* Function returns ChangeDeviceView 
+	 * back to previous state
+	 */
+	turnChangeDeviceViewBack: function(){
+        MFT.States.goToState('info.apps');
+    },
+
+	/**
+	 * Enter screen vith list of devices application model
+	 * 
+	 */
+	onGetDeviceList: function(  ) {
+		MFT.States.goToState('info.devicelist');
+		FFW.AppLinkCoreClient.getDeviceList();
 	}
 });

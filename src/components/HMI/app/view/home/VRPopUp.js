@@ -114,6 +114,9 @@ MFT.VRPopUp = Em.ContainerView.create({
                 MFT.ApplinkMediaController.onSystemContextSwitcher(MFT.ApplinkMediaController.eSystemContext.main);
             }
         }else{
+        	// play audio alert
+			MFT.Audio.play('audio/say.wav');
+            
             this.set('VRActive', true);
             MFT.ApplinkMediaController.onSystemContextSwitcher(MFT.ApplinkMediaController.eSystemContext.VR);
         }

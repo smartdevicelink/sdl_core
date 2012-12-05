@@ -64,14 +64,14 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
 
     },
 
-    AddSubMenu: function( menuId, params ){
+    AddSubMenu: function( menuId, menuName ){
 
         this.get('listOfOptions.list.childViews').pushObject(
             MFT.Button.create({
                 action:                 'turnOnApplinkSubMenu',
                 target:                 'MFT.ApplinkMediaController',
                 menuId:                 menuId,
-                text:                   params.menuName,
+                text:                   menuName,
                 classNames:             'list-item',
                 templateName:           'arrow'
             })

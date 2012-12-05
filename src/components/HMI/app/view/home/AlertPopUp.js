@@ -60,6 +60,9 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
 	AlertActive: function(msg1, msg2, duration, playTone){
 		var self = this;
+		
+		// play audio alert
+		MFT.Audio.play('audio/alert.wav');
 
 		this.set('content1', msg1);
 		this.set('content2', msg2);

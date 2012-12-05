@@ -403,14 +403,12 @@ MFT.MediaController = Em.Object.create({
         if(this.directTuneSelected){
             this.set('directTuneSelected', false);
         }
-        FFW.AppLinkCoreClient.ActivateApp();
+
+        MFT.ApplinkMediaController.turnOnApplink(element.appName);
 
         /* Show Applink application in media left menu */
 		MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);
 		MFT.MediaController.listDown();
-
-		
-		MFT.ApplinkController.getApplicationModel(1).showInfo.set('appName', element.text);
 
     },
 

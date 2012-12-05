@@ -22,7 +22,6 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                             'initialText',
                             'headerLabel',
                             'footerLabel',
-                            'slider'
                         ],
 
     backButton: MFT.Button.extend({
@@ -59,33 +58,76 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
         contentBinding:     'MFT.ApplinkMediaController.performInteractionInitialText'
     }),
 
+    activate: function(){
+        //MFT.ApplinkController.getApplicationModel(1).
+
+        this.get('childViews').pushObject(
+
+            Em.ContainerView.create( {
+                disabled: false,
+
+                classNames:         'control sliderControl',
+
+                elementId:          'sliderControl',
+
+                /** Container components */
+                childViews: [
+                    'minusBtn',
+                    'led',
+                    'plusBtn'
+                ],
+
+                /** Minus button */
+                minusBtn: MFT.Button.extend({
+                    classNames: 'minus',
+                    icon:       'images/common/minus-ico.png',
+                }),
+
+                /** adjust */
+                led: MFT.Indicator.create({
+                    classNames:         'ledContainer ico',
+                    contentBinding:     'MFT.ApplinkMediaModel.applinkSliderContent',
+                    indActiveClass:     'led',
+                    indDefaultClass:    'led-inactive',
+                }),
+
+                /** Plus button */
+                plusBtn: MFT.Button.extend({
+                    classNames: 'plus',
+                    icon:       'images/common/plus-ico.png',
+                })
+            })
+
+        );
+    },
+/*
     slider: Em.ContainerView.create( {//MFT.SelectedIndex, {
           /*
             index:  this.get('index'),
 
             classNameBindings:  ['isSelected:active'],
-            */
+        
             disabled: false,
 
             classNames:         'control sliderControl',
 
             elementId:          'sliderControl',
 
-            /** Container components */
+            /** Container components 
             childViews: [
                 'minusBtn',
                 'led',
                 'plusBtn'
             ],
 
-            /** Minus button */
+            /** Minus button 
             minusBtn: MFT.Button.extend({
                 classNames: 'minus',
                 icon:       'images/common/minus-ico.png',
                 //action:     'onDecrease',
                 //target:     'MFT.MCSController',
 
-                timer:      FLAGS.MCS_EMULATE_CAN ? 200 : 0,
+                //timer:      FLAGS.MCS_EMULATE_CAN ? 200 : 0,
                 /*
                 actionUp:   function() {
                     if(!this._parentView._parentView.get('disabled')) {
@@ -117,7 +159,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                 }*/
             }),
 
-            /** adjust */
+            /** adjust 
             led: MFT.Indicator.create({
                 classNames:         'ledContainer ico',
                 //action:             'select',
@@ -147,7 +189,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                 }*/
             }),
 
-            /** Plus button */
+            /** Plus button 
             plusBtn: MFT.Button.extend({
                 classNames: 'plus',
                 icon:       'images/common/plus-ico.png',
@@ -183,8 +225,8 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                         
                         this._super();
                     }
-                }*/
+                }
             })
-        })
+        })*/
 
 });

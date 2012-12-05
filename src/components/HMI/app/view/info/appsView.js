@@ -27,7 +27,8 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 		'vehicleHealthReport',
 		'Asist911',
 		'installButton',
-		'findNewApps', 
+		'findNewApps',
+        'getDeviceList',
 		'listOfApplications'
 	],
 /*
@@ -101,6 +102,19 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 		onDown:				false,
         templateName:       'text'
 	}),
+
+    getDeviceList:   MFT.Button.extend({
+        /*icon:             'images/info/ico_info_install.png',*/
+        textBinding:        'MFT.locale.label.view_info_apps_vehicle_GetDeviceList',
+        elementId:          'infoAppsGetDeviceList',
+        classNames:         'button getDeviceList leftButtons',
+        arrow:              true,
+        action:             'onGetDeviceList',
+        target:             'MFT.ApplinkController',
+        //disabledBinding:    'MFT.helpMode',
+        onDown:             false,
+        templateName:       'text'
+    }),
 
 	listOfApplications: MFT.List.extend({
 

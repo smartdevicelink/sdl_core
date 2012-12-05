@@ -17,12 +17,13 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
  	 */		
 	 client:		FFW.RPCClient.create({ componentName: "AppLinkCoreClient" }),
 
-	getAppListRequestId: 					-1,
-	activateAppRequestId: 					-1,
+	getAppListRequestId: 						-1,
+	getDeviceListRequestId: 					-1,
+	activateAppRequestId: 						-1,
 	onAppRegisteredSubscribeRequestId:			-1,
-	onAppUnregisteredSubscribeRequestId:			-1,
-	onAppRegisteredUnsubscribeRequestId:			-1,
-	onAppUnregisteredUnsubscribeRequestId:			-1,
+	onAppUnregisteredSubscribeRequestId:		-1,
+	onAppRegisteredUnsubscribeRequestId:		-1,
+	onAppUnregisteredUnsubscribeRequestId:		-1,
 
 	// const
 	onAppRegisteredNotification:		"AppLinkCore.OnAppRegistered",
@@ -96,6 +97,13 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			}
 		}
 
+		if (response.result.method == "AppLinkCore.GetDeviceListResponse")
+		{
+			if(MFT.States.info.active){
+				MFT.ApplinkMediaModel.onGetDeviceList(response.result);
+			}
+		}
+
 		if (response.id == this.activateAppRequestId)
 		{
 			// 
@@ -145,17 +153,31 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	},
 
 	/*
-	 * unregister component is RPC bus
+	 * Request for list of avaliable applications
 	 */
 	getAppList: function() {
 		this.getAppListRequestId = this.client.generateId();
-
-		console.log('onGetAppList        ' + this.getAppListRequestId);
 
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
 			"id": 		this.getAppListRequestId,
 			"method":	"AppLinkCore.GetAppList",
+			"params":	{
+			}
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * Request for list of avaliable devices
+	 */
+	getDeviceList: function() {
+		this.getDeviceListRequestId = this.client.generateId();
+
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"id": 		this.getDeviceListRequestId,
+			"method":	"AppLinkCore.GetDeviceList",
 			"params":	{
 			}
 		};
