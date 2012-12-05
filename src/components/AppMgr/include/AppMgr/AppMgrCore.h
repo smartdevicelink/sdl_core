@@ -235,6 +235,7 @@ namespace NsAppManager
         CapabilitiesContainer<NsAppLinkRPCV2::ButtonCapabilities> mButtonCapabilitiesV2;
         NsAppLinkRPC::DisplayCapabilities mDisplayCapabilitiesV1;
         NsAppLinkRPCV2::DisplayCapabilities mDisplayCapabilitiesV2;
+        NsAppLinkRPCV2::PresetBankCapabilities mPresetBankCapabilities;
         CapabilitiesContainer<NsAppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilitiesV1;
         CapabilitiesContainer<NsAppLinkRPCV2::HmiZoneCapabilities> mHmiZoneCapabilitiesV2;
         CapabilitiesContainer<NsAppLinkRPC::VrCapabilities> mVrCapabilitiesV1;

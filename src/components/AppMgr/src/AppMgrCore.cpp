@@ -293,6 +293,7 @@ namespace NsAppManager
                         response->set_vrCapabilities(core->mVrCapabilitiesV2.get());
                         response->set_syncMsgVersion(app->getSyncMsgVersion());
                         response->set_softButtonCapabilities(core->mSoftButtonCapabilities.get());
+                        response->set_presetBankCapabilities(core->mPresetBankCapabilities);
                         response->set_success(true);
                         response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
 
@@ -1250,6 +1251,10 @@ namespace NsAppManager
                 NsRPC2Communication::Buttons::GetCapabilitiesResponse * btnCaps = (NsRPC2Communication::Buttons::GetCapabilitiesResponse*)msg;
                 core->mButtonCapabilitiesV1.set( btnCaps->get_capabilities() );
                 core->mButtonCapabilitiesV2.set( *((std::vector< NsAppLinkRPCV2::ButtonCapabilities>*)&btnCaps->get_capabilities()) );
+                if(btnCaps->get_presetBankCapabilities())
+                {
+                    core->mPresetBankCapabilities = *btnCaps->get_presetBankCapabilities();
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
