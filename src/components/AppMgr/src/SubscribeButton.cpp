@@ -8,9 +8,9 @@
 #include "AppMgr/AppMgrCore.h"
 #include "AppMgr/AppMgrRegistry.h"
 #include "AppMgr/MobileHandler.h"
-#include "JSONHandler/ALRPCObjects/SubscribeButton_request.h"
-#include "JSONHandler/ALRPCObjects/SubscribeButton_response.h"
-#include "JSONHandler/ALRPCObjects/ButtonName.h"
+#include "JSONHandler/ALRPCObjects/V1/SubscribeButton_request.h"
+#include "JSONHandler/ALRPCObjects/V1/SubscribeButton_response.h"
+#include "JSONHandler/ALRPCObjects/V1/ButtonName.h"
 #include "JSONHandler/JSONHandler.h"
 #include "LoggerHelper.hpp"
 

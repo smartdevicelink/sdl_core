@@ -5,14 +5,14 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/SoftButton.h"
+#include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/SoftButton.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -41,7 +41,7 @@ namespace NsRPC2Communication
       const std::vector< NsAppLinkRPC::TTSChunk>* get_ttsChunks(void);
       const unsigned int* get_duration(void);
       const bool* get_playTone(void);
-      const std::vector< NsAppLinkRPC::SoftButton>* get_softButtons(void);
+      const std::vector< NsAppLinkRPCV2::SoftButton>* get_softButtons(void);
       int get_appId(void);
 
 
@@ -76,7 +76,7 @@ namespace NsRPC2Communication
       void reset_playTone(void);
 
 /// 0 <= size <= 4
-      bool set_softButtons(const std::vector< NsAppLinkRPC::SoftButton>& softButtons);
+      bool set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons);
 
       void reset_softButtons(void);
 
@@ -93,7 +93,7 @@ namespace NsRPC2Communication
       std::vector< NsAppLinkRPC::TTSChunk>* ttsChunks;
       unsigned int* duration;
       bool* playTone;
-      std::vector< NsAppLinkRPC::SoftButton>* softButtons;
+      std::vector< NsAppLinkRPCV2::SoftButton>* softButtons;
       int appId;
 
     };

@@ -1,13 +1,13 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/OnSystemContext.h"
-#include "../src/ALRPCObjectsImpl/SystemContextMarshaller.h"
-#include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/SystemContextMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnSystemContextMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -62,7 +62,6 @@ Json::Value OnSystemContextMarshaller::toJSON(const OnSystemContext& e)
   json["params"]=Json::Value(Json::objectValue);
 
   json["params"]["systemContext"]=NsAppLinkRPC::SystemContextMarshaller::toJSON(e.systemContext);;
-  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -81,9 +80,6 @@ bool OnSystemContextMarshaller::fromJSON(const Json::Value& json,OnSystemContext
 
     if(!js.isMember("systemContext") || !NsAppLinkRPC::SystemContextMarshaller::fromJSON(js["systemContext"],c.systemContext))  return false;
 
-    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
-    c.appId=js["appId"].asInt();
-    
   }
   catch(...)
   {

@@ -16,7 +16,7 @@
 #include "AppMgr/SyncPManager.h"
 #include "AppMgr/DeviceList.h"
 #include "AppMgr/DeviceHandler.h"
-#include "JSONHandler/ALRPCObjects/DisplayCapabilities_v2.h"
+#include "JSONHandler/ALRPCObjects/V2/DisplayCapabilities.h"
 
 namespace NsAppLinkRPC
 {
@@ -232,14 +232,14 @@ namespace NsAppManager
         AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
         CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities> mButtonCapabilitiesV1;
-        CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities_v2> mButtonCapabilitiesV2;
+        CapabilitiesContainer<NsAppLinkRPCV2::PresetBankCapabilities> mButtonCapabilitiesV2;
         NsAppLinkRPC::DisplayCapabilities mDisplayCapabilitiesV1;
-        NsAppLinkRPC::DisplayCapabilities_v2 mDisplayCapabilitiesV2;
+        NsAppLinkRPCV2::DisplayCapabilities mDisplayCapabilitiesV2;
         CapabilitiesContainer<NsAppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilities;
         CapabilitiesContainer<NsAppLinkRPC::VrCapabilities> mVrCapabilitiesV1;
         CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities> mSpeechCapabilitiesV1;
-        CapabilitiesContainer<NsAppLinkRPC::VrCapabilities_v2> mVrCapabilitiesV2;
-        CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities_v2> mSpeechCapabilitiesV2;
+        CapabilitiesContainer<NsAppLinkRPCV2::VrCapabilities> mVrCapabilitiesV2;
+        CapabilitiesContainer<NsAppLinkRPCV2::SpeechCapabilities> mSpeechCapabilitiesV2;
         ButtonMapping    mButtonsMapping;
         MessageMapping   mMessageMapping;
         RequestMapping   mRequestMapping;

@@ -1,17 +1,17 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/PerformInteraction.h"
-#include "../src/ALRPCObjectsImpl/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/InteractionModeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/VrHelpItemMarshaller.h"
-#include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/InteractionModeMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/VrHelpItemMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/PerformInteractionMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -155,7 +155,7 @@ Json::Value PerformInteractionMarshaller::toJSON(const PerformInteraction& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::VrHelpItemMarshaller::toJSON(e.vrHelp[0][i]);
+      j[i]=NsAppLinkRPCV2::VrHelpItemMarshaller::toJSON(e.vrHelp[0][i]);
 
     json["params"]["vrHelp"]=j;
   }
@@ -268,11 +268,11 @@ bool PerformInteractionMarshaller::fromJSON(const Json::Value& json,PerformInter
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.vrHelp=new std::vector<NsAppLinkRPC::VrHelpItem>();
+      c.vrHelp=new std::vector<NsAppLinkRPCV2::VrHelpItem>();
       c.vrHelp->resize(js["vrHelp"].size());
 
       while(i--)
-        if(!NsAppLinkRPC::VrHelpItemMarshaller::fromJSON(js["vrHelp"][i],c.vrHelp[0][i]))  return false;
+        if(!NsAppLinkRPCV2::VrHelpItemMarshaller::fromJSON(js["vrHelp"][i],c.vrHelp[0][i]))  return false;
     }
 
 

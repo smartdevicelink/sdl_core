@@ -326,23 +326,15 @@ notification OnLanguageChange(
   int appId
 );
 
-/*
-  * @descr 
-   *      Request from HMI to AppLink to get the list of devices.
-   *  
-   */
-GetDeviceList(
-  ->
-  string deviceList [1:100]
-);
+
 
 /*
   * @descr 
-   *      Notification from AppLink to HMI about changes in device list.
+   *      Notification from HMI to AppLink when user chooses device
    *  
    */
-notification OnDeviceListUpdated(
-  string deviceList [1:100]
+notification OnDeviceChosen(
+    string deviceName
 );
 
 /*
@@ -613,6 +605,25 @@ GetAppList(
     ->
     HMIApplication appList [] // data specific for RPCBus communication.
     );
+
+    /*
+  * @descr 
+   *      Request from HMI to AppLink to get the list of devices.
+   *  
+   */
+GetDeviceList(
+  ->
+  string deviceList [1:100]
+);
+
+/*
+  * @descr 
+   *      Notification from AppLink to HMI about changes in device list.
+   *  
+   */
+notification OnDeviceListUpdated(
+  string deviceList [1:100]
+);
 
 /*
      * @descr 

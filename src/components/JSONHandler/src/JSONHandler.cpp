@@ -13,7 +13,8 @@
 #include <json/reader.h>
 #include <json/writer.h>
 #include "JSONHandler/JSONHandler.h"
-#include "JSONHandler/ALRPCObjects/Marshaller.h"
+#include "JSONHandler/ALRPCObjects/V1/Marshaller.h"
+#include "JSONHandler/ALRPCObjects/V2/Marshaller.h"
 
 
 log4cplus::Logger JSONHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONHandler"));
@@ -215,7 +216,7 @@ NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV2( const
 
     std::string jsonCleanMessage = clearEmptySpaces( jsonMessage );
 
-    NsAppLinkRPC::ALRPCMessage * messageObject = NsAppLinkRPC::Marshaller::fromString( jsonCleanMessage );
+    NsAppLinkRPC::ALRPCMessage * messageObject = NsAppLinkRPCV2::Marshaller::fromString( jsonCleanMessage, static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(functionId), static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(rpcType) );
 
     if ( message -> getDataSize() > offset + jsonSize )
     {
@@ -242,7 +243,18 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
             const NsAppLinkRPC::ALRPCMessage *  message = messagePair.second;
             LOG4CPLUS_INFO( mLogger, "Outgoing mobile message " << message->getMethodId() << " received." );
 
-            std::string messageString = NsAppLinkRPC::Marshaller::toString( message );
+            std::string messageString = "";
+
+            if ( message -> getProtocolVersion() == 1 )
+            {
+                messageString = NsAppLinkRPC::Marshaller::toString( message );
+            }
+            else if ( message -> getProtocolVersion() == 2 )
+            {
+                messageString = NsAppLinkRPCV2::Marshaller::toString( message, 
+                        static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId()), 
+                        static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()) );
+            }
 
             if ( messageString.length() == 0 )
             {

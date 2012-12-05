@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -31,9 +31,9 @@ Show& Show::operator =(const Show& c)
   if(mediaTrack)  delete mediaTrack;
   mediaTrack= c.mediaTrack ? new std::string(c.mediaTrack[0]) : 0;
   if(graphic)  delete graphic;
-  graphic= c.graphic ? new NsAppLinkRPC::Image(c.graphic[0]) : 0;
+  graphic= c.graphic ? new NsAppLinkRPCV2::Image(c.graphic[0]) : 0;
   if(softButtons)  delete softButtons;
-  softButtons= c.softButtons ? new std::vector<NsAppLinkRPC::SoftButton>(c.softButtons[0]) : 0;
+  softButtons= c.softButtons ? new std::vector<NsAppLinkRPCV2::SoftButton>(c.softButtons[0]) : 0;
   if(customPresets)  delete customPresets;
   customPresets= c.customPresets ? new std::vector<std::string>(c.customPresets[0]) : 0;
   appId=c.appId;
@@ -224,15 +224,15 @@ void Show::reset_mediaTrack(void)
   mediaTrack=0;
 }
 
-const NsAppLinkRPC::Image* Show::get_graphic(void)
+const NsAppLinkRPCV2::Image* Show::get_graphic(void)
 {
   return graphic;
 }
 
-bool Show::set_graphic(const NsAppLinkRPC::Image& graphic_)
+bool Show::set_graphic(const NsAppLinkRPCV2::Image& graphic_)
 {
   if(graphic)  delete graphic;
-  graphic=new NsAppLinkRPC::Image(graphic_);
+  graphic=new NsAppLinkRPCV2::Image(graphic_);
   return true;
 }
 
@@ -242,15 +242,15 @@ void Show::reset_graphic(void)
   graphic=0;
 }
 
-const std::vector< NsAppLinkRPC::SoftButton>* Show::get_softButtons(void)
+const std::vector< NsAppLinkRPCV2::SoftButton>* Show::get_softButtons(void)
 {
   return softButtons;
 }
 
-bool Show::set_softButtons(const std::vector< NsAppLinkRPC::SoftButton>& softButtons_)
+bool Show::set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons_)
 {
   if(softButtons)  delete softButtons;
-  softButtons=new std::vector< NsAppLinkRPC::SoftButton>(softButtons_);
+  softButtons=new std::vector< NsAppLinkRPCV2::SoftButton>(softButtons_);
   return true;
 }
 

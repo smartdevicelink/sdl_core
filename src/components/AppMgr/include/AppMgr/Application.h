@@ -7,8 +7,8 @@
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
 
-#include "JSONHandler/ALRPCObjects/SyncMsgVersion.h"
-#include "JSONHandler/ALRPCObjects/HMILevel.h"
+#include "JSONHandler/ALRPCObjects/V1/SyncMsgVersion.h"
+#include "JSONHandler/ALRPCObjects/V1/HMILevel.h"
 #include "AppMgr/MenuMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/AppMenus.h"

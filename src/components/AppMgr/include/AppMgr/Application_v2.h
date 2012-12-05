@@ -2,17 +2,17 @@
 #define APPLICATION_V2_H
 
 #include "AppMgr/Application.h"
-#include "JSONHandler/ALRPCObjects/AudioStreamingState_v2.h"
-#include "JSONHandler/ALRPCObjects/SystemContext_v2.h"
-#include "JSONHandler/ALRPCObjects/Language_v2.h"
-#include "JSONHandler/ALRPCObjects/AppType.h"
+#include "JSONHandler/ALRPCObjects/V2/AudioStreamingState.h"
+#include "JSONHandler/ALRPCObjects/V2/SystemContext.h"
+#include "JSONHandler/ALRPCObjects/V2/Language.h"
+#include "JSONHandler/ALRPCObjects/V2/AppType.h"
 
 namespace NsAppManager
 {
     /**
      * \brief Application types
      */
-    typedef std::vector<NsAppLinkRPC::AppType> AppTypes;
+    typedef std::vector<NsAppLinkRPCV2::AppType> AppTypes;
 
     /**
      * \brief class Application acts as a metaphor for every mobile application of protocol v2 being registered on HMI
@@ -51,49 +51,49 @@ namespace NsAppManager
          * \brief Set application desired languuage
          * \param value application desired language
          */
-        void setLanguageDesired(NsAppLinkRPC::Language_v2 value);
+        void setLanguageDesired(NsAppLinkRPCV2::Language value);
 
         /**
          * \brief retrieve application desired language
          * \return application desired language
          */
-        const NsAppLinkRPC::Language_v2& getLanguageDesired( ) const;
+        const NsAppLinkRPCV2::Language& getLanguageDesired( ) const;
 
         /**
          * \brief Set application HMI desired display language
          * \param value application HMI desired display language
          */
-        void setHMIDisplayLanguageDesired( NsAppLinkRPC::Language_v2 value );
+        void setHMIDisplayLanguageDesired( NsAppLinkRPCV2::Language value );
 
         /**
          * \brief retrieve application HMI desired display language
          * \return application HMI desired display language
          */
-        const NsAppLinkRPC::Language_v2& getHMIDisplayLanguageDesired( ) const;
+        const NsAppLinkRPCV2::Language& getHMIDisplayLanguageDesired( ) const;
 
         /**
          * \brief set application system context
          * \param application system context
          */
-        void setSystemContext( NsAppLinkRPC::SystemContext_v2 value );
+        void setSystemContext( NsAppLinkRPCV2::SystemContext value );
 
         /**
          * \brief retrieve application system context
          * \return application system context
          */
-        const NsAppLinkRPC::SystemContext_v2& getSystemContext() const;
+        const NsAppLinkRPCV2::SystemContext& getSystemContext() const;
 
         /**
          * \brief Set application audio streaming state
          * \param streamingState audio streaming state of application
          */
-        void setApplicationAudioStreamingState( const NsAppLinkRPC::AudioStreamingState_v2& hmiLevel );
+        void setApplicationAudioStreamingState( const NsAppLinkRPCV2::AudioStreamingState& hmiLevel );
 
         /**
          * \brief retreive application audio streaming state
          * \return application audio streaming state
          */
-        const NsAppLinkRPC::AudioStreamingState_v2& getApplicationAudioStreamingState( ) const;
+        const NsAppLinkRPCV2::AudioStreamingState& getApplicationAudioStreamingState( ) const;
 
         /**
          * \brief Set application type
@@ -114,10 +114,10 @@ namespace NsAppManager
          */
         Application_v2(const Application_v2& );
 
-        NsAppLinkRPC::Language_v2 mLanguageDesired;
-        NsAppLinkRPC::AudioStreamingState_v2 mAudioStreamingState;
-        NsAppLinkRPC::Language_v2 mHMIDisplayLanguageDesired;
-        NsAppLinkRPC::SystemContext_v2 mSystemContext;
+        NsAppLinkRPCV2::Language mLanguageDesired;
+        NsAppLinkRPCV2::AudioStreamingState mAudioStreamingState;
+        NsAppLinkRPCV2::Language mHMIDisplayLanguageDesired;
+        NsAppLinkRPCV2::SystemContext mSystemContext;
 
    //     std::string mAppID;
         AppTypes mAppType;

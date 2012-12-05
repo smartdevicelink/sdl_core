@@ -35,7 +35,7 @@ namespace NsAppLinkRPC
          * \param protocolVersion Version of AppLink protocol (currently 1,2)
          * \param messageType Type of AppLink message
         */
-        ALRPCMessage( unsigned int protocolVersion, MessageType messageType );
+        ALRPCMessage( unsigned int protocolVersion, MessageType messageType = UNDEFINED );
 
         /**
          * \brief Constructor

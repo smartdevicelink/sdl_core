@@ -5,15 +5,15 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/VrHelpItem.h"
+#include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
+#include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/VrHelpItem.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -39,7 +39,7 @@ namespace NsRPC2Communication
       const std::vector< NsAppLinkRPC::TTSChunk>* get_helpPrompt(void);
       const std::vector< NsAppLinkRPC::TTSChunk>* get_timeoutPrompt(void);
       const std::string* get_vrHelpTitle(void);
-      const std::vector< NsAppLinkRPC::VrHelpItem>* get_vrHelp(void);
+      const std::vector< NsAppLinkRPCV2::VrHelpItem>* get_vrHelp(void);
       int get_appId(void);
 
 
@@ -60,7 +60,7 @@ namespace NsRPC2Communication
       void reset_vrHelpTitle(void);
 
 /// 1 <= size <= 100
-      bool set_vrHelp(const std::vector< NsAppLinkRPC::VrHelpItem>& vrHelp);
+      bool set_vrHelp(const std::vector< NsAppLinkRPCV2::VrHelpItem>& vrHelp);
 
       void reset_vrHelp(void);
 
@@ -74,7 +74,7 @@ namespace NsRPC2Communication
       std::vector< NsAppLinkRPC::TTSChunk>* helpPrompt;
       std::vector< NsAppLinkRPC::TTSChunk>* timeoutPrompt;
       std::string* vrHelpTitle;
-      std::vector< NsAppLinkRPC::VrHelpItem>* vrHelp;
+      std::vector< NsAppLinkRPCV2::VrHelpItem>* vrHelp;
       int appId;
 
     };

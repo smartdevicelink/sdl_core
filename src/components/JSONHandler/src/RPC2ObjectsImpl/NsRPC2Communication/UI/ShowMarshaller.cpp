@@ -1,15 +1,15 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/Show.h"
-#include "../src/ALRPCObjectsImpl/TextAlignmentMarshaller.h"
-#include "../src/ALRPCObjectsImpl/ImageMarshaller.h"
-#include "../src/ALRPCObjectsImpl/SoftButtonMarshaller.h"
-#include "../src/ALRPCObjectsImpl/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/TextAlignmentMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ImageMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/SoftButtonMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ShowMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Thu Nov 29 14:32:09 2012
-  source stamp	Thu Nov 29 14:32:05 2012
+  generated at	Tue Dec  4 16:38:13 2012
+  source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
 
@@ -63,7 +63,7 @@ bool ShowMarshaller::checkIntegrityConst(const Show& s)
 
   if(s.mediaTrack && (s.mediaTrack[0].length()>500))  return false;
 
-  if(s.graphic && (!NsAppLinkRPC::ImageMarshaller::checkIntegrityConst(s.graphic[0])))  return false;
+  if(s.graphic && (!NsAppLinkRPCV2::ImageMarshaller::checkIntegrityConst(s.graphic[0])))  return false;
 
   if(s.softButtons)
   {
@@ -115,14 +115,14 @@ Json::Value ShowMarshaller::toJSON(const Show& e)
   if(e.mediaTrack)
     json["params"]["mediaTrack"]=Json::Value(e.mediaTrack[0]);;
   if(e.graphic)
-    json["params"]["graphic"]=NsAppLinkRPC::ImageMarshaller::toJSON(e.graphic[0]);;
+    json["params"]["graphic"]=NsAppLinkRPCV2::ImageMarshaller::toJSON(e.graphic[0]);;
   if(e.softButtons)
   {
     unsigned int i=e.softButtons[0].size();
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
+      j[i]=NsAppLinkRPCV2::SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
 
     json["params"]["softButtons"]=j;
   }
@@ -244,8 +244,8 @@ bool ShowMarshaller::fromJSON(const Json::Value& json,Show& c)
     c.graphic=0;
     if(js.isMember("graphic"))
     {
-      c.graphic=new NsAppLinkRPC::Image();
-      if(!NsAppLinkRPC::ImageMarshaller::fromJSON(js["graphic"],c.graphic[0]))  return false;
+      c.graphic=new NsAppLinkRPCV2::Image();
+      if(!NsAppLinkRPCV2::ImageMarshaller::fromJSON(js["graphic"],c.graphic[0]))  return false;
     }
 
     if(c.softButtons)  delete c.softButtons;
@@ -257,11 +257,11 @@ bool ShowMarshaller::fromJSON(const Json::Value& json,Show& c)
       if(i<0)  return false;
       if(i>8)  return false;
 
-      c.softButtons=new std::vector<NsAppLinkRPC::SoftButton>();
+      c.softButtons=new std::vector<NsAppLinkRPCV2::SoftButton>();
       c.softButtons->resize(js["softButtons"].size());
 
       while(i--)
-        if(!NsAppLinkRPC::SoftButtonMarshaller::fromJSON(js["softButtons"][i],c.softButtons[0][i]))  return false;
+        if(!NsAppLinkRPCV2::SoftButtonMarshaller::fromJSON(js["softButtons"][i],c.softButtons[0][i]))  return false;
     }
 
 
