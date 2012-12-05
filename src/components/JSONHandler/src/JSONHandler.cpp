@@ -222,8 +222,19 @@ NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV2( const
     {
         unsigned int binarySize = message->getDataSize() - offset - jsonSize;
         std::vector<unsigned char> binaryData( receivedData+offset+jsonSize, receivedData + binarySize -1 );
-        //messageObject -> setBinaryData( binaryData );
+        LOG4CPLUS_INFO_EXT(mLogger, "Binary data is present in message.");
+        messageObject -> setBinaryData( binaryData );
     }
+
+    if ( messageObject )
+    {
+        messageObject->setMethodId( functionId );
+        /*if ( RPC_REQUEST == rpcTypeFlag || RPC_RESPONSE == rpcTypeFlag )
+        {
+            messageObject->setCorrelationID( correlationId );
+        } */       
+    }
+    
     return messageObject;
 }
 

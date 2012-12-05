@@ -186,6 +186,9 @@ namespace NsAppManager
         }
         const std::string& currentDeviceName = currentDevice->getUserFriendlyName();
 
+        LOG4CPLUS_INFO_EXT(mLogger, "Message received is from protocol " << protocolVersion);
+        if ( 1 == mobileMsg->getProtocolVersion() )
+        {
         switch(mobileMsg->getMethodId())
         {
             case NsAppLinkRPC::Marshaller::METHOD_REGISTERAPPINTERFACE_REQUEST:
@@ -254,69 +257,7 @@ namespace NsAppManager
                     }
                     case 2:
                     {
-                        NsAppLinkRPCV2::RegisterAppInterface_request * object = (NsAppLinkRPCV2::RegisterAppInterface_request*)mobileMsg;
-                        NsAppLinkRPCV2::RegisterAppInterface_response* response = new NsAppLinkRPCV2::RegisterAppInterface_response();
-                        const std::string& appName = object->get_appName();
-
-                        if(AppMgrRegistry::getInstance().getItem(connectionID, sessionID))
-                        {
-                            LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
-                            response->set_success(false);
-                            response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_REGISTERED_ALREADY);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                            break;
-                        }
-
-                        Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, connectionID, sessionID ));
-                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
-                        if(!app)
-                        {
-                            LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
-                            response->set_success(false);
-                            response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                            break;
-                        }
-
-                        NsAppLinkRPCV2::OnHMIStatus* status = new NsAppLinkRPCV2::OnHMIStatus();
-                        status->set_hmiLevel(app->getApplicationHMIStatusLevel());
-                        status->set_audioStreamingState(app->getApplicationAudioStreamingState());
-                        status->set_systemContext(app->getSystemContext());
-                        MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
-
-                        response->set_buttonCapabilities(core->mButtonCapabilitiesV2.get());
-                        response->set_displayCapabilities(core->mDisplayCapabilitiesV2);
-                        response->set_hmiZoneCapabilities(core->mHmiZoneCapabilitiesV2.get());
-                        response->set_hmiDisplayLanguage(app->getHMIDisplayLanguageDesired());
-                        response->set_language(app->getLanguageDesired());
-                        response->set_speechCapabilities(core->mSpeechCapabilitiesV2.get());
-                        response->set_vrCapabilities(core->mVrCapabilitiesV2.get());
-                        response->set_syncMsgVersion(app->getSyncMsgVersion());
-                        response->set_success(true);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-
-                        LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName() << " gets sent to a mobile side... ");
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-
-                        NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
-                        appRegistered->set_appName(app->getName());
-                        appRegistered->set_isMediaApplication(app->getIsMediaApplication());
-                        const NsAppLinkRPCV2::Language& languageDesired = app->getLanguageDesired();
-                        NsAppLinkRPC::Language languageDesiredV1;
-                        languageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)languageDesired.get());
-                        appRegistered->set_languageDesired(languageDesiredV1);
-                        appRegistered->set_vrSynonym(app->getVrSynonyms());
-                        appRegistered->set_appId(app->getAppID());
-                        appRegistered->set_appType(app->getAppType());
-                        const NsAppLinkRPCV2::Language& hmiLanguageDesired = app->getHMIDisplayLanguageDesired();
-                        NsAppLinkRPC::Language hmiLanguageDesiredV1;
-                        hmiLanguageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)hmiLanguageDesired.get());
-                        appRegistered->set_hmiDisplayLanguageDesired(hmiLanguageDesiredV1);
-                        appRegistered->set_vrSynonym(app->getVrSynonyms());
-                        appRegistered->set_deviceName(currentDeviceName);
-                        HMIHandler::getInstance().sendNotification(appRegistered);
-                        LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
-                        break;
+                        
                     }
                 }
 
@@ -932,6 +873,8 @@ namespace NsAppManager
                 break;
             }
 
+            
+
             case NsAppLinkRPC::Marshaller::METHOD_SHOW_RESPONSE:
             case NsAppLinkRPC::Marshaller::METHOD_SPEAK_RESPONSE:
             case NsAppLinkRPC::Marshaller::METHOD_SETGLOBALPROPERTIES_RESPONSE:
@@ -1163,16 +1106,96 @@ namespace NsAppManager
                     }
                     case 2:
                     {
-                        NsAppLinkRPCV2::GenericResponse_response* response = new NsAppLinkRPCV2::GenericResponse_response();
-                        response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                        break;
+                        
                     }
                 }
                 break;
             }
         }
+    }
+    else if ( 2 == mobileMsg->getProtocolVersion() )
+    {
+        LOG4CPLUS_INFO_EXT(mLogger,"Received message of version 2.");
+        switch(mobileMsg->getMethodId())
+        {
+            case NsAppLinkRPCV2::FunctionID::RegisterAppInterfaceID:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "Message id is NsAppLinkRPCV2::FunctionID::RegisterAppInterfaceID");
+                NsAppLinkRPCV2::RegisterAppInterface_request * object = (NsAppLinkRPCV2::RegisterAppInterface_request*)mobileMsg;
+                NsAppLinkRPCV2::RegisterAppInterface_response* response = new NsAppLinkRPCV2::RegisterAppInterface_response();
+                const std::string& appName = object->get_appName();
+
+                if(AppMgrRegistry::getInstance().getItem(connectionID, sessionID))
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_REGISTERED_ALREADY);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
+                }
+
+                Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, connectionID, sessionID ));
+                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
+                }
+
+                NsAppLinkRPCV2::OnHMIStatus* status = new NsAppLinkRPCV2::OnHMIStatus();
+                status->set_hmiLevel(app->getApplicationHMIStatusLevel());
+                status->set_audioStreamingState(app->getApplicationAudioStreamingState());
+                status->set_systemContext(app->getSystemContext());
+                MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
+
+                response->set_buttonCapabilities(core->mButtonCapabilitiesV2.get());
+                response->set_displayCapabilities(core->mDisplayCapabilitiesV2);
+                response->set_hmiZoneCapabilities(core->mHmiZoneCapabilitiesV2.get());
+                response->set_hmiDisplayLanguage(app->getHMIDisplayLanguageDesired());
+                response->set_language(app->getLanguageDesired());
+                response->set_speechCapabilities(core->mSpeechCapabilitiesV2.get());
+                response->set_vrCapabilities(core->mVrCapabilitiesV2.get());
+                response->set_syncMsgVersion(app->getSyncMsgVersion());
+                response->set_success(true);
+                response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+
+                LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName() << " gets sent to a mobile side... ");
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+
+                NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
+                appRegistered->set_appName(app->getName());
+                appRegistered->set_isMediaApplication(app->getIsMediaApplication());
+                const NsAppLinkRPCV2::Language& languageDesired = app->getLanguageDesired();
+                NsAppLinkRPC::Language languageDesiredV1;
+                languageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)languageDesired.get());
+                appRegistered->set_languageDesired(languageDesiredV1);
+                appRegistered->set_vrSynonym(app->getVrSynonyms());
+                appRegistered->set_appId(app->getAppID());
+                appRegistered->set_appType(app->getAppType());
+                const NsAppLinkRPCV2::Language& hmiLanguageDesired = app->getHMIDisplayLanguageDesired();
+                NsAppLinkRPC::Language hmiLanguageDesiredV1;
+                hmiLanguageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)hmiLanguageDesired.get());
+                appRegistered->set_hmiDisplayLanguageDesired(hmiLanguageDesiredV1);
+                appRegistered->set_vrSynonym(app->getVrSynonyms());
+                appRegistered->set_deviceName(currentDeviceName);
+                HMIHandler::getInstance().sendNotification(appRegistered);
+                LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
+                break;
+            }
+            default:
+            {
+                NsAppLinkRPCV2::GenericResponse_response* response = new NsAppLinkRPCV2::GenericResponse_response();
+                response->setMethodId(NsAppLinkRPCV2::FunctionID::GenericResponseID);
+                response->set_success(false);
+                response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                break;
+            }
+        }
+    }
     }
 
     /**
