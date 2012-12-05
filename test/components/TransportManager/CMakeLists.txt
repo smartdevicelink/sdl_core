@@ -83,9 +83,9 @@ target_link_libraries("test_TransportManagerTestWithMultipleDeviceAdapters" ${LI
 add_test(test_TransportManagerTestWithMultipleDeviceAdapters test_TransportManagerTestWithMultipleDeviceAdapters)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cplus_disabled.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-#add_executable("test_TransportManagerTestWithHighDataTransferRate" ${SOURCES_TEST_WITH_HIGH_DATA_TRANSFER_RATE})
-#target_link_libraries("test_TransportManagerTestWithHighDataTransferRate" ${LIBRARIES})
-#add_test(test_TransportManagerTestWithHighDataTransferRate test_TransportManagerTestWithHighDataTransferRate)
+add_executable("test_TransportManagerTestWithHighDataTransferRate" ${SOURCES_TEST_WITH_HIGH_DATA_TRANSFER_RATE})
+target_link_libraries("test_TransportManagerTestWithHighDataTransferRate" ${LIBRARIES})
+add_test(test_TransportManagerTestWithHighDataTransferRate test_TransportManagerTestWithHighDataTransferRate)
 
 add_executable("test_TransportManagerTestWithMultiThreadedClient" ${SOURCES_TEST_WITH_MULTI_THREADED_CLIENT})
 target_link_libraries("test_TransportManagerTestWithMultiThreadedClient" ${LIBRARIES})
