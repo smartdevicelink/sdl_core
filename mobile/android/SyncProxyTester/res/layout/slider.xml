@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="300px" android:layout_width="fill_parent"
+    android:orientation="vertical" android:id="@+id/itemRoot"
+    android:paddingLeft="20dip" android:paddingRight="20dip"
+    android:layout_marginLeft="10dip" android:layout_marginRight="10dip">
+    <TextView 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:layout_weight="1"
+        android:textStyle="bold"
+        android:text="Num Ticks">
+    </TextView>
+    <EditText 
+        android:text="2" 
+        android:id="@+id/txtNumTicks"
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"
+        android:visibility="visible" 
+        android:freezesText="true">
+    </EditText>
+    <TextView 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:layout_weight="1"
+        android:textStyle="bold" 
+        android:text="Slider Header">
+    </TextView>
+    <EditText 
+        android:text="Slider Header" 
+        android:id="@+id/txtSliderHeader"
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"
+        android:visibility="visible" 
+        android:freezesText="true">
+    </EditText>
+    <TextView 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:layout_weight="1"
+        android:textStyle="bold" 
+        android:text="Slider Footer">
+    </TextView>
+    <EditText 
+        android:text="Slider Footer" 
+        android:id="@+id/txtSliderFooter"
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"
+        android:visibility="visible" 
+        android:freezesText="true">
+    </EditText>
+    <TextView 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:layout_weight="1"
+        android:textStyle="bold" 
+        android:text="Timeout">
+    </TextView>
+    <EditText 
+        android:text="5000" 
+        android:id="@+id/txtTimeout"
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"
+        android:visibility="visible" 
+        android:freezesText="true">
+    </EditText>
+</LinearLayout>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android" 
+	android:layout_width="fill_parent"
+	android:orientation="vertical" 
+	android:id="@+id/submenu_Root" android:paddingLeft="20dip" android:paddingRight="20dip" android:layout_marginLeft="10dip" android:layout_marginRight="10dip">
+		<TextView
+            android:id="@+id/submenu_toptext"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+        	android:text="Submenu to add" >
+        </TextView>
+		<EditText 
+			android:text="SubmenuName" 
+			android:id="@+id/submenu_item" 
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content" 
+			android:visibility="visible" 
+			android:freezesText="true">
+		</EditText>
+</LinearLayout>

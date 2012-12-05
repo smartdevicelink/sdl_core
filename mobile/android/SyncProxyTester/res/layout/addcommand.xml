@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android" 
+	android:layout_width="fill_parent"
+	android:orientation="vertical" 
+	android:id="@+id/itemRoot" android:paddingLeft="20dip" android:paddingRight="20dip" android:layout_marginLeft="10dip" android:layout_marginRight="10dip">
+		<TextView
+            android:id="@+id/toptext"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+        	android:text="Command to add to menu" >
+        </TextView>
+		<EditText 
+			android:text="Item To Add" 
+			android:id="@+id/command" 
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content" 
+			android:visibility="visible" 
+			android:freezesText="true">
+		</EditText>
+		<TextView
+            android:id="@+id/toptext2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+        	android:text="VR Synonym (optional)">
+        </TextView>
+		<EditText 
+			android:text=""
+			android:id="@+id/command2" 
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content" 
+			android:visibility="visible" 
+			android:freezesText="true">
+		</EditText>
+		<TextView
+            android:id="@+id/toptext3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+        	android:text="Add this item to:">
+        </TextView>
+		<Spinner 
+			android:id="@+id/availableSubmenus" 
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content">
+		</Spinner>
+</LinearLayout>

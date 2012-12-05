@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:orientation="vertical">
+	<TableLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+		<TableRow android:id="@+id/LinearLayout01"
+			android:layout_width="fill_parent" android:layout_height="wrap_content">
+			<Button android:layout_weight="1" android:text="Speak"
+				android:id="@+id/btnSpeak" android:layout_width="wrap_content"
+				android:layout_height="wrap_content"></Button>
+			<Button android:layout_weight="1" android:text="Alert"
+				android:id="@+id/btnAlert" android:layout_width="wrap_content"
+				android:layout_height="wrap_content"></Button>
+			<Button android:layout_weight="1" android:text="Show"
+				android:id="@+id/btnShow" android:layout_width="wrap_content"
+				android:layout_height="wrap_content"></Button>
+			<Button android:layout_weight="1" android:text="SetTimer"
+				android:id="@+id/btnSetTimer" android:layout_width="wrap_content"
+				android:layout_height="wrap_content"></Button>
+		</TableRow>
+		<TableRow android:id="@+id/LinearLayout03"
+			android:layout_width="fill_parent" android:layout_height="wrap_content">
+			<Button android:layout_weight="1" android:text="AddCmd"
+				android:id="@+id/btnAddCommand" android:layout_width="wrap_content"
+				android:layout_height="wrap_content"></Button>
+			<Button android:layout_weight="1" android:text="DelCmd"
+				android:id="@+id/btnDeleteCommand" android:layout_width="wrap_content"
+				android:layout_height="wrap_content"></Button>
+			<Button android:layout_weight="1" android:text="AddSub"
+				android:id="@+id/btnAddSubMenu" android:layout_width="wrap_content"
+				android:layout_height="wrap_content"></Button>
+			<Button android:layout_weight="1" android:text="DelSub"
+				android:id="@+id/btnDeleteSubMenu" android:layout_width="wrap_content"
+				android:layout_height="wrap_content"></Button>
+		</TableRow>
+	</TableLayout>
+	<TableLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+		<TableRow android:id="@+id/LinearLayout03"
+			android:layout_width="fill_parent" android:layout_height="wrap_content">
+			<Button android:layout_weight="1"
+				android:id="@+id/btnCreateInteractionChoices" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:text="CreChoiceSet"></Button>
+			<Button android:layout_weight="1"
+				android:id="@+id/btnDeleteInteractionChoices" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:text="DelChoiceSet"></Button>
+			<Button android:layout_weight="1" android:text="PerfInt"
+				android:id="@+id/btnPerformInteraction" android:layout_width="wrap_content"
+				android:layout_height="wrap_content"></Button>
+		</TableRow>
+		<TableRow android:id="@+id/LinearLayout04"
+			android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+			
+			<Button android:layout_weight="1" 
+			    android:text="Button Subs"
+				android:id="@+id/btnSubscribeButton" 
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"></Button>
+
+			
+
+			<Button android:layout_weight="1" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:id="@+id/btnSetGlobal"
+				android:text="Set Glob Props" android:enabled="true"></Button>
+
+			<Button
+			    android:id="@+id/btnPlayPause"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_weight="1"
+			    android:text="Play/Pause" >
+</Button>
+		</TableRow>
+		
+        <TableRow android:id="@+id/LinearLayout05"
+            android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <Button android:layout_weight="1" android:text="Slider"
+                android:id="@+id/btnSlider" android:layout_width="wrap_content"
+                android:layout_height="wrap_content"></Button>
+            <Button android:layout_weight="1" android:text="GenericResponse"
+                android:id="@+id/btnGenResp" android:layout_width="wrap_content"
+                android:layout_height="wrap_content"></Button>
+        </TableRow>
+	</TableLayout>
+
+	<ScrollView android:layout_width="fill_parent"
+		android:layout_height="fill_parent" android:id="@+id/scrollConsole"
+		android:visibility="gone">
+		<TextView android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:id="@+id/console"></TextView>
+	</ScrollView>
+
+	<ListView android:layout_height="fill_parent"
+		android:layout_width="fill_parent" android:id="@+id/messageList"
+		android:visibility="visible">
+	</ListView>
+
+</LinearLayout>

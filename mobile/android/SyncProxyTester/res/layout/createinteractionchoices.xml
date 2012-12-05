@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android" 
+	android:minWidth="300px"
+	android:orientation="vertical" 
+	android:id="@+id/createcommands_Root" 
+	android:paddingLeft="10dip" 
+	android:paddingRight="10dip" 
+	android:layout_marginLeft="10dip" 
+	android:layout_marginRight="10dip">
+		<TextView
+            android:id="@+id/createcommands_text1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+        	android:text="Choice 1" >
+        </TextView>
+		<EditText 
+			android:text="1st item" 
+			android:id="@+id/createcommands_command1" 
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content" 
+			android:visibility="visible" 
+			android:freezesText="true">
+		</EditText>
+		<TextView
+            android:id="@+id/createcommands_text2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+        	android:text="Choice 2">
+        </TextView>
+		<EditText 
+			android:text="2nd item"
+			android:id="@+id/createcommands_command2" 
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content" 
+			android:visibility="visible" 
+			android:freezesText="true">
+		</EditText>
+		<TextView
+            android:id="@+id/createcommands_text3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+        	android:text="Choice 3">
+        </TextView>
+        <EditText 
+			android:text="3rd item"
+			android:id="@+id/createcommands_command3" 
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content" 
+			android:visibility="visible" 
+			android:freezesText="true">
+		</EditText>
+</LinearLayout>
