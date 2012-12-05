@@ -176,4 +176,22 @@ namespace NsAppManager
     {
         mSyncMsgVersion = value;
     }
+
+    /**
+     * \brief retrieve application text-to-speech name
+     * \return application text-to-speech name
+     */
+    const TTSName &Application_v2::getTtsName() const
+    {
+        return mTtsName;
+    }
+
+    /**
+     * \brief Set application text-to-speech name
+     * \param value application text-to-speech name
+     */
+    void Application_v2::setTtsName(const TTSName &value)
+    {
+        mTtsName = value;
+    }
 }

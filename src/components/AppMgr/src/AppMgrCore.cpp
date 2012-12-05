@@ -257,7 +257,7 @@ namespace NsAppManager
                     }
                     case 2:
                     {
-                        
+
                     }
                 }
 
@@ -1159,6 +1159,8 @@ namespace NsAppManager
                 response->set_speechCapabilities(core->mSpeechCapabilitiesV2.get());
                 response->set_vrCapabilities(core->mVrCapabilitiesV2.get());
                 response->set_syncMsgVersion(app->getSyncMsgVersion());
+                response->set_softButtonCapabilities(core->mSoftButtonCapabilities.get());
+                response->set_presetBankCapabilities(core->mPresetBankCapabilities);
                 response->set_success(true);
                 response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
 
@@ -1181,6 +1183,7 @@ namespace NsAppManager
                 appRegistered->set_hmiDisplayLanguageDesired(hmiLanguageDesiredV1);
                 appRegistered->set_vrSynonym(app->getVrSynonyms());
                 appRegistered->set_deviceName(currentDeviceName);
+                appRegistered->set_ttsName(*(std::vector<NsAppLinkRPC::TTSChunk>*)&app->getTtsName());
                 HMIHandler::getInstance().sendNotification(appRegistered);
                 LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                 break;
@@ -1271,6 +1274,10 @@ namespace NsAppManager
                 NsRPC2Communication::Buttons::GetCapabilitiesResponse * btnCaps = (NsRPC2Communication::Buttons::GetCapabilitiesResponse*)msg;
                 core->mButtonCapabilitiesV1.set( btnCaps->get_capabilities() );
                 core->mButtonCapabilitiesV2.set( *((std::vector< NsAppLinkRPCV2::ButtonCapabilities>*)&btnCaps->get_capabilities()) );
+                if(btnCaps->get_presetBankCapabilities())
+                {
+                    core->mPresetBankCapabilities = *btnCaps->get_presetBankCapabilities();
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
@@ -1306,6 +1313,10 @@ namespace NsAppManager
                 core->mDisplayCapabilitiesV2 = (*(NsAppLinkRPCV2::DisplayCapabilities*)&uiCaps->get_displayCapabilities());
                 core->mHmiZoneCapabilitiesV1.set( uiCaps->get_hmiZoneCapabilities() );
                 core->mHmiZoneCapabilitiesV2.set( *(std::vector<NsAppLinkRPCV2::HmiZoneCapabilities>*)&uiCaps->get_hmiZoneCapabilities() );
+                if(uiCaps->get_softButtonCapabilities())
+                {
+                    core->mSoftButtonCapabilities.set(*uiCaps->get_softButtonCapabilities());
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONCOMMAND:
@@ -2091,6 +2102,7 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendResponse(response);
                 return;
             }
+
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
                 LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message " << msg->getMethod() << " has been received!");
@@ -2161,6 +2173,11 @@ namespace NsAppManager
                 application->setIsMediaApplication(isMediaApplication);
                 application->setSyncMsgVersion(syncMsgVersion);
                 application->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);
+
+                if(registerRequest->get_ttsName())
+                {
+                    application->setTtsName(*registerRequest->get_ttsName());
+                }
 
                 application->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_NONE);
 
@@ -2439,6 +2456,21 @@ namespace NsAppManager
     void AppMgrCore::setDeviceList(const NsConnectionHandler::tDeviceList &deviceList)
     {
         mDeviceList.setDeviceList(deviceList);
+        NsRPC2Communication::AppLinkCore::OnDeviceListUpdated* deviceListUpdated = new NsRPC2Communication::AppLinkCore::OnDeviceListUpdated;
+        DeviceNamesList list;
+        const NsConnectionHandler::tDeviceList& devList = mDeviceList.getDeviceList();
+        for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
+        {
+            const NsConnectionHandler::CDevice& device = it->second;
+            list.push_back(device.getUserFriendlyName());
+        }
+        if ( list.empty() )
+        {
+            list.push_back("");
+        }
+
+        deviceListUpdated->set_deviceList(list);
+        HMIHandler::getInstance().sendNotification(deviceListUpdated);
     }
 
     /**
