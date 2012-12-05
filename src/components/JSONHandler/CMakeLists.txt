@@ -456,14 +456,8 @@ set (GENERATED_RPC_SOURCES
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetCapabilitiesMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetCapabilitiesResponse.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetCapabilitiesResponseMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetDeviceList.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetDeviceListMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetDeviceListResponse.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetDeviceListResponseMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnCommand.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnCommandMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnDeviceListUpdated.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnDeviceListUpdatedMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnDriverDistraction.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnDriverDistractionMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnLanguageChange.cpp
@@ -535,6 +529,12 @@ set (GENERATED_RPC_SOURCES
 ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/SendDataMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/SendDataResponse.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/SendDataResponseMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetDeviceList.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetDeviceListMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetDeviceListResponse.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetDeviceListResponseMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/OnDeviceListUpdated.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/OnDeviceListUpdatedMarshaller.cpp
     ./src/RPC2ObjectsImpl/NsRPC2Communication/Buttons/GetCapabilities.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/Buttons/GetCapabilitiesMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/Buttons/GetCapabilitiesResponse.cpp

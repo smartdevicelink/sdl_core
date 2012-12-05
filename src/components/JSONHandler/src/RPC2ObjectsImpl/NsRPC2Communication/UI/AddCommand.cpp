@@ -17,7 +17,7 @@ AddCommand& AddCommand::operator =(const AddCommand& c)
   cmdId=c.cmdId;
   menuParams=c.menuParams;
   if(cmdIcon)  delete cmdIcon;
-  cmdIcon= c.cmdIcon ? new NsAppLinkRPC::Image(c.cmdIcon[0]) : 0;
+  cmdIcon= c.cmdIcon ? new NsAppLinkRPCV2::Image(c.cmdIcon[0]) : 0;
   appId=c.appId;
   return *this;
 }
@@ -64,15 +64,15 @@ bool AddCommand::set_menuParams(const NsAppLinkRPC::MenuParams& menuParams_)
   return true;
 }
 
-const NsAppLinkRPC::Image* AddCommand::get_cmdIcon(void)
+const NsAppLinkRPCV2::Image* AddCommand::get_cmdIcon(void)
 {
   return cmdIcon;
 }
 
-bool AddCommand::set_cmdIcon(const NsAppLinkRPC::Image& cmdIcon_)
+bool AddCommand::set_cmdIcon(const NsAppLinkRPCV2::Image& cmdIcon_)
 {
   if(cmdIcon)  delete cmdIcon;
-  cmdIcon=new NsAppLinkRPC::Image(cmdIcon_);
+  cmdIcon=new NsAppLinkRPCV2::Image(cmdIcon_);
   return true;
 }
 

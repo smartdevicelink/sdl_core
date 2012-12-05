@@ -25,7 +25,7 @@ PerformInteraction& PerformInteraction::operator =(const PerformInteraction& c)
   if(timeout)  delete timeout;
   timeout= c.timeout ? new unsigned int(c.timeout[0]) : 0;
   if(vrHelp)  delete vrHelp;
-  vrHelp= c.vrHelp ? new std::vector<NsAppLinkRPC::VrHelpItem>(c.vrHelp[0]) : 0;
+  vrHelp= c.vrHelp ? new std::vector<NsAppLinkRPCV2::VrHelpItem>(c.vrHelp[0]) : 0;
   appId=c.appId;
   return *this;
 }
@@ -154,15 +154,15 @@ void PerformInteraction::reset_timeout(void)
   timeout=0;
 }
 
-const std::vector< NsAppLinkRPC::VrHelpItem>* PerformInteraction::get_vrHelp(void)
+const std::vector< NsAppLinkRPCV2::VrHelpItem>* PerformInteraction::get_vrHelp(void)
 {
   return vrHelp;
 }
 
-bool PerformInteraction::set_vrHelp(const std::vector< NsAppLinkRPC::VrHelpItem>& vrHelp_)
+bool PerformInteraction::set_vrHelp(const std::vector< NsAppLinkRPCV2::VrHelpItem>& vrHelp_)
 {
   if(vrHelp)  delete vrHelp;
-  vrHelp=new std::vector< NsAppLinkRPC::VrHelpItem>(vrHelp_);
+  vrHelp=new std::vector< NsAppLinkRPCV2::VrHelpItem>(vrHelp_);
   return true;
 }
 

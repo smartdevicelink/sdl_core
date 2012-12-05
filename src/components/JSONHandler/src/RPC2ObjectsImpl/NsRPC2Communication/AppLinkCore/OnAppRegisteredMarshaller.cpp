@@ -2,7 +2,7 @@
 #include "../src/ALRPCObjectsImpl/V1/LanguageMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/LanguageMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/AppTypeMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/AppTypeMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppRegisteredMarshaller.h"
 
@@ -125,7 +125,7 @@ Json::Value OnAppRegisteredMarshaller::toJSON(const OnAppRegistered& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::AppTypeMarshaller::toJSON(e.appType[0][i]);
+      j[i]=NsAppLinkRPCV2::AppTypeMarshaller::toJSON(e.appType[0][i]);
 
     json["params"]["appType"]=j;
   }
@@ -212,11 +212,11 @@ bool OnAppRegisteredMarshaller::fromJSON(const Json::Value& json,OnAppRegistered
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.appType=new std::vector<NsAppLinkRPC::AppType>();
+      c.appType=new std::vector<NsAppLinkRPCV2::AppType>();
       c.appType->resize(js["appType"].size());
 
       while(i--)
-        if(!NsAppLinkRPC::AppTypeMarshaller::fromJSON(js["appType"][i],c.appType[0][i]))  return false;
+        if(!NsAppLinkRPCV2::AppTypeMarshaller::fromJSON(js["appType"][i],c.appType[0][i]))  return false;
     }
 
 

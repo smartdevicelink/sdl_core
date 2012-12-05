@@ -21,7 +21,7 @@ SetGlobalProperties& SetGlobalProperties::operator =(const SetGlobalProperties& 
   if(vrHelpTitle)  delete vrHelpTitle;
   vrHelpTitle= c.vrHelpTitle ? new std::string(c.vrHelpTitle[0]) : 0;
   if(vrHelp)  delete vrHelp;
-  vrHelp= c.vrHelp ? new std::vector<NsAppLinkRPC::VrHelpItem>(c.vrHelp[0]) : 0;
+  vrHelp= c.vrHelp ? new std::vector<NsAppLinkRPCV2::VrHelpItem>(c.vrHelp[0]) : 0;
   appId=c.appId;
   return *this;
 }
@@ -106,15 +106,15 @@ void SetGlobalProperties::reset_vrHelpTitle(void)
   vrHelpTitle=0;
 }
 
-const std::vector< NsAppLinkRPC::VrHelpItem>* SetGlobalProperties::get_vrHelp(void)
+const std::vector< NsAppLinkRPCV2::VrHelpItem>* SetGlobalProperties::get_vrHelp(void)
 {
   return vrHelp;
 }
 
-bool SetGlobalProperties::set_vrHelp(const std::vector< NsAppLinkRPC::VrHelpItem>& vrHelp_)
+bool SetGlobalProperties::set_vrHelp(const std::vector< NsAppLinkRPCV2::VrHelpItem>& vrHelp_)
 {
   if(vrHelp)  delete vrHelp;
-  vrHelp=new std::vector< NsAppLinkRPC::VrHelpItem>(vrHelp_);
+  vrHelp=new std::vector< NsAppLinkRPCV2::VrHelpItem>(vrHelp_);
   return true;
 }
 

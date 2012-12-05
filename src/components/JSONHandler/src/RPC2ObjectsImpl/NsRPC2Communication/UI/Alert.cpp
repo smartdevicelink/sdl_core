@@ -27,7 +27,7 @@ Alert& Alert::operator =(const Alert& c)
   if(playTone)  delete playTone;
   playTone= c.playTone ? new bool(c.playTone[0]) : 0;
   if(softButtons)  delete softButtons;
-  softButtons= c.softButtons ? new std::vector<NsAppLinkRPC::SoftButton>(c.softButtons[0]) : 0;
+  softButtons= c.softButtons ? new std::vector<NsAppLinkRPCV2::SoftButton>(c.softButtons[0]) : 0;
   appId=c.appId;
   return *this;
 }
@@ -172,15 +172,15 @@ void Alert::reset_playTone(void)
   playTone=0;
 }
 
-const std::vector< NsAppLinkRPC::SoftButton>* Alert::get_softButtons(void)
+const std::vector< NsAppLinkRPCV2::SoftButton>* Alert::get_softButtons(void)
 {
   return softButtons;
 }
 
-bool Alert::set_softButtons(const std::vector< NsAppLinkRPC::SoftButton>& softButtons_)
+bool Alert::set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons_)
 {
   if(softButtons)  delete softButtons;
-  softButtons=new std::vector< NsAppLinkRPC::SoftButton>(softButtons_);
+  softButtons=new std::vector< NsAppLinkRPCV2::SoftButton>(softButtons_);
   return true;
 }
 

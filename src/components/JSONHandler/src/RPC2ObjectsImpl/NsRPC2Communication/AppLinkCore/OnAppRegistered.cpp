@@ -25,7 +25,7 @@ OnAppRegistered& OnAppRegistered::operator =(const OnAppRegistered& c)
   if(ttsName)  delete ttsName;
   ttsName= c.ttsName ? new std::vector<NsAppLinkRPC::TTSChunk>(c.ttsName[0]) : 0;
   if(appType)  delete appType;
-  appType= c.appType ? new std::vector<NsAppLinkRPC::AppType>(c.appType[0]) : 0;
+  appType= c.appType ? new std::vector<NsAppLinkRPCV2::AppType>(c.appType[0]) : 0;
   appId=c.appId;
   return *this;
 }
@@ -156,15 +156,15 @@ void OnAppRegistered::reset_ttsName(void)
   ttsName=0;
 }
 
-const std::vector< NsAppLinkRPC::AppType>* OnAppRegistered::get_appType(void)
+const std::vector< NsAppLinkRPCV2::AppType>* OnAppRegistered::get_appType(void)
 {
   return appType;
 }
 
-bool OnAppRegistered::set_appType(const std::vector< NsAppLinkRPC::AppType>& appType_)
+bool OnAppRegistered::set_appType(const std::vector< NsAppLinkRPCV2::AppType>& appType_)
 {
   if(appType)  delete appType;
-  appType=new std::vector< NsAppLinkRPC::AppType>(appType_);
+  appType=new std::vector< NsAppLinkRPCV2::AppType>(appType_);
   return true;
 }
 

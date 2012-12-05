@@ -36,12 +36,12 @@ GetVehicleTypeResponse::GetVehicleTypeResponse(const GetVehicleTypeResponse& c) 
 }
 
 
-const NsAppLinkRPC::VehicleType& GetVehicleTypeResponse::get_vehicleType(void)
+const NsAppLinkRPCV2::VehicleType& GetVehicleTypeResponse::get_vehicleType(void)
 {
   return vehicleType;
 }
 
-bool GetVehicleTypeResponse::set_vehicleType(const NsAppLinkRPC::VehicleType& vehicleType_)
+bool GetVehicleTypeResponse::set_vehicleType(const NsAppLinkRPCV2::VehicleType& vehicleType_)
 {
   vehicleType=vehicleType_;
   return true;

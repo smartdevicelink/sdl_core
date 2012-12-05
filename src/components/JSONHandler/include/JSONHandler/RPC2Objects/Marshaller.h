@@ -91,7 +91,8 @@
   source stamp	Tue Dec  4 16:37:04 2012
   author	robok0der
 */
-
+namespace NsRPC2Communication
+{
 
 class Marshaller
 {
@@ -1104,5 +1105,7 @@ private:
   static NsRPC2Communication::VehicleInfo::GetVehicleTypeResponseMarshaller mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse;
 
 };
+
+}
 
 #endif
