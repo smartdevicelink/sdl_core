@@ -171,7 +171,35 @@ void NsAppLink::NsTransportManager::CTransportManager::sendFrame(tConnectionHand
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "sendFrame called. DataSize: "<<DataSize);
 
-    // TODO Add incomming parameters checking
+    if(InvalidConnectionHandle == ConnectionHandle)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "sendFrame received with invalid connection handle");
+        return;
+    }
+
+    bool bIncomingParamsValid = true;
+    if(0 == Data)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "sendFrame with empty data");
+        bIncomingParamsValid = false;
+    }
+
+    if(0 == DataSize)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "sendFrame with DataSize=0");
+        bIncomingParamsValid = false;
+    }
+
+    if(false == bIncomingParamsValid)
+    {
+        SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameSendCompleted, ConnectionHandle, UserData, SendStatusInvalidParametersError);
+
+        pthread_mutex_lock(&mDataListenersMutex);
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Sending callback");
+        sendDataCallback(newCallback);
+        pthread_mutex_unlock(&mDataListenersMutex);
+        return;
+    }
 
     // Searching device adapter
     pthread_mutex_lock(&mDataListenersMutex);
