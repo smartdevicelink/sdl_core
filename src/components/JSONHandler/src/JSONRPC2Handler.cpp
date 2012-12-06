@@ -56,6 +56,7 @@ void JSONRPC2Handler::subscribeToNotifications()
     subscribeTo( "UI.OnSystemContext" );
     subscribeTo( "UI.OnAppActivated" );
     subscribeTo( "UI.OnAppDeactivated" );
+    subscribeTo( "UI.OnDeviceChosen");
 }
 
 void JSONRPC2Handler::setRPC2CommandsObserver( 
