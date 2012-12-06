@@ -1055,7 +1055,7 @@ $l=sprintf
          {
 $l=qq~    if(!js.isMember("#name#") || !js["#name#"].isArray())  return false;\n~.
    qq~    {\n      unsigned int i=js["#name#"].size();\n~.$ca.qq~      std::vector<#type#> z(i);\n      while(i--)\n~.
-   qq~        if(!#type#Marshaller::fromJSON(js["#name#"][i],c.#name#[i]))  return false;\n      c.#name#=z;\n    }\n~;
+   qq~        if(!#type#Marshaller::fromJSON(js["#name#"][i],z[i]))  return false;\n      c.#name#=z;\n    }\n~;
 
 
          }

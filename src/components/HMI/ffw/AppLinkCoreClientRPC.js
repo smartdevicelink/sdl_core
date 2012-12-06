@@ -28,6 +28,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	// const
 	onAppRegisteredNotification:		"AppLinkCore.OnAppRegistered",
 	onAppUnregisteredNotification:		"AppLinkCore.OnAppUnregistered",
+	onDeviceListUpdatedNotification:	"AppLinkCore.OnDeviceListUpdated",
 
 	/*
    	 * init object
@@ -60,6 +61,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		// subscribe to notifications
 		this.onAppRegisteredSubscribeRequestId 		= this.client.subscribeToNotification(this.onAppRegisteredNotification);
 		this.onAppUnregisteredSubscribeRequestId 	= this.client.subscribeToNotification(this.onAppUnregisteredNotification);
+		this.onDeviceListUpdatedNotificationId		= this.client.subscribeToNotification(this.onDeviceListUpdatedNotification);
 	},
 	
 	/*
@@ -72,6 +74,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		// unsubscribe from notifications
 		this.onAppRegusteredUnsubscribeRequestId 	= this.client.unsubscribeFromNotification(this.onAppRegisteredNotification);
 		this.onAppUnregusteredUnsubscribeRequestId	= this.client.unsubscribeFromNotification(this.onAppUnregisteredNotification);
+		this.onDeviceListUpdatedNotificationId		= this.client.unsubscribeFromNotification(this.onDeviceListUpdatedNotification);
 	},
 
 	/*
@@ -147,9 +150,9 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			MFT.ApplinkController.unRegisterApplication(notification.params.appId);
 		}
 
-		if (notification.method == "AppLinkCore.OnDeviceListUpdated")
+		if (notification.method == this.onDeviceListUpdatedNotification)
 		{
-			MFT.ApplinkMediaModel.onGetDeviceList(notification.result);
+			MFT.ApplinkMediaModel.onGetDeviceList(notification.params);
 		}
 	},
 

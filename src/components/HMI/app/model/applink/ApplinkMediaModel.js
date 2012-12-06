@@ -127,7 +127,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
     },
 
     onGetDeviceList: function( params ){
-        if ("SUCCESS" == params.resultCode) {
+        if (null == params.resultCode || (null != params.resultCode && "SUCCESS" == params.resultCode)) {
             this.devicesList.splice(0, this.devicesList.length);
             for(var i = 0; i < params.deviceList.length; i++){
                 this.devicesList.push({
