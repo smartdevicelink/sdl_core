@@ -9,12 +9,6 @@
 
 using namespace NsAppLink::NsTransportManager;
 
-
-//TODO Add shutdown flag checking inside function calls
-//TODO Fix potential crash due to not thread-safe access to shutdown flag
-//TODO Check all structures for copy constructor and operators implementation
-//TODO Move AppConnected/Disconnected callbacks calling to ConnectionThread
-
 NsAppLink::NsTransportManager::CTransportManager::CTransportManager(void):
 mDeviceAdapters(),
 mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager"))),
@@ -477,9 +471,6 @@ void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnect
         TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived. Connection information for connection does not exist");
         return;
     }
-
-    //TODO: Currently all frames processed in one thread. In the future processing of them
-    //      must be moved to the thread, which sent callbacks for corresponded connection
 
     pthread_mutex_lock(&mDataListenersMutex);
     connectionInfo->mFrameData.appendFrameData(Data, DataSize);
@@ -1150,7 +1141,9 @@ void CTransportManager::SFrameDataForConnection::appendFrameData(const uint8_t* 
     {
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "Data cannot be appended to existing buffer. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize<<", DataSize: " << DataSize);
 
-        size_t newSize = mBufferSize + DataSize; //TODO Think about more correct buffer allocation
+        // Currently memory for incoming data is allocated as sum of existing memory size and incoming data size.
+        // In the future depending of type and sizes of incoming data this algorithm can be changed
+        size_t newSize = mBufferSize + DataSize;
         uint8_t *newBuffer = new uint8_t[newSize];
 
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "New buffer allocated. Buffer size: "<<newSize<<", was: "<<mBufferSize);
@@ -1200,8 +1193,6 @@ bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t *& Data, s
     {
         TM_CH_LOG4CPLUS_WARN_EXT(mLogger, mConnectionHandle, "Unsupported version received: " << version);
         return false;
-        //TODO: Think about what to do in that case. Possible solution - signal about that and terminate connection
-        // For that method CDeviceAdapter::StopConnection can be used (must be unprotected before)
     }
 
     if(mDataSize < requiredDataSize)

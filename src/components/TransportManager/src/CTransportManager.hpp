@@ -27,6 +27,20 @@ namespace NsAppLink
 
         /**
          * @brief Transport manager implementation.
+         *
+         * Potential future optimizations:
+         *
+         * @todo Potential future optimization: Add shutdown flag checking inside client interface function calls
+         * @todo Potential future optimization: Implement more thread-safe processing of shutdown flag
+         * @todo Potential future optimization: Move ITransportManagerDeviceListener::onApplicationConnected and
+         *       ITransportManagerDeviceListener::onApplicationDisconnected callbacks calling to corresponded connection thread
+         *
+         * @todo Potential future optimization: Currently all frames processed in one thread. In the future processing of them
+         *       can be moved to the thread, which sent callbacks for corresponded connection.
+         *
+         * @todo Potential future optimization: Currently it is not possible to validate incoming frame data. Some kind of data
+         *       validation can be implemented and if incoming data is invalid one of the possible solutions is to close
+         *       corresponded connection
          **/
         class CTransportManager: public ITransportManager,
                                  public IDeviceAdapterListener,
@@ -375,7 +389,7 @@ namespace NsAppLink
 
             /**
              * @brief Incapsulates frame data for each connection
-             * @todo implement copy constructor and 
+             * 
              **/
             struct SFrameDataForConnection
             {
