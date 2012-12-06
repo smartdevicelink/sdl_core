@@ -2422,6 +2422,7 @@ namespace NsAppManager
      */
     void AppMgrCore::setDeviceList(const NsConnectionHandler::tDeviceList &deviceList)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, " Updating device list: " << deviceList.size() << " devices");
         mDeviceList.setDeviceList(deviceList);
         NsRPC2Communication::AppLinkCore::OnDeviceListUpdated* deviceListUpdated = new NsRPC2Communication::AppLinkCore::OnDeviceListUpdated;
         DeviceNamesList list;
