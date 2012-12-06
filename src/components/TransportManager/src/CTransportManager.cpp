@@ -9,13 +9,6 @@
 
 using namespace NsAppLink::NsTransportManager;
 
-
-//TODO Add shutdown flag checking inside function calls
-//TODO Fix potential crash due to not thread-safe access to shutdown flag
-//TODO Make function calls from transport manager client thread-safe
-//TODO Check all structures for copy constructor and operators implementation
-//TODO Move AppConnected/Disconnected callbacks calling to ConnectionThread
-
 NsAppLink::NsTransportManager::CTransportManager::CTransportManager(void):
 mDeviceAdapters(),
 mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManager"))),
@@ -33,12 +26,14 @@ mDeviceListenersCallbacks(),
 mTerminateFlag(false),
 mDevicesByAdapter(),
 mDevicesByAdapterMutex(),
-mConnections()
+mConnections(),
+mClientInterfaceMutex()
 {
     pthread_mutex_init(&mDataListenersMutex, 0);
     pthread_mutex_init(&mDeviceListenersMutex, 0);
     pthread_mutex_init(&mDeviceHandleGenerationMutex, 0);
     pthread_mutex_init(&mConnectionHandleGenerationMutex, 0);
+    pthread_mutex_init(&mClientInterfaceMutex, 0);
 
     pthread_cond_init(&mDeviceListenersConditionVar, NULL);
 
@@ -88,6 +83,7 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
     pthread_mutex_destroy(&mDeviceListenersMutex);
     pthread_mutex_destroy(&mDeviceHandleGenerationMutex);
     pthread_mutex_destroy(&mConnectionHandleGenerationMutex);
+    pthread_mutex_destroy(&mClientInterfaceMutex);
 
     pthread_cond_destroy(&mDeviceListenersConditionVar);
 
@@ -96,23 +92,22 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
 
 void NsAppLink::NsTransportManager::CTransportManager::run(void)
 {
+    pthread_mutex_lock(&mClientInterfaceMutex);
     initializeDeviceAdapters();
 
     LOG4CPLUS_INFO_EXT(mLogger, "Starting device adapters");
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
         (*di)->run();
-        //(*di)->scanForNewDevices();
     }
 
-    if( false == startApplicationCallbacksThread())
-    {
-        return;
-    }
+    startApplicationCallbacksThread();
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
 {
+    pthread_mutex_lock(&mClientInterfaceMutex);
     LOG4CPLUS_INFO_EXT(mLogger, "Scanning new devices on all registered device adapters");
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
@@ -121,51 +116,84 @@ void NsAppLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
         LOG4CPLUS_INFO_EXT(mLogger, "Scanning of new devices initiated on adapter: " <<(*di)->getDeviceType());
     }
     LOG4CPLUS_INFO_EXT(mLogger, "Scanning of new devices initiated");
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::connectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
+    pthread_mutex_lock(&mClientInterfaceMutex);
     connectDisconnectDevice(DeviceHandle, true);
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::disconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
+    pthread_mutex_lock(&mClientInterfaceMutex);
     connectDisconnectDevice(DeviceHandle, false);
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::addDataListener(NsAppLink::NsTransportManager::ITransportManagerDataListener * Listener)
 {
-    pthread_mutex_lock(&mDataListenersMutex);
+    pthread_mutex_lock(&mClientInterfaceMutex);
     mDataListeners.push_back(Listener);
-    pthread_mutex_unlock(&mDataListenersMutex);
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::removeDataListener(NsAppLink::NsTransportManager::ITransportManagerDataListener * Listener)
 {
-    pthread_mutex_lock(&mDataListenersMutex);
+    pthread_mutex_lock(&mClientInterfaceMutex);
     mDataListeners.erase(std::remove(mDataListeners.begin(), mDataListeners.end(), Listener), mDataListeners.end());
-    pthread_mutex_unlock(&mDataListenersMutex);
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::addDeviceListener(NsAppLink::NsTransportManager::ITransportManagerDeviceListener * Listener)
 {
-    pthread_mutex_lock(&mDeviceListenersMutex);
+    pthread_mutex_lock(&mClientInterfaceMutex);
     mDeviceListeners.push_back(Listener);
-    pthread_mutex_unlock(&mDeviceListenersMutex);
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::removeDeviceListener(NsAppLink::NsTransportManager::ITransportManagerDeviceListener * Listener)
 {
-    pthread_mutex_lock(&mDeviceListenersMutex);
+    pthread_mutex_lock(&mClientInterfaceMutex);
     mDeviceListeners.erase(std::remove(mDeviceListeners.begin(), mDeviceListeners.end(), Listener), mDeviceListeners.end());
-    pthread_mutex_unlock(&mDeviceListenersMutex);
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::sendFrame(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize, const int UserData)
 {
     TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "sendFrame called. DataSize: "<<DataSize);
 
-    // TODO Add incomming parameters checking
+    if(InvalidConnectionHandle == ConnectionHandle)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "sendFrame received with invalid connection handle");
+        return;
+    }
+
+    bool bIncomingParamsValid = true;
+    if(0 == Data)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "sendFrame with empty data");
+        bIncomingParamsValid = false;
+    }
+
+    if(0 == DataSize)
+    {
+        TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "sendFrame with DataSize=0");
+        bIncomingParamsValid = false;
+    }
+
+    if(false == bIncomingParamsValid)
+    {
+        SDataListenerCallback newCallback(CTransportManager::DataListenerCallbackType_FrameSendCompleted, ConnectionHandle, UserData, SendStatusInvalidParametersError);
+
+        pthread_mutex_lock(&mDataListenersMutex);
+        TM_CH_LOG4CPLUS_INFO_EXT(mLogger, ConnectionHandle, "Sending callback");
+        sendDataCallback(newCallback);
+        pthread_mutex_unlock(&mDataListenersMutex);
+        return;
+    }
 
     // Searching device adapter
     pthread_mutex_lock(&mDataListenersMutex);
@@ -443,9 +471,6 @@ void CTransportManager::onFrameReceived(IDeviceAdapter * DeviceAdapter, tConnect
         TM_CH_LOG4CPLUS_WARN_EXT(mLogger, ConnectionHandle, "onFrameReceived. Connection information for connection does not exist");
         return;
     }
-
-    //TODO: Currently all frames processed in one thread. In the future processing of them
-    //      must be moved to the thread, which sent callbacks for corresponded connection
 
     pthread_mutex_lock(&mDataListenersMutex);
     connectionInfo->mFrameData.appendFrameData(Data, DataSize);
@@ -823,7 +848,7 @@ void* CTransportManager::dataCallbacksThreadStartRoutine(void* Data)
     return 0;
 }
 
-bool CTransportManager::startApplicationCallbacksThread()
+void CTransportManager::startApplicationCallbacksThread()
 {
     LOG4CPLUS_INFO_EXT(mLogger, "Starting device listeners thread");
 
@@ -832,12 +857,10 @@ bool CTransportManager::startApplicationCallbacksThread()
     if (0 == errorCode)
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Device listeners thread started");
-        return true;
     }
     else
     {
         LOG4CPLUS_ERROR_EXT(mLogger, "Device listeners thread cannot be started, error code " << errorCode);
-        return false;
     }
 }
 
@@ -1118,7 +1141,9 @@ void CTransportManager::SFrameDataForConnection::appendFrameData(const uint8_t* 
     {
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "Data cannot be appended to existing buffer. Buffer size: "<<mBufferSize<<", Existing data size: "<<mDataSize<<", DataSize: " << DataSize);
 
-        size_t newSize = mBufferSize + DataSize; //TODO Think about more correct buffer allocation
+        // Currently memory for incoming data is allocated as sum of existing memory size and incoming data size.
+        // In the future depending of type and sizes of incoming data this algorithm can be changed
+        size_t newSize = mBufferSize + DataSize;
         uint8_t *newBuffer = new uint8_t[newSize];
 
         TM_CH_LOG4CPLUS_INFO_EXT(mLogger, mConnectionHandle, "New buffer allocated. Buffer size: "<<newSize<<", was: "<<mBufferSize);
@@ -1168,8 +1193,6 @@ bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t *& Data, s
     {
         TM_CH_LOG4CPLUS_WARN_EXT(mLogger, mConnectionHandle, "Unsupported version received: " << version);
         return false;
-        //TODO: Think about what to do in that case. Possible solution - signal about that and terminate connection
-        // For that method CDeviceAdapter::StopConnection can be used (must be unprotected before)
     }
 
     if(mDataSize < requiredDataSize)

@@ -115,6 +115,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
                     target:         'MFT.MediaController',
                     text:           params.appList[i].appName,
                     appName:        params.appList[i].appName,
+                    appId:          params.appList[i].appId,
                     className:      'scrollButtons button notpressed',
                     icon:           params.icon,
                     templateName:   'rightIcon'
@@ -127,22 +128,23 @@ MFT.ApplinkMediaModel = Em.Object.create({
 
     onGetDeviceList: function( params ){
         if ("SUCCESS" == params.resultCode) {
-        this.devicesList.splice(0, this.devicesList.length);
-        for(var i = 0; i < params.deviceList.length; i++){
-            this.devicesList.push({
-                type:       MFT.Button,
-                params:     {
-                    action:         'turnOnApplink',
-                    target:         'MFT.MediaController',
-                    text:           params.deviceList[i].appName,
-                    className:      'scrollButtons button notpressed',
-                    icon:           params.icon,
-                    templateName:   'rightIcon'
-                }                                   
-            });
+            this.devicesList.splice(0, this.devicesList.length);
+            for(var i = 0; i < params.deviceList.length; i++){
+                this.devicesList.push({
+                    type:       MFT.Button,
+                    params:     {
+                        action:         'onDeviceChoosed',
+                        target:         'MFT.ApplinkController',
+                        text:           params.deviceList[i].deviceName,
+                        deviceName:     params.deviceList[i].deviceName,
+                        className:      'scrollButtons button notpressed',
+                        icon:           params.icon,
+                        templateName:   'rightIcon'
+                    }                                   
+                });
+            }
+            MFT.DeviceLilstView.ShowDeviceList();
         }
-        MFT.DeviceLilstView.ShowDeviceList();
-    }
     },
 
     /**

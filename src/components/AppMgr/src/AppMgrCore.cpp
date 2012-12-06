@@ -2017,6 +2017,7 @@ namespace NsAppManager
                     NsAppLinkRPC::HMIApplication hmiApp;
                     hmiApp.set_appName(core->getApplicationFromItemCheckNotNull(it->second)->getName());
                     hmiApp.set_ngnMediaScreenAppName(core->getApplicationFromItemCheckNotNull(it->second)->getNgnMediaScreenAppName());
+                    hmiApp.set_appId(core->getApplicationFromItemCheckNotNull(it->second)->getAppID());
                     hmiApps.push_back(hmiApp);
                 }
                 if(!hmiApps.empty())

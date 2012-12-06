@@ -51,7 +51,10 @@ HMIApplication::HMIApplication(void) :
 {
 }
 
-
+void HMIApplication::set_appId(int id)
+{
+  appId = id;
+}
 
 bool HMIApplication::set_appName(const std::string& appName_)
 {
@@ -94,7 +97,10 @@ void HMIApplication::reset_ngnMediaScreenAppName(void)
 }
 
 
-
+int  HMIApplication::get_appId() const
+{
+  return appId;
+}
 
 const std::string& HMIApplication::get_appName(void) const 
 {

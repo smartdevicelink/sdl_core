@@ -37,6 +37,7 @@ namespace NsAppLinkRPC
     const std::string& get_appName(void) const;
     const std::string* get_icon(void) const;
     const std::string* get_ngnMediaScreenAppName(void) const;
+    int get_appId() const;
 
 // setters
 
@@ -45,6 +46,7 @@ namespace NsAppLinkRPC
     bool set_icon(const std::string& icon_);
     void reset_ngnMediaScreenAppName(void);
     bool set_ngnMediaScreenAppName(const std::string& ngnMediaScreenAppName_);
+    void set_appId(int id);
 
   private:
 
@@ -53,6 +55,7 @@ namespace NsAppLinkRPC
       std::string appName;	//!< (100)
       std::string* icon;
       std::string* ngnMediaScreenAppName;	//!< (100)
+      int appId;
   };
 
 }
