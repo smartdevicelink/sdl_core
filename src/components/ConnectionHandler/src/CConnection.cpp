@@ -6,6 +6,8 @@
 
 #include "Logger.hpp"
 
+#include <algorithm>
+
 #include "ConnectionHandler/CConnection.hpp"
 
 /**
@@ -37,6 +39,21 @@ namespace NsConnectionHandler
         {
             mSessionList.push_back(mSessionIDCounter);
             result = mSessionIDCounter++;
+        }
+        return result;
+    }
+
+    int CConnection::removeSession(unsigned char aSession)
+    {
+        int result = -1;
+        tSessionListIterator it = std::find(mSessionList.begin(), mSessionList.end(), aSession);
+        if (mSessionList.end() == it)
+        {
+            LOG4CPLUS_ERROR( mLogger, "Session not found in this connection!");
+        } else
+        {
+            mSessionList.erase(it);
+            result = aSession;
         }
         return result;
     }
