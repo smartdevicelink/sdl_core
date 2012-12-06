@@ -151,7 +151,10 @@ MFT.ApplinkMediaModel = Em.Object.create({
                     }                                   
                 });
             }
-            MFT.DeviceLilstView.ShowDeviceList();
+            
+            if( MFT.States.info.devicelist.active ){
+                MFT.DeviceLilstView.ShowDeviceList();
+            }
         }
     },
 
@@ -358,16 +361,6 @@ MFT.ApplinkMediaModel = Em.Object.create({
 
     /** Applink Slider activation */
     onApplinkSlider: function(params){
-
-    /*
-    unsigned int (2:26) numTicks,
-    unsigned int (1:16) position,
-    string (500) sliderHeader,
-    string (500) * sliderFooter[1:26],
-    unsigned int (65535) timeout
-    ->
-    unsigned int (1:26) sliderPosition
-    */
 
         this.applinkSliderContent.set('range', params.numTicks);
         this.applinkSliderContent.set('value', params.sliderPosition);

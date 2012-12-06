@@ -55,8 +55,12 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
 
         classNames:         'footerLabel',
 
-        contentBinding:     'MFT.ApplinkMediaModel.sliderParams.footerLabel'
+        contentBinding:     'parentView.footerLabel'
     }),
+
+    footerLabel: function(){
+        return MFT.ApplinkMediaModel.sliderParams.footerLabel[MFT.ApplinkMediaModel.applinkSliderContent.value];
+    }.property('MFT.ApplinkMediaModel.applinkSliderContent.value'),
 
     activate: function(){
         //MFT.ApplinkController.getApplicationModel(1).
@@ -85,6 +89,10 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                 minusBtn: MFT.Button.extend({
                     classNames: 'minus',
                     icon:       'images/common/minus-ico.png',
+                    actionDown: function() {
+                        this._super();
+                        MFT.ApplinkMediaModel.applinkSliderContent.decrease();
+                    }
                 }),
 
                 /** adjust */
@@ -99,6 +107,10 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                 plusBtn: MFT.Button.extend({
                     classNames: 'plus',
                     icon:       'images/common/plus-ico.png',
+                    actionDown: function() {
+                        this._super();
+                        MFT.ApplinkMediaModel.applinkSliderContent.increase();
+                    }
                 })
             })
 
