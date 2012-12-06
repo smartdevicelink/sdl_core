@@ -50,7 +50,7 @@ namespace test
                     {
                         //Calling callbacks on all listeners
 
-                        NsAppLink::NsTransportManager::tConnectionHandle dummyConnectionHandle;
+                        NsAppLink::NsTransportManager::tConnectionHandle dummyConnectionHandle = 1;
                         std::vector<NsAppLink::NsTransportManager::ITransportManagerDataListener*>::const_iterator dataListenersIterator;                        
 
                         for (dataListenersIterator = mDataListeners.begin(); dataListenersIterator != mDataListeners.end(); ++dataListenersIterator)
