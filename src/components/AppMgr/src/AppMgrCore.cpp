@@ -195,148 +195,96 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request has been invoked");
 
-                switch(protocolVersion)
+                NsAppLinkRPC::RegisterAppInterface_request * object = (NsAppLinkRPC::RegisterAppInterface_request*)mobileMsg;
+                NsAppLinkRPC::RegisterAppInterface_response* response = new NsAppLinkRPC::RegisterAppInterface_response();
+                const std::string& appName = object->get_appName();
+
+                if(AppMgrRegistry::getInstance().getItem(connectionID, sessionID))
                 {
-                    case 1:
-                    {
-                        NsAppLinkRPC::RegisterAppInterface_request * object = (NsAppLinkRPC::RegisterAppInterface_request*)mobileMsg;
-                        NsAppLinkRPC::RegisterAppInterface_response* response = new NsAppLinkRPC::RegisterAppInterface_response();
-                        const std::string& appName = object->get_appName();
-
-                        if(AppMgrRegistry::getInstance().getItem(connectionID, sessionID))
-                        {
-                            LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
-                            response->set_success(false);
-                            response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_REGISTERED_ALREADY);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                            break;
-                        }
-
-                        Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, connectionID, sessionID ));
-                        response->setCorrelationID(object->getCorrelationID());
-                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
-                        if(!app)
-                        {
-                            LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
-                            response->set_success(false);
-                            response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                            break;
-                        }
-
-                        NsAppLinkRPC::OnHMIStatus* status = new NsAppLinkRPC::OnHMIStatus();
-                        status->set_hmiLevel(app->getApplicationHMIStatusLevel());
-                        status->set_audioStreamingState(app->getApplicationAudioStreamingState());
-                        status->set_systemContext(app->getSystemContext());
-                        MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
-
-                        response->set_buttonCapabilities(core->mButtonCapabilitiesV1.get());
-                        response->set_displayCapabilities(core->mDisplayCapabilitiesV1);
-                        response->set_hmiZoneCapabilities(core->mHmiZoneCapabilitiesV1.get());
-                        response->set_speechCapabilities(core->mSpeechCapabilitiesV1.get());
-                        response->set_vrCapabilities(core->mVrCapabilitiesV1.get());
-                        response->set_language(app->getLanguageDesired());
-                        response->set_syncMsgVersion(app->getSyncMsgVersion());
-                        response->set_success(true);
-                        response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-
-                        LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName() << " gets sent to a mobile side... ");
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-
-                        NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
-                        appRegistered->set_appName(app->getName());
-                        appRegistered->set_appId(app->getAppID());
-                        appRegistered->set_isMediaApplication(app->getIsMediaApplication());
-                        appRegistered->set_languageDesired(app->getLanguageDesired());
-                        appRegistered->set_vrSynonym(app->getVrSynonyms());
-                        appRegistered->set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
-                        appRegistered->set_deviceName(currentDeviceName);
-                        HMIHandler::getInstance().sendNotification(appRegistered);
-                        LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
-                        break;
-                    }
-                    case 2:
-                    {
-
-                    }
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_REGISTERED_ALREADY);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
                 }
 
+                Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, connectionID, sessionID ));
+                response->setCorrelationID(object->getCorrelationID());
+                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
+                }
+
+                NsAppLinkRPC::OnHMIStatus* status = new NsAppLinkRPC::OnHMIStatus();
+                status->set_hmiLevel(app->getApplicationHMIStatusLevel());
+                status->set_audioStreamingState(app->getApplicationAudioStreamingState());
+                status->set_systemContext(app->getSystemContext());
+                MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
+
+                response->set_buttonCapabilities(core->mButtonCapabilitiesV1.get());
+                response->set_displayCapabilities(core->mDisplayCapabilitiesV1);
+                response->set_hmiZoneCapabilities(core->mHmiZoneCapabilitiesV1.get());
+                response->set_speechCapabilities(core->mSpeechCapabilitiesV1.get());
+                response->set_vrCapabilities(core->mVrCapabilitiesV1.get());
+                response->set_language(app->getLanguageDesired());
+                response->set_syncMsgVersion(app->getSyncMsgVersion());
+                response->set_success(true);
+                response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
+
+                LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName() << " gets sent to a mobile side... ");
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+
+                NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
+                appRegistered->set_appName(app->getName());
+                appRegistered->set_appId(app->getAppID());
+                appRegistered->set_isMediaApplication(app->getIsMediaApplication());
+                appRegistered->set_languageDesired(app->getLanguageDesired());
+                appRegistered->set_vrSynonym(app->getVrSynonyms());
+                appRegistered->set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
+                appRegistered->set_deviceName(currentDeviceName);
+                HMIHandler::getInstance().sendNotification(appRegistered);
+                LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_UNREGISTERAPPINTERFACE_REQUEST:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
 
-                switch(protocolVersion)
+                NsAppLinkRPC::UnregisterAppInterface_request * object = (NsAppLinkRPC::UnregisterAppInterface_request*)mobileMsg;
+                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
+                if(!app)
                 {
-                    case 1:
-                    {
-                        NsAppLinkRPC::UnregisterAppInterface_request * object = (NsAppLinkRPC::UnregisterAppInterface_request*)mobileMsg;
-                        Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
-                        NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
-                        if(!app)
-                        {
-                            LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
-                            response->set_success(false);
-                            response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                            break;
-                        }
-                        std::string appName = app->getName();
-
-                        core->removeAppFromHmi(app, connectionID, sessionID);
-                        core->unregisterApplication( connectionID, sessionID );
-
-                        response->setCorrelationID(object->getCorrelationID());
-                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
-                        response->set_success(true);
-                        response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-
-                        NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
-                        msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
-                        MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
-                        NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
-                        appUnregistered->set_appName(appName);
-                        appUnregistered->set_appId(app->getAppID());
-                        appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
-                        HMIHandler::getInstance().sendNotification(appUnregistered);
-                        break;
-                    }
-                    case 2:
-                    {
-                        NsAppLinkRPCV2::UnregisterAppInterface_request * object = (NsAppLinkRPCV2::UnregisterAppInterface_request*)mobileMsg;
-                        Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
-                        NsAppLinkRPCV2::UnregisterAppInterface_response* response = new NsAppLinkRPCV2::UnregisterAppInterface_response();
-                        if(!app)
-                        {
-                            LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
-                            response->set_success(false);
-                            response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                            break;
-                        }
-                        std::string appName = app->getName();
-
-                        core->removeAppFromHmi(app, connectionID, sessionID);
-                        core->unregisterApplication( connectionID, sessionID );
-
-                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
-                        response->set_success(true);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-
-                        NsAppLinkRPCV2::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPCV2::OnAppInterfaceUnregistered();
-                        msgUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
-                        MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
-                        NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
-                        appUnregistered->set_appName(appName);
-                        appUnregistered->set_appId(app->getAppID());
-                        appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason((NsAppLinkRPC::AppInterfaceUnregisteredReason::AppInterfaceUnregisteredReasonInternal)NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
-                        HMIHandler::getInstance().sendNotification(appUnregistered);
-                        break;
-                    }
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
                 }
+                std::string appName = app->getName();
+
+                core->removeAppFromHmi(app, connectionID, sessionID);
+                core->unregisterApplication( connectionID, sessionID );
+
+                response->setCorrelationID(object->getCorrelationID());
+                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                response->set_success(true);
+                response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+
+                NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
+                msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
+                MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
+                NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
+                appUnregistered->set_appName(appName);
+                appUnregistered->set_appId(app->getAppID());
+                appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
+                HMIHandler::getInstance().sendNotification(appUnregistered);
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_SUBSCRIBEBUTTON_REQUEST:
@@ -793,88 +741,39 @@ namespace NsAppManager
                 setTimer->set_appId(appId);
                 core->mMessageMapping.addMessage(setTimer->getId(), connectionID, sessionID);
 
-                switch(mobileMsg->getProtocolVersion())
+                NsAppLinkRPC::SetMediaClockTimer_request* object = (NsAppLinkRPC::SetMediaClockTimer_request*)mobileMsg;
+                if(object->get_startTime())
                 {
-                    case 1:
-                    {
-                        NsAppLinkRPC::SetMediaClockTimer_request* object = (NsAppLinkRPC::SetMediaClockTimer_request*)mobileMsg;
-                        if(object->get_startTime())
-                        {
-                            setTimer->set_startTime(*object->get_startTime());
-                        }
-                        setTimer->set_updateMode(object->get_updateMode());
-                        HMIHandler::getInstance().sendRequest(setTimer);
-                        break;
-                    }
-                    case 2:
-                    {
-                        NsAppLinkRPCV2::SetMediaClockTimer_request* object = (NsAppLinkRPCV2::SetMediaClockTimer_request*)mobileMsg;
-                        if(object->get_startTime())
-                        {
-                            NsAppLinkRPC::StartTime startTime;
-                            const NsAppLinkRPCV2::StartTime& startTimeV2 = *object->get_startTime();
-                            startTime.set_hours(startTimeV2.get_hours());
-                            startTime.set_minutes(startTimeV2.get_minutes());
-                            startTime.set_seconds(startTimeV2.get_seconds());
-                            setTimer->set_startTime(startTime);
-                        }
-                        const NsAppLinkRPCV2::UpdateMode& updateModeV2 = object->get_updateMode();
-                        NsAppLinkRPC::UpdateMode updateMode;
-                        updateMode.set((NsAppLinkRPC::UpdateMode::UpdateModeInternal)updateModeV2.get());
-                        setTimer->set_updateMode(updateMode);
-                        HMIHandler::getInstance().sendRequest(setTimer);
-                        break;
-                    }
+                    setTimer->set_startTime(*object->get_startTime());
                 }
+                setTimer->set_updateMode(object->get_updateMode());
+                HMIHandler::getInstance().sendRequest(setTimer);
+
                 break;
             }
             case NsAppLinkRPC::Marshaller::METHOD_ENCODEDSYNCPDATA_REQUEST:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An EncodedSyncPData request has been invoked");
 
-                switch(mobileMsg->getProtocolVersion())
+                NsAppLinkRPC::EncodedSyncPData_request* object = (NsAppLinkRPC::EncodedSyncPData_request*)mobileMsg;
+                NsAppLinkRPC::EncodedSyncPData_response* response = new NsAppLinkRPC::EncodedSyncPData_response;
+                if(object->get_data())
                 {
-                    case 1:
-                    {
-                        NsAppLinkRPC::EncodedSyncPData_request* object = (NsAppLinkRPC::EncodedSyncPData_request*)mobileMsg;
-                        NsAppLinkRPC::EncodedSyncPData_response* response = new NsAppLinkRPC::EncodedSyncPData_response;
-                        if(object->get_data())
-                        {
-                            Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(connectionID, sessionID) );
-                            const std::string& name = app->getName();
-                            core->mSyncPManager.setPData(*object->get_data(), name, object->getMethodId());
-                            response->set_success(true);
-                            response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                        }
-                        else
-                        {
-                            response->set_success(false);
-                            response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
-                        }
-
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                        break;
-                    }
-                    case 2:
-                    {
-                        NsAppLinkRPCV2::EncodedSyncPData_request* object = (NsAppLinkRPCV2::EncodedSyncPData_request*)mobileMsg;
-                        NsAppLinkRPCV2::EncodedSyncPData_response* response = new NsAppLinkRPCV2::EncodedSyncPData_response;
-                        Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(connectionID, sessionID) );
-                        const std::string& name = app->getName();
-                        core->mSyncPManager.setPData(object->get_data(), name, object->getMethodId());
-                        response->set_success(true);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                        break;
-                    }
-
+                    Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(connectionID, sessionID) );
+                    const std::string& name = app->getName();
+                    core->mSyncPManager.setPData(*object->get_data(), name, object->getMethodId());
+                    response->set_success(true);
+                    response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
                 }
+                else
+                {
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                }
+
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
                 break;
             }
-
-            
-
             case NsAppLinkRPC::Marshaller::METHOD_SHOW_RESPONSE:
             case NsAppLinkRPC::Marshaller::METHOD_SPEAK_RESPONSE:
             case NsAppLinkRPC::Marshaller::METHOD_SETGLOBALPROPERTIES_RESPONSE:
@@ -898,217 +797,21 @@ namespace NsAppManager
             /*case NsAppLinkRPCV2::Marshaller::METHOD_PUTFILE_RESPONSE:
             case NsAppLinkRPCV2::Marshaller::METHOD_DELETEFILE_RESPONSE:
             case NsAppLinkRPCV2::Marshaller::METHOD_LISTFILES_RESPONSE:
-            case NsAppLinkRPCV2::Marshaller::METHOD_SLIDER_RESPONSE:
+            case NsAppLinkRPCV2::Marshaller::METHOD_SLIDER_RESPONSE:*/
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A " << mobileMsg->getMethodId() << " response or notification has been invoked");
                 MobileHandler::getInstance().sendRPCMessage(mobileMsg, connectionID, sessionID);
                 break;
             }
-
-            case NsAppLinkRPCV2::Marshaller::METHOD_PUTFILE_REQUEST:
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " An PutFile request has been invoked");
-                NsAppLinkRPCV2::PutFile_request* object = (NsAppLinkRPCV2::PutFile_request*)mobileMsg;
-                NsAppLinkRPCV2::PutFile_response* response = new NsAppLinkRPCV2::PutFile_response;
-                
-                unsigned long int freeSpace = getAvailableSpace();
-                const std::string& syncFileName = object->get_syncFileName();
-                const NsAppLinkRPCV2::FileType& fileType = object->get_fileType();
-                bool persistentFile = object->get_persistentFile();
-                const std::vector<unsigned char>* fileData = object->getBinaryData();
-
-                bool isSyncFileName = !syncFileName.empty();
-                bool isFileData = fileData && !fileData->empty();
-                if (isSyncFileName && isFileData)
-                {
-                    bool flag = false;
-                    if (freeSpace > fileData->size())
-                    {
-                        struct stat status;
-                        memset(&status, 0, sizeof(status));
-                        if (stat(syncFileName.c_str(), &status) == -1) // File doesn't exist
-                        {
-                            Application* app = core->getApplicationFromItemCheckNotNull(
-                                                    AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
-
-                            const std::string& name = app->getName();
-                            const int& id = app->getAppID();
-
-                            char path[FILENAME_MAX];
-                            memset(path, 0, FILENAME_MAX);
-                            snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName.c_str());
-                            std::ofstream file(path, std::ios_base::binary);
-                            if (file.is_open())
-                            {
-                                for (int i = 0; i < fileData->size(); ++i)
-                                {
-                                    file << fileData->operator[](i);
-                                }
-                                file.close();
-                                flag = true;
-                            }
-                        }
-                    }
-
-                    if (flag)
-                    {
-                        response->set_success(true);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-                        response->set_spaceAvailable(freeSpace);
-                    }
-                    else
-                    {
-                        response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
-                        response->set_spaceAvailable(freeSpace);
-                    }
-                }
-                else
-                {
-                    response->set_success(false);
-                    response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
-                    response->set_spaceAvailable(freeSpace);
-                }
-
-                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                break;
-            }
-
-            case NsAppLinkRPCV2::Marshaller::METHOD_DELETEFILE_REQUEST:
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " An DeleteFile request has been invoked");
-                NsAppLinkRPCV2::DeleteFile_request* object = (NsAppLinkRPCV2::DeleteFile_request*)mobileMsg;
-                NsAppLinkRPCV2::DeleteFile_response* response = new NsAppLinkRPCV2::DeleteFile_response;
-
-                unsigned long int freeSpace = getAvailableSpace();
-                const std::string& syncFileName = object->get_syncFileName();
-                if(!syncFileName.empty())
-                {
-                    Application* app = core->getApplicationFromItemCheckNotNull(
-                                AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
-
-                    const std::string& name = app->getName();
-                    const int& id = app->getAppID();
-                    
-                    char path[FILENAME_MAX];
-                    memset(path, 0, FILENAME_MAX);
-                    snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName.c_str());
-                    if(remove(path) != 0)
-                    {
-                        response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
-                        response->set_spaceAvailable(freeSpace);
-                    }
-                    else
-                    {
-                        response->set_success(true);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-                        response->set_spaceAvailable(freeSpace);
-                    }
-                }
-                else
-                {
-                    response->set_success(false);
-                    response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
-                    response->set_spaceAvailable(freeSpace);
-                }
-
-                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                break;
-            }
-
-            case NsAppLinkRPCV2::Marshaller::METHOD_LISTFILES_REQUEST:
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " An ListFiles request has been invoked");
-                NsAppLinkRPCV2::ListFiles_request* object = (NsAppLinkRPCV2::ListFiles_request*)mobileMsg;
-                NsAppLinkRPCV2::ListFiles_response* response = new NsAppLinkRPCV2::ListFiles_response;
-
-                std::vector<std::string> listFiles;
-                unsigned long int freeSpace = getAvailableSpace();
-
-                Application* app = core->getApplicationFromItemCheckNotNull(
-                                AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
-
-                const std::string& name = app->getName();
-                const int& id = app->getAppID();
-                
-                char path[FILENAME_MAX];
-                memset(path, 0, FILENAME_MAX);
-                snprintf(path, FILENAME_MAX - 1, "%s_%d/", name.c_str(), id);
-
-                DIR* dir = NULL;
-                struct dirent* dirElement = NULL;
-                memset(dirElement, 0, sizeof(dirent));
-                dir = opendir(path);
-                if (dir != NULL)
-                {
-                    while (dirElement = readdir(dir))
-                    {
-                        LOG4CPLUS_INFO_EXT(mLogger, " file: " << dirElement->d_name);
-                        listFiles.push_back(std::string(dirElement->d_name));
-                    }
-                    closedir(dir);
-
-                    response->set_filenames(listFiles);
-                    response->set_success(true);
-                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-                    response->set_spaceAvailable(freeSpace);
-                }
-                else
-                {
-                    response->set_success(false);
-                    response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
-                    response->set_spaceAvailable(freeSpace);
-                }
-
-                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                break;
-            }
-
-            case NsAppLinkRPCV2::Marshaller::METHOD_SLIDER_REQUEST:
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " A Slider request has been invoked");
-                NsAppLinkRPCV2::Slider_request* request = (NsAppLinkRPCV2::Slider_request*)mobileMsg;
-                NsRPC2Communication::UI::Slider* slider = new NsRPC2Communication::UI::Slider();
-                
-                slider->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                core->mMessageMapping.addMessage(slider->getId(), connectionID, sessionID);
-
-                slider->set_numTicks(request->get_numTicks());
-
-                slider->set_sliderHeader(request->get_sliderHeader());
-
-                if (request->get_sliderFooter())
-                {
-                    slider->set_sliderFooter(*(request->get_sliderFooter()));
-                }
-
-                slider->set_position(request->get_position());
-                slider->set_timeout(request->get_timeout());
-                HMIHandler::getInstance().sendRequest(slider);
-                break;
-            }*/
-
             case NsAppLinkRPC::Marshaller::METHOD_INVALID:
             default:
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message " << mobileMsg->getMethodId() << " has been received!");
 
-                switch(mobileMsg->getProtocolVersion())
-                {
-                    case 1:
-                    {
-                        NsAppLinkRPC::GenericResponse_response* response = new NsAppLinkRPC::GenericResponse_response();
-                        response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
-                        break;
-                    }
-                    case 2:
-                    {
-                        
-                    }
-                }
+                NsAppLinkRPC::GenericResponse_response* response = new NsAppLinkRPC::GenericResponse_response();
+                response->set_success(false);
+                response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
                 break;
             }
         }
@@ -1188,6 +891,259 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                 break;
             }
+            case NsAppLinkRPCV2::FunctionID::UnregisterAppInterfaceID:
+            {
+                NsAppLinkRPCV2::UnregisterAppInterface_request * object = (NsAppLinkRPCV2::UnregisterAppInterface_request*)mobileMsg;
+                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                NsAppLinkRPCV2::UnregisterAppInterface_response* response = new NsAppLinkRPCV2::UnregisterAppInterface_response();
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
+                }
+                std::string appName = app->getName();
+
+                core->removeAppFromHmi(app, connectionID, sessionID);
+                core->unregisterApplication( connectionID, sessionID );
+
+                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                response->set_success(true);
+                response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+
+                NsAppLinkRPCV2::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPCV2::OnAppInterfaceUnregistered();
+                msgUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
+                MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
+                NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
+                appUnregistered->set_appName(appName);
+                appUnregistered->set_appId(app->getAppID());
+                appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason((NsAppLinkRPC::AppInterfaceUnregisteredReason::AppInterfaceUnregisteredReasonInternal)NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
+                HMIHandler::getInstance().sendNotification(appUnregistered);
+                break;
+            }
+            case NsAppLinkRPCV2::FunctionID::SetMediaClockTimerID:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
+                NsRPC2Communication::UI::SetMediaClockTimer* setTimer = new NsRPC2Communication::UI::SetMediaClockTimer();
+                setTimer->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                setTimer->set_appId(appId);
+                core->mMessageMapping.addMessage(setTimer->getId(), connectionID, sessionID);
+
+                NsAppLinkRPCV2::SetMediaClockTimer_request* object = (NsAppLinkRPCV2::SetMediaClockTimer_request*)mobileMsg;
+                if(object->get_startTime())
+                {
+                    NsAppLinkRPC::StartTime startTime;
+                    const NsAppLinkRPCV2::StartTime& startTimeV2 = *object->get_startTime();
+                    startTime.set_hours(startTimeV2.get_hours());
+                    startTime.set_minutes(startTimeV2.get_minutes());
+                    startTime.set_seconds(startTimeV2.get_seconds());
+                    setTimer->set_startTime(startTime);
+                }
+                        
+                const NsAppLinkRPCV2::UpdateMode& updateModeV2 = object->get_updateMode();
+                NsAppLinkRPC::UpdateMode updateMode;
+                updateMode.set((NsAppLinkRPC::UpdateMode::UpdateModeInternal)updateModeV2.get());
+                setTimer->set_updateMode(updateMode);
+                HMIHandler::getInstance().sendRequest(setTimer);
+                break;
+            }
+            case NsAppLinkRPCV2::FunctionID::PutFileID:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " An PutFile request has been invoked");
+                NsAppLinkRPCV2::PutFile_request* object = (NsAppLinkRPCV2::PutFile_request*)mobileMsg;
+                NsAppLinkRPCV2::PutFile_response* response = new NsAppLinkRPCV2::PutFile_response;
+                
+                unsigned long int freeSpace = getAvailableSpace();
+                const std::string& syncFileName = object->get_syncFileName();
+                const NsAppLinkRPCV2::FileType& fileType = object->get_fileType();
+                bool persistentFile = object->get_persistentFile();
+                const std::vector<unsigned char>* fileData = object->getBinaryData();
+
+                bool isSyncFileName = !syncFileName.empty();
+                bool isFileData = fileData && !fileData->empty();
+                if (isSyncFileName && isFileData)
+                {
+                    bool flag = false;
+                    if (freeSpace > fileData->size())
+                    {
+                        struct stat status;
+                        memset(&status, 0, sizeof(status));
+                        if (stat(syncFileName.c_str(), &status) == -1) // File doesn't exist
+                        {
+                            Application* app = core->getApplicationFromItemCheckNotNull(
+                                                    AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+
+                            const std::string& name = app->getName();
+                            const int& id = app->getAppID();
+
+                            char path[FILENAME_MAX];
+                            memset(path, 0, FILENAME_MAX);
+                            snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName.c_str());
+                            std::ofstream file(path, std::ios_base::binary);
+                            if (file.is_open())
+                            {
+                                for (int i = 0; i < fileData->size(); ++i)
+                                {
+                                    file << fileData->operator[](i);
+                                }
+                                file.close();
+                                flag = true;
+                            }
+                        }
+                    }
+
+                    if (flag)
+                    {
+                        response->set_success(true);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                        response->set_spaceAvailable(freeSpace);
+                    }
+                    else
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                        response->set_spaceAvailable(freeSpace);
+                    }
+                }
+                else
+                {
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+                    response->set_spaceAvailable(freeSpace);
+                }
+
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                break;
+            }
+            case NsAppLinkRPCV2::FunctionID::DeleteFileID:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " An DeleteFile request has been invoked");
+                NsAppLinkRPCV2::DeleteFile_request* object = (NsAppLinkRPCV2::DeleteFile_request*)mobileMsg;
+                NsAppLinkRPCV2::DeleteFile_response* response = new NsAppLinkRPCV2::DeleteFile_response;
+
+                unsigned long int freeSpace = getAvailableSpace();
+                const std::string& syncFileName = object->get_syncFileName();
+                if(!syncFileName.empty())
+                {
+                    Application* app = core->getApplicationFromItemCheckNotNull(
+                                AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+
+                    const std::string& name = app->getName();
+                    const int& id = app->getAppID();
+                    
+                    char path[FILENAME_MAX];
+                    memset(path, 0, FILENAME_MAX);
+                    snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName.c_str());
+                    if(remove(path) != 0)
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                        response->set_spaceAvailable(freeSpace);
+                    }
+                    else
+                    {
+                        response->set_success(true);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                        response->set_spaceAvailable(freeSpace);
+                    }
+                }
+                else
+                {
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+                    response->set_spaceAvailable(freeSpace);
+                }
+
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                break;
+            }
+            case NsAppLinkRPCV2::FunctionID::ListFilesID:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " An ListFiles request has been invoked");
+                NsAppLinkRPCV2::ListFiles_request* object = (NsAppLinkRPCV2::ListFiles_request*)mobileMsg;
+                NsAppLinkRPCV2::ListFiles_response* response = new NsAppLinkRPCV2::ListFiles_response;
+
+                std::vector<std::string> listFiles;
+                unsigned long int freeSpace = getAvailableSpace();
+
+                Application* app = core->getApplicationFromItemCheckNotNull(
+                                AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+
+                const std::string& name = app->getName();
+                const int& id = app->getAppID();
+                
+                char path[FILENAME_MAX];
+                memset(path, 0, FILENAME_MAX);
+                snprintf(path, FILENAME_MAX - 1, "%s_%d/", name.c_str(), id);
+
+                DIR* dir = NULL;
+                struct dirent* dirElement = NULL;
+                memset(dirElement, 0, sizeof(dirent));
+                dir = opendir(path);
+                if (dir != NULL)
+                {
+                    while (dirElement = readdir(dir))
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, " file: " << dirElement->d_name);
+                        listFiles.push_back(std::string(dirElement->d_name));
+                    }
+                    closedir(dir);
+
+                    response->set_filenames(listFiles);
+                    response->set_success(true);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    response->set_spaceAvailable(freeSpace);
+                }
+                else
+                {
+                    response->set_success(false);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                    response->set_spaceAvailable(freeSpace);
+                }
+
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                break;
+            }
+            case NsAppLinkRPCV2::FunctionID::SliderID:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A Slider request has been invoked");
+                NsAppLinkRPCV2::Slider_request* request = (NsAppLinkRPCV2::Slider_request*)mobileMsg;
+                NsRPC2Communication::UI::Slider* slider = new NsRPC2Communication::UI::Slider();
+                
+                slider->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                core->mMessageMapping.addMessage(slider->getId(), connectionID, sessionID);
+
+                slider->set_numTicks(request->get_numTicks());
+
+                slider->set_sliderHeader(request->get_sliderHeader());
+
+                if (request->get_sliderFooter())
+                {
+                    slider->set_sliderFooter(*(request->get_sliderFooter()));
+                }
+
+                slider->set_position(request->get_position());
+                slider->set_timeout(request->get_timeout());
+                HMIHandler::getInstance().sendRequest(slider);
+                break;
+            }
+            case NsAppLinkRPCV2::FunctionID::EncodedSyncPDataID:
+            {
+                NsAppLinkRPCV2::EncodedSyncPData_request* object = (NsAppLinkRPCV2::EncodedSyncPData_request*)mobileMsg;
+                NsAppLinkRPCV2::EncodedSyncPData_response* response = new NsAppLinkRPCV2::EncodedSyncPData_response;
+                Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(connectionID, sessionID) );
+                const std::string& name = app->getName();
+                core->mSyncPManager.setPData(object->get_data(), name, object->getMethodId());
+                response->set_success(true);
+                response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                break;
+            }
+            case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
             default:
             {
                 NsAppLinkRPCV2::GenericResponse_response* response = new NsAppLinkRPCV2::GenericResponse_response();
