@@ -1688,6 +1688,16 @@ namespace NsAppManager
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONDEVICECHOSEN:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " An OnDeviceChosen notification has been income");
+                NsRPC2Communication::UI::OnDeviceChosen* chosen = (NsRPC2Communication::UI::OnDeviceChosen*)msg;
+                const std::string& deviceName = chosen->get_deviceName();
+                const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByName(deviceName);
+                const NsConnectionHandler::tDeviceHandle& handle = device->getDeviceHandle();
+                ConnectionHandler::getInstance().connectToDevice(handle);
+                return;
+            }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
                 LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
