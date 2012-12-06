@@ -12,7 +12,6 @@ using namespace NsAppLink::NsTransportManager;
 
 //TODO Add shutdown flag checking inside function calls
 //TODO Fix potential crash due to not thread-safe access to shutdown flag
-//TODO Make function calls from transport manager client thread-safe
 //TODO Check all structures for copy constructor and operators implementation
 //TODO Move AppConnected/Disconnected callbacks calling to ConnectionThread
 
@@ -33,12 +32,14 @@ mDeviceListenersCallbacks(),
 mTerminateFlag(false),
 mDevicesByAdapter(),
 mDevicesByAdapterMutex(),
-mConnections()
+mConnections(),
+mClientInterfaceMutex()
 {
     pthread_mutex_init(&mDataListenersMutex, 0);
     pthread_mutex_init(&mDeviceListenersMutex, 0);
     pthread_mutex_init(&mDeviceHandleGenerationMutex, 0);
     pthread_mutex_init(&mConnectionHandleGenerationMutex, 0);
+    pthread_mutex_init(&mClientInterfaceMutex, 0);
 
     pthread_cond_init(&mDeviceListenersConditionVar, NULL);
 
@@ -88,6 +89,7 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
     pthread_mutex_destroy(&mDeviceListenersMutex);
     pthread_mutex_destroy(&mDeviceHandleGenerationMutex);
     pthread_mutex_destroy(&mConnectionHandleGenerationMutex);
+    pthread_mutex_destroy(&mClientInterfaceMutex);
 
     pthread_cond_destroy(&mDeviceListenersConditionVar);
 
@@ -96,6 +98,7 @@ NsAppLink::NsTransportManager::CTransportManager::~CTransportManager(void)
 
 void NsAppLink::NsTransportManager::CTransportManager::run(void)
 {
+    pthread_mutex_lock(&mClientInterfaceMutex);
     initializeDeviceAdapters();
 
     LOG4CPLUS_INFO_EXT(mLogger, "Starting device adapters");
@@ -105,10 +108,12 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
     }
 
     startApplicationCallbacksThread();
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
 {
+    pthread_mutex_lock(&mClientInterfaceMutex);
     LOG4CPLUS_INFO_EXT(mLogger, "Scanning new devices on all registered device adapters");
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
@@ -117,44 +122,49 @@ void NsAppLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
         LOG4CPLUS_INFO_EXT(mLogger, "Scanning of new devices initiated on adapter: " <<(*di)->getDeviceType());
     }
     LOG4CPLUS_INFO_EXT(mLogger, "Scanning of new devices initiated");
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::connectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
+    pthread_mutex_lock(&mClientInterfaceMutex);
     connectDisconnectDevice(DeviceHandle, true);
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::disconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
+    pthread_mutex_lock(&mClientInterfaceMutex);
     connectDisconnectDevice(DeviceHandle, false);
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::addDataListener(NsAppLink::NsTransportManager::ITransportManagerDataListener * Listener)
 {
-    pthread_mutex_lock(&mDataListenersMutex);
+    pthread_mutex_lock(&mClientInterfaceMutex);
     mDataListeners.push_back(Listener);
-    pthread_mutex_unlock(&mDataListenersMutex);
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::removeDataListener(NsAppLink::NsTransportManager::ITransportManagerDataListener * Listener)
 {
-    pthread_mutex_lock(&mDataListenersMutex);
+    pthread_mutex_lock(&mClientInterfaceMutex);
     mDataListeners.erase(std::remove(mDataListeners.begin(), mDataListeners.end(), Listener), mDataListeners.end());
-    pthread_mutex_unlock(&mDataListenersMutex);
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::addDeviceListener(NsAppLink::NsTransportManager::ITransportManagerDeviceListener * Listener)
 {
-    pthread_mutex_lock(&mDeviceListenersMutex);
+    pthread_mutex_lock(&mClientInterfaceMutex);
     mDeviceListeners.push_back(Listener);
-    pthread_mutex_unlock(&mDeviceListenersMutex);
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::removeDeviceListener(NsAppLink::NsTransportManager::ITransportManagerDeviceListener * Listener)
 {
-    pthread_mutex_lock(&mDeviceListenersMutex);
+    pthread_mutex_lock(&mClientInterfaceMutex);
     mDeviceListeners.erase(std::remove(mDeviceListeners.begin(), mDeviceListeners.end(), Listener), mDeviceListeners.end());
-    pthread_mutex_unlock(&mDeviceListenersMutex);
+    pthread_mutex_unlock(&mClientInterfaceMutex);
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::sendFrame(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize, const int UserData)

@@ -777,6 +777,11 @@ namespace NsAppLink
              * @brief Connections
              **/
             tConnectionsMap mConnections;
+
+            /**
+             * @brief Mutex restricting access to client interface
+             **/
+            mutable pthread_mutex_t mClientInterfaceMutex;
         };
     }
 }
