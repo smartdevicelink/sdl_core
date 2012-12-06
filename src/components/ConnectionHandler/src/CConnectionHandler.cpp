@@ -111,7 +111,6 @@ namespace NsConnectionHandler
                     mpConnectionHandlerObserver->onSessionStartedCallback((it->second).getConnectionDeviceHandle()
                                                                          , sessionKey);
                 }
-
             }
         }
         return newSessionID;
@@ -121,7 +120,29 @@ namespace NsConnectionHandler
                                                unsigned char sessionId,
                                                unsigned int hashCode)
     {
-        return 0;
+        LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onSessionEndedCallback()" );
+        int result = -1;
+        tConnectionListIterator it = mConnectionList.find(connectionHandle);
+        if (it == mConnectionList.end())
+        {
+            LOG4CPLUS_ERROR( mLogger, "Unknown connection!");
+        } else
+        {
+            result = (it->second).removeSession(sessionId);
+            if (0 > result)
+            {
+                LOG4CPLUS_ERROR( mLogger, "Not possible to remove session!");
+            } else
+            {
+                LOG4CPLUS_INFO( mLogger, "Session removed:" << result );
+                if (0 != mpConnectionHandlerObserver)
+                {
+                    int sessionKey = keyFromPair(connectionHandle, sessionId);
+                    mpConnectionHandlerObserver->onSessionEndedCallback(sessionKey);
+                }
+            }
+        }
+        return result;
     }
     
     int CConnectionHandler::keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
