@@ -49,7 +49,15 @@ MFT.ApplinkMediaModel = Em.Object.create({
     /**
       * Array of connected devices
       */
-    devicesList:            new Array(),
+    devicesList:                new Array(),
+
+    /**
+      * Set of params of Slider View
+      */
+    sliderParams: {
+        headerLabel: "headerLabel",
+        footerLabel: "footerLabel"
+    },
 
 	/**
 	  * Timer for Media Clock
@@ -135,15 +143,18 @@ MFT.ApplinkMediaModel = Em.Object.create({
                     params:     {
                         action:         'onDeviceChoosed',
                         target:         'MFT.ApplinkController',
-                        text:           params.deviceList[i].deviceName,
-                        deviceName:     params.deviceList[i].deviceName,
+                        text:           params.deviceList[i],
+                        deviceName:     params.deviceList[i],
                         className:      'scrollButtons button notpressed',
                         icon:           params.icon,
                         templateName:   'rightIcon'
                     }                                   
                 });
             }
-            MFT.DeviceLilstView.ShowDeviceList();
+            
+            if( MFT.States.info.devicelist.active ){
+                MFT.DeviceLilstView.ShowDeviceList();
+            }
         }
     },
 
@@ -351,20 +362,18 @@ MFT.ApplinkMediaModel = Em.Object.create({
     /** Applink Slider activation */
     onApplinkSlider: function(params){
 
-/*
-unsigned int (2:26) numTicks,
-  unsigned int (1:16) position,
-  string (500) sliderHeader,
-  string (500) * sliderFooter[1:26],
-  unsigned int (65535) timeout
-  ->
-  unsigned int (1:26) sliderPosition
-  */
-
-
+        this.applinkSliderContent.set('range', params.numTicks);
+        this.applinkSliderContent.set('value', params.sliderPosition);
+        this.set('sliderParams.headerLabel', params.sliderHeader);
+        this.set('sliderParams.footerLabel', params.sliderFooter);
         MFT.ApplinkMediaController.turnOnApplinkSlider();
         MFT.ApplinkSliderView.activate();
-
+        setTimeout(function(){
+            if(MFT.States.media.applink.applinkslider.active){
+                MFT.States.goToState('media.applink');
+            }
+        },
+        params.timeout);
     },
 
     /** Applink TTS Speak handler */

@@ -46,7 +46,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
 
         classNames:         'headerLabel',
 
-        contentBinding:     'MFT.ApplinkMediaController.performInteractionInitialText'
+        contentBinding:     'MFT.ApplinkMediaModel.sliderParams.headerLabel'
     }),
 
     footerLabel:    MFT.Label.extend({
@@ -55,11 +55,17 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
 
         classNames:         'footerLabel',
 
-        contentBinding:     'MFT.ApplinkMediaController.performInteractionInitialText'
+        contentBinding:     'parentView.footerLabel'
     }),
+
+    footerLabel: function(){
+        return MFT.ApplinkMediaModel.sliderParams.footerLabel[MFT.ApplinkMediaModel.applinkSliderContent.value];
+    }.property('MFT.ApplinkMediaModel.applinkSliderContent.value'),
 
     activate: function(){
         //MFT.ApplinkController.getApplicationModel(1).
+
+        this.get('childViews').removeObject(this.get('childViews')[4]);
 
         this.get('childViews').pushObject(
 
@@ -69,6 +75,8 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                 classNames:         'control sliderControl',
 
                 elementId:          'sliderControl',
+
+                attributeBindings:  ['style'],
 
                 /** Container components */
                 childViews: [
@@ -81,6 +89,10 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                 minusBtn: MFT.Button.extend({
                     classNames: 'minus',
                     icon:       'images/common/minus-ico.png',
+                    actionDown: function() {
+                        this._super();
+                        MFT.ApplinkMediaModel.applinkSliderContent.decrease();
+                    }
                 }),
 
                 /** adjust */
@@ -95,10 +107,18 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                 plusBtn: MFT.Button.extend({
                     classNames: 'plus',
                     icon:       'images/common/plus-ico.png',
+                    actionDown: function() {
+                        this._super();
+                        MFT.ApplinkMediaModel.applinkSliderContent.increase();
+                    }
                 })
             })
 
         );
+
+        this.get('childViews')[4].set( 'style', 
+            'width:' + (MFT.ApplinkMediaModel.applinkSliderContent.range * 12 + 118) + 'px; left:' + ( 340 - MFT.ApplinkMediaModel.applinkSliderContent.range * 6) + 'px;' );
+
     },
 /*
     slider: Em.ContainerView.create( {//MFT.SelectedIndex, {
@@ -156,7 +176,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                         
                         this._super();
                     }
-                }*/
+                }
             }),
 
             /** adjust 
@@ -186,7 +206,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                     if(!this._parentView._parentView.get('disabled')) {
                         MFT.MCSController.set('highlighted', false);
                     }
-                }*/
+                }
             }),
 
             /** Plus button 

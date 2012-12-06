@@ -58,6 +58,13 @@ namespace NsAppManager
          */
         const NsConnectionHandler::CDevice *findDeviceByHandle(const NsConnectionHandler::tDeviceHandle& handle) const;
 
+        /**
+         * \brief find device associated with the given name
+         * \param name device name
+         * \return device associated with the given name
+         */
+        const NsConnectionHandler::CDevice *findDeviceByName(const std::string& name) const;
+
     private:
 
         /**
