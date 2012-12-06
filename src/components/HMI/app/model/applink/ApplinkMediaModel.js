@@ -115,6 +115,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
                     target:         'MFT.MediaController',
                     text:           params.appList[i].appName,
                     appName:        params.appList[i].appName,
+                    appId:          params.appList[i].appId,
                     className:      'scrollButtons button notpressed',
                     icon:           params.icon,
                     templateName:   'rightIcon'

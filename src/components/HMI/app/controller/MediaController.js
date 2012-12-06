@@ -404,7 +404,7 @@ MFT.MediaController = Em.Object.create({
             this.set('directTuneSelected', false);
         }
 
-        MFT.ApplinkMediaController.turnOnApplink(element.appName);
+        MFT.ApplinkMediaController.turnOnApplink(element.appName, element.appId);
 
         /* Show Applink application in media left menu */
 		MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);

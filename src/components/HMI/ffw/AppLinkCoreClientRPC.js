@@ -213,7 +213,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	/*
 	 * handle RPC requests here
  	 */	
-	ActivateApp: function() {
+	ActivateApp: function( appId ) {
 		Em.Logger.log("FFW.ALCore.ActivateApp");
 
 		// send request
@@ -222,7 +222,10 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.ActivateApp",
-			"params"	:	{"appName":MFT.ApplinkMediaModel.showInfo.appName}
+			"params"	:	{
+				"appName":	MFT.ApplinkMediaModel.showInfo.appName,
+				"appId":	appId
+			}
 		};
 		this.client.send(JSONMessage);
 	}
