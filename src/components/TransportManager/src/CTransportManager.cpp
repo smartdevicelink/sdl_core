@@ -102,13 +102,9 @@ void NsAppLink::NsTransportManager::CTransportManager::run(void)
     for (std::vector<IDeviceAdapter*>::iterator di = mDeviceAdapters.begin(); di != mDeviceAdapters.end(); ++di)
     {
         (*di)->run();
-        //(*di)->scanForNewDevices();
     }
 
-    if( false == startApplicationCallbacksThread())
-    {
-        return;
-    }
+    startApplicationCallbacksThread();
 }
 
 void NsAppLink::NsTransportManager::CTransportManager::scanForNewDevices(void)
@@ -823,7 +819,7 @@ void* CTransportManager::dataCallbacksThreadStartRoutine(void* Data)
     return 0;
 }
 
-bool CTransportManager::startApplicationCallbacksThread()
+void CTransportManager::startApplicationCallbacksThread()
 {
     LOG4CPLUS_INFO_EXT(mLogger, "Starting device listeners thread");
 
@@ -832,12 +828,10 @@ bool CTransportManager::startApplicationCallbacksThread()
     if (0 == errorCode)
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Device listeners thread started");
-        return true;
     }
     else
     {
         LOG4CPLUS_ERROR_EXT(mLogger, "Device listeners thread cannot be started, error code " << errorCode);
-        return false;
     }
 }
 

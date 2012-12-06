@@ -581,10 +581,9 @@ namespace NsAppLink
 
             /**
              * @brief Starts thread for application-related callbacks
-             *
-             * @return bool Thread start status
+             * 
              **/
-            bool startApplicationCallbacksThread();
+            void startApplicationCallbacksThread();
 
             /**
              * @brief Stops thread for application-related callbacks
