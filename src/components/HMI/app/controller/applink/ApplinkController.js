@@ -83,5 +83,12 @@ MFT.ApplinkController = Em.Object.create({
 	onGetDeviceList: function(  ) {
 		MFT.States.goToState('info.devicelist');
 		FFW.AppLinkCoreClient.getDeviceList();
+	},
+
+	/**
+	 * Send notification if device was choosed
+	 */
+	onDeviceChoosed: function( el ) {
+		FFW.UI.OnDeviceChosen( el.deviceName );
 	}
 });
