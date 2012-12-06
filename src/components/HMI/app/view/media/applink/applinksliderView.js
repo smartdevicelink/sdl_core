@@ -46,7 +46,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
 
         classNames:         'headerLabel',
 
-        contentBinding:     'MFT.ApplinkMediaController.performInteractionInitialText'
+        contentBinding:     'MFT.ApplinkMediaModel.sliderParams.headerLabel'
     }),
 
     footerLabel:    MFT.Label.extend({
@@ -55,11 +55,13 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
 
         classNames:         'footerLabel',
 
-        contentBinding:     'MFT.ApplinkMediaController.performInteractionInitialText'
+        contentBinding:     'MFT.ApplinkMediaModel.sliderParams.footerLabel'
     }),
 
     activate: function(){
         //MFT.ApplinkController.getApplicationModel(1).
+
+        this.get('childViews').removeObject(this.get('childViews')[4]);
 
         this.get('childViews').pushObject(
 
@@ -69,6 +71,8 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                 classNames:         'control sliderControl',
 
                 elementId:          'sliderControl',
+
+                attributeBindings:  ['style'],
 
                 /** Container components */
                 childViews: [
@@ -99,6 +103,10 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
             })
 
         );
+
+        this.get('childViews')[4].set( 'style', 
+            'width:' + (MFT.ApplinkMediaModel.applinkSliderContent.range * 12 + 118) + 'px; left:' + ( 340 - MFT.ApplinkMediaModel.applinkSliderContent.range * 6) + 'px;' );
+
     },
 /*
     slider: Em.ContainerView.create( {//MFT.SelectedIndex, {
@@ -156,7 +164,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                         
                         this._super();
                     }
-                }*/
+                }
             }),
 
             /** adjust 
@@ -186,7 +194,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                     if(!this._parentView._parentView.get('disabled')) {
                         MFT.MCSController.set('highlighted', false);
                     }
-                }*/
+                }
             }),
 
             /** Plus button 
