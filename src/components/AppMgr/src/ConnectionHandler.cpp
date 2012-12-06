@@ -63,6 +63,20 @@ namespace NsAppManager
     }
 
     /**
+     * \brief Connect to device specified in params
+     * \param deviceHandle device handle
+     */
+    void ConnectionHandler::connectToDevice(NsConnectionHandler::tDeviceHandle deviceHandle)
+    {
+        if(!mConnectionHandler)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
+            return;
+        }
+        mConnectionHandler->connectToDevice(deviceHandle);
+    }
+
+    /**
      * \brief Default class constructor
      */
     ConnectionHandler::ConnectionHandler()
