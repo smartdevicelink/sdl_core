@@ -59,10 +59,10 @@ namespace NsConnectionHandler
             {
                 LOG4CPLUS_INFO( mLogger, "Add new device" << (*it_in).mUserFriendlyName << " Handler: " << (*it_in).mDeviceHandle);
                 mDeviceList.insert(tDeviceList::value_type((*it_in).mDeviceHandle, CDevice((*it_in).mDeviceHandle, (*it_in).mUserFriendlyName)));
-                if ( mpTransportManager )
+                /*if ( mpTransportManager )
                 {
                     mpTransportManager -> connectDevice((*it_in).mDeviceHandle);
-                }
+                }*/
             }
         }
         if (0 != mpConnectionHandlerObserver)
@@ -160,4 +160,23 @@ namespace NsConnectionHandler
         }
         mpTransportManager->scanForNewDevices();
     }
+
+    void CConnectionHandler::connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle )
+    {
+        NsConnectionHandler::tDeviceList::const_iterator it_in;
+        it_in = mDeviceList.find( deviceHandle );
+        if ( mDeviceList.end() != it_in )
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Connecting to device with handle " << deviceHandle );
+            if ( mpTransportManager )
+            {
+                mpTransportManager -> connectDevice( deviceHandle );
+            }
+        }
+        else
+        {
+            LOG4CPLUS_ERROR(mLogger, "Application Manager wanted to connect to non-existing device");
+        }        
+    }
+
 }/* namespace NsConnectionHandler */
