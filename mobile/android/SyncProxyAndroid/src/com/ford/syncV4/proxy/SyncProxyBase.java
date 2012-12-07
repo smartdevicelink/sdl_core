@@ -1128,9 +1128,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					if (_wiproVersion == 2) {
 						Hashtable hashTemp = new Hashtable();
 						hashTemp.put(Names.correlationID, message.getCorrID());
-						hashTemp.put(Names.parameters, mhash);
+						hashTemp.put(Names.parameters, mhash.get(Names.parameters));
 						FunctionID functionID = new FunctionID();
-						hashTemp.put(Names.function_name, functionID.getFunctionName(message.getFunctionID()));
+						hashTemp.put(Names.function_name, functionID.getFunctionName(message.getFunctionID() + 4));
 						if (message.getRPCType() == 0x00) {
 							hash.put(Names.request, hashTemp);
 						} else if (message.getRPCType() == 0x01) {

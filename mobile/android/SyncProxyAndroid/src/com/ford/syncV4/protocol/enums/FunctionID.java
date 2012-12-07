@@ -40,6 +40,7 @@ public class FunctionID {
 		functionID.add(Names.PutFile);
 		functionID.add(Names.EndAudioCapture);
 		functionID.add(Names.GetVehicleData);
+		functionID.add(Names.Slider);
 		functionID.add(Names.ResetGlobalProperties);
 		functionID.add(Names.PerformAudioCapture);
 		functionID.add(Names.OnCommand);

@@ -28,13 +28,17 @@ public class BinaryFrameHeader {
 		int _jsonSize = BitConverter.intFromByteArray(binHeader, 8);
 		msg.setJsonSize(_jsonSize);
 		
-		byte[] _jsonData = null;
+		byte[] _jsonData = new byte[_jsonSize];
 		System.arraycopy(binHeader, 12, _jsonData, 0, _jsonSize);
 		msg.setJsonData(_jsonData);
 		
-		byte[] _bulkData = null;
-		System.arraycopy(binHeader, 12 + _jsonSize, _bulkData, 0, binHeader.length - _jsonSize );
-		msg.setBulkData(_bulkData);
+		if ( binHeader.length - _jsonSize - 12 > 0 )
+		{
+			int l = binHeader.length;
+			byte[] _bulkData = new byte[binHeader.length - _jsonSize];
+			System.arraycopy(binHeader, 12 + _jsonSize, _bulkData, 0, binHeader.length - _jsonSize -12 );
+			msg.setBulkData(_bulkData);
+		}		
 		
 		return msg;
 	}
@@ -88,7 +92,9 @@ public class BinaryFrameHeader {
 	}
 	
 	public void setJsonData(byte[] _jsonData) {
-		this._jsonData = _jsonData;
+		this._jsonData = new byte[this._jsonSize];
+		System.arraycopy(_jsonData, 0, this._jsonData, 0, _jsonSize);
+		//this._jsonData = _jsonData;
 	}
 	
 	public byte[] getBulkData() {

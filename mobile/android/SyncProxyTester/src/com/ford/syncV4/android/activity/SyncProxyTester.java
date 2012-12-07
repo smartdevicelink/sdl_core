@@ -383,7 +383,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 			// Don't forget to commit your edits!!!
 			editor.commit();
-			super.finish();
+			//super.finish();
 			return true;
 		case MNU_UNREGISTER:
 			endSyncProxyInstance();

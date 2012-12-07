@@ -119,7 +119,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_syncProxy == null) {
 			try {
 				SharedPreferences settings = getSharedPreferences("SyncProxyTesterPrefs", 0);
-				boolean isMediaApp = settings.getBoolean("isMediaApp", false);
+				boolean isMediaApp = true;// settings.getBoolean("isMediaApp", false);
 				
 				int versionNumber = settings.getInt("VersionNumber",1);
 				_syncProxy = new SyncProxyALM(this, "SyncProxyTester", isMediaApp,versionNumber);

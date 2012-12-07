@@ -185,12 +185,12 @@ public class WiProProtocol extends AbstractProtocol {
 		if (!_haveHeader) {
 			// If I can't get the size, just get the bytes that are there.
 			int headerBytesNeeded = _headerBuf.length - _headerBufWritePos;
-			/*if (receivedBytesLength < headerBytesNeeded) {
+			if (receivedBytesLength < headerBytesNeeded) {
 				System.arraycopy(receivedBytes, receivedBytesReadPos,
 						_headerBuf, _headerBufWritePos, receivedBytesLength);
 				_headerBufWritePos += receivedBytesLength;
 				return;
-			} else {*/
+			} else {
 			// If I got the size, allocate the buffer
 				System.arraycopy(receivedBytes, receivedBytesReadPos,
 						_headerBuf, _headerBufWritePos, headerBytesNeeded);
@@ -200,7 +200,7 @@ public class WiProProtocol extends AbstractProtocol {
 				_currentHeader  = ProtocolFrameHeader.parseWiProHeader(_headerBuf);
 				_dataBuf = new byte[_currentHeader.getDataSize()];
 				_dataBufWritePos = 0;
-			//}
+			}
 		}
 
 		int bytesLeft = receivedBytesLength - receivedBytesReadPos;
@@ -376,12 +376,35 @@ public class WiProProtocol extends AbstractProtocol {
 			//TODO: What if data has binary header?
 			if (_version == 2) {
 				BinaryFrameHeader binFrameHeader = new BinaryFrameHeader();
-				binFrameHeader.parseBinaryHeader(data);
+								
+				byte RPC_Type = (byte) (data[0] >>> 4);
+				binFrameHeader.setRPCType(RPC_Type);
+				
+				int _functionID = (BitConverter.intFromByteArray(data, 0) & 0x0FFFFFFF);
+				binFrameHeader.setFunctionID(_functionID);
+				
+				int corrID = BitConverter.intFromByteArray(data, 4);
+				binFrameHeader.setCorrID(corrID);
+				
+				int _jsonSize = BitConverter.intFromByteArray(data, 8);
+				binFrameHeader.setJsonSize(_jsonSize);
+				
+				byte[] _jsonData = new byte[_jsonSize];
+				System.arraycopy(data, 12, _jsonData, 0, _jsonSize);
+				binFrameHeader.setJsonData(_jsonData);
+				
+				if ( data.length - _jsonSize - 12 > 0 )
+				{
+					int l = data.length;
+					byte[] _bulkData = new byte[data.length - _jsonSize];
+					System.arraycopy(data, 12 + _jsonSize, _bulkData, 0, data.length - _jsonSize -12 );
+					binFrameHeader.setBulkData(_bulkData);
+				}	
 				message.setVersion(_version);
-				message.setRPCType(binFrameHeader.getRPCType());
-				message.setFunctionID(binFrameHeader.getFunctionID());
-				message.setCorrID(binFrameHeader.getCorrID());
-				message.setData(binFrameHeader.getJsonData());
+				message.setRPCType(RPC_Type);
+				message.setFunctionID(_functionID);
+				message.setCorrID(corrID);
+				message.setData(_jsonData);
 			} else message.setData(data);
 			
 			_assemblerForMessageID.remove(header.getMessageID());
