@@ -31,8 +31,8 @@ MFT.InfoNonMediaOptionsSubMenu = Em.ContainerView.create( MFT.LoadableView, {
 	
 	title: MFT.Label.extend({
 		classNames:	'options_title',
-		
-		content:	'Submenu'
+
+        contentBinding:     'MFT.ApplinkMediaController.subMenuLabel'
 	}),
 
 
@@ -68,6 +68,7 @@ MFT.InfoNonMediaOptionsSubMenu = Em.ContainerView.create( MFT.LoadableView, {
                         commandId:              MFT.ApplinkNonMediaModel.subMenuCommands[i].cmdId,
                         text:                   MFT.ApplinkNonMediaModel.subMenuCommands[i].menuParams.menuName,
                         parentID:               MFT.ApplinkNonMediaModel.subMenuCommands[i].menuParams.parentID,
+                		appId:                  MFT.ApplinkNonMediaModel.subMenuCommands[i].menuParams.appId,
                         className:              'rs-item',
                         templateName:           'text'
                     }                                   
@@ -85,16 +86,6 @@ MFT.InfoNonMediaOptionsSubMenu = Em.ContainerView.create( MFT.LoadableView, {
 		
 		itemsOnPage:    5,
 		
-		items: [
-			{
-				type:	MFT.Button,
-			
-				params:		{
-					templateName:	'text',
-				
-					text:	'Test'
-				}
-			}	
-		]
+		items:      	new Array()
 	})
 });

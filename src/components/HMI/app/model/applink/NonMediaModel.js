@@ -15,7 +15,10 @@ MFT.ApplinkNonMediaModel = Em.Object.create({
 	
 	deviceName: '<deviceName>',
 	
-	
+	/**
+      * Array of menus in ApplinkOptionsSubMenuView
+      */
+    subMenuCommands:            new Array(),
 	
 	/** Add command to Options list */
     onApplinkOptionsAddCommand: function( commandId, params ){
@@ -45,7 +48,7 @@ MFT.ApplinkNonMediaModel = Em.Object.create({
         }else{
             this.subMenuCommands.push(params);
             if(MFT.States.info.nonMedia.options.subMenu.active){
-                MFT.InfoNonMediaOptionsSubMenu.SubMenuActivate(MFT.MediaController.currentApplinkSubMenuid);
+                MFT.InfoNonMediaOptionsSubMenu.SubMenuActivate(MFT.NonMediaController.currentApplinkSubMenuid);
             }
 
         }
@@ -74,7 +77,7 @@ MFT.ApplinkNonMediaModel = Em.Object.create({
     /** Delete subMenu button from Options list */
     onApplinkDeleteSubMenu: function( menuId ){
 
-        if( MFT.ApplinkMediaController.currentApplinkSubMenuid == menuId ){
+        if( MFT.NonMediaController.currentApplinkSubMenuid == menuId ){
             MFT.States.back();
         }
 

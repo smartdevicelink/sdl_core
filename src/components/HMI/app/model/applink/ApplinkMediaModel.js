@@ -116,19 +116,35 @@ MFT.ApplinkMediaModel = Em.Object.create({
 
 		this.applicationsList.splice(0, this.applicationsList.length);
 		for(var i = 0; i < appList.length; i++){
-            this.applicationsList.push({
-                type:       MFT.Button,
-                params:     {
-                    action:         'turnOnApplink',
-                    target:         'MFT.MediaController',
-                    text:           appList[i].appName,
-                    appName:        appList[i].appName,
-                    appId:          appList[i].appId,
-                    className:      'scrollButtons button notpressed',
-                    icon:           appList[i].icon,
-                    templateName:   'rightIcon'
-                }                                   
-            });
+            if( appList[i].isMediaApplication ){    
+                this.applicationsList.push({
+                    type:       MFT.Button,
+                    params:     {
+                        action:         'turnOnApplink',
+                        target:         'MFT.MediaController',
+                        text:           appList[i].appName,
+                        appName:        appList[i].appName,
+                        appId:          appList[i].appId,
+                        className:      'scrollButtons button notpressed',
+                        icon:           appList[i].icon,
+                        templateName:   'rightIcon'
+                    }                                   
+                });
+            }else{
+                this.applicationsList.push({
+                    type:       MFT.Button,
+                    params:     {
+                        action:         'turnOnApplinkNonMedia',
+                        target:         'MFT.MediaController',
+                        text:           appList[i].appName,
+                        appName:        appList[i].appName,
+                        appId:          appList[i].appId,
+                        className:      'scrollButtons button notpressed',
+                        icon:           appList[i].icon,
+                        templateName:   'rightIcon'
+                    }                                   
+                });
+            }
         }
         MFT.InfoAppsView.ShowAppList();
 
@@ -196,9 +212,9 @@ MFT.ApplinkMediaModel = Em.Object.create({
 	}.observes('this.duration'),
 
     /** Add command to Options list */
-    onApplinkOptionsAddCommand: function( commandId, params ){
+    onApplinkOptionsAddCommand: function( commandId, params, icon, appId ){
 
-       MFT.ApplinkOptionsView.AddCommand( commandId, params );
+       MFT.ApplinkOptionsView.AddCommand( commandId, params, appId );
 
     },
 
@@ -276,7 +292,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
     /** Applink AddCommand handler */
     onApplinkAddCommand: function(params){
         if( params.menuParams.parentID == 0 ){
-            this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams, params.cmdIcon);
+            this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams, params.cmdIcon, params.appId);
         }else{
             this.subMenuCommands.push(params);
             if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
