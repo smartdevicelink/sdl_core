@@ -67,6 +67,9 @@ Json::Value HMIApplicationMarshaller::toJSON(const HMIApplication& e)
   if(e.ngnMediaScreenAppName)
     json["ngnMediaScreenAppName"]=Json::Value(*e.ngnMediaScreenAppName);
 
+  if(e.mIsMediaApplication)
+      json["isMediaApplication"]=Json::Value(e.mIsMediaApplication);
+
   //if (e.appId)
   json["appId"] = Json::Value(e.appId);
 
@@ -111,6 +114,12 @@ bool HMIApplicationMarshaller::fromJSON(const Json::Value& json,HMIApplication& 
       const Json::Value& j=json["ngnMediaScreenAppName"];
       if(!j.isString())  return false;
       c.ngnMediaScreenAppName=new std::string(j.asString());
+    }
+    if(json.isMember("isMediaApplication"))
+    {
+      const Json::Value& j=json["isMediaApplication"];
+ //     if(!j.isString())  return false;
+      c.mIsMediaApplication=j.asBool();
     }
 
   }

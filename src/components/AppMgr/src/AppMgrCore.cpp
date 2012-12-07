@@ -225,6 +225,7 @@ namespace NsAppManager
                 status->set_audioStreamingState(app->getApplicationAudioStreamingState());
                 status->set_systemContext(app->getSystemContext());
                 MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " An OnHMIStatus notofocation for the app "  << app->getName() << " gets sent to a mobile side... ");
 
                 response->set_buttonCapabilities(core->mButtonCapabilitiesV1.get());
                 response->set_displayCapabilities(core->mDisplayCapabilitiesV1);
@@ -248,6 +249,7 @@ namespace NsAppManager
                 appRegistered->set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
                 appRegistered->set_deviceName(currentDeviceName);
                 HMIHandler::getInstance().sendNotification(appRegistered);
+                LOG4CPLUS_INFO_EXT(mLogger, " An AppLinkCore::OnAppRegistered notofocation for the app "  << app->getName() << " gets sent to an HMI side... ");
                 LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                 break;
             }
@@ -2025,9 +2027,16 @@ namespace NsAppManager
                 for(AppMgrRegistry::ItemsMap::const_iterator it = registeredApps.begin(); it != registeredApps.end(); it++)
                 {
                     NsAppLinkRPC::HMIApplication hmiApp;
-                    hmiApp.set_appName(core->getApplicationFromItemCheckNotNull(it->second)->getName());
-                    hmiApp.set_ngnMediaScreenAppName(core->getApplicationFromItemCheckNotNull(it->second)->getNgnMediaScreenAppName());
-                    hmiApp.set_appId(core->getApplicationFromItemCheckNotNull(it->second)->getAppID());
+                    Application* app = core->getApplicationFromItemCheckNotNull(it->second);
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " null-application found!");
+                        continue;
+                    }
+                    hmiApp.set_appName(app->getName());
+                    hmiApp.set_ngnMediaScreenAppName(app->getNgnMediaScreenAppName());
+                    hmiApp.set_appId(app->getAppID());
+                    hmiApp.set_isMediaApplication(app->getIsMediaApplication());
                     hmiApps.push_back(hmiApp);
                 }
                 if(!hmiApps.empty())
