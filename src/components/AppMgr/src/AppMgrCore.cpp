@@ -2051,6 +2051,7 @@ namespace NsAppManager
                     hmiApp.set_ngnMediaScreenAppName(app->getNgnMediaScreenAppName());
                     hmiApp.set_appId(app->getAppID());
                     hmiApp.set_isMediaApplication(app->getIsMediaApplication());
+                    LOG4CPLUS_INFO_EXT(mLogger, "Added an application " << hmiApp.get_appName() << " connection/session key " << hmiApp.get_appId() << " is media? " << hmiApp.get_isMediaApplication() );
                     hmiApps.push_back(hmiApp);
                 }
                 if(!hmiApps.empty())
@@ -2063,6 +2064,9 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, " Application list is empty!");
                     response->setResult(NsAppLinkRPC::Result::GENERIC_ERROR);
                 }
+
+                Json::Value commandJson = NsRPC2Communication::Marshaller::toJSON( response );
+                LOG4CPLUS_INFO(mLogger, "JSONRPC2Handler::waitForCommandsToHMI: received command text: " << commandJson);
                 HMIHandler::getInstance().sendResponse(response);
                 return;
             }
