@@ -1690,6 +1690,8 @@ namespace NsAppManager
                 NsAppLinkRPCV2::Slider_response* response = new NsAppLinkRPCV2::Slider_response();
                 
                 response->set_success(true);
+                response->setMethodId(NsAppLinkRPCV2::FunctionID::SliderID);
+                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                 response->set_sliderPosition(uiResponse->get_sliderPosition());
                 response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(uiResponse->getResult()));
                 core->mMessageMapping.removeMessage(uiResponse->getId());

@@ -278,10 +278,11 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.Slider":{
 
+		    	this.sliderRequestId = request.id;
+
 				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkSlider(request.params);
 
-				this.sendUIResult("SUCCESS", request.id, request.method);
-		    
+				MFT.ApplinkSliderView.activate();		    
 		    	break;
 		    }
 		    case  "UI.GetCapabilities":{
@@ -378,6 +379,19 @@ FFW.UI = FFW.RPCObserver.create({
 			};
 			this.client.send(JSONMessage);
 		}
+	},
+
+	sendSliderResult: function(resultCode  ) {
+		var JSONMessage = {
+				"jsonrpc"	:	"2.0",
+				"id"		: 	this.sliderRequestId,
+				"result":	{
+					"resultCode" : resultCode, //  type (enum) from AppLink protocol
+					"method" : "UI.SliderResponse",
+					"sliderPosition" : MFT.ApplinkMediaModel.applinkSliderContent.value
+					}
+				};
+				this.client.send(JSONMessage);
 	},
 
 	/*

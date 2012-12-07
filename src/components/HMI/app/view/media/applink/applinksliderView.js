@@ -62,6 +62,10 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
         return MFT.ApplinkMediaModel.sliderParams.footerLabel[MFT.ApplinkMediaModel.applinkSliderContent.value];
     }.property('MFT.ApplinkMediaModel.applinkSliderContent.value'),
 
+    afterRender: function(){
+        this.activate();
+    },
+
     activate: function(){
         //MFT.ApplinkController.getApplicationModel(1).
 
@@ -92,6 +96,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                     actionDown: function() {
                         this._super();
                         MFT.ApplinkMediaModel.applinkSliderContent.decrease();
+                        FFW.UI.sendSliderResult("SUCCESS");
                     }
                 }),
 
@@ -110,6 +115,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                     actionDown: function() {
                         this._super();
                         MFT.ApplinkMediaModel.applinkSliderContent.increase();
+                        FFW.UI.sendSliderResult("SUCCESS");
                     }
                 })
             })

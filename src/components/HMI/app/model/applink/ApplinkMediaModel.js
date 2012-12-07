@@ -381,11 +381,11 @@ MFT.ApplinkMediaModel = Em.Object.create({
     onApplinkSlider: function(params){
 
         this.applinkSliderContent.set('range', params.numTicks);
-        this.applinkSliderContent.set('value', params.sliderPosition);
+        this.applinkSliderContent.set('value', params.position);
         this.set('sliderParams.headerLabel', params.sliderHeader);
         this.set('sliderParams.footerLabel', params.sliderFooter);
         MFT.ApplinkMediaController.turnOnApplinkSlider();
-        MFT.ApplinkSliderView.activate();
+        //MFT.ApplinkSliderView.activate();
         setTimeout(function(){
             if(MFT.States.media.applink.applinkslider.active){
                 MFT.States.goToState('media.applink');
