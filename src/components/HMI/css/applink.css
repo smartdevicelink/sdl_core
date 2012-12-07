@@ -98,10 +98,12 @@
 	top: 150px;
 }
 
+#applink_view_container .list-content,
 #info_nonMedia_options .list-content{
 	width: 610px;
 }
-
+#info_apps_deviceList_list .list-content span,
+#applink_view_container .list-content span,
 #info_nonMedia_options .list-content span{
 	margin-left: 15px;
 }
