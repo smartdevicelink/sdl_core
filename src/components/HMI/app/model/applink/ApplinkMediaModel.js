@@ -112,20 +112,20 @@ MFT.ApplinkMediaModel = Em.Object.create({
         tryAgainTime:   0
     }),
 
-	onGetAppList: function( params ){
- 		
+	onGetAppList: function( appList ){
+
 		this.applicationsList.splice(0, this.applicationsList.length);
-		for(var i = 0; i < params.appList.length; i++){
+		for(var i = 0; i < appList.length; i++){
             this.applicationsList.push({
                 type:       MFT.Button,
                 params:     {
                     action:         'turnOnApplink',
                     target:         'MFT.MediaController',
-                    text:           params.appList[i].appName,
-                    appName:        params.appList[i].appName,
-                    appId:          params.appList[i].appId,
+                    text:           appList[i].appName,
+                    appName:        appList[i].appName,
+                    appId:          appList[i].appId,
                     className:      'scrollButtons button notpressed',
-                    icon:           params.icon,
+                    icon:           icon,
                     templateName:   'rightIcon'
                 }                                   
             });

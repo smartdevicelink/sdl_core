@@ -90,5 +90,20 @@ MFT.ApplinkController = Em.Object.create({
 	 */
 	onDeviceChoosed: function( el ) {
 		FFW.UI.OnDeviceChosen( el.deviceName );
+	},
+
+	/**
+	 *  Method creates list of Application ID's
+	 *  Then call HMI method for display a list of Applications
+	 */
+	onGetAppList: function( list ){
+		for(var i = 0; i < appList.length; i++){
+			if( appList[i].isMediaApplication ){
+				MFT.ApplinkController.registerApplication(appList[i].appId, 0);
+			}else{
+				MFT.ApplinkController.registerApplication(appList[i].appId, 1);
+			}
+		}
+		MFT.ApplinkMediaModel.onGetDeviceList(list);
 	}
 });

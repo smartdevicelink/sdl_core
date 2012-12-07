@@ -103,7 +103,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		if (response.result.method == "AppLinkCore.GetDeviceListResponse")
 		{
 			if(MFT.States.info.active){
-				MFT.ApplinkMediaModel.onGetDeviceList(response.result);
+				MFT.ApplinkController.onGetDeviceList(response.result.appList);
 			}
 		}
 
