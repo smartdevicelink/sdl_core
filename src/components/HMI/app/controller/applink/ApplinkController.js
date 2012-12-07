@@ -106,5 +106,10 @@ MFT.ApplinkController = Em.Object.create({
 			}
 		}
 		MFT.ApplinkMediaModel.onGetAppList( appList );
+	},
+
+	findNewApps: function(){
+		FFW.AppLinkCoreClient.getAppList();
 	}
+
 });

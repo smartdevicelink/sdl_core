@@ -34,7 +34,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 		
 			classNames: ['app_title'],
 			
-			contentBinding: 'controller.model.deviceName'
+			contentBinding: 'MFT.ApplinkNonMediaModel.showInfo.deviceName'
 		}),
 		
 		image: Em.View.extend({
@@ -58,19 +58,19 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 			],
 			
 			field1: MFT.Label.extend({
-				content: 'Field 1'
+				contentBinding: 'MFT.ApplinkNonMediaModel.showInfo.field1'
 			}),
 			
 			field2: MFT.Label.extend({
-				content: 'Field 2'
+				contentBinding: 'MFT.ApplinkNonMediaModel.showInfo.field2'
 			}),
 			
 			field3: MFT.Label.extend({
-				content: 'Field 3'
+				contentBinding: 'MFT.ApplinkNonMediaModel.showInfo.field3'
 			}),
 			
 			field4: MFT.Label.extend({
-				content: 'Field 4'
+				contentBinding: 'MFT.ApplinkNonMediaModel.showInfo.field4'
 			})
 		
 		}),
