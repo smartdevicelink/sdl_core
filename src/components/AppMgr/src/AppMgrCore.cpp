@@ -225,6 +225,7 @@ namespace NsAppManager
                 status->set_audioStreamingState(app->getApplicationAudioStreamingState());
                 status->set_systemContext(app->getSystemContext());
                 MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " An OnHMIStatus notofocation for the app "  << app->getName() << " gets sent to a mobile side... ");
 
                 response->set_buttonCapabilities(core->mButtonCapabilitiesV1.get());
                 response->set_displayCapabilities(core->mDisplayCapabilitiesV1);
@@ -248,6 +249,7 @@ namespace NsAppManager
                 appRegistered->set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
                 appRegistered->set_deviceName(currentDeviceName);
                 HMIHandler::getInstance().sendNotification(appRegistered);
+                LOG4CPLUS_INFO_EXT(mLogger, " An AppLinkCore::OnAppRegistered notofocation for the app "  << app->getName() << " gets sent to an HMI side... ");
                 LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                 break;
             }
