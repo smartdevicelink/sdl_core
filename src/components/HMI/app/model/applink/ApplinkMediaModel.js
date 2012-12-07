@@ -181,10 +181,11 @@ MFT.ApplinkMediaModel = Em.Object.create({
 	}.observes('this.pause'),
 
 	setDuration: function() {
+        var number = (this.duration + this.currTime) % 60;
 		if(this.countUp){
-			this.showInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (this.duration + this.currTime) % 60 );
+			this.showInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}else{
-			this.showInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (this.duration - this.currTime) % 60 );
+			this.showInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}
 	}.observes('this.currTime'),
 
@@ -344,6 +345,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
 
     /** Applin UI Show handler */
     onApplinkUIShow: function(params){
+        clearInterval(this.timer);
         this.showInfo.set('field1',        params.mainField1);
         this.showInfo.set('field2',        params.mainField2);
         this.showInfo.set('field3',        params.mainField3);
