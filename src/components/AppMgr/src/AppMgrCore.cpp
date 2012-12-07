@@ -837,7 +837,9 @@ namespace NsAppManager
                     }
 
                     Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, connectionID, sessionID ));
+                    
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::RegisterAppInterfaceID);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
@@ -851,6 +853,8 @@ namespace NsAppManager
                     status->set_hmiLevel(app->getApplicationHMIStatusLevel());
                     status->set_audioStreamingState(app->getApplicationAudioStreamingState());
                     status->set_systemContext(app->getSystemContext());
+                    status->setMethodId(NsAppLinkRPCV2::FunctionID::OnHMIStatusID);
+                    status->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                     MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
 
                     response->set_buttonCapabilities(core->mButtonCapabilitiesV2.get());
@@ -1126,6 +1130,7 @@ namespace NsAppManager
 
                     slider->set_position(request->get_position());
                     slider->set_timeout(request->get_timeout());
+                    slider->set_appId(appId);
                     HMIHandler::getInstance().sendRequest(slider);
                     break;
                 }
@@ -2095,6 +2100,7 @@ namespace NsAppManager
      */
     const RegistryItem* AppMgrCore::registerApplication(NsAppLinkRPC::ALRPCMessage * request, const unsigned int& connectionID, const unsigned char& sessionID)
     {
+        LOG4CPLUS_INFO_EXT(mLogger, __PRETTY_FUNCTION__);
         if(!request)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "Null-request specified for connection id " << connectionID << " session id " << (uint)sessionID << "!");
@@ -2102,14 +2108,14 @@ namespace NsAppManager
         }
 
         const unsigned int& protocolVersion = request->getProtocolVersion();
-        const std::string& appName = ((NsAppLinkRPC::RegisterAppInterface_request*)request)->get_appName();
+        std::string appName = "";
         int appId = connectionID|(sessionID << 16);
-        LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << appName << " app id " << appId << " !");
 
         switch(protocolVersion)
         {
             case 2:
             {
+                appName = ((NsAppLinkRPCV2::RegisterAppInterface_request*)request)->get_appName();
                 Application_v2* application = new Application_v2( appName, connectionID, sessionID, appId );
                 if(!application)
                 {
@@ -2157,11 +2163,11 @@ namespace NsAppManager
 
                 application->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_NONE);
 
-                LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
                 return AppMgrRegistry::getInstance().registerApplication( application );
             }
             case 1:
             {
+                appName = ((NsAppLinkRPC::RegisterAppInterface_request*)request)->get_appName();
                 Application_v1* application = new Application_v1( appName, connectionID, sessionID, appId );
                 if(!application)
                 {
@@ -2209,6 +2215,7 @@ namespace NsAppManager
             }
         }
         LOG4CPLUS_INFO_EXT(mLogger, " Application " << appName << " app id " << appId << " registered successfully !");
+        return 0;
     }
 
     /**
