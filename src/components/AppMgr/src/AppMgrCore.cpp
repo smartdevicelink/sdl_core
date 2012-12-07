@@ -892,6 +892,7 @@ namespace NsAppManager
                 }
                 case NsAppLinkRPCV2::FunctionID::UnregisterAppInterfaceID:
                 {
+                    LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
                     NsAppLinkRPCV2::UnregisterAppInterface_request * object = (NsAppLinkRPCV2::UnregisterAppInterface_request*)mobileMsg;
                     Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
                     NsAppLinkRPCV2::UnregisterAppInterface_response* response = new NsAppLinkRPCV2::UnregisterAppInterface_response();
@@ -1131,6 +1132,7 @@ namespace NsAppManager
                 }
                 case NsAppLinkRPCV2::FunctionID::EncodedSyncPDataID:
                 {
+                    LOG4CPLUS_INFO_EXT(mLogger, " An EncodedSyncPData request has been invoked");
                     NsAppLinkRPCV2::EncodedSyncPData_request* object = (NsAppLinkRPCV2::EncodedSyncPData_request*)mobileMsg;
                     NsAppLinkRPCV2::EncodedSyncPData_response* response = new NsAppLinkRPCV2::EncodedSyncPData_response;
                     Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(connectionID, sessionID) );
