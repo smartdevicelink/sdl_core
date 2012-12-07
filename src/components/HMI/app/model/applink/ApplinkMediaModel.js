@@ -125,7 +125,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
                     appName:        appList[i].appName,
                     appId:          appList[i].appId,
                     className:      'scrollButtons button notpressed',
-                    icon:           icon,
+                    icon:           appList[i].icon,
                     templateName:   'rightIcon'
                 }                                   
             });
