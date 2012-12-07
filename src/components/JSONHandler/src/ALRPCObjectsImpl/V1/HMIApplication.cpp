@@ -19,6 +19,7 @@ HMIApplication& HMIApplication::operator =(const HMIApplication& c)
   appName=c.appName;
   icon=c.icon ? new std::string(c.icon[0]) : 0;
   ngnMediaScreenAppName=c.ngnMediaScreenAppName ? new std::string(c.ngnMediaScreenAppName[0]) : 0;
+  appId = c.appId;
 
   return *this;
 }
