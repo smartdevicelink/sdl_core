@@ -173,7 +173,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
 	startTimer: function(){
 		if(!this.pause){
 			this.timer = setInterval(function(){
-				this.set('currTime', this.currTime+1);
+				MFT.ApplinkMediaModel.set('currTime', MFT.ApplinkMediaModel.currTime+1);
 			}, 1000);
 		}else{
 			clearInterval(this.timer);

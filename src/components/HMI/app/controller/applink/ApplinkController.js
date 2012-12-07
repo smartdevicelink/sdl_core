@@ -90,6 +90,7 @@ MFT.ApplinkController = Em.Object.create({
 	 */
 	onDeviceChoosed: function( el ) {
 		FFW.UI.OnDeviceChosen( el.deviceName );
+		MFT.ApplinkMediaModel.set('showInfo.deviceName', el.deviceName);
 	},
 
 	/**
