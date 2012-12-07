@@ -67,8 +67,7 @@ Json::Value HMIApplicationMarshaller::toJSON(const HMIApplication& e)
   if(e.ngnMediaScreenAppName)
     json["ngnMediaScreenAppName"]=Json::Value(*e.ngnMediaScreenAppName);
 
-  if(e.mIsMediaApplication)
-      json["isMediaApplication"]=Json::Value(e.mIsMediaApplication);
+  json["isMediaApplication"]=Json::Value(e.mIsMediaApplication);
 
   //if (e.appId)
   json["appId"] = Json::Value(e.appId);
