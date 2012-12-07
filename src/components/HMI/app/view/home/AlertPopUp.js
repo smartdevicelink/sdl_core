@@ -64,9 +64,9 @@ MFT.AlertPopUp = Em.ContainerView.create({
 		// play audio alert
 		MFT.Audio.play('audio/alert.wav');
 
-		this.set('content1', msg1);
-		this.set('content2', msg2);
+		this.set('content1', MFT.ApplinkMediaModel.alertInfo.text1);
+		this.set('content2', MFT.ApplinkMediaModel.alertInfo.text2);
 		this.set('activate', true);
-		setTimeout(function(){self.set('activate', false);}, duration);
+		setTimeout(function(){self.set('activate', false);}, MFT.ApplinkMediaModel.alertInfo.duration);
 	}
 });

@@ -226,7 +226,7 @@ namespace NsAppManager
                     status->set_audioStreamingState(app->getApplicationAudioStreamingState());
                     status->set_systemContext(app->getSystemContext());
                     MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
-                    LOG4CPLUS_INFO_EXT(mLogger, " An OnHMIStatus notofocation for the app "  << app->getName() << " connection/session key " << app->getAppID() << " gets sent to a mobile side... ");
+                    LOG4CPLUS_INFO_EXT(mLogger, " An OnHMIStatus notification for the app "  << app->getName() << " connection/session key " << app->getAppID() << " gets sent to a mobile side... ");
 
                     response->set_buttonCapabilities(core->mButtonCapabilitiesV1.get());
                     response->set_displayCapabilities(core->mDisplayCapabilitiesV1);
@@ -288,6 +288,8 @@ namespace NsAppManager
                     appUnregistered->set_appId(app->getAppID());
                     appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
                     HMIHandler::getInstance().sendNotification(appUnregistered);
+
+                    LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_SUBSCRIBEBUTTON_REQUEST:
@@ -896,6 +898,7 @@ namespace NsAppManager
                 }
                 case NsAppLinkRPCV2::FunctionID::UnregisterAppInterfaceID:
                 {
+                    LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
                     NsAppLinkRPCV2::UnregisterAppInterface_request * object = (NsAppLinkRPCV2::UnregisterAppInterface_request*)mobileMsg;
                     Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
                     NsAppLinkRPCV2::UnregisterAppInterface_response* response = new NsAppLinkRPCV2::UnregisterAppInterface_response();
@@ -925,6 +928,7 @@ namespace NsAppManager
                     appUnregistered->set_appId(app->getAppID());
                     appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason((NsAppLinkRPC::AppInterfaceUnregisteredReason::AppInterfaceUnregisteredReasonInternal)NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
                     HMIHandler::getInstance().sendNotification(appUnregistered);
+                    LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::SetMediaClockTimerID:
@@ -1136,6 +1140,7 @@ namespace NsAppManager
                 }
                 case NsAppLinkRPCV2::FunctionID::EncodedSyncPDataID:
                 {
+                    LOG4CPLUS_INFO_EXT(mLogger, " An EncodedSyncPData request has been invoked");
                     NsAppLinkRPCV2::EncodedSyncPData_request* object = (NsAppLinkRPCV2::EncodedSyncPData_request*)mobileMsg;
                     NsAppLinkRPCV2::EncodedSyncPData_response* response = new NsAppLinkRPCV2::EncodedSyncPData_response;
                     Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(connectionID, sessionID) );
@@ -1663,6 +1668,7 @@ namespace NsAppManager
 
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
+                LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
                 MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                 return;
             }
@@ -1698,8 +1704,10 @@ namespace NsAppManager
                 NsRPC2Communication::UI::OnDeviceChosen* chosen = (NsRPC2Communication::UI::OnDeviceChosen*)msg;
                 const std::string& deviceName = chosen->get_deviceName();
                 const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByName(deviceName);
-                const NsConnectionHandler::tDeviceHandle& handle = device->getDeviceHandle();
-                ConnectionHandler::getInstance().connectToDevice(handle);
+                if (device) {
+                    const NsConnectionHandler::tDeviceHandle& handle = device->getDeviceHandle();
+                    ConnectionHandler::getInstance().connectToDevice(handle);
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:

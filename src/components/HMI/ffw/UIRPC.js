@@ -343,7 +343,7 @@ FFW.UI = FFW.RPCObserver.create({
 							"upDownAvailable":		true,
 							"imageSupported":		true
 						}],
-
+						"method"	:	"UI.GetCapabilitiesResponse",
 						"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 					}
 				};
@@ -383,13 +383,16 @@ FFW.UI = FFW.RPCObserver.create({
 	/*
 	 * send notification when command was triggered
  	 */	
-	onCommand: function(commandId) {
+	onCommand: function(commandId, appId) {
 		Em.Logger.log("FFW.UI.onCommand");
 
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
 			"method"	:	"UI.OnCommand",
-			"params"	:	{"commandId":commandId, }
+			"params"	:	{
+				"commandId":	commandId,
+				"appId":		appId
+			}
 		};
 		this.client.send(JSONMessage);
 	},
