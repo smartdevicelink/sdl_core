@@ -343,7 +343,7 @@ FFW.UI = FFW.RPCObserver.create({
 							"upDownAvailable":		true,
 							"imageSupported":		true
 						}],
-
+						"method"	:	"UI.GetCapabilitiesResponse",
 						"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 					}
 				};
