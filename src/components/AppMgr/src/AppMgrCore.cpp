@@ -226,7 +226,7 @@ namespace NsAppManager
                     status->set_audioStreamingState(app->getApplicationAudioStreamingState());
                     status->set_systemContext(app->getSystemContext());
                     MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
-                    LOG4CPLUS_INFO_EXT(mLogger, " An OnHMIStatus notofocation for the app "  << app->getName() << " connection/session key " << app->getAppID() << " gets sent to a mobile side... ");
+                    LOG4CPLUS_INFO_EXT(mLogger, " An OnHMIStatus notification for the app "  << app->getName() << " connection/session key " << app->getAppID() << " gets sent to a mobile side... ");
 
                     response->set_buttonCapabilities(core->mButtonCapabilitiesV1.get());
                     response->set_displayCapabilities(core->mDisplayCapabilitiesV1);
