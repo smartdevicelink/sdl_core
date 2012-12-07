@@ -1658,6 +1658,7 @@ namespace NsAppManager
 
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
+                LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
                 MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                 return;
             }
