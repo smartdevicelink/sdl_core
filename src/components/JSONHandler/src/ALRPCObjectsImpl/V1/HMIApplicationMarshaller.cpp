@@ -114,11 +114,11 @@ bool HMIApplicationMarshaller::fromJSON(const Json::Value& json,HMIApplication& 
       if(!j.isString())  return false;
       c.ngnMediaScreenAppName=new std::string(j.asString());
     }
-    if(json.isMember("isMediaApplication"))
+    if(!json.isMember("isMediaApplication") || !json["isMediaApplication"].isBool()) return false;
     {
-      const Json::Value& j=json["isMediaApplication"];
+//      const Json::Value& j=json["isMediaApplication"];
  //     if(!j.isString())  return false;
-      c.mIsMediaApplication=j.asBool();
+      c.mIsMediaApplication=json["isMediaApplication"].asBool();;
     }
 
   }
