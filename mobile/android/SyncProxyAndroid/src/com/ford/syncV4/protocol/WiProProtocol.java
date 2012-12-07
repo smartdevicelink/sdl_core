@@ -45,9 +45,12 @@ public class WiProProtocol extends AbstractProtocol {
 	
 	public void setVersion(byte version) {
 		this._version = version;
-		HEADER_SIZE = 12;
-		MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE;
-		_headerBuf = new byte[HEADER_SIZE];
+		if ( 2 == version )
+		{
+			HEADER_SIZE = 12;
+			MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE;
+			_headerBuf = new byte[HEADER_SIZE];
+		}		
 	}
 
 	public void StartProtocolSession(SessionType sessionType) {
@@ -182,12 +185,12 @@ public class WiProProtocol extends AbstractProtocol {
 		if (!_haveHeader) {
 			// If I can't get the size, just get the bytes that are there.
 			int headerBytesNeeded = _headerBuf.length - _headerBufWritePos;
-			if (receivedBytesLength < headerBytesNeeded) {
+			/*if (receivedBytesLength < headerBytesNeeded) {
 				System.arraycopy(receivedBytes, receivedBytesReadPos,
 						_headerBuf, _headerBufWritePos, receivedBytesLength);
 				_headerBufWritePos += receivedBytesLength;
 				return;
-			} else {
+			} else {*/
 			// If I got the size, allocate the buffer
 				System.arraycopy(receivedBytes, receivedBytesReadPos,
 						_headerBuf, _headerBufWritePos, headerBytesNeeded);
@@ -197,7 +200,7 @@ public class WiProProtocol extends AbstractProtocol {
 				_currentHeader  = ProtocolFrameHeader.parseWiProHeader(_headerBuf);
 				_dataBuf = new byte[_currentHeader.getDataSize()];
 				_dataBufWritePos = 0;
-			}
+			//}
 		}
 
 		int bytesLeft = receivedBytesLength - receivedBytesReadPos;
