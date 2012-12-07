@@ -288,6 +288,8 @@ namespace NsAppManager
                     appUnregistered->set_appId(app->getAppID());
                     appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
                     HMIHandler::getInstance().sendNotification(appUnregistered);
+
+                    LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_SUBSCRIBEBUTTON_REQUEST:
@@ -922,6 +924,7 @@ namespace NsAppManager
                     appUnregistered->set_appId(app->getAppID());
                     appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason((NsAppLinkRPC::AppInterfaceUnregisteredReason::AppInterfaceUnregisteredReasonInternal)NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
                     HMIHandler::getInstance().sendNotification(appUnregistered);
+                    LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::SetMediaClockTimerID:
