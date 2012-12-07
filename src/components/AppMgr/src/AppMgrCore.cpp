@@ -1694,8 +1694,10 @@ namespace NsAppManager
                 NsRPC2Communication::UI::OnDeviceChosen* chosen = (NsRPC2Communication::UI::OnDeviceChosen*)msg;
                 const std::string& deviceName = chosen->get_deviceName();
                 const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByName(deviceName);
-                const NsConnectionHandler::tDeviceHandle& handle = device->getDeviceHandle();
-                ConnectionHandler::getInstance().connectToDevice(handle);
+                if (device) {
+                    const NsConnectionHandler::tDeviceHandle& handle = device->getDeviceHandle();
+                    ConnectionHandler::getInstance().connectToDevice(handle);
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
