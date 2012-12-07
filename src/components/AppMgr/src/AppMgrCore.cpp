@@ -2025,9 +2025,16 @@ namespace NsAppManager
                 for(AppMgrRegistry::ItemsMap::const_iterator it = registeredApps.begin(); it != registeredApps.end(); it++)
                 {
                     NsAppLinkRPC::HMIApplication hmiApp;
-                    hmiApp.set_appName(core->getApplicationFromItemCheckNotNull(it->second)->getName());
-                    hmiApp.set_ngnMediaScreenAppName(core->getApplicationFromItemCheckNotNull(it->second)->getNgnMediaScreenAppName());
-                    hmiApp.set_appId(core->getApplicationFromItemCheckNotNull(it->second)->getAppID());
+                    Application* app = core->getApplicationFromItemCheckNotNull(it->second);
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " null-application found!");
+                        continue;
+                    }
+                    hmiApp.set_appName(app->getName());
+                    hmiApp.set_ngnMediaScreenAppName(app->getNgnMediaScreenAppName());
+                    hmiApp.set_appId(app->getAppID());
+                    hmiApp.set_isMediaApplication(app->getIsMediaApplication());
                     hmiApps.push_back(hmiApp);
                 }
                 if(!hmiApps.empty())
