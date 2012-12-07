@@ -2030,6 +2030,8 @@ namespace NsAppManager
                         LOG4CPLUS_ERROR_EXT(mLogger, " null-application found!");
                         continue;
                     }
+
+                    LOG4CPLUS_INFO_EXT(mLogger, "Adding an application " << app->getName() << " connection/session key " << app->getAppID() << " is media? " << app->getIsMediaApplication() );
                     hmiApp.set_appName(app->getName());
                     hmiApp.set_ngnMediaScreenAppName(app->getNgnMediaScreenAppName());
                     hmiApp.set_appId(app->getAppID());
