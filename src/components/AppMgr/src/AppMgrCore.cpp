@@ -1895,7 +1895,12 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, "No application is currently active");
                 }
 
-                AppMgrRegistry::getInstance().activateApp(app);
+                if(!AppMgrRegistry::getInstance().activateApp(app))
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "Application " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID() << " hasn't been activated!");
+                    return;
+                }
+
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionID = app->getConnectionID();
 
