@@ -1951,6 +1951,7 @@ namespace NsAppManager
                     const Command& key = *it;
                     const CommandParams& params = key.second;
                     const NsAppLinkRPC::MenuParams* menuParams = params.menuParams;
+                    const std::vector<std::string>* vrCommands = params.vrCommands;
                     const CommandBase& base = key.first;
                     const CommandType& type = std::get<1>(base);
                     unsigned int cmdId = std::get<0>(base);
@@ -1960,11 +1961,13 @@ namespace NsAppManager
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, "Adding UI command");
                         addCmd = new NsRPC2Communication::UI::AddCommand();
+                        ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_menuParams(*menuParams);
                     }
                     else if(type == CommandType::VR)
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, "Adding VR command");
                         addCmd = new NsRPC2Communication::VR::AddCommand();
+                        ((NsRPC2Communication::VR::AddCommand*)addCmd)->set_vrCommands(*vrCommands);
                     }
                     else
                     {
@@ -1973,7 +1976,6 @@ namespace NsAppManager
                     }
                     addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
-                    ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_menuParams(*menuParams);
                     ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_appId(app->getAppID());
                     core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
 
