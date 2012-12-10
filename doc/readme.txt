@@ -35,6 +35,9 @@
   Application starts to search devices and starts HMI in cromium-browser.
   In case HMI has not been started please start web-based HMI manually in browser opening src/components/HMI/index.html.
   AppLinkCore is searching Bluetooth devices with a correspondibg service.
+  Go to info menu in HMI and press App button.
+  Press change Devices button.
   Select the device from a list.
-  Application opens port and starts communication.
+  Application opens all available ports on devices and starts communication.
+  Returning to the App menu all applications will be shown in a list.
 
