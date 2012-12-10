@@ -66,36 +66,40 @@ namespace NsAppManager
             if(!item)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, " Null-item found!");
-                break;
+                continue;
             }
             Application* app = item->getApplication();
             if(!app)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application for the item!");
-                break;
+                continue;
             }
             switch(app->getProtocolVersion())
             {
                 case 1:
                 {
+                    LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID() << " has HMI_LEVEL " << ((Application_v1*)app)->getApplicationHMIStatusLevel());
                     if(NsAppLinkRPC::HMILevel::HMI_FULL == ((Application_v1*)app)->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID() << " is HMI_FULL");
                         return app;
                     }
+                    break;
                 }
                 case 2:
                 {
+                    LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID() << " has HMI_LEVEL " << ((Application_v2*)app)->getApplicationHMIStatusLevel());
                     if(NsAppLinkRPCV2::HMILevel::HMI_FULL == ((Application_v2*)app)->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID() << " is HMI_FULL");
                         return app;
                     }
+                    break;
                 }
                 default:
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, " Unsupported version number " << app->getProtocolVersion());
-                    return 0;
+                    LOG4CPLUS_ERROR_EXT(mLogger, " Unsupported version number " << app->getProtocolVersion() << " for application " << app->getName());
+                    break;
                 }
             }
         }
@@ -194,6 +198,17 @@ namespace NsAppManager
      */
     bool AppMgrRegistry::activateApp(Application *app)
     {
+        if(!app)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " Cannot activate null-application!");
+            return false;
+        }
+        LOG4CPLUS_INFO_EXT(mLogger, "Activating an app " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID());
+        if(mRegistryItems.empty())
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " Cannot activate an application: no applications registered!");
+            return false;
+        }
         for(ItemsMap::iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
         {
             RegistryItem* item_ = it->second;
@@ -230,30 +245,19 @@ namespace NsAppManager
                 }
             }
         }
-        if(!app)
-        {
-            LOG4CPLUS_ERROR_EXT(mLogger, " No application for the specified item!");
-            return false;
-        }
 
         switch(app->getProtocolVersion())
         {
             case 1:
             {
-                if(NsAppLinkRPC::HMILevel::HMI_FULL == ((Application_v1*)app)->getApplicationHMIStatusLevel())
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, " Activating application " << app->getName());
-                    ((Application_v1*)app)->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
-                }
+                LOG4CPLUS_INFO_EXT(mLogger, " Activating application " << app->getName());
+                ((Application_v1*)app)->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
                 return true;
             }
             case 2:
             {
-                if(NsAppLinkRPCV2::HMILevel::HMI_FULL == ((Application_v2*)app)->getApplicationHMIStatusLevel())
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, " Activating application " << app->getName());
-                    ((Application_v2*)app)->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
-                }
+                LOG4CPLUS_INFO_EXT(mLogger, " Activating application " << app->getName());
+                ((Application_v2*)app)->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
                 return true;
             }
         }
