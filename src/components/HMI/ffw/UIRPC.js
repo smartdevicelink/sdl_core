@@ -454,7 +454,7 @@ FFW.UI = FFW.RPCObserver.create({
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
 			"method":	"UI.OnDriverDistraction",
-			"params":	{"state":	driverDistractionState}
+			"params":	{"state":	driverDistractionState, "appId" : 0}
 		};
 		this.client.send(JSONMessage);
 	},
