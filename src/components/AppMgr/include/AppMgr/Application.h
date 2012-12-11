@@ -15,6 +15,7 @@
 #include <vector>
 #include <tuple>
 #include <map>
+#include <list>
 #include <cstddef>
 
 namespace log4cplus
@@ -28,6 +29,11 @@ namespace NsAppManager
      * \brief An application unique id - combination of connection id and session id
      */
     typedef std::tuple<int, unsigned char> ApplicationUniqueID;
+
+    /**
+     * \brief An application session keys
+     */
+    typedef std::list<int> SessionKeys;
 
     /**
      * \brief class Application acts as a metaphor for every mobile application being registered on HMI
@@ -263,6 +269,18 @@ namespace NsAppManager
          */
         unsigned int decrementUnrespondedRequestCount(const unsigned int& cmdId);
 
+        /**
+         * \brief add session key to a list of session keys
+         * \param sessionKey session key
+         */
+        void addSessionKey(const int& sessionKey);
+
+        /**
+         * \brief remove session key from a list of session keys
+         * \param sessionKey session key
+         */
+        void removeSessionKey(const int& sessionKey);
+
     protected:
         static log4cplus::Logger mLogger;
 
@@ -276,6 +294,7 @@ namespace NsAppManager
         const unsigned int mConnectionID;
         const unsigned int mProtocolVersion;
         const int mAppID;
+        SessionKeys mSessionKeys;
         std::string mNgnMediaScreenAppName;
         std::vector<std::string> mVrSynonyms;
         bool m_bIsMediaApplication;
