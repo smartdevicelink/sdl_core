@@ -388,7 +388,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
         //MFT.ApplinkSliderView.activate();
         setTimeout(function(){
             if(MFT.States.media.applink.applinkslider.active){
-                MFT.States.goToState('media.applink');
+                MFT.States.back();
             }
         },
         params.timeout);
