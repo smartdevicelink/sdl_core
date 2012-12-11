@@ -38,7 +38,9 @@ namespace test { namespace components { namespace TransportManager { namespace T
         static const tConnectionHandle ConnectionHandle = 666;
 
         static const int NumberOfClients = 100;
-        static const int NumberOfIterations = 10;
+        static const int NumberOfIterations = 6;
+
+        static const int TotalNumberOfCalls = NumberOfClients * NumberOfIterations;
     }
 
     // ---------------- TEST CLASSES ---------------- //
@@ -126,12 +128,12 @@ namespace test { namespace components { namespace TransportManager { namespace T
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
                 0xFF, 0xFF, 0xFF, 0xFF
             };
-            
+
             for (int i = 0; i < Data::NumberOfIterations; ++i)
             {
                 // Sending only header first
-                uint8_t *pSendBuff = raw_data;  
-                
+                uint8_t *pSendBuff = raw_data;
+
                 LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- Sending Frame #" << 3 * i + 1 << " -----------------");
                 mListener.onFrameReceived(this, Data::ConnectionHandle, pSendBuff, 12);
 
@@ -170,7 +172,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
         IHandleGenerator & mHandleGenerator;
         Logger mLogger;
     };
-    
+
     /**
      * @brief Custom transport manager client that will check data, sent by transport manager
      **/
@@ -184,9 +186,12 @@ namespace test { namespace components { namespace TransportManager { namespace T
         , mFrameSequenceNumber(0)
         , mLogger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TransportManagerTest")))
         , mCurrentIteration(0)
-        , mConnectionHandle(Data::ConnectionHandle)  // should be invalid handle but currently it is valid because of the late applicationConnected callback   
+        , mConnectionHandle(Data::ConnectionHandle)  // should be invalid handle but currently it is valid because of the late applicationConnected callback
         , mConnected(false)
+        , mNumberOfReceivedFrames(0)
+        , mNumberOfReceivedFramesMutex()
         {
+            pthread_mutex_init(&mNumberOfReceivedFramesMutex, 0);
         }
         MOCK_METHOD2(onApplicationConnected, void(const SDeviceInfo& ConnectedDevice, const tConnectionHandle Connection));
         MOCK_METHOD2(onApplicationDisconnected, void(const SDeviceInfo& DisconnectedDevice, const tConnectionHandle Connection));
@@ -205,12 +210,12 @@ namespace test { namespace components { namespace TransportManager { namespace T
                 mTransportManager.connectDevice(device->mDeviceHandle);
             }
         }
-        
+
         void doApplicationConnected(const SDeviceInfo& ConnectedDevice, const tConnectionHandle Connection)
         {
             LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- doApplicationConnected -----------------");
-            
-            mConnectionHandle = Connection;  
+
+            mConnectionHandle = Connection;
             mConnected = true;
         }
 
@@ -218,16 +223,28 @@ namespace test { namespace components { namespace TransportManager { namespace T
         {
             // Sending frame
             uint8_t data[512]={1};
-            mTransportManager.sendFrame(mConnectionHandle, data, 512, ++mFrameSequenceNumber);            
+            mTransportManager.sendFrame(mConnectionHandle, data, 512, ++mFrameSequenceNumber);
         }
-        
+
         void doFrameReceived(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize)
         {
             LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- doFrameReceived -----------------");
 
+            bool finished = false;
+
+            pthread_mutex_lock(&mNumberOfReceivedFramesMutex);
+            mNumberOfReceivedFrames++;
+            finished = mNumberOfReceivedFrames >= Data::TotalNumberOfCalls;
+            pthread_mutex_unlock(&mNumberOfReceivedFramesMutex);
+
+            if (finished)
+            {
+                checkIfFinished();
+            }
+
             if (mCurrentIteration == 0)
             {   // start sending frame on first iteration
-                mCurrentIteration++; 
+                mCurrentIteration++;
                 sendTestFrame();
             }
         }
@@ -235,59 +252,66 @@ namespace test { namespace components { namespace TransportManager { namespace T
         void doFrameSendCompleted(tConnectionHandle ConnectionHandle, int UserData, ESendStatus SendStatus)
         {
             LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- doFrameSendCompleted, UserData: " << UserData << " -----------------");
-            
+
             if (mCurrentIteration < Data::NumberOfIterations)
             {
-                sendTestFrame();   
+                sendTestFrame();
             }
-            else if (mCurrentIteration == Data::NumberOfIterations * Data::NumberOfClients)     // received all events
+            else if (mCurrentIteration == Data::TotalNumberOfCalls)     // received all events
             {
-                mCurrentIteration++;
-                
-                pthread_mutex_lock(&mFinishedMutex);
-                mNumberOfClientsFinished++;
-                pthread_mutex_unlock(&mFinishedMutex);
-                
-                LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- a client has finished -----------------");
+                checkIfFinished();
             }
-            
+
             mCurrentIteration++;
         }
-        
+
         void doApplicationDisconnected(const SDeviceInfo& DisconnectedDevice, const tConnectionHandle Connection)
         {
             LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- Application disconnected -----------------");
-            
+
             mConnected = false;
         }
-        
+
         bool isConnected(void)
         {
             return mConnected;
         }
-        
+
+        void checkIfFinished(void)
+        {
+            if ( mCurrentIteration >= Data::TotalNumberOfCalls &&
+                 mNumberOfReceivedFrames >= Data::TotalNumberOfCalls )
+            {
+                pthread_mutex_lock(&mFinishedMutex);
+                mNumberOfClientsFinished++;
+                pthread_mutex_unlock(&mFinishedMutex);
+
+                LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- a client has finished -----------------");
+            }
+        }
+
         static bool isAllClientsFinished(void)
         {
             bool finished = false;
-            
+
             pthread_mutex_lock(&mFinishedMutex);
             finished = mNumberOfClientsFinished >= Data::NumberOfClients;
             pthread_mutex_unlock(&mFinishedMutex);
-            
+
             return finished;
         }
-        
-        
+
+
         void disconnectAllDevices(void)
         {
             LOG4CPLUS_INFO_EXT(mLogger, "\n-------------- Disconnecting devices -----------------");
-            
+
             tDeviceList::const_iterator device;
-            
+
             for(device = mDeviceList.begin(); device != mDeviceList.end(); ++device)
             {
                 mTransportManager.disconnectDevice(device->mDeviceHandle);
-            }           
+            }
         }
 
     protected:
@@ -300,11 +324,14 @@ namespace test { namespace components { namespace TransportManager { namespace T
         static int mNumberOfClientsFinished;
         static pthread_mutex_t mFinishedMutex;
         bool mConnected;
+
+        int mNumberOfReceivedFrames;
+        pthread_mutex_t mNumberOfReceivedFramesMutex;
     };
-    
+
     int MockTransportManagerClient::mNumberOfClientsFinished = 0;
     pthread_mutex_t MockTransportManagerClient::mFinishedMutex = PTHREAD_MUTEX_INITIALIZER;
-    
+
 
     /**
      * @brief Inherited transport manager class used for some small preparation of class for
@@ -341,12 +368,12 @@ namespace test { namespace components { namespace TransportManager { namespace T
             ;
 
             EXPECT_CALL(*mpDeviceAdapter, sendFrame(Data::ConnectionHandle, _, 512, _))
-                .Times(Data::NumberOfClients * Data::NumberOfIterations)
+                .Times(Data::TotalNumberOfCalls)
                 .WillRepeatedly(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doSendFrame))
             ;
 
             EXPECT_CALL(*mpDeviceAdapter, disconnectDevice(Data::DeviceHandle))
-                .Times(1)                                        
+                .Times(1)
                 .WillOnce(Invoke(mpDeviceAdapter, &MockDeviceAdapter::doDisconnectDevice))
             ;
 
@@ -358,7 +385,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
         MockDeviceAdapter *mpDeviceAdapter;
         Logger mLogger;
     };
-    
+
     // ------------------------------------------------------------------------
 
     static void* startClientThread(void *pData)
@@ -392,36 +419,36 @@ namespace test { namespace components { namespace TransportManager { namespace T
         ;
 
         EXPECT_CALL(tmClient, onFrameReceived(Data::ConnectionHandle, _, 212))
-            .Times(Data::NumberOfClients * Data::NumberOfIterations)
+            .Times(Data::TotalNumberOfCalls)
             .WillRepeatedly(Invoke(&tmClient, &MockTransportManagerClient::doFrameReceived))
         ;
 
         EXPECT_CALL(tmClient, onFrameSendCompleted(Data::ConnectionHandle, _, SendStatusOK))
-            .Times(Data::NumberOfClients * Data::NumberOfIterations)
+            .Times(Data::TotalNumberOfCalls)
             .WillRepeatedly(Invoke(&tmClient, &MockTransportManagerClient::doFrameSendCompleted))
         ;
 
         EXPECT_CALL(tmClient, onApplicationDisconnected(deviceInfo, Data::ConnectionHandle))
-            .Times(1)                                         
+            .Times(1)
             .WillOnce(Invoke(&tmClient, &MockTransportManagerClient::doApplicationDisconnected));
         ;
 
         pTm->addDataListener(&tmClient);
-        pTm->addDeviceListener(&tmClient); 
-             
+        pTm->addDeviceListener(&tmClient);
+
         while (!MockTransportManagerClient::isAllClientsFinished())
         {
             sleep(1);
-        }        
-        
+        }
+
         while (tmClient.isConnected())  // wait for a client to receive onApplicationDisconnected
         {
             sleep(1);
         }
-        
+
         pTm->removeDataListener(&tmClient);
         pTm->removeDeviceListener(&tmClient);
-        
+
         return NULL;
     }
 
@@ -439,36 +466,36 @@ namespace test { namespace components { namespace TransportManager { namespace T
         TestTransportManager *pTm = new TestTransportManager();
 
         LOG4CPLUS_INFO_EXT(logger, "\n--------------------- Calling RUN ----------------");
-        pTm->run();       
-        
+        pTm->run();
+
         std::vector<pthread_t> threads;
-        
+
         for (int i = 0; i < Data::NumberOfClients; ++i)
         {
             pthread_t thread;
             pthread_create(&thread, NULL, &startClientThread, pTm);
-            
+
             threads.push_back(thread);
         }
 
         sleep(1);
-        
+
         LOG4CPLUS_INFO_EXT(logger, "\n--------------------- Calling SCAN FOR DEVICES ----------------");
         pTm->scanForNewDevices();
-        
+
         while (!MockTransportManagerClient::isAllClientsFinished())
         {
             sleep(1);
         }
-        
+
         LOG4CPLUS_INFO_EXT(logger, "\n--------------------- All clients have finished ----------------");
-        
+
         pTm->disconnectDevice(Data::DeviceHandle);
-        
+
         for (int i = 0; i < Data::NumberOfClients; ++i)
         {
             pthread_join(threads[i], NULL);
-        }       
+        }
 
         LOG4CPLUS_INFO_EXT(logger, "*************************** Deleting TM and shutting down *****************************");
 
