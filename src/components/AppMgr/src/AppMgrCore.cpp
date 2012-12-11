@@ -1995,6 +1995,14 @@ namespace NsAppManager
                         Application_v1* appv1 = (Application_v1*)app;
                         NsAppLinkRPC::OnHMIStatus * hmiStatus = new NsAppLinkRPC::OnHMIStatus;
                         hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
+                        if ( appv1->getIsMediaApplication() )
+                        {
+                            appv1->setApplicationAudioStreamingState(NsAppLinkRPC::AudioStreamingState::AUDIBLE);
+                        }
+                        else
+                        {
+                            appv1->setApplicationAudioStreamingState(NsAppLinkRPC::AudioStreamingState::NOT_AUDIBLE);
+                        }
                         hmiStatus->set_audioStreamingState(appv1->getApplicationAudioStreamingState());
                         hmiStatus->set_systemContext(appv1->getSystemContext());
                         MobileHandler::getInstance().sendRPCMessage( hmiStatus, connectionID, sessionID );
