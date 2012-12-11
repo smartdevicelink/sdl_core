@@ -252,12 +252,14 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " Activating application " << app->getName());
                 ((Application_v1*)app)->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
+                ((Application_v1*)app)->setSystemContext(NsAppLinkRPC::SystemContext::SYSCTXT_MAIN);
                 return true;
             }
             case 2:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " Activating application " << app->getName());
                 ((Application_v2*)app)->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
+                ((Application_v2*)app)->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);
                 return true;
             }
         }
