@@ -1650,6 +1650,14 @@ namespace NsAppManager
                     {
                         Application_v1* appv1 = (Application_v1*)app;
                         appv1->setSystemContext(object->get_systemContext());
+                        NsAppLinkRPC::OnHMIStatus* event = new NsAppLinkRPC::OnHMIStatus;
+                        event->set_systemContext(object->get_systemContext());
+                        event->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_BACKGROUND);
+                        event->set_audioStreamingState(appv1->getApplicationAudioStreamingState());
+                        unsigned char sessionID = app->getSessionID();
+                        unsigned int connectionId = app->getConnectionID();
+                        LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
+                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                         break;
                     }
                     case 2:
@@ -1659,17 +1667,17 @@ namespace NsAppManager
                         const NsAppLinkRPC::SystemContext& ctx = object->get_systemContext();
                         ctx2.set((NsAppLinkRPCV2::SystemContext::SystemContextInternal)ctx.get());
                         appv2->setSystemContext(ctx2);
+                        NsAppLinkRPCV2::OnHMIStatus* event = new NsAppLinkRPCV2::OnHMIStatus;
+                        event->set_systemContext(appv2->getSystemContext());
+                        event->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
+                        event->set_audioStreamingState(appv2->getApplicationAudioStreamingState());
+                        unsigned char sessionID = app->getSessionID();
+                        unsigned int connectionId = app->getConnectionID();
+                        LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
+                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                         break;
                     }
                 }
-
-                NsAppLinkRPC::OnHMIStatus* event = new NsAppLinkRPC::OnHMIStatus;
-                event->set_systemContext(object->get_systemContext());
-
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
-                LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
-                MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SLIDERRESPONSE:
@@ -2017,6 +2025,14 @@ namespace NsAppManager
                         Application_v2* appv2 = (Application_v2*)app;
                         NsAppLinkRPCV2::OnHMIStatus * hmiStatus = new NsAppLinkRPCV2::OnHMIStatus;
                         hmiStatus->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
+                        if ( appv2->getIsMediaApplication() )
+                        {
+                            appv2->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::AUDIBLE);
+                        }
+                        else
+                        {
+                            appv2->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
+                        }
                         hmiStatus->set_audioStreamingState(appv2->getApplicationAudioStreamingState());
                         hmiStatus->set_systemContext(appv2->getSystemContext());
                         MobileHandler::getInstance().sendRPCMessage( hmiStatus, connectionID, sessionID );
