@@ -45,18 +45,16 @@ public class WiProProtocol extends AbstractProtocol {
 	
 	public void setVersion(byte version) {
 		this._version = version;
-		if ( 2 == version )
-		{
+		if (version == 2) {
 			HEADER_SIZE = 12;
 			MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE;
 			_headerBuf = new byte[HEADER_SIZE];
-		}		
+		}
 	}
 
 	public void StartProtocolSession(SessionType sessionType) {
 		ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(sessionType, 0x00, _version);
 		sendFrameToTransport(header);
-		//sendFrameToTransport(header);
 	} // end-method
 
 	private void sendStartProtocolSessionACK(SessionType sessionType, byte sessionID) {
@@ -109,7 +107,6 @@ public class WiProProtocol extends AbstractProtocol {
 		if (messageLock == null) {
 			handleProtocolError("Error sending protocol message to SYNC.", 
 					new SyncException("Attempt to send protocol message prior to startSession ACK.", SyncExceptionCause.SYNC_UNAVAILALBE));
-		
 			return;
 		}
 		
@@ -261,7 +258,6 @@ public class WiProProtocol extends AbstractProtocol {
 		protected int totalSize = 0;
 		protected int framesRemaining = 0;
 
-		
 		protected void handleFirstDataFrame(ProtocolFrameHeader header, byte[] data) {
 			//The message is new, so let's figure out how big it is.
 			hasFirstFrame = true;
@@ -277,7 +273,6 @@ public class WiProProtocol extends AbstractProtocol {
 		protected void handleRemainingFrame(ProtocolFrameHeader header, byte[] data) {
 			accumulator.write(data, 0, header.getDataSize());
 			notifyIfFinished(header);
-			
 		}
 		
 		protected void notifyIfFinished(ProtocolFrameHeader header) {
@@ -285,7 +280,7 @@ public class WiProProtocol extends AbstractProtocol {
 				ProtocolMessage message = new ProtocolMessage();
 				message.setSessionType(header.getSessionType());
 				message.setSessionID(header.getSessionID());
-				//TODO: What if data has binary header?
+				//If it is WiPro 2.0 it must have binary header
 				if (_version == 2) {
 					BinaryFrameHeader binFrameHeader = new BinaryFrameHeader();
 					binFrameHeader.parseBinaryHeader(accumulator.toByteArray());
@@ -294,6 +289,7 @@ public class WiProProtocol extends AbstractProtocol {
 					message.setFunctionID(binFrameHeader.getFunctionID());
 					message.setCorrID(binFrameHeader.getCorrID());
 					message.setData(binFrameHeader.getJsonData());
+					if (binFrameHeader.getBulkData() !=null) message.setBulkData(binFrameHeader.getBulkData());
 				} else message.setData(accumulator.toByteArray());
 				
 				_assemblerForMessageID.remove(header.getMessageID());
@@ -373,10 +369,10 @@ public class WiProProtocol extends AbstractProtocol {
 			} // end-if
 			message.setSessionType(header.getSessionType());
 			message.setSessionID(header.getSessionID());
-			//TODO: What if data has binary header?
+			//If it is WiPro 2.0 it must have binary header
 			if (_version == 2) {
 				BinaryFrameHeader binFrameHeader = new BinaryFrameHeader();
-								
+				
 				byte RPC_Type = (byte) (data[0] >>> 4);
 				binFrameHeader.setRPCType(RPC_Type);
 				
@@ -400,6 +396,7 @@ public class WiProProtocol extends AbstractProtocol {
 					System.arraycopy(data, 12 + _jsonSize, _bulkData, 0, data.length - _jsonSize -12 );
 					binFrameHeader.setBulkData(_bulkData);
 				}	
+
 				message.setVersion(_version);
 				message.setRPCType(RPC_Type);
 				message.setFunctionID(_functionID);

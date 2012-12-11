@@ -3,26 +3,43 @@ package com.ford.syncV4.proxy.interfaces;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
+import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
+import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
+import com.ford.syncV4.proxy.rpc.GetDTCs;
+import com.ford.syncV4.proxy.rpc.GetVehicleData;
+import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
+import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
+import com.ford.syncV4.proxy.rpc.ListFilesResponse;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
 import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
+import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
+import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
+import com.ford.syncV4.proxy.rpc.ReadDID;
+import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
+import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
+import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
+import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
+import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
 import com.ford.syncV4.proxy.rpc.SetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimerResponse;
 import com.ford.syncV4.proxy.rpc.ShowResponse;
 import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
+import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 
 
 public interface IProxyListenerBase extends ISyncDriverDistractionListener,
@@ -227,6 +244,40 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * @param notification - Contains information about the changed permissions.
 	 */
 	public void onOnPermissionsChange(OnPermissionsChange notification);
+	
+	public void onSubscribeVehicleDataResponse(SubscribeVehicleData response);
+	
+	public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleData response);
+	
+	public void onGetVehicleDataResponse(GetVehicleData response);
+	
+	public void onReadDIDResponse(ReadDID response);
+	
+	public void onGetDTCsResponse(GetDTCs response);
+	
+	public void onOnVehicleData(OnVehicleData notification);
+	
+	public void onPerformAudioPassThruResponse(PerformAudioPassThruResponse response);
+	
+	public void onEndAudioPassThruResponse(EndAudioPassThruResponse response);
+	
+	public void onOnAudioPassThru(OnAudioPassThru notification);
 
+	public void onPutFileResponse(PutFileResponse response);
+	
+	public void onDeleteFileResponse(DeleteFileResponse response);
+	
+	public void onListFilesResponse(ListFilesResponse response);
+
+	public void onSetAppIconResponse(SetAppIconResponse response);
+	
+	public void onScrollableMessageResponse(ScrollableMessageResponse response);
+
+	public void onChangeRegistrationResponse(ChangeRegistrationResponse response);
+
+	public void onSetDisplayLayoutResponse(SetDisplayLayoutResponse response);
+	
+	public void onOnLanguageChange(OnLanguageChange notification);
+	
 	public void onSliderResponse(SliderResponse response);
 }

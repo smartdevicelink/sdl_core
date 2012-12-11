@@ -31,9 +31,11 @@ public class OnButtonEvent extends RPCNotification {
         }
         return null;
     }
-    public void setButtonName( ButtonName buttonName ) {
+    public void setButtonName(ButtonName buttonName) {
         if (buttonName != null) {
-            parameters.put(Names.buttonName, buttonName );
+            parameters.put(Names.buttonName, buttonName);
+        } else {
+        	parameters.remove(Names.buttonName);
         }
     }
     public ButtonEventMode getButtonEventMode() {
@@ -51,9 +53,21 @@ public class OnButtonEvent extends RPCNotification {
         }
         return null;
     }
-    public void setButtonEventMode( ButtonEventMode buttonEventMode ) {
+    public void setButtonEventMode(ButtonEventMode buttonEventMode) {
         if (buttonEventMode != null) {
-            parameters.put(Names.buttonEventMode, buttonEventMode );
-        }
+            parameters.put(Names.buttonEventMode, buttonEventMode);
+        } else {
+    		parameters.remove(Names.buttonEventMode);
+    	}
+    }
+    public void setCustomButtonID(Integer customButtonID) {
+    	if (customButtonID != null) {
+    		parameters.put(Names.customButtonID, customButtonID);
+    	} else {
+    		parameters.remove(Names.customButtonID);
+    	}
+    }
+    public Integer getCustomButtonID() {
+    	return (Integer) parameters.get(Names.customButtonID);
     }
 }

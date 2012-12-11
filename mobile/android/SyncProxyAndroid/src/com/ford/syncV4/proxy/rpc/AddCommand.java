@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.util.DebugTool;
 
 public class AddCommand extends RPCRequest {
 
@@ -15,26 +16,34 @@ public class AddCommand extends RPCRequest {
         super(hash);
     }
     public Integer getCmdID() {
-        return (Integer) parameters.get( Names.cmdID );
+        return (Integer) parameters.get(Names.cmdID);
     }
-    public void setCmdID( Integer cmdID ) {
+    public void setCmdID(Integer cmdID) {
         if (cmdID != null) {
-            parameters.put(Names.cmdID, cmdID );
+            parameters.put(Names.cmdID, cmdID);
+        } else {
+        	parameters.remove(Names.cmdID);
         }
     }
     public MenuParams getMenuParams() {
         Object obj = parameters.get(Names.menuParams);
         if (obj instanceof MenuParams) {
-        	return (MenuParams)obj;
+        	return (MenuParams) obj;
         }
         else if (obj instanceof Hashtable) {
-        	return new MenuParams((Hashtable)obj);
+        	try {
+        		return new MenuParams((Hashtable) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.menuParams, e);
+            }
         }
         return null;
     }
-    public void setMenuParams( MenuParams menuParams ) {
+    public void setMenuParams(MenuParams menuParams) {
         if (menuParams != null) {
-            parameters.put(Names.menuParams, menuParams );
+            parameters.put(Names.menuParams, menuParams);
+        } else {
+        	parameters.remove(Names.menuParams);
         }
     }
     public Vector<String> getVrCommands() {
@@ -52,6 +61,28 @@ public class AddCommand extends RPCRequest {
     public void setVrCommands( Vector<String> vrCommands ) {
         if (vrCommands != null) {
             parameters.put(Names.vrCommands, vrCommands );
+        } else {
+        	parameters.remove(Names.vrCommands);
+        }
+    }
+    public Image getCmdIcon() {
+    	Object obj = store.get(Names.cmdIcon);
+        if (obj instanceof Image) {
+            return (Image) obj;
+        } else if (obj instanceof Hashtable) {
+        	try {
+        		return new Image((Hashtable) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.cmdIcon, e);
+            }
+        }
+        return null;
+    }
+    public void setCmdIcon(Image cmdIcon) {
+        if (cmdIcon != null) {
+            store.put(Names.cmdIcon, cmdIcon);
+        } else {
+        	store.remove(Names.cmdIcon);
         }
     }
 }

@@ -56,4 +56,14 @@ public class OnButtonPress extends RPCNotification {
             parameters.put(Names.buttonPressMode, buttonPressMode );
         }
     }
+    public void setCustomButtonName(Integer customButtonID) {
+    	if (customButtonID != null) {
+    		parameters.put(Names.customButtonID, customButtonID);
+    	} else {
+    		parameters.remove(Names.customButtonID);
+    	}
+    }
+    public Integer getCustomButtonName() {
+    	return (Integer) parameters.get(Names.customButtonID);
+    }
 }

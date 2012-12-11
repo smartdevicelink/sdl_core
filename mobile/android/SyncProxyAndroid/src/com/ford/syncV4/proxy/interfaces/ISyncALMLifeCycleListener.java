@@ -1,8 +1,25 @@
 package com.ford.syncV4.proxy.interfaces;
 
+import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
+import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
+import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
+import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
+import com.ford.syncV4.proxy.rpc.GetDTCs;
+import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
+import com.ford.syncV4.proxy.rpc.OnVehicleData;
+import com.ford.syncV4.proxy.rpc.ReadDID;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.ListFilesResponse;
+import com.ford.syncV4.proxy.rpc.OnLanguageChange;
+import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
+import com.ford.syncV4.proxy.rpc.PutFileResponse;
+import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
+import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
+import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
 import com.ford.syncV4.proxy.rpc.SliderResponse;
 
 public interface ISyncALMLifeCycleListener {
@@ -55,6 +72,40 @@ public interface ISyncALMLifeCycleListener {
 	 */
 	public void onOnPermissionsChange(OnPermissionsChange notification);
 
+	public void onSubscribeVehicleDataResponse(SubscribeVehicleData response);
+
+	public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleData response);
+
+	public void onGetVehicleDataResponse(GetVehicleData response);
+
+	public void onReadDIDResponse(ReadDID response);
+
+	public void onGetDTCsResponse(GetDTCs response);
+
+	public void onOnVehicleData(OnVehicleData notification);
+
+	public void onPutFileResponse(PutFileResponse response);
+	
+	public void onPerformAudioPassThruResponse(PerformAudioPassThruResponse response);
+
+	public void onEndAudioPassThruResponse(EndAudioPassThruResponse response);
+
+	public void onOnAudioPassThru(OnAudioPassThru notification);
+	
+	public void onDeleteFileResponse(DeleteFileResponse response);
+
+	public void onListFilesResponse(ListFilesResponse response);
+	
+	public void onSetAppIconResponse(SetAppIconResponse response);
+
+	public void onScrollableMessageResponse(ScrollableMessageResponse response);
+	
+	public void onChangeRegistrationResponse(ChangeRegistrationResponse response);
+
+	public void onSetDisplayLayoutResponse(SetDisplayLayoutResponse response);
+
+	public void onOnLanguageChange(OnLanguageChange notification);
+	
 	public void onSliderResponse(SliderResponse response);
 	
 	/**

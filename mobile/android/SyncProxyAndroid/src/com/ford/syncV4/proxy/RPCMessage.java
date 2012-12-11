@@ -53,6 +53,7 @@ public class RPCMessage extends RPCStruct  {
 	public String getMessageType() {
 		return messageType;
 	}
+	
 	public void setParameters(String functionName, Object value) {
 		if (value != null) {
 			parameters.put(functionName, value);
@@ -63,5 +64,17 @@ public class RPCMessage extends RPCStruct  {
 	
 	public Object getParameters(String functionName) {
 		return parameters.get(functionName);
+	}
+
+	public byte[] getBulkData() {
+		return (byte[]) store.get(Names.bulkData);
+	}
+
+	public void setBulkData(byte[] bulkData) {
+		if (bulkData != null) {
+			store.put(Names.bulkData, bulkData);
+		} else {
+			store.remove(bulkData);
+		}
 	}
 }

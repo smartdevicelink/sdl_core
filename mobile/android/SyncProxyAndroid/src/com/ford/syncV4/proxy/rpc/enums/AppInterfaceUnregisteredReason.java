@@ -11,7 +11,8 @@ public enum AppInterfaceUnregisteredReason {
     DRIVER_DISTRACTION_VIOLATION,
     LANGUAGE_CHANGE,
     MASTER_RESET,
-    FACTORY_DEFAULTS;
+    FACTORY_DEFAULTS,
+    APP_UNAUTHORIZED;
 
     public static AppInterfaceUnregisteredReason valueForString(String value) {
         return valueOf(value);

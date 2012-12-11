@@ -1,11 +1,11 @@
 package com.ford.syncV4.proxy.rpc.enums;
 
-public enum FunctionType {
+public enum MessageType {
     request,
     response,
     notification;
 
-    public static FunctionType valueForString(String value) {
+    public static MessageType valueForString(String value) {
         return valueOf(value);
     }
 }

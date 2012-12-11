@@ -14,26 +14,27 @@ public class OnPermissionsChange extends RPCNotification {
 	public OnPermissionsChange(Hashtable hash) {
 		super(hash);
 	}
-
-	public Vector<PermissionGroupItem> getPermissionGroupItems() {
-		Vector<?> list = (Vector<?>)parameters.get(Names.PermissionGroupItems);
+	public Vector<PermissionItem> getPermissionItem() {
+		Vector<?> list = (Vector<?>)parameters.get(Names.permissionItem);
 		if (list != null && list.size()>0) {
 			Object obj = list.get(0);
-			if(obj instanceof PermissionGroupItem){
-				return (Vector<PermissionGroupItem>) list;
+			if(obj instanceof PermissionItem){
+				return (Vector<PermissionItem>) list;
 			} else if(obj instanceof Hashtable) {
-				Vector<PermissionGroupItem> newList = new Vector<PermissionGroupItem>();
+				Vector<PermissionItem> newList = new Vector<PermissionItem>();
 				for (Object hash:list) {
-					newList.add(new PermissionGroupItem((Hashtable)hash));
+					newList.add(new PermissionItem((Hashtable)hash));
 				}
 				return newList;
 			}
 		}
 		return null;
 	}
-	public void setPermissionGroupItems(Vector<PermissionGroupItem> permissionGroupItems) {
-		if (permissionGroupItems != null) {
-			parameters.put(Names.PermissionGroupItems, permissionGroupItems);
-		}
+	public void setPermissionItem(Vector<PermissionItem> permissionItem) {
+		if (permissionItem != null) {
+			parameters.put(Names.permissionItem, permissionItem);
+		} else {
+			parameters.remove(Names.permissionItem);
+        }
 	}
 }

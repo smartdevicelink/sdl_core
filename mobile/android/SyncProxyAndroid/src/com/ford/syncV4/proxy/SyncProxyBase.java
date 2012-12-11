@@ -12,7 +12,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -24,6 +23,7 @@ import java.util.Vector;
 import android.os.Handler;
 import android.os.Looper;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
@@ -50,11 +50,13 @@ import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.Alert;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
 import com.ford.syncV4.proxy.rpc.ButtonCapabilities;
+import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
 import com.ford.syncV4.proxy.rpc.Choice;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteCommand;
 import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
+import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
@@ -62,39 +64,64 @@ import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.DisplayCapabilities;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
+import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
+import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
+import com.ford.syncV4.proxy.rpc.GetDTCs;
+import com.ford.syncV4.proxy.rpc.GetVehicleData;
+import com.ford.syncV4.proxy.rpc.ListFilesResponse;
 import com.ford.syncV4.proxy.rpc.OnAppInterfaceUnregistered;
+import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
 import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnDriverDistraction;
 import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
+import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
+import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
+import com.ford.syncV4.proxy.rpc.ReadDID;
+import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
+import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
+import com.ford.syncV4.proxy.rpc.PerformInteraction;
+import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
+import com.ford.syncV4.proxy.rpc.PresetBankCapabilities;
+import com.ford.syncV4.proxy.rpc.PutFile;
+import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
+import com.ford.syncV4.proxy.rpc.ScrollableMessage;
+import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
+import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
+import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
 import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.SetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimer;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimerResponse;
 import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.ShowResponse;
+import com.ford.syncV4.proxy.rpc.SoftButtonCapabilities;
 import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
+import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.VehicleType;
+import com.ford.syncV4.proxy.rpc.enums.AppType;
 import com.ford.syncV4.proxy.rpc.enums.AudioStreamingState;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
@@ -165,9 +192,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	protected Boolean _advancedLifecycleManagementEnabled = false;
 	// Parameters passed to the constructor from the app to register an app interface
 	private String _applicationName = null;
+	private Vector<TTSChunk> _ttsName = null;
 	private String _ngnMediaScreenAppName = null;
 	private Boolean _isMediaApp = null;
 	private Language _syncLanguageDesired = null;
+	private Language _hmiDisplayLanguageDesired = null;
+	private Vector<AppType> _appType = null;
+	private String _appID = null;
 	private String _autoActivateIdDesired = null;
 	private SyncMsgVersion _syncMsgVersionRequest = null;
 	private Vector<String> _vrSynonyms = null;
@@ -188,11 +219,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	protected SyncMsgVersion _syncMsgVersion = null;
 	protected String _autoActivateIdReturned = null;
 	protected Language _syncLanguage = null;
+	protected Language _hmiDisplayLanguage = null;
 	protected DisplayCapabilities _displayCapabilities = null;
 	protected Vector<ButtonCapabilities> _buttonCapabilities = null;
+	protected Vector<SoftButtonCapabilities> _softButtonCapabilities = null;
+	protected PresetBankCapabilities _presetBankCapabilities = null;
 	protected Vector<HmiZoneCapabilities> _hmiZoneCapabilities = null;
 	protected Vector<SpeechCapabilities> _speechCapabilities = null;
 	protected Vector<VrCapabilities> _vrCapabilities = null;
+	protected VehicleType _vehicleType = null;
 	protected Boolean firstTimeFull = true;
 	
 	protected byte _wiproVersion = 1;
@@ -423,17 +458,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			} // end-if
 		}
 	}
-	
+
 	protected SyncProxyBase(proxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			boolean enableAdvancedLifecycleManagement, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
-			Language languageDesired, String autoActivateID, boolean callbackToUIThread) 
+			boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName, 
+			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppType> appType, String appID, 
+			String autoActivateID, boolean callbackToUIThread) 
 			throws SyncException {
 		
 		_interfaceBroker = new SyncInterfaceBroker();
 		
 		_callbackToUIThread = callbackToUIThread;
-				
+		
 		if (_callbackToUIThread) {
 			_mainUIHandler = new Handler(Looper.getMainLooper());
 		}
@@ -441,11 +477,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		// Set variables for Advanced Lifecycle Management
 		_advancedLifecycleManagementEnabled = enableAdvancedLifecycleManagement;
 		_applicationName = appName;
+		_ttsName = ttsName;
 		_ngnMediaScreenAppName = ngnMediaScreenAppName;
 		_isMediaApp = isMediaApp;
 		_syncMsgVersionRequest = syncMsgVersion;
 		_vrSynonyms = vrSynonyms; 
 		_syncLanguageDesired = languageDesired;
+		_hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
+		_appType = appType;
+		_appID = appID;
 		_autoActivateIdDesired = autoActivateID;
 		
 		// Test conditions to invalidate the proxy
@@ -592,19 +632,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		// Trace that ctor has fired
 		SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
 	}
-
+	
 	protected SyncProxyBase(proxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			boolean enableAdvancedLifecycleManagement, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
-			Language languageDesired, String autoActivateID, boolean callbackToUIThread, int version) 
+			boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName, 
+			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppType> appType, String appID, 
+			String autoActivateID, boolean callbackToUIThread, int version) 
 			throws SyncException {
 		
 		_interfaceBroker = new SyncInterfaceBroker();
 		
 		_callbackToUIThread = callbackToUIThread;
-		
-		Byte b = Byte.valueOf(version + "");
-		_wiproVersion = b;
 		
 		if (_callbackToUIThread) {
 			_mainUIHandler = new Handler(Looper.getMainLooper());
@@ -613,11 +651,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		// Set variables for Advanced Lifecycle Management
 		_advancedLifecycleManagementEnabled = enableAdvancedLifecycleManagement;
 		_applicationName = appName;
+		_ttsName = ttsName;
 		_ngnMediaScreenAppName = ngnMediaScreenAppName;
 		_isMediaApp = isMediaApp;
 		_syncMsgVersionRequest = syncMsgVersion;
 		_vrSynonyms = vrSynonyms; 
 		_syncLanguageDesired = languageDesired;
+		_hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
+		_appType = appType;
+		_appID = appID;
 		_autoActivateIdDesired = autoActivateID;
 		
 		// Test conditions to invalidate the proxy
@@ -764,7 +806,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		// Trace that ctor has fired
 		SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
 	}
-
 	
 	public String sendEncodedSyncPDataToUrl(String urlString, String encodedSyncPData){
 		try{
@@ -1138,6 +1179,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 						} else if (message.getRPCType() == 0x02) {
 							hash.put(Names.notification, hashTemp);
 						}
+						if (message.getBulkData() != null) hash.put(Names.bulkData, message.getBulkData());
 					} else hash = mhash;
 					handleRPCMessage(hash);							
 				} catch (final Exception excp) {
@@ -1154,7 +1196,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		}
 	}
 	
-	public void setWiProVersion(byte version) {
+	private void setWiProVersion(byte version) {
 		this._wiproVersion = version;
 	}
 
@@ -1256,18 +1298,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	}
 	/************* END Functions used by the Message Dispatching Queues ****************/
 	
-
 	// Private sendPRCRequest method. All RPCRequests are funneled through this method after
 		// error checking. 
 	private void sendRPCRequestPrivate(RPCRequest request) throws SyncException {
 		SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
-		if (request instanceof RegisterAppInterface){
-			if (_wiproVersion == 2)
-			{
-				((RegisterAppInterface) request).setHmiDisplayLanguageDesired("EN-US");
-				((RegisterAppInterface) request).setAppId("1101");
-			}
-		}
+		
 		byte[] msgBytes = JsonRPCMarshaller.marshall(request, _wiproVersion);
 		
 		ProtocolMessage pm = new ProtocolMessage();
@@ -1278,7 +1313,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		FunctionID functionID = new FunctionID();
 		pm.setFunctionID(functionID.getFunctionID(request.getFunctionName()) - 4);
 		pm.setCorrID(request.getCorrelationID());
-		
+		if (request.getBulkData() != null) pm.setBulkData(request.getBulkData());
 		
 		// Queue this outgoing message
 		synchronized(OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
@@ -1321,14 +1356,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 						_appInterfaceRegisterd = true;
 					}
 					
-					_autoActivateIdReturned = msg.getAutoActivateID();
+					//_autoActivateIdReturned = msg.getAutoActivateID();
+					/*Place holder for legacy support*/ _autoActivateIdReturned = "8675309";
 					_buttonCapabilities = msg.getButtonCapabilities();
 					_displayCapabilities = msg.getDisplayCapabilities();
+					_softButtonCapabilities = msg.getSoftButtonCapabilities();
+					_presetBankCapabilities = msg.getPresetBankCapabilities();
 					_hmiZoneCapabilities = msg.getHmiZoneCapabilities();
 					_speechCapabilities = msg.getSpeechCapabilities();
 					_syncLanguage = msg.getLanguage();
+					_hmiDisplayLanguage = msg.getHmiDisplayLanguage();
 					_syncMsgVersion = msg.getSyncMsgVersion();
 					_vrCapabilities = msg.getVrCapabilities();
+					_vehicleType = msg.getVehicleType();
 					
 					// Send onSyncConnected message in ALM
 					_syncConnectionState = SyncConnectionState.SYNC_CONNECTED;
@@ -1365,15 +1405,20 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 				if (msg.getSuccess()) {
 					_appInterfaceRegisterd = true;
 				}
-				
-				_autoActivateIdReturned = msg.getAutoActivateID();
+
+				//_autoActivateIdReturned = msg.getAutoActivateID();
+				/*Place holder for legacy support*/ _autoActivateIdReturned = "8675309";
 				_buttonCapabilities = msg.getButtonCapabilities();
 				_displayCapabilities = msg.getDisplayCapabilities();
+				_softButtonCapabilities = msg.getSoftButtonCapabilities();
+				_presetBankCapabilities = msg.getPresetBankCapabilities();
 				_hmiZoneCapabilities = msg.getHmiZoneCapabilities();
 				_speechCapabilities = msg.getSpeechCapabilities();
 				_syncLanguage = msg.getLanguage();
+				_hmiDisplayLanguage = msg.getHmiDisplayLanguage();
 				_syncMsgVersion = msg.getSyncMsgVersion();
 				_vrCapabilities = msg.getVrCapabilities();
+				_vehicleType = msg.getVehicleType();
 				
 				// RegisterAppInterface
 				if (_advancedLifecycleManagementEnabled) {
@@ -1683,20 +1728,216 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					_proxyListener.onGenericResponse((GenericResponse)msg);	
 				}
 			} else if (functionName.equals(Names.Slider)) {
-				// Slider
-				final SliderResponse msg = new SliderResponse(hash);
-				if (_callbackToUIThread) {
-					// Run in UI thread
-					_mainUIHandler.post(new Runnable() {
-						@Override
-						public void run() {
-							_proxyListener.onSliderResponse((SliderResponse)msg);
-						}
-					});
-				} else {
-					_proxyListener.onSliderResponse((SliderResponse)msg);	
-				}
-			} else {
+                // Slider
+                final SliderResponse msg = new SliderResponse(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onSliderResponse((SliderResponse)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onSliderResponse((SliderResponse)msg);   
+                }
+            } else if (functionName.equals(Names.PutFile)) {
+                // PutFile
+                final PutFileResponse msg = new PutFileResponse(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onPutFileResponse((PutFileResponse)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onPutFileResponse((PutFileResponse)msg);
+                }
+            } else if (functionName.equals(Names.DeleteFile)) {
+                // DeleteFile
+                final DeleteFileResponse msg = new DeleteFileResponse(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onDeleteFileResponse((DeleteFileResponse)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onDeleteFileResponse((DeleteFileResponse)msg);   
+                }
+            } else if (functionName.equals(Names.ListFiles)) {
+                // ListFiles
+                final ListFilesResponse msg = new ListFilesResponse(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onListFilesResponse((ListFilesResponse)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onListFilesResponse((ListFilesResponse)msg);     
+                }
+            } else if (functionName.equals(Names.SetAppIcon)) {
+                // SetAppIcon
+                final SetAppIconResponse msg = new SetAppIconResponse(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onSetAppIconResponse((SetAppIconResponse)msg);
+                        }
+                    });
+                } else {
+                        _proxyListener.onSetAppIconResponse((SetAppIconResponse)msg);   
+                }
+            } else if (functionName.equals(Names.ScrollableMessage)) {
+                // ScrollableMessage
+                final ScrollableMessageResponse msg = new ScrollableMessageResponse(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onScrollableMessageResponse((ScrollableMessageResponse)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onScrollableMessageResponse((ScrollableMessageResponse)msg);     
+                }
+            } else if (functionName.equals(Names.ChangeLanguageRegistration)) {
+                // ChangeLanguageRegistration
+                final ChangeRegistrationResponse msg = new ChangeRegistrationResponse(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onChangeRegistrationResponse((ChangeRegistrationResponse)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onChangeRegistrationResponse((ChangeRegistrationResponse)msg);   
+                }
+            } else if (functionName.equals(Names.SetDisplayLayout)) {
+                // SetDisplayLayout
+                final SetDisplayLayoutResponse msg = new SetDisplayLayoutResponse(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onSetDisplayLayoutResponse((SetDisplayLayoutResponse)msg);
+                        }
+                    });
+                } else {
+                        _proxyListener.onSetDisplayLayoutResponse((SetDisplayLayoutResponse)msg);
+                }
+            } else if (functionName.equals(Names.PerformAudioPassThru)) {
+                // PerformAudioPassThru
+                final PerformAudioPassThruResponse msg = new PerformAudioPassThruResponse(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onPerformAudioPassThruResponse((PerformAudioPassThruResponse)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onPerformAudioPassThruResponse((PerformAudioPassThruResponse)msg);       
+                }
+            } else if (functionName.equals(Names.EndAudioPassThru)) {
+                // EndAudioPassThru
+                final EndAudioPassThruResponse msg = new EndAudioPassThruResponse(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onEndAudioPassThruResponse((EndAudioPassThruResponse)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onEndAudioPassThruResponse((EndAudioPassThruResponse)msg);
+                }
+            } else if (functionName.equals(Names.SubscribeVehicleData)) {
+                // SubscribeVehicleData
+                final SubscribeVehicleData msg = new SubscribeVehicleData(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onSubscribeVehicleDataResponse((SubscribeVehicleData)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onSubscribeVehicleDataResponse((SubscribeVehicleData)msg);       
+                }
+            } else if (functionName.equals(Names.UnsubscribeVehicleData)) {
+                // UnsubscribeVehicleData
+                final UnsubscribeVehicleData msg = new UnsubscribeVehicleData(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onUnsubscribeVehicleDataResponse((UnsubscribeVehicleData)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onUnsubscribeVehicleDataResponse((UnsubscribeVehicleData)msg);   
+                }
+            } else if (functionName.equals(Names.GetVehicleData)) {
+                // GetVehicleData
+                final GetVehicleData msg = new GetVehicleData(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onGetVehicleDataResponse((GetVehicleData)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onGetVehicleDataResponse((GetVehicleData)msg);   
+                }
+            } else if (functionName.equals(Names.ReadDID)) {
+                // ReadDID
+                final ReadDID msg = new ReadDID(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onReadDIDResponse((ReadDID)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onReadDIDResponse((ReadDID)msg); 
+                }
+            } else if (functionName.equals(Names.GetDTCs)) {
+                // GetDTCs
+                final GetDTCs msg = new GetDTCs(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onGetDTCsResponse((GetDTCs)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onGetDTCsResponse((GetDTCs)msg); 
+                }
+            } else {
 				if (_syncMsgVersion != null) {
 					DebugTool.logError("Unrecognized response Message: " + functionName.toString() + 
 							"SYNC Message Version = " + _syncMsgVersion);
@@ -1874,6 +2115,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 				} else {
 					_proxyListener.onOnButtonEvent((OnButtonEvent)msg);
 				}
+			} else if (functionName.equals(Names.OnLanguageChange)) {
+				// OnLanguageChange
+				
+				final OnLanguageChange msg = new OnLanguageChange(hash);
+				if (_callbackToUIThread) {
+					// Run in UI thread
+					_mainUIHandler.post(new Runnable() {
+						@Override
+						public void run() {
+							_proxyListener.onOnLanguageChange((OnLanguageChange)msg);
+						}
+					});
+				} else {
+					_proxyListener.onOnLanguageChange((OnLanguageChange)msg);
+				}
 			} else if (functionName.equals(Names.OnAppInterfaceUnregistered)) {
 				// OnAppInterfaceUnregistered
 				
@@ -1902,8 +2158,35 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					
 					notifyProxyClosed("OnAppInterfaceUnregistered", null);
 				}
-			}
-			else {
+			} else if (functionName.equals(Names.OnAudioPassThru)) {
+                // OnAudioPassThru
+                final OnAudioPassThru msg = new OnAudioPassThru(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onOnAudioPassThru((OnAudioPassThru)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onOnAudioPassThru((OnAudioPassThru)msg);
+                }
+			} else if (functionName.equals(Names.OnVehicleData)) {
+                // OnVehicleData
+                final OnVehicleData msg = new OnVehicleData(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onOnVehicleData((OnVehicleData)msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onOnVehicleData((OnVehicleData)msg);
+                }
+			} else {
 				if (_syncMsgVersion != null) {
 					DebugTool.logInfo("Unrecognized notification Message: " + functionName.toString() + 
 							" connected to SYNC using message version: " + _syncMsgVersion.getMajorVersion() + "." + _syncMsgVersion.getMinorVersion());
@@ -1998,10 +2281,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 				registerAppInterfacePrivate(
 						_syncMsgVersionRequest,
 						_applicationName,
+						_ttsName,
 						_ngnMediaScreenAppName,
 						_vrSynonyms,
 						_isMediaApp, 
 						_syncLanguageDesired,
+						_hmiDisplayLanguageDesired,
+						_appType,
+						_appID,
 						_autoActivateIdDesired,
 						REGISTER_APP_INTERFACE_CORRELATION_ID);
 				
@@ -2437,14 +2724,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	// Protected registerAppInterface used to ensure only non-ALM applications call
 	// reqisterAppInterface
 	protected void registerAppInterfacePrivate(
-			SyncMsgVersion syncMsgVersion, String appName, String ngnMediaScreenAppName,
-			Vector<String> vrSynonyms, Boolean isMediaApp, Language languageDesired, 
-			String autoActivateID, Integer correlationID) 
+			SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName,
+			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppType> appType,
+			String appID, String autoActivateID, Integer correlationID) 
 			throws SyncException {
 		
 		RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
-				syncMsgVersion, appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, 
-				languageDesired, autoActivateID, correlationID);
+				syncMsgVersion, appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, 
+				languageDesired, hmiDisplayLanguageDesired, appType, appID, correlationID);
 
 		sendRPCRequestPrivate(msg);
 	}

@@ -28,17 +28,9 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
         }
         return null;
     }
-    public void setSyncMsgVersion( SyncMsgVersion syncMsgVersion ) {
+    public void setSyncMsgVersion(SyncMsgVersion syncMsgVersion) {
         if (syncMsgVersion != null) {
-            parameters.put(Names.syncMsgVersion, syncMsgVersion );
-        }
-    }
-    public String getAutoActivateID() {
-        return (String) parameters.get( Names.autoActivateID );
-    }
-    public void setAutoActivateID( String autoActivateID ) {
-        if (autoActivateID != null) {
-            parameters.put(Names.autoActivateID, autoActivateID );
+            parameters.put(Names.syncMsgVersion, syncMsgVersion);
         }
     }
     public Language getLanguage() {
@@ -56,9 +48,31 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
         }
         return null;
     }
-    public void setLanguage( Language language ) {
+    public void setLanguage(Language language) {
         if (language != null) {
-            parameters.put(Names.language, language );
+            parameters.put(Names.language, language);
+        }
+    }
+    public Language getHmiDisplayLanguage() {
+        Object obj = parameters.get(Names.hmiDisplayLanguage);
+        if (obj instanceof Language) {
+            return (Language) obj;
+        } else if (obj instanceof String) {
+            Language theCode = null;
+            try {
+                theCode = Language.valueForString((String) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiDisplayLanguage, e);
+            }
+            return theCode;
+        }
+        return null;
+    }
+    public void setHmiDisplayLanguage(Language hmiDisplayLanguage) {
+        if (hmiDisplayLanguage != null) {
+            parameters.put(Names.hmiDisplayLanguage, hmiDisplayLanguage);
+        } else {
+        	parameters.remove(Names.hmiDisplayLanguage);
         }
     }
     public DisplayCapabilities getDisplayCapabilities() {
@@ -70,9 +84,9 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
         }
         return null;
     }
-    public void setDisplayCapabilities( DisplayCapabilities displayCapabilities ) {
+    public void setDisplayCapabilities(DisplayCapabilities displayCapabilities) {
         if (displayCapabilities != null) {
-            parameters.put(Names.displayCapabilities, displayCapabilities );
+            parameters.put(Names.displayCapabilities, displayCapabilities);
         }
     }
     public Vector<ButtonCapabilities> getButtonCapabilities() {
@@ -93,9 +107,46 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
         }
         return null;
     }
-    public void setButtonCapabilities( Vector<ButtonCapabilities> buttonCapabilities ) {
+    public void setButtonCapabilities(Vector<ButtonCapabilities> buttonCapabilities) {
         if (buttonCapabilities != null) {
-            parameters.put(Names.buttonCapabilities, buttonCapabilities );
+            parameters.put(Names.buttonCapabilities, buttonCapabilities);
+        }
+    }
+    public Vector<SoftButtonCapabilities> getSoftButtonCapabilities() {
+        if (parameters.get(Names.softButtonCapabilities) instanceof Vector<?>) {
+	    	Vector<?> list = (Vector<?>)parameters.get(Names.softButtonCapabilities);
+	        if (list != null && list.size() > 0) {
+	            Object obj = list.get(0);
+	            if (obj instanceof SoftButtonCapabilities) {
+	                return (Vector<SoftButtonCapabilities>) list;
+	            } else if (obj instanceof Hashtable) {
+	                Vector<SoftButtonCapabilities> newList = new Vector<SoftButtonCapabilities>();
+	                for (Object hashObj : list) {
+	                    newList.add(new SoftButtonCapabilities((Hashtable)hashObj));
+	                }
+	                return newList;
+	            }
+	        }
+        }
+        return null;
+    }
+    public void setSoftButtonCapabilities(Vector<SoftButtonCapabilities> softButtonCapabilities) {
+        if (softButtonCapabilities != null) {
+            parameters.put(Names.softButtonCapabilities, softButtonCapabilities);
+        }
+    }
+    public PresetBankCapabilities getPresetBankCapabilities() {
+        Object obj = parameters.get(Names.presetBankCapabilities);
+        if (obj instanceof PresetBankCapabilities) {
+        	return (PresetBankCapabilities)obj;
+        } else if (obj instanceof Hashtable) {
+        	return new PresetBankCapabilities((Hashtable)obj);
+        }
+        return null;
+    }
+    public void setPresetBankCapabilities(PresetBankCapabilities presetBankCapabilities) {
+        if (presetBankCapabilities != null) {
+            parameters.put(Names.presetBankCapabilities, presetBankCapabilities);
         }
     }
     public Vector<HmiZoneCapabilities> getHmiZoneCapabilities() {
@@ -125,9 +176,9 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
         }
         return null;
     }
-    public void setHmiZoneCapabilities( Vector<HmiZoneCapabilities> hmiZoneCapabilities ) {
+    public void setHmiZoneCapabilities(Vector<HmiZoneCapabilities> hmiZoneCapabilities) {
         if (hmiZoneCapabilities != null) {
-            parameters.put(Names.hmiZoneCapabilities, hmiZoneCapabilities );
+            parameters.put(Names.hmiZoneCapabilities, hmiZoneCapabilities);
         }
     }
     public Vector<SpeechCapabilities> getSpeechCapabilities() {
@@ -157,9 +208,9 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
         }
         return null;
     }
-    public void setSpeechCapabilities( Vector<SpeechCapabilities> speechCapabilities ) {
+    public void setSpeechCapabilities(Vector<SpeechCapabilities> speechCapabilities) {
         if (speechCapabilities != null) {
-            parameters.put(Names.speechCapabilities, speechCapabilities );
+            parameters.put(Names.speechCapabilities, speechCapabilities);
         }
     }
     public Vector<VrCapabilities> getVrCapabilities() {
@@ -189,9 +240,23 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
         }
         return null;
     }
-    public void setVrCapabilities( Vector<VrCapabilities> vrCapabilities ) {
+    public void setVrCapabilities(Vector<VrCapabilities> vrCapabilities) {
         if (vrCapabilities != null) {
-            parameters.put(Names.vrCapabilities, vrCapabilities );
+            parameters.put(Names.vrCapabilities, vrCapabilities);
+        }
+    }
+    public VehicleType getVehicleType() {
+        Object obj = parameters.get(Names.vehicleType);
+        if (obj instanceof VehicleType) {
+        	return (VehicleType)obj;
+        } else if (obj instanceof Hashtable) {
+        	return new VehicleType((Hashtable)obj);
+        }
+        return null;
+    }
+    public void setVehicleType(VehicleType vehicleType) {
+        if (vehicleType != null) {
+            parameters.put(Names.vehicleType, vehicleType);
         }
     }
 }

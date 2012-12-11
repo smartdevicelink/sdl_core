@@ -7,7 +7,10 @@ import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.ButtonCapabilities;
 import com.ford.syncV4.proxy.rpc.DisplayCapabilities;
+import com.ford.syncV4.proxy.rpc.PresetBankCapabilities;
+import com.ford.syncV4.proxy.rpc.SoftButtonCapabilities;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
+import com.ford.syncV4.proxy.rpc.VehicleType;
 import com.ford.syncV4.proxy.rpc.enums.HmiZoneCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
@@ -28,37 +31,24 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @param appName - Name of the application displayed on SYNC. 
 	 * @param isMediaApp - Indicates if the app is a media application.
 	 */
-	public SyncProxyALM(IProxyListenerALM listener, String appName, Boolean isMediaApp, int versionN) throws SyncException {
+	public SyncProxyALM(IProxyListenerALM listener, String appName, Boolean isMediaApp, 
+			Language languageDesired, Language hmiDisplayLanguageDesired, String appID) throws SyncException {
 		super(	listener, 
 				/*sync proxy configuration resources*/null, 
 				/*enable advanced lifecycle management*/true, 
 				appName,
+				/*TTS Name*/null,
 				/*ngn media app*/null,
 				/*vr synonyms*/null,
 				/*is media app*/isMediaApp,
 				/*syncMsgVersion*/null,
-				/*language desired*/null,
-				/*autoActivateID*/null,
-				/*callbackToUIThread*/ false,
-				/*protocolVersion*/versionN);
-		//Byte b = Byte.valueOf(versionN + "");
-		//setWiProVersion(b);
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM instance passing in: IProxyListener, appName, and isMediaApp.", SYNC_LIB_TRACE_KEY);
-	}
-	
-	
-	public SyncProxyALM(IProxyListenerALM listener, String appName, Boolean isMediaApp) throws SyncException {
-		super(	listener, 
-				/*sync proxy configuration resources*/null, 
-				/*enable advanced lifecycle management*/true, 
-				appName,
-				/*ngn media app*/null,
-				/*vr synonyms*/null,
-				/*is media app*/isMediaApp,
-				/*syncMsgVersion*/null,
-				/*language desired*/null,
+				/*language desired*/languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/null,
+				/*App ID*/appID,
 				/*autoActivateID*/null,
 				/*callbackToUIThread*/ false);
+		
 		SyncTrace.logProxyEvent("Application constructed SyncProxyALM instance passing in: IProxyListener, appName, and isMediaApp.", SYNC_LIB_TRACE_KEY);
 	}
 	
@@ -81,16 +71,21 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, String appName, String ngnMediaScreenAppName, 
 			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
-			Language languageDesired, String autoActivateID) throws SyncException {
+			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
+			String autoActivateID) throws SyncException {
 		super(	listener, 
 				/*sync proxy configuration resources*/null, 
 				/*enable advanced lifecycle management*/true, 
 				appName,
+				/*TTS Name*/null,
 				ngnMediaScreenAppName,
 				vrSynonyms,
 				isMediaApp,
 				syncMsgVersion,
 				languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/null,
+				/*App ID*/appID,
 				autoActivateID,
 				/*callbackToUIThread*/ false);
 		
@@ -119,16 +114,20 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
 			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, 
 			Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, 
-			String autoActivateID) throws SyncException {
+			Language hmiDisplayLanguageDesired, String appID, String autoActivateID) throws SyncException {
 		super(	listener, 
 				syncProxyConfigurationResources, 
 				/*enable advanced lifecycle management*/true, 
 				appName,
+				/*TTS Name*/null,
 				ngnMediaScreenAppName,
 				vrSynonyms,
 				isMediaApp,
 				syncMsgVersion,
 				languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/null,
+				/*App ID*/appID,
 				autoActivateID,
 				/*callbackToUIThread*/ false);
 		
@@ -156,16 +155,21 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, String appName, String ngnMediaScreenAppName, 
 			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
-			Language languageDesired, String autoActivateID, boolean callbackToUIThread) throws SyncException {
+			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
+			String autoActivateID, boolean callbackToUIThread) throws SyncException {
 		super(	listener, 
 				/*sync proxy configuration resources*/null,
 				/*enable advanced lifecycle management*/true, 
 				appName,
+				/*TTS Name*/null,
 				ngnMediaScreenAppName,
 				vrSynonyms,
 				isMediaApp,
 				syncMsgVersion,
 				languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/null,
+				/*App ID*/appID,
 				autoActivateID,
 				callbackToUIThread);
 		
@@ -195,23 +199,54 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
 			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
-			SyncMsgVersion syncMsgVersion, Language languageDesired, String autoActivateID, 
+			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
+			String appID, String autoActivateID, 
 			boolean callbackToUIThread) throws SyncException {
 		super(	listener, 
 				syncProxyConfigurationResources,
 				/*enable advanced lifecycle management*/true, 
 				appName,
+				/*TTS Name*/null,
 				ngnMediaScreenAppName,
 				vrSynonyms,
 				isMediaApp,
 				syncMsgVersion,
 				languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/null,
+				/*App ID*/appID,
 				autoActivateID,
 				callbackToUIThread);
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxyALM instance passing in: IProxyListener, syncProxyConfigurationResources, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
 				"and callbackToUIThread", SYNC_LIB_TRACE_KEY);
+	}
+	
+	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
+			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
+			String appID, String autoActivateID, boolean callbackToUIThread, int version) throws SyncException {
+		super(	listener, 
+				syncProxyConfigurationResources,
+				/*enable advanced lifecycle management*/true, 
+				appName,
+				/*TTS Name*/null,
+				ngnMediaScreenAppName,
+				vrSynonyms,
+				isMediaApp,
+				syncMsgVersion,
+				languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/null,
+				/*App ID*/appID,
+				autoActivateID,
+				callbackToUIThread,
+				version);
+		
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
+				"callbackToUIThread and version", SYNC_LIB_TRACE_KEY);
 	}
 	
 	// Allow applications using ALM to reset the proxy (dispose and reinstantiate)
@@ -225,25 +260,6 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	}
 	
 	/********* Getters for values returned by RegisterAppInterfaceResponse **********/
-	
-	/**
-	 * Gets autoActivateId set when application interface is registered.
-	 * 
-	 * @return autoActivateId 
-	 * @throws SyncException
-	 */
-	public String getAutoActivateId() throws SyncException {
-		// Test if proxy has been disposed
-		if (_proxyDisposed) {
-			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
-		}
-		
-		// Test SYNC availability 
-		if (!_appInterfaceRegisterd) {
-			throw new SyncException("SYNC is not connected. Unable to get the autoActivateId.", SyncExceptionCause.SYNC_UNAVAILALBE);
-		}
-		return _autoActivateIdReturned;
-	}
 	
 	/**
 	 * Gets buttonCapabilities set when application interface is registered.
@@ -262,6 +278,44 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 			throw new SyncException("SYNC is unavailable. Unable to get the buttonCapabilities.", SyncExceptionCause.SYNC_UNAVAILALBE);
 		}
 		return _buttonCapabilities;
+	}
+	
+	/**
+	 * Gets getSoftButtonCapabilities set when application interface is registered.
+	 * 
+	 * @return softButtonCapabilities 
+	 * @throws SyncException
+	 */
+	public Vector<SoftButtonCapabilities> getSoftButtonCapabilities() throws SyncException {
+		// Test if proxy has been disposed
+		if (_proxyDisposed) {
+			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
+		}
+		
+		// Test SYNC availability 
+		if (!_appInterfaceRegisterd) {
+			throw new SyncException("SYNC is not connected. Unable to get the softButtonCapabilities.", SyncExceptionCause.SYNC_UNAVAILALBE);
+		}
+		return _softButtonCapabilities;
+	}
+	
+	/**
+	 * Gets getPresetBankCapabilities set when application interface is registered.
+	 * 
+	 * @return presetBankCapabilities 
+	 * @throws SyncException
+	 */
+	public PresetBankCapabilities getPresetBankCapabilities() throws SyncException {
+		// Test if proxy has been disposed
+		if (_proxyDisposed) {
+			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
+		}
+		
+		// Test SYNC availability 
+		if (!_appInterfaceRegisterd) {
+			throw new SyncException("SYNC is not connected. Unable to get the presetBankCapabilities.", SyncExceptionCause.SYNC_UNAVAILALBE);
+		}
+		return _presetBankCapabilities;
 	}
 	
 	/**
@@ -342,6 +396,25 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	}
 	
 	/**
+	 * Gets getHmiDisplayLanguage set when application interface is registered.
+	 * 
+	 * @return hmiDisplayLanguage 
+	 * @throws SyncException
+	 */
+	public Language getHmiDisplayLanguage() throws SyncException {
+		// Test if proxy has been disposed
+		if (_proxyDisposed) {
+			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
+		}
+		
+		// Test SYNC availability 
+		if (!_appInterfaceRegisterd) {
+			throw new SyncException("SYNC is not connected. Unable to get the hmiDisplayLanguage.", SyncExceptionCause.SYNC_UNAVAILALBE);
+		}
+		return _hmiDisplayLanguage;
+	}
+	
+	/**
 	 * Gets syncMsgVersion set when application interface is registered.
 	 * 
 	 * @return syncMsgVersion
@@ -377,5 +450,24 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 			throw new SyncException("SYNC is unavailable. Unable to get the vrCapabilities.", SyncExceptionCause.SYNC_UNAVAILALBE);
 		}
 		return _vrCapabilities;
+	}
+	
+	/**
+	 * Gets getVehicleType set when application interface is registered.
+	 * 
+	 * @return vehicleType 
+	 * @throws SyncException
+	 */
+	public VehicleType getVehicleType() throws SyncException {
+		// Test if proxy has been disposed
+		if (_proxyDisposed) {
+			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
+		}
+		
+		// Test SYNC availability 
+		if (!_appInterfaceRegisterd) {
+			throw new SyncException("SYNC is not connected. Unable to get the vehicleType.", SyncExceptionCause.SYNC_UNAVAILALBE);
+		}
+		return _vehicleType;
 	}
 }

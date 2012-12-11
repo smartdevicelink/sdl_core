@@ -18,7 +18,6 @@ import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
-import com.ford.syncV4.proxy.rpc.PermissionGroupItem;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
@@ -76,8 +75,6 @@ public class TestRPC {
 			rpc = new SetGlobalProperties();
 		} else if (functionName.equalsIgnoreCase(Names.ResetGlobalProperties)) {
 			rpc = new ResetGlobalProperties();
-		} else if (functionName.equalsIgnoreCase(Names.PermissionGroupItems)) {
-			rpc = new PermissionGroupItem();
 		} else if (functionName.equalsIgnoreCase("ClearMediaClockTimer")) {
 			rpc = new Show();
 			((Show) rpc).setMainField1(null);

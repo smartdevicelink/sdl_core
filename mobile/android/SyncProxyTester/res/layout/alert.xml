@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:minWidth="300px" android:layout_width="fill_parent"
-	android:orientation="vertical" android:id="@+id/itemRoot"
-	android:paddingLeft="20dip" android:paddingRight="20dip"
-	android:layout_marginLeft="10dip" android:layout_marginRight="10dip">
+    android:id="@+id/itemRoot"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dip"
+    android:layout_marginRight="10dip"
+    android:minWidth="300px"
+    android:orientation="vertical"
+    android:paddingLeft="20dip"
+    android:paddingRight="20dip" >
+
 	<TextView android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:textStyle="bold"
 		android:text="To Speak">
@@ -28,6 +34,14 @@
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:visibility="visible" android:freezesText="true">
 	</EditText>
+	<TextView android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_weight="1"
+		android:textStyle="bold" android:text="Line 3">
+	</TextView>
+	<EditText android:text="Alert Line 3" android:id="@+id/txtAlertField3"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:visibility="visible" android:freezesText="true">
+	</EditText>
 	<LinearLayout android:orientation="horizontal"
 		android:layout_width="fill_parent" android:layout_height="wrap_content" android:gravity="bottom">
 		<LinearLayout android:orientation="vertical"
@@ -45,5 +59,10 @@
 			android:layout_height="wrap_content" android:id="@+id/chkPlayTone"
 		    android:text="Play Tone?" android:checked="true">
 		</CheckBox>
+
 	</LinearLayout>
+		<CheckBox android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:id="@+id/chkIncludeSBs"
+		    android:text="Include SoftButtons?" android:checked="false">
+		</CheckBox>
 </LinearLayout>

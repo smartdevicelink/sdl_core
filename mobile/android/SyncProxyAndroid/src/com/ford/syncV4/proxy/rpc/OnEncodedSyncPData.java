@@ -14,7 +14,6 @@ public class OnEncodedSyncPData extends RPCNotification {
     public OnEncodedSyncPData(Hashtable hash) {
         super(hash);
     }
-    
     public Vector<String> getData() {
     	if (parameters.get(Names.data) instanceof Vector<?>) {
     		Vector<?> list = (Vector<?>)parameters.get(Names.data);
@@ -27,23 +26,31 @@ public class OnEncodedSyncPData extends RPCNotification {
     	}
         return null;
     }
-    
-    public void setData( Vector<String> data ) {
+    public void setData(Vector<String> data) {
         if (data != null) {
-            parameters.put(Names.data, data );
+            parameters.put(Names.data, data);
+        } else {
+			parameters.remove(Names.data);
         }
     }
-    
     public String getUrl(){
-    	if (parameters.get(Names.URL) instanceof String) {
-    		return (String)parameters.get(Names.URL);
-    	}
-    	return null;
+        return (String) parameters.get(Names.URL);
     }
-    
-    public void setUrl( String url ) {
+    public void setUrl(String url) {
     	if (url != null) {
     		parameters.put(Names.URL, url);
-    	}
+    	} else {
+			parameters.remove(Names.URL);
+        }
+    }
+    public Integer getTimeout() {
+        return (Integer) parameters.get(Names.timeout);
+    }
+    public void setTimeout(Integer timeout) {
+        if (timeout != null) {
+            parameters.put(Names.timeout, timeout);
+        } else {
+        	parameters.remove(Names.timeout);
+        }
     }
 }

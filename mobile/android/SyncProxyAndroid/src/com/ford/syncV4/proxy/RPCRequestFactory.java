@@ -251,20 +251,21 @@ public class RPCRequestFactory {
 	}
 	
 	public static RegisterAppInterface buildRegisterAppInterface(String appName) {
-		return buildRegisterAppInterface(appName, false, "");
+		return buildRegisterAppInterface(appName, false);
 	}
 	
 	public static RegisterAppInterface buildRegisterAppInterface(
-			String appName, Boolean isMediaApp, String autoActivateID) {
+			String appName, Boolean isMediaApp) {
 		
-		return buildRegisterAppInterface(null, appName, null, null, isMediaApp, 
-				null, autoActivateID, null); 
+		return buildRegisterAppInterface(null, appName, null, null, null, isMediaApp, 
+				null, null, null, null, null); 
 	}
 	
 	public static RegisterAppInterface buildRegisterAppInterface(
-			SyncMsgVersion syncMsgVersion, String appName, String ngnMediaScreenAppName,
-			Vector<String> vrSynonyms, Boolean isMediaApp, Language languageDesired, 
-			String autoActivateID, Integer correlationID) {
+			SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName, 
+			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppType> appType,
+			String appID, Integer correlationID) {
 		RegisterAppInterface msg = new RegisterAppInterface();
 		
 		if (correlationID == null) {
@@ -281,7 +282,7 @@ public class RPCRequestFactory {
 		
 		msg.setAppName(appName);
 		
-		msg.setAutoActivateID(autoActivateID);
+		msg.setTtsName(ttsName);
 		
 		if (ngnMediaScreenAppName == null) {
 			ngnMediaScreenAppName = appName;
@@ -305,6 +306,12 @@ public class RPCRequestFactory {
 			languageDesired = Language.EN_US;
 		}
 		msg.setLanguageDesired(languageDesired);
+		
+		msg.setHmiDisplayLanguageDesired(hmiDisplayLanguageDesired);
+		
+		msg.setAppType(appType);
+		
+		msg.setAppID(appID);
 
 		return msg;
 	}

@@ -24,11 +24,15 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*application context*/null, 
 				/*enable advanced lifecycle management*/false, 
 				/*app name*/ null,
+				/*TTS Name*/null,
 				/*ngn media screen app name*/null,
 				/*vr synonyms*/null,
 				/*is media app*/ null,
 				/*syncMsgVersion*/null,
 				/*language desired*/null,
+				/*HMI Display Language Desired*/null,
+				/*App Type*/null,
+				/*App ID*/null,
 				/*autoActivateID*/null,
 				/*callbackToUIThread*/ true);
 		
@@ -48,11 +52,15 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				syncProxyConfigurationResources, 
 				/*enable advanced lifecycle management*/false, 
 				/*app name*/ null,
+				/*TTS Name*/null,
 				/*ngn media screen app name*/null,
 				/*vr synonyms*/null,
 				/*is media app*/ null,
 				/*syncMsgVersion*/null,
 				/*language desired*/null,
+				/*HMI Display Language Desired*/null,
+				/*App Type*/null,
+				/*App ID*/null,
 				/*autoActivateID*/null,
 				/*callbackToUIThread*/ true);
 		
@@ -71,11 +79,15 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*sync proxy configuration resources*/null,
 				/*enable advanced lifecycle management*/false, 
 				/*app name*/ null,
+				/*TTS Name*/null,
 				/*ngn media screen app name*/null,
 				/*vr synonyms*/null,
 				/*is media app*/ null,
 				/*syncMsgVersion*/null,
 				/*language desired*/null,
+				/*HMI Display Language Desired*/null,
+				/*App Type*/null,
+				/*App ID*/null,
 				/*autoActivateID*/null,
 				callbackToUIThread);
 		
@@ -96,11 +108,15 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				syncProxyConfigurationResources,
 				/*enable advanced lifecycle management*/false, 
 				/*app name*/ null,
+				/*TTS Name*/null,
 				/*ngn media screen app name*/null,
 				/*vr synonyms*/null,
 				/*is media app*/ null,
 				/*syncMsgVersion*/null,
 				/*language desired*/null,
+				/*HMI Display Language Desired*/null,
+				/*App Type*/null,
+				/*App ID*/null,
 				/*autoActivateID*/null,
 				callbackToUIThread);
 		
@@ -141,10 +157,14 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 		registerAppInterfacePrivate(
 				syncMsgVersion, 
 				appName,
+				null,
 				ngnMediaScreenAppName,
 				vrSynonyms,
 				isMediaApp, 
 				languageDesired,
+				null,
+				null,
+				null,
 				autoActivateID,
 				correlationID);
 	}

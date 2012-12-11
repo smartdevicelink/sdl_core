@@ -17,11 +17,13 @@ public class PerformInteraction extends RPCRequest {
         super(hash);
     }
     public String getInitialText() {
-        return (String) parameters.get( Names.initialText );
+        return (String) parameters.get(Names.initialText);
     }
-    public void setInitialText( String initialText ) {
+    public void setInitialText(String initialText) {
         if (initialText != null) {
-            parameters.put(Names.initialText, initialText );
+            parameters.put(Names.initialText, initialText);
+        } else {
+        	parameters.remove(Names.initialText);
         }
     }
     public Vector<TTSChunk> getInitialPrompt() {
@@ -42,9 +44,11 @@ public class PerformInteraction extends RPCRequest {
         }
         return null;
     }
-    public void setInitialPrompt( Vector<TTSChunk> initialPrompt ) {
+    public void setInitialPrompt(Vector<TTSChunk> initialPrompt) {
         if (initialPrompt != null) {
-            parameters.put(Names.initialPrompt, initialPrompt );
+            parameters.put(Names.initialPrompt, initialPrompt);
+        } else {
+        	parameters.remove(Names.initialPrompt);
         }
     }
     public InteractionMode getInteractionMode() {
@@ -62,9 +66,11 @@ public class PerformInteraction extends RPCRequest {
         }
         return null;
     }
-    public void setInteractionMode( InteractionMode interactionMode ) {
+    public void setInteractionMode(InteractionMode interactionMode) {
         if (interactionMode != null) {
-            parameters.put(Names.interactionMode, interactionMode );
+            parameters.put(Names.interactionMode, interactionMode);
+        } else {
+        	parameters.remove(Names.interactionMode);
         }
     }
     public Vector<Integer> getInteractionChoiceSetIDList() {
@@ -79,9 +85,11 @@ public class PerformInteraction extends RPCRequest {
     	}
         return null;
     }
-    public void setInteractionChoiceSetIDList( Vector<Integer> interactionChoiceSetIDList ) {
+    public void setInteractionChoiceSetIDList(Vector<Integer> interactionChoiceSetIDList) {
         if (interactionChoiceSetIDList != null) {
-            parameters.put(Names.interactionChoiceSetIDList, interactionChoiceSetIDList );
+            parameters.put(Names.interactionChoiceSetIDList, interactionChoiceSetIDList);
+        } else {
+        	parameters.remove(Names.interactionChoiceSetIDList);
         }
     }
     public Vector<TTSChunk> getHelpPrompt() {
@@ -102,9 +110,11 @@ public class PerformInteraction extends RPCRequest {
         }
         return null;
     }
-    public void setHelpPrompt( Vector<TTSChunk> helpPrompt ) {
+    public void setHelpPrompt(Vector<TTSChunk> helpPrompt) {
         if (helpPrompt != null) {
-            parameters.put(Names.helpPrompt, helpPrompt );
+            parameters.put(Names.helpPrompt, helpPrompt);
+        } else {
+        	parameters.remove(Names.helpPrompt);
         }
     }
     public Vector<TTSChunk> getTimeoutPrompt() {
@@ -125,17 +135,46 @@ public class PerformInteraction extends RPCRequest {
         }
         return null;
     }
-    public void setTimeoutPrompt( Vector<TTSChunk> timeoutPrompt ) {
+    public void setTimeoutPrompt(Vector<TTSChunk> timeoutPrompt) {
         if (timeoutPrompt != null) {
-            parameters.put(Names.timeoutPrompt, timeoutPrompt );
+            parameters.put(Names.timeoutPrompt, timeoutPrompt);
+        } else {
+        	parameters.remove(Names.timeoutPrompt);
         }
     }
     public Integer getTimeout() {
-        return (Integer) parameters.get( Names.timeout );
+        return (Integer) parameters.get(Names.timeout);
     }
-    public void setTimeout( Integer timeout ) {
+    public void setTimeout(Integer timeout) {
         if (timeout != null) {
-            parameters.put(Names.timeout, timeout );
+            parameters.put(Names.timeout, timeout);
+        } else {
+        	parameters.remove(Names.timeout);
+        }
+    }
+    public Vector<VrHelpItem> getVrHelp() {
+        if (parameters.get(Names.vrHelp) instanceof Vector<?>) {
+	    	Vector<?> list = (Vector<?>)parameters.get(Names.vrHelp);
+	        if (list != null && list.size() > 0) {
+	            Object obj = list.get(0);
+	            if (obj instanceof VrHelpItem) {
+	                return (Vector<VrHelpItem>) list;
+	            } else if (obj instanceof Hashtable) {
+	                Vector<VrHelpItem> newList = new Vector<VrHelpItem>();
+	                for (Object hashObj : list) {
+	                    newList.add(new VrHelpItem((Hashtable)hashObj));
+	                }
+	                return newList;
+	            }
+	        }
+        }
+        return null;
+    }
+    public void setVrHelp(Vector<VrHelpItem> vrHelp) {
+        if (vrHelp != null) {
+            parameters.put(Names.vrHelp, vrHelp);
+        } else {
+        	parameters.remove(Names.vrHelp);
         }
     }
 }

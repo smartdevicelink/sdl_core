@@ -27,30 +27,48 @@ import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
+import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
+import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
+import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
+import com.ford.syncV4.proxy.rpc.GetDTCs;
+import com.ford.syncV4.proxy.rpc.GetVehicleData;
+import com.ford.syncV4.proxy.rpc.ListFilesResponse;
+import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
 import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnDriverDistraction;
 import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
+import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
+import com.ford.syncV4.proxy.rpc.OnVehicleData;
+import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
+import com.ford.syncV4.proxy.rpc.PutFileResponse;
+import com.ford.syncV4.proxy.rpc.ReadDID;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
+import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
+import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
+import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
 import com.ford.syncV4.proxy.rpc.SetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimerResponse;
 import com.ford.syncV4.proxy.rpc.ShowResponse;
 import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
+import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
+import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 
 public class ProxyService extends Service implements IProxyListenerALM {	
@@ -122,7 +140,22 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				boolean isMediaApp = true;// settings.getBoolean("isMediaApp", false);
 				
 				int versionNumber = settings.getInt("VersionNumber",1);
-				_syncProxy = new SyncProxyALM(this, "SyncProxyTester", isMediaApp,versionNumber);
+
+				//_syncProxy = new SyncProxyALM(this, "SyncProxyTester", true);
+				_syncProxy = new SyncProxyALM(this,
+						/*sync proxy configuration resources*/null,
+						/*enable advanced lifecycle management true,*/
+						"SyncProxyTester",
+						/*ngn media app*/null,
+						/*vr synonyms*/null,
+						/*is media app*/isMediaApp,
+						/*syncMsgVersion*/null,
+						/*language desired*/Language.EN_US,
+						/*HMI Display Language Desired*/Language.EN_US,
+						/*App ID*/"8675309",
+						/*autoActivateID*/null,
+						/*callbackToUIThread*/ false,
+						versionNumber);
 			} catch (SyncException e) {
 				e.printStackTrace();
 				//error creating proxy, returned proxy = null
@@ -641,5 +674,163 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
+	}
+
+	@Override
+	public void onPutFileResponse(PutFileResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+
+	@Override
+	public void onDeleteFileResponse(DeleteFileResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+
+	@Override
+	public void onListFilesResponse(ListFilesResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+
+	@Override
+	public void onSetAppIconResponse(SetAppIconResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+
+	@Override
+	public void onScrollableMessageResponse(ScrollableMessageResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+
+	@Override
+	public void onChangeRegistrationResponse(ChangeRegistrationResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+
+	@Override
+	public void onSetDisplayLayoutResponse(SetDisplayLayoutResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+
+	@Override
+	public void onOnLanguageChange(OnLanguageChange notification) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+		else Log.i(TAG, "" + notification);
+	}
+
+	@Override
+	public void onPerformAudioPassThruResponse(PerformAudioPassThruResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+
+	@Override
+	public void onEndAudioPassThruResponse(EndAudioPassThruResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+
+	@Override
+	public void onOnAudioPassThru(OnAudioPassThru notification) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+		else Log.i(TAG, "" + notification);
+	}
+
+	@Override
+	public void onSubscribeVehicleDataResponse(SubscribeVehicleData response) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleData response) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onGetVehicleDataResponse(GetVehicleData response) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onReadDIDResponse(ReadDID response) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onGetDTCsResponse(GetDTCs response) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onOnVehicleData(OnVehicleData notification) {
+		// TODO Auto-generated method stub
+		
 	}
 }

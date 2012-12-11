@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/itemRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:minWidth="400px"
+    android:orientation="vertical"
+    android:paddingLeft="20dip"
+    android:paddingRight="20dip" >
+
+		<TextView android:text="Message Body" android:id="@+id/txtSMB" 
+			android:layout_width="fill_parent" android:layout_height="wrap_content" ></TextView>
+		<EditText android:text="This is where long text can go for a scrollable message" android:id="@+id/txtScrollableMessageBody"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"
+			android:visibility="visible">
+		</EditText>
+		<CheckBox android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:id="@+id/chkIncludeSBs"
+		    android:text="Include SoftButtons?" android:checked="false">
+		</CheckBox>
+</LinearLayout>

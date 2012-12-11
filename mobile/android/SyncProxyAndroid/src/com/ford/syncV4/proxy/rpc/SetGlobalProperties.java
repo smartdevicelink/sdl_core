@@ -32,9 +32,9 @@ public class SetGlobalProperties extends RPCRequest {
     	}
 	    return null;
     }
-    public void setHelpPrompt( Vector<TTSChunk> helpPrompt ) {
+    public void setHelpPrompt(Vector<TTSChunk> helpPrompt) {
         if (helpPrompt != null) {
-            parameters.put(Names.helpPrompt, helpPrompt );
+            parameters.put(Names.helpPrompt, helpPrompt);
         }
     }
     public Vector<TTSChunk> getTimeoutPrompt() {
@@ -55,9 +55,44 @@ public class SetGlobalProperties extends RPCRequest {
         }
         return null;
     }
-    public void setTimeoutPrompt( Vector<TTSChunk> timeoutPrompt ) {
+    public void setTimeoutPrompt(Vector<TTSChunk> timeoutPrompt) {
         if (timeoutPrompt != null) {
-            parameters.put(Names.timeoutPrompt, timeoutPrompt );
+            parameters.put(Names.timeoutPrompt, timeoutPrompt);
+        }
+    }
+    public String getVrHelpTitle() {
+        return (String) parameters.get(Names.vrHelpTitle);
+    }
+    public void setVrHelpTitle(String vrHelpTitle) {
+        if (vrHelpTitle != null) {
+            parameters.put(Names.vrHelpTitle, vrHelpTitle);
+        } else {
+        	parameters.remove(Names.vrHelpTitle);
+        }
+    }
+    public Vector<VrHelpItem> getVrHelp() {
+        if (parameters.get(Names.vrHelp) instanceof Vector<?>) {
+	    	Vector<?> list = (Vector<?>)parameters.get(Names.vrHelp);
+	        if (list != null && list.size() > 0) {
+	            Object obj = list.get(0);
+	            if (obj instanceof VrHelpItem) {
+	                return (Vector<VrHelpItem>) list;
+	            } else if (obj instanceof Hashtable) {
+	                Vector<VrHelpItem> newList = new Vector<VrHelpItem>();
+	                for (Object hashObj : list) {
+	                    newList.add(new VrHelpItem((Hashtable)hashObj));
+	                }
+	                return newList;
+	            }
+	        }
+        }
+        return null;
+    }
+    public void setVrHelp(Vector<VrHelpItem> vrHelp) {
+        if (vrHelp != null) {
+            parameters.put(Names.vrHelp, vrHelp);
+        } else {
+        	parameters.remove(Names.vrHelp);
         }
     }
 }

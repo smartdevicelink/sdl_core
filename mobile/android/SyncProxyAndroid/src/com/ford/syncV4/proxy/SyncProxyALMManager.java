@@ -33,33 +33,50 @@ import com.ford.syncV4.proxy.interfaces.ISyncUnsubscribeButtonResponseListener;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
+import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
 import com.ford.syncV4.proxy.rpc.Choice;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
+import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
+import com.ford.syncV4.proxy.rpc.GetDTCs;
+import com.ford.syncV4.proxy.rpc.GetVehicleData;
+import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
+import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
+import com.ford.syncV4.proxy.rpc.ListFilesResponse;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
 import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnDriverDistraction;
 import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
+import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnSyncChoiceChosen;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
+import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
+import com.ford.syncV4.proxy.rpc.ReadDID;
+import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
+import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
+import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
+import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
+import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
 import com.ford.syncV4.proxy.rpc.SetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimerResponse;
 import com.ford.syncV4.proxy.rpc.ShowResponse;
 import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
+import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
@@ -345,11 +362,13 @@ public class SyncProxyALMManager {
 	 * @param appName - Name of the application displayed on SYNC. 
 	 * @param isMediaApp - Indicates if the app is a media application.
 	 */
-	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, String appName, Boolean isMediaApp) throws SyncException {
+	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, String appName, Boolean isMediaApp, 
+			Language languageDesired, Language hmiDisplayLanguageDesired, String appID) throws SyncException {
 		
 		this(lifeCycleListener);
 		
-		syncProxy = new SyncProxyALM(_almInterfaceBroker, appName, isMediaApp);
+		syncProxy = new SyncProxyALM(_almInterfaceBroker, appName, isMediaApp, 
+				languageDesired, hmiDisplayLanguageDesired, appID);
 	}
 	
 	/**
@@ -370,12 +389,13 @@ public class SyncProxyALMManager {
 	 */
 	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, String appName, String ngnMediaScreenAppName, 
 			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
-			Language languageDesired, String autoActivateID) throws SyncException{
+			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
+			String autoActivateID) throws SyncException{
 		
 		this(lifeCycleListener);
 		
 		syncProxy = new SyncProxyALM(_almInterfaceBroker, appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, 
-				languageDesired, autoActivateID);
+				languageDesired, hmiDisplayLanguageDesired, appID, autoActivateID);
 	}
 	
 	/**
@@ -399,13 +419,13 @@ public class SyncProxyALMManager {
 	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
 			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, 
 			Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, 
-			String autoActivateID) throws SyncException {
+			Language hmiDisplayLanguageDesired, String appID, String autoActivateID) throws SyncException {
 		
 		this(lifeCycleListener);
 		
 		syncProxy = new SyncProxyALM(_almInterfaceBroker, syncProxyConfigurationResources, 
 				appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, 
-				languageDesired, autoActivateID);
+				languageDesired, hmiDisplayLanguageDesired, appID, autoActivateID);
 	}
 	
 	/**
@@ -428,13 +448,14 @@ public class SyncProxyALMManager {
 	 */
 	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, String appName, String ngnMediaScreenAppName, 
 			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
-			Language languageDesired, String autoActivateID, boolean callbackToUIThread) throws SyncException {
+			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
+			String autoActivateID, boolean callbackToUIThread) throws SyncException {
 		
 		this(lifeCycleListener);
 		
 		syncProxy = new SyncProxyALM(_almInterfaceBroker, appName, ngnMediaScreenAppName, 
 				vrSynonyms, isMediaApp, syncMsgVersion, 
-				languageDesired, autoActivateID, callbackToUIThread);
+				languageDesired, hmiDisplayLanguageDesired, appID, autoActivateID, callbackToUIThread);
 	}
 	
 	/**
@@ -458,13 +479,14 @@ public class SyncProxyALMManager {
 	 */
 	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
 			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
-			SyncMsgVersion syncMsgVersion, Language languageDesired, String autoActivateID, 
+			SyncMsgVersion syncMsgVersion, Language languageDesired, 
+			Language hmiDisplayLanguageDesired, String appID, String autoActivateID, 
 			boolean callbackToUIThread) throws SyncException {
 		
 		this(lifeCycleListener);
 		
 		syncProxy = new SyncProxyALM(_almInterfaceBroker, syncProxyConfigurationResources, appName, ngnMediaScreenAppName, 
-				vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, 
+				vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appID, autoActivateID, 
 				callbackToUIThread);		
 	}
 	
@@ -2374,6 +2396,89 @@ public class SyncProxyALMManager {
 		}
 
 		@Override
+		public void onSubscribeVehicleDataResponse(SubscribeVehicleData response) {
+			_lifecycleListener.onSubscribeVehicleDataResponse(response);
+		}
+
+		@Override
+		public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleData response) {
+			_lifecycleListener.onUnsubscribeVehicleDataResponse(response);
+		}
+
+		@Override
+		public void onGetVehicleDataResponse(GetVehicleData response) {
+			_lifecycleListener.onGetVehicleDataResponse(response);
+		}
+
+		@Override
+		public void onReadDIDResponse(ReadDID response) {
+			_lifecycleListener.onReadDIDResponse(response);
+		}
+
+		@Override
+		public void onGetDTCsResponse(GetDTCs response) {
+			_lifecycleListener.onGetDTCsResponse(response);
+		}
+
+		@Override
+		public void onOnVehicleData(OnVehicleData notification) {
+			_lifecycleListener.onOnVehicleData(notification);
+		}
+		
+		@Override
+		public void onPerformAudioPassThruResponse(PerformAudioPassThruResponse response) {
+			_lifecycleListener.onPerformAudioPassThruResponse(response);
+		}
+
+		@Override
+		public void onEndAudioPassThruResponse(EndAudioPassThruResponse response) {
+			_lifecycleListener.onEndAudioPassThruResponse(response);
+		}
+
+		@Override
+		public void onOnAudioPassThru(OnAudioPassThru notification) {
+			_lifecycleListener.onOnAudioPassThru(notification);
+		}
+
+		@Override
+		public void onPutFileResponse(PutFileResponse response) {
+			_lifecycleListener.onPutFileResponse(response);
+		}
+
+		@Override
+		public void onDeleteFileResponse(DeleteFileResponse response) {
+			_lifecycleListener.onDeleteFileResponse(response);
+		}
+
+		@Override
+		public void onListFilesResponse(ListFilesResponse response) {
+			_lifecycleListener.onListFilesResponse(response);
+		}
+
+		@Override
+		public void onSetAppIconResponse(SetAppIconResponse response) {
+			_lifecycleListener.onSetAppIconResponse(response);
+		}
+
+		@Override
+		public void onScrollableMessageResponse(ScrollableMessageResponse response) {
+			_lifecycleListener.onScrollableMessageResponse(response);
+		}
+
+		@Override
+		public void onChangeRegistrationResponse(ChangeRegistrationResponse response) {
+			_lifecycleListener.onChangeRegistrationResponse(response);
+		}
+
+		@Override
+		public void onSetDisplayLayoutResponse(SetDisplayLayoutResponse response) {
+			_lifecycleListener.onSetDisplayLayoutResponse(response);
+		}
+
+		@Override
+		public void onOnLanguageChange(OnLanguageChange notification) {
+			_lifecycleListener.onOnLanguageChange(notification);
+		}
 		public void onSliderResponse(SliderResponse response) {
 			_lifecycleListener.onSliderResponse(response);
 		}

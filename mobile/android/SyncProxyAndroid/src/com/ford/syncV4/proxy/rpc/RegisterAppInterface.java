@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.rpc.enums.AppType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.util.DebugTool;
 
@@ -19,36 +20,67 @@ public class RegisterAppInterface extends RPCRequest {
     public SyncMsgVersion getSyncMsgVersion() {
         Object obj = parameters.get(Names.syncMsgVersion);
         if (obj instanceof SyncMsgVersion) {
-        	return (SyncMsgVersion)obj;
+        	return (SyncMsgVersion) obj;
         } else if (obj instanceof Hashtable) {
-        	return new SyncMsgVersion((Hashtable)obj);
+        	return new SyncMsgVersion((Hashtable) obj);
         }
         return null;
     }
-    public void setSyncMsgVersion( SyncMsgVersion syncMsgVersion ) {
+    public void setSyncMsgVersion(SyncMsgVersion syncMsgVersion) {
         if (syncMsgVersion != null) {
-            parameters.put(Names.syncMsgVersion, syncMsgVersion );
+            parameters.put(Names.syncMsgVersion, syncMsgVersion);
+        } else {
+        	parameters.remove(Names.syncMsgVersion);
         }
     }
     public String getAppName() {
-        return (String) parameters.get( Names.appName );
+        return (String) parameters.get(Names.appName);
     }
-    public void setAppName( String appName ) {
+    public void setAppName(String appName) {
         if (appName != null) {
-            parameters.put(Names.appName, appName );
+            parameters.put(Names.appName, appName);
+        } else {
+        	parameters.remove(Names.appName);
+        }
+    }
+    public Vector<TTSChunk> getTtsName() {
+        if (parameters.get(Names.ttsName) instanceof Vector<?>) {
+	    	Vector<?> list = (Vector<?>)parameters.get(Names.ttsName);
+	        if (list != null && list.size() > 0) {
+	            Object obj = list.get(0);
+	            if (obj instanceof TTSChunk) {
+	                return (Vector<TTSChunk>) list;
+	            } else if (obj instanceof Hashtable) {
+	                Vector<TTSChunk> newList = new Vector<TTSChunk>();
+	                for (Object hashObj : list) {
+	                    newList.add(new TTSChunk((Hashtable) hashObj));
+	                }
+	                return newList;
+	            }
+	        }
+        }
+        return null;
+    }
+    public void setTtsName(Vector<TTSChunk> ttsName) {
+        if (ttsName != null) {
+            parameters.put(Names.ttsName, ttsName);
+        } else {
+        	parameters.remove(Names.ttsName);
         }
     }
     public String getNgnMediaScreenAppName() {
-        return (String) parameters.get( Names.ngnMediaScreenAppName );
+        return (String) parameters.get(Names.ngnMediaScreenAppName);
     }
-    public void setNgnMediaScreenAppName( String ngnMediaScreenAppName ) {
+    public void setNgnMediaScreenAppName(String ngnMediaScreenAppName) {
         if (ngnMediaScreenAppName != null) {
-            parameters.put(Names.ngnMediaScreenAppName, ngnMediaScreenAppName );
+            parameters.put(Names.ngnMediaScreenAppName, ngnMediaScreenAppName);
+        } else {
+        	parameters.remove(Names.ngnMediaScreenAppName);
         }
     }
     public Vector<String> getVrSynonyms() {
-    	if (parameters.get( Names.vrSynonyms ) instanceof Vector<?>) {
-    		Vector<?> list = (Vector<?>)parameters.get( Names.vrSynonyms );
+    	if (parameters.get(Names.vrSynonyms) instanceof Vector<?>) {
+    		Vector<?> list = (Vector<?>)parameters.get(Names.vrSynonyms);
     		if (list != null && list.size()>0) {
     			Object obj = list.get(0);
     			if (obj instanceof String) {
@@ -58,17 +90,21 @@ public class RegisterAppInterface extends RPCRequest {
     	}
         return null;
     }
-    public void setVrSynonyms( Vector<String> vrSynonyms ) {
+    public void setVrSynonyms(Vector<String> vrSynonyms) {
         if (vrSynonyms != null) {
-            parameters.put(Names.vrSynonyms, vrSynonyms );
+            parameters.put(Names.vrSynonyms, vrSynonyms);
+        } else {
+        	parameters.remove(Names.vrSynonyms);
         }
     }
     public Boolean getIsMediaApplication() {
-        return (Boolean) parameters.get( Names.isMediaApplication );
+        return (Boolean) parameters.get(Names.isMediaApplication);
     }
-    public void setIsMediaApplication( Boolean isMediaApplication ) {
+    public void setIsMediaApplication(Boolean isMediaApplication) {
         if (isMediaApplication != null) {
-            parameters.put(Names.isMediaApplication, isMediaApplication );
+            parameters.put(Names.isMediaApplication, isMediaApplication);
+        } else {
+        	parameters.remove(Names.isMediaApplication);
         }
     }
     public Language getLanguageDesired() {
@@ -86,27 +122,76 @@ public class RegisterAppInterface extends RPCRequest {
         }
         return null;
     }
-    public void setLanguageDesired( Language languageDesired ) {
+    public void setLanguageDesired(Language languageDesired) {
         if (languageDesired != null) {
-            parameters.put(Names.languageDesired, languageDesired );
+            parameters.put(Names.languageDesired, languageDesired);
+        } else {
+        	parameters.remove(Names.languageDesired);
         }
     }
-    public String getAutoActivateID() {
-        return (String) parameters.get( Names.autoActivateID );
+    public Language getHmiDisplayLanguageDesired() {
+        Object obj = parameters.get(Names.hmiDisplayLanguageDesired);
+        if (obj instanceof Language) {
+            return (Language) obj;
+        } else if (obj instanceof String) {
+            Language theCode = null;
+            try {
+                theCode = Language.valueForString((String) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiDisplayLanguageDesired, e);
+            }
+            return theCode;
+        }
+        return null;
     }
-    public void setAutoActivateID( String autoActivateID ) {
-        if (autoActivateID != null) {
-            parameters.put(Names.autoActivateID, autoActivateID );
+    public void setHmiDisplayLanguageDesired(Language hmiDisplayLanguageDesired) {
+        if (hmiDisplayLanguageDesired != null) {
+            parameters.put(Names.hmiDisplayLanguageDesired, hmiDisplayLanguageDesired);
+        } else {
+        	parameters.remove(Names.hmiDisplayLanguageDesired);
         }
     }
-    
-    public void setHmiDisplayLanguageDesired(String hmiLanguage) {
-    	if (hmiLanguage != null) {
-    		parameters.put("hmiDisplayLanguageDesired", hmiLanguage);
-    	}
+    public Vector<AppType> getAppType() {
+        if (parameters.get(Names.appType) instanceof Vector<?>) {
+	    	Vector<?> list = (Vector<?>)parameters.get(Names.appType);
+	        if (list != null && list.size() > 0) {
+	            Object obj = list.get(0);
+	            if (obj instanceof AppType) {
+	                return (Vector<AppType>) list;
+	            } else if (obj instanceof String) {
+	                Vector<AppType> newList = new Vector<AppType>();
+	                for (Object hashObj : list) {
+	                    String strFormat = (String)hashObj;
+	                    AppType toAdd = null;
+	                    try {
+	                        toAdd = AppType.valueForString(strFormat);
+	                    } catch (Exception e) {
+	                    	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.appType, e);	                    }
+	                    if (toAdd != null) {
+	                        newList.add(toAdd);
+	                    }
+	                }
+	                return newList;
+	            }
+	        }
+        }
+        return null;
     }
-    
-    public void setAppId(String id){
-    	parameters.put("appID", id);
+    public void setAppType(Vector<AppType> appType) {
+        if (appType != null) {
+            parameters.put(Names.appType, appType);
+        } else {
+        	parameters.remove(Names.appType);
+        }
+    }
+    public String getAppID() {
+        return (String) parameters.get(Names.appID);
+    }
+    public void setAppID(String appID) {
+        if (appID != null) {
+            parameters.put(Names.appID, appID);
+        } else {
+        	parameters.remove(Names.appID);
+        }
     }
 }
