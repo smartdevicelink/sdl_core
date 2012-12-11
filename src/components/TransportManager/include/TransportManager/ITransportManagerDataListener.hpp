@@ -36,6 +36,11 @@ namespace NsAppLink
             SendStatusInternalError,
 
             /**
+             * @brief Invalid incoming parameters.
+             **/
+            SendStatusInvalidParametersError,
+
+            /**
              * @brief Unknown error.
              **/
             SendStatusUnknownError

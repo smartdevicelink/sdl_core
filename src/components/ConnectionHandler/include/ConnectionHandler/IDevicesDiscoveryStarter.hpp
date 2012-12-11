@@ -7,6 +7,8 @@
 #ifndef IDEVICESDISCOVERYSTARTER_H 
 #define IDEVICESDISCOVERYSTARTER_H 
 
+#include "ConnectionHandler/CDevice.hpp"
+
 /**
  * \namespace NsConnectionHandler
  * \brief AppLink ConnectionHandler namespace.
@@ -24,6 +26,8 @@ namespace NsConnectionHandler
          * \brief Method which should start devices discoveryng
          */
         virtual void startDevicesDiscovery()=0;
+
+        virtual void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle ) = 0;
 
     protected:
         /**

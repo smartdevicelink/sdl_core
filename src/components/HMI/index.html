@@ -60,11 +60,6 @@
 		<script type="text/javascript" src="ffw/AppLinkCoreClientRPC.js"></script>
 		<script type="text/javascript" src="ffw/Scale.js"></script>
 		
-		<!-- FFW UI -->
-		<!--
-		<script type="text/javascript" src="ffw/ui/AbstractButton.js"></script>
-		-->
-		
         <script type="text/javascript" src="ffw/ImagePreloader.js"></script>
 
 		<!-- APP -->
@@ -103,9 +98,8 @@
         <script type="text/javascript" src="app/controlls/LabelPlusToggleButton.js"></script>
         <script type="text/javascript" src="app/controlls/LabelPlusButton.js"></script>
         <script type="text/javascript" src="app/controlls/MenuList.js"></script>
-        <!--
-        <script type="text/javascript" src="app/controlls/MCS/Cushion.js"></script>
-        -->
+        
+        <script type="text/javascript" src="app/controlls/applink/CommandsList.js"></script>
 
 		<!-- utils -->
 		<script type="text/javascript" src="app/util/Audio.js"></script>
@@ -141,30 +135,12 @@
         <script type="text/javascript" src="app/model/FAQModel.js"></script>
 		
 		<!-- Applink models -->
+		<script type="text/javascript" src="app/model/applink/AppModel.js"></script>
         <script type="text/javascript" src="app/model/applink/NonMediaModel.js"></script>
         <script type="text/javascript" src="app/model/applink/ApplinkMediaModel.js"></script>
         <!-- Applink models END -->
-		
-		<!--
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData1_1.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData1_2.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData1_3.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData1_4.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData1_5.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData2_1.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData2_2.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData4_1.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData5_1.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData5_2.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData6_1.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData6_2.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsData7_1.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsModel.js"></script>
-		<script type="text/javascript" src="app/model/settings/MCS/SettingsModelCAN.js"></script>
-		-->
 
-		 <script type="text/javascript" src="app/view/SelectSystemPopup.js"></script>
+		<script type="text/javascript" src="app/view/SelectSystemPopup.js"></script>
 		<!-- Controllers -->
         <script type="text/javascript" src="app/controller/AppController.js"></script>                                    
 		<script type="text/javascript" src="app/controller/ClimateController.js"></script>
@@ -176,19 +152,11 @@
         <script type="text/javascript" src="app/controller/InfoController.js"></script>
         <script type="text/javascript" src="app/controller/VideoPlayerController.js"></script>
         
-        <script type="text/javascript" src="app/controller/applink/ApplinkController.js"></script>  
+        <script type="text/javascript" src="app/controller/applink/ApplinkController.js"></script>
+        <script type="text/javascript" src="app/controller/applink/AppController.js"></script>  
         <script type="text/javascript" src="app/controller/applink/NonMediaController.js"></script>  
         <script type="text/javascript" src="app/controller/applink/ApplinkMediaController.js"></script>  
-        <!--
-        <script type="text/javascript" src="app/controller/MCS/MCSController.js"></script>
-        -->
-		
-		<!-- mixins -->
-		<!--
-		<script type="text/javascript" src="app/mixins/MCS/SelectedIndex.js"></script>
-		<script type="text/javascript" src="app/mixins/MCS/Dragable.js"></script>
-		<script type="text/javascript" src="app/mixins/MCS/Dropable.js"></script>
-		-->
+
         <script type="text/javascript" src="app/mixins/ScriptLoad.js"></script>
 
 		<!-- Views -->
@@ -230,29 +198,6 @@
 		
 		<script type="text/javascript" src="app/StateManager.js"></script>		
 		
-		<!--MCS Views not needed for MFT Guide releases -->
-		<!--
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/IndicatorControl.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/AdjustView.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView1_1.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView1_2.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView1_3.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView1_4.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView1_5.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView2_1.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView2_2.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView4_1.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView5_1.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView5_2.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView6_1.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView6_2.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView7_1.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/SeatsMassageDialogView.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MassageView7_1_appendix.js"></script>
-		<script type="text/javascript" src="app/view/settings/vehicle/MCS/MCSConcept7_1_VideoHandler.js"></script>
-        -->
-        
         <!--player view-->
         <script type="text/javascript" src="app/view/player/PlayerControllsView.js"></script>
 				

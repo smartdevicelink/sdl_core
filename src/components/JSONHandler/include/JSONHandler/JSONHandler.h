@@ -98,6 +98,12 @@ protected:
 
     NsAppLinkRPC::ALRPCMessage * handleIncomingMessageProtocolV2(
             const NsProtocolHandler::AppLinkRawMessage * message );
+
+    NsProtocolHandler::AppLinkRawMessage * handleOutgoingMessageProtocolV1( 
+            int connectionKey, const NsAppLinkRPC::ALRPCMessage *  message );
+
+    NsProtocolHandler::AppLinkRawMessage * handleOutgoingMessageProtocolV2( 
+            int connectionKey, const NsAppLinkRPC::ALRPCMessage *  message );
     
 private:
     /**
