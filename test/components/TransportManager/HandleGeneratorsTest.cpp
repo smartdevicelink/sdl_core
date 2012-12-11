@@ -1,3 +1,9 @@
+/*
+    Tests correct generation of Device and Connection handles used in TransportManager.
+        - tests that generated handles are valid
+        - generates 10000 handles
+ */
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
