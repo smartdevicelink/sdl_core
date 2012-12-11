@@ -32,7 +32,7 @@ MFT.InfoNonMediaOptionsSubMenu = Em.ContainerView.create( MFT.LoadableView, {
 	title: MFT.Label.extend({
 		classNames:	'options_title',
 
-        contentBinding:     'MFT.ApplinkMediaController.subMenuLabel'
+        contentBinding:     'MFT.ApplinkNonMediaModel.currentSubMenuLabel'
 	}),
 
 

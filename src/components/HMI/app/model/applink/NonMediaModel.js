@@ -1,16 +1,16 @@
 /**
  * @name MFT.ApplinkNonMediaModel
  * 
- * @desc Data model for Applink NonMedia application
+ * @desc Concrate model for Applink NonMedia application
  * 
  * @category	Model
- * @filesource	app/model/applink/ApplinkNonMediaModel.js
+ * @filesource	app/model/applink/NonMediaModel.js
  * @version		1.0
  *
  * @author		Artem Petrosyan
  */
 
-MFT.ApplinkNonMediaModel = Em.Object.create({
+MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.create({
 
 	/**
       * Array of menus in ApplinkOptionsSubMenuView
@@ -48,7 +48,7 @@ MFT.ApplinkNonMediaModel = Em.Object.create({
 	/** Add command to Options list */
     onApplinkOptionsAddCommand: function( commandId, params ){
 
-       MFT.InfoNonMediaOptions.AddCommand( commandId, params );
+       MFT.InfoNonMediaOptions.commands.AddCommand( commandId, params );
 
     },
 	
@@ -82,7 +82,7 @@ MFT.ApplinkNonMediaModel = Em.Object.create({
     /** Delete command to Options list */
     onApplinkOptionsDeleteCommand: function(commandId){
 
-        MFT.InfoNonMediaOptions.DeleteCommand( commandId );
+        MFT.InfoNonMediaOptions.commands.DeleteCommand( commandId );
 
         var  count = this.subMenuCommands.length;
         for(var i = count-1; i >= 0; i--){
@@ -95,7 +95,7 @@ MFT.ApplinkNonMediaModel = Em.Object.create({
     /** Add subMenu button to Options list */
     onApplinkAddSubMenu: function( menuId, params ){
 
-        MFT.InfoNonMediaOptions.AddSubMenu( menuId, params );
+        MFT.InfoNonMediaOptions.commands.AddSubMenu( menuId, params );
 
     },
     
@@ -106,7 +106,7 @@ MFT.ApplinkNonMediaModel = Em.Object.create({
             MFT.States.back();
         }
 
-        MFT.InfoNonMediaOptions.DeleteSubMenu( menuId );
+        MFT.InfoNonMediaOptions.commands.DeleteSubMenu( menuId );
 
         return "SUCCESS";
     },

@@ -17,7 +17,7 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
 	childViews: [
 		'backButton',
 		'title',
-		'listOfOptions'
+		'commands'
 	],
 	
 	backButton: MFT.Button.extend({		
@@ -35,81 +35,29 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
 		content:	'Options'
 	}),
 	
-    AddCommand: function( commandId, params, appId ){
-
-        this.get('listOfOptions.list.childViews').pushObject(
-            MFT.Button.create({
-                action:                 'onCommand',
-                target:                 'MFT.ApplinkMediaController',
-                commandId:              commandId,
-                appId:                  appId,
-                text:                   params.menuName,
-                classNames:             'list-item',
-                templateName:           'text'
-            })
-        );
-
-    },
-    
-    DeleteCommand: function( commandId ){
-
-        this.get('listOfOptions.list.childViews').removeObjects(
-            this.get('listOfOptions.list.childViews').filterProperty( 'commandId' , commandId )
-        );
-
-    },
-    
-    AddSubMenu: function( menuId, params ){
-
-        this.get('listOfOptions.list.childViews').insertAt(0,
-            MFT.Button.create({
-                action:                 'turnOnApplinkSubMenu',
-                target:                 'MFT.NonMediaController',
-                menuId:                 menuId,
-                text:                   params.menuName,
-                classNames:             'list-item',
-                templateName:           'arrow'
-            })
-        );
-
-    },
-
-    DeleteSubMenu: function( menuId ){
-
-        this.get('listOfOptions.list.childViews').removeObjects(
-            this.get('listOfOptions.list.childViews').filterProperty( 'menuId' , menuId )
-        );
-    },
-	
-	listOfOptions: MFT.List.extend({
+	commands: MFT.ApplinkCommandsList.extend({
 		
-		elementId:	'info_nonMedia_options_list',
-		
+		elementId:		'info_nonMedia_options_list',
+				
 		itemsOnPage:    5,
 		
 		items: [
 			{
 				type:	MFT.Button,
 			
-				params:		{
+				params: {
 					templateName:	'text',
-				
-					text:	'Exit',
-									
-					action:		'back',
-					target:		'MFT.States'
+					text:			'Exit',
+					action:			'back',
+					target:			'MFT.States'
 				}
 			},
 			{
 				type:	MFT.Button,
 			
-				params:		{
+				params: {
 					templateName:	'arrow',
-				
-					text:	'Device Information',
-									
-					//action:		'back',
-					//target:		'MFT.States'
+					text:			'Device Information',
 				}
 			}
 		]
