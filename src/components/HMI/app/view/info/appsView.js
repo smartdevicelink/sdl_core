@@ -96,8 +96,8 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 		elementId:			'infoAppsFindNewApps',
 		classNames:			'button findNewApps leftButtons',
 		arrow:				true,
-		//action:				'onState',
-		//target:				'MFT.SettingsController',
+		action:				'findNewApps',
+		target:				'MFT.ApplinkController',
 		disabledBinding:	'MFT.helpMode',
 		onDown:				false,
         templateName:       'text'

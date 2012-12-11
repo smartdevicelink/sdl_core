@@ -19,6 +19,8 @@ HMIApplication& HMIApplication::operator =(const HMIApplication& c)
   appName=c.appName;
   icon=c.icon ? new std::string(c.icon[0]) : 0;
   ngnMediaScreenAppName=c.ngnMediaScreenAppName ? new std::string(c.ngnMediaScreenAppName[0]) : 0;
+  appId = c.appId;
+  mIsMediaApplication = c.mIsMediaApplication;
 
   return *this;
 }
@@ -51,7 +53,16 @@ HMIApplication::HMIApplication(void) :
 {
 }
 
+void HMIApplication::set_appId(int id)
+{
+    appId = id;
+}
 
+bool HMIApplication::set_isMediaApplication(bool isMediaApplication)
+{
+    mIsMediaApplication = isMediaApplication;
+    return true;
+}
 
 bool HMIApplication::set_appName(const std::string& appName_)
 {
@@ -94,7 +105,15 @@ void HMIApplication::reset_ngnMediaScreenAppName(void)
 }
 
 
+int  HMIApplication::get_appId() const
+{
+    return appId;
+}
 
+bool HMIApplication::get_isMediaApplication() const
+{
+    return mIsMediaApplication;
+}
 
 const std::string& HMIApplication::get_appName(void) const 
 {

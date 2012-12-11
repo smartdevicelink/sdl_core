@@ -49,7 +49,15 @@ MFT.ApplinkMediaModel = Em.Object.create({
     /**
       * Array of connected devices
       */
-    devicesList:            new Array(),
+    devicesList:                new Array(),
+
+    /**
+      * Set of params of Slider View
+      */
+    sliderParams: {
+        headerLabel: "headerLabel",
+        footerLabel: "footerLabel"
+    },
 
 	/**
 	  * Timer for Media Clock
@@ -104,45 +112,66 @@ MFT.ApplinkMediaModel = Em.Object.create({
         tryAgainTime:   0
     }),
 
-	onGetAppList: function( params ){
- 		
+	onGetAppList: function( appList ){
+
 		this.applicationsList.splice(0, this.applicationsList.length);
-		for(var i = 0; i < params.appList.length; i++){
-            this.applicationsList.push({
-                type:       MFT.Button,
-                params:     {
-                    action:         'turnOnApplink',
-                    target:         'MFT.MediaController',
-                    text:           params.appList[i].appName,
-                    appName:        params.appList[i].appName,
-                    className:      'scrollButtons button notpressed',
-                    icon:           params.icon,
-                    templateName:   'rightIcon'
-                }                                   
-            });
+		for(var i = 0; i < appList.length; i++){
+            if( appList[i].isMediaApplication ){    
+                this.applicationsList.push({
+                    type:       MFT.Button,
+                    params:     {
+                        action:         'turnOnApplink',
+                        target:         'MFT.MediaController',
+                        text:           appList[i].appName,
+                        appName:        appList[i].appName,
+                        appId:          appList[i].appId,
+                        className:      'scrollButtons button notpressed',
+                        icon:           appList[i].icon,
+                        templateName:   'rightIcon'
+                    }                                   
+                });
+            }else{
+                this.applicationsList.push({
+                    type:       MFT.Button,
+                    params:     {
+                        action:         'turnOnApplinkNonMedia',
+                        target:         'MFT.MediaController',
+                        text:           appList[i].appName,
+                        appName:        appList[i].appName,
+                        appId:          appList[i].appId,
+                        className:      'scrollButtons button notpressed',
+                        icon:           appList[i].icon,
+                        templateName:   'rightIcon'
+                    }                                   
+                });
+            }
         }
         MFT.InfoAppsView.ShowAppList();
 
     },
 
     onGetDeviceList: function( params ){
-        if ("SUCCESS" == params.resultCode) {
-        this.devicesList.splice(0, this.devicesList.length);
-        for(var i = 0; i < params.deviceList.length; i++){
-            this.devicesList.push({
-                type:       MFT.Button,
-                params:     {
-                    action:         'turnOnApplink',
-                    target:         'MFT.MediaController',
-                    text:           params.deviceList[i].appName,
-                    className:      'scrollButtons button notpressed',
-                    icon:           params.icon,
-                    templateName:   'rightIcon'
-                }                                   
-            });
+        if (null == params.resultCode || (null != params.resultCode && "SUCCESS" == params.resultCode)) {
+            this.devicesList.splice(0, this.devicesList.length);
+            for(var i = 0; i < params.deviceList.length; i++){
+                this.devicesList.push({
+                    type:       MFT.Button,
+                    params:     {
+                        action:         'onDeviceChoosed',
+                        target:         'MFT.ApplinkController',
+                        text:           params.deviceList[i],
+                        deviceName:     params.deviceList[i],
+                        className:      'scrollButtons button notpressed',
+                        icon:           params.icon,
+                        templateName:   'rightIcon'
+                    }                                   
+                });
+            }
+            
+            if( MFT.States.info.devicelist.active ){
+                MFT.DeviceLilstView.ShowDeviceList();
+            }
         }
-        MFT.DeviceLilstView.ShowDeviceList();
-    }
     },
 
     /**
@@ -160,7 +189,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
 	startTimer: function(){
 		if(!this.pause){
 			this.timer = setInterval(function(){
-				this.set('currTime', this.currTime+1);
+				MFT.ApplinkMediaModel.set('currTime', MFT.ApplinkMediaModel.currTime+1);
 			}, 1000);
 		}else{
 			clearInterval(this.timer);
@@ -168,10 +197,11 @@ MFT.ApplinkMediaModel = Em.Object.create({
 	}.observes('this.pause'),
 
 	setDuration: function() {
+        var number = (this.duration + this.currTime) % 60;
 		if(this.countUp){
-			this.showInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (this.duration + this.currTime) % 60 );
+			this.showInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}else{
-			this.showInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (this.duration - this.currTime) % 60 );
+			this.showInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}
 	}.observes('this.currTime'),
 
@@ -182,9 +212,9 @@ MFT.ApplinkMediaModel = Em.Object.create({
 	}.observes('this.duration'),
 
     /** Add command to Options list */
-    onApplinkOptionsAddCommand: function( commandId, params ){
+    onApplinkOptionsAddCommand: function( commandId, params, icon, appId ){
 
-       MFT.ApplinkOptionsView.AddCommand( commandId, params );
+       MFT.ApplinkOptionsView.AddCommand( commandId, params, appId );
 
     },
 
@@ -262,7 +292,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
     /** Applink AddCommand handler */
     onApplinkAddCommand: function(params){
         if( params.menuParams.parentID == 0 ){
-            this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams, params.cmdIcon);
+            this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams, params.cmdIcon, params.appId);
         }else{
             this.subMenuCommands.push(params);
             if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
@@ -331,6 +361,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
 
     /** Applin UI Show handler */
     onApplinkUIShow: function(params){
+        clearInterval(this.timer);
         this.showInfo.set('field1',        params.mainField1);
         this.showInfo.set('field2',        params.mainField2);
         this.showInfo.set('field3',        params.mainField3);
@@ -349,20 +380,18 @@ MFT.ApplinkMediaModel = Em.Object.create({
     /** Applink Slider activation */
     onApplinkSlider: function(params){
 
-/*
-unsigned int (2:26) numTicks,
-  unsigned int (1:16) position,
-  string (500) sliderHeader,
-  string (500) * sliderFooter[1:26],
-  unsigned int (65535) timeout
-  ->
-  unsigned int (1:26) sliderPosition
-  */
-
-
+        this.applinkSliderContent.set('range', params.numTicks);
+        this.applinkSliderContent.set('value', params.position);
+        this.set('sliderParams.headerLabel', params.sliderHeader);
+        this.set('sliderParams.footerLabel', params.sliderFooter);
         MFT.ApplinkMediaController.turnOnApplinkSlider();
-        MFT.ApplinkSliderView.activate();
-
+        //MFT.ApplinkSliderView.activate();
+        setTimeout(function(){
+            if(MFT.States.media.applink.applinkslider.active){
+                MFT.States.goToState('media.applink');
+            }
+        },
+        params.timeout);
     },
 
     /** Applink TTS Speak handler */

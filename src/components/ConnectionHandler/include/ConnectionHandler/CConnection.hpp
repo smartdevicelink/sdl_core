@@ -24,10 +24,14 @@ namespace NsConnectionHandler
     typedef int tConnectionHandle;
 
     /**
-     * \brief Type for Connections map
-     * Key is ConnectionHandle which is uniq
+     * \brief Type for Sessions vector
      */
     typedef std::vector<unsigned char> tSessionList;
+
+    /**
+     * \brief Type for Sessions vector iterator
+     */
+    typedef std::vector<unsigned char>::iterator tSessionListIterator;
 
     /**
      * \class CConnection
@@ -63,6 +67,12 @@ namespace NsConnectionHandler
          * \return sessionID or -1 in case of issues
          */
         int addNewSession();
+
+        /**
+         * \brief Removes session from connection
+         * \return sessionID or -1 in case of issues
+         */
+        int removeSession(unsigned char aSession);
     private:
 
         /**

@@ -404,11 +404,35 @@ MFT.MediaController = Em.Object.create({
             this.set('directTuneSelected', false);
         }
 
-        MFT.ApplinkMediaController.turnOnApplink(element.appName);
+        MFT.ApplinkMediaController.turnOnApplink(element.appName, element.appId);
 
         /* Show Applink application in media left menu */
 		MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);
 		MFT.MediaController.listDown();
+
+    },
+
+    /** Switching on Application */
+    turnOnApplinkNonMedia: function(element){
+
+        // Exit form player or radio
+        this.onPlayerExit();
+        this.onRadioExit();
+        // Set Applink Data active
+        MFT.ApplinkNonMediaModel.set('active',true);
+        // Go to Applink state
+        MFT.States.goToState('info.nonMedia');
+        // hide directTune
+        this.offDirectTune();
+        if(this.directTuneSelected){
+            this.set('directTuneSelected', false);
+        }
+
+        MFT.ApplinkNonMediaModel.turnOnApplink(element.appName, element.appId);
+
+        /* Show Applink application in media left menu */
+		//MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);
+		//MFT.MediaController.listDown();
 
     },
 

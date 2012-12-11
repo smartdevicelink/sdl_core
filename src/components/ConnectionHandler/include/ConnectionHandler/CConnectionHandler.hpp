@@ -92,6 +92,8 @@ namespace NsConnectionHandler
 
         virtual void startDevicesDiscovery();
 
+        virtual void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle );
+
     private:
         /**
          * \brief Default class constructor

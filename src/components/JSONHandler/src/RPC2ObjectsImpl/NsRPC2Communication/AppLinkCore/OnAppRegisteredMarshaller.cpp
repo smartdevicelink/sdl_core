@@ -63,7 +63,7 @@ bool OnAppRegisteredMarshaller::checkIntegrityConst(const OnAppRegistered& s)
 
   if(!NsAppLinkRPC::LanguageMarshaller::checkIntegrityConst(s.languageDesired))  return false;
 
-  if(!NsAppLinkRPC::LanguageMarshaller::checkIntegrityConst(s.hmiDisplayLanguageDesired))  return false;
+  //if(!NsAppLinkRPC::LanguageMarshaller::checkIntegrityConst(s.hmiDisplayLanguageDesired))  return false;
 
   if(s.ttsName)
   {

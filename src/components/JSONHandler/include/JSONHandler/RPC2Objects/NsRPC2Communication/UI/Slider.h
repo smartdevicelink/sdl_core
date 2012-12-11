@@ -60,7 +60,8 @@ namespace NsRPC2Communication
 
 /// timeout <= 65535
       bool set_timeout(unsigned int timeout);
-
+    bool set_appId(int appId);
+    int get_appId() const;     
 
     private:
 
@@ -71,7 +72,7 @@ namespace NsRPC2Communication
       std::string sliderHeader;
       std::vector< std::string>* sliderFooter;
       unsigned int timeout;
-
+ int appId;
     };
   }
 }

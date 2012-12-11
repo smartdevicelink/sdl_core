@@ -133,7 +133,7 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
       if(i>100)  return false;
       std::vector<NsAppLinkRPC::HmiZoneCapabilities> z(i);
       while(i--)
-        if(!NsAppLinkRPC::HmiZoneCapabilitiesMarshaller::fromJSON(js["hmiZoneCapabilities"][i],c.hmiZoneCapabilities[i]))  return false;
+        if(!NsAppLinkRPC::HmiZoneCapabilitiesMarshaller::fromJSON(js["hmiZoneCapabilities"][i],z[i]))  return false;
       c.hmiZoneCapabilities=z;
     }
 

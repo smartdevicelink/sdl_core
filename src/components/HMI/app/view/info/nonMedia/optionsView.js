@@ -35,13 +35,14 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
 		content:	'Options'
 	}),
 	
-	AddCommand: function( commandId, params ){
+    AddCommand: function( commandId, params, appId ){
 
-        this.get('listOfOptions.list.childViews').insertAt(0,
+        this.get('listOfOptions.list.childViews').pushObject(
             MFT.Button.create({
                 action:                 'onCommand',
                 target:                 'MFT.ApplinkMediaController',
                 commandId:              commandId,
+                appId:                  appId,
                 text:                   params.menuName,
                 classNames:             'list-item',
                 templateName:           'text'
@@ -60,10 +61,10 @@ MFT.InfoNonMediaOptions = Em.ContainerView.create( MFT.LoadableView, {
     
     AddSubMenu: function( menuId, params ){
 
-        this.get('listOfOptions.list.childViews').pushObject(0,
+        this.get('listOfOptions.list.childViews').insertAt(0,
             MFT.Button.create({
                 action:                 'turnOnApplinkSubMenu',
-                target:                 'MFT.ApplinkMediaController',
+                target:                 'MFT.NonMediaController',
                 menuId:                 menuId,
                 text:                   params.menuName,
                 classNames:             'list-item',

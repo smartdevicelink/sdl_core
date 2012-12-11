@@ -55,7 +55,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
 
         classNames:         'footerLabel',
 
-        contentBinding:     'MFT.ApplinkMediaModel.sliderParams.footerLabel'
+        contentBinding:     'parentView.footerText'
     }),
 
     footerText: function(){

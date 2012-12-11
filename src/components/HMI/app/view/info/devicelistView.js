@@ -24,6 +24,10 @@ MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
                             'deviceListLabel'
                         ],
 
+    afterRender: function(){
+        this.ShowDeviceList();
+    },
+
     /** Button to return to previous view*/
     backButton: MFT.Button.extend({
         classNames:        ['backButton','button'],     

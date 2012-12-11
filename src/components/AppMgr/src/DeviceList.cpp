@@ -68,6 +68,25 @@ namespace NsAppManager
     }
 
     /**
+     * \brief find device associated with the given name
+     * \param name device name
+     * \return device associated with the given name
+     */
+    const NsConnectionHandler::CDevice *DeviceList::findDeviceByName(const std::string &name) const
+    {
+        for(NsConnectionHandler::tDeviceList::const_iterator it = mDeviceList.begin(); it != mDeviceList.end(); it++)
+        {
+            const NsConnectionHandler::CDevice& device = it->second;
+            if(device.getUserFriendlyName() == name)
+            {
+                return &device;
+            }
+        }
+        LOG4CPLUS_INFO_EXT(mLogger, "Device " << name << " not found in subscribed." );
+        return 0;
+    }
+
+    /**
      * \brief Copy constructor
      */
     DeviceList::DeviceList(const DeviceList &)
