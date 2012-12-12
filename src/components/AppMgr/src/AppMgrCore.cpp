@@ -80,7 +80,8 @@ namespace NsAppManager
     AppMgrCore::AppMgrCore()
         :mQueueRPCAppLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
         ,mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
-        ,mDriverDistraction(0)
+        ,mDriverDistractionV1(0)
+        ,mDriverDistractionV2(0)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
     }
@@ -91,7 +92,8 @@ namespace NsAppManager
     AppMgrCore::AppMgrCore(const AppMgrCore &)
         :mQueueRPCAppLinkObjectsIncoming(0)
         ,mQueueRPCBusObjectsIncoming(0)
-        ,mDriverDistraction(0)
+        ,mDriverDistractionV1(0)
+        ,mDriverDistractionV2(0)
     {
     }
 
@@ -104,8 +106,10 @@ namespace NsAppManager
             delete mQueueRPCAppLinkObjectsIncoming;
         if(mQueueRPCBusObjectsIncoming)
             delete mQueueRPCBusObjectsIncoming;
-        if(mDriverDistraction)
-            delete mDriverDistraction;
+        if(mDriverDistractionV1)
+            delete mDriverDistractionV1;
+        if(mDriverDistractionV2)
+            delete mDriverDistractionV2;
 
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore destructed!");
     }
@@ -2128,25 +2132,31 @@ namespace NsAppManager
                 }
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
-            //    switch(app->getProtocolVersion())
-            //    {
-                //    case 1:
-                //    {
-                        NsAppLinkRPC::OnDriverDistraction* event = new NsAppLinkRPC::OnDriverDistraction();
-                        event->set_state(object->get_state());
-                        core->mDriverDistraction = event;
-                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+
+                // We need two events simultaneously, because we may have applications of more than one protocol version registered on the HMI
+                // and all they need to be notified of an OnDriverDistraction event
+                NsAppLinkRPC::OnDriverDistraction* eventV1 = new NsAppLinkRPC::OnDriverDistraction();
+                eventV1->set_state(object->get_state());
+                core->mDriverDistractionV1 = eventV1;
+                NsAppLinkRPCV2::OnDriverDistraction* eventV2 = new NsAppLinkRPCV2::OnDriverDistraction();
+                NsAppLinkRPCV2::DriverDistractionState stateV2;
+                stateV2.set((NsAppLinkRPCV2::DriverDistractionState::DriverDistractionStateInternal)object->get_state().get());
+                eventV2->set_state(stateV2);
+                core->mDriverDistractionV2 = eventV2;
+
+                switch(app->getProtocolVersion())
+                {
+                    case 1:
+                    {
+                        MobileHandler::getInstance().sendRPCMessage(eventV1, connectionId, sessionID);
                         break;
-                //    }
-                //    case 2:
-                //    {
-                //        NsAppLinkRPC::OnDriverDistraction* event = new NsAppLinkRPC::OnDriverDistraction();
-                //        event->set_state(object->get_state());
-                //        core->mDriverDistraction = event;
-                //        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
-                //        break;
-                //    }
-            //    }
+                    }
+                    case 2:
+                    {
+                        MobileHandler::getInstance().sendRPCMessage(eventV2, connectionId, sessionID);
+                        break;
+                    }
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONSYSTEMCONTEXT:
@@ -2536,11 +2546,6 @@ namespace NsAppManager
                 }
                 LOG4CPLUS_INFO_EXT(mLogger, "New app's commands added!");
 
-                if(core->mDriverDistraction)
-                {
-                    MobileHandler::getInstance().sendRPCMessage(core->mDriverDistraction, connectionID, sessionID);
-                }
-
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2563,6 +2568,12 @@ namespace NsAppManager
                         response->setId(object->getId());
                         response->setResult(NsAppLinkRPC::Result::SUCCESS);
                         HMIHandler::getInstance().sendResponse(response);
+
+                        if(core->mDriverDistractionV1)
+                        {
+                            MobileHandler::getInstance().sendRPCMessage(core->mDriverDistractionV1, connectionID, sessionID);
+                        }
+
                         break;
                     }
                     case 2:
@@ -2585,6 +2596,12 @@ namespace NsAppManager
                         response->setId(object->getId());
                         response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
                         HMIHandler::getInstance().sendResponse(response);
+
+                        if(core->mDriverDistractionV2)
+                        {
+                            MobileHandler::getInstance().sendRPCMessage(core->mDriverDistractionV2, connectionID, sessionID);
+                        }
+
                         break;
                     }
                 }
