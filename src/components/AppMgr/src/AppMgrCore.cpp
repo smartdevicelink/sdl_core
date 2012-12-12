@@ -2228,7 +2228,7 @@ namespace NsAppManager
                 unsigned int connectionId = app->getConnectionID();
 
                 NsAppLinkRPCV2::Slider_response* response = new NsAppLinkRPCV2::Slider_response();
-                
+
                 response->set_success(true);
                 response->setMethodId(NsAppLinkRPCV2::FunctionID::SliderID);
                 response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -2246,7 +2246,8 @@ namespace NsAppManager
                 NsRPC2Communication::UI::OnDeviceChosen* chosen = (NsRPC2Communication::UI::OnDeviceChosen*)msg;
                 const std::string& deviceName = chosen->get_deviceName();
                 const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByName(deviceName);
-                if (device) {
+                if (device)
+                {
                     const NsConnectionHandler::tDeviceHandle& handle = device->getDeviceHandle();
                     ConnectionHandler::getInstance().connectToDevice(handle);
                 }
@@ -2283,12 +2284,29 @@ namespace NsAppManager
                 app->decrementUnrespondedRequestCount(cmdId);
                 if(app->getUnrespondedRequestCount(cmdId) == 0)
                 {
-                    NsAppLinkRPC::AddCommand_response* response = new NsAppLinkRPC::AddCommand_response();
-                    response->set_success(true);
-                    response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
-                    core->mRequestMapping.removeRequest(object->getId());
-                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                    switch(app->getProtocolVersion())
+                    {
+                        case 1:
+                        {
+                            NsAppLinkRPC::AddCommand_response* response = new NsAppLinkRPC::AddCommand_response();
+                            response->set_success(true);
+                            response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
+                            core->mRequestMapping.removeRequest(object->getId());
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                            MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                            break;
+                        }
+                        case 2:
+                        {
+                            NsAppLinkRPCV2::AddCommand_response* response = new NsAppLinkRPCV2::AddCommand_response();
+                            response->set_success(true);
+                            response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
+                            core->mRequestMapping.removeRequest(object->getId());
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                            MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                            break;
+                        }
+                    }
                 }
 
                 core->mMessageMapping.removeMessage(object->getId());
