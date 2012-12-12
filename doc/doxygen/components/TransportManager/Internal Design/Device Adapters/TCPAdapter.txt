@@ -1,0 +1,3 @@
+/*! \page components_transportmanager_internal_design_device_adapters_tcp_adapter TCP Adapter
+
+*/
