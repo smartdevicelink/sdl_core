@@ -1572,13 +1572,29 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
-                NsAppLinkRPC::OnCommand* event = new NsAppLinkRPC::OnCommand();
-                event->set_cmdID(object->get_commandId());
-
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                switch(app->getProtocolVersion())
+                {
+                    case 1:
+                    {
+                        NsAppLinkRPC::OnCommand* event = new NsAppLinkRPC::OnCommand();
+                        event->set_cmdID(object->get_commandId());
+                        unsigned char sessionID = app->getSessionID();
+                        unsigned int connectionId = app->getConnectionID();
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        break;
+                    }
+                    case 2:
+                    {
+                        NsAppLinkRPCV2::OnCommand* event = new NsAppLinkRPCV2::OnCommand();
+                        event->set_cmdID(object->get_commandId());
+                        unsigned char sessionID = app->getSessionID();
+                        unsigned int connectionId = app->getConnectionID();
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        break;
+                    }
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SHOWRESPONSE:
