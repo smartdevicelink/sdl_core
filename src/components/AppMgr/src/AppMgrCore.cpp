@@ -1278,6 +1278,29 @@ namespace NsAppManager
                     HMIHandler::getInstance().sendRequest(createInteractionChoiceSet);
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::DeleteInteractionChoiceSetID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet request has been invoked");
+                    NsAppLinkRPCV2::DeleteInteractionChoiceSet_request* object = (NsAppLinkRPCV2::DeleteInteractionChoiceSet_request*)mobileMsg;
+                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        NsAppLinkRPCV2::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPCV2::DeleteInteractionChoiceSet_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
+                    NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteInteractionChoiceSet = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
+                    deleteInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getId(), connectionID, sessionID);
+                    deleteInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
+                    deleteInteractionChoiceSet->set_appId(app->getAppID());
+                    app->removeChoiceSet(object->get_interactionChoiceSetID());
+                    HMIHandler::getInstance().sendRequest(deleteInteractionChoiceSet);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::PerformInteractionID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction request has been invoked");
