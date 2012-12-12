@@ -1436,6 +1436,57 @@ namespace NsAppManager
 
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::DeleteCommandID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
+                    Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        NsAppLinkRPCV2::DeleteCommand_response* response = new NsAppLinkRPCV2::DeleteCommand_response();
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
+
+                    NsAppLinkRPCV2::DeleteCommand_request* object = (NsAppLinkRPCV2::DeleteCommand_request*)mobileMsg;
+
+                    CommandTypes cmdTypes = app->getCommandTypes(object->get_cmdID());
+                    const unsigned int& cmdId = object->get_cmdID();
+                    for(CommandTypes::iterator it = cmdTypes.begin(); it != cmdTypes.end(); it++)
+                    {
+                        CommandType cmdType = *it;
+                        if(cmdType == CommandType::UI)
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand UI request has been invoked");
+                            NsRPC2Communication::UI::DeleteCommand* deleteCmd = new NsRPC2Communication::UI::DeleteCommand();
+                            deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                            deleteCmd->set_appId(app->getAppID());
+                            core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+                            deleteCmd->set_cmdId(cmdId);
+                            app->removeCommand(cmdId, cmdType);
+                            app->incrementUnrespondedRequestCount(cmdId);
+                            app->removeMenuCommand(cmdId);
+                            core->mRequestMapping.addMessage(deleteCmd->getId(), cmdId);
+                            HMIHandler::getInstance().sendRequest(deleteCmd);
+                        }
+                        else if(cmdType == CommandType::VR)
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand VR request has been invoked");
+                            NsRPC2Communication::VR::DeleteCommand* deleteCmd = new NsRPC2Communication::VR::DeleteCommand();
+                            deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                            core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+                            deleteCmd->set_cmdId(cmdId);
+                            deleteCmd->set_appId(app->getAppID());
+                            app->removeCommand(cmdId, cmdType);
+                            app->incrementUnrespondedRequestCount(cmdId);
+                            core->mRequestMapping.addMessage(deleteCmd->getId(), cmdId);
+                            HMIHandler::getInstance().sendRequest(deleteCmd);
+                        }
+                    }
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
                 {
