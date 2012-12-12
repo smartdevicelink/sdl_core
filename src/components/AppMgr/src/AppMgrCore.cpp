@@ -1920,20 +1920,48 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionId = app->getConnectionID();
 
-                NsAppLinkRPC::PerformInteraction_response* response = new NsAppLinkRPC::PerformInteraction_response();
-                if(object->get_choiceID())
+                switch(app->getProtocolVersion())
                 {
-                    response->set_choiceID(*object->get_choiceID());
+                    case 1:
+                    {
+                        NsAppLinkRPC::PerformInteraction_response* response = new NsAppLinkRPC::PerformInteraction_response();
+                        if(object->get_choiceID())
+                        {
+                            response->set_choiceID(*object->get_choiceID());
+                        }
+                        if(object->get_triggerSource())
+                        {
+                            response->set_triggerSource(*object->get_triggerSource());
+                        }
+                        response->set_success(true);
+                        response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
+                        core->mMessageMapping.removeMessage(object->getId());
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        break;
+                    }
+                    case 2:
+                    {
+                        NsAppLinkRPCV2::PerformInteraction_response* response = new NsAppLinkRPCV2::PerformInteraction_response();
+                        if(object->get_choiceID())
+                        {
+                            response->set_choiceID(*object->get_choiceID());
+                        }
+                        if(object->get_triggerSource())
+                        {
+                            NsAppLinkRPCV2::TriggerSource triggerSrc;
+                            triggerSrc.set((NsAppLinkRPCV2::TriggerSource::TriggerSourceInternal)object->get_triggerSource()->get());
+                            response->set_triggerSource(triggerSrc);
+                        }
+                        response->set_success(true);
+                        response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
+                        core->mMessageMapping.removeMessage(object->getId());
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        break;
+                    }
                 }
-                if(object->get_triggerSource())
-                {
-                    response->set_triggerSource(*object->get_triggerSource());
-                }
-                response->set_success(true);
-                response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
-                core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETMEDIACLOCKTIMERRESPONSE:
