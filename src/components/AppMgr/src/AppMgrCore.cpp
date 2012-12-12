@@ -685,7 +685,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet request has been invoked");
                     NsAppLinkRPC::CreateInteractionChoiceSet_request* object = (NsAppLinkRPC::CreateInteractionChoiceSet_request*)mobileMsg;
-                    Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
@@ -709,7 +709,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet request has been invoked");
                     NsAppLinkRPC::DeleteInteractionChoiceSet_request* object = (NsAppLinkRPC::DeleteInteractionChoiceSet_request*)mobileMsg;
-                    Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
@@ -1240,6 +1240,42 @@ namespace NsAppManager
                     mobileResponse->set_success(true);
                     mobileResponse->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(mobileResponse, connectionID, sessionID);
+                    break;
+                }
+                case NsAppLinkRPCV2::FunctionID::CreateInteractionChoiceSetID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet request has been invoked");
+                    NsAppLinkRPCV2::CreateInteractionChoiceSet_request* object = (NsAppLinkRPCV2::CreateInteractionChoiceSet_request*)mobileMsg;
+                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        NsAppLinkRPCV2::CreateInteractionChoiceSet_response* response = new NsAppLinkRPCV2::CreateInteractionChoiceSet_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
+                    NsRPC2Communication::UI::CreateInteractionChoiceSet* createInteractionChoiceSet = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
+                    createInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    core->mMessageMapping.addMessage(createInteractionChoiceSet->getId(), connectionID, sessionID);
+
+                    const std::vector<NsAppLinkRPCV2::Choice>& choicesV2 = object->get_choiceSet();
+                    std::vector<NsAppLinkRPC::Choice> choices;
+                    for(std::vector<NsAppLinkRPCV2::Choice>::const_iterator it = choicesV2.begin(); it != choicesV2.end(); it++)
+                    {
+                        const NsAppLinkRPCV2::Choice& choiceV2 = *it;
+                        NsAppLinkRPC::Choice choice;
+                        choice.set_choiceID(choiceV2.get_choiceID());
+                        choice.set_menuName(choiceV2.get_menuName());
+                        choice.set_vrCommands(choiceV2.get_vrCommands());
+                        choices.push_back(choice);
+                    }
+                    createInteractionChoiceSet->set_choiceSet(choices);
+                    createInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
+                    createInteractionChoiceSet->set_appId(app->getAppID());
+                    app->addChoiceSet(object->get_interactionChoiceSetID(), object->get_choiceSet());
+                    HMIHandler::getInstance().sendRequest(createInteractionChoiceSet);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::PerformInteractionID:
@@ -2716,23 +2752,61 @@ namespace NsAppManager
                 unsigned char sessionID = app->getSessionID();
                 unsigned int connectionID = app->getConnectionID();
 
-                const ChoiceSetItems& newChoiceSets = app->getAllChoiceSets();
-                LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
-                for(ChoiceSetItems::const_iterator it = newChoiceSets.begin(); it != newChoiceSets.end(); it++)
+                switch(app->getProtocolVersion())
                 {
-                    const unsigned int& choiceSetId = it->first;
-                    const ChoiceSet& choiceSet = it->second;
-                    NsRPC2Communication::UI::CreateInteractionChoiceSet* addCmd = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
-                    addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    addCmd->set_interactionChoiceSetID(choiceSetId);
-                    addCmd->set_choiceSet(choiceSet);
-                    addCmd->set_appId(app->getAppID());
-                    core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
+                    case 1:
+                    {
+                        Application_v1* appV1 = (Application_v1*)app;
+                        const ChoiceSetItems& newChoiceSets = appV1->getAllChoiceSets();
+                        LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
+                        for(ChoiceSetItems::const_iterator it = newChoiceSets.begin(); it != newChoiceSets.end(); it++)
+                        {
+                            const unsigned int& choiceSetId = it->first;
+                            const ChoiceSetV1& choiceSet = it->second.choiceSetV1;
+                            NsRPC2Communication::UI::CreateInteractionChoiceSet* addCmd = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
+                            addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                            addCmd->set_interactionChoiceSetID(choiceSetId);
+                            addCmd->set_choiceSet(choiceSet);
+                            addCmd->set_appId(app->getAppID());
+                            core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
 
-                    HMIHandler::getInstance().sendRequest(addCmd);
+                            HMIHandler::getInstance().sendRequest(addCmd);
+                        }
+                        LOG4CPLUS_INFO_EXT(mLogger, "New app's interaction choice sets added!");
+                        break;
+                    }
+                    case 2:
+                    {
+                        Application_v2* appV2 = (Application_v2*)app;
+                        const ChoiceSetItems& newChoiceSets = appV2->getAllChoiceSets();
+                        LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
+                        for(ChoiceSetItems::const_iterator it = newChoiceSets.begin(); it != newChoiceSets.end(); it++)
+                        {
+                            const unsigned int& choiceSetId = it->first;
+                            const ChoiceSetV2& choiceSet = it->second.choiceSetV2;
+                            ChoiceSetV1 choiceSetV1;
+                            for(ChoiceSetV2::const_iterator it = choiceSet.begin(); it != choiceSet.end(); it++)
+                            {
+                                const NsAppLinkRPCV2::Choice& choice = *it;
+                                NsAppLinkRPC::Choice choiceV1;
+                                choiceV1.set_choiceID(choice.get_choiceID());
+                                choiceV1.set_menuName(choice.get_menuName());
+                                choiceV1.set_vrCommands(choice.get_vrCommands());
+                                choiceSetV1.push_back(choiceV1);
+                            }
+                            NsRPC2Communication::UI::CreateInteractionChoiceSet* addCmd = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
+                            addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                            addCmd->set_interactionChoiceSetID(choiceSetId);
+                            addCmd->set_choiceSet(choiceSetV1);
+                            addCmd->set_appId(app->getAppID());
+                            core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
+
+                            HMIHandler::getInstance().sendRequest(addCmd);
+                        }
+                        LOG4CPLUS_INFO_EXT(mLogger, "New app's interaction choice sets added!");
+                        break;
+                    }
                 }
-                LOG4CPLUS_INFO_EXT(mLogger, "New app's interaction choice sets added!");
-
                 const MenuItems& newMenus = app->getAllMenus();
                 LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's menus to HMI due to a new application activation");
                 for(MenuItems::const_iterator it = newMenus.begin(); it != newMenus.end(); it++)
@@ -3232,20 +3306,45 @@ namespace NsAppManager
         }
         LOG4CPLUS_INFO_EXT(mLogger, "Current app's menus removed!");
 
-        const ChoiceSetItems& currentChoiceSets = currentApp->getAllChoiceSets();
-        LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's interaction choice sets from HMI");
-        for(ChoiceSetItems::const_iterator it = currentChoiceSets.begin(); it != currentChoiceSets.end(); it++)
+        switch(currentApp->getProtocolVersion())
         {
-            const unsigned int& choiceSetId = it->first;
-            NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteCmd = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
-            deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-            deleteCmd->set_interactionChoiceSetID(choiceSetId);
-            deleteCmd->set_appId(currentApp->getAppID());
-            mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
-
-            HMIHandler::getInstance().sendRequest(deleteCmd);
+            case 1:
+            {
+                Application_v1* appV1 = (Application_v1*)currentApp;
+                const ChoiceSetItems& currentChoiceSets = appV1->getAllChoiceSets();
+                LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's interaction choice sets from HMI");
+                for(ChoiceSetItems::const_iterator it = currentChoiceSets.begin(); it != currentChoiceSets.end(); it++)
+                {
+                    const unsigned int& choiceSetId = it->first;
+                    NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteCmd = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
+                    deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    deleteCmd->set_interactionChoiceSetID(choiceSetId);
+                    deleteCmd->set_appId(currentApp->getAppID());
+                    mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+                    HMIHandler::getInstance().sendRequest(deleteCmd);
+                }
+                LOG4CPLUS_INFO_EXT(mLogger, "Current app's interaction choice sets removed!");
+                break;
+            }
+            case 2:
+            {
+                Application_v2* appV2 = (Application_v2*)currentApp;
+                const ChoiceSetItems& currentChoiceSets = appV2->getAllChoiceSets();
+                LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's interaction choice sets from HMI");
+                for(ChoiceSetItems::const_iterator it = currentChoiceSets.begin(); it != currentChoiceSets.end(); it++)
+                {
+                    const unsigned int& choiceSetId = it->first;
+                    NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteCmd = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
+                    deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    deleteCmd->set_interactionChoiceSetID(choiceSetId);
+                    deleteCmd->set_appId(currentApp->getAppID());
+                    mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+                    HMIHandler::getInstance().sendRequest(deleteCmd);
+                }
+                LOG4CPLUS_INFO_EXT(mLogger, "Current app's interaction choice sets removed!");
+                break;
+            }
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Current app's interaction choice sets removed!");
     }
 
     /**
