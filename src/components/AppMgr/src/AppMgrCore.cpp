@@ -2699,19 +2699,37 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, "SendData request has been received!");
                 NsRPC2Communication::AppLinkCore::SendData* object = static_cast<NsRPC2Communication::AppLinkCore::SendData*>(msg);
                 core->mSyncPManager.setRawData( object->get_data() );
-                NsAppLinkRPC::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPC::OnEncodedSyncPData;
                 Application* app = AppMgrRegistry::getInstance().getActiveItem();
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, " No active application found!");
                     return;
                 }
-                encodedNotification->set_data(core->mSyncPManager.getPData());
-                MobileHandler::getInstance().sendRPCMessage( encodedNotification, app->getConnectionID(), app->getSessionID() );
-                NsRPC2Communication::AppLinkCore::SendDataResponse* response = new NsRPC2Communication::AppLinkCore::SendDataResponse;
-                response->setId(object->getId());
-                response->setResult(NsAppLinkRPC::Result::SUCCESS);
-                HMIHandler::getInstance().sendResponse(response);
+                switch(app->getProtocolVersion())
+                {
+                    case 1:
+                    {
+                        NsAppLinkRPC::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPC::OnEncodedSyncPData;
+                        encodedNotification->set_data(core->mSyncPManager.getPData());
+                        MobileHandler::getInstance().sendRPCMessage( encodedNotification, app->getConnectionID(), app->getSessionID() );
+                        NsRPC2Communication::AppLinkCore::SendDataResponse* response = new NsRPC2Communication::AppLinkCore::SendDataResponse;
+                        response->setId(object->getId());
+                        response->setResult(NsAppLinkRPC::Result::SUCCESS);
+                        HMIHandler::getInstance().sendResponse(response);
+                        break;
+                    }
+                    case 2:
+                    {
+                        NsAppLinkRPCV2::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPCV2::OnEncodedSyncPData;
+                        encodedNotification->set_data(core->mSyncPManager.getPData());
+                        MobileHandler::getInstance().sendRPCMessage( encodedNotification, app->getConnectionID(), app->getSessionID() );
+                        NsRPC2Communication::AppLinkCore::SendDataResponse* response = new NsRPC2Communication::AppLinkCore::SendDataResponse;
+                        response->setId(object->getId());
+                        response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
+                        HMIHandler::getInstance().sendResponse(response);
+                        break;
+                    }
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST:
