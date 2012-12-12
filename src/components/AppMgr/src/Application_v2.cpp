@@ -194,4 +194,41 @@ namespace NsAppManager
     {
         mTtsName = value;
     }
+
+    /**
+     * \brief add an interaction choice set item to the application
+     * \param choiceSetId interaction choice set id
+     * \param choiceSet interaction choice set
+     */
+    void Application_v2::addChoiceSet(const unsigned int &choiceSetId, const ChoiceSetV2 &choiceSet)
+    {
+        mChoiceSets.addItem(choiceSetId, choiceSet);
+    }
+
+    /**
+     * \brief remove an interaction choice set from the application
+     * \param choiceSetId interaction choice set id
+     */
+    void Application_v2::removeChoiceSet(const unsigned int &choiceSetId)
+    {
+        mChoiceSets.removeItem(choiceSetId);
+    }
+
+    /**
+     * \brief gets all interaction choice set items
+     * \return interaction choice set items
+     */
+    ChoiceSetItems Application_v2::getAllChoiceSets() const
+    {
+        return mChoiceSets.getAllChoiceSets();
+    }
+
+    /**
+     * \brief get count of interaction choice sets
+     * \return interaction choice sets count
+     */
+    size_t Application_v2::getChoiceSetsCount() const
+    {
+        return mChoiceSets.size();
+    }
 }
