@@ -1516,6 +1516,60 @@ namespace NsAppManager
                     HMIHandler::getInstance().sendRequest(addSubMenu);
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::DeleteSubMenuID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubmenu request has been invoked");
+                    NsAppLinkRPCV2::DeleteSubMenu_request* object = (NsAppLinkRPCV2::DeleteSubMenu_request*)mobileMsg;
+                    Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        NsAppLinkRPCV2::DeleteSubMenu_response* response = new NsAppLinkRPCV2::DeleteSubMenu_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
+                    NsRPC2Communication::UI::DeleteSubMenu* delSubMenu = new NsRPC2Communication::UI::DeleteSubMenu();
+                    delSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    core->mMessageMapping.addMessage(delSubMenu->getId(), connectionID, sessionID);
+                    const unsigned int& menuId = object->get_menuID();
+                    delSubMenu->set_menuId(menuId);
+                    delSubMenu->set_appId(app->getAppID());
+                    const MenuCommands& menuCommands = app->findMenuCommands(menuId);
+                    LOG4CPLUS_INFO_EXT(mLogger, " A given menu has " << menuCommands.size() << " UI commands - about to delete 'em!");
+                    for(MenuCommands::const_iterator it = menuCommands.begin(); it != menuCommands.end(); it++)
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, " Deleting command with id " << *it);
+                        NsRPC2Communication::UI::DeleteCommand* delUiCmd = new NsRPC2Communication::UI::DeleteCommand();
+                        delUiCmd->set_cmdId(*it);
+                        delUiCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        delUiCmd->set_appId(app->getAppID());
+                        core->mMessageMapping.addMessage(delUiCmd->getId(), connectionID, sessionID);
+                        core->mRequestMapping.addMessage(delUiCmd->getId(), *it);
+                        HMIHandler::getInstance().sendRequest(delUiCmd);
+                        const CommandTypes& types = app->getCommandTypes(*it);
+                        for(CommandTypes::const_iterator it2 = types.begin(); it2 != types.end(); it2++)
+                        {
+                            const CommandType& type = *it2;
+                            if(type == CommandType::VR)
+                            {
+                                LOG4CPLUS_INFO_EXT(mLogger, " A given command id " << *it << " has VR counterpart attached to: deleting it also!");
+                                NsRPC2Communication::VR::DeleteCommand* delVrCmd = new NsRPC2Communication::VR::DeleteCommand();
+                                delVrCmd->set_cmdId(*it);
+                                delVrCmd->set_appId(app->getAppID());
+                                core->mMessageMapping.addMessage(delVrCmd->getId(), connectionID, sessionID);
+                                core->mRequestMapping.addMessage(delVrCmd->getId(), *it);
+                                HMIHandler::getInstance().sendRequest(delVrCmd);
+                            }
+                        }
+                        app->removeCommand(*it, CommandType::UI);
+                        app->removeMenuCommand(*it);
+                    }
+                    app->removeMenu(menuId);
+                    HMIHandler::getInstance().sendRequest(delSubMenu);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
                 {
