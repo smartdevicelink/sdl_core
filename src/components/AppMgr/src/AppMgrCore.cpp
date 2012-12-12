@@ -49,6 +49,15 @@ namespace {
         statvfs(currentAppPath, &fsInfo);
         return fsInfo.f_bsize * fsInfo.f_bfree;
     }
+
+    template<typename Response, typename Result>
+    void sendResponse(int responseId, Result result)
+    {
+        Response* response = new Response;
+        response->setId(responseId);
+        response->setResult(result);
+        NsAppManager::HMIHandler::getInstance().sendResponse(response);
+    }
 }
 
 namespace NsAppManager
@@ -2050,33 +2059,39 @@ namespace NsAppManager
                 {
                     case 1:
                     {
-                        Application_v1* appv1 = (Application_v1*)app;
-                        appv1->setSystemContext(object->get_systemContext());
-                        NsAppLinkRPC::OnHMIStatus* event = new NsAppLinkRPC::OnHMIStatus;
-                        event->set_systemContext(object->get_systemContext());
-                        event->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_BACKGROUND);
-                        event->set_audioStreamingState(appv1->getApplicationAudioStreamingState());
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
-                        LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
-                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        if (NsAppLinkRPC::SystemContext::SYSCTXT_MAIN == object->get_systemContext().get())
+                        {
+                            Application_v1* appv1 = (Application_v1*)app;
+                            appv1->setSystemContext(object->get_systemContext());
+                            NsAppLinkRPC::OnHMIStatus* event = new NsAppLinkRPC::OnHMIStatus;
+                            event->set_systemContext(object->get_systemContext());
+                            event->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
+                            event->set_audioStreamingState(appv1->getApplicationAudioStreamingState());
+                            unsigned char sessionID = app->getSessionID();
+                            unsigned int connectionId = app->getConnectionID();
+                            LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
+                            MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        }
                         break;
                     }
                     case 2:
                     {
-                        Application_v2* appv2 = (Application_v2*)app;
-                        NsAppLinkRPCV2::SystemContext ctx2;
-                        const NsAppLinkRPC::SystemContext& ctx = object->get_systemContext();
-                        ctx2.set((NsAppLinkRPCV2::SystemContext::SystemContextInternal)ctx.get());
-                        appv2->setSystemContext(ctx2);
-                        NsAppLinkRPCV2::OnHMIStatus* event = new NsAppLinkRPCV2::OnHMIStatus;
-                        event->set_systemContext(appv2->getSystemContext());
-                        event->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
-                        event->set_audioStreamingState(appv2->getApplicationAudioStreamingState());
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
-                        LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
-                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        if (NsAppLinkRPC::SystemContext::SYSCTXT_MAIN == object->get_systemContext().get())
+                        {
+                            Application_v2* appv2 = (Application_v2*)app;
+                            NsAppLinkRPCV2::SystemContext ctx2;
+                            const NsAppLinkRPC::SystemContext& ctx = object->get_systemContext();
+                            ctx2.set((NsAppLinkRPCV2::SystemContext::SystemContextInternal)ctx.get());
+                            appv2->setSystemContext(ctx2);
+                            NsAppLinkRPCV2::OnHMIStatus* event = new NsAppLinkRPCV2::OnHMIStatus;
+                            event->set_systemContext(appv2->getSystemContext());
+                            event->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
+                            event->set_audioStreamingState(appv2->getApplicationAudioStreamingState());
+                            unsigned char sessionID = app->getSessionID();
+                            unsigned int connectionId = app->getConnectionID();
+                            LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
+                            MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        }
                         break;
                     }
                 }
@@ -2275,15 +2290,22 @@ namespace NsAppManager
                 if ( !object )
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't cast object to ActivateApp type");
+                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
+                                NsAppLinkRPC::Result::ResultInternal>(object->getId(), NsAppLinkRPC::Result::GENERIC_ERROR);
                     return;
                 }
 
-                //a silly workaround!!! Until the object starts supplying some sort of connection id + session id instead of just a name (there may me MORE than one app of the same name registered on HMI simultaneously)
+                //  a silly workaround!!!
+                //  Until the object starts supplying some sort of connection id + session id
+                //  instead of just a name (there may me MORE than one app of the same name
+                //  registered on HMI simultaneously).
                 const std::string& appName = object->get_appName();
                 AppMgrRegistry::Items items = AppMgrRegistry::getInstance().getItems(appName);
                 if(items.empty())
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application with the name " << appName << " found!");
+                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
+                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
                     return;
                 }
 
@@ -2291,23 +2313,39 @@ namespace NsAppManager
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
+                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
                     return;
                 }
 
                 Application* currentApp = AppMgrRegistry::getInstance().getActiveItem();
-                if(currentApp)
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application - about to remove it from HMI first");
-                    core->removeAppFromHmi(currentApp, app->getConnectionID(), app->getSessionID());
-                }
-                else
+                if (!currentApp)
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "No application is currently active");
+                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
+                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                    return;
                 }
+
+                if (currentApp == app)
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "App is currently active");
+                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
+                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                    return;
+                }
+                
+                LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application - about to remove it from HMI first");
+                core->removeAppFromHmi(currentApp, app->getConnectionID(), app->getSessionID());                    
 
                 if(!AppMgrRegistry::getInstance().activateApp(app))
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "Application " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID() << " hasn't been activated!");
+                    LOG4CPLUS_ERROR_EXT(mLogger, "Application " << app->getName()
+                        << " connection " << app->getConnectionID()
+                        << " session " << (uint)app->getSessionID()
+                        << " hasn't been activated!");
+                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
+                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
                     return;
                 }
 
@@ -2446,6 +2484,37 @@ namespace NsAppManager
                     }
                 }
                 return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__DEACTIVATEAPP:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "ActivateApp has been received!");
+                NsRPC2Communication::AppLinkCore::DeactivateApp* object = static_cast<NsRPC2Communication::AppLinkCore::DeactivateApp*>(msg);
+                if ( !object )
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't cast object to ActivateApp type");
+                    return;
+                }
+
+                Application* currentApp = AppMgrRegistry::getInstance().getActiveItem();
+                if (!currentApp)
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "No application is currently active");
+                    return;
+                }
+
+                /*switch(currentApp->getApplicationHMIStatusLevel())
+                {
+                    case NsAppLinkRPC::HMILevel::HMI_FULL:
+                    break;
+                    case NsAppLinkRPC::HMILevel::HMI_LIMITED:
+                    break;
+                    case NsAppLinkRPC::HMILevel::HMI_BACKGROUND:
+                    break;
+                    case NsAppLinkRPC::HMILevel::HMI_NONE:
+                    break;
+                }*/
+
+                break;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA:
             {
@@ -2705,6 +2774,28 @@ namespace NsAppManager
     {
         const Commands& currentCommands = currentApp->getAllCommands();
         LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's commands from HMI");
+
+        if (1 == currentApp->getProtocolVersion())
+        {
+            NsAppLinkRPC::OnHMIStatus* hmiStatus = new NsAppLinkRPC::OnHMIStatus;
+            NsAppManager::Application_v1* currentAppV1 = static_cast<NsAppManager::Application_v1*>(currentApp);
+            currentAppV1->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_BACKGROUND);
+            hmiStatus->set_audioStreamingState(currentAppV1->getApplicationAudioStreamingState());
+            hmiStatus->set_systemContext(currentAppV1->getSystemContext());
+            hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_BACKGROUND);
+            MobileHandler::getInstance().sendRPCMessage(hmiStatus, connectionID, sessionID);
+        }
+        else
+        {
+            NsAppLinkRPCV2::OnHMIStatus* hmiStatus = new NsAppLinkRPCV2::OnHMIStatus;
+            NsAppManager::Application_v2* currentAppV2 = static_cast<NsAppManager::Application_v2*>(currentApp);
+            currentAppV2->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
+            hmiStatus->set_audioStreamingState(currentAppV2->getApplicationAudioStreamingState());
+            hmiStatus->set_systemContext(currentAppV2->getSystemContext());
+            hmiStatus->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
+            MobileHandler::getInstance().sendRPCMessage(hmiStatus, connectionID, sessionID);
+        }
+
         for(Commands::const_iterator it = currentCommands.begin(); it != currentCommands.end(); it++)
         {
             const Command& key = *it;
