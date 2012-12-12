@@ -948,6 +948,27 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::SubscribeButtonID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
+                    NsAppLinkRPCV2::SubscribeButton_request * object = (NsAppLinkRPCV2::SubscribeButton_request*)mobileMsg;
+                    NsAppLinkRPCV2::SubscribeButton_response* response = new NsAppLinkRPCV2::SubscribeButton_response();
+                    RegistryItem* item = AppMgrRegistry::getInstance().getItem(connectionID, sessionID);
+                    if(!item)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
+
+                    core->mButtonsMapping.addButton( object->get_buttonName(), item );
+                    response->set_success(true);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::SetMediaClockTimerID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
