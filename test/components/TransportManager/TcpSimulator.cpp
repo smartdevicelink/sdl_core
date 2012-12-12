@@ -1,4 +1,10 @@
-// TcpSimulator.cpp
+/*
+    Test application that connects to the Transport Manager using TCP and sends predefined data.
+    There are two possible usages of application:
+        - Size of data to be sent is provided. Application generates correct packets and sents them.
+        - Path to file with commands is provided. Application generates correct packets for each command
+            and send it
+ */
 #include <iostream>
 #include <string>
 #include <sys/socket.h>

@@ -13,6 +13,7 @@
 #include <set>
 #include <cstddef>
 #include "JSONHandler/ALRPCObjects/V1/MenuParams.h"
+#include "JSONHandler/ALRPCObjects/V2/MenuParams.h"
 
 namespace log4cplus
 {
@@ -144,6 +145,7 @@ namespace NsAppManager
      */
     union CommandParams
     {
+        const NsAppLinkRPCV2::MenuParams* menuParamsV2;
         const NsAppLinkRPC::MenuParams* menuParams;
         const std::vector<std::string>* vrCommands;
     };

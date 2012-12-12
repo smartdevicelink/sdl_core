@@ -11,6 +11,9 @@
 #include "JSONHandler/ALRPCObjects/V1/SubscribeButton_request.h"
 #include "JSONHandler/ALRPCObjects/V1/SubscribeButton_response.h"
 #include "JSONHandler/ALRPCObjects/V1/ButtonName.h"
+#include "JSONHandler/ALRPCObjects/V2/SubscribeButton_request.h"
+#include "JSONHandler/ALRPCObjects/V2/SubscribeButton_response.h"
+#include "JSONHandler/ALRPCObjects/V2/ButtonName.h"
 #include "JSONHandler/JSONHandler.h"
 #include "LoggerHelper.hpp"
 
@@ -44,17 +47,37 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " No params supplied in constructor, null pointer exception is about to occur!");
             return;
         }
-        NsAppLinkRPC::SubscribeButton_request * object = (NsAppLinkRPC::SubscribeButton_request*)msg->first;
         unsigned int connectionID = std::get<0>(msg->second);
         unsigned char sessionID = std::get<1>(msg->second);
-        RegistryItem* item = AppMgrRegistry::getInstance().getItem(connectionID, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
-        AppMgrCore::getInstance().mButtonsMapping.addButton( object->get_buttonName(), item );
-        NsAppLinkRPC::SubscribeButton_response* response = new NsAppLinkRPC::SubscribeButton_response();
-        response->setCorrelationID(object->getCorrelationID());
-        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
-        response->set_success(true);
-        response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);//0-temp! Specify unsigned int connectionID instead!!!!
+        RegistryItem* item = AppMgrRegistry::getInstance().getItem(connectionID, sessionID);
+        Application* app = item->getApplication();
+        switch(app->getProtocolVersion())
+        {
+            case 1:
+            {
+                NsAppLinkRPC::SubscribeButton_request * object = (NsAppLinkRPC::SubscribeButton_request*)msg->first;
+                NsAppLinkRPCV2::ButtonName btnName;
+                btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)object->get_buttonName().get());
+                AppMgrCore::getInstance().mButtonsMapping.addButton( btnName, item );
+                NsAppLinkRPC::SubscribeButton_response* response = new NsAppLinkRPC::SubscribeButton_response();
+                response->setCorrelationID(object->getCorrelationID());
+                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                response->set_success(true);
+                response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                break;
+            }
+            case 2:
+            {
+                NsAppLinkRPCV2::SubscribeButton_request * object = (NsAppLinkRPCV2::SubscribeButton_request*)msg->first;
+                AppMgrCore::getInstance().mButtonsMapping.addButton( object->get_buttonName(), item );
+                NsAppLinkRPCV2::SubscribeButton_response* response = new NsAppLinkRPCV2::SubscribeButton_response();
+                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                response->set_success(true);
+                response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                break;
+            }
+        }
     }
-
 }

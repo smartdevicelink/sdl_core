@@ -1,3 +1,7 @@
+/*
+    Tests Transport Manager behavior with single TM client which sents a lot of data from many different threads (more than 200).
+    Sent data was sent back from device adapter to TM client and validated
+ */
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 

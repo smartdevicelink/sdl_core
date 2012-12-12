@@ -29,6 +29,7 @@ namespace NsAppManager
         ,mProtocolVersion(protocolVersion)
         ,mAppID(appId)
     {
+        addSessionKey(appId);
         LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name << " for the connection id " << connectionId << " session id " << (uint)sessionId);
     }
 
@@ -44,6 +45,7 @@ namespace NsAppManager
         ,mProtocolVersion(app.getProtocolVersion())
         ,mAppID(app.getAppID())
     {
+        addSessionKey(app.getAppID());
         mVrSynonyms = app.getVrSynonyms();
     }
 
@@ -365,6 +367,24 @@ namespace NsAppManager
     unsigned int Application::decrementUnrespondedRequestCount(const unsigned int &cmdId)
     {
         return mCommandMapping.decrementUnrespondedRequestCount(cmdId);
+    }
+
+    /**
+     * \brief add session key to a list of session keys
+     * \param sessionKey session key
+     */
+    void Application::addSessionKey(const int &sessionKey)
+    {
+        mSessionKeys.push_back(sessionKey);
+    }
+
+    /**
+     * \brief remove session key from a list of session keys
+     * \param sessionKey session key
+     */
+    void Application::removeSessionKey(const int &sessionKey)
+    {
+        mSessionKeys.remove(sessionKey);
     }
 
 }
