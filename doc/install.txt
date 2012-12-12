@@ -49,8 +49,13 @@
   cmake ../git_repo
   2.2 For Release configuration, run:
   cmake -DCMAKE_BUILD_TYPE=Release ../git_repo
+  2.3 For Debug configuration with tests, run:
+  cmake -DBUILD_TESTS=On ../git_repo
   
   3. Make project:
   make
   
   Ready to use release application will be in build/src/appMain/appLinkCore
+
+  4. If You built configuration with tests (see 2.3 above), then You can run all project tests and see overall result with:
+  make test
