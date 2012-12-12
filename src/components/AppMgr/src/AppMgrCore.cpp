@@ -969,6 +969,17 @@ namespace NsAppManager
                     MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::UnsubscribeButtonID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeButton request has been invoked");
+                    NsAppLinkRPCV2::UnsubscribeButton_request * object = (NsAppLinkRPCV2::UnsubscribeButton_request*)mobileMsg;
+                    core->mButtonsMapping.removeButton( object->get_buttonName() );
+                    NsAppLinkRPCV2::UnsubscribeButton_response* response = new NsAppLinkRPCV2::UnsubscribeButton_response();
+                    response->set_success(true);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::SetMediaClockTimerID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
