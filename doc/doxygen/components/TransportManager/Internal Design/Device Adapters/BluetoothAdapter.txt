@@ -1,3 +1,23 @@
-/*! \page components_transportmanager_internal_design_device_adapters_bluetooth_adapter Bluetooth Adapter
-
-*/
+/** @page components_transportmanager_internal_design_device_adapters_bluetooth_adapter Bluetooth Adapter
+ *
+ * Bluetooth adapter handles communication with external devices via bluetooth. It is implemented in
+ * NsAppLink::NsTransportManager::CBluetoothAdapter.
+ *
+ * @section components_transportmanager_internal_design_device_adapters_bluetooth_adapter_discovery Device discovery
+ *
+ * When requested by a call to NsAppLink::NsTransportManager::CDeviceAdapter::scanForNewDevices() bluetooth adapter
+ * searches for bluetooth devices. For each found device it runs SDP query for service with AppLink UUID
+ * (936DA01F-9ABD-4D9D-80C7-02AF85C822A8). Devices that support this service are added to bluetooth adapter device list.
+ * Bluetooth device scans are performed only when explicitly requested. For each device in device list that has been
+ * marked as connected by a call to NsAppLink::NsTransportManager::CDeviceAdapter::connectDevice() SDP query is performed periodically
+ * (time interval is specified by NsAppLink::NsTransportManager::CBluetoothAdapter::cConnectedDevicesServiceDiscoveryInterval)
+ * If AppLink service is discovered on some RFCOMM channel that is not yet connected (i.e. new application started)
+ * connection will be established automatically.
+ *
+ * @section components_transportmanager_internal_design_device_adapters_bluetooth_adapter_connecting_devices Connecting devices
+ *
+ * NsAppLink::NsTransportManager::CBluetoothAdapter::createConnectionsListForDevice() runs SDP query for specified device
+ * and fills connection list with connections to all RFCOMM channels on remote device where AppLink service has been discovered.
+ *
+ * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
+ */
