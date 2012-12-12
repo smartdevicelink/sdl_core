@@ -1487,6 +1487,35 @@ namespace NsAppManager
                     }
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::AddSubMenuID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
+                    Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        NsAppLinkRPCV2::AddSubMenu_response* response = new NsAppLinkRPCV2::AddSubMenu_response();
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
+
+                    NsAppLinkRPCV2::AddSubMenu_request* object = (NsAppLinkRPCV2::AddSubMenu_request*)mobileMsg;
+                    NsRPC2Communication::UI::AddSubMenu* addSubMenu = new NsRPC2Communication::UI::AddSubMenu();
+                    addSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    core->mMessageMapping.addMessage(addSubMenu->getId(), connectionID, sessionID);
+                    addSubMenu->set_menuId(object->get_menuID());
+                    addSubMenu->set_menuName(object->get_menuName());
+                    if(object->get_position())
+                    {
+                        addSubMenu->set_position(*object->get_position());
+                    }
+                    addSubMenu->set_appId(app->getAppID());
+                    app->addMenu(object->get_menuID(), object->get_menuName(), object->get_position());
+                    HMIHandler::getInstance().sendRequest(addSubMenu);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
                 {
