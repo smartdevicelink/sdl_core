@@ -1462,16 +1462,44 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
-                NsAppLinkRPC::OnButtonPress* event = new NsAppLinkRPC::OnButtonPress();
+                switch(app->getProtocolVersion())
+                {
+                    case 1:
+                    {
+                        NsAppLinkRPC::OnButtonPress* event = new NsAppLinkRPC::OnButtonPress();
 
-                event->set_buttonName(name);
-                event->set_buttonPressMode(object->get_mode());
-                LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
+                        event->set_buttonName(name);
+                        event->set_buttonPressMode(object->get_mode());
+                        LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
 
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        unsigned char sessionID = app->getSessionID();
+                        unsigned int connectionId = app->getConnectionID();
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        break;
+                    }
+                    case 2:
+                    {
+                        NsAppLinkRPCV2::OnButtonPress* event = new NsAppLinkRPCV2::OnButtonPress();
+                        NsAppLinkRPCV2::ButtonName btnName;
+                        btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)name.get());
+                        event->set_buttonName(btnName);
+                        NsAppLinkRPCV2::ButtonPressMode pressMode;
+                        pressMode.set((NsAppLinkRPCV2::ButtonPressMode::ButtonPressModeInternal)object->get_mode().get());
+                        event->set_buttonPressMode(pressMode);
+                        if(object->get_customButtonName())
+                        {
+                            event->set_customButtonName(*object->get_customButtonName());
+                        }
+                        LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
+
+                        unsigned char sessionID = app->getSessionID();
+                        unsigned int connectionId = app->getConnectionID();
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        break;
+                    }
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
