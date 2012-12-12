@@ -1336,6 +1336,33 @@ namespace NsAppManager
                     HMIHandler::getInstance().sendRequest(showRPC2Request);
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::SpeakID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A Speak request has been invoked");
+                    NsAppLinkRPCV2::Speak_request* object = (NsAppLinkRPCV2::Speak_request*)mobileMsg;
+                    NsRPC2Communication::TTS::Speak* speakRPC2Request = new NsRPC2Communication::TTS::Speak();
+                    speakRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    std::vector<NsAppLinkRPC::TTSChunk> ttsChunks;
+                    for(std::vector<NsAppLinkRPCV2::TTSChunk>::const_iterator it = object->get_ttsChunks().begin(); it != object->get_ttsChunks().end(); it++)
+                    {
+                        const NsAppLinkRPCV2::TTSChunk& ttsChunkV2 = *it;
+                        NsAppLinkRPC::TTSChunk ttsChunkV1;
+                        ttsChunkV1.set_text(ttsChunkV2.get_text());
+                        NsAppLinkRPC::SpeechCapabilities caps;
+                        caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)ttsChunkV2.get_type().get());
+                        ttsChunkV1.set_type(caps);
+                        ttsChunks.push_back(ttsChunkV1);
+                    }
+                    speakRPC2Request->set_ttsChunks(ttsChunks);
+                    speakRPC2Request->set_appId(appId);
+                    core->mMessageMapping.addMessage(speakRPC2Request->getId(), connectionID, sessionID);
+                    HMIHandler::getInstance().sendRequest(speakRPC2Request);
+                    NsAppLinkRPCV2::Speak_response * mobileResponse = new NsAppLinkRPCV2::Speak_response;
+                    mobileResponse->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    mobileResponse->set_success(true);
+                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, connectionID, sessionID);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::AddCommandID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
