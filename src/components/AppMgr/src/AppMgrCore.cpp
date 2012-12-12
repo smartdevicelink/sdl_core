@@ -1695,15 +1695,36 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
-                NsAppLinkRPC::Alert_response* response = new NsAppLinkRPC::Alert_response();
-                response->set_success(true);
-                response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
+                switch(app->getProtocolVersion())
+                {
+                    case 1:
+                    {
+                        NsAppLinkRPC::Alert_response* response = new NsAppLinkRPC::Alert_response();
+                        response->set_success(true);
+                        response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
 
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
-                core->mMessageMapping.removeMessage(object->getId());
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        unsigned char sessionID = app->getSessionID();
+                        unsigned int connectionId = app->getConnectionID();
+                        core->mMessageMapping.removeMessage(object->getId());
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        break;
+                    }
+                    case 2:
+                    {
+                        NsAppLinkRPCV2::Alert_response* response = new NsAppLinkRPCV2::Alert_response();
+                        response->set_success(true);
+                        response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
+
+                        unsigned char sessionID = app->getSessionID();
+                        unsigned int connectionId = app->getConnectionID();
+                        core->mMessageMapping.removeMessage(object->getId());
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        break;
+                        break;
+                    }
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ADDCOMMANDRESPONSE:
