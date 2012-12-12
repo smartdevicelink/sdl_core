@@ -1836,12 +1836,29 @@ namespace NsAppManager
                 app->decrementUnrespondedRequestCount(cmdId);
                 if(app->getUnrespondedRequestCount(cmdId) == 0)
                 {
-                    NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response();
-                    response->set_success(true);
-                    response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
-                    core->mRequestMapping.removeRequest(object->getId());
-                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                    switch(app->getProtocolVersion())
+                    {
+                        case 1:
+                        {
+                            NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response();
+                            response->set_success(true);
+                            response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
+                            core->mRequestMapping.removeRequest(object->getId());
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                            MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                            break;
+                        }
+                        case 2:
+                        {
+                            NsAppLinkRPCV2::DeleteCommand_response* response = new NsAppLinkRPCV2::DeleteCommand_response();
+                            response->set_success(true);
+                            response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
+                            core->mRequestMapping.removeRequest(object->getId());
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                            MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                            break;
+                        }
+                    }
                 }
 
                 core->mMessageMapping.removeMessage(object->getId());
