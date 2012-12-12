@@ -2454,18 +2454,6 @@ namespace NsAppManager
 
         switch(msg->getMethod())
         {
-            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPUNREGISTERED:
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " An OnAppUnregistered notification has been income");
-                NsRPC2Communication::AppLinkCore::OnAppUnregistered * object = (NsRPC2Communication::AppLinkCore::OnAppUnregistered*)msg;
-                NsAppLinkRPC::OnAppInterfaceUnregistered* event = new NsAppLinkRPC::OnAppInterfaceUnregistered();
-                if ( object->get_reason() )
-                {
-                    event->set_reason(*object->get_reason());
-                }
-                MobileHandler::getInstance().sendRPCMessage(event, 0, 1);//just temporarily!!! //0-temp! Specify unsigned int connectionID instead!!!! 1-also temporarily, until an app can be deducted
-                return;
-            }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPP:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "ActivateApp has been received!");
