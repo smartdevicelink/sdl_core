@@ -511,7 +511,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 								}
 							});
@@ -547,7 +547,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 								}
 							});
@@ -579,7 +579,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 								}
 							});
@@ -630,7 +630,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 								}
 							});
@@ -671,7 +671,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									try {
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 								}
 							});
@@ -740,7 +740,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									try {
 										ProxyService.getInstance().getProxyInstance().speak(chunks, autoIncCorrId++);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 								}
 							});
@@ -807,7 +807,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 								}
 							});
@@ -832,7 +832,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 											ProxyService.getInstance().getProxyInstance().subscribeButton(ButtonName.values()[which], autoIncCorrId++);
 										else ProxyService.getInstance().getProxyInstance().unsubscribeButton(ButtonName.values()[which], autoIncCorrId++);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 									isButtonSubscribed[which] = !isButtonSubscribed[which];
 								}
@@ -867,7 +867,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									try {
 										ProxyService.getInstance().getProxyInstance().addCommand(cmdID, itemText, sm.getSubMenuId(), 0, vrCommands, autoIncCorrId++);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 									_commandAdapter.add(cmdID);
 								}
@@ -892,7 +892,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										//ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 										ProxyService.getInstance().getProxyInstance().deleteCommand(cmdID, autoIncCorrId++);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 									_commandAdapter.remove(cmdID);
 								}
@@ -923,7 +923,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									try {
 										ProxyService.getInstance().getProxyInstance().addSubMenu(sm.getSubMenuId(), sm.getName(), autoIncCorrId++);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 								}
 							});
@@ -946,7 +946,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									try {
 										ProxyService.getInstance().getProxyInstance().deleteSubMenu(menu.getSubMenuId(), autoIncCorrId++);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 
 									_submenuAdapter.remove(menu);
@@ -963,7 +963,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								timeout.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, "This is the timeout prompt"));
 								ProxyService.getInstance().getProxyInstance().setGlobalProperties(help, timeout, autoIncCorrId++);	
 							} catch (SyncException e) {
-								appendConsole("Error sending message: " + e);
+								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
 							
 						}
@@ -1004,7 +1004,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 											ProxyService.getInstance().getProxyInstance().setMediaClockTimer(null, null, null, updateMode, corrID);
 										}
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 								}
 							});
@@ -1059,7 +1059,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										ProxyService.getInstance().getProxyInstance().createInteractionChoiceSet(commands, choiceSetID, autoIncCorrId++);
 										_choiceSetAdapter.add(choiceSetID);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 								}
 							});
@@ -1082,7 +1082,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									try {
 										ProxyService.getInstance().getProxyInstance().deleteInteractionChoiceSet(commandSetID, autoIncCorrId++);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 
 									_choiceSetAdapter.remove(commandSetID);
@@ -1110,7 +1110,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 															10000,
 															autoIncCorrId++);
 									} catch (SyncException e) {
-										appendConsole("Error sending message: " + e);
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 								}
 							});
@@ -1134,6 +1134,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		});
 	}
 
+	/*
 	public void appendMessageToList(final Object m) {
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -1158,6 +1159,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	public void appendLine(String line) {
 		appendConsole(line);
 	}
+	*/
 	
 	/*public void finish() {
 		try {
