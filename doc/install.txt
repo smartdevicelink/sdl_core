@@ -20,6 +20,8 @@
   We are using cmake to create build configurations.
   Install cmake:
   sudo apt-get install cmake
+  Also, make sure the g++ compiler is installed:
+  sudo apt-get install g++
   To start web-based HMI we need web-browser with web-socket RFC6455 support.
   For example Google Chromium. Install it using:
   sudo apt-get install chromium-browser
