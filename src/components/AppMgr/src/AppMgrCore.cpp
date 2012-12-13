@@ -1266,7 +1266,15 @@ namespace NsAppManager
                     NsRPC2Communication::UI::ResetGlobalProperties* resetGPRPC2Request = new NsRPC2Communication::UI::ResetGlobalProperties();
                     resetGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     core->mMessageMapping.addMessage(resetGPRPC2Request->getId(), connectionID, sessionID);
-                    resetGPRPC2Request->set_properties(*((std::vector<NsAppLinkRPC::GlobalProperty>*)&object->get_properties()));
+                    std::vector< NsAppLinkRPC::GlobalProperty> gp;
+                    for(std::vector< NsAppLinkRPCV2::GlobalProperty>::const_iterator it = object->get_properties().begin(); it != object->get_properties().end(); it++)
+                    {
+                        const NsAppLinkRPCV2::GlobalProperty& prop = *it;
+                        NsAppLinkRPC::GlobalProperty propV1;
+                        propV1.set((NsAppLinkRPC::GlobalProperty::GlobalPropertyInternal)prop.get());
+                        gp.push_back(propV1);
+                    }
+                    resetGPRPC2Request->set_properties(gp);
                     resetGPRPC2Request->set_appId(appId);
                     HMIHandler::getInstance().sendRequest(resetGPRPC2Request);
                     NsAppLinkRPCV2::ResetGlobalProperties_response * mobileResponse = new NsAppLinkRPCV2::ResetGlobalProperties_response;
