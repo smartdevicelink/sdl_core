@@ -1272,6 +1272,15 @@ namespace NsAppManager
                         setGPRPC2Request->set_timeoutPrompt(timeoutPrompt);
                     }
 
+                    if(object->get_vrHelp())
+                    {
+                        setGPRPC2Request->set_vrHelp(*object->get_vrHelp());
+                    }
+                    if(object->get_vrHelpTitle())
+                    {
+                        setGPRPC2Request->set_vrHelpTitle(*object->get_vrHelpTitle());
+                    }
+
                     setGPRPC2Request->set_appId(appId);
                     HMIHandler::getInstance().sendRequest(setGPRPC2Request);
                     NsAppLinkRPCV2::SetGlobalProperties_response * mobileResponse = new NsAppLinkRPCV2::SetGlobalProperties_response;
