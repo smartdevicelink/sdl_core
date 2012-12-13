@@ -567,6 +567,14 @@ namespace NsAppManager
                     NsAppLinkRPC::DeleteCommand_request* object = (NsAppLinkRPC::DeleteCommand_request*)mobileMsg;
 
                     CommandTypes cmdTypes = app->getCommandTypes(object->get_cmdID());
+                    if(cmdTypes.empty())
+                    {
+                        NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
                     const unsigned int& cmdId = object->get_cmdID();
                     for(CommandTypes::iterator it = cmdTypes.begin(); it != cmdTypes.end(); it++)
                     {
@@ -674,6 +682,7 @@ namespace NsAppManager
                                 delVrCmd->set_appId(app->getAppID());
                                 core->mMessageMapping.addMessage(delVrCmd->getId(), connectionID, sessionID);
                                 core->mRequestMapping.addMessage(delVrCmd->getId(), *it);
+                                app->removeCommand(*it, CommandType::VR);
                                 HMIHandler::getInstance().sendRequest(delVrCmd);
                             }
                         }
@@ -1660,6 +1669,14 @@ namespace NsAppManager
                     NsAppLinkRPCV2::DeleteCommand_request* object = (NsAppLinkRPCV2::DeleteCommand_request*)mobileMsg;
 
                     CommandTypes cmdTypes = app->getCommandTypes(object->get_cmdID());
+                    if(cmdTypes.empty())
+                    {
+                        NsAppLinkRPCV2::DeleteCommand_response* response = new NsAppLinkRPCV2::DeleteCommand_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
                     const unsigned int& cmdId = object->get_cmdID();
                     for(CommandTypes::iterator it = cmdTypes.begin(); it != cmdTypes.end(); it++)
                     {
@@ -1767,6 +1784,7 @@ namespace NsAppManager
                                 delVrCmd->set_appId(app->getAppID());
                                 core->mMessageMapping.addMessage(delVrCmd->getId(), connectionID, sessionID);
                                 core->mRequestMapping.addMessage(delVrCmd->getId(), *it);
+                                app->removeCommand(*it, CommandType::VR);
                                 HMIHandler::getInstance().sendRequest(delVrCmd);
                             }
                         }
