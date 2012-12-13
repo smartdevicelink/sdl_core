@@ -117,6 +117,19 @@
 	left: 0px;
 }
 
+#applink_media_presetButtons .preset-item > span {
+	z-index: 202;
+	display: block;
+	position: absolute;
+	left: 10px;
+	width: 140px;
+	height: 50px;
+	font-size: 20px;
+	line-height: 50px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: white;
+}
 
  #media_applink_slider_view .control {
 	 width: 238px;

@@ -70,9 +70,16 @@ namespace NsConnectionHandler
 
         /**
          * \brief Removes session from connection
+         * \param aSession session ID
          * \return sessionID or -1 in case of issues
          */
         int removeSession(unsigned char aSession);
+
+        /**
+         * \brief Returns ID of first session from connection
+         * \return first sessionID or -1 in case of issues
+         */
+        int getFirstSessionKey();
     private:
 
         /**

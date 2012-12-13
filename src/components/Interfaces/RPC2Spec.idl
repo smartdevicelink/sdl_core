@@ -280,8 +280,7 @@ GetCapabilities(
    *  
    */
 notification OnDriverDistraction(
-    DriverDistractionState state, // data type from AppLink protocol specification
-    int appId
+    DriverDistractionState state // data type from AppLink protocol specification
   );
 
 /*
@@ -299,7 +298,7 @@ notification OnReady(
    *  to user.
    *  
    */
-ChangeLanguageRegistration(
+ChangeRegistration(
   Language hmiDisplayLanguage, //  data type from AppLink protocol specification
   int appId
   ->
@@ -326,8 +325,6 @@ notification OnLanguageChange(
   int appId
 );
 
-
-
 /*
   * @descr 
    *      Notification from HMI to AppLink when user chooses device
@@ -347,9 +344,36 @@ Slider(
   unsigned int (1:16) position,
   string (500) sliderHeader,
   string (500) * sliderFooter[1:26],
-  unsigned int (65535) timeout
+  unsigned int (65535) timeout,
+  int appId
   ->
   unsigned int (1:26) sliderPosition
+);
+
+/*
+  * @descr 
+   *      Request from AppLink to HMI:
+   * Creates a full screen overlay containing a large block of 
+   * formatted text that can be scrolled with up to 8 SoftButtons defined
+   */
+ScrollableMessage(
+  string(500) scrollableMessageBody,
+  unsigned int (65535) * timeout,
+  SoftButton * softButtons[0:8],
+  int appId
+  -> // return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+  * @descr 
+   *      Request from AppLink to HMI:
+   * Used to set an alternate display layou 
+   * If not sent, default screen for given platform will be shown
+   */
+SetDisplayLayout(
+  string displayLayout, //Predefined or dynamically created screen layout, Currently only predefined screen layouts are defined: ONSCREEN_PRESETS
+  int appId
+  -> // return value is provided in corresponding response object, id of request and response should be equal
 );
 
 }
@@ -428,7 +452,7 @@ notification OnCommand(
    *  to user.
    *  
    */
-ChangeLanguageRegistration(
+ChangeRegistration(
   Language language, //  data type from AppLink protocol specification
   int appId
   ->
@@ -498,10 +522,10 @@ Speak(
    *  to user.
    *  
    */
-ChangeLanguageRegistration(
+ChangeRegistration(
   Language language, //  data type from AppLink protocol specification
   int appId
-  ->
+  -> // return value is provided in corresponding response object, id of request and response should be equal
 );
 /*
   * @descr 
@@ -513,6 +537,43 @@ notification OnLanguageChange(
   Language language, //  data type from AppLink protocol specification
   int appId
 );
+
+/*
+  * @descr 
+   *      Request from AppLink to HMI to start audio pass through session
+   *  to user.
+   *  
+   */
+PerformAudioPassThru(
+  TTSChunk initialPrompt[1:100], //SYNC will speak this prompt before opening the audio pass thru sessio
+  string(500) * audioPassThruDisplayText1, //Line of text displayed during audio capture
+  string(500) * audioPassThruDisplayText2, //Line of text displayed during audio capture
+  SamplingRate samplingRate, //This value shall be allowed at 8 khz or 16 or 22 or 44 khz.
+  unsigned int(1000000) maxDuration, //The maximum duration of audio recording in milliseconds
+  AudioCaptureQuality bitsPerSample, //Specifies the quality the audio is recorded. Currently 8 bit or 16 bit
+  AudioType audioType, //Specifies the type of audio data being requested
+  int appId
+  ->// return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+  * @descr 
+   *      Request from AppLink to HMI: when this request is invoked, the audio capture stops
+   *  to user.
+   *  
+   */
+EndAudioPassThru(
+  int appId
+  -> // return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+  * @descr Notification from HMI to Applink
+   */
+notification OnAudioPassThru(
+  int appId
+);
+
 }
 
 
@@ -567,7 +628,7 @@ notification OnButtonEvent(
 notification OnButtonPress(
     ButtonName name,  // data type from AppLink protocol specification
     ButtonPressMode mode,  // data type from AppLink protocol specification
-    string (500) * customButtonName // If ButtonName is “CUSTOM_BUTTON", this references the string passed by a custom button. (e.g. softButtonName)
+    unsigned int (65536) * customButtonID // If ButtonName is “CUSTOM_BUTTON", this references the string passed by a custom button. (e.g. softButtonName)
 );
 }
 
@@ -635,7 +696,7 @@ notification OnDeviceListUpdated(
      *  
      */ 
 ActivateApp(
-    string(100) appName ,
+    string(100) appName,
     int appId
     -> // return value is provided in corresponding response object, id of request and response should be equal
 );
@@ -650,7 +711,8 @@ ActivateApp(
      *  
      */ 
 DeactivateApp(
-    string(100) appName ,
+    string(100) appName,
+    DeactivateReason reason, //DeactivateReason : audio, Phone Call, Navigation map, Phone Menu, Sync settings, general
     int appId
     -> // return value is provided in corresponding response object, id of request and response should be equal
 );
@@ -679,7 +741,7 @@ notification OnAppRegistered(
     string(40) * vrSynonym[1:100], // sysnonyms assossiated with app to start it
     bool isMediaApplication,
     Language languageDesired,  // language for VR and TTS
-    Language hmiDisplayLanguageDesired, // language for UI
+    Language * hmiDisplayLanguageDesired, // language for UI
     TTSChunk * ttsName[1:100], // TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green". Meant to overcome any failing on speech engine in properly pronouncing, understanding app name
     AppType * appType[1:100], // List of all applicable app types stating which classifications to be given to the app
     int appId
@@ -704,13 +766,184 @@ version "1.2";
 prefix "AppLinkCore.";
  /*
      * @descr Request from ApplinkCore to HMI to get info about the vehicle.
-     */ 
+     
 GetVehicleType(
+    int appId
     ->
-    VehicleType vehicleType // manufacturer, model, year etc of the vehicle.
-  );
+    VehicleType vehicleType, // manufacturer, model, year etc of the vehicle.
+  ); */
+/*
+  * @descr Request from ApplinkCore to HMI
+  * Subscribes for specific published data items
+  * The data will be only sent if it has changed
+  * The application will be notified by the onVehicleData notification whenever new data is available.
+  */
+SubscribeVehicleData(
+  VehicleDataType dataType[1:100],
+  int appId
+  -> //return value is provided in corresponding response object, id of request and response should be equal
+  VehicleDataResult * dataResult[1:100] //Permission status of vehicle data element
+);
+
+/*
+  * @descr Request from ApplinkCore to HMI
+  * This function is used to unsubscribe the notifications from the subscribeVehicleData function
+  */
+UnsubscribeVehicleData(
+  VehicleDataType dataType[1:100],
+  int appId
+  -> 
+  VehicleDataResult * dataResult[1:100] //Permission status of vehicle data element
+); //return value is provided in corresponding response object, id of request and response should be equal
+
+/*
+  * @descr Request from ApplinkCore to HMI
+  * Non periodic vehicle data read request
+  */
+GetVehicleData(
+  VehicleDataType dataType,
+  int appId
+  ->
+  GPSData * gps,
+  float(-100:500) * speed,
+  unsigned int(20000) * rpm, // The number of revolutions per minute of the engine
+  float(0:100) * fuelLevel,
+  float(0:7000) * avgFuelEconomy, //The average fuel economy in litres/100km
+  float(0:26) * batteryVoltage,
+  float(-40:100) * externalTemperature, //The external temperature in degrees celsius.
+  string(17) * vin, // Vehicle identification number
+  PRNDL * prndl,
+  TireStatus * tirePressure,
+  float(-1000:1000) * batteryPackVoltage,
+  float(-1000:1000) * batteryPackCurrent,
+  int (-50:250) * batteryPackTemperature,
+  int(-10000:55000) * engineTorque,
+  unsigned int (2000000) * odometer,
+  unsigned int (2000000) * tripOdometer,
+  string(500) * satRadioESN //The hexadecimal ESN of the satellite radio (if supported).
+);
+
+/*
+  * @descr Notification from HMI to Applink
+  * Callback for the periodic and non periodic vehicle data read function.
+  */
+notification OnVehicleData(
+  GPSData * gps,
+  float(-100:500) * speed,
+  unsigned int (20000) * rpm,
+  float (0:100) * fuelLevel,
+  float (0:7000) * avgFuelEconomy, // The average fuel economy in litres/100km
+  float (0:26) * batteryVoltage,
+  float (-40:100) * externalTemperature,
+  string(17) * vin,
+  PRNDL * prndl,
+  TireStatus * tirePressure,
+  float (-1000:1000) * batteryPackVoltage,
+  float (-1000:1000) * batteryPackCurrent,
+  int (-50:250) * batteryPackTemperature,
+  int (-10000:55000) * engineTorque,
+  unsigned int (2000000) * odometer,
+  unsigned int (2000000) * tripOdometer,
+  string (500) * genericbinary
+);
+
+/*
+  * @descr Request from ApplinkCore to HMI
+  * Non periodic vehicle data read request
+  */
+ReadDID(
+  unsigned int (65535) ecuName,
+  unsigned int (65535)  didLocation[0:1000],
+  bool * encrypted,
+  int appId
+  ->
+  VehicleDataResultCode * dataResult[0:1000], //Permission status of data element
+  string(5000) * data[0:1000] //Raw DID-based data returned for requested element
+);
+
+/*
+  * @descr Request from ApplinkCore to HMI
+  * Vehicle module diagnostic trouble code request.
+  */
+GetDTCs(
+  unsigned int (65535) ecuName,
+  bool * encrypted,
+  int appId
+  ->
+  DTC * dtcList[1:100] 
+);
+
 }
 
+
+interface NsRPC2Communication::Phone
+{
+  version "2.0";
+
+  prefix "Phone.";
+/*
+     * @descr Request from ApplinkCore to HMI to make a call.
+     */ 
+DialNumber(
+  string(500) number, //Phone number is a string consisting of only the digits and "+", which can be up to 40 chars
+  int appId
+  -> //return value is provided in corresponding response object, id of request and response should be equal
+);
+
+}
+
+interface NsRPC2Communication::Navigation
+{
+  version "2.0";
+
+  prefix "Navigation.";
+
+/*
+     * @descr Request from ApplinkCore to HMI to show info about navigation.
+     */ 
+ShowConstantTBT(
+  string (500) * navigationText1,
+  string (500) * navigationText2,
+  string (500) * eta,
+  string (500) * totalDistance,
+  Image turnIcon,
+  float (0:1000000000) distanceToManeuver,
+  float (0:1000000000) distanceToManeuverScale,
+  bool * maneuverComplete,
+  SoftButton softButtons[0:3],
+  int appId
+  -> //return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+     * @descr Request from ApplinkCore to HMI to announce navigation maneuver
+     */ 
+AlertManeuver(
+  TTSChunk ttsChunks[1:100],
+  SoftButton softButtons[0:3],
+  int appId
+  -> //return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+     * @descr Request from ApplinkCore to HMI to update turn list.
+     */ 
+UpdateTurnList(
+  Turn turnList[1:100],
+  SoftButton softButtons[0:1],
+  int appId
+  -> //return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+     * @descr Notification from HMI to ApplinkCore
+     * Provides applications with notifications specific to the current TBT client status on the module
+     */
+notification OnTBTClientState(
+  TBTState state
+);
+
+}
 
   /*
 "id": "integer" //REQUIRED for request methods. NOT to be used for notifications

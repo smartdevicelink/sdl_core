@@ -1,4 +1,3 @@
-
 /**
  * @name MFT.ApplinkOptionsSubMenuView
  * 
@@ -39,6 +38,14 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
         contentBinding:     'MFT.ApplinkMediaController.subMenuLabel'
     }),
 
+    DeleteCommand: function( commandId ){
+
+        this.get('listOfSubmenuButtons.list.childViews').removeObjects(
+            this.get('listOfSubmenuButtons.list.childViews').filterProperty( 'commandId' , commandId )
+        );
+
+    },
+
     /** Applink Sub Mennu activate handler */
     applinkSubMenuActivate: function(){
         if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
@@ -71,8 +78,10 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
                         commandId:              MFT.ApplinkMediaModel.subMenuCommands[i].cmdId,
                         text:                   MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.menuName,
                         parentID:               MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.parentID,
+                        appId:                  MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.appId,
+                        icon:                   MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.icon,
                         className:              'rs-item',
-                        templateName:           'text'
+                        templateName:           MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.icon ? 'rightIcon' : 'text'
                     }                                   
                 });
             }

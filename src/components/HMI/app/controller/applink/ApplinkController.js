@@ -108,8 +108,18 @@ MFT.ApplinkController = Em.Object.create({
 		MFT.ApplinkMediaModel.onGetAppList( appList );
 	},
 
+	/**
+	 *  Method call's request to get list of applications
+	 */
 	findNewApps: function(){
 		FFW.AppLinkCoreClient.getAppList();
+	},
+
+	/**
+	 *  Method activates selected registered application
+	 */
+	onActivateApplinkApp: function(element){
+		this.getApplicationModel(element.appId).turnOnApplink( element.appName, element.appId );
 	}
 
 });

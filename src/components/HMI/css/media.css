@@ -490,9 +490,9 @@
 	width: 468px;
 	height: 100px;
 	float: left;
-	margin-left: 165px;
-	margin-top: 290px;
-	z-index:503;
+	left: 165px;
+	top: 290px;
+	z-index: 503;
 }
 
 .main-preset-buttons-wraper .preset-items {
@@ -3078,7 +3078,7 @@
 	background: #393939;
 	padding: 15px;
 }
-
+/*
 #applink_view_container .ffw-button span{
-	/*padding-left: 20px;*/
-}
+	padding-left: 20px;
+}*/

@@ -414,6 +414,23 @@ FFW.UI = FFW.RPCObserver.create({
 	/*
 	 * send notification when command was triggered
  	 */	
+	onCommandSoftButton: function(softButtonID, appId) {
+		Em.Logger.log("FFW.UI.onCommand");
+
+		var JSONMessage = {
+			"jsonrpc"	:	"2.0",
+			"method"	:	"UI.OnCommand",
+			"params"	:	{
+				"commandId":	softButtonID,
+				"appId":		appId
+			}
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * send notification when command was triggered
+ 	 */	
 	onChoosed: function(commandId) {
 		Em.Logger.log("FFW.UI.PerformInteractionResponse");
 
