@@ -95,7 +95,15 @@ MFT.ApplinkMediaModel = Em.Object.create({
 		mediaClock:		'<mediaClock>',
 		statusBar:		'<statusBar',
 		appName:		'<App name>',
-		deviceName:		'<Device name>'
+		deviceName:		'<Device name>',
+        customPresets:[
+            '<no definition>',
+            '<no definition>',
+            '<no definition>',
+            '<no definition>',
+            '<no definition>',
+            '<no definition>'
+        ]
 	}),
 
     /**

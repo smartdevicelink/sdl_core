@@ -60,9 +60,13 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
 
     DeleteCommand: function( commandId ){
 
-        this.get('listOfOptions.list.childViews').removeObjects(
-            this.get('listOfOptions.list.childViews').filterProperty( 'commandId' , commandId )
-        );
+       if( this.get('listOfOptions.list.childViews').filterProperty( 'commandId' , commandId ).length > 0 ){
+            this.get('listOfOptions.list.childViews').removeObjects(
+                this.get('listOfOptions.list.childViews').filterProperty( 'commandId' , commandId )
+            );
+        }else{
+            MFT.ApplinkOptionsSubMenuView.DeleteCommand( commandId );
+        }
 
     },
 

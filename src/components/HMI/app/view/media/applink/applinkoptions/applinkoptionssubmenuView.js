@@ -38,6 +38,14 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
         contentBinding:     'MFT.ApplinkMediaController.subMenuLabel'
     }),
 
+    DeleteCommand: function( commandId ){
+
+        this.get('listOfSubmenuButtons.list.childViews').removeObjects(
+            this.get('listOfSubmenuButtons.list.childViews').filterProperty( 'commandId' , commandId )
+        );
+
+    },
+
     /** Applink Sub Mennu activate handler */
     applinkSubMenuActivate: function(){
         if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
