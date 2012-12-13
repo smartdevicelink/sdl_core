@@ -1453,6 +1453,10 @@ namespace NsAppManager
                     {
                         alert->set_AlertText2(*object->get_alertText2());
                     }
+                    if(object->get_alertText3())
+                    {
+                        alert->set_alertText3(*object->get_alertText3());
+                    }
                     if(object->get_duration())
                     {
                         alert->set_duration(*object->get_duration());
@@ -1460,6 +1464,10 @@ namespace NsAppManager
                     if(object->get_playTone())
                     {
                         alert->set_playTone(*object->get_playTone());
+                    }
+                    if(object->get_softButtons())
+                    {
+                        alert->set_softButtons(*object->get_softButtons());
                     }
                     alert->set_appId(appId);
                     HMIHandler::getInstance().sendRequest(alert);
