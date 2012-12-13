@@ -1898,7 +1898,16 @@ namespace NsAppManager
                 core->mDisplayCapabilitiesV1 = uiCaps->get_displayCapabilities();
                 core->mDisplayCapabilitiesV2 = (*(NsAppLinkRPCV2::DisplayCapabilities*)&uiCaps->get_displayCapabilities());
                 core->mHmiZoneCapabilitiesV1.set( uiCaps->get_hmiZoneCapabilities() );
-                core->mHmiZoneCapabilitiesV2.set( *(std::vector<NsAppLinkRPCV2::HmiZoneCapabilities>*)&uiCaps->get_hmiZoneCapabilities() );
+
+                std::vector< NsAppLinkRPCV2::HmiZoneCapabilities> hmiCaps;
+                for(std::vector< NsAppLinkRPC::HmiZoneCapabilities>::const_iterator it = uiCaps->get_hmiZoneCapabilities().begin(); it != uiCaps->get_hmiZoneCapabilities().end(); it++)
+                {
+                    const NsAppLinkRPC::HmiZoneCapabilities& cap = *it;
+                    NsAppLinkRPCV2::HmiZoneCapabilities capV2;
+                    capV2.set((NsAppLinkRPCV2::HmiZoneCapabilities::HmiZoneCapabilitiesInternal)cap.get());
+                    hmiCaps.push_back(capV2);
+                }
+                core->mHmiZoneCapabilitiesV2.set( hmiCaps );
                 if(uiCaps->get_softButtonCapabilities())
                 {
                     core->mSoftButtonCapabilities.set(*uiCaps->get_softButtonCapabilities());
