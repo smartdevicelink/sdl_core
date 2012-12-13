@@ -2517,7 +2517,15 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetVRCapabilities response has been income");
                 NsRPC2Communication::VR::GetCapabilitiesResponse * vrCaps = (NsRPC2Communication::VR::GetCapabilitiesResponse*)msg;
                 core->mVrCapabilitiesV1.set(vrCaps->get_capabilities());
-                core->mVrCapabilitiesV2.set(*((std::vector< NsAppLinkRPCV2::VrCapabilities>*)&vrCaps->get_capabilities()));
+                std::vector< NsAppLinkRPCV2::VrCapabilities> vrCapsV2;
+                for(std::vector< NsAppLinkRPC::VrCapabilities>::const_iterator it = vrCaps->get_capabilities().begin(); it != vrCaps->get_capabilities().end(); it++)
+                {
+                    const NsAppLinkRPC::VrCapabilities& caps = *it;
+                    NsAppLinkRPCV2::VrCapabilities capsV2;
+                    capsV2.set((NsAppLinkRPCV2::VrCapabilities::VrCapabilitiesInternal)caps.get());
+                    vrCapsV2.push_back(capsV2);
+                }
+                core->mVrCapabilitiesV2.set(vrCapsV2);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMANDRESPONSE:
