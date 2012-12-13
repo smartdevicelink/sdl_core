@@ -1505,6 +1505,10 @@ namespace NsAppManager
                     {
                         showRPC2Request->set_mediaClock(*object->get_mediaClock());
                     }
+                    if(object->get_mediaTrack())
+                    {
+                        showRPC2Request->set_mediaTrack(*object->get_mediaTrack());
+                    }
                     if(object->get_statusBar())
                     {
                         showRPC2Request->set_statusBar(*object->get_statusBar());
