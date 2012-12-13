@@ -1571,6 +1571,11 @@ namespace NsAppManager
                         }
                         core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
 
+                        if(object->get_cmdIcon())
+                        {
+                            addCmd->set_cmdIcon(*object->get_cmdIcon());
+                        }
+
                         CommandParams params;
                         params.menuParamsV2 = menuParams;
                         app->addCommand(cmdId, cmdType, params);
