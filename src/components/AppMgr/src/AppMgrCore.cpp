@@ -1221,12 +1221,34 @@ namespace NsAppManager
                     core->mMessageMapping.addMessage(setGPRPC2Request->getId(), connectionID, sessionID);
                     if(object->get_helpPrompt())
                     {
-                        setGPRPC2Request->set_helpPrompt(*((std::vector<NsAppLinkRPC::TTSChunk>*)object->get_helpPrompt()));
+                        std::vector< NsAppLinkRPC::TTSChunk> helpPrompt;
+                        for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = object->get_helpPrompt()->begin(); it != object->get_helpPrompt()->end(); it++)
+                        {
+                            const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                            NsAppLinkRPC::TTSChunk chunkV1;
+                            chunkV1.set_text(chunk.get_text());
+                            NsAppLinkRPC::SpeechCapabilities caps;
+                            caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                            chunkV1.set_type(caps);
+                            helpPrompt.push_back(chunkV1);
+                        }
+                        setGPRPC2Request->set_helpPrompt(helpPrompt);
                     }
 
                     if(object->get_timeoutPrompt())
                     {
-                        setGPRPC2Request->set_timeoutPrompt(*((std::vector<NsAppLinkRPC::TTSChunk>*)object->get_timeoutPrompt()));
+                        std::vector< NsAppLinkRPC::TTSChunk> timeoutPrompt;
+                        for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = object->get_timeoutPrompt()->begin(); it != object->get_timeoutPrompt()->end(); it++)
+                        {
+                            const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                            NsAppLinkRPC::TTSChunk chunkV1;
+                            chunkV1.set_text(chunk.get_text());
+                            NsAppLinkRPC::SpeechCapabilities caps;
+                            caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                            chunkV1.set_type(caps);
+                            timeoutPrompt.push_back(chunkV1);
+                        }
+                        setGPRPC2Request->set_timeoutPrompt(timeoutPrompt);
                     }
 
                     setGPRPC2Request->set_appId(appId);
