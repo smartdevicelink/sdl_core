@@ -260,7 +260,6 @@ namespace NsAppManager
                     appRegistered->set_isMediaApplication(app->getIsMediaApplication());
                     appRegistered->set_languageDesired(app->getLanguageDesired());
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
-                    appRegistered->set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
                     appRegistered->set_deviceName(currentDeviceName);
                     HMIHandler::getInstance().sendNotification(appRegistered);
                     LOG4CPLUS_INFO_EXT(mLogger, " An AppLinkCore::OnAppRegistered notofocation for the app "  << app->getName() << " connection/session key " << app->getAppID() << " gets sent to an HMI side... ");
@@ -3407,6 +3406,7 @@ namespace NsAppManager
                     application->setVrSynonyms(vrSynonyms);
                 }
 
+                application->setHMIDisplayLanguageDesired(registerRequest->get_hmiDisplayLanguageDesired());
                 application->setIsMediaApplication(isMediaApplication);
                 application->setSyncMsgVersion(syncMsgVersion);
                 application->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);
