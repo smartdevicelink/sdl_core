@@ -1896,7 +1896,37 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetUICapabilities response has been income");
                 NsRPC2Communication::UI::GetCapabilitiesResponse * uiCaps = (NsRPC2Communication::UI::GetCapabilitiesResponse*)msg;
                 core->mDisplayCapabilitiesV1 = uiCaps->get_displayCapabilities();
-                core->mDisplayCapabilitiesV2 = (*(NsAppLinkRPCV2::DisplayCapabilities*)&uiCaps->get_displayCapabilities());
+
+                NsAppLinkRPCV2::DisplayCapabilities displayCaps;
+                const NsAppLinkRPC::DisplayCapabilities& displayCapsV1 = uiCaps->get_displayCapabilities();
+                NsAppLinkRPCV2::DisplayType displayType;
+                displayType.set((NsAppLinkRPCV2::DisplayType::DisplayTypeInternal)displayCapsV1.get_displayType().get());
+                displayCaps.set_displayType(displayType);
+                std::vector<NsAppLinkRPCV2::MediaClockFormat> fmt;
+                for(std::vector<NsAppLinkRPC::MediaClockFormat>::const_iterator it = displayCapsV1.get_mediaClockFormats().begin(); it != displayCapsV1.get_mediaClockFormats().end(); it++)
+                {
+                    NsAppLinkRPCV2::MediaClockFormat fmtItem;
+                    fmtItem.set((NsAppLinkRPCV2::MediaClockFormat::MediaClockFormatInternal)(*it).get());
+                    fmt.push_back(fmtItem);
+                }
+                displayCaps.set_mediaClockFormats(fmt);
+                std::vector<NsAppLinkRPCV2::TextField> txtFields;
+                for(std::vector<NsAppLinkRPC::TextField>::const_iterator it = displayCapsV1.get_textFields().begin(); it != displayCapsV1.get_textFields().end(); it++)
+                {
+                    NsAppLinkRPCV2::TextField txtField;
+                    const NsAppLinkRPC::TextField txtFieldV1 = *it;
+                    NsAppLinkRPCV2::CharacterSet charset;
+                    charset.set((NsAppLinkRPCV2::CharacterSet::CharacterSetInternal)txtFieldV1.get_characterSet().get());
+                    txtField.set_characterSet(charset);
+                    NsAppLinkRPCV2::TextFieldName name;
+                    name.set((NsAppLinkRPCV2::TextFieldName::TextFieldNameInternal)txtFieldV1.get_name().get());
+                    txtField.set_name(name);
+                    txtField.set_rows(txtFieldV1.get_rows());
+                    txtField.set_width(txtFieldV1.get_width());
+                    txtFields.push_back(txtField);
+                }
+                displayCaps.set_textFields(txtFields);
+                core->mDisplayCapabilitiesV2 = displayCaps;
                 core->mHmiZoneCapabilitiesV1.set( uiCaps->get_hmiZoneCapabilities() );
 
                 std::vector< NsAppLinkRPCV2::HmiZoneCapabilities> hmiCaps;
