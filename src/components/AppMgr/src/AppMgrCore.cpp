@@ -1351,7 +1351,18 @@ namespace NsAppManager
                     core->mMessageMapping.addMessage(performInteraction->getId(), connectionID, sessionID);
                     if(object->get_helpPrompt())
                     {
-                        performInteraction->set_helpPrompt(*(const std::vector<NsAppLinkRPC::TTSChunk>*)object->get_helpPrompt());
+                        std::vector< NsAppLinkRPC::TTSChunk> helpPrompt;
+                        for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = object->get_helpPrompt()->begin(); it != object->get_helpPrompt()->end(); it++)
+                        {
+                            const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                            NsAppLinkRPC::TTSChunk chunkV1;
+                            chunkV1.set_text(chunk.get_text());
+                            NsAppLinkRPC::SpeechCapabilities caps;
+                            caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                            chunkV1.set_type(caps);
+                            helpPrompt.push_back(chunkV1);
+                        }
+                        performInteraction->set_helpPrompt(helpPrompt);
                     }
                     performInteraction->set_initialPrompt(*(std::vector<NsAppLinkRPC::TTSChunk>*)&object->get_initialPrompt());
                     performInteraction->set_initialText(object->get_initialText());
@@ -1366,7 +1377,18 @@ namespace NsAppManager
                     }
                     if(object->get_timeoutPrompt())
                     {
-                        performInteraction->set_timeoutPrompt(*(std::vector<NsAppLinkRPC::TTSChunk>*)object->get_timeoutPrompt());
+                        std::vector< NsAppLinkRPC::TTSChunk> timeoutPrompt;
+                        for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = object->get_timeoutPrompt()->begin(); it != object->get_timeoutPrompt()->end(); it++)
+                        {
+                            const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                            NsAppLinkRPC::TTSChunk chunkV1;
+                            chunkV1.set_text(chunk.get_text());
+                            NsAppLinkRPC::SpeechCapabilities caps;
+                            caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                            chunkV1.set_type(caps);
+                            timeoutPrompt.push_back(chunkV1);
+                        }
+                        performInteraction->set_timeoutPrompt(timeoutPrompt);
                     }
                     performInteraction->set_appId(appId);
                     HMIHandler::getInstance().sendRequest(performInteraction);
