@@ -6,6 +6,8 @@ import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.CompassDirection;
 import com.ford.syncV4.proxy.rpc.enums.Dimension;
+import com.ford.syncV4.proxy.rpc.enums.DisplayType;
+import com.ford.syncV4.util.DebugTool;
 
 public class GPSData extends RPCStruct {
 
@@ -101,7 +103,19 @@ public class GPSData extends RPCStruct {
     	}
     }
     public CompassDirection getCompassDirection() {
-    	return (CompassDirection) store.get(Names.compassDirection);
+        Object obj = store.get(Names.compassDirection);
+        if (obj instanceof CompassDirection) {
+            return (CompassDirection) obj;
+        } else if (obj instanceof String) {
+        	CompassDirection theCode = null;
+            try {
+                theCode = CompassDirection.valueForString((String) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.compassDirection, e);
+            }
+            return theCode;
+        }
+        return null;
     }
     public void setPdop(Integer pdop) {
     	if (pdop != null) {
@@ -133,15 +147,15 @@ public class GPSData extends RPCStruct {
     public Integer getVdop() {
     	return (Integer) store.get(Names.vdop);
     }
-    public void setActual(Integer actual) {
+    public void setActual(Boolean actual) {
     	if (actual != null) {
     		store.put(Names.actual, actual);
     	} else {
     		store.remove(Names.actual);
     	}
     }
-    public Integer getActual() {
-    	return (Integer) store.get(Names.actual);
+    public Boolean getActual() {
+    	return (Boolean) store.get(Names.actual);
     }
     public void setSatellites(Integer satellites) {
     	if (satellites != null) {
@@ -161,7 +175,19 @@ public class GPSData extends RPCStruct {
     	}
     }
     public Dimension getDimension() {
-    	return (Dimension) store.get(Names.dimension);
+        Object obj = store.get(Names.dimension);
+        if (obj instanceof Dimension) {
+            return (Dimension) obj;
+        } else if (obj instanceof String) {
+        	Dimension theCode = null;
+            try {
+                theCode = Dimension.valueForString((String) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.dimension, e);
+            }
+            return theCode;
+        }
+        return null;
     }
     public void setAltitude(Integer altitude) {
     	if (altitude != null) {

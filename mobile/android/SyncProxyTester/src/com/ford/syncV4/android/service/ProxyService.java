@@ -26,6 +26,7 @@ import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
+import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
 import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSetResponse;
@@ -33,11 +34,14 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
+import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCs;
+import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleData;
+import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
@@ -54,19 +58,24 @@ import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDID;
+import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
 import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
 import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
 import com.ford.syncV4.proxy.rpc.SetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimerResponse;
+import com.ford.syncV4.proxy.rpc.ShowConstantTBTResponse;
 import com.ford.syncV4.proxy.rpc.ShowResponse;
 import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
+import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
@@ -353,30 +362,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 	}
 	
 	@Override
-	public void onOnButtonPress(OnButtonPress notification) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
-		else Log.i(TAG, "" + notification);
-		
-		switch(notification.getButtonName())
-		{
-			case OK:
-				playPauseAnnoyingRepetitiveAudio();
-				break;
-			case SEEKLEFT:
-				break;
-			case SEEKRIGHT:
-				break;
-			case TUNEUP:
-				break;
-			case TUNEDOWN:
-				break;
-			default:
-				break;
-		}
-	}
-	
-	@Override
 	public void onOnCommand(OnCommand notification) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
@@ -396,30 +381,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 	}
 
 	@Override
-	public void onAlertResponse(AlertResponse response) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-		else Log.i(TAG, "" + response);
-		
-		if (waitingForResponse && _testerMain.getThreadContext() != null) {
-			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
-			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
-		}
-	}
-	
-	@Override
-	public void onPerformInteractionResponse(PerformInteractionResponse response) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-		else Log.i(TAG, "" + response);
-		
-		if (waitingForResponse && _testerMain.getThreadContext() != null) {
-			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
-			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
-		}
-	}
-
-	@Override
 	public void onProxyClosed(String info, Exception e) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e);
@@ -431,7 +392,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		}
 	}
 	
-  
 	public void reset(){
 	   try {
 		   _syncProxy.resetProxy();
@@ -457,20 +417,9 @@ public class ProxyService extends Service implements IProxyListenerALM {
  		}
 	}
 	
-	/*******************************************
-	** Remaing - SYNC AppLink Base Callback's **
-	*******************************************/
-	@Override
-	public void onAddCommandResponse(AddCommandResponse response) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-		else Log.i(TAG, "" + response);
-		
-		if (waitingForResponse && _testerMain.getThreadContext() != null) {
-			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
-			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
-		}
-	}
+	/*********************************
+	** SYNC AppLink Base Callback's **
+	*********************************/
 	@Override
 	public void onAddSubMenuResponse(AddSubMenuResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -538,17 +487,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		}
 	}
 	@Override
-	public void onSetGlobalPropertiesResponse(SetGlobalPropertiesResponse response) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-		else Log.i(TAG, "" + response);
-		
-		if (waitingForResponse && _testerMain.getThreadContext() != null) {
-			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
-			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
-		}
-	}
-	@Override
 	public void onResetGlobalPropertiesResponse(ResetGlobalPropertiesResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
@@ -561,17 +499,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 	}
 	@Override
 	public void onSetMediaClockTimerResponse(SetMediaClockTimerResponse response) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-		else Log.i(TAG, "" + response);
-		
-		if (waitingForResponse && _testerMain.getThreadContext() != null) {
-			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
-			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
-		}
-	}
-	@Override
-	public void onShowResponse(ShowResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
@@ -615,25 +542,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		}
 	}
 	@Override
-	public void onOnEncodedSyncPData(OnEncodedSyncPData notification) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
-		else Log.i(TAG, "" + notification);
-	}
-	@Override
-	public void onOnTBTClientState(OnTBTClientState notification) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
-		else Log.i(TAG, "" + notification);
-	}
-	@Override
 	public void onOnDriverDistraction(OnDriverDistraction notification) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
-		else Log.i(TAG, "" + notification);
-	}
-	@Override
-	public void onOnButtonEvent(OnButtonEvent notification) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
 		else Log.i(TAG, "" + notification);
@@ -649,33 +558,10 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
 	}
-	@Override
-	public void onOnPermissionsChange(OnPermissionsChange notification) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
-		else Log.i(TAG, "" + notification);
-	}
 
-	@Override
-	public IBinder onBind(Intent intent) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage("Service on Bind");
-		else Log.i(TAG, "Service on Bind");
-		return new Binder();
-	}
-
-	@Override
-	public void onSliderResponse(SliderResponse response) {
-		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-		else Log.i(TAG, "" + response);
-		
-		if (waitingForResponse && _testerMain.getThreadContext() != null) {
-			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
-			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
-		}
-	}
-
+	/*********************************
+	** SYNC AppLink Soft Button Image Callback's **
+	*********************************/
 	@Override
 	public void onPutFileResponse(PutFileResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -687,7 +573,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
 	}
-
 	@Override
 	public void onDeleteFileResponse(DeleteFileResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -699,7 +584,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
 	}
-
 	@Override
 	public void onListFilesResponse(ListFilesResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -711,7 +595,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
 	}
-
 	@Override
 	public void onSetAppIconResponse(SetAppIconResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -723,7 +606,109 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
 	}
+	@Override
+	public void onOnButtonEvent(OnButtonEvent notification) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+		else Log.i(TAG, "" + notification);
+	}
+	@Override
+	public void onOnButtonPress(OnButtonPress notification) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+		else Log.i(TAG, "" + notification);
+		
+		switch(notification.getButtonName())
+		{
+			case OK:
+				playPauseAnnoyingRepetitiveAudio();
+				break;
+			case SEEKLEFT:
+				break;
+			case SEEKRIGHT:
+				break;
+			case TUNEUP:
+				break;
+			case TUNEDOWN:
+				break;
+			default:
+				break;
+		}
+	}
+	
+	/*********************************
+	** SYNC AppLink Updated Callback's **
+	*********************************/
+	@Override
+	public void onAddCommandResponse(AddCommandResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+	@Override
+	public void onAlertResponse(AlertResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}	
+	@Override
+	public void onPerformInteractionResponse(PerformInteractionResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+	@Override
+	public void onSetGlobalPropertiesResponse(SetGlobalPropertiesResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+	@Override
+	public void onShowResponse(ShowResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
 
+	/*********************************
+	** SYNC AppLink New Callback's **
+	*********************************/
+	@Override
+	public void onSliderResponse(SliderResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
 	@Override
 	public void onScrollableMessageResponse(ScrollableMessageResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -735,7 +720,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
 	}
-
 	@Override
 	public void onChangeRegistrationResponse(ChangeRegistrationResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -747,7 +731,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
 	}
-
 	@Override
 	public void onSetDisplayLayoutResponse(SetDisplayLayoutResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -759,7 +742,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
 	}
-
 	@Override
 	public void onOnLanguageChange(OnLanguageChange notification) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -767,6 +749,9 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		else Log.i(TAG, "" + notification);
 	}
 
+	/*********************************
+	** SYNC AppLink Audio Pass Thru Callback's **
+	*********************************/
 	@Override
 	public void onPerformAudioPassThruResponse(PerformAudioPassThruResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -778,7 +763,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
 	}
-
 	@Override
 	public void onEndAudioPassThruResponse(EndAudioPassThruResponse response) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -790,7 +774,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
 	}
-
 	@Override
 	public void onOnAudioPassThru(OnAudioPassThru notification) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -798,39 +781,147 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		else Log.i(TAG, "" + notification);
 	}
 
+	/*********************************
+	** SYNC AppLink Vehicle Data Callback's **
+	*********************************/
 	@Override
-	public void onSubscribeVehicleDataResponse(SubscribeVehicleData response) {
-		// TODO Auto-generated method stub
+	public void onSubscribeVehicleDataResponse(SubscribeVehicleDataResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
 		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
 	}
-
 	@Override
-	public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleData response) {
-		// TODO Auto-generated method stub
+	public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleDataResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
 		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
 	}
-
 	@Override
-	public void onGetVehicleDataResponse(GetVehicleData response) {
-		// TODO Auto-generated method stub
+	public void onGetVehicleDataResponse(GetVehicleDataResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
 		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
 	}
-
 	@Override
-	public void onReadDIDResponse(ReadDID response) {
-		// TODO Auto-generated method stub
+	public void onReadDIDResponse(ReadDIDResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
 		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
 	}
-
 	@Override
-	public void onGetDTCsResponse(GetDTCs response) {
-		// TODO Auto-generated method stub
+	public void onGetDTCsResponse(GetDTCsResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
 		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
 	}
-
 	@Override
 	public void onOnVehicleData(OnVehicleData notification) {
-		// TODO Auto-generated method stub
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+		else Log.i(TAG, "" + notification);
+	}
+	
+	/*********************************
+	** SYNC AppLink TBT Callback's **
+	*********************************/
+	@Override
+	public void onShowConstantTBTResponse(ShowConstantTBTResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
 		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+	@Override
+	public void onAlertManeuverResponse(AlertManeuverResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+	@Override
+	public void onUpdateTurnListResponse(UpdateTurnListResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+	@Override
+	public void onOnTBTClientState(OnTBTClientState notification) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+		else Log.i(TAG, "" + notification);
+	}
+
+	/*********************************
+	** SYNC AppLink Policies Callback's **
+	*********************************/
+	@Override
+	public void onOnPermissionsChange(OnPermissionsChange notification) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+		else Log.i(TAG, "" + notification);
+	}
+	@Override
+	public void onOnEncodedSyncPData(OnEncodedSyncPData notification) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+		else Log.i(TAG, "" + notification);
+	}
+
+	@Override
+	public void onDialNumberResponse(DialNumberResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+	
+	@Override
+	public IBinder onBind(Intent intent) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage("Service on Bind");
+		else Log.i(TAG, "Service on Bind");
+		return new Binder();
 	}
 }

@@ -63,7 +63,17 @@ public class TireStatus extends RPCStruct {
     	}
     }
     public SingleTireStatus getRightFront() {
-    	return (SingleTireStatus) store.get(Names.rightFront);
+    	Object obj = store.get(Names.rightFront);
+        if (obj instanceof SingleTireStatus) {
+            return (SingleTireStatus) obj;
+        } else if (obj instanceof Hashtable) {
+        	try {
+        		return new SingleTireStatus((Hashtable) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.rightFront, e);
+            }
+        }
+        return null;
     }
     public void setLeftRear(SingleTireStatus leftRear) {
     	if (leftRear != null) {
@@ -73,7 +83,17 @@ public class TireStatus extends RPCStruct {
     	}
     }
     public SingleTireStatus getLeftRear() {
-    	return (SingleTireStatus) store.get(Names.leftRear);
+    	Object obj = store.get(Names.leftRear);
+        if (obj instanceof SingleTireStatus) {
+            return (SingleTireStatus) obj;
+        } else if (obj instanceof Hashtable) {
+        	try {
+        		return new SingleTireStatus((Hashtable) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.leftRear, e);
+            }
+        }
+        return null;
     }
     public void setRightRear(SingleTireStatus rightRear) {
     	if (rightRear != null) {
@@ -83,7 +103,17 @@ public class TireStatus extends RPCStruct {
     	}
     }
     public SingleTireStatus getRightRear() {
-    	return (SingleTireStatus) store.get(Names.rightRear);
+    	Object obj = store.get(Names.rightRear);
+        if (obj instanceof SingleTireStatus) {
+            return (SingleTireStatus) obj;
+        } else if (obj instanceof Hashtable) {
+        	try {
+        		return new SingleTireStatus((Hashtable) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.rightRear, e);
+            }
+        }
+        return null;
     }
     public void setInnerLeftRear(SingleTireStatus innerLeftRear) {
     	if (innerLeftRear != null) {
@@ -93,7 +123,17 @@ public class TireStatus extends RPCStruct {
     	}
     }
     public SingleTireStatus getInnerLeftRear() {
-    	return (SingleTireStatus) store.get(Names.innerLeftRear);
+    	Object obj = store.get(Names.innerLeftRear);
+        if (obj instanceof SingleTireStatus) {
+            return (SingleTireStatus) obj;
+        } else if (obj instanceof Hashtable) {
+        	try {
+        		return new SingleTireStatus((Hashtable) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.innerLeftRear, e);
+            }
+        }
+        return null;
     }
     public void setInnerRightRear(SingleTireStatus innerRightRear) {
     	if (innerRightRear != null) {
@@ -103,6 +143,16 @@ public class TireStatus extends RPCStruct {
     	}
     }
     public SingleTireStatus getInnerRightRear() {
-    	return (SingleTireStatus) store.get(Names.innerRightRear);
+    	Object obj = store.get(Names.innerRightRear);
+        if (obj instanceof SingleTireStatus) {
+            return (SingleTireStatus) obj;
+        } else if (obj instanceof Hashtable) {
+        	try {
+        		return new SingleTireStatus((Hashtable) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.innerRightRear, e);
+            }
+        }
+        return null;
     }
 }

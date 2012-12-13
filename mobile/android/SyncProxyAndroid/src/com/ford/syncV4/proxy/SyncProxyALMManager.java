@@ -32,6 +32,7 @@ import com.ford.syncV4.proxy.interfaces.ISyncTBTClientStateListener;
 import com.ford.syncV4.proxy.interfaces.ISyncUnsubscribeButtonResponseListener;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
+import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
 import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
 import com.ford.syncV4.proxy.rpc.Choice;
@@ -40,11 +41,12 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
+import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
-import com.ford.syncV4.proxy.rpc.GetDTCs;
-import com.ford.syncV4.proxy.rpc.GetVehicleData;
+import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
+import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
@@ -59,24 +61,26 @@ import com.ford.syncV4.proxy.rpc.OnSyncChoiceChosen;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
-import com.ford.syncV4.proxy.rpc.ReadDID;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
+import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
 import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
 import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
 import com.ford.syncV4.proxy.rpc.SetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimerResponse;
+import com.ford.syncV4.proxy.rpc.ShowConstantTBTResponse;
 import com.ford.syncV4.proxy.rpc.ShowResponse;
 import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
-import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
-import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
+import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
@@ -2396,27 +2400,27 @@ public class SyncProxyALMManager {
 		}
 
 		@Override
-		public void onSubscribeVehicleDataResponse(SubscribeVehicleData response) {
+		public void onSubscribeVehicleDataResponse(SubscribeVehicleDataResponse response) {
 			_lifecycleListener.onSubscribeVehicleDataResponse(response);
 		}
 
 		@Override
-		public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleData response) {
+		public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleDataResponse response) {
 			_lifecycleListener.onUnsubscribeVehicleDataResponse(response);
 		}
 
 		@Override
-		public void onGetVehicleDataResponse(GetVehicleData response) {
+		public void onGetVehicleDataResponse(GetVehicleDataResponse response) {
 			_lifecycleListener.onGetVehicleDataResponse(response);
 		}
 
 		@Override
-		public void onReadDIDResponse(ReadDID response) {
+		public void onReadDIDResponse(ReadDIDResponse response) {
 			_lifecycleListener.onReadDIDResponse(response);
 		}
 
 		@Override
-		public void onGetDTCsResponse(GetDTCs response) {
+		public void onGetDTCsResponse(GetDTCsResponse response) {
 			_lifecycleListener.onGetDTCsResponse(response);
 		}
 
@@ -2481,6 +2485,26 @@ public class SyncProxyALMManager {
 		}
 		public void onSliderResponse(SliderResponse response) {
 			_lifecycleListener.onSliderResponse(response);
+		}
+
+		@Override
+		public void onAlertManeuverResponse(AlertManeuverResponse response) {
+			_lifecycleListener.onAlertManeuverResponse(response);
+		}
+
+		@Override
+		public void onShowConstantTBTResponse(ShowConstantTBTResponse response) {
+			_lifecycleListener.onShowConstantTBTResponse(response);
+		}
+
+		@Override
+		public void onUpdateTurnListResponse(UpdateTurnListResponse response) {
+			_lifecycleListener.onUpdateTurnListResponse(response);
+		}
+
+		@Override
+		public void onDialNumberResponse(DialNumberResponse response) {
+			_lifecycleListener.onDialNumberResponse(response);
 		}
 	}
 }

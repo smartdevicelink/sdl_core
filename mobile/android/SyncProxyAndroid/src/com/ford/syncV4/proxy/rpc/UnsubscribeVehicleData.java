@@ -1,6 +1,8 @@
 package com.ford.syncV4.proxy.rpc;
 
 import java.util.Hashtable;
+import java.util.Vector;
+
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
@@ -14,25 +16,37 @@ public class UnsubscribeVehicleData extends RPCRequest {
     public UnsubscribeVehicleData(Hashtable hash) {
         super(hash);
     }
-    public void setDataType(VehicleDataType dataType) {
+    public void setDataType(Vector<VehicleDataType> dataType) {
     	if (dataType != null) {
     		parameters.put(Names.dataType, dataType);
     	} else {
     		parameters.remove(Names.dataType);
     	}
     }
-    public VehicleDataType getDataType() {
-    	Object obj = parameters.get(Names.dataType);
-        if (obj instanceof VehicleDataType) {
-            return (VehicleDataType) obj;
-        } else if (obj instanceof String) {
-        	VehicleDataType theCode = null;
-            try {
-                theCode = VehicleDataType.valueForString((String) obj);
-            } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.dataType, e);
-            }
-            return theCode;
+    public Vector<VehicleDataType> getDataType() {
+        if (store.get(Names.dataType) instanceof Vector<?>) {
+	    	Vector<?> list = (Vector<?>)store.get(Names.dataType);
+	        if (list != null && list.size() > 0) {
+	            Object obj = list.get(0);
+	            if (obj instanceof VehicleDataType) {
+	                return (Vector<VehicleDataType>) list;
+	            } else if (obj instanceof String) {
+	                Vector<VehicleDataType> newList = new Vector<VehicleDataType>();
+	                for (Object hashObj : list) {
+	                    String strFormat = (String)hashObj;
+	                    VehicleDataType toAdd = null;
+	                    try {
+	                        toAdd = VehicleDataType.valueForString(strFormat);
+	                    } catch (Exception e) {
+	                    	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.dataType, e);
+	                    }
+	                    if (toAdd != null) {
+	                        newList.add(toAdd);
+	                    }
+	                }
+	                return newList;
+	            }
+	        }
         }
         return null;
     }

@@ -6,6 +6,7 @@
 		android:layout_height="wrap_content">
 		<TableRow android:id="@+id/LinearLayout01"
 			android:layout_width="fill_parent" android:layout_height="wrap_content">
+		
 		</TableRow>
 		<TableRow android:id="@+id/LinearLayout03"
 			android:layout_width="fill_parent" android:layout_height="wrap_content">
@@ -30,19 +31,17 @@
 				android:layout_height="wrap_content" android:id="@+id/btnSendMessage"
 				android:text="Send Message" android:enabled="true"></Button>
 		</TableRow>
-		
-	</TableLayout>
-
+	</TableLayout>	
+	
 	<ScrollView android:layout_width="fill_parent"
 		android:layout_height="fill_parent" android:id="@+id/scrollConsole"
 		android:visibility="gone">
-		<TextView android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:id="@+id/console"></TextView>
 	</ScrollView>
 
 	<ListView android:layout_height="fill_parent"
 		android:layout_width="fill_parent" android:id="@+id/messageList"
 		android:visibility="visible">
 	</ListView>
+	
 
 </LinearLayout>

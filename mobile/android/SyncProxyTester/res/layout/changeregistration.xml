@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/itemRoot"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dip"
+    android:layout_marginRight="10dip"
+    android:minWidth="300px"
+    android:orientation="vertical"
+    android:paddingLeft="20dip"
+    android:paddingRight="20dip" >
+    
+    <TextView android:layout_width="fill_parent"
+        android:layout_height="wrap_content" android:layout_weight="1"
+        android:textStyle="bold" android:text="Language">
+    </TextView>
+    <Spinner android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:id="@+id/spnLanguage">
+    </Spinner>
+    <TextView android:layout_width="fill_parent"
+        android:layout_height="wrap_content" android:layout_weight="1"
+        android:textStyle="bold" android:text="Hmi Display Language">
+    </TextView>
+    <Spinner android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:id="@+id/spnHmiDisplayLanguage">
+    </Spinner>
+</LinearLayout>

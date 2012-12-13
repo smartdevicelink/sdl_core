@@ -23,4 +23,14 @@ public class GetDTCs extends RPCRequest {
     public Integer getEcuName() {
     	return (Integer) parameters.get(Names.ecuName);
     }
+    public void setEncrypted(Boolean encrypted) {
+    	if (encrypted != null) {
+    		store.put(Names.encrypted, encrypted);
+    	} else {
+    		store.remove(Names.encrypted);
+    	}
+    }
+    public Boolean getEncrypted() {
+    	return (Boolean) store.get(Names.encrypted);
+    }
 }
