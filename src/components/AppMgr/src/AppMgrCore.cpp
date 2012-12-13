@@ -2664,7 +2664,15 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetTTSCapabilities response has been income");
                 NsRPC2Communication::TTS::GetCapabilitiesResponse * ttsCaps = (NsRPC2Communication::TTS::GetCapabilitiesResponse*)msg;
                 core->mSpeechCapabilitiesV1.set(ttsCaps->get_capabilities());
-                core->mSpeechCapabilitiesV2.set(*((std::vector< NsAppLinkRPCV2::SpeechCapabilities>*)&ttsCaps->get_capabilities()));
+                std::vector< NsAppLinkRPCV2::SpeechCapabilities> speechCapsV2;
+                for(std::vector< NsAppLinkRPC::SpeechCapabilities>::const_iterator it = ttsCaps->get_capabilities().begin(); it != ttsCaps->get_capabilities().end(); it++)
+                {
+                    const NsAppLinkRPC::SpeechCapabilities& caps = *it;
+                    NsAppLinkRPCV2::SpeechCapabilities capsV2;
+                    capsV2.set((NsAppLinkRPCV2::SpeechCapabilities::SpeechCapabilitiesInternal)caps.get());
+                    speechCapsV2.push_back(capsV2);
+                }
+                core->mSpeechCapabilitiesV2.set(speechCapsV2);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE:
