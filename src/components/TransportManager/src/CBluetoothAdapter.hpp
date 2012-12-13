@@ -17,6 +17,8 @@ namespace NsAppLink
     {
         /**
          * @brief Bluetooth device adapter.
+         *
+         * @see @ref components_transportmanager_internal_design_device_adapters_bluetooth_adapter
          **/
         class CBluetoothAdapter: public CDeviceAdapter
         {
@@ -44,6 +46,8 @@ namespace NsAppLink
         private:
             /**
              * @brief Interval between service discovery for connected devices in seconds.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_bluetooth_adapter_discovery
              **/
             static const time_t cConnectedDevicesServiceDiscoveryInterval = 10;
 
@@ -129,11 +133,16 @@ namespace NsAppLink
              *
              * @param DeviceHandle Device handle.
              * @param ConnectionsList Reference to connections list that must be filled.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_bluetooth_adapter_connecting_devices
              **/
             virtual void createConnectionsListForDevice(const tDeviceHandle DeviceHandle, std::vector<SConnection*> & ConnectionsList);
 
             /**
              * @brief Device discovery thread.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
+             * @see @ref components_transportmanager_internal_design_device_adapters_bluetooth_adapter_discovery
              **/
             virtual void mainThread(void);
 
@@ -145,6 +154,8 @@ namespace NsAppLink
              * connection map when connection is terminated before terminating connection thread.
              *
              * @param ConnectionHandle Connection handle.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_connection_thread
              **/
             virtual void connectionThread(const tConnectionHandle ConnectionHandle);
 
@@ -170,6 +181,9 @@ namespace NsAppLink
              * @param AppLinkRFCOMMChannels Reference to variable that will
              *                              receive list of RFCOMM channels
              *                              with AppLink service discovered.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_bluetooth_adapter_discovery
+             * @see @ref components_transportmanager_internal_design_device_adapters_bluetooth_adapter_connecting_devices
              **/
             void discoverAppLinkRFCOMMChannels(const bdaddr_t & DeviceAddress, tRFCOMMChannelVector & AppLinkRFCOMMChannels);
 

@@ -10,7 +10,6 @@
 #include "AppMgr/MenuMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/AppMenus.h"
-#include "AppMgr/AppChoiceSets.h"
 #include <string>
 #include <vector>
 #include <tuple>
@@ -129,31 +128,6 @@ namespace NsAppManager
          * \return application ID
          */
         const int& getAppID( ) const;
-
-        /**
-         * \brief add an interaction choice set item to the application
-         * \param choiceSetId interaction choice set id
-         * \param choiceSet interaction choice set
-         */
-        void addChoiceSet(const unsigned int& choiceSetId, const ChoiceSet& choiceSet);
-
-        /**
-         * \brief remove an interaction choice set from the application
-         * \param choiceSetId interaction choice set id
-         */
-        void removeChoiceSet(const unsigned int& choiceSetId);
-
-        /**
-         * \brief gets all interaction choice set items
-         * \return interaction choice set items
-         */
-        ChoiceSetItems getAllChoiceSets() const;
-
-        /**
-         * \brief get count of interaction choice sets
-         * \return interaction choice sets count
-         */
-        size_t getChoiceSetsCount() const;
 
         /**
          * \brief add a command to a menu
@@ -301,7 +275,6 @@ namespace NsAppManager
         MenuMapping mMenuMapping;
         CommandMapping   mCommandMapping;
         AppMenus mMenus;
-        AppChoiceSets mChoiceSets;
     };
 
 } // namespace NsAppManager

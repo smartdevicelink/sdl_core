@@ -11,6 +11,8 @@ namespace NsAppLink
     {
         /**
          * @brief Device adapter for TCP/IP connections.
+         *
+         * @see @ref components_transportmanager_internal_design_device_adapters_tcp_adapter
          **/
         class CTCPAdapter: public CDeviceAdapter
         {
@@ -38,6 +40,8 @@ namespace NsAppLink
         private:
             /**
              * @brief TCP port for listening for incoming connections.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_tcp_adapter_listen
              **/
             static const uint16_t cTCPAdapterPort = 12345u;
 
@@ -116,6 +120,10 @@ namespace NsAppLink
 
             /**
              * @brief Device adapter main thread.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_tcp_adapter_listen
+             * @see @ref components_transportmanager_internal_design_device_adapters_tcp_adapter_accept
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
              **/
             virtual void mainThread(void);
 
@@ -127,6 +135,9 @@ namespace NsAppLink
              * connection map when connection is terminated before terminating connection thread.
              *
              * @param ConnectionHandle Connection handle.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_tcp_adapter_disconnecting
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_connection_thread
              **/
             virtual void connectionThread(const tConnectionHandle ConnectionHandle);
         };

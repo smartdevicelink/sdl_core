@@ -2,6 +2,7 @@
 #define APPCHOICESETS_H
 
 #include "JSONHandler/ALRPCObjects/V1/Choice.h"
+#include "JSONHandler/ALRPCObjects/V2/Choice.h"
 #include <vector>
 #include <string>
 #include <map>
@@ -16,17 +17,34 @@ namespace NsAppManager
     /**
      * \brief interaction choice sets
      */
-    typedef std::vector<NsAppLinkRPC::Choice> ChoiceSet;
+    union ChoiceSetGeneric
+    {
+        std::vector<NsAppLinkRPC::Choice> choiceSetV1;
+        std::vector<NsAppLinkRPCV2::Choice> choiceSetV2;
+        ChoiceSetGeneric();
+        ChoiceSetGeneric(const ChoiceSetGeneric&);
+        ~ChoiceSetGeneric();
+    };
+
+    /**
+     * \brief interaction choice sets protocol v1
+     */
+    typedef std::vector<NsAppLinkRPC::Choice> ChoiceSetV1;
+
+    /**
+     * \brief interaction choice sets protocol v2
+     */
+    typedef std::vector<NsAppLinkRPCV2::Choice> ChoiceSetV2;
 
     /**
      * \brief mapping of interaction choice set id to choice set item vector
      */
-    typedef std::pair<unsigned int, ChoiceSet> ChoiceSetItem;
+    typedef std::pair<unsigned int, ChoiceSetGeneric> ChoiceSetItem;
 
     /**
      * \brief mapping of  interaction choice set id to choice set item vector
      */
-    typedef std::map<unsigned int, ChoiceSet> ChoiceSetItems;
+    typedef std::map<unsigned int, ChoiceSetGeneric> ChoiceSetItems;
 
     /**
      * \brief AppChoiceSets acts as a mapping between interaction choice set ids and respective choice sets
@@ -50,7 +68,14 @@ namespace NsAppManager
          * \param choiceSetId interaction choice set id
          * \param choiceSet interaction choice set
          */
-        void addItem(const unsigned int& choiceSetId, const ChoiceSet& choiceSet);
+        void addItem(const unsigned int& choiceSetId, const ChoiceSetV1& choiceSet);
+
+        /**
+         * \brief add an interaction choice set item to a mapping
+         * \param choiceSetId interaction choice set id
+         * \param choiceSet interaction choice set
+         */
+        void addItem(const unsigned int& choiceSetId, const ChoiceSetV2& choiceSet);
 
         /**
          * \brief remove an interaction choice set from a mapping
