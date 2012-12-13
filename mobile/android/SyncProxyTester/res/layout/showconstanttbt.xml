@@ -1,65 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/itemRoot"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="10dip"
-    android:layout_marginRight="10dip"
-    android:minWidth="300px"
-    android:orientation="vertical"
-    android:paddingLeft="20dip"
-    android:paddingRight="20dip" >
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
     
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:layout_weight="1"
-        android:textStyle="bold" android:text="Navigation Text 1">
-    </TextView>
-    <EditText android:text="Navigation Text 1" android:id="@+id/txtNavigationText1"
-        android:layout_width="fill_parent" android:layout_height="wrap_content"
-        android:visibility="visible" android:freezesText="true">
-    </EditText>
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:layout_weight="1"
-        android:textStyle="bold" android:text="Navigation Text 2">
-    </TextView>
-    <EditText android:text="Navigation Text 2" android:id="@+id/txtNavigationText2"
-        android:layout_width="fill_parent" android:layout_height="wrap_content"
-        android:visibility="visible" android:freezesText="true">
-    </EditText>
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:layout_weight="1"
-        android:textStyle="bold" android:text="ETA">
-    </TextView>
-    <EditText android:text="ETA" android:id="@+id/txtEta"
-        android:layout_width="fill_parent" android:layout_height="wrap_content"
-        android:visibility="visible" android:freezesText="true">
-    </EditText>
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:layout_weight="1"
-        android:textStyle="bold" android:text="Total Distance">
-    </TextView>
-    <EditText android:text="Total Distance" android:id="@+id/txtTotalDistance"
-        android:layout_width="fill_parent" android:layout_height="wrap_content"
-        android:visibility="visible" android:freezesText="true">
-    </EditText>
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:layout_weight="1"
-        android:textStyle="bold" android:text="Distance To Maneuver">
-    </TextView>
-    <EditText android:text="Distance To Maneuver" android:id="@+id/txtDistanceToManeuver"
-        android:layout_width="fill_parent" android:layout_height="wrap_content"
-        android:visibility="visible" android:freezesText="true">
-    </EditText>
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:layout_weight="1"
-        android:textStyle="bold" android:text="Distance To Maneuver Scale">
-    </TextView>
-    <EditText android:text="Distance To Maneuver Scale" android:id="@+id/txtDistanceToManeuverScale"
-        android:layout_width="fill_parent" android:layout_height="wrap_content"
-        android:visibility="visible" android:freezesText="true">
-    </EditText>
-    <CheckBox android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:id="@+id/chkManeuverComplete"
-        android:text="Maneuver Complete?" android:checked="false">
-    </CheckBox>
-</LinearLayout>
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/itemRoot"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_marginLeft="10dip"
+	    android:layout_marginRight="10dip"
+	    android:minWidth="300px"
+	    android:orientation="vertical"
+	    android:paddingLeft="20dip"
+	    android:paddingRight="20dip" >
+	    
+	    <TextView android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" android:layout_weight="1"
+	        android:textStyle="bold" android:text="Navigation Text 1">
+	    </TextView>
+	    <EditText android:text="Navigation Text 1" android:id="@+id/txtNavigationText1"
+	        android:layout_width="fill_parent" android:layout_height="wrap_content"
+	        android:visibility="visible" android:freezesText="true">
+	    </EditText>
+	    <TextView android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" android:layout_weight="1"
+	        android:textStyle="bold" android:text="Navigation Text 2">
+	    </TextView>
+	    <EditText android:text="Navigation Text 2" android:id="@+id/txtNavigationText2"
+	        android:layout_width="fill_parent" android:layout_height="wrap_content"
+	        android:visibility="visible" android:freezesText="true">
+	    </EditText>
+	    <TextView android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" android:layout_weight="1"
+	        android:textStyle="bold" android:text="ETA">
+	    </TextView>
+	    <EditText android:text="12:34" android:id="@+id/txtEta"
+	        android:layout_width="fill_parent" android:layout_height="wrap_content"
+	        android:visibility="visible" android:freezesText="true">
+	    </EditText>
+	    <TextView android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" android:layout_weight="1"
+	        android:textStyle="bold" android:text="Total Distance">
+	    </TextView>
+	    <EditText android:text="100 Miles" android:id="@+id/txtTotalDistance"
+	        android:layout_width="fill_parent" android:layout_height="wrap_content"
+	        android:visibility="visible" android:freezesText="true">
+	    </EditText>
+	    <TextView android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" android:layout_weight="1"
+	        android:textStyle="bold" android:text="Distance To Maneuver">
+	    </TextView>
+	    <EditText android:text="50" android:id="@+id/txtDistanceToManeuver"
+	        android:layout_width="fill_parent" android:layout_height="wrap_content"
+	        android:visibility="visible" android:freezesText="true">
+	    </EditText>
+	    <TextView android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" android:layout_weight="1"
+	        android:textStyle="bold" android:text="Distance To Maneuver Scale">
+	    </TextView>
+	    <EditText android:text="100" android:id="@+id/txtDistanceToManeuverScale"
+	        android:layout_width="fill_parent" android:layout_height="wrap_content"
+	        android:visibility="visible" android:freezesText="true">
+	    </EditText>
+	    <CheckBox android:layout_width="wrap_content"
+	        android:layout_height="wrap_content" android:id="@+id/chkManeuverComplete"
+	        android:text="Maneuver Complete?" android:checked="false">
+	    </CheckBox>
+        <CheckBox android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:id="@+id/chkIncludeSBs"
+            android:text="Include SoftButtons?" android:checked="false">
+        </CheckBox>
+	</LinearLayout>
+</ScrollView>
