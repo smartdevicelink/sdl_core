@@ -13,7 +13,7 @@
     </TextView>
     <EditText 
         android:text="7D0" 
-        android:id="@+id/txtECUName"
+        android:id="@+id/txtECUNameDID"
         android:layout_width="fill_parent" 
         android:layout_height="wrap_content"
         android:visibility="visible" 
@@ -34,4 +34,8 @@
         android:visibility="visible" 
         android:freezesText="true">
     </EditText>
+    <CheckBox android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:id="@+id/chkEncryptedDID"
+        android:text="Encrypted?" android:checked="false">
+    </CheckBox>
 </LinearLayout>

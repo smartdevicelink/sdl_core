@@ -1,3 +1,6 @@
+/*
+    Tests Transport Manager functionality with multiple (256) device adapters that connects/disconnects/sents data
+ */
 #include <algorithm>
 #include <pthread.h>
 #include <time.h>

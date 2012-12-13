@@ -1,3 +1,8 @@
+/*
+    Tests huge amount of data tranfer through Transport Manager. Currently there are 10000 iterations, on each iteration
+    data randomly sent from TM client to device or from device to TM client. Size of sent data is up to 1 MiB.
+    Average amount of transfered data is 2.4 GiB
+ */
 #define __STDC_FORMAT_MACROS
 
 #include <algorithm>

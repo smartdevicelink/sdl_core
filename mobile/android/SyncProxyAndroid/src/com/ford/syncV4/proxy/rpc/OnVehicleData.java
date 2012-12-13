@@ -56,45 +56,45 @@ public class OnVehicleData extends RPCNotification {
     public Integer getRpm() {
     	return (Integer) store.get(Names.rpm);
     }
-    public void setFuelLevel(Integer fuelLevel) {
+    public void setFuelLevel(Float fuelLevel) {
     	if (fuelLevel != null) {
     		store.put(Names.fuelLevel, fuelLevel);
     	} else {
     		store.remove(Names.fuelLevel);
     	}
     }
-    public Integer getFuelLevel() {
-    	return (Integer) store.get(Names.fuelLevel);
+    public Float getFuelLevel() {
+    	return (Float) store.get(Names.fuelLevel);
     }
-    public void setAvgFuelEconomy(Integer avgFuelEconomy) {
+    public void setAvgFuelEconomy(Float avgFuelEconomy) {
     	if (avgFuelEconomy != null) {
     		store.put(Names.avgFuelEconomy, avgFuelEconomy);
     	} else {
     		store.remove(Names.avgFuelEconomy);
     	}
     }
-    public Integer getAvgFuelEconomy() {
-    	return (Integer) store.get(Names.avgFuelEconomy);
+    public Float getAvgFuelEconomy() {
+    	return (Float) store.get(Names.avgFuelEconomy);
     }
-    public void setBatteryVoltage(Integer batteryVoltage) {
+    public void setBatteryVoltage(Float batteryVoltage) {
     	if (batteryVoltage != null) {
     		store.put(Names.batteryVoltage, batteryVoltage);
     	} else {
     		store.remove(Names.batteryVoltage);
     	}
     }
-    public Integer getBatteryVoltage() {
-    	return (Integer) store.get(Names.batteryVoltage);
+    public Float getBatteryVoltage() {
+    	return (Float) store.get(Names.batteryVoltage);
     }
-    public void setExternalTemperature(Integer externalTemperature) {
+    public void setExternalTemperature(Float externalTemperature) {
     	if (externalTemperature != null) {
     		store.put(Names.externalTemperature, externalTemperature);
     	} else {
     		store.remove(Names.externalTemperature);
     	}
     }
-    public Integer getExternalTemperature() {
-    	return (Integer) store.get(Names.externalTemperature);
+    public Float getExternalTemperature() {
+    	return (Float) store.get(Names.externalTemperature);
     }
     public void setVin(String vin) {
     	if (vin != null) {
@@ -114,7 +114,19 @@ public class OnVehicleData extends RPCNotification {
     	}
     }
     public PRNDL getPrndl() {
-    	return (PRNDL) store.get(Names.prndl);
+        Object obj = store.get(Names.prndl);
+        if (obj instanceof PRNDL) {
+            return (PRNDL) obj;
+        } else if (obj instanceof String) {
+        	PRNDL theCode = null;
+            try {
+                theCode = PRNDL.valueForString((String) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.prndl, e);
+            }
+            return theCode;
+        }
+        return null;
     }
     public void setTirePressure(TireStatus tirePressure) {
     	if (tirePressure != null) {
@@ -124,27 +136,37 @@ public class OnVehicleData extends RPCNotification {
     	}
     }
     public TireStatus getTirePressure() {
-    	return (TireStatus) store.get(Names.tirePressure);
+    	Object obj = store.get(Names.tirePressure);
+        if (obj instanceof TireStatus) {
+            return (TireStatus) obj;
+        } else if (obj instanceof Hashtable) {
+        	try {
+        		return new TireStatus((Hashtable) obj);
+            } catch (Exception e) {
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.tirePressure, e);
+            }
+        }
+        return null;
     }
-    public void setBatteryPackVoltage(Integer batteryPackVoltage) {
+    public void setBatteryPackVoltage(Float batteryPackVoltage) {
     	if (batteryPackVoltage != null) {
     		store.put(Names.batteryPackVoltage, batteryPackVoltage);
     	} else {
     		store.remove(Names.batteryPackVoltage);
     	}
     }
-    public Integer getBatteryPackVoltage() {
-    	return (Integer) store.get(Names.batteryPackVoltage);
+    public Float getBatteryPackVoltage() {
+    	return (Float) store.get(Names.batteryPackVoltage);
     }
-    public void setBatteryPackCurrent(Integer batteryPackCurrent) {
+    public void setBatteryPackCurrent(Float batteryPackCurrent) {
     	if (batteryPackCurrent != null) {
     		store.put(Names.batteryPackCurrent, batteryPackCurrent);
     	} else {
     		store.remove(Names.batteryPackCurrent);
     	}
     }
-    public Integer getBatteryPackCurrent() {
-    	return (Integer) store.get(Names.batteryPackCurrent);
+    public Float getBatteryPackCurrent() {
+    	return (Float) store.get(Names.batteryPackCurrent);
     }
     public void setBatteryPackTemperature(Integer batteryPackTemperature) {
     	if (batteryPackTemperature != null) {
@@ -186,14 +208,14 @@ public class OnVehicleData extends RPCNotification {
     public Integer getTripOdometer() {
     	return (Integer) store.get(Names.tripOdometer);
     }
-    public void setGenericbinary(Integer genericbinary) {
-    	if (genericbinary != null) {
-    		store.put(Names.genericbinary, genericbinary);
+    public void setSatRadioESN(String satRadioESN) {
+    	if (satRadioESN != null) {
+    		store.put(Names.satRadioESN, satRadioESN);
     	} else {
-    		store.remove(Names.genericbinary);
+    		store.remove(Names.satRadioESN);
     	}
     }
-    public Integer getGenericbinary() {
-    	return (Integer) store.get(Names.genericbinary);
+    public String getSatRadioESN() {
+    	return (String) store.get(Names.satRadioESN);
     }
 }

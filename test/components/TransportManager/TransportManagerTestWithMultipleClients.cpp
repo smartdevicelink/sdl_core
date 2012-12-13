@@ -1,3 +1,9 @@
+/*
+    Tests transport manager with multiple TM clients.
+
+    Each client lives within it's own thread. During his live each client sends a lot of data.
+    Also a lot of data also sent from device adapter to all TM clients.
+ */
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 

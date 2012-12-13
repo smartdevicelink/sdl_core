@@ -19,7 +19,7 @@ namespace NsAppLink
         class IHandleGenerator;
 
         /**
-         * @brief Base class for device adapters.
+         * @brief Base class for @link components_transportmanager_internal_design_device_adapters device adapters @endlink.
          **/
         class CDeviceAdapter: public IDeviceAdapter
         {
@@ -48,6 +48,8 @@ namespace NsAppLink
              * @brief Start scanning for new devices.
              *
              * List of new devices will be supplied in onDeviceListUpdated callback.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
              **/
             virtual void scanForNewDevices(void);
 
@@ -55,6 +57,8 @@ namespace NsAppLink
              * @brief Connect to all applications discovered on device.
              *
              * @param DeviceHandle Handle of device to connect to.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
              **/
             virtual void connectDevice(const tDeviceHandle DeviceHandle);
 
@@ -62,6 +66,8 @@ namespace NsAppLink
              * @brief Disconnect from all applications connected on device.
              *
              * @param DeviceHandle Handle of device to disconnect from.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_disconnecting_devices
              **/
             virtual void disconnectDevice(const tDeviceHandle DeviceHandle);
 
@@ -72,6 +78,8 @@ namespace NsAppLink
              * @param Data Frame payload data.
              * @param DataSize Size of data in bytes.
              * @param UserData Any user data.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
              **/
             virtual void sendFrame(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData);
 
@@ -289,6 +297,8 @@ namespace NsAppLink
              *
              * Every device adapter must call this method in destructor to wait
              * for other threads to terminate before destroying device adapter.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_threads_termination
              **/
             void waitForThreadsTermination(void);
 
@@ -324,6 +334,8 @@ namespace NsAppLink
              *
              * @return true if scanForNewDevices() has been called,
              *         false if timeout expired.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
              **/
             bool waitForDeviceScanRequest(const time_t Timeout);
 
@@ -340,6 +352,8 @@ namespace NsAppLink
              * This methods returns when connection is terminated.
              *
              * @param ConnectionHandle Connection handle.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_handling_communication
              **/
             void handleCommunication(const tConnectionHandle ConnectionHandle);
 
@@ -348,6 +362,8 @@ namespace NsAppLink
              *
              * This method is called when list of devices is changed to
              * notify device adapter listener about new list of devices.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_update_client_device_list
              **/
             void updateClientDeviceList(void);
 
@@ -360,11 +376,15 @@ namespace NsAppLink
              *
              * @param DeviceHandle Device handle.
              * @param ConnectionsList Reference to connections list that must be filled.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_connecting_devices
              **/
             virtual void createConnectionsListForDevice(const tDeviceHandle DeviceHandle, std::vector<SConnection*> & ConnectionsList);
 
             /**
              * @brief Device adapter main thread.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
              **/
             virtual void mainThread(void) = 0;
 
@@ -376,6 +396,8 @@ namespace NsAppLink
              * connection map when connection is terminated before terminating connection thread.
              *
              * @param ConnectionHandle Connection handle.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_connection_thread
              **/
             virtual void connectionThread(const tConnectionHandle ConnectionHandle) = 0;
 
@@ -404,16 +426,22 @@ namespace NsAppLink
              *
              * This flag is set in scanForNewDevices and reset after requested
              * device scan is completed.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
              **/
             bool mDeviceScanRequested;
 
             /**
              * @brief Mutex restricting access to DeviceScanRequested flag.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
              **/
             pthread_mutex_t mDeviceScanRequestedMutex;
 
             /**
              * @brief Conditional variable for signaling discovery thread about requested device scan.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_device_scan
              **/
             pthread_cond_t mDeviceScanRequestedCond;
 
@@ -421,21 +449,29 @@ namespace NsAppLink
              * @brief Map of device handle to device.
              *
              * This map contains all currently available bluetooth devices.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_devices_map
              **/
             tDeviceMap mDevices;
 
             /**
              * @brief Mutex restricting access to device map.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_devices_map
              **/
             mutable pthread_mutex_t mDevicesMutex;
 
             /**
              * @brief Map of connections.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_connections_map
              **/
             tConnectionMap mConnections;
 
             /**
              * @brief Mutex restricting access to connections map.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_connections_map
              **/
             mutable pthread_mutex_t mConnectionsMutex;
 
@@ -445,6 +481,8 @@ namespace NsAppLink
              * This flag is set to true on shutdown to inform all device adapter
              * threads that device adapter shutdown is in progress. After setting
              * this flag device adapter waits until all its threads are terminated.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_threads_termination
              **/
             bool mShutdownFlag;
 
@@ -455,6 +493,8 @@ namespace NsAppLink
              * @param Data Must be pointer to CDeviceAdapter instance.
              *
              * @return Thread return value.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
              **/
             static void * mainThreadStartRoutine(void * Data);
 
@@ -466,16 +506,22 @@ namespace NsAppLink
              *             connection thread is responsible for freeing this object.
              *
              * @return Thread return value.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_connection_thread
              **/
             static void * connectionThreadStartRoutine(void * Data);
 
             /**
              * @brief ID of device adapter main thread.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
              **/
             pthread_t mMainThread;
 
             /**
              * @brief Flag indicating whether the device adapter main thread has been started successfully.
+             *
+             * @see @ref components_transportmanager_internal_design_device_adapters_common_main_thread
              **/
             bool mMainThreadStarted;
         };

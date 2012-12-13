@@ -292,6 +292,7 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
 
 NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtocolV1( int connectionKey, const NsAppLinkRPC::ALRPCMessage *  message )
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "handling a message " << message->getMethodId() << " protocol 1");
     std::string messageString = NsAppLinkRPC::Marshaller::toString( message );
 
     if ( messageString.length() == 0 )
@@ -314,6 +315,7 @@ NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtoco
 
 NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtocolV2( int connectionKey, const NsAppLinkRPC::ALRPCMessage *  message )
 {
+    LOG4CPLUS_INFO_EXT(mLogger, "handling a message " << message->getMethodId() << " protocol 2");
     std::string messageString = NsAppLinkRPCV2::Marshaller::toString( message, 
                         static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId()), 
                         static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()) );

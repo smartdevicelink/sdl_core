@@ -2,6 +2,7 @@
 #define APPLICATION_V2_H
 
 #include "AppMgr/Application.h"
+#include "AppMgr/AppChoiceSets.h"
 #include "JSONHandler/ALRPCObjects/V2/AudioStreamingState.h"
 #include "JSONHandler/ALRPCObjects/V2/SystemContext.h"
 #include "JSONHandler/ALRPCObjects/V2/Language.h"
@@ -151,6 +152,31 @@ namespace NsAppManager
          */
         const TTSName& getTtsName( ) const;
 
+        /**
+         * \brief add an interaction choice set item to the application
+         * \param choiceSetId interaction choice set id
+         * \param choiceSet interaction choice set
+         */
+        void addChoiceSet(const unsigned int& choiceSetId, const ChoiceSetV2& choiceSet);
+
+        /**
+         * \brief remove an interaction choice set from the application
+         * \param choiceSetId interaction choice set id
+         */
+        void removeChoiceSet(const unsigned int& choiceSetId);
+
+        /**
+         * \brief gets all interaction choice set items
+         * \return interaction choice set items
+         */
+        ChoiceSetItems getAllChoiceSets() const;
+
+        /**
+         * \brief get count of interaction choice sets
+         * \return interaction choice sets count
+         */
+        size_t getChoiceSetsCount() const;
+
     private:
 
         /**
@@ -167,6 +193,7 @@ namespace NsAppManager
 
    //     std::string mAppID;
         AppTypes mAppType;
+        AppChoiceSets mChoiceSets;
         TTSName mTtsName;
     };
 }

@@ -2,17 +2,18 @@ package com.ford.syncV4.proxy.interfaces;
 
 import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
+import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
+import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
+import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
+import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
-import com.ford.syncV4.proxy.rpc.GetDTCs;
-import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
-import com.ford.syncV4.proxy.rpc.ReadDID;
-import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
-import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
@@ -21,6 +22,9 @@ import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
 import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
 import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
 import com.ford.syncV4.proxy.rpc.SliderResponse;
+import com.ford.syncV4.proxy.rpc.ShowConstantTBTResponse;
+import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
+import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 
 public interface ISyncALMLifeCycleListener {
 
@@ -72,15 +76,15 @@ public interface ISyncALMLifeCycleListener {
 	 */
 	public void onOnPermissionsChange(OnPermissionsChange notification);
 
-	public void onSubscribeVehicleDataResponse(SubscribeVehicleData response);
+	public void onSubscribeVehicleDataResponse(SubscribeVehicleDataResponse response);
 
-	public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleData response);
+	public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleDataResponse response);
 
-	public void onGetVehicleDataResponse(GetVehicleData response);
+	public void onGetVehicleDataResponse(GetVehicleDataResponse response);
 
-	public void onReadDIDResponse(ReadDID response);
+	public void onReadDIDResponse(ReadDIDResponse response);
 
-	public void onGetDTCsResponse(GetDTCs response);
+	public void onGetDTCsResponse(GetDTCsResponse response);
 
 	public void onOnVehicleData(OnVehicleData notification);
 
@@ -107,6 +111,14 @@ public interface ISyncALMLifeCycleListener {
 	public void onOnLanguageChange(OnLanguageChange notification);
 	
 	public void onSliderResponse(SliderResponse response);
+
+	public void onAlertManeuverResponse(AlertManeuverResponse response);
+
+	public void onShowConstantTBTResponse(ShowConstantTBTResponse response);
+
+	public void onUpdateTurnListResponse(UpdateTurnListResponse response);
+	
+	public void onDialNumberResponse(DialNumberResponse response);
 	
 	/**
 	 * **Deprecated** - onSyncConntected() being called indicates that the proxy, for the first time in it's active 

@@ -9,6 +9,7 @@
 
 #include <map>
 #include "JSONHandler/ALRPCObjects/V1/ButtonName.h"
+#include "JSONHandler/ALRPCObjects/V2/ButtonName.h"
 
 namespace log4cplus
 {
@@ -24,18 +25,18 @@ namespace NsAppManager
      * \brief Comparer acts as a comparer that allows to create std::map with NsAppLinkRPC::ButtonName as a key
      */
     struct Comparer {
-        bool operator() (const NsAppLinkRPC::ButtonName &b1, const NsAppLinkRPC::ButtonName &b2) const;
+        bool operator() (const NsAppLinkRPCV2::ButtonName &b1, const NsAppLinkRPCV2::ButtonName &b2) const;
     };
 
     /**
      * \brief a button_name-registered-app map
      */
-    typedef std::map<NsAppLinkRPC::ButtonName, RegistryItem*, Comparer> ButtonMap;
+    typedef std::map<NsAppLinkRPCV2::ButtonName, RegistryItem*, Comparer> ButtonMap;
 
     /**
      * \brief a button_name-registered-app map item
      */
-    typedef std::pair<NsAppLinkRPC::ButtonName, RegistryItem*> ButtonMapItem;
+    typedef std::pair<NsAppLinkRPCV2::ButtonName, RegistryItem*> ButtonMapItem;
 
     /**
      * \brief ButtonMapping acts as a mapping of buttons to registered application which subscribes to them
@@ -59,13 +60,13 @@ namespace NsAppManager
          * \param buttonName button name
          * \param app application to map a button to
          */
-        void addButton( const NsAppLinkRPC::ButtonName& buttonName, RegistryItem* app );
+        void addButton( const NsAppLinkRPCV2::ButtonName& buttonName, RegistryItem* app );
 
         /**
          * \brief remove a button from a mapping
          * \param buttonName button name
          */
-        void removeButton(const NsAppLinkRPC::ButtonName& buttonName);
+        void removeButton(const NsAppLinkRPCV2::ButtonName& buttonName);
 
         /**
          * \brief remove an application from a mapping
@@ -83,7 +84,7 @@ namespace NsAppManager
          * \param btnName button name
          * \return RegistryItem instance
          */
-        RegistryItem *findRegistryItemSubscribedToButton(const NsAppLinkRPC::ButtonName &btnName) const;
+        RegistryItem *findRegistryItemSubscribedToButton(const NsAppLinkRPCV2::ButtonName &btnName) const;
 
     private:
 

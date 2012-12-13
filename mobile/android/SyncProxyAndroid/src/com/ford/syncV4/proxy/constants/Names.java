@@ -43,7 +43,7 @@ public class Names {
 	public static final String ResetGlobalProperties = "ResetGlobalProperties";
 	public static final String PerformAudioCapture = "PerformAudioCapture";
 	public static final String SetAppIcon = "SetAppIcon";
-	public static final String ChangeLanguageRegistration = "ChangeLanguageRegistration";
+	public static final String ChangeRegistration = "ChangeRegistration";
 	public static final String SetDisplayLayout = "SetDisplayLayout";
 	public static final String OnLanguageChange = "OnLanguageChange";
 	public static final String hmiDisplayLanguage = "hmiDisplayLanguage";
@@ -76,6 +76,9 @@ public class Names {
 	public static final String EndAudioPassThru = "EndAudioPassThru";
 	public static final String EndAudioPassThruResponse = "EndAudioPassThruResponse";
 	public static final String OnAudioPassThru = "OnAudioPassThru";
+	public static final String ShowConstantTBT = "ShowConstantTBT";
+	public static final String AlertManeuver = "AlertManeuver";
+	public static final String UpdateTurnList = "UpdateTurnList";
 	
 	public static final String OnCommand = "OnCommand";
 	public static final String OnDataPublished = "OnDataPublished";
@@ -105,6 +108,10 @@ public class Names {
 	public static final String sliderPosition = "sliderPosition";
 	public static final String samplingRate = "samplingRate";
 	public static final String audioType = "audioType";
+	public static final String satRadioESN = "satRadioESN";
+	public static final String encrypted = "encrypted";
+	public static final String dtcList = "dtcList";
+	public static final String tryAgainTime = "tryAgainTime";
 
 	public static final String success = "success";
 	public static final String resultCode = "resultCode";
@@ -274,4 +281,15 @@ public class Names {
 	public static final String softButtons = "softButtons";
 	public static final String customButtonID = "customButtonID";
 	public static final String vrHelp = "vrHelp";
+	public static final String customButtonName = "customButtonName";
+	public static final String navigationText = "navigationText";
+	public static final String turnIcon = "turnIcon";
+	public static final String navigationText1 = "navigationText1";
+	public static final String navigationText2 = "navigationText2";
+	public static final String eta = "eta";
+	public static final String totalDistance = "totalDistance";
+	public static final String distanceToManeuver = "distanceToManeuver";
+	public static final String distanceToManeuverScale = "distanceToManeuverScale";
+	public static final String maneuverComplete = "maneuverComplete";
+	public static final String turnList = "turnList";
 }

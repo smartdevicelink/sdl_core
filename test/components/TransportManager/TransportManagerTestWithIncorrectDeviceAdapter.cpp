@@ -1,3 +1,13 @@
+/*
+    Tests TransportManager behavior when device adapter behaves completely incorrectly.
+    Tested cases are:
+        - receiving data without available devices
+        - receiving frameSendCompleted statuses without available devices/connections
+        - receiving application disconnects without connected applications
+        - receiving new frames with invalid/null data or it's size
+        - receiving application disconnects for already disconnected applications
+        - receiving application connect without available devices
+ */
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 

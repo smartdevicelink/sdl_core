@@ -1,3 +1,0 @@
-/*! \page components_transportmanager_internal_design_trasport_tcp_adapter TCP Adapter
-
-*/

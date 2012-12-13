@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/itemRoot"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dip"
+    android:layout_marginRight="10dip"
+    android:minWidth="300px"
+    android:orientation="vertical"
+    android:paddingLeft="20dip"
+    android:paddingRight="20dip" >
+    
+    <TextView android:layout_width="fill_parent"
+        android:layout_height="wrap_content" android:layout_weight="1"
+        android:textStyle="bold" android:text="File Name">
+    </TextView>
+    <EditText android:text="syncFileName" android:id="@+id/syncFileName"
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:visibility="visible" android:freezesText="true">
+    </EditText>
+    <TextView android:layout_width="fill_parent"
+        android:layout_height="wrap_content" android:layout_weight="1"
+        android:textStyle="bold" android:text="File Type">
+    </TextView>
+    <Spinner android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:id="@+id/spnFileType">
+    </Spinner>
+    <CheckBox android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:id="@+id/chkPersistentFile"
+        android:text="Persistent File?" android:checked="false">
+    </CheckBox>
+</LinearLayout>

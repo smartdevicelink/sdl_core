@@ -1,3 +1,13 @@
+/*
+    Tests correct registration/removal of various TransportManager listeners.
+        - tests that all registered device listeners received callbacks
+        - tests that all registered data listeners received callbacks
+        - tests that not registered device listeners was not received callbacks
+        - tests that not registered data listeners was not received callbacks
+        - tests that registered and then removed device listeners was not received callbacks
+        - tests that registered and then removed data listeners was not received callbacks
+ */
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 

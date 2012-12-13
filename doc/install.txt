@@ -20,6 +20,8 @@
   We are using cmake to create build configurations.
   Install cmake:
   sudo apt-get install cmake
+  Also, make sure the g++ compiler is installed:
+  sudo apt-get install g++
   To start web-based HMI we need web-browser with web-socket RFC6455 support.
   For example Google Chromium. Install it using:
   sudo apt-get install chromium-browser
@@ -49,8 +51,13 @@
   cmake ../git_repo
   2.2 For Release configuration, run:
   cmake -DCMAKE_BUILD_TYPE=Release ../git_repo
+  2.3 For Debug configuration with tests, run:
+  cmake -DBUILD_TESTS=On ../git_repo
   
   3. Make project:
   make
   
   Ready to use release application will be in build/src/appMain/appLinkCore
+
+  4. If You built configuration with tests (see 2.3 above), then You can run all project tests and see overall result with:
+  make test

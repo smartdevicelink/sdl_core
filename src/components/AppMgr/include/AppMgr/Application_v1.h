@@ -2,6 +2,7 @@
 #define APPLICATION_V1_H
 
 #include "AppMgr/Application.h"
+#include "AppMgr/AppChoiceSets.h"
 #include "JSONHandler/ALRPCObjects/V1/AudioStreamingState.h"
 #include "JSONHandler/ALRPCObjects/V1/SystemContext.h"
 #include "JSONHandler/ALRPCObjects/V1/Language.h"
@@ -115,6 +116,31 @@ namespace NsAppManager
          */
         const NsAppLinkRPC::SyncMsgVersion& getSyncMsgVersion( ) const;
 
+        /**
+         * \brief add an interaction choice set item to the application
+         * \param choiceSetId interaction choice set id
+         * \param choiceSet interaction choice set
+         */
+        void addChoiceSet(const unsigned int& choiceSetId, const ChoiceSetV1& choiceSet);
+
+        /**
+         * \brief remove an interaction choice set from the application
+         * \param choiceSetId interaction choice set id
+         */
+        void removeChoiceSet(const unsigned int& choiceSetId);
+
+        /**
+         * \brief gets all interaction choice set items
+         * \return interaction choice set items
+         */
+        ChoiceSetItems getAllChoiceSets() const;
+
+        /**
+         * \brief get count of interaction choice sets
+         * \return interaction choice sets count
+         */
+        size_t getChoiceSetsCount() const;
+
     private:
 
         /**
@@ -128,6 +154,7 @@ namespace NsAppManager
         NsAppLinkRPC::SystemContext mSystemContext;
         NsAppLinkRPC::HMILevel::HMILevelInternal mHMIStatusLevel;
         NsAppLinkRPC::SyncMsgVersion mSyncMsgVersion;
+        AppChoiceSets mChoiceSets;
         bool m_bUsesVehicleData;
     };
 }

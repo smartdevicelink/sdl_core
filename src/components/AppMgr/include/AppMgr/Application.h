@@ -10,11 +10,11 @@
 #include "AppMgr/MenuMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/AppMenus.h"
-#include "AppMgr/AppChoiceSets.h"
 #include <string>
 #include <vector>
 #include <tuple>
 #include <map>
+#include <list>
 #include <cstddef>
 
 namespace log4cplus
@@ -28,6 +28,11 @@ namespace NsAppManager
      * \brief An application unique id - combination of connection id and session id
      */
     typedef std::tuple<int, unsigned char> ApplicationUniqueID;
+
+    /**
+     * \brief An application session keys
+     */
+    typedef std::list<int> SessionKeys;
 
     /**
      * \brief class Application acts as a metaphor for every mobile application being registered on HMI
@@ -123,31 +128,6 @@ namespace NsAppManager
          * \return application ID
          */
         const int& getAppID( ) const;
-
-        /**
-         * \brief add an interaction choice set item to the application
-         * \param choiceSetId interaction choice set id
-         * \param choiceSet interaction choice set
-         */
-        void addChoiceSet(const unsigned int& choiceSetId, const ChoiceSet& choiceSet);
-
-        /**
-         * \brief remove an interaction choice set from the application
-         * \param choiceSetId interaction choice set id
-         */
-        void removeChoiceSet(const unsigned int& choiceSetId);
-
-        /**
-         * \brief gets all interaction choice set items
-         * \return interaction choice set items
-         */
-        ChoiceSetItems getAllChoiceSets() const;
-
-        /**
-         * \brief get count of interaction choice sets
-         * \return interaction choice sets count
-         */
-        size_t getChoiceSetsCount() const;
 
         /**
          * \brief add a command to a menu
@@ -263,6 +243,18 @@ namespace NsAppManager
          */
         unsigned int decrementUnrespondedRequestCount(const unsigned int& cmdId);
 
+        /**
+         * \brief add session key to a list of session keys
+         * \param sessionKey session key
+         */
+        void addSessionKey(const int& sessionKey);
+
+        /**
+         * \brief remove session key from a list of session keys
+         * \param sessionKey session key
+         */
+        void removeSessionKey(const int& sessionKey);
+
     protected:
         static log4cplus::Logger mLogger;
 
@@ -276,13 +268,13 @@ namespace NsAppManager
         const unsigned int mConnectionID;
         const unsigned int mProtocolVersion;
         const int mAppID;
+        SessionKeys mSessionKeys;
         std::string mNgnMediaScreenAppName;
         std::vector<std::string> mVrSynonyms;
         bool m_bIsMediaApplication;
         MenuMapping mMenuMapping;
         CommandMapping   mCommandMapping;
         AppMenus mMenus;
-        AppChoiceSets mChoiceSets;
     };
 
 } // namespace NsAppManager

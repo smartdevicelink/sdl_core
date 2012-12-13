@@ -1,3 +1,20 @@
+/*
+    Tests transport manager functionality with single device adapter that behaves correctly and single client
+    Following sequence is tested:
+        - TM created and runned
+        - TM client registered as listener
+        - TM client requests device scaning
+        - single device was returned to TM client with onDeviceListUpdated callback
+        - TM client calls "connect" on found device
+        - device adapter sends onApplicationConnected
+        - TM client receives onApplicationConnected
+        - device adapter sends three data parts that represents single frame
+        - TM client receives single frame with onFrameReceived callback
+        - TM client calls sendFrame with some frame data and user data
+        - TM client receives onFrameSendCompleted
+        - TM client calls disconnectDevice
+        - TM client receives onApplicationDisconnected
+ */
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 

@@ -33,6 +33,8 @@ public class OnTBTClientState extends RPCNotification {
     public void setState( TBTState state ) {
         if (state != null) {
             parameters.put(Names.state, state );
+        } else {
+        	parameters.remove(Names.state);
         }
     }
 } // end-class

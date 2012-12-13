@@ -25,10 +25,25 @@ namespace NsAppManager
      * \param choiceSetId interaction choice set id
      * \param choiceSet interaction choice set
      */
-    void AppChoiceSets::addItem(const unsigned int &choiceSetId, const ChoiceSet &choiceSet)
+    void AppChoiceSets::addItem(const unsigned int &choiceSetId, const ChoiceSetV1 &choiceSet)
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Adding an interaction choice set item " << choiceSetId );
-        mChoiceSets.insert(ChoiceSetItem(choiceSetId, choiceSet));
+        ChoiceSetGeneric choiceSetGeneric;
+        choiceSetGeneric.choiceSetV1 = choiceSet;
+        mChoiceSets.insert(ChoiceSetItem(choiceSetId, choiceSetGeneric));
+    }
+
+    /**
+     * \brief add an interaction choice set item to a mapping
+     * \param choiceSetId interaction choice set id
+     * \param choiceSet interaction choice set
+     */
+    void AppChoiceSets::addItem(const unsigned int &choiceSetId, const ChoiceSetV2 &choiceSet)
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Adding an interaction choice set item " << choiceSetId );
+        ChoiceSetGeneric choiceSetGeneric;
+        choiceSetGeneric.choiceSetV2 = choiceSet;
+        mChoiceSets.insert(ChoiceSetItem(choiceSetId, choiceSetGeneric));
     }
 
     /**
@@ -73,4 +88,26 @@ namespace NsAppManager
     AppChoiceSets::AppChoiceSets(const AppChoiceSets &)
     {
     }
+
+    /**
+     * \brief ChoiceSetGeneric default constructor
+     */
+    ChoiceSetGeneric::ChoiceSetGeneric()
+    {
+    }
+
+    /**
+     * \brief ChoiceSetGeneric default copy constructor
+     */
+    ChoiceSetGeneric::ChoiceSetGeneric(const ChoiceSetGeneric &)
+    {
+    }
+
+    /**
+     * \brief ChoiceSetGeneric default destructor
+     */
+    ChoiceSetGeneric::~ChoiceSetGeneric()
+    {
+    }
+
 }
