@@ -2218,7 +2218,10 @@ namespace NsAppManager
                         NsAppLinkRPCV2::Alert_response* response = new NsAppLinkRPCV2::Alert_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
-
+                        if(object->get_tryAgainTime())
+                        {
+                            response->set_tryAgainTime(*object->get_tryAgainTime());
+                        }
                         unsigned char sessionID = app->getSessionID();
                         unsigned int connectionId = app->getConnectionID();
                         core->mMessageMapping.removeMessage(object->getId());
