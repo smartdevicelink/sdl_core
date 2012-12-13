@@ -236,5 +236,46 @@ FFW.Buttons = FFW.RPCObserver.create({
 
 		this.client.send(JSONMessage);
 	
+	},
+
+	/*
+	 * Notifies the ButtonsRPC that the web is all set.
+	 * Should be called twice: when the RPC link is up or failed to connect
+	 * and all the views are rendered.
+	 */
+	buttonPressedCustom: function(name, type, softButtonID) {
+
+		var JSONMessage = {
+			"jsonrpc" :	"2.0",
+			"method"  :	"Buttons.OnButtonPress",
+			"params"  :	{
+				"name":			name,
+				"mode":			type,
+				"softButtonID":	softButtonID
+			}
+		};
+
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * Notifies the ButtonsRPC that the web is all set.
+	 * Should be called twice: when the RPC link is up or failed to connect
+	 * and all the views are rendered.
+	 */
+	buttonEventCustom: function(name, type, softButtonID) {
+
+		var JSONMessage = {
+			"jsonrpc" :	"2.0",
+			"method"  :	"Buttons.OnButtonEvent",
+			"params"  :	{
+				"name":			name,
+				"mode":			type,
+				"softButtonID":	softButtonID
+			}
+		};
+
+		this.client.send(JSONMessage);
+	
 	}
 })

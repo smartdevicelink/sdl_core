@@ -51,6 +51,30 @@ MFT.VRPopUp = Em.ContainerView.create({
         classNames:         'popUp',
     }),
 
+    AddActivateApp: function( appId, appName ){
+
+        this.get('listOfCommands.list.childViews').pushObject(
+            MFT.Button.create({
+                action:                 'onActivateApplinkApp',
+                target:                 'MFT.ApplinkController',
+                text:                   appName,
+                appName:                appName,
+                appId:                  appId,
+                classNames:             'list-item',
+                templateName:           'text'
+            })
+        );
+
+    },
+
+    DeleteCommand: function( appId ){
+
+        this.get('listOfCommands.list.childViews').removeObjects(
+            this.get('listOfCommands.list.childViews').filterProperty( 'appId' , appId )
+        );
+
+    },
+
    AddCommand: function( commandId, vrCommands ){
 
         for(var j = 0; j < vrCommands.length; j++){

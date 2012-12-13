@@ -138,6 +138,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			}else{
 				MFT.ApplinkController.registerApplication(notification.params.appId, 1);
 			}
+			MFT.VRPopUp.AddActivateApp(notification.params.appId, notification.params.appName);
 			this.getAppList();
 		}
 

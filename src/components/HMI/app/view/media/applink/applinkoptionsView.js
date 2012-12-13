@@ -41,7 +41,7 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
         content:            'Options'
     }),
 
-    AddCommand: function( commandId, params, appId ){
+    AddCommand: function( commandId, params, appId, icon ){
 
         this.get('listOfOptions.list.childViews').pushObject(
             MFT.Button.create({
@@ -49,9 +49,10 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
                 target:                 'MFT.ApplinkMediaController',
                 commandId:              commandId,
                 appId:                  appId,
+                icon:                   icon,
                 text:                   params.menuName,
                 classNames:             'list-item',
-                templateName:           'text'
+                templateName:           icon ? 'rightIcon' : 'text'
             })
         );
 

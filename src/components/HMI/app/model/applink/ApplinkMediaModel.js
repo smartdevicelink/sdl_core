@@ -112,6 +112,17 @@ MFT.ApplinkMediaModel = Em.Object.create({
         tryAgainTime:   0
     }),
 
+    /**
+      *  Function that calls from VR to activate application
+      */
+    turnOnApplink: function(appName, appId){
+        var params = {
+            "appName":  appName,
+            "appId":    appId
+        };
+        MFT.MediaController.turnOnApplink(params);
+    },
+
 	onGetAppList: function( appList ){
 
 		this.applicationsList.splice(0, this.applicationsList.length);

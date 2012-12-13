@@ -49,6 +49,12 @@ MFT.ApplinkMediaController = Em.Object.create({
        FFW.UI.onCommand(element.commandId, element.appId);
     },
 
+
+    /** Call notification OnCommandSoftButton on UIRPC */
+    onCommandSoftButton: function(element){
+       FFW.UI.onCommandSoftButton(element.softButtonID, element.appId);
+    },
+
     /** Switching on Applink Options */
     turnOnApplinkOptions: function(el){
         MFT.States.goToState('media.applink.applinkoptions');
