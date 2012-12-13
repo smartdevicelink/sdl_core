@@ -138,7 +138,7 @@ namespace NsAppManager
      * \param deviceHandle
      * \param sessionKey
      */
-    void AppMgr::onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey)
+    void AppMgr::onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey, int firstSessionKey)
     {
         AppMgrCore::getInstance().addDevice(sessionKey, deviceHandle);
     }
