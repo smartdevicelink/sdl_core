@@ -366,13 +366,17 @@ namespace NsAppManager
                         showRPC2Request->set_mainField1(*object->get_mainField1());
                     }
                     LOG4CPLUS_INFO_EXT(mLogger, "setMainField1 was called");
-                    if(object->get_mediaClock())
+                    if(object->get_mainField2())
                     {
                         showRPC2Request->set_mainField2(*object->get_mainField2());
                     }
                     if(object->get_mediaClock())
                     {
                         showRPC2Request->set_mediaClock(*object->get_mediaClock());
+                    }
+                    if(object->get_mediaTrack())
+                    {
+                        showRPC2Request->set_mediaTrack(*object->get_mediaTrack());
                     }
                     if(object->get_statusBar())
                     {
