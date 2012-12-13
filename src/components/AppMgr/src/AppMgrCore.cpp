@@ -1485,10 +1485,17 @@ namespace NsAppManager
                     {
                         showRPC2Request->set_mainField1(*object->get_mainField1());
                     }
-                    LOG4CPLUS_INFO_EXT(mLogger, "setMainField1 was called");
-                    if(object->get_mediaClock())
+                    if(object->get_mainField2())
                     {
                         showRPC2Request->set_mainField2(*object->get_mainField2());
+                    }
+                    if(object->get_mainField3())
+                    {
+                        showRPC2Request->set_mainField1(*object->get_mainField3());
+                    }
+                    if(object->get_mainField4())
+                    {
+                        showRPC2Request->set_mainField1(*object->get_mainField4());
                     }
                     if(object->get_mediaClock())
                     {
@@ -1497,6 +1504,18 @@ namespace NsAppManager
                     if(object->get_statusBar())
                     {
                         showRPC2Request->set_statusBar(*object->get_statusBar());
+                    }
+                    if(object->get_graphic())
+                    {
+                        showRPC2Request->set_graphic(*object->get_graphic());
+                    }
+                    if(object->get_softButtons())
+                    {
+                        showRPC2Request->set_softButtons(*object->get_softButtons());
+                    }
+                    if(object->get_customPresets())
+                    {
+                        showRPC2Request->set_customPresets(*object->get_customPresets());
                     }
                     if(object->get_alignment())
                     {
