@@ -1198,6 +1198,27 @@ namespace NsAppManager
                     HMIHandler::getInstance().sendRequest(slider);
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::SetAppIconID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A SetAppIcon request has been invoked");
+                    NsAppLinkRPCV2::SetAppIcon_request* request = static_cast<NsAppLinkRPCV2::SetAppIcon_request*>(mobileMsg);
+                    Application* app = core->getApplicationFromItemCheckNotNull(
+                        AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                    if (!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                        return;
+                    }
+
+                    NsRPC2Communication::UI::SetAppIcon* setAppIcon = new NsRPC2Communication::UI::SetAppIcon();
+                    setAppIcon->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    setAppIcon->set_syncFileName(request->get_syncFileName());
+                    setAppIcon->set_appId(app->getAppID());
+
+                    core->mMessageMapping.addMessage(setAppIcon->getId(), connectionID, sessionID);
+                    HMIHandler::getInstance().sendRequest(setAppIcon);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::EncodedSyncPDataID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An EncodedSyncPData request has been invoked");
@@ -2615,6 +2636,34 @@ namespace NsAppManager
                 core->mMessageMapping.removeMessage(uiResponse->getId());
 
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETAPPICONRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A SetAppId response has been income");
+                NsRPC2Communication::UI::SetAppIconResponse* uiResponse = static_cast<NsRPC2Communication::UI::SetAppIconResponse*>(msg);
+
+                Application* app = core->getApplicationFromItemCheckNotNull(
+                    core->mMessageMapping.findRegistryItemAssignedToCommand(uiResponse->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                unsigned char sessionID = app->getSessionID();
+                unsigned int connectionId = app->getConnectionID();
+                NsAppLinkRPCV2::Result::ResultInternal resultCode
+                    = static_cast<NsAppLinkRPCV2::Result::ResultInternal>(uiResponse->getResult());
+
+                NsAppLinkRPCV2::SetAppIcon_response* response = new NsAppLinkRPCV2::SetAppIcon_response();
+                response->setMethodId(NsAppLinkRPCV2::FunctionID::SetAppIconID);
+                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                response->set_resultCode(resultCode);
+                NsAppLinkRPCV2::Result::SUCCESS == resultCode ? response->set_success(true) : response->set_success(false);
+
+                core->mMessageMapping.removeMessage(uiResponse->getId());
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
