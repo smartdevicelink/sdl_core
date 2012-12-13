@@ -1432,6 +1432,10 @@ namespace NsAppManager
                         performInteraction->set_timeoutPrompt(timeoutPrompt);
                     }
                     performInteraction->set_appId(appId);
+                    if(object->get_vrHelp())
+                    {
+                        performInteraction->set_vrHelp(*object->get_vrHelp());
+                    }
                     HMIHandler::getInstance().sendRequest(performInteraction);
                 }
                 case NsAppLinkRPCV2::FunctionID::AlertID:
