@@ -1364,7 +1364,18 @@ namespace NsAppManager
                         }
                         performInteraction->set_helpPrompt(helpPrompt);
                     }
-                    performInteraction->set_initialPrompt(*(std::vector<NsAppLinkRPC::TTSChunk>*)&object->get_initialPrompt());
+                    std::vector< NsAppLinkRPC::TTSChunk> initialPrompt;
+                    for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = object->get_initialPrompt().begin(); it != object->get_initialPrompt().end(); it++)
+                    {
+                        const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                        NsAppLinkRPC::TTSChunk chunkV1;
+                        chunkV1.set_text(chunk.get_text());
+                        NsAppLinkRPC::SpeechCapabilities caps;
+                        caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                        chunkV1.set_type(caps);
+                        initialPrompt.push_back(chunkV1);
+                    }
+                    performInteraction->set_initialPrompt(initialPrompt);
                     performInteraction->set_initialText(object->get_initialText());
                     performInteraction->set_interactionChoiceSetIDList(object->get_interactionChoiceSetIDList());
                     const NsAppLinkRPCV2::InteractionMode& interactionMode = object->get_interactionMode();
