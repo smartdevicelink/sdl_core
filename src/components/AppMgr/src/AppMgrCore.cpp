@@ -1846,7 +1846,20 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetButtonCapabilities response has been income");
                 NsRPC2Communication::Buttons::GetCapabilitiesResponse * btnCaps = (NsRPC2Communication::Buttons::GetCapabilitiesResponse*)msg;
                 core->mButtonCapabilitiesV1.set( btnCaps->get_capabilities() );
-                core->mButtonCapabilitiesV2.set( *((std::vector< NsAppLinkRPCV2::ButtonCapabilities>*)&btnCaps->get_capabilities()) );
+                std::vector< NsAppLinkRPCV2::ButtonCapabilities> caps;
+                for(std::vector< NsAppLinkRPC::ButtonCapabilities>::const_iterator it = btnCaps->get_capabilities().begin(); it != btnCaps->get_capabilities().end(); it++)
+                {
+                    const NsAppLinkRPC::ButtonCapabilities& cap = *it;
+                    NsAppLinkRPCV2::ButtonCapabilities capV2;
+                    capV2.set_longPressAvailable(cap.get_longPressAvailable());
+                    NsAppLinkRPCV2::ButtonName btnName;
+                    btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)cap.get_name().get());
+                    capV2.set_name(btnName);
+                    capV2.set_shortPressAvailable(cap.get_shortPressAvailable());
+                    capV2.set_upDownAvailable(cap.get_upDownAvailable());
+                    caps.push_back(capV2);
+                }
+                core->mButtonCapabilitiesV2.set(caps);
                 if(btnCaps->get_presetBankCapabilities())
                 {
                     core->mPresetBankCapabilities = *btnCaps->get_presetBankCapabilities();
