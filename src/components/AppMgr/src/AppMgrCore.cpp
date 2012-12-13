@@ -889,6 +889,7 @@ namespace NsAppManager
                     response->set_syncMsgVersion(app->getSyncMsgVersion());
                     response->set_softButtonCapabilities(core->mSoftButtonCapabilities.get());
                     response->set_presetBankCapabilities(core->mPresetBankCapabilities);
+                    response->set_vehicleType(core->mVehicleType);
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
 
@@ -1959,6 +1960,8 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendRequest(getTtsCapsRequest);
                 NsRPC2Communication::Buttons::GetCapabilities* getButtonsCapsRequest = new NsRPC2Communication::Buttons::GetCapabilities();
                 HMIHandler::getInstance().sendRequest(getButtonsCapsRequest);
+                NsRPC2Communication::VehicleInfo::GetVehicleType* getVehicleType = new NsRPC2Communication::VehicleInfo::GetVehicleType;
+                HMIHandler::getInstance().sendRequest(getVehicleType);
 
                 ConnectionHandler::getInstance().startDevicesDiscovery();
 
@@ -3339,9 +3342,23 @@ namespace NsAppManager
 
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_ERROR_EXT(mLogger, " Not AppLinkCore RPC message " << msg->getMethod() << " has been received!");
         }
 
+        switch(msg->getMethod())
+        {
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLETYPERESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleType response has been income");
+                NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse* getVehType = (NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse*)msg;
+                core->mVehicleType = getVehType->get_vehicleType();
+                return;
+            }
+
+            case NsRPC2Communication::Marshaller::METHOD_INVALID:
+            default:
+                LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message " << msg->getMethod() << " has been received!");
+        }
         LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message " << msg->getMethod() << " has been invoked!");
     }
 
