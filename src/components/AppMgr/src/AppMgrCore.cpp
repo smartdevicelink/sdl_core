@@ -2955,11 +2955,11 @@ namespace NsAppManager
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__DEACTIVATEAPP:
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "ActivateApp has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, "DeactivateApp has been received!");
                 NsRPC2Communication::AppLinkCore::DeactivateApp* object = static_cast<NsRPC2Communication::AppLinkCore::DeactivateApp*>(msg);
                 if ( !object )
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't cast object to ActivateApp type");
+                    LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't cast object to DeactivateApp type");
                     return;
                 }
 
