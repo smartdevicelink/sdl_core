@@ -65,16 +65,4 @@ public class RPCMessage extends RPCStruct  {
 	public Object getParameters(String functionName) {
 		return parameters.get(functionName);
 	}
-
-	public byte[] getBulkData() {
-		return (byte[]) store.get(Names.bulkData);
-	}
-
-	public void setBulkData(byte[] bulkData) {
-		if (bulkData != null) {
-			store.put(Names.bulkData, bulkData);
-		} else {
-			store.remove(bulkData);
-		}
-	}
 }

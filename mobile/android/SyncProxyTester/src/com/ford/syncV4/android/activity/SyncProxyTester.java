@@ -1,5 +1,6 @@
 package com.ford.syncV4.android.activity;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.Vector;
@@ -15,6 +16,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -1081,6 +1085,15 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setFileType((FileType) spnFileType.getSelectedItem());
 										msg.setPersistentFile(chkPersistentFile.isChecked());
 										msg.setCorrelationID(autoIncCorrId++);
+										
+									    Bitmap photo = BitmapFactory.decodeResource(getResources(), R.drawable.fiesta);
+								        ByteArrayOutputStream bas = new ByteArrayOutputStream();
+									    photo.compress(CompressFormat.JPEG, 100, bas);
+								        byte[] data = new byte[bas.toByteArray().length];
+								        data = bas.toByteArray();
+								        
+								        msg.setBulkData(data);
+										
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
