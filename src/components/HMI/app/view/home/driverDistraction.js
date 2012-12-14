@@ -14,17 +14,23 @@ MFT.DriverDistraction = Em.ContainerView.create({
 
 	elementId:			'driverDistraction',
 
-	classNames:			'driverDistraction',
+	classNames:			'driverDistractionWindow',
 
 	classNameBindings:		['active'],
 
 	childViews: [
+		'driverDistractionPopUp',
 		'driverDistractionText'
 	],
 
 	content:			'Not accessible while driving',
 
 	active: 			false,
+
+	driverDistractionPopUp: Em.View.create({
+
+		classNames:			'driverDistraction',
+	}),
 
 	driverDistractionText : MFT.Label.extend({
 

@@ -54,15 +54,15 @@ MFT.ApplinkMediaControllsV1 = Em.ContainerView.create({
                 elementId:          'app_view_controlls_prev_track_button',
                 classNames:         ['bc-item-big', 'prevcd'],
                 classNames:         ['bc-item-big', 'prevcd'],
-                target:             'MFT.MediaController',
-                action:             'prevTrack',
+                //target:             'MFT.MediaController',
+                //action:             'prevTrack',
                 icon:               'images/media/ico_prew.png',
             }),
             PlayButton: MFT.Button.extend({
                 elementId:          'app_view_controlls_play_button',
                 classNames:         ['bc-item-big', 'playcd'],
-                target:             'MFT.MediaController',
-                action:             'playTrack',
+                //target:             'MFT.MediaController',
+                //action:             'playTrack',
                 /** Define button template */
                 template: Ember.Handlebars.compile(
                     '<img class="playIcon hideicon"{{bindAttr class="MFT.MediaController.currentSelectedPlayer.isPlaying:visible"}} src="images/media/ico_pause.png" />'+
@@ -72,8 +72,8 @@ MFT.ApplinkMediaControllsV1 = Em.ContainerView.create({
             NextTrackButton: MFT.Button.extend({
                 elementId:          'app_view_controlls_next_track_button',
                 classNames:         ['bc-item-big', 'nextcd'],
-                target:             'MFT.MediaController',
-                action:             'nextTrack',
+                //target:             'MFT.MediaController',
+                //action:             'nextTrack',
                 icon:                 'images/media/ico_next.png',
             })
         })
