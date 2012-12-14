@@ -9,8 +9,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Dec 13 13:37:09 2012
-  source stamp	Thu Dec 13 13:33:23 2012
+  generated at	Fri Dec 14 08:11:37 2012
+  source stamp	Fri Dec 14 08:11:34 2012
   author	robok0der
 */
 
@@ -34,15 +34,19 @@ namespace NsAppLinkRPC
 
 // getters
 
+    int get_appId(void) const;
     const std::string& get_appName(void) const;
     const std::string* get_icon(void) const;
+    bool get_isMediaApplication(void) const;
     const std::string* get_ngnMediaScreenAppName(void) const;
 
 // setters
 
+    bool set_appId(int appId_);
     bool set_appName(const std::string& appName_);
     void reset_icon(void);
     bool set_icon(const std::string& icon_);
+    bool set_isMediaApplication(bool isMediaApplication_);
     void reset_ngnMediaScreenAppName(void);
     bool set_ngnMediaScreenAppName(const std::string& ngnMediaScreenAppName_);
 
@@ -50,8 +54,10 @@ namespace NsAppLinkRPC
 
     friend class HMIApplicationMarshaller;
 
+      int appId;
       std::string appName;	//!< (100)
       std::string* icon;
+      bool isMediaApplication;
       std::string* ngnMediaScreenAppName;	//!< (100)
   };
 

@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/ScrollableMessage.h"
-#include "../src/ALRPCObjectsImpl/V1/SoftButtonMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/SoftButtonMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ScrollableMessageMarshaller.h"
 
 /*
@@ -80,7 +80,7 @@ Json::Value ScrollableMessageMarshaller::toJSON(const ScrollableMessage& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
+      j[i]=NsAppLinkRPCV2::SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
 
     json["params"]["softButtons"]=j;
   }
@@ -127,11 +127,11 @@ bool ScrollableMessageMarshaller::fromJSON(const Json::Value& json,ScrollableMes
       if(i<0)  return false;
       if(i>8)  return false;
 
-      c.softButtons=new std::vector<NsAppLinkRPC::SoftButton>();
+      c.softButtons=new std::vector<NsAppLinkRPCV2::SoftButton>();
       c.softButtons->resize(js["softButtons"].size());
 
       while(i--)
-        if(!NsAppLinkRPC::SoftButtonMarshaller::fromJSON(js["softButtons"][i],c.softButtons[0][i]))  return false;
+        if(!NsAppLinkRPCV2::SoftButtonMarshaller::fromJSON(js["softButtons"][i],c.softButtons[0][i]))  return false;
     }
 
 

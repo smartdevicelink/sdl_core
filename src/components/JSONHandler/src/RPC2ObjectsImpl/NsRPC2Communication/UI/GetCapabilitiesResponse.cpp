@@ -17,7 +17,7 @@ GetCapabilitiesResponse& GetCapabilitiesResponse::operator =(const GetCapabiliti
   displayCapabilities=c.displayCapabilities;
   hmiZoneCapabilities=c.hmiZoneCapabilities;
   if(softButtonCapabilities)  delete softButtonCapabilities;
-  softButtonCapabilities= c.softButtonCapabilities ? new std::vector<NsAppLinkRPC::SoftButtonCapabilities>(c.softButtonCapabilities[0]) : 0;
+  softButtonCapabilities= c.softButtonCapabilities ? new std::vector<NsAppLinkRPCV2::SoftButtonCapabilities>(c.softButtonCapabilities[0]) : 0;
   return *this;
 }
 
@@ -63,15 +63,15 @@ bool GetCapabilitiesResponse::set_hmiZoneCapabilities(const std::vector< NsAppLi
   return true;
 }
 
-const std::vector< NsAppLinkRPC::SoftButtonCapabilities>* GetCapabilitiesResponse::get_softButtonCapabilities(void)
+const std::vector< NsAppLinkRPCV2::SoftButtonCapabilities>* GetCapabilitiesResponse::get_softButtonCapabilities(void)
 {
   return softButtonCapabilities;
 }
 
-bool GetCapabilitiesResponse::set_softButtonCapabilities(const std::vector< NsAppLinkRPC::SoftButtonCapabilities>& softButtonCapabilities_)
+bool GetCapabilitiesResponse::set_softButtonCapabilities(const std::vector< NsAppLinkRPCV2::SoftButtonCapabilities>& softButtonCapabilities_)
 {
   if(softButtonCapabilities)  delete softButtonCapabilities;
-  softButtonCapabilities=new std::vector< NsAppLinkRPC::SoftButtonCapabilities>(softButtonCapabilities_);
+  softButtonCapabilities=new std::vector< NsAppLinkRPCV2::SoftButtonCapabilities>(softButtonCapabilities_);
   return true;
 }
 

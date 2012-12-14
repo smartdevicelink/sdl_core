@@ -5,8 +5,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Dec 13 13:37:09 2012
-  source stamp	Thu Dec 13 13:33:23 2012
+  generated at	Fri Dec 14 08:11:37 2012
+  source stamp	Fri Dec 14 08:11:34 2012
   author	robok0der
 */
 
@@ -16,8 +16,10 @@ using namespace NsAppLinkRPC;
 
 HMIApplication& HMIApplication::operator =(const HMIApplication& c)
 {
+  appId=c.appId;
   appName=c.appName;
   icon=c.icon ? new std::string(c.icon[0]) : 0;
+  isMediaApplication=c.isMediaApplication;
   ngnMediaScreenAppName=c.ngnMediaScreenAppName ? new std::string(c.ngnMediaScreenAppName[0]) : 0;
 
   return *this;
@@ -53,6 +55,12 @@ HMIApplication::HMIApplication(void) :
 
 
 
+bool HMIApplication::set_appId(int appId_)
+{
+  appId=appId_;
+  return true;
+}
+
 bool HMIApplication::set_appName(const std::string& appName_)
 {
   if(appName_.length()>100)  return false;
@@ -76,6 +84,12 @@ void HMIApplication::reset_icon(void)
   icon=0;
 }
 
+bool HMIApplication::set_isMediaApplication(bool isMediaApplication_)
+{
+  isMediaApplication=isMediaApplication_;
+  return true;
+}
+
 bool HMIApplication::set_ngnMediaScreenAppName(const std::string& ngnMediaScreenAppName_)
 {
   if(ngnMediaScreenAppName_.length()>100)  return false;
@@ -96,6 +110,12 @@ void HMIApplication::reset_ngnMediaScreenAppName(void)
 
 
 
+int HMIApplication::get_appId(void) const
+{
+  return appId;
+}
+
+
 const std::string& HMIApplication::get_appName(void) const 
 {
   return appName;
@@ -105,6 +125,12 @@ const std::string& HMIApplication::get_appName(void) const
 const std::string* HMIApplication::get_icon(void) const 
 {
   return icon;
+}
+
+
+bool HMIApplication::get_isMediaApplication(void) const
+{
+  return isMediaApplication;
 }
 
 

@@ -1,5 +1,5 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/VehicleInfo/GetDTCsResponse.h"
-#include "../src/ALRPCObjectsImpl/V1/DTCMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/DTCMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetDTCsResponseMarshaller.h"
 
@@ -75,7 +75,7 @@ Json::Value GetDTCsResponseMarshaller::toJSON(const GetDTCsResponse& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::DTCMarshaller::toJSON(e.dtcList[0][i]);
+      j[i]=NsAppLinkRPCV2::DTCMarshaller::toJSON(e.dtcList[0][i]);
 
     json["result"]["dtcList"]=j;
   }
@@ -113,11 +113,11 @@ bool GetDTCsResponseMarshaller::fromJSON(const Json::Value& json,GetDTCsResponse
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.dtcList=new std::vector<NsAppLinkRPC::DTC>();
+      c.dtcList=new std::vector<NsAppLinkRPCV2::DTC>();
       c.dtcList->resize(js["dtcList"].size());
 
       while(i--)
-        if(!NsAppLinkRPC::DTCMarshaller::fromJSON(js["dtcList"][i],c.dtcList[0][i]))  return false;
+        if(!NsAppLinkRPCV2::DTCMarshaller::fromJSON(js["dtcList"][i],c.dtcList[0][i]))  return false;
     }
 
 

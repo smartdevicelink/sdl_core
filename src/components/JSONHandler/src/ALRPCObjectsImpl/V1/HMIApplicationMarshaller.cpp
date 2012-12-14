@@ -8,8 +8,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Thu Dec 13 13:37:09 2012
-  source stamp	Thu Dec 13 13:33:23 2012
+  generated at	Fri Dec 14 08:11:37 2012
+  source stamp	Fri Dec 14 08:11:34 2012
   author	robok0der
 */
 
@@ -59,10 +59,14 @@ Json::Value HMIApplicationMarshaller::toJSON(const HMIApplication& e)
   if(!checkIntegrityConst(e))
     return Json::Value(Json::nullValue);
 
+  json["appId"]=Json::Value(e.appId);
+
   json["appName"]=Json::Value(e.appName);
 
   if(e.icon)
     json["icon"]=Json::Value(*e.icon);
+
+  json["isMediaApplication"]=Json::Value(e.isMediaApplication);
 
   if(e.ngnMediaScreenAppName)
     json["ngnMediaScreenAppName"]=Json::Value(*e.ngnMediaScreenAppName);
@@ -84,6 +88,12 @@ bool HMIApplicationMarshaller::fromJSON(const Json::Value& json,HMIApplication& 
   {
     if(!json.isObject())  return false;
 
+    if(!json.isMember("appId"))  return false;
+    {
+      const Json::Value& j=json["appId"];
+      if(!j.isInt())  return false;
+      c.appId=j.asInt();
+    }
     if(!json.isMember("appName"))  return false;
     {
       const Json::Value& j=json["appName"];
@@ -95,6 +105,12 @@ bool HMIApplicationMarshaller::fromJSON(const Json::Value& json,HMIApplication& 
       const Json::Value& j=json["icon"];
       if(!j.isString())  return false;
       c.icon=new std::string(j.asString());
+    }
+    if(!json.isMember("isMediaApplication"))  return false;
+    {
+      const Json::Value& j=json["isMediaApplication"];
+      if(!j.isBool())  return false;
+      c.isMediaApplication=j.asBool();
     }
     if(json.isMember("ngnMediaScreenAppName"))
     {

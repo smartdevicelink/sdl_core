@@ -1752,9 +1752,9 @@ namespace NsAppManager
                         NsAppLinkRPCV2::ButtonPressMode pressMode;
                         pressMode.set((NsAppLinkRPCV2::ButtonPressMode::ButtonPressModeInternal)object->get_mode().get());
                         event->set_buttonPressMode(pressMode);
-                        if(object->get_customButtonName())
+                        if(object->get_customButtonID())
                         {
-                            event->set_customButtonName(*object->get_customButtonName());
+                            event->set_customButtonID(*object->get_customButtonID());
                         }
                         LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
 

@@ -1,7 +1,7 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetCapabilitiesResponse.h"
 #include "../src/ALRPCObjectsImpl/V1/DisplayCapabilitiesMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/HmiZoneCapabilitiesMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/SoftButtonCapabilitiesMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/SoftButtonCapabilitiesMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetCapabilitiesResponseMarshaller.h"
 
@@ -95,7 +95,7 @@ Json::Value GetCapabilitiesResponseMarshaller::toJSON(const GetCapabilitiesRespo
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::SoftButtonCapabilitiesMarshaller::toJSON(e.softButtonCapabilities[0][i]);
+      j[i]=NsAppLinkRPCV2::SoftButtonCapabilitiesMarshaller::toJSON(e.softButtonCapabilities[0][i]);
 
     json["result"]["softButtonCapabilities"]=j;
   }
@@ -150,11 +150,11 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.softButtonCapabilities=new std::vector<NsAppLinkRPC::SoftButtonCapabilities>();
+      c.softButtonCapabilities=new std::vector<NsAppLinkRPCV2::SoftButtonCapabilities>();
       c.softButtonCapabilities->resize(js["softButtonCapabilities"].size());
 
       while(i--)
-        if(!NsAppLinkRPC::SoftButtonCapabilitiesMarshaller::fromJSON(js["softButtonCapabilities"][i],c.softButtonCapabilities[0][i]))  return false;
+        if(!NsAppLinkRPCV2::SoftButtonCapabilitiesMarshaller::fromJSON(js["softButtonCapabilities"][i],c.softButtonCapabilities[0][i]))  return false;
     }
 
 

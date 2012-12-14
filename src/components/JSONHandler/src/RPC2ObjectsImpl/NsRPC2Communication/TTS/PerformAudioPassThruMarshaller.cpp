@@ -1,9 +1,9 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/PerformAudioPassThru.h"
 #include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/SamplingRateMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/AudioCaptureQualityMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/AudioTypeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/SamplingRateMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/AudioCaptureQualityMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/AudioTypeMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/PerformAudioPassThruMarshaller.h"
 
 /*
@@ -58,13 +58,13 @@ bool PerformAudioPassThruMarshaller::checkIntegrityConst(const PerformAudioPassT
 
   if(s.audioPassThruDisplayText2 && (s.audioPassThruDisplayText2[0].length()>500))  return false;
 
-  if(!NsAppLinkRPC::SamplingRateMarshaller::checkIntegrityConst(s.samplingRate))  return false;
+  if(!NsAppLinkRPCV2::SamplingRateMarshaller::checkIntegrityConst(s.samplingRate))  return false;
 
   if(s.maxDuration>1000000)  return false;
 
-  if(!NsAppLinkRPC::AudioCaptureQualityMarshaller::checkIntegrityConst(s.bitsPerSample))  return false;
+  if(!NsAppLinkRPCV2::AudioCaptureQualityMarshaller::checkIntegrityConst(s.bitsPerSample))  return false;
 
-  if(!NsAppLinkRPC::AudioTypeMarshaller::checkIntegrityConst(s.audioType))  return false;
+  if(!NsAppLinkRPCV2::AudioTypeMarshaller::checkIntegrityConst(s.audioType))  return false;
 
   return true;
 }
@@ -94,10 +94,10 @@ Json::Value PerformAudioPassThruMarshaller::toJSON(const PerformAudioPassThru& e
     json["params"]["audioPassThruDisplayText1"]=Json::Value(e.audioPassThruDisplayText1[0]);;
   if(e.audioPassThruDisplayText2)
     json["params"]["audioPassThruDisplayText2"]=Json::Value(e.audioPassThruDisplayText2[0]);;
-  json["params"]["samplingRate"]=NsAppLinkRPC::SamplingRateMarshaller::toJSON(e.samplingRate);;
+  json["params"]["samplingRate"]=NsAppLinkRPCV2::SamplingRateMarshaller::toJSON(e.samplingRate);;
   json["params"]["maxDuration"]=Json::Value(e.maxDuration);;
-  json["params"]["bitsPerSample"]=NsAppLinkRPC::AudioCaptureQualityMarshaller::toJSON(e.bitsPerSample);;
-  json["params"]["audioType"]=NsAppLinkRPC::AudioTypeMarshaller::toJSON(e.audioType);;
+  json["params"]["bitsPerSample"]=NsAppLinkRPCV2::AudioCaptureQualityMarshaller::toJSON(e.bitsPerSample);;
+  json["params"]["audioType"]=NsAppLinkRPCV2::AudioTypeMarshaller::toJSON(e.audioType);;
   json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
@@ -154,15 +154,15 @@ bool PerformAudioPassThruMarshaller::fromJSON(const Json::Value& json,PerformAud
 
     }
 
-    if(!js.isMember("samplingRate") || !NsAppLinkRPC::SamplingRateMarshaller::fromJSON(js["samplingRate"],c.samplingRate))  return false;
+    if(!js.isMember("samplingRate") || !NsAppLinkRPCV2::SamplingRateMarshaller::fromJSON(js["samplingRate"],c.samplingRate))  return false;
 
     if(!js.isMember("maxDuration") || !js["maxDuration"].isInt())  return false;
     c.maxDuration=js["maxDuration"].asInt();
     if(c.maxDuration>1000000)  return false;
 
-    if(!js.isMember("bitsPerSample") || !NsAppLinkRPC::AudioCaptureQualityMarshaller::fromJSON(js["bitsPerSample"],c.bitsPerSample))  return false;
+    if(!js.isMember("bitsPerSample") || !NsAppLinkRPCV2::AudioCaptureQualityMarshaller::fromJSON(js["bitsPerSample"],c.bitsPerSample))  return false;
 
-    if(!js.isMember("audioType") || !NsAppLinkRPC::AudioTypeMarshaller::fromJSON(js["audioType"],c.audioType))  return false;
+    if(!js.isMember("audioType") || !NsAppLinkRPCV2::AudioTypeMarshaller::fromJSON(js["audioType"],c.audioType))  return false;
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;
     c.appId=js["appId"].asInt();

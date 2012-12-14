@@ -1155,6 +1155,8 @@
                 <param name="appName" type="String" maxlength="100"/>
                 <param name="ngnMediaScreenAppName" type="String" maxlength="100" mandatory="false"/>
                 <param name="icon" type="String" mandatory="false"/>
+		<param name="appId" type="Integer"/>
+		<param name="isMediaApplication" type="Boolean"/>
         </struct>
 
 <enum name="DeactivateReason">
