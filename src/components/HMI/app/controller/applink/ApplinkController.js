@@ -87,10 +87,12 @@ MFT.ApplinkController = Em.Object.create({
 
 	/**
 	 * Send notification if device was choosed
+	 *
+	 * @param element: MFT.Button
 	 */
-	onDeviceChoosed: function( el ) {
-		FFW.UI.OnDeviceChosen( el.deviceName );
-		MFT.ApplinkMediaModel.set('showInfo.deviceName', el.deviceName);
+	onDeviceChoosed: function( element ) {
+		FFW.UI.OnDeviceChosen( element.deviceName );
+		this.getApplicationModel( element.appId ).set( 'appInfo.deviceName', element.deviceName );
 	},
 
 	/**

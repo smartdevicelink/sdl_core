@@ -75,7 +75,7 @@ MFT.ApplinkMediaController = Em.Object.create({
     /** Switching on Application */
     turnOnApplink: function(appName, appId){
        
-        MFT.ApplinkController.getApplicationModel(1).showInfo.set('appName', appName);
+        MFT.ApplinkController.getApplicationModel(appId).appInfo.set('appName', appName);
         FFW.AppLinkCoreClient.ActivateApp(appId);
         
     },

@@ -153,7 +153,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 			action:				'turnOnApplink',
 			icon:				'images/media/ico_li.png',
 			target:				'MFT.MediaController',
-			textBinding:		'MFT.ApplinkMediaModel.showInfo.appName'
+			textBinding:		'MFT.ApplinkMediaModel.appInfo.appName'
 		})
 			
 	});

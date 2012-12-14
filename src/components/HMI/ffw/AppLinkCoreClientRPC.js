@@ -132,7 +132,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		{	
 			// add new app to the list
 			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " connected!");
-			MFT.ApplinkMediaModel.showInfo.set('appName', notification.params.appName);
+			MFT.ApplinkMediaModel.appInfo.set('appName', notification.params.appName);
 			if( notification.params.isMediaApplication ){
 				MFT.ApplinkController.registerApplication(notification.params.appId, 0);
 			}else{
@@ -146,7 +146,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		{	
 			//  remove app from list
 			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " disconnected!");
-			MFT.ApplinkMediaModel.showInfo.set('appName', "<No app>");
+			MFT.ApplinkMediaModel.appInfo.set('appName', "<No app>");
 			MFT.ApplinkMediaController.set('hideApplinkMediaButton', true);
 			MFT.ApplinkController.unRegisterApplication(notification.params.appId);
 		}
@@ -227,7 +227,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.ActivateApp",
 			"params"	:	{
-				"appName":	MFT.ApplinkMediaModel.showInfo.appName,
+				"appName":	MFT.ApplinkMediaModel.appInfo.appName,
 				"appId":	appId
 			}
 		};

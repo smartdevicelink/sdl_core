@@ -30,7 +30,7 @@ MFT.NonMediaController = Em.Object.create({
 	/** Switching on Application */
     turnOnApplink: function(appName, appId){
        
-        MFT.ApplinkController.getApplicationModel(1).showInfo.set('appName', appName);
+        MFT.ApplinkController.getApplicationModel(1).appInfo.set('appName', appName);
         FFW.AppLinkCoreClient.ActivateApp(appId);
         
     }

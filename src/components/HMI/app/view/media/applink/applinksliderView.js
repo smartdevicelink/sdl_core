@@ -37,7 +37,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
 
         classNames:         'initialText',
 
-        contentBinding:     'MFT.ApplinkMediaModel.showInfo.appName'
+        contentBinding:     'MFT.ApplinkMediaModel.appInfo.appName'
     }),
 
     headerLabel:    MFT.Label.extend({

@@ -88,7 +88,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
  	/**
 	  * Info data
 	  */
-	showInfo: Em.Object.create({
+	appInfo: Em.Object.create({
 		field1:			'<field1>',
 		field2:			'<field2>',
 		field3:			'<field3>',
@@ -218,9 +218,9 @@ MFT.ApplinkMediaModel = Em.Object.create({
 	setDuration: function() {
         var number = (this.duration + this.currTime) % 60;
 		if(this.countUp){
-			this.showInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
+			this.appInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}else{
-			this.showInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
+			this.appInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}
 	}.observes('this.currTime'),
 
@@ -381,17 +381,17 @@ MFT.ApplinkMediaModel = Em.Object.create({
     /** Applin UI Show handler */
     onApplinkUIShow: function(params){
         clearInterval(this.timer);
-        this.showInfo.set('field1',        params.mainField1);
-        this.showInfo.set('field2',        params.mainField2);
-        this.showInfo.set('field3',        params.mainField3);
-        this.showInfo.set('field4',        params.mainField4);
-        this.showInfo.set('alignment',     params.alignment);
-        this.showInfo.set('statusBar',     params.statusBar);
-        this.showInfo.set('mediaClock',    params.mediaClock);
-        this.showInfo.set('mediaTrack',    params.mediaTrack);
-        this.showInfo.set('image',         params.graphic);
-        this.showInfo.set('softButtons',   params.softButtons);        
-        this.showInfo.set('customPresets', params.customPresets);
+        this.appInfo.set('field1',        params.mainField1);
+        this.appInfo.set('field2',        params.mainField2);
+        this.appInfo.set('field3',        params.mainField3);
+        this.appInfo.set('field4',        params.mainField4);
+        this.appInfo.set('alignment',     params.alignment);
+        this.appInfo.set('statusBar',     params.statusBar);
+        this.appInfo.set('mediaClock',    params.mediaClock);
+        this.appInfo.set('mediaTrack',    params.mediaTrack);
+        this.appInfo.set('image',         params.graphic);
+        this.appInfo.set('softButtons',   params.softButtons);        
+        this.appInfo.set('customPresets', params.customPresets);
 
         // appId
     },
