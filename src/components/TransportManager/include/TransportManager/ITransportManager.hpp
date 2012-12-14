@@ -55,6 +55,8 @@ namespace NsAppLink
              * @brief Start scanning for new devices.
              *
              * List of new devices will be supplied in onDeviceListUpdated callback.
+             *
+             * @see @ref components_transportmanager_client_device_management
              **/
             virtual void scanForNewDevices(void) = 0;
 

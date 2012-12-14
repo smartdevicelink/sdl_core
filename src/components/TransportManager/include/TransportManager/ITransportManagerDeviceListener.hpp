@@ -32,6 +32,8 @@ namespace NsAppLink
              * is completed.
              *
              * @param DeviceList New list of available devices.
+             *
+             * @see @ref components_transportmanager_client_device_management
              **/
             virtual void onDeviceListUpdated(const tDeviceList & DeviceList);
 
