@@ -260,7 +260,6 @@ namespace NsAppManager
                     appRegistered->set_isMediaApplication(app->getIsMediaApplication());
                     appRegistered->set_languageDesired(app->getLanguageDesired());
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
-                    appRegistered->set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
                     appRegistered->set_deviceName(currentDeviceName);
                     HMIHandler::getInstance().sendNotification(appRegistered);
                     LOG4CPLUS_INFO_EXT(mLogger, " An AppLinkCore::OnAppRegistered notofocation for the app "  << app->getName() << " connection/session key " << app->getAppID() << " gets sent to an HMI side... ");
@@ -366,13 +365,17 @@ namespace NsAppManager
                         showRPC2Request->set_mainField1(*object->get_mainField1());
                     }
                     LOG4CPLUS_INFO_EXT(mLogger, "setMainField1 was called");
-                    if(object->get_mediaClock())
+                    if(object->get_mainField2())
                     {
                         showRPC2Request->set_mainField2(*object->get_mainField2());
                     }
                     if(object->get_mediaClock())
                     {
                         showRPC2Request->set_mediaClock(*object->get_mediaClock());
+                    }
+                    if(object->get_mediaTrack())
+                    {
+                        showRPC2Request->set_mediaTrack(*object->get_mediaTrack());
                     }
                     if(object->get_statusBar())
                     {
@@ -564,6 +567,14 @@ namespace NsAppManager
                     NsAppLinkRPC::DeleteCommand_request* object = (NsAppLinkRPC::DeleteCommand_request*)mobileMsg;
 
                     CommandTypes cmdTypes = app->getCommandTypes(object->get_cmdID());
+                    if(cmdTypes.empty())
+                    {
+                        NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
                     const unsigned int& cmdId = object->get_cmdID();
                     for(CommandTypes::iterator it = cmdTypes.begin(); it != cmdTypes.end(); it++)
                     {
@@ -671,6 +682,7 @@ namespace NsAppManager
                                 delVrCmd->set_appId(app->getAppID());
                                 core->mMessageMapping.addMessage(delVrCmd->getId(), connectionID, sessionID);
                                 core->mRequestMapping.addMessage(delVrCmd->getId(), *it);
+                                app->removeCommand(*it, CommandType::VR);
                                 HMIHandler::getInstance().sendRequest(delVrCmd);
                             }
                         }
@@ -886,6 +898,7 @@ namespace NsAppManager
                     response->set_syncMsgVersion(app->getSyncMsgVersion());
                     response->set_softButtonCapabilities(core->mSoftButtonCapabilities.get());
                     response->set_presetBankCapabilities(core->mPresetBankCapabilities);
+                    response->set_vehicleType(core->mVehicleType);
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
 
@@ -1272,6 +1285,15 @@ namespace NsAppManager
                         setGPRPC2Request->set_timeoutPrompt(timeoutPrompt);
                     }
 
+                    if(object->get_vrHelp())
+                    {
+                        setGPRPC2Request->set_vrHelp(*object->get_vrHelp());
+                    }
+                    if(object->get_vrHelpTitle())
+                    {
+                        setGPRPC2Request->set_vrHelpTitle(*object->get_vrHelpTitle());
+                    }
+
                     setGPRPC2Request->set_appId(appId);
                     HMIHandler::getInstance().sendRequest(setGPRPC2Request);
                     NsAppLinkRPCV2::SetGlobalProperties_response * mobileResponse = new NsAppLinkRPCV2::SetGlobalProperties_response;
@@ -1423,6 +1445,10 @@ namespace NsAppManager
                         performInteraction->set_timeoutPrompt(timeoutPrompt);
                     }
                     performInteraction->set_appId(appId);
+                    if(object->get_vrHelp())
+                    {
+                        performInteraction->set_vrHelp(*object->get_vrHelp());
+                    }
                     HMIHandler::getInstance().sendRequest(performInteraction);
                 }
                 case NsAppLinkRPCV2::FunctionID::AlertID:
@@ -1440,6 +1466,10 @@ namespace NsAppManager
                     {
                         alert->set_AlertText2(*object->get_alertText2());
                     }
+                    if(object->get_alertText3())
+                    {
+                        alert->set_alertText3(*object->get_alertText3());
+                    }
                     if(object->get_duration())
                     {
                         alert->set_duration(*object->get_duration());
@@ -1447,6 +1477,10 @@ namespace NsAppManager
                     if(object->get_playTone())
                     {
                         alert->set_playTone(*object->get_playTone());
+                    }
+                    if(object->get_softButtons())
+                    {
+                        alert->set_softButtons(*object->get_softButtons());
                     }
                     alert->set_appId(appId);
                     HMIHandler::getInstance().sendRequest(alert);
@@ -1464,18 +1498,41 @@ namespace NsAppManager
                     {
                         showRPC2Request->set_mainField1(*object->get_mainField1());
                     }
-                    LOG4CPLUS_INFO_EXT(mLogger, "setMainField1 was called");
-                    if(object->get_mediaClock())
+                    if(object->get_mainField2())
                     {
                         showRPC2Request->set_mainField2(*object->get_mainField2());
+                    }
+                    if(object->get_mainField3())
+                    {
+                        showRPC2Request->set_mainField1(*object->get_mainField3());
+                    }
+                    if(object->get_mainField4())
+                    {
+                        showRPC2Request->set_mainField1(*object->get_mainField4());
                     }
                     if(object->get_mediaClock())
                     {
                         showRPC2Request->set_mediaClock(*object->get_mediaClock());
                     }
+                    if(object->get_mediaTrack())
+                    {
+                        showRPC2Request->set_mediaTrack(*object->get_mediaTrack());
+                    }
                     if(object->get_statusBar())
                     {
                         showRPC2Request->set_statusBar(*object->get_statusBar());
+                    }
+                    if(object->get_graphic())
+                    {
+                        showRPC2Request->set_graphic(*object->get_graphic());
+                    }
+                    if(object->get_softButtons())
+                    {
+                        showRPC2Request->set_softButtons(*object->get_softButtons());
+                    }
+                    if(object->get_customPresets())
+                    {
+                        showRPC2Request->set_customPresets(*object->get_customPresets());
                     }
                     if(object->get_alignment())
                     {
@@ -1562,6 +1619,11 @@ namespace NsAppManager
                         }
                         core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
 
+                        if(object->get_cmdIcon())
+                        {
+                            addCmd->set_cmdIcon(*object->get_cmdIcon());
+                        }
+
                         CommandParams params;
                         params.menuParamsV2 = menuParams;
                         app->addCommand(cmdId, cmdType, params);
@@ -1607,6 +1669,14 @@ namespace NsAppManager
                     NsAppLinkRPCV2::DeleteCommand_request* object = (NsAppLinkRPCV2::DeleteCommand_request*)mobileMsg;
 
                     CommandTypes cmdTypes = app->getCommandTypes(object->get_cmdID());
+                    if(cmdTypes.empty())
+                    {
+                        NsAppLinkRPCV2::DeleteCommand_response* response = new NsAppLinkRPCV2::DeleteCommand_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
                     const unsigned int& cmdId = object->get_cmdID();
                     for(CommandTypes::iterator it = cmdTypes.begin(); it != cmdTypes.end(); it++)
                     {
@@ -1714,6 +1784,7 @@ namespace NsAppManager
                                 delVrCmd->set_appId(app->getAppID());
                                 core->mMessageMapping.addMessage(delVrCmd->getId(), connectionID, sessionID);
                                 core->mRequestMapping.addMessage(delVrCmd->getId(), *it);
+                                app->removeCommand(*it, CommandType::VR);
                                 HMIHandler::getInstance().sendRequest(delVrCmd);
                             }
                         }
@@ -1907,6 +1978,8 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendRequest(getTtsCapsRequest);
                 NsRPC2Communication::Buttons::GetCapabilities* getButtonsCapsRequest = new NsRPC2Communication::Buttons::GetCapabilities();
                 HMIHandler::getInstance().sendRequest(getButtonsCapsRequest);
+                NsRPC2Communication::VehicleInfo::GetVehicleType* getVehicleType = new NsRPC2Communication::VehicleInfo::GetVehicleType;
+                HMIHandler::getInstance().sendRequest(getVehicleType);
 
                 ConnectionHandler::getInstance().startDevicesDiscovery();
 
@@ -2165,7 +2238,10 @@ namespace NsAppManager
                         NsAppLinkRPCV2::Alert_response* response = new NsAppLinkRPCV2::Alert_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
-
+                        if(object->get_tryAgainTime())
+                        {
+                            response->set_tryAgainTime(*object->get_tryAgainTime());
+                        }
                         unsigned char sessionID = app->getSessionID();
                         unsigned int connectionId = app->getConnectionID();
                         core->mMessageMapping.removeMessage(object->getId());
@@ -3284,9 +3360,23 @@ namespace NsAppManager
 
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_ERROR_EXT(mLogger, " Not AppLinkCore RPC message " << msg->getMethod() << " has been received!");
         }
 
+        switch(msg->getMethod())
+        {
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLETYPERESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleType response has been income");
+                NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse* getVehType = (NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse*)msg;
+                core->mVehicleType = getVehType->get_vehicleType();
+                return;
+            }
+
+            case NsRPC2Communication::Marshaller::METHOD_INVALID:
+            default:
+                LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message " << msg->getMethod() << " has been received!");
+        }
         LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message " << msg->getMethod() << " has been invoked!");
     }
 
@@ -3351,6 +3441,7 @@ namespace NsAppManager
                     application->setVrSynonyms(vrSynonyms);
                 }
 
+                application->setHMIDisplayLanguageDesired(registerRequest->get_hmiDisplayLanguageDesired());
                 application->setIsMediaApplication(isMediaApplication);
                 application->setSyncMsgVersion(syncMsgVersion);
                 application->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);

@@ -69,13 +69,16 @@ namespace NsAppManager
     Commands CommandMapping::findCommands(unsigned int commandId) const
     {
         Commands cmds;
+        LOG4CPLUS_INFO_EXT(mLogger, "Searching for commands by id " << commandId );
         for(Commands::const_iterator it = mCommands.begin(); it != mCommands.end(); it++)
         {
             const Command& cmd = *it;
             const CommandBase& base = cmd.first;
             const unsigned int& cmdId = std::get<0>(base);
+            const CommandType& cmdType = std::get<1>(base);
             if(cmdId == commandId)
             {
+                LOG4CPLUS_INFO_EXT(mLogger, "Found a command " << cmdId << " type " << cmdType.getType() );
                 cmds.insert(cmd);
             }
         }
@@ -99,11 +102,13 @@ namespace NsAppManager
     CommandTypes CommandMapping::getTypes( unsigned int commandId ) const
     {
         CommandTypes types;
+        LOG4CPLUS_INFO_EXT(mLogger, "Searching for command types by command id " << commandId );
         for(CommandType type = CommandType::FIRST; type != CommandType::LAST; type++)
         {
             Commands::const_iterator it = mCommands.find( CommandBase(commandId, type) );
             if ( it != mCommands.end() )
             {
+                LOG4CPLUS_INFO_EXT(mLogger, "Found a type " << type.getType() );
                 types.push_back(type);
             }
         }
