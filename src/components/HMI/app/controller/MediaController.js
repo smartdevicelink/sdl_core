@@ -389,7 +389,7 @@ MFT.MediaController = Em.Object.create({
 	},
 
     /** Switching on Application */
-    turnOnApplink: function(element){
+    turnOnApplink: function(){
 
         // Exit form player or radio
         this.onPlayerExit();
@@ -403,12 +403,6 @@ MFT.MediaController = Em.Object.create({
         if(this.directTuneSelected){
             this.set('directTuneSelected', false);
         }
-
-        MFT.ApplinkMediaController.turnOnApplink(element.appName, element.appId);
-
-        /* Show Applink application in media left menu */
-		MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);
-		MFT.MediaController.listDown();
 
     },
 

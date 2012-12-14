@@ -140,7 +140,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
                     type:       MFT.Button,
                     params:     {
                         action:         'turnOnApplink',
-                        target:         'MFT.MediaController',
+                        target:         'MFT.ApplinkMediaController',
                         text:           appList[i].appName,
                         appName:        appList[i].appName,
                         appId:          appList[i].appId,
