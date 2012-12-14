@@ -34,7 +34,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 		
 			classNames: ['app_title'],
 			
-			contentBinding: 'MFT.ApplinkNonMediaModel.appInfo.deviceName'
+			contentBinding: 'MFT.ApplinkController.deviceName'
 		}),
 		
 		image: Em.View.extend({

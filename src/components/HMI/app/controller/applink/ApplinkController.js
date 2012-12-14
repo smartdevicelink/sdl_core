@@ -17,8 +17,6 @@ MFT.ApplinkController = Em.Object.create({
 	 * @type object
 	 */
 	registeredApps: {
-		1: 0,	// temp
-		2: 1	// temp
 	},
 	
 	/** 
