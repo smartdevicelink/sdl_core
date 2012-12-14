@@ -32,6 +32,8 @@
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/ALRPCObjects/V2/AppType.h"
+#include "Utils/ClientSocket.h"
+#include "Utils/SocketException.h"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 #include <iostream>
@@ -57,6 +59,40 @@ namespace {
         response->setId(responseId);
         response->setResult(result);
         NsAppManager::HMIHandler::getInstance().sendResponse(response);
+    }
+
+    struct thread_data
+    {
+        int  timeout;
+        std::string url;
+        NsAppManager::SyncPManager::PData pdata;
+    };
+
+    void *SendPData(void *data)
+    {
+        struct thread_data* my_data = (struct thread_data*) data;
+        int timeout = my_data->timeout;
+        std::string url = my_data->url;
+        NsAppManager::SyncPManager::PData pData = my_data->pdata;
+        sleep(timeout);
+        int port = 80;
+        size_t pos = url.find(":");
+        if(pos != std::string::npos)
+        {
+            std::string strPort = url.substr(pos+1);
+            if(!strPort.empty())
+            {
+                port = atoi(strPort.c_str());
+            }
+        }
+        ClientSocket client_socket( url, port );
+  //      std::string reply;
+        for(NsAppManager::SyncPManager::PData::iterator it = pData.begin(); it != pData.end(); it++)
+        {
+            client_socket << *it;
+  //          client_socket >> reply;
+        }
+        pthread_exit(NULL);
     }
 }
 
@@ -3287,11 +3323,35 @@ namespace NsAppManager
                     }
                     case 2:
                     {
-                        NsAppLinkRPCV2::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPCV2::OnEncodedSyncPData;
-                        encodedNotification->set_data(core->mSyncPManager.getPData());
-                        MobileHandler::getInstance().sendRPCMessage( encodedNotification, app->getConnectionID(), app->getSessionID() );
                         NsRPC2Communication::AppLinkCore::SendDataResponse* response = new NsRPC2Communication::AppLinkCore::SendDataResponse;
                         response->setId(object->getId());
+                        std::string* urlPtr = 0;
+                        int* timeoutPtr = 0;
+                        if(urlPtr)
+                        {
+                            const std::string& url = *urlPtr;
+                            const int& timeout = timeoutPtr ? *timeoutPtr : 0;
+                            pthread_t* sendingThread = 0;
+                            thread_data* data = new thread_data;
+                            data->pdata = core->mSyncPManager.getPData();
+                            data->timeout = timeout;
+                            data->url = url;
+                            int rc = pthread_create(sendingThread, 0, SendPData,
+                                           (void *) data);
+                            if (rc)
+                            {
+                                 LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't start a thread: return code from pthread_create() is " << rc);
+                                 response->setResult(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                                 HMIHandler::getInstance().sendResponse(response);
+                                 return;
+                            }
+                        }
+                        else
+                        {
+                            NsAppLinkRPCV2::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPCV2::OnEncodedSyncPData;
+                            encodedNotification->set_data(core->mSyncPManager.getPData());
+                            MobileHandler::getInstance().sendRPCMessage( encodedNotification, app->getConnectionID(), app->getSessionID() );
+                        }
                         response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
                         HMIHandler::getInstance().sendResponse(response);
                         break;
