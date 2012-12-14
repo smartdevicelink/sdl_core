@@ -25,7 +25,6 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.create({
      * @type: Em.Object
      */
     appInfo: Em.Object.create({
-    	deviceName:     '<Device name>',
     	appName:        '<App name>',
         field1:         '<field1>',
         field2:         '<field2>',

@@ -50,7 +50,7 @@ MFT.StatusMediaView =  Em.ContainerView.extend({
 						'<span {{bindAttr class="MFT.BTModel.active:visible_display"}}>{{MFT.locale.label.view_mediaStatus_bluetooth}}</span>'+  // BLUETOOTH
 						'<span {{bindAttr class="view.isAV:visible_display"}}{{MFT.locale.label.view_mediaStatus_avIn}}</span>'+ 		//AV IN
 						'<span {{bindAttr class="MFT.SiriusModel.active:visible_display MFT.AmModel.active:visible_display MFT.FmModel.active:visible_display"}}>{{view.controler.currentActiveData.frequency}}</span>'+   // frequency
-						'<span {{bindAttr class="MFT.ApplinkMediaModel.active:visible_display"}}>{{MFT.ApplinkMediaModel.showInfo.statusBar}}</span>'+ 		//Applink
+						'<span {{bindAttr class="MFT.ApplinkMediaModel.active:visible_display"}}>{{MFT.ApplinkMediaModel.appInfo.statusBar}}</span>'+ 		//Applink
 					'</div>'+
 					'<div class="icon  antenaIco"'+
 						'{{bindAttr class="MFT.CDModel.active:cdIco"}}'+ // CD icon

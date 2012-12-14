@@ -15,6 +15,9 @@ namespace NsAppLink
          * in order to register as listener to receive callbacks about device information
          *
          * @interface ITransportManagerDeviceListener
+         *
+         * @see @ref components_transportmanager_client_device_management
+         * @see @ref components_transportmanager_client_connection_management
          **/
         class ITransportManagerDeviceListener
         {
@@ -32,6 +35,8 @@ namespace NsAppLink
              * is completed.
              *
              * @param DeviceList New list of available devices.
+             *
+             * @see @ref components_transportmanager_client_device_management
              **/
             virtual void onDeviceListUpdated(const tDeviceList & DeviceList);
 
@@ -40,6 +45,8 @@ namespace NsAppLink
              *
              * @param ConnectedDevice DeviceInfo of connected device.
              * @param Connection Connection handle.
+             *
+             * @see @ref components_transportmanager_client_connection_management
              **/
             virtual void onApplicationConnected(const SDeviceInfo & ConnectedDevice, const tConnectionHandle Connection);
 
@@ -48,6 +55,8 @@ namespace NsAppLink
              *
              * @param DisconnectedDevice DeviceInfo of disconnected device.
              * @param Connection Connection handle.
+             *
+             * @see @ref components_transportmanager_client_connection_management
              **/
             virtual void onApplicationDisconnected(const SDeviceInfo & DisconnectedDevice, const tConnectionHandle Connection);
         };

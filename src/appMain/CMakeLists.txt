@@ -7,6 +7,7 @@ set(LIBRARIES
   MessageBroker
   MessageBrokerClient
   MessageBrokerServer
+  Utils
   jsoncpp
   bluetooth
   pthread

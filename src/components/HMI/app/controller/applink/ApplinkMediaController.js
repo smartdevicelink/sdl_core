@@ -73,10 +73,16 @@ MFT.ApplinkMediaController = Em.Object.create({
     },
 
     /** Switching on Application */
-    turnOnApplink: function(appName, appId){
-       
-        MFT.ApplinkController.getApplicationModel(1).showInfo.set('appName', appName);
-        FFW.AppLinkCoreClient.ActivateApp(appId);
+    turnOnApplink: function(element){
+
+        MFT.ApplinkController.getApplicationModel(1).showInfo.set('appName', element.appName);
+        FFW.AppLinkCoreClient.ActivateApp(element.appId);
+
+        /* Show Applink application in media left menu */
+        MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);
+        MFT.MediaController.listDown();
+
+        MFT.MediaController.turnOnApplink();
         
     },
 

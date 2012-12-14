@@ -32,6 +32,8 @@
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/ALRPCObjects/V2/AppType.h"
+#include "Utils/ClientSocket.h"
+#include "Utils/SocketException.h"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 #include <iostream>
@@ -57,6 +59,40 @@ namespace {
         response->setId(responseId);
         response->setResult(result);
         NsAppManager::HMIHandler::getInstance().sendResponse(response);
+    }
+
+    struct thread_data
+    {
+        int  timeout;
+        std::string url;
+        NsAppManager::SyncPManager::PData pdata;
+    };
+
+    void *SendPData(void *data)
+    {
+        struct thread_data* my_data = (struct thread_data*) data;
+        int timeout = my_data->timeout;
+        std::string url = my_data->url;
+        NsAppManager::SyncPManager::PData pData = my_data->pdata;
+        sleep(timeout);
+        int port = 80;
+        size_t pos = url.find(":");
+        if(pos != std::string::npos)
+        {
+            std::string strPort = url.substr(pos+1);
+            if(!strPort.empty())
+            {
+                port = atoi(strPort.c_str());
+            }
+        }
+        ClientSocket client_socket( url, port );
+  //      std::string reply;
+        for(NsAppManager::SyncPManager::PData::iterator it = pData.begin(); it != pData.end(); it++)
+        {
+            client_socket << *it;
+  //          client_socket >> reply;
+        }
+        pthread_exit(NULL);
     }
 }
 
@@ -837,7 +873,6 @@ namespace NsAppManager
                 default:
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message " << mobileMsg->getMethodId() << " has been received!");
-
                     NsAppLinkRPC::GenericResponse_response* response = new NsAppLinkRPC::GenericResponse_response();
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
@@ -1798,6 +1833,7 @@ namespace NsAppManager
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
                 {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message " << mobileMsg->getMethodId() << " has been received!");
                     NsAppLinkRPCV2::GenericResponse_response* response = new NsAppLinkRPCV2::GenericResponse_response();
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::GenericResponseID);
                     response->set_success(false);
@@ -1829,6 +1865,18 @@ namespace NsAppManager
             return;
         }
         AppMgrCore* core = (AppMgrCore*)pThis;
+
+        switch(msg->getMethod())
+        {
+            case NsRPC2Communication::Marshaller::METHOD_INVALID:
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " An invalid RPC message " << msg->getMethod() << " has been received!");
+                return;
+            }
+            default:
+                LOG4CPLUS_INFO_EXT(mLogger, " A valid RPC message " << msg->getMethod() << " has been received!");
+        }
+
         switch(msg->getMethod())
         {
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT:
@@ -1958,9 +2006,8 @@ namespace NsAppManager
                 }
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not Buttons RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not Buttons RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -2645,6 +2692,8 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, " null-application found as an active item!");
                     return;
                 }
+
+                LOG4CPLUS_INFO_EXT(mLogger, " About to send OnHMIStatus to a mobile side...");
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2756,9 +2805,8 @@ namespace NsAppManager
                 }
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -2903,9 +2951,8 @@ namespace NsAppManager
                 }
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not VR RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not VR RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -2966,9 +3013,8 @@ namespace NsAppManager
                 }
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not TTS RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not TTS RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -2995,7 +3041,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application with the name " << appName << " found!");
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::INVALID_DATA);
                     return;
                 }
 
@@ -3004,7 +3050,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
                     return;
                 }
 
@@ -3012,21 +3058,20 @@ namespace NsAppManager
                 if (!currentApp)
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "No application is currently active");
-                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
-                    return;
                 }
-
-                if (currentApp == app)
+                else
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "App is currently active");
-                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
-                    return;
+                    if (currentApp == app)
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, "App is currently active");
+                        sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
+                                    NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                        return;
+                    }
+
+                    LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application  " << currentApp->getName() << " ID " << currentApp->getAppID() << " - about to remove it from HMI first");
+                    core->removeAppFromHmi(currentApp, app->getConnectionID(), app->getSessionID());
                 }
-                
-                LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application - about to remove it from HMI first");
-                core->removeAppFromHmi(currentApp, app->getConnectionID(), app->getSessionID());                    
 
                 if(!AppMgrRegistry::getInstance().activateApp(app))
                 {
@@ -3097,6 +3142,7 @@ namespace NsAppManager
                         break;
                     }
                 }
+
                 const MenuItems& newMenus = app->getAllMenus();
                 LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's menus to HMI due to a new application activation");
                 for(MenuItems::const_iterator it = newMenus.begin(); it != newMenus.end(); it++)
@@ -3277,11 +3323,35 @@ namespace NsAppManager
                     }
                     case 2:
                     {
-                        NsAppLinkRPCV2::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPCV2::OnEncodedSyncPData;
-                        encodedNotification->set_data(core->mSyncPManager.getPData());
-                        MobileHandler::getInstance().sendRPCMessage( encodedNotification, app->getConnectionID(), app->getSessionID() );
                         NsRPC2Communication::AppLinkCore::SendDataResponse* response = new NsRPC2Communication::AppLinkCore::SendDataResponse;
                         response->setId(object->getId());
+                        std::string* urlPtr = 0;
+                        int* timeoutPtr = 0;
+                        if(urlPtr)
+                        {
+                            const std::string& url = *urlPtr;
+                            const int& timeout = timeoutPtr ? *timeoutPtr : 0;
+                            pthread_t* sendingThread = 0;
+                            thread_data* data = new thread_data;
+                            data->pdata = core->mSyncPManager.getPData();
+                            data->timeout = timeout;
+                            data->url = url;
+                            int rc = pthread_create(sendingThread, 0, SendPData,
+                                           (void *) data);
+                            if (rc)
+                            {
+                                 LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't start a thread: return code from pthread_create() is " << rc);
+                                 response->setResult(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                                 HMIHandler::getInstance().sendResponse(response);
+                                 return;
+                            }
+                        }
+                        else
+                        {
+                            NsAppLinkRPCV2::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPCV2::OnEncodedSyncPData;
+                            encodedNotification->set_data(core->mSyncPManager.getPData());
+                            MobileHandler::getInstance().sendRPCMessage( encodedNotification, app->getConnectionID(), app->getSessionID() );
+                        }
                         response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
                         HMIHandler::getInstance().sendResponse(response);
                         break;
@@ -3357,10 +3427,8 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendResponse(response);
                 return;
             }
-
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not AppLinkCore RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not AppLinkCore RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -3372,10 +3440,8 @@ namespace NsAppManager
                 core->mVehicleType = getVehType->get_vehicleType();
                 return;
             }
-
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not VehicleInfo RPC message " << msg->getMethod() << " has been received!");
         }
         LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message " << msg->getMethod() << " has been invoked!");
     }

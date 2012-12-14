@@ -12,3 +12,6 @@ add_subdirectory(./ProtocolHandler)
 
 # --- ConnectionHandler
 add_subdirectory(./ConnectionHandler)
+
+# --- Utils
+add_subdirectory(./Utils)
