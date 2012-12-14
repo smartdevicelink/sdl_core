@@ -2995,7 +2995,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application with the name " << appName << " found!");
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::INVALID_DATA);
                     return;
                 }
 
@@ -3004,7 +3004,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
                     return;
                 }
 
@@ -3012,21 +3012,20 @@ namespace NsAppManager
                 if (!currentApp)
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "No application is currently active");
-                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
-                    return;
                 }
-
-                if (currentApp == app)
+                else
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "App is currently active");
-                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
-                    return;
+                    if (currentApp == app)
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, "App is currently active");
+                        sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
+                                    NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                        return;
+                    }
+
+                    LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application  " << currentApp->getName() << " ID " << currentApp->getAppID() << " - about to remove it from HMI first");
+                    core->removeAppFromHmi(currentApp, app->getConnectionID(), app->getSessionID());
                 }
-                
-                LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application - about to remove it from HMI first");
-                core->removeAppFromHmi(currentApp, app->getConnectionID(), app->getSessionID());                    
 
                 if(!AppMgrRegistry::getInstance().activateApp(app))
                 {
@@ -3097,6 +3096,7 @@ namespace NsAppManager
                         break;
                     }
                 }
+
                 const MenuItems& newMenus = app->getAllMenus();
                 LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's menus to HMI due to a new application activation");
                 for(MenuItems::const_iterator it = newMenus.begin(); it != newMenus.end(); it++)
