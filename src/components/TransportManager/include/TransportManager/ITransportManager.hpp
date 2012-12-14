@@ -82,6 +82,8 @@ namespace NsAppLink
              * @brief Add listener to the data-related events
              *
              * @param Listener Pointer to listener.
+             *
+             * @see @ref components_transportmanager_client_data_transfer
              **/
             virtual void addDataListener(ITransportManagerDataListener * Listener) = 0;
 
@@ -89,6 +91,8 @@ namespace NsAppLink
              * @brief Remove listener to the data-related events.
              *
              * @param Listener Pointer to listener.
+             *
+             * @see @ref components_transportmanager_client_data_transfer
              **/
             virtual void removeDataListener(ITransportManagerDataListener * Listener) = 0;
 
@@ -119,6 +123,8 @@ namespace NsAppLink
              * @param Data Frame payload data.
              * @param DataSize Size of data in bytes.
              * @param UserData Any user data. Will be returned as is in ITransportManagerDataListener::onFrameSendCompleted
+             *
+             * @see @ref components_transportmanager_client_data_transfer
              **/
             virtual void sendFrame(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, const int UserData) = 0;
         };
