@@ -3,15 +3,15 @@
 #include "../src/ALRPCObjectsImpl/V1/InteractionModeMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/VrHelpItemMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/VrHelpItemMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/PerformInteractionMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -155,7 +155,7 @@ Json::Value PerformInteractionMarshaller::toJSON(const PerformInteraction& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::VrHelpItemMarshaller::toJSON(e.vrHelp[0][i]);
+      j[i]=NsAppLinkRPC::VrHelpItemMarshaller::toJSON(e.vrHelp[0][i]);
 
     json["params"]["vrHelp"]=j;
   }
@@ -187,10 +187,14 @@ bool PerformInteractionMarshaller::fromJSON(const Json::Value& json,PerformInter
       unsigned int i=js["initialPrompt"].size();
       if(i<1)  return false;
       if(i>100)  return false;
-      std::vector<NsAppLinkRPC::TTSChunk> z(i);
+      c.initialPrompt.resize(i);
       while(i--)
-        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["initialPrompt"][i],c.initialPrompt[i]))  return false;
-      c.initialPrompt=z;
+      {
+        NsAppLinkRPC::TTSChunk t;
+        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["initialPrompt"][i],t))
+          return false;
+         c.initialPrompt[i]=t;
+      }
     }
 
     if(!js.isMember("interactionMode") || !NsAppLinkRPC::InteractionModeMarshaller::fromJSON(js["interactionMode"],c.interactionMode))  return false;
@@ -268,11 +272,11 @@ bool PerformInteractionMarshaller::fromJSON(const Json::Value& json,PerformInter
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.vrHelp=new std::vector<NsAppLinkRPCV2::VrHelpItem>();
+      c.vrHelp=new std::vector<NsAppLinkRPC::VrHelpItem>();
       c.vrHelp->resize(js["vrHelp"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::VrHelpItemMarshaller::fromJSON(js["vrHelp"][i],c.vrHelp[0][i]))  return false;
+        if(!NsAppLinkRPC::VrHelpItemMarshaller::fromJSON(js["vrHelp"][i],c.vrHelp[0][i]))  return false;
     }
 
 

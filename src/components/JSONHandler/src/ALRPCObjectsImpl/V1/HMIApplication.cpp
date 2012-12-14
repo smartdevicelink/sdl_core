@@ -5,8 +5,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Tue Dec  4 16:02:39 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Thu Dec 13 13:37:09 2012
+  source stamp	Thu Dec 13 13:33:23 2012
   author	robok0der
 */
 
@@ -19,8 +19,6 @@ HMIApplication& HMIApplication::operator =(const HMIApplication& c)
   appName=c.appName;
   icon=c.icon ? new std::string(c.icon[0]) : 0;
   ngnMediaScreenAppName=c.ngnMediaScreenAppName ? new std::string(c.ngnMediaScreenAppName[0]) : 0;
-  appId = c.appId;
-  mIsMediaApplication = c.mIsMediaApplication;
 
   return *this;
 }
@@ -53,16 +51,7 @@ HMIApplication::HMIApplication(void) :
 {
 }
 
-void HMIApplication::set_appId(int id)
-{
-    appId = id;
-}
 
-bool HMIApplication::set_isMediaApplication(bool isMediaApplication)
-{
-    mIsMediaApplication = isMediaApplication;
-    return true;
-}
 
 bool HMIApplication::set_appName(const std::string& appName_)
 {
@@ -105,15 +94,7 @@ void HMIApplication::reset_ngnMediaScreenAppName(void)
 }
 
 
-int  HMIApplication::get_appId() const
-{
-    return appId;
-}
 
-bool HMIApplication::get_isMediaApplication() const
-{
-    return mIsMediaApplication;
-}
 
 const std::string& HMIApplication::get_appName(void) const 
 {

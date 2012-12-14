@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -16,21 +16,21 @@ OnButtonPress& OnButtonPress::operator =(const OnButtonPress& c)
 {
   name=c.name;
   mode=c.mode;
-  if(customButtonName)  delete customButtonName;
-  customButtonName= c.customButtonName ? new std::string(c.customButtonName[0]) : 0;
+  if(customButtonID)  delete customButtonID;
+  customButtonID= c.customButtonID ? new unsigned int(c.customButtonID[0]) : 0;
   return *this;
 }
 
 
 OnButtonPress::~OnButtonPress(void)
 {
-  if(customButtonName)  delete customButtonName;
+  if(customButtonID)  delete customButtonID;
 }
 
 
 OnButtonPress::OnButtonPress(void) : 
   RPC2Notification(Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS),
-  customButtonName(0)
+  customButtonID(0)
 {
 }
 
@@ -63,22 +63,22 @@ bool OnButtonPress::set_mode(const NsAppLinkRPC::ButtonPressMode& mode_)
   return true;
 }
 
-const std::string* OnButtonPress::get_customButtonName(void)
+const unsigned int* OnButtonPress::get_customButtonID(void)
 {
-  return customButtonName;
+  return customButtonID;
 }
 
-bool OnButtonPress::set_customButtonName(const std::string& customButtonName_)
+bool OnButtonPress::set_customButtonID(const unsigned int& customButtonID_)
 {
-  if(customButtonName)  delete customButtonName;
-  customButtonName=new std::string(customButtonName_);
+  if(customButtonID)  delete customButtonID;
+  customButtonID=new unsigned int(customButtonID_);
   return true;
 }
 
-void OnButtonPress::reset_customButtonName(void)
+void OnButtonPress::reset_customButtonID(void)
 {
-  if(customButtonName)  delete customButtonName;
-  customButtonName=0;
+  if(customButtonID)  delete customButtonID;
+  customButtonID=0;
 }
 
 bool OnButtonPress::checkIntegrity(void)

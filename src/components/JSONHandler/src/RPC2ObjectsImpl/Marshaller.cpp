@@ -18,11 +18,27 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Buttons/GetCapabilitiesResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Buttons/OnButtonEvent.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Buttons/OnButtonPress.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/ChangeLanguageRegistration.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/ChangeLanguageRegistrationResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Navigation/AlertManeuver.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Navigation/AlertManeuverResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Navigation/OnTBTClientState.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Navigation/ShowConstantTBT.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Navigation/ShowConstantTBTResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Navigation/UpdateTurnList.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Navigation/UpdateTurnListResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Phone/DialNumber.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/Phone/DialNumberResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/ChangeRegistration.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/ChangeRegistrationResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/EndAudioPassThru.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/EndAudioPassThruResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/GetCapabilities.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/GetCapabilitiesResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/GetLanguage.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/GetLanguageResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/OnAudioPassThru.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/OnLanguageChange.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/PerformAudioPassThru.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/PerformAudioPassThruResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/Speak.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/SpeakResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/AddCommand.h"
@@ -31,8 +47,8 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/AddSubMenuResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/Alert.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/AlertResponse.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ChangeLanguageRegistration.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ChangeLanguageRegistrationResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ChangeRegistration.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ChangeRegistrationResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/CreateInteractionChoiceSet.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/CreateInteractionChoiceSetResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/DeleteCommand.h"
@@ -43,6 +59,8 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/DeleteSubMenuResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetCapabilities.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetCapabilitiesResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetLanguage.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetLanguageResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnCommand.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnDeviceChosen.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnDriverDistraction.h"
@@ -53,8 +71,12 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/PerformInteractionResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ResetGlobalProperties.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ResetGlobalPropertiesResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ScrollableMessage.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ScrollableMessageResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/SetAppIcon.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/SetAppIconResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/SetDisplayLayout.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/SetDisplayLayoutResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/SetGlobalProperties.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/SetGlobalPropertiesResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/SetMediaClockTimer.h"
@@ -65,22 +87,35 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/SliderResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/AddCommand.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/AddCommandResponse.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/ChangeLanguageRegistration.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/ChangeLanguageRegistrationResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/ChangeRegistration.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/ChangeRegistrationResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/DeleteCommand.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/DeleteCommandResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/GetCapabilities.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/GetCapabilitiesResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/GetLanguage.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/GetLanguageResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/OnCommand.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/OnLanguageChange.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/GetDTCs.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/GetDTCsResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/GetVehicleData.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/GetVehicleDataResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/GetVehicleType.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/GetVehicleTypeResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/OnVehicleData.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/ReadDID.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/ReadDIDResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/SubscribeVehicleData.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/SubscribeVehicleDataResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/UnsubscribeVehicleData.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataResponse.h"
 
 #include "../src/../src/RPC2ObjectsImpl/Marshaller.inc"
 
 /*
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -170,6 +205,16 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         NsRPC2Communication::Buttons::OnButtonPress *rv=new NsRPC2Communication::Buttons::OnButtonPress;
         return NsRPC2Communication::Buttons::OnButtonPressMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
+      case METHOD_NSRPC2COMMUNICATION_NAVIGATION__ONTBTCLIENTSTATE:
+      {
+        NsRPC2Communication::Navigation::OnTBTClientState *rv=new NsRPC2Communication::Navigation::OnTBTClientState;
+        return NsRPC2Communication::Navigation::OnTBTClientStateMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_TTS__ONAUDIOPASSTHRU:
+      {
+        NsRPC2Communication::TTS::OnAudioPassThru *rv=new NsRPC2Communication::TTS::OnAudioPassThru;
+        return NsRPC2Communication::TTS::OnAudioPassThruMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
       case METHOD_NSRPC2COMMUNICATION_TTS__ONLANGUAGECHANGE:
       {
         NsRPC2Communication::TTS::OnLanguageChange *rv=new NsRPC2Communication::TTS::OnLanguageChange;
@@ -215,6 +260,11 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         NsRPC2Communication::VR::OnLanguageChange *rv=new NsRPC2Communication::VR::OnLanguageChange;
         return NsRPC2Communication::VR::OnLanguageChangeMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
+      case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__ONVEHICLEDATA:
+      {
+        NsRPC2Communication::VehicleInfo::OnVehicleData *rv=new NsRPC2Communication::VehicleInfo::OnVehicleData;
+        return NsRPC2Communication::VehicleInfo::OnVehicleDataMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
       default:
         return 0;
     }
@@ -258,15 +308,50 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         NsRPC2Communication::Buttons::GetCapabilities *rv=new NsRPC2Communication::Buttons::GetCapabilities;
         return NsRPC2Communication::Buttons::GetCapabilitiesMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
-      case METHOD_NSRPC2COMMUNICATION_TTS__CHANGELANGUAGEREGISTRATION:
+      case METHOD_NSRPC2COMMUNICATION_NAVIGATION__ALERTMANEUVER:
       {
-        NsRPC2Communication::TTS::ChangeLanguageRegistration *rv=new NsRPC2Communication::TTS::ChangeLanguageRegistration;
-        return NsRPC2Communication::TTS::ChangeLanguageRegistrationMarshaller::fromJSON(json,*rv) ? rv : 0;
+        NsRPC2Communication::Navigation::AlertManeuver *rv=new NsRPC2Communication::Navigation::AlertManeuver;
+        return NsRPC2Communication::Navigation::AlertManeuverMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_NAVIGATION__SHOWCONSTANTTBT:
+      {
+        NsRPC2Communication::Navigation::ShowConstantTBT *rv=new NsRPC2Communication::Navigation::ShowConstantTBT;
+        return NsRPC2Communication::Navigation::ShowConstantTBTMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_NAVIGATION__UPDATETURNLIST:
+      {
+        NsRPC2Communication::Navigation::UpdateTurnList *rv=new NsRPC2Communication::Navigation::UpdateTurnList;
+        return NsRPC2Communication::Navigation::UpdateTurnListMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_PHONE__DIALNUMBER:
+      {
+        NsRPC2Communication::Phone::DialNumber *rv=new NsRPC2Communication::Phone::DialNumber;
+        return NsRPC2Communication::Phone::DialNumberMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATION:
+      {
+        NsRPC2Communication::TTS::ChangeRegistration *rv=new NsRPC2Communication::TTS::ChangeRegistration;
+        return NsRPC2Communication::TTS::ChangeRegistrationMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_TTS__ENDAUDIOPASSTHRU:
+      {
+        NsRPC2Communication::TTS::EndAudioPassThru *rv=new NsRPC2Communication::TTS::EndAudioPassThru;
+        return NsRPC2Communication::TTS::EndAudioPassThruMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       case METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIES:
       {
         NsRPC2Communication::TTS::GetCapabilities *rv=new NsRPC2Communication::TTS::GetCapabilities;
         return NsRPC2Communication::TTS::GetCapabilitiesMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_TTS__GETLANGUAGE:
+      {
+        NsRPC2Communication::TTS::GetLanguage *rv=new NsRPC2Communication::TTS::GetLanguage;
+        return NsRPC2Communication::TTS::GetLanguageMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRU:
+      {
+        NsRPC2Communication::TTS::PerformAudioPassThru *rv=new NsRPC2Communication::TTS::PerformAudioPassThru;
+        return NsRPC2Communication::TTS::PerformAudioPassThruMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       case METHOD_NSRPC2COMMUNICATION_TTS__SPEAK:
       {
@@ -288,10 +373,10 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         NsRPC2Communication::UI::Alert *rv=new NsRPC2Communication::UI::Alert;
         return NsRPC2Communication::UI::AlertMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
-      case METHOD_NSRPC2COMMUNICATION_UI__CHANGELANGUAGEREGISTRATION:
+      case METHOD_NSRPC2COMMUNICATION_UI__CHANGEREGISTRATION:
       {
-        NsRPC2Communication::UI::ChangeLanguageRegistration *rv=new NsRPC2Communication::UI::ChangeLanguageRegistration;
-        return NsRPC2Communication::UI::ChangeLanguageRegistrationMarshaller::fromJSON(json,*rv) ? rv : 0;
+        NsRPC2Communication::UI::ChangeRegistration *rv=new NsRPC2Communication::UI::ChangeRegistration;
+        return NsRPC2Communication::UI::ChangeRegistrationMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       case METHOD_NSRPC2COMMUNICATION_UI__CREATEINTERACTIONCHOICESET:
       {
@@ -318,6 +403,11 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         NsRPC2Communication::UI::GetCapabilities *rv=new NsRPC2Communication::UI::GetCapabilities;
         return NsRPC2Communication::UI::GetCapabilitiesMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
+      case METHOD_NSRPC2COMMUNICATION_UI__GETLANGUAGE:
+      {
+        NsRPC2Communication::UI::GetLanguage *rv=new NsRPC2Communication::UI::GetLanguage;
+        return NsRPC2Communication::UI::GetLanguageMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
       case METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTION:
       {
         NsRPC2Communication::UI::PerformInteraction *rv=new NsRPC2Communication::UI::PerformInteraction;
@@ -328,10 +418,20 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         NsRPC2Communication::UI::ResetGlobalProperties *rv=new NsRPC2Communication::UI::ResetGlobalProperties;
         return NsRPC2Communication::UI::ResetGlobalPropertiesMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
+      case METHOD_NSRPC2COMMUNICATION_UI__SCROLLABLEMESSAGE:
+      {
+        NsRPC2Communication::UI::ScrollableMessage *rv=new NsRPC2Communication::UI::ScrollableMessage;
+        return NsRPC2Communication::UI::ScrollableMessageMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
       case METHOD_NSRPC2COMMUNICATION_UI__SETAPPICON:
       {
         NsRPC2Communication::UI::SetAppIcon *rv=new NsRPC2Communication::UI::SetAppIcon;
         return NsRPC2Communication::UI::SetAppIconMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_UI__SETDISPLAYLAYOUT:
+      {
+        NsRPC2Communication::UI::SetDisplayLayout *rv=new NsRPC2Communication::UI::SetDisplayLayout;
+        return NsRPC2Communication::UI::SetDisplayLayoutMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       case METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIES:
       {
@@ -358,10 +458,10 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         NsRPC2Communication::VR::AddCommand *rv=new NsRPC2Communication::VR::AddCommand;
         return NsRPC2Communication::VR::AddCommandMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
-      case METHOD_NSRPC2COMMUNICATION_VR__CHANGELANGUAGEREGISTRATION:
+      case METHOD_NSRPC2COMMUNICATION_VR__CHANGEREGISTRATION:
       {
-        NsRPC2Communication::VR::ChangeLanguageRegistration *rv=new NsRPC2Communication::VR::ChangeLanguageRegistration;
-        return NsRPC2Communication::VR::ChangeLanguageRegistrationMarshaller::fromJSON(json,*rv) ? rv : 0;
+        NsRPC2Communication::VR::ChangeRegistration *rv=new NsRPC2Communication::VR::ChangeRegistration;
+        return NsRPC2Communication::VR::ChangeRegistrationMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       case METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMAND:
       {
@@ -373,10 +473,40 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         NsRPC2Communication::VR::GetCapabilities *rv=new NsRPC2Communication::VR::GetCapabilities;
         return NsRPC2Communication::VR::GetCapabilitiesMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
+      case METHOD_NSRPC2COMMUNICATION_VR__GETLANGUAGE:
+      {
+        NsRPC2Communication::VR::GetLanguage *rv=new NsRPC2Communication::VR::GetLanguage;
+        return NsRPC2Communication::VR::GetLanguageMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETDTCS:
+      {
+        NsRPC2Communication::VehicleInfo::GetDTCs *rv=new NsRPC2Communication::VehicleInfo::GetDTCs;
+        return NsRPC2Communication::VehicleInfo::GetDTCsMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLEDATA:
+      {
+        NsRPC2Communication::VehicleInfo::GetVehicleData *rv=new NsRPC2Communication::VehicleInfo::GetVehicleData;
+        return NsRPC2Communication::VehicleInfo::GetVehicleDataMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
       case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLETYPE:
       {
         NsRPC2Communication::VehicleInfo::GetVehicleType *rv=new NsRPC2Communication::VehicleInfo::GetVehicleType;
         return NsRPC2Communication::VehicleInfo::GetVehicleTypeMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__READDID:
+      {
+        NsRPC2Communication::VehicleInfo::ReadDID *rv=new NsRPC2Communication::VehicleInfo::ReadDID;
+        return NsRPC2Communication::VehicleInfo::ReadDIDMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__SUBSCRIBEVEHICLEDATA:
+      {
+        NsRPC2Communication::VehicleInfo::SubscribeVehicleData *rv=new NsRPC2Communication::VehicleInfo::SubscribeVehicleData;
+        return NsRPC2Communication::VehicleInfo::SubscribeVehicleDataMarshaller::fromJSON(json,*rv) ? rv : 0;
+      }
+      case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__UNSUBSCRIBEVEHICLEDATA:
+      {
+        NsRPC2Communication::VehicleInfo::UnsubscribeVehicleData *rv=new NsRPC2Communication::VehicleInfo::UnsubscribeVehicleData;
+        return NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       default:
         return 0;
@@ -426,15 +556,50 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       NsRPC2Communication::Buttons::GetCapabilitiesResponse *rv=new NsRPC2Communication::Buttons::GetCapabilitiesResponse;
       return NsRPC2Communication::Buttons::GetCapabilitiesResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
-    case METHOD_NSRPC2COMMUNICATION_TTS__CHANGELANGUAGEREGISTRATIONRESPONSE:
+    case METHOD_NSRPC2COMMUNICATION_NAVIGATION__ALERTMANEUVERRESPONSE:
     {
-      NsRPC2Communication::TTS::ChangeLanguageRegistrationResponse *rv=new NsRPC2Communication::TTS::ChangeLanguageRegistrationResponse;
-      return NsRPC2Communication::TTS::ChangeLanguageRegistrationResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+      NsRPC2Communication::Navigation::AlertManeuverResponse *rv=new NsRPC2Communication::Navigation::AlertManeuverResponse;
+      return NsRPC2Communication::Navigation::AlertManeuverResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_NAVIGATION__SHOWCONSTANTTBTRESPONSE:
+    {
+      NsRPC2Communication::Navigation::ShowConstantTBTResponse *rv=new NsRPC2Communication::Navigation::ShowConstantTBTResponse;
+      return NsRPC2Communication::Navigation::ShowConstantTBTResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_NAVIGATION__UPDATETURNLISTRESPONSE:
+    {
+      NsRPC2Communication::Navigation::UpdateTurnListResponse *rv=new NsRPC2Communication::Navigation::UpdateTurnListResponse;
+      return NsRPC2Communication::Navigation::UpdateTurnListResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_PHONE__DIALNUMBERRESPONSE:
+    {
+      NsRPC2Communication::Phone::DialNumberResponse *rv=new NsRPC2Communication::Phone::DialNumberResponse;
+      return NsRPC2Communication::Phone::DialNumberResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATIONRESPONSE:
+    {
+      NsRPC2Communication::TTS::ChangeRegistrationResponse *rv=new NsRPC2Communication::TTS::ChangeRegistrationResponse;
+      return NsRPC2Communication::TTS::ChangeRegistrationResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_TTS__ENDAUDIOPASSTHRURESPONSE:
+    {
+      NsRPC2Communication::TTS::EndAudioPassThruResponse *rv=new NsRPC2Communication::TTS::EndAudioPassThruResponse;
+      return NsRPC2Communication::TTS::EndAudioPassThruResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
     case METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIESRESPONSE:
     {
       NsRPC2Communication::TTS::GetCapabilitiesResponse *rv=new NsRPC2Communication::TTS::GetCapabilitiesResponse;
       return NsRPC2Communication::TTS::GetCapabilitiesResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_TTS__GETLANGUAGERESPONSE:
+    {
+      NsRPC2Communication::TTS::GetLanguageResponse *rv=new NsRPC2Communication::TTS::GetLanguageResponse;
+      return NsRPC2Communication::TTS::GetLanguageResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRURESPONSE:
+    {
+      NsRPC2Communication::TTS::PerformAudioPassThruResponse *rv=new NsRPC2Communication::TTS::PerformAudioPassThruResponse;
+      return NsRPC2Communication::TTS::PerformAudioPassThruResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
     case METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE:
     {
@@ -456,10 +621,10 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       NsRPC2Communication::UI::AlertResponse *rv=new NsRPC2Communication::UI::AlertResponse;
       return NsRPC2Communication::UI::AlertResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
-    case METHOD_NSRPC2COMMUNICATION_UI__CHANGELANGUAGEREGISTRATIONRESPONSE:
+    case METHOD_NSRPC2COMMUNICATION_UI__CHANGEREGISTRATIONRESPONSE:
     {
-      NsRPC2Communication::UI::ChangeLanguageRegistrationResponse *rv=new NsRPC2Communication::UI::ChangeLanguageRegistrationResponse;
-      return NsRPC2Communication::UI::ChangeLanguageRegistrationResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+      NsRPC2Communication::UI::ChangeRegistrationResponse *rv=new NsRPC2Communication::UI::ChangeRegistrationResponse;
+      return NsRPC2Communication::UI::ChangeRegistrationResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
     case METHOD_NSRPC2COMMUNICATION_UI__CREATEINTERACTIONCHOICESETRESPONSE:
     {
@@ -486,6 +651,11 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       NsRPC2Communication::UI::GetCapabilitiesResponse *rv=new NsRPC2Communication::UI::GetCapabilitiesResponse;
       return NsRPC2Communication::UI::GetCapabilitiesResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
+    case METHOD_NSRPC2COMMUNICATION_UI__GETLANGUAGERESPONSE:
+    {
+      NsRPC2Communication::UI::GetLanguageResponse *rv=new NsRPC2Communication::UI::GetLanguageResponse;
+      return NsRPC2Communication::UI::GetLanguageResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
     case METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTIONRESPONSE:
     {
       NsRPC2Communication::UI::PerformInteractionResponse *rv=new NsRPC2Communication::UI::PerformInteractionResponse;
@@ -496,10 +666,20 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       NsRPC2Communication::UI::ResetGlobalPropertiesResponse *rv=new NsRPC2Communication::UI::ResetGlobalPropertiesResponse;
       return NsRPC2Communication::UI::ResetGlobalPropertiesResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
+    case METHOD_NSRPC2COMMUNICATION_UI__SCROLLABLEMESSAGERESPONSE:
+    {
+      NsRPC2Communication::UI::ScrollableMessageResponse *rv=new NsRPC2Communication::UI::ScrollableMessageResponse;
+      return NsRPC2Communication::UI::ScrollableMessageResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
     case METHOD_NSRPC2COMMUNICATION_UI__SETAPPICONRESPONSE:
     {
       NsRPC2Communication::UI::SetAppIconResponse *rv=new NsRPC2Communication::UI::SetAppIconResponse;
       return NsRPC2Communication::UI::SetAppIconResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_UI__SETDISPLAYLAYOUTRESPONSE:
+    {
+      NsRPC2Communication::UI::SetDisplayLayoutResponse *rv=new NsRPC2Communication::UI::SetDisplayLayoutResponse;
+      return NsRPC2Communication::UI::SetDisplayLayoutResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
     case METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIESRESPONSE:
     {
@@ -526,10 +706,10 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       NsRPC2Communication::VR::AddCommandResponse *rv=new NsRPC2Communication::VR::AddCommandResponse;
       return NsRPC2Communication::VR::AddCommandResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
-    case METHOD_NSRPC2COMMUNICATION_VR__CHANGELANGUAGEREGISTRATIONRESPONSE:
+    case METHOD_NSRPC2COMMUNICATION_VR__CHANGEREGISTRATIONRESPONSE:
     {
-      NsRPC2Communication::VR::ChangeLanguageRegistrationResponse *rv=new NsRPC2Communication::VR::ChangeLanguageRegistrationResponse;
-      return NsRPC2Communication::VR::ChangeLanguageRegistrationResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+      NsRPC2Communication::VR::ChangeRegistrationResponse *rv=new NsRPC2Communication::VR::ChangeRegistrationResponse;
+      return NsRPC2Communication::VR::ChangeRegistrationResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
     case METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMANDRESPONSE:
     {
@@ -541,10 +721,40 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       NsRPC2Communication::VR::GetCapabilitiesResponse *rv=new NsRPC2Communication::VR::GetCapabilitiesResponse;
       return NsRPC2Communication::VR::GetCapabilitiesResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
+    case METHOD_NSRPC2COMMUNICATION_VR__GETLANGUAGERESPONSE:
+    {
+      NsRPC2Communication::VR::GetLanguageResponse *rv=new NsRPC2Communication::VR::GetLanguageResponse;
+      return NsRPC2Communication::VR::GetLanguageResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETDTCSRESPONSE:
+    {
+      NsRPC2Communication::VehicleInfo::GetDTCsResponse *rv=new NsRPC2Communication::VehicleInfo::GetDTCsResponse;
+      return NsRPC2Communication::VehicleInfo::GetDTCsResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLEDATARESPONSE:
+    {
+      NsRPC2Communication::VehicleInfo::GetVehicleDataResponse *rv=new NsRPC2Communication::VehicleInfo::GetVehicleDataResponse;
+      return NsRPC2Communication::VehicleInfo::GetVehicleDataResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
     case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLETYPERESPONSE:
     {
       NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse *rv=new NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse;
       return NsRPC2Communication::VehicleInfo::GetVehicleTypeResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__READDIDRESPONSE:
+    {
+      NsRPC2Communication::VehicleInfo::ReadDIDResponse *rv=new NsRPC2Communication::VehicleInfo::ReadDIDResponse;
+      return NsRPC2Communication::VehicleInfo::ReadDIDResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__SUBSCRIBEVEHICLEDATARESPONSE:
+    {
+      NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponse *rv=new NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponse;
+      return NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
+    }
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__UNSUBSCRIBEVEHICLEDATARESPONSE:
+    {
+      NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponse *rv=new NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponse;
+      return NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
     default:
       return 0;
@@ -571,6 +781,10 @@ Json::Value Marshaller::Notification2JSON(const NsRPC2Communication::RPC2Notific
       return NsRPC2Communication::Buttons::OnButtonEventMarshaller::toJSON(*static_cast<const NsRPC2Communication::Buttons::OnButtonEvent*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS:
       return NsRPC2Communication::Buttons::OnButtonPressMarshaller::toJSON(*static_cast<const NsRPC2Communication::Buttons::OnButtonPress*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_NAVIGATION__ONTBTCLIENTSTATE:
+      return NsRPC2Communication::Navigation::OnTBTClientStateMarshaller::toJSON(*static_cast<const NsRPC2Communication::Navigation::OnTBTClientState*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_TTS__ONAUDIOPASSTHRU:
+      return NsRPC2Communication::TTS::OnAudioPassThruMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::OnAudioPassThru*>(msg));
     case METHOD_NSRPC2COMMUNICATION_TTS__ONLANGUAGECHANGE:
       return NsRPC2Communication::TTS::OnLanguageChangeMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::OnLanguageChange*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__ONCOMMAND:
@@ -589,6 +803,8 @@ Json::Value Marshaller::Notification2JSON(const NsRPC2Communication::RPC2Notific
       return NsRPC2Communication::VR::OnCommandMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::OnCommand*>(msg));
     case METHOD_NSRPC2COMMUNICATION_VR__ONLANGUAGECHANGE:
       return NsRPC2Communication::VR::OnLanguageChangeMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::OnLanguageChange*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__ONVEHICLEDATA:
+      return NsRPC2Communication::VehicleInfo::OnVehicleDataMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::OnVehicleData*>(msg));
     default:
       return j;
   }
@@ -613,10 +829,24 @@ Json::Value Marshaller::Request2JSON(const NsRPC2Communication::RPC2Request* msg
       return NsRPC2Communication::AppLinkCore::SendDataMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::SendData*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIES:
       return NsRPC2Communication::Buttons::GetCapabilitiesMarshaller::toJSON(*static_cast<const NsRPC2Communication::Buttons::GetCapabilities*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_TTS__CHANGELANGUAGEREGISTRATION:
-      return NsRPC2Communication::TTS::ChangeLanguageRegistrationMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::ChangeLanguageRegistration*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_NAVIGATION__ALERTMANEUVER:
+      return NsRPC2Communication::Navigation::AlertManeuverMarshaller::toJSON(*static_cast<const NsRPC2Communication::Navigation::AlertManeuver*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_NAVIGATION__SHOWCONSTANTTBT:
+      return NsRPC2Communication::Navigation::ShowConstantTBTMarshaller::toJSON(*static_cast<const NsRPC2Communication::Navigation::ShowConstantTBT*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_NAVIGATION__UPDATETURNLIST:
+      return NsRPC2Communication::Navigation::UpdateTurnListMarshaller::toJSON(*static_cast<const NsRPC2Communication::Navigation::UpdateTurnList*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_PHONE__DIALNUMBER:
+      return NsRPC2Communication::Phone::DialNumberMarshaller::toJSON(*static_cast<const NsRPC2Communication::Phone::DialNumber*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATION:
+      return NsRPC2Communication::TTS::ChangeRegistrationMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::ChangeRegistration*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_TTS__ENDAUDIOPASSTHRU:
+      return NsRPC2Communication::TTS::EndAudioPassThruMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::EndAudioPassThru*>(msg));
     case METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIES:
       return NsRPC2Communication::TTS::GetCapabilitiesMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::GetCapabilities*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_TTS__GETLANGUAGE:
+      return NsRPC2Communication::TTS::GetLanguageMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::GetLanguage*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRU:
+      return NsRPC2Communication::TTS::PerformAudioPassThruMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::PerformAudioPassThru*>(msg));
     case METHOD_NSRPC2COMMUNICATION_TTS__SPEAK:
       return NsRPC2Communication::TTS::SpeakMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::Speak*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__ADDCOMMAND:
@@ -625,8 +855,8 @@ Json::Value Marshaller::Request2JSON(const NsRPC2Communication::RPC2Request* msg
       return NsRPC2Communication::UI::AddSubMenuMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::AddSubMenu*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__ALERT:
       return NsRPC2Communication::UI::AlertMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::Alert*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_UI__CHANGELANGUAGEREGISTRATION:
-      return NsRPC2Communication::UI::ChangeLanguageRegistrationMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::ChangeLanguageRegistration*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_UI__CHANGEREGISTRATION:
+      return NsRPC2Communication::UI::ChangeRegistrationMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::ChangeRegistration*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__CREATEINTERACTIONCHOICESET:
       return NsRPC2Communication::UI::CreateInteractionChoiceSetMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::CreateInteractionChoiceSet*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__DELETECOMMAND:
@@ -637,12 +867,18 @@ Json::Value Marshaller::Request2JSON(const NsRPC2Communication::RPC2Request* msg
       return NsRPC2Communication::UI::DeleteSubMenuMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::DeleteSubMenu*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIES:
       return NsRPC2Communication::UI::GetCapabilitiesMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::GetCapabilities*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_UI__GETLANGUAGE:
+      return NsRPC2Communication::UI::GetLanguageMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::GetLanguage*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTION:
       return NsRPC2Communication::UI::PerformInteractionMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::PerformInteraction*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIES:
       return NsRPC2Communication::UI::ResetGlobalPropertiesMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::ResetGlobalProperties*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_UI__SCROLLABLEMESSAGE:
+      return NsRPC2Communication::UI::ScrollableMessageMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::ScrollableMessage*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__SETAPPICON:
       return NsRPC2Communication::UI::SetAppIconMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::SetAppIcon*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_UI__SETDISPLAYLAYOUT:
+      return NsRPC2Communication::UI::SetDisplayLayoutMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::SetDisplayLayout*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIES:
       return NsRPC2Communication::UI::SetGlobalPropertiesMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::SetGlobalProperties*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__SETMEDIACLOCKTIMER:
@@ -653,14 +889,26 @@ Json::Value Marshaller::Request2JSON(const NsRPC2Communication::RPC2Request* msg
       return NsRPC2Communication::UI::SliderMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::Slider*>(msg));
     case METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMAND:
       return NsRPC2Communication::VR::AddCommandMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::AddCommand*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_VR__CHANGELANGUAGEREGISTRATION:
-      return NsRPC2Communication::VR::ChangeLanguageRegistrationMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::ChangeLanguageRegistration*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VR__CHANGEREGISTRATION:
+      return NsRPC2Communication::VR::ChangeRegistrationMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::ChangeRegistration*>(msg));
     case METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMAND:
       return NsRPC2Communication::VR::DeleteCommandMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::DeleteCommand*>(msg));
     case METHOD_NSRPC2COMMUNICATION_VR__GETCAPABILITIES:
       return NsRPC2Communication::VR::GetCapabilitiesMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::GetCapabilities*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VR__GETLANGUAGE:
+      return NsRPC2Communication::VR::GetLanguageMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::GetLanguage*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETDTCS:
+      return NsRPC2Communication::VehicleInfo::GetDTCsMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::GetDTCs*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLEDATA:
+      return NsRPC2Communication::VehicleInfo::GetVehicleDataMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::GetVehicleData*>(msg));
     case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLETYPE:
       return NsRPC2Communication::VehicleInfo::GetVehicleTypeMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::GetVehicleType*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__READDID:
+      return NsRPC2Communication::VehicleInfo::ReadDIDMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::ReadDID*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__SUBSCRIBEVEHICLEDATA:
+      return NsRPC2Communication::VehicleInfo::SubscribeVehicleDataMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::SubscribeVehicleData*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__UNSUBSCRIBEVEHICLEDATA:
+      return NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::UnsubscribeVehicleData*>(msg));
     default:
       return j;
   }
@@ -685,10 +933,24 @@ Json::Value Marshaller::Response2JSON(const NsRPC2Communication::RPC2Response* m
       return NsRPC2Communication::AppLinkCore::SendDataResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::SendDataResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
       return NsRPC2Communication::Buttons::GetCapabilitiesResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::Buttons::GetCapabilitiesResponse*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_TTS__CHANGELANGUAGEREGISTRATIONRESPONSE:
-      return NsRPC2Communication::TTS::ChangeLanguageRegistrationResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::ChangeLanguageRegistrationResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_NAVIGATION__ALERTMANEUVERRESPONSE:
+      return NsRPC2Communication::Navigation::AlertManeuverResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::Navigation::AlertManeuverResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_NAVIGATION__SHOWCONSTANTTBTRESPONSE:
+      return NsRPC2Communication::Navigation::ShowConstantTBTResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::Navigation::ShowConstantTBTResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_NAVIGATION__UPDATETURNLISTRESPONSE:
+      return NsRPC2Communication::Navigation::UpdateTurnListResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::Navigation::UpdateTurnListResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_PHONE__DIALNUMBERRESPONSE:
+      return NsRPC2Communication::Phone::DialNumberResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::Phone::DialNumberResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATIONRESPONSE:
+      return NsRPC2Communication::TTS::ChangeRegistrationResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::ChangeRegistrationResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_TTS__ENDAUDIOPASSTHRURESPONSE:
+      return NsRPC2Communication::TTS::EndAudioPassThruResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::EndAudioPassThruResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIESRESPONSE:
       return NsRPC2Communication::TTS::GetCapabilitiesResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::GetCapabilitiesResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_TTS__GETLANGUAGERESPONSE:
+      return NsRPC2Communication::TTS::GetLanguageResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::GetLanguageResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRURESPONSE:
+      return NsRPC2Communication::TTS::PerformAudioPassThruResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::PerformAudioPassThruResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE:
       return NsRPC2Communication::TTS::SpeakResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::TTS::SpeakResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__ADDCOMMANDRESPONSE:
@@ -697,8 +959,8 @@ Json::Value Marshaller::Response2JSON(const NsRPC2Communication::RPC2Response* m
       return NsRPC2Communication::UI::AddSubMenuResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::AddSubMenuResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__ALERTRESPONSE:
       return NsRPC2Communication::UI::AlertResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::AlertResponse*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_UI__CHANGELANGUAGEREGISTRATIONRESPONSE:
-      return NsRPC2Communication::UI::ChangeLanguageRegistrationResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::ChangeLanguageRegistrationResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_UI__CHANGEREGISTRATIONRESPONSE:
+      return NsRPC2Communication::UI::ChangeRegistrationResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::ChangeRegistrationResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__CREATEINTERACTIONCHOICESETRESPONSE:
       return NsRPC2Communication::UI::CreateInteractionChoiceSetResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::CreateInteractionChoiceSetResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__DELETECOMMANDRESPONSE:
@@ -709,12 +971,18 @@ Json::Value Marshaller::Response2JSON(const NsRPC2Communication::RPC2Response* m
       return NsRPC2Communication::UI::DeleteSubMenuResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::DeleteSubMenuResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE:
       return NsRPC2Communication::UI::GetCapabilitiesResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::GetCapabilitiesResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_UI__GETLANGUAGERESPONSE:
+      return NsRPC2Communication::UI::GetLanguageResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::GetLanguageResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTIONRESPONSE:
       return NsRPC2Communication::UI::PerformInteractionResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::PerformInteractionResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIESRESPONSE:
       return NsRPC2Communication::UI::ResetGlobalPropertiesResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::ResetGlobalPropertiesResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_UI__SCROLLABLEMESSAGERESPONSE:
+      return NsRPC2Communication::UI::ScrollableMessageResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::ScrollableMessageResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__SETAPPICONRESPONSE:
       return NsRPC2Communication::UI::SetAppIconResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::SetAppIconResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_UI__SETDISPLAYLAYOUTRESPONSE:
+      return NsRPC2Communication::UI::SetDisplayLayoutResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::SetDisplayLayoutResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIESRESPONSE:
       return NsRPC2Communication::UI::SetGlobalPropertiesResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::SetGlobalPropertiesResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_UI__SETMEDIACLOCKTIMERRESPONSE:
@@ -725,14 +993,26 @@ Json::Value Marshaller::Response2JSON(const NsRPC2Communication::RPC2Response* m
       return NsRPC2Communication::UI::SliderResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::SliderResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMANDRESPONSE:
       return NsRPC2Communication::VR::AddCommandResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::AddCommandResponse*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_VR__CHANGELANGUAGEREGISTRATIONRESPONSE:
-      return NsRPC2Communication::VR::ChangeLanguageRegistrationResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::ChangeLanguageRegistrationResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VR__CHANGEREGISTRATIONRESPONSE:
+      return NsRPC2Communication::VR::ChangeRegistrationResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::ChangeRegistrationResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMANDRESPONSE:
       return NsRPC2Communication::VR::DeleteCommandResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::DeleteCommandResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_VR__GETCAPABILITIESRESPONSE:
       return NsRPC2Communication::VR::GetCapabilitiesResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::GetCapabilitiesResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VR__GETLANGUAGERESPONSE:
+      return NsRPC2Communication::VR::GetLanguageResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VR::GetLanguageResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETDTCSRESPONSE:
+      return NsRPC2Communication::VehicleInfo::GetDTCsResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::GetDTCsResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLEDATARESPONSE:
+      return NsRPC2Communication::VehicleInfo::GetVehicleDataResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::GetVehicleDataResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLETYPERESPONSE:
       return NsRPC2Communication::VehicleInfo::GetVehicleTypeResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__READDIDRESPONSE:
+      return NsRPC2Communication::VehicleInfo::ReadDIDResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::ReadDIDResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__SUBSCRIBEVEHICLEDATARESPONSE:
+      return NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__UNSUBSCRIBEVEHICLEDATARESPONSE:
+      return NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponse*>(msg));
     default:
       return j;
   }
@@ -763,7 +1043,7 @@ Json::Value Marshaller::toJSON(const RPC2Command* msg)
 }
 
 
-const Marshaller::localHash Marshaller::mHashTable[74]=
+const Marshaller::localHash Marshaller::mHashTable[109]=
 {
   {"AppLinkCore.ActivateApp",0,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateApp},
   {"AppLinkCore.ActivateAppResponse",1,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse},
@@ -782,63 +1062,98 @@ const Marshaller::localHash Marshaller::mHashTable[74]=
   {"Buttons.GetCapabilitiesResponse",14,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilitiesResponse},
   {"Buttons.OnButtonEvent",15,&Marshaller::mNsRPC2Communication_Buttons__OnButtonEvent},
   {"Buttons.OnButtonPress",16,&Marshaller::mNsRPC2Communication_Buttons__OnButtonPress},
-  {"TTS.ChangeLanguageRegistration",17,&Marshaller::mNsRPC2Communication_TTS__ChangeLanguageRegistration},
-  {"TTS.ChangeLanguageRegistrationResponse",18,&Marshaller::mNsRPC2Communication_TTS__ChangeLanguageRegistrationResponse},
-  {"TTS.GetCapabilities",19,&Marshaller::mNsRPC2Communication_TTS__GetCapabilities},
-  {"TTS.GetCapabilitiesResponse",20,&Marshaller::mNsRPC2Communication_TTS__GetCapabilitiesResponse},
-  {"TTS.OnLanguageChange",21,&Marshaller::mNsRPC2Communication_TTS__OnLanguageChange},
-  {"TTS.Speak",22,&Marshaller::mNsRPC2Communication_TTS__Speak},
-  {"TTS.SpeakResponse",23,&Marshaller::mNsRPC2Communication_TTS__SpeakResponse},
-  {"UI.AddCommand",24,&Marshaller::mNsRPC2Communication_UI__AddCommand},
-  {"UI.AddCommandResponse",25,&Marshaller::mNsRPC2Communication_UI__AddCommandResponse},
-  {"UI.AddSubMenu",26,&Marshaller::mNsRPC2Communication_UI__AddSubMenu},
-  {"UI.AddSubMenuResponse",27,&Marshaller::mNsRPC2Communication_UI__AddSubMenuResponse},
-  {"UI.Alert",28,&Marshaller::mNsRPC2Communication_UI__Alert},
-  {"UI.AlertResponse",29,&Marshaller::mNsRPC2Communication_UI__AlertResponse},
-  {"UI.ChangeLanguageRegistration",30,&Marshaller::mNsRPC2Communication_UI__ChangeLanguageRegistration},
-  {"UI.ChangeLanguageRegistrationResponse",31,&Marshaller::mNsRPC2Communication_UI__ChangeLanguageRegistrationResponse},
-  {"UI.CreateInteractionChoiceSet",32,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSet},
-  {"UI.CreateInteractionChoiceSetResponse",33,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse},
-  {"UI.DeleteCommand",34,&Marshaller::mNsRPC2Communication_UI__DeleteCommand},
-  {"UI.DeleteCommandResponse",35,&Marshaller::mNsRPC2Communication_UI__DeleteCommandResponse},
-  {"UI.DeleteInteractionChoiceSet",36,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSet},
-  {"UI.DeleteInteractionChoiceSetResponse",37,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSetResponse},
-  {"UI.DeleteSubMenu",38,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenu},
-  {"UI.DeleteSubMenuResponse",39,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenuResponse},
-  {"UI.GetCapabilities",40,&Marshaller::mNsRPC2Communication_UI__GetCapabilities},
-  {"UI.GetCapabilitiesResponse",41,&Marshaller::mNsRPC2Communication_UI__GetCapabilitiesResponse},
-  {"UI.OnCommand",42,&Marshaller::mNsRPC2Communication_UI__OnCommand},
-  {"UI.OnDeviceChosen",43,&Marshaller::mNsRPC2Communication_UI__OnDeviceChosen},
-  {"UI.OnDriverDistraction",44,&Marshaller::mNsRPC2Communication_UI__OnDriverDistraction},
-  {"UI.OnLanguageChange",45,&Marshaller::mNsRPC2Communication_UI__OnLanguageChange},
-  {"UI.OnReady",46,&Marshaller::mNsRPC2Communication_UI__OnReady},
-  {"UI.OnSystemContext",47,&Marshaller::mNsRPC2Communication_UI__OnSystemContext},
-  {"UI.PerformInteraction",48,&Marshaller::mNsRPC2Communication_UI__PerformInteraction},
-  {"UI.PerformInteractionResponse",49,&Marshaller::mNsRPC2Communication_UI__PerformInteractionResponse},
-  {"UI.ResetGlobalProperties",50,&Marshaller::mNsRPC2Communication_UI__ResetGlobalProperties},
-  {"UI.ResetGlobalPropertiesResponse",51,&Marshaller::mNsRPC2Communication_UI__ResetGlobalPropertiesResponse},
-  {"UI.SetAppIcon",52,&Marshaller::mNsRPC2Communication_UI__SetAppIcon},
-  {"UI.SetAppIconResponse",53,&Marshaller::mNsRPC2Communication_UI__SetAppIconResponse},
-  {"UI.SetGlobalProperties",54,&Marshaller::mNsRPC2Communication_UI__SetGlobalProperties},
-  {"UI.SetGlobalPropertiesResponse",55,&Marshaller::mNsRPC2Communication_UI__SetGlobalPropertiesResponse},
-  {"UI.SetMediaClockTimer",56,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimer},
-  {"UI.SetMediaClockTimerResponse",57,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimerResponse},
-  {"UI.Show",58,&Marshaller::mNsRPC2Communication_UI__Show},
-  {"UI.ShowResponse",59,&Marshaller::mNsRPC2Communication_UI__ShowResponse},
-  {"UI.Slider",60,&Marshaller::mNsRPC2Communication_UI__Slider},
-  {"UI.SliderResponse",61,&Marshaller::mNsRPC2Communication_UI__SliderResponse},
-  {"VR.AddCommand",62,&Marshaller::mNsRPC2Communication_VR__AddCommand},
-  {"VR.AddCommandResponse",63,&Marshaller::mNsRPC2Communication_VR__AddCommandResponse},
-  {"VR.ChangeLanguageRegistration",64,&Marshaller::mNsRPC2Communication_VR__ChangeLanguageRegistration},
-  {"VR.ChangeLanguageRegistrationResponse",65,&Marshaller::mNsRPC2Communication_VR__ChangeLanguageRegistrationResponse},
-  {"VR.DeleteCommand",66,&Marshaller::mNsRPC2Communication_VR__DeleteCommand},
-  {"VR.DeleteCommandResponse",67,&Marshaller::mNsRPC2Communication_VR__DeleteCommandResponse},
-  {"VR.GetCapabilities",68,&Marshaller::mNsRPC2Communication_VR__GetCapabilities},
-  {"VR.GetCapabilitiesResponse",69,&Marshaller::mNsRPC2Communication_VR__GetCapabilitiesResponse},
-  {"VR.OnCommand",70,&Marshaller::mNsRPC2Communication_VR__OnCommand},
-  {"VR.OnLanguageChange",71,&Marshaller::mNsRPC2Communication_VR__OnLanguageChange},
-  {"AppLinkCore.GetVehicleType",72,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleType},
-  {"AppLinkCore.GetVehicleTypeResponse",73,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse}
+  {"Navigation.AlertManeuver",17,&Marshaller::mNsRPC2Communication_Navigation__AlertManeuver},
+  {"Navigation.AlertManeuverResponse",18,&Marshaller::mNsRPC2Communication_Navigation__AlertManeuverResponse},
+  {"Navigation.OnTBTClientState",19,&Marshaller::mNsRPC2Communication_Navigation__OnTBTClientState},
+  {"Navigation.ShowConstantTBT",20,&Marshaller::mNsRPC2Communication_Navigation__ShowConstantTBT},
+  {"Navigation.ShowConstantTBTResponse",21,&Marshaller::mNsRPC2Communication_Navigation__ShowConstantTBTResponse},
+  {"Navigation.UpdateTurnList",22,&Marshaller::mNsRPC2Communication_Navigation__UpdateTurnList},
+  {"Navigation.UpdateTurnListResponse",23,&Marshaller::mNsRPC2Communication_Navigation__UpdateTurnListResponse},
+  {"Phone.DialNumber",24,&Marshaller::mNsRPC2Communication_Phone__DialNumber},
+  {"Phone.DialNumberResponse",25,&Marshaller::mNsRPC2Communication_Phone__DialNumberResponse},
+  {"TTS.ChangeRegistration",26,&Marshaller::mNsRPC2Communication_TTS__ChangeRegistration},
+  {"TTS.ChangeRegistrationResponse",27,&Marshaller::mNsRPC2Communication_TTS__ChangeRegistrationResponse},
+  {"TTS.EndAudioPassThru",28,&Marshaller::mNsRPC2Communication_TTS__EndAudioPassThru},
+  {"TTS.EndAudioPassThruResponse",29,&Marshaller::mNsRPC2Communication_TTS__EndAudioPassThruResponse},
+  {"TTS.GetCapabilities",30,&Marshaller::mNsRPC2Communication_TTS__GetCapabilities},
+  {"TTS.GetCapabilitiesResponse",31,&Marshaller::mNsRPC2Communication_TTS__GetCapabilitiesResponse},
+  {"TTS.GetLanguage",32,&Marshaller::mNsRPC2Communication_TTS__GetLanguage},
+  {"TTS.GetLanguageResponse",33,&Marshaller::mNsRPC2Communication_TTS__GetLanguageResponse},
+  {"TTS.OnAudioPassThru",34,&Marshaller::mNsRPC2Communication_TTS__OnAudioPassThru},
+  {"TTS.OnLanguageChange",35,&Marshaller::mNsRPC2Communication_TTS__OnLanguageChange},
+  {"TTS.PerformAudioPassThru",36,&Marshaller::mNsRPC2Communication_TTS__PerformAudioPassThru},
+  {"TTS.PerformAudioPassThruResponse",37,&Marshaller::mNsRPC2Communication_TTS__PerformAudioPassThruResponse},
+  {"TTS.Speak",38,&Marshaller::mNsRPC2Communication_TTS__Speak},
+  {"TTS.SpeakResponse",39,&Marshaller::mNsRPC2Communication_TTS__SpeakResponse},
+  {"UI.AddCommand",40,&Marshaller::mNsRPC2Communication_UI__AddCommand},
+  {"UI.AddCommandResponse",41,&Marshaller::mNsRPC2Communication_UI__AddCommandResponse},
+  {"UI.AddSubMenu",42,&Marshaller::mNsRPC2Communication_UI__AddSubMenu},
+  {"UI.AddSubMenuResponse",43,&Marshaller::mNsRPC2Communication_UI__AddSubMenuResponse},
+  {"UI.Alert",44,&Marshaller::mNsRPC2Communication_UI__Alert},
+  {"UI.AlertResponse",45,&Marshaller::mNsRPC2Communication_UI__AlertResponse},
+  {"UI.ChangeRegistration",46,&Marshaller::mNsRPC2Communication_UI__ChangeRegistration},
+  {"UI.ChangeRegistrationResponse",47,&Marshaller::mNsRPC2Communication_UI__ChangeRegistrationResponse},
+  {"UI.CreateInteractionChoiceSet",48,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSet},
+  {"UI.CreateInteractionChoiceSetResponse",49,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse},
+  {"UI.DeleteCommand",50,&Marshaller::mNsRPC2Communication_UI__DeleteCommand},
+  {"UI.DeleteCommandResponse",51,&Marshaller::mNsRPC2Communication_UI__DeleteCommandResponse},
+  {"UI.DeleteInteractionChoiceSet",52,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSet},
+  {"UI.DeleteInteractionChoiceSetResponse",53,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSetResponse},
+  {"UI.DeleteSubMenu",54,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenu},
+  {"UI.DeleteSubMenuResponse",55,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenuResponse},
+  {"UI.GetCapabilities",56,&Marshaller::mNsRPC2Communication_UI__GetCapabilities},
+  {"UI.GetCapabilitiesResponse",57,&Marshaller::mNsRPC2Communication_UI__GetCapabilitiesResponse},
+  {"UI.GetLanguage",58,&Marshaller::mNsRPC2Communication_UI__GetLanguage},
+  {"UI.GetLanguageResponse",59,&Marshaller::mNsRPC2Communication_UI__GetLanguageResponse},
+  {"UI.OnCommand",60,&Marshaller::mNsRPC2Communication_UI__OnCommand},
+  {"UI.OnDeviceChosen",61,&Marshaller::mNsRPC2Communication_UI__OnDeviceChosen},
+  {"UI.OnDriverDistraction",62,&Marshaller::mNsRPC2Communication_UI__OnDriverDistraction},
+  {"UI.OnLanguageChange",63,&Marshaller::mNsRPC2Communication_UI__OnLanguageChange},
+  {"UI.OnReady",64,&Marshaller::mNsRPC2Communication_UI__OnReady},
+  {"UI.OnSystemContext",65,&Marshaller::mNsRPC2Communication_UI__OnSystemContext},
+  {"UI.PerformInteraction",66,&Marshaller::mNsRPC2Communication_UI__PerformInteraction},
+  {"UI.PerformInteractionResponse",67,&Marshaller::mNsRPC2Communication_UI__PerformInteractionResponse},
+  {"UI.ResetGlobalProperties",68,&Marshaller::mNsRPC2Communication_UI__ResetGlobalProperties},
+  {"UI.ResetGlobalPropertiesResponse",69,&Marshaller::mNsRPC2Communication_UI__ResetGlobalPropertiesResponse},
+  {"UI.ScrollableMessage",70,&Marshaller::mNsRPC2Communication_UI__ScrollableMessage},
+  {"UI.ScrollableMessageResponse",71,&Marshaller::mNsRPC2Communication_UI__ScrollableMessageResponse},
+  {"UI.SetAppIcon",72,&Marshaller::mNsRPC2Communication_UI__SetAppIcon},
+  {"UI.SetAppIconResponse",73,&Marshaller::mNsRPC2Communication_UI__SetAppIconResponse},
+  {"UI.SetDisplayLayout",74,&Marshaller::mNsRPC2Communication_UI__SetDisplayLayout},
+  {"UI.SetDisplayLayoutResponse",75,&Marshaller::mNsRPC2Communication_UI__SetDisplayLayoutResponse},
+  {"UI.SetGlobalProperties",76,&Marshaller::mNsRPC2Communication_UI__SetGlobalProperties},
+  {"UI.SetGlobalPropertiesResponse",77,&Marshaller::mNsRPC2Communication_UI__SetGlobalPropertiesResponse},
+  {"UI.SetMediaClockTimer",78,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimer},
+  {"UI.SetMediaClockTimerResponse",79,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimerResponse},
+  {"UI.Show",80,&Marshaller::mNsRPC2Communication_UI__Show},
+  {"UI.ShowResponse",81,&Marshaller::mNsRPC2Communication_UI__ShowResponse},
+  {"UI.Slider",82,&Marshaller::mNsRPC2Communication_UI__Slider},
+  {"UI.SliderResponse",83,&Marshaller::mNsRPC2Communication_UI__SliderResponse},
+  {"VR.AddCommand",84,&Marshaller::mNsRPC2Communication_VR__AddCommand},
+  {"VR.AddCommandResponse",85,&Marshaller::mNsRPC2Communication_VR__AddCommandResponse},
+  {"VR.ChangeRegistration",86,&Marshaller::mNsRPC2Communication_VR__ChangeRegistration},
+  {"VR.ChangeRegistrationResponse",87,&Marshaller::mNsRPC2Communication_VR__ChangeRegistrationResponse},
+  {"VR.DeleteCommand",88,&Marshaller::mNsRPC2Communication_VR__DeleteCommand},
+  {"VR.DeleteCommandResponse",89,&Marshaller::mNsRPC2Communication_VR__DeleteCommandResponse},
+  {"VR.GetCapabilities",90,&Marshaller::mNsRPC2Communication_VR__GetCapabilities},
+  {"VR.GetCapabilitiesResponse",91,&Marshaller::mNsRPC2Communication_VR__GetCapabilitiesResponse},
+  {"VR.GetLanguage",92,&Marshaller::mNsRPC2Communication_VR__GetLanguage},
+  {"VR.GetLanguageResponse",93,&Marshaller::mNsRPC2Communication_VR__GetLanguageResponse},
+  {"VR.OnCommand",94,&Marshaller::mNsRPC2Communication_VR__OnCommand},
+  {"VR.OnLanguageChange",95,&Marshaller::mNsRPC2Communication_VR__OnLanguageChange},
+  {"AppLinkCore.GetDTCs",96,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCs},
+  {"AppLinkCore.GetDTCsResponse",97,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCsResponse},
+  {"AppLinkCore.GetVehicleData",98,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleData},
+  {"AppLinkCore.GetVehicleDataResponse",99,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse},
+  {"AppLinkCore.GetVehicleType",100,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleType},
+  {"AppLinkCore.GetVehicleTypeResponse",101,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse},
+  {"AppLinkCore.OnVehicleData",102,&Marshaller::mNsRPC2Communication_VehicleInfo__OnVehicleData},
+  {"AppLinkCore.ReadDID",103,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDID},
+  {"AppLinkCore.ReadDIDResponse",104,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDIDResponse},
+  {"AppLinkCore.SubscribeVehicleData",105,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleData},
+  {"AppLinkCore.SubscribeVehicleDataResponse",106,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse},
+  {"AppLinkCore.UnsubscribeVehicleData",107,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData},
+  {"AppLinkCore.UnsubscribeVehicleDataResponse",108,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse}
 
 };
 
@@ -861,11 +1176,27 @@ NsRPC2Communication::Buttons::GetCapabilitiesMarshaller Marshaller::mNsRPC2Commu
 NsRPC2Communication::Buttons::GetCapabilitiesResponseMarshaller Marshaller::mNsRPC2Communication_Buttons__GetCapabilitiesResponse;
 NsRPC2Communication::Buttons::OnButtonEventMarshaller Marshaller::mNsRPC2Communication_Buttons__OnButtonEvent;
 NsRPC2Communication::Buttons::OnButtonPressMarshaller Marshaller::mNsRPC2Communication_Buttons__OnButtonPress;
-NsRPC2Communication::TTS::ChangeLanguageRegistrationMarshaller Marshaller::mNsRPC2Communication_TTS__ChangeLanguageRegistration;
-NsRPC2Communication::TTS::ChangeLanguageRegistrationResponseMarshaller Marshaller::mNsRPC2Communication_TTS__ChangeLanguageRegistrationResponse;
+NsRPC2Communication::Navigation::AlertManeuverMarshaller Marshaller::mNsRPC2Communication_Navigation__AlertManeuver;
+NsRPC2Communication::Navigation::AlertManeuverResponseMarshaller Marshaller::mNsRPC2Communication_Navigation__AlertManeuverResponse;
+NsRPC2Communication::Navigation::OnTBTClientStateMarshaller Marshaller::mNsRPC2Communication_Navigation__OnTBTClientState;
+NsRPC2Communication::Navigation::ShowConstantTBTMarshaller Marshaller::mNsRPC2Communication_Navigation__ShowConstantTBT;
+NsRPC2Communication::Navigation::ShowConstantTBTResponseMarshaller Marshaller::mNsRPC2Communication_Navigation__ShowConstantTBTResponse;
+NsRPC2Communication::Navigation::UpdateTurnListMarshaller Marshaller::mNsRPC2Communication_Navigation__UpdateTurnList;
+NsRPC2Communication::Navigation::UpdateTurnListResponseMarshaller Marshaller::mNsRPC2Communication_Navigation__UpdateTurnListResponse;
+NsRPC2Communication::Phone::DialNumberMarshaller Marshaller::mNsRPC2Communication_Phone__DialNumber;
+NsRPC2Communication::Phone::DialNumberResponseMarshaller Marshaller::mNsRPC2Communication_Phone__DialNumberResponse;
+NsRPC2Communication::TTS::ChangeRegistrationMarshaller Marshaller::mNsRPC2Communication_TTS__ChangeRegistration;
+NsRPC2Communication::TTS::ChangeRegistrationResponseMarshaller Marshaller::mNsRPC2Communication_TTS__ChangeRegistrationResponse;
+NsRPC2Communication::TTS::EndAudioPassThruMarshaller Marshaller::mNsRPC2Communication_TTS__EndAudioPassThru;
+NsRPC2Communication::TTS::EndAudioPassThruResponseMarshaller Marshaller::mNsRPC2Communication_TTS__EndAudioPassThruResponse;
 NsRPC2Communication::TTS::GetCapabilitiesMarshaller Marshaller::mNsRPC2Communication_TTS__GetCapabilities;
 NsRPC2Communication::TTS::GetCapabilitiesResponseMarshaller Marshaller::mNsRPC2Communication_TTS__GetCapabilitiesResponse;
+NsRPC2Communication::TTS::GetLanguageMarshaller Marshaller::mNsRPC2Communication_TTS__GetLanguage;
+NsRPC2Communication::TTS::GetLanguageResponseMarshaller Marshaller::mNsRPC2Communication_TTS__GetLanguageResponse;
+NsRPC2Communication::TTS::OnAudioPassThruMarshaller Marshaller::mNsRPC2Communication_TTS__OnAudioPassThru;
 NsRPC2Communication::TTS::OnLanguageChangeMarshaller Marshaller::mNsRPC2Communication_TTS__OnLanguageChange;
+NsRPC2Communication::TTS::PerformAudioPassThruMarshaller Marshaller::mNsRPC2Communication_TTS__PerformAudioPassThru;
+NsRPC2Communication::TTS::PerformAudioPassThruResponseMarshaller Marshaller::mNsRPC2Communication_TTS__PerformAudioPassThruResponse;
 NsRPC2Communication::TTS::SpeakMarshaller Marshaller::mNsRPC2Communication_TTS__Speak;
 NsRPC2Communication::TTS::SpeakResponseMarshaller Marshaller::mNsRPC2Communication_TTS__SpeakResponse;
 NsRPC2Communication::UI::AddCommandMarshaller Marshaller::mNsRPC2Communication_UI__AddCommand;
@@ -874,8 +1205,8 @@ NsRPC2Communication::UI::AddSubMenuMarshaller Marshaller::mNsRPC2Communication_U
 NsRPC2Communication::UI::AddSubMenuResponseMarshaller Marshaller::mNsRPC2Communication_UI__AddSubMenuResponse;
 NsRPC2Communication::UI::AlertMarshaller Marshaller::mNsRPC2Communication_UI__Alert;
 NsRPC2Communication::UI::AlertResponseMarshaller Marshaller::mNsRPC2Communication_UI__AlertResponse;
-NsRPC2Communication::UI::ChangeLanguageRegistrationMarshaller Marshaller::mNsRPC2Communication_UI__ChangeLanguageRegistration;
-NsRPC2Communication::UI::ChangeLanguageRegistrationResponseMarshaller Marshaller::mNsRPC2Communication_UI__ChangeLanguageRegistrationResponse;
+NsRPC2Communication::UI::ChangeRegistrationMarshaller Marshaller::mNsRPC2Communication_UI__ChangeRegistration;
+NsRPC2Communication::UI::ChangeRegistrationResponseMarshaller Marshaller::mNsRPC2Communication_UI__ChangeRegistrationResponse;
 NsRPC2Communication::UI::CreateInteractionChoiceSetMarshaller Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSet;
 NsRPC2Communication::UI::CreateInteractionChoiceSetResponseMarshaller Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse;
 NsRPC2Communication::UI::DeleteCommandMarshaller Marshaller::mNsRPC2Communication_UI__DeleteCommand;
@@ -886,6 +1217,8 @@ NsRPC2Communication::UI::DeleteSubMenuMarshaller Marshaller::mNsRPC2Communicatio
 NsRPC2Communication::UI::DeleteSubMenuResponseMarshaller Marshaller::mNsRPC2Communication_UI__DeleteSubMenuResponse;
 NsRPC2Communication::UI::GetCapabilitiesMarshaller Marshaller::mNsRPC2Communication_UI__GetCapabilities;
 NsRPC2Communication::UI::GetCapabilitiesResponseMarshaller Marshaller::mNsRPC2Communication_UI__GetCapabilitiesResponse;
+NsRPC2Communication::UI::GetLanguageMarshaller Marshaller::mNsRPC2Communication_UI__GetLanguage;
+NsRPC2Communication::UI::GetLanguageResponseMarshaller Marshaller::mNsRPC2Communication_UI__GetLanguageResponse;
 NsRPC2Communication::UI::OnCommandMarshaller Marshaller::mNsRPC2Communication_UI__OnCommand;
 NsRPC2Communication::UI::OnDeviceChosenMarshaller Marshaller::mNsRPC2Communication_UI__OnDeviceChosen;
 NsRPC2Communication::UI::OnDriverDistractionMarshaller Marshaller::mNsRPC2Communication_UI__OnDriverDistraction;
@@ -896,8 +1229,12 @@ NsRPC2Communication::UI::PerformInteractionMarshaller Marshaller::mNsRPC2Communi
 NsRPC2Communication::UI::PerformInteractionResponseMarshaller Marshaller::mNsRPC2Communication_UI__PerformInteractionResponse;
 NsRPC2Communication::UI::ResetGlobalPropertiesMarshaller Marshaller::mNsRPC2Communication_UI__ResetGlobalProperties;
 NsRPC2Communication::UI::ResetGlobalPropertiesResponseMarshaller Marshaller::mNsRPC2Communication_UI__ResetGlobalPropertiesResponse;
+NsRPC2Communication::UI::ScrollableMessageMarshaller Marshaller::mNsRPC2Communication_UI__ScrollableMessage;
+NsRPC2Communication::UI::ScrollableMessageResponseMarshaller Marshaller::mNsRPC2Communication_UI__ScrollableMessageResponse;
 NsRPC2Communication::UI::SetAppIconMarshaller Marshaller::mNsRPC2Communication_UI__SetAppIcon;
 NsRPC2Communication::UI::SetAppIconResponseMarshaller Marshaller::mNsRPC2Communication_UI__SetAppIconResponse;
+NsRPC2Communication::UI::SetDisplayLayoutMarshaller Marshaller::mNsRPC2Communication_UI__SetDisplayLayout;
+NsRPC2Communication::UI::SetDisplayLayoutResponseMarshaller Marshaller::mNsRPC2Communication_UI__SetDisplayLayoutResponse;
 NsRPC2Communication::UI::SetGlobalPropertiesMarshaller Marshaller::mNsRPC2Communication_UI__SetGlobalProperties;
 NsRPC2Communication::UI::SetGlobalPropertiesResponseMarshaller Marshaller::mNsRPC2Communication_UI__SetGlobalPropertiesResponse;
 NsRPC2Communication::UI::SetMediaClockTimerMarshaller Marshaller::mNsRPC2Communication_UI__SetMediaClockTimer;
@@ -908,13 +1245,26 @@ NsRPC2Communication::UI::SliderMarshaller Marshaller::mNsRPC2Communication_UI__S
 NsRPC2Communication::UI::SliderResponseMarshaller Marshaller::mNsRPC2Communication_UI__SliderResponse;
 NsRPC2Communication::VR::AddCommandMarshaller Marshaller::mNsRPC2Communication_VR__AddCommand;
 NsRPC2Communication::VR::AddCommandResponseMarshaller Marshaller::mNsRPC2Communication_VR__AddCommandResponse;
-NsRPC2Communication::VR::ChangeLanguageRegistrationMarshaller Marshaller::mNsRPC2Communication_VR__ChangeLanguageRegistration;
-NsRPC2Communication::VR::ChangeLanguageRegistrationResponseMarshaller Marshaller::mNsRPC2Communication_VR__ChangeLanguageRegistrationResponse;
+NsRPC2Communication::VR::ChangeRegistrationMarshaller Marshaller::mNsRPC2Communication_VR__ChangeRegistration;
+NsRPC2Communication::VR::ChangeRegistrationResponseMarshaller Marshaller::mNsRPC2Communication_VR__ChangeRegistrationResponse;
 NsRPC2Communication::VR::DeleteCommandMarshaller Marshaller::mNsRPC2Communication_VR__DeleteCommand;
 NsRPC2Communication::VR::DeleteCommandResponseMarshaller Marshaller::mNsRPC2Communication_VR__DeleteCommandResponse;
 NsRPC2Communication::VR::GetCapabilitiesMarshaller Marshaller::mNsRPC2Communication_VR__GetCapabilities;
 NsRPC2Communication::VR::GetCapabilitiesResponseMarshaller Marshaller::mNsRPC2Communication_VR__GetCapabilitiesResponse;
+NsRPC2Communication::VR::GetLanguageMarshaller Marshaller::mNsRPC2Communication_VR__GetLanguage;
+NsRPC2Communication::VR::GetLanguageResponseMarshaller Marshaller::mNsRPC2Communication_VR__GetLanguageResponse;
 NsRPC2Communication::VR::OnCommandMarshaller Marshaller::mNsRPC2Communication_VR__OnCommand;
 NsRPC2Communication::VR::OnLanguageChangeMarshaller Marshaller::mNsRPC2Communication_VR__OnLanguageChange;
+NsRPC2Communication::VehicleInfo::GetDTCsMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCs;
+NsRPC2Communication::VehicleInfo::GetDTCsResponseMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCsResponse;
+NsRPC2Communication::VehicleInfo::GetVehicleDataMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleData;
+NsRPC2Communication::VehicleInfo::GetVehicleDataResponseMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse;
 NsRPC2Communication::VehicleInfo::GetVehicleTypeMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleType;
 NsRPC2Communication::VehicleInfo::GetVehicleTypeResponseMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse;
+NsRPC2Communication::VehicleInfo::OnVehicleDataMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__OnVehicleData;
+NsRPC2Communication::VehicleInfo::ReadDIDMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__ReadDID;
+NsRPC2Communication::VehicleInfo::ReadDIDResponseMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__ReadDIDResponse;
+NsRPC2Communication::VehicleInfo::SubscribeVehicleDataMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleData;
+NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponseMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse;
+NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData;
+NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponseMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse;

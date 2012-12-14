@@ -10,9 +10,6 @@
 #define MAX_HASH_VALUE 4
 /* maximum key range = 1, duplicates = 0 */
 
-namespace NsAppLinkRPCV2
-{
-
 class VrCapabilities_intHash
 {
 private:
@@ -56,6 +53,4 @@ VrCapabilities_intHash::getPointer (register const char *str, register unsigned 
           }
     }
   return 0;
-}
-
 }

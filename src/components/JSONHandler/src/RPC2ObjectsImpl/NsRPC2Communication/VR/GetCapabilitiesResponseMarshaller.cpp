@@ -6,8 +6,8 @@
 /*
   interface	NsRPC2Communication::VR
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -107,10 +107,14 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
       unsigned int i=js["capabilities"].size();
       if(i<1)  return false;
       if(i>100)  return false;
-      std::vector<NsAppLinkRPC::VrCapabilities> z(i);
+      c.capabilities.resize(i);
       while(i--)
-        if(!NsAppLinkRPC::VrCapabilitiesMarshaller::fromJSON(js["capabilities"][i],c.capabilities[i]))  return false;
-      c.capabilities=z;
+      {
+        NsAppLinkRPC::VrCapabilities t;
+        if(!NsAppLinkRPC::VrCapabilitiesMarshaller::fromJSON(js["capabilities"][i],t))
+          return false;
+         c.capabilities[i]=t;
+      }
     }
 
   }

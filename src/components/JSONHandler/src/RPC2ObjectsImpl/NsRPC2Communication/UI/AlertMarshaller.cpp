@@ -1,14 +1,14 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/Alert.h"
 #include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/SoftButtonMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/SoftButtonMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AlertMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -109,7 +109,7 @@ Json::Value AlertMarshaller::toJSON(const Alert& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
+      j[i]=NsAppLinkRPC::SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
 
     json["params"]["softButtons"]=j;
   }
@@ -212,11 +212,11 @@ bool AlertMarshaller::fromJSON(const Json::Value& json,Alert& c)
       if(i<0)  return false;
       if(i>4)  return false;
 
-      c.softButtons=new std::vector<NsAppLinkRPCV2::SoftButton>();
+      c.softButtons=new std::vector<NsAppLinkRPC::SoftButton>();
       c.softButtons->resize(js["softButtons"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::SoftButtonMarshaller::fromJSON(js["softButtons"][i],c.softButtons[0][i]))  return false;
+        if(!NsAppLinkRPC::SoftButtonMarshaller::fromJSON(js["softButtons"][i],c.softButtons[0][i]))  return false;
     }
 
 

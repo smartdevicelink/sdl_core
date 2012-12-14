@@ -1,5 +1,6 @@
 #include "../include/JSONHandler/ALRPCObjects/V2/PermissionItem.h"
 #include "HMIPermissionsMarshaller.h"
+#include "ParameterPermissionsMarshaller.h"
 
 #include "PermissionItemMarshaller.h"
 
@@ -8,8 +9,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 17:03:13 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Thu Dec 13 14:18:29 2012
+  source stamp	Thu Dec 13 14:18:27 2012
   author	robok0der
 */
 
@@ -49,6 +50,7 @@ const std::string PermissionItemMarshaller::toString(const PermissionItem& e)
 bool PermissionItemMarshaller::checkIntegrityConst(const PermissionItem& s)
 {
   if(!HMIPermissionsMarshaller::checkIntegrityConst(s.hmiPermissions))  return false;
+  if(!ParameterPermissionsMarshaller::checkIntegrityConst(s.parameterPermissions))  return false;
   if(s.rpcName.length()>100)  return false;
   return true;
 }
@@ -60,6 +62,8 @@ Json::Value PermissionItemMarshaller::toJSON(const PermissionItem& e)
     return Json::Value(Json::nullValue);
 
   json["hmiPermissions"]=HMIPermissionsMarshaller::toJSON(e.hmiPermissions);
+
+  json["parameterPermissions"]=ParameterPermissionsMarshaller::toJSON(e.parameterPermissions);
 
   json["rpcName"]=Json::Value(e.rpcName);
 
@@ -78,6 +82,12 @@ bool PermissionItemMarshaller::fromJSON(const Json::Value& json,PermissionItem& 
     {
       const Json::Value& j=json["hmiPermissions"];
       if(!HMIPermissionsMarshaller::fromJSON(j,c.hmiPermissions))
+        return false;
+    }
+    if(!json.isMember("parameterPermissions"))  return false;
+    {
+      const Json::Value& j=json["parameterPermissions"];
+      if(!ParameterPermissionsMarshaller::fromJSON(j,c.parameterPermissions))
         return false;
     }
     if(!json.isMember("rpcName"))  return false;

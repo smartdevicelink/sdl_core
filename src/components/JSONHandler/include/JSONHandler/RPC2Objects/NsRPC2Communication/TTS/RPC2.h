@@ -4,11 +4,18 @@
 #include <string>
 #include <json/json.h>
 
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/ChangeLanguageRegistration.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/ChangeLanguageRegistrationResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/ChangeRegistration.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/ChangeRegistrationResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/EndAudioPassThru.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/EndAudioPassThruResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/GetCapabilities.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/GetCapabilitiesResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/GetLanguage.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/GetLanguageResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/OnAudioPassThru.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/OnLanguageChange.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/PerformAudioPassThru.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/PerformAudioPassThruResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/Speak.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/TTS/SpeakResponse.h"
 
@@ -18,8 +25,8 @@
 /*
   interface	NsRPC2Communication::TTS
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 

@@ -6,12 +6,14 @@
 
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/AddCommand.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/AddCommandResponse.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/ChangeLanguageRegistration.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/ChangeLanguageRegistrationResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/ChangeRegistration.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/ChangeRegistrationResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/DeleteCommand.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/DeleteCommandResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/GetCapabilities.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/GetCapabilitiesResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/GetLanguage.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/GetLanguageResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/OnCommand.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VR/OnLanguageChange.h"
 
@@ -21,8 +23,8 @@
 /*
   interface	NsRPC2Communication::VR
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 

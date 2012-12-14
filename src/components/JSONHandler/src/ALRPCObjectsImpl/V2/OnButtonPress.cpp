@@ -11,8 +11,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 17:03:13 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Thu Dec 13 14:18:29 2012
+  source stamp	Thu Dec 13 14:18:27 2012
   author	robok0der
 */
 
@@ -55,10 +55,10 @@ bool OnButtonPress::set_buttonPressMode(const ButtonPressMode& buttonPressMode_)
   return true;
 }
 
-bool OnButtonPress::set_customButtonName(const std::string& customButtonName_)
+bool OnButtonPress::set_customButtonID(unsigned int customButtonID_)
 {
-  if(customButtonName_.length()>500)  return false;
-  customButtonName=customButtonName_;
+  if(customButtonID_>65536)  return false;
+  customButtonID=customButtonID_;
   return true;
 }
 
@@ -75,8 +75,8 @@ const ButtonPressMode& OnButtonPress::get_buttonPressMode(void) const
   return buttonPressMode;
 }
 
-const std::string& OnButtonPress::get_customButtonName(void) const 
+unsigned int OnButtonPress::get_customButtonID(void) const
 {
-  return customButtonName;
+  return customButtonID;
 }
 

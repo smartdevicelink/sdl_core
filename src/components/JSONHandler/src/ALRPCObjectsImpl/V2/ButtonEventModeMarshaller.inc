@@ -10,9 +10,6 @@
 #define MAX_HASH_VALUE 10
 /* maximum key range = 3, duplicates = 0 */
 
-namespace NsAppLinkRPCV2
-{
-
 class ButtonEventMode_intHash
 {
 private:
@@ -59,6 +56,4 @@ ButtonEventMode_intHash::getPointer (register const char *str, register unsigned
           }
     }
   return 0;
-}
-
 }

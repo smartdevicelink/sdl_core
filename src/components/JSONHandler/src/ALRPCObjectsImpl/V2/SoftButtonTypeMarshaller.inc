@@ -29,8 +29,6 @@
 #error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
 #endif
 
-namespace NsAppLinkRPCV2
-{
 
 #define TOTAL_KEYWORDS 3
 #define MIN_WORD_LENGTH 4
@@ -114,6 +112,4 @@ SoftButtonType_intHash::getPointer (register const char *str, register unsigned 
           }
     }
   return 0;
-}
-
 }

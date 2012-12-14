@@ -13,8 +13,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -48,10 +48,11 @@ namespace NsRPC2Communication
 
       const NsAppLinkRPC::Language& get_languageDesired(void);
 
-      const NsAppLinkRPC::Language& get_hmiDisplayLanguageDesired(void);
-
+      const NsAppLinkRPC::Language* get_hmiDisplayLanguageDesired(void);
       const std::vector< NsAppLinkRPC::TTSChunk>* get_ttsName(void);
       const std::vector< NsAppLinkRPCV2::AppType>* get_appType(void);
+      unsigned int get_versionNumber(void);
+
       int get_appId(void);
 
 
@@ -74,6 +75,8 @@ namespace NsRPC2Communication
 
       bool set_hmiDisplayLanguageDesired(const NsAppLinkRPC::Language& hmiDisplayLanguageDesired);
 
+      void reset_hmiDisplayLanguageDesired(void);
+
 /// 1 <= size <= 100
       bool set_ttsName(const std::vector< NsAppLinkRPC::TTSChunk>& ttsName);
 
@@ -83,6 +86,8 @@ namespace NsRPC2Communication
       bool set_appType(const std::vector< NsAppLinkRPCV2::AppType>& appType);
 
       void reset_appType(void);
+
+      bool set_versionNumber(unsigned int versionNumber);
 
       bool set_appId(int appId);
 
@@ -97,9 +102,10 @@ namespace NsRPC2Communication
       std::vector< std::string>* vrSynonym;
       bool isMediaApplication;
       NsAppLinkRPC::Language languageDesired;
-      NsAppLinkRPC::Language hmiDisplayLanguageDesired;
+      NsAppLinkRPC::Language* hmiDisplayLanguageDesired;
       std::vector< NsAppLinkRPC::TTSChunk>* ttsName;
       std::vector< NsAppLinkRPCV2::AppType>* appType;
+      unsigned int versionNumber;
       int appId;
 
     };

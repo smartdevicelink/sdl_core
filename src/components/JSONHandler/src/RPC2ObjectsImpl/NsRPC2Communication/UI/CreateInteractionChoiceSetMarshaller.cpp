@@ -6,8 +6,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -106,10 +106,14 @@ bool CreateInteractionChoiceSetMarshaller::fromJSON(const Json::Value& json,Crea
       unsigned int i=js["choiceSet"].size();
       if(i<1)  return false;
       if(i>100)  return false;
-      std::vector<NsAppLinkRPC::Choice> z(i);
+      c.choiceSet.resize(i);
       while(i--)
-        if(!NsAppLinkRPC::ChoiceMarshaller::fromJSON(js["choiceSet"][i],c.choiceSet[i]))  return false;
-      c.choiceSet=z;
+      {
+        NsAppLinkRPC::Choice t;
+        if(!NsAppLinkRPC::ChoiceMarshaller::fromJSON(js["choiceSet"][i],t))
+          return false;
+         c.choiceSet[i]=t;
+      }
     }
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;

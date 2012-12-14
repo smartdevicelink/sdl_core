@@ -1053,10 +1053,14 @@ $l=sprintf
        {
          if(ref $z->[0])		#array not optional not simple type
          {
-$l=qq~    if(!js.isMember("#name#") || !js["#name#"].isArray())  return false;\n~.
-   qq~    {\n      unsigned int i=js["#name#"].size();\n~.$ca.qq~      std::vector<#type#> z(i);\n      while(i--)\n~.
-   qq~        if(!#type#Marshaller::fromJSON(js["#name#"][i],z[i]))  return false;\n      c.#name#=z;\n    }\n~;
 
+#$l=qq~    if(!js.isMember("#name#") || !js["#name#"].isArray())  return false;\n~.
+#   qq~    {\n      unsigned int i=js["#name#"].size();\n~.$ca.qq~      std::vector<#type#> z(i);\n      while(i--)\n~.
+#   qq~        if(!#type#Marshaller::fromJSON(js["#name#"][i],c.#name#[i]))  return false;\n      c.#name#=z;\n    }\n~;
+
+$l=qq~    if(!js.isMember("#name#") || !js["#name#"].isArray())  return false;\n~.
+   qq~    {\n      unsigned int i=js["#name#"].size();\n~.$ca.qq~      c.#name#.resize(i);\n      while(i--)\n      {\n        #type# t;\n~.
+   qq~        if(!#type#Marshaller::fromJSON(js["#name#"][i],t))\n          return false;\n         c.#name#[i]=t;\n      }\n    }\n~;
 
          }
          else				#array not optional simple type
@@ -1068,9 +1072,7 @@ $l=sprintf
    qq~      {\n        if(!js["#name#"][i].is%s())\n          return false;\n        c.#name#[i]=js["#name#"][i].as%s();\n        ~.$ct.
    qq~\n      }\n    }\n\n~,$json2{$z->[0]},$json{$z->[0]};
 
-#   qq~      unsigned int i=js["#name#"].size();\n~.$ca.qq~      std::vector<#type#> z(i);\n      while(i--)\n~.
-#   qq~      {\n        if(!js["#name#"][i].is%s())\n          return false;\n        z[i]=js["#name#"][i].as%s();\n        ~.$ct.
-#   qq~\n      }\n      c.#name#=z;\n    }\n\n~,$json2{$z->[0]},$json{$z->[0]};
+
          }
        }
      }

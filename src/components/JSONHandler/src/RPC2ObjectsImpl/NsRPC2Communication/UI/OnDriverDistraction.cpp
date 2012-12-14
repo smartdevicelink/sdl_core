@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -15,7 +15,6 @@ using namespace NsRPC2Communication::UI;
 OnDriverDistraction& OnDriverDistraction::operator =(const OnDriverDistraction& c)
 {
   state=c.state;
-  appId=c.appId;
   return *this;
 }
 
@@ -45,17 +44,6 @@ const NsAppLinkRPC::DriverDistractionState& OnDriverDistraction::get_state(void)
 bool OnDriverDistraction::set_state(const NsAppLinkRPC::DriverDistractionState& state_)
 {
   state=state_;
-  return true;
-}
-
-int OnDriverDistraction::get_appId(void)
-{
-  return appId;
-}
-
-bool OnDriverDistraction::set_appId(int appId_)
-{
-  appId=appId_;
   return true;
 }
 

@@ -6,8 +6,8 @@
 /*
   interface	NsRPC2Communication::TTS
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -99,10 +99,14 @@ bool SpeakMarshaller::fromJSON(const Json::Value& json,Speak& c)
       unsigned int i=js["ttsChunks"].size();
       if(i<1)  return false;
       if(i>100)  return false;
-      std::vector<NsAppLinkRPC::TTSChunk> z(i);
+      c.ttsChunks.resize(i);
       while(i--)
-        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["ttsChunks"][i],c.ttsChunks[i]))  return false;
-      c.ttsChunks=z;
+      {
+        NsAppLinkRPC::TTSChunk t;
+        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["ttsChunks"][i],t))
+          return false;
+         c.ttsChunks[i]=t;
+      }
     }
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;

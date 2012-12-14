@@ -10,9 +10,6 @@
 #define MAX_HASH_VALUE 15
 /* maximum key range = 12, duplicates = 0 */
 
-namespace NsAppLinkRPCV2
-{
-
 class SpeechCapabilities_intHash
 {
 private:
@@ -68,6 +65,4 @@ SpeechCapabilities_intHash::getPointer (register const char *str, register unsig
           }
     }
   return 0;
-}
-
 }

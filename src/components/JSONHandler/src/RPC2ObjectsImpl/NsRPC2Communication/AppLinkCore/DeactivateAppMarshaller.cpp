@@ -1,12 +1,13 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/AppLinkCore/DeactivateApp.h"
+#include "../src/ALRPCObjectsImpl/V1/DeactivateReasonMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/DeactivateAppMarshaller.h"
 
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -46,6 +47,8 @@ bool DeactivateAppMarshaller::checkIntegrityConst(const DeactivateApp& s)
 {
   if(s.appName.length()>100)  return false;
 
+  if(!NsAppLinkRPC::DeactivateReasonMarshaller::checkIntegrityConst(s.reason))  return false;
+
   return true;
 }
 
@@ -62,6 +65,7 @@ Json::Value DeactivateAppMarshaller::toJSON(const DeactivateApp& e)
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
   json["params"]["appName"]=Json::Value(e.appName);;
+  json["params"]["reason"]=NsAppLinkRPC::DeactivateReasonMarshaller::toJSON(e.reason);;
   json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
@@ -84,6 +88,8 @@ bool DeactivateAppMarshaller::fromJSON(const Json::Value& json,DeactivateApp& c)
     if(!js.isMember("appName") || !js["appName"].isString())  return false;
     c.appName=js["appName"].asString();
     if(c.appName.length()>100)  return false;
+
+    if(!js.isMember("reason") || !NsAppLinkRPC::DeactivateReasonMarshaller::fromJSON(js["reason"],c.reason))  return false;
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;
     c.appId=js["appId"].asInt();

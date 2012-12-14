@@ -6,8 +6,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -99,10 +99,14 @@ bool ResetGlobalPropertiesMarshaller::fromJSON(const Json::Value& json,ResetGlob
       unsigned int i=js["properties"].size();
       if(i<1)  return false;
       if(i>100)  return false;
-      std::vector<NsAppLinkRPC::GlobalProperty> z(i);
+      c.properties.resize(i);
       while(i--)
-        if(!NsAppLinkRPC::GlobalPropertyMarshaller::fromJSON(js["properties"][i],c.properties[i]))  return false;
-      c.properties=z;
+      {
+        NsAppLinkRPC::GlobalProperty t;
+        if(!NsAppLinkRPC::GlobalPropertyMarshaller::fromJSON(js["properties"][i],t))
+          return false;
+         c.properties[i]=t;
+      }
     }
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;

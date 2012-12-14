@@ -5,8 +5,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -92,9 +92,7 @@ Json::Value SliderMarshaller::toJSON(const Slider& e)
     json["params"]["sliderFooter"]=j;
   }
   json["params"]["timeout"]=Json::Value(e.timeout);;
-
-
-    json["params"]["appId"] = Json::Value(e.appId);  
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -151,9 +149,10 @@ bool SliderMarshaller::fromJSON(const Json::Value& json,Slider& c)
     if(!js.isMember("timeout") || !js["timeout"].isInt())  return false;
     c.timeout=js["timeout"].asInt();
     if(c.timeout>65535)  return false;
-     if (!js.isMember("appId") || !js["appId"].isInt()) return false;
-    c.appId = js["appId"].asInt();
 
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

@@ -10,9 +10,6 @@
 #define MAX_HASH_VALUE 3
 /* maximum key range = 1, duplicates = 0 */
 
-namespace NsAppLinkRPCV2
-{
-
 class AudioType_intHash
 {
 private:
@@ -56,6 +53,4 @@ AudioType_intHash::getPointer (register const char *str, register unsigned int l
           }
     }
   return 0;
-}
-
 }

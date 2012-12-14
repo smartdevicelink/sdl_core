@@ -4,14 +4,15 @@
 #include <string>
 
 #include "HMIPermissions.h"
+#include "ParameterPermissions.h"
 
 
 /*
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 17:03:13 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Thu Dec 13 14:18:29 2012
+  source stamp	Thu Dec 13 14:18:27 2012
   author	robok0der
 */
 
@@ -30,11 +31,13 @@ namespace NsAppLinkRPCV2
   // getters
 
     const HMIPermissions& get_hmiPermissions(void) const;
+    const ParameterPermissions& get_parameterPermissions(void) const;
     const std::string& get_rpcName(void) const;
 
 // setters
 
     bool set_hmiPermissions(const HMIPermissions& hmiPermissions_);
+    bool set_parameterPermissions(const ParameterPermissions& parameterPermissions_);
     bool set_rpcName(const std::string& rpcName_);
 
   private:
@@ -42,6 +45,7 @@ namespace NsAppLinkRPCV2
     friend class PermissionItemMarshaller;
 
       HMIPermissions hmiPermissions;
+      ParameterPermissions parameterPermissions;
 
 ///  Name of the individual RPC in the policy table.
       std::string rpcName;	//!< (100)

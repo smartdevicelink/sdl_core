@@ -303,6 +303,16 @@ ChangeRegistration(
   int appId
   ->
 );
+
+/*
+  * @descr 
+   *      Request from Applink to HMI to get the currently active  UI language
+   *  
+   */
+GetLanguage(
+  ->
+  Language hmiDisplayLanguage
+);
 /*
   * @descr 
    *      Used to set existing local file on SYNC as the app's icon.
@@ -467,6 +477,16 @@ notification OnLanguageChange(
   Language language, //  data type from AppLink protocol specification
   int appId
 );
+
+/*
+  * @descr 
+   *      Request from Applink to HMI to get currently active  VR language
+   *  
+   */
+GetLanguage(
+  ->
+  Language language
+);
 }
 
 
@@ -536,6 +556,16 @@ ChangeRegistration(
 notification OnLanguageChange(
   Language language, //  data type from AppLink protocol specification
   int appId
+);
+
+/*
+  * @descr 
+   *      Request from Applink to HMI to get currently active TTS language
+   *  
+   */
+GetLanguage(
+  ->
+  Language language
 );
 
 /*
@@ -744,6 +774,7 @@ notification OnAppRegistered(
     Language * hmiDisplayLanguageDesired, // language for UI
     TTSChunk * ttsName[1:100], // TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green". Meant to overcome any failing on speech engine in properly pronouncing, understanding app name
     AppType * appType[1:100], // List of all applicable app types stating which classifications to be given to the app
+    unsigned int versionNumber,
     int appId
 );
 
@@ -766,12 +797,12 @@ version "1.2";
 prefix "AppLinkCore.";
  /*
      * @descr Request from ApplinkCore to HMI to get info about the vehicle.
-     
+    */ 
 GetVehicleType(
     int appId
     ->
-    VehicleType vehicleType, // manufacturer, model, year etc of the vehicle.
-  ); */
+    VehicleType vehicleType // manufacturer, model, year etc of the vehicle.
+  ); 
 /*
   * @descr Request from ApplinkCore to HMI
   * Subscribes for specific published data items

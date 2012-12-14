@@ -6,8 +6,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -105,10 +105,14 @@ bool GetAppListResponseMarshaller::fromJSON(const Json::Value& json,GetAppListRe
     {
       unsigned int i=js["appList"].size();
       if(i<0)  return false;
-      std::vector<NsAppLinkRPC::HMIApplication> z(i);
+      c.appList.resize(i);
       while(i--)
-        if(!NsAppLinkRPC::HMIApplicationMarshaller::fromJSON(js["appList"][i],c.appList[i]))  return false;
-      c.appList=z;
+      {
+        NsAppLinkRPC::HMIApplication t;
+        if(!NsAppLinkRPC::HMIApplicationMarshaller::fromJSON(js["appList"][i],t))
+          return false;
+         c.appList[i]=t;
+      }
     }
 
   }

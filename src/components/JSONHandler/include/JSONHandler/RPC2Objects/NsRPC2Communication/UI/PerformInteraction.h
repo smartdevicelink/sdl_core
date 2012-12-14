@@ -7,15 +7,13 @@
 
 #include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
 #include "../include/JSONHandler/ALRPCObjects/V1/InteractionMode.h"
-#include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/VrHelpItem.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 

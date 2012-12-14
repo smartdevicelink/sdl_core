@@ -5,8 +5,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 17:03:13 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Thu Dec 13 14:18:29 2012
+  source stamp	Thu Dec 13 14:18:27 2012
   author	robok0der
 */
 
@@ -38,6 +38,7 @@ bool ParameterPermissions::set_allowed(const std::vector<std::string>& allowed_)
   if(i>100 || i<0)  return false;
   while(i--)
   {
+    if(allowed_[i].length()>100)  return false;
   }
   allowed=allowed_;
   return true;

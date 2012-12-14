@@ -10,9 +10,6 @@
 #define MAX_HASH_VALUE 20
 /* maximum key range = 14, duplicates = 0 */
 
-namespace NsAppLinkRPCV2
-{
-
 class PermissionStatus_intHash
 {
 private:
@@ -66,6 +63,4 @@ PermissionStatus_intHash::getPointer (register const char *str, register unsigne
           }
     }
   return 0;
-}
-
 }

@@ -9,8 +9,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -42,6 +42,8 @@ namespace NsRPC2Communication
       const std::vector< std::string>* get_sliderFooter(void);
       unsigned int get_timeout(void);
 
+      int get_appId(void);
+
 
 // setters
 /// 2 <= numTicks <= 26
@@ -60,8 +62,9 @@ namespace NsRPC2Communication
 
 /// timeout <= 65535
       bool set_timeout(unsigned int timeout);
-    bool set_appId(int appId);
-    int get_appId() const;     
+
+      bool set_appId(int appId);
+
 
     private:
 
@@ -72,7 +75,8 @@ namespace NsRPC2Communication
       std::string sliderHeader;
       std::vector< std::string>* sliderFooter;
       unsigned int timeout;
- int appId;
+      int appId;
+
     };
   }
 }

@@ -70,8 +70,8 @@
 #include "../src/ALRPCObjectsImpl/V2/AlertManeuver_responseMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/UpdateTurnList_requestMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/UpdateTurnList_responseMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ChangeLanguageRegistration_requestMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ChangeLanguageRegistration_responseMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ChangeRegistration_requestMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ChangeRegistration_responseMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/GenericResponse_responseMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/PutFile_requestMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/PutFile_responseMarshaller.h"
@@ -101,8 +101,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 17:03:13 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Thu Dec 13 14:18:29 2012
+  source stamp	Thu Dec 13 14:18:27 2012
   author	robok0der
 */
 
@@ -804,26 +804,26 @@ namespace NsAppLinkRPCV2
       return mUpdateTurnList_response.toString(res);
     }
 
-// ChangeLanguageRegistration_request
-    static bool fromString(const std::string& str, ChangeLanguageRegistration_request& res)
+// ChangeRegistration_request
+    static bool fromString(const std::string& str, ChangeRegistration_request& res)
     {
-      return mChangeLanguageRegistration_request.fromString(str, res);
+      return mChangeRegistration_request.fromString(str, res);
     }
 
-    static std::string toString(const ChangeLanguageRegistration_request& res)
+    static std::string toString(const ChangeRegistration_request& res)
     {
-      return mChangeLanguageRegistration_request.toString(res);
+      return mChangeRegistration_request.toString(res);
     }
 
-// ChangeLanguageRegistration_response
-    static bool fromString(const std::string& str, ChangeLanguageRegistration_response& res)
+// ChangeRegistration_response
+    static bool fromString(const std::string& str, ChangeRegistration_response& res)
     {
-      return mChangeLanguageRegistration_response.fromString(str, res);
+      return mChangeRegistration_response.fromString(str, res);
     }
 
-    static std::string toString(const ChangeLanguageRegistration_response& res)
+    static std::string toString(const ChangeRegistration_response& res)
     {
-      return mChangeLanguageRegistration_response.toString(res);
+      return mChangeRegistration_response.toString(res);
     }
 
 // GenericResponse_response
@@ -1141,8 +1141,8 @@ namespace NsAppLinkRPCV2
     static AlertManeuver_responseMarshaller mAlertManeuver_response;
     static UpdateTurnList_requestMarshaller mUpdateTurnList_request;
     static UpdateTurnList_responseMarshaller mUpdateTurnList_response;
-    static ChangeLanguageRegistration_requestMarshaller mChangeLanguageRegistration_request;
-    static ChangeLanguageRegistration_responseMarshaller mChangeLanguageRegistration_response;
+    static ChangeRegistration_requestMarshaller mChangeRegistration_request;
+    static ChangeRegistration_responseMarshaller mChangeRegistration_response;
     static GenericResponse_responseMarshaller mGenericResponse_response;
     static PutFile_requestMarshaller mPutFile_request;
     static PutFile_responseMarshaller mPutFile_response;

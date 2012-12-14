@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -20,7 +20,7 @@ Slider& Slider::operator =(const Slider& c)
   if(sliderFooter)  delete sliderFooter;
   sliderFooter= c.sliderFooter ? new std::vector<std::string>(c.sliderFooter[0]) : 0;
   timeout=c.timeout;
-  appId = c.appId;
+  appId=c.appId;
   return *this;
 }
 
@@ -106,18 +106,18 @@ bool Slider::set_timeout(unsigned int timeout_)
   return true;
 }
 
+int Slider::get_appId(void)
+{
+  return appId;
+}
+
+bool Slider::set_appId(int appId_)
+{
+  appId=appId_;
+  return true;
+}
+
 bool Slider::checkIntegrity(void)
 {
   return SliderMarshaller::checkIntegrity(*this);
-}
-
-bool Slider::set_appId(int appId)
-{
-  this->appId = appId;
-  return true;
-}
-    
-int Slider::get_appId() const
-{
-  return appId;
 }

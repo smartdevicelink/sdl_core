@@ -63,8 +63,8 @@
 #include "../include/JSONHandler/ALRPCObjects/V2/AlertManeuver_response.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/UpdateTurnList_request.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/UpdateTurnList_response.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/ChangeLanguageRegistration_request.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/ChangeLanguageRegistration_response.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/ChangeRegistration_request.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/ChangeRegistration_response.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/GenericResponse_response.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/PutFile_request.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/PutFile_response.h"
@@ -94,8 +94,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 17:03:13 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Thu Dec 13 14:18:29 2012
+  source stamp	Thu Dec 13 14:18:27 2012
   author	robok0der
 */
 
@@ -220,11 +220,11 @@ NsAppLinkRPC::ALRPCMessage* Marshaller::fromJSON(const Json::Value& json,Functio
         return NULL;
       }
       return NULL;
-    case FunctionID::ChangeLanguageRegistrationID:
+    case FunctionID::ChangeRegistrationID:
       if(mt==messageType::request)
       {
-        ChangeLanguageRegistration_request* rv=new ChangeLanguageRegistration_request;
-        if(ChangeLanguageRegistration_requestMarshaller::fromJSON(j,*rv))
+        ChangeRegistration_request* rv=new ChangeRegistration_request;
+        if(ChangeRegistration_requestMarshaller::fromJSON(j,*rv))
           return rv;
         delete rv;
         return NULL;
@@ -232,8 +232,8 @@ NsAppLinkRPC::ALRPCMessage* Marshaller::fromJSON(const Json::Value& json,Functio
 
       if(mt==messageType::response)
       {
-        ChangeLanguageRegistration_response* rv=new ChangeLanguageRegistration_response;
-        if(ChangeLanguageRegistration_responseMarshaller::fromJSON(j,*rv))
+        ChangeRegistration_response* rv=new ChangeRegistration_response;
+        if(ChangeRegistration_responseMarshaller::fromJSON(j,*rv))
           return rv;
         delete rv;
         return NULL;
@@ -1012,11 +1012,11 @@ Json::Value Marshaller::toJSONparam(const NsAppLinkRPC::ALRPCMessage* msg,Functi
       if(mt==messageType::response)
          return AlertManeuver_responseMarshaller::toJSON(* static_cast<const AlertManeuver_response*>(msg));
       return j;
-    case FunctionID::ChangeLanguageRegistrationID:
+    case FunctionID::ChangeRegistrationID:
       if(mt==messageType::request)
-        return ChangeLanguageRegistration_requestMarshaller::toJSON(* static_cast<const ChangeLanguageRegistration_request*>(msg));
+        return ChangeRegistration_requestMarshaller::toJSON(* static_cast<const ChangeRegistration_request*>(msg));
       if(mt==messageType::response)
-         return ChangeLanguageRegistration_responseMarshaller::toJSON(* static_cast<const ChangeLanguageRegistration_response*>(msg));
+         return ChangeRegistration_responseMarshaller::toJSON(* static_cast<const ChangeRegistration_response*>(msg));
       return j;
     case FunctionID::CreateInteractionChoiceSetID:
       if(mt==messageType::request)
@@ -1307,8 +1307,8 @@ AlertManeuver_requestMarshaller Marshaller::mAlertManeuver_request;
 AlertManeuver_responseMarshaller Marshaller::mAlertManeuver_response;
 UpdateTurnList_requestMarshaller Marshaller::mUpdateTurnList_request;
 UpdateTurnList_responseMarshaller Marshaller::mUpdateTurnList_response;
-ChangeLanguageRegistration_requestMarshaller Marshaller::mChangeLanguageRegistration_request;
-ChangeLanguageRegistration_responseMarshaller Marshaller::mChangeLanguageRegistration_response;
+ChangeRegistration_requestMarshaller Marshaller::mChangeRegistration_request;
+ChangeRegistration_responseMarshaller Marshaller::mChangeRegistration_response;
 GenericResponse_responseMarshaller Marshaller::mGenericResponse_response;
 PutFile_requestMarshaller Marshaller::mPutFile_request;
 PutFile_responseMarshaller Marshaller::mPutFile_response;

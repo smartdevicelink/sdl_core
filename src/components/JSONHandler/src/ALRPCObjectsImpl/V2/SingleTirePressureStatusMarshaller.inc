@@ -10,9 +10,6 @@
 #define MAX_HASH_VALUE 13
 /* maximum key range = 11, duplicates = 0 */
 
-namespace NsAppLinkRPCV2
-{
-
 class SingleTirePressureStatus_intHash
 {
 private:
@@ -66,6 +63,4 @@ SingleTirePressureStatus_intHash::getPointer (register const char *str, register
           }
     }
   return 0;
-}
-
 }

@@ -10,9 +10,6 @@
 #define MAX_HASH_VALUE 12
 /* maximum key range = 6, duplicates = 0 */
 
-namespace NsAppLinkRPCV2
-{
-
 class messageType_intHash
 {
 private:
@@ -61,6 +58,4 @@ messageType_intHash::getPointer (register const char *str, register unsigned int
           }
     }
   return 0;
-}
-
 }

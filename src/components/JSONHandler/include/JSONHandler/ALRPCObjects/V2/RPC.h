@@ -131,8 +131,8 @@
 #include "AlertManeuver_response.h"
 #include "UpdateTurnList_request.h"
 #include "UpdateTurnList_response.h"
-#include "ChangeLanguageRegistration_request.h"
-#include "ChangeLanguageRegistration_response.h"
+#include "ChangeRegistration_request.h"
+#include "ChangeRegistration_response.h"
 #include "GenericResponse_response.h"
 #include "PutFile_request.h"
 #include "PutFile_response.h"
@@ -162,8 +162,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 17:03:13 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Thu Dec 13 14:18:29 2012
+  source stamp	Thu Dec 13 14:18:27 2012
   author	robok0der
 */
 

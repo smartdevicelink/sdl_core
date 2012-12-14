@@ -5,8 +5,8 @@
 /*
   interface	NsRPC2Communication::VehicleInfo
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -58,6 +58,8 @@ Json::Value GetVehicleTypeMarshaller::toJSON(const GetVehicleType& e)
   json["method"]=Json::Value("AppLinkCore.GetVehicleType");
 
   json["id"]=Json::Value(e.getId());
+  json["params"]=Json::Value(Json::objectValue);
+  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -72,6 +74,13 @@ bool GetVehicleTypeMarshaller::fromJSON(const Json::Value& json,GetVehicleType& 
     if(!json.isMember("id") || !json["id"].isInt()) return false;
     c.setId(json["id"].asInt());
 
+    if(!json.isMember("params")) return false;
+
+    Json::Value js=json["params"];
+    if(!js.isObject())  return false;
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
+    
   }
   catch(...)
   {

@@ -46,7 +46,7 @@ SliderID,28
 ShowConstantTBTID,29
 AlertManeuverID,30
 UpdateTurnListID,31
-ChangeLanguageRegistrationID,32
+ChangeRegistrationID,32
 GenericResponseID,33
 PutFileID,34
 DeleteFileID,35

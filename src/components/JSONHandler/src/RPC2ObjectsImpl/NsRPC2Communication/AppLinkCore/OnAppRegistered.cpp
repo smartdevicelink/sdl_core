@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -21,11 +21,13 @@ OnAppRegistered& OnAppRegistered::operator =(const OnAppRegistered& c)
   vrSynonym= c.vrSynonym ? new std::vector<std::string>(c.vrSynonym[0]) : 0;
   isMediaApplication=c.isMediaApplication;
   languageDesired=c.languageDesired;
-  hmiDisplayLanguageDesired=c.hmiDisplayLanguageDesired;
+  if(hmiDisplayLanguageDesired)  delete hmiDisplayLanguageDesired;
+  hmiDisplayLanguageDesired= c.hmiDisplayLanguageDesired ? new NsAppLinkRPC::Language(c.hmiDisplayLanguageDesired[0]) : 0;
   if(ttsName)  delete ttsName;
   ttsName= c.ttsName ? new std::vector<NsAppLinkRPC::TTSChunk>(c.ttsName[0]) : 0;
   if(appType)  delete appType;
-  appType= c.appType ? new std::vector<NsAppLinkRPCV2::AppType>(c.appType[0]) : 0;
+  appType= c.appType ? new std::vector<NsAppLinkRPC::AppType>(c.appType[0]) : 0;
+  versionNumber=c.versionNumber;
   appId=c.appId;
   return *this;
 }
@@ -34,6 +36,7 @@ OnAppRegistered& OnAppRegistered::operator =(const OnAppRegistered& c)
 OnAppRegistered::~OnAppRegistered(void)
 {
   if(vrSynonym)  delete vrSynonym;
+  if(hmiDisplayLanguageDesired)  delete hmiDisplayLanguageDesired;
   if(ttsName)  delete ttsName;
   if(appType)  delete appType;
 }
@@ -42,6 +45,7 @@ OnAppRegistered::~OnAppRegistered(void)
 OnAppRegistered::OnAppRegistered(void) : 
   RPC2Notification(Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPREGISTERED),
   vrSynonym(0),
+  hmiDisplayLanguageDesired(0),
   ttsName(0),
   appType(0)
 {
@@ -127,15 +131,22 @@ bool OnAppRegistered::set_languageDesired(const NsAppLinkRPC::Language& language
   return true;
 }
 
-const NsAppLinkRPC::Language& OnAppRegistered::get_hmiDisplayLanguageDesired(void)
+const NsAppLinkRPC::Language* OnAppRegistered::get_hmiDisplayLanguageDesired(void)
 {
   return hmiDisplayLanguageDesired;
 }
 
 bool OnAppRegistered::set_hmiDisplayLanguageDesired(const NsAppLinkRPC::Language& hmiDisplayLanguageDesired_)
 {
-  hmiDisplayLanguageDesired=hmiDisplayLanguageDesired_;
+  if(hmiDisplayLanguageDesired)  delete hmiDisplayLanguageDesired;
+  hmiDisplayLanguageDesired=new NsAppLinkRPC::Language(hmiDisplayLanguageDesired_);
   return true;
+}
+
+void OnAppRegistered::reset_hmiDisplayLanguageDesired(void)
+{
+  if(hmiDisplayLanguageDesired)  delete hmiDisplayLanguageDesired;
+  hmiDisplayLanguageDesired=0;
 }
 
 const std::vector< NsAppLinkRPC::TTSChunk>* OnAppRegistered::get_ttsName(void)
@@ -156,15 +167,15 @@ void OnAppRegistered::reset_ttsName(void)
   ttsName=0;
 }
 
-const std::vector< NsAppLinkRPCV2::AppType>* OnAppRegistered::get_appType(void)
+const std::vector< NsAppLinkRPC::AppType>* OnAppRegistered::get_appType(void)
 {
   return appType;
 }
 
-bool OnAppRegistered::set_appType(const std::vector< NsAppLinkRPCV2::AppType>& appType_)
+bool OnAppRegistered::set_appType(const std::vector< NsAppLinkRPC::AppType>& appType_)
 {
   if(appType)  delete appType;
-  appType=new std::vector< NsAppLinkRPCV2::AppType>(appType_);
+  appType=new std::vector< NsAppLinkRPC::AppType>(appType_);
   return true;
 }
 
@@ -172,6 +183,17 @@ void OnAppRegistered::reset_appType(void)
 {
   if(appType)  delete appType;
   appType=0;
+}
+
+unsigned int OnAppRegistered::get_versionNumber(void)
+{
+  return versionNumber;
+}
+
+bool OnAppRegistered::set_versionNumber(unsigned int versionNumber_)
+{
+  versionNumber=versionNumber_;
+  return true;
 }
 
 int OnAppRegistered::get_appId(void)

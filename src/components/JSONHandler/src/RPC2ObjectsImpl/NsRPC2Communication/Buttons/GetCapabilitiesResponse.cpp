@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -16,7 +16,7 @@ GetCapabilitiesResponse& GetCapabilitiesResponse::operator =(const GetCapabiliti
 {
   capabilities=c.capabilities;
   if(presetBankCapabilities)  delete presetBankCapabilities;
-  presetBankCapabilities= c.presetBankCapabilities ? new NsAppLinkRPCV2::PresetBankCapabilities(c.presetBankCapabilities[0]) : 0;
+  presetBankCapabilities= c.presetBankCapabilities ? new NsAppLinkRPC::PresetBankCapabilities(c.presetBankCapabilities[0]) : 0;
   return *this;
 }
 
@@ -51,15 +51,15 @@ bool GetCapabilitiesResponse::set_capabilities(const std::vector< NsAppLinkRPC::
   return true;
 }
 
-const NsAppLinkRPCV2::PresetBankCapabilities* GetCapabilitiesResponse::get_presetBankCapabilities(void)
+const NsAppLinkRPC::PresetBankCapabilities* GetCapabilitiesResponse::get_presetBankCapabilities(void)
 {
   return presetBankCapabilities;
 }
 
-bool GetCapabilitiesResponse::set_presetBankCapabilities(const NsAppLinkRPCV2::PresetBankCapabilities& presetBankCapabilities_)
+bool GetCapabilitiesResponse::set_presetBankCapabilities(const NsAppLinkRPC::PresetBankCapabilities& presetBankCapabilities_)
 {
   if(presetBankCapabilities)  delete presetBankCapabilities;
-  presetBankCapabilities=new NsAppLinkRPCV2::PresetBankCapabilities(presetBankCapabilities_);
+  presetBankCapabilities=new NsAppLinkRPC::PresetBankCapabilities(presetBankCapabilities_);
   return true;
 }
 

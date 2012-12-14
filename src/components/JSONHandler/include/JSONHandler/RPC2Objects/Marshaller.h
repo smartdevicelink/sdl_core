@@ -28,11 +28,27 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/GetCapabilitiesResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/OnButtonEventMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/OnButtonPressMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/ChangeLanguageRegistrationMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/ChangeLanguageRegistrationResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Navigation/AlertManeuverMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Navigation/AlertManeuverResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Navigation/OnTBTClientStateMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Navigation/ShowConstantTBTMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Navigation/ShowConstantTBTResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Navigation/UpdateTurnListMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Navigation/UpdateTurnListResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Phone/DialNumberMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Phone/DialNumberResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/ChangeRegistrationMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/ChangeRegistrationResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/EndAudioPassThruMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/EndAudioPassThruResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/GetCapabilitiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/GetCapabilitiesResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/GetLanguageMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/GetLanguageResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/OnAudioPassThruMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/OnLanguageChangeMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/PerformAudioPassThruMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/PerformAudioPassThruResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/SpeakMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/SpeakResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AddCommandMarshaller.h"
@@ -41,8 +57,8 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AddSubMenuResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AlertMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AlertResponseMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ChangeLanguageRegistrationMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ChangeLanguageRegistrationResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ChangeRegistrationMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ChangeRegistrationResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/CreateInteractionChoiceSetMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/CreateInteractionChoiceSetResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/DeleteCommandMarshaller.h"
@@ -53,6 +69,8 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/DeleteSubMenuResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetCapabilitiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetCapabilitiesResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetLanguageMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetLanguageResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnCommandMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnDeviceChosenMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnDriverDistractionMarshaller.h"
@@ -63,8 +81,12 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/PerformInteractionResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ResetGlobalPropertiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ResetGlobalPropertiesResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ScrollableMessageMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ScrollableMessageResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetAppIconMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetAppIconResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetDisplayLayoutMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetDisplayLayoutResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetGlobalPropertiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetGlobalPropertiesResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetMediaClockTimerMarshaller.h"
@@ -75,25 +97,38 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SliderResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/AddCommandMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/AddCommandResponseMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/ChangeLanguageRegistrationMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/ChangeLanguageRegistrationResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/ChangeRegistrationMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/ChangeRegistrationResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/DeleteCommandMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/DeleteCommandResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/GetCapabilitiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/GetCapabilitiesResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/GetLanguageMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/GetLanguageResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/OnCommandMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VR/OnLanguageChangeMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetDTCsMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetDTCsResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetVehicleDataMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetVehicleDataResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetVehicleTypeMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetVehicleTypeResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/OnVehicleDataMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/ReadDIDMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/ReadDIDResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/SubscribeVehicleDataMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/SubscribeVehicleDataResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataResponseMarshaller.h"
 
 /*
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
+
 namespace NsRPC2Communication
 {
-
 class Marshaller
 {
 public:
@@ -118,11 +153,27 @@ public:
     METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE,
     METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT,
     METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS,
-    METHOD_NSRPC2COMMUNICATION_TTS__CHANGELANGUAGEREGISTRATION,
-    METHOD_NSRPC2COMMUNICATION_TTS__CHANGELANGUAGEREGISTRATIONRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_NAVIGATION__ALERTMANEUVER,
+    METHOD_NSRPC2COMMUNICATION_NAVIGATION__ALERTMANEUVERRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_NAVIGATION__ONTBTCLIENTSTATE,
+    METHOD_NSRPC2COMMUNICATION_NAVIGATION__SHOWCONSTANTTBT,
+    METHOD_NSRPC2COMMUNICATION_NAVIGATION__SHOWCONSTANTTBTRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_NAVIGATION__UPDATETURNLIST,
+    METHOD_NSRPC2COMMUNICATION_NAVIGATION__UPDATETURNLISTRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_PHONE__DIALNUMBER,
+    METHOD_NSRPC2COMMUNICATION_PHONE__DIALNUMBERRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATION,
+    METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATIONRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_TTS__ENDAUDIOPASSTHRU,
+    METHOD_NSRPC2COMMUNICATION_TTS__ENDAUDIOPASSTHRURESPONSE,
     METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIES,
     METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIESRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_TTS__GETLANGUAGE,
+    METHOD_NSRPC2COMMUNICATION_TTS__GETLANGUAGERESPONSE,
+    METHOD_NSRPC2COMMUNICATION_TTS__ONAUDIOPASSTHRU,
     METHOD_NSRPC2COMMUNICATION_TTS__ONLANGUAGECHANGE,
+    METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRU,
+    METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRURESPONSE,
     METHOD_NSRPC2COMMUNICATION_TTS__SPEAK,
     METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__ADDCOMMAND,
@@ -131,8 +182,8 @@ public:
     METHOD_NSRPC2COMMUNICATION_UI__ADDSUBMENURESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__ALERT,
     METHOD_NSRPC2COMMUNICATION_UI__ALERTRESPONSE,
-    METHOD_NSRPC2COMMUNICATION_UI__CHANGELANGUAGEREGISTRATION,
-    METHOD_NSRPC2COMMUNICATION_UI__CHANGELANGUAGEREGISTRATIONRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_UI__CHANGEREGISTRATION,
+    METHOD_NSRPC2COMMUNICATION_UI__CHANGEREGISTRATIONRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__CREATEINTERACTIONCHOICESET,
     METHOD_NSRPC2COMMUNICATION_UI__CREATEINTERACTIONCHOICESETRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__DELETECOMMAND,
@@ -143,6 +194,8 @@ public:
     METHOD_NSRPC2COMMUNICATION_UI__DELETESUBMENURESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIES,
     METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_UI__GETLANGUAGE,
+    METHOD_NSRPC2COMMUNICATION_UI__GETLANGUAGERESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__ONCOMMAND,
     METHOD_NSRPC2COMMUNICATION_UI__ONDEVICECHOSEN,
     METHOD_NSRPC2COMMUNICATION_UI__ONDRIVERDISTRACTION,
@@ -153,8 +206,12 @@ public:
     METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTIONRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIES,
     METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIESRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_UI__SCROLLABLEMESSAGE,
+    METHOD_NSRPC2COMMUNICATION_UI__SCROLLABLEMESSAGERESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__SETAPPICON,
     METHOD_NSRPC2COMMUNICATION_UI__SETAPPICONRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_UI__SETDISPLAYLAYOUT,
+    METHOD_NSRPC2COMMUNICATION_UI__SETDISPLAYLAYOUTRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIES,
     METHOD_NSRPC2COMMUNICATION_UI__SETGLOBALPROPERTIESRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__SETMEDIACLOCKTIMER,
@@ -165,16 +222,29 @@ public:
     METHOD_NSRPC2COMMUNICATION_UI__SLIDERRESPONSE,
     METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMAND,
     METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMANDRESPONSE,
-    METHOD_NSRPC2COMMUNICATION_VR__CHANGELANGUAGEREGISTRATION,
-    METHOD_NSRPC2COMMUNICATION_VR__CHANGELANGUAGEREGISTRATIONRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_VR__CHANGEREGISTRATION,
+    METHOD_NSRPC2COMMUNICATION_VR__CHANGEREGISTRATIONRESPONSE,
     METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMAND,
     METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMANDRESPONSE,
     METHOD_NSRPC2COMMUNICATION_VR__GETCAPABILITIES,
     METHOD_NSRPC2COMMUNICATION_VR__GETCAPABILITIESRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_VR__GETLANGUAGE,
+    METHOD_NSRPC2COMMUNICATION_VR__GETLANGUAGERESPONSE,
     METHOD_NSRPC2COMMUNICATION_VR__ONCOMMAND,
     METHOD_NSRPC2COMMUNICATION_VR__ONLANGUAGECHANGE,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETDTCS,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETDTCSRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLEDATA,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLEDATARESPONSE,
     METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLETYPE,
-    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLETYPERESPONSE
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLETYPERESPONSE,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__ONVEHICLEDATA,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__READDID,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__READDIDRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__SUBSCRIBEVEHICLEDATA,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__SUBSCRIBEVEHICLEDATARESPONSE,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__UNSUBSCRIBEVEHICLEDATA,
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__UNSUBSCRIBEVEHICLEDATARESPONSE
   };
 
 
@@ -376,26 +446,147 @@ protected:
     return mNsRPC2Communication_Buttons__OnButtonPress.toString(res);
   }
 
-// NsRPC2Communication::TTS::ChangeLanguageRegistration
-  static bool fromString(const std::string& str, NsRPC2Communication::TTS::ChangeLanguageRegistration& res)
+// NsRPC2Communication::Navigation::AlertManeuver
+  static bool fromString(const std::string& str, NsRPC2Communication::Navigation::AlertManeuver& res)
   {
-    return mNsRPC2Communication_TTS__ChangeLanguageRegistration.fromString(str, res);
+    return mNsRPC2Communication_Navigation__AlertManeuver.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::TTS::ChangeLanguageRegistration& res)
+  static std::string toString(const NsRPC2Communication::Navigation::AlertManeuver& res)
   {
-    return mNsRPC2Communication_TTS__ChangeLanguageRegistration.toString(res);
+    return mNsRPC2Communication_Navigation__AlertManeuver.toString(res);
   }
 
-// NsRPC2Communication::TTS::ChangeLanguageRegistrationResponse
-  static bool fromString(const std::string& str, NsRPC2Communication::TTS::ChangeLanguageRegistrationResponse& res)
+// NsRPC2Communication::Navigation::AlertManeuverResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::Navigation::AlertManeuverResponse& res)
   {
-    return mNsRPC2Communication_TTS__ChangeLanguageRegistrationResponse.fromString(str, res);
+    return mNsRPC2Communication_Navigation__AlertManeuverResponse.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::TTS::ChangeLanguageRegistrationResponse& res)
+  static std::string toString(const NsRPC2Communication::Navigation::AlertManeuverResponse& res)
   {
-    return mNsRPC2Communication_TTS__ChangeLanguageRegistrationResponse.toString(res);
+    return mNsRPC2Communication_Navigation__AlertManeuverResponse.toString(res);
+  }
+
+// NsRPC2Communication::Navigation::OnTBTClientState
+  static bool fromString(const std::string& str, NsRPC2Communication::Navigation::OnTBTClientState& res)
+  {
+    return mNsRPC2Communication_Navigation__OnTBTClientState.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::Navigation::OnTBTClientState& res)
+  {
+    return mNsRPC2Communication_Navigation__OnTBTClientState.toString(res);
+  }
+
+// NsRPC2Communication::Navigation::ShowConstantTBT
+  static bool fromString(const std::string& str, NsRPC2Communication::Navigation::ShowConstantTBT& res)
+  {
+    return mNsRPC2Communication_Navigation__ShowConstantTBT.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::Navigation::ShowConstantTBT& res)
+  {
+    return mNsRPC2Communication_Navigation__ShowConstantTBT.toString(res);
+  }
+
+// NsRPC2Communication::Navigation::ShowConstantTBTResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::Navigation::ShowConstantTBTResponse& res)
+  {
+    return mNsRPC2Communication_Navigation__ShowConstantTBTResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::Navigation::ShowConstantTBTResponse& res)
+  {
+    return mNsRPC2Communication_Navigation__ShowConstantTBTResponse.toString(res);
+  }
+
+// NsRPC2Communication::Navigation::UpdateTurnList
+  static bool fromString(const std::string& str, NsRPC2Communication::Navigation::UpdateTurnList& res)
+  {
+    return mNsRPC2Communication_Navigation__UpdateTurnList.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::Navigation::UpdateTurnList& res)
+  {
+    return mNsRPC2Communication_Navigation__UpdateTurnList.toString(res);
+  }
+
+// NsRPC2Communication::Navigation::UpdateTurnListResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::Navigation::UpdateTurnListResponse& res)
+  {
+    return mNsRPC2Communication_Navigation__UpdateTurnListResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::Navigation::UpdateTurnListResponse& res)
+  {
+    return mNsRPC2Communication_Navigation__UpdateTurnListResponse.toString(res);
+  }
+
+// NsRPC2Communication::Phone::DialNumber
+  static bool fromString(const std::string& str, NsRPC2Communication::Phone::DialNumber& res)
+  {
+    return mNsRPC2Communication_Phone__DialNumber.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::Phone::DialNumber& res)
+  {
+    return mNsRPC2Communication_Phone__DialNumber.toString(res);
+  }
+
+// NsRPC2Communication::Phone::DialNumberResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::Phone::DialNumberResponse& res)
+  {
+    return mNsRPC2Communication_Phone__DialNumberResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::Phone::DialNumberResponse& res)
+  {
+    return mNsRPC2Communication_Phone__DialNumberResponse.toString(res);
+  }
+
+// NsRPC2Communication::TTS::ChangeRegistration
+  static bool fromString(const std::string& str, NsRPC2Communication::TTS::ChangeRegistration& res)
+  {
+    return mNsRPC2Communication_TTS__ChangeRegistration.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::TTS::ChangeRegistration& res)
+  {
+    return mNsRPC2Communication_TTS__ChangeRegistration.toString(res);
+  }
+
+// NsRPC2Communication::TTS::ChangeRegistrationResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::TTS::ChangeRegistrationResponse& res)
+  {
+    return mNsRPC2Communication_TTS__ChangeRegistrationResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::TTS::ChangeRegistrationResponse& res)
+  {
+    return mNsRPC2Communication_TTS__ChangeRegistrationResponse.toString(res);
+  }
+
+// NsRPC2Communication::TTS::EndAudioPassThru
+  static bool fromString(const std::string& str, NsRPC2Communication::TTS::EndAudioPassThru& res)
+  {
+    return mNsRPC2Communication_TTS__EndAudioPassThru.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::TTS::EndAudioPassThru& res)
+  {
+    return mNsRPC2Communication_TTS__EndAudioPassThru.toString(res);
+  }
+
+// NsRPC2Communication::TTS::EndAudioPassThruResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::TTS::EndAudioPassThruResponse& res)
+  {
+    return mNsRPC2Communication_TTS__EndAudioPassThruResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::TTS::EndAudioPassThruResponse& res)
+  {
+    return mNsRPC2Communication_TTS__EndAudioPassThruResponse.toString(res);
   }
 
 // NsRPC2Communication::TTS::GetCapabilities
@@ -420,6 +611,39 @@ protected:
     return mNsRPC2Communication_TTS__GetCapabilitiesResponse.toString(res);
   }
 
+// NsRPC2Communication::TTS::GetLanguage
+  static bool fromString(const std::string& str, NsRPC2Communication::TTS::GetLanguage& res)
+  {
+    return mNsRPC2Communication_TTS__GetLanguage.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::TTS::GetLanguage& res)
+  {
+    return mNsRPC2Communication_TTS__GetLanguage.toString(res);
+  }
+
+// NsRPC2Communication::TTS::GetLanguageResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::TTS::GetLanguageResponse& res)
+  {
+    return mNsRPC2Communication_TTS__GetLanguageResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::TTS::GetLanguageResponse& res)
+  {
+    return mNsRPC2Communication_TTS__GetLanguageResponse.toString(res);
+  }
+
+// NsRPC2Communication::TTS::OnAudioPassThru
+  static bool fromString(const std::string& str, NsRPC2Communication::TTS::OnAudioPassThru& res)
+  {
+    return mNsRPC2Communication_TTS__OnAudioPassThru.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::TTS::OnAudioPassThru& res)
+  {
+    return mNsRPC2Communication_TTS__OnAudioPassThru.toString(res);
+  }
+
 // NsRPC2Communication::TTS::OnLanguageChange
   static bool fromString(const std::string& str, NsRPC2Communication::TTS::OnLanguageChange& res)
   {
@@ -429,6 +653,28 @@ protected:
   static std::string toString(const NsRPC2Communication::TTS::OnLanguageChange& res)
   {
     return mNsRPC2Communication_TTS__OnLanguageChange.toString(res);
+  }
+
+// NsRPC2Communication::TTS::PerformAudioPassThru
+  static bool fromString(const std::string& str, NsRPC2Communication::TTS::PerformAudioPassThru& res)
+  {
+    return mNsRPC2Communication_TTS__PerformAudioPassThru.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::TTS::PerformAudioPassThru& res)
+  {
+    return mNsRPC2Communication_TTS__PerformAudioPassThru.toString(res);
+  }
+
+// NsRPC2Communication::TTS::PerformAudioPassThruResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::TTS::PerformAudioPassThruResponse& res)
+  {
+    return mNsRPC2Communication_TTS__PerformAudioPassThruResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::TTS::PerformAudioPassThruResponse& res)
+  {
+    return mNsRPC2Communication_TTS__PerformAudioPassThruResponse.toString(res);
   }
 
 // NsRPC2Communication::TTS::Speak
@@ -519,26 +765,26 @@ protected:
     return mNsRPC2Communication_UI__AlertResponse.toString(res);
   }
 
-// NsRPC2Communication::UI::ChangeLanguageRegistration
-  static bool fromString(const std::string& str, NsRPC2Communication::UI::ChangeLanguageRegistration& res)
+// NsRPC2Communication::UI::ChangeRegistration
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::ChangeRegistration& res)
   {
-    return mNsRPC2Communication_UI__ChangeLanguageRegistration.fromString(str, res);
+    return mNsRPC2Communication_UI__ChangeRegistration.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::UI::ChangeLanguageRegistration& res)
+  static std::string toString(const NsRPC2Communication::UI::ChangeRegistration& res)
   {
-    return mNsRPC2Communication_UI__ChangeLanguageRegistration.toString(res);
+    return mNsRPC2Communication_UI__ChangeRegistration.toString(res);
   }
 
-// NsRPC2Communication::UI::ChangeLanguageRegistrationResponse
-  static bool fromString(const std::string& str, NsRPC2Communication::UI::ChangeLanguageRegistrationResponse& res)
+// NsRPC2Communication::UI::ChangeRegistrationResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::ChangeRegistrationResponse& res)
   {
-    return mNsRPC2Communication_UI__ChangeLanguageRegistrationResponse.fromString(str, res);
+    return mNsRPC2Communication_UI__ChangeRegistrationResponse.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::UI::ChangeLanguageRegistrationResponse& res)
+  static std::string toString(const NsRPC2Communication::UI::ChangeRegistrationResponse& res)
   {
-    return mNsRPC2Communication_UI__ChangeLanguageRegistrationResponse.toString(res);
+    return mNsRPC2Communication_UI__ChangeRegistrationResponse.toString(res);
   }
 
 // NsRPC2Communication::UI::CreateInteractionChoiceSet
@@ -651,6 +897,28 @@ protected:
     return mNsRPC2Communication_UI__GetCapabilitiesResponse.toString(res);
   }
 
+// NsRPC2Communication::UI::GetLanguage
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::GetLanguage& res)
+  {
+    return mNsRPC2Communication_UI__GetLanguage.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::GetLanguage& res)
+  {
+    return mNsRPC2Communication_UI__GetLanguage.toString(res);
+  }
+
+// NsRPC2Communication::UI::GetLanguageResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::GetLanguageResponse& res)
+  {
+    return mNsRPC2Communication_UI__GetLanguageResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::GetLanguageResponse& res)
+  {
+    return mNsRPC2Communication_UI__GetLanguageResponse.toString(res);
+  }
+
 // NsRPC2Communication::UI::OnCommand
   static bool fromString(const std::string& str, NsRPC2Communication::UI::OnCommand& res)
   {
@@ -761,6 +1029,28 @@ protected:
     return mNsRPC2Communication_UI__ResetGlobalPropertiesResponse.toString(res);
   }
 
+// NsRPC2Communication::UI::ScrollableMessage
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::ScrollableMessage& res)
+  {
+    return mNsRPC2Communication_UI__ScrollableMessage.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::ScrollableMessage& res)
+  {
+    return mNsRPC2Communication_UI__ScrollableMessage.toString(res);
+  }
+
+// NsRPC2Communication::UI::ScrollableMessageResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::ScrollableMessageResponse& res)
+  {
+    return mNsRPC2Communication_UI__ScrollableMessageResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::ScrollableMessageResponse& res)
+  {
+    return mNsRPC2Communication_UI__ScrollableMessageResponse.toString(res);
+  }
+
 // NsRPC2Communication::UI::SetAppIcon
   static bool fromString(const std::string& str, NsRPC2Communication::UI::SetAppIcon& res)
   {
@@ -781,6 +1071,28 @@ protected:
   static std::string toString(const NsRPC2Communication::UI::SetAppIconResponse& res)
   {
     return mNsRPC2Communication_UI__SetAppIconResponse.toString(res);
+  }
+
+// NsRPC2Communication::UI::SetDisplayLayout
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::SetDisplayLayout& res)
+  {
+    return mNsRPC2Communication_UI__SetDisplayLayout.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::SetDisplayLayout& res)
+  {
+    return mNsRPC2Communication_UI__SetDisplayLayout.toString(res);
+  }
+
+// NsRPC2Communication::UI::SetDisplayLayoutResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::SetDisplayLayoutResponse& res)
+  {
+    return mNsRPC2Communication_UI__SetDisplayLayoutResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::UI::SetDisplayLayoutResponse& res)
+  {
+    return mNsRPC2Communication_UI__SetDisplayLayoutResponse.toString(res);
   }
 
 // NsRPC2Communication::UI::SetGlobalProperties
@@ -893,26 +1205,26 @@ protected:
     return mNsRPC2Communication_VR__AddCommandResponse.toString(res);
   }
 
-// NsRPC2Communication::VR::ChangeLanguageRegistration
-  static bool fromString(const std::string& str, NsRPC2Communication::VR::ChangeLanguageRegistration& res)
+// NsRPC2Communication::VR::ChangeRegistration
+  static bool fromString(const std::string& str, NsRPC2Communication::VR::ChangeRegistration& res)
   {
-    return mNsRPC2Communication_VR__ChangeLanguageRegistration.fromString(str, res);
+    return mNsRPC2Communication_VR__ChangeRegistration.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::VR::ChangeLanguageRegistration& res)
+  static std::string toString(const NsRPC2Communication::VR::ChangeRegistration& res)
   {
-    return mNsRPC2Communication_VR__ChangeLanguageRegistration.toString(res);
+    return mNsRPC2Communication_VR__ChangeRegistration.toString(res);
   }
 
-// NsRPC2Communication::VR::ChangeLanguageRegistrationResponse
-  static bool fromString(const std::string& str, NsRPC2Communication::VR::ChangeLanguageRegistrationResponse& res)
+// NsRPC2Communication::VR::ChangeRegistrationResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::VR::ChangeRegistrationResponse& res)
   {
-    return mNsRPC2Communication_VR__ChangeLanguageRegistrationResponse.fromString(str, res);
+    return mNsRPC2Communication_VR__ChangeRegistrationResponse.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::VR::ChangeLanguageRegistrationResponse& res)
+  static std::string toString(const NsRPC2Communication::VR::ChangeRegistrationResponse& res)
   {
-    return mNsRPC2Communication_VR__ChangeLanguageRegistrationResponse.toString(res);
+    return mNsRPC2Communication_VR__ChangeRegistrationResponse.toString(res);
   }
 
 // NsRPC2Communication::VR::DeleteCommand
@@ -959,6 +1271,28 @@ protected:
     return mNsRPC2Communication_VR__GetCapabilitiesResponse.toString(res);
   }
 
+// NsRPC2Communication::VR::GetLanguage
+  static bool fromString(const std::string& str, NsRPC2Communication::VR::GetLanguage& res)
+  {
+    return mNsRPC2Communication_VR__GetLanguage.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VR::GetLanguage& res)
+  {
+    return mNsRPC2Communication_VR__GetLanguage.toString(res);
+  }
+
+// NsRPC2Communication::VR::GetLanguageResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::VR::GetLanguageResponse& res)
+  {
+    return mNsRPC2Communication_VR__GetLanguageResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VR::GetLanguageResponse& res)
+  {
+    return mNsRPC2Communication_VR__GetLanguageResponse.toString(res);
+  }
+
 // NsRPC2Communication::VR::OnCommand
   static bool fromString(const std::string& str, NsRPC2Communication::VR::OnCommand& res)
   {
@@ -979,6 +1313,50 @@ protected:
   static std::string toString(const NsRPC2Communication::VR::OnLanguageChange& res)
   {
     return mNsRPC2Communication_VR__OnLanguageChange.toString(res);
+  }
+
+// NsRPC2Communication::VehicleInfo::GetDTCs
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::GetDTCs& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__GetDTCs.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::GetDTCs& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__GetDTCs.toString(res);
+  }
+
+// NsRPC2Communication::VehicleInfo::GetDTCsResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::GetDTCsResponse& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__GetDTCsResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::GetDTCsResponse& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__GetDTCsResponse.toString(res);
+  }
+
+// NsRPC2Communication::VehicleInfo::GetVehicleData
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::GetVehicleData& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__GetVehicleData.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::GetVehicleData& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__GetVehicleData.toString(res);
+  }
+
+// NsRPC2Communication::VehicleInfo::GetVehicleDataResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::GetVehicleDataResponse& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::GetVehicleDataResponse& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse.toString(res);
   }
 
 // NsRPC2Communication::VehicleInfo::GetVehicleType
@@ -1003,6 +1381,83 @@ protected:
     return mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse.toString(res);
   }
 
+// NsRPC2Communication::VehicleInfo::OnVehicleData
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::OnVehicleData& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__OnVehicleData.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::OnVehicleData& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__OnVehicleData.toString(res);
+  }
+
+// NsRPC2Communication::VehicleInfo::ReadDID
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::ReadDID& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__ReadDID.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::ReadDID& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__ReadDID.toString(res);
+  }
+
+// NsRPC2Communication::VehicleInfo::ReadDIDResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::ReadDIDResponse& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__ReadDIDResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::ReadDIDResponse& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__ReadDIDResponse.toString(res);
+  }
+
+// NsRPC2Communication::VehicleInfo::SubscribeVehicleData
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::SubscribeVehicleData& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__SubscribeVehicleData.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::SubscribeVehicleData& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__SubscribeVehicleData.toString(res);
+  }
+
+// NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponse& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponse& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse.toString(res);
+  }
+
+// NsRPC2Communication::VehicleInfo::UnsubscribeVehicleData
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::UnsubscribeVehicleData& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::UnsubscribeVehicleData& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData.toString(res);
+  }
+
+// NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponse& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse.fromString(str, res);
+  }
+  
+  static std::string toString(const NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponse& res)
+  {
+    return mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse.toString(res);
+  }
+
 
   struct localHash
   {
@@ -1019,12 +1474,12 @@ private:
   
   static const char* getName(Methods e)
   {
-    return (e>=0 && e<74) ? mHashTable[e].name : NULL;
+    return (e>=0 && e<109) ? mHashTable[e].name : NULL;
   }
   
   static const Methods getIndex(const char* s);
   
-  static const localHash mHashTable[74];
+  static const localHash mHashTable[109];
   friend class Marshaller_intHash;
   
   static ::NsRPC2Communication::RPC2ErrorMarshaller mRPC2ErrorInternal;
@@ -1046,11 +1501,27 @@ private:
   static NsRPC2Communication::Buttons::GetCapabilitiesResponseMarshaller mNsRPC2Communication_Buttons__GetCapabilitiesResponse;
   static NsRPC2Communication::Buttons::OnButtonEventMarshaller mNsRPC2Communication_Buttons__OnButtonEvent;
   static NsRPC2Communication::Buttons::OnButtonPressMarshaller mNsRPC2Communication_Buttons__OnButtonPress;
-  static NsRPC2Communication::TTS::ChangeLanguageRegistrationMarshaller mNsRPC2Communication_TTS__ChangeLanguageRegistration;
-  static NsRPC2Communication::TTS::ChangeLanguageRegistrationResponseMarshaller mNsRPC2Communication_TTS__ChangeLanguageRegistrationResponse;
+  static NsRPC2Communication::Navigation::AlertManeuverMarshaller mNsRPC2Communication_Navigation__AlertManeuver;
+  static NsRPC2Communication::Navigation::AlertManeuverResponseMarshaller mNsRPC2Communication_Navigation__AlertManeuverResponse;
+  static NsRPC2Communication::Navigation::OnTBTClientStateMarshaller mNsRPC2Communication_Navigation__OnTBTClientState;
+  static NsRPC2Communication::Navigation::ShowConstantTBTMarshaller mNsRPC2Communication_Navigation__ShowConstantTBT;
+  static NsRPC2Communication::Navigation::ShowConstantTBTResponseMarshaller mNsRPC2Communication_Navigation__ShowConstantTBTResponse;
+  static NsRPC2Communication::Navigation::UpdateTurnListMarshaller mNsRPC2Communication_Navigation__UpdateTurnList;
+  static NsRPC2Communication::Navigation::UpdateTurnListResponseMarshaller mNsRPC2Communication_Navigation__UpdateTurnListResponse;
+  static NsRPC2Communication::Phone::DialNumberMarshaller mNsRPC2Communication_Phone__DialNumber;
+  static NsRPC2Communication::Phone::DialNumberResponseMarshaller mNsRPC2Communication_Phone__DialNumberResponse;
+  static NsRPC2Communication::TTS::ChangeRegistrationMarshaller mNsRPC2Communication_TTS__ChangeRegistration;
+  static NsRPC2Communication::TTS::ChangeRegistrationResponseMarshaller mNsRPC2Communication_TTS__ChangeRegistrationResponse;
+  static NsRPC2Communication::TTS::EndAudioPassThruMarshaller mNsRPC2Communication_TTS__EndAudioPassThru;
+  static NsRPC2Communication::TTS::EndAudioPassThruResponseMarshaller mNsRPC2Communication_TTS__EndAudioPassThruResponse;
   static NsRPC2Communication::TTS::GetCapabilitiesMarshaller mNsRPC2Communication_TTS__GetCapabilities;
   static NsRPC2Communication::TTS::GetCapabilitiesResponseMarshaller mNsRPC2Communication_TTS__GetCapabilitiesResponse;
+  static NsRPC2Communication::TTS::GetLanguageMarshaller mNsRPC2Communication_TTS__GetLanguage;
+  static NsRPC2Communication::TTS::GetLanguageResponseMarshaller mNsRPC2Communication_TTS__GetLanguageResponse;
+  static NsRPC2Communication::TTS::OnAudioPassThruMarshaller mNsRPC2Communication_TTS__OnAudioPassThru;
   static NsRPC2Communication::TTS::OnLanguageChangeMarshaller mNsRPC2Communication_TTS__OnLanguageChange;
+  static NsRPC2Communication::TTS::PerformAudioPassThruMarshaller mNsRPC2Communication_TTS__PerformAudioPassThru;
+  static NsRPC2Communication::TTS::PerformAudioPassThruResponseMarshaller mNsRPC2Communication_TTS__PerformAudioPassThruResponse;
   static NsRPC2Communication::TTS::SpeakMarshaller mNsRPC2Communication_TTS__Speak;
   static NsRPC2Communication::TTS::SpeakResponseMarshaller mNsRPC2Communication_TTS__SpeakResponse;
   static NsRPC2Communication::UI::AddCommandMarshaller mNsRPC2Communication_UI__AddCommand;
@@ -1059,8 +1530,8 @@ private:
   static NsRPC2Communication::UI::AddSubMenuResponseMarshaller mNsRPC2Communication_UI__AddSubMenuResponse;
   static NsRPC2Communication::UI::AlertMarshaller mNsRPC2Communication_UI__Alert;
   static NsRPC2Communication::UI::AlertResponseMarshaller mNsRPC2Communication_UI__AlertResponse;
-  static NsRPC2Communication::UI::ChangeLanguageRegistrationMarshaller mNsRPC2Communication_UI__ChangeLanguageRegistration;
-  static NsRPC2Communication::UI::ChangeLanguageRegistrationResponseMarshaller mNsRPC2Communication_UI__ChangeLanguageRegistrationResponse;
+  static NsRPC2Communication::UI::ChangeRegistrationMarshaller mNsRPC2Communication_UI__ChangeRegistration;
+  static NsRPC2Communication::UI::ChangeRegistrationResponseMarshaller mNsRPC2Communication_UI__ChangeRegistrationResponse;
   static NsRPC2Communication::UI::CreateInteractionChoiceSetMarshaller mNsRPC2Communication_UI__CreateInteractionChoiceSet;
   static NsRPC2Communication::UI::CreateInteractionChoiceSetResponseMarshaller mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse;
   static NsRPC2Communication::UI::DeleteCommandMarshaller mNsRPC2Communication_UI__DeleteCommand;
@@ -1071,6 +1542,8 @@ private:
   static NsRPC2Communication::UI::DeleteSubMenuResponseMarshaller mNsRPC2Communication_UI__DeleteSubMenuResponse;
   static NsRPC2Communication::UI::GetCapabilitiesMarshaller mNsRPC2Communication_UI__GetCapabilities;
   static NsRPC2Communication::UI::GetCapabilitiesResponseMarshaller mNsRPC2Communication_UI__GetCapabilitiesResponse;
+  static NsRPC2Communication::UI::GetLanguageMarshaller mNsRPC2Communication_UI__GetLanguage;
+  static NsRPC2Communication::UI::GetLanguageResponseMarshaller mNsRPC2Communication_UI__GetLanguageResponse;
   static NsRPC2Communication::UI::OnCommandMarshaller mNsRPC2Communication_UI__OnCommand;
   static NsRPC2Communication::UI::OnDeviceChosenMarshaller mNsRPC2Communication_UI__OnDeviceChosen;
   static NsRPC2Communication::UI::OnDriverDistractionMarshaller mNsRPC2Communication_UI__OnDriverDistraction;
@@ -1081,8 +1554,12 @@ private:
   static NsRPC2Communication::UI::PerformInteractionResponseMarshaller mNsRPC2Communication_UI__PerformInteractionResponse;
   static NsRPC2Communication::UI::ResetGlobalPropertiesMarshaller mNsRPC2Communication_UI__ResetGlobalProperties;
   static NsRPC2Communication::UI::ResetGlobalPropertiesResponseMarshaller mNsRPC2Communication_UI__ResetGlobalPropertiesResponse;
+  static NsRPC2Communication::UI::ScrollableMessageMarshaller mNsRPC2Communication_UI__ScrollableMessage;
+  static NsRPC2Communication::UI::ScrollableMessageResponseMarshaller mNsRPC2Communication_UI__ScrollableMessageResponse;
   static NsRPC2Communication::UI::SetAppIconMarshaller mNsRPC2Communication_UI__SetAppIcon;
   static NsRPC2Communication::UI::SetAppIconResponseMarshaller mNsRPC2Communication_UI__SetAppIconResponse;
+  static NsRPC2Communication::UI::SetDisplayLayoutMarshaller mNsRPC2Communication_UI__SetDisplayLayout;
+  static NsRPC2Communication::UI::SetDisplayLayoutResponseMarshaller mNsRPC2Communication_UI__SetDisplayLayoutResponse;
   static NsRPC2Communication::UI::SetGlobalPropertiesMarshaller mNsRPC2Communication_UI__SetGlobalProperties;
   static NsRPC2Communication::UI::SetGlobalPropertiesResponseMarshaller mNsRPC2Communication_UI__SetGlobalPropertiesResponse;
   static NsRPC2Communication::UI::SetMediaClockTimerMarshaller mNsRPC2Communication_UI__SetMediaClockTimer;
@@ -1093,16 +1570,29 @@ private:
   static NsRPC2Communication::UI::SliderResponseMarshaller mNsRPC2Communication_UI__SliderResponse;
   static NsRPC2Communication::VR::AddCommandMarshaller mNsRPC2Communication_VR__AddCommand;
   static NsRPC2Communication::VR::AddCommandResponseMarshaller mNsRPC2Communication_VR__AddCommandResponse;
-  static NsRPC2Communication::VR::ChangeLanguageRegistrationMarshaller mNsRPC2Communication_VR__ChangeLanguageRegistration;
-  static NsRPC2Communication::VR::ChangeLanguageRegistrationResponseMarshaller mNsRPC2Communication_VR__ChangeLanguageRegistrationResponse;
+  static NsRPC2Communication::VR::ChangeRegistrationMarshaller mNsRPC2Communication_VR__ChangeRegistration;
+  static NsRPC2Communication::VR::ChangeRegistrationResponseMarshaller mNsRPC2Communication_VR__ChangeRegistrationResponse;
   static NsRPC2Communication::VR::DeleteCommandMarshaller mNsRPC2Communication_VR__DeleteCommand;
   static NsRPC2Communication::VR::DeleteCommandResponseMarshaller mNsRPC2Communication_VR__DeleteCommandResponse;
   static NsRPC2Communication::VR::GetCapabilitiesMarshaller mNsRPC2Communication_VR__GetCapabilities;
   static NsRPC2Communication::VR::GetCapabilitiesResponseMarshaller mNsRPC2Communication_VR__GetCapabilitiesResponse;
+  static NsRPC2Communication::VR::GetLanguageMarshaller mNsRPC2Communication_VR__GetLanguage;
+  static NsRPC2Communication::VR::GetLanguageResponseMarshaller mNsRPC2Communication_VR__GetLanguageResponse;
   static NsRPC2Communication::VR::OnCommandMarshaller mNsRPC2Communication_VR__OnCommand;
   static NsRPC2Communication::VR::OnLanguageChangeMarshaller mNsRPC2Communication_VR__OnLanguageChange;
+  static NsRPC2Communication::VehicleInfo::GetDTCsMarshaller mNsRPC2Communication_VehicleInfo__GetDTCs;
+  static NsRPC2Communication::VehicleInfo::GetDTCsResponseMarshaller mNsRPC2Communication_VehicleInfo__GetDTCsResponse;
+  static NsRPC2Communication::VehicleInfo::GetVehicleDataMarshaller mNsRPC2Communication_VehicleInfo__GetVehicleData;
+  static NsRPC2Communication::VehicleInfo::GetVehicleDataResponseMarshaller mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse;
   static NsRPC2Communication::VehicleInfo::GetVehicleTypeMarshaller mNsRPC2Communication_VehicleInfo__GetVehicleType;
   static NsRPC2Communication::VehicleInfo::GetVehicleTypeResponseMarshaller mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse;
+  static NsRPC2Communication::VehicleInfo::OnVehicleDataMarshaller mNsRPC2Communication_VehicleInfo__OnVehicleData;
+  static NsRPC2Communication::VehicleInfo::ReadDIDMarshaller mNsRPC2Communication_VehicleInfo__ReadDID;
+  static NsRPC2Communication::VehicleInfo::ReadDIDResponseMarshaller mNsRPC2Communication_VehicleInfo__ReadDIDResponse;
+  static NsRPC2Communication::VehicleInfo::SubscribeVehicleDataMarshaller mNsRPC2Communication_VehicleInfo__SubscribeVehicleData;
+  static NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponseMarshaller mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse;
+  static NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataMarshaller mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData;
+  static NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponseMarshaller mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse;
 
 };
 

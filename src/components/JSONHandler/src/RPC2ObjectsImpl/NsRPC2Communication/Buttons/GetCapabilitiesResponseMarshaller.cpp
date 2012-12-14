@@ -1,14 +1,14 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/GetCapabilitiesResponse.h"
 #include "../src/ALRPCObjectsImpl/V1/ButtonCapabilitiesMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/PresetBankCapabilitiesMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/PresetBankCapabilitiesMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/GetCapabilitiesResponseMarshaller.h"
 
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -52,7 +52,7 @@ bool GetCapabilitiesResponseMarshaller::checkIntegrityConst(const GetCapabilitie
     if(i>100)  return false;
   }
 
-  if(s.presetBankCapabilities && (!NsAppLinkRPCV2::PresetBankCapabilitiesMarshaller::checkIntegrityConst(s.presetBankCapabilities[0])))  return false;
+  if(s.presetBankCapabilities && (!NsAppLinkRPC::PresetBankCapabilitiesMarshaller::checkIntegrityConst(s.presetBankCapabilities[0])))  return false;
 
   return true;
 }
@@ -81,7 +81,7 @@ Json::Value GetCapabilitiesResponseMarshaller::toJSON(const GetCapabilitiesRespo
     json["result"]["capabilities"]=j;
   }
   if(e.presetBankCapabilities)
-    json["result"]["presetBankCapabilities"]=NsAppLinkRPCV2::PresetBankCapabilitiesMarshaller::toJSON(e.presetBankCapabilities[0]);;
+    json["result"]["presetBankCapabilities"]=NsAppLinkRPC::PresetBankCapabilitiesMarshaller::toJSON(e.presetBankCapabilities[0]);;
   return json;
 }
 
@@ -112,18 +112,22 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
       unsigned int i=js["capabilities"].size();
       if(i<1)  return false;
       if(i>100)  return false;
-      std::vector<NsAppLinkRPC::ButtonCapabilities> z(i);
+      c.capabilities.resize(i);
       while(i--)
-        if(!NsAppLinkRPC::ButtonCapabilitiesMarshaller::fromJSON(js["capabilities"][i],c.capabilities[i]))  return false;
-      c.capabilities=z;
+      {
+        NsAppLinkRPC::ButtonCapabilities t;
+        if(!NsAppLinkRPC::ButtonCapabilitiesMarshaller::fromJSON(js["capabilities"][i],t))
+          return false;
+         c.capabilities[i]=t;
+      }
     }
 
     if(c.presetBankCapabilities)  delete c.presetBankCapabilities;
     c.presetBankCapabilities=0;
     if(js.isMember("presetBankCapabilities"))
     {
-      c.presetBankCapabilities=new NsAppLinkRPCV2::PresetBankCapabilities();
-      if(!NsAppLinkRPCV2::PresetBankCapabilitiesMarshaller::fromJSON(js["presetBankCapabilities"],c.presetBankCapabilities[0]))  return false;
+      c.presetBankCapabilities=new NsAppLinkRPC::PresetBankCapabilities();
+      if(!NsAppLinkRPC::PresetBankCapabilitiesMarshaller::fromJSON(js["presetBankCapabilities"],c.presetBankCapabilities[0]))  return false;
     }
 
   }

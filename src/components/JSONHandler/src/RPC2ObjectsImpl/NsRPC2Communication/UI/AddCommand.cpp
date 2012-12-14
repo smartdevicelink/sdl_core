@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -17,7 +17,7 @@ AddCommand& AddCommand::operator =(const AddCommand& c)
   cmdId=c.cmdId;
   menuParams=c.menuParams;
   if(cmdIcon)  delete cmdIcon;
-  cmdIcon= c.cmdIcon ? new NsAppLinkRPCV2::Image(c.cmdIcon[0]) : 0;
+  cmdIcon= c.cmdIcon ? new NsAppLinkRPC::Image(c.cmdIcon[0]) : 0;
   appId=c.appId;
   return *this;
 }
@@ -72,7 +72,7 @@ const NsAppLinkRPCV2::Image* AddCommand::get_cmdIcon(void)
 bool AddCommand::set_cmdIcon(const NsAppLinkRPCV2::Image& cmdIcon_)
 {
   if(cmdIcon)  delete cmdIcon;
-  cmdIcon=new NsAppLinkRPCV2::Image(cmdIcon_);
+  cmdIcon=new NsAppLinkRPC::Image(cmdIcon_);
   return true;
 }
 

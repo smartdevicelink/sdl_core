@@ -6,8 +6,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -62,7 +62,6 @@ Json::Value OnDriverDistractionMarshaller::toJSON(const OnDriverDistraction& e)
   json["params"]=Json::Value(Json::objectValue);
 
   json["params"]["state"]=NsAppLinkRPC::DriverDistractionStateMarshaller::toJSON(e.state);;
-  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -81,9 +80,6 @@ bool OnDriverDistractionMarshaller::fromJSON(const Json::Value& json,OnDriverDis
 
     if(!js.isMember("state") || !NsAppLinkRPC::DriverDistractionStateMarshaller::fromJSON(js["state"],c.state))  return false;
 
-    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
-    c.appId=js["appId"].asInt();
-    
   }
   catch(...)
   {

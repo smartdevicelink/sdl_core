@@ -1,13 +1,13 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/VehicleInfo/GetVehicleTypeResponse.h"
-#include "../src/ALRPCObjectsImpl/V2/VehicleTypeMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/VehicleTypeMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetVehicleTypeResponseMarshaller.h"
 
 /*
   interface	NsRPC2Communication::VehicleInfo
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -45,7 +45,7 @@ const std::string GetVehicleTypeResponseMarshaller::toString(const GetVehicleTyp
 
 bool GetVehicleTypeResponseMarshaller::checkIntegrityConst(const GetVehicleTypeResponse& s)
 {
-  if(!NsAppLinkRPCV2::VehicleTypeMarshaller::checkIntegrityConst(s.vehicleType))  return false;
+  if(!NsAppLinkRPC::VehicleTypeMarshaller::checkIntegrityConst(s.vehicleType))  return false;
 
   return true;
 }
@@ -64,7 +64,7 @@ Json::Value GetVehicleTypeResponseMarshaller::toJSON(const GetVehicleTypeRespons
   json["result"]["resultCode"]=NsAppLinkRPC::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("AppLinkCore.GetVehicleTypeResponse");
 
-  json["result"]["vehicleType"]=NsAppLinkRPCV2::VehicleTypeMarshaller::toJSON(e.vehicleType);;
+  json["result"]["vehicleType"]=NsAppLinkRPC::VehicleTypeMarshaller::toJSON(e.vehicleType);;
   return json;
 }
 
@@ -90,7 +90,7 @@ bool GetVehicleTypeResponseMarshaller::fromJSON(const Json::Value& json,GetVehic
 
     if(!NsAppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
-    if(!js.isMember("vehicleType") || !NsAppLinkRPCV2::VehicleTypeMarshaller::fromJSON(js["vehicleType"],c.vehicleType))  return false;
+    if(!js.isMember("vehicleType") || !NsAppLinkRPC::VehicleTypeMarshaller::fromJSON(js["vehicleType"],c.vehicleType))  return false;
 
   }
   catch(...)

@@ -1,12 +1,13 @@
 #include "../include/JSONHandler/ALRPCObjects/V2/PermissionItem.h"
 #include "PermissionItemMarshaller.h"
 #include "HMIPermissionsMarshaller.h"
+#include "ParameterPermissionsMarshaller.h"
 /*
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 17:03:13 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Thu Dec 13 14:18:29 2012
+  source stamp	Thu Dec 13 14:18:27 2012
   author	robok0der
 */
 
@@ -39,6 +40,13 @@ bool PermissionItem::set_hmiPermissions(const HMIPermissions& hmiPermissions_)
   return true;
 }
 
+bool PermissionItem::set_parameterPermissions(const ParameterPermissions& parameterPermissions_)
+{
+  if(!ParameterPermissionsMarshaller::checkIntegrityConst(parameterPermissions_))   return false;
+  parameterPermissions=parameterPermissions_;
+  return true;
+}
+
 bool PermissionItem::set_rpcName(const std::string& rpcName_)
 {
   if(rpcName_.length()>100)  return false;
@@ -52,6 +60,12 @@ bool PermissionItem::set_rpcName(const std::string& rpcName_)
 const HMIPermissions& PermissionItem::get_hmiPermissions(void) const 
 {
   return hmiPermissions;
+}
+
+
+const ParameterPermissions& PermissionItem::get_parameterPermissions(void) const 
+{
+  return parameterPermissions;
 }
 
 

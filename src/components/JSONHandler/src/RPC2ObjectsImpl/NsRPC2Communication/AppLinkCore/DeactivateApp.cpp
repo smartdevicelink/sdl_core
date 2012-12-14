@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -15,6 +15,7 @@ using namespace NsRPC2Communication::AppLinkCore;
 DeactivateApp& DeactivateApp::operator =(const DeactivateApp& c)
 {
   appName=c.appName;
+  reason=c.reason;
   appId=c.appId;
   return *this;
 }
@@ -45,6 +46,17 @@ const std::string& DeactivateApp::get_appName(void)
 bool DeactivateApp::set_appName(const std::string& appName_)
 {
   appName=appName_;
+  return true;
+}
+
+const NsAppLinkRPC::DeactivateReason& DeactivateApp::get_reason(void)
+{
+  return reason;
+}
+
+bool DeactivateApp::set_reason(const NsAppLinkRPC::DeactivateReason& reason_)
+{
+  reason=reason_;
   return true;
 }
 

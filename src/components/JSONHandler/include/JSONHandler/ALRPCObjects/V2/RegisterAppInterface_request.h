@@ -15,8 +15,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Tue Dec  4 17:03:13 2012
-  source stamp	Tue Dec  4 14:21:32 2012
+  generated at	Thu Dec 13 14:18:29 2012
+  source stamp	Thu Dec 13 14:18:27 2012
   author	robok0der
 */
 
@@ -121,14 +121,14 @@ namespace NsAppLinkRPCV2
 /**
      See Language
      Current app’s expected VR+TTS language
-     If there is a mismatch with SYNC, the app will be able to change this registration with changeLanguageRegistration prior to app being brought into focus.
+     If there is a mismatch with SYNC, the app will be able to change this registration with changeRegistration prior to app being brought into focus.
 */
       Language languageDesired;
 
 /**
      See Language
      Current app’s expected display language
-     If there is a mismatch with SYNC, the app will be able to change this registration with changeLanguageRegistration prior to app being brought into focus.
+     If there is a mismatch with SYNC, the app will be able to change this registration with changeRegistration prior to app being brought into focus.
 */
       Language hmiDisplayLanguageDesired;
 

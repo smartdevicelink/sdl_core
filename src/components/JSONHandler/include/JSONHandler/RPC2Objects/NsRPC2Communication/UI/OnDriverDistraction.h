@@ -8,8 +8,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Tue Dec  4 16:38:13 2012
-  source stamp	Tue Dec  4 16:37:04 2012
+  generated at	Fri Dec 14 06:14:25 2012
+  source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
@@ -34,13 +34,9 @@ namespace NsRPC2Communication
 // getters
       const NsAppLinkRPC::DriverDistractionState& get_state(void);
 
-      int get_appId(void);
-
 
 // setters
       bool set_state(const NsAppLinkRPC::DriverDistractionState& state);
-
-      bool set_appId(int appId);
 
 
     private:
@@ -48,7 +44,6 @@ namespace NsRPC2Communication
       friend class OnDriverDistractionMarshaller;
 
       NsAppLinkRPC::DriverDistractionState state;
-      int appId;
 
     };
   }
