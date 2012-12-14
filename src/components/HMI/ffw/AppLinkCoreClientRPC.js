@@ -132,7 +132,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		{	
 			// add new app to the list
 			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " connected!");
-			MFT.ApplinkMediaModel.appInfo.set('appName', notification.params.appName);
+			MFT.ApplinkController.getApplicationModel(notification.params.appId).appInfo.set('appName', notification.params.appName);
 			if( notification.params.isMediaApplication ){
 				MFT.ApplinkController.registerApplication(notification.params.appId, 0);
 			}else{
