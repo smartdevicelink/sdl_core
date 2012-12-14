@@ -837,7 +837,6 @@ namespace NsAppManager
                 default:
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message " << mobileMsg->getMethodId() << " has been received!");
-
                     NsAppLinkRPC::GenericResponse_response* response = new NsAppLinkRPC::GenericResponse_response();
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
@@ -1798,6 +1797,7 @@ namespace NsAppManager
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
                 {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message " << mobileMsg->getMethodId() << " has been received!");
                     NsAppLinkRPCV2::GenericResponse_response* response = new NsAppLinkRPCV2::GenericResponse_response();
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::GenericResponseID);
                     response->set_success(false);
@@ -1829,6 +1829,18 @@ namespace NsAppManager
             return;
         }
         AppMgrCore* core = (AppMgrCore*)pThis;
+
+        switch(msg->getMethod())
+        {
+            case NsRPC2Communication::Marshaller::METHOD_INVALID:
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " An invalid RPC message " << msg->getMethod() << " has been received!");
+                return;
+            }
+            default:
+                LOG4CPLUS_INFO_EXT(mLogger, " A valid RPC message " << msg->getMethod() << " has been received!");
+        }
+
         switch(msg->getMethod())
         {
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT:
@@ -1958,9 +1970,8 @@ namespace NsAppManager
                 }
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not Buttons RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not Buttons RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -2645,6 +2656,8 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, " null-application found as an active item!");
                     return;
                 }
+
+                LOG4CPLUS_INFO_EXT(mLogger, " About to send OnHMIStatus to a mobile side...");
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2756,9 +2769,8 @@ namespace NsAppManager
                 }
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -2903,9 +2915,8 @@ namespace NsAppManager
                 }
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not VR RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not VR RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -2966,9 +2977,8 @@ namespace NsAppManager
                 }
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not TTS RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not TTS RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -3357,10 +3367,8 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendResponse(response);
                 return;
             }
-
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not AppLinkCore RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not AppLinkCore RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -3372,10 +3380,8 @@ namespace NsAppManager
                 core->mVehicleType = getVehType->get_vehicleType();
                 return;
             }
-
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not VehicleInfo RPC message " << msg->getMethod() << " has been received!");
         }
         LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message " << msg->getMethod() << " has been invoked!");
     }
