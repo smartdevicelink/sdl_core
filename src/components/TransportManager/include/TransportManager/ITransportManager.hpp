@@ -64,6 +64,8 @@ namespace NsAppLink
              * @brief Connect to all applications discovered on device.
              *
              * @param DeviceHandle Handle of device to connect to.
+             *
+             * @see @ref components_transportmanager_client_connection_management
              **/
             virtual void connectDevice(const tDeviceHandle DeviceHandle) = 0;
 
@@ -71,6 +73,8 @@ namespace NsAppLink
              * @brief Disconnect from all applications connected on device.
              *
              * @param DeviceHandle Handle of device to disconnect from.
+             *
+             * @see @ref components_transportmanager_client_connection_management
              **/
             virtual void disconnectDevice(const tDeviceHandle DeviceHandle) = 0;
 
@@ -92,6 +96,9 @@ namespace NsAppLink
              * @brief Add listener to the device-related events.
              *
              * @param Listener Pointer to listener.
+             *
+             * @see @ref components_transportmanager_client_device_management
+             * @see @ref components_transportmanager_client_connection_management
              **/
             virtual void addDeviceListener(ITransportManagerDeviceListener * Listener) = 0;
 
@@ -99,6 +106,9 @@ namespace NsAppLink
              * @brief Remove listenerto the device-related events.
              *
              * @param Listener Pointer to listener.
+             *
+             * @see @ref components_transportmanager_client_device_management
+             * @see @ref components_transportmanager_client_connection_management
              **/
             virtual void removeDeviceListener(ITransportManagerDeviceListener * Listener) = 0;
 

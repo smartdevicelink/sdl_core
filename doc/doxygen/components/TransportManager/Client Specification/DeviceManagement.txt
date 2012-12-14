@@ -1,7 +1,8 @@
 /** @page components_transportmanager_client_device_management Device Management
  *
  * As all requests to TransportManager are asynchronous, client must implement NsAppLink::NsTransportManager::ITransportManagerDeviceListener
- * interface and add itself as a device listener to TransportManager in order to receive notifications.
+ * interface and add itself as a device listener with NsAppLink::NsTransportManager::ITransportManager::addDeviceListener()
+ * in order to receive notifications.
  * Client of TransportManager may use NsAppLink::NsTransportManager::ITransportManager::scanForNewDevices()
  * to initiate device scan on all device adapters that support this feature. In order to get list of available
  * devices client must override NsAppLink::NsTransportManager::ITransportManagerDeviceListener::onDeviceListUpdated().
