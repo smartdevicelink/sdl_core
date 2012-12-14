@@ -1,7 +1,7 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Navigation/ShowConstantTBT.h"
-#include "../src/ALRPCObjectsImpl/V1/ImageMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/SoftButtonMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ImageMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/SoftButtonMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Navigation/ShowConstantTBTMarshaller.h"
 
 /*
@@ -54,7 +54,7 @@ bool ShowConstantTBTMarshaller::checkIntegrityConst(const ShowConstantTBT& s)
 
   if(s.totalDistance && (s.totalDistance[0].length()>500))  return false;
 
-  if(!NsAppLinkRPC::ImageMarshaller::checkIntegrityConst(s.turnIcon))  return false;
+  if(!NsAppLinkRPCV2::ImageMarshaller::checkIntegrityConst(s.turnIcon))  return false;
 
   if(s.distanceToManeuver<0 || s.distanceToManeuver>1000000000)  return false;
 
@@ -89,7 +89,7 @@ Json::Value ShowConstantTBTMarshaller::toJSON(const ShowConstantTBT& e)
     json["params"]["eta"]=Json::Value(e.eta[0]);;
   if(e.totalDistance)
     json["params"]["totalDistance"]=Json::Value(e.totalDistance[0]);;
-  json["params"]["turnIcon"]=NsAppLinkRPC::ImageMarshaller::toJSON(e.turnIcon);;
+  json["params"]["turnIcon"]=NsAppLinkRPCV2::ImageMarshaller::toJSON(e.turnIcon);;
   json["params"]["distanceToManeuver"]=Json::Value(e.distanceToManeuver);;
   json["params"]["distanceToManeuverScale"]=Json::Value(e.distanceToManeuverScale);;
   if(e.maneuverComplete)
@@ -99,7 +99,7 @@ Json::Value ShowConstantTBTMarshaller::toJSON(const ShowConstantTBT& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::SoftButtonMarshaller::toJSON(e.softButtons[i]);
+      j[i]=NsAppLinkRPCV2::SoftButtonMarshaller::toJSON(e.softButtons[i]);
 
     json["params"]["softButtons"]=j;
   }
@@ -166,7 +166,7 @@ bool ShowConstantTBTMarshaller::fromJSON(const Json::Value& json,ShowConstantTBT
 
     }
 
-    if(!js.isMember("turnIcon") || !NsAppLinkRPC::ImageMarshaller::fromJSON(js["turnIcon"],c.turnIcon))  return false;
+    if(!js.isMember("turnIcon") || !NsAppLinkRPCV2::ImageMarshaller::fromJSON(js["turnIcon"],c.turnIcon))  return false;
 
     if(!js.isMember("distanceToManeuver") || !js["distanceToManeuver"].isNumeric())  return false;
     c.distanceToManeuver=js["distanceToManeuver"].asDouble();
@@ -194,8 +194,8 @@ bool ShowConstantTBTMarshaller::fromJSON(const Json::Value& json,ShowConstantTBT
       c.softButtons.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::SoftButton t;
-        if(!NsAppLinkRPC::SoftButtonMarshaller::fromJSON(js["softButtons"][i],t))
+        NsAppLinkRPCV2::SoftButton t;
+        if(!NsAppLinkRPCV2::SoftButtonMarshaller::fromJSON(js["softButtons"][i],t))
           return false;
          c.softButtons[i]=t;
       }

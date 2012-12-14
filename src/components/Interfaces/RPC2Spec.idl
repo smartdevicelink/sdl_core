@@ -757,6 +757,8 @@ DeactivateApp(
      */
 SendData(
   string data[1:100],
+  string(1000) * url,
+  long int (-2000000000:2000000000) * timeout,
   int appId
   -> //return value is provided in corresponding response object, id of request and response should be equal
 );

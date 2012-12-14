@@ -36,7 +36,8 @@
 #define MIN_HASH_VALUE 11
 #define MAX_HASH_VALUE 28
 /* maximum key range = 18, duplicates = 0 */
-
+namespace NsAppLinkRPCV2
+{
 class TBTState_intHash
 {
 private:
@@ -134,4 +135,5 @@ TBTState_intHash::getPointer (register const char *str, register unsigned int le
           }
     }
   return 0;
+}
 }

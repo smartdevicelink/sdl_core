@@ -1,7 +1,7 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Navigation/UpdateTurnList.h"
-#include "../src/ALRPCObjectsImpl/V1/TurnMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/SoftButtonMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/TurnMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/SoftButtonMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Navigation/UpdateTurnListMarshaller.h"
 
 /*
@@ -78,7 +78,7 @@ Json::Value UpdateTurnListMarshaller::toJSON(const UpdateTurnList& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::TurnMarshaller::toJSON(e.turnList[i]);
+      j[i]=NsAppLinkRPCV2::TurnMarshaller::toJSON(e.turnList[i]);
 
     json["params"]["turnList"]=j;
   }
@@ -87,7 +87,7 @@ Json::Value UpdateTurnListMarshaller::toJSON(const UpdateTurnList& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::SoftButtonMarshaller::toJSON(e.softButtons[i]);
+      j[i]=NsAppLinkRPCV2::SoftButtonMarshaller::toJSON(e.softButtons[i]);
 
     json["params"]["softButtons"]=j;
   }
@@ -118,8 +118,8 @@ bool UpdateTurnListMarshaller::fromJSON(const Json::Value& json,UpdateTurnList& 
       c.turnList.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::Turn t;
-        if(!NsAppLinkRPC::TurnMarshaller::fromJSON(js["turnList"][i],t))
+        NsAppLinkRPCV2::Turn t;
+        if(!NsAppLinkRPCV2::TurnMarshaller::fromJSON(js["turnList"][i],t))
           return false;
          c.turnList[i]=t;
       }
@@ -133,8 +133,8 @@ bool UpdateTurnListMarshaller::fromJSON(const Json::Value& json,UpdateTurnList& 
       c.softButtons.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::SoftButton t;
-        if(!NsAppLinkRPC::SoftButtonMarshaller::fromJSON(js["softButtons"][i],t))
+        NsAppLinkRPCV2::SoftButton t;
+        if(!NsAppLinkRPCV2::SoftButtonMarshaller::fromJSON(js["softButtons"][i],t))
           return false;
          c.softButtons[i]=t;
       }

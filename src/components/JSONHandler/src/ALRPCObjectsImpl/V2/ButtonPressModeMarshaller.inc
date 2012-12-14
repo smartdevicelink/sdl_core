@@ -9,7 +9,8 @@
 #define MIN_HASH_VALUE 4
 #define MAX_HASH_VALUE 5
 /* maximum key range = 2, duplicates = 0 */
-
+namespace NsAppLinkRPCV2
+{
 class ButtonPressMode_intHash
 {
 private:
@@ -55,4 +56,5 @@ ButtonPressMode_intHash::getPointer (register const char *str, register unsigned
           }
     }
   return 0;
+}
 }

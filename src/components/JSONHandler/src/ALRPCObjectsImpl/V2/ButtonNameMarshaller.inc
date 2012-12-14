@@ -36,7 +36,8 @@
 #define MIN_HASH_VALUE 2
 #define MAX_HASH_VALUE 38
 /* maximum key range = 37, duplicates = 0 */
-
+namespace NsAppLinkRPCV2
+{
 class ButtonName_intHash
 {
 private:
@@ -169,4 +170,5 @@ ButtonName_intHash::getPointer (register const char *str, register unsigned int 
           }
     }
   return 0;
+}
 }

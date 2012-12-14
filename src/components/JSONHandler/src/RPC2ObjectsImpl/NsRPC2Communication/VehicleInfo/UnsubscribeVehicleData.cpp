@@ -37,12 +37,12 @@ UnsubscribeVehicleData::UnsubscribeVehicleData(const UnsubscribeVehicleData& c) 
 }
 
 
-const std::vector< NsAppLinkRPC::VehicleDataType>& UnsubscribeVehicleData::get_dataType(void)
+const std::vector< NsAppLinkRPCV2::VehicleDataType>& UnsubscribeVehicleData::get_dataType(void)
 {
   return dataType;
 }
 
-bool UnsubscribeVehicleData::set_dataType(const std::vector< NsAppLinkRPC::VehicleDataType>& dataType_)
+bool UnsubscribeVehicleData::set_dataType(const std::vector< NsAppLinkRPCV2::VehicleDataType>& dataType_)
 {
   dataType=dataType_;
   return true;

@@ -36,7 +36,8 @@
 #define MIN_HASH_VALUE 8
 #define MAX_HASH_VALUE 235
 /* maximum key range = 228, duplicates = 0 */
-
+namespace NsRPC2Communication
+{
 class Marshaller_intHash
 {
 private:
@@ -423,4 +424,5 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
           }
     }
   return 0;
+}
 }

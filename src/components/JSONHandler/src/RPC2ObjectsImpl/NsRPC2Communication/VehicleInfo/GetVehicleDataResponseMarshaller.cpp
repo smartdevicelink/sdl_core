@@ -1,8 +1,8 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/VehicleInfo/GetVehicleDataResponse.h"
-#include "../src/ALRPCObjectsImpl/V1/GPSDataMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/PRNDLMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/TireStatusMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/GPSDataMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/PRNDLMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/TireStatusMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetVehicleDataResponseMarshaller.h"
 
 /*
@@ -47,7 +47,7 @@ const std::string GetVehicleDataResponseMarshaller::toString(const GetVehicleDat
 
 bool GetVehicleDataResponseMarshaller::checkIntegrityConst(const GetVehicleDataResponse& s)
 {
-  if(s.gps && (!NsAppLinkRPC::GPSDataMarshaller::checkIntegrityConst(s.gps[0])))  return false;
+  if(s.gps && (!NsAppLinkRPCV2::GPSDataMarshaller::checkIntegrityConst(s.gps[0])))  return false;
 
   if(s.speed && (s.speed[0]<-100 || s.speed[0]>500))  return false;
 
@@ -63,9 +63,9 @@ bool GetVehicleDataResponseMarshaller::checkIntegrityConst(const GetVehicleDataR
 
   if(s.vin && (s.vin[0].length()>17))  return false;
 
-  if(s.prndl && (!NsAppLinkRPC::PRNDLMarshaller::checkIntegrityConst(s.prndl[0])))  return false;
+  if(s.prndl && (!NsAppLinkRPCV2::PRNDLMarshaller::checkIntegrityConst(s.prndl[0])))  return false;
 
-  if(s.tirePressure && (!NsAppLinkRPC::TireStatusMarshaller::checkIntegrityConst(s.tirePressure[0])))  return false;
+  if(s.tirePressure && (!NsAppLinkRPCV2::TireStatusMarshaller::checkIntegrityConst(s.tirePressure[0])))  return false;
 
   if(s.batteryPackVoltage && (s.batteryPackVoltage[0]<-1000 || s.batteryPackVoltage[0]>1000))  return false;
 
@@ -94,12 +94,12 @@ Json::Value GetVehicleDataResponseMarshaller::toJSON(const GetVehicleDataRespons
   json["jsonrpc"]=Json::Value("2.0");
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
-  NsAppLinkRPC::Result r(static_cast<NsAppLinkRPC::Result::ResultInternal>(e.getResult()));
-  json["result"]["resultCode"]=NsAppLinkRPC::ResultMarshaller::toJSON(r);
+  NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
+  json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("AppLinkCore.GetVehicleDataResponse");
 
   if(e.gps)
-    json["result"]["gps"]=NsAppLinkRPC::GPSDataMarshaller::toJSON(e.gps[0]);;
+    json["result"]["gps"]=NsAppLinkRPCV2::GPSDataMarshaller::toJSON(e.gps[0]);;
   if(e.speed)
     json["result"]["speed"]=Json::Value(e.speed[0]);;
   if(e.rpm)
@@ -115,9 +115,9 @@ Json::Value GetVehicleDataResponseMarshaller::toJSON(const GetVehicleDataRespons
   if(e.vin)
     json["result"]["vin"]=Json::Value(e.vin[0]);;
   if(e.prndl)
-    json["result"]["prndl"]=NsAppLinkRPC::PRNDLMarshaller::toJSON(e.prndl[0]);;
+    json["result"]["prndl"]=NsAppLinkRPCV2::PRNDLMarshaller::toJSON(e.prndl[0]);;
   if(e.tirePressure)
-    json["result"]["tirePressure"]=NsAppLinkRPC::TireStatusMarshaller::toJSON(e.tirePressure[0]);;
+    json["result"]["tirePressure"]=NsAppLinkRPCV2::TireStatusMarshaller::toJSON(e.tirePressure[0]);;
   if(e.batteryPackVoltage)
     json["result"]["batteryPackVoltage"]=Json::Value(e.batteryPackVoltage[0]);;
   if(e.batteryPackCurrent)
@@ -150,19 +150,19 @@ bool GetVehicleDataResponseMarshaller::fromJSON(const Json::Value& json,GetVehic
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    NsAppLinkRPC::Result r;
+    NsAppLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("AppLinkCore.GetVehicleDataResponse")) return false;
 
-    if(!NsAppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
+    if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
     if(c.gps)  delete c.gps;
     c.gps=0;
     if(js.isMember("gps"))
     {
-      c.gps=new NsAppLinkRPC::GPSData();
-      if(!NsAppLinkRPC::GPSDataMarshaller::fromJSON(js["gps"],c.gps[0]))  return false;
+      c.gps=new NsAppLinkRPCV2::GPSData();
+      if(!NsAppLinkRPCV2::GPSDataMarshaller::fromJSON(js["gps"],c.gps[0]))  return false;
     }
 
     if(c.speed)  delete c.speed;
@@ -246,16 +246,16 @@ bool GetVehicleDataResponseMarshaller::fromJSON(const Json::Value& json,GetVehic
     c.prndl=0;
     if(js.isMember("prndl"))
     {
-      c.prndl=new NsAppLinkRPC::PRNDL();
-      if(!NsAppLinkRPC::PRNDLMarshaller::fromJSON(js["prndl"],c.prndl[0]))  return false;
+      c.prndl=new NsAppLinkRPCV2::PRNDL();
+      if(!NsAppLinkRPCV2::PRNDLMarshaller::fromJSON(js["prndl"],c.prndl[0]))  return false;
     }
 
     if(c.tirePressure)  delete c.tirePressure;
     c.tirePressure=0;
     if(js.isMember("tirePressure"))
     {
-      c.tirePressure=new NsAppLinkRPC::TireStatus();
-      if(!NsAppLinkRPC::TireStatusMarshaller::fromJSON(js["tirePressure"],c.tirePressure[0]))  return false;
+      c.tirePressure=new NsAppLinkRPCV2::TireStatus();
+      if(!NsAppLinkRPCV2::TireStatusMarshaller::fromJSON(js["tirePressure"],c.tirePressure[0]))  return false;
     }
 
     if(c.batteryPackVoltage)  delete c.batteryPackVoltage;

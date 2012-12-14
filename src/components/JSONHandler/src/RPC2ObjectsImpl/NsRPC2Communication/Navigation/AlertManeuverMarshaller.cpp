@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Navigation/AlertManeuver.h"
 #include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/SoftButtonMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/SoftButtonMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Navigation/AlertManeuverMarshaller.h"
 
@@ -87,7 +87,7 @@ Json::Value AlertManeuverMarshaller::toJSON(const AlertManeuver& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::SoftButtonMarshaller::toJSON(e.softButtons[i]);
+      j[i]=NsAppLinkRPCV2::SoftButtonMarshaller::toJSON(e.softButtons[i]);
 
     json["params"]["softButtons"]=j;
   }
@@ -133,8 +133,8 @@ bool AlertManeuverMarshaller::fromJSON(const Json::Value& json,AlertManeuver& c)
       c.softButtons.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::SoftButton t;
-        if(!NsAppLinkRPC::SoftButtonMarshaller::fromJSON(js["softButtons"][i],t))
+        NsAppLinkRPCV2::SoftButton t;
+        if(!NsAppLinkRPCV2::SoftButtonMarshaller::fromJSON(js["softButtons"][i],t))
           return false;
          c.softButtons[i]=t;
       }

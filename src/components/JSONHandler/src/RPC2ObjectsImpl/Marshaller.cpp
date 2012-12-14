@@ -1,5 +1,5 @@
 #include <cstring>
-#include "../src/../include/JSONHandler/RPC2Objects/Marshaller.h"
+#include "JSONHandler/RPC2Objects/Marshaller.h"
 
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/ActivateApp.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/ActivateAppResponse.h"

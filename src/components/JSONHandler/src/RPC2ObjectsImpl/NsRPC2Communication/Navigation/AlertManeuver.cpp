@@ -1,4 +1,4 @@
-#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Navigation/AlertManeuver.h"
+  #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Navigation/AlertManeuver.h"
 #include "../src/../include/JSONHandler/RPC2Objects/Marshaller.h"
 
 /*
@@ -49,12 +49,12 @@ bool AlertManeuver::set_ttsChunks(const std::vector< NsAppLinkRPC::TTSChunk>& tt
   return true;
 }
 
-const std::vector< NsAppLinkRPC::SoftButton>& AlertManeuver::get_softButtons(void)
+const std::vector< NsAppLinkRPCV2::SoftButton>& AlertManeuver::get_softButtons(void)
 {
   return softButtons;
 }
 
-bool AlertManeuver::set_softButtons(const std::vector< NsAppLinkRPC::SoftButton>& softButtons_)
+bool AlertManeuver::set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons_)
 {
   softButtons=softButtons_;
   return true;

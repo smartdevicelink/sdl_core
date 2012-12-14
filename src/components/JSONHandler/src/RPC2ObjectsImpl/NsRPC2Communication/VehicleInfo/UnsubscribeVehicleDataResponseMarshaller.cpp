@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataResponse.h"
-#include "../src/ALRPCObjectsImpl/V1/VehicleDataResultMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/VehicleDataResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataResponseMarshaller.h"
 
 /*
@@ -65,8 +65,8 @@ Json::Value UnsubscribeVehicleDataResponseMarshaller::toJSON(const UnsubscribeVe
   json["jsonrpc"]=Json::Value("2.0");
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
-  NsAppLinkRPC::Result r(static_cast<NsAppLinkRPC::Result::ResultInternal>(e.getResult()));
-  json["result"]["resultCode"]=NsAppLinkRPC::ResultMarshaller::toJSON(r);
+  NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
+  json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("AppLinkCore.UnsubscribeVehicleDataResponse");
 
   if(e.dataResult)
@@ -75,7 +75,7 @@ Json::Value UnsubscribeVehicleDataResponseMarshaller::toJSON(const UnsubscribeVe
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::VehicleDataResultMarshaller::toJSON(e.dataResult[0][i]);
+      j[i]=NsAppLinkRPCV2::VehicleDataResultMarshaller::toJSON(e.dataResult[0][i]);
 
     json["result"]["dataResult"]=j;
   }
@@ -97,12 +97,12 @@ bool UnsubscribeVehicleDataResponseMarshaller::fromJSON(const Json::Value& json,
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    NsAppLinkRPC::Result r;
+    NsAppLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("AppLinkCore.UnsubscribeVehicleDataResponse")) return false;
 
-    if(!NsAppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
+    if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
     if(c.dataResult)  delete c.dataResult;
     c.dataResult=0;
@@ -113,11 +113,11 @@ bool UnsubscribeVehicleDataResponseMarshaller::fromJSON(const Json::Value& json,
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.dataResult=new std::vector<NsAppLinkRPC::VehicleDataResult>();
+      c.dataResult=new std::vector<NsAppLinkRPCV2::VehicleDataResult>();
       c.dataResult->resize(js["dataResult"].size());
 
       while(i--)
-        if(!NsAppLinkRPC::VehicleDataResultMarshaller::fromJSON(js["dataResult"][i],c.dataResult[0][i]))  return false;
+        if(!NsAppLinkRPCV2::VehicleDataResultMarshaller::fromJSON(js["dataResult"][i],c.dataResult[0][i]))  return false;
     }
 
 

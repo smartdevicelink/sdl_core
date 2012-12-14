@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/VehicleInfo/UnsubscribeVehicleData.h"
-#include "../src/ALRPCObjectsImpl/V1/VehicleDataTypeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/VehicleDataTypeMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataMarshaller.h"
 
 /*
@@ -71,7 +71,7 @@ Json::Value UnsubscribeVehicleDataMarshaller::toJSON(const UnsubscribeVehicleDat
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::VehicleDataTypeMarshaller::toJSON(e.dataType[i]);
+      j[i]=NsAppLinkRPCV2::VehicleDataTypeMarshaller::toJSON(e.dataType[i]);
 
     json["params"]["dataType"]=j;
   }
@@ -102,8 +102,8 @@ bool UnsubscribeVehicleDataMarshaller::fromJSON(const Json::Value& json,Unsubscr
       c.dataType.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::VehicleDataType t;
-        if(!NsAppLinkRPC::VehicleDataTypeMarshaller::fromJSON(js["dataType"][i],t))
+        NsAppLinkRPCV2::VehicleDataType t;
+        if(!NsAppLinkRPCV2::VehicleDataTypeMarshaller::fromJSON(js["dataType"][i],t))
           return false;
          c.dataType[i]=t;
       }
