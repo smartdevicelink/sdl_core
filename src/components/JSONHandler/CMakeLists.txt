@@ -68,8 +68,6 @@ set (GENERATED_SOURCES2
 ./src/ALRPCObjectsImpl/V1/OnEncodedSyncPDataMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/OnHMIStatus.cpp
 ./src/ALRPCObjectsImpl/V1/OnHMIStatusMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/OnTBTClientState.cpp
-./src/ALRPCObjectsImpl/V1/OnTBTClientStateMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/PerformInteraction_request.cpp
 ./src/ALRPCObjectsImpl/V1/PerformInteraction_requestMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/PerformInteraction_response.cpp
@@ -228,7 +226,6 @@ set (GENERATED_SOURCES4
 ./src/ALRPCObjectsImpl/V2/ListFiles_requestMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/ListFiles_response.cpp
 ./src/ALRPCObjectsImpl/V2/ListFiles_responseMarshaller.cpp
-./src/ALRPCObjectsImpl/V2/Marshaller.cpp
 ./src/ALRPCObjectsImpl/V2/messageTypeMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/OnEncodedSyncPData.cpp
 ./src/ALRPCObjectsImpl/V2/OnEncodedSyncPDataMarshaller.cpp
@@ -236,8 +233,6 @@ set (GENERATED_SOURCES4
 ./src/ALRPCObjectsImpl/V2/OnHMIStatusMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/OnPermissionsChange.cpp
 ./src/ALRPCObjectsImpl/V2/OnPermissionsChangeMarshaller.cpp
-./src/ALRPCObjectsImpl/V2/OnTBTClientState.cpp
-./src/ALRPCObjectsImpl/V2/OnTBTClientStateMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/ParameterPermissions.cpp
 ./src/ALRPCObjectsImpl/V2/ParameterPermissionsMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/PerformAudioPassThru_request.cpp
@@ -378,8 +373,6 @@ set (GENERATED_SOURCES7
 )
 
 set (GENERATED_RPC_SOURCES
-./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AddCommandResponse.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AddCommandResponseMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AddSubMenu.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AddSubMenuMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AddSubMenuResponse.cpp
@@ -666,5 +659,12 @@ add_library("JSONHandler" ${SOURCES}
 ./src/ALRPCObjectsImpl/V1/HMILevelMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AddCommand.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AddCommandMarshaller.cpp
+./src/ALRPCObjectsImpl/V1/OnTBTClientState.cpp
+./src/ALRPCObjectsImpl/V1/OnTBTClientStateMarshaller.cpp
+./src/ALRPCObjectsImpl/V2/OnTBTClientState.cpp
+./src/ALRPCObjectsImpl/V2/OnTBTClientStateMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AddCommandResponse.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AddCommandResponseMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/Marshaller.cpp
+./src/ALRPCObjectsImpl/V2/Marshaller.cpp
     ./src/RPC2ObjectsImpl/Marshaller.cpp)
