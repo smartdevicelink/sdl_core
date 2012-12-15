@@ -58,6 +58,17 @@ namespace NsConnectionHandler
         return result;
     }
 
+    int CConnection::getFirstSessionKey()
+    {
+        int result = -1;
+        tSessionListIterator it = mSessionList.begin();
+        if (mSessionList.end() != it)
+        {
+            result = *it;
+        } 
+        return result;
+    }
+
     tConnectionHandle CConnection::getConnectionHandle()
     {
         return mConnectionHandle;

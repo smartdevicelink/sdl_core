@@ -1,4 +1,3 @@
-
 /**
  * @name MFT.AppPerformInteractionChoise
  * 

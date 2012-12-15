@@ -89,13 +89,15 @@ public class WiProProtocol extends AbstractProtocol {
 		
 		byte[] data = null;
 		if (_version == 2) {
-			data = new byte[12 + protocolMsg.getJsonSize()];
+			if (protocolMsg.getBulkData() != null) {
+				data = new byte[12 + protocolMsg.getJsonSize() + protocolMsg.getBulkData().length];
+				sessionType = SessionType.Bulk_Data;
+			} else data = new byte[12 + protocolMsg.getJsonSize()];
 			BinaryFrameHeader binFrameHeader = new BinaryFrameHeader();
 			binFrameHeader = ProtocolFrameHeaderFactory.createBinaryFrameHeader(protocolMsg.getRPCType(), protocolMsg.getFunctionID(), protocolMsg.getCorrID(), protocolMsg.getJsonSize());
 			System.arraycopy(binFrameHeader.assembleHeaderBytes(), 0, data, 0, 12);
 			System.arraycopy(protocolMsg.getData(), 0, data, 12, protocolMsg.getJsonSize());
 			if (protocolMsg.getBulkData() != null) {
-				sessionType = SessionType.Bulk_Data;
 				System.arraycopy(protocolMsg.getBulkData(), 0, data, 12 + protocolMsg.getJsonSize(), protocolMsg.getBulkData().length);
 			}
 		} else {
@@ -395,6 +397,7 @@ public class WiProProtocol extends AbstractProtocol {
 					byte[] _bulkData = new byte[data.length - _jsonSize];
 					System.arraycopy(data, 12 + _jsonSize, _bulkData, 0, data.length - _jsonSize -12 );
 					binFrameHeader.setBulkData(_bulkData);
+					message.setBulkData(_bulkData);
 				}	
 
 				message.setVersion(_version);

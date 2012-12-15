@@ -53,6 +53,8 @@ namespace NsAppLink
          * in order to register as listener to receive callbacks about data information
          *
          * @interface ITransportManagerDataListener
+         *
+         * @see @ref components_transportmanager_client_data_transfer
          **/
         class ITransportManagerDataListener
         {
@@ -69,6 +71,8 @@ namespace NsAppLink
              * @param ConnectionHandle Connection handle.
              * @param Data Received frame payload data.
              * @param DataSize Size of data in bytes.
+             *
+             * @see @ref components_transportmanager_client_data_transfer
              **/
             virtual void onFrameReceived(tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize);
 
@@ -78,6 +82,8 @@ namespace NsAppLink
              * @param ConnectionHandle Connection handle.
              * @param UserData User data that was previously passed to ITransportManager::sendFrame.
              * @param SendStatus Result status.
+             *
+             * @see @ref components_transportmanager_client_data_transfer
              **/
             virtual void onFrameSendCompleted(tConnectionHandle ConnectionHandle, int UserData, ESendStatus SendStatus);
         };

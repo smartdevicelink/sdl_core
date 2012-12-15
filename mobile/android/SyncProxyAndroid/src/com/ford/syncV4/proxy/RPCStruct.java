@@ -9,6 +9,8 @@ import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.proxy.constants.Names;
 
 public class RPCStruct {
+	
+	private byte[] _bulkData = null;
 
 	protected Hashtable<String, Object> store = null;
 	
@@ -50,5 +52,16 @@ public class RPCStruct {
 			hashToSend.put(Names.parameters, hash);
 			return JsonRPCMarshaller.serializeHashtable(hashToSend);
 		} else return JsonRPCMarshaller.serializeHashtable(store);
+	}
+
+	public byte[] getBulkData() {
+		//return this._bulkData;
+		return (byte[])store.get(Names.bulkData);
+	}
+
+	public void setBulkData(byte[] bulkData) {
+		if (bulkData != null) {
+			this._bulkData = bulkData;
+		}
 	}
 }

@@ -49,6 +49,12 @@ MFT.ApplinkMediaController = Em.Object.create({
        FFW.UI.onCommand(element.commandId, element.appId);
     },
 
+
+    /** Call notification OnCommandSoftButton on UIRPC */
+    onCommandSoftButton: function(element){
+       FFW.UI.onCommandSoftButton(element.softButtonID, element.appId);
+    },
+
     /** Switching on Applink Options */
     turnOnApplinkOptions: function(el){
         MFT.States.goToState('media.applink.applinkoptions');
@@ -67,10 +73,16 @@ MFT.ApplinkMediaController = Em.Object.create({
     },
 
     /** Switching on Application */
-    turnOnApplink: function(appName, appId){
-       
-        MFT.ApplinkController.getApplicationModel(1).showInfo.set('appName', appName);
-        FFW.AppLinkCoreClient.ActivateApp(appId);
+    turnOnApplink: function(element){
+
+        MFT.ApplinkController.getApplicationModel(1).showInfo.set('appName', element.appName);
+        FFW.AppLinkCoreClient.ActivateApp(element.appId);
+
+        /* Show Applink application in media left menu */
+        MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);
+        MFT.MediaController.listDown();
+
+        MFT.MediaController.turnOnApplink();
         
     },
 

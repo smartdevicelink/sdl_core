@@ -1,5 +1,6 @@
 package com.ford.syncV4.android.activity;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.Vector;
@@ -15,15 +16,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -32,7 +37,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
@@ -77,11 +81,11 @@ import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.SamplingRate;
 import com.ford.syncV4.proxy.rpc.enums.SoftButtonType;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
-import com.ford.syncV4.proxy.rpc.enums.SamplingRate;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 
 public class SyncProxyTester extends Activity implements OnClickListener {
@@ -832,35 +836,52 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText command1 = (EditText) layout.findViewById(R.id.createcommands_command1);
 							final EditText command2 = (EditText) layout.findViewById(R.id.createcommands_command2);
 							final EditText command3 = (EditText) layout.findViewById(R.id.createcommands_command3);
+							final CheckBox choice1 = (CheckBox) layout.findViewById(R.id.createcommands_choice1);
+							final CheckBox choice2 = (CheckBox) layout.findViewById(R.id.createcommands_choice2);
+							final CheckBox choice3 = (CheckBox) layout.findViewById(R.id.createcommands_choice3);
 
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
 									Vector<Choice> commands = new Vector<Choice>();
-									Choice one = new Choice();
-									one.setChoiceID(autoIncChoiceSetIdCmdId++);
-									one.setMenuName(command1.getText().toString());
-									one.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command1.getText().toString(),
-											"Command one" })));
-									commands.add(one);
-									Choice two = new Choice();
-									two.setChoiceID(autoIncChoiceSetIdCmdId++);
-									two.setMenuName(command2.getText().toString());
-									two.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command2.getText().toString(),
-											"Command two" })));
-									commands.add(two);
-									Choice three = new Choice();
-									three.setChoiceID(autoIncChoiceSetIdCmdId++);
-									three.setMenuName(command3.getText().toString());
-									three.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command3.getText().toString(),
-											"Command three" })));
-									commands.add(three);
-									try {
-										int choiceSetID = autoIncChoiceSetId++;
-										ProxyService.getInstance().getProxyInstance().createInteractionChoiceSet(commands, choiceSetID, autoIncCorrId++);
-										_choiceSetAdapter.add(choiceSetID);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									
+									if (choice1.isChecked()) {
+										Choice one = new Choice();
+										one.setChoiceID(autoIncChoiceSetIdCmdId++);
+										one.setMenuName(command1.getText().toString());
+										one.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command1.getText().toString(),
+												"Command one" })));
+										commands.add(one);
+									}
+									
+									if (choice2.isChecked()) {
+										Choice two = new Choice();
+										two.setChoiceID(autoIncChoiceSetIdCmdId++);
+										two.setMenuName(command2.getText().toString());
+										two.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command2.getText().toString(),
+												"Command two" })));
+										commands.add(two);
+									}
+									
+									if (choice3.isChecked()) {
+										Choice three = new Choice();
+										three.setChoiceID(autoIncChoiceSetIdCmdId++);
+										three.setMenuName(command3.getText().toString());
+										three.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command3.getText().toString(),
+												"Command three" })));
+										commands.add(three);
+									}
+									
+									if (!commands.isEmpty()) {
+										try {
+											int choiceSetID = autoIncChoiceSetId++;
+											ProxyService.getInstance().getProxyInstance().createInteractionChoiceSet(commands, choiceSetID, autoIncCorrId++);
+											_choiceSetAdapter.add(choiceSetID);
+										} catch (SyncException e) {
+											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+										}
+									} else {
+										Toast.makeText(getApplicationContext(), "No commands to set", Toast.LENGTH_SHORT).show();
 									}
 								}
 							});
@@ -1081,6 +1102,15 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setFileType((FileType) spnFileType.getSelectedItem());
 										msg.setPersistentFile(chkPersistentFile.isChecked());
 										msg.setCorrelationID(autoIncCorrId++);
+										
+									    Bitmap photo = BitmapFactory.decodeResource(getResources(), R.drawable.fiesta);
+								        ByteArrayOutputStream bas = new ByteArrayOutputStream();
+									    photo.compress(CompressFormat.JPEG, 100, bas);
+								        byte[] data = new byte[bas.toByteArray().length];
+								        data = bas.toByteArray();
+								        
+								        msg.setBulkData(data);
+										
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {

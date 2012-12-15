@@ -638,6 +638,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			String autoActivateID, boolean callbackToUIThread, int version) 
 			throws SyncException {
 		
+		setWiProVersion((byte)version);
+		
 		_interfaceBroker = new SyncInterfaceBroker();
 		
 		_callbackToUIThread = callbackToUIThread;
@@ -1300,9 +1302,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		// error checking. 
 	private void sendRPCRequestPrivate(RPCRequest request) throws SyncException {
 		SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
-		
+
 		byte[] msgBytes = JsonRPCMarshaller.marshall(request, _wiproVersion);
-		
+
 		ProtocolMessage pm = new ProtocolMessage();
 		pm.setData(msgBytes);
 		pm.setSessionID(_rpcSessionID);

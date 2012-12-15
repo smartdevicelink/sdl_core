@@ -17,8 +17,6 @@ MFT.ApplinkController = Em.Object.create({
 	 * @type object
 	 */
 	registeredApps: {
-		1: 0,	// temp
-		2: 1	// temp
 	},
 	
 	/** 
@@ -87,10 +85,12 @@ MFT.ApplinkController = Em.Object.create({
 
 	/**
 	 * Send notification if device was choosed
+	 *
+	 * @param element: MFT.Button
 	 */
-	onDeviceChoosed: function( el ) {
-		FFW.UI.OnDeviceChosen( el.deviceName );
-		MFT.ApplinkMediaModel.set('showInfo.deviceName', el.deviceName);
+	onDeviceChoosed: function( element ) {
+		FFW.UI.OnDeviceChosen( element.deviceName );
+		MFT.ApplinkModel.set( 'deviceName', element.deviceName );
 	},
 
 	/**
@@ -108,8 +108,18 @@ MFT.ApplinkController = Em.Object.create({
 		MFT.ApplinkMediaModel.onGetAppList( appList );
 	},
 
+	/**
+	 *  Method call's request to get list of applications
+	 */
 	findNewApps: function(){
 		FFW.AppLinkCoreClient.getAppList();
+	},
+
+	/**
+	 *  Method activates selected registered application
+	 */
+	onActivateApplinkApp: function(element){
+		this.getApplicationModel(element.appId).turnOnApplink( element.appName, element.appId );
 	}
 
 });

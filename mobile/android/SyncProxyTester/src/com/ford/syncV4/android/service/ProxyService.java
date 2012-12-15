@@ -165,6 +165,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 						/*autoActivateID*/null,
 						/*callbackToUIThread*/ false,
 						versionNumber);
+						//2);
 			} catch (SyncException e) {
 				e.printStackTrace();
 				//error creating proxy, returned proxy = null

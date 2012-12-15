@@ -18,6 +18,7 @@
 #include "AppMgr/DeviceHandler.h"
 #include "JSONHandler/ALRPCObjects/V2/DisplayCapabilities.h"
 #include "JSONHandler/ALRPCObjects/V2/OnDriverDistraction.h"
+#include "JSONHandler/ALRPCObjects/V2/VehicleType.h"
 
 namespace NsAppLinkRPC
 {
@@ -252,6 +253,8 @@ namespace NsAppManager
 
         NsAppLinkRPC::OnDriverDistraction* mDriverDistractionV1;
         NsAppLinkRPCV2::OnDriverDistraction* mDriverDistractionV2;
+
+        NsAppLinkRPCV2::VehicleType mVehicleType;
 
         SyncPManager     mSyncPManager;
 

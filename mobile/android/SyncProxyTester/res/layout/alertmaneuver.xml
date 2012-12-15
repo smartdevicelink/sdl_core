@@ -22,4 +22,8 @@
         android:layout_height="wrap_content" android:id="@+id/chkManeuverComplete"
         android:text="Maneuver Complete?" android:checked="false">
     </CheckBox>
+    <CheckBox android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:id="@+id/chkIncludeSBs"
+        android:text="Include SoftButtons?" android:checked="false">
+    </CheckBox>
 </LinearLayout>

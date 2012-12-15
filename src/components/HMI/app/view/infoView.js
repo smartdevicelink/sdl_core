@@ -118,7 +118,7 @@ MFT.InfoView = Em.ContainerView.create( MFT.LoadableView, {
 				classNames:			'menu-item lsp1_p',
 				classNameBindings:	 ['MFT.States.info.nonMedia.active:info_active'],
 				//textBinding:		   'AppLink',
-				text:					'NonMedia',
+				textBinding:		'MFT.ApplinkNonMediaModel.appInfo.appName',
 				icon:				  'images/info/info_leftMenu_apps_ico.png',
 				action:				'onState',
 				target:				'MFT.InfoController',

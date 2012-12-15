@@ -34,7 +34,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 		
 			classNames: ['app_title'],
 			
-			contentBinding: 'MFT.ApplinkNonMediaModel.showInfo.deviceName'
+			contentBinding: 'MFT.ApplinkModel.deviceName'
 		}),
 		
 		image: Em.View.extend({
@@ -58,19 +58,19 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 			],
 			
 			field1: MFT.Label.extend({
-				contentBinding: 'MFT.ApplinkNonMediaModel.showInfo.field1'
+				contentBinding: 'MFT.ApplinkNonMediaModel.appInfo.field1'
 			}),
 			
 			field2: MFT.Label.extend({
-				contentBinding: 'MFT.ApplinkNonMediaModel.showInfo.field2'
+				contentBinding: 'MFT.ApplinkNonMediaModel.appInfo.field2'
 			}),
 			
 			field3: MFT.Label.extend({
-				contentBinding: 'MFT.ApplinkNonMediaModel.showInfo.field3'
+				contentBinding: 'MFT.ApplinkNonMediaModel.appInfo.field3'
 			}),
 			
 			field4: MFT.Label.extend({
-				contentBinding: 'MFT.ApplinkNonMediaModel.showInfo.field4'
+				contentBinding: 'MFT.ApplinkNonMediaModel.appInfo.field4'
 			})
 		
 		}),
@@ -86,11 +86,6 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 				childViews: [
 					'optionsButton',
 					'routeInfoButton'
-					//'softButton1',
-					//'softButton2',
-					//'softButton3',
-					//'softButton4',
-					//'softButton5'
 				],
 				
 				optionsButton: MFT.Button.extend({
@@ -109,26 +104,6 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 					//hidden:	true,
 					
 					templateName: 'arrow'
-				}),
-				
-				softButton1: MFT.Button.extend({
-					text: 'Soft Button 1'
-				}),
-				
-				softButton2: MFT.Button.extend({
-					text: 'Soft Button 2'
-				}),
-				
-				softButton3: MFT.Button.extend({
-					text: 'Soft Button 3'
-				}),
-				
-				softButton4: MFT.Button.extend({
-					text: 'Soft Button 4'
-				}),
-				
-				softButton5: MFT.Button.extend({
-					text: 'Soft Button 5'
 				})
 			})
 		})

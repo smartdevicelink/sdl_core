@@ -140,12 +140,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 				},
 				actionUp:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 					if(this.time > 0){
 						FFW.Buttons.buttonPressed( this.elementId, "LONG");
 					}else{
 						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 					}
+					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 					this.time = 0;
 				}
 			}),
@@ -164,12 +164,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 				},
 				actionUp:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 					if(this.time > 0){
 						FFW.Buttons.buttonPressed( this.elementId, "LONG");
 					}else{
 						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 					}
+					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 					this.time = 0;
 				}
 			}),
@@ -188,12 +188,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 				},
 				actionUp:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 					if(this.time > 0){
 						FFW.Buttons.buttonPressed( this.elementId, "LONG");
 					}else{
 						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 					}
+					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 					this.time = 0;
 				}
 			}),
@@ -212,12 +212,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 				},
 				actionUp:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 					if(this.time > 0){
 						FFW.Buttons.buttonPressed( this.elementId, "LONG");
 					}else{
 						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 					}
+					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 					this.time = 0;
 				}
 			}),
@@ -236,12 +236,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 				},
 				actionUp:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 					if(this.time > 0){
 						FFW.Buttons.buttonPressed( this.elementId, "LONG");
 					}else{
 						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 					}
+					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 					this.time = 0;
 				}
 			})
@@ -255,19 +255,19 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
+				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
 				var self = this;
 				this.time = 0;
 				setTimeout(function(){ self.time ++; }, 1000);
 			},
 			actionUp:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				if(this.time > 0){
 					FFW.Buttons.buttonPressed( this.elementId, "LONG");
 				}else{
 					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				this.time = 0;
 			}
 		}),
@@ -287,12 +287,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 			},
 			actionUp:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				if(this.time > 0){
 					FFW.Buttons.buttonPressed( this.elementId, "LONG");
 				}else{
 					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				this.time = 0;
 			}
 		}),
@@ -312,12 +312,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 			},
 			actionUp:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				if(this.time > 0){
 					FFW.Buttons.buttonPressed( this.elementId, "LONG");
 				}else{
 					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				this.time = 0;
 			}
 		}),
@@ -337,12 +337,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 			},
 			actionUp:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				if(this.time > 0){
 					FFW.Buttons.buttonPressed( this.elementId, "LONG");
 				}else{
 					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				this.time = 0;
 			}
 		}),
@@ -362,12 +362,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 			},
 			actionUp:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				if(this.time > 0){
 					FFW.Buttons.buttonPressed( this.elementId, "LONG");
 				}else{
 					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				this.time = 0;
 			}
 		}),
@@ -387,12 +387,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 			},
 			actionUp:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				if(this.time > 0){
 					FFW.Buttons.buttonPressed( this.elementId, "LONG");
 				}else{
 					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				this.time = 0;
 			}
 		}),
@@ -412,12 +412,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 			},
 			actionUp:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				if(this.time > 0){
 					FFW.Buttons.buttonPressed( this.elementId, "LONG");
 				}else{
 					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				this.time = 0;
 			}
 		}),
@@ -437,12 +437,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 			},
 			actionUp:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				if(this.time > 0){
 					FFW.Buttons.buttonPressed( this.elementId, "LONG");
 				}else{
 					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				this.time = 0;
 			}
 		}),
@@ -462,12 +462,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 			},
 			actionUp:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				if(this.time > 0){
 					FFW.Buttons.buttonPressed( this.elementId, "LONG");
 				}else{
 					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				this.time = 0;
 			}
 		}),
@@ -487,12 +487,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 			},
 			actionUp:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				if(this.time > 0){
 					FFW.Buttons.buttonPressed( this.elementId, "LONG");
 				}else{
 					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
 				}
+				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				this.time = 0;
 			}
 		}),

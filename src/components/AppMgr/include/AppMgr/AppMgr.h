@@ -77,7 +77,7 @@ namespace NsAppManager
          * \param deviceHandle
          * \param sessionKey
          */
-        virtual void onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey);
+        virtual void onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey, int firstSessionKey);
 
         /**
          * \brief callback which is called upon session ending

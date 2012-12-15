@@ -2,8 +2,39 @@ package com.ford.syncV4.proxy;
 
 import java.util.Vector;
 
-import com.ford.syncV4.proxy.rpc.*;
-import com.ford.syncV4.proxy.rpc.enums.*;
+import com.ford.syncV4.proxy.rpc.AddCommand;
+import com.ford.syncV4.proxy.rpc.AddSubMenu;
+import com.ford.syncV4.proxy.rpc.Alert;
+import com.ford.syncV4.proxy.rpc.Choice;
+import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
+import com.ford.syncV4.proxy.rpc.DeleteCommand;
+import com.ford.syncV4.proxy.rpc.DeleteFile;
+import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
+import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
+import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
+import com.ford.syncV4.proxy.rpc.ListFiles;
+import com.ford.syncV4.proxy.rpc.MenuParams;
+import com.ford.syncV4.proxy.rpc.PerformInteraction;
+import com.ford.syncV4.proxy.rpc.PutFile;
+import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
+import com.ford.syncV4.proxy.rpc.SetAppIcon;
+import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
+import com.ford.syncV4.proxy.rpc.SetMediaClockTimer;
+import com.ford.syncV4.proxy.rpc.Show;
+import com.ford.syncV4.proxy.rpc.Speak;
+import com.ford.syncV4.proxy.rpc.StartTime;
+import com.ford.syncV4.proxy.rpc.SubscribeButton;
+import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
+import com.ford.syncV4.proxy.rpc.TTSChunk;
+import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
+import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
+import com.ford.syncV4.proxy.rpc.enums.AppType;
+import com.ford.syncV4.proxy.rpc.enums.ButtonName;
+import com.ford.syncV4.proxy.rpc.enums.FileType;
+import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
+import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
+import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
 public class RPCRequestFactory {
 
@@ -140,6 +171,14 @@ public class RPCRequestFactory {
 		return msg;
 	}
 	
+	public static DeleteFile buildDeleteFile(String syncFileName,
+			Integer correlationID) {
+		DeleteFile deleteFile = new DeleteFile();
+		deleteFile.setCorrelationID(correlationID);
+		deleteFile.setSyncFileName(syncFileName);
+		return deleteFile;
+	}
+	
 	public static DeleteInteractionChoiceSet buildDeleteInteractionChoiceSet(
 			Integer interactionChoiceSetID, Integer correlationID) {
 		DeleteInteractionChoiceSet msg = new DeleteInteractionChoiceSet();
@@ -156,6 +195,12 @@ public class RPCRequestFactory {
 		msg.setMenuID(menuID);
 
 		return msg;
+	}
+	
+	public static ListFiles buildListFiles(Integer correlationID) {
+		ListFiles listFiles = new ListFiles();
+		listFiles.setCorrelationID(correlationID);
+		return listFiles;
 	}
 
 	public static PerformInteraction buildPerformInteraction(
@@ -250,6 +295,17 @@ public class RPCRequestFactory {
 		return msg;
 	}
 	
+	public static PutFile buildPutFile(String syncFileName, FileType fileType,
+			Boolean persistentFile, byte[] fileData, Integer correlationID) {
+		PutFile putFile = new PutFile();
+		putFile.setCorrelationID(correlationID);
+		putFile.setSyncFileName(syncFileName);
+		putFile.setFileType(fileType);
+		putFile.setPersistentFile(persistentFile);
+		putFile.setBulkData(fileData);
+		return putFile;
+	}
+	
 	public static RegisterAppInterface buildRegisterAppInterface(String appName) {
 		return buildRegisterAppInterface(appName, false);
 	}
@@ -314,6 +370,14 @@ public class RPCRequestFactory {
 		msg.setAppID(appID);
 
 		return msg;
+	}
+	
+	public static SetAppIcon buildSetAppIcon(String syncFileName,
+			Integer correlationID) {
+		SetAppIcon setAppIcon = new SetAppIcon();
+		setAppIcon.setCorrelationID(correlationID);
+		setAppIcon.setSyncFileName(syncFileName);
+		return setAppIcon;
 	}
 	
 	public static SetGlobalProperties buildSetGlobalProperties(

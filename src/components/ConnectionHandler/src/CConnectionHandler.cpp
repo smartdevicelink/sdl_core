@@ -98,6 +98,7 @@ namespace NsConnectionHandler
             LOG4CPLUS_ERROR( mLogger, "Unknown connection!");
         } else
         {
+            int firstSessionID = (it->second).getFirstSessionKey();
             newSessionID = (it->second).addNewSession();
             if (0 > newSessionID)
             {
@@ -107,9 +108,13 @@ namespace NsConnectionHandler
                 LOG4CPLUS_INFO( mLogger, "New session ID:" << newSessionID );
                 if (0 != mpConnectionHandlerObserver)
                 {
+                    if (0 < firstSessionID)
+                    {
+                        firstSessionID = keyFromPair(connectionHandle, firstSessionID);
+                    }
                     int sessionKey = keyFromPair(connectionHandle, newSessionID);
                     mpConnectionHandlerObserver->onSessionStartedCallback((it->second).getConnectionDeviceHandle()
-                                                                         , sessionKey);
+                                                                         , sessionKey, firstSessionID);
                 }
             }
         }

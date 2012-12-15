@@ -92,8 +92,18 @@ div {
 	display: block;
 }
 /* Diver Distraction PopUp */
-#driverDistraction.driverDistraction{
+#driverDistraction.driverDistractionWindow{
+	left: 0;
+	top: 0;
+	width: 800px;
+	height: 480px;
+	background: rgba(0, 0, 0, 0.7);
+	z-index: 30000;
 	opacity: 0;
+	display: none;
+}
+
+#driverDistraction .driverDistraction{
 	left: 200px;
 	width: 400px;
 	height: 200px;
@@ -103,7 +113,6 @@ div {
 	background-color: black;
 	border: #A6A6A6 solid 2px;
 	border-radius: 6px;
-	display: none;
 }
 
 #driverDistraction.active{
@@ -112,12 +121,13 @@ div {
 }
 
 #driverDistraction .driverDistractionText{
-	top: 84px;
-	left: 10px;
+	top: 224px;
+	left: 210px;
 	width: 374px;
 	height: 20px;
 	text-align: center;
 	font-size: 28px;
+	z-index: 2;
 }
 /* UI popUp*/
 

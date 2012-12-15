@@ -32,6 +32,8 @@
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/ALRPCObjects/V2/AppType.h"
+#include "Utils/ClientSocket.h"
+#include "Utils/SocketException.h"
 #include <sys/socket.h>
 #include "LoggerHelper.hpp"
 #include <iostream>
@@ -57,6 +59,40 @@ namespace {
         response->setId(responseId);
         response->setResult(result);
         NsAppManager::HMIHandler::getInstance().sendResponse(response);
+    }
+
+    struct thread_data
+    {
+        int  timeout;
+        std::string url;
+        NsAppManager::SyncPManager::PData pdata;
+    };
+
+    void *SendPData(void *data)
+    {
+        struct thread_data* my_data = (struct thread_data*) data;
+        int timeout = my_data->timeout;
+        std::string url = my_data->url;
+        NsAppManager::SyncPManager::PData pData = my_data->pdata;
+        sleep(timeout);
+        int port = 80;
+        size_t pos = url.find(":");
+        if(pos != std::string::npos)
+        {
+            std::string strPort = url.substr(pos+1);
+            if(!strPort.empty())
+            {
+                port = atoi(strPort.c_str());
+            }
+        }
+        ClientSocket client_socket( url, port );
+  //      std::string reply;
+        for(NsAppManager::SyncPManager::PData::iterator it = pData.begin(); it != pData.end(); it++)
+        {
+            client_socket << *it;
+  //          client_socket >> reply;
+        }
+        pthread_exit(NULL);
     }
 }
 
@@ -260,7 +296,6 @@ namespace NsAppManager
                     appRegistered->set_isMediaApplication(app->getIsMediaApplication());
                     appRegistered->set_languageDesired(app->getLanguageDesired());
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
-                    appRegistered->set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
                     appRegistered->set_deviceName(currentDeviceName);
                     HMIHandler::getInstance().sendNotification(appRegistered);
                     LOG4CPLUS_INFO_EXT(mLogger, " An AppLinkCore::OnAppRegistered notofocation for the app "  << app->getName() << " connection/session key " << app->getAppID() << " gets sent to an HMI side... ");
@@ -366,13 +401,17 @@ namespace NsAppManager
                         showRPC2Request->set_mainField1(*object->get_mainField1());
                     }
                     LOG4CPLUS_INFO_EXT(mLogger, "setMainField1 was called");
-                    if(object->get_mediaClock())
+                    if(object->get_mainField2())
                     {
                         showRPC2Request->set_mainField2(*object->get_mainField2());
                     }
                     if(object->get_mediaClock())
                     {
                         showRPC2Request->set_mediaClock(*object->get_mediaClock());
+                    }
+                    if(object->get_mediaTrack())
+                    {
+                        showRPC2Request->set_mediaTrack(*object->get_mediaTrack());
                     }
                     if(object->get_statusBar())
                     {
@@ -564,6 +603,14 @@ namespace NsAppManager
                     NsAppLinkRPC::DeleteCommand_request* object = (NsAppLinkRPC::DeleteCommand_request*)mobileMsg;
 
                     CommandTypes cmdTypes = app->getCommandTypes(object->get_cmdID());
+                    if(cmdTypes.empty())
+                    {
+                        NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
                     const unsigned int& cmdId = object->get_cmdID();
                     for(CommandTypes::iterator it = cmdTypes.begin(); it != cmdTypes.end(); it++)
                     {
@@ -671,6 +718,7 @@ namespace NsAppManager
                                 delVrCmd->set_appId(app->getAppID());
                                 core->mMessageMapping.addMessage(delVrCmd->getId(), connectionID, sessionID);
                                 core->mRequestMapping.addMessage(delVrCmd->getId(), *it);
+                                app->removeCommand(*it, CommandType::VR);
                                 HMIHandler::getInstance().sendRequest(delVrCmd);
                             }
                         }
@@ -825,7 +873,6 @@ namespace NsAppManager
                 default:
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message " << mobileMsg->getMethodId() << " has been received!");
-
                     NsAppLinkRPC::GenericResponse_response* response = new NsAppLinkRPC::GenericResponse_response();
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
@@ -886,6 +933,7 @@ namespace NsAppManager
                     response->set_syncMsgVersion(app->getSyncMsgVersion());
                     response->set_softButtonCapabilities(core->mSoftButtonCapabilities.get());
                     response->set_presetBankCapabilities(core->mPresetBankCapabilities);
+                    response->set_vehicleType(core->mVehicleType);
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
 
@@ -908,7 +956,18 @@ namespace NsAppManager
                     appRegistered->set_hmiDisplayLanguageDesired(hmiLanguageDesiredV1);
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
                     appRegistered->set_deviceName(currentDeviceName);
-                    appRegistered->set_ttsName(*(std::vector<NsAppLinkRPC::TTSChunk>*)&app->getTtsName());
+                    std::vector< NsAppLinkRPC::TTSChunk> ttsName;
+                    for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = app->getTtsName().begin(); it != app->getTtsName().end(); it++)
+                    {
+                        const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                        NsAppLinkRPC::TTSChunk chunkV1;
+                        chunkV1.set_text(chunk.get_text());
+                        NsAppLinkRPC::SpeechCapabilities caps;
+                        caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                        chunkV1.set_type(caps);
+                        ttsName.push_back(chunkV1);
+                    }
+                    appRegistered->set_ttsName(ttsName);
                     HMIHandler::getInstance().sendNotification(appRegistered);
                     LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                     break;
@@ -1187,6 +1246,27 @@ namespace NsAppManager
                     HMIHandler::getInstance().sendRequest(slider);
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::SetAppIconID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A SetAppIcon request has been invoked");
+                    NsAppLinkRPCV2::SetAppIcon_request* request = static_cast<NsAppLinkRPCV2::SetAppIcon_request*>(mobileMsg);
+                    Application* app = core->getApplicationFromItemCheckNotNull(
+                        AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                    if (!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                        return;
+                    }
+
+                    NsRPC2Communication::UI::SetAppIcon* setAppIcon = new NsRPC2Communication::UI::SetAppIcon();
+                    setAppIcon->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    setAppIcon->set_syncFileName(request->get_syncFileName());
+                    setAppIcon->set_appId(app->getAppID());
+
+                    core->mMessageMapping.addMessage(setAppIcon->getId(), connectionID, sessionID);
+                    HMIHandler::getInstance().sendRequest(setAppIcon);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::EncodedSyncPDataID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An EncodedSyncPData request has been invoked");
@@ -1210,12 +1290,43 @@ namespace NsAppManager
                     core->mMessageMapping.addMessage(setGPRPC2Request->getId(), connectionID, sessionID);
                     if(object->get_helpPrompt())
                     {
-                        setGPRPC2Request->set_helpPrompt(*((std::vector<NsAppLinkRPC::TTSChunk>*)object->get_helpPrompt()));
+                        std::vector< NsAppLinkRPC::TTSChunk> helpPrompt;
+                        for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = object->get_helpPrompt()->begin(); it != object->get_helpPrompt()->end(); it++)
+                        {
+                            const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                            NsAppLinkRPC::TTSChunk chunkV1;
+                            chunkV1.set_text(chunk.get_text());
+                            NsAppLinkRPC::SpeechCapabilities caps;
+                            caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                            chunkV1.set_type(caps);
+                            helpPrompt.push_back(chunkV1);
+                        }
+                        setGPRPC2Request->set_helpPrompt(helpPrompt);
                     }
 
                     if(object->get_timeoutPrompt())
                     {
-                        setGPRPC2Request->set_timeoutPrompt(*((std::vector<NsAppLinkRPC::TTSChunk>*)object->get_timeoutPrompt()));
+                        std::vector< NsAppLinkRPC::TTSChunk> timeoutPrompt;
+                        for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = object->get_timeoutPrompt()->begin(); it != object->get_timeoutPrompt()->end(); it++)
+                        {
+                            const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                            NsAppLinkRPC::TTSChunk chunkV1;
+                            chunkV1.set_text(chunk.get_text());
+                            NsAppLinkRPC::SpeechCapabilities caps;
+                            caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                            chunkV1.set_type(caps);
+                            timeoutPrompt.push_back(chunkV1);
+                        }
+                        setGPRPC2Request->set_timeoutPrompt(timeoutPrompt);
+                    }
+
+                    if(object->get_vrHelp())
+                    {
+                        setGPRPC2Request->set_vrHelp(*object->get_vrHelp());
+                    }
+                    if(object->get_vrHelpTitle())
+                    {
+                        setGPRPC2Request->set_vrHelpTitle(*object->get_vrHelpTitle());
                     }
 
                     setGPRPC2Request->set_appId(appId);
@@ -1233,7 +1344,15 @@ namespace NsAppManager
                     NsRPC2Communication::UI::ResetGlobalProperties* resetGPRPC2Request = new NsRPC2Communication::UI::ResetGlobalProperties();
                     resetGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     core->mMessageMapping.addMessage(resetGPRPC2Request->getId(), connectionID, sessionID);
-                    resetGPRPC2Request->set_properties(*((std::vector<NsAppLinkRPC::GlobalProperty>*)&object->get_properties()));
+                    std::vector< NsAppLinkRPC::GlobalProperty> gp;
+                    for(std::vector< NsAppLinkRPCV2::GlobalProperty>::const_iterator it = object->get_properties().begin(); it != object->get_properties().end(); it++)
+                    {
+                        const NsAppLinkRPCV2::GlobalProperty& prop = *it;
+                        NsAppLinkRPC::GlobalProperty propV1;
+                        propV1.set((NsAppLinkRPC::GlobalProperty::GlobalPropertyInternal)prop.get());
+                        gp.push_back(propV1);
+                    }
+                    resetGPRPC2Request->set_properties(gp);
                     resetGPRPC2Request->set_appId(appId);
                     HMIHandler::getInstance().sendRequest(resetGPRPC2Request);
                     NsAppLinkRPCV2::ResetGlobalProperties_response * mobileResponse = new NsAppLinkRPCV2::ResetGlobalProperties_response;
@@ -1310,9 +1429,31 @@ namespace NsAppManager
                     core->mMessageMapping.addMessage(performInteraction->getId(), connectionID, sessionID);
                     if(object->get_helpPrompt())
                     {
-                        performInteraction->set_helpPrompt(*(const std::vector<NsAppLinkRPC::TTSChunk>*)object->get_helpPrompt());
+                        std::vector< NsAppLinkRPC::TTSChunk> helpPrompt;
+                        for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = object->get_helpPrompt()->begin(); it != object->get_helpPrompt()->end(); it++)
+                        {
+                            const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                            NsAppLinkRPC::TTSChunk chunkV1;
+                            chunkV1.set_text(chunk.get_text());
+                            NsAppLinkRPC::SpeechCapabilities caps;
+                            caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                            chunkV1.set_type(caps);
+                            helpPrompt.push_back(chunkV1);
+                        }
+                        performInteraction->set_helpPrompt(helpPrompt);
                     }
-                    performInteraction->set_initialPrompt(*(std::vector<NsAppLinkRPC::TTSChunk>*)&object->get_initialPrompt());
+                    std::vector< NsAppLinkRPC::TTSChunk> initialPrompt;
+                    for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = object->get_initialPrompt().begin(); it != object->get_initialPrompt().end(); it++)
+                    {
+                        const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                        NsAppLinkRPC::TTSChunk chunkV1;
+                        chunkV1.set_text(chunk.get_text());
+                        NsAppLinkRPC::SpeechCapabilities caps;
+                        caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                        chunkV1.set_type(caps);
+                        initialPrompt.push_back(chunkV1);
+                    }
+                    performInteraction->set_initialPrompt(initialPrompt);
                     performInteraction->set_initialText(object->get_initialText());
                     performInteraction->set_interactionChoiceSetIDList(object->get_interactionChoiceSetIDList());
                     const NsAppLinkRPCV2::InteractionMode& interactionMode = object->get_interactionMode();
@@ -1325,9 +1466,24 @@ namespace NsAppManager
                     }
                     if(object->get_timeoutPrompt())
                     {
-                        performInteraction->set_timeoutPrompt(*(std::vector<NsAppLinkRPC::TTSChunk>*)object->get_timeoutPrompt());
+                        std::vector< NsAppLinkRPC::TTSChunk> timeoutPrompt;
+                        for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = object->get_timeoutPrompt()->begin(); it != object->get_timeoutPrompt()->end(); it++)
+                        {
+                            const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                            NsAppLinkRPC::TTSChunk chunkV1;
+                            chunkV1.set_text(chunk.get_text());
+                            NsAppLinkRPC::SpeechCapabilities caps;
+                            caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                            chunkV1.set_type(caps);
+                            timeoutPrompt.push_back(chunkV1);
+                        }
+                        performInteraction->set_timeoutPrompt(timeoutPrompt);
                     }
                     performInteraction->set_appId(appId);
+                    if(object->get_vrHelp())
+                    {
+                        performInteraction->set_vrHelp(*object->get_vrHelp());
+                    }
                     HMIHandler::getInstance().sendRequest(performInteraction);
                 }
                 case NsAppLinkRPCV2::FunctionID::AlertID:
@@ -1345,6 +1501,10 @@ namespace NsAppManager
                     {
                         alert->set_AlertText2(*object->get_alertText2());
                     }
+                    if(object->get_alertText3())
+                    {
+                        alert->set_alertText3(*object->get_alertText3());
+                    }
                     if(object->get_duration())
                     {
                         alert->set_duration(*object->get_duration());
@@ -1352,6 +1512,10 @@ namespace NsAppManager
                     if(object->get_playTone())
                     {
                         alert->set_playTone(*object->get_playTone());
+                    }
+                    if(object->get_softButtons())
+                    {
+                        alert->set_softButtons(*object->get_softButtons());
                     }
                     alert->set_appId(appId);
                     HMIHandler::getInstance().sendRequest(alert);
@@ -1369,18 +1533,41 @@ namespace NsAppManager
                     {
                         showRPC2Request->set_mainField1(*object->get_mainField1());
                     }
-                    LOG4CPLUS_INFO_EXT(mLogger, "setMainField1 was called");
-                    if(object->get_mediaClock())
+                    if(object->get_mainField2())
                     {
                         showRPC2Request->set_mainField2(*object->get_mainField2());
+                    }
+                    if(object->get_mainField3())
+                    {
+                        showRPC2Request->set_mainField1(*object->get_mainField3());
+                    }
+                    if(object->get_mainField4())
+                    {
+                        showRPC2Request->set_mainField1(*object->get_mainField4());
                     }
                     if(object->get_mediaClock())
                     {
                         showRPC2Request->set_mediaClock(*object->get_mediaClock());
                     }
+                    if(object->get_mediaTrack())
+                    {
+                        showRPC2Request->set_mediaTrack(*object->get_mediaTrack());
+                    }
                     if(object->get_statusBar())
                     {
                         showRPC2Request->set_statusBar(*object->get_statusBar());
+                    }
+                    if(object->get_graphic())
+                    {
+                        showRPC2Request->set_graphic(*object->get_graphic());
+                    }
+                    if(object->get_softButtons())
+                    {
+                        showRPC2Request->set_softButtons(*object->get_softButtons());
+                    }
+                    if(object->get_customPresets())
+                    {
+                        showRPC2Request->set_customPresets(*object->get_customPresets());
                     }
                     if(object->get_alignment())
                     {
@@ -1467,6 +1654,11 @@ namespace NsAppManager
                         }
                         core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
 
+                        if(object->get_cmdIcon())
+                        {
+                            addCmd->set_cmdIcon(*object->get_cmdIcon());
+                        }
+
                         CommandParams params;
                         params.menuParamsV2 = menuParams;
                         app->addCommand(cmdId, cmdType, params);
@@ -1512,6 +1704,14 @@ namespace NsAppManager
                     NsAppLinkRPCV2::DeleteCommand_request* object = (NsAppLinkRPCV2::DeleteCommand_request*)mobileMsg;
 
                     CommandTypes cmdTypes = app->getCommandTypes(object->get_cmdID());
+                    if(cmdTypes.empty())
+                    {
+                        NsAppLinkRPCV2::DeleteCommand_response* response = new NsAppLinkRPCV2::DeleteCommand_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        break;
+                    }
                     const unsigned int& cmdId = object->get_cmdID();
                     for(CommandTypes::iterator it = cmdTypes.begin(); it != cmdTypes.end(); it++)
                     {
@@ -1619,6 +1819,7 @@ namespace NsAppManager
                                 delVrCmd->set_appId(app->getAppID());
                                 core->mMessageMapping.addMessage(delVrCmd->getId(), connectionID, sessionID);
                                 core->mRequestMapping.addMessage(delVrCmd->getId(), *it);
+                                app->removeCommand(*it, CommandType::VR);
                                 HMIHandler::getInstance().sendRequest(delVrCmd);
                             }
                         }
@@ -1632,6 +1833,7 @@ namespace NsAppManager
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
                 {
+                    LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message " << mobileMsg->getMethodId() << " has been received!");
                     NsAppLinkRPCV2::GenericResponse_response* response = new NsAppLinkRPCV2::GenericResponse_response();
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::GenericResponseID);
                     response->set_success(false);
@@ -1663,6 +1865,18 @@ namespace NsAppManager
             return;
         }
         AppMgrCore* core = (AppMgrCore*)pThis;
+
+        switch(msg->getMethod())
+        {
+            case NsRPC2Communication::Marshaller::METHOD_INVALID:
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " An invalid RPC message " << msg->getMethod() << " has been received!");
+                return;
+            }
+            default:
+                LOG4CPLUS_INFO_EXT(mLogger, " A valid RPC message " << msg->getMethod() << " has been received!");
+        }
+
         switch(msg->getMethod())
         {
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT:
@@ -1772,16 +1986,28 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetButtonCapabilities response has been income");
                 NsRPC2Communication::Buttons::GetCapabilitiesResponse * btnCaps = (NsRPC2Communication::Buttons::GetCapabilitiesResponse*)msg;
                 core->mButtonCapabilitiesV1.set( btnCaps->get_capabilities() );
-                core->mButtonCapabilitiesV2.set( *((std::vector< NsAppLinkRPCV2::ButtonCapabilities>*)&btnCaps->get_capabilities()) );
+                std::vector< NsAppLinkRPCV2::ButtonCapabilities> caps;
+                for(std::vector< NsAppLinkRPC::ButtonCapabilities>::const_iterator it = btnCaps->get_capabilities().begin(); it != btnCaps->get_capabilities().end(); it++)
+                {
+                    const NsAppLinkRPC::ButtonCapabilities& cap = *it;
+                    NsAppLinkRPCV2::ButtonCapabilities capV2;
+                    capV2.set_longPressAvailable(cap.get_longPressAvailable());
+                    NsAppLinkRPCV2::ButtonName btnName;
+                    btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)cap.get_name().get());
+                    capV2.set_name(btnName);
+                    capV2.set_shortPressAvailable(cap.get_shortPressAvailable());
+                    capV2.set_upDownAvailable(cap.get_upDownAvailable());
+                    caps.push_back(capV2);
+                }
+                core->mButtonCapabilitiesV2.set(caps);
                 if(btnCaps->get_presetBankCapabilities())
                 {
                     core->mPresetBankCapabilities = *btnCaps->get_presetBankCapabilities();
                 }
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not Buttons RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not Buttons RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -1799,6 +2025,8 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendRequest(getTtsCapsRequest);
                 NsRPC2Communication::Buttons::GetCapabilities* getButtonsCapsRequest = new NsRPC2Communication::Buttons::GetCapabilities();
                 HMIHandler::getInstance().sendRequest(getButtonsCapsRequest);
+                NsRPC2Communication::VehicleInfo::GetVehicleType* getVehicleType = new NsRPC2Communication::VehicleInfo::GetVehicleType;
+                HMIHandler::getInstance().sendRequest(getVehicleType);
 
                 ConnectionHandler::getInstance().startDevicesDiscovery();
 
@@ -1809,9 +2037,48 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetUICapabilities response has been income");
                 NsRPC2Communication::UI::GetCapabilitiesResponse * uiCaps = (NsRPC2Communication::UI::GetCapabilitiesResponse*)msg;
                 core->mDisplayCapabilitiesV1 = uiCaps->get_displayCapabilities();
-                core->mDisplayCapabilitiesV2 = (*(NsAppLinkRPCV2::DisplayCapabilities*)&uiCaps->get_displayCapabilities());
+
+                NsAppLinkRPCV2::DisplayCapabilities displayCaps;
+                const NsAppLinkRPC::DisplayCapabilities& displayCapsV1 = uiCaps->get_displayCapabilities();
+                NsAppLinkRPCV2::DisplayType displayType;
+                displayType.set((NsAppLinkRPCV2::DisplayType::DisplayTypeInternal)displayCapsV1.get_displayType().get());
+                displayCaps.set_displayType(displayType);
+                std::vector<NsAppLinkRPCV2::MediaClockFormat> fmt;
+                for(std::vector<NsAppLinkRPC::MediaClockFormat>::const_iterator it = displayCapsV1.get_mediaClockFormats().begin(); it != displayCapsV1.get_mediaClockFormats().end(); it++)
+                {
+                    NsAppLinkRPCV2::MediaClockFormat fmtItem;
+                    fmtItem.set((NsAppLinkRPCV2::MediaClockFormat::MediaClockFormatInternal)(*it).get());
+                    fmt.push_back(fmtItem);
+                }
+                displayCaps.set_mediaClockFormats(fmt);
+                std::vector<NsAppLinkRPCV2::TextField> txtFields;
+                for(std::vector<NsAppLinkRPC::TextField>::const_iterator it = displayCapsV1.get_textFields().begin(); it != displayCapsV1.get_textFields().end(); it++)
+                {
+                    NsAppLinkRPCV2::TextField txtField;
+                    const NsAppLinkRPC::TextField txtFieldV1 = *it;
+                    NsAppLinkRPCV2::CharacterSet charset;
+                    charset.set((NsAppLinkRPCV2::CharacterSet::CharacterSetInternal)txtFieldV1.get_characterSet().get());
+                    txtField.set_characterSet(charset);
+                    NsAppLinkRPCV2::TextFieldName name;
+                    name.set((NsAppLinkRPCV2::TextFieldName::TextFieldNameInternal)txtFieldV1.get_name().get());
+                    txtField.set_name(name);
+                    txtField.set_rows(txtFieldV1.get_rows());
+                    txtField.set_width(txtFieldV1.get_width());
+                    txtFields.push_back(txtField);
+                }
+                displayCaps.set_textFields(txtFields);
+                core->mDisplayCapabilitiesV2 = displayCaps;
                 core->mHmiZoneCapabilitiesV1.set( uiCaps->get_hmiZoneCapabilities() );
-                core->mHmiZoneCapabilitiesV2.set( *(std::vector<NsAppLinkRPCV2::HmiZoneCapabilities>*)&uiCaps->get_hmiZoneCapabilities() );
+
+                std::vector< NsAppLinkRPCV2::HmiZoneCapabilities> hmiCaps;
+                for(std::vector< NsAppLinkRPC::HmiZoneCapabilities>::const_iterator it = uiCaps->get_hmiZoneCapabilities().begin(); it != uiCaps->get_hmiZoneCapabilities().end(); it++)
+                {
+                    const NsAppLinkRPC::HmiZoneCapabilities& cap = *it;
+                    NsAppLinkRPCV2::HmiZoneCapabilities capV2;
+                    capV2.set((NsAppLinkRPCV2::HmiZoneCapabilities::HmiZoneCapabilitiesInternal)cap.get());
+                    hmiCaps.push_back(capV2);
+                }
+                core->mHmiZoneCapabilitiesV2.set( hmiCaps );
                 if(uiCaps->get_softButtonCapabilities())
                 {
                     core->mSoftButtonCapabilities.set(*uiCaps->get_softButtonCapabilities());
@@ -2018,7 +2285,10 @@ namespace NsAppManager
                         NsAppLinkRPCV2::Alert_response* response = new NsAppLinkRPCV2::Alert_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
-
+                        if(object->get_tryAgainTime())
+                        {
+                            response->set_tryAgainTime(*object->get_tryAgainTime());
+                        }
                         unsigned char sessionID = app->getSessionID();
                         unsigned int connectionId = app->getConnectionID();
                         core->mMessageMapping.removeMessage(object->getId());
@@ -2422,6 +2692,8 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, " null-application found as an active item!");
                     return;
                 }
+
+                LOG4CPLUS_INFO_EXT(mLogger, " About to send OnHMIStatus to a mobile side...");
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2492,6 +2764,34 @@ namespace NsAppManager
                 MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETAPPICONRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A SetAppId response has been income");
+                NsRPC2Communication::UI::SetAppIconResponse* uiResponse = static_cast<NsRPC2Communication::UI::SetAppIconResponse*>(msg);
+
+                Application* app = core->getApplicationFromItemCheckNotNull(
+                    core->mMessageMapping.findRegistryItemAssignedToCommand(uiResponse->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                unsigned char sessionID = app->getSessionID();
+                unsigned int connectionId = app->getConnectionID();
+                NsAppLinkRPCV2::Result::ResultInternal resultCode
+                    = static_cast<NsAppLinkRPCV2::Result::ResultInternal>(uiResponse->getResult());
+
+                NsAppLinkRPCV2::SetAppIcon_response* response = new NsAppLinkRPCV2::SetAppIcon_response();
+                response->setMethodId(NsAppLinkRPCV2::FunctionID::SetAppIconID);
+                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                response->set_resultCode(resultCode);
+                NsAppLinkRPCV2::Result::SUCCESS == resultCode ? response->set_success(true) : response->set_success(false);
+
+                core->mMessageMapping.removeMessage(uiResponse->getId());
+                MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                return;
+            }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONDEVICECHOSEN:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnDeviceChosen notification has been income");
@@ -2505,9 +2805,8 @@ namespace NsAppManager
                 }
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -2517,7 +2816,15 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetVRCapabilities response has been income");
                 NsRPC2Communication::VR::GetCapabilitiesResponse * vrCaps = (NsRPC2Communication::VR::GetCapabilitiesResponse*)msg;
                 core->mVrCapabilitiesV1.set(vrCaps->get_capabilities());
-                core->mVrCapabilitiesV2.set(*((std::vector< NsAppLinkRPCV2::VrCapabilities>*)&vrCaps->get_capabilities()));
+                std::vector< NsAppLinkRPCV2::VrCapabilities> vrCapsV2;
+                for(std::vector< NsAppLinkRPC::VrCapabilities>::const_iterator it = vrCaps->get_capabilities().begin(); it != vrCaps->get_capabilities().end(); it++)
+                {
+                    const NsAppLinkRPC::VrCapabilities& caps = *it;
+                    NsAppLinkRPCV2::VrCapabilities capsV2;
+                    capsV2.set((NsAppLinkRPCV2::VrCapabilities::VrCapabilitiesInternal)caps.get());
+                    vrCapsV2.push_back(capsV2);
+                }
+                core->mVrCapabilitiesV2.set(vrCapsV2);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMANDRESPONSE:
@@ -2644,9 +2951,8 @@ namespace NsAppManager
                 }
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not VR RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not VR RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -2656,7 +2962,15 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetTTSCapabilities response has been income");
                 NsRPC2Communication::TTS::GetCapabilitiesResponse * ttsCaps = (NsRPC2Communication::TTS::GetCapabilitiesResponse*)msg;
                 core->mSpeechCapabilitiesV1.set(ttsCaps->get_capabilities());
-                core->mSpeechCapabilitiesV2.set(*((std::vector< NsAppLinkRPCV2::SpeechCapabilities>*)&ttsCaps->get_capabilities()));
+                std::vector< NsAppLinkRPCV2::SpeechCapabilities> speechCapsV2;
+                for(std::vector< NsAppLinkRPC::SpeechCapabilities>::const_iterator it = ttsCaps->get_capabilities().begin(); it != ttsCaps->get_capabilities().end(); it++)
+                {
+                    const NsAppLinkRPC::SpeechCapabilities& caps = *it;
+                    NsAppLinkRPCV2::SpeechCapabilities capsV2;
+                    capsV2.set((NsAppLinkRPCV2::SpeechCapabilities::SpeechCapabilitiesInternal)caps.get());
+                    speechCapsV2.push_back(capsV2);
+                }
+                core->mSpeechCapabilitiesV2.set(speechCapsV2);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE:
@@ -2699,9 +3013,8 @@ namespace NsAppManager
                 }
                 return;
             }
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Not TTS RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not TTS RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())
@@ -2728,7 +3041,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application with the name " << appName << " found!");
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::INVALID_DATA);
                     return;
                 }
 
@@ -2737,7 +3050,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
                     return;
                 }
 
@@ -2745,21 +3058,20 @@ namespace NsAppManager
                 if (!currentApp)
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "No application is currently active");
-                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
-                    return;
                 }
-
-                if (currentApp == app)
+                else
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "App is currently active");
-                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
-                    return;
+                    if (currentApp == app)
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, "App is currently active");
+                        sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
+                                    NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                        return;
+                    }
+
+                    LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application  " << currentApp->getName() << " ID " << currentApp->getAppID() << " - about to remove it from HMI first");
+                    core->removeAppFromHmi(currentApp, app->getConnectionID(), app->getSessionID());
                 }
-                
-                LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application - about to remove it from HMI first");
-                core->removeAppFromHmi(currentApp, app->getConnectionID(), app->getSessionID());                    
 
                 if(!AppMgrRegistry::getInstance().activateApp(app))
                 {
@@ -2830,6 +3142,7 @@ namespace NsAppManager
                         break;
                     }
                 }
+
                 const MenuItems& newMenus = app->getAllMenus();
                 LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's menus to HMI due to a new application activation");
                 for(MenuItems::const_iterator it = newMenus.begin(); it != newMenus.end(); it++)
@@ -3010,11 +3323,35 @@ namespace NsAppManager
                     }
                     case 2:
                     {
-                        NsAppLinkRPCV2::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPCV2::OnEncodedSyncPData;
-                        encodedNotification->set_data(core->mSyncPManager.getPData());
-                        MobileHandler::getInstance().sendRPCMessage( encodedNotification, app->getConnectionID(), app->getSessionID() );
                         NsRPC2Communication::AppLinkCore::SendDataResponse* response = new NsRPC2Communication::AppLinkCore::SendDataResponse;
                         response->setId(object->getId());
+                        std::string* urlPtr = 0;
+                        int* timeoutPtr = 0;
+                        if(urlPtr)
+                        {
+                            const std::string& url = *urlPtr;
+                            const int& timeout = timeoutPtr ? *timeoutPtr : 0;
+                            pthread_t* sendingThread = 0;
+                            thread_data* data = new thread_data;
+                            data->pdata = core->mSyncPManager.getPData();
+                            data->timeout = timeout;
+                            data->url = url;
+                            int rc = pthread_create(sendingThread, 0, SendPData,
+                                           (void *) data);
+                            if (rc)
+                            {
+                                 LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't start a thread: return code from pthread_create() is " << rc);
+                                 response->setResult(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                                 HMIHandler::getInstance().sendResponse(response);
+                                 return;
+                            }
+                        }
+                        else
+                        {
+                            NsAppLinkRPCV2::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPCV2::OnEncodedSyncPData;
+                            encodedNotification->set_data(core->mSyncPManager.getPData());
+                            MobileHandler::getInstance().sendRPCMessage( encodedNotification, app->getConnectionID(), app->getSessionID() );
+                        }
                         response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
                         HMIHandler::getInstance().sendResponse(response);
                         break;
@@ -3090,12 +3427,22 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendResponse(response);
                 return;
             }
-
-            case NsRPC2Communication::Marshaller::METHOD_INVALID:
             default:
-                LOG4CPLUS_ERROR_EXT(mLogger, " Unknown RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not AppLinkCore RPC message " << msg->getMethod() << " has been received!");
         }
 
+        switch(msg->getMethod())
+        {
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLETYPERESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleType response has been income");
+                NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse* getVehType = (NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse*)msg;
+                core->mVehicleType = getVehType->get_vehicleType();
+                return;
+            }
+            default:
+                LOG4CPLUS_INFO_EXT(mLogger, " Not VehicleInfo RPC message " << msg->getMethod() << " has been received!");
+        }
         LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message " << msg->getMethod() << " has been invoked!");
     }
 
@@ -3160,6 +3507,7 @@ namespace NsAppManager
                     application->setVrSynonyms(vrSynonyms);
                 }
 
+                application->setHMIDisplayLanguageDesired(registerRequest->get_hmiDisplayLanguageDesired());
                 application->setIsMediaApplication(isMediaApplication);
                 application->setSyncMsgVersion(syncMsgVersion);
                 application->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);
