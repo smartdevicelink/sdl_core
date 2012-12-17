@@ -19,6 +19,8 @@
 #include "JSONHandler/ALRPCObjects/V2/DisplayCapabilities.h"
 #include "JSONHandler/ALRPCObjects/V2/OnDriverDistraction.h"
 #include "JSONHandler/ALRPCObjects/V2/VehicleType.h"
+#include "JSONHandler/ALRPCObjects/V1/Language.h"
+#include "JSONHandler/ALRPCObjects/V2/Language.h"
 
 namespace NsAppLinkRPC
 {
@@ -253,6 +255,13 @@ namespace NsAppManager
 
         NsAppLinkRPC::OnDriverDistraction* mDriverDistractionV1;
         NsAppLinkRPCV2::OnDriverDistraction* mDriverDistractionV2;
+
+        NsAppLinkRPC::Language mUiLanguageV1;
+        NsAppLinkRPC::Language mVrLanguageV1;
+        NsAppLinkRPC::Language mTtsLanguageV1;
+        NsAppLinkRPCV2::Language mUiLanguageV2;
+        NsAppLinkRPCV2::Language mVrLanguageV2;
+        NsAppLinkRPCV2::Language mTtsLanguageV2;
 
         NsAppLinkRPCV2::VehicleType mVehicleType;
 

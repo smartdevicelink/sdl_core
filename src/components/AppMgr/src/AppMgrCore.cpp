@@ -2028,6 +2028,13 @@ namespace NsAppManager
                 NsRPC2Communication::VehicleInfo::GetVehicleType* getVehicleType = new NsRPC2Communication::VehicleInfo::GetVehicleType;
                 HMIHandler::getInstance().sendRequest(getVehicleType);
 
+                NsRPC2Communication::UI::GetLanguage* getUiLang = new NsRPC2Communication::UI::GetLanguage;
+                HMIHandler::getInstance().sendRequest(getUiLang);
+                NsRPC2Communication::VR::GetLanguage* getVrLang = new NsRPC2Communication::VR::GetLanguage;
+                HMIHandler::getInstance().sendRequest(getVrLang);
+                NsRPC2Communication::TTS::GetLanguage* getTtsLang = new NsRPC2Communication::TTS::GetLanguage;
+                HMIHandler::getInstance().sendRequest(getTtsLang);
+
                 ConnectionHandler::getInstance().startDevicesDiscovery();
 
                 return;
@@ -2083,6 +2090,15 @@ namespace NsAppManager
                 {
                     core->mSoftButtonCapabilities.set(*uiCaps->get_softButtonCapabilities());
                 }
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETLANGUAGERESPONSE:
+            {
+                NsRPC2Communication::UI::GetLanguageResponse* getLang = (NsRPC2Communication::UI::GetLanguageResponse*)msg;
+                core->mUiLanguageV1 = getLang->get_hmiDisplayLanguage();
+                NsAppLinkRPCV2::Language langV2;
+                langV2.set((NsAppLinkRPCV2::Language::LanguageInternal)getLang->get_hmiDisplayLanguage().get());
+                core->mUiLanguageV2 = langV2;
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONCOMMAND:
@@ -2827,6 +2843,15 @@ namespace NsAppManager
                 core->mVrCapabilitiesV2.set(vrCapsV2);
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__GETLANGUAGERESPONSE:
+            {
+                NsRPC2Communication::VR::GetLanguageResponse* getLang = (NsRPC2Communication::VR::GetLanguageResponse*)msg;
+                core->mVrLanguageV1 = getLang->get_language();
+                NsAppLinkRPCV2::Language langV2;
+                langV2.set((NsAppLinkRPCV2::Language::LanguageInternal)getLang->get_language().get());
+                core->mVrLanguageV2 = langV2;
+                return;
+            }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMANDRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand VR response has been income");
@@ -2971,6 +2996,15 @@ namespace NsAppManager
                     speechCapsV2.push_back(capsV2);
                 }
                 core->mSpeechCapabilitiesV2.set(speechCapsV2);
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__GETLANGUAGERESPONSE:
+            {
+                NsRPC2Communication::TTS::GetLanguageResponse* getLang = (NsRPC2Communication::TTS::GetLanguageResponse*)msg;
+                core->mTtsLanguageV1 = getLang->get_language();
+                NsAppLinkRPCV2::Language langV2;
+                langV2.set((NsAppLinkRPCV2::Language::LanguageInternal)getLang->get_language().get());
+                core->mTtsLanguageV2 = langV2;
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE:
