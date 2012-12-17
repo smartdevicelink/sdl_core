@@ -267,6 +267,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private final int MNU_TOGGLE_MEDIA = 12;
 	private final int MNU_TOGGLE_PROTOCOL_VERSION = 13;
 	private final int MNU_UNREGISTER = 14;
+	private final int MNU_APP_VERSION = 15;
 
 	
 	/* Creates the menu items */
@@ -282,6 +283,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");
 			menu.add(0, MNU_TOGGLE_PROTOCOL_VERSION, 0, "Toggle Protocol Version");
 			menu.add(0, MNU_UNREGISTER, 0, "Unregister");
+			menu.add(0, MNU_APP_VERSION, 0, "App version");
 			return true;
 		} else {
 			return false;
@@ -395,8 +397,19 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				} catch (SyncException e) {}
 	        }
 			return true;
+		case MNU_APP_VERSION: {
+			showAppVersion();
+			break;
 		}
+		}
+		
 		return false;
+	}
+
+	private void showAppVersion() {
+		new AlertDialog.Builder(this).setTitle("App version")
+				.setMessage("R5.0.0")
+				.setNeutralButton(android.R.string.ok, null).create().show();
 	}
 
 	public void onClick(View v) {
