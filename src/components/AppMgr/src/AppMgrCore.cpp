@@ -282,7 +282,7 @@ namespace NsAppManager
                     response->set_hmiZoneCapabilities(core->mHmiZoneCapabilitiesV1.get());
                     response->set_speechCapabilities(core->mSpeechCapabilitiesV1.get());
                     response->set_vrCapabilities(core->mVrCapabilitiesV1.get());
-                    response->set_language(app->getLanguageDesired());
+                    response->set_language(core->mUiLanguageV1);
                     response->set_syncMsgVersion(app->getSyncMsgVersion());
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
@@ -926,8 +926,8 @@ namespace NsAppManager
                     response->set_buttonCapabilities(core->mButtonCapabilitiesV2.get());
                     response->set_displayCapabilities(core->mDisplayCapabilitiesV2);
                     response->set_hmiZoneCapabilities(core->mHmiZoneCapabilitiesV2.get());
-                    response->set_hmiDisplayLanguage(app->getHMIDisplayLanguageDesired());
-                    response->set_language(app->getLanguageDesired());
+                    response->set_hmiDisplayLanguage(core->mUiLanguageV2);
+                    response->set_language(core->mVrLanguageV2);
                     response->set_speechCapabilities(core->mSpeechCapabilitiesV2.get());
                     response->set_vrCapabilities(core->mVrCapabilitiesV2.get());
                     response->set_syncMsgVersion(app->getSyncMsgVersion());
