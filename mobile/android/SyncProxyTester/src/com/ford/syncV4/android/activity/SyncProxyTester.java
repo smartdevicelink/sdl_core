@@ -265,7 +265,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private final int MNU_CLEAR = 10;
 	private final int MNU_EXIT = 11;
 	private final int MNU_TOGGLE_MEDIA = 12;
-	private final int MNU_VERSION = 13;
+	private final int MNU_TOGGLE_PROTOCOL_VERSION = 13;
 	private final int MNU_UNREGISTER = 14;
 
 	
@@ -280,7 +280,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			menu.add(0, MNU_CLEAR, 0, "Clear Messages");
 			menu.add(0, MNU_EXIT, 0, "Exit");
 			menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");
-			menu.add(0, MNU_VERSION, 0, "Version");
+			menu.add(0, MNU_TOGGLE_PROTOCOL_VERSION, 0, "Toggle Protocol Version");
 			menu.add(0, MNU_UNREGISTER, 0, "Unregister");
 			return true;
 		} else {
@@ -332,7 +332,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		case MNU_EXIT:
 			super.finish();
 			break;
-		case MNU_VERSION:
+		case MNU_TOGGLE_PROTOCOL_VERSION:
 			{SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 			int versionN = settings.getInt("VersionNumber", 1);
 			SharedPreferences.Editor editor = settings.edit();
