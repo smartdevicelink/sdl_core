@@ -174,6 +174,68 @@ div {
 	display: block;
 }
 
+/* ScrollableMessage */
+
+#ScrollableMessage.ScrollableMessage{
+	left: 0;
+	top: 48px;
+	width: 800px;
+	height: 384px;
+	background: black;
+	z-index: 1;
+	display: none;
+}
+
+#ScrollableMessage.active{
+	opacity: 1;
+	display: block;
+}
+
+#ScrollableMessage .backButton {
+	top: 32px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+#ScrollableMessage .titleText{
+	top: 32px;
+	left: 75px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
+
+#ScrollableMessage .list{
+	position: absolute;
+	width: 525px;
+	height: 251px;
+	border-radius: 2px;
+	left: 200px;
+	top: 102px;
+}
+
+#ScrollableMessage .list-content{
+	border: none;
+	width: 578px;
+}
+
+#ScrollableMessage .list-item {
+	position: relative;
+	width: 100%;
+	height: 48px;
+	font-size: 20px;
+	line-height: 50px;
+	border: 1px solid #393939;
+}
+
+#ScrollableMessage .ffw_list_menu {
+	top: 102px;
+	left: 25px;
+}
+
 /* VR popUp*/
 
 #VRPopUp.VRPopUp{

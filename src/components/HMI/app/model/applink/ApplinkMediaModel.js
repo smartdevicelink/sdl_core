@@ -371,6 +371,13 @@ MFT.ApplinkMediaModel = Em.Object.create({
             this.set('currentApplinkPerformInteractionChoiseId', params.interactionChoiceSetIDList);
             MFT.States.goToState('media.applink.applinkperforminteractionchoise');
         }
+
+        this.onApplinkTTSSpeak(params.initialPrompt);
+
+        setTimeout(function(){
+            MFT.ApplinkMediaModel.onApplinkTTSSpeak(params.timeoutPrompt);
+        }, params.timeout);
+
     },
 
     /** Create list of lapplications on info view */
@@ -414,15 +421,17 @@ MFT.ApplinkMediaModel = Em.Object.create({
     },
 
     /** Applink TTS Speak handler */
-    onApplinkTTSSpeak: function(params){
+    onApplinkTTSSpeak: function(ttsChunks){
         var message = '';
-        for(var i = 0; i < params.ttsChunks.length; i++){
-            message += params.ttsChunks[i].text + '\n';
+        if(ttsChunks){
+            for(var i = 0; i < ttsChunks.length; i++){
+                message += ttsChunks[i].text + '\n';
+            }
+            MFT.TTSPopUp.ActivateTTS(message);
         }
-        MFT.TTSPopUp.ActivateTTS(message);
     },
 
-    /** Applin UI Alert handler */
+    /** Applink UI Alert handler */
     onApplinkUIAlert: function(params){
 
         this.alertInfo.set('text1', params.AlertText1);
@@ -437,6 +446,8 @@ MFT.ApplinkMediaModel = Em.Object.create({
         // appId
 
         MFT.AlertPopUp.AlertActive();
+
+        this.onApplinkTTSSpeak(params.ttsChunks);
 
     }
 });

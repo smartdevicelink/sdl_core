@@ -285,6 +285,11 @@ FFW.UI = FFW.RPCObserver.create({
 				MFT.ApplinkSliderView.activate();		    
 		    	break;
 		    }
+		    case "UI.ScrolableMessage":{
+
+				MFT.ScrollableMessage.activate( request.params.appId, request.params.softButtons );		    
+		    	break;
+		    }
 		    case  "UI.GetCapabilities":{
 				// send repsonse
 				var JSONMessage = {
