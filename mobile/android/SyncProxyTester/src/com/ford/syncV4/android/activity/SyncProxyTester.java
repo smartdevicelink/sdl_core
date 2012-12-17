@@ -284,13 +284,20 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			menu.add(0, MNU_CLEAR, 0, "Clear Messages");
 			menu.add(0, MNU_EXIT, 0, "Exit");
 			menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");
-			menu.add(0, MNU_TOGGLE_PROTOCOL_VERSION, 0, "Toggle Protocol Version");
+			menu.add(0, MNU_TOGGLE_PROTOCOL_VERSION, 0,
+					"Toggle Protocol Ver. (cur " + getCurrentProtocolVersion()
+							+ ")");
 			menu.add(0, MNU_UNREGISTER, 0, "Unregister");
 			menu.add(0, MNU_APP_VERSION, 0, "App version");
 			return true;
 		} else {
 			return false;
 		}
+	}
+	
+	private String getCurrentProtocolVersion() {
+		return String.valueOf(getSharedPreferences(PREFS_NAME, 0).getInt(
+			"VersionNumber", 1));
 	}
 
 	/* Handles item selections */
