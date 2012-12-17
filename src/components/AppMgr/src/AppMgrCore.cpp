@@ -3446,7 +3446,7 @@ namespace NsAppManager
                         {
                             NsAppLinkRPCV2::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPCV2::OnEncodedSyncPData;
                             encodedNotification->set_data(core->mSyncPManager.getPData());
-                            MobileHandler::getInstance().sendRPCMessage( encodedNotification, app->getConnectionID(), app->getSessionID() );
+                            MobileHandler::getInstance().sendRPCMessage( encodedNotification, appId );
                         }
                         response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
                         HMIHandler::getInstance().sendResponse(response);
