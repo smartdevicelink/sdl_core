@@ -187,7 +187,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				if (listObj instanceof RPCMessage) {
 					String rawJSON = "";
 					try {
-						rawJSON = ((RPCMessage) listObj).serializeJSON().toString(2);
+						rawJSON = ((RPCMessage) listObj).serializeJSON(
+								ProxyService.getInstance().getProxyInstance().getWiProVersion()).toString(2);
 					} catch (JSONException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

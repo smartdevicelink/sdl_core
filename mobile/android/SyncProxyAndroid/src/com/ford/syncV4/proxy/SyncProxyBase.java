@@ -1196,6 +1196,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		}
 	}
 	
+	public byte getWiProVersion() {
+		return this._wiproVersion;
+	}
+	
 	private void setWiProVersion(byte version) {
 		this._wiproVersion = version;
 	}
