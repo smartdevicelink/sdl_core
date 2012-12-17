@@ -40,7 +40,7 @@ namespace NsAppManager
      */
     void SubscribeButtonCmd::execute()
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButtonCmd command has been executing");
+        /*LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButtonCmd command has been executing");
         Message* msg = (Message*)mParams;
         if(!mParams)
         {
@@ -78,6 +78,6 @@ namespace NsAppManager
                 MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
                 break;
             }
-        }
+        }*/
     }
 }

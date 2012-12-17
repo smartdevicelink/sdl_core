@@ -33,8 +33,8 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " Trying to unregister null app!");
             return;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << item->getApplication()->getName() << " connection id " << item->getApplication()->getConnectionID() << " session id " << (uint)item->getApplication()->getSessionID());
-        ItemsMap::const_iterator registryItemIterator = mRegistryItems.find(ApplicationUniqueID(item->getApplication()->getConnectionID(), item->getApplication()->getSessionID()));
+        LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << item->getApplication()->getName() << " app id " << item->getApplication()->getAppID());
+        ItemsMap::const_iterator registryItemIterator = mRegistryItems.find(ApplicationUniqueID(item->getApplication()->getAppID()));
         mRegistryItems.erase(registryItemIterator);
     }
 
@@ -50,7 +50,7 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " Getting registry item for null application!");
             return 0;
         }
-        return getItem( app->getConnectionID(), app->getSessionID() );
+        return getItem( app->getAppID() );
     }
 
     /**
@@ -78,20 +78,20 @@ namespace NsAppManager
             {
                 case 1:
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID() << " has HMI_LEVEL " << ((Application_v1*)app)->getApplicationHMIStatusLevel());
+                    LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " application id " << app->getAppID() << " has HMI_LEVEL " << ((Application_v1*)app)->getApplicationHMIStatusLevel());
                     if(NsAppLinkRPC::HMILevel::HMI_FULL == ((Application_v1*)app)->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID() << " is HMI_FULL");
+                        LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " application id " << app->getAppID() << " is HMI_FULL");
                         return app;
                     }
                     break;
                 }
                 case 2:
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID() << " has HMI_LEVEL " << ((Application_v2*)app)->getApplicationHMIStatusLevel());
+                    LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " application id " << app->getAppID()<< " has HMI_LEVEL " << ((Application_v2*)app)->getApplicationHMIStatusLevel());
                     if(NsAppLinkRPCV2::HMILevel::HMI_FULL == ((Application_v2*)app)->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID() << " is HMI_FULL");
+                        LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " application id " << app->getAppID() << " is HMI_FULL");
                         return app;
                     }
                     break;
@@ -132,7 +132,7 @@ namespace NsAppManager
             }
             if(appName == app->getName())
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "Adding an application from connection " << app->getConnectionID() << " session " << (uint)app->getSessionID());
+                LOG4CPLUS_INFO_EXT(mLogger, "Adding an application from application id " << app->getAppID());
                 items.push_back(item);
             }
         }
@@ -146,21 +146,21 @@ namespace NsAppManager
      * \param sessionId id of the session associated with the application we need to retrieve a registry item for
      * \return RegistryItem instance
      */
-    RegistryItem *AppMgrRegistry::getItem(unsigned int connectionId, unsigned char sessionId) const
+    RegistryItem *AppMgrRegistry::getItem(int appId) const
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Searching for registered application with the connection id " << connectionId << " sesion id " << (uint)sessionId );
-        ItemsMap::const_iterator it = mRegistryItems.find(ApplicationUniqueID(connectionId, sessionId));
+        LOG4CPLUS_INFO_EXT(mLogger, "Searching for registered application with the app id " << appId);
+        ItemsMap::const_iterator it = mRegistryItems.find(ApplicationUniqueID(appId));
         if(it != mRegistryItems.end())
         {
             RegistryItem* item = it->second;
             if(!item)
             {
-                LOG4CPLUS_ERROR_EXT(mLogger, " NULL-application registered for the connection id " << connectionId << " session id " << (uint)sessionId);
+                LOG4CPLUS_ERROR_EXT(mLogger, " NULL-application registered for the application id " << appId);
                 return 0;
             }
             return item;
         }
-        LOG4CPLUS_ERROR_EXT(mLogger, " No application found with the connection id " << connectionId << " session id " << (uint)sessionId);
+        LOG4CPLUS_ERROR_EXT(mLogger, " No application found with the application id " << appId);
         return 0;
     }
 
@@ -203,7 +203,7 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " Cannot activate null-application!");
             return false;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Activating an app " << app->getName() << " connection " << app->getConnectionID() << " session " << (uint)app->getSessionID());
+        LOG4CPLUS_INFO_EXT(mLogger, "Activating an app " << app->getName() << " application id " << app->getAppID());
         if(mRegistryItems.empty())
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " Cannot activate an application: no applications registered!");
@@ -274,11 +274,11 @@ namespace NsAppManager
      * \param sessionId id of the session associated with the application we need to retrieve
      * \return application, if the specified name found in a registry, NULL otherwise
      */
-    Application *AppMgrRegistry::getApplication(unsigned int connectionId, unsigned char sessionId) const
+    Application *AppMgrRegistry::getApplication(int appId) const
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Searching for registered application with the connection id " << connectionId << " sesion id " << (uint)sessionId );
+        LOG4CPLUS_INFO_EXT(mLogger, "Searching for registered application with the application id " << appId );
 
-        RegistryItem* item = getItem(connectionId, sessionId);
+        RegistryItem* item = getItem(appId);
         if(!item)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " Item " << item << " is empty in registry!");
@@ -290,9 +290,10 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " No application for the item " << item);
             return 0;
         }
-        if((app->getSessionID() != sessionId) || (app->getConnectionID() != connectionId))
+        if(app->getAppID() != appId)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " An-application registered for the connection id " << connectionId << " session id " << (uint)sessionId << " has the connection id " << app->getConnectionID() << " and session id " << (uint)app->getSessionID() << " which is an error!");
+            LOG4CPLUS_ERROR_EXT(mLogger, " An-application registered for the application id "
+                << app << " which is an error!");
             return 0;
         }
         return app;
@@ -386,9 +387,9 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " Trying to register a null-application!");
             return 0;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << app->getName() << " connection id " << app->getConnectionID() << " session id " << (uint)app->getSessionID());
-        mRegistryItems.insert(ItemsMapItem(ApplicationUniqueID(app->getConnectionID(), app->getSessionID()), new RegistryItem(app)));
-        return mRegistryItems.find(ApplicationUniqueID(app->getConnectionID(), app->getSessionID()))->second;
+        LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << app->getName() << " application id " << app->getAppID());
+        mRegistryItems.insert(ItemsMapItem(ApplicationUniqueID(app->getAppID()), new RegistryItem(app)));
+        return mRegistryItems.find(ApplicationUniqueID(app->getAppID()))->second;
     }
 
 }

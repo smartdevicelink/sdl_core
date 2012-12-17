@@ -1,0 +1,7 @@
+[R5.1.0]
+SyncProxyTester:
++ Introduce changelog.
++ The app version, build info, and the changelog can be shown from options menu => "App version".
++ All the bugs and features that have been around since the beginning.
++ CreateChoiceSet dialog: the user can create a choice set with 1..3 choices with the help of checkboxes.
++ Show current protocol version in the options menu: "Toggle Protocol Ver. (cur 2)".

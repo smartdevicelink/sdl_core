@@ -27,7 +27,7 @@ namespace NsAppManager
     /**
      * \brief An application unique id - combination of connection id and session id
      */
-    typedef std::tuple<int, unsigned char> ApplicationUniqueID;
+    typedef int ApplicationUniqueID;
 
     /**
      * \brief An application session keys
@@ -44,12 +44,10 @@ namespace NsAppManager
         /**
          * \brief Class constructor
          * \param name application name
-         * \param connectionId id of the connection associated with this application
-         * \param sessionId id of the session associated with this application
          * \param appId application id
          * \param protocolVersion protocol version
          */
-        Application(const std::string& name, unsigned int connectionId, unsigned char sessionId, int appId, unsigned int protocolVersion);
+        Application(const std::string& name, int appId, unsigned int protocolVersion);
 
         /**
          * \brief Default class destructor
@@ -98,18 +96,6 @@ namespace NsAppManager
          * \return is the application a media application
          */
         bool getIsMediaApplication( ) const;
-
-        /**
-         * \brief retrieve application session ID
-         * \return application session ID
-         */
-        const unsigned char& getSessionID() const;
-
-        /**
-         * \brief retrieve application session ID
-         * \return application connection ID
-         */
-        const unsigned int& getConnectionID() const;
 
         /**
          * \brief retrieve application protocol version
@@ -264,8 +250,6 @@ namespace NsAppManager
         Application(const Application& );
 
         const std::string mName;
-        const unsigned char mSessionID;
-        const unsigned int mConnectionID;
         const unsigned int mProtocolVersion;
         const int mAppID;
         SessionKeys mSessionKeys;

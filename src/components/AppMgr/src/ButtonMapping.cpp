@@ -66,7 +66,7 @@ namespace NsAppManager
         }
         for(ButtonMap::iterator it = mButtonsMapping.begin(); it != mButtonsMapping.end(); it++)
         {
-            if(it->second->getApplication()->getSessionID() == app->getApplication()->getSessionID())
+            if(it->second->getApplication()->getAppID() == app->getApplication()->getAppID())
             {
                 mButtonsMapping.erase(it->first);
             }

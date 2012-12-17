@@ -1,6 +1,9 @@
 package com.ford.syncV4.android.activity;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.Vector;
@@ -265,8 +268,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private final int MNU_CLEAR = 10;
 	private final int MNU_EXIT = 11;
 	private final int MNU_TOGGLE_MEDIA = 12;
-	private final int MNU_VERSION = 13;
+	private final int MNU_TOGGLE_PROTOCOL_VERSION = 13;
 	private final int MNU_UNREGISTER = 14;
+	private final int MNU_APP_VERSION = 15;
 
 	
 	/* Creates the menu items */
@@ -280,12 +284,20 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			menu.add(0, MNU_CLEAR, 0, "Clear Messages");
 			menu.add(0, MNU_EXIT, 0, "Exit");
 			menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");
-			menu.add(0, MNU_VERSION, 0, "Version");
+			menu.add(0, MNU_TOGGLE_PROTOCOL_VERSION, 0,
+					"Toggle Protocol Ver. (cur " + getCurrentProtocolVersion()
+							+ ")");
 			menu.add(0, MNU_UNREGISTER, 0, "Unregister");
+			menu.add(0, MNU_APP_VERSION, 0, "App version");
 			return true;
 		} else {
 			return false;
 		}
+	}
+	
+	private String getCurrentProtocolVersion() {
+		return String.valueOf(getSharedPreferences(PREFS_NAME, 0).getInt(
+			"VersionNumber", 1));
 	}
 
 	/* Handles item selections */
@@ -332,7 +344,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		case MNU_EXIT:
 			super.finish();
 			break;
-		case MNU_VERSION:
+		case MNU_TOGGLE_PROTOCOL_VERSION:
 			{SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 			int versionN = settings.getInt("VersionNumber", 1);
 			SharedPreferences.Editor editor = settings.edit();
@@ -395,8 +407,52 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				} catch (SyncException e) {}
 	        }
 			return true;
+		case MNU_APP_VERSION: {
+			showAppVersion();
+			break;
 		}
+		}
+		
 		return false;
+	}
+	
+	private String getAssetsContents(String filename, String defaultString) {
+		StringBuilder builder = new StringBuilder();
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new InputStreamReader(getAssets().open(
+					filename)));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				builder.append(line + "\n");
+			}
+		} catch (IOException e) {
+			Log.d(logTag, "Can't open file with build info", e);
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return builder.length() > 0 ? builder.toString().trim() : defaultString;
+	}
+
+	private void showAppVersion() {
+		String appVersion = getAssetsContents("appVersion", "Unknown");
+		String buildInfo = getAssetsContents("build.info",
+				"Build info not available");
+		String changelog = getAssetsContents("CHANGELOG.txt",
+				"Changelog not available");
+
+		new AlertDialog.Builder(this)
+				.setTitle("App version")
+				.setMessage(
+						appVersion + ", " + buildInfo + "\n\nCHANGELOG:\n"
+								+ changelog)
+				.setNeutralButton(android.R.string.ok, null).create().show();
 	}
 
 	public void onClick(View v) {

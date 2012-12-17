@@ -15,22 +15,18 @@ namespace NsAppManager
     /**
      * \brief Class constructor
      * \param name application name
-     * \param connectionId id of the connection associated with this application
-     * \param sessionId id of the session associated with this application
      * \param appId application id
      * \param protocolVersion protocol version
      */
-    Application::Application(const std::string& name , unsigned int connectionId, unsigned char sessionId, int appId, unsigned int protocolVersion)
+    Application::Application(const std::string& name , int appId, unsigned int protocolVersion)
         :mNgnMediaScreenAppName("")
         ,m_bIsMediaApplication(false)
-        ,mSessionID(sessionId)
-        ,mConnectionID(connectionId)
         ,mName(name)
         ,mProtocolVersion(protocolVersion)
         ,mAppID(appId)
     {
         addSessionKey(appId);
-        LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name << " for the connection id " << connectionId << " session id " << (uint)sessionId);
+        LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name << " application id " << appId);
     }
 
     /**
@@ -40,8 +36,6 @@ namespace NsAppManager
         :mNgnMediaScreenAppName(app.getNgnMediaScreenAppName())
         ,mName(app.getName())
         ,m_bIsMediaApplication(app.getIsMediaApplication())
-        ,mConnectionID(app.getConnectionID())
-        ,mSessionID(app.getSessionID())
         ,mProtocolVersion(app.getProtocolVersion())
         ,mAppID(app.getAppID())
     {
@@ -54,7 +48,7 @@ namespace NsAppManager
      */
     Application::~Application( )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Deleted an application " << mName << " connection id " << mConnectionID << " session id " << mSessionID);
+        LOG4CPLUS_INFO_EXT(mLogger, " Deleted an application " << mName << " application id " << mAppID);
     }
 
     /**
@@ -64,8 +58,7 @@ namespace NsAppManager
      */
     bool Application::operator ==(const Application &item) const
     {
-        return this->getSessionID() == item.getSessionID()
-            && this->getConnectionID() == item.getConnectionID();
+        return this->getAppID() == item.getAppID();
     }
 
     /**
@@ -120,24 +113,6 @@ namespace NsAppManager
     bool Application::getIsMediaApplication( ) const
     {
         return m_bIsMediaApplication;
-    }
-
-    /**
-     * \brief retrieve application session ID
-     * \return application session ID
-     */
-    const unsigned char &Application::getSessionID() const
-    {
-        return mSessionID;
-    }
-
-    /**
-     * \brief retrieve application session ID
-     * \return application connection ID
-     */
-    const unsigned int &Application::getConnectionID() const
-    {
-        return mConnectionID;
     }
 
     /**

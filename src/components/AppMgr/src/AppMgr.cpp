@@ -94,15 +94,13 @@ namespace NsAppManager
     */
     void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message, int connectionKey)
     {
-        int connectionID = connectionKey & 0xFF00FFFF;
-        unsigned char sessionID = connectionKey >> 16;
         if(!message)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Calling a function with null command! Session id " << (uint)sessionID << " connection id " << connectionID);
+            LOG4CPLUS_ERROR_EXT(mLogger, " Calling a function with null command! connection key" << connectionKey);
             return;
         }
         LOG4CPLUS_INFO_EXT(mLogger, " Message " << message->getMethodId() << " received from mobile side");
-        AppMgrCore::getInstance().pushMobileRPCMessage( message, connectionID, sessionID );
+        AppMgrCore::getInstance().pushMobileRPCMessage( message, connectionKey );
     }
 
     /**

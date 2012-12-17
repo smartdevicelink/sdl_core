@@ -61,7 +61,7 @@ namespace NsAppManager
     /**
      * \brief a connection between a mobile RPC message and a session
      */
-    typedef std::pair<NsAppLinkRPC::ALRPCMessage*, ApplicationUniqueID> Message;
+    typedef std::pair<NsAppLinkRPC::ALRPCMessage*, int> Message;
 
     /**
      * \brief a list of device names
@@ -90,10 +90,8 @@ namespace NsAppManager
         /**
          * \brief push mobile RPC message to a queue
          * \param message a message to be pushed
-         * \param connectionID id of a connection associated with application that sent the message
-         * \param sessionID an id of a session associated with the application which pushes a message
          */
-        void pushMobileRPCMessage(NsAppLinkRPC::ALRPCMessage * message , int connectionID, unsigned char sessionID);
+        void pushMobileRPCMessage(NsAppLinkRPC::ALRPCMessage * message , int appId);
 
         /**
          * \brief push HMI RPC2 message to a queue
@@ -200,14 +198,14 @@ namespace NsAppManager
          * \param sessionID an id of the session which will be associated with the application
          * \return A instance of RegistryItem created for application
          */
-        const RegistryItem* registerApplication(NsAppLinkRPC::ALRPCMessage *request , const unsigned int &connectionID, const unsigned char &sessionID);
+        const RegistryItem* registerApplication(NsAppLinkRPC::ALRPCMessage *request , int sessionKey);
 
         /**
          * \brief unregister an application associated with the given session
          * \param connectionID an id of the connection asociated with the application to be unregistered
          * \param sessionID an id of the session asociated with the application to be unregistered
          */
-        void unregisterApplication(const unsigned int &connectionID, const unsigned char &sessionID);
+        void unregisterApplication(int appId);
 
         /**
          * \brief Remove all app components from HMI
@@ -215,7 +213,7 @@ namespace NsAppManager
          * \param connectionID connection id
          * \param sessionID session id
          */
-        void removeAppFromHmi(Application* currentApp, const unsigned int& connectionID, const unsigned char &sessionID);
+        void removeAppFromHmi(Application* currentApp, int appId);
 
         /**
          * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values

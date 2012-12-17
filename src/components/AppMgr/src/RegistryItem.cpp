@@ -42,7 +42,8 @@ namespace NsAppManager
     {
         if(mApplication)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, " Destroying RegistryItem for the application " << mApplication->getName() << " connection id " << mApplication->getConnectionID() << " session id " << (uint)mApplication->getSessionID() << " ...");
+            LOG4CPLUS_INFO_EXT(mLogger, " Destroying RegistryItem for the application " << mApplication->getName()
+                << " application id " << mApplication->getAppID() << " ...");
             delete mApplication;
             mApplication = 0;
         }
