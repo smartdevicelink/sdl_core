@@ -70,10 +70,13 @@ namespace {
 
     void *SendPData(void *data)
     {
+        log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AppMgrCore"));
+        LOG4CPLUS_INFO_EXT(logger, " Started data sending thread");
         struct thread_data* my_data = (struct thread_data*) data;
         int timeout = my_data->timeout;
         std::string url = my_data->url;
         NsAppManager::SyncPManager::PData pData = my_data->pdata;
+        LOG4CPLUS_INFO_EXT(logger, " Sending params: url " << url << " timeout " << timeout << " data of " << pData.size() << " lines");
         sleep(timeout);
         int port = 80;
         size_t pos = url.find(":");
@@ -85,13 +88,17 @@ namespace {
                 port = atoi(strPort.c_str());
             }
         }
-        ClientSocket client_socket( url, port );
+        std::string host = url.substr(0, pos);
+        LOG4CPLUS_INFO_EXT(logger, " Sending at " << host << " port " << port);
+        ClientSocket client_socket( host, port );
   //      std::string reply;
         for(NsAppManager::SyncPManager::PData::iterator it = pData.begin(); it != pData.end(); it++)
         {
+            LOG4CPLUS_INFO_EXT(logger, " Sending data " << *it);
             client_socket << *it;
   //          client_socket >> reply;
         }
+        LOG4CPLUS_INFO_EXT(logger, " All data sent to host " << host << " port " << port);
         pthread_exit(NULL);
     }
 }
@@ -3365,6 +3372,7 @@ namespace NsAppManager
                         {
                             const std::string& url = *urlPtr;
                             const int& timeout = timeoutPtr ? *timeoutPtr : 0;
+                            LOG4CPLUS_INFO_EXT(mLogger, "SendData about to send at " << url << " timeout " << timeout);
                             pthread_t* sendingThread = 0;
                             thread_data* data = new thread_data;
                             data->pdata = core->mSyncPManager.getPData();
@@ -3379,6 +3387,7 @@ namespace NsAppManager
                                  HMIHandler::getInstance().sendResponse(response);
                                  return;
                             }
+                            LOG4CPLUS_INFO_EXT(mLogger, "Data sending thread started!");
                         }
                         else
                         {
