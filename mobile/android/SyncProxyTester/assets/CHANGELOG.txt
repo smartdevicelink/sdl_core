@@ -1,5 +1,6 @@
 [R5.1.0]
 SyncProxyTester:
+* Fix: AddCommand dialog: correctly send the entered VR Synonym with the command.
 + Introduce changelog.
 + The app version, build info, and the changelog can be shown from options menu => "App version".
 + All the bugs and features that have been around since the beginning.

@@ -720,6 +720,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									(ViewGroup) findViewById(R.id.itemRoot));
 
 							final EditText er = (EditText) layout.findViewById(R.id.command);
+							final EditText editVrSynonym = (EditText) layout.findViewById(R.id.command2);
 							final Spinner s = (Spinner) layout.findViewById(R.id.availableSubmenus);
 							s.setAdapter(_submenuAdapter);
 							builder = new AlertDialog.Builder(mContext);
@@ -729,8 +730,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									SyncSubMenu sm = new SyncSubMenu();
 									sm = (SyncSubMenu) s.getSelectedItem();
 									
-									Vector<String> vrCommands = new Vector<String>();
-									vrCommands.add(itemText);
+									String vrSynonym = editVrSynonym.getText().toString();
+									Vector<String> vrCommands = null;
+									if (vrSynonym.length() > 0) {
+										vrCommands = new Vector<String>();
+										vrCommands.add(vrSynonym);
+									}
 									int cmdID = itemcmdID++;
 									try {
 										ProxyService.getInstance().getProxyInstance().addCommand(cmdID, itemText, sm.getSubMenuId(), 0, vrCommands, autoIncCorrId++);
