@@ -5,7 +5,7 @@
  */
 
 #include "AppMgr/SyncPManager.h"
-#include "AppMgr/Base64.h"
+#include "Utils/Base64.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>

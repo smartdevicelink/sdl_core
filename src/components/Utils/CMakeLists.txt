@@ -10,6 +10,7 @@ set (SOURCES
     ./src/ServerSocket.cpp
     ./src/Socket.cpp
     ./src/SocketException.cpp
+    ./src/Base64.cpp
 )
 
 add_library("Utils" ${SOURCES})

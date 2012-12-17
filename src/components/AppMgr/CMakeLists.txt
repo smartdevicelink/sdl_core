@@ -34,7 +34,6 @@ set (SOURCES
     ./src/ConnectionHandler.cpp
     ./src/RequestMapping.cpp
     ./src/SyncPManager.cpp
-    ./src/Base64.cpp
     ./src/AppMenus.cpp
     ./src/AppChoiceSets.cpp
     ./src/DeviceList.cpp
