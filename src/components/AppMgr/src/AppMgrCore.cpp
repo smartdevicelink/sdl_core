@@ -1288,6 +1288,35 @@ namespace NsAppManager
                     HMIHandler::getInstance().sendRequest(setAppIcon);
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::ScrollableMessageID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A ScrollableMessageID request has been invoked");
+                    NsAppLinkRPCV2::ScrollableMessage_request* request = static_cast<NsAppLinkRPCV2::ScrollableMessage_request*>(mobileMsg);
+                    Application* app = core->getApplicationFromItemCheckNotNull(
+                        AppMgrRegistry::getInstance().getItem(sessionKey));
+                    if (!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                        return;
+                    }
+
+                    NsRPC2Communication::UI::ScrollableMessage* scrollableMessage = new NsRPC2Communication::UI::ScrollableMessage();
+                    if (!scrollableMessage)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "Can't create scrollable message object.");
+                        return;
+                    }
+                    scrollableMessage->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    scrollableMessage->set_appId(app->getAppID());
+                    scrollableMessage->set_scrollableMessageBody(request->get_scrollableMessageBody());
+                    scrollableMessage->set_timeout(*(request->get_timeout()));
+                    scrollableMessage->set_softButtons(*(request->get_softButtons()));
+
+
+                    core->mMessageMapping.addMessage(scrollableMessage->getId(), sessionKey);
+                    HMIHandler::getInstance().sendRequest(scrollableMessage);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::EncodedSyncPDataID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An EncodedSyncPData request has been invoked");
@@ -2850,6 +2879,39 @@ namespace NsAppManager
 
                 NsAppLinkRPCV2::SetAppIcon_response* response = new NsAppLinkRPCV2::SetAppIcon_response();
                 response->setMethodId(NsAppLinkRPCV2::FunctionID::SetAppIconID);
+                response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                response->set_resultCode(resultCode);
+                NsAppLinkRPCV2::Result::SUCCESS == resultCode ? response->set_success(true) : response->set_success(false);
+
+                core->mMessageMapping.removeMessage(uiResponse->getId());
+                MobileHandler::getInstance().sendRPCMessage(response, appId);
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SCROLLABLEMESSAGERESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A ScrollableMessageID response has been income");
+                NsRPC2Communication::UI::ScrollableMessageResponse* uiResponse
+                    = static_cast<NsRPC2Communication::UI::ScrollableMessageResponse*>(msg);
+
+                Application* app = core->getApplicationFromItemCheckNotNull(
+                    core->mMessageMapping.findRegistryItemAssignedToCommand(uiResponse->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+                NsAppLinkRPCV2::Result::ResultInternal resultCode
+                    = static_cast<NsAppLinkRPCV2::Result::ResultInternal>(uiResponse->getResult());
+
+                NsAppLinkRPCV2::ScrollableMessage_response* response = new NsAppLinkRPCV2::ScrollableMessage_response();
+                if (!response)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "Can't create scrollable message response object");
+                    return;
+                }
+                response->setMethodId(NsAppLinkRPCV2::FunctionID::ScrollableMessageID);
                 response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                 response->set_resultCode(resultCode);
                 NsAppLinkRPCV2::Result::SUCCESS == resultCode ? response->set_success(true) : response->set_success(false);
