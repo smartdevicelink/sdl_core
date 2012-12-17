@@ -801,7 +801,6 @@ prefix "AppLinkCore.";
      * @descr Request from ApplinkCore to HMI to get info about the vehicle.
     */ 
 GetVehicleType(
-    int appId
     ->
     VehicleType vehicleType // manufacturer, model, year etc of the vehicle.
   ); 

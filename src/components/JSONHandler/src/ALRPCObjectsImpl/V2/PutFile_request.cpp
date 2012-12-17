@@ -21,7 +21,7 @@ PutFile_request& PutFile_request::operator =(const PutFile_request& c)
   syncFileName= c.syncFileName;
   fileType= c.fileType;
   persistentFile= c.persistentFile ? new bool(c.persistentFile[0]) : 0;
-  fileData= c.fileData;
+//  fileData= c.fileData;
 
   return *this;
 }
@@ -83,11 +83,7 @@ void PutFile_request::reset_persistentFile(void)
   persistentFile=0;
 }
 
-bool PutFile_request::set_fileData(const std::string& fileData_)
-{
-  fileData=fileData_;
-  return true;
-}
+
 
 
 
@@ -107,8 +103,5 @@ const bool* PutFile_request::get_persistentFile(void) const
   return persistentFile;
 }
 
-const std::string& PutFile_request::get_fileData(void) const 
-{
-  return fileData;
-}
+
 
