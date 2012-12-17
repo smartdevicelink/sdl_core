@@ -408,13 +408,17 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		
 		return false;
 	}
-
-	private void showAppVersion() {
-		String buildInfo = "N/A";
+	
+	private String getAssetsContents(String filename, String defaultString) {
+		StringBuilder builder = new StringBuilder();
 		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new InputStreamReader(getAssets().open("build.info")));
-			buildInfo = reader.readLine();
+			reader = new BufferedReader(new InputStreamReader(getAssets().open(
+					filename)));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				builder.append(line + "\n");
+			}
 		} catch (IOException e) {
 			Log.d(logTag, "Can't open file with build info", e);
 		} finally {
@@ -426,9 +430,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				}
 			}
 		}
-		
-		new AlertDialog.Builder(this).setTitle("App version")
-				.setMessage("R5.0.0\n" + buildInfo)
+		return builder.length() > 0 ? builder.toString().trim() : defaultString;
+	}
+
+	private void showAppVersion() {
+		String appVersion = getAssetsContents("appVersion", "Unknown");
+		String buildInfo = getAssetsContents("build.info",
+				"Build info not available");
+		String changelog = getAssetsContents("CHANGELOG.txt",
+				"Changelog not available");
+
+		new AlertDialog.Builder(this)
+				.setTitle("App version")
+				.setMessage(
+						appVersion + ", " + buildInfo + "\n\nCHANGELOG:\n"
+								+ changelog)
 				.setNeutralButton(android.R.string.ok, null).create().show();
 	}
 
