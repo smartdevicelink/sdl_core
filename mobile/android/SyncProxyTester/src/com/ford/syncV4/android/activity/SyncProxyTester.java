@@ -1,6 +1,9 @@
 package com.ford.syncV4.android.activity;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.Vector;
@@ -407,8 +410,25 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	}
 
 	private void showAppVersion() {
+		String buildInfo = "N/A";
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new InputStreamReader(getAssets().open("build.info")));
+			buildInfo = reader.readLine();
+		} catch (IOException e) {
+			Log.d(logTag, "Can't open file with build info", e);
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		new AlertDialog.Builder(this).setTitle("App version")
-				.setMessage("R5.0.0")
+				.setMessage("R5.0.0\n" + buildInfo)
 				.setNeutralButton(android.R.string.ok, null).create().show();
 	}
 
