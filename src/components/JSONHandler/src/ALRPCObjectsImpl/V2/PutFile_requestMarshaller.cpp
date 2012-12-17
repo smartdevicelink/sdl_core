@@ -66,7 +66,7 @@ Json::Value PutFile_requestMarshaller::toJSON(const PutFile_request& e)
   if(e.persistentFile)
     json["persistentFile"]=Json::Value(*e.persistentFile);
 
-  json["fileData"]=Json::Value(e.fileData);
+  //json["fileData"]=Json::Value(e.fileData);
 
   return json;
 }
@@ -99,12 +99,12 @@ bool PutFile_requestMarshaller::fromJSON(const Json::Value& json,PutFile_request
       if(!j.isBool())  return false;
       c.persistentFile=new bool(j.asBool());
     }
-    if(!json.isMember("fileData"))  return false;
+    /*if(!json.isMember("fileData"))  return false;
     {
       const Json::Value& j=json["fileData"];
       if(!j.isString())  return false;
       c.fileData=j.asString();
-    }
+    }*/
 
   }
   catch(...)
