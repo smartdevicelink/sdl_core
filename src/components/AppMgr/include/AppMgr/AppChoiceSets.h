@@ -17,12 +17,13 @@ namespace NsAppManager
     /**
      * \brief interaction choice sets
      */
-    union ChoiceSetGeneric
+    struct ChoiceSetGeneric
     {
         std::vector<NsAppLinkRPC::Choice> choiceSetV1;
         std::vector<NsAppLinkRPCV2::Choice> choiceSetV2;
         ChoiceSetGeneric();
-        ChoiceSetGeneric(const ChoiceSetGeneric&);
+        ChoiceSetGeneric(const ChoiceSetGeneric&src);
+        const ChoiceSetGeneric& operator= (const ChoiceSetGeneric&);
         ~ChoiceSetGeneric();
     };
 

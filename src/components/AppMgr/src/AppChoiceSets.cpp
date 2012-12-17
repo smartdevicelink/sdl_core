@@ -98,9 +98,18 @@ namespace NsAppManager
 
     /**
      * \brief ChoiceSetGeneric default copy constructor
+     * \param src source
      */
-    ChoiceSetGeneric::ChoiceSetGeneric(const ChoiceSetGeneric &)
+    ChoiceSetGeneric::ChoiceSetGeneric(const ChoiceSetGeneric &src)
     {
+        *this = src;
+    }
+
+    const ChoiceSetGeneric &ChoiceSetGeneric::operator =(const ChoiceSetGeneric& src)
+    {
+        choiceSetV1 = src.choiceSetV1;
+        choiceSetV2 = src.choiceSetV2;
+        return *this;
     }
 
     /**
@@ -108,6 +117,8 @@ namespace NsAppManager
      */
     ChoiceSetGeneric::~ChoiceSetGeneric()
     {
+        choiceSetV1.clear();
+        choiceSetV2.clear();
     }
 
 }
