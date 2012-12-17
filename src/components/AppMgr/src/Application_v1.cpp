@@ -6,14 +6,13 @@ namespace NsAppManager
     /**
      * \brief Class constructor
      * \param name application name
-     * \param connectionId id of the connection associated with this application
-     * \param sessionId id of the session associated with this application
      * \param appId application id
      */
-    Application_v1::Application_v1(const std::string& name , unsigned int connectionId, unsigned char sessionId, int appId)
-        :Application(name, connectionId, sessionId, appId, 1)
+    Application_v1::Application_v1(const std::string& name, int appId)
+        :Application(name, appId, 1)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name << " for the connection id " << connectionId << " session id " << (uint)sessionId);
+        LOG4CPLUS_INFO_EXT(mLogger, " Created an application " << name
+            << " for the application id " << appId);
     }
 
     /**
@@ -29,7 +28,8 @@ namespace NsAppManager
      */
     Application_v1::~Application_v1( )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Deleted an application " << mName << " connection id " << mConnectionID << " session id " << mSessionID);
+        LOG4CPLUS_INFO_EXT(mLogger, " Deleted an application " << mName
+            << " appId " << mAppID);
     }
 
     /**

@@ -163,18 +163,18 @@ namespace NsAppManager
      * \param connectionID id of a connection associated with application that sent the message
      * \param sessionID an id of a session associated with the application which pushes a message
      */
-    void AppMgrCore::pushMobileRPCMessage( NsAppLinkRPC::ALRPCMessage * message, int connectionID, unsigned char sessionID )
+    void AppMgrCore::pushMobileRPCMessage( NsAppLinkRPC::ALRPCMessage * message, int appId )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Pushing mobile RPC message for connection id " << connectionID << " session id " << (uint)sessionID << "...");
+        LOG4CPLUS_INFO_EXT(mLogger, " Pushing mobile RPC message for application id " << appId << "...");
         if(!message)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "Nothing to push! A null-ptr occured!");
             return;
         }
 
-        mQueueRPCAppLinkObjectsIncoming->pushMessage(Message(message, ApplicationUniqueID(connectionID, sessionID)));
+        mQueueRPCAppLinkObjectsIncoming->pushMessage(Message(message, appId));
 
-        LOG4CPLUS_INFO_EXT(mLogger, " Pushed mobile RPC message for connection id " << connectionID << " session id " << (uint)sessionID);
+        LOG4CPLUS_INFO_EXT(mLogger, " Pushed mobile RPC message for application id " << appId);
     }
 
     /**
@@ -215,18 +215,15 @@ namespace NsAppManager
      */
     void AppMgrCore::handleMobileRPCMessage(Message message , void *pThis)
     {
-        const unsigned int& connectionID = std::get<0>(message.second);
-        const unsigned char& sessionID = std::get<1>(message.second);
-        int appId = connectionID|(sessionID << 16);
+        int sessionKey = message.second;
 
         NsAppLinkRPC::ALRPCMessage* mobileMsg = message.first;
         if(!mobileMsg)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " No message associated with the connection " << connectionID << " session " << (uint)sessionID << " !");
+            LOG4CPLUS_ERROR_EXT(mLogger, " No message associated with the session key " << sessionKey << " !");
             return;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message " << mobileMsg->getMethodId() << " has been received for the connection " << connectionID << " session id " << (uint)sessionID << " !");
-        LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message " << mobileMsg->getMethodId() << " has been received for the app id == connection key == session key ==  " << appId << " !");
+        LOG4CPLUS_INFO_EXT(mLogger, " A mobile RPC message " << mobileMsg->getMethodId() << " has been received for the session key " << sessionKey << " !");
         if(!pThis)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " pThis should point to an instance of AppMgrCore class");
@@ -234,11 +231,11 @@ namespace NsAppManager
         }
         AppMgrCore* core = (AppMgrCore*)pThis;
         const unsigned int& protocolVersion = mobileMsg->getProtocolVersion();
-        const NsConnectionHandler::tDeviceHandle& currentDeviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(appId);
+        const NsConnectionHandler::tDeviceHandle& currentDeviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(sessionKey);
         const NsConnectionHandler::CDevice* currentDevice = core->mDeviceList.findDeviceByHandle(currentDeviceHandle);
         if(!currentDevice)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, " Cannot retreive current device name for the message with connection " << connectionID << " session " << (uint)sessionID << " !");
+            LOG4CPLUS_ERROR_EXT(mLogger, " Cannot retreive current device name for the message with session key " << sessionKey << " !");
             return;
         }
         const std::string& currentDeviceName = currentDevice->getUserFriendlyName();
@@ -256,16 +253,16 @@ namespace NsAppManager
                     NsAppLinkRPC::RegisterAppInterface_response* response = new NsAppLinkRPC::RegisterAppInterface_response();
                     const std::string& appName = object->get_appName();
 
-                    if(AppMgrRegistry::getInstance().getItem(connectionID, sessionID))
+                    if(AppMgrRegistry::getInstance().getItem(sessionKey))
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_REGISTERED_ALREADY);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
 
-                    Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, connectionID, sessionID ));
+                    Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, sessionKey ));
                     response->setCorrelationID(object->getCorrelationID());
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     if(!app)
@@ -273,7 +270,7 @@ namespace NsAppManager
                         LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
 
@@ -281,8 +278,10 @@ namespace NsAppManager
                     status->set_hmiLevel(app->getApplicationHMIStatusLevel());
                     status->set_audioStreamingState(app->getApplicationAudioStreamingState());
                     status->set_systemContext(app->getSystemContext());
-                    MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
-                    LOG4CPLUS_INFO_EXT(mLogger, " An OnHMIStatus notification for the app "  << app->getName() << " connection/session key " << app->getAppID() << " gets sent to a mobile side... ");
+                    MobileHandler::getInstance().sendRPCMessage(status, sessionKey);
+                    LOG4CPLUS_INFO_EXT(mLogger, " An OnHMIStatus notification for the app "  << app->getName()
+                        << " connection/session key " << app->getAppID()
+                        << " gets sent to a mobile side... ");
 
                     response->set_buttonCapabilities(core->mButtonCapabilitiesV1.get());
                     response->set_displayCapabilities(core->mDisplayCapabilitiesV1);
@@ -294,8 +293,10 @@ namespace NsAppManager
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
 
-                    LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName() << " connection/session key " << app->getAppID() << " gets sent to a mobile side... ");
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName()
+                        << " connection/session key " << app->getAppID()
+                        << " gets sent to a mobile side... ");
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
 
                     NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
                     appRegistered->set_appName(app->getName());
@@ -305,8 +306,11 @@ namespace NsAppManager
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
                     appRegistered->set_deviceName(currentDeviceName);
                     HMIHandler::getInstance().sendNotification(appRegistered);
-                    LOG4CPLUS_INFO_EXT(mLogger, " An AppLinkCore::OnAppRegistered notofocation for the app "  << app->getName() << " connection/session key " << app->getAppID() << " gets sent to an HMI side... ");
-                    LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName() << " connection/session key " << app->getAppID());
+                    LOG4CPLUS_INFO_EXT(mLogger, " An AppLinkCore::OnAppRegistered notofocation for the app " << app->getName()
+                        << " application id " << app->getAppID()
+                        << " gets sent to an HMI side... ");
+                    LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName()
+                        << " application id " << app->getAppID());
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_UNREGISTERAPPINTERFACE_REQUEST:
@@ -314,30 +318,31 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
 
                     NsAppLinkRPC::UnregisterAppInterface_request * object = (NsAppLinkRPC::UnregisterAppInterface_request*)mobileMsg;
-                    Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                    Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
                     NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey 
+                            << " hasn't been associated with any application!");
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     std::string appName = app->getName();
 
-                    core->removeAppFromHmi(app, connectionID, sessionID);
-                    core->unregisterApplication( connectionID, sessionID );
+                    core->removeAppFromHmi(app, sessionKey);
+                    core->unregisterApplication( sessionKey );
 
                     response->setCorrelationID(object->getCorrelationID());
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
 
                     NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
                     msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
-                    MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionKey);
                     NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                     appUnregistered->set_appName(appName);
                     appUnregistered->set_appId(app->getAppID());
@@ -360,13 +365,14 @@ namespace NsAppManager
 
                     NsAppLinkRPC::SubscribeButton_request * object = (NsAppLinkRPC::SubscribeButton_request*)mobileMsg;
                     NsAppLinkRPC::SubscribeButton_response* response = new NsAppLinkRPC::SubscribeButton_response();
-                    RegistryItem* item = AppMgrRegistry::getInstance().getItem(connectionID, sessionID);
+                    RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
                     if(!item)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     NsAppLinkRPCV2::ButtonName btnName;
@@ -377,7 +383,7 @@ namespace NsAppManager
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_UNSUBSCRIBEBUTTON_REQUEST:
@@ -392,7 +398,7 @@ namespace NsAppManager
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_SHOW_REQUEST:
@@ -428,9 +434,9 @@ namespace NsAppManager
                     {
                         showRPC2Request->set_alignment(*object->get_alignment());
                     }
-                    showRPC2Request->set_appId(appId);
+                    showRPC2Request->set_appId(sessionKey);
                     LOG4CPLUS_INFO_EXT(mLogger, "Show request almost handled" );
-                    core->mMessageMapping.addMessage(showRPC2Request->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(showRPC2Request->getId(), sessionKey);
                     HMIHandler::getInstance().sendRequest(showRPC2Request);
                     break;
                 }
@@ -441,13 +447,13 @@ namespace NsAppManager
                     NsRPC2Communication::TTS::Speak* speakRPC2Request = new NsRPC2Communication::TTS::Speak();
                     speakRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     speakRPC2Request->set_ttsChunks(object->get_ttsChunks());
-                    speakRPC2Request->set_appId(appId);
-                    core->mMessageMapping.addMessage(speakRPC2Request->getId(), connectionID, sessionID);
+                    speakRPC2Request->set_appId(sessionKey);
+                    core->mMessageMapping.addMessage(speakRPC2Request->getId(), sessionKey);
                     HMIHandler::getInstance().sendRequest(speakRPC2Request);
                     NsAppLinkRPC::Speak_response * mobileResponse = new NsAppLinkRPC::Speak_response;
                     mobileResponse->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
                     mobileResponse->set_success(true);
-                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_SETGLOBALPROPERTIES_REQUEST:
@@ -456,7 +462,7 @@ namespace NsAppManager
                     NsAppLinkRPC::SetGlobalProperties_request* object = (NsAppLinkRPC::SetGlobalProperties_request*)mobileMsg;
                     NsRPC2Communication::UI::SetGlobalProperties* setGPRPC2Request = new NsRPC2Communication::UI::SetGlobalProperties();
                     setGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(setGPRPC2Request->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(setGPRPC2Request->getId(), sessionKey);
                     if(object->get_helpPrompt())
                     {
                         setGPRPC2Request->set_helpPrompt(*object->get_helpPrompt());
@@ -467,12 +473,12 @@ namespace NsAppManager
                         setGPRPC2Request->set_timeoutPrompt(*object->get_timeoutPrompt());
                     }
 
-                    setGPRPC2Request->set_appId(appId);
+                    setGPRPC2Request->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(setGPRPC2Request);
                     NsAppLinkRPC::SetGlobalProperties_response * mobileResponse = new NsAppLinkRPC::SetGlobalProperties_response;
                     mobileResponse->set_success(true);
                     mobileResponse->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_RESETGLOBALPROPERTIES_REQUEST:
@@ -481,14 +487,14 @@ namespace NsAppManager
                     NsAppLinkRPC::ResetGlobalProperties_request* object = (NsAppLinkRPC::ResetGlobalProperties_request*)mobileMsg;
                     NsRPC2Communication::UI::ResetGlobalProperties* resetGPRPC2Request = new NsRPC2Communication::UI::ResetGlobalProperties();
                     resetGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(resetGPRPC2Request->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(resetGPRPC2Request->getId(), sessionKey);
                     resetGPRPC2Request->set_properties(object->get_properties());
-                    resetGPRPC2Request->set_appId(appId);
+                    resetGPRPC2Request->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(resetGPRPC2Request);
                     NsAppLinkRPC::ResetGlobalProperties_response * mobileResponse = new NsAppLinkRPC::ResetGlobalProperties_response;
                     mobileResponse->set_success(true);
                     mobileResponse->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_ALERT_REQUEST:
@@ -497,7 +503,7 @@ namespace NsAppManager
                     NsAppLinkRPC::Alert_request* object = (NsAppLinkRPC::Alert_request*)mobileMsg;
                     NsRPC2Communication::UI::Alert* alert = new NsRPC2Communication::UI::Alert();
                     alert->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(alert->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(alert->getId(), sessionKey);
                     if(object->get_alertText1())
                     {
                         alert->set_AlertText1(*object->get_alertText1());
@@ -514,34 +520,35 @@ namespace NsAppManager
                     {
                         alert->set_playTone(*object->get_playTone());
                     }
-                    alert->set_appId(appId);
+                    alert->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(alert);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_ONBUTTONPRESS:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "OnButtonPress Notification has been received.");
-                    MobileHandler::getInstance().sendRPCMessage(mobileMsg, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(mobileMsg, sessionKey);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_ONCOMMAND:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "OnCommand Notification has been received.");
-                    MobileHandler::getInstance().sendRPCMessage(mobileMsg, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(mobileMsg, sessionKey);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_ADDCOMMAND_REQUEST:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
 
-                    Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application* app = AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         NsAppLinkRPC::AddCommand_response* response = new NsAppLinkRPC::AddCommand_response();
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     NsAppLinkRPC::AddCommand_request* object = (NsAppLinkRPC::AddCommand_request*)mobileMsg;
@@ -563,7 +570,7 @@ namespace NsAppManager
                             const unsigned int& menuId = *menuParams->get_parentID();
                             app->addMenuCommand(cmdId, menuId);
                         }
-                        core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
+                        core->mMessageMapping.addMessage(addCmd->getId(), sessionKey);
 
                         CommandParams params;
                         params.menuParams = menuParams;
@@ -582,7 +589,7 @@ namespace NsAppManager
                         addCmd->set_vrCommands(*object->get_vrCommands());
                         addCmd->set_cmdId(cmdId);
                         addCmd->set_appId(app->getAppID());
-                        core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
+                        core->mMessageMapping.addMessage(addCmd->getId(), sessionKey);
                         CommandParams params;
                         params.vrCommands = object->get_vrCommands();
                         app->addCommand(cmdId, cmdType, params);
@@ -596,14 +603,15 @@ namespace NsAppManager
                 case NsAppLinkRPC::Marshaller::METHOD_DELETECOMMAND_REQUEST:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
-                    Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application* app = AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " Application id " << sessionKey
+                            << " hasn't been associated with any application!");
                         NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response();
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
 
@@ -615,7 +623,7 @@ namespace NsAppManager
                         NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     const unsigned int& cmdId = object->get_cmdID();
@@ -628,7 +636,7 @@ namespace NsAppManager
                             NsRPC2Communication::UI::DeleteCommand* deleteCmd = new NsRPC2Communication::UI::DeleteCommand();
                             deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                             deleteCmd->set_appId(app->getAppID());
-                            core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+                            core->mMessageMapping.addMessage(deleteCmd->getId(), sessionKey);
                             deleteCmd->set_cmdId(cmdId);
                             app->removeCommand(cmdId, cmdType);
                             app->incrementUnrespondedRequestCount(cmdId);
@@ -641,7 +649,7 @@ namespace NsAppManager
                             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand VR request has been invoked");
                             NsRPC2Communication::VR::DeleteCommand* deleteCmd = new NsRPC2Communication::VR::DeleteCommand();
                             deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                            core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+                            core->mMessageMapping.addMessage(deleteCmd->getId(), sessionKey);
                             deleteCmd->set_cmdId(cmdId);
                             deleteCmd->set_appId(app->getAppID());
                             app->removeCommand(cmdId, cmdType);
@@ -655,21 +663,22 @@ namespace NsAppManager
                 case NsAppLinkRPC::Marshaller::METHOD_ADDSUBMENU_REQUEST:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
-                    Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application* app = AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         NsAppLinkRPC::AddSubMenu_response* response = new NsAppLinkRPC::AddSubMenu_response();
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
 
                     NsAppLinkRPC::AddSubMenu_request* object = (NsAppLinkRPC::AddSubMenu_request*)mobileMsg;
                     NsRPC2Communication::UI::AddSubMenu* addSubMenu = new NsRPC2Communication::UI::AddSubMenu();
                     addSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(addSubMenu->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(addSubMenu->getId(), sessionKey);
                     addSubMenu->set_menuId(object->get_menuID());
                     addSubMenu->set_menuName(object->get_menuName());
                     if(object->get_position())
@@ -685,19 +694,20 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubmenu request has been invoked");
                     NsAppLinkRPC::DeleteSubMenu_request* object = (NsAppLinkRPC::DeleteSubMenu_request*)mobileMsg;
-                    Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application* app = AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         NsAppLinkRPC::DeleteSubMenu_response* response = new NsAppLinkRPC::DeleteSubMenu_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     NsRPC2Communication::UI::DeleteSubMenu* delSubMenu = new NsRPC2Communication::UI::DeleteSubMenu();
                     delSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(delSubMenu->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(delSubMenu->getId(), sessionKey);
                     const unsigned int& menuId = object->get_menuID();
                     delSubMenu->set_menuId(menuId);
                     delSubMenu->set_appId(app->getAppID());
@@ -710,7 +720,7 @@ namespace NsAppManager
                         delUiCmd->set_cmdId(*it);
                         delUiCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                         delUiCmd->set_appId(app->getAppID());
-                        core->mMessageMapping.addMessage(delUiCmd->getId(), connectionID, sessionID);
+                        core->mMessageMapping.addMessage(delUiCmd->getId(), sessionKey);
                         core->mRequestMapping.addMessage(delUiCmd->getId(), *it);
                         HMIHandler::getInstance().sendRequest(delUiCmd);
                         const CommandTypes& types = app->getCommandTypes(*it);
@@ -723,7 +733,7 @@ namespace NsAppManager
                                 NsRPC2Communication::VR::DeleteCommand* delVrCmd = new NsRPC2Communication::VR::DeleteCommand();
                                 delVrCmd->set_cmdId(*it);
                                 delVrCmd->set_appId(app->getAppID());
-                                core->mMessageMapping.addMessage(delVrCmd->getId(), connectionID, sessionID);
+                                core->mMessageMapping.addMessage(delVrCmd->getId(), sessionKey);
                                 core->mRequestMapping.addMessage(delVrCmd->getId(), *it);
                                 app->removeCommand(*it, CommandType::VR);
                                 HMIHandler::getInstance().sendRequest(delVrCmd);
@@ -740,19 +750,20 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet request has been invoked");
                     NsAppLinkRPC::CreateInteractionChoiceSet_request* object = (NsAppLinkRPC::CreateInteractionChoiceSet_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         NsAppLinkRPC::CreateInteractionChoiceSet_response* response = new NsAppLinkRPC::CreateInteractionChoiceSet_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     NsRPC2Communication::UI::CreateInteractionChoiceSet* createInteractionChoiceSet = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
                     createInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(createInteractionChoiceSet->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(createInteractionChoiceSet->getId(), sessionKey);
                     createInteractionChoiceSet->set_choiceSet(object->get_choiceSet());
                     createInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
                     createInteractionChoiceSet->set_appId(app->getAppID());
@@ -764,19 +775,20 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet request has been invoked");
                     NsAppLinkRPC::DeleteInteractionChoiceSet_request* object = (NsAppLinkRPC::DeleteInteractionChoiceSet_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         NsAppLinkRPC::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPC::DeleteInteractionChoiceSet_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteInteractionChoiceSet = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
                     deleteInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getId(), sessionKey);
                     deleteInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
                     deleteInteractionChoiceSet->set_appId(app->getAppID());
                     app->removeChoiceSet(object->get_interactionChoiceSetID());
@@ -789,7 +801,7 @@ namespace NsAppManager
                     NsAppLinkRPC::PerformInteraction_request* object = (NsAppLinkRPC::PerformInteraction_request*)mobileMsg;
                     NsRPC2Communication::UI::PerformInteraction* performInteraction = new NsRPC2Communication::UI::PerformInteraction();
                     performInteraction->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(performInteraction->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(performInteraction->getId(), sessionKey);
                     if(object->get_helpPrompt())
                     {
                         performInteraction->set_helpPrompt(*object->get_helpPrompt());
@@ -806,7 +818,7 @@ namespace NsAppManager
                     {
                         performInteraction->set_timeoutPrompt(*object->get_timeoutPrompt());
                     }
-                    performInteraction->set_appId(appId);
+                    performInteraction->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(performInteraction);
                     break;
                 }
@@ -815,8 +827,8 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
                     NsRPC2Communication::UI::SetMediaClockTimer* setTimer = new NsRPC2Communication::UI::SetMediaClockTimer();
                     setTimer->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    setTimer->set_appId(appId);
-                    core->mMessageMapping.addMessage(setTimer->getId(), connectionID, sessionID);
+                    setTimer->set_appId(sessionKey);
+                    core->mMessageMapping.addMessage(setTimer->getId(), sessionKey);
 
                     NsAppLinkRPC::SetMediaClockTimer_request* object = (NsAppLinkRPC::SetMediaClockTimer_request*)mobileMsg;
                     if(object->get_startTime())
@@ -836,7 +848,7 @@ namespace NsAppManager
                     NsAppLinkRPC::EncodedSyncPData_response* response = new NsAppLinkRPC::EncodedSyncPData_response;
                     if(object->get_data())
                     {
-                        Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(connectionID, sessionID) );
+                        Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(sessionKey) );
                         const std::string& name = app->getName();
                         core->mSyncPManager.setPData(*object->get_data(), name, object->getMethodId());
                         response->set_success(true);
@@ -848,7 +860,7 @@ namespace NsAppManager
                         response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
                     }
 
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_SHOW_RESPONSE:
@@ -873,7 +885,7 @@ namespace NsAppManager
                 case NsAppLinkRPC::Marshaller::METHOD_UNREGISTERAPPINTERFACE_RESPONSE:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A " << mobileMsg->getMethodId() << " response or notification has been invoked");
-                    MobileHandler::getInstance().sendRPCMessage(mobileMsg, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(mobileMsg, sessionKey);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_INVALID:
@@ -883,7 +895,7 @@ namespace NsAppManager
                     NsAppLinkRPC::GenericResponse_response* response = new NsAppLinkRPC::GenericResponse_response();
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
             }
@@ -900,16 +912,16 @@ namespace NsAppManager
                     NsAppLinkRPCV2::RegisterAppInterface_response* response = new NsAppLinkRPCV2::RegisterAppInterface_response();
                     const std::string& appName = object->get_appName();
 
-                    if(AppMgrRegistry::getInstance().getItem(connectionID, sessionID))
+                    if(AppMgrRegistry::getInstance().getItem(sessionKey))
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_REGISTERED_ALREADY);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
 
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, connectionID, sessionID ));
+                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, sessionKey ));
                     
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::RegisterAppInterfaceID);
@@ -918,7 +930,7 @@ namespace NsAppManager
                         LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
 
@@ -928,7 +940,7 @@ namespace NsAppManager
                     status->set_systemContext(app->getSystemContext());
                     status->setMethodId(NsAppLinkRPCV2::FunctionID::OnHMIStatusID);
                     status->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                    MobileHandler::getInstance().sendRPCMessage(status, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(status, sessionKey);
 
                     response->set_buttonCapabilities(core->mButtonCapabilitiesV2.get());
                     response->set_displayCapabilities(core->mDisplayCapabilitiesV2);
@@ -945,7 +957,7 @@ namespace NsAppManager
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
 
                     LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName() << " gets sent to a mobile side... ");
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
 
                     NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
                     appRegistered->set_appName(app->getName());
@@ -983,29 +995,30 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
                     NsAppLinkRPCV2::UnregisterAppInterface_request * object = (NsAppLinkRPCV2::UnregisterAppInterface_request*)mobileMsg;
-                    Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                    Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
                     NsAppLinkRPCV2::UnregisterAppInterface_response* response = new NsAppLinkRPCV2::UnregisterAppInterface_response();
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     std::string appName = app->getName();
 
-                    core->removeAppFromHmi(app, connectionID, sessionID);
-                    core->unregisterApplication( connectionID, sessionID );
+                    core->removeAppFromHmi(app, sessionKey);
+                    core->unregisterApplication( sessionKey );
 
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
 
                     NsAppLinkRPCV2::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPCV2::OnAppInterfaceUnregistered();
                     msgUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
-                    MobileHandler::getInstance().sendRPCMessage(msgUnregistered, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionKey);
                     NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                     appUnregistered->set_appName(appName);
                     appUnregistered->set_appId(app->getAppID());
@@ -1019,20 +1032,21 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
                     NsAppLinkRPCV2::SubscribeButton_request * object = (NsAppLinkRPCV2::SubscribeButton_request*)mobileMsg;
                     NsAppLinkRPCV2::SubscribeButton_response* response = new NsAppLinkRPCV2::SubscribeButton_response();
-                    RegistryItem* item = AppMgrRegistry::getInstance().getItem(connectionID, sessionID);
+                    RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
                     if(!item)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
 
                     core->mButtonsMapping.addButton( object->get_buttonName(), item );
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::UnsubscribeButtonID:
@@ -1043,7 +1057,7 @@ namespace NsAppManager
                     NsAppLinkRPCV2::UnsubscribeButton_response* response = new NsAppLinkRPCV2::UnsubscribeButton_response();
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::SetMediaClockTimerID:
@@ -1051,8 +1065,8 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
                     NsRPC2Communication::UI::SetMediaClockTimer* setTimer = new NsRPC2Communication::UI::SetMediaClockTimer();
                     setTimer->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    setTimer->set_appId(appId);
-                    core->mMessageMapping.addMessage(setTimer->getId(), connectionID, sessionID);
+                    setTimer->set_appId(sessionKey);
+                    core->mMessageMapping.addMessage(setTimer->getId(), sessionKey);
 
                     NsAppLinkRPCV2::SetMediaClockTimer_request* object = (NsAppLinkRPCV2::SetMediaClockTimer_request*)mobileMsg;
                     if(object->get_startTime())
@@ -1096,7 +1110,7 @@ namespace NsAppManager
                             if (stat(syncFileName.c_str(), &status) == -1) // File doesn't exist
                             {
                                 Application* app = core->getApplicationFromItemCheckNotNull(
-                                                        AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                                                        AppMgrRegistry::getInstance().getItem(sessionKey));
 
                                 const std::string& name = app->getName();
                                 const int& id = app->getAppID();
@@ -1137,7 +1151,7 @@ namespace NsAppManager
                         response->set_spaceAvailable(freeSpace);
                     }
 
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::DeleteFileID:
@@ -1151,7 +1165,7 @@ namespace NsAppManager
                     if(!syncFileName.empty())
                     {
                         Application* app = core->getApplicationFromItemCheckNotNull(
-                                    AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                                    AppMgrRegistry::getInstance().getItem(sessionKey));
 
                         const std::string& name = app->getName();
                         const int& id = app->getAppID();
@@ -1179,7 +1193,7 @@ namespace NsAppManager
                         response->set_spaceAvailable(freeSpace);
                     }
 
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::ListFilesID:
@@ -1192,7 +1206,7 @@ namespace NsAppManager
                     unsigned long int freeSpace = getAvailableSpace();
 
                     Application* app = core->getApplicationFromItemCheckNotNull(
-                                    AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                                    AppMgrRegistry::getInstance().getItem(sessionKey));
 
                     const std::string& name = app->getName();
                     const int& id = app->getAppID();
@@ -1226,7 +1240,7 @@ namespace NsAppManager
                         response->set_spaceAvailable(freeSpace);
                     }
 
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::SliderID:
@@ -1236,7 +1250,7 @@ namespace NsAppManager
                     NsRPC2Communication::UI::Slider* slider = new NsRPC2Communication::UI::Slider();
 
                     slider->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(slider->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(slider->getId(), sessionKey);
 
                     slider->set_numTicks(request->get_numTicks());
 
@@ -1249,7 +1263,7 @@ namespace NsAppManager
 
                     slider->set_position(request->get_position());
                     slider->set_timeout(request->get_timeout());
-                    slider->set_appId(appId);
+                    slider->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(slider);
                     break;
                 }
@@ -1258,7 +1272,7 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " A SetAppIcon request has been invoked");
                     NsAppLinkRPCV2::SetAppIcon_request* request = static_cast<NsAppLinkRPCV2::SetAppIcon_request*>(mobileMsg);
                     Application* app = core->getApplicationFromItemCheckNotNull(
-                        AppMgrRegistry::getInstance().getItem(connectionID, sessionID));
+                        AppMgrRegistry::getInstance().getItem(sessionKey));
                     if (!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -1270,7 +1284,7 @@ namespace NsAppManager
                     setAppIcon->set_syncFileName(request->get_syncFileName());
                     setAppIcon->set_appId(app->getAppID());
 
-                    core->mMessageMapping.addMessage(setAppIcon->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(setAppIcon->getId(), sessionKey);
                     HMIHandler::getInstance().sendRequest(setAppIcon);
                     break;
                 }
@@ -1279,13 +1293,13 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " An EncodedSyncPData request has been invoked");
                     NsAppLinkRPCV2::EncodedSyncPData_request* object = (NsAppLinkRPCV2::EncodedSyncPData_request*)mobileMsg;
                     NsAppLinkRPCV2::EncodedSyncPData_response* response = new NsAppLinkRPCV2::EncodedSyncPData_response;
-                    Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(connectionID, sessionID) );
+                    Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(sessionKey) );
                     const std::string& name = app->getName();
                     core->mSyncPManager.setPData(object->get_data(), name, object->getMethodId());
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
 
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::SetGlobalPropertiesID:
@@ -1294,7 +1308,7 @@ namespace NsAppManager
                     NsAppLinkRPCV2::SetGlobalProperties_request* object = (NsAppLinkRPCV2::SetGlobalProperties_request*)mobileMsg;
                     NsRPC2Communication::UI::SetGlobalProperties* setGPRPC2Request = new NsRPC2Communication::UI::SetGlobalProperties();
                     setGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(setGPRPC2Request->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(setGPRPC2Request->getId(), sessionKey);
                     if(object->get_helpPrompt())
                     {
                         std::vector< NsAppLinkRPC::TTSChunk> helpPrompt;
@@ -1336,12 +1350,12 @@ namespace NsAppManager
                         setGPRPC2Request->set_vrHelpTitle(*object->get_vrHelpTitle());
                     }
 
-                    setGPRPC2Request->set_appId(appId);
+                    setGPRPC2Request->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(setGPRPC2Request);
                     NsAppLinkRPCV2::SetGlobalProperties_response * mobileResponse = new NsAppLinkRPCV2::SetGlobalProperties_response;
                     mobileResponse->set_success(true);
                     mobileResponse->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::ResetGlobalPropertiesID:
@@ -1350,7 +1364,7 @@ namespace NsAppManager
                     NsAppLinkRPCV2::ResetGlobalProperties_request* object = (NsAppLinkRPCV2::ResetGlobalProperties_request*)mobileMsg;
                     NsRPC2Communication::UI::ResetGlobalProperties* resetGPRPC2Request = new NsRPC2Communication::UI::ResetGlobalProperties();
                     resetGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(resetGPRPC2Request->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(resetGPRPC2Request->getId(), sessionKey);
                     std::vector< NsAppLinkRPC::GlobalProperty> gp;
                     for(std::vector< NsAppLinkRPCV2::GlobalProperty>::const_iterator it = object->get_properties().begin(); it != object->get_properties().end(); it++)
                     {
@@ -1360,31 +1374,32 @@ namespace NsAppManager
                         gp.push_back(propV1);
                     }
                     resetGPRPC2Request->set_properties(gp);
-                    resetGPRPC2Request->set_appId(appId);
+                    resetGPRPC2Request->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(resetGPRPC2Request);
                     NsAppLinkRPCV2::ResetGlobalProperties_response * mobileResponse = new NsAppLinkRPCV2::ResetGlobalProperties_response;
                     mobileResponse->set_success(true);
                     mobileResponse->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::CreateInteractionChoiceSetID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet request has been invoked");
                     NsAppLinkRPCV2::CreateInteractionChoiceSet_request* object = (NsAppLinkRPCV2::CreateInteractionChoiceSet_request*)mobileMsg;
-                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         NsAppLinkRPCV2::CreateInteractionChoiceSet_response* response = new NsAppLinkRPCV2::CreateInteractionChoiceSet_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     NsRPC2Communication::UI::CreateInteractionChoiceSet* createInteractionChoiceSet = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
                     createInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(createInteractionChoiceSet->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(createInteractionChoiceSet->getId(), sessionKey);
 
                     const std::vector<NsAppLinkRPCV2::Choice>& choicesV2 = object->get_choiceSet();
                     std::vector<NsAppLinkRPC::Choice> choices;
@@ -1408,19 +1423,20 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet request has been invoked");
                     NsAppLinkRPCV2::DeleteInteractionChoiceSet_request* object = (NsAppLinkRPCV2::DeleteInteractionChoiceSet_request*)mobileMsg;
-                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         NsAppLinkRPCV2::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPCV2::DeleteInteractionChoiceSet_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteInteractionChoiceSet = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
                     deleteInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getId(), sessionKey);
                     deleteInteractionChoiceSet->set_interactionChoiceSetID(object->get_interactionChoiceSetID());
                     deleteInteractionChoiceSet->set_appId(app->getAppID());
                     app->removeChoiceSet(object->get_interactionChoiceSetID());
@@ -1433,7 +1449,7 @@ namespace NsAppManager
                     NsAppLinkRPCV2::PerformInteraction_request* object = (NsAppLinkRPCV2::PerformInteraction_request*)mobileMsg;
                     NsRPC2Communication::UI::PerformInteraction* performInteraction = new NsRPC2Communication::UI::PerformInteraction();
                     performInteraction->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(performInteraction->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(performInteraction->getId(), sessionKey);
                     if(object->get_helpPrompt())
                     {
                         std::vector< NsAppLinkRPC::TTSChunk> helpPrompt;
@@ -1486,7 +1502,7 @@ namespace NsAppManager
                         }
                         performInteraction->set_timeoutPrompt(timeoutPrompt);
                     }
-                    performInteraction->set_appId(appId);
+                    performInteraction->set_appId(sessionKey);
                     if(object->get_vrHelp())
                     {
                         performInteraction->set_vrHelp(*object->get_vrHelp());
@@ -1499,7 +1515,7 @@ namespace NsAppManager
                     NsAppLinkRPCV2::Alert_request* object = (NsAppLinkRPCV2::Alert_request*)mobileMsg;
                     NsRPC2Communication::UI::Alert* alert = new NsRPC2Communication::UI::Alert();
                     alert->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(alert->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(alert->getId(), sessionKey);
                     if(object->get_alertText1())
                     {
                         alert->set_AlertText1(*object->get_alertText1());
@@ -1524,7 +1540,7 @@ namespace NsAppManager
                     {
                         alert->set_softButtons(*object->get_softButtons());
                     }
-                    alert->set_appId(appId);
+                    alert->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(alert);
                     break;
                 }
@@ -1583,9 +1599,9 @@ namespace NsAppManager
                         textAlignmentV1.set((NsAppLinkRPC::TextAlignment::TextAlignmentInternal)textAlignment.get());
                         showRPC2Request->set_alignment(textAlignmentV1);
                     }
-                    showRPC2Request->set_appId(appId);
+                    showRPC2Request->set_appId(sessionKey);
                     LOG4CPLUS_INFO_EXT(mLogger, "Show request almost handled" );
-                    core->mMessageMapping.addMessage(showRPC2Request->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(showRPC2Request->getId(), sessionKey);
                     HMIHandler::getInstance().sendRequest(showRPC2Request);
                     break;
                 }
@@ -1607,27 +1623,28 @@ namespace NsAppManager
                         ttsChunks.push_back(ttsChunkV1);
                     }
                     speakRPC2Request->set_ttsChunks(ttsChunks);
-                    speakRPC2Request->set_appId(appId);
-                    core->mMessageMapping.addMessage(speakRPC2Request->getId(), connectionID, sessionID);
+                    speakRPC2Request->set_appId(sessionKey);
+                    core->mMessageMapping.addMessage(speakRPC2Request->getId(), sessionKey);
                     HMIHandler::getInstance().sendRequest(speakRPC2Request);
                     NsAppLinkRPCV2::Speak_response * mobileResponse = new NsAppLinkRPCV2::Speak_response;
                     mobileResponse->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     mobileResponse->set_success(true);
-                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::AddCommandID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
 
-                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         NsAppLinkRPCV2::AddCommand_response* response = new NsAppLinkRPCV2::AddCommand_response();
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     NsAppLinkRPCV2::AddCommand_request* object = (NsAppLinkRPCV2::AddCommand_request*)mobileMsg;
@@ -1659,7 +1676,7 @@ namespace NsAppManager
                             const unsigned int& menuId = *menuParams->get_parentID();
                             app->addMenuCommand(cmdId, menuId);
                         }
-                        core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
+                        core->mMessageMapping.addMessage(addCmd->getId(), sessionKey);
 
                         if(object->get_cmdIcon())
                         {
@@ -1683,7 +1700,7 @@ namespace NsAppManager
                         addCmd->set_vrCommands(*object->get_vrCommands());
                         addCmd->set_cmdId(cmdId);
                         addCmd->set_appId(app->getAppID());
-                        core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
+                        core->mMessageMapping.addMessage(addCmd->getId(), sessionKey);
                         CommandParams params;
                         params.vrCommands = object->get_vrCommands();
                         app->addCommand(cmdId, cmdType, params);
@@ -1697,14 +1714,15 @@ namespace NsAppManager
                 case NsAppLinkRPCV2::FunctionID::DeleteCommandID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
-                    Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application* app = AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         NsAppLinkRPCV2::DeleteCommand_response* response = new NsAppLinkRPCV2::DeleteCommand_response();
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
 
@@ -1716,7 +1734,7 @@ namespace NsAppManager
                         NsAppLinkRPCV2::DeleteCommand_response* response = new NsAppLinkRPCV2::DeleteCommand_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     const unsigned int& cmdId = object->get_cmdID();
@@ -1729,7 +1747,7 @@ namespace NsAppManager
                             NsRPC2Communication::UI::DeleteCommand* deleteCmd = new NsRPC2Communication::UI::DeleteCommand();
                             deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                             deleteCmd->set_appId(app->getAppID());
-                            core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+                            core->mMessageMapping.addMessage(deleteCmd->getId(), sessionKey);
                             deleteCmd->set_cmdId(cmdId);
                             app->removeCommand(cmdId, cmdType);
                             app->incrementUnrespondedRequestCount(cmdId);
@@ -1742,7 +1760,7 @@ namespace NsAppManager
                             LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand VR request has been invoked");
                             NsRPC2Communication::VR::DeleteCommand* deleteCmd = new NsRPC2Communication::VR::DeleteCommand();
                             deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                            core->mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+                            core->mMessageMapping.addMessage(deleteCmd->getId(), sessionKey);
                             deleteCmd->set_cmdId(cmdId);
                             deleteCmd->set_appId(app->getAppID());
                             app->removeCommand(cmdId, cmdType);
@@ -1756,21 +1774,22 @@ namespace NsAppManager
                 case NsAppLinkRPCV2::FunctionID::AddSubMenuID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
-                    Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application* app = AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         NsAppLinkRPCV2::AddSubMenu_response* response = new NsAppLinkRPCV2::AddSubMenu_response();
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
 
                     NsAppLinkRPCV2::AddSubMenu_request* object = (NsAppLinkRPCV2::AddSubMenu_request*)mobileMsg;
                     NsRPC2Communication::UI::AddSubMenu* addSubMenu = new NsRPC2Communication::UI::AddSubMenu();
                     addSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(addSubMenu->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(addSubMenu->getId(), sessionKey);
                     addSubMenu->set_menuId(object->get_menuID());
                     addSubMenu->set_menuName(object->get_menuName());
                     if(object->get_position())
@@ -1786,19 +1805,20 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubmenu request has been invoked");
                     NsAppLinkRPCV2::DeleteSubMenu_request* object = (NsAppLinkRPCV2::DeleteSubMenu_request*)mobileMsg;
-                    Application* app = AppMgrRegistry::getInstance().getApplication(connectionID, sessionID);
+                    Application* app = AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " Connection " << connectionID << " and session " << (uint)sessionID << " haven't been associated with any application!");
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
                         NsAppLinkRPCV2::DeleteSubMenu_response* response = new NsAppLinkRPCV2::DeleteSubMenu_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     NsRPC2Communication::UI::DeleteSubMenu* delSubMenu = new NsRPC2Communication::UI::DeleteSubMenu();
                     delSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageMapping.addMessage(delSubMenu->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(delSubMenu->getId(), sessionKey);
                     const unsigned int& menuId = object->get_menuID();
                     delSubMenu->set_menuId(menuId);
                     delSubMenu->set_appId(app->getAppID());
@@ -1811,7 +1831,7 @@ namespace NsAppManager
                         delUiCmd->set_cmdId(*it);
                         delUiCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                         delUiCmd->set_appId(app->getAppID());
-                        core->mMessageMapping.addMessage(delUiCmd->getId(), connectionID, sessionID);
+                        core->mMessageMapping.addMessage(delUiCmd->getId(), sessionKey);
                         core->mRequestMapping.addMessage(delUiCmd->getId(), *it);
                         HMIHandler::getInstance().sendRequest(delUiCmd);
                         const CommandTypes& types = app->getCommandTypes(*it);
@@ -1824,7 +1844,7 @@ namespace NsAppManager
                                 NsRPC2Communication::VR::DeleteCommand* delVrCmd = new NsRPC2Communication::VR::DeleteCommand();
                                 delVrCmd->set_cmdId(*it);
                                 delVrCmd->set_appId(app->getAppID());
-                                core->mMessageMapping.addMessage(delVrCmd->getId(), connectionID, sessionID);
+                                core->mMessageMapping.addMessage(delVrCmd->getId(), sessionKey);
                                 core->mRequestMapping.addMessage(delVrCmd->getId(), *it);
                                 app->removeCommand(*it, CommandType::VR);
                                 HMIHandler::getInstance().sendRequest(delVrCmd);
@@ -1845,7 +1865,7 @@ namespace NsAppManager
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::GenericResponseID);
                     response->set_success(false);
                     response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
-                    MobileHandler::getInstance().sendRPCMessage(response, connectionID, sessionID);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
             }
@@ -1871,8 +1891,8 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " pThis should point to an instance of AppMgrCore class");
             return;
         }
+        
         AppMgrCore* core = (AppMgrCore*)pThis;
-
         switch(msg->getMethod())
         {
             case NsRPC2Communication::Marshaller::METHOD_INVALID:
@@ -1899,8 +1919,9 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
+
+                int appId = app->getAppID();
+
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -1909,8 +1930,8 @@ namespace NsAppManager
                         event->set_buttonEventMode(object->get_mode());
                         const NsAppLinkRPC::ButtonName & name = object->get_name();
                         event->set_buttonName(name);
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " Application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(event, appId);
                         break;
                     }
                     case 2:
@@ -1928,8 +1949,8 @@ namespace NsAppManager
                         {
                             event->set_customButtonID(*object->get_customButtonID());
                         }
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(event, appId);
                         break;
                     }
                 }
@@ -1948,6 +1969,9 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
+
+                int appId = app->getAppID();
+
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -1958,10 +1982,9 @@ namespace NsAppManager
                         event->set_buttonPressMode(object->get_mode());
                         LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
 
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(event, appId);
                         break;
                     }
                     case 2:
@@ -1979,10 +2002,9 @@ namespace NsAppManager
                         }
                         LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
 
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(event, appId);
                         break;
                     }
                 }
@@ -2118,26 +2140,27 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
+
+                int appId = app->getAppID();
+
                 switch(app->getProtocolVersion())
                 {
                     case 1:
                     {
                         NsAppLinkRPC::OnCommand* event = new NsAppLinkRPC::OnCommand();
                         event->set_cmdID(object->get_commandId());
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(event, appId);
                         break;
                     }
                     case 2:
                     {
                         NsAppLinkRPCV2::OnCommand* event = new NsAppLinkRPCV2::OnCommand();
                         event->set_cmdID(object->get_commandId());
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(event, appId);
                         break;
                     }
                 }
@@ -2154,6 +2177,8 @@ namespace NsAppManager
                     return;
                 }
 
+                int appId = app->getAppID();
+
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2163,11 +2188,10 @@ namespace NsAppManager
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                         response->set_success(true);
 
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                     case 2:
@@ -2177,11 +2201,10 @@ namespace NsAppManager
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                         response->set_success(true);
 
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                 }
@@ -2197,6 +2220,9 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
+
+                int appId = app->getAppID();
+
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2207,11 +2233,10 @@ namespace NsAppManager
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                         response->set_success(true);
 
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                     case 2:
@@ -2222,11 +2247,10 @@ namespace NsAppManager
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                         response->set_success(true);
 
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                 }
@@ -2242,6 +2266,9 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
+
+                int appId = app->getAppID();
+
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2252,11 +2279,10 @@ namespace NsAppManager
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
 
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                     case 2:
@@ -2267,11 +2293,10 @@ namespace NsAppManager
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
 
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                         break;
                     }
@@ -2288,6 +2313,9 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
+
+                int appId = app->getAppID();
+
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2296,11 +2324,10 @@ namespace NsAppManager
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
 
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                     case 2:
@@ -2312,11 +2339,11 @@ namespace NsAppManager
                         {
                             response->set_tryAgainTime(*object->get_tryAgainTime());
                         }
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
+
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                         break;
                     }
@@ -2333,8 +2360,8 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
+
+                int appId = app->getAppID();
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(object->getId());
                 app->decrementUnrespondedRequestCount(cmdId);
                 if(app->getUnrespondedRequestCount(cmdId) == 0)
@@ -2347,8 +2374,9 @@ namespace NsAppManager
                             response->set_success(true);
                             response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                             core->mRequestMapping.removeRequest(object->getId());
-                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                                << " application id " << appId);
+                            MobileHandler::getInstance().sendRPCMessage(response, appId);
                             break;
                         }
                         case 2:
@@ -2357,8 +2385,9 @@ namespace NsAppManager
                             response->set_success(true);
                             response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                             core->mRequestMapping.removeRequest(object->getId());
-                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                                << " application id " << appId);
+                            MobileHandler::getInstance().sendRPCMessage(response, appId);
                             break;
                         }
                     }
@@ -2379,8 +2408,7 @@ namespace NsAppManager
                     return;
                 }
 
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
+                int appId = app->getAppID();
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(object->getId());
                 app->decrementUnrespondedRequestCount(cmdId);
                 if(app->getUnrespondedRequestCount(cmdId) == 0)
@@ -2393,8 +2421,9 @@ namespace NsAppManager
                             response->set_success(true);
                             response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                             core->mRequestMapping.removeRequest(object->getId());
-                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                                << " application id " << appId);
+                            MobileHandler::getInstance().sendRPCMessage(response, appId);
                             break;
                         }
                         case 2:
@@ -2403,8 +2432,9 @@ namespace NsAppManager
                             response->set_success(true);
                             response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                             core->mRequestMapping.removeRequest(object->getId());
-                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                                << " application id " << appId);
+                            MobileHandler::getInstance().sendRPCMessage(response, appId);
                             break;
                         }
                     }
@@ -2424,6 +2454,9 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
+
+                int appId = app->getAppID();
+
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2431,11 +2464,11 @@ namespace NsAppManager
                         NsAppLinkRPC::AddSubMenu_response* response = new NsAppLinkRPC::AddSubMenu_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
+
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                     case 2:
@@ -2443,11 +2476,11 @@ namespace NsAppManager
                         NsAppLinkRPCV2::AddSubMenu_response* response = new NsAppLinkRPCV2::AddSubMenu_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
+
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                 }
@@ -2463,6 +2496,9 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
+
+                int appId = app->getAppID();
+
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2470,11 +2506,11 @@ namespace NsAppManager
                         NsAppLinkRPC::DeleteSubMenu_response* response = new NsAppLinkRPC::DeleteSubMenu_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
+
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                     case 2:
@@ -2482,11 +2518,11 @@ namespace NsAppManager
                         NsAppLinkRPCV2::DeleteSubMenu_response* response = new NsAppLinkRPCV2::DeleteSubMenu_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
+
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                 }
@@ -2502,6 +2538,9 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
+
+                int appId = app->getAppID();
+
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2509,11 +2548,11 @@ namespace NsAppManager
                         NsAppLinkRPC::CreateInteractionChoiceSet_response* response = new NsAppLinkRPC::CreateInteractionChoiceSet_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
+
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                     case 2:
@@ -2521,11 +2560,11 @@ namespace NsAppManager
                         NsAppLinkRPCV2::CreateInteractionChoiceSet_response* response = new NsAppLinkRPCV2::CreateInteractionChoiceSet_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
+
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                 }
@@ -2541,6 +2580,9 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
+
+                int appId = app->getAppID();
+
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2548,11 +2590,11 @@ namespace NsAppManager
                         NsAppLinkRPC::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPC::DeleteInteractionChoiceSet_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
+
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                     case 2:
@@ -2560,11 +2602,11 @@ namespace NsAppManager
                         NsAppLinkRPCV2::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPCV2::DeleteInteractionChoiceSet_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
-                        unsigned char sessionID = app->getSessionID();
-                        unsigned int connectionId = app->getConnectionID();
+
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                 }
@@ -2580,8 +2622,8 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
+
+                int appId = app->getAppID();
 
                 switch(app->getProtocolVersion())
                 {
@@ -2599,8 +2641,9 @@ namespace NsAppManager
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                     case 2:
@@ -2619,8 +2662,9 @@ namespace NsAppManager
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                 }
@@ -2637,8 +2681,8 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
+
+                int appId = app->getAppID();
 
                 switch(app->getProtocolVersion())
                 {
@@ -2648,8 +2692,9 @@ namespace NsAppManager
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                     case 2:
@@ -2658,8 +2703,9 @@ namespace NsAppManager
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                         core->mMessageMapping.removeMessage(object->getId());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                 }
@@ -2675,8 +2721,8 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, "No currently active application found");
                     return;
                 }
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
+
+                int appId = app->getAppID();
 
                 // We need two events simultaneously, because we may have applications of more than one protocol version registered on the HMI
                 // and all they need to be notified of an OnDriverDistraction event
@@ -2693,12 +2739,12 @@ namespace NsAppManager
                 {
                     case 1:
                     {
-                        MobileHandler::getInstance().sendRPCMessage(eventV1, connectionId, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(eventV1, appId);
                         break;
                     }
                     case 2:
                     {
-                        MobileHandler::getInstance().sendRPCMessage(eventV2, connectionId, sessionID);
+                        MobileHandler::getInstance().sendRPCMessage(eventV2, appId);
                         break;
                     }
                 }
@@ -2717,6 +2763,7 @@ namespace NsAppManager
                 }
 
                 LOG4CPLUS_INFO_EXT(mLogger, " About to send OnHMIStatus to a mobile side...");
+                int appId = app->getAppID();
                 switch(app->getProtocolVersion())
                 {
                     case 1:
@@ -2729,10 +2776,9 @@ namespace NsAppManager
                             event->set_systemContext(object->get_systemContext());
                             event->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
                             event->set_audioStreamingState(appv1->getApplicationAudioStreamingState());
-                            unsigned char sessionID = app->getSessionID();
-                            unsigned int connectionId = app->getConnectionID();
+
                             LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
-                            MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                            MobileHandler::getInstance().sendRPCMessage(event, appId);
                         }
                         break;
                     }
@@ -2749,10 +2795,9 @@ namespace NsAppManager
                             event->set_systemContext(appv2->getSystemContext());
                             event->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
                             event->set_audioStreamingState(appv2->getApplicationAudioStreamingState());
-                            unsigned char sessionID = app->getSessionID();
-                            unsigned int connectionId = app->getConnectionID();
+
                             LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
-                            MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                            MobileHandler::getInstance().sendRPCMessage(event, appId);
                         }
                         break;
                     }
@@ -2771,9 +2816,7 @@ namespace NsAppManager
                     return;
                 }
 
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
-
+                int appId = app->getAppID();
                 NsAppLinkRPCV2::Slider_response* response = new NsAppLinkRPCV2::Slider_response();
 
                 response->set_success(true);
@@ -2783,8 +2826,9 @@ namespace NsAppManager
                 response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(uiResponse->getResult()));
                 core->mMessageMapping.removeMessage(uiResponse->getId());
 
-                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                    << " application id " << appId);
+                MobileHandler::getInstance().sendRPCMessage(response, appId);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETAPPICONRESPONSE:
@@ -2800,8 +2844,7 @@ namespace NsAppManager
                     return;
                 }
 
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
+                int appId = app->getAppID();
                 NsAppLinkRPCV2::Result::ResultInternal resultCode
                     = static_cast<NsAppLinkRPCV2::Result::ResultInternal>(uiResponse->getResult());
 
@@ -2812,7 +2855,7 @@ namespace NsAppManager
                 NsAppLinkRPCV2::Result::SUCCESS == resultCode ? response->set_success(true) : response->set_success(false);
 
                 core->mMessageMapping.removeMessage(uiResponse->getId());
-                MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                MobileHandler::getInstance().sendRPCMessage(response, appId);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONDEVICECHOSEN:
@@ -2869,8 +2912,8 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
+
+                int appId = app->getAppID();
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(object->getId());
                 app->decrementUnrespondedRequestCount(cmdId);
                 if(app->getUnrespondedRequestCount(cmdId) == 0)
@@ -2883,8 +2926,9 @@ namespace NsAppManager
                             response->set_success(true);
                             response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                             core->mRequestMapping.removeRequest(object->getId());
-                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                                << " application id " << appId);
+                            MobileHandler::getInstance().sendRPCMessage(response, appId);
                             break;
                         }
                         case 2:
@@ -2893,8 +2937,9 @@ namespace NsAppManager
                             response->set_success(true);
                             response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                             core->mRequestMapping.removeRequest(object->getId());
-                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                                << " application id " << appId);
+                            MobileHandler::getInstance().sendRPCMessage(response, appId);
                             break;
                         }
                     }
@@ -2914,8 +2959,8 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
+
+                int appId = app->getAppID();
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(object->getId());
                 app->decrementUnrespondedRequestCount(cmdId);
                 if(app->getUnrespondedRequestCount(cmdId) == 0)
@@ -2928,8 +2973,9 @@ namespace NsAppManager
                             response->set_success(true);
                             response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                             core->mRequestMapping.removeRequest(object->getId());
-                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                                << " application id " << appId);
+                            MobileHandler::getInstance().sendRPCMessage(response, appId);
                             break;
                         }
                         case 2:
@@ -2938,8 +2984,9 @@ namespace NsAppManager
                             response->set_success(true);
                             response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                             core->mRequestMapping.removeRequest(object->getId());
-                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                            MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                                << " application id " << appId);
+                            MobileHandler::getInstance().sendRPCMessage(response, appId);
                             break;
                         }
                     }
@@ -2959,8 +3006,8 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     return;
                 }
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
+
+                int appId = app->getAppID();
 
                 switch(app->getProtocolVersion())
                 {
@@ -2968,16 +3015,18 @@ namespace NsAppManager
                     {
                         NsAppLinkRPC::OnCommand* event = new NsAppLinkRPC::OnCommand();
                         event->set_cmdID(object->get_cmdID());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(event, appId);
                         break;
                     }
                     case 2:
                     {
                         NsAppLinkRPCV2::OnCommand* event = new NsAppLinkRPCV2::OnCommand();
                         event->set_cmdID(object->get_cmdID());
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(event, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(event, appId);
                         break;
                     }
                 }
@@ -3025,8 +3074,7 @@ namespace NsAppManager
                     return;
                 }
 
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionId = app->getConnectionID();
+                int appId = app->getAppID();
                 core->mMessageMapping.removeMessage(object->getId());
 
                 switch(app->getProtocolVersion())
@@ -3037,8 +3085,9 @@ namespace NsAppManager
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                         response->set_success(true);
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                     case 2:
@@ -3047,8 +3096,9 @@ namespace NsAppManager
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                         response->set_success(true);
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " connection id " << connectionId << " session id " << (uint)sessionID);
-                        MobileHandler::getInstance().sendRPCMessage(response, connectionId, sessionID);
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                        MobileHandler::getInstance().sendRPCMessage(response, appId);
                         break;
                     }
                 }
@@ -3095,6 +3145,8 @@ namespace NsAppManager
                     return;
                 }
 
+                int appId = app->getAppID();
+
                 Application* currentApp = AppMgrRegistry::getInstance().getActiveItem();
                 if (!currentApp)
                 {
@@ -3110,23 +3162,21 @@ namespace NsAppManager
                         return;
                     }
 
-                    LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application  " << currentApp->getName() << " ID " << currentApp->getAppID() << " - about to remove it from HMI first");
-                    core->removeAppFromHmi(currentApp, app->getConnectionID(), app->getSessionID());
+                    LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application  " << currentApp->getName()
+                        << " ID " << currentApp->getAppID()
+                        << " - about to remove it from HMI first");
+                    core->removeAppFromHmi(currentApp, appId);
                 }
 
                 if(!AppMgrRegistry::getInstance().activateApp(app))
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "Application " << app->getName()
-                        << " connection " << app->getConnectionID()
-                        << " session " << (uint)app->getSessionID()
-                        << " hasn't been activated!");
+                        << " application id " << appId);
+
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
                                 NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
                     return;
                 }
-
-                unsigned char sessionID = app->getSessionID();
-                unsigned int connectionID = app->getConnectionID();
 
                 switch(app->getProtocolVersion())
                 {
@@ -3144,7 +3194,7 @@ namespace NsAppManager
                             addCmd->set_interactionChoiceSetID(choiceSetId);
                             addCmd->set_choiceSet(choiceSet);
                             addCmd->set_appId(app->getAppID());
-                            core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
+                            core->mMessageMapping.addMessage(addCmd->getId(), appId);
 
                             HMIHandler::getInstance().sendRequest(addCmd);
                         }
@@ -3175,7 +3225,7 @@ namespace NsAppManager
                             addCmd->set_interactionChoiceSetID(choiceSetId);
                             addCmd->set_choiceSet(choiceSetV1);
                             addCmd->set_appId(app->getAppID());
-                            core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
+                            core->mMessageMapping.addMessage(addCmd->getId(), appId);
 
                             HMIHandler::getInstance().sendRequest(addCmd);
                         }
@@ -3201,7 +3251,7 @@ namespace NsAppManager
                         addCmd->set_position(*position);
                     }
                     addCmd->set_appId(app->getAppID());
-                    core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(addCmd->getId(), appId);
 
                     HMIHandler::getInstance().sendRequest(addCmd);
                 }
@@ -3240,7 +3290,7 @@ namespace NsAppManager
                     addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
                     ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_appId(app->getAppID());
-                    core->mMessageMapping.addMessage(addCmd->getId(), connectionID, sessionID);
+                    core->mMessageMapping.addMessage(addCmd->getId(), appId);
 
                     HMIHandler::getInstance().sendRequest(addCmd);
                 }
@@ -3263,7 +3313,7 @@ namespace NsAppManager
                         }
                         hmiStatus->set_audioStreamingState(appv1->getApplicationAudioStreamingState());
                         hmiStatus->set_systemContext(appv1->getSystemContext());
-                        MobileHandler::getInstance().sendRPCMessage( hmiStatus, connectionID, sessionID );
+                        MobileHandler::getInstance().sendRPCMessage( hmiStatus, appId );
                         NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
                         response->setId(object->getId());
                         response->setResult(NsAppLinkRPC::Result::SUCCESS);
@@ -3271,7 +3321,7 @@ namespace NsAppManager
 
                         if(core->mDriverDistractionV1)
                         {
-                            MobileHandler::getInstance().sendRPCMessage(core->mDriverDistractionV1, connectionID, sessionID);
+                            MobileHandler::getInstance().sendRPCMessage(core->mDriverDistractionV1, appId);
                         }
 
                         break;
@@ -3291,7 +3341,7 @@ namespace NsAppManager
                         }
                         hmiStatus->set_audioStreamingState(appv2->getApplicationAudioStreamingState());
                         hmiStatus->set_systemContext(appv2->getSystemContext());
-                        MobileHandler::getInstance().sendRPCMessage( hmiStatus, connectionID, sessionID );
+                        MobileHandler::getInstance().sendRPCMessage( hmiStatus, appId );
                         NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
                         response->setId(object->getId());
                         response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
@@ -3299,7 +3349,7 @@ namespace NsAppManager
 
                         if(core->mDriverDistractionV2)
                         {
-                            MobileHandler::getInstance().sendRPCMessage(core->mDriverDistractionV2, connectionID, sessionID);
+                            MobileHandler::getInstance().sendRPCMessage(core->mDriverDistractionV2, appId);
                         }
 
                         break;
@@ -3349,13 +3399,16 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, " No active application found!");
                     return;
                 }
+
+                int appId = app->getAppID();
+
                 switch(app->getProtocolVersion())
                 {
                     case 1:
                     {
                         NsAppLinkRPC::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPC::OnEncodedSyncPData;
                         encodedNotification->set_data(core->mSyncPManager.getPData());
-                        MobileHandler::getInstance().sendRPCMessage( encodedNotification, app->getConnectionID(), app->getSessionID() );
+                        MobileHandler::getInstance().sendRPCMessage( encodedNotification, appId );
                         NsRPC2Communication::AppLinkCore::SendDataResponse* response = new NsRPC2Communication::AppLinkCore::SendDataResponse;
                         response->setId(object->getId());
                         response->setResult(NsAppLinkRPC::Result::SUCCESS);
@@ -3420,12 +3473,18 @@ namespace NsAppManager
                         continue;
                     }
 
-                    LOG4CPLUS_INFO_EXT(mLogger, "Adding an application " << app->getName() << " connection/session key " << app->getAppID() << " is media? " << app->getIsMediaApplication() );
+                    LOG4CPLUS_INFO_EXT(mLogger, "Adding an application " << app->getName()
+                        << " application id " << app->getAppID()
+                        << " is media? " << app->getIsMediaApplication() );
+
                     hmiApp.set_appName(app->getName());
                     hmiApp.set_ngnMediaScreenAppName(app->getNgnMediaScreenAppName());
                     hmiApp.set_appId(app->getAppID());
                     hmiApp.set_isMediaApplication(app->getIsMediaApplication());
-                    LOG4CPLUS_INFO_EXT(mLogger, "Added an application " << hmiApp.get_appName() << " connection/session key " << hmiApp.get_appId() << " is media? " << hmiApp.get_isMediaApplication() );
+                    
+                    LOG4CPLUS_INFO_EXT(mLogger, "Added an application " << hmiApp.get_appName()
+                        << " application id " << hmiApp.get_appId()
+                        << " is media? " << hmiApp.get_isMediaApplication() );
                     hmiApps.push_back(hmiApp);
                 }
                 if(!hmiApps.empty())
@@ -3496,28 +3555,30 @@ namespace NsAppManager
      * \param sessionID an id of the session which will be associated with the application
      * \return A instance of RegistryItem created for application
      */
-    const RegistryItem* AppMgrCore::registerApplication(NsAppLinkRPC::ALRPCMessage * request, const unsigned int& connectionID, const unsigned char& sessionID)
+    const RegistryItem* AppMgrCore::registerApplication(NsAppLinkRPC::ALRPCMessage * request, int appId)
     {
         LOG4CPLUS_INFO_EXT(mLogger, __PRETTY_FUNCTION__);
         if(!request)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Null-request specified for connection id " << connectionID << " session id " << (uint)sessionID << "!");
+            LOG4CPLUS_ERROR_EXT(mLogger, "Null-request specified for application id " << appId << "!");
             return 0;
         }
 
         const unsigned int& protocolVersion = request->getProtocolVersion();
         std::string appName = "";
-        int appId = connectionID|(sessionID << 16);
 
         switch(protocolVersion)
         {
             case 2:
             {
                 appName = ((NsAppLinkRPCV2::RegisterAppInterface_request*)request)->get_appName();
-                Application_v2* application = new Application_v2( appName, connectionID, sessionID, appId );
+                Application_v2* application = new Application_v2(appName, appId);
                 if(!application)
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "Cannot register application " << appName << " connection " << connectionID << " session " << (uint)sessionID << " protocol version " << protocolVersion << " !");
+                    LOG4CPLUS_ERROR_EXT(mLogger, "Cannot register application " << appName
+                        << " application id " << appId
+                        << " protocol version " << protocolVersion
+                        << " !");
                     return 0;
                 }
 
@@ -3567,10 +3628,13 @@ namespace NsAppManager
             case 1:
             {
                 appName = ((NsAppLinkRPC::RegisterAppInterface_request*)request)->get_appName();
-                Application_v1* application = new Application_v1( appName, connectionID, sessionID, appId );
+                Application_v1* application = new Application_v1(appName, appId);
                 if(!application)
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "Cannot register application " << appName << " connection " << connectionID << " session " << (uint)sessionID << " protocol version " << protocolVersion << " !");
+                    LOG4CPLUS_ERROR_EXT(mLogger, "Cannot register application " << appName
+                        << " application id " << appId
+                        << " protocol version " << protocolVersion
+                        << " !");
                     return 0;
                 }
 
@@ -3613,19 +3677,18 @@ namespace NsAppManager
                 return 0;
             }
         }
-        LOG4CPLUS_INFO_EXT(mLogger, " Application " << appName << " app id " << appId << " registered successfully !");
+        LOG4CPLUS_INFO_EXT(mLogger, " Application " << appName << " application id " << appId << " registered successfully !");
         return 0;
     }
 
     /**
      * \brief unregister an application associated with the given session
-     * \param connectionID an id of the connection asociated with the application to be unregistered
-     * \param sessionID an id of the session asociated with the application to be unregistered
+     * \param appId an id of the application to be unregistered
      */
-    void AppMgrCore::unregisterApplication(const unsigned int& connectionID, const unsigned char &sessionID)
+    void AppMgrCore::unregisterApplication(int appId)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Trying to unregister an application for connection id " << connectionID << " session id " << (uint)sessionID);
-        RegistryItem* item = AppMgrRegistry::getInstance().getItem(connectionID, sessionID);
+        LOG4CPLUS_INFO_EXT(mLogger, "Trying to unregister an application for application id " << appId);
+        RegistryItem* item = AppMgrRegistry::getInstance().getItem(appId);
         Application* app = getApplicationFromItemCheckNotNull( item );
         if(!app)
         {
@@ -3634,20 +3697,25 @@ namespace NsAppManager
         }
 
         const std::string& appName = app->getName();
-        LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName << " connection id " << connectionID << " session id " << (uint)sessionID << "!");
+        LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName
+            << " application id " << appId
+            << "!");
+
         mButtonsMapping.removeItem(item);
         mMessageMapping.removeItem(item);
         AppMgrRegistry::getInstance().unregisterApplication(item);
-        LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName << " connection id " << connectionID << " session id " << (uint)sessionID << "!");
+
+        LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName
+            << " application id " << appId
+            << "!");
     }
 
     /**
      * \brief Remove all app components from HMI
      * \param currentApp app which components to be removed
-     * \param connectionID connection id
-     * \param sessionID session id
+     * \param appId application id
      */
-    void AppMgrCore::removeAppFromHmi(Application* currentApp, const unsigned int &connectionID, const unsigned char &sessionID)
+    void AppMgrCore::removeAppFromHmi(Application* currentApp, int appId)
     {
         const Commands& currentCommands = currentApp->getAllCommands();
         LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's commands from HMI");
@@ -3660,7 +3728,7 @@ namespace NsAppManager
             hmiStatus->set_audioStreamingState(currentAppV1->getApplicationAudioStreamingState());
             hmiStatus->set_systemContext(currentAppV1->getSystemContext());
             hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_BACKGROUND);
-            MobileHandler::getInstance().sendRPCMessage(hmiStatus, connectionID, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(hmiStatus, appId);
         }
         else
         {
@@ -3670,7 +3738,7 @@ namespace NsAppManager
             hmiStatus->set_audioStreamingState(currentAppV2->getApplicationAudioStreamingState());
             hmiStatus->set_systemContext(currentAppV2->getSystemContext());
             hmiStatus->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
-            MobileHandler::getInstance().sendRPCMessage(hmiStatus, connectionID, sessionID);
+            MobileHandler::getInstance().sendRPCMessage(hmiStatus, appId);
         }
 
         for(Commands::const_iterator it = currentCommands.begin(); it != currentCommands.end(); it++)
@@ -3699,7 +3767,7 @@ namespace NsAppManager
             deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             ((NsRPC2Communication::UI::DeleteCommand*)deleteCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
             ((NsRPC2Communication::UI::DeleteCommand*)deleteCmd)->set_appId(currentApp->getAppID());
-            mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+            mMessageMapping.addMessage(deleteCmd->getId(), appId);
 
             HMIHandler::getInstance().sendRequest(deleteCmd);
         }
@@ -3714,7 +3782,7 @@ namespace NsAppManager
             deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
             deleteCmd->set_menuId(menuId);
             deleteCmd->set_appId(currentApp->getAppID());
-            mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+            mMessageMapping.addMessage(deleteCmd->getId(), appId);
 
             HMIHandler::getInstance().sendRequest(deleteCmd);
         }
@@ -3734,7 +3802,7 @@ namespace NsAppManager
                     deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     deleteCmd->set_interactionChoiceSetID(choiceSetId);
                     deleteCmd->set_appId(currentApp->getAppID());
-                    mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+                    mMessageMapping.addMessage(deleteCmd->getId(), appId);
                     HMIHandler::getInstance().sendRequest(deleteCmd);
                 }
                 LOG4CPLUS_INFO_EXT(mLogger, "Current app's interaction choice sets removed!");
@@ -3752,7 +3820,7 @@ namespace NsAppManager
                     deleteCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     deleteCmd->set_interactionChoiceSetID(choiceSetId);
                     deleteCmd->set_appId(currentApp->getAppID());
-                    mMessageMapping.addMessage(deleteCmd->getId(), connectionID, sessionID);
+                    mMessageMapping.addMessage(deleteCmd->getId(), appId);
                     HMIHandler::getInstance().sendRequest(deleteCmd);
                 }
                 LOG4CPLUS_INFO_EXT(mLogger, "Current app's interaction choice sets removed!");

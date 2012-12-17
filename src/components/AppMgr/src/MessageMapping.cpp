@@ -51,12 +51,12 @@ namespace NsAppManager
      * \param connectionID connection to map appropriate application with message
      * \param sessionID session to map appropriate application with message
      */
-    void MessageMapping::addMessage(int msgId, unsigned int connectionID, unsigned char sessionID)
+    void MessageMapping::addMessage(int msgId, int appId)
     {
-        RegistryItem* app = AppMgrRegistry::getInstance().getItem(connectionID, sessionID);
+        RegistryItem* app = AppMgrRegistry::getInstance().getItem(appId);
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found by connection id " << connectionID << " session id " << (uint)sessionID );
+            LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found by application id " << appId );
             return;
         }
         LOG4CPLUS_INFO_EXT(mLogger, "Subscribe to a message " << msgId << " in app " << app->getApplication()->getName() );
@@ -85,7 +85,7 @@ namespace NsAppManager
         }
         for(MessageMap::iterator it = mMessageMapping.begin(); it != mMessageMapping.end(); it++)
         {
-            if(it->second->getApplication()->getSessionID() == app->getApplication()->getSessionID())
+            if(it->second->getApplication()->getAppID() == app->getApplication()->getAppID())
             {
                 mMessageMapping.erase(it->first);
             }

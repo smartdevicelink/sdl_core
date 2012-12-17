@@ -59,7 +59,7 @@ namespace NsAppManager
          * \param connectionID connection to map appropriate application with message
          * \param sessionID session to map appropriate application with message
          */
-        void addMessage(int msgId, unsigned int connectionID, unsigned char sessionID );
+        void addMessage(int msgId, int appId );
 
         /**
          * \brief remove a message from a mapping

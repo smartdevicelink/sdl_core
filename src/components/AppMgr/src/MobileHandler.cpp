@@ -29,13 +29,15 @@ namespace NsAppManager
      * \param connectionID id of a connection associated with application that sent the message
      * \param sessionId id of a session associated with application that sent the message
      */
-    void MobileHandler::sendRPCMessage(const NsAppLinkRPC::ALRPCMessage *message, unsigned int connectionID, unsigned char sessionId)
+    void MobileHandler::sendRPCMessage(const NsAppLinkRPC::ALRPCMessage *message, int appId)
     {
         if(mJSONHandler)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, " Sending a message " << message->getMethodId() << " of the type " << message->getMessageType() << " with the connection id " << connectionID << " session id " << (uint)sessionId << " to a mobile side");
-            int key = connectionID|(sessionId << 16);
-            mJSONHandler->sendRPCMessage(message, key);
+            LOG4CPLUS_INFO_EXT(mLogger, " Sending a message " << message->getMethodId()
+                << " of the type " << message->getMessageType()
+                << " with the application id " << appId
+                << " to a mobile side");
+            mJSONHandler->sendRPCMessage(message, appId);
         }
         else
         {

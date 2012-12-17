@@ -96,7 +96,7 @@ namespace NsAppManager
          * \param sessionId id of the session associated with the application we need to retrieve a registry item for
          * \return RegistryItem instance
          */
-        RegistryItem *getItem( unsigned int connectionId, unsigned char sessionId ) const;
+        RegistryItem *getItem( int appId ) const;
 
         /**
          * \brief Returns registered applications list
@@ -124,7 +124,7 @@ namespace NsAppManager
          * \param sessionId id of the session associated with the application we need to retrieve
          * \return application, if the specified name found in a registry, NULL otherwise
          */
-        Application* getApplication( unsigned int connectionId, unsigned char sessionId ) const;
+        Application* getApplication( int appId ) const;
 
         /**
          * \brief Gets an application assigned to a command

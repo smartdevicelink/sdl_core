@@ -21,11 +21,9 @@ namespace NsAppManager
         /**
          * \brief Class constructor
          * \param name application name
-         * \param connectionId id of the connection associated with this application
-         * \param sessionId id of the session associated with this application
          * \param appId application id
          */
-        Application_v1(const std::string& name, unsigned int connectionId, unsigned char sessionId , int appId);
+        Application_v1(const std::string& name, int appId);
 
         /**
          * \brief Default class destructor
