@@ -3359,8 +3359,8 @@ namespace NsAppManager
                     {
                         NsRPC2Communication::AppLinkCore::SendDataResponse* response = new NsRPC2Communication::AppLinkCore::SendDataResponse;
                         response->setId(object->getId());
-                        std::string* urlPtr = 0;
-                        int* timeoutPtr = 0;
+                        const std::string* urlPtr = object->get_url();
+                        const int* timeoutPtr = object->get_timeout();
                         if(urlPtr)
                         {
                             const std::string& url = *urlPtr;
