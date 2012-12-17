@@ -130,15 +130,16 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 
 		if (notification.method == this.onAppRegisteredNotification)
 		{	
-			// add new app to the list
-			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " connected!");
-			MFT.ApplinkController.getApplicationModel(notification.params.appId).appInfo.set('appName', notification.params.appName);
 			if( notification.params.isMediaApplication ){
 				MFT.ApplinkController.registerApplication(notification.params.appId, 0);
 			}else{
 				MFT.ApplinkController.registerApplication(notification.params.appId, 1);
 			}
 			MFT.VRPopUp.AddActivateApp(notification.params.appId, notification.params.appName);
+			// add new app to the list
+			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " connected!");
+			MFT.ApplinkController.getApplicationModel(notification.params.appId).appInfo.set('appName', notification.params.appName);
+			
 			this.getAppList();
 		}
 
