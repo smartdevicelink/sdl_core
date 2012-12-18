@@ -305,6 +305,7 @@ namespace NsAppManager
                     appRegistered->set_languageDesired(app->getLanguageDesired());
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
                     appRegistered->set_deviceName(currentDeviceName);
+                    appRegistered->set_versionNumber(1);
                     HMIHandler::getInstance().sendNotification(appRegistered);
                     LOG4CPLUS_INFO_EXT(mLogger, " An AppLinkCore::OnAppRegistered notofocation for the app " << app->getName()
                         << " application id " << app->getAppID()
@@ -974,6 +975,7 @@ namespace NsAppManager
                     appRegistered->set_hmiDisplayLanguageDesired(hmiLanguageDesiredV1);
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
                     appRegistered->set_deviceName(currentDeviceName);
+                    appRegistered->set_versionNumber(2);
                     std::vector< NsAppLinkRPC::TTSChunk> ttsName;
                     for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = app->getTtsName().begin(); it != app->getTtsName().end(); it++)
                     {
