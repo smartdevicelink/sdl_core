@@ -10,7 +10,7 @@
  * @author      Andriy Melnik
  */
 
-MFT.ScrollableMessage = Em.ContainerView.create({
+MFT.ScrollableMessage = Em.ContainerView.create(MFT.LoadableView,{
 
     elementId:          'ScrollableMessage',
 
@@ -29,14 +29,24 @@ MFT.ScrollableMessage = Em.ContainerView.create({
         'listOfCommands'
     ],
 
+    /** Applink Sub Mennu activate handler */
+    applinkSubMenuActivate: function(){
+        if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
+            MFT.ScrollableMessage.activate( params.appId, params.softButtons );
+        }else{
+            
+        }
+    }.observes('MFT.States.media.applink.applinkscrollablemessage.active'),
+
     backButton: MFT.Button.extend({
         classNames: 'backButton',
         
         icon:       'images/common/ico_back.png',
-        action: function(el){
-            el.get('parentView').deactivate();
-        }
+        action:     'back',
+        traget:     'MFT.States'
     }),
+
+    titleText:           '',
 
     title:    MFT.Label.extend({
 
@@ -44,19 +54,16 @@ MFT.ScrollableMessage = Em.ContainerView.create({
 
         classNames:         'titleText',
 
-        contentBinding:     'MFT.ApplinkController.getApplicationModel(this.parentView.appId).appInfo.appName'
+        contentBinding:     'this.parentView.titleText'
     }),
 
-    activate: function(appId, buttons){
-        if(appId){
-            this.set('appId', appId);
-            this.softButtons.addItem( buttons );
+    activate: function( appName, params ){
+        if(appName){
+            this.set('titleText', appName);
+            this.softButtons.addItem( params.buttons );
+            this.set('listOfCommands.items', params.scrollableMessageBody );
+            MFT.States.goToState('media.applink.applinkscrollablemessage');
         }
-        this.set('active', true);
-    },
-
-    deactivate: function(){
-        this.set('active', false);
     },
 
     softButtons: MFT.MenuList.extend({
@@ -75,13 +82,13 @@ MFT.ScrollableMessage = Em.ContainerView.create({
      /**
       * List for option on ApplinkOptionsView screen
       */
-    listOfCommands: MFT.List.extend({
+    listOfCommands: MFT.ScrollableText.extend({
 
         elementId:      'scrollable_message_list',
 
         itemsOnPage:    5,
 
         /** Items array */
-        items:          new Array()
+        items:          'asdasdasd'
     })
 });

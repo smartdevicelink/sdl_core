@@ -17,14 +17,12 @@ MFT.ApplinkModel = Em.Object.create({
 	 *
 	 * @type:	String
 	 */
-	deviceName: null
-
-    ,
+	deviceName: null,
 
     /** Applink UI ScrolableMessage handler */
     onApplinkScrolableMessage: function(params){
 
-       
+       MFT.ScrollableMessage.activate( MFT.ApplinkController.getApplicationModel(params.appId).appInfo.appName , params );
 
     },
     
@@ -43,6 +41,8 @@ MFT.ApplinkModel = Em.Object.create({
 			message.duration,
 			message.playTone
 		);
-	}
+	},
+
+
 });
  

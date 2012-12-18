@@ -19,16 +19,18 @@ MFT.MenuList = Em.ContainerView.extend({
 	 */
 	addItem: function( buttons ) {
 		
-		this.deleteItem();
+		if(buttons){
+			this.deleteItem();
 
-		for(var i=0; i<buttons.length; i++){
-			this.get('content.childViews').pushObject( 
-				MFT.Button.create({
-					text:			buttons[i].text,
-					icon:			buttons[i].image,
-					softButtonId:	buttons[i].softButtonID
-				})
-			);
+			for(var i=0; i<buttons.length; i++){
+				this.get('content.childViews').pushObject( 
+					MFT.Button.create({
+						text:			buttons[i].text,
+						icon:			buttons[i].image,
+						softButtonId:	buttons[i].softButtonID
+					})
+				);
+			}
 		}
 	},
 	

@@ -35,7 +35,6 @@ MFT.AppViews = Em.ContainerView.extend({
 		MFT.AlertPopUp,
 		MFT.VRPopUp,
 		MFT.DriverDistraction,
-		MFT.ScrollableMessage,
 		//MFT.PlayerControllsView,
 		//MFT.VideoErrorPopupView,
 		MFT.ControlButtons,
@@ -70,6 +69,7 @@ MFT.AppViews = Em.ContainerView.extend({
 		FFW.AppendScript.pushScript('media.applink');
 		FFW.AppendScript.pushScript('media.applink.applinkoptions');
 		FFW.AppendScript.pushScript('media.applink.applinkslider');
+		FFW.AppendScript.pushScript('media.applink.applinkscrollablemessage');
 		
 		FFW.AppendScript.pushScript('info');
 		FFW.AppendScript.pushScript('info.nonMedia');

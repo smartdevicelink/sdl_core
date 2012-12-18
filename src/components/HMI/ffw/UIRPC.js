@@ -185,7 +185,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    	break;
 		    }
 		    case "UI.SetGlobalProperties":{
-			    MFT.TTSPopUp.receiveMessage("Set global properties");
+			    MFT.TTSPopUp.ActivateTTS("Set global properties");
 
 				// TODO: please process as array 
 				this.globalProperties.set('helpPrompt', request.params.helpPrompt);
@@ -202,7 +202,7 @@ FFW.UI = FFW.RPCObserver.create({
 				for (var i=0;i<request.params.length;i++)
 				{
 				    this.resetProperties(reuqest.params[i]);
-					MFT.TTSPopUp.receiveMessage("Reset property: " + reuqest.params[i]);
+					MFT.TTSPopUp.ActivateTTS("Reset property: " + reuqest.params[i]);
 				}
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
@@ -286,9 +286,10 @@ FFW.UI = FFW.RPCObserver.create({
 				MFT.ApplinkSliderView.activate();		    
 		    	break;
 		    }
-		    case "UI.ScrolableMessage":{
+		    case "UI.ScrollableMessage":{
 
-				MFT.ScrollableMessage.activate( request.params.appId, request.params.softButtons );		    
+				MFT.ApplinkModel.onApplinkScrolableMessage( request.params );
+
 		    	break;
 		    }
 		    case  "UI.GetCapabilities":{
