@@ -26,7 +26,7 @@ MFT.ApplinkModel = Em.Object.create({
 
        
 
-    }
+    },
     
     /**
      * Applink UI Alert response handeler
