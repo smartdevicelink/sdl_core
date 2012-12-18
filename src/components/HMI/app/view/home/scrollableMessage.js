@@ -18,7 +18,7 @@ MFT.ScrollableMessage = Em.ContainerView.create({
 
     classNameBindings:  ['active:active'],
 
-    active:             true,
+    active:             false,
 
     appId:              null,
 
