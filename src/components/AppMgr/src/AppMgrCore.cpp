@@ -2249,7 +2249,7 @@ namespace NsAppManager
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                         response->set_success(true);
-
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::ShowID);
                         core->mMessageMapping.removeMessage(object->getId());
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                             << " application id " << appId);

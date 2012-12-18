@@ -13,12 +13,15 @@
 */
 
 
-
 using namespace NsAppLinkRPCV2;
 
 SoftButton::SoftButton(const SoftButton& c)
 {
   *this=c;
+  this->image = 0;
+ 
+  if (c.image)
+    this->image = new Image(*c.image); 
 }
 
 
@@ -28,7 +31,7 @@ bool SoftButton::checkIntegrity(void)
 }
 
 
-SoftButton::SoftButton(void)
+SoftButton::SoftButton(void):image(0)
 {
 }
 
@@ -37,7 +40,12 @@ SoftButton::SoftButton(void)
 bool SoftButton::set_image(const Image& image_)
 {
   if(!ImageMarshaller::checkIntegrityConst(image_))   return false;
-  image=image_;
+  if (image)
+  {
+    delete image;
+    image = 0;
+  }
+  image=new Image(image_);
   return true;
 }
 
@@ -78,7 +86,7 @@ bool SoftButton::set_type(const SoftButtonType& type_)
 
 
 
-const Image& SoftButton::get_image(void) const 
+const Image* SoftButton::get_image(void) const 
 {
   return image;
 }
@@ -114,3 +122,8 @@ const SoftButtonType& SoftButton::get_type(void) const
 }
 
 
+SoftButton::~SoftButton()
+{
+  delete image;
+  image = 0;
+}

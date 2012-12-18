@@ -27,11 +27,12 @@ namespace NsAppLinkRPCV2
   
     SoftButton(const SoftButton& c);
     SoftButton(void);
+    virtual ~SoftButton();
   
     bool checkIntegrity(void);
   // getters
 
-    const Image& get_image(void) const;
+    const Image* get_image(void) const;
     bool get_isHighlighted(void) const;
     unsigned int get_softButtonID(void) const;
     const SystemAction& get_systemAction(void) const;
@@ -53,7 +54,7 @@ namespace NsAppLinkRPCV2
 
 
 ///  Optional image struct for SoftButton (if defined as IMAGE or BOTH)
-      Image image;
+      Image * image;
 
 /**
      True, if highlighted

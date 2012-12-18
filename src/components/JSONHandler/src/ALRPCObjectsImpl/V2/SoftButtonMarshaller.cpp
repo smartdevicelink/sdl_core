@@ -5,7 +5,6 @@
 
 #include "SoftButtonMarshaller.h"
 
-
 /*
   interface	Ford Sync RAPI
   version	2.0O
@@ -50,7 +49,7 @@ const std::string SoftButtonMarshaller::toString(const SoftButton& e)
 
 bool SoftButtonMarshaller::checkIntegrityConst(const SoftButton& s)
 {
-  if(!ImageMarshaller::checkIntegrityConst(s.image))  return false;
+  if(s.image && !ImageMarshaller::checkIntegrityConst(*s.image))  return false;
   if(s.softButtonID>65536)  return false;
   if(!SystemActionMarshaller::checkIntegrityConst(s.systemAction))  return false;
   if(s.text.length()>500)  return false;
@@ -64,7 +63,11 @@ Json::Value SoftButtonMarshaller::toJSON(const SoftButton& e)
   if(!checkIntegrityConst(e))
     return Json::Value(Json::nullValue);
 
-  json["image"]=ImageMarshaller::toJSON(e.image);
+  if (e.image)
+  {
+    json["image"]=ImageMarshaller::toJSON(*e.image);
+  }
+  
 
   json["isHighlighted"]=Json::Value(e.isHighlighted);
 
@@ -83,15 +86,19 @@ Json::Value SoftButtonMarshaller::toJSON(const SoftButton& e)
 
 bool SoftButtonMarshaller::fromJSON(const Json::Value& json,SoftButton& c)
 {
+  delete c.image;
+  c.image = 0;
   try
   {
     if(!json.isObject())  return false;
 
-    if(!json.isMember("image"))  return false;
+    if(json.isMember("image"))  
     {
       const Json::Value& j=json["image"];
-      if(!ImageMarshaller::fromJSON(j,c.image))
+      Image m;
+      if(!ImageMarshaller::fromJSON(j,m))
         return false;
+      c.image = new Image(m);
     }
     if(!json.isMember("isHighlighted"))  return false;
     {
