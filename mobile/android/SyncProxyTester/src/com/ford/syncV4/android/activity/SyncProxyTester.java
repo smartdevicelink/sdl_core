@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.Vector;
@@ -97,6 +98,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final String logTag = "SyncProxyTester";
 
     private static SyncProxyTester _activity;
+    private static ArrayList<Object> _logMessages = new ArrayList<Object>();
 	private static logAdapter _msgAdapter;
 	private ProxyService _applinkService;
 	private ModuleTest _testerMain;
@@ -159,7 +161,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		};
 
 		_listview = (ListView) findViewById(R.id.messageList);
-		_msgAdapter = new logAdapter(logTag, false, this, R.layout.row);
+		_msgAdapter = new logAdapter(logTag, false, this, R.layout.row, _logMessages);
 		_submenuAdapter = new ArrayAdapter<SyncSubMenu>(this, android.R.layout.select_dialog_item);
 		_submenuAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 

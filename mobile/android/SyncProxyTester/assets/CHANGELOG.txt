@@ -1,5 +1,6 @@
 [R5.1.0]
 SyncProxyTester:
++ Persist the log messages in the UI during one app launch.
 * Fix: AddCommand dialog: correctly send the entered VR Synonym with the command.
 + Introduce changelog.
 + The app version, build info, and the changelog can be shown from options menu => "App version".

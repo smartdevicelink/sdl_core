@@ -1,5 +1,7 @@
 package com.ford.syncV4.android.adapters;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.util.Log;
 
@@ -8,8 +10,8 @@ public class logAdapter extends MessageAdapter {
 	boolean fullUIDebug;
 	Activity activity;
 
-	public logAdapter(String logTag, boolean fullUIDebug, Activity activity, int textViewResourceId) {
-		super(activity, textViewResourceId);
+	public logAdapter(String logTag, boolean fullUIDebug, Activity activity, int textViewResourceId, ArrayList<Object> items) {
+		super(activity, textViewResourceId, items);
 		this.activity = activity;
 		this.logTag = logTag;
 		this.fullUIDebug = fullUIDebug;
@@ -17,7 +19,7 @@ public class logAdapter extends MessageAdapter {
 	
     private void addMessageToUI(final Object m) {    	
     	activity.runOnUiThread(new Runnable() {
-			public void run() { add(m); }
+			public void run() { addMessage(m); }
 		});
     }
     

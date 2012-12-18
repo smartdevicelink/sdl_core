@@ -2,6 +2,7 @@ package com.ford.syncV4.android.adapters;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -18,10 +19,18 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 
 public class MessageAdapter extends ArrayAdapter<Object> {
 	private LayoutInflater vi;
+	private ArrayList<Object> items;
 	
-	public MessageAdapter(Context context, int textViewResourceId) {
-        super(context, textViewResourceId);
+	public MessageAdapter(Context context, int textViewResourceId, ArrayList<Object> items) {
+        super(context, textViewResourceId, items);
         this.vi = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.items = items;
+	}
+	
+	/** Adds the specified message to the items list and notifies of the change. */
+	public void addMessage(Object m) {
+		items.add(m);
+		notifyDataSetChanged();
 	}
 	
     public View getView(int position, View convertView, ViewGroup parent) {
