@@ -165,7 +165,7 @@ namespace NsAppManager
      */
     void AppMgrCore::pushMobileRPCMessage( NsAppLinkRPC::ALRPCMessage * message, int appId )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Pushing mobile RPC message for application id " << appId << "...");
+        LOG4CPLUS_INFO_EXT(mLogger, " Pushing mobile RPC message " << message->getMethodId() << " for application id " << appId << "...");
         if(!message)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "Nothing to push! A null-ptr occured!");
@@ -174,7 +174,7 @@ namespace NsAppManager
 
         mQueueRPCAppLinkObjectsIncoming->pushMessage(Message(message, appId));
 
-        LOG4CPLUS_INFO_EXT(mLogger, " Pushed mobile RPC message for application id " << appId);
+        LOG4CPLUS_INFO_EXT(mLogger, " Pushed mobile RPC message " << message->getMethodId() << " for application id " << appId);
     }
 
     /**
@@ -183,7 +183,7 @@ namespace NsAppManager
      */
     void AppMgrCore::pushRPC2CommunicationMessage( NsRPC2Communication::RPC2Command * message )
     {
-        LOG4CPLUS_INFO_EXT(mLogger, " Returning a message from HMI...");
+        LOG4CPLUS_INFO_EXT(mLogger, " Returning a message " << message->getMethod() << " from HMI...");
         if(!message)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "Nothing to push! A null-ptr occured!");
@@ -192,7 +192,7 @@ namespace NsAppManager
 
         mQueueRPCBusObjectsIncoming->pushMessage(message);
 
-        LOG4CPLUS_INFO_EXT(mLogger, " Returned a message from HMI");
+        LOG4CPLUS_INFO_EXT(mLogger, " Returned a message " << message->getMethod() << " from HMI");
     }
 
     /**
@@ -3276,117 +3276,129 @@ namespace NsAppManager
                     {
                         Application_v1* appV1 = (Application_v1*)app;
                         const ChoiceSetItems& newChoiceSets = appV1->getAllChoiceSets();
-                        LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
-                        for(ChoiceSetItems::const_iterator it = newChoiceSets.begin(); it != newChoiceSets.end(); it++)
+                        if(!newChoiceSets.empty())
                         {
-                            const unsigned int& choiceSetId = it->first;
-                            const ChoiceSetV1& choiceSet = it->second.choiceSetV1;
-                            NsRPC2Communication::UI::CreateInteractionChoiceSet* addCmd = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
-                            addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                            addCmd->set_interactionChoiceSetID(choiceSetId);
-                            addCmd->set_choiceSet(choiceSet);
-                            addCmd->set_appId(app->getAppID());
-                            core->mMessageMapping.addMessage(addCmd->getId(), appId);
+                            LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
+                            for(ChoiceSetItems::const_iterator it = newChoiceSets.begin(); it != newChoiceSets.end(); it++)
+                            {
+                                const unsigned int& choiceSetId = it->first;
+                                const ChoiceSetV1& choiceSet = it->second.choiceSetV1;
+                                NsRPC2Communication::UI::CreateInteractionChoiceSet* addCmd = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
+                                addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                                addCmd->set_interactionChoiceSetID(choiceSetId);
+                                addCmd->set_choiceSet(choiceSet);
+                                addCmd->set_appId(app->getAppID());
+                                core->mMessageMapping.addMessage(addCmd->getId(), appId);
 
-                            HMIHandler::getInstance().sendRequest(addCmd);
+                                HMIHandler::getInstance().sendRequest(addCmd);
+                            }
+                            LOG4CPLUS_INFO_EXT(mLogger, "New app's interaction choice sets added!");
                         }
-                        LOG4CPLUS_INFO_EXT(mLogger, "New app's interaction choice sets added!");
                         break;
                     }
                     case 2:
                     {
                         Application_v2* appV2 = (Application_v2*)app;
                         const ChoiceSetItems& newChoiceSets = appV2->getAllChoiceSets();
-                        LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
-                        for(ChoiceSetItems::const_iterator it = newChoiceSets.begin(); it != newChoiceSets.end(); it++)
+                        if(!newChoiceSets.empty())
                         {
-                            const unsigned int& choiceSetId = it->first;
-                            const ChoiceSetV2& choiceSet = it->second.choiceSetV2;
-                            ChoiceSetV1 choiceSetV1;
-                            for(ChoiceSetV2::const_iterator it = choiceSet.begin(); it != choiceSet.end(); it++)
+                            LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
+                            for(ChoiceSetItems::const_iterator it = newChoiceSets.begin(); it != newChoiceSets.end(); it++)
                             {
-                                const NsAppLinkRPCV2::Choice& choice = *it;
-                                NsAppLinkRPC::Choice choiceV1;
-                                choiceV1.set_choiceID(choice.get_choiceID());
-                                choiceV1.set_menuName(choice.get_menuName());
-                                choiceV1.set_vrCommands(choice.get_vrCommands());
-                                choiceSetV1.push_back(choiceV1);
-                            }
-                            NsRPC2Communication::UI::CreateInteractionChoiceSet* addCmd = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
-                            addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                            addCmd->set_interactionChoiceSetID(choiceSetId);
-                            addCmd->set_choiceSet(choiceSetV1);
-                            addCmd->set_appId(app->getAppID());
-                            core->mMessageMapping.addMessage(addCmd->getId(), appId);
+                                const unsigned int& choiceSetId = it->first;
+                                const ChoiceSetV2& choiceSet = it->second.choiceSetV2;
+                                ChoiceSetV1 choiceSetV1;
+                                for(ChoiceSetV2::const_iterator it = choiceSet.begin(); it != choiceSet.end(); it++)
+                                {
+                                    const NsAppLinkRPCV2::Choice& choice = *it;
+                                    NsAppLinkRPC::Choice choiceV1;
+                                    choiceV1.set_choiceID(choice.get_choiceID());
+                                    choiceV1.set_menuName(choice.get_menuName());
+                                    choiceV1.set_vrCommands(choice.get_vrCommands());
+                                    choiceSetV1.push_back(choiceV1);
+                                }
+                                NsRPC2Communication::UI::CreateInteractionChoiceSet* addCmd = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
+                                addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                                addCmd->set_interactionChoiceSetID(choiceSetId);
+                                addCmd->set_choiceSet(choiceSetV1);
+                                addCmd->set_appId(app->getAppID());
+                                core->mMessageMapping.addMessage(addCmd->getId(), appId);
 
-                            HMIHandler::getInstance().sendRequest(addCmd);
+                                HMIHandler::getInstance().sendRequest(addCmd);
+                            }
+                            LOG4CPLUS_INFO_EXT(mLogger, "New app's interaction choice sets added!");
                         }
-                        LOG4CPLUS_INFO_EXT(mLogger, "New app's interaction choice sets added!");
                         break;
                     }
                 }
 
                 const MenuItems& newMenus = app->getAllMenus();
-                LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's menus to HMI due to a new application activation");
-                for(MenuItems::const_iterator it = newMenus.begin(); it != newMenus.end(); it++)
+                if(!newMenus.empty())
                 {
-                    const unsigned int& menuId = it->first;
-                    const MenuValue& menuVal = it->second;
-                    const std::string& menuName = menuVal.first;
-                    const unsigned int* position = menuVal.second;
-                    NsRPC2Communication::UI::AddSubMenu* addCmd = new NsRPC2Communication::UI::AddSubMenu();
-                    addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    addCmd->set_menuId(menuId);
-                    addCmd->set_menuName(menuName);
-                    if(position)
+                    LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's menus to HMI due to a new application activation");
+                    for(MenuItems::const_iterator it = newMenus.begin(); it != newMenus.end(); it++)
                     {
-                        addCmd->set_position(*position);
-                    }
-                    addCmd->set_appId(app->getAppID());
-                    core->mMessageMapping.addMessage(addCmd->getId(), appId);
+                        const unsigned int& menuId = it->first;
+                        const MenuValue& menuVal = it->second;
+                        const std::string& menuName = menuVal.first;
+                        const unsigned int* position = menuVal.second;
+                        NsRPC2Communication::UI::AddSubMenu* addCmd = new NsRPC2Communication::UI::AddSubMenu();
+                        addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        addCmd->set_menuId(menuId);
+                        addCmd->set_menuName(menuName);
+                        if(position)
+                        {
+                            addCmd->set_position(*position);
+                        }
+                        addCmd->set_appId(app->getAppID());
+                        core->mMessageMapping.addMessage(addCmd->getId(), appId);
 
-                    HMIHandler::getInstance().sendRequest(addCmd);
+                        HMIHandler::getInstance().sendRequest(addCmd);
+                    }
+                    LOG4CPLUS_INFO_EXT(mLogger, "New app's menus added!");
                 }
-                LOG4CPLUS_INFO_EXT(mLogger, "New app's menus added!");
 
                 const Commands& newCommands = app->getAllCommands();
-                LOG4CPLUS_INFO_EXT(mLogger, "Adding a new application's commands to HMI due to a new application activation");
-                for(Commands::const_iterator it = newCommands.begin(); it != newCommands.end(); it++)
+                if(!newCommands.empty())
                 {
-                    const Command& key = *it;
-                    const CommandParams& params = key.second;
-                    const NsAppLinkRPC::MenuParams* menuParams = params.menuParams;
-                    const std::vector<std::string>* vrCommands = params.vrCommands;
-                    const CommandBase& base = key.first;
-                    const CommandType& type = std::get<1>(base);
-                    unsigned int cmdId = std::get<0>(base);
+                    LOG4CPLUS_INFO_EXT(mLogger, "Adding a new application's commands to HMI due to a new application activation");
+                    for(Commands::const_iterator it = newCommands.begin(); it != newCommands.end(); it++)
+                    {
+                        const Command& key = *it;
+                        const CommandParams& params = key.second;
+                        const NsAppLinkRPC::MenuParams* menuParams = params.menuParams;
+                        const std::vector<std::string>* vrCommands = params.vrCommands;
+                        const CommandBase& base = key.first;
+                        const CommandType& type = std::get<1>(base);
+                        unsigned int cmdId = std::get<0>(base);
 
-                    NsRPC2Communication::RPC2Request* addCmd = 0;
-                    if(type == CommandType::UI)
-                    {
-                        LOG4CPLUS_INFO_EXT(mLogger, "Adding UI command");
-                        addCmd = new NsRPC2Communication::UI::AddCommand();
-                        ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_menuParams(*menuParams);
-                    }
-                    else if(type == CommandType::VR)
-                    {
-                        LOG4CPLUS_INFO_EXT(mLogger, "Adding VR command");
-                        addCmd = new NsRPC2Communication::VR::AddCommand();
-                        ((NsRPC2Communication::VR::AddCommand*)addCmd)->set_vrCommands(*vrCommands);
-                    }
-                    else
-                    {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An unindentified command type - " << type.getType());
-                        continue;
-                    }
-                    addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
-                    ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_appId(app->getAppID());
-                    core->mMessageMapping.addMessage(addCmd->getId(), appId);
+                        NsRPC2Communication::RPC2Request* addCmd = 0;
+                        if(type == CommandType::UI)
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "Adding UI command");
+                            addCmd = new NsRPC2Communication::UI::AddCommand();
+                            ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_menuParams(*menuParams);
+                        }
+                        else if(type == CommandType::VR)
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "Adding VR command");
+                            addCmd = new NsRPC2Communication::VR::AddCommand();
+                            ((NsRPC2Communication::VR::AddCommand*)addCmd)->set_vrCommands(*vrCommands);
+                        }
+                        else
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, "An unindentified command type - " << type.getType());
+                            continue;
+                        }
+                        addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
+                        ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_appId(app->getAppID());
+                        core->mMessageMapping.addMessage(addCmd->getId(), appId);
 
-                    HMIHandler::getInstance().sendRequest(addCmd);
+                        HMIHandler::getInstance().sendRequest(addCmd);
+                    }
+                    LOG4CPLUS_INFO_EXT(mLogger, "New app's commands added!");
                 }
-                LOG4CPLUS_INFO_EXT(mLogger, "New app's commands added!");
 
                 switch(app->getProtocolVersion())
                 {
@@ -3447,6 +3459,7 @@ namespace NsAppManager
                         break;
                     }
                 }
+                LOG4CPLUS_INFO_EXT(mLogger, "New app  " << app->getName() << " id " << app->getAppID() << " activated!");
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__DEACTIVATEAPP:
