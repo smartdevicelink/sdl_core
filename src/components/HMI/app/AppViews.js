@@ -70,6 +70,11 @@ MFT.AppViews = Em.ContainerView.extend({
 		FFW.AppendScript.pushScript('media.applink');
 		FFW.AppendScript.pushScript('media.applink.applinkoptions');
 		FFW.AppendScript.pushScript('media.applink.applinkslider');
+		
+		FFW.AppendScript.pushScript('info');
+		FFW.AppendScript.pushScript('info.nonMedia');
+		FFW.AppendScript.pushScript('info.nonMedia.options');
+		
 		//FFW.AppendScript.pushScript('info');
 		//FFW.AppendScript.pushScript('settings');
 		
