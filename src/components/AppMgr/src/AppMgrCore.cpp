@@ -1310,10 +1310,14 @@ namespace NsAppManager
                     scrollableMessage->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     scrollableMessage->set_appId(app->getAppID());
                     scrollableMessage->set_scrollableMessageBody(request->get_scrollableMessageBody());
-                    scrollableMessage->set_timeout(*(request->get_timeout()));
-                    scrollableMessage->set_softButtons(*(request->get_softButtons()));
-
-
+                    if (request->get_timeout())
+                    {
+                        scrollableMessage->set_timeout(*(request->get_timeout()));
+                    }
+                    if ( request->get_softButtons() )
+                    {
+                        scrollableMessage->set_softButtons(*(request->get_softButtons()));
+                    }
                     core->mMessageMapping.addMessage(scrollableMessage->getId(), sessionKey);
                     HMIHandler::getInstance().sendRequest(scrollableMessage);
                     break;
@@ -2201,6 +2205,8 @@ namespace NsAppManager
                     {
                         NsAppLinkRPCV2::OnCommand* event = new NsAppLinkRPCV2::OnCommand();
                         event->set_cmdID(object->get_commandId());
+                        event->setMethodId(NsAppLinkRPCV2::FunctionID::OnCommandID);
+                        event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                             << " application id " << appId);
                         MobileHandler::getInstance().sendRPCMessage(event, appId);
@@ -3106,6 +3112,8 @@ namespace NsAppManager
                     {
                         NsAppLinkRPCV2::OnCommand* event = new NsAppLinkRPCV2::OnCommand();
                         event->set_cmdID(object->get_cmdID());
+                        event->setMethodId(NsAppLinkRPCV2::FunctionID::OnCommandID);
+                        event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                             << " application id " << appId);
                         MobileHandler::getInstance().sendRPCMessage(event, appId);
