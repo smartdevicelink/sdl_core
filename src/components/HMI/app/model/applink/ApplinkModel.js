@@ -27,5 +27,21 @@ MFT.ApplinkModel = Em.Object.create({
        
 
     }
+    
+    /**
+     * Applink UI Alert response handeler
+     * show popup window 
+     *
+     * @param message:Object
+     */
+	onUIAlert: function( message ) {
+		
+		MFT.AlertPopUp.AlertActive(
+			message.AlertText1,
+			message.AlertText2,
+			message.duration,
+			message.playTone
+		);
+	}
 });
  
