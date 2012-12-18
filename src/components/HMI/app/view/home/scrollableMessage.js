@@ -77,7 +77,7 @@ MFT.ScrollableMessage = Em.ContainerView.create({
       */
     listOfCommands: MFT.List.extend({
 
-        elementId:      'VR_list',
+        elementId:      'scrollable_message_list',
 
         itemsOnPage:    5,
 
