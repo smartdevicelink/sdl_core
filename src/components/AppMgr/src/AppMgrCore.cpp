@@ -380,7 +380,6 @@ namespace NsAppManager
                     core->mButtonsMapping.addButton( btnName, item );
 
                     response->setCorrelationID(object->getCorrelationID());
-                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -1043,7 +1042,9 @@ namespace NsAppManager
                         break;
                     }
 
-                    core->mButtonsMapping.addButton( object->get_buttonName(), item );
+                    core->mButtonsMapping.addButton( object->get_buttonName(), item );                    
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::SubscribeButtonID);
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -1978,6 +1979,12 @@ namespace NsAppManager
                         {
                             event->set_customButtonID(*object->get_customButtonID());
                         }
+                        else
+                        {
+                            event->set_customButtonID(0);
+                        }
+                        event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                        event->setMethodId(NsAppLinkRPCV2::FunctionID::OnButtonEventID);
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " application id " << appId);
                         MobileHandler::getInstance().sendRPCMessage(event, appId);
                         break;
@@ -2029,7 +2036,14 @@ namespace NsAppManager
                         {
                             event->set_customButtonID(*object->get_customButtonID());
                         }
+                        else
+                        {
+                            event->set_customButtonID(0);
+                        }
                         LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
+
+                        event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                        event->setMethodId(NsAppLinkRPCV2::FunctionID::OnButtonPressID);
 
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()
                             << " application id " << appId);
@@ -2362,7 +2376,9 @@ namespace NsAppManager
                     case 2:
                     {
                         NsAppLinkRPCV2::Alert_response* response = new NsAppLinkRPCV2::Alert_response();
-                        response->set_success(true);
+                        response->set_success(true);                        
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::AlertID);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                         if(object->get_tryAgainTime())
                         {
@@ -2411,7 +2427,9 @@ namespace NsAppManager
                         case 2:
                         {
                             NsAppLinkRPCV2::AddCommand_response* response = new NsAppLinkRPCV2::AddCommand_response();
-                            response->set_success(true);
+                            response->set_success(true);                            
+                            response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                            response->setMethodId(NsAppLinkRPCV2::FunctionID::AddCommandID);
                             response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                             core->mRequestMapping.removeRequest(object->getId());
                             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
@@ -2997,6 +3015,8 @@ namespace NsAppManager
                         {
                             NsAppLinkRPCV2::AddCommand_response* response = new NsAppLinkRPCV2::AddCommand_response();
                             response->set_success(true);
+                            response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                            response->setMethodId(NsAppLinkRPCV2::FunctionID::AddCommandID);
                             response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                             core->mRequestMapping.removeRequest(object->getId());
                             LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
