@@ -1,5 +1,6 @@
 [R5.1.0]
 SyncProxyTester:
++ Add extra logs for requests.
 + Persist the log messages in the UI during one app launch.
 * Fix: AddCommand dialog: correctly send the entered VR Synonym with the command.
 + Introduce changelog.

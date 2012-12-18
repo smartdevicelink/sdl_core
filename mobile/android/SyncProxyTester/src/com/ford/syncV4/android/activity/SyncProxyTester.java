@@ -611,6 +611,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										
 									}
 									try {
+										_msgAdapter.logMessage("Speak (request)", true);
 										ProxyService.getInstance().getProxyInstance().speak(chunks, autoIncCorrId++);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
@@ -699,6 +700,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								public void onClick(DialogInterface dialog, int which) {
 								boolean needToSubscribe = !isButtonSubscribed[which];
 									try {
+										_msgAdapter.logMessage("ButtonSubscriptions (request)", true);
 										if (needToSubscribe) 
 											ProxyService.getInstance().getProxyInstance().subscribeButton(ButtonName.values()[which], autoIncCorrId++);
 										else ProxyService.getInstance().getProxyInstance().unsubscribeButton(ButtonName.values()[which], autoIncCorrId++);
@@ -740,6 +742,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									}
 									int cmdID = itemcmdID++;
 									try {
+										_msgAdapter.logMessage("AddCommand (request)", true);
 										ProxyService.getInstance().getProxyInstance().addCommand(cmdID, itemText, sm.getSubMenuId(), 0, vrCommands, autoIncCorrId++);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
@@ -763,6 +766,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								public void onClick(DialogInterface dialog, int which) {
 									int cmdID = _commandAdapter.getItem(which);
 									try {
+										_msgAdapter.logMessage("DeleteCommand (request)", true);
 										//ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 										ProxyService.getInstance().getProxyInstance().deleteCommand(cmdID, autoIncCorrId++);
 									} catch (SyncException e) {
@@ -794,6 +798,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									sm.setSubMenuId(submenucmdID++);
 									addSubMenuToList(sm);
 									try {
+										_msgAdapter.logMessage("AddSubMenu (request)", true);
 										ProxyService.getInstance().getProxyInstance().addSubMenu(sm.getSubMenuId(), sm.getName(), autoIncCorrId++);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
@@ -816,6 +821,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								public void onClick(DialogInterface dialog, int which) {
 									SyncSubMenu menu = _submenuAdapter.getItem(which);
 									try {
+										_msgAdapter.logMessage("DeleteSubMenu (request)", true);
 										ProxyService.getInstance().getProxyInstance().deleteSubMenu(menu.getSubMenuId(), autoIncCorrId++);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
@@ -832,7 +838,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								help.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, "This is the help prompt"));
 								Vector<TTSChunk> timeout = new Vector<TTSChunk>();
 								timeout.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, "This is the timeout prompt"));
-								ProxyService.getInstance().getProxyInstance().setGlobalProperties(help, timeout, autoIncCorrId++);	
+								_msgAdapter.logMessage("SetGlobalProperties (request)", true);
+								ProxyService.getInstance().getProxyInstance().setGlobalProperties(help, timeout, autoIncCorrId++);
 							} catch (SyncException e) {
 								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
@@ -864,6 +871,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									String strSeconds = txtSeconds.getText().toString();
 									
 									try {
+										_msgAdapter.logMessage("SetMediaClockTimer (request)", true);
 										if (strHours.length() > 0 && strMinutes.length() > 0 && strSeconds.length() > 0) {
 											ProxyService.getInstance().getProxyInstance().setMediaClockTimer(
 													Integer.parseInt(strHours), 
@@ -938,6 +946,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									
 									if (!commands.isEmpty()) {
 										try {
+											_msgAdapter.logMessage("CreateChoiceSet (request)", true);
 											int choiceSetID = autoIncChoiceSetId++;
 											ProxyService.getInstance().getProxyInstance().createInteractionChoiceSet(commands, choiceSetID, autoIncCorrId++);
 											_choiceSetAdapter.add(choiceSetID);
@@ -965,6 +974,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								public void onClick(DialogInterface dialog, int which) {
 									int commandSetID = _choiceSetAdapter.getItem(which);
 									try {
+										_msgAdapter.logMessage("DeleteChoiceSet (request)", true);
 										ProxyService.getInstance().getProxyInstance().deleteInteractionChoiceSet(commandSetID, autoIncCorrId++);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
@@ -984,6 +994,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									Vector<Integer> interactionChoiceSetIDs = new Vector<Integer>();
 									interactionChoiceSetIDs.add(_choiceSetAdapter.getItem(which));
 									try {
+										_msgAdapter.logMessage("PerformInteraction (request)", true);
 										ProxyService.getInstance().getProxyInstance().performInteraction(
 															"Pick a command",
 															"Pick number:",
