@@ -37,6 +37,7 @@ MFT.ApplinkModel = Em.Object.create({
 	onUIAlert: function( message ) {
 		
 		MFT.AlertPopUp.AlertActive(
+			message.appId,
 			message.AlertText1,
 			message.AlertText2,
 			message.duration,

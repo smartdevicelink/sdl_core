@@ -37,7 +37,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
 		classNames:			'applicationName',
 
-		contentBinding:		'MFT.ApplinkMediaModel.appInfo.appName'
+		contentBinding:		'parentView.appName'
 	}),
 
 	message1 : MFT.Label.extend({
@@ -58,17 +58,18 @@ MFT.AlertPopUp = Em.ContainerView.create({
 		contentBinding:		'parentView.content2'
 	}),
 
-	AlertActive: function( msg1, msg2, duration, playTone){
+	AlertActive: function( appId, msg1, msg2, duration, playTone){
 		var self = this;
 		
 		// play audio alert
 		if ( playTone ) {
 			MFT.Audio.play('audio/alert.wav');
 		}
-
-		this.set('content1', msg1);
-		this.set('content2', msg2);
-		this.set('activate', true);
+		
+		this.set('appName',		MFT.ApplinkController.getApplicationModel(appId).appInfo.appName);
+		this.set('content1',	msg1);
+		this.set('content2',	msg2);
+		this.set('activate',	true);
 		
 		setTimeout(function(){self.set('activate', false);}, duration);
 	}
