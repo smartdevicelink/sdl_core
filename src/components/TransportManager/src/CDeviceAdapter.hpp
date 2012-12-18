@@ -9,7 +9,7 @@
 
 #include "IDeviceAdapter.hpp"
 
-#define LOG4CPLUS_ERROR_EXT_WITH_ERRNO(logger, message) LOG4CPLUS_ERROR_EXT(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
+#define LOG4CPLUS_ERROR_WITH_ERRNO(logger, message) LOG4CPLUS_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
 
 namespace NsAppLink
 {
@@ -30,7 +30,7 @@ namespace NsAppLink
              * @param Listener Listener for device adapter notifications.
              * @param HandleGenerator Handle generator implementation.
              **/
-            CDeviceAdapter(const char * LoggerName, IDeviceAdapterListener & Listener, IHandleGenerator & HandleGenerator);
+            CDeviceAdapter(IDeviceAdapterListener & Listener, IHandleGenerator & HandleGenerator);
 
             /**
              * @brief Destructor.

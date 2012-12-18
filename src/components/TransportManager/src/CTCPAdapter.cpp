@@ -64,7 +64,7 @@ bool NsAppLink::NsTransportManager::CTCPAdapter::STCPConnection::isSameAs(const 
 }
 
 NsAppLink::NsTransportManager::CTCPAdapter::CTCPAdapter(NsAppLink::NsTransportManager::IDeviceAdapterListener & Listener, NsAppLink::NsTransportManager::IHandleGenerator & HandleGenerator):
-CDeviceAdapter("TCPAdapter", Listener, HandleGenerator)
+CDeviceAdapter(Listener, HandleGenerator)
 {
 }
 
@@ -80,7 +80,7 @@ NsAppLink::NsTransportManager::EDeviceType NsAppLink::NsTransportManager::CTCPAd
 
 void NsAppLink::NsTransportManager::CTCPAdapter::mainThread(void)
 {
-    LOG4CPLUS_INFO_EXT(mLogger, "Main thread initialized");
+    LOG4CPLUS_INFO(mLogger, "Main thread initialized");
 
     int socketFd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -116,7 +116,7 @@ void NsAppLink::NsTransportManager::CTCPAdapter::mainThread(void)
 
                             strncpy(deviceName, inet_ntoa(clientAddress.sin_addr), sizeof(deviceName) / sizeof(deviceName[0]));
 
-                            LOG4CPLUS_INFO_EXT(mLogger, "Connected client " << deviceName);
+                            LOG4CPLUS_INFO(mLogger, "Connected client " << deviceName);
 
                             tDeviceHandle deviceHandle = InvalidDeviceHandle;
 
@@ -150,11 +150,11 @@ void NsAppLink::NsTransportManager::CTCPAdapter::mainThread(void)
                                     device->mIsConnected = true;
                                     device->mUniqueDeviceId = std::string("TCP-") + deviceName;
 
-                                    LOG4CPLUS_INFO_EXT(mLogger, "Added new device " << deviceHandle << ": " << device->mName << " (" << device->mUniqueDeviceId << ")");
+                                    LOG4CPLUS_INFO(mLogger, "Added new device " << deviceHandle << ": " << device->mName << " (" << device->mUniqueDeviceId << ")");
                                 }
                                 else
                                 {
-                                    LOG4CPLUS_ERROR_EXT(mLogger, "Device handle " << deviceHandle << " is already present in devices map");
+                                    LOG4CPLUS_ERROR(mLogger, "Device handle " << deviceHandle << " is already present in devices map");
 
                                     deviceHandle = InvalidDeviceHandle;
                                     delete device;
@@ -175,12 +175,12 @@ void NsAppLink::NsTransportManager::CTCPAdapter::mainThread(void)
                             }
                             else
                             {
-                                LOG4CPLUS_ERROR_EXT(mLogger, "Failed to insert new device into devices map");
+                                LOG4CPLUS_ERROR(mLogger, "Failed to insert new device into devices map");
                             }
                         }
                         else
                         {
-                            LOG4CPLUS_ERROR_EXT(mLogger, "Address of connected client is invalid");
+                            LOG4CPLUS_ERROR(mLogger, "Address of connected client is invalid");
                         }
 
                         if (false == isConnectionThreadStarted)
@@ -190,28 +190,28 @@ void NsAppLink::NsTransportManager::CTCPAdapter::mainThread(void)
                     }
                     else
                     {
-                        LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "accept() failed");
+                        LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "accept() failed");
                     }
                 }
             }
             else
             {
-                LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "listen() failed");
+                LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "listen() failed");
             }
         }
         else
         {
-            LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "bind() failed");
+            LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "bind() failed");
         }
 
         close(socketFd);
     }
     else
     {
-        LOG4CPLUS_ERROR_EXT_WITH_ERRNO(mLogger, "Failed to create socket");
+        LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "Failed to create socket");
     }
 
-    LOG4CPLUS_INFO_EXT(mLogger, "Main thread finished");
+    LOG4CPLUS_INFO(mLogger, "Main thread finished");
 }
 
 void NsAppLink::NsTransportManager::CTCPAdapter::connectionThread(const NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle)
@@ -236,14 +236,14 @@ void NsAppLink::NsTransportManager::CTCPAdapter::connectionThread(const NsAppLin
         }
         else
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "Connection " << ConnectionHandle << " is invalid");
+            LOG4CPLUS_ERROR(mLogger, "Connection " << ConnectionHandle << " is invalid");
         }
 
         mConnections.erase(connectionIterator);
     }
     else
     {
-        LOG4CPLUS_ERROR_EXT(mLogger, "Connection " << ConnectionHandle << " was not found in connections map");
+        LOG4CPLUS_ERROR(mLogger, "Connection " << ConnectionHandle << " was not found in connections map");
     }
 
     for (connectionIterator = mConnections.begin(); connectionIterator != mConnections.end(); ++connectionIterator)
@@ -264,7 +264,7 @@ void NsAppLink::NsTransportManager::CTCPAdapter::connectionThread(const NsAppLin
 
     if (InvalidDeviceHandle != deviceHandle)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "No connections left for device " << deviceHandle << ". Deleting device");
+        LOG4CPLUS_INFO(mLogger, "No connections left for device " << deviceHandle << ". Deleting device");
 
         pthread_mutex_lock(&mDevicesMutex);
 
