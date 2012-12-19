@@ -814,7 +814,8 @@ namespace NsAppManager
                     for(std::vector<unsigned int>::const_iterator it = choiceSets.begin(); it != choiceSets.end(); it++)
                     {
                         const unsigned int& choiceSetId = *it;
-                        if(app->findChoiceSet(choiceSetId).empty())
+                        const ChoiceSetV1* choiceSetFound = app->findChoiceSet(choiceSetId);
+                        if(!choiceSetFound)
                         {
                             LOG4CPLUS_ERROR_EXT(mLogger, " a choice set " << choiceSetId
                                                 << " hasn't been registered within the application " << app->getName() << " id" << app->getAppID() << " !");
@@ -1524,7 +1525,8 @@ namespace NsAppManager
                     for(std::vector<unsigned int>::const_iterator it = choiceSets.begin(); it != choiceSets.end(); it++)
                     {
                         const unsigned int& choiceSetId = *it;
-                        if(app->findChoiceSet(choiceSetId).empty())
+                        const ChoiceSetV2* choiceSetFound = app->findChoiceSet(choiceSetId);
+                        if(!choiceSetFound)
                         {
                             LOG4CPLUS_ERROR_EXT(mLogger, " a choice set " << choiceSetId
                                                 << " hasn't been registered within the application " << app->getName() << " id" << app->getAppID() << " !");
