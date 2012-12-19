@@ -226,7 +226,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
 			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
-			String appID, String autoActivateID, boolean callbackToUIThread, int version) throws SyncException {
+			String appID, String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version) throws SyncException {
 		super(	listener, 
 				syncProxyConfigurationResources,
 				/*enable advanced lifecycle management*/true, 
@@ -242,6 +242,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				/*App ID*/appID,
 				autoActivateID,
 				callbackToUIThread,
+				preRegister,
 				version);
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxyALM instance passing in: IProxyListener, syncProxyConfigurationResources, " +

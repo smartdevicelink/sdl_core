@@ -59,6 +59,7 @@ import com.ford.syncV4.proxy.rpc.ChangeRegistration;
 import com.ford.syncV4.proxy.rpc.Choice;
 import com.ford.syncV4.proxy.rpc.DeleteFile;
 import com.ford.syncV4.proxy.rpc.DialNumber;
+import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
 import com.ford.syncV4.proxy.rpc.GetDTCs;
 import com.ford.syncV4.proxy.rpc.GetVehicleData;
@@ -486,6 +487,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			adapter.add("CreateChoiceSet");
 			adapter.add("DeleteChoiceSet");
 			adapter.add("PerformInteraction");
+			adapter.add("EncodedSyncPData");
 			adapter.add("Slider");
 			adapter.add("ScrollableMessage");
 			adapter.add("ChangeRegistration");
@@ -1026,6 +1028,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							});
 							AlertDialog dlg = builder.create();
 							dlg.show();
+						} else if (adapter.getItem(which) == "EncodedSyncPData") {
+							//EncodedSyncPData
+							EncodedSyncPData msg = new EncodedSyncPData();
+							Vector<String> syncPData = new Vector<String>();
+							syncPData.add("AAM4AAkAAAAAAAAAAAA=");
+							msg.setData(syncPData);
+							msg.setCorrelationID(autoIncCorrId++);
+							
+							_msgAdapter.logMessage(msg, true);
+							
+							try {
+								ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+							} catch (SyncException e) {
+								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+							}
 						} else if (adapter.getItem(which) == "Slider") {
 							//something
 							AlertDialog.Builder builder;

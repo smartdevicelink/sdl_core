@@ -164,6 +164,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 						/*App ID*/"8675309",
 						/*autoActivateID*/null,
 						/*callbackToUIThread*/ false,
+						/*preRegister*/ false,
 						versionNumber);
 						//2);
 			} catch (SyncException e) {

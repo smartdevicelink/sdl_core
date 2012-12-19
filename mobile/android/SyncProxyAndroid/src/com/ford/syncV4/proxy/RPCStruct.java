@@ -55,8 +55,7 @@ public class RPCStruct {
 	}
 
 	public byte[] getBulkData() {
-		//return this._bulkData;
-		return (byte[])store.get(Names.bulkData);
+		return this._bulkData;
 	}
 
 	public void setBulkData(byte[] bulkData) {
