@@ -24,6 +24,13 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 *
 	 * @type:	String
 	 */	
-	currentSubMenuLabel:	''
+	currentSubMenuLabel:	'',
+	
+	/**
+	 * Interaction chooses data
+	 *
+	 * @type:	Object
+	 */	
+	interactionChoises: {}
 });
  

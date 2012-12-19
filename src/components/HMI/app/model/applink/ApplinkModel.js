@@ -45,13 +45,28 @@ MFT.ApplinkModel = Em.Object.create({
 
 	/**
 	 * Applink UI PreformInteraction response handeler
-	 * open Perform Interaction screen
+	 * open Perform Interaction screen and show choices
 	 *
 	 * @param message:Object
 	 */
 	onPreformInteraction: function( message ) {
-		// todo
-		MFT.States.goToState('interactionChoises');
+		/* test message
+		message = JSON.parse('{"appId":1,"helpPrompt":[{"text":"help me, Im melting","type":"TEXT"}],"initialPrompt":[{"text":"Pick a command","type":"TEXT"}],"initialText":"Pick number:","interactionChoiceSetIDList":[4]}');
+		*/
+		
+		var i = 0,
+			length = message.interactionChoiceSetIDList.length;
+		
+		
+		MFT.InteractionChoicesView.clean();
+		
+		for ( i = 0; i < length; i++ ) {
+			MFT.InteractionChoicesView.preformChoices(
+				MFT.ApplinkController.getApplicationModel(message.appId).interactionChoises[ message.interactionChoiceSetIDList[i] ]
+			);		
+		}
+		
+		MFT.InteractionChoicesView.activate();
 	},
 	
 	/**
@@ -61,7 +76,12 @@ MFT.ApplinkModel = Em.Object.create({
 	 * @param message:Object
 	 */
 	onCreateInteraction: function( message ) {
-		// todo
+		
+		/* test message
+		message = JSON.parse('{"appId":1,"choiceSet":[{"choiceID":10,"menuName":"1st item","vrCommands":["1st item","Command one"]},{"choiceID":11,"menuName":"2nd item","vrCommands":["2nd item","Command two"]},{"choiceID":12,"menuName":"3rd item","vrCommands":["3rd item","Command three"]}],"interactionChoiceSetID":4}');
+		*/
+		
+		MFT.ApplinkController.getApplicationModel(message.appId).interactionChoises[message.interactionChoiceSetID] = message.choiceSet;
 	},
 	
 	/**
@@ -69,10 +89,10 @@ MFT.ApplinkModel = Em.Object.create({
 	 * close current interaction set window (if opened)
 	 * and delete current set commands from voice recognition list
 	 *
-	 * @param id: interaction set identificator
+	 * @param message:Object
 	 */
-	onDeleteInteraction: function( id ) {
-		// todo
+	onDeleteInteraction: function( message ) {		
+		delete MFT.ApplinkController.getApplicationModel(message.appId).interactionChoises[message.interactionChoiceSetID];
 	}
 });
  

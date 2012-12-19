@@ -1,16 +1,16 @@
 /**
- * @name MFT.InteractionChoisesView
+ * @name MFT.InteractionChoicesView
  * 
- * @desc Interaction Choises visual representation
+ * @desc Interaction Choices visual representation
  * 
  * @category	View
- * @filesource	app/view/interactionChoisesView.js
+ * @filesource	app/view/interactionChoicesView.js
  * @version		1.0
  *
  * @author		Artem Petrosyan
  */
  
-MFT.InteractionChoisesView = Em.ContainerView.create({
+MFT.InteractionChoicesView = Em.ContainerView.create({
 	
 	elementId: 'perform_interaction_view',
 	
@@ -23,7 +23,7 @@ MFT.InteractionChoisesView = Em.ContainerView.create({
 	childViews: [
 		'backButton',
 		'initialText',
-		'listOfChoises'
+		'listOfChoices'
 	],
 	
 	backButton: MFT.Button.extend({
@@ -35,21 +35,28 @@ MFT.InteractionChoisesView = Em.ContainerView.create({
 
     initialText: MFT.Label.extend({
         classNames:	['initialText'],
-        content:	'Interaction Choises'
+        content:	'Interaction Choices'
     }),
     
-    listOfChoises: MFT.List.extend({
+    listOfChoices: MFT.List.extend({
     	elementId:	'perform_interaction_view_list',
         itemsOnPage:5,
         items:		[]
     }),
     
     /**
+     * Clean choices list before new proform
+     */
+    clean: function() {
+    	this.listOfChoices.items = []; 
+    	this.listOfChoices.list.refresh();
+    },
+    
+    /**
      * Activate preform interaction window
      */
     activate: function() {
-    	this.set('active',true);
-    	this.preformChoises();
+    	this.set('active',true); 	
     },
     
     /**
@@ -62,25 +69,29 @@ MFT.InteractionChoisesView = Em.ContainerView.create({
     /**
      * Update choises list with actual set id
      */
-    preformChoises: function(){
+    preformChoices: function( data ){
+		
+		if ( !data ) {
+			Em.Logger.error('No choices to preform')
+			return;
+		}
     	
-    	var i,count = 15;
-    	
-    	this.listOfChoises.items = [];
+    	var i=0,
+    		length = data.length;
     	
     	// temp for testing
-    	for ( i=0; i < count; i++ ) {
-    		this.listOfChoises.items.push(
+    	for ( i=0; i < length; i++ ) {
+    		this.listOfChoices.items.push(
     			{
 					type: MFT.Button,
 					params:{
-						text:			'Test Choises ' + Date.now() + i,
+						text:			data[i].menuName,
 						templateName:	'text'
 					}
 				} 
     		);
     	}
     	    	
-    	this.listOfChoises.list.refresh();
+    	this.listOfChoices.list.refresh();
     }
 });
