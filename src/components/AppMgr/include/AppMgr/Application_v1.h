@@ -144,7 +144,7 @@ namespace NsAppManager
          * \param choiceSetId interaction choice set id
          * \return a mapped choice set item
          */
-        ChoiceSetV1 findChoiceSet(const unsigned int& choiceSetId);
+        const ChoiceSetV1 *findChoiceSet(const unsigned int& choiceSetId);
 
     private:
 
