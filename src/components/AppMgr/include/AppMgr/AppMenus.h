@@ -58,6 +58,13 @@ namespace NsAppManager
         void removeItem(const unsigned int& menuId);
 
         /**
+         * \brief find a menu item from a mapping
+         * \param menuId menu id
+         * \return a menu item from a mapping
+         */
+        const MenuValue* findItem(const unsigned int& menuId);
+
+        /**
          * \brief gets all menu items
          * \return menu items
          */
