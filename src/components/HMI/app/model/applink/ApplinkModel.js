@@ -66,7 +66,7 @@ MFT.ApplinkModel = Em.Object.create({
 			);		
 		}
 		
-		MFT.InteractionChoicesView.activate();
+		MFT.InteractionChoicesView.activate(message.initialText);
 	},
 	
 	/**

@@ -45,17 +45,22 @@ MFT.InteractionChoicesView = Em.ContainerView.create({
     }),
     
     /**
-     * Clean choices list before new proform
+     * Clean choices caption and list before new proform
      */
     clean: function() {
-    	this.listOfChoices.items = []; 
+    	this.set('initialText.content','Interaction Choices');
+    	this.listOfChoices.items = [];
     	this.listOfChoices.list.refresh();
     },
     
     /**
      * Activate preform interaction window
+     * and set caption text
+     *
+     * @param text: String
      */
-    activate: function() {
+    activate: function( text ) {
+    	this.set('initialText.content',text);
     	this.set('active',true); 	
     },
     
@@ -68,6 +73,8 @@ MFT.InteractionChoicesView = Em.ContainerView.create({
     
     /**
      * Update choises list with actual set id
+     *
+     * @param data: Array
      */
     preformChoices: function( data ){
 		
