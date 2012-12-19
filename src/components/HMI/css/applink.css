@@ -318,3 +318,47 @@
 	font-size: 16px;
 	color: white;
 }
+
+
+/* Applink Perform Interaction Choise */
+#perform_interaction_view{
+	width: 800px;
+	height: 480px;
+	background-color: #000;
+	z-index: 1;
+}
+
+#perform_interaction_view .backButton {
+	top: 80px;
+	left: 20px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+#perform_interaction_view .list{
+	position: absolute;
+	width: 650px;
+	height: 251px;
+	border-radius: 2px;
+	left: 100px;
+	top: 150px;
+}
+
+#perform_interaction_view .list span{
+	margin-left: 15px;
+}
+
+#perform_interaction_view .initialText{
+	top: 80px;
+	left: 100px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
+
+#perform_interaction_view .list-content{
+	width: 578px;
+}

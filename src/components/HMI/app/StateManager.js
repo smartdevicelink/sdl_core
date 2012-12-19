@@ -69,11 +69,6 @@ var StateManager = Em.StateManager.extend({
 				
 	}),
 	
-	// Interaction Choises state
-	interactionChoises: Em.State.create({
-		
-	}),
-	
 	/** FAQ state */
 	faq: Em.State.create({
 	
