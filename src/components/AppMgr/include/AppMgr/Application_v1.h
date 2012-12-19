@@ -139,6 +139,13 @@ namespace NsAppManager
          */
         size_t getChoiceSetsCount() const;
 
+        /**
+         * \brief find a mapped choice set item
+         * \param choiceSetId interaction choice set id
+         * \return a mapped choice set item
+         */
+        ChoiceSetV1 findChoiceSet(const unsigned int& choiceSetId);
+
     private:
 
         /**
