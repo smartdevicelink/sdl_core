@@ -786,6 +786,22 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
+                    const std::vector<unsigned int>& choiceSets = object->get_interactionChoiceSetIDList();
+                    for(std::vector<unsigned int>::const_iterator it = choiceSets.begin(); it != choiceSets.end(); it++)
+                    {
+                        const unsigned int& choiceSetId = *it;
+                        const ChoiceSetV1* choiceSetFound = app->findChoiceSet(choiceSetId);
+                        if(!choiceSetFound)
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, " a choice set " << choiceSetId
+                                                << " hasn't been registered within the application " << app->getName() << " id" << app->getAppID() << " !");
+                            NsAppLinkRPC::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPC::DeleteInteractionChoiceSet_response;
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                            MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                            return;
+                        }
+                    }
                     NsRPC2Communication::UI::DeleteInteractionChoiceSet* deleteInteractionChoiceSet = new NsRPC2Communication::UI::DeleteInteractionChoiceSet();
                     deleteInteractionChoiceSet->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     core->mMessageMapping.addMessage(deleteInteractionChoiceSet->getId(), sessionKey);
