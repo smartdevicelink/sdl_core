@@ -635,10 +635,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName, 
 			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppType> appType, String appID, 
-			String autoActivateID, boolean callbackToUIThread, int version) 
+			String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version) 
 			throws SyncException {
 		
 		setWiProVersion((byte)version);
+		if (preRegister) _appInterfaceRegisterd = preRegister;
 		
 		_interfaceBroker = new SyncInterfaceBroker();
 		
