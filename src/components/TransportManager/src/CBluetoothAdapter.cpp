@@ -152,7 +152,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
         tDeviceMap newDevices;
         tDeviceVector discoveredDevices;
 
-        bool deviceScanRequested = waitForDeviceScanRequest(cConnectedDevicesServiceDiscoveryInterval);
+        bool deviceScanRequested = waitForDeviceScanRequest(0);
 
         if (true == deviceScanRequested)
         {
@@ -201,82 +201,52 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
                     close(deviceHandle);
                 }
             }
-        }
-        else
-        {
+
+            for (tDeviceVector::iterator discoveredDeviceIterator = discoveredDevices.begin(); discoveredDeviceIterator != discoveredDevices.end(); ++discoveredDeviceIterator)
+            {
+                SDevice * discoveredDevice = *discoveredDeviceIterator;
+
+                if (0 != discoveredDevice)
+                {
+                    tDeviceHandle deviceHandle = InvalidDeviceHandle;
+
+                    pthread_mutex_lock(&mDevicesMutex);
+
+                    for (tDeviceMap::iterator deviceIterator = mDevices.begin(); deviceIterator != mDevices.end(); ++deviceIterator)
+                    {
+                        SDevice * exisingDevice = deviceIterator->second;
+
+                        if (true == discoveredDevice->isSameAs(exisingDevice))
+                        {
+                            deviceHandle = deviceIterator->first;
+                            break;
+                        }
+                    }
+
+                    pthread_mutex_unlock(&mDevicesMutex);
+
+                    if (InvalidDeviceHandle == deviceHandle)
+                    {
+                        deviceHandle = mHandleGenerator.generateNewDeviceHandle();
+
+                        LOG4CPLUS_INFO(mLogger, "Adding new device " << deviceHandle << " (\"" << discoveredDevice->mName << "\")");
+                    }
+
+                    newDevices[deviceHandle] = discoveredDevice;
+                }
+            }
+
             pthread_mutex_lock(&mDevicesMutex);
 
             for (tDeviceMap::iterator deviceIterator = mDevices.begin(); deviceIterator != mDevices.end(); ++deviceIterator)
             {
-                discoveredDevices.push_back(deviceIterator->second);
+                delete deviceIterator->second;
             }
+
+            mDevices = newDevices;
 
             pthread_mutex_unlock(&mDevicesMutex);
 
-            for (tDeviceVector::iterator discoveredDeviceIterator = discoveredDevices.begin(); discoveredDeviceIterator != discoveredDevices.end(); ++discoveredDeviceIterator)
-            {
-                SBluetoothDevice * device = dynamic_cast<SBluetoothDevice*>(*discoveredDeviceIterator);
-
-                if (0 != device)
-                {
-                    if (true == device->mIsConnected)
-                    {
-                        discoverAppLinkRFCOMMChannels(device->mAddress, device->mAppLinkRFCOMMChannels);
-                    }
-                }
-            }
-        }
-
-        for (tDeviceVector::iterator discoveredDeviceIterator = discoveredDevices.begin(); discoveredDeviceIterator != discoveredDevices.end(); ++discoveredDeviceIterator)
-        {
-            SDevice * discoveredDevice = *discoveredDeviceIterator;
-
-            if (0 != discoveredDevice)
-            {
-                tDeviceHandle deviceHandle = InvalidDeviceHandle;
-
-                pthread_mutex_lock(&mDevicesMutex);
-
-                for (tDeviceMap::iterator deviceIterator = mDevices.begin(); deviceIterator != mDevices.end(); ++deviceIterator)
-                {
-                    SDevice * exisingDevice = deviceIterator->second;
-
-                    if (true == discoveredDevice->isSameAs(exisingDevice))
-                    {
-                        deviceHandle = deviceIterator->first;
-                        break;
-                    }
-                }
-
-                pthread_mutex_unlock(&mDevicesMutex);
-
-                if (InvalidDeviceHandle == deviceHandle)
-                {
-                    deviceHandle = mHandleGenerator.generateNewDeviceHandle();
-
-                    LOG4CPLUS_INFO(mLogger, "Adding new device " << deviceHandle << " (\"" << discoveredDevice->mName << "\")");
-                }
-
-                newDevices[deviceHandle] = discoveredDevice;
-            }
-        }
-
-        pthread_mutex_lock(&mDevicesMutex);
-
-        if (true == deviceScanRequested)
-        {
-            for (tDeviceMap::iterator deviceIterator = mDevices.begin(); deviceIterator != mDevices.end(); ++deviceIterator)
-            {
-                delete deviceIterator->second;
-            }
-        }
-
-        mDevices = newDevices;
-
-        pthread_mutex_unlock(&mDevicesMutex);
-
-        if (true == deviceScanRequested)
-        {
             LOG4CPLUS_INFO(mLogger, "Discovered " << newDevices.size() << " device" << ((1u == newDevices.size()) ? "" : "s") << " with AppLink service. New devices map:");
 
             for (tDeviceMap::iterator deviceIterator = newDevices.begin(); deviceIterator != newDevices.end(); ++deviceIterator)
@@ -296,52 +266,6 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
             mDeviceScanRequested = false;
 
             updateClientDeviceList();
-        }
-
-        std::set<std::pair<tDeviceHandle, uint8_t> > connectionsToEstablish;
-
-        for (tDeviceMap::const_iterator newDeviceIterator = newDevices.begin(); newDeviceIterator != newDevices.end(); ++newDeviceIterator)
-        {
-            const SBluetoothDevice * device = dynamic_cast<const SBluetoothDevice*>(newDeviceIterator->second);
-
-            if (0 != device)
-            {
-                if (true == device->mIsConnected)
-                {
-                    for (tRFCOMMChannelVector::const_iterator channelIterator = device->mAppLinkRFCOMMChannels.begin(); channelIterator != device->mAppLinkRFCOMMChannels.end(); ++channelIterator)
-                    {
-                        connectionsToEstablish.insert(std::make_pair(newDeviceIterator->first, *channelIterator));
-                    }
-                }
-            }
-        }
-
-        pthread_mutex_lock(&mConnectionsMutex);
-
-        for (tConnectionMap::const_iterator connectionIterator = mConnections.begin(); connectionIterator != mConnections.end(); ++connectionIterator)
-        {
-            const SRFCOMMConnection * connection = dynamic_cast<SRFCOMMConnection*>(connectionIterator->second);
-
-            if (0 != connection)
-            {
-                const std::pair<tDeviceHandle, uint8_t> newConnection(connection->mDeviceHandle, connection->mRFCOMMChannel);
-
-                if (connectionsToEstablish.find(newConnection) != connectionsToEstablish.end())
-                {
-                    connectionsToEstablish.erase(newConnection);
-                }
-            }
-            else
-            {
-                LOG4CPLUS_ERROR(mLogger, "Connection " << connectionIterator->first << " is null");
-            }
-        }
-
-        pthread_mutex_unlock(&mConnectionsMutex);
-
-        for (std::set<std::pair<tDeviceHandle, uint8_t> >::const_iterator newConnectionsIterator = connectionsToEstablish.begin(); newConnectionsIterator != connectionsToEstablish.end(); ++newConnectionsIterator)
-        {
-            startConnection(new SRFCOMMConnection(newConnectionsIterator->first, newConnectionsIterator->second));
         }
     }
 

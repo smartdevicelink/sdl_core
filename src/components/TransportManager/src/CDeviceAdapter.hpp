@@ -330,7 +330,8 @@ namespace NsAppLink
              * Wait until scanForNewDevices() is called or timeout
              * expires.
              *
-             * @param Timeout Timeout value in seconds.
+             * @param Timeout Timeout value in seconds. 0 means no
+             *                timeout.
              *
              * @return true if scanForNewDevices() has been called,
              *         false if timeout expired.
