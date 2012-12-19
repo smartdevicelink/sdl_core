@@ -17,14 +17,26 @@
         android:checked="true"
         android:text="Choice 1" />
 
-		<EditText 
-			android:text="1st item" 
-			android:id="@+id/createcommands_command1" 
-			android:layout_width="fill_parent" 
-			android:layout_height="wrap_content" 
-			android:visibility="visible" 
-			android:freezesText="true">
+		<EditText
+		    android:id="@+id/createcommands_command1"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:freezesText="true"
+		    android:inputType="textCapSentences"
+		    android:text="1st item"
+		    android:visibility="visible" >
+
 		</EditText>
+
+		<EditText
+		    android:id="@+id/createcommands_vr1"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:freezesText="true"
+		    android:hint="VR Synonym"
+		    android:inputType="textCapSentences"
+		    android:text="Command one"
+		    android:visibility="visible" />
 
 		<CheckBox
 		    android:id="@+id/createcommands_choice2"
@@ -33,14 +45,26 @@
 		    android:checked="true"
 		    android:text="Choice 2" />
 
-		<EditText 
-			android:text="2nd item"
-			android:id="@+id/createcommands_command2" 
-			android:layout_width="fill_parent" 
-			android:layout_height="wrap_content" 
-			android:visibility="visible" 
-			android:freezesText="true">
+		<EditText
+		    android:id="@+id/createcommands_command2"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:freezesText="true"
+		    android:inputType="textCapSentences"
+		    android:text="2nd item"
+		    android:visibility="visible" >
+
 		</EditText>
+
+		<EditText
+		    android:id="@+id/createcommands_vr2"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:freezesText="true"
+		    android:hint="VR Synonym"
+		    android:inputType="textCapSentences"
+		    android:text="Command two"
+		    android:visibility="visible" />
 
 		<CheckBox
 		    android:id="@+id/createcommands_choice3"
@@ -49,12 +73,25 @@
 		    android:checked="true"
 		    android:text="Choice 3" />
 
-        <EditText 
-			android:text="3rd item"
-			android:id="@+id/createcommands_command3" 
-			android:layout_width="fill_parent" 
-			android:layout_height="wrap_content" 
-			android:visibility="visible" 
-			android:freezesText="true">
+        <EditText
+            android:id="@+id/createcommands_command3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="textCapSentences"
+            android:text="3rd item"
+            android:visibility="visible" >
+
 		</EditText>
+
+        <EditText
+            android:id="@+id/createcommands_vr3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:hint="VR Synonym"
+            android:inputType="textCapSentences"
+            android:text="Command three"
+            android:visibility="visible" />
+
 </LinearLayout>
