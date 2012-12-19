@@ -1,5 +1,6 @@
 [R5.1.0]
 SyncProxyTester:
++ After toggling protocol version, the app needs to be restarted by the user.
 + When clicking the Exit options menu item, the app closes the activity and also stops the proxy service.
 + The user can specify VR synonyms for choice set's commands with the help of additional text fields.
 + Add extra logs for requests.

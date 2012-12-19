@@ -354,6 +354,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			int newVersion = versionN == 1 ? 2:1;
 			editor.putInt("VersionNumber", newVersion);
 			editor.commit();
+			
+			Toast.makeText(getApplicationContext(),
+					"Please start the app again", Toast.LENGTH_LONG).show();
+			exitApp();
 			/*new AlertDialog.Builder(this)  
 			       .setMessage(VERSION)
 			       .setNeutralButton("Copy", new DialogInterface.OnClickListener() {
