@@ -119,8 +119,7 @@ namespace NsAppManager
         }
         while(true)
         {
-            std::size_t size = mQueue.size();
-            if( size > 0 )
+            while ( !mQueue.empty() )
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "Handling message in queue.");
                 mMtx.Lock();
