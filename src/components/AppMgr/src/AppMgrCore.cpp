@@ -705,10 +705,20 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
+                    const unsigned int& menuId = object->get_menuID();
+                    if(!app->findMenu(menuId))
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " menuId " << menuId
+                                            << " hasn't been associated with the application " << app->getName() << " id " << app->getAppID() << " !");
+                        NsAppLinkRPC::DeleteSubMenu_response* response = new NsAppLinkRPC::DeleteSubMenu_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
                     NsRPC2Communication::UI::DeleteSubMenu* delSubMenu = new NsRPC2Communication::UI::DeleteSubMenu();
                     delSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     core->mMessageMapping.addMessage(delSubMenu->getId(), sessionKey);
-                    const unsigned int& menuId = object->get_menuID();
                     delSubMenu->set_menuId(menuId);
                     delSubMenu->set_appId(app->getAppID());
                     const MenuCommands& menuCommands = app->findMenuCommands(menuId);
