@@ -345,7 +345,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			PoliciesTest.runPoliciesTest();
 			break;
 		case MNU_EXIT:
-			super.finish();
+			exitApp();
 			break;
 		case MNU_TOGGLE_PROTOCOL_VERSION:
 			{SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
@@ -419,6 +419,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		return false;
 	}
 	
+	/** Closes the activity and stops the proxy service. */
+	private void exitApp() {
+		finish();
+		if (ProxyService.getInstance() != null) {
+			ProxyService.getInstance().stopSelf();
+		}
+	}
+
 	private String getAssetsContents(String filename, String defaultString) {
 		StringBuilder builder = new StringBuilder();
 		BufferedReader reader = null;
