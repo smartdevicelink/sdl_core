@@ -512,25 +512,35 @@ bool NsAppLink::NsTransportManager::CDeviceAdapter::waitForDeviceScanRequest(con
 
     if (false == mDeviceScanRequested)
     {
-        timespec timeoutTime;
-
-        if (0 == clock_gettime(CLOCK_REALTIME, &timeoutTime))
+        if (0 == Timeout)
         {
-            timeoutTime.tv_sec += Timeout;
-
-            while (0 == pthread_cond_timedwait(&mDeviceScanRequestedCond, &mDeviceScanRequestedMutex, &timeoutTime))
+            if (0 != pthread_cond_wait(&mDeviceScanRequestedCond, &mDeviceScanRequestedMutex))
             {
-                if (true == mDeviceScanRequested)
-                {
-                    break;
-                }
+                LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "pthread_cond_wait failed");
             }
         }
         else
         {
-            LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "clock_gettime failed");
+            timespec timeoutTime;
 
-            sleep(Timeout);
+            if (0 == clock_gettime(CLOCK_REALTIME, &timeoutTime))
+            {
+                timeoutTime.tv_sec += Timeout;
+
+                while (0 == pthread_cond_timedwait(&mDeviceScanRequestedCond, &mDeviceScanRequestedMutex, &timeoutTime))
+                {
+                    if (true == mDeviceScanRequested)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                LOG4CPLUS_ERROR_WITH_ERRNO(mLogger, "clock_gettime failed");
+
+                sleep(Timeout);
+            }
         }
     }
 

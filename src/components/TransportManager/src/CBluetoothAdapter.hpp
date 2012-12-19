@@ -45,13 +45,6 @@ namespace NsAppLink
 
         private:
             /**
-             * @brief Interval between service discovery for connected devices in seconds.
-             *
-             * @see @ref components_transportmanager_internal_design_device_adapters_bluetooth_adapter_discovery
-             **/
-            static const time_t cConnectedDevicesServiceDiscoveryInterval = 10;
-
-            /**
              * @brief Vector of RFCOMM channels.
              **/
             typedef std::vector<uint8_t> tRFCOMMChannelVector;
