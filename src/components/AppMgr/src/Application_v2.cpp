@@ -235,9 +235,9 @@ namespace NsAppManager
      * \param choiceSetId interaction choice set id
      * \return a mapped choice set item
      */
-    ChoiceSetV2 Application_v2::findChoiceSet(const unsigned int &choiceSetId)
+    const ChoiceSetV2* Application_v2::findChoiceSet(const unsigned int &choiceSetId)
     {
         const ChoiceSetGeneric* choiceSetGeneric = mChoiceSets.findItem(choiceSetId);
-        return choiceSetGeneric ? choiceSetGeneric->choiceSetV2 : ChoiceSetV2();
+        return choiceSetGeneric ? &choiceSetGeneric->choiceSetV2 : 0;
     }
 }
