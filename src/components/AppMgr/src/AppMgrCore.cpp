@@ -799,8 +799,36 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction request has been invoked");
                     NsAppLinkRPC::PerformInteraction_request* object = (NsAppLinkRPC::PerformInteraction_request*)mobileMsg;
+                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
+                        NsAppLinkRPC::PerformInteraction_response* response = new NsAppLinkRPC::PerformInteraction_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    const std::vector<unsigned int>& choiceSets = object->get_interactionChoiceSetIDList();
+                    for(std::vector<unsigned int>::const_iterator it = choiceSets.begin(); it != choiceSets.end(); it++)
+                    {
+                        const unsigned int& choiceSetId = *it;
+                        if(app->findChoiceSet(choiceSetId).empty())
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, " a choice set " << choiceSetId
+                                                << " hasn't been registered within the application " << app->getName() << " id" << app->getAppID() << " !");
+                            NsAppLinkRPC::PerformInteraction_response* response = new NsAppLinkRPC::PerformInteraction_response;
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                            MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                            return;
+                        }
+                    }
                     NsRPC2Communication::UI::PerformInteraction* performInteraction = new NsRPC2Communication::UI::PerformInteraction();
                     performInteraction->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    performInteraction->set_appId(sessionKey);
+                    performInteraction->set_interactionChoiceSetIDList(choiceSets);
                     core->mMessageMapping.addMessage(performInteraction->getId(), sessionKey);
                     if(object->get_helpPrompt())
                     {
@@ -808,7 +836,6 @@ namespace NsAppManager
                     }
                     performInteraction->set_initialPrompt(object->get_initialPrompt());
                     performInteraction->set_initialText(object->get_initialText());
-                    performInteraction->set_interactionChoiceSetIDList(object->get_interactionChoiceSetIDList());
                     performInteraction->set_interactionMode(object->get_interactionMode());
                     if(object->get_timeout())
                     {
@@ -818,7 +845,6 @@ namespace NsAppManager
                     {
                         performInteraction->set_timeoutPrompt(*object->get_timeoutPrompt());
                     }
-                    performInteraction->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(performInteraction);
                     break;
                 }
