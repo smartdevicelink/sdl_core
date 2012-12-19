@@ -43,6 +43,36 @@ MFT.ApplinkModel = Em.Object.create({
 		);
 	},
 
-
+	/**
+	 * Applink UI PreformInteraction response handeler
+	 * open Perform Interaction screen
+	 *
+	 * @param message:Object
+	 */
+	onPreformInteraction: function( message ) {
+		// todo
+		MFT.States.goToState('interactionChoises');
+	},
+	
+	/**
+	 * Applink UI CreateInteraction response handeler
+	 * push set of commands to voice recognition list
+	 *
+	 * @param message:Object
+	 */
+	onCreateInteraction: function( message ) {
+		// todo
+	},
+	
+	/**
+	 * Applink UI DeleteInteraction response handeler
+	 * close current interaction set window (if opened)
+	 * and delete current set commands from voice recognition list
+	 *
+	 * @param id: interaction set identificator
+	 */
+	onDeleteInteraction: function( id ) {
+		// todo
+	}
 });
  
