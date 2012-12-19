@@ -83,7 +83,7 @@ namespace NsAppManager
          * \brief callback which is called upon session ending
          * \param sessionKey
          */
-        virtual void onSessionEndedCallback(int sessionKey);
+        virtual void onSessionEndedCallback(int sessionKey, int firstSessionKey);
 
         /**
          * \brief Sets Json mobile handler instance
