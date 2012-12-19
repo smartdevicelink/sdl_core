@@ -192,6 +192,16 @@ namespace NsAppManager
     }
 
     /**
+     * \brief find a menu item from a mapping
+     * \param menuId menu id
+     * \return a menu item from a mapping
+     */
+    const MenuValue *Application::findMenu(const unsigned int &menuId)
+    {
+        return mMenus.findItem(menuId);
+    }
+
+    /**
      * \brief gets all application menus
      * \return application menus
      */
