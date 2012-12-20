@@ -204,6 +204,11 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 			clearInterval(this.timer);
 		}
 	}.observes('this.pause'),
+	
+	stopTimer: function() {
+		clearInterval(this.timer);
+		this.appInfo.set('mediaClock','');
+	},
 
 	setDuration: function() {
         var number;
@@ -320,7 +325,10 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 
     /** Applink Setter for Media Clock Timer */
     applinkSetMediaClockTimer: function(params){
-
+		if(params.updateMode == "CLEAR" ) {
+			this.stopTimer();
+			return;
+		}
         if(params.updateMode == "COUNTUP"){
             this.set('countUp', true);
         }else if(params.updateMode == "COUNTDOWN"){
