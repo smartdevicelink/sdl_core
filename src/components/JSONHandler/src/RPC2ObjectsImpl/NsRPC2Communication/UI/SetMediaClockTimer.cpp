@@ -59,12 +59,12 @@ void SetMediaClockTimer::reset_startTime(void)
   startTime=0;
 }
 
-const NsAppLinkRPC::UpdateMode& SetMediaClockTimer::get_updateMode(void)
+const NsAppLinkRPCV2::UpdateMode& SetMediaClockTimer::get_updateMode(void)
 {
   return updateMode;
 }
 
-bool SetMediaClockTimer::set_updateMode(const NsAppLinkRPC::UpdateMode& updateMode_)
+bool SetMediaClockTimer::set_updateMode(const NsAppLinkRPCV2::UpdateMode& updateMode_)
 {
   updateMode=updateMode_;
   return true;
