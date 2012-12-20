@@ -42,21 +42,21 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 			'plusBtn'
 		],
 		
-		value:	MFT.RangedValue.create({range: 10, value:0, cycle: false, minValue: 0}),
+		sliderValue:	MFT.RangedValue.create({range: 10, value:0, cycle: false, minValue: 0}),
 		
 		minusBtn: MFT.Button.extend({
 			classNames: 'control minus',
 			icon:       'images/common/minus-ico.png',
 			actionDown: function() {
 				this._super();
-				this.get('parentView.value').decrease();
-				FFW.UI.sendSliderResult("SUCCESS");
+				this.get('parentView.sliderValue').decrease();
+				FFW.UI.sendSliderResult("SUCCESS", this.get('parentView.sliderValue.value') );
 			}
 		}),
 		
 		led: MFT.Indicator.create({
 			classNames:         'ledContainer ico',
-			contentBinding:     'parentView.value',
+			contentBinding:     'parentView.sliderValue',
 			indActiveClass:     'led',
 			indDefaultClass:    'led-inactive',
 		}),
@@ -66,8 +66,8 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 			icon:       'images/common/plus-ico.png',
 			actionDown: function() {
 				this._super();
-				this.get('parentView.value').increase();
-				FFW.UI.sendSliderResult("SUCCESS");
+				this.get('parentView.sliderValue').increase();
+				FFW.UI.sendSliderResult("SUCCESS", this.get('parentView.sliderValue.value') );
 			}
 		})
 	}),
@@ -75,8 +75,8 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
     loadData: function( data ){
 		this.set( 'headerLabel.content', data.sliderHeader );
 		this.set( 'footerLabel.content', data.sliderFooter[0] );
-		this.get( 'adjustControl.value').set('range',data.numTicks);
-		this.get( 'adjustControl.value').set('value',data.position);
+		this.get( 'adjustControl.sliderValue').set('range',data.numTicks);
+		this.get( 'adjustControl.sliderValue').set('value',data.position);
 
 		setTimeout(function(){
 			MFT.SliderView.adjustControl.rerender();

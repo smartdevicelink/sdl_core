@@ -386,14 +386,14 @@ FFW.UI = FFW.RPCObserver.create({
 		}
 	},
 
-	sendSliderResult: function(resultCode  ) {
+	sendSliderResult: function(resultCode, sliderPosition ) {
 		var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	this.sliderRequestId,
 				"result":	{
 					"resultCode" : resultCode, //  type (enum) from AppLink protocol
 					"method" : "UI.SliderResponse",
-					"sliderPosition" : MFT.ApplinkMediaModel.applinkSliderContent.value
+					"sliderPosition" : sliderPosition
 					}
 				};
 				this.client.send(JSONMessage);
