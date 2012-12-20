@@ -395,7 +395,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
         this.appInfo.set('softButtons',   params.softButtons);        
         this.appInfo.set('customPresets', params.customPresets);
 
-        MFT.applinkView.innerMenu.AddSoftButton(params.softButtons);
+        MFT.applinkView.innerMenu.content.AddSoftButton(params.softButtons);
 
         // appId
     },
