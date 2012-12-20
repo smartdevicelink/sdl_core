@@ -1752,10 +1752,10 @@ namespace NsAppManager
                     speakRPC2Request->set_appId(sessionKey);
                     core->mMessageMapping.addMessage(speakRPC2Request->getId(), sessionKey);
                     HMIHandler::getInstance().sendRequest(speakRPC2Request);
-                    NsAppLinkRPCV2::Speak_response * mobileResponse = new NsAppLinkRPCV2::Speak_response;
+                    /*NsAppLinkRPCV2::Speak_response * mobileResponse = new NsAppLinkRPCV2::Speak_response;
                     mobileResponse->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     mobileResponse->set_success(true);
-                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
+                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);*/
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::AddCommandID:
@@ -2714,7 +2714,8 @@ namespace NsAppManager
                         NsAppLinkRPCV2::CreateInteractionChoiceSet_response* response = new NsAppLinkRPCV2::CreateInteractionChoiceSet_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
-
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::CreateInteractionChoiceSetID);
                         core->mMessageMapping.removeMessage(object->getId());
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                             << " application id " << appId);

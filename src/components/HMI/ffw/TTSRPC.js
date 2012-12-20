@@ -100,7 +100,8 @@ FFW.TTS = FFW.RPCObserver.create({
 				"jsonrpc"	:	"2.0",
 				"id"		: 	request.id,
 				"result":	{
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+					"method"   :    "TTS.SpeakResponse"
 				}
 			};
 			this.client.send(JSONMessage);
@@ -116,7 +117,8 @@ FFW.TTS = FFW.RPCObserver.create({
 				"result"	:	{
 					"capabilities":["TEXT"],
 
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+					"method" : "TTS.GetCapabilitiesResponse"
 				}
 			};
 			this.client.send(JSONMessage);
