@@ -2281,6 +2281,15 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::AddCommand_response* response = new NsAppLinkRPCV2::AddCommand_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
                     NsAppLinkRPCV2::AddCommand_request* object = (NsAppLinkRPCV2::AddCommand_request*)mobileMsg;
 
                     const unsigned int& cmdId = object->get_cmdID();
