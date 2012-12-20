@@ -30,7 +30,7 @@ MFT.InteractionChoicesView = MFT.ApplinkAbstractView.create({
      * Clean choices caption and list before new proform
      */
     clean: function() {
-    	this.set('initialText.content','Interaction Choices');
+    	this.set('captionText.content','Interaction Choices');
     	this.listOfChoices.items = [];
     	this.listOfChoices.list.refresh();
     },
