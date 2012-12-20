@@ -1754,6 +1754,8 @@ namespace NsAppManager
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
                         response->set_success(false);
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::EncodedSyncPDataID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
@@ -1762,6 +1764,8 @@ namespace NsAppManager
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::EncodedSyncPDataID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
@@ -1770,6 +1774,8 @@ namespace NsAppManager
                     const std::string& name = app->getName();
                     core->mSyncPManager.setPData(object->get_data(), name, object->getMethodId());
                     response->set_success(true);
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::EncodedSyncPDataID);
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
 
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -2232,6 +2238,8 @@ namespace NsAppManager
                         NsAppLinkRPCV2::Speak_response* response = new NsAppLinkRPCV2::Speak_response();
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::SpeakID);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
@@ -2240,6 +2248,8 @@ namespace NsAppManager
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::Speak_response* response = new NsAppLinkRPCV2::Speak_response;
                         response->set_success(false);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::SpeakID);
                         response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
@@ -3438,6 +3448,8 @@ namespace NsAppManager
                 NsAppLinkRPCV2::DriverDistractionState stateV2;
                 stateV2.set((NsAppLinkRPCV2::DriverDistractionState::DriverDistractionStateInternal)object->get_state().get());
                 eventV2->set_state(stateV2);
+                eventV2->setMethodId(NsAppLinkRPCV2::FunctionID::OnDriverDistractionID);
+                eventV2->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                 core->mDriverDistractionV2 = eventV2;
 
                 switch(app->getProtocolVersion())
@@ -3828,6 +3840,7 @@ namespace NsAppManager
                         NsAppLinkRPC::Speak_response* response = new NsAppLinkRPC::Speak_response();
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::SpeakID);
                         response->set_success(true);
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                             << " application id " << appId);
