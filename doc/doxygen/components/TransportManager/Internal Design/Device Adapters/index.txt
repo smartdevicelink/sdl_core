@@ -51,11 +51,10 @@
   * @subsection components_transportmanager_internal_design_device_adapters_common_connecting_devices Connecting devices
   *
   * Device connection is initiated with a call to NsAppLink::NsTransportManager::CDeviceAdapter::connectDevice().
-  * This method checks if specified device is not connected already, and if it's not it calls virtual function
-  * NsAppLink::NsTransportManager::CDeviceAdapter::createConnectionsListForDevice() which may be implemented by
-  * specific device adapter to create a list of connections that must be established for the device. For each connection
-  * created by device adapter it calls NsAppLink::NsTransportManager::CDeviceAdapter::startConnection() which adds
-  * connection to connections map and starts connection thread.
+  * This method calls virtual function NsAppLink::NsTransportManager::CDeviceAdapter::createConnectionsListForDevice()
+  * which may be implemented by specific device adapter to create a list of connections that must be established for the device.
+  * For each connection created by device adapter it calls NsAppLink::NsTransportManager::CDeviceAdapter::startConnection()
+  * which adds connection to connections map and starts connection thread.
   *
   * @subsection components_transportmanager_internal_design_device_adapters_common_disconnecting_devices Disconnecting devices
   *

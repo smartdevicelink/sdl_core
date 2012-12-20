@@ -9,7 +9,7 @@
 
 #include "IDeviceAdapter.hpp"
 
-#define LOG4CPLUS_ERROR_EXT_WITH_ERRNO(logger, message) LOG4CPLUS_ERROR_EXT(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
+#define LOG4CPLUS_ERROR_WITH_ERRNO(logger, message) LOG4CPLUS_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
 
 namespace NsAppLink
 {
@@ -30,7 +30,7 @@ namespace NsAppLink
              * @param Listener Listener for device adapter notifications.
              * @param HandleGenerator Handle generator implementation.
              **/
-            CDeviceAdapter(const char * LoggerName, IDeviceAdapterListener & Listener, IHandleGenerator & HandleGenerator);
+            CDeviceAdapter(IDeviceAdapterListener & Listener, IHandleGenerator & HandleGenerator);
 
             /**
              * @brief Destructor.
@@ -167,17 +167,6 @@ namespace NsAppLink
                  * @brief Unique device identifier across all devices.
                  **/
                 std::string mUniqueDeviceId;
-
-                /**
-                 * @brief Flag indicating that device is connected.
-                 *
-                 * This flag is set by connectDevice and reset by disconnectDevice.
-                 * If device is connected service discovery is periodically performed on this
-                 * device. All newly discovered AppLink applications are automatically
-                 * connected and all connections for applications that are no longer
-                 * discoverable are disconnected.
-                 **/
-                bool mIsConnected;
             };
 
             /**
@@ -330,7 +319,8 @@ namespace NsAppLink
              * Wait until scanForNewDevices() is called or timeout
              * expires.
              *
-             * @param Timeout Timeout value in seconds.
+             * @param Timeout Timeout value in seconds. 0 means no
+             *                timeout.
              *
              * @return true if scanForNewDevices() has been called,
              *         false if timeout expired.
