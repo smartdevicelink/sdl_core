@@ -1953,6 +1953,15 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPCV2::DeleteInteractionChoiceSet_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
                     const unsigned int& choiceSetId = object->get_interactionChoiceSetID();
                     const ChoiceSetV2* choiceSetFound = app->findChoiceSet(choiceSetId);
                     if(!choiceSetFound)
