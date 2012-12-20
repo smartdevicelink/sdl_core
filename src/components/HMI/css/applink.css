@@ -33,7 +33,28 @@
 	display: none;
 } 
  
- 
+.applink-window .back-button {
+	top: 80px;
+	left: 20px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+.applink-window .back-button .ico {
+	margin-top: 13px;
+	margin-left: 8px;
+}
+
+.applink-window .caption-text {
+	top: 80px;
+	left: 100px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
  
 #info_nonMedia {
 	z-index: 1001;
@@ -328,15 +349,6 @@
 	z-index: 1;
 }
 
-#perform_interaction_view .backButton {
-	top: 80px;
-	left: 20px;
-	width: 48px;
-	height: 48px;
-	border: 1px solid #333;
-	border-radius: 2px;
-}
-
 #perform_interaction_view .list{
 	position: absolute;
 	width: 650px;
@@ -348,15 +360,6 @@
 
 #perform_interaction_view .list span{
 	margin-left: 15px;
-}
-
-#perform_interaction_view .initialText{
-	top: 80px;
-	left: 100px;
-	width: 620px;
-	height: 20px;
-	background: #393939;
-	padding: 15px;
 }
 
 #perform_interaction_view .list-content{
