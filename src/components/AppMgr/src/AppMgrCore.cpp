@@ -2144,6 +2144,25 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A Show request has been invoked");
                     LOG4CPLUS_INFO_EXT(mLogger, "message " << mobileMsg->getMethodId() );
+                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
+                        NsAppLinkRPCV2::Show_response* response = new NsAppLinkRPCV2::Show_response();
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::Show_response* response = new NsAppLinkRPCV2::Show_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
                     NsAppLinkRPCV2::Show_request* object = (NsAppLinkRPCV2::Show_request*)mobileMsg;
                     NsRPC2Communication::UI::Show* showRPC2Request = new NsRPC2Communication::UI::Show();
                     showRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
