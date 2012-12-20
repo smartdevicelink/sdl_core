@@ -380,6 +380,9 @@ namespace NsAppManager
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::GENERIC_ERROR);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
                     if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
