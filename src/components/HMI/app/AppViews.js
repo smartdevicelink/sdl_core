@@ -22,6 +22,7 @@ MFT.AppViews = Em.ContainerView.extend({
 	
 	childViews: [
 		//MFT.WelcomeOrientationView,
+		MFT.InteractionChoicesView,
 		MFT.SelectSystempopup,
 		//MFT.WOSkippButtonView,
 		MFT.StatusClimateView,

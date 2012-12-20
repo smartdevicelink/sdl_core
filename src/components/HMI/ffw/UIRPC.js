@@ -243,7 +243,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.CreateInteractionChoiceSet":{
 
-				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkCreateInteractionChoise(request.params);
+				MFT.ApplinkController.getApplicationModel(request.params.appId).onCreateInteraction(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 		    	
@@ -251,7 +251,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.DeleteInteractionChoiceSet":{
 
-				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkDeleteInteractionChoise(request.params.interactionChoiceSetID);
+				MFT.ApplinkController.getApplicationModel(request.params.appId).onDeleteInteraction(request.params.interactionChoiceSetID);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 		    	
@@ -261,7 +261,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 				this.performInteractionRequestId = request.id;
 
-				MFT.ApplinkController.getApplicationModel(request.params.appId).turnOnApplinkPerform(request.params);
+				MFT.ApplinkController.getApplicationModel(request.params.appId).onPreformInteraction(request.params);
 		    	
 		    	break;
 		    }

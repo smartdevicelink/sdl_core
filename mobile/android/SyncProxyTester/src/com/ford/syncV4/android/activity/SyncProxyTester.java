@@ -345,7 +345,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			PoliciesTest.runPoliciesTest();
 			break;
 		case MNU_EXIT:
-			super.finish();
+			exitApp();
 			break;
 		case MNU_TOGGLE_PROTOCOL_VERSION:
 			{SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
@@ -354,6 +354,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			int newVersion = versionN == 1 ? 2:1;
 			editor.putInt("VersionNumber", newVersion);
 			editor.commit();
+			
+			Toast.makeText(getApplicationContext(),
+					"Please start the app again", Toast.LENGTH_LONG).show();
+			exitApp();
 			/*new AlertDialog.Builder(this)  
 			       .setMessage(VERSION)
 			       .setNeutralButton("Copy", new DialogInterface.OnClickListener() {
@@ -419,6 +423,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		return false;
 	}
 	
+	/** Closes the activity and stops the proxy service. */
+	private void exitApp() {
+		finish();
+		if (ProxyService.getInstance() != null) {
+			ProxyService.getInstance().stopSelf();
+		}
+	}
+
 	private String getAssetsContents(String filename, String defaultString) {
 		StringBuilder builder = new StringBuilder();
 		BufferedReader reader = null;
@@ -908,6 +920,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText command1 = (EditText) layout.findViewById(R.id.createcommands_command1);
 							final EditText command2 = (EditText) layout.findViewById(R.id.createcommands_command2);
 							final EditText command3 = (EditText) layout.findViewById(R.id.createcommands_command3);
+							final EditText vr1 = (EditText) layout.findViewById(R.id.createcommands_vr1);
+							final EditText vr2 = (EditText) layout.findViewById(R.id.createcommands_vr2);
+							final EditText vr3 = (EditText) layout.findViewById(R.id.createcommands_vr3);
 							final CheckBox choice1 = (CheckBox) layout.findViewById(R.id.createcommands_choice1);
 							final CheckBox choice2 = (CheckBox) layout.findViewById(R.id.createcommands_choice2);
 							final CheckBox choice3 = (CheckBox) layout.findViewById(R.id.createcommands_choice3);
@@ -922,7 +937,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										one.setChoiceID(autoIncChoiceSetIdCmdId++);
 										one.setMenuName(command1.getText().toString());
 										one.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command1.getText().toString(),
-												"Command one" })));
+												vr1.getText().toString() })));
 										commands.add(one);
 									}
 									
@@ -931,7 +946,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										two.setChoiceID(autoIncChoiceSetIdCmdId++);
 										two.setMenuName(command2.getText().toString());
 										two.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command2.getText().toString(),
-												"Command two" })));
+												vr2.getText().toString() })));
 										commands.add(two);
 									}
 									
@@ -940,7 +955,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										three.setChoiceID(autoIncChoiceSetIdCmdId++);
 										three.setMenuName(command3.getText().toString());
 										three.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command3.getText().toString(),
-												"Command three" })));
+												vr3.getText().toString() })));
 										commands.add(three);
 									}
 									

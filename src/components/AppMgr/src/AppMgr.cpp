@@ -145,7 +145,7 @@ namespace NsAppManager
      * \brief callback which is called upon session ending
      * \param sessionKey
      */
-    void AppMgr::onSessionEndedCallback(int sessionKey)
+    void AppMgr::onSessionEndedCallback(int sessionKey, int firstSessionKey)
     {
         AppMgrCore::getInstance().removeDevice(sessionKey);
     }

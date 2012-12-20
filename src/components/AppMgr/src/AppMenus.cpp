@@ -43,6 +43,28 @@ namespace NsAppManager
     }
 
     /**
+     * \brief find a menu item from a mapping
+     * \param menuId menu id
+     * \return a menu item from a mapping
+     */
+    const MenuValue *AppMenus::findItem(const unsigned int &menuId)
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Searching for a menu item " << menuId );
+        const MenuItems::const_iterator& it = mMenuItems.find(menuId);
+        if(it != mMenuItems.end())
+        {
+            const MenuItem& item = *it;
+            if(menuId == item.first)
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "Found a menu item for id " << menuId << " !");
+                return &item.second;
+            }
+        }
+        LOG4CPLUS_ERROR_EXT(mLogger, "A menu item " << menuId << " has not been found!");
+        return 0;
+    }
+
+    /**
      * \brief gets all menu items
      * \return menu items
      */

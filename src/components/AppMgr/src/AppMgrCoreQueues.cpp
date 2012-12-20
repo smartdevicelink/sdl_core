@@ -117,10 +117,15 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " pThis should be non-null!");
             return 0;
         }
+        if(!mCallbackFn)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " callback function pointer should be non-null!");
+            return 0;
+        }
         while(true)
         {
-            std::size_t size = mQueue.size();
-            if( size > 0 )
+            bool result = false;
+            while ( mMtx.Lock(), result = !mQueue.empty(), mMtx.Unlock(), result )
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "Handling message in queue.");
                 mMtx.Lock();

@@ -15,19 +15,6 @@ namespace log4cplus
 namespace NsAppManager
 {
     /**
-     * \brief interaction choice sets
-     */
-    struct ChoiceSetGeneric
-    {
-        std::vector<NsAppLinkRPC::Choice> choiceSetV1;
-        std::vector<NsAppLinkRPCV2::Choice> choiceSetV2;
-        ChoiceSetGeneric();
-        ChoiceSetGeneric(const ChoiceSetGeneric&src);
-        const ChoiceSetGeneric& operator= (const ChoiceSetGeneric&);
-        ~ChoiceSetGeneric();
-    };
-
-    /**
      * \brief interaction choice sets protocol v1
      */
     typedef std::vector<NsAppLinkRPC::Choice> ChoiceSetV1;
@@ -36,6 +23,19 @@ namespace NsAppManager
      * \brief interaction choice sets protocol v2
      */
     typedef std::vector<NsAppLinkRPCV2::Choice> ChoiceSetV2;
+
+    /**
+     * \brief interaction choice sets
+     */
+    struct ChoiceSetGeneric
+    {
+        ChoiceSetV1 choiceSetV1;
+        ChoiceSetV2 choiceSetV2;
+        ChoiceSetGeneric();
+        ChoiceSetGeneric(const ChoiceSetGeneric&src);
+        const ChoiceSetGeneric& operator= (const ChoiceSetGeneric&);
+        ~ChoiceSetGeneric();
+    };
 
     /**
      * \brief mapping of interaction choice set id to choice set item vector
@@ -83,6 +83,13 @@ namespace NsAppManager
          * \param choiceSetId interaction choice set id
          */
         void removeItem(const unsigned int& choiceSetId);
+
+        /**
+         * \brief find a mapped choice set item
+         * \param choiceSetId interaction choice set id
+         * \return a mapped choice set item
+         */
+        const ChoiceSetGeneric *findItem(const unsigned int& choiceSetId);
 
         /**
          * \brief gets all interaction choice set items

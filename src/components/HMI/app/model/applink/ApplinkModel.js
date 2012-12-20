@@ -41,8 +41,6 @@ MFT.ApplinkModel = Em.Object.create({
 			message.duration,
 			message.playTone
 		);
-	},
-
-
+	}
 });
  
