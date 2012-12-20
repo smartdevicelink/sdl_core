@@ -186,10 +186,8 @@ FFW.UI = FFW.RPCObserver.create({
 		    case "UI.SetGlobalProperties":{
 			    MFT.TTSPopUp.ActivateTTS("Set global properties");
 
-				// TODO: please process as array 
-				this.globalProperties.set('helpPrompt', request.params.helpPrompt);
-				// TODO: please process as array 
-				this.globalProperties.set('timeoutPrompt', request.params.timeoutPrompt);
+				this.globalProperties.helpPrompt = request.params.helpPrompt;
+				this.globalProperties.timeoutPrompt = request.params.timeoutPrompt;
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 		      	
