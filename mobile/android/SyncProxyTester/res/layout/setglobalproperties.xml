@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/setglobalproperties_Root"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dip"
+    android:layout_marginRight="10dip"
+    android:minWidth="300px"
+    android:orientation="vertical"
+    android:paddingLeft="10dip"
+    android:paddingRight="10dip" >
+
+    <CheckBox
+        android:id="@+id/setglobalproperties_choiceHelpPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Help prompt" />
+
+		<EditText
+		    android:id="@+id/setglobalproperties_helpPrompt"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:freezesText="true"
+		    android:inputType="textCapSentences"
+		    android:text="This is the help prompt"
+		    android:visibility="visible" >
+
+		</EditText>
+
+		<CheckBox
+		    android:id="@+id/setglobalproperties_choiceTimeoutPrompt"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:checked="true"
+		    android:text="Timeout prompt" />
+
+		<EditText
+		    android:id="@+id/setglobalproperties_timeoutPrompt"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:freezesText="true"
+		    android:inputType="textCapSentences"
+		    android:text="This is the timeout prompt"
+		    android:visibility="visible" >
+
+		</EditText>
+
+</LinearLayout>
