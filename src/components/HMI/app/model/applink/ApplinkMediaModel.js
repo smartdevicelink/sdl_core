@@ -20,21 +20,11 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 	  * RangedValue for Slider
 	  */
 	applinkSliderContent:		MFT.RangedValue.create({range: 10, value:3, cycle: false, minValue: 0}),
-	
-	/**
-	  * Array of Interaction Choises
-	  */
-	interactionChoises:			new Array(),
 
 	/**
 	  * Array of commands in ApplinkOptionsView
 	  */
     optionsCommands:			new Array(),
-
-	/**
-	  * Array of menus in ApplinkOptionsSubMenuView
-	  */
-    subMenuCommands:			new Array(),
 
     /**
 	  * Array of commands for VR

@@ -13,6 +13,13 @@
 MFT.ApplinkAppModel = Em.Object.extend({
 	
 	/**
+     * Submenu commands list
+     *
+     * @type: Array
+     */
+    subMenuCommands: [],
+    
+	/**
 	 * Current command submenu identificator
 	 *
 	 * @type:	Number
@@ -92,6 +99,16 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 */
 	onDeleteInteraction: function( message ) {		
 		delete this.interactionChoices[message.interactionChoiceSetID];
+	},
+	
+	/**
+	 * Applink UI Slider response handeler
+	 * open Slider window with received parameters
+	 *
+	 * @param message:Object
+	 */
+	onSlider: function( message ) {
+		// todo
 	}
 });
  

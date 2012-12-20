@@ -15,7 +15,7 @@ MFT.ApplinkAppController = Em.Object.create({
 	/**
 	 * Handeler for command button press
 	 * 
-	 * @param element:		MFT.Button
+	 * @param element:	MFT.Button
 	 */
 	onCommand: function( element ) {
 		FFW.UI.onCommand( element.commandId, element.appId );
@@ -24,7 +24,7 @@ MFT.ApplinkAppController = Em.Object.create({
 	/**
 	 * Handeler for command submenu press
 	 * 
-	 * @param element:		MFT.Button
+	 * @param element:	MFT.Button
 	 */
 	onCommandSubMenu: function( element ) {
 		MFT.ApplinkController.getApplicationModel( element.appId ).set('currentSubMenuId',		element.menuId );
@@ -36,9 +36,10 @@ MFT.ApplinkAppController = Em.Object.create({
 	/**
 	 * Handeler for preform interaction choice
 	 * send response to device and deactivate interactions window
-	 * 
+	 *
+	 * @param element:	MFT.Button 
 	 */
-	onPerformInteraction: function( element ) {
+	onChoiceInteraction: function( element ) {
 	
 		FFW.UI.onChoosed( element.choiceId );
 		

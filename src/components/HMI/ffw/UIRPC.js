@@ -177,7 +177,6 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.Alert":{
 
-				//MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkUIAlert(request.params);
 				MFT.ApplinkModel.onUIAlert( request.params );
 				
 				this.sendUIResult("SUCCESS", request.id, request.method);
