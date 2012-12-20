@@ -34,7 +34,6 @@ MFT.ScrollableMessage = MFT.ApplinkAbstractView.create({
             this.set('captionText.content',appName);
             this.softButtons.addItems( params.softButtons );
             this.set('listOfCommands.items', params.scrollableMessageBody );
-            MFT.States.goToState('media.applink.applinkscrollablemessage');
             this.set('active',true);
         }
     },

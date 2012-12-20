@@ -348,3 +348,9 @@
 #perform_interaction_view .list-content{
 	width: 578px;
 }
+
+#applink_view_container .textLimit{
+	width: 460px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
