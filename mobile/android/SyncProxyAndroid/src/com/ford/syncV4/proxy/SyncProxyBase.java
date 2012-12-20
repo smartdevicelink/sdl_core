@@ -1315,10 +1315,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		pm.setSessionID(_rpcSessionID);
 		pm.setMessageType(MessageType.RPC);
 		pm.setSessionType(SessionType.RPC);
-		FunctionID functionID = new FunctionID();
-		pm.setFunctionID(functionID.getFunctionID(request.getFunctionName()) - 4);
+		pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()) - 4);
 		pm.setCorrID(request.getCorrelationID());
-		if (request.getBulkData() != null) pm.setBulkData(request.getBulkData());
+		if (request.getBulkData() != null) 
+			pm.setBulkData(request.getBulkData());
 		
 		// Queue this outgoing message
 		synchronized(OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
