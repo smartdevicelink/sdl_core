@@ -95,7 +95,7 @@ MFT.InteractionChoicesView = Em.ContainerView.create({
 						text:			data[i].menuName,
 						choiceId:		data[i].choiceID,
 						action:			'onPerformInteraction',
-						target:			'MFT.ApplinkAppController'
+						target:			'MFT.ApplinkAppController',
 						templateName:	'text'
 					}
 				} 
