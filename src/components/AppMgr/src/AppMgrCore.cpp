@@ -518,6 +518,21 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties request has been invoked");
                     NsAppLinkRPC::SetGlobalProperties_request* object = (NsAppLinkRPC::SetGlobalProperties_request*)mobileMsg;
+                    Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
+                        break;
+                    }
+                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPC::SetGlobalProperties_response* response = new NsAppLinkRPC::SetGlobalProperties_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
                     NsRPC2Communication::UI::SetGlobalProperties* setGPRPC2Request = new NsRPC2Communication::UI::SetGlobalProperties();
                     setGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     core->mMessageMapping.addMessage(setGPRPC2Request->getId(), sessionKey);
