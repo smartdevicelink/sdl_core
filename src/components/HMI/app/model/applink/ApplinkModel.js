@@ -41,6 +41,19 @@ MFT.ApplinkModel = Em.Object.create({
 			message.duration,
 			message.playTone
 		);
+	},
+	
+	/** 
+	 * Prompt activation
+	 */
+	onPrompt: function(ttsChunks){
+		var message = '';
+		if(ttsChunks){
+			for(var i = 0; i < ttsChunks.length; i++){
+				message += ttsChunks[i].text + '\n';
+			}
+			MFT.TTSPopUp.ActivateTTS(message);
+		}
 	}
 });
  

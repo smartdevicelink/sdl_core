@@ -57,6 +57,15 @@ MFT.ApplinkAppModel = Em.Object.extend({
 		}
 		
 		MFT.InteractionChoicesView.activate(message.initialText);
+		
+		
+		// Show Initial prompt
+		MFT.ApplinkModel.onPrompt(message.initialPrompt);
+		
+		// Show Timeout prompt
+        setTimeout(function(){
+           MFT.ApplinkModel.onPrompt(message.timeoutPrompt);
+        }, message.timeout);
 	},
 	
 	/**
