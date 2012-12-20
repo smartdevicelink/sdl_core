@@ -71,7 +71,9 @@ MFT.ApplinkAppModel = Em.Object.extend({
 		
 		// Show Timeout prompt
         setTimeout(function(){
-           MFT.ApplinkModel.onPrompt(message.timeoutPrompt);
+        	if ( MFT.InteractionChoicesView.active ) {
+        		MFT.ApplinkModel.onPrompt( message.timeoutPrompt );
+        	}
         }, message.timeout);
 	},
 	
@@ -109,6 +111,20 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 */
 	onSlider: function( message ) {
 		MFT.SliderView.activate('Slider Caption');
+		
+		/*
+		this.applinkSliderContent.set('range', params.numTicks);
+        this.applinkSliderContent.set('value', params.position);
+        this.set('sliderParams.headerLabel', params.sliderHeader);
+        this.set('sliderParams.footerLabel', params.sliderFooter);
+       
+        setTimeout(function(){
+            if(MFT.States.media.applink.applinkslider.active){
+                MFT.States.back();
+            }
+        },
+        params.timeout);
+        */
 	}
 });
  

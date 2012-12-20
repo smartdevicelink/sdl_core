@@ -37,7 +37,7 @@ MFT.ApplinkAbstractView = Em.ContainerView.extend({
     },
     
     /**
-     * Activate window
+     * Deactivate window
      */
     deactivate: function() {
     	this.set('active',false);

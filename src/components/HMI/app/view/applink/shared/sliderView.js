@@ -16,6 +16,63 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 	
 	childViews: [
 		'backButton',
-		'captionText'
-	]
+		'captionText',
+		'headerLabel',
+		'footerLabel',
+		'adjustControl'
+	],
+	
+	headerLabel: MFT.Label.extend({
+		classNames:	'slider-header',
+		content:	'Header Label'
+	}),
+	
+	footerLabel: MFT.Label.extend({
+		classNames:	'slider-footer',
+		content:	'Footer Label'
+	}),
+		
+	adjustControl: Em.ContainerView.extend({
+		
+		classNames:         'sliderControl',
+		
+		childViews: [
+			'minusBtn',
+			'led',
+			'plusBtn'
+		],
+		
+		value:	MFT.RangedValue.create({range: 30, value:15, cycle: false, minValue: 0}),
+		
+		minusBtn: MFT.Button.extend({
+			classNames: 'control minus',
+			icon:       'images/common/minus-ico.png',
+			actionDown: function() {
+				this._super();
+				this.get('parentView.value').decrease();
+				//FFW.UI.sendSliderResult("SUCCESS");
+			}
+		}),
+		
+		led: MFT.Indicator.create({
+			classNames:         'ledContainer ico',
+			contentBinding:     'parentView.value',
+			indActiveClass:     'led',
+			indDefaultClass:    'led-inactive',
+		}),
+		
+		plusBtn: MFT.Button.extend({
+			classNames: 'control plus',
+			icon:       'images/common/plus-ico.png',
+			actionDown: function() {
+				this._super();
+				this.get('parentView.value').increase();
+				//FFW.UI.sendSliderResult("SUCCESS");
+			}
+		})
+	}),
+	
+    preformSlider: function(){
+
+    }
 });
