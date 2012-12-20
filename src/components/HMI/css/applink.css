@@ -32,6 +32,13 @@
 .ffw_list_menu .ffw-button.hidden {
 	display: none;
 } 
+
+.applink-window {
+	width: 800px;
+	height: 480px;
+	background-color: #000;
+	z-index: 1;
+}
  
 .applink-window .back-button {
 	top: 80px;
@@ -342,12 +349,6 @@
 
 
 /* Applink Perform Interaction Choise */
-#perform_interaction_view{
-	width: 800px;
-	height: 480px;
-	background-color: #000;
-	z-index: 1;
-}
 
 #perform_interaction_view .list{
 	position: absolute;

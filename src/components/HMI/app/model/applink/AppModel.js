@@ -108,7 +108,7 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 * @param message:Object
 	 */
 	onSlider: function( message ) {
-		// todo
+		MFT.SliderView.activate('Slider Caption');
 	}
 });
  
