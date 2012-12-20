@@ -310,7 +310,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
         }else{
             this.subMenuCommands.push(params);
             if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
-                MFT.ApplinkOptionsSubMenuView.SubMenuActivate(MFT.MediaController.currentApplinkSubMenuid);
+                MFT.ApplinkOptionsSubMenuView.SubMenuActivate(MFT.ApplinkMediaController.currentApplinkSubMenuid);
             }
 
         }
