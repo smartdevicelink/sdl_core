@@ -56,7 +56,7 @@ MFT.AppViews = Em.ContainerView.extend({
 	 */
 	didInsertElement: function() {
 		this._super();
-		
+
 		//Em.Logger.log('MFT Rendered!');
 		//if ( FLAGS.MCS_ENABLED ) {
 		//	WarningOkButtonView.appLoaded();
@@ -64,7 +64,7 @@ MFT.AppViews = Em.ContainerView.extend({
 			FFW.Backend.notifyAppLoaded();
 			MFT.set('appReady',true);
 		//}
-		
+
 		// preload other views
 		//FFW.AppendScript.pushScript('phone');
 		FFW.AppendScript.pushScript('media');

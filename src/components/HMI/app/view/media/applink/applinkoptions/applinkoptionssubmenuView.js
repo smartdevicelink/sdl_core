@@ -23,10 +23,10 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
                         ],
 
     backButton: MFT.Button.extend({
-        classNames:        ['backButton','button'],     
+        classNames:        ['backButton','button'],
         action:            'back',
         target:            'MFT.States',   
-        icon:              'images/media/ico_back.png',   
+        icon:              'images/media/ico_back.png',
     }),
 
     optionsSubMenuLabel:    MFT.Label.extend({

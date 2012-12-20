@@ -39,11 +39,10 @@ MFT.ScrollableMessage = Em.ContainerView.create(MFT.LoadableView,{
     }.observes('MFT.States.media.applink.applinkscrollablemessage.active'),
 
     backButton: MFT.Button.extend({
-        classNames: 'backButton',
-        
-        icon:       'images/common/ico_back.png',
-        action:     'back',
-        traget:     'MFT.States'
+        classNames:        ['backButton','button'],
+        action:            'back',
+        target:            'MFT.States',   
+        icon:              'images/media/ico_back.png',
     }),
 
     titleText:           '',
@@ -60,7 +59,7 @@ MFT.ScrollableMessage = Em.ContainerView.create(MFT.LoadableView,{
     activate: function( appName, params ){
         if(appName){
             this.set('titleText', appName);
-            this.softButtons.addItem( params.buttons );
+            this.softButtons.addItems( params.softButtons );
             this.set('listOfCommands.items', params.scrollableMessageBody );
             MFT.States.goToState('media.applink.applinkscrollablemessage');
         }
@@ -86,7 +85,7 @@ MFT.ScrollableMessage = Em.ContainerView.create(MFT.LoadableView,{
 
         elementId:      'scrollable_message_list',
 
-        itemsOnPage:    5,
+        itemsOnPage:    11,
 
         /** Items array */
         items:          'asdasdasd'

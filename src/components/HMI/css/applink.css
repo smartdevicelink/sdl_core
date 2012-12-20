@@ -280,7 +280,7 @@
 /* ScrollableMessage */
 #ScrollableMessage.ScrollableMessage{
 	left: 0;
-	top: 48px;
+	top: 0;
 	width:	800px;
 	height: 480px;
 	z-index: 1000;
@@ -293,7 +293,7 @@
 }
 
 #ScrollableMessage .backButton {
-	top: 32px;
+	top: 80px;
 	width: 48px;
 	height: 48px;
 	border: 1px solid #333;
@@ -301,7 +301,7 @@
 }
 
 #ScrollableMessage .titleText{
-	top: 32px;
+	top: 80px;
 	left: 75px;
 	width: 620px;
 	height: 20px;
@@ -315,7 +315,8 @@
 	height: 251px;
 	border-radius: 2px;
 	left: 200px;
-	top: 102px;
+	top: 150px;
+	overflow: hidden;
 }
 
 #ScrollableMessage .scrollableText-content{
@@ -333,18 +334,21 @@
 }
 
 #ScrollableMessage .ffw_list_menu {
-	top: 102px !important;
+	top: 150px !important;
 	left: 25px !important;
 }
 
 #ScrollableMessage .scrollableTextArea{
 	margin: 0px;
-	height: 251px;
+	/*height: 251px;*/
 	width: 469px;
-	background: black;
 	font-family: sans-serif;
 	font-size: 16px;
 	color: white;
+	background-color: transparent;
+	resize: none;
+	line-height: 23px;
+	position: absolute;
 }
 
 

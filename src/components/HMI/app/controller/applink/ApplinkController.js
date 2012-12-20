@@ -94,8 +94,8 @@ MFT.ApplinkController = Em.Object.create({
 	},
 
 	/**
-	 *  Method creates list of Application ID's
-	 *  Then call HMI method for display a list of Applications
+	 * Method creates list of Application ID's
+	 * Then call HMI method for display a list of Applications
 	 */
 	onGetAppList: function( appList ){
 		for(var i = 0; i < appList.length; i++){
@@ -109,7 +109,7 @@ MFT.ApplinkController = Em.Object.create({
 	},
 
 	/**
-	 *  Method call's request to get list of applications
+	 * Method call's request to get list of applications
 	 */
 	findNewApps: function(){
 		FFW.AppLinkCoreClient.getAppList();

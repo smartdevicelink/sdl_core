@@ -227,7 +227,9 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 
     },
 
-    /** Delete command to Options list */
+    /** 
+     * Delete command to Options list
+     */
     onApplinkOptionsDeleteCommand: function(commandId){
 
         MFT.ApplinkOptionsView.DeleteCommand( commandId );
@@ -389,6 +391,8 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
         this.appInfo.set('image',         params.graphic);
         this.appInfo.set('softButtons',   params.softButtons);        
         this.appInfo.set('customPresets', params.customPresets);
+
+        MFT.applinkView.innerMenu.AddSoftButton(params.softButtons);
 
         // appId
     },

@@ -37,7 +37,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
             )
         }),
 
-        Controls:   Em.ContainerView.create({
+         Controls:   Em.ContainerView.create({
 
             elementId: 'app_view_controlls',
 
@@ -54,15 +54,45 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 elementId:          'app_view_controlls_prev_track_button',
                 classNames:         ['bc-item-big', 'prevcd'],
                 classNames:         ['bc-item-big', 'prevcd'],
-                //target:             'MFT.MediaController',
-                //action:             'prevTrack',
+                actionDown:     function(){
+                    this._super();
+                    FFW.Buttons.buttonEvent( 'SEEKLEFT', "BUTTONDOWN");
+                    var self = this;
+                    this.time = 0;
+                    setTimeout(function(){ self.time ++; }, 1000);
+                },
+                actionUp:       function(){
+                    this._super();
+                    if(this.time > 0){
+                        FFW.Buttons.buttonPressed( 'SEEKLEFT', "LONG");
+                    }else{
+                        FFW.Buttons.buttonPressed( 'SEEKLEFT', "SHORT");
+                    }
+                    FFW.Buttons.buttonEvent( 'SEEKLEFT', "BUTTONUP");
+                    this.time = 0;
+                },
                 icon:               'images/media/ico_prew.png',
             }),
             PlayButton: MFT.Button.extend({
                 elementId:          'app_view_controlls_play_button',
                 classNames:         ['bc-item-big', 'playcd'],
-                //target:             'MFT.MediaController',
-                //action:             'playTrack',
+                actionDown:     function(){
+                    this._super();
+                    FFW.Buttons.buttonEvent( 'OK', "BUTTONDOWN");
+                    var self = this;
+                    this.time = 0;
+                    setTimeout(function(){ self.time ++; }, 1000);
+                },
+                actionUp:       function(){
+                    this._super();
+                    if(this.time > 0){
+                        FFW.Buttons.buttonPressed( 'OK', "LONG");
+                    }else{
+                        FFW.Buttons.buttonPressed( 'OK', "SHORT");
+                    }
+                    FFW.Buttons.buttonEvent( 'OK', "BUTTONUP");
+                    this.time = 0;
+                },
                 /** Define button template */
                 template: Ember.Handlebars.compile(
                     '<img class="playIcon hideicon"{{bindAttr class="MFT.MediaController.currentSelectedPlayer.isPlaying:visible"}} src="images/media/ico_pause.png" />'+
@@ -72,8 +102,23 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
             NextTrackButton: MFT.Button.extend({
                 elementId:          'app_view_controlls_next_track_button',
                 classNames:         ['bc-item-big', 'nextcd'],
-                //target:             'MFT.MediaController',
-                //action:             'nextTrack',
+                actionDown:     function(){
+                    this._super();
+                    FFW.Buttons.buttonEvent( 'SEEKRIGHT', "BUTTONDOWN");
+                    var self = this;
+                    this.time = 0;
+                    setTimeout(function(){ self.time ++; }, 1000);
+                },
+                actionUp:       function(){
+                    this._super();
+                    if(this.time > 0){
+                        FFW.Buttons.buttonPressed( 'SEEKRIGHT', "LONG");
+                    }else{
+                        FFW.Buttons.buttonPressed( 'SEEKRIGHT', "SHORT");
+                    }
+                    FFW.Buttons.buttonEvent( 'SEEKRIGHT', "BUTTONUP");
+                    this.time = 0;
+                },
                 icon:                 'images/media/ico_next.png',
             })
         }),
@@ -111,18 +156,18 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 templateName:   'text',
                 actionDown:       function(){
                     this._super();
-                    FFW.Buttons.buttonEventCustom( "PRESET_1", "BUTTONDOWN");
+                    FFW.Buttons.buttonEvent( "PRESET_1", "BUTTONDOWN");
                     var self = this;
                     this.time = 0;
                     setTimeout(function(){ self.time ++; }, 1000);
                 },
                 actionUp:       function(){
                     this._super();
-                    FFW.Buttons.buttonEventCustom( "PRESET_1", "BUTTONUP");
+                    FFW.Buttons.buttonEvent( "PRESET_1", "BUTTONUP");
                     if(this.time > 0){
-                        FFW.Buttons.buttonPressedCustom( "PRESET_1", "LONG");
+                        FFW.Buttons.buttonPressed( "PRESET_1", "LONG");
                     }else{
-                        FFW.Buttons.buttonPressedCustom( "PRESET_1", "SHORT");
+                        FFW.Buttons.buttonPressed( "PRESET_1", "SHORT");
                     }
                     this.time = 0;
                 }
@@ -134,18 +179,18 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 templateName:   'text',
                 actionDown:       function(){
                     this._super();
-                    FFW.Buttons.buttonEventCustom( "PRESET_2", "BUTTONDOWN");
+                    FFW.Buttons.buttonEvent( "PRESET_2", "BUTTONDOWN");
                     var self = this;
                     this.time = 0;
                     setTimeout(function(){ self.time ++; }, 1000);
                 },
                 actionUp:       function(){
                     this._super();
-                    FFW.Buttons.buttonEventCustom( "PRESET_2", "BUTTONUP");
+                    FFW.Buttons.buttonEvent( "PRESET_2", "BUTTONUP");
                     if(this.time > 0){
-                        FFW.Buttons.buttonPressedCustom( "PRESET_2", "LONG");
+                        FFW.Buttons.buttonPressed( "PRESET_2", "LONG");
                     }else{
-                        FFW.Buttons.buttonPressedCustom( "PRESET_2", "SHORT");
+                        FFW.Buttons.buttonPressed( "PRESET_2", "SHORT");
                     }
                     this.time = 0;
                 }
@@ -157,18 +202,18 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 templateName:   'text',
                 actionDown:       function(){
                     this._super();
-                    FFW.Buttons.buttonEventCustom( "PRESET_3", "BUTTONDOWN");
+                    FFW.Buttons.buttonEvent( "PRESET_3", "BUTTONDOWN");
                     var self = this;
                     this.time = 0;
                     setTimeout(function(){ self.time ++; }, 1000);
                 },
                 actionUp:       function(){
                     this._super();
-                    FFW.Buttons.buttonEventCustom( "PRESET_3", "BUTTONUP");
+                    FFW.Buttons.buttonEvent( "PRESET_3", "BUTTONUP");
                     if(this.time > 0){
-                        FFW.Buttons.buttonPressedCustom( "PRESET_3", "LONG");
+                        FFW.Buttons.buttonPressed( "PRESET_3", "LONG");
                     }else{
-                        FFW.Buttons.buttonPressedCustom( "PRESET_3", "SHORT");
+                        FFW.Buttons.buttonPressed( "PRESET_3", "SHORT");
                     }
                     this.time = 0;
                 }
@@ -180,18 +225,18 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 templateName:   'text',
                 actionDown:       function(){
                     this._super();
-                    FFW.Buttons.buttonEventCustom( "PRESET_4", "BUTTONDOWN");
+                    FFW.Buttons.buttonEvent( "PRESET_4", "BUTTONDOWN");
                     var self = this;
                     this.time = 0;
                     setTimeout(function(){ self.time ++; }, 1000);
                 },
                 actionUp:       function(){
                     this._super();
-                    FFW.Buttons.buttonEventCustom( "PRESET_4", "BUTTONUP");
+                    FFW.Buttons.buttonEvent( "PRESET_4", "BUTTONUP");
                     if(this.time > 0){
-                        FFW.Buttons.buttonPressedCustom( "PRESET_4", "LONG");
+                        FFW.Buttons.buttonPressed( "PRESET_4", "LONG");
                     }else{
-                        FFW.Buttons.buttonPressedCustom( "PRESET_4", "SHORT");
+                        FFW.Buttons.buttonPressed( "PRESET_4", "SHORT");
                     }
                     this.time = 0;
                 }
@@ -203,18 +248,18 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 templateName:   'text',
                 actionDown:       function(){
                     this._super();
-                    FFW.Buttons.buttonEventCustom( "PRESET_5", "BUTTONDOWN");
+                    FFW.Buttons.buttonEvent( "PRESET_5", "BUTTONDOWN");
                     var self = this;
                     this.time = 0;
                     setTimeout(function(){ self.time ++; }, 1000);
                 },
                 actionUp:       function(){
                     this._super();
-                    FFW.Buttons.buttonEventCustom( "PRESET_5", "BUTTONUP");
+                    FFW.Buttons.buttonEvent( "PRESET_5", "BUTTONUP");
                     if(this.time > 0){
-                        FFW.Buttons.buttonPressedCustom( "PRESET_5", "LONG");
+                        FFW.Buttons.buttonPressed( "PRESET_5", "LONG");
                     }else{
-                        FFW.Buttons.buttonPressedCustom( "PRESET_5", "SHORT");
+                        FFW.Buttons.buttonPressed( "PRESET_5", "SHORT");
                     }
                     this.time = 0;
                 }
@@ -226,18 +271,18 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 templateName:   'text',
                 actionDown:       function(){
                     this._super();
-                    FFW.Buttons.buttonEventCustom( "PRESET_6", "BUTTONDOWN");
+                    FFW.Buttons.buttonEvent( "PRESET_6", "BUTTONDOWN");
                     var self = this;
                     this.time = 0;
                     setTimeout(function(){ self.time ++; }, 1000);
                 },
                 actionUp:       function(){
                     this._super();
-                    FFW.Buttons.buttonEventCustom( "PRESET_6", "BUTTONUP");
+                    FFW.Buttons.buttonEvent( "PRESET_6", "BUTTONUP");
                     if(this.time > 0){
-                        FFW.Buttons.buttonPressedCustom( "PRESET_6", "LONG");
+                        FFW.Buttons.buttonPressed( "PRESET_6", "LONG");
                     }else{
-                        FFW.Buttons.buttonPressedCustom( "PRESET_6", "SHORT");
+                        FFW.Buttons.buttonPressed( "PRESET_6", "SHORT");
                     }
                     this.time = 0;
                 }

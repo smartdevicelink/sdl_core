@@ -35,6 +35,13 @@ MFT.ScrollableText = Em.ContainerView.extend({
     /** Css style of scrollableText*/
     scrollableTextScrollingAttributes: '',
 
+    /** Css style of line-height of rows*/
+    linesHeght: 23,
+
+    linesCount: 1,
+
+    scrollHeight: null,
+
     /** Count of items in menu*/
     /*
     scrollableTextCount: function(){
@@ -43,15 +50,21 @@ MFT.ScrollableText = Em.ContainerView.extend({
         }
     }.property('items.@each.type'),
     */
+
     scrollableTextCount: function(){
-        //console.log(this.get('this.scrollableText.childViews.length'));
-            return this.get('this.scrollableText.childViews.length');
-    }.property('this.scrollableText.childViews.length'),
+        if( $('#' + this.get('childViews')[1].elementId) ){
+            $('#' + this.get('childViews')[1].elementId).removeAttr('style');
+            this.set('scrollHeight', $('#' + this.get('childViews')[1].elementId)[0].scrollHeight);
+            $('#' + this.get('childViews')[1].elementId).height(this.scrollHeight);
+            this.set('linesCount', $('#' + this.get('childViews')[1].elementId)[0].scrollHeight / this.linesHeght);
+            console.log('linesCount     ' + this.linesCount);
+        }
+    },
 
     /**Pages count*/
     pageCount: function(){
-        return Math.ceil(this.get('scrollableTextCount')/this.get('columnsNumber')/this.get('itemsOnPage'));
-    }.property('scrollableTextCount','itemsOnPage'),
+                return Math.ceil(this.get('linesCount')/this.get('itemsOnPage'));
+    }.property('linesCount','itemsOnPage'),
 
     scrollableTextHeight: function(){
         return this.itemsOnPage*this.itemheight;
@@ -73,7 +86,7 @@ MFT.ScrollableText = Em.ContainerView.extend({
 
     /** Scroll content according to current page */
     onCurrentPageChange: function(){
-        this.set('scrollableTextScrollingAttributes', 'margin-top: '+(this.get('currentPage')* this.itemsOnPage*(-50))+'px');
+        this.set('scrollableTextScrollingAttributes', 'height: '+ this.scrollHeight +'px; top: '+(this.get('currentPage')* this.itemsOnPage*(-23))+'px');
     }.observes('currentPage'),
 
     /** Method for delete certain item from scrollableText */
@@ -84,24 +97,69 @@ MFT.ScrollableText = Em.ContainerView.extend({
 
     /** scrollableText components */
     childViews: [
-        'scrollableText',
-        'scrollbar'
+        'scrollbar',
+       // 'scrollableText'
     ],
 
-    /** scrollableText view */
-    scrollableText: Em.View.extend({
+    refreshTextArea: function(){
+        if( this.get('childViews')[1] ){
+            this.get('childViews').removeObject(this.get('childViews')[1]);
+        }
 
-        classNames: 'scrollableText-content',
+        $('#scrollableTextArea').height(23);
+        this.set('scrollHeight', 23);
+        this.set('linesCount', 1);
+        this.set('currentPage', 0);
+
+        this.get('childViews').pushObject(
+            Ember.TextArea.create({
+
+                classNames: 'scrollableTextArea',
+
+                elementId:  'scrollableTextArea',
+
+                scrollableTextStyleBinding: 'parentView.scrollableTextScrollingAttributes',
+
+                attributeBindings: ['scrollableTextStyle:style'],
+
+                valueBinding:     'this.parentView.items',
+
+                actionDown: function(){
+                    return false;
+                },
+
+                didInsertElement: function(){
+                    this.get('parentView').scrollableTextCount();
+                },
+/*
+                refresh: function() {
+                 //   this.rerender();
+                }.observes('items'),
+*/
+            })
+        );
+    }.observes('items'),
+
+    /** scrollableText view */
+    scrollableText: Ember.TextArea.extend({
+
+        classNames: 'scrollableTextArea',
+
+        elementId:  'scrollableTextArea',
 
         scrollableTextStyleBinding: 'parentView.scrollableTextScrollingAttributes',
 
         attributeBindings: ['scrollableTextStyle:style'],
 
-        contentBinding:     'this.parentView.items',
-        
-        defaultTemplate: Em.Handlebars.compile(
-            '<textarea class="scrollableTextArea">{{view.content}}</textarea>'
-        ),
+        valueBinding:     'this.parentView.items',
+
+        actionDown: function(){
+            return false;
+        },
+
+        didInsertElement: function(){
+            this._parentView.scrollableTextCount();
+        },
 
         refresh: function() {
             this.rerender();
