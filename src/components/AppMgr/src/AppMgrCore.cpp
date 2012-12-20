@@ -2212,9 +2212,6 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendRequest(getVrLang);
                 NsRPC2Communication::TTS::GetLanguage* getTtsLang = new NsRPC2Communication::TTS::GetLanguage;
                 HMIHandler::getInstance().sendRequest(getTtsLang);
-
-                ConnectionHandler::getInstance().startDevicesDiscovery();
-
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE:
@@ -3735,6 +3732,7 @@ namespace NsAppManager
                     response->setResult(NsAppLinkRPC::Result::SUCCESS);
                 }
                 response->set_deviceList(list);
+                ConnectionHandler::getInstance().startDevicesDiscovery();
                 HMIHandler::getInstance().sendResponse(response);
                 return;
             }
