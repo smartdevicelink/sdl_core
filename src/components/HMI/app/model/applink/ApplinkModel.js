@@ -47,6 +47,9 @@ MFT.ApplinkModel = Em.Object.create({
 	 * Prompt activation
 	 */
 	onPrompt: function(ttsChunks){
+		/*
+		ttsChunks = JSON.parse('[{"text":"speak","type":"TEXT"},{"text":"INITIAL_JINGLE","type":"PRE_RECORDED"},{"text":"that was a jingle","type":"TEXT"},{"text":". 1 l ih v 1 .  _ l ay v .  r iy 1 d  . r eh d .","type":"SAPI_PHONEMES"}]');
+		*/
 		var message = '';
 		if(ttsChunks){
 			for(var i = 0; i < ttsChunks.length; i++){
