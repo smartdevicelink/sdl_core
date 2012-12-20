@@ -3287,6 +3287,7 @@ namespace NsAppManager
                     {
                         NsAppLinkRPCV2::Speak_response* response = new NsAppLinkRPCV2::Speak_response();
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::SpeakID);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                         response->set_success(true);
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
