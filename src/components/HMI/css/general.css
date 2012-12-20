@@ -165,7 +165,15 @@ div {
 	top: 70px;
 	left: 10px;
 	width: 374px;
-	height: 124px;
+	height: 60px;
+	text-align: center;
+}
+
+#AlertPopUp .message3{
+	top: 130px;
+	left: 10px;
+	width: 374px;
+	height: 69px;
 	text-align: center;
 }
 
