@@ -1053,6 +1053,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									.getSystemService(LAYOUT_INFLATER_SERVICE);
 							View layout = inflater.inflate(R.layout.slider, null);
 							final EditText txtNumTicks = (EditText) layout.findViewById(R.id.txtNumTicks);
+							final EditText txtPosititon = (EditText) layout.findViewById(R.id.txtPosition);
 							final EditText txtSliderHeader = (EditText) layout.findViewById(R.id.txtSliderHeader);
 							final EditText txtSliderFooter = (EditText) layout.findViewById(R.id.txtSliderFooter);
 							final EditText txtTimeout = (EditText) layout.findViewById(R.id.txtTimeout);
@@ -1066,6 +1067,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									Vector<String> footerelements = new Vector<String>();
 									footerelements.add(txtSliderFooter.getText().toString());
 									msg.setSliderFooter(footerelements);
+									msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
 									msg.setCorrelationID(autoIncCorrId++);
 									_msgAdapter.logMessage(msg, true);
 									try {
