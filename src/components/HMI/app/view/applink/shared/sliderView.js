@@ -42,7 +42,7 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 			'plusBtn'
 		],
 		
-		value:	MFT.RangedValue.create({range: 30, value:15, cycle: false, minValue: 0}),
+		value:	MFT.RangedValue.create({range: 10, value:0, cycle: false, minValue: 0}),
 		
 		minusBtn: MFT.Button.extend({
 			classNames: 'control minus',
@@ -50,7 +50,7 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 			actionDown: function() {
 				this._super();
 				this.get('parentView.value').decrease();
-				//FFW.UI.sendSliderResult("SUCCESS");
+				FFW.UI.sendSliderResult("SUCCESS");
 			}
 		}),
 		
@@ -67,12 +67,16 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 			actionDown: function() {
 				this._super();
 				this.get('parentView.value').increase();
-				//FFW.UI.sendSliderResult("SUCCESS");
+				FFW.UI.sendSliderResult("SUCCESS");
 			}
 		})
 	}),
 	
-    preformSlider: function(){
-
+    loadData: function( data ){
+		this.set( 'headerLabel.content', data.sliderHeader );
+		this.set( 'footerLabel.content', data.sliderFooter );
+		this.get( 'adjustControl.value').set('range',params.numTicks);
+		this.get( 'adjustControl.value').set('value',params.position);
+		this.get( 'adjustControl').rerender();
     }
 });

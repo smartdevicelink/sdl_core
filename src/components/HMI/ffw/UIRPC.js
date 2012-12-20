@@ -280,9 +280,8 @@ FFW.UI = FFW.RPCObserver.create({
 
 		    	this.sliderRequestId = request.id;
 
-				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkSlider(request.params);
-
-				MFT.ApplinkSliderView.activate();		    
+				MFT.ApplinkController.getApplicationModel(request.params.appId).onSlider(request.params);
+	    
 		    	break;
 		    }
 		    case "UI.ScrollableMessage":{

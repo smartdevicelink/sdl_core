@@ -110,21 +110,14 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 * @param message:Object
 	 */
 	onSlider: function( message ) {
-		MFT.SliderView.activate('Slider Caption');
 		
-		/*
-		this.applinkSliderContent.set('range', params.numTicks);
-        this.applinkSliderContent.set('value', params.position);
-        this.set('sliderParams.headerLabel', params.sliderHeader);
-        this.set('sliderParams.footerLabel', params.sliderFooter);
-       
-        setTimeout(function(){
-            if(MFT.States.media.applink.applinkslider.active){
-                MFT.States.back();
-            }
-        },
-        params.timeout);
-        */
+		MFT.SliderView.loadData( message );
+		
+		MFT.SliderView.activate( this.appInfo.appName );
+			 
+		setTimeout( function() {
+			MFT.SliderView.deactivate();
+		}, message.timeout );
 	}
 });
  
