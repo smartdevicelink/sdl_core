@@ -38,6 +38,8 @@ MFT.ApplinkModel = Em.Object.create({
 			message.appId,
 			message.AlertText1,
 			message.AlertText2,
+            message.alertText3,
+            message.ttsChunks,
 			message.duration,
 			message.playTone
 		);
