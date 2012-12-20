@@ -143,8 +143,8 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
                 this.applicationsList.push({
                     type:       MFT.Button,
                     params:     {
-                        action:         'turnOnApplinkNonMedia',
-                        target:         'MFT.MediaController',
+                        action:         'turnOnApplink',
+                        target:         'MFT.NonMediaController',
                         text:           appList[i].appName,
                         appName:        appList[i].appName,
                         appId:          appList[i].appId,

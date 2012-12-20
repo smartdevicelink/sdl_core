@@ -10,7 +10,7 @@
  * @author      Andriy Melnik
  */
 
-MFT.ScrollableMessage = Em.ContainerView.create(MFT.LoadableView,{
+MFT.ScrollableMessage = MFT.ApplinkAbstractView.create({
 
     elementId:          'ScrollableMessage',
 
@@ -24,44 +24,18 @@ MFT.ScrollableMessage = Em.ContainerView.create(MFT.LoadableView,{
 
     childViews: [
         'backButton',
-        'title',
+        'captionText',
         'softButtons',
         'listOfCommands'
     ],
 
-    /** Applink Sub Mennu activate handler */
-    applinkSubMenuActivate: function(){
-        if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
-            MFT.ScrollableMessage.activate( params.appId, params.softButtons );
-        }else{
-            
-        }
-    }.observes('MFT.States.media.applink.applinkscrollablemessage.active'),
-
-    backButton: MFT.Button.extend({
-        classNames:        ['backButton','button'],
-        action:            'back',
-        target:            'MFT.States',   
-        icon:              'images/media/ico_back.png',
-    }),
-
-    titleText:           '',
-
-    title:    MFT.Label.extend({
-
-        elementId:          'titleText',
-
-        classNames:         'titleText',
-
-        contentBinding:     'this.parentView.titleText'
-    }),
-
     activate: function( appName, params ){
         if(appName){
-            this.set('titleText', appName);
+            this.set('captionText.content',appName);
             this.softButtons.addItems( params.softButtons );
             this.set('listOfCommands.items', params.scrollableMessageBody );
             MFT.States.goToState('media.applink.applinkscrollablemessage');
+            this.set('active',true);
         }
     },
 

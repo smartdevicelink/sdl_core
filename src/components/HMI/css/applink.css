@@ -188,7 +188,7 @@
 	top: 0;
 	width:	800px;
 	height: 480px;
-	z-index: 1000;
+	/*z-index: 1000;*/
 	background: url(../images/media/bg.png) no-repeat;
 }
 

@@ -189,6 +189,10 @@ div {
 	display: none;
 }
 
+#VRPopUp span{
+	margin-left: 15px;
+}
+
 #VRPopUp .popUp{
 	width: 698px;
 	height: 338px;
@@ -244,8 +248,8 @@ div {
 
 #VRPopUp .VRLabel{
 	top: 10px;
-	width: 560px;
-	left: 10px;
+	width: 550px;
+	left: 35px;
 	height: 20px;
 	padding: 15px;
 	background: #393939;

@@ -23,6 +23,7 @@ MFT.AppViews = Em.ContainerView.extend({
 	childViews: [
 		//MFT.WelcomeOrientationView,
 		MFT.InteractionChoicesView,
+		MFT.ScrollableMessage,
 		MFT.SliderView,
 		MFT.SelectSystempopup,
 		//MFT.WOSkippButtonView,
@@ -71,7 +72,6 @@ MFT.AppViews = Em.ContainerView.extend({
 		FFW.AppendScript.pushScript('media.applink');
 		FFW.AppendScript.pushScript('media.applink.applinkoptions');
 		FFW.AppendScript.pushScript('media.applink.applinkslider');
-		FFW.AppendScript.pushScript('media.applink.applinkscrollablemessage');
 		
 		FFW.AppendScript.pushScript('info');
 		FFW.AppendScript.pushScript('info.nonMedia');

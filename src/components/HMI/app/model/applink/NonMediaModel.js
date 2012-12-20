@@ -26,6 +26,14 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.create({
         statusBar:      '<statusBar',
         image:			''
     }),
+
+    turnOnApplink: function(appName, appId){
+        var params = {
+            "appName":  appName,
+            "appId":    appId
+        };
+        MFT.NonMediaController.turnOnApplink(params);
+    },
     
     /** Applin UI Show handler */
     onApplinkUIShow: function(params){

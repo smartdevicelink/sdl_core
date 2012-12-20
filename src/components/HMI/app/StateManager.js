@@ -344,10 +344,7 @@ var StateManager = Em.StateManager.extend({
 			}),
 
 			applinkslider: Em.State.create({
-			}),
-
-			applinkscrollablemessage: Em.State.create({
-			})			
+			})		
 
 		}),
 
