@@ -1424,6 +1424,8 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " An PutFile request has been invoked");
                     NsAppLinkRPCV2::PutFile_request* object = (NsAppLinkRPCV2::PutFile_request*)mobileMsg;
                     NsAppLinkRPCV2::PutFile_response* response = new NsAppLinkRPCV2::PutFile_response;
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::PutFileID);
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
                     if(!app)
                     {
@@ -1451,6 +1453,7 @@ namespace NsAppManager
                     bool isFileData = fileData && !fileData->empty();
                     if (isSyncFileName && isFileData)
                     {
+                        LOG4CPLUS_INFO_EXT(mLogger, "Trying to save file  of size " << fileData->size());
                         bool flag = false;
                         if (freeSpace > fileData->size())
                         {
@@ -1464,12 +1467,16 @@ namespace NsAppManager
                                 const std::string& name = app->getName();
                                 const int& id = app->getAppID();
 
-                                char path[FILENAME_MAX];
+                                /*char path[FILENAME_MAX];
                                 memset(path, 0, FILENAME_MAX);
-                                snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName.c_str());
-                                std::ofstream file(path, std::ios_base::binary);
+                                snprintf(path, FILENAME_MAX - 1, "%s_%d", name.c_str(), id);
+                                mkdir(path, 777);
+                                snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName.c_str());*/
+                                LOG4CPLUS_INFO_EXT(mLogger, "Saving to file " << syncFileName);
+                                std::ofstream file(syncFileName.c_str(), std::ios_base::binary);
                                 if (file.is_open())
                                 {
+                                    LOG4CPLUS_INFO_EXT(mLogger, "Managed to create file");
                                     for (int i = 0; i < fileData->size(); ++i)
                                     {
                                         file << fileData->operator[](i);
@@ -1508,6 +1515,8 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " An DeleteFile request has been invoked");
                     NsAppLinkRPCV2::DeleteFile_request* object = (NsAppLinkRPCV2::DeleteFile_request*)mobileMsg;
                     NsAppLinkRPCV2::DeleteFile_response* response = new NsAppLinkRPCV2::DeleteFile_response;
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteFileID);
                     Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
                     if(!app)
                     {
@@ -1535,10 +1544,10 @@ namespace NsAppManager
                         const std::string& name = app->getName();
                         const int& id = app->getAppID();
 
-                        char path[FILENAME_MAX];
+                        /*char path[FILENAME_MAX];
                         memset(path, 0, FILENAME_MAX);
-                        snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName.c_str());
-                        if(remove(path) != 0)
+                        snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName.c_str());*/
+                        if(remove(syncFileName.c_str()) != 0)
                         {
                             response->set_success(false);
                             response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
@@ -1566,6 +1575,8 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " An ListFiles request has been invoked");
                     NsAppLinkRPCV2::ListFiles_request* object = (NsAppLinkRPCV2::ListFiles_request*)mobileMsg;
                     NsAppLinkRPCV2::ListFiles_response* response = new NsAppLinkRPCV2::ListFiles_response;
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::ListFilesID);
 
                     std::vector<std::string> listFiles;
                     unsigned long int freeSpace = getAvailableSpace();
@@ -1590,14 +1601,15 @@ namespace NsAppManager
                     const std::string& name = app->getName();
                     const int& id = app->getAppID();
 
-                    char path[FILENAME_MAX];
+                    /*char path[FILENAME_MAX];
                     memset(path, 0, FILENAME_MAX);
-                    snprintf(path, FILENAME_MAX - 1, "%s_%d/", name.c_str(), id);
-
+                    snprintf(path, FILENAME_MAX - 1, "%s_%d/", name.c_str(), id);                    
+                    */
                     DIR* dir = NULL;
+                    std::string path = ".";
                     struct dirent* dirElement = NULL;
                     memset(dirElement, 0, sizeof(dirent));
-                    dir = opendir(path);
+                    dir = opendir(path.c_str());
                     if (dir != NULL)
                     {
                         while (dirElement = readdir(dir))

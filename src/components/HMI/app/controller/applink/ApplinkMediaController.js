@@ -39,9 +39,9 @@ MFT.ApplinkMediaController = Em.Object.create({
      * and app's HMI might be in.
      */
     eSystemContext:{
-        main:           "MAIN",
+        main:           "MENU",
         VR:             "VRSESSION",
-        application:    "MENU"
+        application:    "MAIN"
     },
 
     /** Call notification OnCommand on UIRPC */
