@@ -2085,6 +2085,7 @@ namespace NsAppManager
                         performInteraction->set_vrHelp(*object->get_vrHelp());
                     }
                     HMIHandler::getInstance().sendRequest(performInteraction);
+                    break;
                 }
                 case NsAppLinkRPCV2::FunctionID::AlertID:
                 {
