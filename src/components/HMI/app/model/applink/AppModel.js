@@ -116,7 +116,9 @@ MFT.ApplinkAppModel = Em.Object.extend({
 		MFT.SliderView.activate( this.appInfo.appName );
 			 
 		setTimeout( function() {
-			MFT.SliderView.deactivate();
+			if ( MFT.SliderView.active ) {
+				MFT.SliderView.deactivate();
+			}
 		}, message.timeout );
 	}
 });

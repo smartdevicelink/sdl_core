@@ -31,6 +31,15 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 		classNames:	'slider-footer',
 		content:	'Footer Label'
 	}),
+	
+	/**
+	 * Extend deactivate method
+	 * send SUCCESS response on deactivate with current slider value
+	 */
+	deactivate: function() {
+		this._super();
+		FFW.UI.sendSliderResult( "SUCCESS", this.get('adjustControl.sliderValue.value') );
+	},
 		
 	adjustControl: Em.ContainerView.extend({
 		
@@ -42,7 +51,7 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 			'plusBtn'
 		],
 		
-		sliderValue:	MFT.RangedValue.create({range: 10, value:0, cycle: false, minValue: 0}),
+		sliderValue:	MFT.RangedValue.create({range: 10, value:0, cycle: false, minValue: 1}),
 		
 		minusBtn: MFT.Button.extend({
 			classNames: 'control minus',
@@ -50,7 +59,6 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 			actionDown: function() {
 				this._super();
 				this.get('parentView.sliderValue').decrease();
-				FFW.UI.sendSliderResult("SUCCESS", this.get('parentView.sliderValue.value') );
 			}
 		}),
 		
@@ -67,7 +75,6 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 			actionDown: function() {
 				this._super();
 				this.get('parentView.sliderValue').increase();
-				FFW.UI.sendSliderResult("SUCCESS", this.get('parentView.sliderValue.value') );
 			}
 		})
 	}),
