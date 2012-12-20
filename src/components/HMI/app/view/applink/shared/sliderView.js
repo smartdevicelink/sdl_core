@@ -74,9 +74,12 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 	
     loadData: function( data ){
 		this.set( 'headerLabel.content', data.sliderHeader );
-		this.set( 'footerLabel.content', data.sliderFooter );
-		this.get( 'adjustControl.value').set('range',params.numTicks);
-		this.get( 'adjustControl.value').set('value',params.position);
-		this.get( 'adjustControl').rerender();
+		this.set( 'footerLabel.content', data.sliderFooter[0] );
+		this.get( 'adjustControl.value').set('range',data.numTicks);
+		this.get( 'adjustControl.value').set('value',data.position);
+
+		setTimeout(function(){
+			MFT.SliderView.adjustControl.rerender();
+		},1);
     }
 });

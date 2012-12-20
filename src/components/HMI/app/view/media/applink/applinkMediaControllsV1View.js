@@ -26,9 +26,9 @@ MFT.ApplinkMediaControllsV1 = Em.ContainerView.create({
                 '<div class="track-info">'+
                     '<div class="device">{{MFT.ApplinkModel.deviceName}}</div>'+
                             '<div class="divider_o"></div>'+
-                    '<div class="title">{{MFT.ApplinkMediaModel.appInfo.field1}}</div>'+
-                    '<div class="album">{{MFT.ApplinkMediaModel.appInfo.field2}}</div>'+
-                    '<div class="artist">{{MFT.ApplinkMediaModel.appInfo.field3}}</div>'+
+                    '<div class="title textLimit">{{MFT.ApplinkMediaModel.appInfo.field1}}</div>'+
+                    '<div class="album textLimit">{{MFT.ApplinkMediaModel.appInfo.field2}}</div>'+
+                    '<div class="artist textLimit">{{MFT.ApplinkMediaModel.appInfo.field3}}</div>'+
                     '<div class="time">{{MFT.ApplinkMediaModel.appInfo.mediaClock}}</div>'+
     //              '<div id="cd_logo" {{bindAttr class="MFT.CDModel.active:visible_display MFT.AppModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
     //              '<div id="usb_logo" {{bindAttr class="MFT.USBModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+

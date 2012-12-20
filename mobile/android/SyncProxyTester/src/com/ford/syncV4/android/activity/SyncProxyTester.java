@@ -933,6 +933,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
 									Vector<Choice> commands = new Vector<Choice>();
+									Image image = new Image();
+									image.setImageType(ImageType.STATIC);
+									image.setValue("iconFilename");
 									
 									if (choice1.isChecked()) {
 										Choice one = new Choice();
@@ -940,6 +943,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										one.setMenuName(command1.getText().toString());
 										one.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command1.getText().toString(),
 												vr1.getText().toString() })));
+										one.setImage(image);
 										commands.add(one);
 									}
 									
@@ -949,6 +953,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										two.setMenuName(command2.getText().toString());
 										two.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command2.getText().toString(),
 												vr2.getText().toString() })));
+										two.setImage(image);
 										commands.add(two);
 									}
 									
@@ -958,6 +963,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										three.setMenuName(command3.getText().toString());
 										three.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command3.getText().toString(),
 												vr3.getText().toString() })));
+										three.setImage(image);
 										commands.add(three);
 									}
 									
@@ -1053,6 +1059,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									.getSystemService(LAYOUT_INFLATER_SERVICE);
 							View layout = inflater.inflate(R.layout.slider, null);
 							final EditText txtNumTicks = (EditText) layout.findViewById(R.id.txtNumTicks);
+							final EditText txtPosititon = (EditText) layout.findViewById(R.id.txtPosition);
 							final EditText txtSliderHeader = (EditText) layout.findViewById(R.id.txtSliderHeader);
 							final EditText txtSliderFooter = (EditText) layout.findViewById(R.id.txtSliderFooter);
 							final EditText txtTimeout = (EditText) layout.findViewById(R.id.txtTimeout);
@@ -1066,6 +1073,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									Vector<String> footerelements = new Vector<String>();
 									footerelements.add(txtSliderFooter.getText().toString());
 									msg.setSliderFooter(footerelements);
+									msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
 									msg.setCorrelationID(autoIncCorrId++);
 									_msgAdapter.logMessage(msg, true);
 									try {
