@@ -251,7 +251,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 			"params"  :	{
 				"name":			name,
 				"mode":			type,
-				"softButtonID":	softButtonID
+				"customButtonID":	softButtonID
 			}
 		};
 
@@ -271,7 +271,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 			"params"  :	{
 				"name":			name,
 				"mode":			type,
-				"softButtonID":	softButtonID
+				"customButtonID":	softButtonID
 			}
 		};
 

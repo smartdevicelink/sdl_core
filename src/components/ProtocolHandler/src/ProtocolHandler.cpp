@@ -454,6 +454,8 @@ RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportMana
             return RESULT_FAIL;
         }
 
+        //LOG4CPLUS_INFO(mLogger, "Found message " << it->second->)
+
         if ( it->second->appendData( packet -> getData(), packet -> getDataSize() ) != RESULT_OK )
         {
             LOG4CPLUS_ERROR(mLogger, "Failed to append frame for multiframe message.");
@@ -468,10 +470,11 @@ RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportMana
                 return RESULT_FAIL;
             }
 
+            ProtocolPacket * completePacket = it->second;
             AppLinkRawMessage * rawMessage = new AppLinkRawMessage( key,
-                                        packet -> getVersion(),
-                                        packet -> getData(),
-                                        packet -> getDataSize() );
+                                        completePacket -> getVersion(),
+                                        completePacket -> getData(),
+                                        completePacket -> getTotalDataBytes() );
 
             mProtocolObserver -> onDataReceivedCallback( rawMessage );
 
@@ -559,7 +562,7 @@ void * ProtocolHandler::handleMessagesFromMobileApp( void * params )
 
             //@TODO check for ConnectionHandle.
             //@TODO check for data size - crash is possible.
-            if ((0 != message -> mData) && (0 != message -> mDataSize) && (MAXIMUM_FRAME_SIZE >= message -> mDataSize))
+            if ((0 != message -> mData) && (0 != message -> mDataSize) && (MAXIMUM_FRAME_DATA_SIZE + PROTOCOL_HEADER_V2_SIZE >= message -> mDataSize))
             {        
                 ProtocolPacket * packet = new ProtocolPacket;
                 LOG4CPLUS_INFO_EXT(mLogger ,"Data: " << packet -> getData());

@@ -31,7 +31,8 @@ const unsigned char FRAME_DATA_END_SESSION_NACK = 0x05; //Assumption
 
 const unsigned char FRAME_DATA_MAX_VALUE = 0xFF;
 
-const unsigned int MAXIMUM_FRAME_SIZE = 1024;
+const unsigned int MAXIMUM_FRAME_SIZE = 1024; // TODO: better get rid of this one.
+const unsigned int MAXIMUM_FRAME_DATA_SIZE = 1488;
 
 /**
  * If FRAME_TYPE_CONSECUTIVE :
@@ -141,6 +142,7 @@ struct ProtocolData
         unsigned int getMessageId() const;
         unsigned char * getData() const;
         void setTotalDataBytes(unsigned int dataBytes);
+        unsigned int getTotalDataBytes() const;
         /*End of Deserialization*/         
 
     private:
