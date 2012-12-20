@@ -2357,7 +2357,7 @@ namespace NsAppManager
                 case NsAppLinkRPCV2::FunctionID::DeleteCommandID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
-                    Application* app = AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -2368,7 +2368,15 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::DeleteCommand_response* response = new NsAppLinkRPCV2::DeleteCommand_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
                     NsAppLinkRPCV2::DeleteCommand_request* object = (NsAppLinkRPCV2::DeleteCommand_request*)mobileMsg;
 
                     CommandTypes cmdTypes = app->getCommandTypes(object->get_cmdID());
