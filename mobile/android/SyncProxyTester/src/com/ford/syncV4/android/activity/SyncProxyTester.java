@@ -1803,8 +1803,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 						final EditText helpPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_helpPrompt);
 						final EditText timeoutPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_timeoutPrompt);
+						final EditText vrHelpTitle = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpTitle);
 						final CheckBox choiceHelpPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceHelpPrompt);
 						final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceTimeoutPrompt);
+						final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpTitle);
 
 						builder = new AlertDialog.Builder(mContext);
 						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -1821,6 +1823,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									Vector<TTSChunk> timeout = new Vector<TTSChunk>();
 									timeout.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, timeoutPrompt.getText().toString()));
 									msg.setTimeoutPrompt(timeout);
+								}
+
+								if (choiceVRHelpTitle.isChecked()) {
+									msg.setVrHelpTitle(vrHelpTitle.getText().toString());
 								}
 
 								_msgAdapter.logMessage(msg, true);

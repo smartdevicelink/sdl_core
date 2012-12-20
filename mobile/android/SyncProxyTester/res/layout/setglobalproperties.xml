@@ -17,33 +17,47 @@
         android:checked="true"
         android:text="Help prompt" />
 
-		<EditText
-		    android:id="@+id/setglobalproperties_helpPrompt"
-		    android:layout_width="match_parent"
-		    android:layout_height="wrap_content"
-		    android:freezesText="true"
-		    android:inputType="textCapSentences"
-		    android:text="This is the help prompt"
-		    android:visibility="visible" >
+    <EditText
+        android:id="@+id/setglobalproperties_helpPrompt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:freezesText="true"
+        android:inputType="textCapSentences"
+        android:text="This is the help prompt"
+        android:visibility="visible" >
+    </EditText>
 
-		</EditText>
+    <CheckBox
+        android:id="@+id/setglobalproperties_choiceTimeoutPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Timeout prompt" />
 
-		<CheckBox
-		    android:id="@+id/setglobalproperties_choiceTimeoutPrompt"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:checked="true"
-		    android:text="Timeout prompt" />
+    <EditText
+        android:id="@+id/setglobalproperties_timeoutPrompt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:freezesText="true"
+        android:inputType="textCapSentences"
+        android:text="This is the timeout prompt"
+        android:visibility="visible" >
+    </EditText>
 
-		<EditText
-		    android:id="@+id/setglobalproperties_timeoutPrompt"
-		    android:layout_width="match_parent"
-		    android:layout_height="wrap_content"
-		    android:freezesText="true"
-		    android:inputType="textCapSentences"
-		    android:text="This is the timeout prompt"
-		    android:visibility="visible" >
+    <CheckBox
+        android:id="@+id/setglobalproperties_choiceVRHelpTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="VR help title" />
 
-		</EditText>
+    <EditText
+        android:id="@+id/setglobalproperties_vrHelpTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:freezesText="true"
+        android:inputType="textCapSentences"
+        android:text="This is the VR help title"
+        android:visibility="visible" />
 
 </LinearLayout>
