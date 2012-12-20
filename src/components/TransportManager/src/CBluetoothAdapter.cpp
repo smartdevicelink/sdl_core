@@ -128,6 +128,28 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::createConnectionsListForD
 
         if (false == rfcommChannels.empty())
         {
+            pthread_mutex_lock(&mConnectionsMutex);
+
+            for (tConnectionMap::const_iterator connectionIterator = mConnections.begin(); connectionIterator != mConnections.end(); ++connectionIterator)
+            {
+                const SRFCOMMConnection * connection = dynamic_cast<SRFCOMMConnection*>(connectionIterator->second);
+
+                if (0 != connection)
+                {
+                    rfcommChannels.erase(std::remove_if(rfcommChannels.begin(),
+                                                        rfcommChannels.end(),
+                                                        [&DeviceHandle, &connection] (const uint8_t & Channel)
+                                                        {
+                                                            return (connection->mDeviceHandle == DeviceHandle) &&
+                                                                   (connection->mRFCOMMChannel == Channel);
+                                                        }
+                                                       ),
+                                         rfcommChannels.end());
+                }
+            }
+
+            pthread_mutex_unlock(&mConnectionsMutex);
+
             for (tRFCOMMChannelVector::const_iterator channelIterator = rfcommChannels.begin(); channelIterator != rfcommChannels.end(); ++channelIterator)
             {
                 ConnectionsList.push_back(new SRFCOMMConnection(DeviceHandle, *channelIterator));

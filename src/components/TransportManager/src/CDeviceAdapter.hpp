@@ -167,17 +167,6 @@ namespace NsAppLink
                  * @brief Unique device identifier across all devices.
                  **/
                 std::string mUniqueDeviceId;
-
-                /**
-                 * @brief Flag indicating that device is connected.
-                 *
-                 * This flag is set by connectDevice and reset by disconnectDevice.
-                 * If device is connected service discovery is periodically performed on this
-                 * device. All newly discovered AppLink applications are automatically
-                 * connected and all connections for applications that are no longer
-                 * discoverable are disconnected.
-                 **/
-                bool mIsConnected;
             };
 
             /**

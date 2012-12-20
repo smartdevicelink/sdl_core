@@ -37,8 +37,7 @@ NsAppLink::NsTransportManager::CDeviceAdapter::SFrame::~SFrame(void)
 
 NsAppLink::NsTransportManager::CDeviceAdapter::SDevice::SDevice(const char * Name):
 mName(Name),
-mUniqueDeviceId(),
-mIsConnected(false)
+mUniqueDeviceId()
 {
 }
 
@@ -155,32 +154,13 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::scanForNewDevices(void)
 
 void NsAppLink::NsTransportManager::CDeviceAdapter::connectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
-    bool isConnectionRequired = false;
+    bool isDeviceValid = false;
 
     pthread_mutex_lock(&mDevicesMutex);
 
-    tDeviceMap::iterator deviceIterator = mDevices.find(DeviceHandle);
-
-    if (mDevices.end() != deviceIterator)
+    if (mDevices.end() != mDevices.find(DeviceHandle))
     {
-        SDevice * device = deviceIterator->second;
-
-        if (0 != device)
-        {
-            if (false == device->mIsConnected)
-            {
-                device->mIsConnected = true;
-                isConnectionRequired = true;
-            }
-            else
-            {
-                LOG4CPLUS_WARN(mLogger, "Device " << DeviceHandle << " is already connected");
-            }
-        }
-        else
-        {
-            LOG4CPLUS_ERROR(mLogger, "Device " << DeviceHandle << " is invalid");
-        }
+        isDeviceValid = true;
     }
     else
     {
@@ -189,7 +169,7 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::connectDevice(const NsAppLin
 
     pthread_mutex_unlock(&mDevicesMutex);
 
-    if (true == isConnectionRequired)
+    if (true == isDeviceValid)
     {
         std::vector<SConnection*> connections;
         createConnectionsListForDevice(DeviceHandle, connections);
@@ -212,32 +192,13 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::connectDevice(const NsAppLin
 
 void NsAppLink::NsTransportManager::CDeviceAdapter::disconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle)
 {
-    bool isDisconnectionRequired = false;
+    bool isDeviceValid = false;
 
     pthread_mutex_lock(&mDevicesMutex);
 
-    tDeviceMap::iterator deviceIterator = mDevices.find(DeviceHandle);
-
-    if (mDevices.end() != deviceIterator)
+    if (mDevices.end() != mDevices.find(DeviceHandle))
     {
-        SDevice * device = deviceIterator->second;
-
-        if (0 != device)
-        {
-            if (true == device->mIsConnected)
-            {
-                device->mIsConnected = false;
-                isDisconnectionRequired = true;
-            }
-            else
-            {
-                LOG4CPLUS_WARN(mLogger, "Device " << DeviceHandle << " is already disconnected");
-            }
-        }
-        else
-        {
-            LOG4CPLUS_ERROR(mLogger, "Device " << DeviceHandle << " is invalid");
-        }
+        isDeviceValid = true;
     }
     else
     {
@@ -246,7 +207,7 @@ void NsAppLink::NsTransportManager::CDeviceAdapter::disconnectDevice(const NsApp
 
     pthread_mutex_unlock(&mDevicesMutex);
 
-    if (true == isDisconnectionRequired)
+    if (true == isDeviceValid)
     {
         std::vector<tConnectionHandle> connectionsToTerminate;
 
