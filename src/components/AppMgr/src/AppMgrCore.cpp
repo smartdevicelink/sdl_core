@@ -807,7 +807,7 @@ namespace NsAppManager
                 case NsAppLinkRPC::Marshaller::METHOD_ADDSUBMENU_REQUEST:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
-                    Application* app = AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -815,6 +815,15 @@ namespace NsAppManager
                         NsAppLinkRPC::AddSubMenu_response* response = new NsAppLinkRPC::AddSubMenu_response();
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPC::AddSubMenu_response* response = new NsAppLinkRPC::AddSubMenu_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
