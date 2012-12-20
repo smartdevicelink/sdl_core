@@ -1301,7 +1301,7 @@ namespace NsAppManager
                     NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                     appUnregistered->set_appName(appName);
                     appUnregistered->set_appId(app->getAppID());
-                    appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason((NsAppLinkRPC::AppInterfaceUnregisteredReason::AppInterfaceUnregisteredReasonInternal)NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
+                    appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT);
                     HMIHandler::getInstance().sendNotification(appUnregistered);
                     LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
                     break;
@@ -4485,6 +4485,8 @@ namespace NsAppManager
         else
         {
             NsAppLinkRPCV2::OnHMIStatus* hmiStatus = new NsAppLinkRPCV2::OnHMIStatus;
+            hmiStatus->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+            hmiStatus->setMethodId(NsAppLinkRPCV2::FunctionID::OnHMIStatusID);
             NsAppManager::Application_v2* currentAppV2 = static_cast<NsAppManager::Application_v2*>(currentApp);
             currentAppV2->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
             hmiStatus->set_audioStreamingState(currentAppV2->getApplicationAudioStreamingState());
