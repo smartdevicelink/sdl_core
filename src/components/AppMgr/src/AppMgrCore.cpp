@@ -621,7 +621,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if((NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel()) || (NsAppLinkRPC::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel()))
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::Alert_response* response = new NsAppLinkRPC::Alert_response;
