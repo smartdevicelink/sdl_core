@@ -206,12 +206,15 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 	}.observes('this.pause'),
 
 	setDuration: function() {
-        var number = (this.duration + this.currTime) % 60;
+        var number;
 		if(this.countUp){
-			this.appInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
+			number = this.duration + this.currTime;
+			//this.appInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}else{
-			this.appInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
+			number = this.duration - this.currTime;
+			//this.appInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}
+		this.appInfo.set('mediaClock', Math.ceil((number+1)/60)-1 + ":" + ((number % 60) < 10 ? '0' : '') + (number % 60) );
 	}.observes('this.currTime'),
 
 	changeDuration: function() {
