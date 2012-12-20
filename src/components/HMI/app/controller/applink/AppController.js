@@ -31,5 +31,17 @@ MFT.ApplinkAppController = Em.Object.create({
 		MFT.ApplinkController.getApplicationModel( element.appId ).set('currentSubMenuLabel',	element.text );
 		
 		MFT.States.goToState( MFT.States.get('currentState.path') + '.subMenu' );
+	},
+	
+	/**
+	 * Handeler for preform interaction choice
+	 * send response to device and deactivate interactions window
+	 * 
+	 */
+	onPerformInteraction: function( element ) {
+	
+		FFW.UI.onChoosed( element.choiceId );
+		
+		MFT.InteractionChoicesView.deactivate();
 	}
 });
