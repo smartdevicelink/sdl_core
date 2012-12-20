@@ -2298,6 +2298,7 @@ namespace NsAppManager
                     {
                         NsAppLinkRPC::OnCommand* event = new NsAppLinkRPC::OnCommand();
                         event->set_cmdID(object->get_commandId());
+                        event->set_triggerSource(NsAppLinkRPC::TriggerSource::TS_MENU);
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                             << " application id " << appId);
                         MobileHandler::getInstance().sendRPCMessage(event, appId);
@@ -2307,6 +2308,7 @@ namespace NsAppManager
                     {
                         NsAppLinkRPCV2::OnCommand* event = new NsAppLinkRPCV2::OnCommand();
                         event->set_cmdID(object->get_commandId());
+                        event->set_triggerSource(NsAppLinkRPCV2::TriggerSource::TS_MENU);
                         event->setMethodId(NsAppLinkRPCV2::FunctionID::OnCommandID);
                         event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
@@ -3205,6 +3207,7 @@ namespace NsAppManager
                     {
                         NsAppLinkRPC::OnCommand* event = new NsAppLinkRPC::OnCommand();
                         event->set_cmdID(object->get_cmdID());
+                        event->set_triggerSource(NsAppLinkRPC::TriggerSource::TS_VR);
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                             << " application id " << appId);
                         MobileHandler::getInstance().sendRPCMessage(event, appId);
@@ -3214,6 +3217,7 @@ namespace NsAppManager
                     {
                         NsAppLinkRPCV2::OnCommand* event = new NsAppLinkRPCV2::OnCommand();
                         event->set_cmdID(object->get_cmdID());
+                        event->set_triggerSource(NsAppLinkRPCV2::TriggerSource::TS_VR);
                         event->setMethodId(NsAppLinkRPCV2::FunctionID::OnCommandID);
                         event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
