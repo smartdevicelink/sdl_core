@@ -4,7 +4,7 @@
  * @desc Interaction Choices visual representation
  * 
  * @category	View
- * @filesource	app/view/interactionChoicesView.js
+ * @filesource	app/view/applink/shared/interactionChoicesView.js
  * @version		1.0
  *
  * @author		Artem Petrosyan
