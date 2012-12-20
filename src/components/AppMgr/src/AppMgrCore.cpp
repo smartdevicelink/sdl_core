@@ -2178,11 +2178,11 @@ namespace NsAppManager
                     }
                     if(object->get_mainField3())
                     {
-                        showRPC2Request->set_mainField1(*object->get_mainField3());
+                        showRPC2Request->set_mainField3(*object->get_mainField3());
                     }
                     if(object->get_mainField4())
                     {
-                        showRPC2Request->set_mainField1(*object->get_mainField4());
+                        showRPC2Request->set_mainField4(*object->get_mainField4());
                     }
                     if(object->get_mediaClock())
                     {
