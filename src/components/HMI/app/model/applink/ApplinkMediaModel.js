@@ -10,7 +10,7 @@
  * @author		Andriy Melnik
  */
 
-MFT.ApplinkMediaModel = Em.Object.create({
+MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 	
 	active: false,
 
