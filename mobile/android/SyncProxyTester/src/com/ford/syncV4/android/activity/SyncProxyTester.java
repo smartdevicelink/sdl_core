@@ -53,6 +53,7 @@ import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.TTSChunkFactory;
+import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.Alert;
 import com.ford.syncV4.proxy.rpc.AlertManeuver;
 import com.ford.syncV4.proxy.rpc.ChangeRegistration;
@@ -115,6 +116,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private ArrayAdapter<Integer> _commandAdapter = null;
 	private ArrayAdapter<Integer> _choiceSetAdapter = null;
 	private ArrayAdapter<String> _putFileAdapter = null;
+	
+	/** List of function names supported in protocol v1. */
+	private Vector<String> v1Functions = null;
 
 	private int autoIncCorrId = 101;
 	private int autoIncChoiceSetId = 1;
@@ -293,8 +297,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			menu.add(0, MNU_EXIT, 0, "Exit");
 			menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");
 			menu.add(0, MNU_TOGGLE_PROTOCOL_VERSION, 0,
-					"Toggle Protocol Ver. (cur " + getCurrentProtocolVersion()
-							+ ")");
+					"Toggle Protocol Ver. (cur " + String.valueOf(
+							getCurrentProtocolVersion()) + ")");
 			menu.add(0, MNU_UNREGISTER, 0, "Unregister");
 			menu.add(0, MNU_APP_VERSION, 0, "App version");
 			return true;
@@ -303,9 +307,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		}
 	}
 	
-	private String getCurrentProtocolVersion() {
-		return String.valueOf(getSharedPreferences(PREFS_NAME, 0).getInt(
-			"VersionNumber", 1));
+	private int getCurrentProtocolVersion() {
+		return getSharedPreferences(PREFS_NAME, 0).getInt("VersionNumber", 1);
 	}
 
 	/* Handles item selections */
@@ -475,45 +478,87 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				.setNeutralButton(android.R.string.ok, null).create().show();
 	}
 
+	/**
+	 * Adds the function name to the adapter if it is supported by the specified
+	 * protocol version.
+	 */
+	private void addToFunctionsAdapter(ArrayAdapter<String> adapter,
+			int protocolVersion, String functionName) {
+		switch (protocolVersion) {
+		case 1:
+			if (v1Functions == null) {
+				v1Functions = new Vector<String>();
+				v1Functions.add(Names.RegisterAppInterface);
+				v1Functions.add(Names.UnregisterAppInterface);
+				v1Functions.add(Names.SetGlobalProperties);
+				v1Functions.add(Names.ResetGlobalProperties);
+				v1Functions.add(Names.AddCommand);
+				v1Functions.add(Names.DeleteCommand);
+				v1Functions.add(Names.AddSubMenu);
+				v1Functions.add(Names.DeleteSubMenu);
+				v1Functions.add(Names.CreateInteractionChoiceSet);
+				v1Functions.add(Names.PerformInteraction);
+				v1Functions.add(Names.DeleteInteractionChoiceSet);
+				v1Functions.add(Names.Alert);
+				v1Functions.add(Names.Show);
+				v1Functions.add(Names.Speak);
+				v1Functions.add(Names.SetMediaClockTimer);
+				v1Functions.add(Names.EncodedSyncPData);
+				v1Functions.add(Names.SubscribeButton);
+				v1Functions.add(Names.UnsubscribeButton);
+			}
+			
+			if (v1Functions.contains(functionName)) {
+				adapter.add(functionName);
+			}
+			break;
+
+		default:
+			adapter.add(functionName);
+			break;
+		}
+	}
+
 	public void onClick(View v) {
 		if (v == findViewById(R.id.btnSendMessage)) {
 			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item);
-			adapter.add("Alert");
-			adapter.add("Speak");
-			adapter.add("Show");
-			adapter.add("ButtonSubscriptions");
-			adapter.add("AddCommand");
-			adapter.add("DeleteCommand");
-			adapter.add("AddSubMenu");
-			adapter.add("DeleteSubMenu");
-			adapter.add("SetGlobalProperties");
-			adapter.add("ResetGlobalProperties");
-			adapter.add("SetMediaClockTimer");
-			adapter.add("CreateChoiceSet");
-			adapter.add("DeleteChoiceSet");
-			adapter.add("PerformInteraction");
-			adapter.add("EncodedSyncPData");
-			adapter.add("Slider");
-			adapter.add("ScrollableMessage");
-			adapter.add("ChangeRegistration");
-			adapter.add("PutFile");
-			adapter.add("DeleteFile");
-			adapter.add("ListFiles");
-			adapter.add("SetAppIcon");
-			adapter.add("PerformAudioPassThru");
-			adapter.add("EndAudioPassThru");
-			adapter.add("SubscribeVehicleData");
-			adapter.add("UnsubscribeVehicleData");
-			adapter.add("GetVehicleData");
-			adapter.add("ReadDID");
-			adapter.add("GetDTCs");
-			adapter.add("ShowConstantTBT");
-			adapter.add("AlertManeuver");
-			adapter.add("UpdateTurnList");
-			adapter.add("DialNumber");
+			int protocolVersion = getCurrentProtocolVersion();
+			addToFunctionsAdapter(adapter, protocolVersion, "Alert");
+			addToFunctionsAdapter(adapter, protocolVersion, "Speak");
+			addToFunctionsAdapter(adapter, protocolVersion, "Show");
+			addToFunctionsAdapter(adapter, protocolVersion, "ButtonSubscriptions");
+			addToFunctionsAdapter(adapter, protocolVersion, "AddCommand");
+			addToFunctionsAdapter(adapter, protocolVersion, "DeleteCommand");
+			addToFunctionsAdapter(adapter, protocolVersion, "AddSubMenu");
+			addToFunctionsAdapter(adapter, protocolVersion, "DeleteSubMenu");
+			addToFunctionsAdapter(adapter, protocolVersion, "SetGlobalProperties");
+			addToFunctionsAdapter(adapter, protocolVersion, "ResetGlobalProperties");
+			addToFunctionsAdapter(adapter, protocolVersion, "SetMediaClockTimer");
+			addToFunctionsAdapter(adapter, protocolVersion, "CreateChoiceSet");
+			addToFunctionsAdapter(adapter, protocolVersion, "DeleteChoiceSet");
+			addToFunctionsAdapter(adapter, protocolVersion, "PerformInteraction");
+			addToFunctionsAdapter(adapter, protocolVersion, "EncodedSyncPData");
+			addToFunctionsAdapter(adapter, protocolVersion, "Slider");
+			addToFunctionsAdapter(adapter, protocolVersion, "ScrollableMessage");
+			addToFunctionsAdapter(adapter, protocolVersion, "ChangeRegistration");
+			addToFunctionsAdapter(adapter, protocolVersion, "PutFile");
+			addToFunctionsAdapter(adapter, protocolVersion, "DeleteFile");
+			addToFunctionsAdapter(adapter, protocolVersion, "ListFiles");
+			addToFunctionsAdapter(adapter, protocolVersion, "SetAppIcon");
+			addToFunctionsAdapter(adapter, protocolVersion, "PerformAudioPassThru");
+			addToFunctionsAdapter(adapter, protocolVersion, "EndAudioPassThru");
+			addToFunctionsAdapter(adapter, protocolVersion, "SubscribeVehicleData");
+			addToFunctionsAdapter(adapter, protocolVersion, "UnsubscribeVehicleData");
+			addToFunctionsAdapter(adapter, protocolVersion, "GetVehicleData");
+			addToFunctionsAdapter(adapter, protocolVersion, "ReadDID");
+			addToFunctionsAdapter(adapter, protocolVersion, "GetDTCs");
+			addToFunctionsAdapter(adapter, protocolVersion, "ShowConstantTBT");
+			addToFunctionsAdapter(adapter, protocolVersion, "AlertManeuver");
+			addToFunctionsAdapter(adapter, protocolVersion, "UpdateTurnList");
+			addToFunctionsAdapter(adapter, protocolVersion, "DialNumber");
 			
 			new AlertDialog.Builder(this)  
-		       .setTitle("Pick a Function")
+		       .setTitle("Pick a Function (v" + protocolVersion + ")")
 		       .setAdapter(adapter, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
 						if(adapter.getItem(which) == "Alert"){
