@@ -29,8 +29,7 @@ public class MessageAdapter extends ArrayAdapter<Object> {
 	
 	/** Adds the specified message to the items list and notifies of the change. */
 	public void addMessage(Object m) {
-		items.add(m);
-		notifyDataSetChanged();
+		add(m);
 	}
 	
     public View getView(int position, View convertView, ViewGroup parent) {

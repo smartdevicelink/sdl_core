@@ -1,5 +1,6 @@
 [R5.1.0]
 SyncProxyTester:
+* Fix a rare crash when creating a command after resuming the app.
 * Fix sending CreateChoiceSet command by adding image values.
 + The user can specify position when creating Slider request.
 + Adding EncodedSyncPData support to SyncProxyTester (Ford's).
