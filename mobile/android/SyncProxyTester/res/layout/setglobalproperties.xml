@@ -60,4 +60,44 @@
         android:text="This is the VR help title"
         android:visibility="visible" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <CheckBox
+            android:id="@+id/setglobalproperties_choiceVRHelpItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="VR help item #" />
+
+        <EditText
+            android:id="@+id/setglobalproperties_vrHelpItemPos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="number"
+            android:text="1" >
+        </EditText>
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/setglobalproperties_vrHelpItemText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:freezesText="true"
+        android:inputType="textCapSentences"
+        android:text="VR help item text"
+        android:visibility="visible" />
+
+    <EditText
+        android:id="@+id/setglobalproperties_vrHelpItemImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:freezesText="true"
+        android:inputType="textCapSentences"
+        android:text="imageFilename"
+        android:visibility="visible" />
+
 </LinearLayout>

@@ -1,5 +1,6 @@
 [R5.1.0]
 SyncProxyTester:
++ Add the possibility to set the parameters of SetGlobalProperties command with GUI.
 + Add dialog for SetGlobalProperties command's helpPrompt and timeoutPrompt values.
 * Fix a rare crash when creating a command after resuming the app.
 * Fix sending CreateChoiceSet command by adding image values.

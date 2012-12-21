@@ -80,6 +80,7 @@ import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.Turn;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
+import com.ford.syncV4.proxy.rpc.VrHelpItem;
 import com.ford.syncV4.proxy.rpc.enums.AudioCaptureQuality;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
@@ -1804,9 +1805,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						final EditText helpPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_helpPrompt);
 						final EditText timeoutPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_timeoutPrompt);
 						final EditText vrHelpTitle = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpTitle);
+						final EditText vrHelpItemText = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemText);
+						final EditText vrHelpItemImage = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemImage);
+						final EditText vrHelpItemPosition = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemPos);
 						final CheckBox choiceHelpPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceHelpPrompt);
 						final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceTimeoutPrompt);
 						final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpTitle);
+						final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpItem);
 
 						builder = new AlertDialog.Builder(mContext);
 						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -1827,6 +1832,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 								if (choiceVRHelpTitle.isChecked()) {
 									msg.setVrHelpTitle(vrHelpTitle.getText().toString());
+								}
+								
+								if (choiceVRHelpItem.isChecked()) {
+									Vector<VrHelpItem> vrHelp = new Vector<VrHelpItem>();
+									
+									VrHelpItem helpItem = new VrHelpItem();
+									helpItem.setText(vrHelpItemText.getText().toString());
+									helpItem.setPosition(Integer.parseInt(vrHelpItemPosition.getText().toString()));
+									Image image = new Image();
+									image.setValue(vrHelpItemImage.getText().toString());
+									image.setImageType(ImageType.STATIC);
+									helpItem.setImage(image);
+									vrHelp.add(helpItem);
+									
+									msg.setVrHelp(vrHelp);
 								}
 
 								_msgAdapter.logMessage(msg, true);
