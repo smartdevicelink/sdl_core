@@ -90,6 +90,8 @@ MFT.ApplinkAppModel = Em.Object.extend({
 		*/
 		
 		this.interactionChoices[message.interactionChoiceSetID] = message.choiceSet;
+		
+		MFT.VRPopUp.CreateInteractionChoise(message);
 	},
 	
 	/**
@@ -101,6 +103,8 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 */
 	onDeleteInteraction: function( message ) {		
 		delete this.interactionChoices[message.interactionChoiceSetID];
+		
+		MFT.VRPopUp.DeleteInteractionChoise(message.interactionChoiceSetID);
 	},
 	
 	/**

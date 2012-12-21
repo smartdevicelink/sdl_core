@@ -106,8 +106,8 @@ MFT.VRPopUp = Em.ContainerView.create({
             for(var j = 0; j<params.choiceSet[i].vrCommands.length; j++){
                 this.get('listOfCommands.list.childViews').pushObject(
                     MFT.Button.create({
-                        action:                 'onVRPerformInteractionChoosed',
-                        target:                 'MFT.ApplinkMediaController',
+                        action:                 'onChoiceInteraction',
+                        target:                 'MFT.ApplinkAppController',
                         choiceID:               params.choiceSet[i].choiceID,
                         interactionChoiceSetID: params.interactionChoiceSetID,
                         text:                   params.choiceSet[i].vrCommands[j],
