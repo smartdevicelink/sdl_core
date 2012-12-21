@@ -68,6 +68,7 @@ import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.ReadDID;
+import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.ScrollableMessage;
 import com.ford.syncV4.proxy.rpc.SetAppIcon;
 import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
@@ -85,6 +86,7 @@ import com.ford.syncV4.proxy.rpc.enums.AudioCaptureQuality;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
+import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
@@ -485,6 +487,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			adapter.add("AddSubMenu");
 			adapter.add("DeleteSubMenu");
 			adapter.add("SetGlobalProperties");
+			adapter.add("ResetGlobalProperties");
 			adapter.add("SetMediaClockTimer");
 			adapter.add("CreateChoiceSet");
 			adapter.add("DeleteChoiceSet");
@@ -850,6 +853,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							dlg.show();
 						} else if (adapter.getItem(which) == "SetGlobalProperties") {
 							sendSetGlobalProperties();
+						} else if (adapter.getItem(which) == "ResetGlobalProperties") {
+							sendResetGlobalProperties();
 						} else if (adapter.getItem(which) == "SetMediaClockTimer") {
 							//something
 							AlertDialog.Builder builder;
@@ -1854,6 +1859,64 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 								} catch (SyncException e) {
 									_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+								}
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+						builder.setView(layout);
+						builder.create().show();
+					}
+
+					private void sendResetGlobalProperties() {
+						AlertDialog.Builder builder;
+
+						Context mContext = adapter.getContext();
+						LayoutInflater inflater = (LayoutInflater) mContext
+								.getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.resetglobalproperties,
+								(ViewGroup) findViewById(R.id.resetglobalproperties_Root));
+
+						final CheckBox choiceHelpPrompt = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceHelpPrompt);
+						final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceTimeoutPrompt);
+						final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceVRHelpTitle);
+						final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceVRHelpItems);
+
+						builder = new AlertDialog.Builder(mContext);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								ResetGlobalProperties msg = new ResetGlobalProperties();
+								Vector<GlobalProperty> properties = new Vector<GlobalProperty>();
+								
+								if (choiceHelpPrompt.isChecked()) {
+									properties.add(GlobalProperty.HELPPROMPT);
+								}
+
+								if (choiceTimeoutPrompt.isChecked()) {
+									properties.add(GlobalProperty.TIMEOUTPROMPT);
+								}
+
+								if (choiceVRHelpTitle.isChecked()) {
+									properties.add(GlobalProperty.VRHELPTITLE);
+								}
+
+								if (choiceVRHelpItem.isChecked()) {
+									properties.add(GlobalProperty.VRHELPITEMS);
+								}
+
+								if (!properties.isEmpty()) {
+									msg.setProperties(properties);
+									_msgAdapter.logMessage(msg, true);
+									try {
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (SyncException e) {
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									}
+								} else {
+									Toast.makeText(getApplicationContext(), "No items selected", Toast.LENGTH_LONG).show();
 								}
 							}
 						});

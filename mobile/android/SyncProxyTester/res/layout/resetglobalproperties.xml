@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/resetglobalproperties_Root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="10dip"
+    android:layout_marginRight="10dip"
+    android:minWidth="300dip"
+    android:orientation="vertical"
+    android:paddingLeft="10dip"
+    android:paddingRight="10dip" >
+
+    <CheckBox
+        android:id="@+id/resetglobalproperties_choiceHelpPrompt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Help prompt" />
+
+    <CheckBox
+        android:id="@+id/resetglobalproperties_choiceTimeoutPrompt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Timeout prompt" />
+
+    <CheckBox
+        android:id="@+id/resetglobalproperties_choiceVRHelpTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="VR help title" />
+
+    <CheckBox
+        android:id="@+id/resetglobalproperties_choiceVRHelpItems"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="VR help items" />
+
+</LinearLayout>
