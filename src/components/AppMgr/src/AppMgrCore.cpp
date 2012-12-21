@@ -1617,13 +1617,17 @@ namespace NsAppManager
                     DIR* dir = NULL;
                     std::string path = ".";
                     struct dirent* dirElement = NULL;
-                    memset(dirElement, 0, sizeof(dirent));
                     dir = opendir(path.c_str());
                     if (dir != NULL)
                     {
                         while (dirElement = readdir(dir))
                         {
                             LOG4CPLUS_INFO_EXT(mLogger, " file: " << dirElement->d_name);
+                            if (0 == strcmp(dirElement->d_name, "..")
+                                || 0 == strcmp(dirElement->d_name, "."))
+                            {
+                                continue;
+                            }
                             listFiles.push_back(std::string(dirElement->d_name));
                         }
                         closedir(dir);
