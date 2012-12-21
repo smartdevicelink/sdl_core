@@ -59,6 +59,30 @@ MFT.ApplinkModel = Em.Object.create({
 			}
 			MFT.TTSPopUp.ActivateTTS(message);
 		}
+	},
+	
+	/**
+	 * Applink VR AddCommand response handeler
+	 * add command to voice recognition window
+	 *
+	 * @param message:	Object
+	 */
+	onAddCommandVR: function ( message ) {
+		//message = JSON.parse('{"appId":65537,"cmdId":4,"vrCommands":["F you bc hi iv"]}');
+		
+		MFT.VRPopUp.AddCommand( message.commandId, message.vrCommands, message.appId );
+	},
+	
+	/**
+	 * Applink VR DeleteCommand response handeler
+	 * delete command from voice recognition window
+	 *
+	 * @param commandId:	Number
+	 */
+	onDeleteCommandVR: function ( commandId ) {
+		//message = 4;
+		
+		MFT.VRPopUp.DeleteCommand( commandId );
 	}
 });
  

@@ -109,7 +109,7 @@ FFW.VR = FFW.RPCObserver.create({
 
 		if (request.method == "VR.AddCommand") {
 			
-			MFT.ApplinkMediaModel.onApplinkVRAddCommand(request.params.cmdId, request.params.vrCommands);
+			MFT.ApplinkModel.onAddCommandVR(request.params);
 
 			// send repsonse
 			var JSONMessage = {
@@ -125,7 +125,7 @@ FFW.VR = FFW.RPCObserver.create({
 
 		if (request.method == "VR.DeleteCommand") {
 
-			MFT.ApplinkMediaModel.onApplinkVRDeleteCommand(request.params.cmdId);
+			MFT.ApplinkModel.onDeleteCommandVR(request.params.cmdId);
 
 			// send repsonse
 			var JSONMessage = {
