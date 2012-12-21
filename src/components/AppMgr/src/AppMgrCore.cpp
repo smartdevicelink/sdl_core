@@ -331,7 +331,7 @@ namespace NsAppManager
                         break;
                     }
                     std::string appName = app->getName();
-
+                    int appId = app->getAppID();
                     core->removeAppFromHmi(app, sessionKey);
                     core->unregisterApplication( sessionKey );
 
@@ -344,6 +344,23 @@ namespace NsAppManager
                     NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
                     msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
                     MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionKey);
+                    NsRPC2Communication::UI::Show* show = new NsRPC2Communication::UI::Show;
+                    show->set_alignment(NsAppLinkRPC::TextAlignment());
+                    show->set_appId(appId);
+                    std::vector<std::string> customPresets;
+                    show->set_customPresets(customPresets);
+                    show->set_graphic(NsAppLinkRPCV2::Image());
+                    show->set_mainField1("");
+                    show->set_mainField2("");
+                    show->set_mainField3("");
+                    show->set_mainField4("");
+                    show->set_mediaClock("");
+                    show->set_mediaTrack("");
+                    std::vector<NsAppLinkRPCV2::SoftButton> softButtons;
+                    show->set_softButtons(softButtons);
+                    show->set_statusBar("");
+                    HMIHandler::getInstance().sendRequest(show);
+
                     NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                     appUnregistered->set_appName(appName);
                     appUnregistered->set_appId(app->getAppID());
