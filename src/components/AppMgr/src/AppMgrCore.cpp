@@ -4004,7 +4004,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application with the name " << appName << " found!");
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::INVALID_DATA);
+                                NsAppLinkRPC::Result::ResultInternal>(object->getId(), NsAppLinkRPC::Result::INVALID_DATA);
                     return;
                 }
 
@@ -4013,7 +4013,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                                NsAppLinkRPC::Result::ResultInternal>(object->getId(), NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
                     return;
                 }
 
@@ -4030,7 +4030,7 @@ namespace NsAppManager
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, "App is currently active");
                         sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                    NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                                    NsAppLinkRPC::Result::ResultInternal>(object->getId(), NsAppLinkRPC::Result::GENERIC_ERROR);
                         return;
                     }
 
@@ -4046,7 +4046,7 @@ namespace NsAppManager
                         << " application id " << appId);
 
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPCV2::Result::ResultInternal>(object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                                NsAppLinkRPC::Result::ResultInternal>(object->getId(), NsAppLinkRPC::Result::GENERIC_ERROR);
                     return;
                 }
 
@@ -4230,7 +4230,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage( hmiStatus, appId );
                         NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
                         response->setId(object->getId());
-                        response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
+                        response->setResult(NsAppLinkRPC::Result::SUCCESS);
                         HMIHandler::getInstance().sendResponse(response);
 
                         if(core->mDriverDistractionV2)
