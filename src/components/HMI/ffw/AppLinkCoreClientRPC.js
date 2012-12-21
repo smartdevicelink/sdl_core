@@ -103,7 +103,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		if (response.result.method == "AppLinkCore.GetDeviceListResponse")
 		{
 			if(MFT.States.info.active){
-				MFT.ApplinkMediaModel.onGetDeviceList(response.result);
+				MFT.ApplinkModel.onGetDeviceList(response.result);
 			}
 		}
 
@@ -154,7 +154,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 
 		if (notification.method == this.onDeviceListUpdatedNotification)
 		{
-			MFT.ApplinkMediaModel.onGetDeviceList(notification.params);
+			MFT.ApplinkModel.onGetDeviceList(notification.params);
 		}
 	},
 

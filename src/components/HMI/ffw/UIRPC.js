@@ -51,34 +51,6 @@ FFW.UI = FFW.RPCObserver.create({
 	},
 
 	/*
-   	 * Global properties
- 	 */
-	globalProperties	: {
-		helpPrompt	: null ,
-		timeoutPrompt	: null
-	},
-	
-	
-	/*
-   	 * init object
- 	 */
-	init: function() {
-		// init global properties
-		this.resetProperties();
-	},
-
-	/*
-   	 * resetGlobalProperties
- 	 */
-	resetProperties: function(propertyName) {
-		if (propertyName == "HELPPROMPT" || propertyName == "")
-			this.globalProperties.helpPrompt 	= this.globalPropertiesDefault.helpPrompt;
-	
-		if (propertyName == "TIMEOUTPROMPT" || propertyName == "")
-			this.globalProperties.timeoutPrompt = this.globalPropertiesDefault.timoutPrompt;
-	},
-
-	/*
    	 * connect to RPC bus
  	 */
 	connect: function() {
@@ -186,8 +158,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    case "UI.SetGlobalProperties":{
 			    MFT.TTSPopUp.ActivateTTS("Set global properties");
 
-				this.globalProperties.helpPrompt = request.params.helpPrompt;
-				this.globalProperties.timeoutPrompt = request.params.timeoutPrompt;
+				MFT.ApplinkModel.setProperties(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 		      	
@@ -198,7 +169,7 @@ FFW.UI = FFW.RPCObserver.create({
 			    // reset all requested properties
 				for (var i=0;i<request.params.length;i++)
 				{
-				    this.resetProperties(reuqest.params[i]);
+				    MFT.ApplinkModel.resetProperties(reuqest.params[i]);
 					MFT.TTSPopUp.ActivateTTS("Reset property: " + reuqest.params[i]);
 				}
 
@@ -279,12 +250,22 @@ FFW.UI = FFW.RPCObserver.create({
 		    	this.sliderRequestId = request.id;
 
 				MFT.ApplinkController.getApplicationModel(request.params.appId).onSlider(request.params);
-	    
+
 		    	break;
 		    }
 		    case "UI.ScrollableMessage":{
 
 				MFT.ApplinkModel.onApplinkScrolableMessage( request.params );
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
+
+		    	break;
+		    }
+		    case "UI.SetAppIcon":{
+
+				MFT.ApplinkModel.onApplinkSetAppIcon( request.params );
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
 
 		    	break;
 		    }

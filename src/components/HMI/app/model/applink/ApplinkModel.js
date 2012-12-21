@@ -11,6 +11,14 @@
  */
  
 MFT.ApplinkModel = Em.Object.create({
+    
+    /*
+     * init object
+     */
+    init: function() {
+        // init global properties
+        this.resetProperties();
+    },
 	
 	/**
 	 * Chosen device name
@@ -19,11 +27,133 @@ MFT.ApplinkModel = Em.Object.create({
 	 */
 	deviceName: null,
 
-    /** Applink UI ScrolableMessage handler */
+    /**
+     * List of icons
+     *
+     * @type:   Struct
+     */
+    listOfIcons:{
+        //appId: syncFileName
+    },
+
+    /**
+      * Array of active applications
+      */
+    applicationsList:           new Array(),
+
+    /**
+      * Array of connected devices
+      */
+    devicesList:                new Array(),
+
+    /*
+     * Global properties
+     */
+    globalProperties    : {
+        helpPrompt  : null ,
+        timeoutPrompt   : null
+    },
+
+    /**
+     * Applink UI ScrolableMessage handler
+     */
     onApplinkScrolableMessage: function(params){
 
        MFT.ScrollableMessage.activate( MFT.ApplinkController.getApplicationModel(params.appId).appInfo.appName , params );
 
+    },
+
+    /*
+     * resetGlobalProperties
+     */
+    resetProperties: function(propertyName) {
+        if (propertyName == "HELPPROMPT" || propertyName == "")
+            this.globalProperties.helpPrompt    = this.globalPropertiesDefault.helpPrompt;
+    
+        if (propertyName == "TIMEOUTPROMPT" || propertyName == "")
+            this.globalProperties.timeoutPrompt = this.globalPropertiesDefault.timoutPrompt;
+    },
+
+    /*
+     * setGlobalProperties
+     */
+    setProperties: function(message) {
+
+        this.globalProperties.helpPrompt = message.helpPrompt;
+        this.globalProperties.timeoutPrompt = message.timeoutPrompt;
+        MFT.ControlButtons.infoTable.globalPropertiesData.propertiesData();
+
+    },
+
+    onGetAppList: function( appList ){
+
+        this.applicationsList.splice(0, this.applicationsList.length);
+        for(var i = 0; i < appList.length; i++){
+            this.set('listOfIcons.' + appList[i].appId, appList[i].icon );
+            if( appList[i].isMediaApplication ){    
+                this.applicationsList.push({
+                    type:       MFT.Button,
+                    params:     {
+                        action:         'turnOnApplink',
+                        target:         'MFT.ApplinkMediaController',
+                        text:           appList[i].appName,
+                        appName:        appList[i].appName,
+                        appId:          appList[i].appId,
+                        className:      'scrollButtons button notpressed',
+                        icon:           appList[i].icon,
+                        templateName:   appList[i].icon ? 'rightIcon' : 'text'
+                    }                                   
+                });
+            }else{
+                this.applicationsList.push({
+                    type:       MFT.Button,
+                    params:     {
+                        action:         'turnOnApplink',
+                        target:         'MFT.NonMediaController',
+                        text:           appList[i].appName,
+                        appName:        appList[i].appName,
+                        appId:          appList[i].appId,
+                        className:      'scrollButtons button notpressed',
+                        icon:           appList[i].icon,
+                        templateName:   appList[i].icon ? 'rightIcon' : 'text'
+                    }                                   
+                });
+            }
+        }
+        MFT.InfoAppsView.ShowAppList();
+
+    },
+
+    onGetDeviceList: function( params ){
+        if (null == params.resultCode || (null != params.resultCode && "SUCCESS" == params.resultCode)) {
+            this.devicesList.splice(0, this.devicesList.length);
+            for(var i = 0; i < params.deviceList.length; i++){
+                this.devicesList.push({
+                    type:       MFT.Button,
+                    params:     {
+                        text:           params.deviceList[i],
+                        deviceName:     params.deviceList[i],
+                        className:      'scrollButtons button notpressed',
+                        icon:           params.icon,
+                        templateName:   'rightIcon',
+                        actionUp:     function(){
+                           MFT.ApplinkController.onDeviceChoosed(this);
+                        }
+                    }                                   
+                });
+            }
+            
+            if( MFT.States.info.devicelist.active ){
+                MFT.DeviceLilstView.ShowDeviceList();
+            }
+        }
+    },
+
+    /**
+     * Applink UI SetAppIcon handler
+     */
+    onApplinkSetAppIcon: function( message ){
+        this.set('listOfIcons.' + message.appId, message.syncFileName );
     },
     
     /**

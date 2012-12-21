@@ -91,6 +91,7 @@ MFT.ApplinkController = Em.Object.create({
 	onDeviceChoosed: function( element ) {
 		FFW.UI.OnDeviceChosen( element.deviceName );
 		MFT.ApplinkModel.set( 'deviceName', element.deviceName );
+		this.turnChangeDeviceViewBack();
 	},
 
 	/**
@@ -105,7 +106,7 @@ MFT.ApplinkController = Em.Object.create({
 				MFT.ApplinkController.registerApplication(appList[i].appId, 1);
 			}
 		}
-		MFT.ApplinkMediaModel.onGetAppList( appList );
+		MFT.ApplinkModel.onGetAppList( appList );
 	},
 
 	/**

@@ -47,7 +47,7 @@ MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
 
     ShowDeviceList: function( ){
 
-        this.listOfDevices.items = MFT.ApplinkMediaModel.devicesList.slice();
+        this.listOfDevices.items = MFT.ApplinkModel.devicesList.slice();
 
         this.listOfDevices.list.refresh();
 
