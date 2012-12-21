@@ -248,7 +248,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.DeleteInteractionChoiceSet":{
 
-				MFT.ApplinkController.getApplicationModel(request.params.appId).onDeleteInteraction(request.params.interactionChoiceSetID);
+				MFT.ApplinkController.getApplicationModel(request.params.appId).onDeleteInteraction(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 		    	
