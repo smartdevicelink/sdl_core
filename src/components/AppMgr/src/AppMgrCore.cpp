@@ -2698,6 +2698,8 @@ namespace NsAppManager
                     case 2:
                     {
                         NsAppLinkRPCV2::OnButtonEvent* event = new NsAppLinkRPCV2::OnButtonEvent();
+                        event->setMethodId(NsAppLinkRPCV2::FunctionID::OnButtonEventID);
+                        event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                         const NsAppLinkRPC::ButtonEventMode& evtMode = object->get_mode();
                         NsAppLinkRPCV2::ButtonEventMode evtModeV2;
                         evtModeV2.set((NsAppLinkRPCV2::ButtonEventMode::ButtonEventModeInternal)evtMode.get());
@@ -2757,6 +2759,8 @@ namespace NsAppManager
                     case 2:
                     {
                         NsAppLinkRPCV2::OnButtonPress* event = new NsAppLinkRPCV2::OnButtonPress();
+                        event->setMethodId(NsAppLinkRPCV2::FunctionID::OnButtonPressID);
+                        event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                         NsAppLinkRPCV2::ButtonName btnName;
                         btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)name.get());
                         event->set_buttonName(btnName);
@@ -2929,6 +2933,8 @@ namespace NsAppManager
                     case 2:
                     {
                         NsAppLinkRPCV2::OnCommand* event = new NsAppLinkRPCV2::OnCommand();
+                        event->setMethodId(NsAppLinkRPCV2::FunctionID::OnCommandID);
+                        event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                         event->set_cmdID(object->get_commandId());
                         event->set_triggerSource(NsAppLinkRPCV2::TriggerSource::TS_MENU);
                         event->setMethodId(NsAppLinkRPCV2::FunctionID::OnCommandID);
@@ -2972,6 +2978,7 @@ namespace NsAppManager
                     case 2:
                     {
                         NsAppLinkRPCV2::Show_response* response = new NsAppLinkRPCV2::Show_response();
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::ShowID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                         response->set_success(true);
@@ -3018,6 +3025,7 @@ namespace NsAppManager
                     {
                         NsAppLinkRPCV2::SetGlobalProperties_response* response = new NsAppLinkRPCV2::SetGlobalProperties_response();
 
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::SetGlobalPropertiesID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                         response->set_success(true);
@@ -3064,6 +3072,7 @@ namespace NsAppManager
                     {
                         NsAppLinkRPCV2::ResetGlobalProperties_response* response = new NsAppLinkRPCV2::ResetGlobalProperties_response();
 
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::ResetGlobalPropertiesID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
@@ -3208,6 +3217,8 @@ namespace NsAppManager
                         case 2:
                         {
                             NsAppLinkRPCV2::DeleteCommand_response* response = new NsAppLinkRPCV2::DeleteCommand_response();
+                            response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteCommandID);
+                            response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                             response->set_success(true);
                             response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                             core->mRequestMapping.removeRequest(object->getId());
@@ -3255,7 +3266,8 @@ namespace NsAppManager
                         NsAppLinkRPCV2::AddSubMenu_response* response = new NsAppLinkRPCV2::AddSubMenu_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
-
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::AddSubMenuID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         core->mMessageMapping.removeMessage(object->getId());
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                             << " application id " << appId);
@@ -3297,7 +3309,8 @@ namespace NsAppManager
                         NsAppLinkRPCV2::DeleteSubMenu_response* response = new NsAppLinkRPCV2::DeleteSubMenu_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
-
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteSubMenuID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         core->mMessageMapping.removeMessage(object->getId());
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                             << " application id " << appId);
@@ -3382,7 +3395,8 @@ namespace NsAppManager
                         NsAppLinkRPCV2::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPCV2::DeleteInteractionChoiceSet_response();
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
-
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteInteractionChoiceSetID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         core->mMessageMapping.removeMessage(object->getId());
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                             << " application id " << appId);
@@ -3429,6 +3443,8 @@ namespace NsAppManager
                     case 2:
                     {
                         NsAppLinkRPCV2::PerformInteraction_response* response = new NsAppLinkRPCV2::PerformInteraction_response();
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::PerformInteractionID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         if(object->get_choiceID())
                         {
                             response->set_choiceID(*object->get_choiceID());
@@ -3480,6 +3496,8 @@ namespace NsAppManager
                     case 2:
                     {
                         NsAppLinkRPCV2::SetMediaClockTimer_response* response = new NsAppLinkRPCV2::SetMediaClockTimer_response();
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::SetMediaClockTimerID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_success(true);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                         core->mMessageMapping.removeMessage(object->getId());
@@ -3510,6 +3528,8 @@ namespace NsAppManager
                 eventV1->set_state(object->get_state());
                 core->mDriverDistractionV1 = eventV1;
                 NsAppLinkRPCV2::OnDriverDistraction* eventV2 = new NsAppLinkRPCV2::OnDriverDistraction();
+                eventV2->setMethodId(NsAppLinkRPCV2::FunctionID::OnDriverDistractionID);
+                eventV2->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                 NsAppLinkRPCV2::DriverDistractionState stateV2;
                 stateV2.set((NsAppLinkRPCV2::DriverDistractionState::DriverDistractionStateInternal)object->get_state().get());
                 eventV2->set_state(stateV2);
@@ -3574,6 +3594,8 @@ namespace NsAppManager
                             ctx2.set((NsAppLinkRPCV2::SystemContext::SystemContextInternal)ctx.get());
                             appv2->setSystemContext(ctx2);
                             NsAppLinkRPCV2::OnHMIStatus* event = new NsAppLinkRPCV2::OnHMIStatus;
+                            event->setMethodId(NsAppLinkRPCV2::FunctionID::OnHMIStatusID);
+                            event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                             event->set_systemContext(appv2->getSystemContext());
                             event->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
                             event->set_audioStreamingState(appv2->getApplicationAudioStreamingState());
@@ -3798,6 +3820,8 @@ namespace NsAppManager
                         case 2:
                         {
                             NsAppLinkRPCV2::DeleteCommand_response* response = new NsAppLinkRPCV2::DeleteCommand_response();
+                            response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteCommandID);
+                            response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                             response->set_success(true);
                             response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                             core->mRequestMapping.removeRequest(object->getId());
@@ -4165,6 +4189,8 @@ namespace NsAppManager
                     {
                         Application_v2* appv2 = (Application_v2*)app;
                         NsAppLinkRPCV2::OnHMIStatus * hmiStatus = new NsAppLinkRPCV2::OnHMIStatus;
+                        hmiStatus->setMethodId(NsAppLinkRPCV2::FunctionID::OnHMIStatusID);
+                        hmiStatus->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                         hmiStatus->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
                         if ( appv2->getIsMediaApplication() )
                         {
@@ -4281,6 +4307,8 @@ namespace NsAppManager
                         else
                         {
                             NsAppLinkRPCV2::OnEncodedSyncPData* encodedNotification = new NsAppLinkRPCV2::OnEncodedSyncPData;
+                            encodedNotification->setMethodId(NsAppLinkRPCV2::FunctionID::OnEncodedSyncPDataID);
+                            encodedNotification->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                             encodedNotification->set_data(core->mSyncPManager.getPData());
                             MobileHandler::getInstance().sendRPCMessage( encodedNotification, appId );
                         }
