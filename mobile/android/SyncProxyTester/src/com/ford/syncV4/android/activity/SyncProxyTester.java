@@ -70,6 +70,7 @@ import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.ReadDID;
 import com.ford.syncV4.proxy.rpc.ScrollableMessage;
 import com.ford.syncV4.proxy.rpc.SetAppIcon;
+import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.ShowConstantTBT;
 import com.ford.syncV4.proxy.rpc.Slider;
@@ -79,6 +80,7 @@ import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.Turn;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
+import com.ford.syncV4.proxy.rpc.VrHelpItem;
 import com.ford.syncV4.proxy.rpc.enums.AudioCaptureQuality;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
@@ -847,17 +849,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							AlertDialog dlg = builder.create();
 							dlg.show();
 						} else if (adapter.getItem(which) == "SetGlobalProperties") {
-							try{
-								Vector<TTSChunk> help = new Vector<TTSChunk>();
-								help.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, "This is the help prompt"));
-								Vector<TTSChunk> timeout = new Vector<TTSChunk>();
-								timeout.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, "This is the timeout prompt"));
-								_msgAdapter.logMessage("SetGlobalProperties (request)", true);
-								ProxyService.getInstance().getProxyInstance().setGlobalProperties(help, timeout, autoIncCorrId++);
-							} catch (SyncException e) {
-								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-							}
-							
+							sendSetGlobalProperties();
 						} else if (adapter.getItem(which) == "SetMediaClockTimer") {
 							//something
 							AlertDialog.Builder builder;
@@ -1799,6 +1791,79 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
 						}
+					}
+
+					private void sendSetGlobalProperties() {
+						AlertDialog.Builder builder;
+
+						Context mContext = adapter.getContext();
+						LayoutInflater inflater = (LayoutInflater) mContext
+								.getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.setglobalproperties,
+								(ViewGroup) findViewById(R.id.setglobalproperties_Root));
+
+						final EditText helpPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_helpPrompt);
+						final EditText timeoutPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_timeoutPrompt);
+						final EditText vrHelpTitle = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpTitle);
+						final EditText vrHelpItemText = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemText);
+						final EditText vrHelpItemImage = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemImage);
+						final EditText vrHelpItemPosition = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemPos);
+						final CheckBox choiceHelpPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceHelpPrompt);
+						final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceTimeoutPrompt);
+						final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpTitle);
+						final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpItem);
+
+						builder = new AlertDialog.Builder(mContext);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								SetGlobalProperties msg = new SetGlobalProperties();
+								
+								if (choiceHelpPrompt.isChecked()) {
+									Vector<TTSChunk> help = new Vector<TTSChunk>();
+									help.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, helpPrompt.getText().toString()));
+									msg.setHelpPrompt(help);
+								}
+
+								if (choiceTimeoutPrompt.isChecked()) {
+									Vector<TTSChunk> timeout = new Vector<TTSChunk>();
+									timeout.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, timeoutPrompt.getText().toString()));
+									msg.setTimeoutPrompt(timeout);
+								}
+
+								if (choiceVRHelpTitle.isChecked()) {
+									msg.setVrHelpTitle(vrHelpTitle.getText().toString());
+								}
+								
+								if (choiceVRHelpItem.isChecked()) {
+									Vector<VrHelpItem> vrHelp = new Vector<VrHelpItem>();
+									
+									VrHelpItem helpItem = new VrHelpItem();
+									helpItem.setText(vrHelpItemText.getText().toString());
+									helpItem.setPosition(Integer.parseInt(vrHelpItemPosition.getText().toString()));
+									Image image = new Image();
+									image.setValue(vrHelpItemImage.getText().toString());
+									image.setImageType(ImageType.STATIC);
+									helpItem.setImage(image);
+									vrHelp.add(helpItem);
+									
+									msg.setVrHelp(vrHelp);
+								}
+
+								_msgAdapter.logMessage(msg, true);
+								try {
+									ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+								} catch (SyncException e) {
+									_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+								}
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+						builder.setView(layout);
+						builder.create().show();
 					}
 				})
 		       .setNegativeButton("Close", null)
