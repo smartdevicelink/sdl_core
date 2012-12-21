@@ -1724,7 +1724,23 @@ namespace NsAppManager
 
                     NsRPC2Communication::UI::SetAppIcon* setAppIcon = new NsRPC2Communication::UI::SetAppIcon();
                     setAppIcon->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    setAppIcon->set_syncFileName(request->get_syncFileName());
+                    
+                    char currentAppPath[FILENAME_MAX];
+                    char fullPathToSyncFileName[FILENAME_MAX];
+
+                    memset(currentAppPath, 0, FILENAME_MAX);
+                    memset(fullPathToSyncFileName, 0, FILENAME_MAX);
+
+                    getcwd(currentAppPath, FILENAME_MAX);
+                    const std::string& syncFileName = request->get_syncFileName();
+                    // TODO(akandul): '.png' - for testing only
+                    // TODO(akandul): We look for icon in current app dir.
+                    snprintf(fullPathToSyncFileName, FILENAME_MAX - 1, "%s/%s.png"
+                        , currentAppPath, syncFileName.c_str());
+
+                    LOG4CPLUS_INFO_EXT(mLogger, "Full path to sync file name: " << fullPathToSyncFileName);
+
+                    setAppIcon->set_syncFileName(fullPathToSyncFileName);
                     setAppIcon->set_appId(app->getAppID());
 
                     core->mMessageMapping.addMessage(setAppIcon->getId(), sessionKey);
