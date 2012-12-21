@@ -1,8 +1,6 @@
 [R5.1.0]
 SyncProxyTester:
-+ Add the possibility to set the parameters of ResetGlobalProperties command with GUI.
-+ Add the possibility to set the parameters of SetGlobalProperties command with GUI.
-+ Add dialog for SetGlobalProperties command's helpPrompt and timeoutPrompt values.
++ Add the possibility to set the parameters of SetGlobalProperties and ResetGlobalProperties commands with GUI.
 * Fix a rare crash when creating a command after resuming the app.
 * Fix sending CreateChoiceSet command by adding image values.
 + The user can specify position when creating Slider request.

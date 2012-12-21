@@ -1822,21 +1822,25 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								SetGlobalProperties msg = new SetGlobalProperties();
+								int numberOfChoices = 0;
 								
 								if (choiceHelpPrompt.isChecked()) {
 									Vector<TTSChunk> help = new Vector<TTSChunk>();
 									help.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, helpPrompt.getText().toString()));
 									msg.setHelpPrompt(help);
+									++numberOfChoices;
 								}
 
 								if (choiceTimeoutPrompt.isChecked()) {
 									Vector<TTSChunk> timeout = new Vector<TTSChunk>();
 									timeout.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, timeoutPrompt.getText().toString()));
 									msg.setTimeoutPrompt(timeout);
+									++numberOfChoices;
 								}
 
 								if (choiceVRHelpTitle.isChecked()) {
 									msg.setVrHelpTitle(vrHelpTitle.getText().toString());
+									++numberOfChoices;
 								}
 								
 								if (choiceVRHelpItem.isChecked()) {
@@ -1852,13 +1856,18 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									vrHelp.add(helpItem);
 									
 									msg.setVrHelp(vrHelp);
+									++numberOfChoices;
 								}
 
-								_msgAdapter.logMessage(msg, true);
-								try {
-									ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-								} catch (SyncException e) {
-									_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+								if (numberOfChoices > 0) {
+									_msgAdapter.logMessage(msg, true);
+									try {
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (SyncException e) {
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									}
+								} else {
+									Toast.makeText(getApplicationContext(), "No items selected", Toast.LENGTH_LONG).show();
 								}
 							}
 						});
