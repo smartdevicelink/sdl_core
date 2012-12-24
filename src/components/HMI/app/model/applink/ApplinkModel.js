@@ -34,6 +34,7 @@ MFT.ApplinkModel = Em.Object.create({
      */
     listOfIcons:{
         //appId: syncFileName
+        0:  "images/media/ico_li.png"
     },
 
     /**
@@ -154,6 +155,9 @@ MFT.ApplinkModel = Em.Object.create({
      */
     onApplinkSetAppIcon: function( message ){
         this.set('listOfIcons.' + message.appId, message.syncFileName );
+        var tempId = MFT.ApplinkMediaModel.activeAppId;
+        MFT.ApplinkMediaModel.activeAppId = -1;
+        MFT.ApplinkMediaModel.set('activeAppId', tempId);
     },
     
     /**

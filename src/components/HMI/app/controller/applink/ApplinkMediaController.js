@@ -77,6 +77,7 @@ MFT.ApplinkMediaController = Em.Object.create({
 
         MFT.ApplinkMediaModel.appInfo.set('appName', element.appName);
         FFW.AppLinkCoreClient.ActivateApp(element.appId);
+        MFT.ApplinkMediaModel.set('activeAppId', element.appId);
 
         /* Show Applink application in media left menu */
         MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);

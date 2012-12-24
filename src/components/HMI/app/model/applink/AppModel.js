@@ -11,6 +11,13 @@
  */
  
 MFT.ApplinkAppModel = Em.Object.extend({
+
+	/**
+     * Active Application Id
+     *
+     * @type: int
+     */
+    activeAppId: 0,
 	
 	/**
      * Submenu commands list

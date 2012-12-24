@@ -262,10 +262,12 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
         this.appInfo.set('mediaTrack',    params.mediaTrack);
         this.appInfo.set('image',         params.graphic);
         this.appInfo.set('softButtons',   params.softButtons);
-        var i=0;
-        for(i=0; i<params.customPresets.length; i++){
-            if(params.customPresets[i] != '' || params.customPresets[i] != null){
-                this.appInfo.set('customPresets.' + i, params.customPresets[i]);
+        if(params.customPresets){
+            var i=0;
+            for(i=0; i<params.customPresets.length; i++){
+                if(params.customPresets[i] != '' || params.customPresets[i] != null){
+                    this.appInfo.set('customPresets.' + i, params.customPresets[i]);
+                }
             }
         }
 
