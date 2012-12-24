@@ -1750,9 +1750,8 @@ namespace NsAppManager
 
                     getcwd(currentAppPath, FILENAME_MAX);
                     const std::string& syncFileName = request->get_syncFileName();
-                    // TODO(akandul): '.png' - for testing only
                     // TODO(akandul): We look for icon in current app dir.
-                    snprintf(fullPathToSyncFileName, FILENAME_MAX - 1, "%s/%s.png"
+                    snprintf(fullPathToSyncFileName, FILENAME_MAX - 1, "%s/%s"
                         , currentAppPath, syncFileName.c_str());
 
                     LOG4CPLUS_INFO_EXT(mLogger, "Full path to sync file name: " << fullPathToSyncFileName);
