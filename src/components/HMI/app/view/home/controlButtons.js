@@ -17,6 +17,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 	childViews: [
 		'buttonControls',
 		'driverDistractionControl',
+		'protocolVersion',
 		'infoTable',
 		'sendData'
 	],
@@ -98,7 +99,40 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:			'driverDistractionControlCheckBox',
 
 			onCheckBoxSelected:	function(){
-				MFT.ApplinkMediaController.selectdDriverDistraction(this.checked);
+				MFT.ApplinkController.selectdDriverDistraction(this.checked);
+			}.observes('this.checked')
+
+		})
+	}),
+
+
+	protocolVersion: Em.ContainerView.extend({
+		elementId:	'protocolVersion',
+		
+		classNames:	'protocolVersion',
+
+		childViews: [
+			'protocolVersionLabel',
+			'protocolVersionCheckBox'
+		],
+
+		protocolVersionLabel : MFT.Label.extend({
+
+			elementId:			'protocolVersionLabel',
+
+			classNames:			'protocolVersionLabel',
+
+			content:			'Protocol version V2'
+		}),		
+
+		protocolVersionCheckBox : Em.Checkbox.extend({
+
+			elementId:			'protocolVersionCheckBox',
+
+			classNames:			'protocolVersionCheckBox',
+
+			onCheckBoxSelected:	function(){
+				MFT.ApplinkController.selectProtocolVersion(this.checked);
 			}.observes('this.checked')
 
 		})

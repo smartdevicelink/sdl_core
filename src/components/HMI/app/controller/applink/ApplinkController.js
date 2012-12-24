@@ -45,7 +45,7 @@ MFT.ApplinkController = Em.Object.create({
 		this.registeredApps[ applicationId ] = applicationType;
 		//Em.Logger.log('Application ['+ applicationId +'] registered!');
 	},
-	
+
 	/**
 	 * Unregister application
 	 * @desc ...
@@ -55,7 +55,35 @@ MFT.ApplinkController = Em.Object.create({
 	unRegisterApplication: function( applicationId ) {
 		delete this.registeredApps[ applicationId ];
 	},
-	
+
+    /**
+     * Applink Driver Distraction ON/OFF switcher
+     * 
+     * @param checked: bool
+     */
+    selectdDriverDistraction: function(checked){
+        if(checked){
+            FFW.UI.onDriverDistraction( this.eDriverDistractionState.on );
+            MFT.DriverDistraction.activate();
+        }else{
+            FFW.UI.onDriverDistraction( this.eDriverDistractionState.off );
+            MFT.DriverDistraction.deactivate();
+        }
+    },
+
+    /**
+     * Applink Protocol Version 2 ON/OFF switcher
+     * 
+     * @param checked: bool
+     */
+    selectProtocolVersion: function(checked){
+        if(checked){
+            FFW.AppLinkCoreClient.OnVersionChanged( 2 );
+        }else{
+            FFW.AppLinkCoreClient.OnVersionChanged( 1 );
+        }
+    },
+
 	/**
 	 * Get application model
 	 * @desc ...

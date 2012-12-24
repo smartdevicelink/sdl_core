@@ -59,10 +59,18 @@ MFT.VRPopUp = Em.ContainerView.create({
                 target:                 'MFT.ApplinkController',
                 text:                   appName,
                 appName:                appName,
-                appId:                  appId,
+                activeAppId:            appId,
                 classNames:             'list-item',
                 templateName:           'text'
             })
+        );
+
+    },
+
+    DeleteActivateApp: function( appId ){
+
+        this.get('listOfCommands.list.childViews').removeObjects(
+            this.get('listOfCommands.list.childViews').filterProperty( 'activeAppId' , appId )
         );
 
     },

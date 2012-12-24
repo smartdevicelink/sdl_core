@@ -12,6 +12,12 @@
  
 MFT.ApplinkAppModel = Em.Object.extend({
 
+
+    /**
+     * Indicates Applink media application button
+     */
+    hideApplinkButton: true,
+
 	/**
      * Active Application Id
      *

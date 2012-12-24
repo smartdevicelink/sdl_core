@@ -137,7 +137,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			}
 			MFT.VRPopUp.AddActivateApp(notification.params.appId, notification.params.appName);
 			// add new app to the list
-			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " connected!");
+			//MFT.TTSPopUp.ActivateTTS(notification.params.appName + " connected!");
 			MFT.ApplinkController.getApplicationModel(notification.params.appId).appInfo.set('appName', notification.params.appName);
 			
 			this.getAppList();
@@ -146,9 +146,10 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		if (notification.method == this.onAppUnregisteredNotification)
 		{	
 			//  remove app from list
-			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " disconnected!");
-			MFT.ApplinkMediaModel.appInfo.set('appName', "<No app>");
-			MFT.ApplinkMediaController.set('hideApplinkMediaButton', true);
+			//MFT.TTSPopUp.ActivateTTS(notification.params.appName + " disconnected!");
+			MFT.ApplinkController.getApplicationModel(notification.params.appId).appInfo.set('appName', "<No app>");
+			MFT.ApplinkController.getApplicationModel(notification.params.appId).set('hideApplinkButton', true);
+			MFT.VRPopUp.DeleteActivateApp(notification.params.appId);
 			MFT.ApplinkController.unRegisterApplication(notification.params.appId);
 		}
 
@@ -180,6 +181,21 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"method":	"AppLinkCore.GetAppList",
 			"params":	{
 			}
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * send notification when DriverDistraction PopUp is visible
+ 	 */	
+	OnVersionChanged: function( version ) {
+		Em.Logger.log("FFW.AppLinkCore.OnVersionChanged");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"AppLinkCore.OnVersionChanged",
+			"params":	{"versionNumber":	version}
 		};
 		this.client.send(JSONMessage);
 	},
