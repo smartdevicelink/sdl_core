@@ -55,9 +55,20 @@ MFT.ControlButtons = Em.ContainerView.create({
 
 			classNames:			'applinkGPData',
 
-			contentBinding:		'FFW.UI.globalPropertiesDefault.helpPrompt.0.text'
+			content:			'Some text for help prompt',
 			
-			//this.globalProperties.set('timeoutPrompt',
+			propertiesData: function(){
+				var i=0,
+					str='HELP_PROMPT: ';
+				for(i = 0; i < MFT.ApplinkModel.globalProperties.helpPrompt.length; i++){
+					str += MFT.ApplinkModel.globalProperties.helpPrompt[i].text + ' ';
+				}
+				str += 'TIMEOUT_PROMPT: ';
+				for(i = 0; i < MFT.ApplinkModel.globalProperties.timeoutPrompt.length; i++){
+					str += MFT.ApplinkModel.globalProperties.timeoutPrompt[i].text + ' ';
+				}
+				this.set('content', str);
+			}
 		})
 	}),
 

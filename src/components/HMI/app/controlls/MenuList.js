@@ -17,18 +17,37 @@ MFT.MenuList = Em.ContainerView.extend({
 	 *
 	 * @param buttons: SoftButton[]
 	 */
-	addItem: function( buttons ) {
-		
-		this.deleteItem();
+	addItems: function( buttons ) {
 
-		for(var i=0; i<buttons.length; i++){
-			this.get('content.childViews').pushObject( 
-				MFT.Button.create({
-					text:			buttons[i].text,
-					icon:			buttons[i].image,
-					softButtonId:	buttons[i].softButtonID
-				})
-			);
+		this.deleteItems();
+
+		if(buttons){
+			for(var i=0; i<buttons.length; i++){
+				this.get('content.childViews').pushObject( 
+					MFT.Button.create({
+						text:			buttons[i].text,
+						icon:			buttons[i].image,
+						softButtonId:	buttons[i].softButtonID,
+						actionDown:       function(){
+		                    this._super();
+		                    FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", this.softButtonId);
+		                    var self = this;
+		                    this.time = 0;
+		                    setTimeout(function(){ self.time ++; }, 1000);
+		                },
+		                actionUp:       function(){
+		                    this._super();
+		                    FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", this.softButtonId);
+		                    if(this.time > 0){
+		                        FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "LONG", this.softButtonId);
+		                    }else{
+		                        FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "SHORT", this.softButtonId);
+		                    }
+		                    this.time = 0;
+		                }
+					})
+				);
+			}
 		}
 	},
 	
@@ -36,10 +55,12 @@ MFT.MenuList = Em.ContainerView.extend({
 	 * Delete items from container
 	 * 
 	 */
-	deleteItem: function() {
-		this.get('content.childViews').removeObjects(
-			this.get('content.childViews')
-		);
+	deleteItems: function() {
+		var i,
+			count = this.get('content.childViews').length;
+		for( i=0; i < count; i++){
+			this.get('content.childViews').popObject();
+		}
 	},
 
 	classNames: ['ffw_list_menu'],

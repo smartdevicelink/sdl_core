@@ -194,4 +194,15 @@ namespace NsAppManager
     {
         return mChoiceSets.size();
     }
+
+    /**
+     * \brief find a mapped choice set item
+     * \param choiceSetId interaction choice set id
+     * \return a mapped choice set item
+     */
+    const ChoiceSetV1* Application_v1::findChoiceSet(const unsigned int &choiceSetId)
+    {
+        const ChoiceSetGeneric* choiceSetGeneric = mChoiceSets.findItem(choiceSetId);
+        return choiceSetGeneric ? &choiceSetGeneric->choiceSetV1 : 0;
+    }
 }

@@ -12,13 +12,6 @@
 
 MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.create({
 
-	/**
-     * Submenu commands list
-     *
-     * @type: Array
-     */
-    subMenuCommands: [],
-
     /**
      * Info data
      *
@@ -33,6 +26,14 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.create({
         statusBar:      '<statusBar',
         image:			''
     }),
+
+    turnOnApplink: function(appName, appId){
+        var params = {
+            "appName":  appName,
+            "appId":    appId
+        };
+        MFT.NonMediaController.turnOnApplink(params);
+    },
     
     /** Applin UI Show handler */
     onApplinkUIShow: function(params){
@@ -48,11 +49,6 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.create({
 
        MFT.InfoNonMediaOptions.commands.AddCommand( commandId, params );
 
-    },
-    
-    /** Applin UI Alert handler */
-    onApplinkUIAlert: function(params){
-        MFT.AlertPopUp.AlertActive(params.AlertText1, params.AlertText2, params.duration, params.playTone);
     },
     
     /** Applink AddCommand handler */
@@ -101,21 +97,6 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.create({
         return "SUCCESS";
     },
     
-    /** Delete all commands in sub menu from VR */
-    onApplinkCreateInteractionChoise: function(params){
-		return;
-    },
-    
-    /** Delete all commands in sub menu from VR */
-    onApplinkDeleteInteractionChoise: function(choiseSetID){
-		return;
-    },
-    
-    /** Switching on Applink Perform Interaction Choise */
-    turnOnApplinkPerform: function(params){
-        return;
-    },
-    
     /** Applink Setter for Media Clock Timer */
     applinkSetMediaClockTimer: function(params){
 		return;
@@ -124,23 +105,5 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.create({
     /** Applink Slider activation */
     onApplinkSlider: function(params){
     	return;
-    },
-
-    /** Applin UI Alert handler */
-    onApplinkUIAlert: function(params){
-
-        this.alertInfo.set('text1', params.AlertText1);
-        this.alertInfo.set('text2', params.AlertText2);
-        this.alertInfo.set('text3', params.alertText3);
-        this.alertInfo.set('ttsChunks', params.ttsChunks );
-        this.alertInfo.set('duration', params.duration );
-        this.alertInfo.set('playTone', params.playTone );
-        this.alertInfo.set('softButtons', params.softButtons );
-        this.alertInfo.set('tryAgainTime', params.tryAgainTime );
-
-        // appId
-
-        MFT.AlertPopUp.AlertActive();
-
     }
 });

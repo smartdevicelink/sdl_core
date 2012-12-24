@@ -48,7 +48,11 @@ public class ProtocolMessage {
 	}
 
 	public void setBulkData(byte[] bulkData) {
-		this._bulkData = bulkData;
+		if (this._bulkData != null)
+			this._bulkData = null;
+		this._bulkData = new byte[bulkData.length];
+		System.arraycopy(bulkData, 0, this._bulkData, 0, bulkData.length);
+		//this._bulkData = bulkData;
 	}
 
 	public SessionType getSessionType() {

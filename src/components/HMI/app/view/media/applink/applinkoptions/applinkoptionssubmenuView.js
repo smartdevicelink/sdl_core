@@ -23,10 +23,10 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
                         ],
 
     backButton: MFT.Button.extend({
-        classNames:        ['backButton','button'],     
+        classNames:        ['backButton','button'],
         action:            'back',
         target:            'MFT.States',   
-        icon:              'images/media/ico_back.png',   
+        icon:              'images/media/ico_back.png',
     }),
 
     optionsSubMenuLabel:    MFT.Label.extend({
@@ -78,7 +78,7 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
                         commandId:              MFT.ApplinkMediaModel.subMenuCommands[i].cmdId,
                         text:                   MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.menuName,
                         parentID:               MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.parentID,
-                        appId:                  MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.appId,
+                        appId:                  MFT.ApplinkMediaModel.subMenuCommands[i].appId,
                         icon:                   MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.icon,
                         className:              'rs-item',
                         templateName:           MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.icon ? 'rightIcon' : 'text'

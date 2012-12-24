@@ -188,9 +188,6 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char * message, uns
     }
     
     const unsigned int dataPayloadSize = messageSize - offset;
-
-    //std::cout << "ProtocolPacket::deserializePacket: dataPayloadSize " << dataPayloadSize << std::endl;
-    //std::cout.flush();
     
     if (dataPayloadSize != mPacketHeader.dataSize)
     {        
@@ -203,9 +200,6 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char * message, uns
         data = new unsigned char[messageSize - offset];
         memcpy(data, message + offset, dataPayloadSize);
     }
-
-    //std::cout << "ProtocolPacket::deserializePacket: data " << (int)data << std::endl;
-    //std::cout.flush();
 
     mPacketData.data = data;
     mPacketData.totalDataBytes = dataPayloadSize;
@@ -260,6 +254,20 @@ unsigned char * ProtocolPacket::getData() const
 
 void ProtocolPacket::setTotalDataBytes(unsigned int dataBytes)
 {
-    mPacketData.totalDataBytes = dataBytes;
+    if ( dataBytes )
+    {
+        if ( mPacketData.data )
+        {
+            delete [] mPacketData.data;
+            mPacketData.data = 0;
+        }
+        mPacketData.data = new unsigned char[dataBytes];
+        mPacketData.totalDataBytes = dataBytes;
+    }    
+}
+
+unsigned int ProtocolPacket::getTotalDataBytes() const
+{
+    return mPacketData.totalDataBytes;
 }
 /*End of Deserialization*/    

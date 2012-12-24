@@ -2776,24 +2776,6 @@
 	padding: 15px;
 }
 
-#media_applink_slider_view .headerLabel{
-	top: 167px;
-	left: 145px;
-	width: 480px;
-	height: 20px;
-	background: #393939;
-	padding: 15px;
-}
-
-#media_applink_slider_view .footerLabel{
-	top: 325px;
-	left: 145px;
-	width: 480px;
-	height: 20px;
-	background: #393939;
-	padding: 15px;
-}
-
 /* Applink Perform Interaction Choise */
 #media_app_perform_interaction_view{
 	width: 800px;

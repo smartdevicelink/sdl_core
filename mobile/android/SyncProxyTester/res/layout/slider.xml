@@ -1,67 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="300px" android:layout_width="fill_parent"
-    android:orientation="vertical" android:id="@+id/itemRoot"
-    android:paddingLeft="20dip" android:paddingRight="20dip"
-    android:layout_marginLeft="10dip" android:layout_marginRight="10dip">
-    <TextView 
+    android:id="@+id/itemRoot"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dip"
+    android:layout_marginRight="10dip"
+    android:minWidth="300px"
+    android:orientation="vertical"
+    android:paddingLeft="20dip"
+    android:paddingRight="20dip" >
+
+    <TextView
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" 
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textStyle="bold"
-        android:text="Num Ticks">
+        android:text="Num Ticks"
+        android:textStyle="bold" >
     </TextView>
-    <EditText 
-        android:text="2" 
+
+    <EditText
         android:id="@+id/txtNumTicks"
-        android:layout_width="fill_parent" 
-        android:layout_height="wrap_content"
-        android:visibility="visible" 
-        android:freezesText="true">
-    </EditText>
-    <TextView 
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" 
+        android:layout_height="wrap_content"
+        android:freezesText="true"
+        android:text="2"
+        android:visibility="visible" >
+    </EditText>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textStyle="bold" 
-        android:text="Slider Header">
+        android:text="Position"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/txtPosition"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ems="10"
+        android:freezesText="true"
+        android:text="1"
+        android:visibility="visible" />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Slider Header"
+        android:textStyle="bold" >
     </TextView>
-    <EditText 
-        android:text="Slider Header" 
+
+    <EditText
         android:id="@+id/txtSliderHeader"
-        android:layout_width="fill_parent" 
-        android:layout_height="wrap_content"
-        android:visibility="visible" 
-        android:freezesText="true">
-    </EditText>
-    <TextView 
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" 
+        android:layout_height="wrap_content"
+        android:freezesText="true"
+        android:text="Slider Header"
+        android:visibility="visible" >
+    </EditText>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textStyle="bold" 
-        android:text="Slider Footer">
+        android:text="Slider Footer"
+        android:textStyle="bold" >
     </TextView>
-    <EditText 
-        android:text="Slider Footer" 
+
+    <EditText
         android:id="@+id/txtSliderFooter"
-        android:layout_width="fill_parent" 
-        android:layout_height="wrap_content"
-        android:visibility="visible" 
-        android:freezesText="true">
-    </EditText>
-    <TextView 
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" 
-        android:layout_weight="1"
-        android:textStyle="bold" 
-        android:text="Timeout">
-    </TextView>
-    <EditText 
-        android:text="5000" 
-        android:id="@+id/txtTimeout"
-        android:layout_width="fill_parent" 
         android:layout_height="wrap_content"
-        android:visibility="visible" 
-        android:freezesText="true">
+        android:freezesText="true"
+        android:text="Slider Footer"
+        android:visibility="visible" >
     </EditText>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Timeout"
+        android:textStyle="bold" >
+    </TextView>
+
+    <EditText
+        android:id="@+id/txtTimeout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:freezesText="true"
+        android:text="5000"
+        android:visibility="visible" >
+    </EditText>
+
 </LinearLayout>

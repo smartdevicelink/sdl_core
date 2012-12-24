@@ -153,7 +153,9 @@ NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV1( const
 
     std::string jsonCleanMessage = clearEmptySpaces( jsonMessage );
 
-    return NsAppLinkRPC::Marshaller::fromString( jsonCleanMessage );
+    NsAppLinkRPC::ALRPCMessage * messageObject = NsAppLinkRPC::Marshaller::fromString( jsonCleanMessage );
+    LOG4CPLUS_INFO_EXT(mLogger, "Received a message from mobile side: " << std::endl << NsAppLinkRPC::Marshaller::toJSON(messageObject));
+    return messageObject;
 }
 
 NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV2( const NsProtocolHandler::AppLinkRawMessage * message )
@@ -217,6 +219,7 @@ NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV2( const
     std::string jsonCleanMessage = clearEmptySpaces( jsonMessage );
 
     NsAppLinkRPC::ALRPCMessage * messageObject = NsAppLinkRPCV2::Marshaller::fromString( jsonCleanMessage, static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(functionId), static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(rpcType) );
+    LOG4CPLUS_INFO_EXT(mLogger, "Received a message from mobile side: " << std::endl << NsAppLinkRPCV2::Marshaller::toJSON(messageObject, static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(functionId), static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(rpcType)));
 
     if ( message -> getDataSize() > offset + jsonSize )
     {
@@ -293,6 +296,7 @@ void * JSONHandler::waitForOutgoingMessages( void * params )
 NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtocolV1( int connectionKey, const NsAppLinkRPC::ALRPCMessage *  message )
 {
     LOG4CPLUS_INFO_EXT(mLogger, "handling a message " << message->getMethodId() << " protocol 1");
+    LOG4CPLUS_INFO_EXT(mLogger, "message text: " << std::endl << NsAppLinkRPC::Marshaller::toJSON( message ));
     std::string messageString = NsAppLinkRPC::Marshaller::toString( message );
 
     if ( messageString.length() == 0 )
@@ -316,6 +320,9 @@ NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtoco
 NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtocolV2( int connectionKey, const NsAppLinkRPC::ALRPCMessage *  message )
 {
     LOG4CPLUS_INFO_EXT(mLogger, "handling a message " << message->getMethodId() << " protocol 2");
+    LOG4CPLUS_INFO_EXT(mLogger, "message text: " << std::endl << NsAppLinkRPCV2::Marshaller::toJSON( message,
+                                                                     static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId()),
+                                                                     static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType())) );
     std::string messageString = NsAppLinkRPCV2::Marshaller::toString( message, 
                         static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId()), 
                         static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()) );

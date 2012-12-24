@@ -53,6 +53,7 @@ import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.TTSChunkFactory;
+import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.Alert;
 import com.ford.syncV4.proxy.rpc.AlertManeuver;
 import com.ford.syncV4.proxy.rpc.ChangeRegistration;
@@ -68,8 +69,10 @@ import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.ReadDID;
+import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.ScrollableMessage;
 import com.ford.syncV4.proxy.rpc.SetAppIcon;
+import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.ShowConstantTBT;
 import com.ford.syncV4.proxy.rpc.Slider;
@@ -79,10 +82,12 @@ import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.Turn;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
+import com.ford.syncV4.proxy.rpc.VrHelpItem;
 import com.ford.syncV4.proxy.rpc.enums.AudioCaptureQuality;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
+import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
@@ -111,6 +116,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private ArrayAdapter<Integer> _commandAdapter = null;
 	private ArrayAdapter<Integer> _choiceSetAdapter = null;
 	private ArrayAdapter<String> _putFileAdapter = null;
+	
+	/** List of function names supported in protocol v1. */
+	private Vector<String> v1Functions = null;
 
 	private int autoIncCorrId = 101;
 	private int autoIncChoiceSetId = 1;
@@ -289,8 +297,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			menu.add(0, MNU_EXIT, 0, "Exit");
 			menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");
 			menu.add(0, MNU_TOGGLE_PROTOCOL_VERSION, 0,
-					"Toggle Protocol Ver. (cur " + getCurrentProtocolVersion()
-							+ ")");
+					"Toggle Protocol Ver. (cur " + String.valueOf(
+							getCurrentProtocolVersion()) + ")");
 			menu.add(0, MNU_UNREGISTER, 0, "Unregister");
 			menu.add(0, MNU_APP_VERSION, 0, "App version");
 			return true;
@@ -299,9 +307,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		}
 	}
 	
-	private String getCurrentProtocolVersion() {
-		return String.valueOf(getSharedPreferences(PREFS_NAME, 0).getInt(
-			"VersionNumber", 1));
+	private int getCurrentProtocolVersion() {
+		return getSharedPreferences(PREFS_NAME, 0).getInt("VersionNumber", 1);
 	}
 
 	/* Handles item selections */
@@ -346,7 +353,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			PoliciesTest.runPoliciesTest();
 			break;
 		case MNU_EXIT:
-			super.finish();
+			exitApp();
 			break;
 		case MNU_TOGGLE_PROTOCOL_VERSION:
 			{SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
@@ -355,6 +362,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			int newVersion = versionN == 1 ? 2:1;
 			editor.putInt("VersionNumber", newVersion);
 			editor.commit();
+			
+			Toast.makeText(getApplicationContext(),
+					"Please start the app again", Toast.LENGTH_LONG).show();
+			exitApp();
 			/*new AlertDialog.Builder(this)  
 			       .setMessage(VERSION)
 			       .setNeutralButton("Copy", new DialogInterface.OnClickListener() {
@@ -420,6 +431,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		return false;
 	}
 	
+	/** Closes the activity and stops the proxy service. */
+	private void exitApp() {
+		finish();
+		if (ProxyService.getInstance() != null) {
+			ProxyService.getInstance().stopSelf();
+		}
+	}
+
 	private String getAssetsContents(String filename, String defaultString) {
 		StringBuilder builder = new StringBuilder();
 		BufferedReader reader = null;
@@ -459,44 +478,87 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				.setNeutralButton(android.R.string.ok, null).create().show();
 	}
 
+	/**
+	 * Adds the function name to the adapter if it is supported by the specified
+	 * protocol version.
+	 */
+	private void addToFunctionsAdapter(ArrayAdapter<String> adapter,
+			int protocolVersion, String functionName) {
+		switch (protocolVersion) {
+		case 1:
+			if (v1Functions == null) {
+				v1Functions = new Vector<String>();
+				v1Functions.add(Names.RegisterAppInterface);
+				v1Functions.add(Names.UnregisterAppInterface);
+				v1Functions.add(Names.SetGlobalProperties);
+				v1Functions.add(Names.ResetGlobalProperties);
+				v1Functions.add(Names.AddCommand);
+				v1Functions.add(Names.DeleteCommand);
+				v1Functions.add(Names.AddSubMenu);
+				v1Functions.add(Names.DeleteSubMenu);
+				v1Functions.add(Names.CreateInteractionChoiceSet);
+				v1Functions.add(Names.PerformInteraction);
+				v1Functions.add(Names.DeleteInteractionChoiceSet);
+				v1Functions.add(Names.Alert);
+				v1Functions.add(Names.Show);
+				v1Functions.add(Names.Speak);
+				v1Functions.add(Names.SetMediaClockTimer);
+				v1Functions.add(Names.EncodedSyncPData);
+				v1Functions.add(Names.SubscribeButton);
+				v1Functions.add(Names.UnsubscribeButton);
+			}
+			
+			if (v1Functions.contains(functionName)) {
+				adapter.add(functionName);
+			}
+			break;
+
+		default:
+			adapter.add(functionName);
+			break;
+		}
+	}
+
 	public void onClick(View v) {
 		if (v == findViewById(R.id.btnSendMessage)) {
 			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item);
-			adapter.add("Alert");
-			adapter.add("Speak");
-			adapter.add("Show");
-			adapter.add("ButtonSubscriptions");
-			adapter.add("AddCommand");
-			adapter.add("DeleteCommand");
-			adapter.add("AddSubMenu");
-			adapter.add("DeleteSubMenu");
-			adapter.add("SetGlobalProperties");
-			adapter.add("SetMediaClockTimer");
-			adapter.add("CreateChoiceSet");
-			adapter.add("DeleteChoiceSet");
-			adapter.add("PerformInteraction");
-			adapter.add("EncodedSyncPData");
-			adapter.add("Slider");
-			adapter.add("ScrollableMessage");
-			adapter.add("ChangeRegistration");
-			adapter.add("PutFile");
-			adapter.add("DeleteFile");
-			adapter.add("ListFiles");
-			adapter.add("SetAppIcon");
-			adapter.add("PerformAudioPassThru");
-			adapter.add("EndAudioPassThru");
-			adapter.add("SubscribeVehicleData");
-			adapter.add("UnsubscribeVehicleData");
-			adapter.add("GetVehicleData");
-			adapter.add("ReadDID");
-			adapter.add("GetDTCs");
-			adapter.add("ShowConstantTBT");
-			adapter.add("AlertManeuver");
-			adapter.add("UpdateTurnList");
-			adapter.add("DialNumber");
+			int protocolVersion = getCurrentProtocolVersion();
+			addToFunctionsAdapter(adapter, protocolVersion, "Alert");
+			addToFunctionsAdapter(adapter, protocolVersion, "Speak");
+			addToFunctionsAdapter(adapter, protocolVersion, "Show");
+			addToFunctionsAdapter(adapter, protocolVersion, "ButtonSubscriptions");
+			addToFunctionsAdapter(adapter, protocolVersion, "AddCommand");
+			addToFunctionsAdapter(adapter, protocolVersion, "DeleteCommand");
+			addToFunctionsAdapter(adapter, protocolVersion, "AddSubMenu");
+			addToFunctionsAdapter(adapter, protocolVersion, "DeleteSubMenu");
+			addToFunctionsAdapter(adapter, protocolVersion, "SetGlobalProperties");
+			addToFunctionsAdapter(adapter, protocolVersion, "ResetGlobalProperties");
+			addToFunctionsAdapter(adapter, protocolVersion, "SetMediaClockTimer");
+			addToFunctionsAdapter(adapter, protocolVersion, "CreateChoiceSet");
+			addToFunctionsAdapter(adapter, protocolVersion, "DeleteChoiceSet");
+			addToFunctionsAdapter(adapter, protocolVersion, "PerformInteraction");
+			addToFunctionsAdapter(adapter, protocolVersion, "EncodedSyncPData");
+			addToFunctionsAdapter(adapter, protocolVersion, "Slider");
+			addToFunctionsAdapter(adapter, protocolVersion, "ScrollableMessage");
+			addToFunctionsAdapter(adapter, protocolVersion, "ChangeRegistration");
+			addToFunctionsAdapter(adapter, protocolVersion, "PutFile");
+			addToFunctionsAdapter(adapter, protocolVersion, "DeleteFile");
+			addToFunctionsAdapter(adapter, protocolVersion, "ListFiles");
+			addToFunctionsAdapter(adapter, protocolVersion, "SetAppIcon");
+			addToFunctionsAdapter(adapter, protocolVersion, "PerformAudioPassThru");
+			addToFunctionsAdapter(adapter, protocolVersion, "EndAudioPassThru");
+			addToFunctionsAdapter(adapter, protocolVersion, "SubscribeVehicleData");
+			addToFunctionsAdapter(adapter, protocolVersion, "UnsubscribeVehicleData");
+			addToFunctionsAdapter(adapter, protocolVersion, "GetVehicleData");
+			addToFunctionsAdapter(adapter, protocolVersion, "ReadDID");
+			addToFunctionsAdapter(adapter, protocolVersion, "GetDTCs");
+			addToFunctionsAdapter(adapter, protocolVersion, "ShowConstantTBT");
+			addToFunctionsAdapter(adapter, protocolVersion, "AlertManeuver");
+			addToFunctionsAdapter(adapter, protocolVersion, "UpdateTurnList");
+			addToFunctionsAdapter(adapter, protocolVersion, "DialNumber");
 			
 			new AlertDialog.Builder(this)  
-		       .setTitle("Pick a Function")
+		       .setTitle("Pick a Function (v" + protocolVersion + ")")
 		       .setAdapter(adapter, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
 						if(adapter.getItem(which) == "Alert"){
@@ -613,6 +675,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										
 									}
 									try {
+										_msgAdapter.logMessage("Speak (request)", true);
 										ProxyService.getInstance().getProxyInstance().speak(chunks, autoIncCorrId++);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
@@ -701,6 +764,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								public void onClick(DialogInterface dialog, int which) {
 								boolean needToSubscribe = !isButtonSubscribed[which];
 									try {
+										_msgAdapter.logMessage("ButtonSubscriptions (request)", true);
 										if (needToSubscribe) 
 											ProxyService.getInstance().getProxyInstance().subscribeButton(ButtonName.values()[which], autoIncCorrId++);
 										else ProxyService.getInstance().getProxyInstance().unsubscribeButton(ButtonName.values()[which], autoIncCorrId++);
@@ -742,6 +806,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									}
 									int cmdID = itemcmdID++;
 									try {
+										_msgAdapter.logMessage("AddCommand (request)", true);
 										ProxyService.getInstance().getProxyInstance().addCommand(cmdID, itemText, sm.getSubMenuId(), 0, vrCommands, autoIncCorrId++);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
@@ -765,6 +830,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								public void onClick(DialogInterface dialog, int which) {
 									int cmdID = _commandAdapter.getItem(which);
 									try {
+										_msgAdapter.logMessage("DeleteCommand (request)", true);
 										//ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 										ProxyService.getInstance().getProxyInstance().deleteCommand(cmdID, autoIncCorrId++);
 									} catch (SyncException e) {
@@ -796,6 +862,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									sm.setSubMenuId(submenucmdID++);
 									addSubMenuToList(sm);
 									try {
+										_msgAdapter.logMessage("AddSubMenu (request)", true);
 										ProxyService.getInstance().getProxyInstance().addSubMenu(sm.getSubMenuId(), sm.getName(), autoIncCorrId++);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
@@ -818,6 +885,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								public void onClick(DialogInterface dialog, int which) {
 									SyncSubMenu menu = _submenuAdapter.getItem(which);
 									try {
+										_msgAdapter.logMessage("DeleteSubMenu (request)", true);
 										ProxyService.getInstance().getProxyInstance().deleteSubMenu(menu.getSubMenuId(), autoIncCorrId++);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
@@ -829,16 +897,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							AlertDialog dlg = builder.create();
 							dlg.show();
 						} else if (adapter.getItem(which) == "SetGlobalProperties") {
-							try{
-								Vector<TTSChunk> help = new Vector<TTSChunk>();
-								help.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, "This is the help prompt"));
-								Vector<TTSChunk> timeout = new Vector<TTSChunk>();
-								timeout.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, "This is the timeout prompt"));
-								ProxyService.getInstance().getProxyInstance().setGlobalProperties(help, timeout, autoIncCorrId++);	
-							} catch (SyncException e) {
-								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-							}
-							
+							sendSetGlobalProperties();
+						} else if (adapter.getItem(which) == "ResetGlobalProperties") {
+							sendResetGlobalProperties();
 						} else if (adapter.getItem(which) == "SetMediaClockTimer") {
 							//something
 							AlertDialog.Builder builder;
@@ -866,6 +927,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									String strSeconds = txtSeconds.getText().toString();
 									
 									try {
+										_msgAdapter.logMessage("SetMediaClockTimer (request)", true);
 										if (strHours.length() > 0 && strMinutes.length() > 0 && strSeconds.length() > 0) {
 											ProxyService.getInstance().getProxyInstance().setMediaClockTimer(
 													Integer.parseInt(strHours), 
@@ -902,6 +964,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText command1 = (EditText) layout.findViewById(R.id.createcommands_command1);
 							final EditText command2 = (EditText) layout.findViewById(R.id.createcommands_command2);
 							final EditText command3 = (EditText) layout.findViewById(R.id.createcommands_command3);
+							final EditText vr1 = (EditText) layout.findViewById(R.id.createcommands_vr1);
+							final EditText vr2 = (EditText) layout.findViewById(R.id.createcommands_vr2);
+							final EditText vr3 = (EditText) layout.findViewById(R.id.createcommands_vr3);
 							final CheckBox choice1 = (CheckBox) layout.findViewById(R.id.createcommands_choice1);
 							final CheckBox choice2 = (CheckBox) layout.findViewById(R.id.createcommands_choice2);
 							final CheckBox choice3 = (CheckBox) layout.findViewById(R.id.createcommands_choice3);
@@ -910,13 +975,17 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
 									Vector<Choice> commands = new Vector<Choice>();
+									Image image = new Image();
+									image.setImageType(ImageType.STATIC);
+									image.setValue("iconFilename");
 									
 									if (choice1.isChecked()) {
 										Choice one = new Choice();
 										one.setChoiceID(autoIncChoiceSetIdCmdId++);
 										one.setMenuName(command1.getText().toString());
 										one.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command1.getText().toString(),
-												"Command one" })));
+												vr1.getText().toString() })));
+										one.setImage(image);
 										commands.add(one);
 									}
 									
@@ -925,7 +994,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										two.setChoiceID(autoIncChoiceSetIdCmdId++);
 										two.setMenuName(command2.getText().toString());
 										two.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command2.getText().toString(),
-												"Command two" })));
+												vr2.getText().toString() })));
+										two.setImage(image);
 										commands.add(two);
 									}
 									
@@ -934,12 +1004,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										three.setChoiceID(autoIncChoiceSetIdCmdId++);
 										three.setMenuName(command3.getText().toString());
 										three.setVrCommands(new Vector<String>(Arrays.asList(new String[] { command3.getText().toString(),
-												"Command three" })));
+												vr3.getText().toString() })));
+										three.setImage(image);
 										commands.add(three);
 									}
 									
 									if (!commands.isEmpty()) {
 										try {
+											_msgAdapter.logMessage("CreateChoiceSet (request)", true);
 											int choiceSetID = autoIncChoiceSetId++;
 											ProxyService.getInstance().getProxyInstance().createInteractionChoiceSet(commands, choiceSetID, autoIncCorrId++);
 											_choiceSetAdapter.add(choiceSetID);
@@ -967,6 +1039,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								public void onClick(DialogInterface dialog, int which) {
 									int commandSetID = _choiceSetAdapter.getItem(which);
 									try {
+										_msgAdapter.logMessage("DeleteChoiceSet (request)", true);
 										ProxyService.getInstance().getProxyInstance().deleteInteractionChoiceSet(commandSetID, autoIncCorrId++);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
@@ -986,6 +1059,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									Vector<Integer> interactionChoiceSetIDs = new Vector<Integer>();
 									interactionChoiceSetIDs.add(_choiceSetAdapter.getItem(which));
 									try {
+										_msgAdapter.logMessage("PerformInteraction (request)", true);
 										ProxyService.getInstance().getProxyInstance().performInteraction(
 															"Pick a command",
 															"Pick number:",
@@ -1027,6 +1101,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									.getSystemService(LAYOUT_INFLATER_SERVICE);
 							View layout = inflater.inflate(R.layout.slider, null);
 							final EditText txtNumTicks = (EditText) layout.findViewById(R.id.txtNumTicks);
+							final EditText txtPosititon = (EditText) layout.findViewById(R.id.txtPosition);
 							final EditText txtSliderHeader = (EditText) layout.findViewById(R.id.txtSliderHeader);
 							final EditText txtSliderFooter = (EditText) layout.findViewById(R.id.txtSliderFooter);
 							final EditText txtTimeout = (EditText) layout.findViewById(R.id.txtTimeout);
@@ -1040,6 +1115,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									Vector<String> footerelements = new Vector<String>();
 									footerelements.add(txtSliderFooter.getText().toString());
 									msg.setSliderFooter(footerelements);
+									msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
 									msg.setCorrelationID(autoIncCorrId++);
 									_msgAdapter.logMessage(msg, true);
 									try {
@@ -1765,6 +1841,146 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
 						}
+					}
+
+					private void sendSetGlobalProperties() {
+						AlertDialog.Builder builder;
+
+						Context mContext = adapter.getContext();
+						LayoutInflater inflater = (LayoutInflater) mContext
+								.getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.setglobalproperties,
+								(ViewGroup) findViewById(R.id.setglobalproperties_Root));
+
+						final EditText helpPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_helpPrompt);
+						final EditText timeoutPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_timeoutPrompt);
+						final EditText vrHelpTitle = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpTitle);
+						final EditText vrHelpItemText = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemText);
+						final EditText vrHelpItemImage = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemImage);
+						final EditText vrHelpItemPosition = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemPos);
+						final CheckBox choiceHelpPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceHelpPrompt);
+						final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceTimeoutPrompt);
+						final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpTitle);
+						final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpItem);
+
+						builder = new AlertDialog.Builder(mContext);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								SetGlobalProperties msg = new SetGlobalProperties();
+								int numberOfChoices = 0;
+								
+								if (choiceHelpPrompt.isChecked()) {
+									Vector<TTSChunk> help = new Vector<TTSChunk>();
+									help.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, helpPrompt.getText().toString()));
+									msg.setHelpPrompt(help);
+									++numberOfChoices;
+								}
+
+								if (choiceTimeoutPrompt.isChecked()) {
+									Vector<TTSChunk> timeout = new Vector<TTSChunk>();
+									timeout.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, timeoutPrompt.getText().toString()));
+									msg.setTimeoutPrompt(timeout);
+									++numberOfChoices;
+								}
+
+								if (choiceVRHelpTitle.isChecked()) {
+									msg.setVrHelpTitle(vrHelpTitle.getText().toString());
+									++numberOfChoices;
+								}
+								
+								if (choiceVRHelpItem.isChecked()) {
+									Vector<VrHelpItem> vrHelp = new Vector<VrHelpItem>();
+									
+									VrHelpItem helpItem = new VrHelpItem();
+									helpItem.setText(vrHelpItemText.getText().toString());
+									helpItem.setPosition(Integer.parseInt(vrHelpItemPosition.getText().toString()));
+									Image image = new Image();
+									image.setValue(vrHelpItemImage.getText().toString());
+									image.setImageType(ImageType.STATIC);
+									helpItem.setImage(image);
+									vrHelp.add(helpItem);
+									
+									msg.setVrHelp(vrHelp);
+									++numberOfChoices;
+								}
+
+								if (numberOfChoices > 0) {
+									_msgAdapter.logMessage(msg, true);
+									try {
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (SyncException e) {
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									}
+								} else {
+									Toast.makeText(getApplicationContext(), "No items selected", Toast.LENGTH_LONG).show();
+								}
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+						builder.setView(layout);
+						builder.create().show();
+					}
+
+					private void sendResetGlobalProperties() {
+						AlertDialog.Builder builder;
+
+						Context mContext = adapter.getContext();
+						LayoutInflater inflater = (LayoutInflater) mContext
+								.getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.resetglobalproperties,
+								(ViewGroup) findViewById(R.id.resetglobalproperties_Root));
+
+						final CheckBox choiceHelpPrompt = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceHelpPrompt);
+						final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceTimeoutPrompt);
+						final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceVRHelpTitle);
+						final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.resetglobalproperties_choiceVRHelpItems);
+
+						builder = new AlertDialog.Builder(mContext);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								ResetGlobalProperties msg = new ResetGlobalProperties();
+								Vector<GlobalProperty> properties = new Vector<GlobalProperty>();
+								
+								if (choiceHelpPrompt.isChecked()) {
+									properties.add(GlobalProperty.HELPPROMPT);
+								}
+
+								if (choiceTimeoutPrompt.isChecked()) {
+									properties.add(GlobalProperty.TIMEOUTPROMPT);
+								}
+
+								if (choiceVRHelpTitle.isChecked()) {
+									properties.add(GlobalProperty.VRHELPTITLE);
+								}
+
+								if (choiceVRHelpItem.isChecked()) {
+									properties.add(GlobalProperty.VRHELPITEMS);
+								}
+
+								if (!properties.isEmpty()) {
+									msg.setProperties(properties);
+									_msgAdapter.logMessage(msg, true);
+									try {
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (SyncException e) {
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									}
+								} else {
+									Toast.makeText(getApplicationContext(), "No items selected", Toast.LENGTH_LONG).show();
+								}
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+						builder.setView(layout);
+						builder.create().show();
 					}
 				})
 		       .setNegativeButton("Close", null)

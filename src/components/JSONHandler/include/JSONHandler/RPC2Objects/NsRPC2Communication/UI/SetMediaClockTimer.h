@@ -4,7 +4,7 @@
 #include "JSONHandler/RPC2Request.h"
 
 #include "../include/JSONHandler/ALRPCObjects/V1/StartTime.h"
-#include "../include/JSONHandler/ALRPCObjects/V1/UpdateMode.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/UpdateMode.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -34,7 +34,7 @@ namespace NsRPC2Communication
     
 // getters
       const NsAppLinkRPC::StartTime* get_startTime(void);
-      const NsAppLinkRPC::UpdateMode& get_updateMode(void);
+      const NsAppLinkRPCV2::UpdateMode& get_updateMode(void);
 
       int get_appId(void);
 
@@ -44,7 +44,7 @@ namespace NsRPC2Communication
 
       void reset_startTime(void);
 
-      bool set_updateMode(const NsAppLinkRPC::UpdateMode& updateMode);
+      bool set_updateMode(const NsAppLinkRPCV2::UpdateMode& updateMode);
 
       bool set_appId(int appId);
 
@@ -54,7 +54,7 @@ namespace NsRPC2Communication
       friend class SetMediaClockTimerMarshaller;
 
       NsAppLinkRPC::StartTime* startTime;
-      NsAppLinkRPC::UpdateMode updateMode;
+      NsAppLinkRPCV2::UpdateMode updateMode;
       int appId;
 
     };

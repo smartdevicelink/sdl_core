@@ -27,11 +27,13 @@ MFT.NonMediaController = Em.Object.create({
 		MFT.States.goToState('info.nonMedia.options.subMenu');
 	},
 
-	/** Switching on Application */
-    turnOnApplink: function(appName, appId){
-       
-        MFT.ApplinkController.getApplicationModel(1).appInfo.set('appName', appName);
-        FFW.AppLinkCoreClient.ActivateApp(appId);
+    /** Switching on Application */
+    turnOnApplink: function(element){
+
+        MFT.ApplinkNonMediaModel.appInfo.set('appName', element.appName);
+        FFW.AppLinkCoreClient.ActivateApp(element.appId);
+
+        MFT.MediaController.turnOnApplinkNonMedia();
         
     }
 

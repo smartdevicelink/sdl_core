@@ -52,18 +52,10 @@ namespace NsConnectionHandler
     {
         LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onDeviceListUpdated()" );
         NsAppLink::NsTransportManager::tDeviceList::const_iterator it_in;
+        mDeviceList.clear();
         for (it_in = DeviceList.begin(); it_in != DeviceList.end(); it_in++)
         {
-            tDeviceListIterator it = mDeviceList.find((*it_in).mDeviceHandle);
-            if (it == mDeviceList.end())
-            {
-                LOG4CPLUS_INFO( mLogger, "Add new device" << (*it_in).mUserFriendlyName << " Handler: " << (*it_in).mDeviceHandle);
-                mDeviceList.insert(tDeviceList::value_type((*it_in).mDeviceHandle, CDevice((*it_in).mDeviceHandle, (*it_in).mUserFriendlyName)));
-                /*if ( mpTransportManager )
-                {
-                    mpTransportManager -> connectDevice((*it_in).mDeviceHandle);
-                }*/
-            }
+            mDeviceList.insert(tDeviceList::value_type((*it_in).mDeviceHandle, CDevice((*it_in).mDeviceHandle, (*it_in).mUserFriendlyName)));
         }
         if (0 != mpConnectionHandlerObserver)
         {
@@ -133,6 +125,7 @@ namespace NsConnectionHandler
             LOG4CPLUS_ERROR( mLogger, "Unknown connection!");
         } else
         {
+            int firstSessionID = (it->second).getFirstSessionKey();
             result = (it->second).removeSession(sessionId);
             if (0 > result)
             {
@@ -142,8 +135,12 @@ namespace NsConnectionHandler
                 LOG4CPLUS_INFO( mLogger, "Session removed:" << result );
                 if (0 != mpConnectionHandlerObserver)
                 {
+                    if (0 < firstSessionID)
+                    {
+                        firstSessionID = keyFromPair(connectionHandle, firstSessionID);
+                    }
                     int sessionKey = keyFromPair(connectionHandle, sessionId);
-                    mpConnectionHandlerObserver->onSessionEndedCallback(sessionKey);
+                    mpConnectionHandlerObserver->onSessionEndedCallback(sessionKey, firstSessionID);
                 }
             }
         }

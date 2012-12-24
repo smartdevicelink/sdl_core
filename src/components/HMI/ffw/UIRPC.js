@@ -51,34 +51,6 @@ FFW.UI = FFW.RPCObserver.create({
 	},
 
 	/*
-   	 * Global properties
- 	 */
-	globalProperties	: {
-		helpPrompt	: null ,
-		timeoutPrompt	: null
-	},
-	
-	
-	/*
-   	 * init object
- 	 */
-	init: function() {
-		// init global properties
-		this.resetProperties();
-	},
-
-	/*
-   	 * resetGlobalProperties
- 	 */
-	resetProperties: function(propertyName) {
-		if (propertyName == "HELPPROMPT" || propertyName == "")
-			this.globalProperties.helpPrompt 	= this.globalPropertiesDefault.helpPrompt;
-	
-		if (propertyName == "TIMEOUTPROMPT" || propertyName == "")
-			this.globalProperties.timeoutPrompt = this.globalPropertiesDefault.timoutPrompt;
-	},
-
-	/*
    	 * connect to RPC bus
  	 */
 	connect: function() {
@@ -177,7 +149,6 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.Alert":{
 
-				//MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkUIAlert(request.params);
 				MFT.ApplinkModel.onUIAlert( request.params );
 				
 				this.sendUIResult("SUCCESS", request.id, request.method);
@@ -185,12 +156,9 @@ FFW.UI = FFW.RPCObserver.create({
 		    	break;
 		    }
 		    case "UI.SetGlobalProperties":{
-			    MFT.TTSPopUp.receiveMessage("Set global properties");
+			    MFT.TTSPopUp.ActivateTTS("Set global properties");
 
-				// TODO: please process as array 
-				this.globalProperties.set('helpPrompt', request.params.helpPrompt);
-				// TODO: please process as array 
-				this.globalProperties.set('timeoutPrompt', request.params.timeoutPrompt);
+				MFT.ApplinkModel.setProperties(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 		      	
@@ -201,8 +169,8 @@ FFW.UI = FFW.RPCObserver.create({
 			    // reset all requested properties
 				for (var i=0;i<request.params.length;i++)
 				{
-				    this.resetProperties(reuqest.params[i]);
-					MFT.TTSPopUp.receiveMessage("Reset property: " + reuqest.params[i]);
+				    MFT.ApplinkModel.resetProperties(reuqest.params[i]);
+					MFT.TTSPopUp.ActivateTTS("Reset property: " + reuqest.params[i]);
 				}
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
@@ -243,7 +211,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.CreateInteractionChoiceSet":{
 
-				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkCreateInteractionChoise(request.params);
+				MFT.ApplinkController.getApplicationModel(request.params.appId).onCreateInteraction(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 		    	
@@ -251,7 +219,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.DeleteInteractionChoiceSet":{
 
-				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkDeleteInteractionChoise(request.params.interactionChoiceSetID);
+				MFT.ApplinkController.getApplicationModel(request.params.appId).onDeleteInteraction(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 		    	
@@ -261,7 +229,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 				this.performInteractionRequestId = request.id;
 
-				MFT.ApplinkController.getApplicationModel(request.params.appId).turnOnApplinkPerform(request.params);
+				MFT.ApplinkController.getApplicationModel(request.params.appId).onPreformInteraction(request.params);
 		    	
 		    	break;
 		    }
@@ -281,14 +249,24 @@ FFW.UI = FFW.RPCObserver.create({
 
 		    	this.sliderRequestId = request.id;
 
-				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkSlider(request.params);
+				MFT.ApplinkController.getApplicationModel(request.params.appId).onSlider(request.params);
 
-				MFT.ApplinkSliderView.activate();		    
 		    	break;
 		    }
-		    case "UI.ScrolableMessage":{
+		    case "UI.ScrollableMessage":{
 
-				MFT.ScrollableMessage.activate( request.params.appId, request.params.softButtons );		    
+				MFT.ApplinkModel.onApplinkScrolableMessage( request.params );
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
+
+		    	break;
+		    }
+		    case "UI.SetAppIcon":{
+
+				MFT.ApplinkModel.onApplinkSetAppIcon( request.params );
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
+
 		    	break;
 		    }
 		    case  "UI.GetCapabilities":{
@@ -387,14 +365,14 @@ FFW.UI = FFW.RPCObserver.create({
 		}
 	},
 
-	sendSliderResult: function(resultCode  ) {
+	sendSliderResult: function(resultCode, sliderPosition ) {
 		var JSONMessage = {
 				"jsonrpc"	:	"2.0",
 				"id"		: 	this.sliderRequestId,
 				"result":	{
 					"resultCode" : resultCode, //  type (enum) from AppLink protocol
 					"method" : "UI.SliderResponse",
-					"sliderPosition" : MFT.ApplinkMediaModel.applinkSliderContent.value
+					"sliderPosition" : sliderPosition
 					}
 				};
 				this.client.send(JSONMessage);

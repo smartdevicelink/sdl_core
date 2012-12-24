@@ -3,7 +3,6 @@
 
 #include "ScrollableMessage_requestMarshaller.h"
 
-
 /*
   interface	Ford Sync RAPI
   version	2.0O

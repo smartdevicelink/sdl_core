@@ -1,5 +1,15 @@
 [R5.1.0]
 SyncProxyTester:
++ When the v1 protocol is active, the user can only send a command supported by version 1.
++ Add the possibility to set the parameters of SetGlobalProperties and ResetGlobalProperties commands with GUI.
+* Fix a rare crash when creating a command after resuming the app.
+* Fix sending CreateChoiceSet command by adding image values.
++ The user can specify position when creating Slider request.
++ Adding EncodedSyncPData support to SyncProxyTester (Ford's).
++ After toggling protocol version, the app needs to be restarted by the user.
++ When clicking the Exit options menu item, the app closes the activity and also stops the proxy service.
++ The user can specify VR synonyms for choice set's commands with the help of additional text fields.
++ Add extra logs for requests.
 + Persist the log messages in the UI during one app launch.
 * Fix: AddCommand dialog: correctly send the entered VR Synonym with the command.
 + Introduce changelog.

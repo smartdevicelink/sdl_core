@@ -10,7 +10,7 @@
  * @author		Andriy Melnik
  */
 
-MFT.ApplinkMediaModel = Em.Object.create({
+MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 	
 	active: false,
 
@@ -20,36 +20,16 @@ MFT.ApplinkMediaModel = Em.Object.create({
 	  * RangedValue for Slider
 	  */
 	applinkSliderContent:		MFT.RangedValue.create({range: 10, value:3, cycle: false, minValue: 0}),
-	
-	/**
-	  * Array of Interaction Choises
-	  */
-	interactionChoises:			new Array(),
 
 	/**
 	  * Array of commands in ApplinkOptionsView
 	  */
     optionsCommands:			new Array(),
 
-	/**
-	  * Array of menus in ApplinkOptionsSubMenuView
-	  */
-    subMenuCommands:			new Array(),
-
     /**
 	  * Array of commands for VR
 	  */
     voiceRecognitionCommands:	new Array(),
-
-    /**
-	  * Array of active applications
-	  */
-    applicationsList:			new Array(),
-
-    /**
-      * Array of connected devices
-      */
-    devicesList:                new Array(),
 
     /**
       * Set of params of Slider View
@@ -129,68 +109,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
             "appId":    appId
         };
         MFT.MediaController.turnOnApplink(params);
-    },
-
-	onGetAppList: function( appList ){
-
-		this.applicationsList.splice(0, this.applicationsList.length);
-		for(var i = 0; i < appList.length; i++){
-            if( appList[i].isMediaApplication ){    
-                this.applicationsList.push({
-                    type:       MFT.Button,
-                    params:     {
-                        action:         'turnOnApplink',
-                        target:         'MFT.ApplinkMediaController',
-                        text:           appList[i].appName,
-                        appName:        appList[i].appName,
-                        appId:          appList[i].appId,
-                        className:      'scrollButtons button notpressed',
-                        icon:           appList[i].icon,
-                        templateName:   'rightIcon'
-                    }                                   
-                });
-            }else{
-                this.applicationsList.push({
-                    type:       MFT.Button,
-                    params:     {
-                        action:         'turnOnApplinkNonMedia',
-                        target:         'MFT.MediaController',
-                        text:           appList[i].appName,
-                        appName:        appList[i].appName,
-                        appId:          appList[i].appId,
-                        className:      'scrollButtons button notpressed',
-                        icon:           appList[i].icon,
-                        templateName:   'rightIcon'
-                    }                                   
-                });
-            }
-        }
-        MFT.InfoAppsView.ShowAppList();
-
-    },
-
-    onGetDeviceList: function( params ){
-        if (null == params.resultCode || (null != params.resultCode && "SUCCESS" == params.resultCode)) {
-            this.devicesList.splice(0, this.devicesList.length);
-            for(var i = 0; i < params.deviceList.length; i++){
-                this.devicesList.push({
-                    type:       MFT.Button,
-                    params:     {
-                        action:         'onDeviceChoosed',
-                        target:         'MFT.ApplinkController',
-                        text:           params.deviceList[i],
-                        deviceName:     params.deviceList[i],
-                        className:      'scrollButtons button notpressed',
-                        icon:           params.icon,
-                        templateName:   'rightIcon'
-                    }                                   
-                });
-            }
-            
-            if( MFT.States.info.devicelist.active ){
-                MFT.DeviceLilstView.ShowDeviceList();
-            }
-        }
+        MFT.MediaView.leftMenu.applinkButton.set('icon', 'sdfsdf');
     },
 
     /**
@@ -214,14 +133,22 @@ MFT.ApplinkMediaModel = Em.Object.create({
 			clearInterval(this.timer);
 		}
 	}.observes('this.pause'),
+	
+	stopTimer: function() {
+		clearInterval(this.timer);
+		this.appInfo.set('mediaClock','');
+	},
 
 	setDuration: function() {
-        var number = (this.duration + this.currTime) % 60;
+        var number;
 		if(this.countUp){
-			this.appInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
+			number = this.duration + this.currTime;
+			//this.appInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}else{
-			this.appInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
+			number = this.duration - this.currTime;
+			//this.appInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}
+		this.appInfo.set('mediaClock', Math.ceil((number+1)/60)-1 + ":" + ((number % 60) < 10 ? '0' : '') + (number % 60) );
 	}.observes('this.currTime'),
 
 	changeDuration: function() {
@@ -237,7 +164,9 @@ MFT.ApplinkMediaModel = Em.Object.create({
 
     },
 
-    /** Delete command to Options list */
+    /** 
+     * Delete command to Options list
+     */
     onApplinkOptionsDeleteCommand: function(commandId){
 
         MFT.ApplinkOptionsView.DeleteCommand( commandId );
@@ -281,33 +210,6 @@ MFT.ApplinkMediaModel = Em.Object.create({
 
     },
 
-    /** Delete all commands in sub menu from VR */
-    onApplinkCreateInteractionChoise: function(params){
-
-        this.interactionChoises.push(params);
-
-        MFT.VRPopUp.CreateInteractionChoise(params);
-
-    },
-
-    /** Delete all commands in sub menu from VR */
-    onApplinkDeleteInteractionChoise: function(choiseSetID){
-
-        if( (choiseSetID == this.currentApplinkPerformInteractionChoiseId) && MFT.States.media.applink.applinkperforminteractionchoise.active){
-            MFT.States.back();
-        }
-
-        for(var val in this.interactionChoises){
-            if(this.interactionChoises[val].interactionChoiceSetID == choiseSetID){
-                this.interactionChoises.splice(val, 1);
-                break;
-            }
-        }
-
-        MFT.VRPopUp.DeleteInteractionChoise( choiseSetID );
-
-    },
-
     /** Applink AddCommand handler */
     onApplinkAddCommand: function(params){
         if( params.menuParams.parentID == 0 ){
@@ -315,7 +217,7 @@ MFT.ApplinkMediaModel = Em.Object.create({
         }else{
             this.subMenuCommands.push(params);
             if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
-                MFT.ApplinkOptionsSubMenuView.SubMenuActivate(MFT.MediaController.currentApplinkSubMenuid);
+                MFT.ApplinkOptionsSubMenuView.SubMenuActivate(MFT.ApplinkMediaController.currentApplinkSubMenuid);
             }
 
         }
@@ -325,7 +227,10 @@ MFT.ApplinkMediaModel = Em.Object.create({
 
     /** Applink Setter for Media Clock Timer */
     applinkSetMediaClockTimer: function(params){
-
+		if(params.updateMode == "CLEAR" ) {
+			this.stopTimer();
+			return;
+		}
         if(params.updateMode == "COUNTUP"){
             this.set('countUp', true);
         }else if(params.updateMode == "COUNTDOWN"){
@@ -344,47 +249,6 @@ MFT.ApplinkMediaModel = Em.Object.create({
         
     },
 
-    /** Switching on Applink Perform Interaction Choise */
-    turnOnApplinkPerform: function(params){
-        this.set('performInteractionInitialText', params.initialText);
-
-/*
-    TTSChunk initialPrompt[1:100], //data type from AppLink protocol specification
-    InteractionMode interactionMode, // data type from AppLink protocol specification
-    unsigned int (2000000000)  interactionChoiceSetIDList[1:100],// List of interaction choice set IDs to use with an interaction
-    TTSChunk * helpPrompt[1:100], //data type from AppLink protocol specification
-    TTSChunk * timeoutPrompt[1:100], // data type from AppLink protocol specification
-    unsigned int (5000:100000) * timeout, //in milliseconds
-    VrHelpItem * vrHelp[1:100], // Ability to send suggested VR Help Items to display on-screen during Perform Interaction
-    int appId
-    -> 
-    unsigned int (2000000000) * choiceID, // ID of the choice that was selected in response to PerformInteraction
-    TriggerSource * triggerSource //data type from AppLink protocol specification
-
-*/
-
-
-
-        if(MFT.States.media.applink.applinkperforminteractionchoise.active){
-            MFT.AppPerformInteractionChoise.PerformInteraction(params.interactionChoiceSetIDList);
-        }else{
-            this.set('currentApplinkPerformInteractionChoiseId', params.interactionChoiceSetIDList);
-            MFT.States.goToState('media.applink.applinkperforminteractionchoise');
-        }
-
-        this.onApplinkTTSSpeak(params.initialPrompt);
-
-        setTimeout(function(){
-            MFT.ApplinkMediaModel.onApplinkTTSSpeak(params.timeoutPrompt);
-        }, params.timeout);
-
-    },
-
-    /** Create list of lapplications on info view */
-    /*onShowAppList: function(params){
-        MFT.InfoAppsView.ShowAppList(params);
-    },*/
-
     /** Applin UI Show handler */
     onApplinkUIShow: function(params){
         clearInterval(this.timer);
@@ -397,57 +261,19 @@ MFT.ApplinkMediaModel = Em.Object.create({
         this.appInfo.set('mediaClock',    params.mediaClock);
         this.appInfo.set('mediaTrack',    params.mediaTrack);
         this.appInfo.set('image',         params.graphic);
-        this.appInfo.set('softButtons',   params.softButtons);        
-        this.appInfo.set('customPresets', params.customPresets);
-
-        // appId
-    },
-
-    /** Applink Slider activation */
-    onApplinkSlider: function(params){
-
-        this.applinkSliderContent.set('range', params.numTicks);
-        this.applinkSliderContent.set('value', params.position);
-        this.set('sliderParams.headerLabel', params.sliderHeader);
-        this.set('sliderParams.footerLabel', params.sliderFooter);
-        MFT.ApplinkMediaController.turnOnApplinkSlider();
-        //MFT.ApplinkSliderView.activate();
-        setTimeout(function(){
-            if(MFT.States.media.applink.applinkslider.active){
-                MFT.States.back();
+        this.appInfo.set('softButtons',   params.softButtons);
+        if(params.customPresets){
+            var i=0;
+            for(i=0; i<params.customPresets.length; i++){
+                if(params.customPresets[i] != '' || params.customPresets[i] != null){
+                    this.appInfo.set('customPresets.' + i, params.customPresets[i]);
+                }
             }
-        },
-        params.timeout);
-    },
-
-    /** Applink TTS Speak handler */
-    onApplinkTTSSpeak: function(ttsChunks){
-        var message = '';
-        if(ttsChunks){
-            for(var i = 0; i < ttsChunks.length; i++){
-                message += ttsChunks[i].text + '\n';
-            }
-            MFT.TTSPopUp.ActivateTTS(message);
         }
-    },
 
-    /** Applink UI Alert handler */
-    onApplinkUIAlert: function(params){
-
-        this.alertInfo.set('text1', params.AlertText1);
-        this.alertInfo.set('text2', params.AlertText2);
-        this.alertInfo.set('text3', params.alertText3);
-        this.alertInfo.set('ttsChunks', params.ttsChunks );
-        this.alertInfo.set('duration', params.duration );
-        this.alertInfo.set('playTone', params.playTone );
-        this.alertInfo.set('softButtons', params.softButtons );
-        this.alertInfo.set('tryAgainTime', params.tryAgainTime );
+        MFT.applinkView.innerMenu.content.AddSoftButton(params.softButtons);
 
         // appId
+    },
 
-        MFT.AlertPopUp.AlertActive();
-
-        this.onApplinkTTSSpeak(params.ttsChunks);
-
-    }
 });

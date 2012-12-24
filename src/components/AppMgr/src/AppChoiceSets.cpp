@@ -57,6 +57,28 @@ namespace NsAppManager
     }
 
     /**
+     * \brief find a mapped choice set item
+     * \param choiceSetId interaction choice set id
+     * \return a mapped choice set item
+     */
+    const ChoiceSetGeneric* AppChoiceSets::findItem(const unsigned int &choiceSetId)
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Searching for an interaction choice set item with id " << choiceSetId );
+        ChoiceSetItems::iterator it = mChoiceSets.find(choiceSetId);
+        if(it != mChoiceSets.end())
+        {
+            const ChoiceSetItem& item = *it;
+            if(choiceSetId == item.first)
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "Found an interaction choice set item with id " << choiceSetId );
+                return &item.second;
+            }
+        }
+        LOG4CPLUS_INFO_EXT(mLogger, "Interaction choice set item for id " << choiceSetId << " not found!" );
+        return 0;
+    }
+
+    /**
      * \brief gets all interaction choice set items
      * \return interaction choice set items
      */

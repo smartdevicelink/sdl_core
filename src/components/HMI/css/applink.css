@@ -32,8 +32,36 @@
 .ffw_list_menu .ffw-button.hidden {
 	display: none;
 } 
+
+.applink-window {
+	width: 800px;
+	height: 480px;
+	background-color: #000;
+	z-index: 1;
+}
  
- 
+.applink-window .back-button {
+	top: 80px;
+	left: 20px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+.applink-window .back-button .ico {
+	margin-top: 13px;
+	margin-left: 8px;
+}
+
+.applink-window .caption-text {
+	top: 80px;
+	left: 100px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
  
 #info_nonMedia {
 	z-index: 1001;
@@ -153,98 +181,176 @@
 	margin-top: -26px;
 }
 
-#media_applink_slider_view .control {
-	 width: 238px;
-	 height: 41px;
-	 border: 1px solid #393939;
-	 -webkit-border-radius: 3px;
-	 -moz-border-radius: 3px;
-	 border-radius: 3px;
- }
+
+/* ScrollableMessage */
+#ScrollableMessage.ScrollableMessage{
+	left: 0;
+	top: 0;
+	width:	800px;
+	height: 480px;
+	/*z-index: 1000;*/
+	background: url(../images/media/bg.png) no-repeat;
+}
+
+#ScrollableMessage.active{
+	opacity: 1;
+	display: block;
+}
+
+#ScrollableMessage .backButton {
+	top: 80px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+#ScrollableMessage .titleText{
+	top: 80px;
+	left: 75px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
+
+#ScrollableMessage .scrollableText{
+	position: absolute;
+	width: 525px;
+	height: 251px;
+	border-radius: 2px;
+	left: 200px;
+	top: 150px;
+	overflow: hidden;
+}
+
+#ScrollableMessage .scrollableText-content{
+	border: none;
+	width: 474px;
+}
+
+#ScrollableMessage .scrollableText-item {
+	position: relative;
+	width: 100%;
+	height: 48px;
+	font-size: 20px;
+	line-height: 50px;
+	border: 1px solid #393939;
+}
+
+#ScrollableMessage .ffw_list_menu {
+	top: 150px !important;
+	left: 25px !important;
+}
+
+#ScrollableMessage .scrollableTextArea{
+	margin: 0px;
+	/*height: 251px;*/
+	width: 469px;
+	font-family: sans-serif;
+	font-size: 16px;
+	color: white;
+	background-color: transparent;
+	resize: none;
+	line-height: 23px;
+	position: absolute;
+}
+
+
+/* Applink Slider */
+
+.slider-header {
+	top: 167px;
+	left: 145px;
+	width: 480px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
+
+.slider-footer {
+	top: 325px;
+	left: 145px;
+	width: 480px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
+
+#slider_view .sliderControl {
+	width: 600px;
+	left: 100px;
+	top: 250px;
+	text-align: center;
+}
+
+#slider_view .control {
+	width: 58px;
+	height: 38px;
+	border: 1px solid #393939;
+	position: relative;
+	display: inline-block;
+}
+
  
- #media_applink_slider_view .control{
-	width: 213px;
-	/*height: 28px;*/
- }
+#slider_view .ledContainer{
+	position: relative;
+	display: inline-block;
+	border: 1px solid #393939;
+	height: 38px;
+}
+
  
- #media_applink_slider_view .control.active {
-	border: 1px solid #ff9900;
- }
- #media_applink_slider_view .control .minus {
-	 width: 58px;
-	 height: 41px;
-	 border-right: 1px solid #393939;
-	 -webkit-border-top-right-radius: 3px;
-	 -webkit-border-bottom-right-radius: 3px;
-	 -moz-border-radius-topright: 3px;
-	 -moz-border-radius-bottomright: 3px;
-	 border-top-right-radius: 3px;
-	 border-bottom-right-radius: 3px;
-	 top: 0;
-	 left: 0;
-	 background: url(../images/common/btn-48h.png);
-	 position: relative;
-	 float: left;
-	 cursor: pointer;
- }
- 
- #media_applink_slider_view .control .minus {
-	/* height: 28px;*/
- }
- 
- #media_applink_slider_view .ledContainer{
- 	 position: relative;
-	 float: left;
- }
- #media_applink_slider_view .control .plus {
-	 width: 58px;
-	 height: 41px;
-	 border-left: 1px solid #393939;
-	 -webkit-border-top-left-radius: 3px;
-	 -webkit-border-bottom-left-radius: 3px;
-	 -moz-border-radius-topleft: 3px;
-	 -moz-border-radius-bottomleft: 3px;
-	 border-top-left-radius: 3px;
-	 border-bottom-left-radius: 3px;
-	 top: 0px;
-	 right: 0;
-	 background: url(../images/common/btn-48h.png);
-	 cursor: pointer;
- }
- 
- #media_applink_slider_view .control .plus {
-	/* height: 28px;*/
- }
- 
- #media_applink_slider_view .control .minus .ico {
+ #slider_view .control.minus .ico {
 	 top: 19px;
 	 left: 20px;
 	 position: absolute;
  }
- #media_applink_slider_view .control .plus .ico {
+ #slider_view .control.plus .ico {
 	 top: 12px;
 	 left: 20px;
 	 position: absolute;
  }
 
-#media_applink_slider_view .led {
+#slider_view .led {
 	width: 12px;
 	height: 40px;
 	background: url("../images/common/seat-act-led.png") no-repeat;
 	position: relative !important;
-	float: left;
 	background-position: -4px 0;
+	display: inline-block;
 }
-#media_applink_slider_view .led-inactive {
+#slider_view .led-inactive {
 	background: url("../images/common/seat-inact-led.png") no-repeat;
 	background-position: 3px 8px;
 	width: 12px;
 	height: 40px;
 	position: relative !important;
-	float: left;
+	display: inline-block;
 }
 
-#media_applink_slider_view .sliderControl{
-	top: 250px;
-	left: 300px;
+
+/* Applink Perform Interaction Choise */
+
+#perform_interaction_view .list{
+	position: absolute;
+	width: 650px;
+	height: 251px;
+	border-radius: 2px;
+	left: 100px;
+	top: 150px;
+}
+
+#perform_interaction_view .list span{
+	margin-left: 15px;
+}
+
+#perform_interaction_view .list-content{
+	width: 578px;
+}
+
+#applink_view_container .textLimit{
+	width: 460px;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }

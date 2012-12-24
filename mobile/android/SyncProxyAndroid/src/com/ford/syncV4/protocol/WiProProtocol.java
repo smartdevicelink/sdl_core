@@ -123,7 +123,8 @@ public class WiProProtocol extends AbstractProtocol {
 				if (data.length % MAX_DATA_SIZE > 0) {
 					frameCount++;
 				}
-				byte[] firstFrameData = new byte[HEADER_SIZE];
+				//byte[] firstFrameData = new byte[HEADER_SIZE];
+				byte[] firstFrameData = new byte[8];
 				// First four bytes are data size.
 				System.arraycopy(BitConverter.intToByteArray(data.length), 0, firstFrameData, 0, 4);
 				// Second four bytes are frame count.

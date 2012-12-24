@@ -246,6 +246,7 @@ int main(int argc, char** argv)
                     {
                         execlp("/usr/bin/chromium-browser",
                               "chromium-browser",
+                              "--auth-schemes=basic,digest,ntlm",
                               hmi_link.c_str(),
                               (char *) 0); /* Execute the program */
                         LOG4CPLUS_INFO(logger, "execl() failed! Install chromium-browser!");

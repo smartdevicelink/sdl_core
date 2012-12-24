@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/SetMediaClockTimer.h"
 #include "../src/ALRPCObjectsImpl/V1/StartTimeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/UpdateModeMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/UpdateModeMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetMediaClockTimerMarshaller.h"
 
@@ -48,7 +48,7 @@ bool SetMediaClockTimerMarshaller::checkIntegrityConst(const SetMediaClockTimer&
 {
   if(s.startTime && (!NsAppLinkRPC::StartTimeMarshaller::checkIntegrityConst(s.startTime[0])))  return false;
 
-  if(!NsAppLinkRPC::UpdateModeMarshaller::checkIntegrityConst(s.updateMode))  return false;
+  if(!NsAppLinkRPCV2::UpdateModeMarshaller::checkIntegrityConst(s.updateMode))  return false;
 
   return true;
 }
@@ -67,7 +67,7 @@ Json::Value SetMediaClockTimerMarshaller::toJSON(const SetMediaClockTimer& e)
   json["params"]=Json::Value(Json::objectValue);
   if(e.startTime)
     json["params"]["startTime"]=NsAppLinkRPC::StartTimeMarshaller::toJSON(e.startTime[0]);;
-  json["params"]["updateMode"]=NsAppLinkRPC::UpdateModeMarshaller::toJSON(e.updateMode);;
+  json["params"]["updateMode"]=NsAppLinkRPCV2::UpdateModeMarshaller::toJSON(e.updateMode);;
   json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
@@ -95,7 +95,7 @@ bool SetMediaClockTimerMarshaller::fromJSON(const Json::Value& json,SetMediaCloc
       if(!NsAppLinkRPC::StartTimeMarshaller::fromJSON(js["startTime"],c.startTime[0]))  return false;
     }
 
-    if(!js.isMember("updateMode") || !NsAppLinkRPC::UpdateModeMarshaller::fromJSON(js["updateMode"],c.updateMode))  return false;
+    if(!js.isMember("updateMode") || !NsAppLinkRPCV2::UpdateModeMarshaller::fromJSON(js["updateMode"],c.updateMode))  return false;
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;
     c.appId=js["appId"].asInt();

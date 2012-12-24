@@ -165,75 +165,21 @@ div {
 	top: 70px;
 	left: 10px;
 	width: 374px;
-	height: 124px;
+	height: 60px;
+	text-align: center;
+}
+
+#AlertPopUp .message3{
+	top: 130px;
+	left: 10px;
+	width: 374px;
+	height: 69px;
 	text-align: center;
 }
 
 #AlertPopUp.AlertActive{
 	opacity: 1;
 	display: block;
-}
-
-/* ScrollableMessage */
-
-#ScrollableMessage.ScrollableMessage{
-	left: 0;
-	top: 48px;
-	width: 800px;
-	height: 384px;
-	background: black;
-	z-index: 1;
-	display: none;
-}
-
-#ScrollableMessage.active{
-	opacity: 1;
-	display: block;
-}
-
-#ScrollableMessage .backButton {
-	top: 32px;
-	width: 48px;
-	height: 48px;
-	border: 1px solid #333;
-	border-radius: 2px;
-}
-
-#ScrollableMessage .titleText{
-	top: 32px;
-	left: 75px;
-	width: 620px;
-	height: 20px;
-	background: #393939;
-	padding: 15px;
-}
-
-#ScrollableMessage .list{
-	position: absolute;
-	width: 525px;
-	height: 251px;
-	border-radius: 2px;
-	left: 200px;
-	top: 102px;
-}
-
-#ScrollableMessage .list-content{
-	border: none;
-	width: 578px;
-}
-
-#ScrollableMessage .list-item {
-	position: relative;
-	width: 100%;
-	height: 48px;
-	font-size: 20px;
-	line-height: 50px;
-	border: 1px solid #393939;
-}
-
-#ScrollableMessage .ffw_list_menu {
-	top: 102px;
-	left: 25px;
 }
 
 /* VR popUp*/
@@ -249,6 +195,10 @@ div {
 	top: 70px;
 	-webkit-transition: opacity 1s ease-in-out;
 	display: none;
+}
+
+#VRPopUp span{
+	margin-left: 15px;
 }
 
 #VRPopUp .popUp{
@@ -306,8 +256,8 @@ div {
 
 #VRPopUp .VRLabel{
 	top: 10px;
-	width: 560px;
-	left: 10px;
+	width: 550px;
+	left: 35px;
 	height: 20px;
 	padding: 15px;
 	background: #393939;

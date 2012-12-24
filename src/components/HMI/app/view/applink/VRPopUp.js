@@ -67,21 +67,14 @@ MFT.VRPopUp = Em.ContainerView.create({
 
     },
 
-    DeleteCommand: function( appId ){
-
-        this.get('listOfCommands.list.childViews').removeObjects(
-            this.get('listOfCommands.list.childViews').filterProperty( 'appId' , appId )
-        );
-
-    },
-
-   AddCommand: function( commandId, vrCommands ){
+   AddCommand: function( commandId, vrCommands, appId ){
 
         for(var j = 0; j < vrCommands.length; j++){
             this.get('listOfCommands.list.childViews').pushObject(
                 MFT.Button.create({
                     action:                 'onCommand',
-                    target:                 'MFT.ApplinkMediaController',
+                    target:                 'MFT.ApplinkAppController',
+                    appId:					appId,
                     commandId:              commandId,
                     text:                   vrCommands[j],
                     classNames:             'list-item',
@@ -106,8 +99,8 @@ MFT.VRPopUp = Em.ContainerView.create({
             for(var j = 0; j<params.choiceSet[i].vrCommands.length; j++){
                 this.get('listOfCommands.list.childViews').pushObject(
                     MFT.Button.create({
-                        action:                 'onVRPerformInteractionChoosed',
-                        target:                 'MFT.ApplinkMediaController',
+                        action:                 'onChoiceInteraction',
+                        target:                 'MFT.ApplinkAppController',
                         choiceID:               params.choiceSet[i].choiceID,
                         interactionChoiceSetID: params.interactionChoiceSetID,
                         text:                   params.choiceSet[i].vrCommands[j],

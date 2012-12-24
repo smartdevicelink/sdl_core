@@ -1191,7 +1191,7 @@ bool CTransportManager::SFrameDataForConnection::extractFrame(uint8_t *& Data, s
     }
     else
     {
-        TM_CH_LOG4CPLUS_WARN(mLogger, mConnectionHandle, "Unsupported version received: " << version);
+        TM_CH_LOG4CPLUS_WARN(mLogger, mConnectionHandle, "Unsupported version received: " << (int)version);
         return false;
     }
 

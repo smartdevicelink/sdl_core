@@ -91,11 +91,12 @@ MFT.ApplinkController = Em.Object.create({
 	onDeviceChoosed: function( element ) {
 		FFW.UI.OnDeviceChosen( element.deviceName );
 		MFT.ApplinkModel.set( 'deviceName', element.deviceName );
+		this.turnChangeDeviceViewBack();
 	},
 
 	/**
-	 *  Method creates list of Application ID's
-	 *  Then call HMI method for display a list of Applications
+	 * Method creates list of Application ID's
+	 * Then call HMI method for display a list of Applications
 	 */
 	onGetAppList: function( appList ){
 		for(var i = 0; i < appList.length; i++){
@@ -105,11 +106,11 @@ MFT.ApplinkController = Em.Object.create({
 				MFT.ApplinkController.registerApplication(appList[i].appId, 1);
 			}
 		}
-		MFT.ApplinkMediaModel.onGetAppList( appList );
+		MFT.ApplinkModel.onGetAppList( appList );
 	},
 
 	/**
-	 *  Method call's request to get list of applications
+	 * Method call's request to get list of applications
 	 */
 	findNewApps: function(){
 		FFW.AppLinkCoreClient.getAppList();

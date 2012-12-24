@@ -47,8 +47,10 @@ public class RPCStruct {
 		if (version == 2) {
 			String messageType = (String)store.keys().nextElement();
 			Hashtable function = (Hashtable)store.get(messageType);
-			Hashtable parameters = (Hashtable)function.get(Names.parameters);
-			return JsonRPCMarshaller.serializeHashtable(parameters);
+			Hashtable hash = (Hashtable)function.get(Names.parameters);
+			Hashtable hashToSend = new Hashtable();
+			hashToSend.put(Names.parameters, hash);
+			return JsonRPCMarshaller.serializeHashtable(hashToSend);
 		} else return JsonRPCMarshaller.serializeHashtable(store);
 	}
 
@@ -58,7 +60,9 @@ public class RPCStruct {
 
 	public void setBulkData(byte[] bulkData) {
 		if (bulkData != null) {
-			this._bulkData = bulkData;
+			this._bulkData = new byte[bulkData.length];
+			System.arraycopy(bulkData, 0, _bulkData, 0, bulkData.length);
+			//this._bulkData = bulkData;
 		}
 	}
 }

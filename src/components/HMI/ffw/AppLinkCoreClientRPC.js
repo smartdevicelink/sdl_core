@@ -103,7 +103,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		if (response.result.method == "AppLinkCore.GetDeviceListResponse")
 		{
 			if(MFT.States.info.active){
-				MFT.ApplinkMediaModel.onGetDeviceList(response.result);
+				MFT.ApplinkModel.onGetDeviceList(response.result);
 			}
 		}
 
@@ -154,7 +154,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 
 		if (notification.method == this.onDeviceListUpdatedNotification)
 		{
-			MFT.ApplinkMediaModel.onGetDeviceList(notification.params);
+			MFT.ApplinkModel.onGetDeviceList(notification.params);
 		}
 	},
 
@@ -210,7 +210,11 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.SendData",
-			"params"	:	{"data": ["Data for sending from HMI to Mobile application."]}
+			"params"	:	{
+				"data": ["Data for sending from HMI to Mobile application."],
+				"url":	"ftp://appsurv:appsurv@ftp.drivehq.com/",
+				"timeout":	10000
+			}
 		};
 		this.client.send(JSONMessage);
     },
@@ -228,7 +232,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.ActivateApp",
 			"params"	:	{
-				"appName":	MFT.ApplinkMediaModel.appInfo.appName,
+				"appName":	MFT.ApplinkController.getApplicationModel(appId).appInfo.appName,
 				"appId":	appId
 			}
 		};

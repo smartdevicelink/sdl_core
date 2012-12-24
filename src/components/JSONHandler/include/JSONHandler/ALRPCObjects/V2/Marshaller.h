@@ -118,10 +118,10 @@ namespace NsAppLinkRPCV2
     static NsAppLinkRPC::ALRPCMessage* fromString(const std::string&,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
     static std::string toString(const NsAppLinkRPC::ALRPCMessage* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
   
-  protected:
     static NsAppLinkRPC::ALRPCMessage* fromJSON(const Json::Value&,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
     static Json::Value toJSON(const NsAppLinkRPC::ALRPCMessage* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
 
+  protected:
 // RegisterAppInterface_request
     static bool fromString(const std::string& str, RegisterAppInterface_request& res)
     {

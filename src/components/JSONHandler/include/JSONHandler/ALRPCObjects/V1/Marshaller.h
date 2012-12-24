@@ -123,10 +123,10 @@ namespace NsAppLinkRPC
     static ALRPCMessage* fromString(const std::string&);
     static std::string toString(const ALRPCMessage* msg);
   
-  protected:
     static ALRPCMessage* fromJSON(const Json::Value&);
     static Json::Value toJSON(const ALRPCMessage* msg);
 
+  protected:
 // RegisterAppInterface_request
     static bool fromString(const std::string& str, RegisterAppInterface_request& res)
     {

@@ -39,7 +39,7 @@ namespace NsConnectionHandler
         virtual void onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, 
                                                int sessionKey, int firstSessionKey) = 0;
 
-        virtual void onSessionEndedCallback(int sessionKey) = 0;
+        virtual void onSessionEndedCallback(int sessionKey, int firstSessionKey) = 0;
 
     protected:
         /**

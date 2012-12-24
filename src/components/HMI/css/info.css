@@ -725,7 +725,9 @@
 	width: 578px;
 	border: none;
 }
-
+#info_apps_deviceList_view .list-item{
+	border: 1px solid #393939 !important;
+}
 /******************* For Info.Apps menu*******************/
 #info_apps {
 	position: absolute;
