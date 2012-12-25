@@ -595,6 +595,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setAlertText3(txtAlertField3.getText().toString());
 										msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
 										msg.setPlayTone(chkPlayTone.isChecked());
+										if (toSpeak.length() > 0) {
+											Vector<TTSChunk> ttsChunks = TTSChunkFactory.createSimpleTTSChunks(toSpeak);
+											msg.setTtsChunks(ttsChunks);
+										}
 										if (chkIncludeSoftButtons.isChecked()) {
 											SoftButton sb1 = new SoftButton();
 											sb1.setSoftButtonID(5400);
