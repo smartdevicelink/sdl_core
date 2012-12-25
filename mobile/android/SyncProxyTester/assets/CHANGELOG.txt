@@ -1,4 +1,7 @@
-[R5.1.0]
+[R6.1.0]
+* Fix: don't show choiceSetId in the app until a successful response has come.
+
+[R6.0.0]
 SyncProxyTester:
 + When the v1 protocol is active, the user can only send a command supported by version 1.
 + Add the possibility to set the parameters of SetGlobalProperties and ResetGlobalProperties commands with GUI.

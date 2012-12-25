@@ -117,6 +117,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private ArrayAdapter<Integer> _choiceSetAdapter = null;
 	private ArrayAdapter<String> _putFileAdapter = null;
 	
+	private static final int CHOICESETID_UNSET = -1;
+	/**
+	 * Latest choiceSetId, required to add it to the adapter when a successful
+	 * CreateInteractionChoiceSetResponse comes.
+	 */
+	private int _latestChoiceSetId = CHOICESETID_UNSET;
+	
 	/** List of function names supported in protocol v1. */
 	private Vector<String> v1Functions = null;
 
@@ -188,7 +195,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 		_putFileAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item);
 		_putFileAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
+		
 		_listview.setClickable(true);
 		_listview.setAdapter(_msgAdapter);
 		_listview.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
@@ -1014,7 +1021,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 											_msgAdapter.logMessage("CreateChoiceSet (request)", true);
 											int choiceSetID = autoIncChoiceSetId++;
 											ProxyService.getInstance().getProxyInstance().createInteractionChoiceSet(commands, choiceSetID, autoIncCorrId++);
-											_choiceSetAdapter.add(choiceSetID);
+											if (_latestChoiceSetId != CHOICESETID_UNSET) {
+												Log.w(logTag, "Latest choiceSetId should be unset, but equals to " + _latestChoiceSetId);
+											}
+											_latestChoiceSetId = choiceSetID;
 										} catch (SyncException e) {
 											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 										}
@@ -2077,6 +2087,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	@Override
 	public void onPause() {
 		super.onPause();
+	}
+	
+	/**
+	 * Called when a CreateChoiceSetResponse comes. If successful, add it to the
+	 * adapter. In any case, remove the key from the map.
+	 */
+	public void onCreateChoiceSetResponse(boolean success) {
+		if (_latestChoiceSetId != CHOICESETID_UNSET) {
+			if (success) {
+				_choiceSetAdapter.add(_latestChoiceSetId);
+			}
+			_latestChoiceSetId = CHOICESETID_UNSET;
+		} else {
+			Log.w(logTag, "Latest choiceSetId is unset");
+		}
 	}
 }
 
