@@ -3,12 +3,11 @@
  * \brief App manager core functionality
  * \author vsalo
  */
-
-#include <sys/statvfs.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <dirent.h>
-
+#include <sys/socket.h>
+#include "LoggerHelper.hpp"
+#include "Utils/ClientSocket.h"
+#include "Utils/SocketException.h"
+#include "Utils/WorkWithOS.h"
 #include "AppMgr/AppMgrCore.h"
 #include "AppMgr/AppMgrRegistry.h"
 #include "AppMgr/AppPolicy.h"
@@ -32,25 +31,8 @@
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/ALRPCObjects/V2/AppType.h"
-#include "Utils/ClientSocket.h"
-#include "Utils/SocketException.h"
-#include <sys/socket.h>
-#include "LoggerHelper.hpp"
-#include <iostream>
-#include <fstream>
-#include <cstddef>
 
-namespace {
-    unsigned long int getAvailableSpace() {
-        char currentAppPath[256];
-        memset((void*)currentAppPath, 0, 256);
-        getcwd(currentAppPath, 255);
-
-        struct statvfs fsInfo;
-        memset((void*)&fsInfo, 0, sizeof(fsInfo));
-        statvfs(currentAppPath, &fsInfo);
-        return fsInfo.f_bsize * fsInfo.f_bfree;
-    }
+namespace {   
 
     template<typename Response, typename Result>
     void sendResponse(int responseId, Result result)
@@ -1470,7 +1452,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    unsigned long int freeSpace = getAvailableSpace();
+                    unsigned long int freeSpace = WorkWithOS::getAvailableSpace();
                     const std::string& syncFileName = object->get_syncFileName();
                     const NsAppLinkRPCV2::FileType& fileType = object->get_fileType();
                     bool persistentFile = object->get_persistentFile();
@@ -1484,33 +1466,21 @@ namespace NsAppManager
                         bool flag = false;
                         if (freeSpace > fileData->size())
                         {
-                            struct stat status;
-                            memset(&status, 0, sizeof(status));
-                            if (stat(syncFileName.c_str(), &status) == -1) // File doesn't exist
+                            std::string relativeFilePath = WorkWithOS::createDirectory(app->getName());
+
+                            relativeFilePath += "/";
+                            relativeFilePath += syncFileName;
+
+                            LOG4CPLUS_INFO(mLogger, "Relative path to file " << relativeFilePath);
+
+                            std::string fullFilePath = WorkWithOS::getFullPath( relativeFilePath );
+
+                            LOG4CPLUS_INFO(mLogger, "Full path to file " << fullFilePath);
+
+                            if (!WorkWithOS::checkIfFileExists(fullFilePath)) // File doesn't exist
                             {
-                                Application* app = core->getApplicationFromItemCheckNotNull(
-                                                        AppMgrRegistry::getInstance().getItem(sessionKey));
-
-                                const std::string& name = app->getName();
-                                const int& id = app->getAppID();
-
-                                /*char path[FILENAME_MAX];
-                                memset(path, 0, FILENAME_MAX);
-                                snprintf(path, FILENAME_MAX - 1, "%s_%d", name.c_str(), id);
-                                mkdir(path, 777);
-                                snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName.c_str());*/
-                                LOG4CPLUS_INFO_EXT(mLogger, "Saving to file " << syncFileName);
-                                std::ofstream file(syncFileName.c_str(), std::ios_base::binary);
-                                if (file.is_open())
-                                {
-                                    LOG4CPLUS_INFO_EXT(mLogger, "Managed to create file");
-                                    for (int i = 0; i < fileData->size(); ++i)
-                                    {
-                                        file << fileData->operator[](i);
-                                    }
-                                    file.close();
-                                    flag = true;
-                                }
+                                LOG4CPLUS_INFO_EXT(mLogger, "Saving to file " << fullFilePath);
+                                flag = WorkWithOS::createFileAndWrite(fullFilePath, *fileData);
                             }
                         }
 
@@ -1561,29 +1531,28 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    unsigned long int freeSpace = getAvailableSpace();
+                    unsigned long int freeSpace = WorkWithOS::getAvailableSpace();
                     const std::string& syncFileName = object->get_syncFileName();
                     if(!syncFileName.empty())
                     {
-                        Application* app = core->getApplicationFromItemCheckNotNull(
-                                    AppMgrRegistry::getInstance().getItem(sessionKey));
+                        std::string relativeFilePath = app->getName();
+                        relativeFilePath += "/";
+                        relativeFilePath += syncFileName;
 
-                        const std::string& name = app->getName();
-                        const int& id = app->getAppID();
+                        std::string fullFilePath = WorkWithOS::getFullPath( relativeFilePath );
 
-                        /*char path[FILENAME_MAX];
-                        memset(path, 0, FILENAME_MAX);
-                        snprintf(path, FILENAME_MAX - 1, "%s_%d/%s", name.c_str(), id, syncFileName.c_str());*/
-                        if(remove(syncFileName.c_str()) != 0)
+                        LOG4CPLUS_INFO(mLogger, "Trying to remove file " << fullFilePath);
+
+                        if ( WorkWithOS::deleteFile(fullFilePath) )
                         {
-                            response->set_success(false);
-                            response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                            response->set_success(true);
+                            response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                             response->set_spaceAvailable(freeSpace);
                         }
                         else
                         {
-                            response->set_success(true);
-                            response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                            response->set_success(false);
+                            response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
                             response->set_spaceAvailable(freeSpace);
                         }
                     }
@@ -1603,9 +1572,8 @@ namespace NsAppManager
                     NsAppLinkRPCV2::ListFiles_request* object = (NsAppLinkRPCV2::ListFiles_request*)mobileMsg;
                     NsAppLinkRPCV2::ListFiles_response* response = new NsAppLinkRPCV2::ListFiles_response;
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
-                    response->setMethodId(NsAppLinkRPCV2::FunctionID::ListFilesID);
-                    std::vector<std::string> listFiles;
-                    unsigned long int freeSpace = getAvailableSpace();
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::ListFilesID);                    
+                    unsigned long int freeSpace = WorkWithOS::getAvailableSpace();
 
                     Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
                     if(!app)
@@ -1624,37 +1592,24 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    const std::string& name = app->getName();
-                    const int& id = app->getAppID();
 
-                    /*char path[FILENAME_MAX];
-                    memset(path, 0, FILENAME_MAX);
-                    snprintf(path, FILENAME_MAX - 1, "%s_%d/", name.c_str(), id);                    
-                    */
-                    DIR* dir = NULL;
-                    std::string path = ".";
-                    struct dirent* dirElement = NULL;
-                    dir = opendir(path.c_str());
-                    if (dir != NULL)
+                    bool successFlag = false;
+                    
+                    if ( WorkWithOS::checkIfDirectoryExists(app->getName()))
                     {
-                        while (dirElement = readdir(dir))
+                        const std::string & fullDirectoryPath = WorkWithOS::getFullPath(app->getName());
+                        std::vector<std::string> listFiles = WorkWithOS::listFilesInDirectory( fullDirectoryPath );
+                        if (!listFiles.empty())
                         {
-                            LOG4CPLUS_INFO_EXT(mLogger, " file: " << dirElement->d_name);
-                            if (0 == strcmp(dirElement->d_name, "..")
-                                || 0 == strcmp(dirElement->d_name, "."))
-                            {
-                                continue;
-                            }
-                            listFiles.push_back(std::string(dirElement->d_name));
+                            successFlag = true;
+                            response->set_filenames(listFiles);
+                            response->set_success(true);
+                            response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                            response->set_spaceAvailable(freeSpace);
                         }
-                        closedir(dir);
-
-                        response->set_filenames(listFiles);
-                        response->set_success(true);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-                        response->set_spaceAvailable(freeSpace);
                     }
-                    else
+
+                    if ( !successFlag )
                     {
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
@@ -4756,34 +4711,6 @@ namespace NsAppManager
             return 0;
         }
         return app;
-    }
-
-    /**
-     * \brief serialize a string value to the text file
-     * \param fileName name of the file to serialize to
-     * \param value a value to serialize
-     * \return success of an operation - true or false
-     */
-    bool AppMgrCore::serializeToFile(const std::string &fileName, const std::string& value) const
-    {
-        if(!value.empty())
-        {
-            std::ofstream file(fileName, std::ios::out | std::ios::trunc);
-            if(file.is_open())
-            {
-                file << value;
-                file.close();
-                LOG4CPLUS_INFO_EXT(mLogger, " Serialized a value " << value << " to a file " << fileName);
-                return true;
-            }
-            else
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore cannot serialize a value " << value << " to a file " << fileName << ": error creating file!");
-                return false;
-            }
-        }
-        LOG4CPLUS_ERROR_EXT(mLogger, " Cannot serialize an empty value to a file " << fileName << " !");
-        return false;
     }
 
     /**

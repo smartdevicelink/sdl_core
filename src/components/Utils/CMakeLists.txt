@@ -11,6 +11,7 @@ set (SOURCES
     ./src/Socket.cpp
     ./src/SocketException.cpp
     ./src/Base64.cpp
+    ./src/WorkWithOS.cpp
 )
 
 add_library("Utils" ${SOURCES})
