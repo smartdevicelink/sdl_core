@@ -1923,6 +1923,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								}
 
 								if (numberOfChoices > 0) {
+									msg.setCorrelationID(autoIncCorrId++);
 									_msgAdapter.logMessage(msg, true);
 									try {
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
@@ -1981,6 +1982,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 								if (!properties.isEmpty()) {
 									msg.setProperties(properties);
+									msg.setCorrelationID(autoIncCorrId++);
 									_msgAdapter.logMessage(msg, true);
 									try {
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
