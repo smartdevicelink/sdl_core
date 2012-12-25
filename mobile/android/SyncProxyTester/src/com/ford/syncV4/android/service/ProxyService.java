@@ -38,9 +38,7 @@ import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
-import com.ford.syncV4.proxy.rpc.GetDTCs;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
-import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
@@ -57,7 +55,6 @@ import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
-import com.ford.syncV4.proxy.rpc.ReadDID;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
@@ -70,10 +67,8 @@ import com.ford.syncV4.proxy.rpc.ShowResponse;
 import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
-import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
-import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
@@ -438,6 +433,15 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
+		
+		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+		final boolean success = response.getSuccess();
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.onCreateChoiceSetResponse(success);
+			}
+		});
 		
 		if (waitingForResponse && _testerMain.getThreadContext() != null) {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));

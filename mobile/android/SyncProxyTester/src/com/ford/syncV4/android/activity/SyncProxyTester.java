@@ -102,6 +102,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final String VERSION = "$Version:$";
 	
 	private static final String logTag = "SyncProxyTester";
+	
+	private static final String ButtonSubscriptions = "ButtonSubscriptions";
 
     private static SyncProxyTester _activity;
     private static ArrayList<Object> _logMessages = new ArrayList<Object>();
@@ -116,6 +118,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private ArrayAdapter<Integer> _commandAdapter = null;
 	private ArrayAdapter<Integer> _choiceSetAdapter = null;
 	private ArrayAdapter<String> _putFileAdapter = null;
+	
+	private static final int CHOICESETID_UNSET = -1;
+	/**
+	 * Latest choiceSetId, required to add it to the adapter when a successful
+	 * CreateInteractionChoiceSetResponse comes.
+	 */
+	private int _latestChoiceSetId = CHOICESETID_UNSET;
 	
 	/** List of function names supported in protocol v1. */
 	private Vector<String> v1Functions = null;
@@ -188,7 +197,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 		_putFileAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item);
 		_putFileAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
+		
 		_listview.setClickable(true);
 		_listview.setAdapter(_msgAdapter);
 		_listview.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
@@ -506,6 +515,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				v1Functions.add(Names.EncodedSyncPData);
 				v1Functions.add(Names.SubscribeButton);
 				v1Functions.add(Names.UnsubscribeButton);
+				// it's the name of the menu item for the last two commands
+				v1Functions.add(ButtonSubscriptions);
 			}
 			
 			if (v1Functions.contains(functionName)) {
@@ -523,45 +534,45 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		if (v == findViewById(R.id.btnSendMessage)) {
 			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item);
 			int protocolVersion = getCurrentProtocolVersion();
-			addToFunctionsAdapter(adapter, protocolVersion, "Alert");
-			addToFunctionsAdapter(adapter, protocolVersion, "Speak");
-			addToFunctionsAdapter(adapter, protocolVersion, "Show");
-			addToFunctionsAdapter(adapter, protocolVersion, "ButtonSubscriptions");
-			addToFunctionsAdapter(adapter, protocolVersion, "AddCommand");
-			addToFunctionsAdapter(adapter, protocolVersion, "DeleteCommand");
-			addToFunctionsAdapter(adapter, protocolVersion, "AddSubMenu");
-			addToFunctionsAdapter(adapter, protocolVersion, "DeleteSubMenu");
-			addToFunctionsAdapter(adapter, protocolVersion, "SetGlobalProperties");
-			addToFunctionsAdapter(adapter, protocolVersion, "ResetGlobalProperties");
-			addToFunctionsAdapter(adapter, protocolVersion, "SetMediaClockTimer");
-			addToFunctionsAdapter(adapter, protocolVersion, "CreateChoiceSet");
-			addToFunctionsAdapter(adapter, protocolVersion, "DeleteChoiceSet");
-			addToFunctionsAdapter(adapter, protocolVersion, "PerformInteraction");
-			addToFunctionsAdapter(adapter, protocolVersion, "EncodedSyncPData");
-			addToFunctionsAdapter(adapter, protocolVersion, "Slider");
-			addToFunctionsAdapter(adapter, protocolVersion, "ScrollableMessage");
-			addToFunctionsAdapter(adapter, protocolVersion, "ChangeRegistration");
-			addToFunctionsAdapter(adapter, protocolVersion, "PutFile");
-			addToFunctionsAdapter(adapter, protocolVersion, "DeleteFile");
-			addToFunctionsAdapter(adapter, protocolVersion, "ListFiles");
-			addToFunctionsAdapter(adapter, protocolVersion, "SetAppIcon");
-			addToFunctionsAdapter(adapter, protocolVersion, "PerformAudioPassThru");
-			addToFunctionsAdapter(adapter, protocolVersion, "EndAudioPassThru");
-			addToFunctionsAdapter(adapter, protocolVersion, "SubscribeVehicleData");
-			addToFunctionsAdapter(adapter, protocolVersion, "UnsubscribeVehicleData");
-			addToFunctionsAdapter(adapter, protocolVersion, "GetVehicleData");
-			addToFunctionsAdapter(adapter, protocolVersion, "ReadDID");
-			addToFunctionsAdapter(adapter, protocolVersion, "GetDTCs");
-			addToFunctionsAdapter(adapter, protocolVersion, "ShowConstantTBT");
-			addToFunctionsAdapter(adapter, protocolVersion, "AlertManeuver");
-			addToFunctionsAdapter(adapter, protocolVersion, "UpdateTurnList");
-			addToFunctionsAdapter(adapter, protocolVersion, "DialNumber");
+			addToFunctionsAdapter(adapter, protocolVersion, Names.Alert);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.Speak);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.Show);
+			addToFunctionsAdapter(adapter, protocolVersion, ButtonSubscriptions);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.AddCommand);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.DeleteCommand);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.AddSubMenu);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.DeleteSubMenu);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.SetGlobalProperties);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.ResetGlobalProperties);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.SetMediaClockTimer);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.CreateInteractionChoiceSet);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.DeleteInteractionChoiceSet);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.PerformInteraction);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.EncodedSyncPData);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.Slider);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.ScrollableMessage);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.ChangeRegistration);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.PutFile);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.DeleteFile);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.ListFiles);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.SetAppIcon);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.PerformAudioPassThru);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.EndAudioPassThru);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.SubscribeVehicleData);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.UnsubscribeVehicleData);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.GetVehicleData);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.ReadDID);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.GetDTCs);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.ShowConstantTBT);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.AlertManeuver);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.UpdateTurnList);
+			addToFunctionsAdapter(adapter, protocolVersion, Names.DialNumber);
 			
 			new AlertDialog.Builder(this)  
 		       .setTitle("Pick a Function (v" + protocolVersion + ")")
 		       .setAdapter(adapter, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
-						if(adapter.getItem(which) == "Alert"){
+						if(adapter.getItem(which) == Names.Alert){
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
 
@@ -588,6 +599,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setAlertText3(txtAlertField3.getText().toString());
 										msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
 										msg.setPlayTone(chkPlayTone.isChecked());
+										if (toSpeak.length() > 0) {
+											Vector<TTSChunk> ttsChunks = TTSChunkFactory.createSimpleTTSChunks(toSpeak);
+											msg.setTtsChunks(ttsChunks);
+										}
 										if (chkIncludeSoftButtons.isChecked()) {
 											SoftButton sb1 = new SoftButton();
 											sb1.setSoftButtonID(5400);
@@ -621,7 +636,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();	
-						} else if (adapter.getItem(which) == "Speak") {
+						} else if (adapter.getItem(which) == Names.Speak) {
 							//something
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -690,7 +705,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "Show") {
+						} else if (adapter.getItem(which) == Names.Show) {
 							//something
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -756,7 +771,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "ButtonSubscriptions") {
+						} else if (adapter.getItem(which) == ButtonSubscriptions) {
 							//something
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
 							builder.setAdapter(_buttonAdapter, new DialogInterface.OnClickListener() {
@@ -776,7 +791,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							});
 							AlertDialog dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "AddCommand") {
+						} else if (adapter.getItem(which) == Names.AddCommand) {
 							//something
 							AlertDialog.Builder builder;
 							AlertDialog addCommandDialog;
@@ -822,7 +837,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							addCommandDialog = builder.create();
 							addCommandDialog.show();
-						} else if (adapter.getItem(which) == "DeleteCommand") {
+						} else if (adapter.getItem(which) == Names.DeleteCommand) {
 							//something
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
 							builder.setAdapter(_commandAdapter, new DialogInterface.OnClickListener() {
@@ -841,7 +856,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							});
 							AlertDialog dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "AddSubMenu") {
+						} else if (adapter.getItem(which) == Names.AddSubMenu) {
 							//something
 							AlertDialog.Builder builder;
 							AlertDialog addSubMenuDialog;
@@ -877,7 +892,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							addSubMenuDialog = builder.create();
 							addSubMenuDialog.show();
-						} else if (adapter.getItem(which) == "DeleteSubMenu") {
+						} else if (adapter.getItem(which) == Names.DeleteSubMenu) {
 							//something
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
 							builder.setAdapter(_submenuAdapter, new DialogInterface.OnClickListener() {
@@ -896,11 +911,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							});
 							AlertDialog dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "SetGlobalProperties") {
+						} else if (adapter.getItem(which) == Names.SetGlobalProperties) {
 							sendSetGlobalProperties();
-						} else if (adapter.getItem(which) == "ResetGlobalProperties") {
+						} else if (adapter.getItem(which) == Names.ResetGlobalProperties) {
 							sendResetGlobalProperties();
-						} else if (adapter.getItem(which) == "SetMediaClockTimer") {
+						} else if (adapter.getItem(which) == Names.SetMediaClockTimer) {
 							//something
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -950,7 +965,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "CreateChoiceSet") {
+						} else if (adapter.getItem(which) == Names.CreateInteractionChoiceSet) {
 							//something
 							AlertDialog.Builder builder;
 							AlertDialog createCommandSet;
@@ -1014,7 +1029,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 											_msgAdapter.logMessage("CreateChoiceSet (request)", true);
 											int choiceSetID = autoIncChoiceSetId++;
 											ProxyService.getInstance().getProxyInstance().createInteractionChoiceSet(commands, choiceSetID, autoIncCorrId++);
-											_choiceSetAdapter.add(choiceSetID);
+											if (_latestChoiceSetId != CHOICESETID_UNSET) {
+												Log.w(logTag, "Latest choiceSetId should be unset, but equals to " + _latestChoiceSetId);
+											}
+											_latestChoiceSetId = choiceSetID;
 										} catch (SyncException e) {
 											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 										}
@@ -1031,7 +1049,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							createCommandSet = builder.create();
 							createCommandSet.show();
-						} else if (adapter.getItem(which) == "DeleteChoiceSet") {
+						} else if (adapter.getItem(which) == Names.DeleteInteractionChoiceSet) {
 							//something
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
 							builder.setAdapter(_choiceSetAdapter, new DialogInterface.OnClickListener() {
@@ -1050,7 +1068,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							});
 							AlertDialog dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "PerformInteraction") {
+						} else if (adapter.getItem(which) == Names.PerformInteraction) {
 							//something
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
 							builder.setAdapter(_choiceSetAdapter, new DialogInterface.OnClickListener() {
@@ -1076,7 +1094,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							});
 							AlertDialog dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "EncodedSyncPData") {
+						} else if (adapter.getItem(which) == Names.EncodedSyncPData) {
 							//EncodedSyncPData
 							EncodedSyncPData msg = new EncodedSyncPData();
 							Vector<String> syncPData = new Vector<String>();
@@ -1091,7 +1109,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							} catch (SyncException e) {
 								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
-						} else if (adapter.getItem(which) == "Slider") {
+						} else if (adapter.getItem(which) == Names.Slider) {
 							//something
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -1133,7 +1151,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "ScrollableMessage") {
+						} else if (adapter.getItem(which) == Names.ScrollableMessage) {
 							//something
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -1184,7 +1202,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "ChangeRegistration") {
+						} else if (adapter.getItem(which) == Names.ChangeRegistration) {
 							//ChangeRegistration
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -1229,7 +1247,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "PutFile") {
+						} else if (adapter.getItem(which) == Names.PutFile) {
 							//PutFile
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -1284,7 +1302,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "DeleteFile") {
+						} else if (adapter.getItem(which) == Names.DeleteFile) {
 							//DeleteFile
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
 							builder.setAdapter(_putFileAdapter, new DialogInterface.OnClickListener() {
@@ -1306,7 +1324,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							});
 							AlertDialog dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "ListFiles") {
+						} else if (adapter.getItem(which) == Names.ListFiles) {
 							//ListFiles
 							try {
 								ListFiles msg = new ListFiles();
@@ -1316,7 +1334,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							} catch (SyncException e) {
 								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
-						} else if (adapter.getItem(which) == "SetAppIcon") {
+						} else if (adapter.getItem(which) == Names.SetAppIcon) {
 							//SetAppIcon
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -1351,7 +1369,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "PerformAudioPassThru") {
+						} else if (adapter.getItem(which) == Names.PerformAudioPassThru) {
 							//PerformAudioPassThru
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -1417,7 +1435,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "EndAudioPassThru") {
+						} else if (adapter.getItem(which) == Names.EndAudioPassThru) {
 							//EndAudioPassThru
 							try {
 								EndAudioPassThru msg = new EndAudioPassThru();
@@ -1427,7 +1445,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							} catch (SyncException e) {
 								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
-						} else if (adapter.getItem(which) == "SubscribeVehicleData") {
+						} else if (adapter.getItem(which) == Names.SubscribeVehicleData) {
 							//SubscribeVehicleData
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -1494,7 +1512,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "UnsubscribeVehicleData") {
+						} else if (adapter.getItem(which) == Names.UnsubscribeVehicleData) {
 							//UnsubscribeVehicleData
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -1561,7 +1579,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "GetVehicleData") {
+						} else if (adapter.getItem(which) == Names.GetVehicleData) {
 							//GetVehicleData
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
 							builder.setAdapter(_vehicleDataType, new DialogInterface.OnClickListener() {
@@ -1582,7 +1600,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							});
 							AlertDialog dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "ReadDID") {
+						} else if (adapter.getItem(which) == Names.ReadDID) {
 							//ReadDID
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -1622,7 +1640,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "GetDTCs") { 
+						} else if (adapter.getItem(which) == Names.GetDTCs) { 
 							//GetDTCs
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -1658,7 +1676,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "ShowConstantTBT") {
+						} else if (adapter.getItem(which) == Names.ShowConstantTBT) {
 							//ShowConstantTBT
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -1729,7 +1747,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "AlertManeuver") {
+						} else if (adapter.getItem(which) == Names.AlertManeuver) {
 							//AlertManeuver
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
@@ -1785,7 +1803,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setView(layout);
 							dlg = builder.create();
 							dlg.show();
-						} else if (adapter.getItem(which) == "UpdateTurnList") {
+						} else if (adapter.getItem(which) == Names.UpdateTurnList) {
 							UpdateTurnList msg = new UpdateTurnList();
 							
 							Turn t1 = new Turn();
@@ -1829,7 +1847,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							} catch (SyncException e) {
 								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
-						} else if (adapter.getItem(which) == "DialNumber") {
+						} else if (adapter.getItem(which) == Names.DialNumber) {
 							DialNumber msg = new DialNumber();
 							msg.setNumber("3138675309");
 							
@@ -2077,6 +2095,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	@Override
 	public void onPause() {
 		super.onPause();
+	}
+	
+	/**
+	 * Called when a CreateChoiceSetResponse comes. If successful, add it to the
+	 * adapter. In any case, remove the key from the map.
+	 */
+	public void onCreateChoiceSetResponse(boolean success) {
+		if (_latestChoiceSetId != CHOICESETID_UNSET) {
+			if (success) {
+				_choiceSetAdapter.add(_latestChoiceSetId);
+			}
+			_latestChoiceSetId = CHOICESETID_UNSET;
+		} else {
+			Log.w(logTag, "Latest choiceSetId is unset");
+		}
 	}
 }
 
