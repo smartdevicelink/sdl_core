@@ -12,6 +12,7 @@
 #include "JSONHandler/MessageQueue.h"
 #include "JSONHandler/ALRPCMessage.h"
 #include "JSONHandler/IRPCMessagesObserver.h"
+#include "JSONHandler/IJsonHandler.h"
 #include "ProtocolHandler/AppLinkRawMessage.h"
 #include "ProtocolHandler/IProtocolObserver.h"
 #include "ProtocolHandler/ProtocolHandler.h"
@@ -27,7 +28,7 @@ const unsigned char RPC_UNKNOWN = 0xF;
  * Receives AppLink Json message from Protocol layer, creates corresponding object and sends it to Application Manager.
  * Receives AppLink message object from Application manager, serializes it into Json string and sends to Protocol Layer.
 */
-class JSONHandler : public NsProtocolHandler::IProtocolObserver
+class JSONHandler : public IJsonHandler, public NsProtocolHandler::IProtocolObserver
 {
 public:
     /**
@@ -69,7 +70,7 @@ public:
      * to be serialized to Json message and sent to mobile App.
      * \param sessionId ID of the session the message was received within.
      */
-    void sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, int connectionKey );   
+    void sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, int connectionKey );
     /*End of methods for IRPCMessagesObserver*/
        
 protected:

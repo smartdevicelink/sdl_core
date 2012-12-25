@@ -12,6 +12,7 @@
 #include <json/value.h>
 #include "mb_controller.hpp"
 #include "Logger.hpp"
+#include "JSONHandler/IJSONRPC2Handler.h"
 #include "JSONHandler/IRPC2CommandsObserver.h"
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/RPC2Notification.h"
@@ -25,7 +26,7 @@
  * Receives RPC2 Json message from RPCBus (HMI), creates corresponding object and sends it to Application Manager.
  * Receives RPC2 message object from Application manager, serializes it into Json object and sends to RPCBus (HMI). 
 */
-class JSONRPC2Handler : public NsMessageBroker::CMessageBrokerController
+class JSONRPC2Handler : public IJSONRPC2Handler, public NsMessageBroker::CMessageBrokerController
 {
 public:
     /**
@@ -38,7 +39,7 @@ public:
     /**
      * \brief Destructor
     */
-    ~JSONRPC2Handler();
+    virtual ~JSONRPC2Handler();
 
     /*Methods from CMessageBrokerController*/
     /**

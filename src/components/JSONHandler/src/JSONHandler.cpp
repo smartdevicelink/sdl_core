@@ -334,7 +334,12 @@ NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtoco
 
     const uint MAX_HEADER_SIZE = 12;
     unsigned int jsonSize = messageString.length() +1;
-    unsigned char * dataForSending = new unsigned char[MAX_HEADER_SIZE + jsonSize];
+    unsigned int binarySize = 0;
+    if ( message->getBinaryData() )
+    {
+        binarySize = message->getBinaryData()->size();
+    }
+    unsigned char * dataForSending = new unsigned char[MAX_HEADER_SIZE + jsonSize + binarySize];
     unsigned char offset = 0;
 
     unsigned char rpcTypeFlag = 0;
@@ -372,7 +377,12 @@ NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtoco
 
     if ( message->getBinaryData() )
     {
-        //TODO: add binary.
+        const std::vector<unsigned char> & binaryData = *(message->getBinaryData());
+        unsigned char * currentPointer = dataForSending + offset + jsonSize;
+        for( unsigned int i = 0; i < binarySize; ++i )
+        {
+            currentPointer[i] = binaryData[i];
+        }        
     }
 
     NsProtocolHandler::AppLinkRawMessage * msgToProtocolHandler = new NsProtocolHandler::AppLinkRawMessage(

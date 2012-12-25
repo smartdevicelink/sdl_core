@@ -795,7 +795,7 @@ version "1.2";
 
 //using AppLinkRPC;
 
-prefix "AppLinkCore.";
+prefix "VehicleInfo.";
  /*
      * @descr Request from ApplinkCore to HMI to get info about the vehicle.
     */ 
