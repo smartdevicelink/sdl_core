@@ -1,4 +1,5 @@
 [R6.1.0]
+* Fix the list of commands available for protocol v1.
 * Fix: the user can set Alert command's ttsChunk parameter.
 * Fix: don't show choiceSetId in the app until a successful response has come.
 
