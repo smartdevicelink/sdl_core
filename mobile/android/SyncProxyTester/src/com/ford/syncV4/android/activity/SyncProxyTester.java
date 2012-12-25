@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -446,6 +447,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		if (ProxyService.getInstance() != null) {
 			ProxyService.getInstance().stopSelf();
 		}
+		new Handler().postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				System.exit(0);
+			}
+		}, 1000);
 	}
 
 	private String getAssetsContents(String filename, String defaultString) {
@@ -1923,6 +1930,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								}
 
 								if (numberOfChoices > 0) {
+									msg.setCorrelationID(autoIncCorrId++);
 									_msgAdapter.logMessage(msg, true);
 									try {
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
@@ -1981,6 +1989,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 								if (!properties.isEmpty()) {
 									msg.setProperties(properties);
+									msg.setCorrelationID(autoIncCorrId++);
 									_msgAdapter.logMessage(msg, true);
 									try {
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);

@@ -1,4 +1,6 @@
 [R6.1.0]
+* Stop the whole process when clicking the Exit options menu item.
+* Fix the crashes when sending SetGlobalProperties and ResetGlobalProperties commands.
 * Fix the list of commands available for protocol v1.
 * Fix: the user can set Alert command's ttsChunk parameter.
 * Fix: don't show choiceSetId in the app until a successful response has come.
