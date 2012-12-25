@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.util.DebugTool;
 
@@ -61,15 +60,15 @@ public class SyncReceiver extends BroadcastReceiver {
 					}
 				} else if ((intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == (BluetoothAdapter.STATE_TURNING_ON))){
 						Log.i(TAG, "Bt on");
-						if (serviceInstance == null){
+						/*if (serviceInstance == null){
 							Log.i(TAG, "Bt on start service");
 							Intent startIntent = new Intent(context, ProxyService.class);  
 							startIntent.putExtras(intent);
 							context.startService(startIntent);
-						}
+						}*/
 				}
 		//Listen for phone reboot and start service 
-		} else if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
+/*		} else if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
 			mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 			if (mBtAdapter != null)
 			{
@@ -78,7 +77,7 @@ public class SyncReceiver extends BroadcastReceiver {
 					startIntent.putExtras(intent);
 					context.startService(startIntent);
 				}
-			}
+			}*/
 		}
 		
 		if (intent.getAction().compareTo(Intent.ACTION_MEDIA_BUTTON) == 0) {

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
 import java.util.Vector;
 
 import org.json.JSONException;
@@ -15,7 +14,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -2049,7 +2047,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		});
 	}
 	
-	public void startSyncProxyService() {
+/*	public void startSyncProxyService() {
     	// Get the local Bluetooth adapter
         BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -2090,7 +2088,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		        }
 			}
 		}
-	}
+	}*/
 
 	//upon onDestroy(), dispose current proxy and create a new one to enable auto-start
 	//call resetProxy() to do so
