@@ -45,6 +45,7 @@ import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.adapters.logAdapter;
+import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
@@ -135,7 +136,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private int itemcmdID = 1;
 	private int submenucmdID = 1000;
 
-	private static final String PREFS_NAME = "SyncProxyTesterPrefs";
 	private ArrayAdapter<ButtonName> _buttonAdapter = null;
 	private boolean[] isButtonSubscribed = null;
 
@@ -380,7 +380,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	}
 	
 	private int getCurrentProtocolVersion() {
-		return getSharedPreferences(PREFS_NAME, 0).getInt("VersionNumber", 1);
+		return getSharedPreferences(Const.PREFS_NAME, 0).getInt(Const.PREFS_KEY_PROTOCOLVERSION, 1);
 	}
 
 	/* Handles item selections */
@@ -428,11 +428,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			exitApp();
 			break;
 		case MNU_TOGGLE_PROTOCOL_VERSION:
-			{SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-			int versionN = settings.getInt("VersionNumber", 1);
+			{SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
+			int versionN = settings.getInt(Const.PREFS_KEY_PROTOCOLVERSION, 1);
 			SharedPreferences.Editor editor = settings.edit();
 			int newVersion = versionN == 1 ? 2:1;
-			editor.putInt("VersionNumber", newVersion);
+			editor.putInt(Const.PREFS_KEY_PROTOCOLVERSION, newVersion);
 			editor.commit();
 			
 			Toast.makeText(getApplicationContext(),
@@ -463,10 +463,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			_msgAdapter.clear();
 			return true;
 		case MNU_TOGGLE_MEDIA:
-			SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-			boolean isMediaApp = settings.getBoolean("isMediaApp", false);
+			SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
+			boolean isMediaApp = settings.getBoolean(Const.PREFS_KEY_ISMEDIAAPP, false);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putBoolean("isMediaApp", !isMediaApp);
+			editor.putBoolean(Const.PREFS_KEY_ISMEDIAAPP, !isMediaApp);
 
 			// Don't forget to commit your edits!!!
 			editor.commit();

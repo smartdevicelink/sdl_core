@@ -17,6 +17,7 @@ import android.util.Pair;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.logAdapter;
+import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.receivers.SyncReceiver;
@@ -140,10 +141,10 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		
 		if (_syncProxy == null) {
 			try {
-				SharedPreferences settings = getSharedPreferences("SyncProxyTesterPrefs", 0);
-				boolean isMediaApp = true;// settings.getBoolean("isMediaApp", false);
+				SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
+				boolean isMediaApp = true;// settings.getBoolean(Const.PREFS_KEY_ISMEDIAAPP, false);
 				
-				int versionNumber = settings.getInt("VersionNumber",1);
+				int versionNumber = settings.getInt(Const.PREFS_KEY_PROTOCOLVERSION,1);
 
 				//_syncProxy = new SyncProxyALM(this, "SyncProxyTester", true);
 				_syncProxy = new SyncProxyALM(this,
@@ -161,7 +162,6 @@ public class ProxyService extends Service implements IProxyListenerALM {
 						/*callbackToUIThread*/ false,
 						/*preRegister*/ false,
 						versionNumber);
-						//2);
 			} catch (SyncException e) {
 				e.printStackTrace();
 				//error creating proxy, returned proxy = null
