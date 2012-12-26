@@ -79,7 +79,7 @@ namespace NsConnectionHandler
          * \brief Returns ID of first session from connection
          * \return first sessionID or -1 in case of issues
          */
-        int getFirstSessionKey();
+        int getFirstSessionID();
     private:
 
         /**

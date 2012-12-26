@@ -58,7 +58,7 @@ namespace NsConnectionHandler
         return result;
     }
 
-    int CConnection::getFirstSessionKey()
+    int CConnection::getFirstSessionID()
     {
         int result = -1;
         tSessionListIterator it = mSessionList.begin();

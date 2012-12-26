@@ -33,6 +33,11 @@ namespace NsConnectionHandler
          * \param observer Pointer to observer object.
          **/
         virtual void setConnectionHandlerObserver(IConnectionHandlerObserver * observer)=0;
+
+        /**
+         * \brief Sets pointer to TransportManager.
+         * \param transportManager Pointer to TransportManager object.
+         **/
         virtual void setTransportManager( NsAppLink::NsTransportManager::ITransportManager * transportManager )=0;
 
     protected:
