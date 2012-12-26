@@ -38,6 +38,7 @@ import android.widget.CheckBox;
 import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -197,14 +198,59 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				}
 			}
 		});
+		
+		selectProtocolUI();
+	}
 
+	/**
+	 * Shows a dialog where the user can select connection features (protocol
+	 * version and media flag). Starts the proxy after selecting.
+	 */
+	private void selectProtocolUI() {
+		Context context = this;
+		LayoutInflater inflater = (LayoutInflater) context
+				.getSystemService(LAYOUT_INFLATER_SERVICE);
+		View view = inflater.inflate(R.layout.selectprotocol,
+				(ViewGroup) findViewById(R.id.selectprotocol_Root));
+
+		final RadioGroup protocolVersionGroup = (RadioGroup) view
+				.findViewById(R.id.selectProtocol_radioGroupProtocolVersion);
+		final CheckBox mediaCheckBox = (CheckBox) view
+				.findViewById(R.id.selectprotocol_checkMedia);
+
+		new AlertDialog.Builder(context)
+				.setTitle("Please select protocol properties")
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						int protocolVersion = 1;
+						switch (protocolVersionGroup.getCheckedRadioButtonId()) {
+						case R.id.selectprotocol_radioV2:
+							protocolVersion = 2;
+							break;
+
+						case R.id.selectprotocol_radioV1:
+							// 1 by default
+						default:
+							break;
+						}
+
+						boolean isMedia = mediaCheckBox.isChecked();
+
+						startSyncProxy();
+					}
+				}).setView(view).show();
+	}
+
+	/** Starts the sync proxy at startup after selecting protocol features. */
+	private void startSyncProxy() {
 		// Publish an SDP record and create a SYNC proxy.
-		//startSyncProxyService();		
+		// startSyncProxyService();
 		_applinkService = new ProxyService();
 		if (ProxyService.getInstance() == null) {
 			Intent startIntent = new Intent(this, ProxyService.class);
 			startService(startIntent);
-			//bindService(startIntent, this, Context.BIND_AUTO_CREATE);
+			// bindService(startIntent, this, Context.BIND_AUTO_CREATE);
 		} else {
 			// need to get the instance and add myself as a listener
 			ProxyService.getInstance().setCurrentActivity(this);

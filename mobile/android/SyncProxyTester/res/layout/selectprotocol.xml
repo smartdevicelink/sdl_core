@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/selectprotocol_Root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RadioGroup
+        android:id="@+id/selectProtocol_radioGroupProtocolVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <RadioButton
+            android:id="@+id/selectprotocol_radioV1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Protocol v1" />
+
+        <RadioButton
+            android:id="@+id/selectprotocol_radioV2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Protocol v2" />
+    </RadioGroup>
+
+    <CheckBox
+        android:id="@+id/selectprotocol_checkMedia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Media" />
+
+</LinearLayout>
