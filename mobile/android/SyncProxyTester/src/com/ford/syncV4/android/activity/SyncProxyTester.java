@@ -273,6 +273,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							Log.w(logTag,
 									"Can't save selected protocol properties");
 						}
+						
+						// reflect the settings in the activity's title
+						setTitle(getResources().getString(R.string.app_name)
+								+ " (v" + protocolVersion + ", "
+								+ (isMedia ? "" : "non-") + "media)");
 
 						startSyncProxy();
 					}
