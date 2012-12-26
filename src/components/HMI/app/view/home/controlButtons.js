@@ -15,20 +15,49 @@ MFT.ControlButtons = Em.ContainerView.create({
 	elementId:		'app_controlButtons',
 
 	childViews: [
+		'VRButton',
 		'buttonControls',
 		'driverDistractionControl',
 		'protocolVersion',
 		'infoTable',
-		'sendData'
+		'sendData',
+		'vehicleInfo'
 	],
 
-	/** Sending data from HMI for processing in ApplinkCore */
+	/**
+	 * Sending data from HMI for processing in ApplinkCore
+	 */
 	sendData: MFT.Button.create({
 		elementId:	'sendData',
 		classNames:	'sendData btnNotPressed',
 		action:		'SendData',
 		target:		'FFW.AppLinkCoreClient',
 		text:		'Send Data'
+	}),
+
+	/**
+	 * Voice Recognition button
+	 */
+	vehicleInfo: MFT.Button.create({
+		elementId:	'vehicleInfoButton',
+		classNames:	'vehicleInfoButton btn',
+		text:		'Vehicle Info', 
+		actionUp:		function(){
+			this._super();
+			MFT.VehicleInfo.activate();
+		}
+	}),
+
+	/**
+	 * Voice Recognition button
+	 */
+	VRButton: MFT.Button.create({
+		elementId:	'VRButton',
+		classNames:	'VRButton',
+		actionUp:		function(){
+			this._super();
+			MFT.VRPopUp.activateVRPopUp();
+		}
 	}),
 
 	infoTable: Em.ContainerView.extend({
@@ -99,7 +128,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:			'driverDistractionControlCheckBox',
 
 			onCheckBoxSelected:	function(){
-				MFT.ApplinkController.selectdDriverDistraction(this.checked);
+				MFT.ApplinkController.selectDriverDistraction(this.checked);
 			}.observes('this.checked')
 
 		})
@@ -154,8 +183,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			'SevenBtn',
 			'EightBtn',
 			'NineBtn',
-			'ZiroBtn',
-			'VRButton'
+			'ZiroBtn'
 		],
 		
 		ContainerControlls: Em.ContainerView.extend({
@@ -540,16 +568,6 @@ MFT.ControlButtons = Em.ContainerView.create({
 				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
 				this.time = 0;
 			}
-		}),
-
-		/** Voice Recognition button */
-		VRButton: MFT.Button.create({
-			elementId:	'VRButton',
-			classNames:	'VRButton',
-			actionUp:		function(){
-				this._super();
-				MFT.VRPopUp.activateVRPopUp();
-			}
-		}),
+		})
 	})
 });

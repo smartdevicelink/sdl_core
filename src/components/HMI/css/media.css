@@ -2832,10 +2832,10 @@
 
 #media_app_options_view .list{
 	position: absolute;
-	width: 629px;
+	width: 650px;
 	height: 251px;
 	border-radius: 2px;
-	left: 100px;
+	left: 75px;
 	top: 154px;
 }
 

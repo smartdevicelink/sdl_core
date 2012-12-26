@@ -19,6 +19,90 @@ MFT.ApplinkModel = Em.Object.create({
         // init global properties
         this.resetProperties();
     },
+
+    /**
+     * Stored Vehicle Data
+     */
+    vehicleInfoPRNDL: [
+        "Parking",
+        "Reverse gear",
+        "No gear",
+        "Forward drive",
+        "1st gear hold"
+    ],
+
+    /**
+     * Stored Vehicle Data
+     */
+    vehicleData: [{
+            'type':     "gps",
+            'data':     null
+        },
+        {
+            'type':     "speed",
+            'data':     null
+        },
+        {
+            'type':     "rpm",
+            'data':     null
+        },
+        {
+            'type':     "fuelLevel",
+            'data':     null
+        },
+        {
+            'type':     "avgFuelEconomy",
+            'data':     null
+        },
+        {
+            'type':     "batteryVoltage",
+            'data':     null
+        },
+        {
+            'type':     "externalTemperature",
+            'data':     null
+        },
+        {
+            'type':     "vin",
+            'data':     null
+        },
+        {
+            'type':     "prndl",
+            'data':     null
+        },
+        {
+            'type':     "tirePressure",
+            'data':     null
+        },
+        {
+            'type':     "batteryPackVoltage",
+            'data':     null
+        },
+        {
+            'type':     "batteryPackCurrent",
+            'data':     null
+        },
+        {
+            'type':     "batteryPackTemperature",
+            'data':     null
+        },
+        {
+            'type':     "engineTorque",
+            'data':     null
+        },
+        {
+            'type':     "odometer",
+            'data':     null
+        },
+        {
+            'type':     "tripOdometer",
+            'data':     null
+        },
+        {
+            'type':     "genericbinary",
+            'data':     null
+        }
+    ],
 	
 	/**
 	 * Chosen device name
@@ -60,7 +144,11 @@ MFT.ApplinkModel = Em.Object.create({
      */
     onApplinkScrolableMessage: function(params){
 
-       MFT.ScrollableMessage.activate( MFT.ApplinkController.getApplicationModel(params.appId).appInfo.appName , params );
+        if( MFT.ApplinkController.driverDistractionState ){
+            MFT.DriverDistraction.activate();
+        }else{
+            MFT.ScrollableMessage.activate( MFT.ApplinkController.getApplicationModel(params.appId).appInfo.appName , params );
+        }
 
     },
 
@@ -204,7 +292,7 @@ MFT.ApplinkModel = Em.Object.create({
 	onAddCommandVR: function ( message ) {
 		//message = JSON.parse('{"appId":65537,"cmdId":4,"vrCommands":["F you bc hi iv"]}');
 		
-		MFT.VRPopUp.AddCommand( message.commandId, message.vrCommands, message.appId );
+		MFT.VRPopUp.AddCommand( message.cmdId, message.vrCommands, message.appId );
 	},
 	
 	/**
@@ -217,6 +305,30 @@ MFT.ApplinkModel = Em.Object.create({
 		//message = 4;
 		
 		MFT.VRPopUp.DeleteCommand( commandId );
-	}
+	},
+
+    /** 
+     * Function returns response message to VehicleInfoRPC
+     */
+    onGetVehicleData: function( message ){
+
+        return this.vehicleData[message.dataType];
+
+    },
+
+    /** 
+     * Function call FFW.VehicleInfo.OnVehicleData when data changes
+     */
+    onVehicleDataChanged: function(){
+
+        var jsonData = { "gps": this.vehicleData[0].data, "speed": this.vehicleData[1].data, "rpm": this.vehicleData[2].data,
+        "fuelLevel": this.vehicleData[3].data, "avgFuelEconomy": this.vehicleData[4].data, "batteryVoltage": this.vehicleData[5].data,
+        "externalTemperature": this.vehicleData[6].data, "vin": this.vehicleData[7].data, "prndl": this.vehicleData[8].data,
+        "tirePressure": this.vehicleData[9].data, "batteryPackVoltage": this.vehicleData[10].data, "batteryPackCurrent": this.vehicleData[11].data,
+        "batteryPackTemperature": this.vehicleData[12].data, "engineTorque": this.vehicleData[13].data, "odometer": this.vehicleData[14].data,
+        "tripOdometer": this.vehicleData[15].data, "genericbinary": this.vehicleData[16].data };
+        FFW.VehicleInfo.OnVehicleData(jsonData);
+
+    }.observes('this.vehicleData.@each.data')
 });
  

@@ -80,7 +80,7 @@ MFT.VRPopUp = Em.ContainerView.create({
         for(var j = 0; j < vrCommands.length; j++){
             this.get('listOfCommands.list.childViews').pushObject(
                 MFT.Button.create({
-                    action:                 'onCommand',
+                    action:                 'onVRCommand',
                     target:                 'MFT.ApplinkAppController',
                     appId:					appId,
                     commandId:              commandId,

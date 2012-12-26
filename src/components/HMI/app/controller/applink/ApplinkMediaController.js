@@ -21,15 +21,6 @@ MFT.ApplinkMediaController = Em.Object.create({
     subMenuLabel: '',
 
     /*
-     *  Driver Distraction State 
-     *  may be "DD_OFF" or "DD_ON"
-     */
-    eDriverDistractionState:{
-        on : "DD_ON",
-        off : "DD_OFF"
-    },
-
-    /*
      * Enumeraction that describes possible contexts
      * and app's HMI might be in.
      */
@@ -62,9 +53,13 @@ MFT.ApplinkMediaController = Em.Object.create({
 
     /** Switching on Applink Sub Mennu */
     turnOnApplinkSubMenu: function(el){
-        this.set('currentApplinkSubMenuid', el.menuId);
-        this.set('subMenuLabel', el.text);
-        MFT.States.goToState('media.applink.applinkoptions.applinkoptionssubmenu');
+        if( MFT.ApplinkController.driverDistractionState ){
+            MFT.DriverDistraction.activate();
+        }else{
+            this.set('currentApplinkSubMenuid', el.menuId);
+            this.set('subMenuLabel', el.text);
+            MFT.States.goToState('media.applink.applinkoptions.applinkoptionssubmenu');
+        }
     },
 
     /** Switching on Application */

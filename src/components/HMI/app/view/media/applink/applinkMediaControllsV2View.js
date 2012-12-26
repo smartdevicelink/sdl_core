@@ -18,6 +18,11 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
             'tuneButtons'
         ],
 
+        /**
+         * Verification paramiter
+         */
+        applinkMediaControlls: "V2",
+
         info:   Em.View.extend({
             
             elementId: 'app_view_info',
@@ -39,7 +44,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
 
          Controls:   Em.ContainerView.create({
 
-            elementId: 'app_view_controlls',
+            elementId: 'app_view_controllsV2',
 
             /** View components*/
             childViews: [

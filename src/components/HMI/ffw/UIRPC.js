@@ -79,7 +79,7 @@ FFW.UI = FFW.RPCObserver.create({
 		//  main purpose is to nitofy ALCore
 		this.onReady();
 	},
-	
+
 	/*
      * Client is unregistered - no more requests
  	 */
@@ -150,7 +150,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    case "UI.Alert":{
 
 				MFT.ApplinkModel.onUIAlert( request.params );
-				
+
 				this.sendUIResult("SUCCESS", request.id, request.method);
 
 		    	break;
@@ -161,7 +161,7 @@ FFW.UI = FFW.RPCObserver.create({
 				MFT.ApplinkModel.setProperties(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
-		      	
+
 		      	break;
 		    }
 		    case "UI.ResetGlobalProperties":{
@@ -174,7 +174,7 @@ FFW.UI = FFW.RPCObserver.create({
 				}
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
-			    
+
 			    break;
 			}
 		    case "UI.AddCommand":{
@@ -190,7 +190,7 @@ FFW.UI = FFW.RPCObserver.create({
 				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkOptionsDeleteCommand(request.params.cmdId);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
-				
+
 				break;
 			}
 		    case "UI.AddSubMenu":{
@@ -198,7 +198,7 @@ FFW.UI = FFW.RPCObserver.create({
 				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkAddSubMenu(request.params.menuId, request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
-		    
+
 		    	break;
 		    }
 		    case "UI.DeleteSubMenu":{
@@ -206,7 +206,7 @@ FFW.UI = FFW.RPCObserver.create({
 				var resultCode =  MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkDeleteSubMenu(request.params.menuId);
 
 				this.sendUIResult(resultCode, request.id, request.method);
-		    	
+
 		    	break;
 		    }
 		    case "UI.CreateInteractionChoiceSet":{
@@ -214,7 +214,7 @@ FFW.UI = FFW.RPCObserver.create({
 				MFT.ApplinkController.getApplicationModel(request.params.appId).onCreateInteraction(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
-		    	
+
 		    	break;
 		    }
 		    case "UI.DeleteInteractionChoiceSet":{
@@ -222,7 +222,7 @@ FFW.UI = FFW.RPCObserver.create({
 				MFT.ApplinkController.getApplicationModel(request.params.appId).onDeleteInteraction(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
-		    	
+
 		    	break;
 		    }
 		    case "UI.PerformInteraction":{
@@ -230,7 +230,7 @@ FFW.UI = FFW.RPCObserver.create({
 				this.performInteractionRequestId = request.id;
 
 				MFT.ApplinkController.getApplicationModel(request.params.appId).onPreformInteraction(request.params);
-		    	
+
 		    	break;
 		    }
 		    case "UI.SetMediaClockTimer":{
@@ -238,7 +238,7 @@ FFW.UI = FFW.RPCObserver.create({
 				var resultCode = MFT.ApplinkController.getApplicationModel(request.params.appId).applinkSetMediaClockTimer(request.params);
 
 				this.sendUIResult(resultCode, request.id, request.method);
-		    	
+
 		    	break;
 		    }
 		    case "UI.OnAppActivated":{
@@ -334,20 +334,20 @@ FFW.UI = FFW.RPCObserver.create({
 				};
 
 				this.client.send(JSONMessage);
-		    	
-		    	break;
-		    }
-		   	
-		   	default:{
-		      	//statements_def
-		      	break;
-		    }
+
+				break;
+			}
+
+			default:{
+				//statements_def
+				break;
+			}
 		}
 	},
 	
 	/*
 	 * send response from onRPCRequest
- 	 */	
+	 */	
 	sendUIResult: function(resultCode, id, method) {
 		
 		if(resultCode){
@@ -355,7 +355,7 @@ FFW.UI = FFW.RPCObserver.create({
 			// send repsonse
 			var JSONMessage = {
 				"jsonrpc"	:	"2.0",
-				"id"		: 	id,
+				"id"		:	id,
 				"result":	{
 					"resultCode" : resultCode, //  type (enum) from AppLink protocol
 					"method" : method + "Response"

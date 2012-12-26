@@ -171,14 +171,3 @@
 	box-shadow: inset 5px 5px 10px black, inset -3px -3px 10px #383737;
 	line-height: 45px;
 }
-#buttonControls .VRButton{
-	background: url(../images/home/controlButtons/vr.png) no-repeat;
-	width: 89px;
-	height: 90px;
-	left: 234px;
-	top: 2px;
-	-webkit-transition: 0.2s;
-}
-#VRButton.pressed{
-	background: url(../images/home/controlButtons/vr_pressed.png) no-repeat;
-}

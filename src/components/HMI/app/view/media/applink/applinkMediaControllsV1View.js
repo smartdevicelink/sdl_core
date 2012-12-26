@@ -17,6 +17,11 @@ MFT.ApplinkMediaControllsV1 = Em.ContainerView.create({
             'Controls'
         ],
 
+        /**
+         * Verification paramiter
+         */
+        applinkMediaControlls: "V1",
+
         info:   Em.View.extend({
             
             elementId: 'app_view_info',

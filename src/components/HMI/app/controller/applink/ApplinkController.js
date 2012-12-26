@@ -18,7 +18,21 @@ MFT.ApplinkController = Em.Object.create({
 	 */
 	registeredApps: {
 	},
-	
+
+    /*
+     * Driver Distraction State
+     *
+     * @type bool
+     */
+    driverDistractionState:		false,
+
+    /*
+     * Protocol Version 2 State
+     *
+     * @type bool
+     */
+    protocolVersion2State:		false,
+
 	/** 
 	 * List of Applink application models
 	 *
@@ -61,13 +75,13 @@ MFT.ApplinkController = Em.Object.create({
      * 
      * @param checked: bool
      */
-    selectdDriverDistraction: function(checked){
+    selectDriverDistraction: function(checked){
         if(checked){
-            FFW.UI.onDriverDistraction( this.eDriverDistractionState.on );
-            MFT.DriverDistraction.activate();
+            FFW.UI.onDriverDistraction( "DD_ON" );
+            this.set('driverDistractionState', true);
         }else{
-            FFW.UI.onDriverDistraction( this.eDriverDistractionState.off );
-            MFT.DriverDistraction.deactivate();
+            FFW.UI.onDriverDistraction( "DD_OFF" );
+            this.set('driverDistractionState', false);
         }
     },
 
@@ -79,8 +93,10 @@ MFT.ApplinkController = Em.Object.create({
     selectProtocolVersion: function(checked){
         if(checked){
             FFW.AppLinkCoreClient.OnVersionChanged( 2 );
+            this.set('protocolVersion2State', true);
         }else{
             FFW.AppLinkCoreClient.OnVersionChanged( 1 );
+            this.set('protocolVersion2State', false);
         }
     },
 

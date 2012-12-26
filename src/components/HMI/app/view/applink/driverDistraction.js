@@ -43,6 +43,9 @@ MFT.DriverDistraction = Em.ContainerView.create({
 
 	activate: function(){
 		this.set('active', true);
+		setTimeout(function(){
+			MFT.DriverDistraction.deactivate();
+		}, 3000);
 	},
 
 	deactivate: function(){

@@ -93,7 +93,7 @@ FFW.TTS = FFW.RPCObserver.create({
 		
 		if (request.method == "TTS.Speak") {
 
-			MFT.ApplinkModel.onPrompt(request.params.ttsChunks.splice(0, 3));
+			MFT.ApplinkModel.onPrompt(request.params.ttsChunks.splice(0, 1));
 
 			// send repsonse
 			var JSONMessage = {

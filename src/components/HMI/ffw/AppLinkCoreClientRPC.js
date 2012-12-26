@@ -81,7 +81,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * Client disconnected.
 	 */
 	onRPCDisconnected: function() {
-		MFT.ApplinkMediaModel.onApplicationDisconected();
+		//MFT.ApplinkMediaModel.onApplicationDisconected();
 	},
 
 	/*

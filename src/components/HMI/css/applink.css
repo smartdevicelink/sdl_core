@@ -42,7 +42,7 @@
  
 .applink-window .back-button {
 	top: 80px;
-	left: 20px;
+	left: 5px;
 	width: 48px;
 	height: 48px;
 	border: 1px solid #333;
@@ -56,7 +56,7 @@
 
 .applink-window .caption-text {
 	top: 80px;
-	left: 100px;
+	left: 75px;
 	width: 620px;
 	height: 20px;
 	background: #393939;
@@ -168,16 +168,16 @@
 	width: 155px;
 }
 
-#applink_view_container .player_controlls{
+#applink_view_container #app_view_controllsV2.player_controlls{
 	top: 241px;
 	height: 48px;
 }
 
-#applink_view_container #app_view_controlls .ffw-button{
+#applink_view_container #app_view_controllsV2 .ffw-button{
 	height: 48px;
 }
 
-#applink_view_container #app_view_controlls img{
+#applink_view_container #app_view_controllsV2 img{
 	margin-top: -26px;
 }
 
@@ -220,7 +220,7 @@
 	height: 251px;
 	border-radius: 2px;
 	left: 200px;
-	top: 150px;
+	top: 154px;
 	overflow: hidden;
 }
 
@@ -239,7 +239,7 @@
 }
 
 #ScrollableMessage .ffw_list_menu {
-	top: 150px !important;
+	top: 154px !important;
 	left: 25px !important;
 }
 
@@ -337,8 +337,8 @@
 	width: 650px;
 	height: 251px;
 	border-radius: 2px;
-	left: 100px;
-	top: 150px;
+	left: 75px;
+	top: 154px;
 }
 
 #perform_interaction_view .list span{
@@ -353,4 +353,68 @@
 	width: 460px;
 	text-overflow: ellipsis;
 	overflow: hidden;
+}
+#VRButton.VRButton{
+	background: url(../images/home/controlButtons/vr.png) no-repeat;
+	width: 89px;
+	height: 90px;
+	left: 1024px;;
+	top: 2px;
+	-webkit-transition: 0.2s;
+}
+#VRButton.pressed{
+	background: url(../images/home/controlButtons/vr_pressed.png) no-repeat;
+}
+#vehicleInfoButton.vehicleInfoButton{
+	width: 117px;
+	height: 48px;
+	left: 1059px;
+	top: 206px;
+	text-align: center;
+	line-height: 48px;
+}
+#VehicleInfo{
+	opacity: 0;
+	left: 50px;
+	width: 700px;
+	height: 340px;
+	background-color: black;
+	z-index: 2;
+	border-radius: 10PX;
+	top: 70px;
+	-webkit-transition: opacity 1s ease-in-out;
+	display: none;
+	border: 1px solid white;
+}
+#VehicleInfo .vehicleInfoLabel{
+	top: 10px;
+	width: 600px;
+	left: 35px;
+	height: 20px;
+	padding: 15px;
+	background: #393939;
+}
+#VehicleInfo.active{
+	opacity: 1;
+	display: block;
+}
+#VehicleInfo .prndl{
+	top: 70px;
+	width: 600px;
+	left: 40px;
+	height: 20px;
+	padding: 10px;
+	background: #535353;
+}
+#VehicleInfo .prndlSelect{
+	top: 160px;
+	position: absolute;
+	width: 150px;
+	left: 275px;
+	height: 40px;
+	color: white;
+	background: #393939;
+}
+#VehicleInfo .prndlSelect option{
+	background: #393939;
 }
