@@ -218,6 +218,31 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		final CheckBox mediaCheckBox = (CheckBox) view
 				.findViewById(R.id.selectprotocol_checkMedia);
 
+		// display current configs
+		final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME,
+				0);
+		int protocolVersion = prefs.getInt(Const.PREFS_KEY_PROTOCOLVERSION,
+				Const.PREFS_DEFAULT_PROTOCOLVERSION);
+		boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
+				Const.PREFS_DEFAULT_ISMEDIAAPP);
+
+		int radioButtonId = R.id.selectprotocol_radioV1;
+		switch (protocolVersion) {
+		case 2:
+			radioButtonId = R.id.selectprotocol_radioV2;
+			break;
+
+		case 1:
+			// 1 is the default
+			break;
+
+		default:
+			radioButtonId = -1;
+			break;
+		}
+		protocolVersionGroup.check(radioButtonId);
+		mediaCheckBox.setChecked(isMedia);
+
 		new AlertDialog.Builder(context)
 				.setTitle("Please select protocol properties")
 				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -236,6 +261,18 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						}
 
 						boolean isMedia = mediaCheckBox.isChecked();
+
+						// save the configs
+						boolean success = prefs
+								.edit()
+								.putInt(Const.PREFS_KEY_PROTOCOLVERSION,
+										protocolVersion)
+								.putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
+								.commit();
+						if (!success) {
+							Log.w(logTag,
+									"Can't save selected protocol properties");
+						}
 
 						startSyncProxy();
 					}
