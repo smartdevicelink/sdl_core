@@ -380,7 +380,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	}
 	
 	private int getCurrentProtocolVersion() {
-		return getSharedPreferences(Const.PREFS_NAME, 0).getInt(Const.PREFS_KEY_PROTOCOLVERSION, 1);
+		return getSharedPreferences(Const.PREFS_NAME, 0).getInt(
+				Const.PREFS_KEY_PROTOCOLVERSION,
+				Const.PREFS_DEFAULT_PROTOCOLVERSION);
 	}
 
 	/* Handles item selections */
@@ -429,7 +431,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			break;
 		case MNU_TOGGLE_PROTOCOL_VERSION:
 			{SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
-			int versionN = settings.getInt(Const.PREFS_KEY_PROTOCOLVERSION, 1);
+			int versionN = settings.getInt(Const.PREFS_KEY_PROTOCOLVERSION, Const.PREFS_DEFAULT_PROTOCOLVERSION);
 			SharedPreferences.Editor editor = settings.edit();
 			int newVersion = versionN == 1 ? 2:1;
 			editor.putInt(Const.PREFS_KEY_PROTOCOLVERSION, newVersion);
@@ -464,7 +466,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			return true;
 		case MNU_TOGGLE_MEDIA:
 			SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
-			boolean isMediaApp = settings.getBoolean(Const.PREFS_KEY_ISMEDIAAPP, false);
+			boolean isMediaApp = settings.getBoolean(Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
 			SharedPreferences.Editor editor = settings.edit();
 			editor.putBoolean(Const.PREFS_KEY_ISMEDIAAPP, !isMediaApp);
 
