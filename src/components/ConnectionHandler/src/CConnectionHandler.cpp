@@ -99,6 +99,8 @@ namespace NsConnectionHandler
                 if (0 < firstSessionID)
                 {
                     firstSessionID = keyFromPair(Connection, firstSessionID);
+                    // In case bot parameters of onSessionEndedCallback are the same AppMgr knows
+                    // that Application with id=firstSessionID should be closed.
                     mpConnectionHandlerObserver->onSessionEndedCallback(firstSessionID, firstSessionID);
                 }
             }
