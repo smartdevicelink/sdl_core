@@ -141,6 +141,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 	private ArrayAdapter<VehicleDataType> _vehicleDataType = null;
 	private boolean[] isVehicleDataSubscribed = null;
+	
+	/**
+	 * In onCreate() specifies if it is the first time the activity is created
+	 * during this app launch.
+	 */
+	private static boolean isFirstActivityRun = true;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -199,7 +205,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			}
 		});
 		
-		selectProtocolUI();
+		if (isFirstActivityRun) {
+			selectProtocolUI();
+		} else {
+			showProtocolPropertiesInTitle();
+			startSyncProxy();
+		}
+		
+		isFirstActivityRun = false;
 	}
 
 	/**
@@ -275,11 +288,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									"Can't save selected protocol properties");
 						}
 						
-						// reflect the settings in the activity's title
-						setTitle(getResources().getString(R.string.app_name)
-								+ " (v" + protocolVersion + ", "
-								+ (isMedia ? "" : "non-") + "media)");
-
+						showProtocolPropertiesInTitle();
 						startSyncProxy();
 					}
 				}).setView(view).show();
@@ -354,6 +363,18 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				android.R.layout.select_dialog_item);
 		_putFileAdapter
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	}
+
+	/** Displays the current protocol properties in the activity's title. */
+	private void showProtocolPropertiesInTitle() {
+		final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME,
+				0);
+		int protocolVersion = prefs.getInt(Const.PREFS_KEY_PROTOCOLVERSION,
+				Const.PREFS_DEFAULT_PROTOCOLVERSION);
+		boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
+				Const.PREFS_DEFAULT_ISMEDIAAPP);
+		setTitle(getResources().getString(R.string.app_name) + " (v"
+				+ protocolVersion + ", " + (isMedia ? "" : "non-") + "media)");
 	}
 
 	protected void onDestroy() {
