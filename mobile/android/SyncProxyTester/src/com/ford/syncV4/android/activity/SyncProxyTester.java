@@ -245,6 +245,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 		new AlertDialog.Builder(context)
 				.setTitle("Please select protocol properties")
+				.setCancelable(false)
 				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
