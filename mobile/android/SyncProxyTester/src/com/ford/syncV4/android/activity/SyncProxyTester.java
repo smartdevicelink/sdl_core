@@ -906,14 +906,20 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 								public void onClick(DialogInterface dialog, int which) {
 									SyncSubMenu menu = _submenuAdapter.getItem(which);
-									try {
-										_msgAdapter.logMessage("DeleteSubMenu (request)", true);
-										ProxyService.getInstance().getProxyInstance().deleteSubMenu(menu.getSubMenuId(), autoIncCorrId++);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									if (menu.getSubMenuId() != 0) {
+										try {
+											_msgAdapter.logMessage("DeleteSubMenu (request)", true);
+											ProxyService.getInstance().getProxyInstance().deleteSubMenu(menu.getSubMenuId(), autoIncCorrId++);
+										} catch (SyncException e) {
+											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+										}
+	
+										_submenuAdapter.remove(menu);
+									} else {
+										Toast.makeText(getApplicationContext(),
+												"Sorry, can't delete top-level menu",
+												Toast.LENGTH_LONG).show();
 									}
-
-									_submenuAdapter.remove(menu);
 								}
 							});
 							AlertDialog dlg = builder.create();
