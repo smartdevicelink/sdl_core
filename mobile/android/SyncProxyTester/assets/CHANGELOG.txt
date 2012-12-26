@@ -1,4 +1,5 @@
 [R6.1.0]
+* Clear the lists of button subscriptions, vehicle data subscriptions, created submenus, commands, choice sets, and put files when SYNC is disconnected.
 * Don't allow to delete the top-level menu.
 * Stop the whole process when clicking the Exit options menu item.
 * Fix the crashes when sending SetGlobalProperties and ResetGlobalProperties commands.

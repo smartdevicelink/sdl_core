@@ -155,49 +155,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 		((Button) findViewById(R.id.btnSendMessage)).setOnClickListener(this);
 		((Button) findViewById(R.id.btnPlayPause)).setOnClickListener(this);
-
-		// set up storage for subscription records
-		isButtonSubscribed = new boolean[ButtonName.values().length];
-		_buttonAdapter = new ArrayAdapter<ButtonName>(this,
-				android.R.layout.select_dialog_multichoice, ButtonName.values()) {
-			public View getView(int position, View convertView, ViewGroup parent) {
-				CheckedTextView ret = (CheckedTextView) super
-						.getView(position, convertView, parent);
-				ret.setChecked(isButtonSubscribed[position]);
-				return ret;
-			}
-		};
-
-		isVehicleDataSubscribed = new boolean[VehicleDataType.values().length];
-		_vehicleDataType = new ArrayAdapter<VehicleDataType>(this,
-				android.R.layout.select_dialog_multichoice, VehicleDataType.values()) {
-			public View getView(int position, View convertView, ViewGroup parent) {
-				CheckedTextView ret = (CheckedTextView) super
-						.getView(position, convertView, parent);
-				ret.setChecked(isVehicleDataSubscribed[position]);
-				return ret;
-			}
-		};
+		
+		resetAdapters();
 
 		_listview = (ListView) findViewById(R.id.messageList);
 		_msgAdapter = new logAdapter(logTag, false, this, R.layout.row, _logMessages);
-		_submenuAdapter = new ArrayAdapter<SyncSubMenu>(this, android.R.layout.select_dialog_item);
-		_submenuAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-		// Add top level menu with parent ID zero
-		SyncSubMenu sm = new SyncSubMenu();
-		sm.setName("Top Level Menu");
-		sm.setSubMenuId(0);
-		addSubMenuToList(sm);
-
-		_commandAdapter = new ArrayAdapter<Integer>(this, android.R.layout.select_dialog_item);
-		_commandAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-		_choiceSetAdapter = new ArrayAdapter<Integer>(this, android.R.layout.select_dialog_item);
-		_choiceSetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-		_putFileAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item);
-		_putFileAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
 		_listview.setClickable(true);
 		_listview.setAdapter(_msgAdapter);
@@ -249,6 +211,62 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			// need to get the instance and add myself as a listener
 			ProxyService.getInstance().setCurrentActivity(this);
 		}
+	}
+
+	/**
+	 * Initializes/resets the adapters keeping created submenus, interaction
+	 * choice set ids, etc.
+	 */
+	private void resetAdapters() {
+		// set up storage for subscription records
+		isButtonSubscribed = new boolean[ButtonName.values().length];
+		_buttonAdapter = new ArrayAdapter<ButtonName>(this,
+				android.R.layout.select_dialog_multichoice, ButtonName.values()) {
+			public View getView(int position, View convertView, ViewGroup parent) {
+				CheckedTextView ret = (CheckedTextView) super.getView(position,
+						convertView, parent);
+				ret.setChecked(isButtonSubscribed[position]);
+				return ret;
+			}
+		};
+
+		isVehicleDataSubscribed = new boolean[VehicleDataType.values().length];
+		_vehicleDataType = new ArrayAdapter<VehicleDataType>(this,
+				android.R.layout.select_dialog_multichoice,
+				VehicleDataType.values()) {
+			public View getView(int position, View convertView, ViewGroup parent) {
+				CheckedTextView ret = (CheckedTextView) super.getView(position,
+						convertView, parent);
+				ret.setChecked(isVehicleDataSubscribed[position]);
+				return ret;
+			}
+		};
+
+		_submenuAdapter = new ArrayAdapter<SyncSubMenu>(this,
+				android.R.layout.select_dialog_item);
+		_submenuAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+		// Add top level menu with parent ID zero
+		SyncSubMenu sm = new SyncSubMenu();
+		sm.setName("Top Level Menu");
+		sm.setSubMenuId(0);
+		addSubMenuToList(sm);
+
+		_commandAdapter = new ArrayAdapter<Integer>(this,
+				android.R.layout.select_dialog_item);
+		_commandAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+		_choiceSetAdapter = new ArrayAdapter<Integer>(this,
+				android.R.layout.select_dialog_item);
+		_choiceSetAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+		_putFileAdapter = new ArrayAdapter<String>(this,
+				android.R.layout.select_dialog_item);
+		_putFileAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 	}
 
 	protected void onDestroy() {
@@ -2125,6 +2143,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		} else {
 			Log.w(logTag, "Latest choiceSetId is unset");
 		}
+	}
+
+	/** Called when a connection to a SYNC device has been closed. */
+	public void onProxyClosed() {
+		resetAdapters();
+		_msgAdapter.logMessage("Disconnected", true);
 	}
 }
 
