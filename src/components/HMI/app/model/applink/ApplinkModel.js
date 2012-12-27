@@ -21,7 +21,7 @@ MFT.ApplinkModel = Em.Object.create({
     },
 
     /**
-     * Stored Vehicle Data
+     * Stored VehicleInfo Data
      */
     vehicleInfoPRNDL: [
         "Parking",
@@ -32,7 +32,19 @@ MFT.ApplinkModel = Em.Object.create({
     ],
 
     /**
-     * Stored Vehicle Data
+     * Stored VehicleInfo Data
+     */
+    ecuDIDData:[
+        {
+            'data':     "ECU 1 Test Data"
+        },
+        {
+            'data':     "ECU 2 Test Data"
+        }
+    ],
+
+    /**
+     * Stored VehicleInfo Data
      */
     vehicleData: [{
             'type':     "gps",
@@ -137,6 +149,55 @@ MFT.ApplinkModel = Em.Object.create({
     globalProperties    : {
         helpPrompt  : null ,
         timeoutPrompt   : null
+    },
+
+    /**
+     * Applink VehicleInfo.GetDTCs handler
+     */
+    onVehicleInfoGetDTCs: function( id ){
+        var data = {},
+            i = 0,
+            info = "Inormation about reported DTC's",
+            result = "";
+
+        for(i = 0; i < 3; i++) {
+            data[i] = {};
+            data[i].identifier =  "0";
+            data[i].statusByte =  "0";
+        }
+
+        result = "SUCCESS";
+
+        FFW.VehicleInfo.onVehicleInfoGetDTCsResponse( data, info, result, id );
+    },
+
+    /**
+     * Applink VehicleInfo.ReadDID handler
+     */
+    onVehicleInfoReadDID: function(params, id){
+        var data = [],
+            i = 0,
+            info = '',
+            dataResult = [],
+            resultCode = "";
+        if(this.ecuDIDData[params.ecuName].data){
+            info = this.ecuDIDData[params.ecuName].data;
+            result = "SUCCESS";
+        }else{
+            info = "";
+            result = "INVALID_DATA";
+        }
+
+        if(params.didLocation.length < 10){
+            for(i = 0; i < params.didLocation.length; i++) {
+              dataResult[i] =   'SUCCESS';
+              data[i] =         0;
+            }
+        }else{
+            result = "INVALID_DATA";
+        }
+
+        FFW.VehicleInfo.onVehicleInfoReadDIDResponse( dataResult, data, info, result, id );
     },
 
     /**
@@ -321,12 +382,11 @@ MFT.ApplinkModel = Em.Object.create({
      */
     onVehicleDataChanged: function(){
 
-        var jsonData = { "gps": this.vehicleData[0].data, "speed": this.vehicleData[1].data, "rpm": this.vehicleData[2].data,
-        "fuelLevel": this.vehicleData[3].data, "avgFuelEconomy": this.vehicleData[4].data, "batteryVoltage": this.vehicleData[5].data,
-        "externalTemperature": this.vehicleData[6].data, "vin": this.vehicleData[7].data, "prndl": this.vehicleData[8].data,
-        "tirePressure": this.vehicleData[9].data, "batteryPackVoltage": this.vehicleData[10].data, "batteryPackCurrent": this.vehicleData[11].data,
-        "batteryPackTemperature": this.vehicleData[12].data, "engineTorque": this.vehicleData[13].data, "odometer": this.vehicleData[14].data,
-        "tripOdometer": this.vehicleData[15].data, "genericbinary": this.vehicleData[16].data };
+        var jsonData = {},
+            i = 0;
+        for(i = 0; i < this.vehicleData.length; i++) {
+          jsonData[this.vehicleData[i].type] = this.vehicleData[i].data;
+        }
         FFW.VehicleInfo.OnVehicleData(jsonData);
 
     }.observes('this.vehicleData.@each.data')

@@ -114,6 +114,18 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
             };
             this.client.send(JSONMessage);
         }
+
+        if (request.method == "VehicleInfo.ReadDID") {
+
+            MFT.ApplinkModel.onVehicleInfoReadDID( request.params, request.id );
+
+        }
+
+        if (request.method == "VehicleInfo.GetDTCs") {
+
+            MFT.ApplinkModel.onVehicleInfoGetDTCs( request.id );
+
+        }
     },
 
     /*
@@ -127,6 +139,51 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
             "jsonrpc":  "2.0",
             "method":   "VehicleInfo.OnVehicleData",
             "params":   params
+        };
+        this.client.send(JSONMessage);
+    },
+
+    /*
+     * ReadDID Response
+     */ 
+    onVehicleInfoReadDIDResponse: function( dataResult, data, info, result, id ) {
+        Em.Logger.log("FFW.VehicleInfo.ReadDID");
+
+        // send repsonse
+        var JSONMessage = {
+            "jsonrpc"   :   "2.0",
+            "id"        :   id,
+            "result":   {
+                "resultCode":       result, //  type (enum) from AppLink protocol
+                "method":           "VehicleInfo.ReadDIDResponse",
+                "params":{
+                    "info":         info,
+                    "dataResult":   dataResult,
+                    "data":         data
+                }
+            }
+        };
+        this.client.send(JSONMessage);
+    },
+
+    /*
+     * GetDTCs Response
+     */ 
+    onVehicleInfoGetDTCsResponse: function( data, info, result, id ) {
+        Em.Logger.log("FFW.VehicleInfo.GetDTCs");
+
+        // send repsonse
+        var JSONMessage = {
+            "jsonrpc"   :   "2.0",
+            "id"        :   id,
+            "result":   {
+                "resultCode":       result, //  type (enum) from AppLink protocol
+                "method":           "VehicleInfo.GetDTCsResponse",
+                "params":{
+                    "info":         info,
+                    "dtcList":      data
+                }
+            }
         };
         this.client.send(JSONMessage);
     }
