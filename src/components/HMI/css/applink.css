@@ -407,7 +407,7 @@
 	background: #535353;
 }
 #VehicleInfo .prndlSelect{
-	top: 160px;
+	top: 125px;
 	position: absolute;
 	width: 150px;
 	left: 275px;
@@ -417,4 +417,40 @@
 }
 #VehicleInfo .prndlSelect option{
 	background: #393939;
+}
+#VehicleInfo .ecu1Title{
+	top: 180px;
+	width: 600px;
+	left: 40px;
+	height: 20px;
+	padding: 10px;
+	background: #535353;
+}
+#VehicleInfo .ecu1{
+	top: 233px;
+	width: 80px;
+	left: 65px;
+	height: 20px;
+	padding: 10px;
+}
+#VehicleInfo .ecu2{
+	top: 265px;
+	width: 80px;
+	left: 65px;
+	height: 20px;
+	padding: 10px;
+}
+#VehicleInfo .ecu1Data{
+	top: 233px;
+	width: 485px;
+	left: 155px;
+	height: 20px;
+	padding: 10px;
+}
+#VehicleInfo .ecu2Data{
+	top: 265px;
+	width: 485px;
+	left: 155px;
+	height: 20px;
+	padding: 10px;
 }

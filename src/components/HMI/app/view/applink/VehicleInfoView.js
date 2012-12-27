@@ -21,9 +21,59 @@ MFT.VehicleInfo = Em.ContainerView.create({
     childViews: [
         'prndl',
         'vehicleInfoLabel',
-        'prndlSelect'
+        'prndlSelect',
+        'ecu1Title',
+        'ecu1',
+        'ecu2',
+        'ecu1Data',
+        'ecu2Data'
 
     ],
+
+    ecu2Data:    MFT.Label.extend({
+
+        elementId:      'ecu2Data',
+
+        classNames:     'ecu2Data',
+
+        contentBinding:        'MFT.ApplinkModel.ecuDIDData.1.data'
+    }),
+
+    ecu1Data:    MFT.Label.extend({
+
+        elementId:      'ecu1Data',
+
+        classNames:     'ecu1Data',
+
+        contentBinding:        'MFT.ApplinkModel.ecuDIDData.0.data'
+    }),
+
+    ecu2:    MFT.Label.extend({
+
+        elementId:      'ecu2',
+
+        classNames:     'ecu2',
+
+        content:        'ECU 2:'
+    }),
+
+    ecu1:    MFT.Label.extend({
+
+        elementId:      'ecu1',
+
+        classNames:     'ecu1',
+
+        content:        'ECU 1:'
+    }),
+
+    ecu1Title:    MFT.Label.extend({
+
+        elementId:      'ecu1Title',
+
+        classNames:     'ecu1Title',
+
+        content:        'ECU'
+    }),
 
     vehicleInfoLabel:    MFT.Label.extend({
 
