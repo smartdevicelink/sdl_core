@@ -226,10 +226,24 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		View view = inflater.inflate(R.layout.selectprotocol,
 				(ViewGroup) findViewById(R.id.selectprotocol_Root));
 
+		ArrayAdapter<Language> langAdapter = new ArrayAdapter<Language>(this,
+				android.R.layout.simple_spinner_item, Language.values());
+		langAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
 		final RadioGroup protocolVersionGroup = (RadioGroup) view
 				.findViewById(R.id.selectProtocol_radioGroupProtocolVersion);
 		final CheckBox mediaCheckBox = (CheckBox) view
 				.findViewById(R.id.selectprotocol_checkMedia);
+		final EditText appNameEditText = (EditText) view
+				.findViewById(R.id.selectProtocol_appName);
+		final Spinner langSpinner = (Spinner) view
+				.findViewById(R.id.selectprotocol_lang);
+		final Spinner hmiLangSpinner = (Spinner) view
+				.findViewById(R.id.selectprotocol_hmiLang);
+		
+		langSpinner.setAdapter(langAdapter);
+		hmiLangSpinner.setAdapter(langAdapter);
 
 		// display current configs
 		final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME,
@@ -238,6 +252,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				Const.PREFS_DEFAULT_PROTOCOLVERSION);
 		boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
 				Const.PREFS_DEFAULT_ISMEDIAAPP);
+		String appName = prefs.getString(Const.PREFS_KEY_APPNAME,
+				Const.PREFS_DEFAULT_APPNAME);
+		Language lang = Language.valueOf(prefs.getString(Const.PREFS_KEY_LANG,
+				Const.PREFS_DEFAULT_LANG));
+		Language hmiLang = Language.valueOf(prefs.getString(
+				Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
 
 		int radioButtonId = R.id.selectprotocol_radioV1;
 		switch (protocolVersion) {
@@ -255,6 +275,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		}
 		protocolVersionGroup.check(radioButtonId);
 		mediaCheckBox.setChecked(isMedia);
+		appNameEditText.setText(appName);
+		langSpinner.setSelection(langAdapter.getPosition(lang));
+		hmiLangSpinner.setSelection(langAdapter.getPosition(hmiLang));
 
 		new AlertDialog.Builder(context)
 				.setTitle("Please select protocol properties")
@@ -275,6 +298,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						}
 
 						boolean isMedia = mediaCheckBox.isChecked();
+						String appName = appNameEditText.getText().toString();
+						String lang = ((Language) langSpinner.getSelectedItem())
+								.name();
+						String hmiLang = ((Language) hmiLangSpinner.getSelectedItem()).name();
 
 						// save the configs
 						boolean success = prefs
@@ -282,6 +309,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								.putInt(Const.PREFS_KEY_PROTOCOLVERSION,
 										protocolVersion)
 								.putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
+								.putString(Const.PREFS_KEY_APPNAME, appName)
+								.putString(Const.PREFS_KEY_LANG, lang)
+								.putString(Const.PREFS_KEY_HMILANG, hmiLang)
 								.commit();
 						if (!success) {
 							Log.w(logTag,

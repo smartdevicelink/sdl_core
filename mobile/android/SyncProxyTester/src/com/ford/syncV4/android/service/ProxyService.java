@@ -149,18 +149,25 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				int versionNumber = settings.getInt(
 						Const.PREFS_KEY_PROTOCOLVERSION,
 						Const.PREFS_DEFAULT_PROTOCOLVERSION);
+				String appName = settings.getString(Const.PREFS_KEY_APPNAME,
+						Const.PREFS_DEFAULT_APPNAME);
+				Language lang = Language.valueOf(settings.getString(
+						Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
+				Language hmiLang = Language.valueOf(settings.getString(
+						Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
+				Log.i(TAG, "Using protocol version " + versionNumber);
 
 				//_syncProxy = new SyncProxyALM(this, "SyncProxyTester", true);
 				_syncProxy = new SyncProxyALM(this,
 						/*sync proxy configuration resources*/null,
 						/*enable advanced lifecycle management true,*/
-						"SyncProxyTester",
+						appName,
 						/*ngn media app*/null,
 						/*vr synonyms*/null,
 						/*is media app*/isMediaApp,
 						/*syncMsgVersion*/null,
-						/*language desired*/Language.EN_US,
-						/*HMI Display Language Desired*/Language.EN_US,
+						/*language desired*/lang,
+						/*HMI Display Language Desired*/hmiLang,
 						/*App ID*/"8675309",
 						/*autoActivateID*/null,
 						/*callbackToUIThread*/ false,
