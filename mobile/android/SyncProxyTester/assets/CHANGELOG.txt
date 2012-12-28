@@ -1,4 +1,4 @@
-[R6.1.0]
+[CW52]
 + Slider message: allow to specify dynamic footer.
 + ScrollableMessage dialog: the user can specify timeout.
 + Experimental: select protocol properties (protocol version, is media app, app name, desired language and HMI language) at app launch. The proxy service starts only when the app's activity launches.
