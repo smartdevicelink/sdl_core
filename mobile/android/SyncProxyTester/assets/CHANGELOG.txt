@@ -1,4 +1,5 @@
 [R6.1.0]
++ Slider message: allow to specify dynamic footer.
 + ScrollableMessage dialog: the user can specify timeout.
 + Experimental: select protocol properties (protocol version, is media app, app name, desired language and HMI language) at app launch. The proxy service starts only when the app's activity launches.
 * Clear the lists of button subscriptions, vehicle data subscriptions, created submenus, commands, choice sets, and put files when SYNC is disconnected.

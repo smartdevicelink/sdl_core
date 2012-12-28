@@ -1294,6 +1294,41 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText txtSliderHeader = (EditText) layout.findViewById(R.id.txtSliderHeader);
 							final EditText txtSliderFooter = (EditText) layout.findViewById(R.id.txtSliderFooter);
 							final EditText txtTimeout = (EditText) layout.findViewById(R.id.txtTimeout);
+							
+							final Button btnStaticFooter = (Button) layout.findViewById(R.id.slider_staticFooter);
+							btnStaticFooter.setOnClickListener(new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									// set default static text
+									txtSliderFooter.setText(R.string.slider_footer);
+								}
+							});
+							
+							// string to join/split footer strings
+							final String joinString = ",";
+							final Button btnDynamicFooter = (Button) layout.findViewById(R.id.slider_dynamicFooter);
+							btnDynamicFooter.setOnClickListener(new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									// set numTicks comma-separated strings
+									int numTicks = 0;
+									try {
+										numTicks = Integer.parseInt(txtNumTicks.getText().toString());
+									} catch (NumberFormatException e) {
+										// do nothing, leave 0
+									}
+									if (numTicks > 0) {
+										StringBuilder b = new StringBuilder();
+										for (int i = 0; i < numTicks; ++i) {
+											b.append(joinString).append(i);
+										}
+										txtSliderFooter.setText(b.toString().substring(joinString.length()));
+									} else {
+										txtSliderFooter.setText("");
+									}
+								}
+							});
+							
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
@@ -1301,9 +1336,18 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
 									msg.setNumTicks(Integer.parseInt(txtNumTicks.getText().toString()));
 									msg.setSliderHeader(txtSliderHeader.getText().toString());
-									Vector<String> footerelements = new Vector<String>();
-									footerelements.add(txtSliderFooter.getText().toString());
+									
+									Vector<String> footerelements = null;
+									String footer = txtSliderFooter.getText().toString();
+									// if footer has 1+ join strings, split it to array, otherwise use as is
+									if (footer.indexOf(joinString) != -1) {
+										footerelements = new Vector<String>(Arrays.asList(footer.split(joinString)));
+									} else {
+										footerelements = new Vector<String>();
+										footerelements.add(footer);
+									}
 									msg.setSliderFooter(footerelements);
+									
 									msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
 									msg.setCorrelationID(autoIncCorrId++);
 									_msgAdapter.logMessage(msg, true);
