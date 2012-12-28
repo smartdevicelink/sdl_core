@@ -30,24 +30,34 @@ MFT.VehicleInfo = Em.ContainerView.create({
 
     ],
 
+    /*
+     * Label with stored data in VehicleInfo model
+     */ 
     ecu2Data:    MFT.Label.extend({
 
         elementId:      'ecu2Data',
 
         classNames:     'ecu2Data',
 
-        contentBinding:        'MFT.ApplinkModel.ecuDIDData.1.data'
+        contentBinding:        'MFT.ApplinkVehicleInfoModel.ecuDIDData.1.data'
     }),
 
+    /*
+     * Label with stored data in VehicleInfo model
+     */ 
     ecu1Data:    MFT.Label.extend({
 
         elementId:      'ecu1Data',
 
         classNames:     'ecu1Data',
 
-        contentBinding:        'MFT.ApplinkModel.ecuDIDData.0.data'
+        contentBinding:        'MFT.ApplinkVehicleInfoModel.ecuDIDData.0.data'
     }),
 
+    /*
+     * Label with name of some parameter
+     * stored data in VehicleInfo model
+     */ 
     ecu2:    MFT.Label.extend({
 
         elementId:      'ecu2',
@@ -57,6 +67,10 @@ MFT.VehicleInfo = Em.ContainerView.create({
         content:        'ECU 2:'
     }),
 
+    /*
+     * Label with name of some parameter
+     * stored data in VehicleInfo model
+     */ 
     ecu1:    MFT.Label.extend({
 
         elementId:      'ecu1',
@@ -66,6 +80,10 @@ MFT.VehicleInfo = Em.ContainerView.create({
         content:        'ECU 1:'
     }),
 
+    /*
+     * Title of ecu group of parameters
+     * stored data in VehicleInfo model
+     */ 
     ecu1Title:    MFT.Label.extend({
 
         elementId:      'ecu1Title',
@@ -75,6 +93,9 @@ MFT.VehicleInfo = Em.ContainerView.create({
         content:        'ECU'
     }),
 
+    /*
+     * Title of VehicleInfo PopUp view
+     */ 
     vehicleInfoLabel:    MFT.Label.extend({
 
         elementId:      'vehicleInfoLabel',
@@ -84,8 +105,16 @@ MFT.VehicleInfo = Em.ContainerView.create({
         content:        'Vehicle Information'
     }),
 
+
+    /*
+     * Property indicates the activity state of VehicleInfo PopUp
+     */
     active:           false,
 
+    /*
+     * Title of prndl group of parameters
+     * stored in VehicleInfo model
+     */ 
     prndl : MFT.Label.extend({
 
         elementId:          'prndl',
@@ -95,36 +124,42 @@ MFT.VehicleInfo = Em.ContainerView.create({
         content:            'PRNDL'
     }),
 
+    /*
+     * Select with parameters of transmission state
+     */ 
     prndlSelect : Ember.Select.extend({
 
         elementId:          'prndlSelect',
 
         classNames:         'prndlSelect',
 
-        content:            MFT.ApplinkModel.vehicleInfoPRNDL,
+        content:            MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL,
 
         selected:           function( element ){
             switch(element.selection){
                 case "Parking": 
-                    MFT.ApplinkModel.set('vehicleData.8.data', "PARK");
+                    MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "PARK");
                     break;
                 case "Reverse gear": 
-                    MFT.ApplinkModel.set('vehicleData.8.data', "REVERSE");
+                    MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "REVERSE");
                     break;
                 case "No gear": 
-                    MFT.ApplinkModel.set('vehicleData.8.data', "NEUTRAL");
+                    MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "NEUTRAL");
                     break;
                 case "Forward drive": 
-                    MFT.ApplinkModel.set('vehicleData.8.data', "FORWARD_DRIVE_2");
+                    MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "FORWARD_DRIVE_2");
                     break;
                 case "1st gear hold": 
-                    MFT.ApplinkModel.set('vehicleData.8.data', "LOWGEAR");
+                    MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "LOWGEAR");
                     break;
             }
         }.observes('selection')
     }),
 
-    activate: function(){
+    /*
+     * Trigger function that activates and deactivates VehicleInfo PopUp
+     */
+    toggleActivity: function(){
         if(this.active){
             this.set('active', false);
         }else{

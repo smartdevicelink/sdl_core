@@ -93,7 +93,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 
         if (request.method == "VehicleInfo.GetVehicleData") {
 
-            var vehicleData = MFT.ApplinkModel.onGetVehicleData(request.params),
+            var vehicleData = MFT.ApplinkVehicleInfoModel.onGetVehicleData(request.params),
                 resultCode;
 
             if( vehicleData ){
@@ -117,13 +117,13 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 
         if (request.method == "VehicleInfo.ReadDID") {
 
-            MFT.ApplinkModel.onVehicleInfoReadDID( request.params, request.id );
+            MFT.ApplinkVehicleInfoModel.onVehicleInfoReadDID( request.params, request.id );
 
         }
 
         if (request.method == "VehicleInfo.GetDTCs") {
 
-            MFT.ApplinkModel.onVehicleInfoGetDTCs( request.id );
+            MFT.ApplinkVehicleInfoModel.onVehicleInfoGetDTCs( request.id );
 
         }
     },

@@ -44,7 +44,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 		text:		'Vehicle Info', 
 		actionUp:		function(){
 			this._super();
-			MFT.VehicleInfo.activate();
+			MFT.VehicleInfo.toggleActivity();
 		}
 	}),
 
