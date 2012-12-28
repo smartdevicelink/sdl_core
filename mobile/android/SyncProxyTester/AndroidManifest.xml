@@ -14,7 +14,7 @@
         android:icon="@drawable/fiesta"
         android:label="@string/app_name" >
         <activity
-            android:name="com.ford.syncV4.android.activity.SyncProxyTester"
+            android:name=".activity.SyncProxyTester"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
             <intent-filter>
@@ -24,10 +24,10 @@
             </intent-filter>
         </activity>
 
-        <service android:name="com.ford.syncV4.android.service.ProxyService" >
+        <service android:name=".service.ProxyService" >
         </service>
 
-        <receiver android:name="com.ford.syncV4.android.receivers.SyncReceiver" >
+        <receiver android:name=".receivers.SyncReceiver" >
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
@@ -37,7 +37,7 @@
         </receiver>
 
         <activity
-            android:name="com.ford.syncV4.android.SoftButtonsEditActivity"
+            android:name=".activity.SoftButtonsEditActivity"
             android:label="@string/title_activity_soft_buttons_edit" >
         </activity>
     </application>
