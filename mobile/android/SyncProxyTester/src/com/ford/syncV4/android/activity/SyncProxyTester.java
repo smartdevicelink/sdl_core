@@ -1333,12 +1333,19 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							View layout = inflater.inflate(R.layout.scrollablemessage, null);
 							final EditText txtScrollableMessageBody = (EditText) layout.findViewById(R.id.txtScrollableMessageBody);
 							final CheckBox chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
+							final EditText txtTimeout = (EditText) layout.findViewById(R.id.scrollablemessage_editTimeout);
+							
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
 									try {
 										ScrollableMessage msg = new ScrollableMessage();
 										msg.setCorrelationID(autoIncCorrId++);
+										try {
+											msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
+										} catch (NumberFormatException e) {
+											// do nothing, leave the default timeout
+										}
 										msg.setScrollableMessageBody(txtScrollableMessageBody.getEditableText().toString());
 										if (chkIncludeSoftButtons.isChecked()) {
 											SoftButton sb1 = new SoftButton();

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/itemRoot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:minWidth="400px"
     android:orientation="vertical"
     android:paddingLeft="20dip"
@@ -14,8 +14,27 @@
 			android:layout_width="fill_parent" android:layout_height="wrap_content"
 			android:visibility="visible">
 		</EditText>
-		<CheckBox android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:id="@+id/chkIncludeSBs"
-		    android:text="Include SoftButtons?" android:checked="false">
-		</CheckBox>
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="Timeout" />
+
+		<EditText
+		    android:id="@+id/scrollablemessage_editTimeout"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:ems="10"
+		    android:inputType="number"
+		    android:maxLength="5"
+		    android:text="30000" >
+		</EditText>
+
+		<CheckBox
+		    android:id="@+id/chkIncludeSBs"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:checked="false"
+		    android:text="Include SoftButtons?" />
+
 </LinearLayout>
