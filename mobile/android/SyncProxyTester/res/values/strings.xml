@@ -5,4 +5,10 @@
 <string name="connect">Connect</string>
 <string name="speak">Speak</string>
 <string name="slider_footer">Slider Footer</string>
+<string name="softbutton_type">Type:</string>
+<string name="softbutton_text">Text (if TEXT or BOTH):</string>
+<string name="softbutton_image">Image (if IMAGE or BOTH):</string>
+<string name="softbutton_isHighlighted">Highlighted?</string>
+<string name="softbutton_defaultText">Text</string>
+<string name="softbutton_defaultImage">imageFilename</string>
 </resources>
