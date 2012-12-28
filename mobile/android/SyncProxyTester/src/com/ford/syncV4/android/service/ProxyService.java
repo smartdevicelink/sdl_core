@@ -17,6 +17,7 @@ import android.util.Pair;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.logAdapter;
+import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.receivers.SyncReceiver;
@@ -140,28 +141,38 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		
 		if (_syncProxy == null) {
 			try {
-				SharedPreferences settings = getSharedPreferences("SyncProxyTesterPrefs", 0);
-				boolean isMediaApp = true;// settings.getBoolean("isMediaApp", false);
-				
-				int versionNumber = settings.getInt("VersionNumber",1);
+				SharedPreferences settings = getSharedPreferences(
+						Const.PREFS_NAME, 0);
+				boolean isMediaApp = settings.getBoolean(
+						Const.PREFS_KEY_ISMEDIAAPP,
+						Const.PREFS_DEFAULT_ISMEDIAAPP);
+				int versionNumber = settings.getInt(
+						Const.PREFS_KEY_PROTOCOLVERSION,
+						Const.PREFS_DEFAULT_PROTOCOLVERSION);
+				String appName = settings.getString(Const.PREFS_KEY_APPNAME,
+						Const.PREFS_DEFAULT_APPNAME);
+				Language lang = Language.valueOf(settings.getString(
+						Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
+				Language hmiLang = Language.valueOf(settings.getString(
+						Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
+				Log.i(TAG, "Using protocol version " + versionNumber);
 
 				//_syncProxy = new SyncProxyALM(this, "SyncProxyTester", true);
 				_syncProxy = new SyncProxyALM(this,
 						/*sync proxy configuration resources*/null,
 						/*enable advanced lifecycle management true,*/
-						"SyncProxyTester",
+						appName,
 						/*ngn media app*/null,
 						/*vr synonyms*/null,
 						/*is media app*/isMediaApp,
 						/*syncMsgVersion*/null,
-						/*language desired*/Language.EN_US,
-						/*HMI Display Language Desired*/Language.EN_US,
+						/*language desired*/lang,
+						/*HMI Display Language Desired*/hmiLang,
 						/*App ID*/"8675309",
 						/*autoActivateID*/null,
 						/*callbackToUIThread*/ false,
 						/*preRegister*/ false,
 						versionNumber);
-						//2);
 			} catch (SyncException e) {
 				e.printStackTrace();
 				//error creating proxy, returned proxy = null

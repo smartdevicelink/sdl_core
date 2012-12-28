@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
 import java.util.Vector;
 
 import org.json.JSONException;
@@ -15,7 +14,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,12 +38,14 @@ import android.widget.CheckBox;
 import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.adapters.logAdapter;
+import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
@@ -136,12 +136,17 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private int itemcmdID = 1;
 	private int submenucmdID = 1000;
 
-	private static final String PREFS_NAME = "SyncProxyTesterPrefs";
 	private ArrayAdapter<ButtonName> _buttonAdapter = null;
 	private boolean[] isButtonSubscribed = null;
 
 	private ArrayAdapter<VehicleDataType> _vehicleDataType = null;
 	private boolean[] isVehicleDataSubscribed = null;
+	
+	/**
+	 * In onCreate() specifies if it is the first time the activity is created
+	 * during this app launch.
+	 */
+	private static boolean isFirstActivityRun = true;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -199,14 +204,135 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				}
 			}
 		});
+		
+		if (isFirstActivityRun) {
+			selectProtocolUI();
+		} else {
+			showProtocolPropertiesInTitle();
+			startSyncProxy();
+		}
+		
+		isFirstActivityRun = false;
+	}
 
+	/**
+	 * Shows a dialog where the user can select connection features (protocol
+	 * version and media flag). Starts the proxy after selecting.
+	 */
+	private void selectProtocolUI() {
+		Context context = this;
+		LayoutInflater inflater = (LayoutInflater) context
+				.getSystemService(LAYOUT_INFLATER_SERVICE);
+		View view = inflater.inflate(R.layout.selectprotocol,
+				(ViewGroup) findViewById(R.id.selectprotocol_Root));
+
+		ArrayAdapter<Language> langAdapter = new ArrayAdapter<Language>(this,
+				android.R.layout.simple_spinner_item, Language.values());
+		langAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+		final RadioGroup protocolVersionGroup = (RadioGroup) view
+				.findViewById(R.id.selectProtocol_radioGroupProtocolVersion);
+		final CheckBox mediaCheckBox = (CheckBox) view
+				.findViewById(R.id.selectprotocol_checkMedia);
+		final EditText appNameEditText = (EditText) view
+				.findViewById(R.id.selectProtocol_appName);
+		final Spinner langSpinner = (Spinner) view
+				.findViewById(R.id.selectprotocol_lang);
+		final Spinner hmiLangSpinner = (Spinner) view
+				.findViewById(R.id.selectprotocol_hmiLang);
+		
+		langSpinner.setAdapter(langAdapter);
+		hmiLangSpinner.setAdapter(langAdapter);
+
+		// display current configs
+		final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME,
+				0);
+		int protocolVersion = prefs.getInt(Const.PREFS_KEY_PROTOCOLVERSION,
+				Const.PREFS_DEFAULT_PROTOCOLVERSION);
+		boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
+				Const.PREFS_DEFAULT_ISMEDIAAPP);
+		String appName = prefs.getString(Const.PREFS_KEY_APPNAME,
+				Const.PREFS_DEFAULT_APPNAME);
+		Language lang = Language.valueOf(prefs.getString(Const.PREFS_KEY_LANG,
+				Const.PREFS_DEFAULT_LANG));
+		Language hmiLang = Language.valueOf(prefs.getString(
+				Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
+
+		int radioButtonId = R.id.selectprotocol_radioV1;
+		switch (protocolVersion) {
+		case 2:
+			radioButtonId = R.id.selectprotocol_radioV2;
+			break;
+
+		case 1:
+			// 1 is the default
+			break;
+
+		default:
+			radioButtonId = -1;
+			break;
+		}
+		protocolVersionGroup.check(radioButtonId);
+		mediaCheckBox.setChecked(isMedia);
+		appNameEditText.setText(appName);
+		langSpinner.setSelection(langAdapter.getPosition(lang));
+		hmiLangSpinner.setSelection(langAdapter.getPosition(hmiLang));
+
+		new AlertDialog.Builder(context)
+				.setTitle("Please select protocol properties")
+				.setCancelable(false)
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						int protocolVersion = 1;
+						switch (protocolVersionGroup.getCheckedRadioButtonId()) {
+						case R.id.selectprotocol_radioV2:
+							protocolVersion = 2;
+							break;
+
+						case R.id.selectprotocol_radioV1:
+							// 1 by default
+						default:
+							break;
+						}
+
+						boolean isMedia = mediaCheckBox.isChecked();
+						String appName = appNameEditText.getText().toString();
+						String lang = ((Language) langSpinner.getSelectedItem())
+								.name();
+						String hmiLang = ((Language) hmiLangSpinner.getSelectedItem()).name();
+
+						// save the configs
+						boolean success = prefs
+								.edit()
+								.putInt(Const.PREFS_KEY_PROTOCOLVERSION,
+										protocolVersion)
+								.putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
+								.putString(Const.PREFS_KEY_APPNAME, appName)
+								.putString(Const.PREFS_KEY_LANG, lang)
+								.putString(Const.PREFS_KEY_HMILANG, hmiLang)
+								.commit();
+						if (!success) {
+							Log.w(logTag,
+									"Can't save selected protocol properties");
+						}
+						
+						showProtocolPropertiesInTitle();
+						startSyncProxy();
+					}
+				}).setView(view).show();
+	}
+
+	/** Starts the sync proxy at startup after selecting protocol features. */
+	private void startSyncProxy() {
 		// Publish an SDP record and create a SYNC proxy.
-		//startSyncProxyService();		
+		// startSyncProxyService();
 		_applinkService = new ProxyService();
 		if (ProxyService.getInstance() == null) {
 			Intent startIntent = new Intent(this, ProxyService.class);
 			startService(startIntent);
-			//bindService(startIntent, this, Context.BIND_AUTO_CREATE);
+			// bindService(startIntent, this, Context.BIND_AUTO_CREATE);
 		} else {
 			// need to get the instance and add myself as a listener
 			ProxyService.getInstance().setCurrentActivity(this);
@@ -269,6 +395,18 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 	}
 
+	/** Displays the current protocol properties in the activity's title. */
+	private void showProtocolPropertiesInTitle() {
+		final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME,
+				0);
+		int protocolVersion = prefs.getInt(Const.PREFS_KEY_PROTOCOLVERSION,
+				Const.PREFS_DEFAULT_PROTOCOLVERSION);
+		boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
+				Const.PREFS_DEFAULT_ISMEDIAAPP);
+		setTitle(getResources().getString(R.string.app_name) + " (v"
+				+ protocolVersion + ", " + (isMedia ? "" : "non-") + "media)");
+	}
+
 	protected void onDestroy() {
 		super.onDestroy();
 		endSyncProxyInstance();
@@ -323,10 +461,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			menu.add(0, MNU_TOGGLE_CONSOLE, 0, "Toggle Console");
 			menu.add(0, MNU_CLEAR, 0, "Clear Messages");
 			menu.add(0, MNU_EXIT, 0, "Exit");
-			menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");
+/*			menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");
 			menu.add(0, MNU_TOGGLE_PROTOCOL_VERSION, 0,
 					"Toggle Protocol Ver. (cur " + String.valueOf(
-							getCurrentProtocolVersion()) + ")");
+							getCurrentProtocolVersion()) + ")");*/
 			menu.add(0, MNU_UNREGISTER, 0, "Unregister");
 			menu.add(0, MNU_APP_VERSION, 0, "App version");
 			return true;
@@ -336,7 +474,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	}
 	
 	private int getCurrentProtocolVersion() {
-		return getSharedPreferences(PREFS_NAME, 0).getInt("VersionNumber", 1);
+		return getSharedPreferences(Const.PREFS_NAME, 0).getInt(
+				Const.PREFS_KEY_PROTOCOLVERSION,
+				Const.PREFS_DEFAULT_PROTOCOLVERSION);
 	}
 
 	/* Handles item selections */
@@ -384,11 +524,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			exitApp();
 			break;
 		case MNU_TOGGLE_PROTOCOL_VERSION:
-			{SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-			int versionN = settings.getInt("VersionNumber", 1);
+			{SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
+			int versionN = settings.getInt(Const.PREFS_KEY_PROTOCOLVERSION, Const.PREFS_DEFAULT_PROTOCOLVERSION);
 			SharedPreferences.Editor editor = settings.edit();
 			int newVersion = versionN == 1 ? 2:1;
-			editor.putInt("VersionNumber", newVersion);
+			editor.putInt(Const.PREFS_KEY_PROTOCOLVERSION, newVersion);
 			editor.commit();
 			
 			Toast.makeText(getApplicationContext(),
@@ -419,10 +559,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			_msgAdapter.clear();
 			return true;
 		case MNU_TOGGLE_MEDIA:
-			SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-			boolean isMediaApp = settings.getBoolean("isMediaApp", false);
+			SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
+			boolean isMediaApp = settings.getBoolean(Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putBoolean("isMediaApp", !isMediaApp);
+			editor.putBoolean(Const.PREFS_KEY_ISMEDIAAPP, !isMediaApp);
 
 			// Don't forget to commit your edits!!!
 			editor.commit();
@@ -2049,7 +2189,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		});
 	}
 	
-	public void startSyncProxyService() {
+/*	public void startSyncProxyService() {
     	// Get the local Bluetooth adapter
         BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -2090,7 +2230,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		        }
 			}
 		}
-	}
+	}*/
 
 	//upon onDestroy(), dispose current proxy and create a new one to enable auto-start
 	//call resetProxy() to do so
