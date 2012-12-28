@@ -17,23 +17,23 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
      */
     vehicleInfoPRNDL: [
         {
-            name:   "Parking",
+            name:   "PARK",
             id:     0
         },
         {
-            name:   "Reverse gear",
+            name:   "REVERSE",
             id:     1
         },
         {
-            name:   "No gear",
+            name:   "NEUTRAL",
             id:     2
         },
         {
-            name:   "Forward drive",
+            name:   "FORWARD_DRIVE_2",
             id:     3
         },
         {
-            name:   "1st gear hold",
+            name:   "LOWGEAR",
             id:     4
         }
     ],
@@ -53,75 +53,24 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
     /**
      * Stored VehicleInfo Data
      */
-    vehicleData: [{
-            'type':     "gps",
-            'data':     null
-        },
-        {
-            'type':     "speed",
-            'data':     null
-        },
-        {
-            'type':     "rpm",
-            'data':     null
-        },
-        {
-            'type':     "fuelLevel",
-            'data':     null
-        },
-        {
-            'type':     "avgFuelEconomy",
-            'data':     null
-        },
-        {
-            'type':     "batteryVoltage",
-            'data':     null
-        },
-        {
-            'type':     "externalTemperature",
-            'data':     null
-        },
-        {
-            'type':     "vin",
-            'data':     null
-        },
-        {
-            'type':     "prndl",
-            'data':     null
-        },
-        {
-            'type':     "tirePressure",
-            'data':     null
-        },
-        {
-            'type':     "batteryPackVoltage",
-            'data':     null
-        },
-        {
-            'type':     "batteryPackCurrent",
-            'data':     null
-        },
-        {
-            'type':     "batteryPackTemperature",
-            'data':     null
-        },
-        {
-            'type':     "engineTorque",
-            'data':     null
-        },
-        {
-            'type':     "odometer",
-            'data':     null
-        },
-        {
-            'type':     "tripOdometer",
-            'data':     null
-        },
-        {
-            'type':     "genericbinary",
-            'data':     null
-        }
-    ],
+    vehicleData: {
+        'speed':                    null,
+        'rpm':                      null,
+        'fuelLevel':                null,
+        'avgFuelEconomy':           null,
+        'batteryVoltage':           null,
+        'externalTemperature':      null,
+        'vin':                      null,
+        'prndl':                    null,
+        'tirePressure':             null,
+        'batteryPackVoltage':       null,
+        'batteryPackCurrent':       null,
+        'batteryPackTemperature':   null,
+        'engineTorque':             null,
+        'odometer':                 null,
+        'tripOdometer':             null,
+        'genericbinary':            null
+    },
 
     /**
      * Applink VehicleInfo.GetDTCs handler
@@ -140,7 +89,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
 
         result = "SUCCESS";
 
-        FFW.VehicleInfo.onVehicleInfoGetDTCsResponse( data, info, result, id );
+        FFW.VehicleInfo.vehicleInfoGetDTCsResponse( data, info, result, id );
     },
 
     /**
@@ -169,7 +118,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             result = "INVALID_DATA";
         }
 
-        FFW.VehicleInfo.onVehicleInfoReadDIDResponse( dataResult, data, info, result, id );
+        FFW.VehicleInfo.vhicleInfoReadDIDResponse( dataResult, data, info, result, id );
     },
 
     /** 
@@ -186,13 +135,27 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
      */
     onVehicleDataChanged: function(){
 
-        var jsonData = {},
-            i = 0;
-        for(i = 0; i < this.vehicleData.length; i++) {
-          jsonData[this.vehicleData[i].type] = this.vehicleData[i].data;
+        var jsonData = {};
+        for(var i  in this.vehicleData) {
+          jsonData[i] = this.vehicleData[i];
         }
         FFW.VehicleInfo.OnVehicleData(jsonData);
 
-    }.observes('this.vehicleData.@each.data')
+    }.observes('this.vehicleData.speed',
+        'this.vehicleData.rpm',
+        'this.vehicleData.fuelLevel',
+        'this.vehicleData.avgFuelEconomy',
+        'this.vehicleData.batteryVoltage',
+        'this.vehicleData.externalTemperature',
+        'this.vehicleData.vin',
+        'this.vehicleData.prndl',
+        'this.vehicleData.tirePressure', 
+        'this.vehicleData.batteryPackVoltage',
+        'this.vehicleData.batteryPackCurrent',
+        'this.vehicleData.batteryPackTemperature',
+        'this.vehicleData.engineTorque',
+        'this.vehicleData.odometer',
+        'this.vehicleData.tripOdometer',
+        'this.vehicleData.genericbinary' )
 });
  

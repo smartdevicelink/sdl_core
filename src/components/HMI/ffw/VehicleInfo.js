@@ -144,7 +144,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
     /*
      * ReadDID Response
      */ 
-    onVehicleInfoReadDIDResponse: function( dataResult, data, info, result, id ) {
+    vehicleInfoReadDIDResponse: function( dataResult, data, info, result, id ) {
         Em.Logger.log("FFW.VehicleInfo.ReadDID");
 
         // send repsonse
@@ -167,7 +167,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
     /*
      * GetDTCs Response
      */ 
-    onVehicleInfoGetDTCsResponse: function( data, info, result, id ) {
+    vehicleInfoGetDTCsResponse: function( data, info, result, id ) {
         Em.Logger.log("FFW.VehicleInfo.GetDTCs");
 
         // send repsonse

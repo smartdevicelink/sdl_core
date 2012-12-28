@@ -133,28 +133,29 @@ MFT.VehicleInfo = Em.ContainerView.create({
 
         classNames:         'prndlSelect',
 
-        content:            MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL,
+        contentBinding:     'MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL',
 
-        optionValuePath:    "content.id",
+        optionValuePath:    'content.id',
 
-        optionLabelPath:    "content.name",
+        optionLabelPath:    'content.name',
 
         selected:           function( element ){
-            switch(element.selection.id){
+            var id = element.selection.id;
+            switch(id){
                 case 0: 
-                    MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "PARK");
+                    MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL[id].name);
                     break;
                 case 1: 
-                    MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "REVERSE");
+                    MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL[id].name);
                     break;
                 case 2: 
-                    MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "NEUTRAL");
+                    MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL[id].name);
                     break;
                 case 3: 
-                    MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "FORWARD_DRIVE_2");
+                    MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL[id].name);
                     break;
                 case 4: 
-                    MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "LOWGEAR");
+                    MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL[id].name);
                     break;
             }
         }.observes('selection')
