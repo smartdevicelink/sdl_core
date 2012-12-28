@@ -1,11 +1,9 @@
 /*
  * Reference implementation of VehicleInfo component.
  * 
- * Interface to get or set some essential information from OS.
- * Since web application is not able to access some OS feature through WebKit
- * it is necessary to use communication with native code to get some or set values 
- * and execute some functions. 
- * 
+ * Interface to get or set some essential information
+ * sent from ApplinkCore. VehicleInfo is responsible for sending a data
+ * about the condition of the vehicle between ApplinkCore and CanNetwork.
  *
  * @author Andriy Melnik
  */

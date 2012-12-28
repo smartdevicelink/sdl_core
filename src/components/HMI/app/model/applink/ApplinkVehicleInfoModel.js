@@ -16,11 +16,26 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
      * Stored VehicleInfo transmission state Data
      */
     vehicleInfoPRNDL: [
-        "Parking",
-        "Reverse gear",
-        "No gear",
-        "Forward drive",
-        "1st gear hold"
+        {
+            name:   "Parking",
+            id:     0
+        },
+        {
+            name:   "Reverse gear",
+            id:     1
+        },
+        {
+            name:   "No gear",
+            id:     2
+        },
+        {
+            name:   "Forward drive",
+            id:     3
+        },
+        {
+            name:   "1st gear hold",
+            id:     4
+        }
     ],
 
     /**

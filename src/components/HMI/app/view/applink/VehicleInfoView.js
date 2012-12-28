@@ -135,21 +135,25 @@ MFT.VehicleInfo = Em.ContainerView.create({
 
         content:            MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL,
 
+        optionValuePath:    "content.id",
+
+        optionLabelPath:    "content.name",
+
         selected:           function( element ){
-            switch(element.selection){
-                case "Parking": 
+            switch(element.selection.id){
+                case 0: 
                     MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "PARK");
                     break;
-                case "Reverse gear": 
+                case 1: 
                     MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "REVERSE");
                     break;
-                case "No gear": 
+                case 2: 
                     MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "NEUTRAL");
                     break;
-                case "Forward drive": 
+                case 3: 
                     MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "FORWARD_DRIVE_2");
                     break;
-                case "1st gear hold": 
+                case 4: 
                     MFT.ApplinkVehicleInfoModel.set('vehicleData.8.data', "LOWGEAR");
                     break;
             }

@@ -1,12 +1,11 @@
 /*
- * Reference implementation of ButtonsBackend component.
+ * Reference implementation of Buttons component.
  * 
- * Interface to get or set some essential information from OS.
- * Since web application is not able to access some OS feature through WebKit
- * it is necessary to use communication with native code to get some or set values 
- * and execute some functions. 
+ *  Interface to get or set some essential information
+ * sent from ApplinkCore. Buttons is responsible for managing
+ * buttons, sends to ApplinkCore press and hold events of
+ * soft buttons, presets and some hard keys. 
  * 
- *
  * @author Andriy Melnik
  */
 
