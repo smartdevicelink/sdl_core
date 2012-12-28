@@ -1,33 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      android:versionCode="1"
-      android:versionName="1.1 (CW2)" package="com.ford.syncV4.android">
-      <uses-permission android:name="android.permission.BLUETOOTH"/>
-      <!-- Required to pair Bluetooth devices -->
-      <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-      <uses-permission android:name="android.permission.INTERNET"/>
-    <application android:icon="@drawable/fiesta" android:debuggable="true" android:label="@string/app_name">
-        <activity android:name=".activity.SyncProxyTester"
-                  android:label="@string/app_name"
-                  android:screenOrientation="portrait">
-           <intent-filter>
+    package="com.ford.syncV4.android"
+    android:versionCode="1"
+    android:versionName="1.1 (CW2)" >
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!-- Required to pair Bluetooth devices -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:debuggable="true"
+        android:icon="@drawable/fiesta"
+        android:label="@string/app_name" >
+        <activity
+            android:name="com.ford.syncV4.android.activity.SyncProxyTester"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-		<service android:name=".service.ProxyService"></service>
-		<receiver android:name=".receivers.SyncReceiver">
-			<intent-filter>
-				<action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
-				<action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
-				<action android:name="android.media.AUDIO_BECOMING_NOISY" />
-				<action android:name="android.intent.action.MEDIA_BUTTON" />
-			</intent-filter>
-		</receiver>
-    
-</application>
+
+        <service android:name="com.ford.syncV4.android.service.ProxyService" >
+        </service>
+
+        <receiver android:name="com.ford.syncV4.android.receivers.SyncReceiver" >
+            <intent-filter>
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name="com.ford.syncV4.android.SoftButtonsEditActivity"
+            android:label="@string/title_activity_soft_buttons_edit" >
+        </activity>
+    </application>
+
     <uses-sdk android:minSdkVersion="5" />
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
+    </uses-permission>
 
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 </manifest>
