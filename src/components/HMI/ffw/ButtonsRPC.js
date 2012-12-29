@@ -1,9 +1,7 @@
 /*
  * Reference implementation of Buttons component.
  * 
- *  Interface to get or set some essential information
- * sent from ApplinkCore. Buttons is responsible for managing
- * buttons, sends to ApplinkCore press and hold events of
+ *  Buttons sends to ApplinkCore press and hold events of
  * soft buttons, presets and some hard keys. 
  * 
  * @author Andriy Melnik

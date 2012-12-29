@@ -41,6 +41,7 @@ MFT = Em.Application.create({
 	        FFW.VR.connect();
 	        FFW.AppLinkCoreClient.connect();
         	FFW.UI.connect();
+            FFW.VehicleInfo.connect();
 
 	        this._super();
 	},

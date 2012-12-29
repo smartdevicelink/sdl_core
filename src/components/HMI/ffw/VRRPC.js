@@ -2,9 +2,8 @@
  * Reference implementation of VR component.
  * 
  * Interface to get or set some essential information
- * sent from ApplinkCore. VR is responsible for receiving
- * voice commands from user 
- * and sending notification of recognized commands to ApplinkCore.
+ * sent from ApplinkCore. VR is responsible for receiving voice commands
+ * choosed by user and sending notification of chosen commands to ApplinkCore.
  *
  * @author Andriy Melnik
  */

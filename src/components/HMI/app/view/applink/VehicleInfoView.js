@@ -125,7 +125,8 @@ MFT.VehicleInfo = Em.ContainerView.create({
     }),
 
     /*
-     * Select with parameters of transmission state
+     * HMI element Select with parameters of transmission state
+     * from VehicleInfo Model
      */ 
     prndlSelect : Ember.Select.extend({
 
@@ -165,10 +166,6 @@ MFT.VehicleInfo = Em.ContainerView.create({
      * Trigger function that activates and deactivates VehicleInfo PopUp
      */
     toggleActivity: function(){
-        if(this.active){
-            this.set('active', false);
-        }else{
-            this.set('active', true);
-        }
+        this.set('active', !this.active);
     }
 });

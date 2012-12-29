@@ -1,9 +1,8 @@
 /*
  * Reference implementation of TTSBackend component.
  * 
- *  Interface to get or set some essential information sent from ApplinkCore.
- * TTS is responsible for the functionality provided 
- * by the application that user receives by sound notification.  
+ * TTS is responsible for playing sound data sent from ApplinkCore
+ * to notify user about some events happened.
  *
  * @author Andriy Melnik
  */

@@ -886,7 +886,7 @@ ReadDID(
   unsigned int (65535) ecuName,
   unsigned int (65535)  didLocation[0:1000],
   bool * encrypted,
-  int appId
+  int  
   ->
   VehicleDataResultCode * dataResult[0:1000], //Permission status of data element
   string(5000) * data[0:1000] //Raw DID-based data returned for requested element

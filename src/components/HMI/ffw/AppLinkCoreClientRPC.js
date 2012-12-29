@@ -3,7 +3,7 @@
  * 
  * Interface to get or set some essential information from OS.
  * AppLinkCoreClient responsible for handling the basic commands of non-graphical part
- * such as the registration of components, geting the list of devices and applications
+ * such as the registration of mobile apps, geting the list of devices and applications
  * and data transfer.
  * 
  * @author Andriy Melnik

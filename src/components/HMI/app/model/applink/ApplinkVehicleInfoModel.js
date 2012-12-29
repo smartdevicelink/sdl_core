@@ -1,7 +1,7 @@
 /**
  * @name MFT.ApplinkVehicleInfoModel
  * 
- * @desc General Applink model
+ * @desc Applink model with vehicle information used instead of CAN network
  * 
  * @category    Model
  * @filesource  app/model/applink/ApplinkVehicleInfoModel.js
@@ -74,8 +74,9 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
 
     /**
      * Applink VehicleInfo.GetDTCs handler
+     * fill data for response about vehicle errors
      */
-    onVehicleInfoGetDTCs: function( id ){
+    vehicleInfoGetDTCs: function( id ){
         var data = {},
             i = 0,
             info = "Inormation about reported DTC's",
@@ -94,8 +95,9 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
 
     /**
      * Applink VehicleInfo.ReadDID handler
+     * send response about vehicle conditions
      */
-    onVehicleInfoReadDID: function(params, id){
+    vehicleInfoReadDID: function(params, id){
         var data = [],
             i = 0,
             info = '',
@@ -109,29 +111,32 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             result = "INVALID_DATA";
         }
 
-        if(params.didLocation.length < 10){
-            for(i = 0; i < params.didLocation.length; i++) {
-              dataResult[i] =   'SUCCESS';
-              data[i] =         0;
+        
+        for(i = 0; i < params.didLocation.length; i++) {
+            if(i < 10){
+                dataResult[i] = 'SUCCESS';
+                data[i] =       0;
+            }else{
+                dataResult[i] = "INVALID_DATA";
+                data[i] =       0;
             }
-        }else{
-            result = "INVALID_DATA";
         }
 
-        FFW.VehicleInfo.vhicleInfoReadDIDResponse( dataResult, data, info, result, id );
+        FFW.VehicleInfo.vehicleInfoReadDIDResponse( dataResult, data, info, result, id );
     },
 
     /** 
      * Function returns response message to VehicleInfoRPC
      */
-    onGetVehicleData: function( message ){
+    getVehicleData: function( message ){
 
         return this.vehicleData[message.dataType];
 
     },
 
     /** 
-     * Function call FFW.VehicleInfo.OnVehicleData when data changes
+     * Function send all vehicle conditions on FFW.VehicleInfo.OnVehicleData
+     * fo notification when data changes
      */
     onVehicleDataChanged: function(){
 

@@ -56,7 +56,8 @@ MFT.ApplinkModel = Em.Object.create({
     },
 
     /**
-     * Applink UI ScrolableMessage handler
+     * Applink UI ScrolableMessage activation function
+     * dependent of Driver Distraction toggle state
      */
     onApplinkScrolableMessage: function(params){
 

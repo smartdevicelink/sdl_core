@@ -3,7 +3,8 @@
  * 
  * Interface to get or set some essential information
  * sent from ApplinkCore. VehicleInfo is responsible for sending a data
- * about the condition of the vehicle between ApplinkCore and CanNetwork.
+ * about the condition of the vehicle between ApplinkCore and CAN network.
+ * Instead CAN network used VehicleInfoModel.
  *
  * @author Andriy Melnik
  */
@@ -91,7 +92,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 
         if (request.method == "VehicleInfo.GetVehicleData") {
 
-            var vehicleData = MFT.ApplinkVehicleInfoModel.onGetVehicleData(request.params),
+            var vehicleData = MFT.ApplinkVehicleInfoModel.getVehicleData(request.params),
                 resultCode;
 
             if( vehicleData ){
@@ -115,13 +116,13 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 
         if (request.method == "VehicleInfo.ReadDID") {
 
-            MFT.ApplinkVehicleInfoModel.onVehicleInfoReadDID( request.params, request.id );
+            MFT.ApplinkVehicleInfoModel.vehicleInfoReadDID( request.params, request.id );
 
         }
 
         if (request.method == "VehicleInfo.GetDTCs") {
 
-            MFT.ApplinkVehicleInfoModel.onVehicleInfoGetDTCs( request.id );
+            MFT.ApplinkVehicleInfoModel.vehicleInfoGetDTCs( request.id );
 
         }
     },
