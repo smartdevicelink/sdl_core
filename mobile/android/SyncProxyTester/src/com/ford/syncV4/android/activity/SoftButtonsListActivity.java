@@ -29,6 +29,9 @@ public class SoftButtonsListActivity extends ListActivity {
 			.getSimpleName();
 
 	private Vector<SoftButton> softButtons = null;
+	/** Index of the softButton being edited. */
+	private int currentSoftButtonIndex = -1;
+	private ArrayAdapter<SoftButton> adapter;
 
 	class SoftButtonsAdapter extends ArrayAdapter<SoftButton> {
 
@@ -112,18 +115,36 @@ public class SoftButtonsListActivity extends ListActivity {
 		sb3.setSystemAction(SystemAction.KEEP_CONTEXT);
 		softButtons.add(sb3);
 
-		ArrayAdapter<SoftButton> adapter = new SoftButtonsAdapter(this,
-				softButtons);
+		adapter = new SoftButtonsAdapter(this, softButtons);
 		setListAdapter(adapter);
 	}
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
+		currentSoftButtonIndex = position;
 		SoftButton softButton = softButtons.get(position);
-		Log.w(LOG_TAG, "selected " + softButton);
-		
-		IntentHelper.addObjectForKey(softButton, Const.INTENTHELPER_KEY_SOFTBUTTON);
-		startActivity(new Intent(this, SoftButtonEditActivity.class));
+		IntentHelper.addObjectForKey(softButton,
+				Const.INTENTHELPER_KEY_SOFTBUTTON);
+		startActivityForResult(new Intent(this, SoftButtonEditActivity.class),
+				Const.REQUEST_EDIT_SOFTBUTTON);
 	}
 
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case Const.REQUEST_EDIT_SOFTBUTTON:
+			if (resultCode == RESULT_OK) {
+				SoftButton result = (SoftButton) IntentHelper
+						.getObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTON);
+				softButtons.set(currentSoftButtonIndex, result);
+				adapter.notifyDataSetChanged();
+			}
+			currentSoftButtonIndex = -1;
+			IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTON);
+			break;
+		default:
+			Log.i(LOG_TAG, "Unknown request code: " + requestCode);
+			break;
+		}
+	}
 }
