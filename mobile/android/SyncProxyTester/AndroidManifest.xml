@@ -37,8 +37,14 @@
         </receiver>
 
         <activity
-            android:name=".activity.SoftButtonsEditActivity"
-            android:label="@string/title_activity_soft_buttons_edit" >
+            android:name=".activity.SoftButtonsListActivity"
+            android:label="@string/title_activity_soft_buttons_list" >
+        </activity>
+
+        <activity
+            android:name=".activity.SoftButtonEditActivity"
+            android:label="@string/title_activity_soft_button_edit"
+            android:theme="@android:style/Theme.Dialog" >
         </activity>
     </application>
 

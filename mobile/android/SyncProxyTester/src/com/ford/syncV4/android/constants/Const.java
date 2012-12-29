@@ -20,4 +20,7 @@ public class Const {
 	public static final String PREFS_DEFAULT_APPNAME = "SyncProxyTester";
 	public static final String PREFS_DEFAULT_LANG = Language.EN_US.name();
 	public static final String PREFS_DEFAULT_HMILANG = Language.EN_US.name();
+	
+	// Keys to pass objects via IntentHelper
+	public static final String INTENTHELPER_KEY_SOFTBUTTON = "IntentSoftButton";
 }

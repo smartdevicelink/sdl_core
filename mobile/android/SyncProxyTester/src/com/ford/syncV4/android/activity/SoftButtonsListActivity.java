@@ -5,22 +5,29 @@ import java.util.Vector;
 
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TwoLineListItem;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.proxy.rpc.Image;
 import com.ford.syncV4.proxy.rpc.SoftButton;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.SoftButtonType;
 import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 
-public class SoftButtonsEditActivity extends ListActivity {
+public class SoftButtonsListActivity extends ListActivity {
+	private final static String LOG_TAG = SoftButtonsListActivity.class
+			.getSimpleName();
+
 	private Vector<SoftButton> softButtons = null;
 
 	class SoftButtonsAdapter extends ArrayAdapter<SoftButton> {
@@ -108,6 +115,15 @@ public class SoftButtonsEditActivity extends ListActivity {
 		ArrayAdapter<SoftButton> adapter = new SoftButtonsAdapter(this,
 				softButtons);
 		setListAdapter(adapter);
+	}
+
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		SoftButton softButton = softButtons.get(position);
+		Log.w(LOG_TAG, "selected " + softButton);
+		
+		IntentHelper.addObjectForKey(softButton, Const.INTENTHELPER_KEY_SOFTBUTTON);
+		startActivity(new Intent(this, SoftButtonEditActivity.class));
 	}
 
 }
