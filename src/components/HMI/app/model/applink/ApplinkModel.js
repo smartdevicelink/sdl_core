@@ -180,7 +180,8 @@ MFT.ApplinkModel = Em.Object.create({
             message.alertText3,
             message.ttsChunks,
 			message.duration,
-			message.playTone
+			message.playTone,
+            message.softButtons
 		);
 	},
 	

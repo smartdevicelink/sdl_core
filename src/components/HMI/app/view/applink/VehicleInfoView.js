@@ -142,23 +142,9 @@ MFT.VehicleInfo = Em.ContainerView.create({
 
         selected:           function( element ){
             var id = element.selection.id;
-            switch(id){
-                case 0: 
-                    MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL[id].name);
-                    break;
-                case 1: 
-                    MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL[id].name);
-                    break;
-                case 2: 
-                    MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL[id].name);
-                    break;
-                case 3: 
-                    MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL[id].name);
-                    break;
-                case 4: 
-                    MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL[id].name);
-                    break;
-            }
+            
+            MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL[id].name);
+
         }.observes('selection')
     }),
 

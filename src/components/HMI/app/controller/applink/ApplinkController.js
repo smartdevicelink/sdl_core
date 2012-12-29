@@ -16,7 +16,10 @@ MFT.ApplinkController = Em.Object.create({
 	 * List of registered applications
 	 * @type object
 	 */
+	 
+	// To prevent errors without registered application "-1" used as test appId
 	registeredApps: {
+		"-1": 0
 	},
 
     /*

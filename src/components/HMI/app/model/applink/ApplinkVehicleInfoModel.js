@@ -1,7 +1,7 @@
 /**
  * @name MFT.ApplinkVehicleInfoModel
  * 
- * @desc Applink model with vehicle information used instead of CAN network
+ * @desc Applink model with vehicle information used instead of CAN network. VehicleInfoModel is simulation of real CAN network. 
  * 
  * @category    Model
  * @filesource  app/model/applink/ApplinkVehicleInfoModel.js

@@ -131,57 +131,6 @@ div {
 }
 /* UI popUp*/
 
-#AlertPopUp.AlertPopUp{
-	opacity: 0;
-	left: 200px;
-	width: 400px;
-	height: 200px;
-	z-index: 2;
-	top: 140px;
-	-webkit-transition: opacity 1s ease-in-out;
-	background-color: black;
-	border: #A6A6A6 solid 2px;
-	border-radius: 6px;
-	display: none;
-}
-
-#AlertPopUp .applicationName{
-	width: 380px;
-	left: 10px;
-	text-align: center;
-}
-
-#AlertPopUp .message1{
-	top: 27px;
-	left: 10px;
-	width: 374px;
-	height: 30px;
-	text-align: center;
-	font-size: 25px;
-	line-height: 30px;
-}
-
-#AlertPopUp .message2{
-	top: 70px;
-	left: 10px;
-	width: 374px;
-	height: 60px;
-	text-align: center;
-}
-
-#AlertPopUp .message3{
-	top: 130px;
-	left: 10px;
-	width: 374px;
-	height: 69px;
-	text-align: center;
-}
-
-#AlertPopUp.AlertActive{
-	opacity: 1;
-	display: block;
-}
-
 /* VR popUp*/
 
 #VRPopUp.VRPopUp{
