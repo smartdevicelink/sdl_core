@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
@@ -638,7 +639,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	}
 
 	private void showAppVersion() {
-		String appVersion = getAssetsContents("appVersion", "Unknown");
+		String appVersion;
+		try {
+			appVersion = getPackageManager()
+					.getPackageInfo(getPackageName(), 0).versionName;
+		} catch (NameNotFoundException e) {
+			Log.d(logTag, "Can't get package info", e);
+			appVersion = "Unknown";
+		}
 		String buildInfo = getAssetsContents("build.info",
 				"Build info not available");
 		String changelog = getAssetsContents("CHANGELOG.txt",

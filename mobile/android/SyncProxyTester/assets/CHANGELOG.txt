@@ -1,3 +1,6 @@
+[CW2]
+* Set the current release version in the app's manifest to be displayed in system settings.
+
 [CW52]
 + Slider message: allow to specify dynamic footer.
 + ScrollableMessage dialog: the user can specify timeout.

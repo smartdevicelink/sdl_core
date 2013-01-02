@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       android:versionCode="1"
-      android:versionName="1.0" package="com.ford.syncV4.android">
+      android:versionName="1.1 (CW2)" package="com.ford.syncV4.android">
       <uses-permission android:name="android.permission.BLUETOOTH"/>
       <!-- Required to pair Bluetooth devices -->
       <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
