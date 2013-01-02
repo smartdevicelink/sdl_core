@@ -15,5 +15,6 @@
     <string name="title_activity_soft_buttons_list">SoftButtons List</string>
     <string name="title_activity_soft_button_edit">Edit SoftButton</string>
     <string name="delete_icon_desc">Delete icon</string>
+    <string name="softbutton_id">Id:</string>
     
 </resources>

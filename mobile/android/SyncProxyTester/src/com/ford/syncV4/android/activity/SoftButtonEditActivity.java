@@ -24,6 +24,7 @@ public class SoftButtonEditActivity extends Activity {
 
 	private SoftButton softButton = null;
 
+	private EditText editId;
 	private EditText editText;
 	private EditText editImage;
 	private CheckBox checkBoxHighlighted;
@@ -43,6 +44,7 @@ public class SoftButtonEditActivity extends Activity {
 		softButton = (SoftButton) IntentHelper
 				.getObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTON);
 
+		editId = (EditText) findViewById(R.id.softbutton_id);
 		editText = (EditText) findViewById(R.id.softbutton_text);
 		editImage = (EditText) findViewById(R.id.softbutton_image);
 		checkBoxHighlighted = (CheckBox) findViewById(R.id.softbutton_isHighlighted);
@@ -71,7 +73,12 @@ public class SoftButtonEditActivity extends Activity {
 				result.setIsHighlighted(checkBoxHighlighted.isChecked());
 				result.setSystemAction((SystemAction) spinnerSystemAction
 						.getSelectedItem());
-				result.setSoftButtonID(softButton.getSoftButtonID());
+				try {
+					result.setSoftButtonID(Integer.parseInt(editId.getText()
+							.toString()));
+				} catch (NumberFormatException e) {
+					result.setSoftButtonID(5555);
+				}
 
 				IntentHelper.addObjectForKey(result,
 						Const.INTENTHELPER_KEY_SOFTBUTTON);
@@ -88,6 +95,8 @@ public class SoftButtonEditActivity extends Activity {
 				finish();
 			}
 		});
+
+		editId.setText(String.valueOf(softButton.getSoftButtonID()));
 
 		// setup adapters
 		typeAdapter = new ArrayAdapter<SoftButtonType>(this,
