@@ -1,4 +1,5 @@
 [CW2]
++ Alert dialog: allow to set soft buttons.
 * Set the current release version in the app's manifest to be displayed in system settings.
 
 [CW52]
