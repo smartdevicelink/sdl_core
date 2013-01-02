@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -145,37 +146,30 @@ public class SoftButtonsListActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		softButtons = new Vector<SoftButton>();
+		setContentView(R.layout.softbuttons);
 
-		SoftButton sb1 = new SoftButton();
-		sb1.setSoftButtonID(5400);
-		sb1.setText("Reply");
-		sb1.setType(SoftButtonType.SBT_TEXT);
-		sb1.setIsHighlighted(false);
-		sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-		softButtons.add(sb1);
+		Button btnOk = ((Button) findViewById(R.id.softbuttons_ok));
+		btnOk.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				IntentHelper.addObjectForKey(softButtons,
+						Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+				setResult(RESULT_OK);
+				finish();
+			}
+		});
 
-		Image img = new Image();
-		img.setValue("imageFilename");
-		img.setImageType(ImageType.STATIC);
+		Button btnCancel = ((Button) findViewById(R.id.softbuttons_cancel));
+		btnCancel.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				setResult(RESULT_CANCELED);
+				finish();
+			}
+		});
 
-		SoftButton sb2 = new SoftButton();
-		sb2.setSoftButtonID(5399);
-		sb2.setText("Close");
-		sb2.setType(SoftButtonType.SBT_BOTH);
-		sb2.setImage(img);
-		sb2.setIsHighlighted(true);
-		sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
-		softButtons.add(sb2);
-
-		SoftButton sb3 = new SoftButton();
-		sb3.setSoftButtonID(5401);
-		sb3.setType(SoftButtonType.SBT_IMAGE);
-		sb3.setImage(img);
-		sb3.setIsHighlighted(false);
-		sb3.setSystemAction(SystemAction.KEEP_CONTEXT);
-		softButtons.add(sb3);
-
+		softButtons = (Vector<SoftButton>) IntentHelper
+				.getObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
 		adapter = new SoftButtonsAdapter(this, softButtons);
 		setListAdapter(adapter);
 	}

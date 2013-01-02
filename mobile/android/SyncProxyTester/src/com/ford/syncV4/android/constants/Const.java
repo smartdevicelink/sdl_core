@@ -23,7 +23,10 @@ public class Const {
 
 	// Keys to pass objects via IntentHelper
 	public static final String INTENTHELPER_KEY_SOFTBUTTON = "IntentSoftButton";
+	public static final String INTENTHELPER_KEY_SOFTBUTTONSLIST = "IntentSoftButtonsList";
 
 	// Request id for SoftButtonEditActivity
 	public static final int REQUEST_EDIT_SOFTBUTTON = 42;
+	// Request id for SoftButtonsListActivity
+	public static final int REQUEST_LIST_SOFTBUTTONS = 43;
 }

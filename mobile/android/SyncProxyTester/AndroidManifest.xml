@@ -38,7 +38,7 @@
 
         <activity
             android:name=".activity.SoftButtonsListActivity"
-            android:label="@string/title_activity_soft_buttons_list" >
+            android:label="@string/title_activity_soft_buttons_list" android:theme="@android:style/Theme.Dialog">
         </activity>
 
         <activity

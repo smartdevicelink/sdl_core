@@ -144,6 +144,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private boolean[] isVehicleDataSubscribed = null;
 	
 	/**
+	 * List of soft buttons for current function. Passed between
+	 * {@link SoftButtonsListActivity} and this activity.
+	 */
+	private Vector<SoftButton> currentSoftButtons;
+	
+	/**
 	 * In onCreate() specifies if it is the first time the activity is created
 	 * during this app launch.
 	 */
@@ -749,7 +755,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
 
-							Context mContext = adapter.getContext();
+							final Context mContext = adapter.getContext();
 							LayoutInflater inflater = (LayoutInflater) mContext
 									.getSystemService(LAYOUT_INFLATER_SERVICE);
 							View layout = inflater.inflate(R.layout.alert, null);
@@ -760,6 +766,34 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText txtDuration = (EditText) layout.findViewById(R.id.txtDuration);
 							final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
 							final CheckBox chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
+							
+							Button btnSoftButtons = (Button) layout.findViewById(R.id.alert_btnSoftButtons);
+							btnSoftButtons.setOnClickListener(new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									SoftButton sb1 = new SoftButton();
+									sb1.setSoftButtonID(5400);
+									sb1.setText("ReRoute");
+									sb1.setType(SoftButtonType.SBT_TEXT);
+									sb1.setIsHighlighted(false);
+									sb1.setSystemAction(SystemAction.STEAL_FOCUS);
+									SoftButton sb2 = new SoftButton();
+									sb2.setSoftButtonID(5399);
+									sb2.setText("Close");
+									sb2.setType(SoftButtonType.SBT_TEXT);
+									sb2.setIsHighlighted(false);
+									sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
+									currentSoftButtons = new Vector<SoftButton>();
+									currentSoftButtons.add(sb1);
+									currentSoftButtons.add(sb2);
+									
+									IntentHelper.addObjectForKey(currentSoftButtons,
+											Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+									startActivityForResult(new Intent(mContext, SoftButtonsListActivity.class),
+											Const.REQUEST_LIST_SOFTBUTTONS);
+								}
+							});
+							
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
@@ -776,24 +810,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 											Vector<TTSChunk> ttsChunks = TTSChunkFactory.createSimpleTTSChunks(toSpeak);
 											msg.setTtsChunks(ttsChunks);
 										}
-										if (chkIncludeSoftButtons.isChecked()) {
-											SoftButton sb1 = new SoftButton();
-											sb1.setSoftButtonID(5400);
-											sb1.setText("ReRoute");
-											sb1.setType(SoftButtonType.SBT_TEXT);
-											sb1.setIsHighlighted(false);
-											sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-											SoftButton sb2 = new SoftButton();
-											sb2.setSoftButtonID(5399);
-											sb2.setText("Close");
-											sb2.setType(SoftButtonType.SBT_TEXT);
-											sb2.setIsHighlighted(false);
-											sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
-											Vector<SoftButton> sbarray = new Vector<SoftButton>();
-											sbarray.add(sb1);
-											sbarray.add(sb2);
-											msg.setSoftButtons(sbarray);
+										if (chkIncludeSoftButtons.isChecked() && currentSoftButtons != null) {
+											msg.setSoftButtons(currentSoftButtons);
 										}
+										currentSoftButtons = null;
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
@@ -2348,6 +2368,22 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	public void onProxyClosed() {
 		resetAdapters();
 		_msgAdapter.logMessage("Disconnected", true);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case Const.REQUEST_LIST_SOFTBUTTONS:
+			if (resultCode == RESULT_OK) {
+				currentSoftButtons = (Vector<SoftButton>) IntentHelper.
+						getObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+			}
+			IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+			break;
+		default:
+			Log.i(logTag, "Unknown request code: " + requestCode);
+			break;
+		}
 	}
 }
 
