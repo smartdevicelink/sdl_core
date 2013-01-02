@@ -106,6 +106,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final String logTag = "SyncProxyTester";
 	
 	private static final String ButtonSubscriptions = "ButtonSubscriptions";
+	
+	private static final int ALERT_MAXSOFTBUTTONS = 4;
 
     private static SyncProxyTester _activity;
     private static ArrayList<Object> _logMessages = new ArrayList<Object>();
@@ -790,7 +792,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									IntentHelper.addObjectForKey(currentSoftButtons,
 											Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
 									Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-									intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER, 4);
+									intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+											ALERT_MAXSOFTBUTTONS);
 									startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
 								}
 							});
@@ -826,6 +829,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							});
 							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
+									currentSoftButtons = null;
 									dialog.cancel();
 								}
 							});
