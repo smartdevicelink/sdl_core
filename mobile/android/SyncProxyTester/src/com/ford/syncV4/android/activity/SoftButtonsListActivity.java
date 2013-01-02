@@ -10,8 +10,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TwoLineListItem;
@@ -49,9 +51,19 @@ public class SoftButtonsListActivity extends ListActivity {
 						R.layout.softbutton_row, null);
 			}
 
-			SoftButton softButton = getItem(position);
+			final SoftButton softButton = getItem(position);
 			TextView text1 = item.getText1();
 			TextView text2 = item.getText2();
+
+			ImageButton btnDelete = (ImageButton) item
+					.findViewById(R.id.softbuttonrow_deleteButton);
+			btnDelete.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					softButtons.remove(softButton);
+					notifyDataSetChanged();
+				}
+			});
 
 			StringBuilder b = new StringBuilder();
 			b.append("[" + softButton.getType().name() + "], ");
