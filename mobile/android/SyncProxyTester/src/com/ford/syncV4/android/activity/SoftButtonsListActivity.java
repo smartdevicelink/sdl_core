@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,59 +37,107 @@ public class SoftButtonsListActivity extends ListActivity {
 	private ArrayAdapter<SoftButton> adapter;
 
 	class SoftButtonsAdapter extends ArrayAdapter<SoftButton> {
+		private static final int ITEMTYPE_REGULAR = 0;
+		private static final int ITEMTYPE_ADD = 1;
 
 		public SoftButtonsAdapter(Context context, List<SoftButton> objects) {
 			super(context, 0, objects);
 		}
 
 		@Override
+		public int getCount() {
+			// return the number of soft buttons + 1 to add row
+			return softButtons.size() + 1;
+		}
+
+		@Override
+		public int getViewTypeCount() {
+			// 1 is regular soft button row
+			// 2 is add soft button row
+			return 2;
+		}
+
+		@Override
+		public int getItemViewType(int position) {
+			if (position == softButtons.size()) {
+				return ITEMTYPE_ADD;
+			} else {
+				return ITEMTYPE_REGULAR;
+			}
+		}
+
+		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			TwoLineListItem item = (TwoLineListItem) convertView;
-			if (item == null) {
-				LayoutInflater inflater = (LayoutInflater) getContext()
-						.getSystemService(LAYOUT_INFLATER_SERVICE);
-				item = (TwoLineListItem) inflater.inflate(
-						R.layout.softbutton_row, null);
-			}
-
-			final SoftButton softButton = getItem(position);
-			TextView text1 = item.getText1();
-			TextView text2 = item.getText2();
-
-			ImageButton btnDelete = (ImageButton) item
-					.findViewById(R.id.softbuttonrow_deleteButton);
-			btnDelete.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					softButtons.remove(softButton);
-					notifyDataSetChanged();
+			switch (getItemViewType(position)) {
+			case ITEMTYPE_REGULAR: {
+				TwoLineListItem item = (TwoLineListItem) convertView;
+				if (item == null) {
+					LayoutInflater inflater = (LayoutInflater) getContext()
+							.getSystemService(LAYOUT_INFLATER_SERVICE);
+					item = (TwoLineListItem) inflater.inflate(
+							R.layout.softbutton_row, null);
 				}
-			});
 
-			StringBuilder b = new StringBuilder();
-			b.append("[" + softButton.getType().name() + "], ");
-			switch (softButton.getType()) {
-			case SBT_TEXT:
-				b.append("\"" + softButton.getText() + "\"");
-				break;
-			case SBT_IMAGE:
-				b.append("\"" + softButton.getImage().getValue() + "\" ["
-						+ softButton.getImage().getImageType().name() + "]");
-				break;
-			case SBT_BOTH:
-				b.append("\"" + softButton.getText() + "\", \""
-						+ softButton.getImage().getValue() + "\" ["
-						+ softButton.getImage().getImageType().name() + "]");
-				break;
+				final SoftButton softButton = getItem(position);
+				TextView text1 = item.getText1();
+				TextView text2 = item.getText2();
+
+				ImageButton btnDelete = (ImageButton) item
+						.findViewById(R.id.softbuttonrow_deleteButton);
+				btnDelete.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						softButtons.remove(softButton);
+						notifyDataSetChanged();
+					}
+				});
+
+				StringBuilder b = new StringBuilder();
+				b.append("[" + softButton.getType().name() + "], ");
+				switch (softButton.getType()) {
+				case SBT_TEXT:
+					b.append("\"" + softButton.getText() + "\"");
+					break;
+				case SBT_IMAGE:
+					b.append("\"" + softButton.getImage().getValue() + "\" ["
+							+ softButton.getImage().getImageType().name() + "]");
+					break;
+				case SBT_BOTH:
+					b.append("\"" + softButton.getText() + "\", \""
+							+ softButton.getImage().getValue() + "\" ["
+							+ softButton.getImage().getImageType().name() + "]");
+					break;
+				}
+				String line1 = b.toString();
+				String line2 = softButton.getSystemAction().name() + ", "
+						+ (softButton.getIsHighlighted() ? "" : "non-")
+						+ "highlighted, id=" + softButton.getSoftButtonID();
+				text1.setText(line1);
+				text2.setText(line2);
+
+				return item;
 			}
-			String line1 = b.toString();
-			String line2 = softButton.getSystemAction().name() + ", "
-					+ (softButton.getIsHighlighted() ? "" : "non-")
-					+ "highlighted, id=" + softButton.getSoftButtonID();
-			text1.setText(line1);
-			text2.setText(line2);
 
-			return item;
+			case ITEMTYPE_ADD: {
+				TextView text = (TextView) convertView;
+				if (text == null) {
+					LayoutInflater inflater = (LayoutInflater) getContext()
+							.getSystemService(LAYOUT_INFLATER_SERVICE);
+					text = (TextView) inflater.inflate(
+							android.R.layout.simple_list_item_1, null);
+				}
+
+				text.setGravity(Gravity.CENTER);
+				text.setText("Add soft button");
+
+				return text;
+			}
+
+			default:
+				Log.w(LOG_TAG, "Unknown item view type: "
+						+ getItemViewType(position));
+				return null;
+			}
 		}
 	}
 
@@ -133,12 +182,31 @@ public class SoftButtonsListActivity extends ListActivity {
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		currentSoftButtonIndex = position;
-		SoftButton softButton = softButtons.get(position);
-		IntentHelper.addObjectForKey(softButton,
-				Const.INTENTHELPER_KEY_SOFTBUTTON);
-		startActivityForResult(new Intent(this, SoftButtonEditActivity.class),
-				Const.REQUEST_EDIT_SOFTBUTTON);
+		if (position == softButtons.size()) {
+			// create and add default soft button
+			Image img = new Image();
+			img.setValue("imageFilename");
+			img.setImageType(ImageType.STATIC);
+
+			SoftButton sb = new SoftButton();
+			sb.setSoftButtonID(5402);
+			sb.setText("Close");
+			sb.setType(SoftButtonType.SBT_BOTH);
+			sb.setImage(img);
+			sb.setIsHighlighted(true);
+			sb.setSystemAction(SystemAction.DEFAULT_ACTION);
+
+			softButtons.add(sb);
+			adapter.notifyDataSetChanged();
+		} else {
+			currentSoftButtonIndex = position;
+			SoftButton softButton = softButtons.get(position);
+			IntentHelper.addObjectForKey(softButton,
+					Const.INTENTHELPER_KEY_SOFTBUTTON);
+			startActivityForResult(new Intent(this,
+					SoftButtonEditActivity.class),
+					Const.REQUEST_EDIT_SOFTBUTTON);
+		}
 	}
 
 	@Override
