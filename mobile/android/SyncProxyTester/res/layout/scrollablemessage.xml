@@ -29,12 +29,22 @@
 		    android:maxLength="5"
 		    android:text="30000" >
 		</EditText>
+	
+	<LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-		<CheckBox
-		    android:id="@+id/chkIncludeSBs"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:checked="false"
-		    android:text="Include SoftButtons?" />
+        <CheckBox
+            android:id="@+id/chkIncludeSBs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="Include" />
 
+        <Button
+            android:id="@+id/scrollablemessage_btnSoftButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Soft Buttons" />
+    </LinearLayout>
 </LinearLayout>
