@@ -25,6 +25,9 @@ public class Const {
 	public static final String INTENTHELPER_KEY_SOFTBUTTON = "IntentSoftButton";
 	public static final String INTENTHELPER_KEY_SOFTBUTTONSLIST = "IntentSoftButtonsList";
 
+	// Keys to pass values via Intent
+	public static final String INTENT_KEY_SOFTBUTTONS_MAXNUMBER = "MaxSoftButtonsNumber";
+
 	// Request id for SoftButtonEditActivity
 	public static final int REQUEST_EDIT_SOFTBUTTON = 42;
 	// Request id for SoftButtonsListActivity

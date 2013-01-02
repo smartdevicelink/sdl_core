@@ -31,8 +31,10 @@ import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 public class SoftButtonsListActivity extends ListActivity {
 	private final static String LOG_TAG = SoftButtonsListActivity.class
 			.getSimpleName();
+	private final static int MAXBUTTONS_DEFAULT = 10;
 
 	private Vector<SoftButton> softButtons = null;
+	private int maxSoftButtonsNumber;
 	/** Index of the softButton being edited. */
 	private int currentSoftButtonIndex = -1;
 	private ArrayAdapter<SoftButton> adapter;
@@ -47,8 +49,9 @@ public class SoftButtonsListActivity extends ListActivity {
 
 		@Override
 		public int getCount() {
-			// return the number of soft buttons + 1 to add row
-			return softButtons.size() + 1;
+			// return the number of soft buttons
+			// + 1 to add row if maximum is not reached
+			return softButtons.size() + (isMaxReached() ? 0 : 1);
 		}
 
 		@Override
@@ -60,7 +63,7 @@ public class SoftButtonsListActivity extends ListActivity {
 
 		@Override
 		public int getItemViewType(int position) {
-			if (position == softButtons.size()) {
+			if ((position == softButtons.size()) && !isMaxReached()) {
 				return ITEMTYPE_ADD;
 			} else {
 				return ITEMTYPE_REGULAR;
@@ -142,6 +145,14 @@ public class SoftButtonsListActivity extends ListActivity {
 		}
 	}
 
+	/**
+	 * Returns true if the soft buttons list contains maximum number of items or
+	 * more.
+	 */
+	private boolean isMaxReached() {
+		return softButtons.size() >= maxSoftButtonsNumber;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -170,13 +181,19 @@ public class SoftButtonsListActivity extends ListActivity {
 
 		softButtons = (Vector<SoftButton>) IntentHelper
 				.getObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+		maxSoftButtonsNumber = getIntent().getIntExtra(
+				Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER, MAXBUTTONS_DEFAULT);
+		if (softButtons.size() > maxSoftButtonsNumber) {
+			softButtons.setSize(maxSoftButtonsNumber);
+		}
+
 		adapter = new SoftButtonsAdapter(this, softButtons);
 		setListAdapter(adapter);
 	}
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		if (position == softButtons.size()) {
+		if ((position == softButtons.size()) && !isMaxReached()) {
 			// create and add default soft button
 			Image img = new Image();
 			img.setValue("imageFilename");

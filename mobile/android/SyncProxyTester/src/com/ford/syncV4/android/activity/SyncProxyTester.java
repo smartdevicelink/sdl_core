@@ -789,8 +789,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									
 									IntentHelper.addObjectForKey(currentSoftButtons,
 											Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
-									startActivityForResult(new Intent(mContext, SoftButtonsListActivity.class),
-											Const.REQUEST_LIST_SOFTBUTTONS);
+									Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
+									intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER, 4);
+									startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
 								}
 							});
 							
