@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.json.JSONException;
@@ -156,6 +160,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private Vector<SoftButton> currentSoftButtons;
 	
 	/**
+	 * Stores the number of selections of each message to sort them by
+	 * most-popular usage.
+	 */
+	private Map<String, Integer> messageSelectCount;
+	private static final String MSC_PREFIX = "msc_";
+	
+	/**
 	 * In onCreate() specifies if it is the first time the activity is created
 	 * during this app launch.
 	 */
@@ -224,8 +235,47 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			showProtocolPropertiesInTitle();
 			startSyncProxy();
 		}
+
+		loadMessageSelectCount();
 		
 		isFirstActivityRun = false;
+	}
+
+	private void loadMessageSelectCount() {
+		SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
+		messageSelectCount = new Hashtable<String, Integer>();
+		for (Entry<String, ?> entry : prefs.getAll().entrySet()) {
+			if (entry.getKey().startsWith(MSC_PREFIX)) {
+				messageSelectCount.put(
+						entry.getKey().substring(MSC_PREFIX.length()),
+						(Integer) entry.getValue());
+			}
+		}
+	}
+
+	private void saveMessageSelectCount() {
+		if (messageSelectCount == null) {
+			return;
+		}
+
+		SharedPreferences.Editor editor = getSharedPreferences(
+				Const.PREFS_NAME, 0).edit();
+		for (Entry<String, Integer> entry : messageSelectCount.entrySet()) {
+			editor.putInt(MSC_PREFIX + entry.getKey(), entry.getValue());
+		}
+		editor.commit();
+	}
+
+	private void clearMessageSelectCount() {
+		messageSelectCount = new Hashtable<String, Integer>();
+		SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
+		SharedPreferences.Editor editor = prefs.edit();
+		for (Entry<String, ?> entry : prefs.getAll().entrySet()) {
+			if (entry.getKey().startsWith(MSC_PREFIX)) {
+				editor.remove(entry.getKey());
+			}
+		}
+		editor.commit();
 	}
 
 	/**
@@ -423,6 +473,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	protected void onDestroy() {
 		super.onDestroy();
 		endSyncProxyInstance();
+		saveMessageSelectCount();
 		_activity = null;
 		ProxyService service = ProxyService.getInstance();
 		if (service != null) {
@@ -462,6 +513,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private final int MNU_TOGGLE_PROTOCOL_VERSION = 13;
 	private final int MNU_UNREGISTER = 14;
 	private final int MNU_APP_VERSION = 15;
+	private final int MNU_CLEAR_FUNCTIONS_USAGE = 16;
 
 	
 	/* Creates the menu items */
@@ -480,6 +532,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							getCurrentProtocolVersion()) + ")");*/
 			menu.add(0, MNU_UNREGISTER, 0, "Unregister");
 			menu.add(0, MNU_APP_VERSION, 0, "App version");
+			menu.add(0, MNU_CLEAR_FUNCTIONS_USAGE, 0, "Reset functions usage");
 			return true;
 		} else {
 			return false;
@@ -607,6 +660,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			showAppVersion();
 			break;
 		}
+		case MNU_CLEAR_FUNCTIONS_USAGE:
+			clearMessageSelectCount();
+			break;
 		}
 		
 		return false;
@@ -618,6 +674,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		if (ProxyService.getInstance() != null) {
 			ProxyService.getInstance().stopSelf();
 		}
+		saveMessageSelectCount();
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
@@ -752,6 +809,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			addToFunctionsAdapter(adapter, protocolVersion, Names.AlertManeuver);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.UpdateTurnList);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.DialNumber);
+			adapter.sort(new Comparator<String>() {
+				@Override
+				public int compare(String lhs, String rhs) {
+					// compare based on the number of selections so far
+					Integer lCount = messageSelectCount.get(lhs);
+					if (lCount == null) {
+						lCount = 0;
+					}
+					Integer rCount = messageSelectCount.get(rhs);
+					if (rCount == null) {
+						rCount = 0;
+					}
+					return rCount - lCount;
+				}
+			});
 			
 			new AlertDialog.Builder(this)  
 		       .setTitle("Pick a Function (v" + protocolVersion + ")")
@@ -2192,6 +2264,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
 						}
+						
+						String function = adapter.getItem(which);
+						Integer curCount = messageSelectCount.get(function);
+						if (curCount == null) {
+							curCount = 0;
+						}
+						messageSelectCount.put(function, curCount + 1);
 					}
 
 					private void sendSetGlobalProperties() {
@@ -2425,11 +2504,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
+		saveMessageSelectCount();
 	}
 	
 	@Override
 	public void onPause() {
 		super.onPause();
+		saveMessageSelectCount();
 	}
 	
 	/**
