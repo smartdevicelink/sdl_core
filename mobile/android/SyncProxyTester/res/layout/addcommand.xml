@@ -16,13 +16,16 @@
             android:textStyle="bold"
         	android:text="Command to add to menu" >
         </TextView>
-		<EditText 
-			android:text="Item To Add" 
-			android:id="@+id/command" 
-			android:layout_width="fill_parent" 
-			android:layout_height="wrap_content" 
-			android:visibility="visible" 
-			android:freezesText="true">
+
+		<EditText
+		    android:id="@+id/command"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:freezesText="true"
+		    android:inputType="textCapWords"
+		    android:text="Item To Add"
+		    android:visibility="visible" >
+
 		</EditText>
 		<TextView
             android:id="@+id/toptext2"
@@ -32,13 +35,16 @@
             android:textStyle="bold"
         	android:text="VR Synonym (optional)">
         </TextView>
-		<EditText 
-			android:text=""
-			android:id="@+id/command2" 
-			android:layout_width="fill_parent" 
-			android:layout_height="wrap_content" 
-			android:visibility="visible" 
-			android:freezesText="true">
+
+		<EditText
+		    android:id="@+id/command2"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:freezesText="true"
+		    android:inputType="textCapSentences"
+		    android:text=""
+		    android:visibility="visible" >
+
 		</EditText>
 		<TextView
             android:id="@+id/toptext3"
@@ -53,4 +59,27 @@
 			android:layout_width="fill_parent" 
 			android:layout_height="wrap_content">
 		</Spinner>
+
+		<CheckBox
+		    android:id="@+id/addcommand_useIcon"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:checked="true"
+		    android:text="Use icon:" />
+
+		<EditText
+		    android:id="@+id/addcommand_iconValue"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:ems="10"
+		    android:freezesText="true"
+		    android:inputType="text"
+		    android:text="iconFilename"
+		    android:visibility="visible" />
+
+		<Spinner
+		    android:id="@+id/addcommand_iconType"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content" />
+
 </LinearLayout>

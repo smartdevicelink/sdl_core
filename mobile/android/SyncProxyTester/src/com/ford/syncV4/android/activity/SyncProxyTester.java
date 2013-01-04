@@ -56,6 +56,7 @@ import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.Alert;
 import com.ford.syncV4.proxy.rpc.AlertManeuver;
 import com.ford.syncV4.proxy.rpc.ChangeRegistration;
@@ -68,6 +69,7 @@ import com.ford.syncV4.proxy.rpc.GetDTCs;
 import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.Image;
 import com.ford.syncV4.proxy.rpc.ListFiles;
+import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.ReadDID;
@@ -1029,23 +1031,48 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText editVrSynonym = (EditText) layout.findViewById(R.id.command2);
 							final Spinner s = (Spinner) layout.findViewById(R.id.availableSubmenus);
 							s.setAdapter(_submenuAdapter);
+							final CheckBox chkUseIcon = (CheckBox) layout.findViewById(R.id.addcommand_useIcon);
+							final EditText editIconValue = (EditText) layout.findViewById(R.id.addcommand_iconValue);
+							final Spinner spnIconType = (Spinner) layout.findViewById(R.id.addcommand_iconType);
+							ArrayAdapter<ImageType> imageTypeAdapter = new ArrayAdapter<ImageType>(
+									mContext, android.R.layout.simple_spinner_item, ImageType.values());
+							imageTypeAdapter	.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+							spnIconType.setAdapter(imageTypeAdapter);
+							
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
+									AddCommand msg = new AddCommand();
+									msg.setCorrelationID(autoIncCorrId++);
 									String itemText = er.getText().toString();
 									SyncSubMenu sm = new SyncSubMenu();
 									sm = (SyncSubMenu) s.getSelectedItem();
+									MenuParams menuParams = new MenuParams();
+									menuParams.setMenuName(itemText);
+									menuParams.setPosition(0);
+									menuParams.setParentID(sm.getSubMenuId());
+									msg.setMenuParams(menuParams);
 									
 									String vrSynonym = editVrSynonym.getText().toString();
-									Vector<String> vrCommands = null;
 									if (vrSynonym.length() > 0) {
-										vrCommands = new Vector<String>();
+										Vector<String> vrCommands = new Vector<String>();
 										vrCommands.add(vrSynonym);
+										msg.setVrCommands(vrCommands);
 									}
+									
+									if (chkUseIcon.isChecked()) {
+										Image icon = new Image();
+										icon.setValue(editIconValue.getText().toString());
+										icon.setImageType((ImageType) spnIconType.getSelectedItem());
+										msg.setCmdIcon(icon);
+									}
+									
 									int cmdID = itemcmdID++;
+									msg.setCmdID(cmdID);
+									
 									try {
-										_msgAdapter.logMessage("AddCommand (request)", true);
-										ProxyService.getInstance().getProxyInstance().addCommand(cmdID, itemText, sm.getSubMenuId(), 0, vrCommands, autoIncCorrId++);
+										_msgAdapter.logMessage(msg, true);
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
