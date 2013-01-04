@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:minWidth="300px" android:layout_width="fill_parent"
-	android:orientation="vertical" android:id="@+id/itemRoot"
-	android:paddingLeft="20dip" android:paddingRight="20dip"
-	android:layout_marginLeft="10dip" android:layout_marginRight="10dip">
+    android:id="@+id/itemRoot"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="10dip"
+    android:layout_marginRight="10dip"
+    android:minWidth="300px"
+    android:orientation="vertical"
+    android:paddingLeft="20dip"
+    android:paddingRight="20dip" >
+
 	<TextView android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:textStyle="bold"
 		android:text="Line 1">
@@ -44,4 +50,23 @@
 		android:layout_height="wrap_content" android:id="@+id/txtMediaClock"
 		android:text="12:34">
 	</EditText>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <CheckBox
+            android:id="@+id/show_chkIncludeSBs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="Include" />
+
+        <Button
+            android:id="@+id/show_btnSoftButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Soft Buttons" />
+    </LinearLayout>
+
 </LinearLayout>

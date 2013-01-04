@@ -109,6 +109,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	
 	private static final int ALERT_MAXSOFTBUTTONS = 4;
 	private static final int SCROLLABLEMESSAGE_MAXSOFTBUTTONS = 8;
+	private static final int SHOW_MAXSOFTBUTTONS = 8;
 
     private static SyncProxyTester _activity;
     private static ArrayList<Object> _logMessages = new ArrayList<Object>();
@@ -911,7 +912,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
 
-							Context mContext = adapter.getContext();
+							final Context mContext = adapter.getContext();
 							LayoutInflater inflater = (LayoutInflater) mContext
 									.getSystemService(LAYOUT_INFLATER_SERVICE);
 							View layout = inflater.inflate(R.layout.show, null);
@@ -920,33 +921,48 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText statusBar = (EditText) layout.findViewById(R.id.txtStatusBar);
 							final EditText mediaClock = (EditText) layout.findViewById(R.id.txtMediaClock);
 							final EditText mediaTrack = (EditText) layout.findViewById(R.id.txtMediaTrack);
+							final CheckBox chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.show_chkIncludeSBs);
+							
+							Button btnSoftButtons = (Button) layout.findViewById(R.id.show_btnSoftButtons);
+							btnSoftButtons.setOnClickListener(new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									SoftButton sb1 = new SoftButton();
+									sb1.setSoftButtonID(5432);
+									sb1.setText("KeepContext");
+									sb1.setType(SoftButtonType.SBT_TEXT);
+									sb1.setIsHighlighted(false);
+									sb1.setSystemAction(SystemAction.KEEP_CONTEXT);
+									SoftButton sb2 = new SoftButton();
+									sb2.setSoftButtonID(5431);
+									sb2.setText("StealFocus");
+									sb2.setType(SoftButtonType.SBT_TEXT);
+									sb2.setIsHighlighted(false);
+									sb2.setSystemAction(SystemAction.STEAL_FOCUS);
+									SoftButton sb3 = new SoftButton();
+									sb3.setSoftButtonID(5430);
+									sb3.setText("Default");
+									sb3.setType(SoftButtonType.SBT_TEXT);
+									sb3.setIsHighlighted(false);
+									sb3.setSystemAction(SystemAction.DEFAULT_ACTION);
+									currentSoftButtons = new Vector<SoftButton>();
+									currentSoftButtons.add(sb1);
+									currentSoftButtons.add(sb2);
+									currentSoftButtons.add(sb3);
+									
+									IntentHelper.addObjectForKey(currentSoftButtons,
+											Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+									Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
+									intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+											SHOW_MAXSOFTBUTTONS);
+									startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+								}
+							});
+
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
 									try {
-										//
-										SoftButton sb1 = new SoftButton();
-										sb1.setSoftButtonID(5432);
-										sb1.setText("KeepContext");
-										sb1.setType(SoftButtonType.SBT_TEXT);
-										sb1.setIsHighlighted(false);
-										sb1.setSystemAction(SystemAction.KEEP_CONTEXT);
-										SoftButton sb2 = new SoftButton();
-										sb2.setSoftButtonID(5431);
-										sb2.setText("StealFocus");
-										sb2.setType(SoftButtonType.SBT_TEXT);
-										sb2.setIsHighlighted(false);
-										sb2.setSystemAction(SystemAction.STEAL_FOCUS);
-										SoftButton sb3 = new SoftButton();
-										sb3.setSoftButtonID(5430);
-										sb3.setText("Default");
-										sb3.setType(SoftButtonType.SBT_TEXT);
-										sb3.setIsHighlighted(false);
-										sb3.setSystemAction(SystemAction.DEFAULT_ACTION);
-										Vector<SoftButton> sbarray = new Vector<SoftButton>();
-										sbarray.add(sb1);
-										sbarray.add(sb2);
-										sbarray.add(sb3);
 										Show msg = new Show();
 										msg.setCorrelationID(autoIncCorrId++);
 										msg.setMainField1(txtShowField1.getText().toString());
@@ -956,7 +972,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setStatusBar(statusBar.getText().toString());
 										msg.setMediaClock(mediaClock.getText().toString());
 										msg.setMediaTrack(mediaTrack.getText().toString());
-										msg.setSoftButtons(sbarray);
+										if (chkIncludeSoftButtons.isChecked() &&
+												(currentSoftButtons != null) &&
+												(currentSoftButtons.size() > 0)) {
+											msg.setSoftButtons(currentSoftButtons);
+										}
+										currentSoftButtons = null;
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
@@ -966,6 +987,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							});
 							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
+									currentSoftButtons = null;
 									dialog.cancel();
 								}
 							});
