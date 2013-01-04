@@ -80,9 +80,9 @@ public class AddCommand extends RPCRequest {
     }
     public void setCmdIcon(Image cmdIcon) {
         if (cmdIcon != null) {
-            store.put(Names.cmdIcon, cmdIcon);
+            parameters.put(Names.cmdIcon, cmdIcon);
         } else {
-        	store.remove(Names.cmdIcon);
+        	parameters.remove(Names.cmdIcon);
         }
     }
 }
