@@ -924,6 +924,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText mediaClock = (EditText) layout.findViewById(R.id.txtMediaClock);
 							final EditText mediaTrack = (EditText) layout.findViewById(R.id.txtMediaTrack);
 							final CheckBox chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.show_chkIncludeSBs);
+							final EditText editCustomPresets = (EditText) layout.findViewById(R.id.show_customPresets);
 							
 							Button btnSoftButtons = (Button) layout.findViewById(R.id.show_btnSoftButtons);
 							btnSoftButtons.setOnClickListener(new OnClickListener() {
@@ -980,6 +981,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 											msg.setSoftButtons(currentSoftButtons);
 										}
 										currentSoftButtons = null;
+										if (editCustomPresets.length() > 0) {
+											String splitter = ",";
+											String[] customPresets = editCustomPresets.getText().
+													toString().split(splitter);
+											msg.setCustomPresets(new Vector<String>(Arrays.
+													asList(customPresets)));
+										}
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
