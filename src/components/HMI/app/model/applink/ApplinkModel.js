@@ -40,12 +40,12 @@ MFT.ApplinkModel = Em.Object.create({
     /**
       * Array of active applications
       */
-    applicationsList:           new Array(),
+    applicationsList:           [],
 
     /**
       * Array of connected devices
       */
-    devicesList:                new Array(),
+    devicesList:                [],
 
     /*
      * Global properties
@@ -164,35 +164,26 @@ MFT.ApplinkModel = Em.Object.create({
         MFT.ApplinkMediaModel.activeAppId = -1;
         MFT.ApplinkMediaModel.set('activeAppId', tempId);
     },
-    
+
     /**
      * Applink UI Alert response handeler
      * show popup window 
      *
      * @param message:Object
      */
-	onUIAlert: function( message ) {
-		
-		MFT.AlertPopUp.AlertActive(
-			message.appId,
-			message.AlertText1,
-			message.AlertText2,
-            message.alertText3,
-            message.ttsChunks,
-			message.duration,
-			message.playTone,
-            message.softButtons
-		);
-	},
-	
-	/** 
-	 * Prompt activation
-	 */
-	onPrompt: function(ttsChunks){
-		/*
-		ttsChunks = JSON.parse('[{"text":"speak","type":"TEXT"},{"text":"INITIAL_JINGLE","type":"PRE_RECORDED"},{"text":"that was a jingle","type":"TEXT"},{"text":". 1 l ih v 1 .  _ l ay v .  r iy 1 d  . r eh d .","type":"SAPI_PHONEMES"}]');
-		*/
-		var message = '';
+    onUIAlert: function( message ) {
+
+        MFT.AlertPopUp.AlertActive( message );
+    },
+
+    /** 
+     * Prompt activation
+     */
+    onPrompt: function(ttsChunks){
+        /*
+        ttsChunks = JSON.parse('[{"text":"speak","type":"TEXT"},{"text":"INITIAL_JINGLE","type":"PRE_RECORDED"},{"text":"that was a jingle","type":"TEXT"},{"text":". 1 l ih v 1 .  _ l ay v .  r iy 1 d  . r eh d .","type":"SAPI_PHONEMES"}]');
+        */
+        var message = '';
 		if(ttsChunks){
 			for(var i = 0; i < ttsChunks.length; i++){
 				message += ttsChunks[i].text + '\n';

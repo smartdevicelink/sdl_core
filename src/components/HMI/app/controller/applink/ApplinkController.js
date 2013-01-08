@@ -19,7 +19,8 @@ MFT.ApplinkController = Em.Object.create({
 	 
 	// To prevent errors without registered application "-1" used as test appId
 	registeredApps: {
-		"-1": 0
+		"-1": 0,			// Used for media applications
+		"-2": 1				// Used for non media applications
 	},
 
     /*
@@ -168,6 +169,28 @@ MFT.ApplinkController = Em.Object.create({
 	 */
 	onActivateApplinkApp: function(element){
 		this.getApplicationModel(element.appId).turnOnApplink( element.appName, element.appId );
-	}
+	},
 
+	
+	/**
+	 * Method sent softButtons pressed and event status to RPC
+	 */
+	onSoftButtonActionUp: function( element ){
+		FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
+        if(element.time > 0){
+            FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "LONG", element.softButtonID);
+        }else{
+            FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "SHORT", element.softButtonID);
+        }
+        element.time = 0;
+    },
+
+	/**
+	 * Method sent softButtons pressed and event status to RPC 
+	 */
+	onSoftButtonActionDown: function( element ){
+        FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", element.softButtonID);
+        element.time = 0;
+        setTimeout(function(){ element.time ++; }, 1000);
+	}
 });

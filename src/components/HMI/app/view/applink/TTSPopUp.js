@@ -27,6 +27,8 @@ MFT.TTSPopUp = Em.ContainerView.create({
 
 	active: 			false,
 
+	timer:				null,
+
 	popUp : Em.View.extend({
 
 		elementId:			'popUp',
@@ -46,11 +48,12 @@ MFT.TTSPopUp = Em.ContainerView.create({
 	ActivateTTS: function(msg){
 		var self = this;
 		
+        clearTimeout(this.timer);
 		// play audio alert
 		MFT.Audio.play('audio/initial.wav');
 		
 		this.set('content', msg);
 		this.set('active', true);
-		setTimeout(function(){self.set('active', false);}, 10000);
+		this.timer = setTimeout(function(){self.set('active', false);}, 10000);
 	}
 });

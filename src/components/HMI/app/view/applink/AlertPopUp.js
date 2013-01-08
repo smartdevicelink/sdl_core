@@ -3,148 +3,155 @@
  * 
  * @desc AlertPopUp module visual representation
  * 
- * @category	View
- * @filesource	app/view/home/AlertPopUp.js
- * @version		2.0
+ * @category    View
+ * @filesource    app/view/home/AlertPopUp.js
+ * @version        2.0
  *
- * @author		Andriy Melnik
+ * @author        Andriy Melnik
  */
 
 MFT.AlertPopUp = Em.ContainerView.create({
 
-	elementId:			'AlertPopUp',
+    elementId:            	'AlertPopUp',
 
-	classNames:			'AlertPopUp',
+    classNames:            	'AlertPopUp',
 
-	classNameBindings:		['activate:AlertActive'],
+    classNameBindings:      ['activate:AlertActive'],
 
-	childViews: [
-		'applicationName',
-		'message1',
-		'message2',
-		'message3'
-	],
+    childViews: [
+        'applicationName',
+        'message1',
+        'message2',
+        'message3',
+        'softbuttons'
+    ],
 
-	content1:			'Title',
+    content1:         	'Title',
 
-	content2:			'Text',
+    content2:           'Text',
 
-	activate: 			false,
+    activate:           false,
 
+    timer:              null,
 
-	applicationName :	MFT.Label.extend({
+    applicationName :    MFT.Label.extend({
 
-		elementId:			'applicationName',
+        elementId:            	'applicationName',
 
-		classNames:			'applicationName',
+        classNames:            	'applicationName',
 
-		contentBinding:		'parentView.appName'
-	}),
+        contentBinding:        	'parentView.appName'
+    }),
 
-	message1 : MFT.Label.extend({
+    message1 : MFT.Label.extend({
 
-		elementId:			'message1',
+        elementId:            	'message1',
 
-		classNames:			'message1',
+        classNames:            	'message1',
 
-		contentBinding:		'parentView.content1'
-	}),
+        contentBinding:        	'parentView.content1'
+    }),
 
-	message2 : MFT.Label.extend({
+    message2 : MFT.Label.extend({
 
-		elementId:			'message2',
+        elementId:            	'message2',
 
-		classNames:			'message2',
+        classNames:            	'message2',
 
-		contentBinding:		'parentView.content2'
-	}),
+        contentBinding:        	'parentView.content2'
+    }),
 
-	message3 : MFT.Label.extend({
+    message3 : MFT.Label.extend({
 
-		elementId:			'message3',
+        elementId:           	'message3',
 
-		classNames:			'message3',
+        classNames:				'message3',
 
-		contentBinding:		'parentView.content3'
-	}),
+        contentBinding:     	'parentView.content3'
+    }),
 
-	/**
-	 *
-	 * @desc Function creates Soft Buttons on AlertPoUp
-	 * 
-	 * @param params: SoftButton
-	*/
-	addSoftButtons: function( params ){
-		
-		this.get('childViews').removeObjects(
-            this.get('childViews').filterProperty( 'buttonType', 'softbutton' )
-        );
+    /**
+     * Container for softbuttons
+     */
+    softbuttons: Em.ContainerView.extend({
+        elementId:		'alertSoftButtons',
 
-		if( params ){
+        classNames:		'alertSoftButtons'
+    }),
 
-	        var softButtonsClass;
-	        switch(params.length){
-	        	case 1 : softButtonsClass = 'one';
-	        		break;
-	        	case 2 : softButtonsClass = 'two';
-	        		break;
-	        	case 3 : softButtonsClass = 'three';
-	        		break;
-	        	case 4 : softButtonsClass = 'four';
-	        		break;
-	        }
+    /**
+     *
+     * @desc Function creates Soft Buttons on AlertPoUp
+     * 
+     * @param params: SoftButton
+    */
+    addSoftButtons: function( params ){
 
-			for(var i=0; i<params.length; i++){
-				this.get('childViews').pushObject(
-					MFT.Button.create({
-						actionDown:		function(){
-							this._super();
-							FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", this.softButtonID);
-							var self = this;
-							this.time = 0;
-							setTimeout(function(){ self.time ++; }, 1000);
-						},
-						actionUp:		function(){
-							this._super();
-							FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", this.softButtonID);
-							if(this.time > 0){
-								FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "LONG", this.softButtonID);
-							}else{
-								FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "SHORT", this.softButtonID);
-							}
-							this.time = 0;
-						},
-						softButtonID:           params[i].softButtonID,
-		                icon:                   params[i].image,
-		                buttonType:				'softbutton',
-		                text:                   params[i].text,
-		                classNames:             'list-item softButton ' + softButtonsClass,
-		                elementId:				'softButton' + i,
-		                templateName:           params[i].image ? 'rightIcon' : 'text'
-		            })
-				);
-			}
-		}
-	},
+        var count = this.get('softbuttons.childViews').length - 1;
+        for(var i = count; i>=0; i--){
+            this.get('softbuttons.childViews').removeObject(
+                this.get('softbuttons.childViews')[0]
+            );
+        }
 
-	AlertActive: function( appId, msg1, msg2, msg3, tts, duration, playTone, softButtons){
-		var self = this;
+        if( params ){
 
-		// play audio alert
-		if ( playTone ) {
-			MFT.Audio.play('audio/alert.wav');
-		}
+            var softButtonsClass;
+            switch(params.length){
+                case 1 : softButtonsClass = 'one';
+                    break;
+                case 2 : softButtonsClass = 'two';
+                    break;
+                case 3 : softButtonsClass = 'three';
+                    break;
+                case 4 : softButtonsClass = 'four';
+                    break;
+            }
 
-		this.addSoftButtons(softButtons);
-		MFT.ApplinkModel.onPrompt(tts.ttsChunks);
+            for(var i=0; i<params.length; i++){
+                this.get('softbuttons.childViews').pushObject(
+                    MFT.Button.create({
+                        actionDown:        function(){
+                            this._super();
+                            MFT.ApplinkController.onSoftButtonActionDown(this);
+                        },
+                        actionUp:        function(){
+                            this._super();
+                            MFT.ApplinkController.onSoftButtonActionUp(this);
+                        },
+                        softButtonID:           params[i].softButtonID,
+                        icon:                   params[i].image,
+                        text:                   params[i].text,
+                        classNames:             'list-item softButton ' + softButtonsClass,
+                        elementId:              'softButton' + i,
+                        templateName:           params[i].image ? 'rightIcon' : 'text'
+                    })
+                );
+            }
+        }
+    },
 
-		this.set('appName',	MFT.ApplinkController.getApplicationModel(appId).appInfo.appName);
+    AlertActive: function( message ){
+        var self = this;
 
-		this.set('content1',	msg1);
-		this.set('content2',	msg2);
-		this.set('content3',	msg3);
-		this.set('activate',	true);
-		
-		setTimeout(function(){self.set('activate', false);}, duration);
-	}
+        FFW.UI.OnSystemContext('ALERT');
+        clearTimeout(this.timer);
+
+        // play audio alert
+        if ( message.playTone ) {
+            MFT.Audio.play('audio/alert.wav');
+        }
+
+        this.addSoftButtons(message.softButtons);
+        MFT.ApplinkModel.onPrompt(message.ttsChunks.ttsChunks);
+
+        this.set('appName',    MFT.ApplinkController.getApplicationModel(message.appId).appInfo.appName);
+
+        this.set('content1',    message.AlertText1);
+        this.set('content2',    message.AlertText2);
+        this.set('content3',    message.alertText3);
+        this.set('activate',    true);
+        
+        this.timer = setTimeout(function(){self.set('activate', false);}, message.duration);
+    }
 });
