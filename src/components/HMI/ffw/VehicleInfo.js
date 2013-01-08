@@ -122,7 +122,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 
         if (request.method == "VehicleInfo.GetDTCs") {
 
-            MFT.ApplinkVehicleInfoModel.vehicleInfoGetDTCs( request.id );
+            MFT.ApplinkVehicleInfoModel.vehicleInfoGetDTCs( request.params, request.id );
 
         }
     },
@@ -148,20 +148,35 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
     vehicleInfoReadDIDResponse: function( dataResult, data, info, result, id ) {
         Em.Logger.log("FFW.VehicleInfo.ReadDID");
 
+        var JSONMessage;
         // send repsonse
-        var JSONMessage = {
-            "jsonrpc"   :   "2.0",
-            "id"        :   id,
-            "result":   {
-                "resultCode":       result, //  type (enum) from AppLink protocol
-                "method":           "VehicleInfo.ReadDIDResponse",
-                "params":{
-                    "info":         info,
-                    "dataResult":   dataResult,
-                    "data":         data
+        if(result != 'ENCRYPTED'){
+            JSONMessage = {
+                "jsonrpc"   :   "2.0",
+                "id"        :   id,
+                "result":   {
+                    "resultCode":       result, //  type (enum) from AppLink protocol
+                    "method":           "VehicleInfo.ReadDIDResponse",
+                    "params":{
+                        "info":         info,
+                        "dataResult":   dataResult,
+                        "data":         data
+                    }
                 }
-            }
-        };
+            };
+        }else{
+            JSONMessage = {
+                "jsonrpc"   :   "2.0",
+                "id"        :   id,
+                "result":   {
+                    "resultCode":       result, //  type (enum) from AppLink protocol
+                    "method":           "VehicleInfo.ReadDIDResponse",
+                    "params":{
+                        "info":         info
+                    }
+                }
+            }; 
+        }
         this.client.send(JSONMessage);
     },
 
@@ -171,19 +186,34 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
     vehicleInfoGetDTCsResponse: function( data, info, result, id ) {
         Em.Logger.log("FFW.VehicleInfo.GetDTCs");
 
+        var JSONMessage;
         // send repsonse
-        var JSONMessage = {
-            "jsonrpc"   :   "2.0",
-            "id"        :   id,
-            "result":   {
-                "resultCode":       result, //  type (enum) from AppLink protocol
-                "method":           "VehicleInfo.GetDTCsResponse",
-                "params":{
-                    "info":         info,
-                    "dtcList":      data
+        if(result != 'ENCRYPTED'){
+            JSONMessage = {
+                "jsonrpc"   :   "2.0",
+                "id"        :   id,
+                "result":   {
+                    "resultCode":       result, //  type (enum) from AppLink protocol
+                    "method":           "VehicleInfo.GetDTCsResponse",
+                    "params":{
+                        "info":         info,
+                        "dtcList":      data
+                    }
                 }
-            }
-        };
+            };
+        }else{
+            JSONMessage = {
+                "jsonrpc"   :   "2.0",
+                "id"        :   id,
+                "result":   {
+                    "resultCode":       result, //  type (enum) from AppLink protocol
+                    "method":           "VehicleInfo.GetDTCsResponse",
+                    "params":{
+                        "info":         info
+                    }
+                }
+            }; 
+        }
         this.client.send(JSONMessage);
     }
 })

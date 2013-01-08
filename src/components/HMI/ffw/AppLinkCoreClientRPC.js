@@ -216,18 +216,21 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	},
 
     /** Sending data from HMI for processing in ApplinkCore */
-    SendData: function(){
+    SendData: function( data ){
     	Em.Logger.log("FFW.ALCore.SendData");
 
-		// send request
+    	if(!data){
+    		data = ["Data for sending from HMI to Mobile application."];
+    	}
 
+		// send request
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.SendData",
 			"params"	:	{
-				"data": ["Data for sending from HMI to Mobile application."],
-				"url":	"ftp://appsurv:appsurv@ftp.drivehq.com/",
+				"data": 	data,
+				"url":		"ftp://appsurv:appsurv@ftp.drivehq.com/",
 				"timeout":	10000
 			}
 		};

@@ -76,7 +76,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
      * Applink VehicleInfo.GetDTCs handler
      * fill data for response about vehicle errors
      */
-    vehicleInfoGetDTCs: function( id ){
+    vehicleInfoGetDTCs: function( params, id ){
         var data = {},
             i = 0,
             info = "Inormation about reported DTC's",
@@ -90,14 +90,20 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
 
         result = "SUCCESS";
 
-        FFW.VehicleInfo.vehicleInfoGetDTCsResponse( data, info, result, id );
+        if(params.encrypted){
+            result = 'ENCRYPTED';
+            FFW.AppLinkCoreClient.SendData( data );
+            FFW.VehicleInfo.vehicleInfoGetDTCsResponse( null, info, result, id );
+        }else{
+            FFW.VehicleInfo.vehicleInfoGetDTCsResponse( data, info, result, id );
+        }
     },
 
     /**
      * Applink VehicleInfo.ReadDID handler
      * send response about vehicle conditions
      */
-    vehicleInfoReadDID: function(params, id){
+    vehicleInfoReadDID: function( params, id ){
         var data = [],
             i = 0,
             info = '',
@@ -122,7 +128,13 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             }
         }
 
-        FFW.VehicleInfo.vehicleInfoReadDIDResponse( dataResult, data, info, result, id );
+        if(params.encrypted){
+            result = 'ENCRYPTED';
+            FFW.AppLinkCoreClient.SendData( data );
+            FFW.VehicleInfo.vehicleInfoReadDIDResponse( null, null, info, result, id );
+        }else{
+            FFW.VehicleInfo.vehicleInfoReadDIDResponse( dataResult, data, info, result, id );
+        }
     },
 
     /** 

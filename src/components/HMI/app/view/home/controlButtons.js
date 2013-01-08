@@ -30,8 +30,9 @@ MFT.ControlButtons = Em.ContainerView.create({
 	sendData: MFT.Button.create({
 		elementId:	'sendData',
 		classNames:	'sendData btnNotPressed',
-		action:		'SendData',
-		target:		'FFW.AppLinkCoreClient',
+		action:		function(){
+			FFW.AppLinkCoreClient.SendData( null );
+		},
 		text:		'Send Data'
 	}),
 
