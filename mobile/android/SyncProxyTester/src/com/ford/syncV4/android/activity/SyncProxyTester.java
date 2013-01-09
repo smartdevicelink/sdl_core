@@ -61,11 +61,16 @@ import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.AddCommand;
+import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.Alert;
 import com.ford.syncV4.proxy.rpc.AlertManeuver;
 import com.ford.syncV4.proxy.rpc.ChangeRegistration;
 import com.ford.syncV4.proxy.rpc.Choice;
+import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
+import com.ford.syncV4.proxy.rpc.DeleteCommand;
 import com.ford.syncV4.proxy.rpc.DeleteFile;
+import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
+import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
 import com.ford.syncV4.proxy.rpc.DialNumber;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
@@ -75,19 +80,25 @@ import com.ford.syncV4.proxy.rpc.Image;
 import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
+import com.ford.syncV4.proxy.rpc.PerformInteraction;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.ReadDID;
 import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.ScrollableMessage;
 import com.ford.syncV4.proxy.rpc.SetAppIcon;
 import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
+import com.ford.syncV4.proxy.rpc.SetMediaClockTimer;
 import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.ShowConstantTBT;
 import com.ford.syncV4.proxy.rpc.Slider;
 import com.ford.syncV4.proxy.rpc.SoftButton;
+import com.ford.syncV4.proxy.rpc.Speak;
+import com.ford.syncV4.proxy.rpc.StartTime;
+import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.Turn;
+import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.VrHelpItem;
@@ -943,6 +954,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
+									Speak msg = new Speak();
+									msg.setCorrelationID(autoIncCorrId++);
 									String speak1 = txtSpeakText1.getText().toString();
 									String speak2 = txtSpeakText2.getText().toString();
 									String speak3 = txtSpeakText3.getText().toString();
@@ -965,9 +978,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										chunks.add(TTSChunkFactory.createChunk(SpeechCapabilities.SAPI_PHONEMES, speak4));
 										
 									}
+									msg.setTtsChunks(chunks);
 									try {
-										_msgAdapter.logMessage("Speak (request)", true);
-										ProxyService.getInstance().getProxyInstance().speak(chunks, autoIncCorrId++);
+										_msgAdapter.logMessage(msg, true);
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
@@ -1084,10 +1098,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								public void onClick(DialogInterface dialog, int which) {
 								boolean needToSubscribe = !isButtonSubscribed[which];
 									try {
-										_msgAdapter.logMessage("ButtonSubscriptions (request)", true);
-										if (needToSubscribe) 
-											ProxyService.getInstance().getProxyInstance().subscribeButton(ButtonName.values()[which], autoIncCorrId++);
-										else ProxyService.getInstance().getProxyInstance().unsubscribeButton(ButtonName.values()[which], autoIncCorrId++);
+										ButtonName buttonName = ButtonName.values()[which];
+										int corrId = autoIncCorrId++;
+										if (needToSubscribe) {
+											SubscribeButton msg = new SubscribeButton();
+											msg.setCorrelationID(corrId);
+											msg.setButtonName(buttonName);
+											_msgAdapter.logMessage(msg, true);
+											ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+										} else {
+											UnsubscribeButton msg = new UnsubscribeButton();
+											msg.setCorrelationID(corrId);
+											msg.setButtonName(buttonName);
+											_msgAdapter.logMessage(msg, true);
+											ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+										}
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
@@ -1173,11 +1198,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setAdapter(_commandAdapter, new DialogInterface.OnClickListener() {
 
 								public void onClick(DialogInterface dialog, int which) {
+									DeleteCommand msg = new DeleteCommand();
+									msg.setCorrelationID(autoIncCorrId++);
 									int cmdID = _commandAdapter.getItem(which);
+									msg.setCmdID(cmdID);
 									try {
-										_msgAdapter.logMessage("DeleteCommand (request)", true);
-										//ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-										ProxyService.getInstance().getProxyInstance().deleteCommand(cmdID, autoIncCorrId++);
+										_msgAdapter.logMessage(msg, true);
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
@@ -1202,13 +1229,18 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
+									AddSubMenu msg = new AddSubMenu();
+									msg.setCorrelationID(autoIncCorrId++);
 									SyncSubMenu sm = new SyncSubMenu();
 									sm.setName(subMenu.getText().toString());
 									sm.setSubMenuId(submenucmdID++);
 									addSubMenuToList(sm);
+									msg.setMenuID(sm.getSubMenuId());
+									msg.setMenuName(sm.getName());
+									msg.setPosition(null);
 									try {
-										_msgAdapter.logMessage("AddSubMenu (request)", true);
-										ProxyService.getInstance().getProxyInstance().addSubMenu(sm.getSubMenuId(), sm.getName(), autoIncCorrId++);
+										_msgAdapter.logMessage(msg, true);
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
@@ -1230,9 +1262,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								public void onClick(DialogInterface dialog, int which) {
 									SyncSubMenu menu = _submenuAdapter.getItem(which);
 									if (menu.getSubMenuId() != 0) {
+										DeleteSubMenu msg = new DeleteSubMenu();
+										msg.setCorrelationID(autoIncCorrId++);
+										msg.setMenuID(menu.getSubMenuId());
 										try {
-											_msgAdapter.logMessage("DeleteSubMenu (request)", true);
-											ProxyService.getInstance().getProxyInstance().deleteSubMenu(menu.getSubMenuId(), autoIncCorrId++);
+											_msgAdapter.logMessage(msg, true);
+											ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 										} catch (SyncException e) {
 											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 										}
@@ -1271,23 +1306,26 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
+									SetMediaClockTimer msg = new SetMediaClockTimer();
+									msg.setCorrelationID(autoIncCorrId++);
 									UpdateMode updateMode =  (UpdateMode)spnUpdateMode.getSelectedItem();
-									int corrID = autoIncCorrId++;
-									String strHours = txtHours.getText().toString();
-									String strMinutes = txtMinutes.getText().toString();
-									String strSeconds = txtSeconds.getText().toString();
+									msg.setUpdateMode(updateMode);
+									try {
+										Integer hours = Integer.parseInt(txtHours.getText().toString());
+										Integer minutes = Integer.parseInt(txtMinutes.getText().toString());
+										Integer seconds = Integer.parseInt(txtSeconds.getText().toString());
+										StartTime startTime = new StartTime();
+										startTime.setHours(hours);
+										startTime.setMinutes(minutes);
+										startTime.setSeconds(seconds);
+										msg.setStartTime(startTime);
+									} catch (NumberFormatException e) {
+										// skip setting start time if parsing failed
+									}
 									
 									try {
-										_msgAdapter.logMessage("SetMediaClockTimer (request)", true);
-										if (strHours.length() > 0 && strMinutes.length() > 0 && strSeconds.length() > 0) {
-											ProxyService.getInstance().getProxyInstance().setMediaClockTimer(
-													Integer.parseInt(strHours), 
-													Integer.parseInt(strMinutes), Integer.parseInt(strSeconds), 
-													updateMode, 
-													corrID);
-										} else {
-											ProxyService.getInstance().getProxyInstance().setMediaClockTimer(null, null, null, updateMode, corrID);
-										}
+										_msgAdapter.logMessage(msg, true);
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
@@ -1361,10 +1399,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									}
 									
 									if (!commands.isEmpty()) {
+										CreateInteractionChoiceSet msg = new CreateInteractionChoiceSet();
+										msg.setCorrelationID(autoIncCorrId++);
+										int choiceSetID = autoIncChoiceSetId++;
+										msg.setInteractionChoiceSetID(choiceSetID);
+										msg.setChoiceSet(commands);
 										try {
-											_msgAdapter.logMessage("CreateChoiceSet (request)", true);
-											int choiceSetID = autoIncChoiceSetId++;
-											ProxyService.getInstance().getProxyInstance().createInteractionChoiceSet(commands, choiceSetID, autoIncCorrId++);
+											_msgAdapter.logMessage(msg, true);
+											ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 											if (_latestChoiceSetId != CHOICESETID_UNSET) {
 												Log.w(logTag, "Latest choiceSetId should be unset, but equals to " + _latestChoiceSetId);
 											}
@@ -1391,10 +1433,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setAdapter(_choiceSetAdapter, new DialogInterface.OnClickListener() {
 
 								public void onClick(DialogInterface dialog, int which) {
+									DeleteInteractionChoiceSet msg = new DeleteInteractionChoiceSet();
+									msg.setCorrelationID(autoIncCorrId++);
 									int commandSetID = _choiceSetAdapter.getItem(which);
+									msg.setInteractionChoiceSetID(commandSetID);
 									try {
-										_msgAdapter.logMessage("DeleteChoiceSet (request)", true);
-										ProxyService.getInstance().getProxyInstance().deleteInteractionChoiceSet(commandSetID, autoIncCorrId++);
+										_msgAdapter.logMessage(msg, true);
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
@@ -1410,19 +1455,26 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setAdapter(_choiceSetAdapter, new DialogInterface.OnClickListener() {
 
 								public void onClick(DialogInterface dialog, int which) {
+									PerformInteraction msg = new PerformInteraction();
+									msg.setCorrelationID(autoIncCorrId++);
 									Vector<Integer> interactionChoiceSetIDs = new Vector<Integer>();
 									interactionChoiceSetIDs.add(_choiceSetAdapter.getItem(which));
+									Vector<TTSChunk> initChunks = TTSChunkFactory
+											.createSimpleTTSChunks("Pick a command");
+									Vector<TTSChunk> helpChunks = TTSChunkFactory
+											.createSimpleTTSChunks("help me, I'm melting");
+									Vector<TTSChunk> timeoutChunks = TTSChunkFactory
+											.createSimpleTTSChunks("hurry it up");
+									msg.setInitialPrompt(initChunks);
+									msg.setInitialText("Pick number:");
+									msg.setInteractionChoiceSetIDList(interactionChoiceSetIDs);
+									msg.setInteractionMode(InteractionMode.BOTH);
+									msg.setTimeout(10000);
+									msg.setHelpPrompt(helpChunks);
+									msg.setTimeoutPrompt(timeoutChunks);
 									try {
-										_msgAdapter.logMessage("PerformInteraction (request)", true);
-										ProxyService.getInstance().getProxyInstance().performInteraction(
-															"Pick a command",
-															"Pick number:",
-															interactionChoiceSetIDs,
-															"help me, I'm melting",
-															"hurry it up",
-															InteractionMode.BOTH, 
-															10000,
-															autoIncCorrId++);
+										_msgAdapter.logMessage(msg, true);
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
