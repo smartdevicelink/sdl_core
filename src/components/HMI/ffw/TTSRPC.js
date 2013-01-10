@@ -88,37 +88,78 @@ FFW.TTS = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.TTSBackend.onRPCRequest");
 		this._super();
 		
-		if (request.method == "TTS.Speak") {
-
-			MFT.ApplinkModel.onPrompt(request.params.ttsChunks.splice(0, 1));
-
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
-					"method"   :    "TTS.SpeakResponse"
-				}
-			};
-			this.client.send(JSONMessage);
-		}
-
 		
-		if (request.method == "TTS.GetCapabilities") {
+		switch (request.method) {
+		    case "TTS.Speak":{
+		    	MFT.ApplinkModel.onPrompt(request.params.ttsChunks.splice(0, 1));
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result"	:	{
-					"capabilities":["TEXT"],
+				// send repsonse
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result":	{
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method"   :    "TTS.SpeakResponse"
+					}
+				};
+				this.client.send(JSONMessage);
 
-					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
-					"method" : "TTS.GetCapabilitiesResponse"
-				}
-			};
-			this.client.send(JSONMessage);
+		    	break;
+		    }
+			case "TTS.GetCapabilities":{
+
+				// send repsonse
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result"	:	{
+						"capabilities":["TEXT"],
+
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method" : "TTS.GetCapabilitiesResponse"
+					}
+				};
+				this.client.send(JSONMessage);
+
+		    	break;
+			}
+			case "TTS.ChangeRegistration":{
+
+				MFT.ApplinkModel.ChangeRegistrationTTSVR(request.params.language);
+
+				// send repsonse
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result":	{
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method"   :    "TTS.ChangeRegistrationResponse"
+					}
+				};
+				this.client.send(JSONMessage);
+
+		    	break;
+			}
+
+			default:{
+				//statements_def
+				break;
+			}
 		}
+	},
+
+	/*
+	 * Notifies if applink TTS components language was changed
+ 	 */	
+	OnLanguageChange: function( lang ) {
+		Em.Logger.log("FFW.TTS.OnLanguageChange");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"TTS.OnLanguageChange",
+			"params":	{"language":	lang}
+		};
+		this.client.send(JSONMessage);
 	}
 })

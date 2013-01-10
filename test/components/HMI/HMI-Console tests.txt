@@ -1,3 +1,11 @@
 VehicleInfo.ReadDID     FFW.VehicleInfo.client.onWSMessage({data:'{"method":"VehicleInfo.ReadDID", "params":{"ecuName": 1, "didLocation":["123","123","123123","123","123","123123","123","123","123123","123","123","123123"], "encrypted": false}, "id": 6000}'})
+
 VehicleInfo.GetDTCs     FFW.VehicleInfo.client.onWSMessage({data:'{"method":"VehicleInfo.GetDTCs", "params":{"encrypted": false}, "id": 6000}'})
+
 UI.Alert                FFW.UI.client.onWSMessage({data:'{"method":"UI.Alert", "params":{"appId":-1, "AlertText1":"Test1", "AlertText2":"Test2", "alertText3":"Test3", "ttsChunks":{"ttsChunks":[{"text":"speak","type":"TEXT"},{"text":"INITIAL_JINGLE","type":"PRE_RECORDED"}]}, "duration":5000, "playTone":true, "softButtons":[{"isHighlighted":false,"softButtonID":5432,"systemAction":"KEEP_CONTEXT","text":"KeepContext","type":"TEXT"},{"isHighlighted":false,"softButtonID":5431,"systemAction":"STEAL_FOCUS","text":"StealFocus","type":"TEXT"},{"isHighlighted":false,"softButtonID":5430,"systemAction":"DEFAULT_ACTION","text":"Default","type":"TEXT"},{"isHighlighted":false,"softButtonID":5430,"systemAction":"DEFAULT_ACTION","text":"Default","type":"TEXT"}]}, "id": 6000}'})
+
+UI.ChangeRegistration   FFW.UI.client.onWSMessage({data:'{"method":"UI.ChangeRegistration", "params":{"hmiDisplayLanguage": "RU-RU"}, "id": 6000}'})
+
+TTS.ChangeRegistration  FFW.TTS.client.onWSMessage({data:'{"method":"TTS.ChangeRegistration", "params":{"language": "RU-RU"}, "id": 6000}'})
+
+VR.ChangeRegistration   FFW.VR.client.onWSMessage({data:'{"method":"VR.ChangeRegistration", "params":{"language": "RU-RU"}, "id": 6000}'})

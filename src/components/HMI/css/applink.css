@@ -568,3 +568,33 @@
 #softButton3.four{
 	width: 170px;
 }
+#app_controlButtons .languageSelect{
+	position: absolute;
+	width: 150px;
+	height: 30px;
+	color: white;
+	background: #393939;
+}
+
+#app_controlButtons .languageSelect option{
+	background: #393939;
+}
+#UILanguages.languageSelect{
+	top: 110px;
+	left: 1028px;
+}
+#TTSVRLanguages.languageSelect{
+	top: 170px;
+	left: 1028px;
+}
+
+#app_controlButtons .UILanguagesLabel{
+	top: 91px;
+	left: 1028px;
+	width: 150px;
+}
+#app_controlButtons .TTSVRLanguagesLabel{
+	top: 151px;
+	left: 1028px;
+	width: 160px;
+}

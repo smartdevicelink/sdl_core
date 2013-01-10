@@ -260,6 +260,14 @@ FFW.UI = FFW.RPCObserver.create({
 
 		    	break;
 		    }
+		    case "UI.ChangeRegistration":{
+
+				MFT.ApplinkModel.ChangeRegistrationUI( request.params.hmiDisplayLanguage );
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
+
+		    	break;
+		    }
 		    case "UI.SetAppIcon":{
 
 				MFT.ApplinkModel.onApplinkSetAppIcon( request.params );
@@ -446,7 +454,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 	/*
 	 * send notification when DriverDistraction PopUp is visible
- 	 */	
+ 	 */
 	onDriverDistraction: function(driverDistractionState) {
 		Em.Logger.log("FFW.UI.DriverDistraction");
 
@@ -461,7 +469,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 	/*
 	 * Notifies if system context is changed
- 	 */	
+ 	 */
 	OnSystemContext: function(systemContextValue) {
 		Em.Logger.log("FFW.UI.OnSystemContext");
 
@@ -476,7 +484,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 	/*
 	 * Notifies if application was activated
- 	 */	
+ 	 */
 	OnAppActivated: function( appName ) {
 		Em.Logger.log("FFW.UI.OnAppActivated");
 
@@ -491,7 +499,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 	/*
 	 * Notifies if device was choosed
- 	 */	
+ 	 */
 	OnDeviceChosen: function( deviceName ) {
 		Em.Logger.log("FFW.UI.OnDeviceChosen");
 
@@ -500,6 +508,21 @@ FFW.UI = FFW.RPCObserver.create({
 			"jsonrpc":	"2.0",
 			"method":	"UI.OnDeviceChosen",
 			"params":	{"deviceName":	deviceName}
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * Notifies if applink UI components language was changed
+ 	 */
+	OnLanguageChange: function( lang ) {
+		Em.Logger.log("FFW.UI.OnLanguageChange");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"UI.OnLanguageChange",
+			"params":	{"hmiDisplayLanguage":	lang}
 		};
 		this.client.send(JSONMessage);
 	}

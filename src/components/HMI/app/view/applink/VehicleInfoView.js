@@ -141,9 +141,8 @@ MFT.VehicleInfo = Em.ContainerView.create({
         optionLabelPath:    'content.name',
 
         selected:           function( element ){
-            var id = element.selection.id;
-            
-            MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', MFT.ApplinkVehicleInfoModel.vehicleInfoPRNDL[id].name);
+
+            MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', element.selection.name);
 
         }.observes('selection')
     }),

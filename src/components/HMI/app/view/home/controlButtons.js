@@ -21,8 +21,73 @@ MFT.ControlButtons = Em.ContainerView.create({
 		'protocolVersion',
 		'infoTable',
 		'sendData',
-		'vehicleInfo'
+		'vehicleInfo',
+		'UILanguages',
+		'TTSVRLanguages',
+		'UILanguagesLabel',
+		'TTSVRLanguagesLabel'
 	],
+
+	/*
+     * Label with name of UILanguages select
+     */ 
+	UILanguagesLabel : MFT.Label.extend({
+
+		elementId:			'UILanguagesLabel',
+
+		classNames:			'UILanguagesLabel',
+
+		content:			'UI Languages'
+	}),
+
+	/*
+     * Label with name of TTSVRLanguages select
+     */ 
+	TTSVRLanguagesLabel : MFT.Label.extend({
+
+		elementId:			'TTSVRLanguagesLabel',
+
+		classNames:			'TTSVRLanguagesLabel',
+
+		content:			'TTS + VR Languages'
+	}),	
+
+	/*
+     * HMI element Select with list of supported UI component languages
+     */ 
+    UILanguages : Ember.Select.extend({
+
+        elementId:          'UILanguages',
+
+        classNames:         'languageSelect',
+
+        contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
+
+        click: function(){
+
+        	FFW.UI.OnLanguageChange( this.selection );
+
+        }
+    }),
+
+	/*
+     * HMI element Select with list of supported TTS and VR component languages
+     */ 
+    TTSVRLanguages : Ember.Select.extend({
+
+        elementId:          'TTSVRLanguages',
+
+        classNames:         'languageSelect',
+
+        contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
+
+        click: function(){
+
+            FFW.VR.OnLanguageChange( this.selection );
+            FFW.TTS.OnLanguageChange( this.selection );
+
+        }
+    }),
 
 	/**
 	 * Sending data from HMI for processing in ApplinkCore

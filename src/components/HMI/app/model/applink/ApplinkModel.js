@@ -1,7 +1,7 @@
 /**
  * @name MFT.ApplinkModel
  * 
- * @desc General Applink model
+ * @desc General model for Applink applications
  * 
  * @category	Model
  * @filesource	app/model/applink/ApplinkModel.js
@@ -9,9 +9,9 @@
  *
  * @author		Artem Petrosyan
  */
- 
+
 MFT.ApplinkModel = Em.Object.create({
-    
+
     /*
      * init object
      */
@@ -20,12 +20,12 @@ MFT.ApplinkModel = Em.Object.create({
         this.resetProperties();
     },
 
-	/**
-	 * Chosen device name
-	 *
-	 * @type:	String
-	 */
-	deviceName: null,
+  	/**
+     * Chosen device name
+  	 *
+  	 * @type:	String
+  	 */
+  	deviceName: null,
 
     /**
      * List of icons
@@ -53,6 +53,46 @@ MFT.ApplinkModel = Em.Object.create({
     globalProperties    : {
         helpPrompt  : null ,
         timeoutPrompt   : null
+    },
+
+    /**
+     * List of supported languages
+     */
+    applinkLanguagesList: [
+        "EN-US",
+        "ES-MX",
+        "FR-CA",
+        "DE-EU",
+        "ES-EU",
+        "EN-EU",
+        "RU-RU",
+        "TR-TR",
+        "PL-EU",
+        "FR-EU",
+        "IT-EU",
+        "SV-EU",
+        "PT-EU",
+        "NL-EU",
+        "EN-AU",
+        "ZH-CN",
+        "ZH-TW",
+        "JA-JP",
+        "AR",
+        "KO-KR"
+    ],
+
+    /**
+     * Method to set language for UI component with parameters sent from ApplinkCore to UIRPC
+     */
+    ChangeRegistrationUI: function( language ){
+        MFT.ControlButtons.UILanguages.set( 'selection', language );
+    },
+
+    /**
+     * Method to set language for TTS and VR components with parameters sent from ApplinkCore to UIRPC
+     */
+    ChangeRegistrationTTSVR: function( language ){
+        MFT.ControlButtons.TTSVRLanguages.set( 'selection', language );
     },
 
     /**

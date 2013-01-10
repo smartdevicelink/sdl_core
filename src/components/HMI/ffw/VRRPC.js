@@ -105,53 +105,81 @@ FFW.VR = FFW.RPCObserver.create({
 		Em.Logger.log("FFW.VR.onRPCRequest");
 		this._super();
 
-		if (request.method == "VR.AddCommand") {
+		switch (request.method) {
+			case "VR.AddCommand":{
+				
+				MFT.ApplinkModel.onAddCommandVR(request.params);
+
+				// send repsonse
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result"	: 	{
+						"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+						"method" 	:  request.method + "Response"
+					}
+				};
+				this.client.send(JSONMessage);
+
+				break;
+			}
+			case "VR.DeleteCommand":{
+
+				MFT.ApplinkModel.onDeleteCommandVR(request.params.cmdId);
+
+				// send repsonse
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result"	: 	{
+						"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+						"method" 	:  request.method + "Response"
+					}
+				};
+				this.client.send(JSONMessage);
+
+				break;
+			}
+			case "VR.GetCapabilities":{
+
+				// send repsonse
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result"	:	{
+						"capabilities": ["TEXT"],
+
+						"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+					}
+				};
+				this.client.send(JSONMessage);
+
+				break;
+			}
+			case "VR.ChangeRegistration":{
+
+				MFT.ApplinkModel.ChangeRegistrationTTSVR(request.params.language);
+
+				// send repsonse
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result"	: 	{
+						"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+						"method" 	:  request.method + "Response"
+					}
+				};
+				this.client.send(JSONMessage);
+
+				break;
+			}
+
+			default:{
+				//statements_def
+				break;
+			}
+		}
 			
-			MFT.ApplinkModel.onAddCommandVR(request.params);
-
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result"	: 	{
-					"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
-					"method" 	:  request.method + "Response"
-				}
-			};
-			this.client.send(JSONMessage);
-		}
-
-		if (request.method == "VR.DeleteCommand") {
-
-			MFT.ApplinkModel.onDeleteCommandVR(request.params.cmdId);
-
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result"	: 	{
-					"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
-					"method" 	:  request.method + "Response"
-				}
-			};
-			this.client.send(JSONMessage);
-		}
-
-		if (request.method == "VR.GetCapabilities") {
-
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result"	:	{
-					"capabilities": ["TEXT"],
-
-					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
-				}
-			};
-			this.client.send(JSONMessage);
-		}
-		
 	},
 
 	/*
@@ -182,6 +210,21 @@ FFW.VR = FFW.RPCObserver.create({
 				"commandId":	commandId,
 				"appId":		appId
 			}
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * Notifies if applink VR components language was changed
+ 	 */	
+	OnLanguageChange: function( lang ) {
+		Em.Logger.log("FFW.VR.OnLanguageChange");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"VR.OnLanguageChange",
+			"params":	{"language":	lang}
 		};
 		this.client.send(JSONMessage);
 	}
