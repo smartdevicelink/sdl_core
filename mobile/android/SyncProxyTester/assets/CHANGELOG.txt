@@ -1,5 +1,5 @@
 [CW2]
-* Fix a crash when sending ReadDID request.
+* Fix a crash when sending ReadDID or GetDTCs requests.
 * Display the source JSON for all requests (added for Speak, SubscribeButton, UnsubscribeButton, DeleteCommand, AddSubMenu, DeleteSubMenu, SetMediaClockTimer, CreateInteractionChoiceSet, DeleteInteractionChoiceSet, and PerformInteraction).
 + "Pick a Function" list: Sort the functions by most-popular usage. Functions that are used more frequently will appear closer to the top of the list. Add an options menu item to clear the usage stats.
 + Show dialog: allow to set custom presets (as a comma-separated string).
