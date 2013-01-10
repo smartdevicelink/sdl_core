@@ -5,7 +5,6 @@ import java.util.Vector;
 
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.MediaClockFormat;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.util.DebugTool;
 
@@ -25,8 +24,8 @@ public class SubscribeVehicleData extends RPCRequest {
     	}
     }
     public Vector<VehicleDataType> getDataType() {
-        if (store.get(Names.dataType) instanceof Vector<?>) {
-	    	Vector<?> list = (Vector<?>)store.get(Names.dataType);
+        if (parameters.get(Names.dataType) instanceof Vector<?>) {
+	    	Vector<?> list = (Vector<?>)parameters.get(Names.dataType);
 	        if (list != null && list.size() > 0) {
 	            Object obj = list.get(0);
 	            if (obj instanceof VehicleDataType) {
