@@ -66,7 +66,7 @@ public class AddCommand extends RPCRequest {
         }
     }
     public Image getCmdIcon() {
-    	Object obj = store.get(Names.cmdIcon);
+    	Object obj = parameters.get(Names.cmdIcon);
         if (obj instanceof Image) {
             return (Image) obj;
         } else if (obj instanceof Hashtable) {

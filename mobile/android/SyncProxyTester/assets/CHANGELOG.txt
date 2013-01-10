@@ -4,7 +4,7 @@
 + "Pick a Function" list: Sort the functions by most-popular usage. Functions that are used more frequently will appear closer to the top of the list. Add an options menu item to clear the usage stats.
 + Show dialog: allow to set custom presets (as a comma-separated string).
 + AddCommand dialog: allow to set icon.
-* SyncProxyAndroid SDK: fix AddCommand's setCmdIcon method.
+* SyncProxyAndroid SDK: fix AddCommand (setCmdIcon, getCmdIcon), ReadDID (getEncrypted, setEncrypted, getDidLocation) requests.
 + Alert, ScrollableMessage, Show dialogs: allow to set soft buttons.
 * Set the current release version in the app's manifest to be displayed in system settings.
 
