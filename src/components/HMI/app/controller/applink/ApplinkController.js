@@ -162,6 +162,7 @@ MFT.ApplinkController = Em.Object.create({
 	/**
 	 * Method creates list of Application ID's
 	 * Then call HMI method for display a list of Applications
+	 * @param {Object}
 	 */
 	onGetAppList: function( appList ){
 		for(var i = 0; i < appList.length; i++){
@@ -182,7 +183,8 @@ MFT.ApplinkController = Em.Object.create({
 	},
 
 	/**
-	 *  Method activates selected registered application
+	 * Method activates selected registered application
+	 * @param {Object}
 	 */
 	onActivateApplinkApp: function(element){
 		this.getApplicationModel(element.appId).turnOnApplink( element.appName, element.appId );
@@ -191,6 +193,7 @@ MFT.ApplinkController = Em.Object.create({
 	
 	/**
 	 * Method sent softButtons pressed and event status to RPC
+	 * @param {Object}
 	 */
 	onSoftButtonActionUp: function( element ){
 		FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
@@ -204,6 +207,7 @@ MFT.ApplinkController = Em.Object.create({
 
 	/**
 	 * Method sent softButtons pressed and event status to RPC 
+	 * @param {Object}
 	 */
 	onSoftButtonActionDown: function( element ){
         FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", element.softButtonID);
