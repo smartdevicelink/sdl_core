@@ -35,7 +35,7 @@ PerformAudioPassThru::~PerformAudioPassThru(void)
 }
 
 
-PerformAudioPassThru::PerformAudioPassThru(void) : 
+PerformAudioPassThru::PerformAudioPassThru(void) :
   RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRU),
   audioPassThruDisplayText1(0),
   audioPassThruDisplayText2(0)
@@ -49,12 +49,12 @@ PerformAudioPassThru::PerformAudioPassThru(const PerformAudioPassThru& c) : RPC2
 }
 
 
-const std::vector< NsAppLinkRPC::TTSChunk>& PerformAudioPassThru::get_initialPrompt(void)
+const std::vector< NsAppLinkRPCV2::TTSChunk>& PerformAudioPassThru::get_initialPrompt(void)
 {
   return initialPrompt;
 }
 
-bool PerformAudioPassThru::set_initialPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& initialPrompt_)
+bool PerformAudioPassThru::set_initialPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& initialPrompt_)
 {
   initialPrompt=initialPrompt_;
   return true;

@@ -1,5 +1,5 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/PerformAudioPassThru.h"
-#include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/SamplingRateMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/AudioCaptureQualityMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/AudioTypeMarshaller.h"
@@ -86,7 +86,7 @@ Json::Value PerformAudioPassThruMarshaller::toJSON(const PerformAudioPassThru& e
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::TTSChunkMarshaller::toJSON(e.initialPrompt[i]);
+      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.initialPrompt[i]);
 
     json["params"]["initialPrompt"]=j;
   }
@@ -125,8 +125,8 @@ bool PerformAudioPassThruMarshaller::fromJSON(const Json::Value& json,PerformAud
       c.initialPrompt.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::TTSChunk t;
-        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["initialPrompt"][i],t))
+        NsAppLinkRPCV2::TTSChunk t;
+        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["initialPrompt"][i],t))
           return false;
          c.initialPrompt[i]=t;
       }
@@ -166,7 +166,7 @@ bool PerformAudioPassThruMarshaller::fromJSON(const Json::Value& json,PerformAud
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;
     c.appId=js["appId"].asInt();
-    
+
   }
   catch(...)
   {
