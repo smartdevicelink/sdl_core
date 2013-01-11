@@ -20,9 +20,6 @@ FFW.VR = FFW.RPCObserver.create({
    	 * connect to RPC bus
  	 */
 	connect: function() {
-		// to be removed
-		//this.stubGetValues();
-		
 		this.client.connect(this, 500);
 	},
 
@@ -108,7 +105,7 @@ FFW.VR = FFW.RPCObserver.create({
 		switch (request.method) {
 			case "VR.AddCommand":{
 				
-				MFT.ApplinkModel.onAddCommandVR(request.params);
+				MFT.ApplinkModel.addCommandVR(request.params);
 
 				// send repsonse
 				var JSONMessage = {
@@ -125,7 +122,7 @@ FFW.VR = FFW.RPCObserver.create({
 			}
 			case "VR.DeleteCommand":{
 
-				MFT.ApplinkModel.onDeleteCommandVR(request.params.cmdId);
+				MFT.ApplinkModel.deleteCommandVR(request.params.cmdId);
 
 				// send repsonse
 				var JSONMessage = {
@@ -158,7 +155,7 @@ FFW.VR = FFW.RPCObserver.create({
 			}
 			case "VR.ChangeRegistration":{
 
-				MFT.ApplinkModel.ChangeRegistrationTTSVR(request.params.language);
+				MFT.ApplinkModel.changeRegistrationTTSVR(request.params.language);
 
 				// send repsonse
 				var JSONMessage = {

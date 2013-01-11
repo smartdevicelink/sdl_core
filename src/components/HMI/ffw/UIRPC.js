@@ -53,7 +53,6 @@ FFW.UI = FFW.RPCObserver.create({
    	 * connect to RPC bus
  	 */
 	connect: function() {
-		
 		this.client.connect(this, 400);
 	},
 
@@ -262,7 +261,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.ChangeRegistration":{
 
-				MFT.ApplinkModel.ChangeRegistrationUI( request.params.hmiDisplayLanguage );
+				MFT.ApplinkModel.changeRegistrationUI( request.params.hmiDisplayLanguage );
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 

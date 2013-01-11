@@ -21,9 +21,6 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
      * connect to RPC bus
      */
     connect: function() {
-        // to be removed
-        //this.stubGetValues();
-        
         this.client.connect(this, 600);
     },
 
@@ -125,6 +122,12 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
             MFT.ApplinkVehicleInfoModel.vehicleInfoGetDTCs( request.params, request.id );
 
         }
+
+        if (request.method == "VehicleInfo.GetVehicleType") {
+
+            MFT.ApplinkModel.getVehicleType();
+
+        }
     },
 
     /*
@@ -140,6 +143,28 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
             "params":   params
         };
         this.client.send(JSONMessage);
+    },
+
+
+    /*
+     * GetVehicleType Response 
+     */ 
+    GetVehicleTypeResponse: function( vehicleType ) {
+        Em.Logger.log("FFW.VehicleInfo.GetVehicleType");
+
+            var JSONMessage = {
+                "jsonrpc"   :   "2.0",
+                "id"        :   id,
+                "result":   {
+                    "resultCode":       "SUCCESS", //  type (enum) from AppLink protocol
+                    "method":           "VehicleInfo.GetVehicleTypeResponse",
+                    "params":{
+                        "vehicleType":         vehicleType
+                    }
+                }
+            }; 
+
+            this.client.send(JSONMessage);
     },
 
     /*

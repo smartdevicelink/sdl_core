@@ -46,6 +46,23 @@ MFT.ApplinkController = Em.Object.create({
 		0:	'ApplinkMediaModel',
 		1:	'ApplinkNonMediaModel'
 	},
+
+    /**
+     * Method to set language for UI component with parameters sent from ApplinkCore to UIRPC
+     * @param {string} lang Language code
+     */
+    onLanguageChangeUI: function( lang ){
+        FFW.UI.OnLanguageChange( lang );
+    },
+
+    /**
+     * Method to set language for TTS and VR components with parameters sent from ApplinkCore to UIRPC
+     * @param {string} lang Language code
+     */
+    onLanguageChangeTTSVR: function( lang ){
+        FFW.TTS.OnLanguageChange( lang );
+        FFW.VR.OnLanguageChange( lang );
+    },
 	
 	/**
 	 * Register application

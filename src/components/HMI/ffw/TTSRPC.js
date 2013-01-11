@@ -1,5 +1,5 @@
 /*
- * Reference implementation of TTSBackend component.
+ * Reference implementation of TTS component.
  * 
  * TTS is responsible for playing sound data sent from ApplinkCore
  * to notify user about some events happened.
@@ -19,9 +19,6 @@ FFW.TTS = FFW.RPCObserver.create({
    	 * connect to RPC bus
  	 */
 	connect: function() {
-		// to be removed
-		//this.stubGetValues();
-		
 		this.client.connect(this, 300);
 	},
 
@@ -36,7 +33,7 @@ FFW.TTS = FFW.RPCObserver.create({
      * Client is registered - we can send request starting from this point of time
  	 */	
 	onRPCRegistered: function () {
-		Em.Logger.log("FFW.TTSBackend.onRPCRegistered");
+		Em.Logger.log("FFW.TTS.onRPCRegistered");
 		this._super();
 	},
 	
@@ -44,7 +41,7 @@ FFW.TTS = FFW.RPCObserver.create({
      * Client is unregistered - no more requests
  	 */	
 	onRPCUnregistered: function () {
-		Em.Logger.log("FFW.TTSBackend.onRPCUnregistered");
+		Em.Logger.log("FFW.TTS.onRPCUnregistered");
 		this._super();
 	},
 
@@ -61,7 +58,7 @@ FFW.TTS = FFW.RPCObserver.create({
 	 * Please use previously store reuqestID to determine to which request repsonse belongs to
  	 */	
 	onRPCResult: function(response) {
-		Em.Logger.log("FFW.TTSBackend.onRPCResult");
+		Em.Logger.log("FFW.TTS.onRPCResult");
 		this._super();
 	 },
 	
@@ -69,7 +66,7 @@ FFW.TTS = FFW.RPCObserver.create({
 	 * handle RPC erros here
  	 */	
 	onRPCError: function(error) {
-		Em.Logger.log("FFW.TTSBackend.onRPCError");
+		Em.Logger.log("FFW.TTS.onRPCError");
 		this._super();
 	},
 
@@ -77,7 +74,7 @@ FFW.TTS = FFW.RPCObserver.create({
 	 * handle RPC notifications here 
  	 */	
 	onRPCNotification: function(notification) {
-		Em.Logger.log("FFW.TTSBackend.onRPCNotification");
+		Em.Logger.log("FFW.TTS.onRPCNotification");
 		this._super();
 	},
 	
@@ -85,7 +82,7 @@ FFW.TTS = FFW.RPCObserver.create({
 	 * handle RPC requests here
  	 */	
 	onRPCRequest: function(request) {
-		Em.Logger.log("FFW.TTSBackend.onRPCRequest");
+		Em.Logger.log("FFW.TTS.onRPCRequest");
 		this._super();
 		
 		
@@ -125,7 +122,7 @@ FFW.TTS = FFW.RPCObserver.create({
 			}
 			case "TTS.ChangeRegistration":{
 
-				MFT.ApplinkModel.ChangeRegistrationTTSVR(request.params.language);
+				MFT.ApplinkModel.changeRegistrationTTSVR(request.params.language);
 
 				// send repsonse
 				var JSONMessage = {

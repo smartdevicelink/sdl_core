@@ -55,7 +55,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 	/*
      * HMI element Select with list of supported UI component languages
      */ 
-    UILanguages : Ember.Select.extend({
+    UILanguages : Em.Select.extend({
 
         elementId:          'UILanguages',
 
@@ -63,9 +63,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 
         contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
 
+        valueBinding:		'MFT.ApplinkModel.UILanguage',
+
         click: function(){
 
-        	FFW.UI.OnLanguageChange( this.selection );
+        	MFT.ApplinkController.onLanguageChangeUI( this.selection );
 
         }
     }),
@@ -73,7 +75,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 	/*
      * HMI element Select with list of supported TTS and VR component languages
      */ 
-    TTSVRLanguages : Ember.Select.extend({
+    TTSVRLanguages : Em.Select.extend({
 
         elementId:          'TTSVRLanguages',
 
@@ -81,10 +83,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 
         contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
 
+        valueBinding:		'MFT.ApplinkModel.TTSVRLanguage',
+
         click: function(){
 
-            FFW.VR.OnLanguageChange( this.selection );
-            FFW.TTS.OnLanguageChange( this.selection );
+            MFT.ApplinkController.onLanguageChangeTTSVR( this.selection );
 
         }
     }),

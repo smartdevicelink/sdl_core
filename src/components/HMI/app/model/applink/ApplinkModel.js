@@ -43,61 +43,98 @@ MFT.ApplinkModel = Em.Object.create({
     applicationsList:           [],
 
     /**
-      * Array of connected devices
-      */
+     * Array of connected devices
+     * @type {Array}
+     */
     devicesList:                [],
 
     /*
      * Global properties
+     * @type {Object}
      */
     globalProperties    : {
         helpPrompt  : null ,
         timeoutPrompt   : null
     },
 
+    /*
+     * Current language of UI component
+     * @type {String}
+     */
+    UILanguage: '',
+
+    /*
+     * Current language of TTS and VR component
+     * @type {String}
+     */
+    TTSVRLanguage: '',
+
+    /**
+     * Type of current vehicle: make of the vehicle, model of the vehicle,
+     * model Year of the vehicle, trim of the vehicle.
+     * @type {Object}
+     */ 
+    vehicleType:{
+      make:       "Ford",
+      model:      "Fiesta",
+      modelYear:  2013,
+      trim:       "SE"  
+    },
+
     /**
      * List of supported languages
+     * @type {Array}
      */
     applinkLanguagesList: [
-        "EN-US",
-        "ES-MX",
-        "FR-CA",
-        "DE-EU",
-        "ES-EU",
-        "EN-EU",
-        "RU-RU",
-        "TR-TR",
-        "PL-EU",
-        "FR-EU",
-        "IT-EU",
-        "SV-EU",
-        "PT-EU",
-        "NL-EU",
-        "EN-AU",
-        "ZH-CN",
-        "ZH-TW",
-        "JA-JP",
-        "AR",
-        "KO-KR"
+        'EN-US',
+        'ES-MX',
+        'FR-CA',
+        'DE-EU',
+        'ES-EU',
+        'EN-EU',
+        'RU-RU',
+        'TR-TR',
+        'PL-EU',
+        'FR-EU',
+        'IT-EU',
+        'SV-EU',
+        'PT-EU',
+        'NL-EU',
+        'EN-AU',
+        'ZH-CN',
+        'ZH-TW',
+        'JA-JP',
+        'AR',
+        'KO-KR'
     ],
 
     /**
-     * Method to set language for UI component with parameters sent from ApplinkCore to UIRPC
+     * Method calls GetVehicleType response
      */
-    ChangeRegistrationUI: function( language ){
-        MFT.ControlButtons.UILanguages.set( 'selection', language );
+    getVehicleType: function(){
+        FFW.VehicleInfo.GetVehicleTypeResponse( this.vehicleType );
+    },
+
+    /**
+     * Method to set language for UI component with parameters sent from ApplinkCore to UIRPC
+     * @param {string} lang Language code.
+     */
+    changeRegistrationUI: function( lang ){
+        this.set( 'UILanguage', lang );
     },
 
     /**
      * Method to set language for TTS and VR components with parameters sent from ApplinkCore to UIRPC
+     * @param {string} lang Language code
      */
-    ChangeRegistrationTTSVR: function( language ){
-        MFT.ControlButtons.TTSVRLanguages.set( 'selection', language );
+    changeRegistrationTTSVR: function( lang ){
+        this.set( 'TTSVRLanguage', lang );
     },
 
     /**
      * Applink UI ScrolableMessage activation function
      * dependent of Driver Distraction toggle state
+     * @param {Object} Object with parameters come from ApplinkCore.
      */
     onApplinkScrolableMessage: function(params){
 
@@ -111,17 +148,21 @@ MFT.ApplinkModel = Em.Object.create({
 
     /*
      * resetGlobalProperties
+     * @param {String} name of propety to reset.
      */
     resetProperties: function(propertyName) {
-        if (propertyName == "HELPPROMPT" || propertyName == "")
+        if (propertyName == "HELPPROMPT" || propertyName == ""){
             this.globalProperties.helpPrompt    = this.globalPropertiesDefault.helpPrompt;
+        }
     
-        if (propertyName == "TIMEOUTPROMPT" || propertyName == "")
+        if (propertyName == "TIMEOUTPROMPT" || propertyName == ""){
             this.globalProperties.timeoutPrompt = this.globalPropertiesDefault.timoutPrompt;
+        }
     },
 
     /*
      * setGlobalProperties
+     * @param {Object} Object with parameters come from ApplinkCore.
      */
     setProperties: function(message) {
 
@@ -140,7 +181,7 @@ MFT.ApplinkModel = Em.Object.create({
                 type:       MFT.Button,
                 params:     {
                     action:         'turnOnApplink',
-                    target:         appList[i].isMediaApplication ? 'MFT.ApplinkMediaController' : 'MFT.NonMediaController'
+                    target:         appList[i].isMediaApplication ? 'MFT.ApplinkMediaController' : 'MFT.NonMediaController',
                     text:           appList[i].appName,
                     appName:        appList[i].appName,
                     appId:          appList[i].appId,
@@ -181,6 +222,7 @@ MFT.ApplinkModel = Em.Object.create({
 
     /**
      * Applink UI SetAppIcon handler
+     * @param {Object} message Object with parameters come from ApplinkCore.
      */
     onApplinkSetAppIcon: function( message ){
         this.set('listOfIcons.' + message.appId, message.syncFileName );
@@ -222,7 +264,7 @@ MFT.ApplinkModel = Em.Object.create({
 	 *
 	 * @param message:	Object
 	 */
-	onAddCommandVR: function ( message ) {
+	addCommandVR: function ( message ) {
 		//message = JSON.parse('{"appId":65537,"cmdId":4,"vrCommands":["F you bc hi iv"]}');
 		
 		MFT.VRPopUp.AddCommand( message.cmdId, message.vrCommands, message.appId );
@@ -234,7 +276,7 @@ MFT.ApplinkModel = Em.Object.create({
 	 *
 	 * @param commandId:	Number
 	 */
-	onDeleteCommandVR: function ( commandId ) {
+	deleteCommandVR: function ( commandId ) {
 		//message = 4;
 		
 		MFT.VRPopUp.DeleteCommand( commandId );

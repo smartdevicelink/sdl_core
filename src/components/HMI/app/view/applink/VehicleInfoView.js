@@ -128,7 +128,7 @@ MFT.VehicleInfo = Em.ContainerView.create({
      * HMI element Select with parameters of transmission state
      * from VehicleInfo Model
      */ 
-    prndlSelect : Ember.Select.extend({
+    prndlSelect : Em.Select.extend({
 
         elementId:          'prndlSelect',
 
@@ -140,11 +140,12 @@ MFT.VehicleInfo = Em.ContainerView.create({
 
         optionLabelPath:    'content.name',
 
-        selected:           function( element ){
+        // Selected data sent on model for further processing
+        click: function(){
 
-            MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', element.selection.name);
+            MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', this.selection.name);
 
-        }.observes('selection')
+        }
     }),
 
     /*
