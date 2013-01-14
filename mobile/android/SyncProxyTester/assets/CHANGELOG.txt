@@ -1,3 +1,6 @@
+[CW3]
+* Fix: SubscribeVehicleData and UnsubscribeVehicleData now sends a list of selected items.
+
 [CW2]
 * SyncProxyAndroid SDK: fix PerformAudioPassThru's property name for audio capture quality.
 * Fix a crash when sending ReadDID or GetDTCs requests.

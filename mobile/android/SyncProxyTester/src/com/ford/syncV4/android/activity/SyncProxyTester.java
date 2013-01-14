@@ -1934,21 +1934,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								public void onClick(DialogInterface dialog, int id) {
 									Vector<VehicleDataType> dataType = new Vector<VehicleDataType>();
 									if (chkVEHICLEDATA_GPS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_GPS);
-									else if (chkVEHICLEDATA_SPEED.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_SPEED);
-									else if (chkVEHICLEDATA_FUELLEVEL.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_FUELLEVEL);
-									else if (chkVEHICLEDATA_FUELECONOMY.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_FUELECONOMY);
-									else if (chkVEHICLEDATA_ENGINERPM.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_ENGINERPM);
-									else if (chkVEHICLEDATA_BATTVOLTS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTVOLTS);
-									else if (chkVEHICLEDATA_RAINSENSOR.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_RAINSENSOR);
-									else if (chkVEHICLEDATA_ODOMETER.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_ODOMETER);
-									else if (chkVEHICLEDATA_VIN.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_VIN);
-									else if (chkVEHICLEDATA_EXTERNTEMP.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_EXTERNTEMP);
-									else if (chkVEHICLEDATA_PRNDLSTATUS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_PRNDLSTATUS);
-									else if (chkVEHICLEDATA_TIREPRESSURE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_TIREPRESSURE);
-									else if (chkVEHICLEDATA_BATTERYPACKVOLTAGE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYPACKVOLTAGE);
-									else if (chkVEHICLEDATA_BATTERYCURRENT.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYCURRENT);
-									else if (chkVEHICLEDATA_BATTERYTEMPERATURE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYTEMPERATURE);
-									else if (chkVEHICLEDATA_SATESN.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_SATESN);
+									if (chkVEHICLEDATA_SPEED.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_SPEED);
+									if (chkVEHICLEDATA_FUELLEVEL.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_FUELLEVEL);
+									if (chkVEHICLEDATA_FUELECONOMY.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_FUELECONOMY);
+									if (chkVEHICLEDATA_ENGINERPM.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_ENGINERPM);
+									if (chkVEHICLEDATA_BATTVOLTS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTVOLTS);
+									if (chkVEHICLEDATA_RAINSENSOR.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_RAINSENSOR);
+									if (chkVEHICLEDATA_ODOMETER.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_ODOMETER);
+									if (chkVEHICLEDATA_VIN.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_VIN);
+									if (chkVEHICLEDATA_EXTERNTEMP.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_EXTERNTEMP);
+									if (chkVEHICLEDATA_PRNDLSTATUS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_PRNDLSTATUS);
+									if (chkVEHICLEDATA_TIREPRESSURE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_TIREPRESSURE);
+									if (chkVEHICLEDATA_BATTERYPACKVOLTAGE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYPACKVOLTAGE);
+									if (chkVEHICLEDATA_BATTERYCURRENT.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYCURRENT);
+									if (chkVEHICLEDATA_BATTERYTEMPERATURE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYTEMPERATURE);
+									if (chkVEHICLEDATA_SATESN.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_SATESN);
 									
 									try {
 										SubscribeVehicleData msg = new SubscribeVehicleData();
@@ -2001,21 +2001,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								public void onClick(DialogInterface dialog, int id) {
 									Vector<VehicleDataType> dataType = new Vector<VehicleDataType>();
 									if (chkVEHICLEDATA_GPS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_GPS);
-									else if (chkVEHICLEDATA_SPEED.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_SPEED);
-									else if (chkVEHICLEDATA_FUELLEVEL.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_FUELLEVEL);
-									else if (chkVEHICLEDATA_FUELECONOMY.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_FUELECONOMY);
-									else if (chkVEHICLEDATA_ENGINERPM.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_ENGINERPM);
-									else if (chkVEHICLEDATA_BATTVOLTS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTVOLTS);
-									else if (chkVEHICLEDATA_RAINSENSOR.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_RAINSENSOR);
-									else if (chkVEHICLEDATA_ODOMETER.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_ODOMETER);
-									else if (chkVEHICLEDATA_VIN.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_VIN);
-									else if (chkVEHICLEDATA_EXTERNTEMP.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_EXTERNTEMP);
-									else if (chkVEHICLEDATA_PRNDLSTATUS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_PRNDLSTATUS);
-									else if (chkVEHICLEDATA_TIREPRESSURE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_TIREPRESSURE);
-									else if (chkVEHICLEDATA_BATTERYPACKVOLTAGE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYPACKVOLTAGE);
-									else if (chkVEHICLEDATA_BATTERYCURRENT.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYCURRENT);
-									else if (chkVEHICLEDATA_BATTERYTEMPERATURE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYTEMPERATURE);
-									else if (chkVEHICLEDATA_SATESN.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_SATESN);
+									if (chkVEHICLEDATA_SPEED.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_SPEED);
+									if (chkVEHICLEDATA_FUELLEVEL.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_FUELLEVEL);
+									if (chkVEHICLEDATA_FUELECONOMY.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_FUELECONOMY);
+									if (chkVEHICLEDATA_ENGINERPM.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_ENGINERPM);
+									if (chkVEHICLEDATA_BATTVOLTS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTVOLTS);
+									if (chkVEHICLEDATA_RAINSENSOR.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_RAINSENSOR);
+									if (chkVEHICLEDATA_ODOMETER.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_ODOMETER);
+									if (chkVEHICLEDATA_VIN.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_VIN);
+									if (chkVEHICLEDATA_EXTERNTEMP.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_EXTERNTEMP);
+									if (chkVEHICLEDATA_PRNDLSTATUS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_PRNDLSTATUS);
+									if (chkVEHICLEDATA_TIREPRESSURE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_TIREPRESSURE);
+									if (chkVEHICLEDATA_BATTERYPACKVOLTAGE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYPACKVOLTAGE);
+									if (chkVEHICLEDATA_BATTERYCURRENT.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYCURRENT);
+									if (chkVEHICLEDATA_BATTERYTEMPERATURE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYTEMPERATURE);
+									if (chkVEHICLEDATA_SATESN.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_SATESN);
 									
 									try {
 										UnsubscribeVehicleData msg = new UnsubscribeVehicleData();
