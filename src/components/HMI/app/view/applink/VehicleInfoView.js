@@ -30,7 +30,7 @@ MFT.VehicleInfo = Em.ContainerView.create({
 
     ],
 
-    /*
+    /**
      * Label with stored data in VehicleInfo model
      */ 
     ecu2Data:    MFT.Label.extend({
@@ -42,7 +42,7 @@ MFT.VehicleInfo = Em.ContainerView.create({
         contentBinding:        'MFT.ApplinkVehicleInfoModel.ecuDIDData.1.data'
     }),
 
-    /*
+    /**
      * Label with stored data in VehicleInfo model
      */ 
     ecu1Data:    MFT.Label.extend({
@@ -54,7 +54,7 @@ MFT.VehicleInfo = Em.ContainerView.create({
         contentBinding:        'MFT.ApplinkVehicleInfoModel.ecuDIDData.0.data'
     }),
 
-    /*
+    /**
      * Label with name of some parameter
      * stored data in VehicleInfo model
      */ 
@@ -67,7 +67,7 @@ MFT.VehicleInfo = Em.ContainerView.create({
         content:        'ECU 2:'
     }),
 
-    /*
+    /**
      * Label with name of some parameter
      * stored data in VehicleInfo model
      */ 
@@ -80,7 +80,7 @@ MFT.VehicleInfo = Em.ContainerView.create({
         content:        'ECU 1:'
     }),
 
-    /*
+    /**
      * Title of ecu group of parameters
      * stored data in VehicleInfo model
      */ 
@@ -93,7 +93,7 @@ MFT.VehicleInfo = Em.ContainerView.create({
         content:        'ECU'
     }),
 
-    /*
+    /**
      * Title of VehicleInfo PopUp view
      */ 
     vehicleInfoLabel:    MFT.Label.extend({
@@ -106,12 +106,12 @@ MFT.VehicleInfo = Em.ContainerView.create({
     }),
 
 
-    /*
+    /**
      * Property indicates the activity state of VehicleInfo PopUp
      */
     active:           false,
 
-    /*
+    /**
      * Title of prndl group of parameters
      * stored in VehicleInfo model
      */ 
@@ -124,7 +124,7 @@ MFT.VehicleInfo = Em.ContainerView.create({
         content:            'PRNDL'
     }),
 
-    /*
+    /**
      * HMI element Select with parameters of transmission state
      * from VehicleInfo Model
      */ 
@@ -140,15 +140,17 @@ MFT.VehicleInfo = Em.ContainerView.create({
 
         optionLabelPath:    'content.name',
 
-        // Selected data sent on model for further processing
+        /**
+         * Selected data sent on model for further processing
+         */
         click: function(){
 
-            MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', this.selection.name);
+            MFT.ApplinkController.onPRNDLSelected( this.selection.name );
 
         }
     }),
 
-    /*
+    /**
      * Trigger function that activates and deactivates VehicleInfo PopUp
      */
     toggleActivity: function(){

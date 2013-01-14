@@ -53,9 +53,9 @@ MFT.ApplinkModel = Em.Object.create({
      * Global properties
      * @type {Object}
      */
-    globalProperties    : {
-        helpPrompt  : null ,
-        timeoutPrompt   : null
+    globalProperties:{
+        helpPrompt:             [],
+        timeoutPrompt:          []
     },
 
     /**
@@ -153,11 +153,11 @@ MFT.ApplinkModel = Em.Object.create({
      */
     resetProperties: function(propertyName) {
         if (propertyName == "HELPPROMPT" || propertyName == ""){
-            this.globalProperties.helpPrompt    = this.globalPropertiesDefault.helpPrompt;
+            this.set('globalProperties.helpPrompt', this.globalPropertiesDefault.helpPrompt);
         }
     
         if (propertyName == "TIMEOUTPROMPT" || propertyName == ""){
-            this.globalProperties.timeoutPrompt = this.globalPropertiesDefault.timoutPrompt;
+            this.set('globalProperties.timeoutPrompt', this.globalPropertiesDefault.timoutPrompt);
         }
     },
 
@@ -167,9 +167,8 @@ MFT.ApplinkModel = Em.Object.create({
      */
     setProperties: function(message) {
 
-        this.globalProperties.helpPrompt = message.helpPrompt;
-        this.globalProperties.timeoutPrompt = message.timeoutPrompt;
-        MFT.ControlButtons.infoTable.globalPropertiesData.propertiesData();
+        this.set('globalProperties.helpPrompt', message.helpPrompt);
+        this.set('globalProperties.timeoutPrompt', message.timeoutPrompt);
 
     },
 

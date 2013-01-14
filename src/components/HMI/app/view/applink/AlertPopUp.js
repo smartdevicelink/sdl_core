@@ -113,11 +113,11 @@ MFT.AlertPopUp = Em.ContainerView.create({
                     MFT.Button.create({
                         actionDown:        function(){
                             this._super();
-                            MFT.ApplinkController.onSoftButtonActionDown(this);
+                            MFT.ApplinkController.onSoftButtonActionDownCustom(this);
                         },
                         actionUp:        function(){
                             this._super();
-                            MFT.ApplinkController.onSoftButtonActionUp(this);
+                            MFT.ApplinkController.onSoftButtonActionUpCustom(this);
                         },
                         softButtonID:           params[i].softButtonID,
                         icon:                   params[i].image,

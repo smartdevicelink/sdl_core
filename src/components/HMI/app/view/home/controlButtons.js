@@ -67,7 +67,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 
         click: function(){
 
-        	MFT.ApplinkController.onLanguageChangeUI( this.selection );
+    		MFT.ApplinkController.onLanguageChangeUI( this.selection );
 
         }
     }),
@@ -154,20 +154,25 @@ MFT.ControlButtons = Em.ContainerView.create({
 
 			classNames:			'applinkGPData',
 
-			content:			'Some text for help prompt',
+			contentBinding:		'this.propertiesData',
 			
 			propertiesData: function(){
-				var i=0,
+				var str='';
+				if( MFT.ApplinkModel.globalProperties.helpPrompt && MFT.ApplinkModel.globalProperties.timeoutPrompt ){
+					var i=0;
+					
 					str='HELP_PROMPT: ';
-				for(i = 0; i < MFT.ApplinkModel.globalProperties.helpPrompt.length; i++){
-					str += MFT.ApplinkModel.globalProperties.helpPrompt[i].text + ' ';
+					for(i = 0; i < MFT.ApplinkModel.globalProperties.helpPrompt.length; i++){
+						str += MFT.ApplinkModel.globalProperties.helpPrompt[i].text + ' ';
+					}
+					str += 'TIMEOUT_PROMPT: ';
+					for(i = 0; i < MFT.ApplinkModel.globalProperties.timeoutPrompt.length; i++){
+						str += MFT.ApplinkModel.globalProperties.timeoutPrompt[i].text + ' ';
+					}
 				}
-				str += 'TIMEOUT_PROMPT: ';
-				for(i = 0; i < MFT.ApplinkModel.globalProperties.timeoutPrompt.length; i++){
-					str += MFT.ApplinkModel.globalProperties.timeoutPrompt[i].text + ' ';
-				}
-				this.set('content', str);
-			}
+				
+				return str;
+			}.property( 'MFT.ApplinkModel.globalProperties.helpPrompt.@each.text', 'MFT.ApplinkModel.globalProperties.timeoutPrompt.@each.text' )
 		})
 	}),
 
@@ -275,20 +280,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 				actionDown:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-					var self = this;
-					this.time = 0;
-					setTimeout(function(){ self.time ++; }, 1000);
+					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 				},
 				actionUp:		function(){
 					this._super();
-					if(this.time > 0){
-						FFW.Buttons.buttonPressed( this.elementId, "LONG");
-					}else{
-						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-					}
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-					this.time = 0;
+					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 				}
 			}),
 			
@@ -299,20 +295,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 				actionDown:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-					var self = this;
-					this.time = 0;
-					setTimeout(function(){ self.time ++; }, 1000);
+					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 				},
 				actionUp:		function(){
 					this._super();
-					if(this.time > 0){
-						FFW.Buttons.buttonPressed( this.elementId, "LONG");
-					}else{
-						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-					}
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-					this.time = 0;
+					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 				}
 			}),
 			
@@ -323,20 +310,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 				actionDown:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-					var self = this;
-					this.time = 0;
-					setTimeout(function(){ self.time ++; }, 1000);
+					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 				},
 				actionUp:		function(){
 					this._super();
-					if(this.time > 0){
-						FFW.Buttons.buttonPressed( this.elementId, "LONG");
-					}else{
-						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-					}
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-					this.time = 0;
+					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 				}
 			}),
 			
@@ -347,20 +325,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 				actionDown:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-					var self = this;
-					this.time = 0;
-					setTimeout(function(){ self.time ++; }, 1000);
+					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 				},
 				actionUp:		function(){
 					this._super();
-					if(this.time > 0){
-						FFW.Buttons.buttonPressed( this.elementId, "LONG");
-					}else{
-						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-					}
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-					this.time = 0;
+					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 				}
 			}),
 			
@@ -371,20 +340,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 				actionDown:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-					var self = this;
-					this.time = 0;
-					setTimeout(function(){ self.time ++; }, 1000);
+					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 				},
 				actionUp:		function(){
 					this._super();
-					if(this.time > 0){
-						FFW.Buttons.buttonPressed( this.elementId, "LONG");
-					}else{
-						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-					}
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-					this.time = 0;
+					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 				}
 			})
 		}),
@@ -397,20 +357,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -422,20 +373,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -447,20 +389,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -472,20 +405,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -497,20 +421,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -522,20 +437,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -547,20 +453,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -572,20 +469,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -597,20 +485,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -622,20 +501,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		})
 	})
