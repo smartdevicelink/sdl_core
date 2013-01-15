@@ -1,4 +1,5 @@
 [CW3]
+* The subscribed vehicle data items now persist between launches of SubscribeVehicleData and UnsubscribeVehicleData dialogs. 
 * Fix: SubscribeVehicleData and UnsubscribeVehicleData now sends a list of selected items.
 
 [CW2]
