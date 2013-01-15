@@ -38,6 +38,7 @@ set (SOURCES
     ./src/AppChoiceSets.cpp
     ./src/DeviceList.cpp
     ./src/DeviceHandler.cpp
+    ./src/VehicleDataMapping.cpp
 )
 
 add_library("AppMgr" ${SOURCES})
