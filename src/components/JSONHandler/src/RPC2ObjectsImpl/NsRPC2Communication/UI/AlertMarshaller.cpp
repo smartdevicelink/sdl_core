@@ -50,7 +50,7 @@ bool AlertMarshaller::checkIntegrityConst(const Alert& s)
 
   if(s.AlertText2 && (s.AlertText2[0].length()>500))  return false;
 
-  if(s.alertText3 && (s.alertText3[0].length()>500))  return false;
+  if(s.AlertText3 && (s.AlertText3[0].length()>500))  return false;
 
   if(s.ttsChunks)
   {
@@ -87,8 +87,8 @@ Json::Value AlertMarshaller::toJSON(const Alert& e)
     json["params"]["AlertText1"]=Json::Value(e.AlertText1[0]);;
   if(e.AlertText2)
     json["params"]["AlertText2"]=Json::Value(e.AlertText2[0]);;
-  if(e.alertText3)
-    json["params"]["alertText3"]=Json::Value(e.alertText3[0]);;
+  if(e.AlertText3)
+    json["params"]["AlertText3"]=Json::Value(e.AlertText3[0]);;
   if(e.ttsChunks)
   {
     unsigned int i=e.ttsChunks[0].size();
@@ -154,14 +154,14 @@ bool AlertMarshaller::fromJSON(const Json::Value& json,Alert& c)
 
     }
 
-    if(c.alertText3)  delete c.alertText3;
-    c.alertText3=0;
-    if(js.isMember("alertText3"))
+    if(c.AlertText3)  delete c.AlertText3;
+    c.AlertText3=0;
+    if(js.isMember("AlertText3"))
     {
-      if(!js["alertText3"].isString())  return false;
-      c.alertText3=new std::string();
-      c.alertText3[0]=js["alertText3"].asString();
-      if(c.alertText3[0].length()>500)  return false;
+      if(!js["AlertText3"].isString())  return false;
+      c.AlertText3=new std::string();
+      c.AlertText3[0]=js["AlertText3"].asString();
+      if(c.AlertText3[0].length()>500)  return false;
 
     }
 

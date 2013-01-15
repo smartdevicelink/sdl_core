@@ -89,7 +89,7 @@ namespace NsRPC2Communication
 
       std::string* AlertText1;
       std::string* AlertText2;
-      std::string* alertText3;
+      std::string* AlertText3;
       std::vector< NsAppLinkRPC::TTSChunk>* ttsChunks;
       unsigned int* duration;
       bool* playTone;

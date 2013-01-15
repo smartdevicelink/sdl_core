@@ -1,20 +1,20 @@
-#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/PerformAudioPassThru.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/PerformAudioPassThru.h"
 #include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/SamplingRateMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/AudioCaptureQualityMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/AudioTypeMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/PerformAudioPassThruMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/PerformAudioPassThruMarshaller.h"
 
 /*
-  interface	NsRPC2Communication::TTS
+  interface	NsRPC2Communication::UI
   version	1.2
   generated at	Fri Dec 14 06:14:25 2012
   source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
-using namespace NsRPC2Communication::TTS;
+using namespace NsRPC2Communication::UI;
 
 bool PerformAudioPassThruMarshaller::checkIntegrity(PerformAudioPassThru& s)
 {

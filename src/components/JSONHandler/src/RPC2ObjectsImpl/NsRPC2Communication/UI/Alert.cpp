@@ -18,8 +18,8 @@ Alert& Alert::operator =(const Alert& c)
   AlertText1= c.AlertText1 ? new std::string(c.AlertText1[0]) : 0;
   if(AlertText2)  delete AlertText2;
   AlertText2= c.AlertText2 ? new std::string(c.AlertText2[0]) : 0;
-  if(alertText3)  delete alertText3;
-  alertText3= c.alertText3 ? new std::string(c.alertText3[0]) : 0;
+  if(AlertText3)  delete AlertText3;
+  AlertText3= c.AlertText3 ? new std::string(c.AlertText3[0]) : 0;
   if(ttsChunks)  delete ttsChunks;
   ttsChunks= c.ttsChunks ? new std::vector<NsAppLinkRPC::TTSChunk>(c.ttsChunks[0]) : 0;
   if(duration)  delete duration;
@@ -37,7 +37,7 @@ Alert::~Alert(void)
 {
   if(AlertText1)  delete AlertText1;
   if(AlertText2)  delete AlertText2;
-  if(alertText3)  delete alertText3;
+  if(AlertText3)  delete AlertText3;
   if(ttsChunks)  delete ttsChunks;
   if(duration)  delete duration;
   if(playTone)  delete playTone;
@@ -49,7 +49,7 @@ Alert::Alert(void) :
   RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ALERT),
   AlertText1(0),
   AlertText2(0),
-  alertText3(0),
+  AlertText3(0),
   ttsChunks(0),
   duration(0),
   playTone(0),
@@ -102,20 +102,20 @@ void Alert::reset_AlertText2(void)
 
 const std::string* Alert::get_alertText3(void)
 {
-  return alertText3;
+  return AlertText3;
 }
 
 bool Alert::set_alertText3(const std::string& alertText3_)
 {
-  if(alertText3)  delete alertText3;
-  alertText3=new std::string(alertText3_);
+  if(AlertText3)  delete AlertText3;
+  AlertText3=new std::string(alertText3_);
   return true;
 }
 
 void Alert::reset_alertText3(void)
 {
-  if(alertText3)  delete alertText3;
-  alertText3=0;
+  if(AlertText3)  delete AlertText3;
+  AlertText3=0;
 }
 
 const std::vector< NsAppLinkRPC::TTSChunk>* Alert::get_ttsChunks(void)

@@ -39,16 +39,16 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Phone/DialNumberResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/ChangeRegistrationMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/ChangeRegistrationResponseMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/EndAudioPassThruMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/EndAudioPassThruResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/EndAudioPassThruMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/EndAudioPassThruResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/GetCapabilitiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/GetCapabilitiesResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/GetLanguageMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/GetLanguageResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/OnAudioPassThruMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/OnLanguageChangeMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/PerformAudioPassThruMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/PerformAudioPassThruResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/PerformAudioPassThruMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/PerformAudioPassThruResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/SpeakMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/SpeakResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AddCommandMarshaller.h"
@@ -568,23 +568,23 @@ protected:
   }
 
 // NsRPC2Communication::TTS::EndAudioPassThru
-  static bool fromString(const std::string& str, NsRPC2Communication::TTS::EndAudioPassThru& res)
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::EndAudioPassThru& res)
   {
     return mNsRPC2Communication_TTS__EndAudioPassThru.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::TTS::EndAudioPassThru& res)
+  static std::string toString(const NsRPC2Communication::UI::EndAudioPassThru& res)
   {
     return mNsRPC2Communication_TTS__EndAudioPassThru.toString(res);
   }
 
 // NsRPC2Communication::TTS::EndAudioPassThruResponse
-  static bool fromString(const std::string& str, NsRPC2Communication::TTS::EndAudioPassThruResponse& res)
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::EndAudioPassThruResponse& res)
   {
     return mNsRPC2Communication_TTS__EndAudioPassThruResponse.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::TTS::EndAudioPassThruResponse& res)
+  static std::string toString(const NsRPC2Communication::UI::EndAudioPassThruResponse& res)
   {
     return mNsRPC2Communication_TTS__EndAudioPassThruResponse.toString(res);
   }
@@ -656,23 +656,23 @@ protected:
   }
 
 // NsRPC2Communication::TTS::PerformAudioPassThru
-  static bool fromString(const std::string& str, NsRPC2Communication::TTS::PerformAudioPassThru& res)
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::PerformAudioPassThru& res)
   {
     return mNsRPC2Communication_TTS__PerformAudioPassThru.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::TTS::PerformAudioPassThru& res)
+  static std::string toString(const NsRPC2Communication::UI::PerformAudioPassThru& res)
   {
     return mNsRPC2Communication_TTS__PerformAudioPassThru.toString(res);
   }
 
 // NsRPC2Communication::TTS::PerformAudioPassThruResponse
-  static bool fromString(const std::string& str, NsRPC2Communication::TTS::PerformAudioPassThruResponse& res)
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::PerformAudioPassThruResponse& res)
   {
     return mNsRPC2Communication_TTS__PerformAudioPassThruResponse.fromString(str, res);
   }
   
-  static std::string toString(const NsRPC2Communication::TTS::PerformAudioPassThruResponse& res)
+  static std::string toString(const NsRPC2Communication::UI::PerformAudioPassThruResponse& res)
   {
     return mNsRPC2Communication_TTS__PerformAudioPassThruResponse.toString(res);
   }
@@ -1512,16 +1512,16 @@ private:
   static NsRPC2Communication::Phone::DialNumberResponseMarshaller mNsRPC2Communication_Phone__DialNumberResponse;
   static NsRPC2Communication::TTS::ChangeRegistrationMarshaller mNsRPC2Communication_TTS__ChangeRegistration;
   static NsRPC2Communication::TTS::ChangeRegistrationResponseMarshaller mNsRPC2Communication_TTS__ChangeRegistrationResponse;
-  static NsRPC2Communication::TTS::EndAudioPassThruMarshaller mNsRPC2Communication_TTS__EndAudioPassThru;
-  static NsRPC2Communication::TTS::EndAudioPassThruResponseMarshaller mNsRPC2Communication_TTS__EndAudioPassThruResponse;
+  static NsRPC2Communication::UI::EndAudioPassThruMarshaller mNsRPC2Communication_TTS__EndAudioPassThru;
+  static NsRPC2Communication::UI::EndAudioPassThruResponseMarshaller mNsRPC2Communication_TTS__EndAudioPassThruResponse;
   static NsRPC2Communication::TTS::GetCapabilitiesMarshaller mNsRPC2Communication_TTS__GetCapabilities;
   static NsRPC2Communication::TTS::GetCapabilitiesResponseMarshaller mNsRPC2Communication_TTS__GetCapabilitiesResponse;
   static NsRPC2Communication::TTS::GetLanguageMarshaller mNsRPC2Communication_TTS__GetLanguage;
   static NsRPC2Communication::TTS::GetLanguageResponseMarshaller mNsRPC2Communication_TTS__GetLanguageResponse;
   static NsRPC2Communication::TTS::OnAudioPassThruMarshaller mNsRPC2Communication_TTS__OnAudioPassThru;
   static NsRPC2Communication::TTS::OnLanguageChangeMarshaller mNsRPC2Communication_TTS__OnLanguageChange;
-  static NsRPC2Communication::TTS::PerformAudioPassThruMarshaller mNsRPC2Communication_TTS__PerformAudioPassThru;
-  static NsRPC2Communication::TTS::PerformAudioPassThruResponseMarshaller mNsRPC2Communication_TTS__PerformAudioPassThruResponse;
+  static NsRPC2Communication::UI::PerformAudioPassThruMarshaller mNsRPC2Communication_TTS__PerformAudioPassThru;
+  static NsRPC2Communication::UI::PerformAudioPassThruResponseMarshaller mNsRPC2Communication_TTS__PerformAudioPassThruResponse;
   static NsRPC2Communication::TTS::SpeakMarshaller mNsRPC2Communication_TTS__Speak;
   static NsRPC2Communication::TTS::SpeakResponseMarshaller mNsRPC2Communication_TTS__SpeakResponse;
   static NsRPC2Communication::UI::AddCommandMarshaller mNsRPC2Communication_UI__AddCommand;
