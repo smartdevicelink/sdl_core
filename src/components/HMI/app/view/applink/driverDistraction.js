@@ -4,7 +4,7 @@
  * @desc DriverDistractionPopUp module visual representation
  * 
  * @category	View
- * @filesource	app/view/home/driverDistraction.js
+ * @filesource	app/view/applink/driverDistraction.js
  * @version		2.0
  *
  * @author		Andriy Melnik

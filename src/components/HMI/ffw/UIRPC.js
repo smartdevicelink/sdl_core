@@ -28,7 +28,13 @@ FFW.UI = FFW.RPCObserver.create({
 	/*
 	 *	id for request Perform Interaction 
  	 */
- 	 performInteractionRequestId: -1,
+ 	performInteractionRequestId: -1,
+	
+	/*
+	 *	ids for requests AudioPassThru 
+ 	 */
+	performAudioPassThruRequestId:		-1,
+	endAudioPassThruRequestId:			-1,
 
 	/*
    	 * Default values for global properties
@@ -275,6 +281,22 @@ FFW.UI = FFW.RPCObserver.create({
 
 		    	break;
 		    }
+		    case "UI.PerformAudioPassThru":{
+
+		    	this.performAudioPassThruRequestId = request.id;
+
+				MFT.ApplinkModel.UIPerformAudioPassThru( request.params );
+
+		    	break;
+		    }
+		    case "UI.EndAudioPassThru":{
+
+				this.endAudioPassThruRequestId = request.id;
+
+				MFT.ApplinkModel.UIEndAudioPassThru();
+
+		    	break;
+		    }
 		    case  "UI.GetCapabilities":{
 				// send repsonse
 				var JSONMessage = {
@@ -454,7 +476,7 @@ FFW.UI = FFW.RPCObserver.create({
 	/*
 	 * send notification when DriverDistraction PopUp is visible
  	 */
-	onDriverDistraction: function(driverDistractionState) {
+	onDriverDistractionl: function(driverDistractionState) {
 		Em.Logger.log("FFW.UI.DriverDistraction");
 
 		// send repsonse

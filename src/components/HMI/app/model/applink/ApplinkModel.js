@@ -21,6 +21,29 @@ MFT.ApplinkModel = Em.Object.create({
     },
 
     /**
+     * Flag to indicate AudioPassThruPopUp activity
+     * @type {Bool}
+     */
+    AudioPassThruState:     false,
+
+
+    /**
+     * Data for AudioPassThruPopUp that contains params for visualisation
+     * @type {Object}
+     */
+    AudioPassThruData:     {},
+    
+    /**
+     * List of registered applications,
+     * To prevent errors without registered application "-1" used as test appId
+     * @type object
+     */
+    registeredApps: {
+        "-1": 0,            // Used for media applications
+        "-2": 1             // Used for non media applications
+    },
+
+    /**
      * Chosen device name
      *
      * @type {String}
@@ -242,6 +265,31 @@ MFT.ApplinkModel = Em.Object.create({
         MFT.AlertPopUp.AlertActive( message );
     },
 
+    /**
+     * Applink UI AudioPassThru response handeler
+     * show popup window 
+     *
+     * @param {Object} message Object with parameters come from ApplinkCore.
+     */
+    UIPerformAudioPassThru: function( message ) {
+        this.set('AudioPassThruData', message );
+        this.set('AudioPassThruState', true );
+    },
+
+    /**
+     * Method ends processing of AudioPassThru
+     * and call AudioPassThru UI response handeler
+     */
+    UIEndAudioPassThru: function() {
+        if( this.AudioPassThruState ){
+            MFT.ApplinkController.closePopUp();
+            FFW.UI.sendUIResult( "SUCCESS", FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru");
+            MFT.ApplinkController.performAudioPassThruResponse("SUCCESS");
+        }else{
+            FFW.UI.sendUIResult( "GENERIC_ERROR", FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru");
+        }
+    },
+
     /** 
      * Prompt activation
      * @param {Object}
@@ -254,27 +302,25 @@ MFT.ApplinkModel = Em.Object.create({
             }
             MFT.TTSPopUp.ActivateTTS(message);
         }
-  },
+    },
   
-  /**
-   * Applink VR AddCommand response handeler
-   * add command to voice recognition window
-   *
-   *  @param {Object}
-   */
-  addCommandVR: function ( message ) {
-    //message = JSON.parse('{"appId":65537,"cmdId":4,"vrCommands":["F you bc hi iv"]}');
-    
-    MFT.VRPopUp.AddCommand( message.cmdId, message.vrCommands, message.appId );
-  },
+    /**
+    * Applink VR AddCommand response handeler
+    * add command to voice recognition window
+    *
+    *  @param {Object}
+    */
+    addCommandVR: function ( message ) {
+        MFT.VRPopUp.AddCommand( message.cmdId, message.vrCommands, message.appId );
+    },
   
-  /**
-   * Applink VR DeleteCommand response handeler
-   * delete command from voice recognition window
-   *
-   * @param {Number}
-   */
-  deleteCommandVR: function ( commandId ) {    
+    /**
+    * Applink VR DeleteCommand response handeler
+    * delete command from voice recognition window
+    *
+    * @param {Number}
+    */
+    deleteCommandVR: function ( commandId ) {    
       MFT.VRPopUp.DeleteCommand( commandId );
-  }
+    }
 });
