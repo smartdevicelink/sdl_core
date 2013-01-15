@@ -477,10 +477,10 @@ set (GENERATED_RPC_SOURCES
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/OnAudioPassThruMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/OnLanguageChange.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/OnLanguageChangeMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UI/PerformAudioPassThru.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UI/PerformAudioPassThruMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UI/PerformAudioPassThruResponse.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UI/PerformAudioPassThruResponseMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UnregisterAppInterface_response/PerformAudioPassThru.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UnregisterAppInterface_response/PerformAudioPassThruMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UnregisterAppInterface_response/PerformAudioPassThruResponse.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UnregisterAppInterface_response/PerformAudioPassThruResponseMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/Speak.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/SpeakMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/SpeakResponse.cpp
