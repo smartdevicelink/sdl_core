@@ -23,13 +23,13 @@ PerformAudioPassThruResponse::~PerformAudioPassThruResponse(void)
 }
 
 
-PerformAudioPassThruResponse::PerformAudioPassThruResponse(void) : 
-  RPC2Response(Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRURESPONSE)
+PerformAudioPassThruResponse::PerformAudioPassThruResponse(void) :
+  RPC2Response(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__PERFORMAUDIOPASSTHRURESPONSE)
 {
 }
 
 
-PerformAudioPassThruResponse::PerformAudioPassThruResponse(const PerformAudioPassThruResponse& c) : RPC2Response(Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRURESPONSE,c.getId(),c.getResult())
+PerformAudioPassThruResponse::PerformAudioPassThruResponse(const PerformAudioPassThruResponse& c) : RPC2Response(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__PERFORMAUDIOPASSTHRURESPONSE,c.getId(),c.getResult())
 {
   *this=c;
 }

@@ -2876,8 +2876,8 @@ namespace NsAppManager
                     NsAppLinkRPCV2::PerformAudioPassThru_request* request
                         = static_cast<NsAppLinkRPCV2::PerformAudioPassThru_request*>(mobileMsg);
 
-                    NsRPC2Communication::TTS::PerformAudioPassThru* performAudioPassThru
-                        = new NsRPC2Communication::TTS::PerformAudioPassThru;
+                    NsRPC2Communication::UI::PerformAudioPassThru* performAudioPassThru
+                        = new NsRPC2Communication::UI::PerformAudioPassThru;
                     if (!performAudioPassThru)
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, "PerformAudioPassThru::OUT_OF_MEMORY");

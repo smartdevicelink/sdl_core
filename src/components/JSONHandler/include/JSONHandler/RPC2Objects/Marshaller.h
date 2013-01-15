@@ -164,16 +164,12 @@ public:
     METHOD_NSRPC2COMMUNICATION_PHONE__DIALNUMBERRESPONSE,
     METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATION,
     METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATIONRESPONSE,
-    METHOD_NSRPC2COMMUNICATION_TTS__ENDAUDIOPASSTHRU,
-    METHOD_NSRPC2COMMUNICATION_TTS__ENDAUDIOPASSTHRURESPONSE,
     METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIES,
     METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIESRESPONSE,
     METHOD_NSRPC2COMMUNICATION_TTS__GETLANGUAGE,
     METHOD_NSRPC2COMMUNICATION_TTS__GETLANGUAGERESPONSE,
     METHOD_NSRPC2COMMUNICATION_TTS__ONAUDIOPASSTHRU,
     METHOD_NSRPC2COMMUNICATION_TTS__ONLANGUAGECHANGE,
-    METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRU,
-    METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRURESPONSE,
     METHOD_NSRPC2COMMUNICATION_TTS__SPEAK,
     METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__ADDCOMMAND,
@@ -192,6 +188,8 @@ public:
     METHOD_NSRPC2COMMUNICATION_UI__DELETEINTERACTIONCHOICESETRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__DELETESUBMENU,
     METHOD_NSRPC2COMMUNICATION_UI__DELETESUBMENURESPONSE,
+    METHOD_NSRPC2COMMUNICATION_UI__ENDAUDIOPASSTHRU,
+    METHOD_NSRPC2COMMUNICATION_UI__ENDAUDIOPASSTHRURESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIES,
     METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__GETLANGUAGE,
@@ -202,6 +200,8 @@ public:
     METHOD_NSRPC2COMMUNICATION_UI__ONLANGUAGECHANGE,
     METHOD_NSRPC2COMMUNICATION_UI__ONREADY,
     METHOD_NSRPC2COMMUNICATION_UI__ONSYSTEMCONTEXT,
+    METHOD_NSRPC2COMMUNICATION_UI__PERFORMAUDIOPASSTHRU,
+    METHOD_NSRPC2COMMUNICATION_UI__PERFORMAUDIOPASSTHRURESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTION,
     METHOD_NSRPC2COMMUNICATION_UI__PERFORMINTERACTIONRESPONSE,
     METHOD_NSRPC2COMMUNICATION_UI__RESETGLOBALPROPERTIES,
@@ -250,13 +250,13 @@ public:
 
   Marshaller()			{}
   ~Marshaller()			{}
-  
+
   static ::NsRPC2Communication::RPC2Command* fromString(const std::string&);
   static std::string toString(const ::NsRPC2Communication::RPC2Command* msg);
-  
+
   static ::NsRPC2Communication::RPC2Command* fromJSON(const Json::Value&);
   static Json::Value toJSON(const ::NsRPC2Communication::RPC2Command* msg);
-  
+
 protected:
 
 // NsRPC2Communication::AppLinkCore::ActivateApp
@@ -264,7 +264,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__ActivateApp.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::ActivateApp& res)
   {
     return mNsRPC2Communication_AppLinkCore__ActivateApp.toString(res);
@@ -275,7 +275,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__ActivateAppResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::ActivateAppResponse& res)
   {
     return mNsRPC2Communication_AppLinkCore__ActivateAppResponse.toString(res);
@@ -286,7 +286,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__DeactivateApp.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::DeactivateApp& res)
   {
     return mNsRPC2Communication_AppLinkCore__DeactivateApp.toString(res);
@@ -297,7 +297,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__DeactivateAppResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::DeactivateAppResponse& res)
   {
     return mNsRPC2Communication_AppLinkCore__DeactivateAppResponse.toString(res);
@@ -308,7 +308,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__GetAppList.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::GetAppList& res)
   {
     return mNsRPC2Communication_AppLinkCore__GetAppList.toString(res);
@@ -319,7 +319,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__GetAppListResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::GetAppListResponse& res)
   {
     return mNsRPC2Communication_AppLinkCore__GetAppListResponse.toString(res);
@@ -330,7 +330,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__GetDeviceList.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::GetDeviceList& res)
   {
     return mNsRPC2Communication_AppLinkCore__GetDeviceList.toString(res);
@@ -341,7 +341,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__GetDeviceListResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::GetDeviceListResponse& res)
   {
     return mNsRPC2Communication_AppLinkCore__GetDeviceListResponse.toString(res);
@@ -352,7 +352,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__OnAppRegistered.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::OnAppRegistered& res)
   {
     return mNsRPC2Communication_AppLinkCore__OnAppRegistered.toString(res);
@@ -363,7 +363,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__OnAppUnregistered.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::OnAppUnregistered& res)
   {
     return mNsRPC2Communication_AppLinkCore__OnAppUnregistered.toString(res);
@@ -374,7 +374,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::OnDeviceListUpdated& res)
   {
     return mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated.toString(res);
@@ -385,7 +385,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__SendData.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::SendData& res)
   {
     return mNsRPC2Communication_AppLinkCore__SendData.toString(res);
@@ -396,7 +396,7 @@ protected:
   {
     return mNsRPC2Communication_AppLinkCore__SendDataResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::AppLinkCore::SendDataResponse& res)
   {
     return mNsRPC2Communication_AppLinkCore__SendDataResponse.toString(res);
@@ -407,7 +407,7 @@ protected:
   {
     return mNsRPC2Communication_Buttons__GetCapabilities.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Buttons::GetCapabilities& res)
   {
     return mNsRPC2Communication_Buttons__GetCapabilities.toString(res);
@@ -418,7 +418,7 @@ protected:
   {
     return mNsRPC2Communication_Buttons__GetCapabilitiesResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Buttons::GetCapabilitiesResponse& res)
   {
     return mNsRPC2Communication_Buttons__GetCapabilitiesResponse.toString(res);
@@ -429,7 +429,7 @@ protected:
   {
     return mNsRPC2Communication_Buttons__OnButtonEvent.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Buttons::OnButtonEvent& res)
   {
     return mNsRPC2Communication_Buttons__OnButtonEvent.toString(res);
@@ -440,7 +440,7 @@ protected:
   {
     return mNsRPC2Communication_Buttons__OnButtonPress.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Buttons::OnButtonPress& res)
   {
     return mNsRPC2Communication_Buttons__OnButtonPress.toString(res);
@@ -451,7 +451,7 @@ protected:
   {
     return mNsRPC2Communication_Navigation__AlertManeuver.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Navigation::AlertManeuver& res)
   {
     return mNsRPC2Communication_Navigation__AlertManeuver.toString(res);
@@ -462,7 +462,7 @@ protected:
   {
     return mNsRPC2Communication_Navigation__AlertManeuverResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Navigation::AlertManeuverResponse& res)
   {
     return mNsRPC2Communication_Navigation__AlertManeuverResponse.toString(res);
@@ -473,7 +473,7 @@ protected:
   {
     return mNsRPC2Communication_Navigation__OnTBTClientState.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Navigation::OnTBTClientState& res)
   {
     return mNsRPC2Communication_Navigation__OnTBTClientState.toString(res);
@@ -484,7 +484,7 @@ protected:
   {
     return mNsRPC2Communication_Navigation__ShowConstantTBT.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Navigation::ShowConstantTBT& res)
   {
     return mNsRPC2Communication_Navigation__ShowConstantTBT.toString(res);
@@ -495,7 +495,7 @@ protected:
   {
     return mNsRPC2Communication_Navigation__ShowConstantTBTResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Navigation::ShowConstantTBTResponse& res)
   {
     return mNsRPC2Communication_Navigation__ShowConstantTBTResponse.toString(res);
@@ -506,7 +506,7 @@ protected:
   {
     return mNsRPC2Communication_Navigation__UpdateTurnList.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Navigation::UpdateTurnList& res)
   {
     return mNsRPC2Communication_Navigation__UpdateTurnList.toString(res);
@@ -517,7 +517,7 @@ protected:
   {
     return mNsRPC2Communication_Navigation__UpdateTurnListResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Navigation::UpdateTurnListResponse& res)
   {
     return mNsRPC2Communication_Navigation__UpdateTurnListResponse.toString(res);
@@ -528,7 +528,7 @@ protected:
   {
     return mNsRPC2Communication_Phone__DialNumber.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Phone::DialNumber& res)
   {
     return mNsRPC2Communication_Phone__DialNumber.toString(res);
@@ -539,7 +539,7 @@ protected:
   {
     return mNsRPC2Communication_Phone__DialNumberResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::Phone::DialNumberResponse& res)
   {
     return mNsRPC2Communication_Phone__DialNumberResponse.toString(res);
@@ -550,7 +550,7 @@ protected:
   {
     return mNsRPC2Communication_TTS__ChangeRegistration.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::TTS::ChangeRegistration& res)
   {
     return mNsRPC2Communication_TTS__ChangeRegistration.toString(res);
@@ -561,32 +561,10 @@ protected:
   {
     return mNsRPC2Communication_TTS__ChangeRegistrationResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::TTS::ChangeRegistrationResponse& res)
   {
     return mNsRPC2Communication_TTS__ChangeRegistrationResponse.toString(res);
-  }
-
-// NsRPC2Communication::TTS::EndAudioPassThru
-  static bool fromString(const std::string& str, NsRPC2Communication::UI::EndAudioPassThru& res)
-  {
-    return mNsRPC2Communication_TTS__EndAudioPassThru.fromString(str, res);
-  }
-  
-  static std::string toString(const NsRPC2Communication::UI::EndAudioPassThru& res)
-  {
-    return mNsRPC2Communication_TTS__EndAudioPassThru.toString(res);
-  }
-
-// NsRPC2Communication::TTS::EndAudioPassThruResponse
-  static bool fromString(const std::string& str, NsRPC2Communication::UI::EndAudioPassThruResponse& res)
-  {
-    return mNsRPC2Communication_TTS__EndAudioPassThruResponse.fromString(str, res);
-  }
-  
-  static std::string toString(const NsRPC2Communication::UI::EndAudioPassThruResponse& res)
-  {
-    return mNsRPC2Communication_TTS__EndAudioPassThruResponse.toString(res);
   }
 
 // NsRPC2Communication::TTS::GetCapabilities
@@ -594,7 +572,7 @@ protected:
   {
     return mNsRPC2Communication_TTS__GetCapabilities.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::TTS::GetCapabilities& res)
   {
     return mNsRPC2Communication_TTS__GetCapabilities.toString(res);
@@ -605,7 +583,7 @@ protected:
   {
     return mNsRPC2Communication_TTS__GetCapabilitiesResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::TTS::GetCapabilitiesResponse& res)
   {
     return mNsRPC2Communication_TTS__GetCapabilitiesResponse.toString(res);
@@ -616,7 +594,7 @@ protected:
   {
     return mNsRPC2Communication_TTS__GetLanguage.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::TTS::GetLanguage& res)
   {
     return mNsRPC2Communication_TTS__GetLanguage.toString(res);
@@ -627,7 +605,7 @@ protected:
   {
     return mNsRPC2Communication_TTS__GetLanguageResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::TTS::GetLanguageResponse& res)
   {
     return mNsRPC2Communication_TTS__GetLanguageResponse.toString(res);
@@ -638,7 +616,7 @@ protected:
   {
     return mNsRPC2Communication_TTS__OnAudioPassThru.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::TTS::OnAudioPassThru& res)
   {
     return mNsRPC2Communication_TTS__OnAudioPassThru.toString(res);
@@ -649,32 +627,10 @@ protected:
   {
     return mNsRPC2Communication_TTS__OnLanguageChange.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::TTS::OnLanguageChange& res)
   {
     return mNsRPC2Communication_TTS__OnLanguageChange.toString(res);
-  }
-
-// NsRPC2Communication::TTS::PerformAudioPassThru
-  static bool fromString(const std::string& str, NsRPC2Communication::UI::PerformAudioPassThru& res)
-  {
-    return mNsRPC2Communication_TTS__PerformAudioPassThru.fromString(str, res);
-  }
-  
-  static std::string toString(const NsRPC2Communication::UI::PerformAudioPassThru& res)
-  {
-    return mNsRPC2Communication_TTS__PerformAudioPassThru.toString(res);
-  }
-
-// NsRPC2Communication::TTS::PerformAudioPassThruResponse
-  static bool fromString(const std::string& str, NsRPC2Communication::UI::PerformAudioPassThruResponse& res)
-  {
-    return mNsRPC2Communication_TTS__PerformAudioPassThruResponse.fromString(str, res);
-  }
-  
-  static std::string toString(const NsRPC2Communication::UI::PerformAudioPassThruResponse& res)
-  {
-    return mNsRPC2Communication_TTS__PerformAudioPassThruResponse.toString(res);
   }
 
 // NsRPC2Communication::TTS::Speak
@@ -682,7 +638,7 @@ protected:
   {
     return mNsRPC2Communication_TTS__Speak.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::TTS::Speak& res)
   {
     return mNsRPC2Communication_TTS__Speak.toString(res);
@@ -693,7 +649,7 @@ protected:
   {
     return mNsRPC2Communication_TTS__SpeakResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::TTS::SpeakResponse& res)
   {
     return mNsRPC2Communication_TTS__SpeakResponse.toString(res);
@@ -704,7 +660,7 @@ protected:
   {
     return mNsRPC2Communication_UI__AddCommand.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::AddCommand& res)
   {
     return mNsRPC2Communication_UI__AddCommand.toString(res);
@@ -715,7 +671,7 @@ protected:
   {
     return mNsRPC2Communication_UI__AddCommandResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::AddCommandResponse& res)
   {
     return mNsRPC2Communication_UI__AddCommandResponse.toString(res);
@@ -726,7 +682,7 @@ protected:
   {
     return mNsRPC2Communication_UI__AddSubMenu.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::AddSubMenu& res)
   {
     return mNsRPC2Communication_UI__AddSubMenu.toString(res);
@@ -737,7 +693,7 @@ protected:
   {
     return mNsRPC2Communication_UI__AddSubMenuResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::AddSubMenuResponse& res)
   {
     return mNsRPC2Communication_UI__AddSubMenuResponse.toString(res);
@@ -748,7 +704,7 @@ protected:
   {
     return mNsRPC2Communication_UI__Alert.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::Alert& res)
   {
     return mNsRPC2Communication_UI__Alert.toString(res);
@@ -759,7 +715,7 @@ protected:
   {
     return mNsRPC2Communication_UI__AlertResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::AlertResponse& res)
   {
     return mNsRPC2Communication_UI__AlertResponse.toString(res);
@@ -770,7 +726,7 @@ protected:
   {
     return mNsRPC2Communication_UI__ChangeRegistration.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::ChangeRegistration& res)
   {
     return mNsRPC2Communication_UI__ChangeRegistration.toString(res);
@@ -781,7 +737,7 @@ protected:
   {
     return mNsRPC2Communication_UI__ChangeRegistrationResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::ChangeRegistrationResponse& res)
   {
     return mNsRPC2Communication_UI__ChangeRegistrationResponse.toString(res);
@@ -792,7 +748,7 @@ protected:
   {
     return mNsRPC2Communication_UI__CreateInteractionChoiceSet.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::CreateInteractionChoiceSet& res)
   {
     return mNsRPC2Communication_UI__CreateInteractionChoiceSet.toString(res);
@@ -803,7 +759,7 @@ protected:
   {
     return mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::CreateInteractionChoiceSetResponse& res)
   {
     return mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse.toString(res);
@@ -814,7 +770,7 @@ protected:
   {
     return mNsRPC2Communication_UI__DeleteCommand.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::DeleteCommand& res)
   {
     return mNsRPC2Communication_UI__DeleteCommand.toString(res);
@@ -825,7 +781,7 @@ protected:
   {
     return mNsRPC2Communication_UI__DeleteCommandResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::DeleteCommandResponse& res)
   {
     return mNsRPC2Communication_UI__DeleteCommandResponse.toString(res);
@@ -836,7 +792,7 @@ protected:
   {
     return mNsRPC2Communication_UI__DeleteInteractionChoiceSet.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::DeleteInteractionChoiceSet& res)
   {
     return mNsRPC2Communication_UI__DeleteInteractionChoiceSet.toString(res);
@@ -847,7 +803,7 @@ protected:
   {
     return mNsRPC2Communication_UI__DeleteInteractionChoiceSetResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::DeleteInteractionChoiceSetResponse& res)
   {
     return mNsRPC2Communication_UI__DeleteInteractionChoiceSetResponse.toString(res);
@@ -858,7 +814,7 @@ protected:
   {
     return mNsRPC2Communication_UI__DeleteSubMenu.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::DeleteSubMenu& res)
   {
     return mNsRPC2Communication_UI__DeleteSubMenu.toString(res);
@@ -869,10 +825,32 @@ protected:
   {
     return mNsRPC2Communication_UI__DeleteSubMenuResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::DeleteSubMenuResponse& res)
   {
     return mNsRPC2Communication_UI__DeleteSubMenuResponse.toString(res);
+  }
+
+// NsRPC2Communication::UI::EndAudioPassThru
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::EndAudioPassThru& res)
+  {
+    return mNsRPC2Communication_UI__EndAudioPassThru.fromString(str, res);
+  }
+
+  static std::string toString(const NsRPC2Communication::UI::EndAudioPassThru& res)
+  {
+    return mNsRPC2Communication_UI__EndAudioPassThru.toString(res);
+  }
+
+// NsRPC2Communication::UI::EndAudioPassThruResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::EndAudioPassThruResponse& res)
+  {
+    return mNsRPC2Communication_UI__EndAudioPassThruResponse.fromString(str, res);
+  }
+
+  static std::string toString(const NsRPC2Communication::UI::EndAudioPassThruResponse& res)
+  {
+    return mNsRPC2Communication_UI__EndAudioPassThruResponse.toString(res);
   }
 
 // NsRPC2Communication::UI::GetCapabilities
@@ -880,7 +858,7 @@ protected:
   {
     return mNsRPC2Communication_UI__GetCapabilities.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::GetCapabilities& res)
   {
     return mNsRPC2Communication_UI__GetCapabilities.toString(res);
@@ -891,7 +869,7 @@ protected:
   {
     return mNsRPC2Communication_UI__GetCapabilitiesResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::GetCapabilitiesResponse& res)
   {
     return mNsRPC2Communication_UI__GetCapabilitiesResponse.toString(res);
@@ -902,7 +880,7 @@ protected:
   {
     return mNsRPC2Communication_UI__GetLanguage.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::GetLanguage& res)
   {
     return mNsRPC2Communication_UI__GetLanguage.toString(res);
@@ -913,7 +891,7 @@ protected:
   {
     return mNsRPC2Communication_UI__GetLanguageResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::GetLanguageResponse& res)
   {
     return mNsRPC2Communication_UI__GetLanguageResponse.toString(res);
@@ -924,7 +902,7 @@ protected:
   {
     return mNsRPC2Communication_UI__OnCommand.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::OnCommand& res)
   {
     return mNsRPC2Communication_UI__OnCommand.toString(res);
@@ -935,7 +913,7 @@ protected:
   {
     return mNsRPC2Communication_UI__OnDeviceChosen.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::OnDeviceChosen& res)
   {
     return mNsRPC2Communication_UI__OnDeviceChosen.toString(res);
@@ -946,7 +924,7 @@ protected:
   {
     return mNsRPC2Communication_UI__OnDriverDistraction.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::OnDriverDistraction& res)
   {
     return mNsRPC2Communication_UI__OnDriverDistraction.toString(res);
@@ -957,7 +935,7 @@ protected:
   {
     return mNsRPC2Communication_UI__OnLanguageChange.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::OnLanguageChange& res)
   {
     return mNsRPC2Communication_UI__OnLanguageChange.toString(res);
@@ -968,7 +946,7 @@ protected:
   {
     return mNsRPC2Communication_UI__OnReady.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::OnReady& res)
   {
     return mNsRPC2Communication_UI__OnReady.toString(res);
@@ -979,10 +957,32 @@ protected:
   {
     return mNsRPC2Communication_UI__OnSystemContext.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::OnSystemContext& res)
   {
     return mNsRPC2Communication_UI__OnSystemContext.toString(res);
+  }
+
+// NsRPC2Communication::UI::PerformAudioPassThru
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::PerformAudioPassThru& res)
+  {
+    return mNsRPC2Communication_UI__PerformAudioPassThru.fromString(str, res);
+  }
+
+  static std::string toString(const NsRPC2Communication::UI::PerformAudioPassThru& res)
+  {
+    return mNsRPC2Communication_UI__PerformAudioPassThru.toString(res);
+  }
+
+// NsRPC2Communication::UI::PerformAudioPassThruResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::UI::PerformAudioPassThruResponse& res)
+  {
+    return mNsRPC2Communication_UI__PerformAudioPassThruResponse.fromString(str, res);
+  }
+
+  static std::string toString(const NsRPC2Communication::UI::PerformAudioPassThruResponse& res)
+  {
+    return mNsRPC2Communication_UI__PerformAudioPassThruResponse.toString(res);
   }
 
 // NsRPC2Communication::UI::PerformInteraction
@@ -990,7 +990,7 @@ protected:
   {
     return mNsRPC2Communication_UI__PerformInteraction.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::PerformInteraction& res)
   {
     return mNsRPC2Communication_UI__PerformInteraction.toString(res);
@@ -1001,7 +1001,7 @@ protected:
   {
     return mNsRPC2Communication_UI__PerformInteractionResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::PerformInteractionResponse& res)
   {
     return mNsRPC2Communication_UI__PerformInteractionResponse.toString(res);
@@ -1012,7 +1012,7 @@ protected:
   {
     return mNsRPC2Communication_UI__ResetGlobalProperties.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::ResetGlobalProperties& res)
   {
     return mNsRPC2Communication_UI__ResetGlobalProperties.toString(res);
@@ -1023,7 +1023,7 @@ protected:
   {
     return mNsRPC2Communication_UI__ResetGlobalPropertiesResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::ResetGlobalPropertiesResponse& res)
   {
     return mNsRPC2Communication_UI__ResetGlobalPropertiesResponse.toString(res);
@@ -1034,7 +1034,7 @@ protected:
   {
     return mNsRPC2Communication_UI__ScrollableMessage.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::ScrollableMessage& res)
   {
     return mNsRPC2Communication_UI__ScrollableMessage.toString(res);
@@ -1045,7 +1045,7 @@ protected:
   {
     return mNsRPC2Communication_UI__ScrollableMessageResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::ScrollableMessageResponse& res)
   {
     return mNsRPC2Communication_UI__ScrollableMessageResponse.toString(res);
@@ -1056,7 +1056,7 @@ protected:
   {
     return mNsRPC2Communication_UI__SetAppIcon.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::SetAppIcon& res)
   {
     return mNsRPC2Communication_UI__SetAppIcon.toString(res);
@@ -1067,7 +1067,7 @@ protected:
   {
     return mNsRPC2Communication_UI__SetAppIconResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::SetAppIconResponse& res)
   {
     return mNsRPC2Communication_UI__SetAppIconResponse.toString(res);
@@ -1078,7 +1078,7 @@ protected:
   {
     return mNsRPC2Communication_UI__SetDisplayLayout.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::SetDisplayLayout& res)
   {
     return mNsRPC2Communication_UI__SetDisplayLayout.toString(res);
@@ -1089,7 +1089,7 @@ protected:
   {
     return mNsRPC2Communication_UI__SetDisplayLayoutResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::SetDisplayLayoutResponse& res)
   {
     return mNsRPC2Communication_UI__SetDisplayLayoutResponse.toString(res);
@@ -1100,7 +1100,7 @@ protected:
   {
     return mNsRPC2Communication_UI__SetGlobalProperties.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::SetGlobalProperties& res)
   {
     return mNsRPC2Communication_UI__SetGlobalProperties.toString(res);
@@ -1111,7 +1111,7 @@ protected:
   {
     return mNsRPC2Communication_UI__SetGlobalPropertiesResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::SetGlobalPropertiesResponse& res)
   {
     return mNsRPC2Communication_UI__SetGlobalPropertiesResponse.toString(res);
@@ -1122,7 +1122,7 @@ protected:
   {
     return mNsRPC2Communication_UI__SetMediaClockTimer.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::SetMediaClockTimer& res)
   {
     return mNsRPC2Communication_UI__SetMediaClockTimer.toString(res);
@@ -1133,7 +1133,7 @@ protected:
   {
     return mNsRPC2Communication_UI__SetMediaClockTimerResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::SetMediaClockTimerResponse& res)
   {
     return mNsRPC2Communication_UI__SetMediaClockTimerResponse.toString(res);
@@ -1144,7 +1144,7 @@ protected:
   {
     return mNsRPC2Communication_UI__Show.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::Show& res)
   {
     return mNsRPC2Communication_UI__Show.toString(res);
@@ -1155,7 +1155,7 @@ protected:
   {
     return mNsRPC2Communication_UI__ShowResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::ShowResponse& res)
   {
     return mNsRPC2Communication_UI__ShowResponse.toString(res);
@@ -1166,7 +1166,7 @@ protected:
   {
     return mNsRPC2Communication_UI__Slider.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::Slider& res)
   {
     return mNsRPC2Communication_UI__Slider.toString(res);
@@ -1177,7 +1177,7 @@ protected:
   {
     return mNsRPC2Communication_UI__SliderResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::UI::SliderResponse& res)
   {
     return mNsRPC2Communication_UI__SliderResponse.toString(res);
@@ -1188,7 +1188,7 @@ protected:
   {
     return mNsRPC2Communication_VR__AddCommand.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VR::AddCommand& res)
   {
     return mNsRPC2Communication_VR__AddCommand.toString(res);
@@ -1199,7 +1199,7 @@ protected:
   {
     return mNsRPC2Communication_VR__AddCommandResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VR::AddCommandResponse& res)
   {
     return mNsRPC2Communication_VR__AddCommandResponse.toString(res);
@@ -1210,7 +1210,7 @@ protected:
   {
     return mNsRPC2Communication_VR__ChangeRegistration.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VR::ChangeRegistration& res)
   {
     return mNsRPC2Communication_VR__ChangeRegistration.toString(res);
@@ -1221,7 +1221,7 @@ protected:
   {
     return mNsRPC2Communication_VR__ChangeRegistrationResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VR::ChangeRegistrationResponse& res)
   {
     return mNsRPC2Communication_VR__ChangeRegistrationResponse.toString(res);
@@ -1232,7 +1232,7 @@ protected:
   {
     return mNsRPC2Communication_VR__DeleteCommand.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VR::DeleteCommand& res)
   {
     return mNsRPC2Communication_VR__DeleteCommand.toString(res);
@@ -1243,7 +1243,7 @@ protected:
   {
     return mNsRPC2Communication_VR__DeleteCommandResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VR::DeleteCommandResponse& res)
   {
     return mNsRPC2Communication_VR__DeleteCommandResponse.toString(res);
@@ -1254,7 +1254,7 @@ protected:
   {
     return mNsRPC2Communication_VR__GetCapabilities.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VR::GetCapabilities& res)
   {
     return mNsRPC2Communication_VR__GetCapabilities.toString(res);
@@ -1265,7 +1265,7 @@ protected:
   {
     return mNsRPC2Communication_VR__GetCapabilitiesResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VR::GetCapabilitiesResponse& res)
   {
     return mNsRPC2Communication_VR__GetCapabilitiesResponse.toString(res);
@@ -1276,7 +1276,7 @@ protected:
   {
     return mNsRPC2Communication_VR__GetLanguage.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VR::GetLanguage& res)
   {
     return mNsRPC2Communication_VR__GetLanguage.toString(res);
@@ -1287,7 +1287,7 @@ protected:
   {
     return mNsRPC2Communication_VR__GetLanguageResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VR::GetLanguageResponse& res)
   {
     return mNsRPC2Communication_VR__GetLanguageResponse.toString(res);
@@ -1298,7 +1298,7 @@ protected:
   {
     return mNsRPC2Communication_VR__OnCommand.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VR::OnCommand& res)
   {
     return mNsRPC2Communication_VR__OnCommand.toString(res);
@@ -1309,7 +1309,7 @@ protected:
   {
     return mNsRPC2Communication_VR__OnLanguageChange.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VR::OnLanguageChange& res)
   {
     return mNsRPC2Communication_VR__OnLanguageChange.toString(res);
@@ -1320,7 +1320,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__GetDTCs.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::GetDTCs& res)
   {
     return mNsRPC2Communication_VehicleInfo__GetDTCs.toString(res);
@@ -1331,7 +1331,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__GetDTCsResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::GetDTCsResponse& res)
   {
     return mNsRPC2Communication_VehicleInfo__GetDTCsResponse.toString(res);
@@ -1342,7 +1342,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__GetVehicleData.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::GetVehicleData& res)
   {
     return mNsRPC2Communication_VehicleInfo__GetVehicleData.toString(res);
@@ -1353,7 +1353,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::GetVehicleDataResponse& res)
   {
     return mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse.toString(res);
@@ -1364,7 +1364,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__GetVehicleType.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::GetVehicleType& res)
   {
     return mNsRPC2Communication_VehicleInfo__GetVehicleType.toString(res);
@@ -1375,7 +1375,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse& res)
   {
     return mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse.toString(res);
@@ -1386,7 +1386,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__OnVehicleData.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::OnVehicleData& res)
   {
     return mNsRPC2Communication_VehicleInfo__OnVehicleData.toString(res);
@@ -1397,7 +1397,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__ReadDID.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::ReadDID& res)
   {
     return mNsRPC2Communication_VehicleInfo__ReadDID.toString(res);
@@ -1408,7 +1408,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__ReadDIDResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::ReadDIDResponse& res)
   {
     return mNsRPC2Communication_VehicleInfo__ReadDIDResponse.toString(res);
@@ -1419,7 +1419,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__SubscribeVehicleData.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::SubscribeVehicleData& res)
   {
     return mNsRPC2Communication_VehicleInfo__SubscribeVehicleData.toString(res);
@@ -1430,7 +1430,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponse& res)
   {
     return mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse.toString(res);
@@ -1441,7 +1441,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::UnsubscribeVehicleData& res)
   {
     return mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData.toString(res);
@@ -1452,7 +1452,7 @@ protected:
   {
     return mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse.fromString(str, res);
   }
-  
+
   static std::string toString(const NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponse& res)
   {
     return mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse.toString(res);
@@ -1465,23 +1465,23 @@ protected:
     unsigned int idx;
     void* marshaller;					// Bingo!!!  old good plain C with direct casting!!!
   };
-  
+
 private:
-  
+
   static Json::Value Request2JSON(const ::NsRPC2Communication::RPC2Request* msg);
   static Json::Value Response2JSON(const ::NsRPC2Communication::RPC2Response* msg);
   static Json::Value Notification2JSON(const ::NsRPC2Communication::RPC2Notification* msg);
-  
+
   static const char* getName(Methods e)
   {
     return (e>=0 && e<109) ? mHashTable[e].name : NULL;
   }
-  
+
   static const Methods getIndex(const char* s);
-  
+
   static const localHash mHashTable[109];
   friend class Marshaller_intHash;
-  
+
   static ::NsRPC2Communication::RPC2ErrorMarshaller mRPC2ErrorInternal;
 
   static NsRPC2Communication::AppLinkCore::ActivateAppMarshaller mNsRPC2Communication_AppLinkCore__ActivateApp;
@@ -1512,16 +1512,12 @@ private:
   static NsRPC2Communication::Phone::DialNumberResponseMarshaller mNsRPC2Communication_Phone__DialNumberResponse;
   static NsRPC2Communication::TTS::ChangeRegistrationMarshaller mNsRPC2Communication_TTS__ChangeRegistration;
   static NsRPC2Communication::TTS::ChangeRegistrationResponseMarshaller mNsRPC2Communication_TTS__ChangeRegistrationResponse;
-  static NsRPC2Communication::UI::EndAudioPassThruMarshaller mNsRPC2Communication_TTS__EndAudioPassThru;
-  static NsRPC2Communication::UI::EndAudioPassThruResponseMarshaller mNsRPC2Communication_TTS__EndAudioPassThruResponse;
   static NsRPC2Communication::TTS::GetCapabilitiesMarshaller mNsRPC2Communication_TTS__GetCapabilities;
   static NsRPC2Communication::TTS::GetCapabilitiesResponseMarshaller mNsRPC2Communication_TTS__GetCapabilitiesResponse;
   static NsRPC2Communication::TTS::GetLanguageMarshaller mNsRPC2Communication_TTS__GetLanguage;
   static NsRPC2Communication::TTS::GetLanguageResponseMarshaller mNsRPC2Communication_TTS__GetLanguageResponse;
   static NsRPC2Communication::TTS::OnAudioPassThruMarshaller mNsRPC2Communication_TTS__OnAudioPassThru;
   static NsRPC2Communication::TTS::OnLanguageChangeMarshaller mNsRPC2Communication_TTS__OnLanguageChange;
-  static NsRPC2Communication::UI::PerformAudioPassThruMarshaller mNsRPC2Communication_TTS__PerformAudioPassThru;
-  static NsRPC2Communication::UI::PerformAudioPassThruResponseMarshaller mNsRPC2Communication_TTS__PerformAudioPassThruResponse;
   static NsRPC2Communication::TTS::SpeakMarshaller mNsRPC2Communication_TTS__Speak;
   static NsRPC2Communication::TTS::SpeakResponseMarshaller mNsRPC2Communication_TTS__SpeakResponse;
   static NsRPC2Communication::UI::AddCommandMarshaller mNsRPC2Communication_UI__AddCommand;
@@ -1540,6 +1536,8 @@ private:
   static NsRPC2Communication::UI::DeleteInteractionChoiceSetResponseMarshaller mNsRPC2Communication_UI__DeleteInteractionChoiceSetResponse;
   static NsRPC2Communication::UI::DeleteSubMenuMarshaller mNsRPC2Communication_UI__DeleteSubMenu;
   static NsRPC2Communication::UI::DeleteSubMenuResponseMarshaller mNsRPC2Communication_UI__DeleteSubMenuResponse;
+  static NsRPC2Communication::UI::EndAudioPassThruMarshaller mNsRPC2Communication_UI__EndAudioPassThru;
+  static NsRPC2Communication::UI::EndAudioPassThruResponseMarshaller mNsRPC2Communication_UI__EndAudioPassThruResponse;
   static NsRPC2Communication::UI::GetCapabilitiesMarshaller mNsRPC2Communication_UI__GetCapabilities;
   static NsRPC2Communication::UI::GetCapabilitiesResponseMarshaller mNsRPC2Communication_UI__GetCapabilitiesResponse;
   static NsRPC2Communication::UI::GetLanguageMarshaller mNsRPC2Communication_UI__GetLanguage;
@@ -1550,6 +1548,8 @@ private:
   static NsRPC2Communication::UI::OnLanguageChangeMarshaller mNsRPC2Communication_UI__OnLanguageChange;
   static NsRPC2Communication::UI::OnReadyMarshaller mNsRPC2Communication_UI__OnReady;
   static NsRPC2Communication::UI::OnSystemContextMarshaller mNsRPC2Communication_UI__OnSystemContext;
+  static NsRPC2Communication::UI::PerformAudioPassThruMarshaller mNsRPC2Communication_UI__PerformAudioPassThru;
+  static NsRPC2Communication::UI::PerformAudioPassThruResponseMarshaller mNsRPC2Communication_UI__PerformAudioPassThruResponse;
   static NsRPC2Communication::UI::PerformInteractionMarshaller mNsRPC2Communication_UI__PerformInteraction;
   static NsRPC2Communication::UI::PerformInteractionResponseMarshaller mNsRPC2Communication_UI__PerformInteractionResponse;
   static NsRPC2Communication::UI::ResetGlobalPropertiesMarshaller mNsRPC2Communication_UI__ResetGlobalProperties;

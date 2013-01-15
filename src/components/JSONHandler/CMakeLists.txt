@@ -4,7 +4,7 @@ include_directories (
   ../ProtocolHandler/include/
   ../Utils/include/
   ../../thirdPartyLibs/jsoncpp/include/
-  ../../thirdPartyLibs/MessageBroker/include   
+  ../../thirdPartyLibs/MessageBroker/include
   ../../thirdPartyLibs/logger/include
   ../../thirdPartyLibs/logger/log4cplus-1.1.0/include
   ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
@@ -465,6 +465,10 @@ set (GENERATED_RPC_SOURCES
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/EndAudioPassThruMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/EndAudioPassThruResponse.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/EndAudioPassThruResponseMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/PerformAudioPassThru.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/PerformAudioPassThruMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/PerformAudioPassThruResponse.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/PerformAudioPassThruResponseMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/GetCapabilities.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/GetCapabilitiesMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/GetCapabilitiesResponse.cpp
@@ -477,10 +481,6 @@ set (GENERATED_RPC_SOURCES
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/OnAudioPassThruMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/OnLanguageChange.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/OnLanguageChangeMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UnregisterAppInterface_response/PerformAudioPassThru.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UnregisterAppInterface_response/PerformAudioPassThruMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UnregisterAppInterface_response/PerformAudioPassThruResponse.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/UnregisterAppInterface_response/PerformAudioPassThruResponseMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/Speak.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/SpeakMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/SpeakResponse.cpp
@@ -601,13 +601,13 @@ set (SOURCES
     ./src/RPC2Notification.cpp
     ./src/RPC2Request.cpp
     ./src/RPC2Response.cpp
-    ./src/RPC2Error.cpp 
-    ./src/RPC2ErrorMarshaller.cpp 
+    ./src/RPC2Error.cpp
+    ./src/RPC2ErrorMarshaller.cpp
 )
 
-add_library("JSONHandler" ${SOURCES}         
-        ${GENERATED_SOURCES2}        
-        ${GENERATED_SOURCES4}  
+add_library("JSONHandler" ${SOURCES}
+        ${GENERATED_SOURCES2}
+        ${GENERATED_SOURCES4}
         ${GENERATED_RPC_SOURCES}
 ./src/ALRPCObjectsImpl/V2/OnDriverDistraction.cpp
 ./src/ALRPCObjectsImpl/V2/OnDriverDistractionMarshaller.cpp

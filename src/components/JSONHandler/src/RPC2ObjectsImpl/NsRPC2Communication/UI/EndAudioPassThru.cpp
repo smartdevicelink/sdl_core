@@ -24,13 +24,13 @@ EndAudioPassThru::~EndAudioPassThru(void)
 }
 
 
-EndAudioPassThru::EndAudioPassThru(void) : 
-  RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__ENDAUDIOPASSTHRU)
+EndAudioPassThru::EndAudioPassThru(void) :
+  RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ENDAUDIOPASSTHRU)
 {
 }
 
 
-EndAudioPassThru::EndAudioPassThru(const EndAudioPassThru& c) : RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__ENDAUDIOPASSTHRU,c.getId())
+EndAudioPassThru::EndAudioPassThru(const EndAudioPassThru& c) : RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ENDAUDIOPASSTHRU,c.getId())
 {
   *this=c;
 }

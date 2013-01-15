@@ -36,14 +36,14 @@ PerformAudioPassThru::~PerformAudioPassThru(void)
 
 
 PerformAudioPassThru::PerformAudioPassThru(void) :
-  RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRU),
+  RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__PERFORMAUDIOPASSTHRU),
   audioPassThruDisplayText1(0),
   audioPassThruDisplayText2(0)
 {
 }
 
 
-PerformAudioPassThru::PerformAudioPassThru(const PerformAudioPassThru& c) : RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRU,c.getId())
+PerformAudioPassThru::PerformAudioPassThru(const PerformAudioPassThru& c) : RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__PERFORMAUDIOPASSTHRU,c.getId())
 {
   *this=c;
 }
