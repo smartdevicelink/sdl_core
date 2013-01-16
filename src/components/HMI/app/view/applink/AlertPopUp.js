@@ -20,6 +20,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
     childViews: [
         'applicationName',
+        'image',
         'message1',
         'message2',
         'message3',
@@ -33,6 +34,15 @@ MFT.AlertPopUp = Em.ContainerView.create({
     activate:           false,
 
     timer:              null,
+
+    /**
+     * Wagning image on Alert PopUp
+     */
+    image:  Em.View.extend({
+        elementId:              'alertPopUpImage',
+
+        classNames:             'alertPopUpImage',
+    }),
 
     applicationName :    MFT.Label.extend({
 
@@ -142,7 +152,9 @@ MFT.AlertPopUp = Em.ContainerView.create({
         }
 
         this.addSoftButtons(message.softButtons);
-        MFT.ApplinkModel.onPrompt(message.ttsChunks.ttsChunks);
+        if( message.ttsChunks ){
+            MFT.ApplinkModel.onPrompt(message.ttsChunks.ttsChunks);
+        }
 
         this.set('appName',    MFT.ApplinkController.getApplicationModel(message.appId).appInfo.appName);
 

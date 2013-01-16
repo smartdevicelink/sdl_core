@@ -20,6 +20,7 @@ MFT.AudioPassThruPopUp = Em.ContainerView.create({
 
     childViews: [
         'applicationName',
+        'image',
         'message1',
         'message2',
         'message3',
@@ -43,6 +44,15 @@ MFT.AudioPassThruPopUp = Em.ContainerView.create({
         classNames:             'applicationName',
 
         contentBinding:         'parentView.appName'
+    }),
+
+    /**
+     * Wagning image on Alert PopUp
+     */
+    image:  Em.View.extend({
+        elementId:              'audioPassThruImage',
+
+        classNames:             'audioPassThruImage',
     }),
 
     message1 : MFT.Label.extend({

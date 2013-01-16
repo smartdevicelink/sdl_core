@@ -54,22 +54,22 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
      * Stored VehicleInfo Data
      */
     vehicleData: {
-        'speed':                    null,
-        'rpm':                      null,
-        'fuelLevel':                null,
-        'avgFuelEconomy':           null,
-        'batteryVoltage':           null,
-        'externalTemperature':      null,
-        'vin':                      null,
-        'prndl':                    null,
-        'tirePressure':             null,
-        'batteryPackVoltage':       null,
-        'batteryPackCurrent':       null,
-        'batteryPackTemperature':   null,
-        'engineTorque':             null,
-        'odometer':                 null,
-        'tripOdometer':             null,
-        'genericbinary':            null
+        'speed':                    80,
+        'rpm':                      5000,
+        'fuelLevel':                'F',
+        'avgFuelEconomy':           true,
+        'batteryVoltage':           12.5,
+        'externalTemperature':      40,
+        'vin':                      '52-452-52-752',
+        'prndl':                    'PARK',
+        'tirePressure':             2,
+        'batteryPackVoltage':       12,
+        'batteryPackCurrent':       7,
+        'batteryPackTemperature':   30,
+        'engineTorque':             0,
+        'odometer':                 0,
+        'tripOdometer':             0,
+        'genericbinary':            165165650
     },
 
     /**
