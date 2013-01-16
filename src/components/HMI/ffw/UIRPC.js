@@ -312,6 +312,21 @@ FFW.UI = FFW.RPCObserver.create({
 
 		    	break;
 		    }
+		    case "UI.GetLanguage":{
+
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result":	{
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method" : "UI.GetLanguageResponse",
+						"hmiDisplayLanguage" : MFT.ApplinkModel.UILanguage
+					}
+				};
+				this.client.send(JSONMessage);
+
+		    	break;
+		    }
 		    case  "UI.GetCapabilities":{
 				// send repsonse
 				var JSONMessage = {

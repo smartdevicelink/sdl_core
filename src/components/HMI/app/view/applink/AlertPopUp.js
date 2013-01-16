@@ -160,7 +160,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
         this.set('content1',    message.AlertText1);
         this.set('content2',    message.AlertText2);
-        this.set('content3',    message.alertText3);
+        this.set('content3',    message.AlertText3);
         this.set('activate',    true);
         
         clearTimeout(this.timer);
