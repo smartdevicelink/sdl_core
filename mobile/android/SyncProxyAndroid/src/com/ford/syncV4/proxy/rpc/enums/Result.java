@@ -20,6 +20,7 @@ public enum Result {
     REJECTED,
     ABORTED,
     IGNORED,
+    RETRY,
     UNSUPPORTED_BUTTON,
     FILE_NOT_FOUND,
     GENERIC_ERROR,
