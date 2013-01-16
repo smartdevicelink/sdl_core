@@ -4,7 +4,7 @@
  * @desc VRPopUp module visual representation
  * 
  * @category    View
- * @filesource  app/view/home/VRPopUp.js
+ * @filesource  app/view/applink/VRPopUp.js
  * @version     2.0
  *
  * @author      Andriy Melnik

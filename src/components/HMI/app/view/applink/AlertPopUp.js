@@ -4,7 +4,7 @@
  * @desc AlertPopUp module visual representation
  * 
  * @category    View
- * @filesource    app/view/home/AlertPopUp.js
+ * @filesource    app/view/applink/AlertPopUp.js
  * @version        2.0
  *
  * @author        Andriy Melnik
@@ -83,8 +83,8 @@ MFT.AlertPopUp = Em.ContainerView.create({
      *
      * @desc Function creates Soft Buttons on AlertPoUp
      * 
-     * @param params: SoftButton
-    */
+     * @param {Object} params
+     */
     addSoftButtons: function( params ){
 
         var count = this.get('softbuttons.childViews').length - 1;

@@ -4,7 +4,7 @@
  * @desc TTSPopUp module visual representation
  * 
  * @category	View
- * @filesource	app/view/home/TTSPopUp.js
+ * @filesource	app/view/applink/TTSPopUp.js
  * @version		2.0
  *
  * @author		Andriy Melnik
