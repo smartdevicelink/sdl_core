@@ -195,6 +195,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 	/** The output stream to write audioPassThru data. */
 	private OutputStream audioPassThruOutStream = null;
+	/**
+	 * The most recent sent PerformAudioPassThru message, saved in case we need
+	 * to retry the request.
+	 */
+	private PerformAudioPassThru latestPerformAudioPassThruMsg = null;
 
 	/**
 	 * In onCreate() specifies if it is the first time the activity is created
@@ -1892,6 +1897,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setBitsPerSample((AudioCaptureQuality) spnBitsPerSample.getSelectedItem());
 										msg.setAudioType((AudioType) spnAudioType.getSelectedItem());
 										msg.setCorrelationID(autoIncCorrId++);
+										latestPerformAudioPassThruMsg = msg;
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
@@ -2628,7 +2634,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 	/**
 	 * Called when a PerformAudioPassThru response comes. Save the file only if
-	 * the result is success.
+	 * the result is success. If the result is retry, send the latest request
+	 * again.
 	 */
 	public void onPerformAudioPassThruResponse(Result result) {
 		closeAudioPassThruStream();
@@ -2637,6 +2644,19 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			if ((outFile != null) && outFile.exists()) {
 				if (!outFile.delete()) {
 					logToConsoleAndUI("Failed to delete output file", null);
+				}
+			}
+
+			if ((Result.RETRY == result)
+					&& (latestPerformAudioPassThruMsg != null)) {
+				latestPerformAudioPassThruMsg.setCorrelationID(autoIncCorrId++);
+				try {
+					_msgAdapter.logMessage(latestPerformAudioPassThruMsg, true);
+					ProxyService.getInstance().getProxyInstance()
+							.sendRPCRequest(latestPerformAudioPassThruMsg);
+				} catch (SyncException e) {
+					_msgAdapter.logMessage("Error sending message: " + e,
+							Log.ERROR, e);
 				}
 			}
 		}
