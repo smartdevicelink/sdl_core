@@ -469,6 +469,8 @@ namespace NsAppManager
                     NsAppLinkRPC::RegisterAppInterface_request * object = (NsAppLinkRPC::RegisterAppInterface_request*)mobileMsg;
                     NsAppLinkRPC::RegisterAppInterface_response* response = new NsAppLinkRPC::RegisterAppInterface_response();
                     const std::string& appName = object->get_appName();
+                    response->set_success(true);
+                    response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
 
                     if(AppMgrRegistry::getInstance().getItem(sessionKey))
                     {
@@ -506,9 +508,13 @@ namespace NsAppManager
                     response->set_speechCapabilities(core->mSpeechCapabilitiesV1.get());
                     response->set_vrCapabilities(core->mVrCapabilitiesV1.get());
                     response->set_language(core->mUiLanguageV1);
+                    if (object->get_languageDesired().get() != core->mUiLanguageV1.get())
+                    {
+                        LOG4CPLUS_WARN(mLogger, "Wrong language on registering application " << appName);
+                        response->set_resultCode(NsAppLinkRPC::Result::WRONG_LANGUAGE);
+                    }
                     response->set_syncMsgVersion(app->getSyncMsgVersion());
-                    response->set_success(true);
-                    response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
+                    
 
                     LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName()
                         << " connection/session key " << app->getAppID()
@@ -1427,6 +1433,8 @@ namespace NsAppManager
                     NsAppLinkRPCV2::RegisterAppInterface_response* response = new NsAppLinkRPCV2::RegisterAppInterface_response();
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::RegisterAppInterfaceID);
+                    response->set_success(true);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
 
                     const std::string& appName = object->get_appName();
 
@@ -1461,16 +1469,20 @@ namespace NsAppManager
                     response->set_buttonCapabilities(core->mButtonCapabilitiesV2.get());
                     response->set_displayCapabilities(core->mDisplayCapabilitiesV2);
                     response->set_hmiZoneCapabilities(core->mHmiZoneCapabilitiesV2.get());
+
                     response->set_hmiDisplayLanguage(core->mUiLanguageV2);
                     response->set_language(core->mVrLanguageV2);
+                    if ( object->get_languageDesired().get() != core->mVrLanguageV2.get() )
+                    {
+                        LOG4CPLUS_WARN(mLogger, "Wrong language on registering application " << appName);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::WRONG_LANGUAGE);
+                    }
                     response->set_speechCapabilities(core->mSpeechCapabilitiesV2.get());
                     response->set_vrCapabilities(core->mVrCapabilitiesV2.get());
                     response->set_syncMsgVersion(app->getSyncMsgVersion());
                     response->set_softButtonCapabilities(core->mSoftButtonCapabilities.get());
                     response->set_presetBankCapabilities(core->mPresetBankCapabilities);
                     response->set_vehicleType(core->mVehicleType);
-                    response->set_success(true);
-                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
 
                     LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName() << " gets sent to a mobile side... ");
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -4078,6 +4090,17 @@ namespace NsAppManager
                 }
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETSUPPORTEDLANGUAGESRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "Get Supported Languages for UI response is received.");
+                NsRPC2Communication::UI::GetSupportedLanguagesResponse * languages = 
+                    static_cast<NsRPC2Communication::UI::GetSupportedLanguagesResponse*>(msg);
+                if (NsAppLinkRPC::Result::SUCCESS == languages->getResult())
+                {
+                    core->mUISupportedLanguages = languages->get_languages();
+                }
+                return;
+            }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
         }
@@ -4829,8 +4852,12 @@ namespace NsAppManager
                     application->setAppType(appType);
                 }
                 bool isMediaApplication = registerRequest->get_isMediaApplication();
-                const NsAppLinkRPCV2::Language& languageDesired = registerRequest->get_languageDesired();
-                application->setLanguageDesired(languageDesired);
+                if (mVrLanguageV2.get() != mTtsLanguageV2.get())
+                {
+                    //TODO: posibly notify application that VR&TTS have different languages.
+                    LOG4CPLUS_WARN(mLogger, "VR and TTS have different active languages. Unspecified behaviour.");
+                }
+                application->setLanguageDesired(mVrLanguageV2);
 
                 const NsAppLinkRPCV2::SyncMsgVersion& syncMsgVersion = registerRequest->get_syncMsgVersion();
 
@@ -4846,7 +4873,7 @@ namespace NsAppManager
                     application->setVrSynonyms(vrSynonyms);
                 }
 
-                application->setHMIDisplayLanguageDesired(registerRequest->get_hmiDisplayLanguageDesired());
+                application->setHMIDisplayLanguageDesired(mUiLanguageV2);
                 application->setIsMediaApplication(isMediaApplication);
                 application->setSyncMsgVersion(syncMsgVersion);
                 application->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);
@@ -4875,7 +4902,7 @@ namespace NsAppManager
 
                 NsAppLinkRPC::RegisterAppInterface_request* registerRequest = (NsAppLinkRPC::RegisterAppInterface_request*) request;
                 bool isMediaApplication = registerRequest->get_isMediaApplication();
-                const NsAppLinkRPC::Language& languageDesired = registerRequest->get_languageDesired();
+                
                 const NsAppLinkRPC::SyncMsgVersion& syncMsgVersion = registerRequest->get_syncMsgVersion();
 
                 if ( registerRequest -> get_ngnMediaScreenAppName() )
@@ -4897,7 +4924,8 @@ namespace NsAppManager
                 }
 
                 application->setIsMediaApplication(isMediaApplication);
-                application->setLanguageDesired(languageDesired);
+                application->setLanguageDesired(mUiLanguageV1);
+
                 application->setSyncMsgVersion(syncMsgVersion);
                 application->setSystemContext(NsAppLinkRPC::SystemContext::SYSCTXT_MAIN);
 

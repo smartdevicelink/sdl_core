@@ -112,7 +112,7 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataResponse.h"
 
 #include "../src/../src/RPC2ObjectsImpl/Marshaller.inc"
-#include <iostream>
+
 /*
   generated at	Fri Dec 14 06:14:25 2012
   source stamp	Fri Dec 14 06:14:23 2012
@@ -164,8 +164,6 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
   if(!json.isObject())  return 0;
   if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return 0;
 
-  std::cout<<"fromJSON:: method " << json["method"].asString() ;
-
   if(json.isMember("error"))				// error
   {
     RPC2Error rv;
@@ -179,7 +177,6 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
     if(!json.isMember("method") || !json["method"].isString())  return 0;
 
     Methods m=getIndex(json["method"].asString().c_str());
-    std::cout<< "; id " << m << std::endl;
 
     switch(m)
     {
@@ -246,7 +243,6 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       case METHOD_NSRPC2COMMUNICATION_UI__ONREADY:
       {
         NsRPC2Communication::UI::OnReady *rv=new NsRPC2Communication::UI::OnReady;
-        std::cout<<"on ready\n";
         return NsRPC2Communication::UI::OnReadyMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       case METHOD_NSRPC2COMMUNICATION_UI__ONSYSTEMCONTEXT:
