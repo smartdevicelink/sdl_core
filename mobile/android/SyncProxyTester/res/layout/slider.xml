@@ -72,26 +72,12 @@
         android:textStyle="bold" >
     </TextView>
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <CheckBox
+        android:id="@+id/slider_chkDynamicFooter"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
-
-        <Button
-            android:id="@+id/slider_staticFooter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Static" />
-
-        <Button
-            android:id="@+id/slider_dynamicFooter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Dynamic" />
-
-    </LinearLayout>
+        android:layout_weight="1"
+        android:text="Dynamic" />
 
     <EditText
         android:id="@+id/txtSliderFooter"

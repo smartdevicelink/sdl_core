@@ -279,7 +279,9 @@ public class WiProProtocol extends AbstractProtocol {
 		}
 		
 		protected void notifyIfFinished(ProtocolFrameHeader header) {
-			if (framesRemaining == 0) {
+			//if (framesRemaining == 0) {
+			if (header.getFrameType() == FrameType.Consecutive && header.getFrameData() == 0x0) 
+			{
 				ProtocolMessage message = new ProtocolMessage();
 				message.setSessionType(header.getSessionType());
 				message.setSessionID(header.getSessionID());
@@ -310,17 +312,25 @@ public class WiProProtocol extends AbstractProtocol {
 		} // end-method
 		
 		protected void handleMultiFrameMessageFrame(ProtocolFrameHeader header, byte[] data) {
-			if (!hasFirstFrame) {
-				hasFirstFrame = true;
+			//if (!hasFirstFrame) {
+			//	hasFirstFrame = true;
+			if (header.getFrameType() == FrameType.First)
+			{
 				handleFirstDataFrame(header, data);
-			} else if (!hasSecondFrame) {
-				hasSecondFrame = true;
-				framesRemaining--;
-				handleSecondFrame(header, data);
-			} else {
-				framesRemaining--;
+			}
+				
+			//} else if (!hasSecondFrame) {
+			//	hasSecondFrame = true;
+			//	framesRemaining--;
+			//	handleSecondFrame(header, data);
+			//} else {
+			//	framesRemaining--;
+			else
+			{
 				handleRemainingFrame(header, data);
 			}
+				
+			//}
 		} // end-method
 		
 		protected void handleFrame(ProtocolFrameHeader header, byte[] data) {
