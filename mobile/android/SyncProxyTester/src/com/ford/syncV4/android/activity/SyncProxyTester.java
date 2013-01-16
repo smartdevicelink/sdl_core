@@ -2607,9 +2607,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			File outFile = null;
 			try {
 				if (audioPassThruOutStream == null) {
-					outFile = new File(
-							Environment.getExternalStorageDirectory(),
-							AUDIOPASSTHRU_OUTPUT_FILE);
+					outFile = audioPassThruOutputFile();
 					audioPassThruOutStream = new BufferedOutputStream(
 							new FileOutputStream(outFile, false));
 				}
@@ -2628,9 +2626,20 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		}
 	}
 
-	/** Called when a PerformAudioPassThru response comes. */
+	/**
+	 * Called when a PerformAudioPassThru response comes. Save the file only if
+	 * the result is success.
+	 */
 	public void onPerformAudioPassThruResponse(Result result) {
 		closeAudioPassThruStream();
+		if (Result.SUCCESS != result) {
+			File outFile = audioPassThruOutputFile();
+			if ((outFile != null) && outFile.exists()) {
+				if (!outFile.delete()) {
+					logToConsoleAndUI("Failed to delete output file", null);
+				}
+			}
+		}
 	}
 
 	private void closeAudioPassThruStream() {
@@ -2644,6 +2653,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			}
 			audioPassThruOutStream = null;
 		}
+	}
+
+	private File audioPassThruOutputFile() {
+		File outFile = new File(Environment.getExternalStorageDirectory(),
+				AUDIOPASSTHRU_OUTPUT_FILE);
+		return outFile;
 	}
 
 	private void logToConsoleAndUI(String msg, Throwable thr) {
