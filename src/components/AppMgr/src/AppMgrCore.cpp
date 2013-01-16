@@ -4101,6 +4101,37 @@ namespace NsAppManager
                 }
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONLANGUAGECHANGE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "UI::OnLanguageChange is received from HMI.");
+                NsRPC2Communication::UI::OnLanguageChange * languageChange = 
+                    static_cast<NsRPC2Communication::UI::OnLanguageChange*>(msg);
+                if ( languageChange->get_hmiDisplayLanguage().get() != core->mUiLanguageV1.get() )
+                {
+                    //TODO: clear mess around versions up.
+                    core->mUiLanguageV1 = languageChange->get_hmiDisplayLanguage();
+                    core->mUiLanguageV2.set(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_hmiDisplayLanguage().get()));
+                    // = NsAppLinkRPCV2::Language(
+                            //static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_hmiDisplayLanguage().get()));
+                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp = 
+                        new NsAppLinkRPCV2::OnLanguageChange;
+                    languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                    languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
+                    languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
+                    languageChangeToApp->set_language(core->mVrLanguageV2);
+                    const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
+                    for( AppMgrRegistry::ItemsMap::const_iterator it = allRegisteredApplications.begin();
+                            it != allRegisteredApplications.end();
+                            ++it )
+                    {
+                        if ( 0 != it->second && 0 != it->second->getApplication() )
+                        {
+                            MobileHandler::getInstance().sendRPCMessage(languageChangeToApp, it->first);
+                        }
+                    }
+                }
+                break;
+            }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
         }
@@ -4270,6 +4301,37 @@ namespace NsAppManager
                 }
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ONLANGUAGECHANGE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "VR::OnLanguageChange is received from HMI.");
+                NsRPC2Communication::VR::OnLanguageChange * languageChange = 
+                    static_cast<NsRPC2Communication::VR::OnLanguageChange*>(msg);
+                if ( languageChange->get_language().get() != core->mVrLanguageV2.get() )
+                {
+                    //TODO: clear mess around versions up.
+                    core->mVrLanguageV1 = languageChange->get_language();
+                    core->mVrLanguageV2.set(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_language().get()));
+                    // = NsAppLinkRPCV2::Language(
+                            //static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_language().get()));
+                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp = 
+                        new NsAppLinkRPCV2::OnLanguageChange;
+                    languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                    languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
+                    languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
+                    languageChangeToApp->set_language(core->mVrLanguageV2);
+                    const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
+                    for( AppMgrRegistry::ItemsMap::const_iterator it = allRegisteredApplications.begin();
+                            it != allRegisteredApplications.end();
+                            ++it )
+                    {
+                        if ( 0 != it->second && 0 != it->second->getApplication() )
+                        {
+                            MobileHandler::getInstance().sendRPCMessage(languageChangeToApp, it->first);
+                        }
+                    }
+                }
+                break;
+            }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not VR RPC message " << msg->getMethod() << " has been received!");
         }
@@ -4343,6 +4405,37 @@ namespace NsAppManager
                     }
                 }
                 return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__ONLANGUAGECHANGE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "TTS::OnLanguageChange is received from HMI.");
+                NsRPC2Communication::TTS::OnLanguageChange * languageChange = 
+                    static_cast<NsRPC2Communication::TTS::OnLanguageChange*>(msg);
+                if ( languageChange->get_language().get() != core->mTtsLanguageV2.get() )
+                {
+                    //TODO: clear mess around versions up.
+                    core->mTtsLanguageV1 = languageChange->get_language();
+                    core->mTtsLanguageV2.set(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_language().get()));
+                    // = NsAppLinkRPCV2::Language(
+                            //static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_language().get()));
+                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp = 
+                        new NsAppLinkRPCV2::OnLanguageChange;
+                    languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                    languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
+                    languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
+                    languageChangeToApp->set_language(core->mTtsLanguageV2);
+                    const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
+                    for( AppMgrRegistry::ItemsMap::const_iterator it = allRegisteredApplications.begin();
+                            it != allRegisteredApplications.end();
+                            ++it )
+                    {
+                        if ( 0 != it->second && 0 != it->second->getApplication() )
+                        {
+                            MobileHandler::getInstance().sendRPCMessage(languageChangeToApp, it->first);
+                        }
+                    }
+                }
+                break;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not TTS RPC message " << msg->getMethod() << " has been received!");

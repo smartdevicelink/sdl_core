@@ -344,7 +344,6 @@ SetAppIcon(
    */
 notification OnLanguageChange(
   Language hmiDisplayLanguage, //  data type from AppLink protocol specification
-  int appId
 );
 
 /*
@@ -527,7 +526,6 @@ ChangeRegistration(
    */
 notification OnLanguageChange(
   Language language, //  data type from AppLink protocol specification
-  int appId
 );
 
 /*
@@ -619,7 +617,6 @@ ChangeRegistration(
    */
 notification OnLanguageChange(
   Language language, //  data type from AppLink protocol specification
-  int appId
 );
 
 /*
