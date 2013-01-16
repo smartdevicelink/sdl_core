@@ -3377,6 +3377,7 @@ namespace NsAppManager
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETLANGUAGERESPONSE:
             {
+                LOG4CPLUS_INFO_EXT(mLogger, "GetLanguageResponse from UI is received");
                 NsRPC2Communication::UI::GetLanguageResponse* getLang = (NsRPC2Communication::UI::GetLanguageResponse*)msg;
                 core->mUiLanguageV1 = getLang->get_hmiDisplayLanguage();
                 NsAppLinkRPCV2::Language langV2;
@@ -4253,6 +4254,7 @@ namespace NsAppManager
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__GETLANGUAGERESPONSE:
             {
+                LOG4CPLUS_INFO_EXT(mLogger, "GetLanguageResponse from VR is received");
                 NsRPC2Communication::VR::GetLanguageResponse* getLang = (NsRPC2Communication::VR::GetLanguageResponse*)msg;
                 core->mVrLanguageV1 = getLang->get_language();
                 NsAppLinkRPCV2::Language langV2;
@@ -4453,6 +4455,7 @@ namespace NsAppManager
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__GETLANGUAGERESPONSE:
             {
+                LOG4CPLUS_INFO_EXT(mLogger, "GetLanguage Response from TTS is received.");
                 NsRPC2Communication::TTS::GetLanguageResponse* getLang = (NsRPC2Communication::TTS::GetLanguageResponse*)msg;
                 core->mTtsLanguageV1 = getLang->get_language();
                 NsAppLinkRPCV2::Language langV2;
