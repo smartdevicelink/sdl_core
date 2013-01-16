@@ -30,7 +30,7 @@
 #endif
 
 
-#define TOTAL_KEYWORDS 109
+#define TOTAL_KEYWORDS 111
 #define MIN_WORD_LENGTH 7
 #define MAX_WORD_LENGTH 42
 #define MIN_HASH_VALUE 8
@@ -407,7 +407,9 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
 #line 45 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.ChangeRegistrationResponse",27,&Marshaller::mNsRPC2Communication_TTS__ChangeRegistrationResponse}
+      {"TTS.ChangeRegistrationResponse",27,&Marshaller::mNsRPC2Communication_TTS__ChangeRegistrationResponse},
+      {"UI.GetSupportedLanguages",109,&Marshaller::mNsRPC2Communication_UI__GetSupportedLanguages},
+      {"UI.GetSupportedLanguagesResponse",110,&Marshaller::mNsRPC2Communication_UI__GetSupportedLanguagesResponse}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)

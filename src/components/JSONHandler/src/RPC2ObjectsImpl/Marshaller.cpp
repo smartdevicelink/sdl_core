@@ -112,7 +112,7 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataResponse.h"
 
 #include "../src/../src/RPC2ObjectsImpl/Marshaller.inc"
-
+#include <iostream>
 /*
   generated at	Fri Dec 14 06:14:25 2012
   source stamp	Fri Dec 14 06:14:23 2012
@@ -164,6 +164,8 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
   if(!json.isObject())  return 0;
   if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return 0;
 
+  std::cout<<"fromJSON:: method " << json["method"].asString() ;
+
   if(json.isMember("error"))				// error
   {
     RPC2Error rv;
@@ -177,6 +179,7 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
     if(!json.isMember("method") || !json["method"].isString())  return 0;
 
     Methods m=getIndex(json["method"].asString().c_str());
+    std::cout<< "; id " << m << std::endl;
 
     switch(m)
     {
@@ -243,6 +246,7 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       case METHOD_NSRPC2COMMUNICATION_UI__ONREADY:
       {
         NsRPC2Communication::UI::OnReady *rv=new NsRPC2Communication::UI::OnReady;
+        std::cout<<"on ready\n";
         return NsRPC2Communication::UI::OnReadyMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
       case METHOD_NSRPC2COMMUNICATION_UI__ONSYSTEMCONTEXT:
@@ -508,6 +512,11 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
         NsRPC2Communication::VehicleInfo::UnsubscribeVehicleData *rv=new NsRPC2Communication::VehicleInfo::UnsubscribeVehicleData;
         return NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
+      case METHOD_NSRPC2COMMUNICATION_UI__GETSUPPORTEDLANGUAGES:
+      {
+        NsRPC2Communication::UI::GetSupportedLanguages * rv = new NsRPC2Communication::UI::GetSupportedLanguages;
+        return NsRPC2Communication::UI::GetSupportedLanguagesMarshaller::fromJSON(json, *rv) ? rv : 0;
+      }
       default:
         return 0;
     }
@@ -756,6 +765,11 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponse *rv=new NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponse;
       return NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
+    case METHOD_NSRPC2COMMUNICATION_UI__GETSUPPORTEDLANGUAGESRESPONSE:
+    {
+      NsRPC2Communication::UI::GetSupportedLanguagesResponse *rv = new NsRPC2Communication::UI::GetSupportedLanguagesResponse;
+      return NsRPC2Communication::UI::GetSupportedLanguagesResponseMarshaller::fromJSON(json, *rv) ? rv : 0;
+    }
     default:
       return 0;
   }
@@ -909,6 +923,8 @@ Json::Value Marshaller::Request2JSON(const NsRPC2Communication::RPC2Request* msg
       return NsRPC2Communication::VehicleInfo::SubscribeVehicleDataMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::SubscribeVehicleData*>(msg));
     case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__UNSUBSCRIBEVEHICLEDATA:
       return NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::UnsubscribeVehicleData*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_UI__GETSUPPORTEDLANGUAGES:
+      return NsRPC2Communication::UI::GetSupportedLanguagesMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::GetSupportedLanguages*>(msg));
     default:
       return j;
   }
@@ -1013,6 +1029,8 @@ Json::Value Marshaller::Response2JSON(const NsRPC2Communication::RPC2Response* m
       return NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__UNSUBSCRIBEVEHICLEDATARESPONSE:
       return NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponse*>(msg));
+    case METHOD_NSRPC2COMMUNICATION_UI__GETSUPPORTEDLANGUAGESRESPONSE:
+      return NsRPC2Communication::UI::GetSupportedLanguagesResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::UI::GetSupportedLanguagesResponse*>(msg));
     default:
       return j;
   }
@@ -1043,7 +1061,7 @@ Json::Value Marshaller::toJSON(const RPC2Command* msg)
 }
 
 
-const Marshaller::localHash Marshaller::mHashTable[109]=
+const Marshaller::localHash Marshaller::mHashTable[111]=
 {
   {"AppLinkCore.ActivateApp",0,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateApp},
   {"AppLinkCore.ActivateAppResponse",1,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse},
@@ -1153,7 +1171,9 @@ const Marshaller::localHash Marshaller::mHashTable[109]=
   {"AppLinkCore.SubscribeVehicleData",105,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleData},
   {"AppLinkCore.SubscribeVehicleDataResponse",106,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse},
   {"AppLinkCore.UnsubscribeVehicleData",107,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData},
-  {"AppLinkCore.UnsubscribeVehicleDataResponse",108,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse}
+  {"AppLinkCore.UnsubscribeVehicleDataResponse",108,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse},
+  {"UI.GetSupportedLanguages",109,&Marshaller::mNsRPC2Communication_UI__GetSupportedLanguages},
+  {"UI.GetSupportedLanguagesResponse",110,&Marshaller::mNsRPC2Communication_UI__GetSupportedLanguagesResponse}
 
 };
 
@@ -1268,3 +1288,5 @@ NsRPC2Communication::VehicleInfo::SubscribeVehicleDataMarshaller Marshaller::mNs
 NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponseMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse;
 NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData;
 NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponseMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse;
+NsRPC2Communication::UI::GetSupportedLanguagesMarshaller Marshaller::mNsRPC2Communication_UI__GetSupportedLanguages;
+NsRPC2Communication::UI::GetSupportedLanguagesResponseMarshaller Marshaller::mNsRPC2Communication_UI__GetSupportedLanguagesResponse; 

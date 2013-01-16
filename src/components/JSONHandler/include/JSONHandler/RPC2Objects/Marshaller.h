@@ -120,6 +120,8 @@
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/SubscribeVehicleDataResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataResponseMarshaller.h"
+#include "../src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetSupportedLanguagesMarshaller.h"
+#include "../src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetSupportedLanguagesResponseMarshaller.h"
 
 /*
   generated at	Fri Dec 14 06:14:25 2012
@@ -244,7 +246,9 @@ public:
     METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__SUBSCRIBEVEHICLEDATA,
     METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__SUBSCRIBEVEHICLEDATARESPONSE,
     METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__UNSUBSCRIBEVEHICLEDATA,
-    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__UNSUBSCRIBEVEHICLEDATARESPONSE
+    METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__UNSUBSCRIBEVEHICLEDATARESPONSE,
+    METHOD_NSRPC2COMMUNICATION_UI__GETSUPPORTEDLANGUAGES,
+    METHOD_NSRPC2COMMUNICATION_UI__GETSUPPORTEDLANGUAGESRESPONSE
   };
 
 
@@ -1474,12 +1478,12 @@ private:
 
   static const char* getName(Methods e)
   {
-    return (e>=0 && e<109) ? mHashTable[e].name : NULL;
+    return (e>=0 && e<111) ? mHashTable[e].name : NULL;
   }
 
   static const Methods getIndex(const char* s);
 
-  static const localHash mHashTable[109];
+  static const localHash mHashTable[111];
   friend class Marshaller_intHash;
 
   static ::NsRPC2Communication::RPC2ErrorMarshaller mRPC2ErrorInternal;
@@ -1593,6 +1597,8 @@ private:
   static NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponseMarshaller mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse;
   static NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataMarshaller mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData;
   static NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponseMarshaller mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse;
+  static NsRPC2Communication::UI::GetSupportedLanguagesMarshaller mNsRPC2Communication_UI__GetSupportedLanguages;
+  static NsRPC2Communication::UI::GetSupportedLanguagesResponseMarshaller mNsRPC2Communication_UI__GetSupportedLanguagesResponse;
 
 };
 

@@ -2963,6 +2963,29 @@ namespace NsAppManager
                     core->setAudioPassThruFlag(false);
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::ChangeRegistrationID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "A ChangeRegistration request has been invoked." );
+
+                    NsAppManager::Application_v2* app = static_cast<NsAppManager::Application_v2*>(
+                    NsAppManager::AppMgrRegistry::getInstance().getApplication(sessionKey));
+                    if(!app)
+                    {
+                        sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                            NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                            , NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED
+                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                            , false
+                            , sessionKey);
+
+                        break;
+                    }                    
+
+                    NsAppLinkRPCV2::ChangeRegistration_request* request
+                        = static_cast<NsAppLinkRPCV2::ChangeRegistration_request*>(mobileMsg);
+
+
+                }
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
                 {
@@ -3179,6 +3202,8 @@ namespace NsAppManager
                 HMIHandler::getInstance().sendRequest(getButtonsCapsRequest);
                 NsRPC2Communication::VehicleInfo::GetVehicleType* getVehicleType = new NsRPC2Communication::VehicleInfo::GetVehicleType;
                 HMIHandler::getInstance().sendRequest(getVehicleType);
+                NsRPC2Communication::UI::GetSupportedLanguages * getUISupportedLanguages = new NsRPC2Communication::UI::GetSupportedLanguages;
+                HMIHandler::getInstance().sendRequest(getUISupportedLanguages);
 
                 NsRPC2Communication::UI::GetLanguage* getUiLang = new NsRPC2Communication::UI::GetLanguage;
                 HMIHandler::getInstance().sendRequest(getUiLang);

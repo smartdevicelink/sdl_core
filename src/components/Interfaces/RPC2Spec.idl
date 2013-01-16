@@ -274,6 +274,18 @@ GetCapabilities(
   );
 
 /*
+  * @descr
+  * method should be invoked at system startup
+  *  provides information about UI supported languages
+  * @returns
+  *   UI supported languages
+  */
+GetSupportedLanguages(
+  ->
+  Language [1:100] languages
+);
+
+/*
   * @descr 
    *      Notification is sent from HMI to AppManager on showing warning
    *  to user.
@@ -519,6 +531,18 @@ notification OnLanguageChange(
 );
 
 /*
+  * @descr
+  * method should be invoked at system startup
+  *  provides information about VR supported languages
+  * @returns
+  *   VR supported languages
+  */
+GetSupportedLanguages(
+  ->
+  Language [1:100] languages
+);
+
+/*
   * @descr 
    *      Request from Applink to HMI to get currently active  VR language
    *  
@@ -606,6 +630,18 @@ notification OnLanguageChange(
 GetLanguage(
   ->
   Language language
+);
+
+/*
+  * @descr
+  * method should be invoked at system startup
+  *  provides information about TTS supported languages
+  * @returns
+  *   TTS supported languages
+  */
+GetSupportedLanguages(
+  ->
+  Language [1:100] languages
 );
 
 }
