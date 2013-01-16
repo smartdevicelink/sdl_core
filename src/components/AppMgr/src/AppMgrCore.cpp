@@ -2980,7 +2980,7 @@ namespace NsAppManager
                 case NsAppLinkRPCV2::FunctionID::SubscribeVehicleDataID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeVehicleData request has been invoked");
-                    NsAppLinkRPCV2::SubscribeVehicleData_request * object = (NsAppLinkRPCV2::SubscribeVehicleData_request*)mobileMsg;
+                    NsAppLinkRPCV2::SubscribeVehicleData_request * object = static_cast<NsAppLinkRPCV2::SubscribeVehicleData_request*>(mobileMsg);
                     NsAppLinkRPCV2::SubscribeVehicleData_response* response = new NsAppLinkRPCV2::SubscribeVehicleData_response();
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::SubscribeVehicleDataID);
@@ -3025,7 +3025,7 @@ namespace NsAppManager
                 case NsAppLinkRPCV2::FunctionID::UnsubscribeVehicleDataID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeVehicleData request has been invoked");
-                    NsAppLinkRPCV2::UnsubscribeVehicleData_request * object = (NsAppLinkRPCV2::UnsubscribeVehicleData_request*)mobileMsg;
+                    NsAppLinkRPCV2::UnsubscribeVehicleData_request * object = static_cast<NsAppLinkRPCV2::UnsubscribeVehicleData_request*>(mobileMsg);
                     NsAppLinkRPCV2::UnsubscribeVehicleData_response* response = new NsAppLinkRPCV2::UnsubscribeVehicleData_response();
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::UnsubscribeVehicleDataID);
