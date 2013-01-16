@@ -282,7 +282,6 @@ MFT.ApplinkModel = Em.Object.create({
      */
     UIEndAudioPassThru: function() {
         if( this.AudioPassThruState ){
-            MFT.ApplinkController.closePopUp();
             FFW.UI.sendUIResult( "SUCCESS", FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru");
             MFT.ApplinkController.performAudioPassThruResponse("SUCCESS");
         }else{
