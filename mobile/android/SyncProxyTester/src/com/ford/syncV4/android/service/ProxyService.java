@@ -808,6 +808,15 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
 		else Log.i(TAG, "" + notification);
+		
+		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+		final byte[] aptData = notification.getAPTData();
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.onAudioPassThru(aptData);
+			}
+		});
 	}
 
 	/*********************************

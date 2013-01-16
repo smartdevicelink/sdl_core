@@ -1,9 +1,14 @@
 package com.ford.syncV4.android.activity;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -28,6 +33,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -80,6 +86,7 @@ import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.Image;
 import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.MenuParams;
+import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
 import com.ford.syncV4.proxy.rpc.PutFile;
@@ -124,7 +131,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final String logTag = "SyncProxyTester";
 	
 	private static final String ButtonSubscriptions = "ButtonSubscriptions";
-	
+
+	/**
+	 * The name of the file where all the data coming with
+	 * {@link OnAudioPassThru} notifications is saved. The root directory is the
+	 * external storage.
+	 */
+	private static final String AUDIOPASSTHRU_OUTPUT_FILE = "audiopassthru.bin";
+
 	private static final int ALERT_MAXSOFTBUTTONS = 4;
 	private static final int SCROLLABLEMESSAGE_MAXSOFTBUTTONS = 8;
 	private static final int SHOW_MAXSOFTBUTTONS = 8;
@@ -2576,6 +2590,56 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		} else {
 			Log.w(logTag, "Latest choiceSetId is unset");
 		}
+	}
+
+	/**
+	 * Called whenever an OnAudioPassThru notification comes. The aptData is the
+	 * audio data sent in it.
+	 */
+	public void onAudioPassThru(byte[] aptData) {
+		Log.i(logTag, "data len " + aptData.length);
+		if (isExtStorageWritable()) {
+			OutputStream out = null;
+			File outFile = null;
+			try {
+				outFile = new File(Environment.getExternalStorageDirectory(),
+						AUDIOPASSTHRU_OUTPUT_FILE);
+				out = new BufferedOutputStream(new FileOutputStream(outFile,
+						false));
+				out.write(aptData);
+			} catch (FileNotFoundException e) {
+				logToConsoleAndUI(
+						"Output file "
+								+ (outFile != null ? outFile.toString()
+										: "'unknown'")
+								+ " can't be opened for writing", e);
+			} catch (IOException e) {
+				logToConsoleAndUI("Can't write to output file", e);
+			} finally {
+				if (out != null) {
+					try {
+						out.flush();
+						out.close();
+					} catch (IOException e) {
+						logToConsoleAndUI("Can't close output file", e);
+					}
+					out = null;
+				}
+			}
+		} else {
+			logToConsoleAndUI("External storage is not available", null);
+		}
+	}
+
+	private void logToConsoleAndUI(String msg, Throwable thr) {
+		Log.d(logTag, msg, thr);
+		Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+	}
+
+	/** Returns whether the external storage is available for writing. */
+	private boolean isExtStorageWritable() {
+		String state = Environment.getExternalStorageState();
+		return Environment.MEDIA_MOUNTED.equals(state);
 	}
 
 	/** Called when a connection to a SYNC device has been closed. */
