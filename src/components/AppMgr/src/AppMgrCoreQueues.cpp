@@ -101,7 +101,6 @@ namespace NsAppManager
         mMtx.Unlock();
 
         mBinarySemaphore.Notify();
-        sleep(1);
         LOG4CPLUS_INFO_EXT(mLogger, " Pushed a message");
     }
 

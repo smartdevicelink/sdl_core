@@ -137,6 +137,36 @@ FFW.VR = FFW.RPCObserver.create({
 
 				break;
 			}
+			case "VR.GetSupportedLanguages":{
+
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result":	{
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method" : "VR.GetSupportedLanguagesResponse",
+						"languages" : MFT.ApplinkModel.applinkLanguagesList
+					}
+				};
+				this.client.send(JSONMessage);
+
+		    	break;
+		    }
+		    case "VR.GetLanguage":{
+
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result":	{
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method" : "VR.GetLanguageResponse",
+						"language" : MFT.ApplinkModel.TTSVRLanguage
+					}
+				};
+				this.client.send(JSONMessage);
+
+		    	break;
+		    }
 			case "VR.GetCapabilities":{
 
 				// send repsonse

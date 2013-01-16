@@ -37,51 +37,28 @@ MFT.ApplinkController = Em.Object.create({
 	},
 
     /**
-     * Method to set selected state of vehicle transmittion to vehicleData
-     * @param {string} prndl Vehicle transmittion state
+     * Method to set selected state of vehicle transmission to vehicleData
+     * @param {string} prndl Vehicle transmission state
      */
 	onPRNDLSelected: function( prndl ){
         MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', prndl);
     },
 
-   	/**
-     * Method closes AudioPassThruPopUp
+    /**
+     * Method to call performAudioPassThruResponse with Result code parameters
+     * @param {Object} element Button object
      */
-    closePopUp: function( result ){
-        MFT.ApplinkModel.set('AudioPassThruState', false);
-        this.performAudioPassThruResponse( result );
+	callPerformAudioPassThruPopUpResponse: function( element ){
+        this.performAudioPassThruResponse( element.responseResult );
     },
 
     /**
-     * Method to send response from UIRPC back to ApplinkCore
+     * Method close PerformAudioPassThruPopUp and call response from UIRPC back to ApplinkCore
      * @param {string} result Result code
      */
 	performAudioPassThruResponse: function( result ){
-        FFW.UI.sendUIResult( result, FFW.UI.performAudioPassThruRequestId, "UI.PerformAudioPassThru");
-    },
-
-    /**
-     * Method ends processing of AudioPassThru
-     * and call AudioPassThru UI response handeler with parameters "ABORTED"
-     */
-    cancelAudioPassThru: function() {
-        this.closePopUp("ABORTED");
-    },
-
-    /**
-     * Method ends processing of AudioPassThru
-     * and call AudioPassThru UI response handeler with parameters "SUCCESS"
-     */
-    doneAudioPassThru: function() {
-        this.closePopUp("SUCCESS");
-    },
-
-    /**
-     * Method ends processing of AudioPassThru
-     * and call AudioPassThru UI response handeler with parameters "RETRY"
-     */
-    retryAudioPassThru: function() {
-        this.closePopUp("RETRY");
+        MFT.ApplinkModel.set('AudioPassThruState', false);
+        FFW.UI.sendUIResult( result, FFW.UI.performAudioPassThruRequestId, "UI.PerformAudioPassThru" );
     },
 
     /**

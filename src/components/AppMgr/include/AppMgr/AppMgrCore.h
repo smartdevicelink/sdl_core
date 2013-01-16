@@ -10,6 +10,7 @@
 #include <string>
 #include "AppMgr/Application.h"
 #include "AppMgr/ButtonMapping.h"
+#include "AppMgr/VehicleDataMapping.h"
 #include "AppMgr/MessageMapping.h"
 #include "AppMgr/RequestMapping.h"
 #include "AppMgr/CapabilitesContainer.h"
@@ -248,11 +249,12 @@ namespace NsAppManager
         CapabilitiesContainer<NsAppLinkRPCV2::VrCapabilities> mVrCapabilitiesV2;
         CapabilitiesContainer<NsAppLinkRPCV2::SpeechCapabilities> mSpeechCapabilitiesV2;
         CapabilitiesContainer<NsAppLinkRPCV2::SoftButtonCapabilities> mSoftButtonCapabilities;
-        ButtonMapping    mButtonsMapping;
-        MessageMapping   mMessageMapping;
-        RequestMapping   mRequestMapping;
-        DeviceList       mDeviceList;
-        DeviceHandler    mDeviceHandler;
+        ButtonMapping       mButtonsMapping;
+        VehicleDataMapping  mVehicleDataMapping;
+        MessageMapping      mMessageMapping;
+        RequestMapping      mRequestMapping;
+        DeviceList          mDeviceList;
+        DeviceHandler       mDeviceHandler;
 
         NsAppLinkRPC::OnDriverDistraction* mDriverDistractionV1;
         NsAppLinkRPCV2::OnDriverDistraction* mDriverDistractionV2;

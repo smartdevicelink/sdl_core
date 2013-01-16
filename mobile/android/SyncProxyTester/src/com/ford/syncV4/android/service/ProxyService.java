@@ -791,6 +791,15 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
+		
+		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+		final Result result = response.getResultCode();
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.onPerformAudioPassThruResponse(result);
+			}
+		});
 	}
 	@Override
 	public void onEndAudioPassThruResponse(EndAudioPassThruResponse response) {
@@ -802,12 +811,30 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
+		
+		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+		final Result result = response.getResultCode();
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.onEndAudioPassThruResponse(result);
+			}
+		});
 	}
 	@Override
 	public void onOnAudioPassThru(OnAudioPassThru notification) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
 		else Log.i(TAG, "" + notification);
+		
+		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+		final byte[] aptData = notification.getAPTData();
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.onAudioPassThru(aptData);
+			}
+		});
 	}
 
 	/*********************************

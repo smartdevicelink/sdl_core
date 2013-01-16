@@ -1,3 +1,4 @@
+
 /**
  * \file AppMgrCore.cpp
  * \brief App manager core functionality
@@ -35,6 +36,7 @@
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Notification.h"
 #include "JSONHandler/ALRPCObjects/V2/AppType.h"
+#include "JSONHandler/ALRPCObjects/V2/VehicleDataType.h"
 
 namespace {
 
@@ -2975,6 +2977,103 @@ namespace NsAppManager
                     core->setAudioPassThruFlag(false);
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::SubscribeVehicleDataID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeVehicleData request has been invoked");
+                    NsAppLinkRPCV2::SubscribeVehicleData_request * object = static_cast<NsAppLinkRPCV2::SubscribeVehicleData_request*>(mobileMsg);
+                    NsAppLinkRPCV2::SubscribeVehicleData_response* response = new NsAppLinkRPCV2::SubscribeVehicleData_response();
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::SubscribeVehicleDataID);
+                    RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
+                    if(!item)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    Application_v2* app = (Application_v2*)item->getApplication();
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    std::vector<NsAppLinkRPCV2::VehicleDataType> vdVector = object->get_dataType();
+                    std::vector<NsAppLinkRPCV2::VehicleDataType>::iterator it;
+                    for (it = vdVector.begin(); it != vdVector.end(); it++)
+                    {
+                        core->mVehicleDataMapping.addVehicleDataMapping(*it, item);
+                    }
+                    response->set_success(true);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                    break;
+                }
+                case NsAppLinkRPCV2::FunctionID::UnsubscribeVehicleDataID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeVehicleData request has been invoked");
+                    NsAppLinkRPCV2::UnsubscribeVehicleData_request * object = static_cast<NsAppLinkRPCV2::UnsubscribeVehicleData_request*>(mobileMsg);
+                    NsAppLinkRPCV2::UnsubscribeVehicleData_response* response = new NsAppLinkRPCV2::UnsubscribeVehicleData_response();
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::UnsubscribeVehicleDataID);
+                    RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
+                    if(!item)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                            << " hasn't been associated with any application!");
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    Application_v2* app = (Application_v2*)item->getApplication();
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    std::vector<NsAppLinkRPCV2::VehicleDataType> vdVector = object->get_dataType();
+                    std::vector<NsAppLinkRPCV2::VehicleDataType>::iterator it;
+                    for (it = vdVector.begin(); it != vdVector.end(); it++)
+                    {
+                        core->mVehicleDataMapping.removeVehicleDataMapping(*it, item);
+                    }
+                    response->set_success(true);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                    break;
+                }
+                case NsAppLinkRPCV2::FunctionID::GetVehicleDataID:
+                case NsAppLinkRPCV2::FunctionID::ReadDIDID:
+                case NsAppLinkRPCV2::FunctionID::GetDTCsID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A given command id " << mobileMsg->getMethodId() << " RECEIVED! TODO!!!");
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::ChangeRegistrationID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "A ChangeRegistration request has been invoked." );
@@ -2995,8 +3094,6 @@ namespace NsAppManager
 
                     NsAppLinkRPCV2::ChangeRegistration_request* request
                         = static_cast<NsAppLinkRPCV2::ChangeRegistration_request*>(mobileMsg);
-
-
                 }
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:

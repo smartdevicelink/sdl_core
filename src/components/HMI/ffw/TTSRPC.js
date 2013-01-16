@@ -120,6 +120,36 @@ FFW.TTS = FFW.RPCObserver.create({
 
 		    	break;
 			}
+			case "TTS.GetSupportedLanguages":{
+
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result":	{
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method" : "TTS.GetSupportedLanguagesResponse",
+						"languages" : MFT.ApplinkModel.applinkLanguagesList
+					}
+				};
+				this.client.send(JSONMessage);
+
+		    	break;
+		    }
+		    case "TTS.GetLanguage":{
+
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result":	{
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method" : "TTS.GetLanguageResponse",
+						"language" : MFT.ApplinkModel.TTSVRLanguage
+					}
+				};
+				this.client.send(JSONMessage);
+
+		    	break;
+		    }
 			case "TTS.ChangeRegistration":{
 
 				MFT.ApplinkModel.changeRegistrationTTSVR(request.params.language);

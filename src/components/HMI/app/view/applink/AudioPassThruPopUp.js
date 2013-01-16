@@ -20,6 +20,7 @@ MFT.AudioPassThruPopUp = Em.ContainerView.create({
 
     childViews: [
         'applicationName',
+        'image',
         'message1',
         'message2',
         'message3',
@@ -43,6 +44,15 @@ MFT.AudioPassThruPopUp = Em.ContainerView.create({
         classNames:             'applicationName',
 
         contentBinding:         'parentView.appName'
+    }),
+
+    /**
+     * Wagning image on Alert PopUp
+     */
+    image:  Em.View.extend({
+        elementId:              'audioPassThruImage',
+
+        classNames:             'audioPassThruImage',
     }),
 
     message1 : MFT.Label.extend({
@@ -73,27 +83,30 @@ MFT.AudioPassThruPopUp = Em.ContainerView.create({
     }),
 
     buttonRetry: MFT.Button.create({
-        elementId:  'AudioPassThruPopUpButtonRetry',
-        classNames: 'buttonRetry softButton',
-        text:       'Retry',
-        action:     'retryAudioPassThru',
-        target:     'MFT.ApplinkController'
+        elementId:      'AudioPassThruPopUpButtonRetry',
+        classNames:     'buttonRetry softButton',
+        text:           'Retry',
+        responseResult: 'RETRY',
+        action:         'callPerformAudioPassThruPopUpResponse',
+        target:         'MFT.ApplinkController'
     }),
 
     buttonDone: MFT.Button.create({
-        elementId:  'AudioPassThruPopUpButtonDone',
-        classNames: 'buttonDone softButton',
-        text:       'Done',
-        action:     'doneAudioPassThru',
-        target:     'MFT.ApplinkController'
+        elementId:      'AudioPassThruPopUpButtonDone',
+        classNames:     'buttonDone softButton',
+        text:           'Done',
+        responseResult: 'SUCCESS',
+        action:         'callPerformAudioPassThruPopUpResponse',
+        target:         'MFT.ApplinkController'
     }),
 
     buttonCancel: MFT.Button.create({
-        elementId:  'AudioPassThruPopUpButtonCancel',
-        classNames: 'buttonCancel softButton',
-        text:       'Cancel',
-        action:     'cancelAudioPassThru',
-        target:     'MFT.ApplinkController'
+        elementId:      'AudioPassThruPopUpButtonCancel',
+        classNames:     'buttonCancel softButton',
+        text:           'Cancel',
+        responseResult: 'ABORTED',
+        action:         'callPerformAudioPassThruPopUpResponse',
+        target:         'MFT.ApplinkController'
     }),
 
     /**
@@ -107,19 +120,16 @@ MFT.AudioPassThruPopUp = Em.ContainerView.create({
             var self = this,
                 data = MFT.ApplinkModel.AudioPassThruData;
 
-
-            this.set('activate', true);
             MFT.ApplinkModel.onPrompt(data.initialPrompt.ttsChunks);
 
             this.set('appName',    MFT.ApplinkController.getApplicationModel(data.appId).appInfo.appName);
 
             this.set('content1',    data.audioPassThruDisplayText1);
             this.set('content2',    data.audioPassThruDisplayText2);
-            this.set('activate',    true);
             
             clearTimeout(this.timer);
             this.timer = setTimeout(function(){
-                MFT.ApplinkController.closePopUp("SUCCESS");
+                MFT.ApplinkController.performAudioPassThruResponse("SUCCESS");
             }, data.maxDuration);
         }else{
             if( this.timer ){

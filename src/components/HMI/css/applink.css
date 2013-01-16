@@ -480,11 +480,25 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+#AlertPopUp .alertPopUpImage{
+	width: 83px;
+	height: 74px;
+	background: url(../images/applink/Warning.png) no-repeat;
+	top: 45px;
+	left: 10px;
+}
+#AudioPassThruPopUp .audioPassThruImage{
+	width: 83px;
+	height: 74px;
+	background: url(../images/home/controlButtons/vrImage.png) no-repeat;
+	top: 45px;
+	left: 25px;
+}
 #AudioPassThruPopUp .message1,
 #AlertPopUp .message1{
 	top: 37px;
-	left: 10px;
-	width: 374px;
+	left: 105px;
+	width: 285px;
 	height: 30px;
 	text-align: center;
 	font-size: 23px;
@@ -495,8 +509,8 @@
 #AudioPassThruPopUp .message2,
 #AlertPopUp .message2{
 	top: 70px;
-	left: 10px;
-	width: 374px;
+	left: 105px;
+	width: 285px;
 	height: 28px;
 	text-align: center;
 	font-size: 23px;
@@ -507,8 +521,8 @@
 #AudioPassThruPopUp .message3,
 #AlertPopUp .message3{
 	top: 100px;
-	left: 10px;
-	width: 374px;
+	left: 105px;
+	width: 285px;
 	height: 28px;
 	text-align: center;
 	font-size: 23px;

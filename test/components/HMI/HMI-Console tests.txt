@@ -13,3 +13,5 @@ VR.ChangeRegistration   FFW.VR.client.onWSMessage({data:'{"method":"VR.ChangeReg
 UI.PerformAudioPassThru FFW.UI.client.onWSMessage({data:'{"method":"UI.PerformAudioPassThru", "params":{"appId":-1, "audioPassThruDisplayText1":"Test1", "audioPassThruDisplayText2":"Test2", "initialPrompt":{"ttsChunks":[{"text":"speak","type":"TEXT"},{"text":"INITIAL_JINGLE","type":"PRE_RECORDED"}]}, "maxDuration":5000}, "id": 6000}'})
 
 UI.EndAudioPassThru     FFW.UI.client.onWSMessage({data:'{"method":"UI.EndAudioPassThru", "params":{"appId":-1}}, "id": 6000}'})
+
+UI.Slider               FFW.UI.client.onWSMessage({data:'{"method":"UI.Slider","params":{"appId":-1,"numTicks":2,"position":1,"sliderFooter":["Line 1","Line 2"],"sliderHeader":"Slider Header","timeout":5000},"id": 6000}'});
