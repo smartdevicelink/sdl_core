@@ -4,7 +4,7 @@
  * @desc VehicleInfo module visual representation
  * 
  * @category    View
- * @filesource  app/view/home/VehicleInfo.js
+ * @filesource  app/view/applink/VehicleInfo.js
  * @version     2.0
  *
  * @author      Andriy Melnyk

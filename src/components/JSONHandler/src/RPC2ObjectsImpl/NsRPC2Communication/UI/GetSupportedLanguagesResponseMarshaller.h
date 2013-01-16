@@ -1,0 +1,28 @@
+#ifndef NSRPC2COMMUNICATION_UI_GETSUPPORTEDLANGUAGESRESPONSEMARSHALLER
+#define NSRPC2COMMUNICATION_UI_GETSUPPORTEDLANGUAGESRESPONSEMARSHALLER
+
+#include <string>
+#include <json/json.h>
+
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetSupportedLanguagesResponse.h"
+
+namespace NsRPC2Communication
+{
+  namespace UI
+  {
+
+    struct GetSupportedLanguagesResponseMarshaller
+    {
+      static bool checkIntegrity(GetSupportedLanguagesResponse& e);
+      static bool checkIntegrityConst(const GetSupportedLanguagesResponse& e);
+    
+      static bool fromString(const std::string& s,GetSupportedLanguagesResponse& e);
+      static const std::string toString(const GetSupportedLanguagesResponse& e);
+    
+      static bool fromJSON(const Json::Value& s,GetSupportedLanguagesResponse& e);
+      static Json::Value toJSON(const GetSupportedLanguagesResponse& e);
+    };
+  }
+}
+
+#endif

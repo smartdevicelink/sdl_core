@@ -56,7 +56,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
             classNames: 'player_controlls',
             
             PrevTrackButton: MFT.Button.extend({
-                elementId:          'app_view_controlls_prev_track_button',
+                elementId:          'app_view_controlls_prev_track_button_v2',
                 classNames:         ['bc-item-big', 'prevcd'],
                 classNames:         ['bc-item-big', 'prevcd'],
                 actionDown:     function(){
@@ -70,7 +70,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 icon:               'images/media/ico_prew.png',
             }),
             PlayButton: MFT.Button.extend({
-                elementId:          'app_view_controlls_play_button',
+                elementId:          'app_view_controlls_play_button_v2',
                 classNames:         ['bc-item-big', 'playcd'],
                 actionDown:     function(){
                     this._super();
@@ -87,7 +87,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 )
             }),
             NextTrackButton: MFT.Button.extend({
-                elementId:          'app_view_controlls_next_track_button',
+                elementId:          'app_view_controlls_next_track_button_v2',
                 classNames:         ['bc-item-big', 'nextcd'],
                 actionDown:     function(){
                     this._super();

@@ -454,8 +454,9 @@
 	height: 20px;
 	padding: 10px;
 }
-/* Alert popup*/
 
+/* Alert, AudioPassThruPopUp popup*/
+#AudioPassThruPopUp.AudioPassThruPopUp,
 #AlertPopUp.AlertPopUp{
 	opacity: 0;
 	left: 200px;
@@ -469,7 +470,7 @@
 	border-radius: 6px;
 	display: none;
 }
-
+#AudioPassThruPopUp .applicationName,
 #AlertPopUp .applicationName{
 	width: 380px;
 	left: 10px;
@@ -479,7 +480,7 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-
+#AudioPassThruPopUp .message1,
 #AlertPopUp .message1{
 	top: 37px;
 	left: 10px;
@@ -491,7 +492,7 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-
+#AudioPassThruPopUp .message2,
 #AlertPopUp .message2{
 	top: 70px;
 	left: 10px;
@@ -503,7 +504,7 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-
+#AudioPassThruPopUp .message3,
 #AlertPopUp .message3{
 	top: 100px;
 	left: 10px;
@@ -515,12 +516,12 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-
+#AudioPassThruPopUp.AudioPassThruActive,
 #AlertPopUp.AlertActive{
 	opacity: 1;
 	display: block;
 }
-
+#AudioPassThruPopUp .softButton,
 #AlertPopUp .softButton{
 	border: 1px solid #393939;
 	border-radius: 3px;
@@ -529,6 +530,7 @@
 	text-align: center;
 	float: left;
 	margin: 10px;
+	position: relative;
 }
 
 #AlertPopUp .alertSoftButtons{
@@ -550,9 +552,11 @@
 #softButton0.three{
 	width: 170px;
 }
+#AudioPassThruPopUp .buttonDone,
 #softButton1.three{
 	width: 170px;
 }
+#AudioPassThruPopUp .buttonCancel,
 #softButton2.three{
 	width: 362px;
 }
@@ -568,6 +572,21 @@
 #softButton3.four{
 	width: 170px;
 }
+#AudioPassThruPopUp .buttonRetry{
+	top: 120px;
+	width: 175px;
+}
+#AudioPassThruPopUp .buttonDone{
+	top: 120px;
+	width: 175px;
+}
+#AudioPassThruPopUp .buttonCancel{
+	top: 120px;
+	width: 372px;
+}
+
+
+
 #app_controlButtons .languageSelect{
 	position: absolute;
 	width: 150px;

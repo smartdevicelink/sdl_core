@@ -385,6 +385,10 @@ set (GENERATED_RPC_SOURCES
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/ChangeRegistrationMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/ChangeRegistrationResponse.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/ChangeRegistrationResponseMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetSupportedLanguages.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetSupportedLanguagesMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetSupportedLanguagesResponse.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetSupportedLanguagesResponseMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/CreateInteractionChoiceSet.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/CreateInteractionChoiceSetMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/CreateInteractionChoiceSetResponse.cpp

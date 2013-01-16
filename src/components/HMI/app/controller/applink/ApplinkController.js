@@ -11,26 +11,15 @@
  */
  
 MFT.ApplinkController = Em.Object.create({
-	
-	/**
-	 * List of registered applications
-	 * @type object
-	 */
-	 
-	// To prevent errors without registered application "-1" used as test appId
-	registeredApps: {
-		"-1": 0,			// Used for media applications
-		"-2": 1				// Used for non media applications
-	},
 
-    /*
+    /**
      * Driver Distraction State
      *
      * @type bool
      */
     driverDistractionState:		false,
 
-    /*
+    /**
      * Protocol Version 2 State
      *
      * @type bool
@@ -49,10 +38,50 @@ MFT.ApplinkController = Em.Object.create({
 
     /**
      * Method to set selected state of vehicle transmittion to vehicleData
-     * @param {string} lang Language code
+     * @param {string} prndl Vehicle transmittion state
      */
 	onPRNDLSelected: function( prndl ){
         MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', prndl);
+    },
+
+   	/**
+     * Method closes AudioPassThruPopUp
+     */
+    closePopUp: function( result ){
+        MFT.ApplinkModel.set('AudioPassThruState', false);
+        this.performAudioPassThruResponse( result );
+    },
+
+    /**
+     * Method to send response from UIRPC back to ApplinkCore
+     * @param {string} result Result code
+     */
+	performAudioPassThruResponse: function( result ){
+        FFW.UI.sendUIResult( result, FFW.UI.performAudioPassThruRequestId, "UI.PerformAudioPassThru");
+    },
+
+    /**
+     * Method ends processing of AudioPassThru
+     * and call AudioPassThru UI response handeler with parameters "ABORTED"
+     */
+    cancelAudioPassThru: function() {
+        this.closePopUp("ABORTED");
+    },
+
+    /**
+     * Method ends processing of AudioPassThru
+     * and call AudioPassThru UI response handeler with parameters "SUCCESS"
+     */
+    doneAudioPassThru: function() {
+        this.closePopUp("SUCCESS");
+    },
+
+    /**
+     * Method ends processing of AudioPassThru
+     * and call AudioPassThru UI response handeler with parameters "RETRY"
+     */
+    retryAudioPassThru: function() {
+        this.closePopUp("RETRY");
     },
 
     /**
@@ -80,12 +109,12 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param applicationType: Number
 	 */
 	registerApplication: function( applicationId, applicationType ) {
-		if ( this.registeredApps[ applicationId ] ) {
+		if ( MFT.ApplinkModel.registeredApps[ applicationId ] ) {
 			//Em.Logger.error('Application ['+ applicationId +'] already registered!');
 			return;
 		}
 		
-		this.registeredApps[ applicationId ] = applicationType;
+		MFT.ApplinkModel.registeredApps[ applicationId ] = applicationType;
 		//Em.Logger.log('Application ['+ applicationId +'] registered!');
 	},
 
@@ -96,7 +125,7 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param applicationId: Number
 	 */
 	unRegisterApplication: function( applicationId ) {
-		delete this.registeredApps[ applicationId ];
+		delete MFT.ApplinkModel.registeredApps[ applicationId ];
 	},
 
     /**
@@ -137,7 +166,7 @@ MFT.ApplinkController = Em.Object.create({
 	 * @return Object Model
 	 */
 	getApplicationModel: function( applicationId ) {
-		return MFT[ this.applicationModels[ this.registeredApps[ applicationId ] ] ];
+		return MFT[ this.applicationModels[ MFT.ApplinkModel.registeredApps[ applicationId ] ] ];
 	},
 
 	/* Function returns ChangeDeviceView 
@@ -173,7 +202,9 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param {Object}
 	 */
 	onGetAppList: function( appList ){
-		for(var i = 0; i < appList.length; i++){
+		var i = 0,
+			len = appList.length;
+		for(i = 0; i < len; i++){
 			if( appList[i].isMediaApplication ){
 				MFT.ApplinkController.registerApplication(appList[i].appId, 0);
 			}else{

@@ -9,3 +9,7 @@ UI.ChangeRegistration   FFW.UI.client.onWSMessage({data:'{"method":"UI.ChangeReg
 TTS.ChangeRegistration  FFW.TTS.client.onWSMessage({data:'{"method":"TTS.ChangeRegistration", "params":{"language": "RU-RU"}, "id": 6000}'})
 
 VR.ChangeRegistration   FFW.VR.client.onWSMessage({data:'{"method":"VR.ChangeRegistration", "params":{"language": "RU-RU"}, "id": 6000}'})
+
+UI.PerformAudioPassThru FFW.UI.client.onWSMessage({data:'{"method":"UI.PerformAudioPassThru", "params":{"appId":-1, "audioPassThruDisplayText1":"Test1", "audioPassThruDisplayText2":"Test2", "initialPrompt":{"ttsChunks":[{"text":"speak","type":"TEXT"},{"text":"INITIAL_JINGLE","type":"PRE_RECORDED"}]}, "maxDuration":5000}, "id": 6000}'})
+
+UI.EndAudioPassThru     FFW.UI.client.onWSMessage({data:'{"method":"UI.EndAudioPassThru", "params":{"appId":-1}}, "id": 6000}'})
