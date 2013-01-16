@@ -297,6 +297,21 @@ FFW.UI = FFW.RPCObserver.create({
 
 		    	break;
 		    }
+		    case "UI.GetSupportedLanguages":{
+
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result":	{
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method" : "UI.GetSupportedLanguagesResponse",
+						"languages" : MFT.ApplinkModel.applinkLanguagesList
+					}
+				};
+				this.client.send(JSONMessage);
+
+		    	break;
+		    }
 		    case  "UI.GetCapabilities":{
 				// send repsonse
 				var JSONMessage = {
@@ -401,9 +416,9 @@ FFW.UI = FFW.RPCObserver.create({
 					"resultCode" : resultCode, //  type (enum) from AppLink protocol
 					"method" : "UI.SliderResponse",
 					"sliderPosition" : sliderPosition
-					}
-				};
-				this.client.send(JSONMessage);
+				}
+			};
+			this.client.send(JSONMessage);
 	},
 
 	/*
@@ -476,7 +491,7 @@ FFW.UI = FFW.RPCObserver.create({
 	/*
 	 * send notification when DriverDistraction PopUp is visible
  	 */
-	onDriverDistractionl: function(driverDistractionState) {
+	onDriverDistraction: function(driverDistractionState) {
 		Em.Logger.log("FFW.UI.DriverDistraction");
 
 		// send repsonse

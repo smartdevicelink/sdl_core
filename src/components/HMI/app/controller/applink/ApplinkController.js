@@ -37,8 +37,8 @@ MFT.ApplinkController = Em.Object.create({
 	},
 
     /**
-     * Method to set selected state of vehicle transmittion to vehicleData
-     * @param {string} prndl Vehicle transmittion state
+     * Method to set selected state of vehicle transmission to vehicleData
+     * @param {string} prndl Vehicle transmission state
      */
 	onPRNDLSelected: function( prndl ){
         MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', prndl);
