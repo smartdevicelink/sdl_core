@@ -48,6 +48,14 @@ MFT.ApplinkController = Em.Object.create({
 	},
 
     /**
+     * Method to set selected state of vehicle transmittion to vehicleData
+     * @param {string} lang Language code
+     */
+	onPRNDLSelected: function( prndl ){
+        MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', prndl);
+    },
+
+    /**
      * Method to set language for UI component with parameters sent from ApplinkCore to UIRPC
      * @param {string} lang Language code
      */
@@ -162,6 +170,7 @@ MFT.ApplinkController = Em.Object.create({
 	/**
 	 * Method creates list of Application ID's
 	 * Then call HMI method for display a list of Applications
+	 * @param {Object}
 	 */
 	onGetAppList: function( appList ){
 		for(var i = 0; i < appList.length; i++){
@@ -182,31 +191,57 @@ MFT.ApplinkController = Em.Object.create({
 	},
 
 	/**
-	 *  Method activates selected registered application
+	 * Method activates selected registered application
+	 * @param {Object}
 	 */
 	onActivateApplinkApp: function(element){
 		this.getApplicationModel(element.appId).turnOnApplink( element.appName, element.appId );
 	},
 
-	
 	/**
-	 * Method sent softButtons pressed and event status to RPC
+	 * Method sent custom softButtons pressed and event status to RPC
+	 * @param {Object}
 	 */
-	onSoftButtonActionUp: function( element ){
-		FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
+	onSoftButtonActionUpCustom: function( element ){
         if(element.time > 0){
             FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "LONG", element.softButtonID);
         }else{
             FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "SHORT", element.softButtonID);
         }
+		FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
+        element.time = 0;
+    },
+
+	/**
+	 * Method sent custom softButtons pressed and event status to RPC 
+	 * @param {Object}
+	 */
+	onSoftButtonActionDownCustom: function( element ){
+        FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", element.softButtonID);
+        element.time = 0;
+        setTimeout(function(){ element.time ++; }, 1000);
+	},
+	
+	/**
+	 * Method sent softButtons pressed and event status to RPC
+	 * @param {Object}
+	 */
+	onSoftButtonActionUp: function( name, element ){
+        if(element.time > 0){
+            FFW.Buttons.buttonPressed( name, "LONG" );
+        }else{
+            FFW.Buttons.buttonPressed( name, "SHORT" );
+        }
+		FFW.Buttons.buttonEvent( name, "BUTTONUP" );
         element.time = 0;
     },
 
 	/**
 	 * Method sent softButtons pressed and event status to RPC 
+	 * @param {Object}
 	 */
-	onSoftButtonActionDown: function( element ){
-        FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", element.softButtonID);
+	onSoftButtonActionDown: function( name, element ){
+        FFW.Buttons.buttonEvent( name, "BUTTONDOWN" );
         element.time = 0;
         setTimeout(function(){ element.time ++; }, 1000);
 	}

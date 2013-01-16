@@ -7,12 +7,14 @@
 #include <iostream>
 #include <fstream>
 #include <cstddef>
+#include <algorithm>
+#include <string>
+#include <sstream>
 #include <sys/statvfs.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include "Utils/WorkWithOS.h"
-
 
 unsigned long int WorkWithOS::getAvailableSpace()
 {
@@ -45,10 +47,10 @@ std::string WorkWithOS::createDirectory(const std::string & directoryName)
     {
         mkdir(directoryName.c_str(), S_IRWXU);
     }
-    
+
     return directoryName;
 }
-    
+
 bool WorkWithOS::checkIfDirectoryExists(const std::string & directoryName)
 {
     struct stat status;
@@ -62,7 +64,7 @@ bool WorkWithOS::checkIfDirectoryExists(const std::string & directoryName)
 
     return true;
 }
-    
+
 bool WorkWithOS::checkIfFileExists(const std::string & fileName)
 {
     struct stat status;
@@ -74,8 +76,8 @@ bool WorkWithOS::checkIfFileExists(const std::string & fileName)
     }
     return true;
 }
-    
-bool WorkWithOS::createFileAndWrite(const std::string & fileName, 
+
+bool WorkWithOS::createFileAndWrite(const std::string & fileName,
         const std::vector<unsigned char>& fileData)
 {
     std::ofstream file(fileName.c_str(), std::ios_base::binary);
@@ -127,4 +129,19 @@ std::vector<std::string> WorkWithOS::listFilesInDirectory(
     }
 
     return listFiles;
+}
+
+bool WorkWithOS::readFileAsBinary(const std::string& fileName, std::vector<unsigned char>& v)
+{
+    if (!checkIfFileExists(fileName))
+        return false;
+
+    std::ifstream file(fileName.c_str(), std::ios_base::binary);
+    std::ostringstream ss;
+    ss << file.rdbuf();
+    const std::string& s = ss.str();
+
+    v.resize(s.length());
+    std::copy(s.begin(), s.end(), v.begin());
+    return true;
 }

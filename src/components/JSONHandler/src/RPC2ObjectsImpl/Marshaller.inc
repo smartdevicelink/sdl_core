@@ -184,7 +184,7 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
 #line 119 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"AppLinkCore.GetVehicleTypeResponse",101,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse},
 #line 46 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.EndAudioPassThru",28,&Marshaller::mNsRPC2Communication_TTS__EndAudioPassThru},
+      {"UI.EndAudioPassThru",28,&Marshaller::mNsRPC2Communication_UI__EndAudioPassThru},
 #line 61 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"UI.AddSubMenuResponse",43,&Marshaller::mNsRPC2Communication_UI__AddSubMenuResponse},
 #line 49 "../src/RPC2ObjectsImpl/Marshaller.gp"
@@ -195,7 +195,7 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {"AppLinkCore.GetVehicleDataResponse",99,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse},
       {""}, {""}, {""},
 #line 47 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.EndAudioPassThruResponse",29,&Marshaller::mNsRPC2Communication_TTS__EndAudioPassThruResponse},
+      {"UI.EndAudioPassThruResponse",29,&Marshaller::mNsRPC2Communication_UI__EndAudioPassThruResponse},
 #line 121 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"AppLinkCore.ReadDID",103,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDID},
 #line 20 "../src/RPC2ObjectsImpl/Marshaller.gp"
@@ -321,7 +321,7 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
 #line 18 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"AppLinkCore.ActivateApp",0,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateApp},
 #line 54 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.PerformAudioPassThru",36,&Marshaller::mNsRPC2Communication_TTS__PerformAudioPassThru},
+      {"UI.PerformAudioPassThru",36,&Marshaller::mNsRPC2Communication_UI__PerformAudioPassThru},
       {""},
 #line 103 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"VR.AddCommandResponse",85,&Marshaller::mNsRPC2Communication_VR__AddCommandResponse},
@@ -333,7 +333,7 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
 #line 19 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"AppLinkCore.ActivateAppResponse",1,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse},
 #line 55 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.PerformAudioPassThruResponse",37,&Marshaller::mNsRPC2Communication_TTS__PerformAudioPassThruResponse},
+      {"UI.PerformAudioPassThruResponse",37,&Marshaller::mNsRPC2Communication_UI__PerformAudioPassThruResponse},
       {""},
 #line 69 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"UI.DeleteCommandResponse",51,&Marshaller::mNsRPC2Communication_UI__DeleteCommandResponse},

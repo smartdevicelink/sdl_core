@@ -1,16 +1,16 @@
-#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/EndAudioPassThruResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/EndAudioPassThruResponse.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/EndAudioPassThruResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/EndAudioPassThruResponseMarshaller.h"
 
 /*
-  interface	NsRPC2Communication::TTS
+  interface	NsRPC2Communication::UI
   version	1.2
   generated at	Fri Dec 14 06:14:25 2012
   source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
-using namespace NsRPC2Communication::TTS;
+using namespace NsRPC2Communication::UI;
 
 bool EndAudioPassThruResponseMarshaller::checkIntegrity(EndAudioPassThruResponse& s)
 {

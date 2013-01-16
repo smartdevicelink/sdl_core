@@ -1,15 +1,15 @@
-#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/EndAudioPassThru.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/EndAudioPassThru.h"
 #include "../src/../include/JSONHandler/RPC2Objects/Marshaller.h"
 
 /*
-  interface	NsRPC2Communication::TTS
+  interface	NsRPC2Communication::UI
   version	1.2
   generated at	Fri Dec 14 06:14:25 2012
   source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
-using namespace NsRPC2Communication::TTS;
+using namespace NsRPC2Communication::UI;
 
 
 EndAudioPassThru& EndAudioPassThru::operator =(const EndAudioPassThru& c)
@@ -24,13 +24,13 @@ EndAudioPassThru::~EndAudioPassThru(void)
 }
 
 
-EndAudioPassThru::EndAudioPassThru(void) : 
-  RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__ENDAUDIOPASSTHRU)
+EndAudioPassThru::EndAudioPassThru(void) :
+  RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ENDAUDIOPASSTHRU)
 {
 }
 
 
-EndAudioPassThru::EndAudioPassThru(const EndAudioPassThru& c) : RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__ENDAUDIOPASSTHRU,c.getId())
+EndAudioPassThru::EndAudioPassThru(const EndAudioPassThru& c) : RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ENDAUDIOPASSTHRU,c.getId())
 {
   *this=c;
 }

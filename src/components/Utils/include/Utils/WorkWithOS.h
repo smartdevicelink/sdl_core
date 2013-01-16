@@ -20,6 +20,7 @@ namespace WorkWithOS
     std::string getFullPath(const std::string & fileName);
     bool deleteFile(const std::string & fileName);
     std::vector<std::string> listFilesInDirectory(const std::string & directoryName);
+    bool readFileAsBinary(const std::string& fileName, std::vector<unsigned char>& v);
 }
 
-#endif // WORKWITHSYSTEM_INCLUDE    
+#endif // WORKWITHSYSTEM_INCLUDE

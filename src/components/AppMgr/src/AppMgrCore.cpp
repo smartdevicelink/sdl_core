@@ -1,9 +1,14 @@
+
 /**
  * \file AppMgrCore.cpp
  * \brief App manager core functionality
  * \author vsalo
  */
 #include <sys/socket.h>
+#include <signal.h>
+#include <pthread.h>
+#include <sys/time.h>
+
 #include "LoggerHelper.hpp"
 #include "Utils/ClientSocket.h"
 #include "Utils/SocketException.h"
@@ -33,20 +38,78 @@
 #include "JSONHandler/ALRPCObjects/V2/AppType.h"
 #include "JSONHandler/ALRPCObjects/V2/VehicleDataType.h"
 
-namespace {   
+namespace {
 
     template<typename Response, typename Result>
     void sendResponse(int responseId, Result result)
     {
         Response* response = new Response;
+        if (!response)
+            return;
+
         response->setId(responseId);
         response->setResult(result);
         NsAppManager::HMIHandler::getInstance().sendResponse(response);
     }
 
+    template<typename Response, typename Result>
+    void sendResponse(NsAppLinkRPCV2::FunctionID::FunctionIDInternal functionId
+        , Result result
+        , NsAppLinkRPC::ALRPCMessage::MessageType messageType
+        , bool succes
+        , unsigned int sessionKey)
+    {
+        Response* response = new Response;
+        if (!response)
+            return;
+
+        response->setMethodId(functionId);
+        response->setMessageType(messageType);
+        response->set_success(succes);
+        response->set_resultCode(result);
+        NsAppManager::MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+    }
+
+    template<typename Response>
+    NsAppManager::Application_v2* getApplicationV2AndCheckHMIStatus(unsigned int sessionKey
+        , NsAppLinkRPCV2::FunctionID::FunctionIDInternal functionId)
+    {
+        NsAppManager::Application_v2* app = static_cast<NsAppManager::Application_v2*>(
+            NsAppManager::AppMgrRegistry::getInstance().getApplication(sessionKey));
+        if(!app)
+        {
+            /*LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
+                << " hasn't been associated with any application!");*/
+
+            sendResponse<Response, NsAppLinkRPCV2::Result::ResultInternal>(functionId
+                , NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED
+                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                , false
+                , sessionKey);
+
+            return NULL;
+        }
+
+        if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+        {
+            /*LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key "
+                << sessionKey << " has not been activated yet!" );*/
+
+            sendResponse<Response, NsAppLinkRPCV2::Result::ResultInternal>(functionId
+                , NsAppLinkRPCV2::Result::REJECTED
+                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                , false
+                , sessionKey);
+
+            return NULL;
+        }
+
+        return app;
+    }
+
     struct thread_data
     {
-        int  timeout;
+        int timeout;
         std::string url;
         NsAppManager::SyncPManager::PData pdata;
     };
@@ -84,6 +147,176 @@ namespace {
         LOG4CPLUS_INFO_EXT(logger, " All data sent to host " << host << " port " << port);
         pthread_exit(NULL);
     }
+
+    // !----------------------------------------------------------------------------------------------------------------
+
+    const unsigned int AUDIO_PASS_THRU_TIMEOUT = 1;
+
+    pthread_cond_t cv;
+    pthread_mutex_t audioPassThruMutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_t audioPassThruThread;
+
+    void AudioPassThruTimerProc(int i)
+    {
+        pthread_cond_signal(&cv);
+    }
+
+    struct AudioPassThruData
+    {
+        unsigned int sessionKey;  // For error reports
+
+        unsigned int maxDuration;
+        NsAppLinkRPCV2::SamplingRate samplingRate;
+        NsAppLinkRPCV2::AudioCaptureQuality bitsPerSample;
+        NsAppLinkRPCV2::AudioType audioType;
+    };
+
+    void* AudioPassThru(void* data)
+    {
+        AudioPassThruData* data_ = static_cast<AudioPassThruData*>(data);
+        if (!data_)
+        {
+            NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
+            std::cout << "AudioPassThru thread -> AudioPassThruData empty..." << std::endl;
+            pthread_exit(NULL);  // TODO(akandul): How can we send error information to mobile from here?
+        }
+
+        unsigned int audioLength = 0;
+        std::string filename;
+        if (data_->bitsPerSample.get() == NsAppLinkRPCV2::AudioCaptureQuality::FIX_8_BIT)
+        {
+            filename = "audio.8bit.wav";
+            audioLength = 1000;
+        }
+        else if (data_->bitsPerSample.get() == NsAppLinkRPCV2::AudioCaptureQuality::FIX_16_BIT)
+        {
+            filename = "";  //TODO(akandul): Add file name here.
+            audioLength = static_cast<unsigned int>(1000 * 60 * 2.7); // 3 minute audio.
+        }
+        else
+        {
+            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+            sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                    , NsAppLinkRPCV2::Result::GENERIC_ERROR
+                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                    , false
+                    , data_->sessionKey);
+
+            NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
+            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+            pthread_exit(NULL);
+        }
+
+        std::vector<unsigned char> binaryData;
+        if (!WorkWithOS::readFileAsBinary(filename, binaryData))
+        {
+            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+            std::cout << "AudioPassThru thread -> can't read from file..." << std::endl;
+            sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                    , NsAppLinkRPCV2::Result::GENERIC_ERROR
+                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                    , false
+                    , data_->sessionKey);
+
+            NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
+            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+            pthread_exit(NULL);
+        }
+
+        if (binaryData.empty())
+        {
+            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+            std::cout << "AudioPassThru thread -> binary data empty..." << std::endl;
+            sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                    , NsAppLinkRPCV2::Result::GENERIC_ERROR
+                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                    , false
+                    , data_->sessionKey);
+
+            NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
+            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+            pthread_exit(NULL);
+        }
+
+        unsigned int audioPart = 0;
+        unsigned int dataLength = 0;
+
+        // Send only part of file
+        if (data_->maxDuration != 0 && data_->maxDuration < audioLength)
+        {
+            audioPart = (data_->maxDuration * 100) / audioLength; // % of audio file.
+            dataLength = (binaryData.size() * audioPart) / 100;  // part of file data.
+        }
+        else
+        {
+            audioPart = audioLength;
+            dataLength = binaryData.size();
+        }
+
+        unsigned int step = (dataLength * (audioPart / 1000)) / 100;
+        std::vector<unsigned char>::iterator from = binaryData.begin();
+        std::vector<unsigned char>::iterator to = from + step;
+
+        for (int i = 0; i <= (audioPart / 1000); ++i)  // minimal timeout is 1 sec now.
+        {
+            struct itimerval tout_val;
+            tout_val.it_interval.tv_sec = 0;
+            tout_val.it_interval.tv_usec = 0;
+            tout_val.it_value.tv_sec = AUDIO_PASS_THRU_TIMEOUT;
+            tout_val.it_value.tv_usec = 0;
+            setitimer(ITIMER_REAL, &tout_val, 0);
+            signal(SIGALRM, AudioPassThruTimerProc);
+
+            pthread_cond_wait(&cv, &audioPassThruMutex);
+            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+
+            NsAppLinkRPCV2::OnAudioPassThru* onAudioPassThru = new NsAppLinkRPCV2::OnAudioPassThru;
+            if (!onAudioPassThru)
+            {
+                pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+                std::cout << "AudioPassThru thread -> OUT_OF_MEMORY -> new NsAppLinkRPCV2::OnAudioPassThru" << std::endl;
+                sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                    , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                        , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
+                        , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                        , false
+                        , data_->sessionKey);
+
+                delete onAudioPassThru;
+                NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
+                pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+                pthread_exit(NULL);
+            }
+
+            onAudioPassThru->setBinaryData(std::vector<unsigned char>(from, to));
+            onAudioPassThru->setMethodId(NsAppLinkRPCV2::FunctionID::OnAudioPassThruID);
+            onAudioPassThru->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+            NsAppManager::MobileHandler::getInstance().sendRPCMessage(onAudioPassThru, data_->sessionKey);
+
+            from = to;
+            to = to + step;
+
+            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+        }
+
+        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+        if (data_)
+            delete data_;
+        NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
+
+        sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                            , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                                , NsAppLinkRPCV2::Result::SUCCESS
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , true
+                                , data_->sessionKey);
+
+        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+        pthread_exit(NULL);
+    }
 }
 
 namespace NsAppManager
@@ -104,12 +337,15 @@ namespace NsAppManager
      * \brief Default class constructor
      */
     AppMgrCore::AppMgrCore()
-        :mQueueRPCAppLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
-        ,mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
-        ,mDriverDistractionV1(0)
-        ,mDriverDistractionV2(0)
+        : mQueueRPCAppLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
+        , mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
+        , mDriverDistractionV1(0)
+        , mDriverDistractionV2(0)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
+
+        pthread_mutex_init(&audioPassThruMutex, NULL);
+        memset(static_cast<void*>(&cv), 0, sizeof(cv));
     }
 
     /**
@@ -306,7 +542,7 @@ namespace NsAppManager
                     NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey 
+                        LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
                             << " hasn't been associated with any application!");
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
@@ -1206,7 +1442,7 @@ namespace NsAppManager
                     }
 
                     Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, sessionKey ));
-                    
+
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
@@ -1347,7 +1583,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    core->mButtonsMapping.addButton( object->get_buttonName(), item );                    
+                    core->mButtonsMapping.addButton( object->get_buttonName(), item );
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -1573,7 +1809,7 @@ namespace NsAppManager
                     NsAppLinkRPCV2::ListFiles_request* object = (NsAppLinkRPCV2::ListFiles_request*)mobileMsg;
                     NsAppLinkRPCV2::ListFiles_response* response = new NsAppLinkRPCV2::ListFiles_response;
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
-                    response->setMethodId(NsAppLinkRPCV2::FunctionID::ListFilesID);                    
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::ListFilesID);
                     unsigned long int freeSpace = WorkWithOS::getAvailableSpace();
 
                     Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
@@ -1595,7 +1831,7 @@ namespace NsAppManager
                     }
 
                     bool successFlag = false;
-                    
+
                     if ( WorkWithOS::checkIfDirectoryExists(app->getName()))
                     {
                         const std::string & fullDirectoryPath = WorkWithOS::getFullPath(app->getName());
@@ -1697,7 +1933,7 @@ namespace NsAppManager
 
                     NsRPC2Communication::UI::SetAppIcon* setAppIcon = new NsRPC2Communication::UI::SetAppIcon();
                     setAppIcon->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    
+
                     char currentAppPath[FILENAME_MAX];
                     char fullPathToSyncFileName[FILENAME_MAX];
 
@@ -2615,6 +2851,120 @@ namespace NsAppManager
                     HMIHandler::getInstance().sendRequest(delSubMenu);
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A PerformAudioPassThru request has been invoked");
+
+                    if (core->getAudioPassThruFlag())
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, "PerformAudioPassThru::TOO_MANY_PENDING_REQUESTS");
+                        sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                            , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                                , NsAppLinkRPCV2::Result::TOO_MANY_PENDING_REQUESTS
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , false
+                                , sessionKey);
+                        break;
+                    }
+
+                    core->setAudioPassThruFlag(true);
+
+                    Application_v2* app
+                        = getApplicationV2AndCheckHMIStatus<NsAppLinkRPCV2::PerformAudioPassThru_response>(sessionKey,
+                            NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID);
+                    if (!app)
+                        break;
+
+                    NsAppLinkRPCV2::PerformAudioPassThru_request* request
+                        = static_cast<NsAppLinkRPCV2::PerformAudioPassThru_request*>(mobileMsg);
+
+                    NsRPC2Communication::UI::PerformAudioPassThru* performAudioPassThru
+                        = new NsRPC2Communication::UI::PerformAudioPassThru;
+                    if (!performAudioPassThru)
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, "PerformAudioPassThru::OUT_OF_MEMORY");
+                        sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                            , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                                , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , false
+                                , sessionKey);
+                        core->setAudioPassThruFlag(false);
+                        break;
+                    }
+
+                    performAudioPassThru->set_initialPrompt(request->get_initialPrompt());
+                    performAudioPassThru->set_samplingRate(request->get_samplingRate());
+                    performAudioPassThru->set_maxDuration(request->get_maxDuration());
+                    performAudioPassThru->set_bitsPerSample(request->get_bitsPerSample());
+                    performAudioPassThru->set_audioType(request->get_audioType());
+
+                    const std::string* firstDisplayText = request->get_audioPassThruDisplayText1();
+                    if(firstDisplayText)
+                        performAudioPassThru->set_audioPassThruDisplayText1(*firstDisplayText);
+
+                    const std::string* secondDisplayText = request->get_audioPassThruDisplayText2();
+                    if (secondDisplayText)
+                        performAudioPassThru->set_audioPassThruDisplayText2(*secondDisplayText);
+
+                    performAudioPassThru->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    performAudioPassThru->set_appId(app->getAppID());
+                    HMIHandler::getInstance().sendRequest(performAudioPassThru);
+
+                    LOG4CPLUS_INFO_EXT(mLogger, "Request to HMI sent...");
+
+                    AudioPassThruData* data = new AudioPassThruData;
+                    if (!data)
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, "PerformAudioPassThru::OUT_OF_MEMORY");
+                        sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                            , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                                , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , false
+                                , sessionKey);
+                        core->setAudioPassThruFlag(false);
+                        break;
+                    }
+
+                    //  Thread for audio record operation
+                    data->samplingRate = request->get_samplingRate();
+                    data->maxDuration = request->get_maxDuration();
+                    data->bitsPerSample = request->get_bitsPerSample();
+                    data->audioType = request->get_audioType();
+                    data->sessionKey = sessionKey;
+                    pthread_create(&audioPassThruThread, 0, AudioPassThru, static_cast<void*>(data));
+
+                    LOG4CPLUS_INFO_EXT(mLogger, "AudioPassThru thread created...");
+
+                    // We send response only when we finish or EndAudioPassThru request received.
+                    // Look for AudioPassThru thread proc and EndAudioPassThruID event handler.
+                    break;
+                }
+                case NsAppLinkRPCV2::FunctionID::EndAudioPassThruID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A EndAudioPassThru request has been invoked");
+
+                    pthread_cond_signal(&cv);
+                    pthread_cancel(audioPassThruThread);
+
+                    sendResponse<NsAppLinkRPCV2::EndAudioPassThru_response
+                            , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::EndAudioPassThruID
+                                , NsAppLinkRPCV2::Result::SUCCESS
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , true
+                                , sessionKey);
+
+                    sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                            , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                                , NsAppLinkRPCV2::Result::SUCCESS
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , true
+                                , sessionKey);
+
+                    core->setAudioPassThruFlag(false);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::SubscribeVehicleDataID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeVehicleData request has been invoked");
@@ -2746,7 +3096,7 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " pThis should point to an instance of AppMgrCore class");
             return;
         }
-        
+
         AppMgrCore* core = (AppMgrCore*)pThis;
         switch(msg->getMethod())
         {
@@ -3211,7 +3561,7 @@ namespace NsAppManager
                     case 2:
                     {
                         NsAppLinkRPCV2::Alert_response* response = new NsAppLinkRPCV2::Alert_response();
-                        response->set_success(true);                        
+                        response->set_success(true);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::AlertID);
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
@@ -3262,7 +3612,7 @@ namespace NsAppManager
                         case 2:
                         {
                             NsAppLinkRPCV2::AddCommand_response* response = new NsAppLinkRPCV2::AddCommand_response();
-                            response->set_success(true);                            
+                            response->set_success(true);
                             response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                             response->setMethodId(NsAppLinkRPCV2::FunctionID::AddCommandID);
                             response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
@@ -4439,7 +4789,7 @@ namespace NsAppManager
                     hmiApp.set_ngnMediaScreenAppName(app->getNgnMediaScreenAppName());
                     hmiApp.set_appId(app->getAppID());
                     hmiApp.set_isMediaApplication(app->getIsMediaApplication());
-                    
+
                     LOG4CPLUS_INFO_EXT(mLogger, "Added an application " << hmiApp.get_appName()
                         << " application id " << hmiApp.get_appId()
                         << " is media? " << hmiApp.get_isMediaApplication() );
@@ -4931,6 +5281,16 @@ namespace NsAppManager
     void AppMgrCore::removeDevice(const int &sessionKey)
     {
         mDeviceHandler.removeDevice(sessionKey);
+    }
+
+    bool AppMgrCore::getAudioPassThruFlag() const
+    {
+        return mAudioPassThruFlag;
+    }
+
+    void AppMgrCore::setAudioPassThruFlag(bool flag)
+    {
+        mAudioPassThruFlag = flag;
     }
 
 }

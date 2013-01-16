@@ -3,11 +3,11 @@
  * 
  * @desc General model for Applink applications
  * 
- * @category	Model
- * @filesource	app/model/applink/ApplinkModel.js
- * @version		1.0
+ * @category  Model
+ * @filesource  app/model/applink/ApplinkModel.js
+ * @version    1.0
  *
- * @author		Artem Petrosyan
+ * @author    Artem Petrosyan
  */
 
 MFT.ApplinkModel = Em.Object.create({
@@ -20,17 +20,17 @@ MFT.ApplinkModel = Em.Object.create({
         this.resetProperties();
     },
 
-  	/**
+    /**
      * Chosen device name
-  	 *
-  	 * @type:	String
-  	 */
-  	deviceName: null,
+     *
+     * @type {String}
+     */
+    deviceName: null,
 
     /**
      * List of icons
-     *
-     * @type:   Struct
+     * 
+     * @type {Object}
      */
     listOfIcons:{
         //appId: syncFileName
@@ -38,8 +38,9 @@ MFT.ApplinkModel = Em.Object.create({
     },
 
     /**
-      * Array of active applications
-      */
+     * Array of active applications
+     * @type {Array}
+     */
     applicationsList:           [],
 
     /**
@@ -48,22 +49,22 @@ MFT.ApplinkModel = Em.Object.create({
      */
     devicesList:                [],
 
-    /*
+    /**
      * Global properties
      * @type {Object}
      */
-    globalProperties    : {
-        helpPrompt  : null ,
-        timeoutPrompt   : null
+    globalProperties:{
+        helpPrompt:             [],
+        timeoutPrompt:          []
     },
 
-    /*
+    /**
      * Current language of UI component
      * @type {String}
      */
     UILanguage: '',
 
-    /*
+    /**
      * Current language of TTS and VR component
      * @type {String}
      */
@@ -148,27 +149,26 @@ MFT.ApplinkModel = Em.Object.create({
 
     /*
      * resetGlobalProperties
-     * @param {String} name of propety to reset.
+     * @param {String} propertyName Name of propety to reset.
      */
     resetProperties: function(propertyName) {
         if (propertyName == "HELPPROMPT" || propertyName == ""){
-            this.globalProperties.helpPrompt    = this.globalPropertiesDefault.helpPrompt;
+            this.set('globalProperties.helpPrompt', this.globalPropertiesDefault.helpPrompt);
         }
     
         if (propertyName == "TIMEOUTPROMPT" || propertyName == ""){
-            this.globalProperties.timeoutPrompt = this.globalPropertiesDefault.timoutPrompt;
+            this.set('globalProperties.timeoutPrompt', this.globalPropertiesDefault.timoutPrompt);
         }
     },
 
-    /*
+    /**
      * setGlobalProperties
-     * @param {Object} Object with parameters come from ApplinkCore.
+     * @param {Object} message Object with parameters come from ApplinkCore.
      */
     setProperties: function(message) {
 
-        this.globalProperties.helpPrompt = message.helpPrompt;
-        this.globalProperties.timeoutPrompt = message.timeoutPrompt;
-        MFT.ControlButtons.infoTable.globalPropertiesData.propertiesData();
+        this.set('globalProperties.helpPrompt', message.helpPrompt);
+        this.set('globalProperties.timeoutPrompt', message.timeoutPrompt);
 
     },
 
@@ -235,7 +235,7 @@ MFT.ApplinkModel = Em.Object.create({
      * Applink UI Alert response handeler
      * show popup window 
      *
-     * @param message:Object
+     * @param {Object} message Object with parameters come from ApplinkCore.
      */
     onUIAlert: function( message ) {
 
@@ -244,42 +244,37 @@ MFT.ApplinkModel = Em.Object.create({
 
     /** 
      * Prompt activation
+     * @param {Object}
      */
     onPrompt: function(ttsChunks){
-        /*
-        ttsChunks = JSON.parse('[{"text":"speak","type":"TEXT"},{"text":"INITIAL_JINGLE","type":"PRE_RECORDED"},{"text":"that was a jingle","type":"TEXT"},{"text":". 1 l ih v 1 .  _ l ay v .  r iy 1 d  . r eh d .","type":"SAPI_PHONEMES"}]');
-        */
         var message = '';
-		if(ttsChunks){
-			for(var i = 0; i < ttsChunks.length; i++){
-				message += ttsChunks[i].text + '\n';
-			}
-			MFT.TTSPopUp.ActivateTTS(message);
-		}
-	},
-	
-	/**
-	 * Applink VR AddCommand response handeler
-	 * add command to voice recognition window
-	 *
-	 * @param message:	Object
-	 */
-	addCommandVR: function ( message ) {
-		//message = JSON.parse('{"appId":65537,"cmdId":4,"vrCommands":["F you bc hi iv"]}');
-		
-		MFT.VRPopUp.AddCommand( message.cmdId, message.vrCommands, message.appId );
-	},
-	
-	/**
-	 * Applink VR DeleteCommand response handeler
-	 * delete command from voice recognition window
-	 *
-	 * @param commandId:	Number
-	 */
-	deleteCommandVR: function ( commandId ) {
-		//message = 4;
-		
-		MFT.VRPopUp.DeleteCommand( commandId );
-	}
+        if(ttsChunks){
+            for(var i = 0; i < ttsChunks.length; i++){
+              message += ttsChunks[i].text + '\n';
+            }
+            MFT.TTSPopUp.ActivateTTS(message);
+        }
+  },
+  
+  /**
+   * Applink VR AddCommand response handeler
+   * add command to voice recognition window
+   *
+   *  @param {Object}
+   */
+  addCommandVR: function ( message ) {
+    //message = JSON.parse('{"appId":65537,"cmdId":4,"vrCommands":["F you bc hi iv"]}');
+    
+    MFT.VRPopUp.AddCommand( message.cmdId, message.vrCommands, message.appId );
+  },
+  
+  /**
+   * Applink VR DeleteCommand response handeler
+   * delete command from voice recognition window
+   *
+   * @param {Number}
+   */
+  deleteCommandVR: function ( commandId ) {    
+      MFT.VRPopUp.DeleteCommand( commandId );
+  }
 });
- 

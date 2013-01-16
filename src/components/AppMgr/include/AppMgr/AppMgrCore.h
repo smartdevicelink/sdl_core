@@ -166,6 +166,9 @@ namespace NsAppManager
          */
         void removeDevice(const int& sessionKey);
 
+        bool getAudioPassThruFlag() const;
+        void setAudioPassThruFlag(bool flag);
+
     private:
 
         /**
@@ -264,6 +267,7 @@ namespace NsAppManager
         NsAppLinkRPCV2::Language mTtsLanguageV2;
 
         NsAppLinkRPCV2::VehicleType mVehicleType;
+        bool mAudioPassThruFlag;
 
         SyncPManager     mSyncPManager;
 

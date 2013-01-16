@@ -1,15 +1,15 @@
-#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/PerformAudioPassThru.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/PerformAudioPassThru.h"
 #include "../src/../include/JSONHandler/RPC2Objects/Marshaller.h"
 
 /*
-  interface	NsRPC2Communication::TTS
+  interface	NsRPC2Communication::UI
   version	1.2
   generated at	Fri Dec 14 06:14:25 2012
   source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
-using namespace NsRPC2Communication::TTS;
+using namespace NsRPC2Communication::UI;
 
 
 PerformAudioPassThru& PerformAudioPassThru::operator =(const PerformAudioPassThru& c)
@@ -35,26 +35,26 @@ PerformAudioPassThru::~PerformAudioPassThru(void)
 }
 
 
-PerformAudioPassThru::PerformAudioPassThru(void) : 
-  RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRU),
+PerformAudioPassThru::PerformAudioPassThru(void) :
+  RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__PERFORMAUDIOPASSTHRU),
   audioPassThruDisplayText1(0),
   audioPassThruDisplayText2(0)
 {
 }
 
 
-PerformAudioPassThru::PerformAudioPassThru(const PerformAudioPassThru& c) : RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__PERFORMAUDIOPASSTHRU,c.getId())
+PerformAudioPassThru::PerformAudioPassThru(const PerformAudioPassThru& c) : RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__PERFORMAUDIOPASSTHRU,c.getId())
 {
   *this=c;
 }
 
 
-const std::vector< NsAppLinkRPC::TTSChunk>& PerformAudioPassThru::get_initialPrompt(void)
+const std::vector< NsAppLinkRPCV2::TTSChunk>& PerformAudioPassThru::get_initialPrompt(void)
 {
   return initialPrompt;
 }
 
-bool PerformAudioPassThru::set_initialPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& initialPrompt_)
+bool PerformAudioPassThru::set_initialPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& initialPrompt_)
 {
   initialPrompt=initialPrompt_;
   return true;

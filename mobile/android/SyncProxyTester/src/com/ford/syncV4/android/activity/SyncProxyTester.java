@@ -20,6 +20,7 @@ import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -197,6 +198,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		((Button) findViewById(R.id.btnPlayPause)).setOnClickListener(this);
 		
 		resetAdapters();
+
+		_vehicleDataType = new ArrayAdapter<VehicleDataType>(this,
+				android.R.layout.simple_spinner_item, VehicleDataType.values());
+		_vehicleDataType
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 		_listview = (ListView) findViewById(R.id.messageList);
 		_msgAdapter = new logAdapter(logTag, false, this, R.layout.row, _logMessages);
@@ -431,16 +437,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		};
 
 		isVehicleDataSubscribed = new boolean[VehicleDataType.values().length];
-		_vehicleDataType = new ArrayAdapter<VehicleDataType>(this,
-				android.R.layout.select_dialog_multichoice,
-				VehicleDataType.values()) {
-			public View getView(int position, View convertView, ViewGroup parent) {
-				CheckedTextView ret = (CheckedTextView) super.getView(position,
-						convertView, parent);
-				ret.setChecked(isVehicleDataSubscribed[position]);
-				return ret;
-			}
-		};
 
 		_submenuAdapter = new ArrayAdapter<SyncSubMenu>(this,
 				android.R.layout.select_dialog_item);
@@ -1903,146 +1899,15 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
 						} else if (adapter.getItem(which) == Names.SubscribeVehicleData) {
-							//SubscribeVehicleData
-							AlertDialog.Builder builder;
-							AlertDialog dlg;
-							
-							Context mContext = adapter.getContext();
-							LayoutInflater inflater = (LayoutInflater) mContext
-									.getSystemService(LAYOUT_INFLATER_SERVICE);
-							View layout = inflater.inflate(R.layout.subscribevehicledata, null);
-							
-							final CheckBox chkVEHICLEDATA_GPS = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_GPS);
-							final CheckBox chkVEHICLEDATA_SPEED = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_SPEED);
-							final CheckBox chkVEHICLEDATA_FUELLEVEL = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_FUELLEVEL);
-							final CheckBox chkVEHICLEDATA_FUELECONOMY = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_FUELECONOMY);
-							final CheckBox chkVEHICLEDATA_ENGINERPM = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_ENGINERPM);
-							final CheckBox chkVEHICLEDATA_BATTVOLTS = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_BATTVOLTS);
-							final CheckBox chkVEHICLEDATA_RAINSENSOR = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_RAINSENSOR);
-							final CheckBox chkVEHICLEDATA_ODOMETER = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_ODOMETER);
-							final CheckBox chkVEHICLEDATA_VIN = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_VIN);
-							final CheckBox chkVEHICLEDATA_EXTERNTEMP = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_EXTERNTEMP);
-							final CheckBox chkVEHICLEDATA_PRNDLSTATUS = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_PRNDLSTATUS);
-							final CheckBox chkVEHICLEDATA_TIREPRESSURE = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_TIREPRESSURE);
-							final CheckBox chkVEHICLEDATA_BATTERYPACKVOLTAGE = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_BATTERYPACKVOLTAGE);
-							final CheckBox chkVEHICLEDATA_BATTERYCURRENT = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_BATTERYCURRENT);
-							final CheckBox chkVEHICLEDATA_BATTERYTEMPERATURE = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_BATTERYTEMPERATURE);
-							final CheckBox chkVEHICLEDATA_SATESN = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_SATESN);
-							
-							builder = new AlertDialog.Builder(mContext);
-							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									Vector<VehicleDataType> dataType = new Vector<VehicleDataType>();
-									if (chkVEHICLEDATA_GPS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_GPS);
-									else if (chkVEHICLEDATA_SPEED.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_SPEED);
-									else if (chkVEHICLEDATA_FUELLEVEL.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_FUELLEVEL);
-									else if (chkVEHICLEDATA_FUELECONOMY.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_FUELECONOMY);
-									else if (chkVEHICLEDATA_ENGINERPM.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_ENGINERPM);
-									else if (chkVEHICLEDATA_BATTVOLTS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTVOLTS);
-									else if (chkVEHICLEDATA_RAINSENSOR.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_RAINSENSOR);
-									else if (chkVEHICLEDATA_ODOMETER.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_ODOMETER);
-									else if (chkVEHICLEDATA_VIN.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_VIN);
-									else if (chkVEHICLEDATA_EXTERNTEMP.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_EXTERNTEMP);
-									else if (chkVEHICLEDATA_PRNDLSTATUS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_PRNDLSTATUS);
-									else if (chkVEHICLEDATA_TIREPRESSURE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_TIREPRESSURE);
-									else if (chkVEHICLEDATA_BATTERYPACKVOLTAGE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYPACKVOLTAGE);
-									else if (chkVEHICLEDATA_BATTERYCURRENT.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYCURRENT);
-									else if (chkVEHICLEDATA_BATTERYTEMPERATURE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYTEMPERATURE);
-									else if (chkVEHICLEDATA_SATESN.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_SATESN);
-									
-									try {
-										SubscribeVehicleData msg = new SubscribeVehicleData();
-										msg.setDataType(dataType);
-										msg.setCorrelationID(autoIncCorrId++);
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-								}
-							});
-							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									dialog.cancel();
-								}
-							});
-							builder.setView(layout);
-							dlg = builder.create();
-							dlg.show();
+							sendSubscribeVehicleData();
 						} else if (adapter.getItem(which) == Names.UnsubscribeVehicleData) {
-							//UnsubscribeVehicleData
-							AlertDialog.Builder builder;
-							AlertDialog dlg;
-							
-							Context mContext = adapter.getContext();
-							LayoutInflater inflater = (LayoutInflater) mContext
-									.getSystemService(LAYOUT_INFLATER_SERVICE);
-							View layout = inflater.inflate(R.layout.subscribevehicledata, null);
-							
-							final CheckBox chkVEHICLEDATA_GPS = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_GPS);
-							final CheckBox chkVEHICLEDATA_SPEED = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_SPEED);
-							final CheckBox chkVEHICLEDATA_FUELLEVEL = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_FUELLEVEL);
-							final CheckBox chkVEHICLEDATA_FUELECONOMY = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_FUELECONOMY);
-							final CheckBox chkVEHICLEDATA_ENGINERPM = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_ENGINERPM);
-							final CheckBox chkVEHICLEDATA_BATTVOLTS = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_BATTVOLTS);
-							final CheckBox chkVEHICLEDATA_RAINSENSOR = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_RAINSENSOR);
-							final CheckBox chkVEHICLEDATA_ODOMETER = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_ODOMETER);
-							final CheckBox chkVEHICLEDATA_VIN = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_VIN);
-							final CheckBox chkVEHICLEDATA_EXTERNTEMP = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_EXTERNTEMP);
-							final CheckBox chkVEHICLEDATA_PRNDLSTATUS = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_PRNDLSTATUS);
-							final CheckBox chkVEHICLEDATA_TIREPRESSURE = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_TIREPRESSURE);
-							final CheckBox chkVEHICLEDATA_BATTERYPACKVOLTAGE = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_BATTERYPACKVOLTAGE);
-							final CheckBox chkVEHICLEDATA_BATTERYCURRENT = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_BATTERYCURRENT);
-							final CheckBox chkVEHICLEDATA_BATTERYTEMPERATURE = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_BATTERYTEMPERATURE);
-							final CheckBox chkVEHICLEDATA_SATESN = (CheckBox) layout.findViewById(R.id.chkVEHICLEDATA_SATESN);
-							
-							builder = new AlertDialog.Builder(mContext);
-							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									Vector<VehicleDataType> dataType = new Vector<VehicleDataType>();
-									if (chkVEHICLEDATA_GPS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_GPS);
-									else if (chkVEHICLEDATA_SPEED.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_SPEED);
-									else if (chkVEHICLEDATA_FUELLEVEL.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_FUELLEVEL);
-									else if (chkVEHICLEDATA_FUELECONOMY.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_FUELECONOMY);
-									else if (chkVEHICLEDATA_ENGINERPM.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_ENGINERPM);
-									else if (chkVEHICLEDATA_BATTVOLTS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTVOLTS);
-									else if (chkVEHICLEDATA_RAINSENSOR.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_RAINSENSOR);
-									else if (chkVEHICLEDATA_ODOMETER.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_ODOMETER);
-									else if (chkVEHICLEDATA_VIN.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_VIN);
-									else if (chkVEHICLEDATA_EXTERNTEMP.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_EXTERNTEMP);
-									else if (chkVEHICLEDATA_PRNDLSTATUS.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_PRNDLSTATUS);
-									else if (chkVEHICLEDATA_TIREPRESSURE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_TIREPRESSURE);
-									else if (chkVEHICLEDATA_BATTERYPACKVOLTAGE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYPACKVOLTAGE);
-									else if (chkVEHICLEDATA_BATTERYCURRENT.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYCURRENT);
-									else if (chkVEHICLEDATA_BATTERYTEMPERATURE.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_BATTERYTEMPERATURE);
-									else if (chkVEHICLEDATA_SATESN.isChecked()) dataType.add(VehicleDataType.VEHICLEDATA_SATESN);
-									
-									try {
-										UnsubscribeVehicleData msg = new UnsubscribeVehicleData();
-										msg.setDataType(dataType);
-										msg.setCorrelationID(autoIncCorrId++);
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-								}
-							});
-							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									dialog.cancel();
-								}
-							});
-							builder.setView(layout);
-							dlg = builder.create();
-							dlg.show();
+							sendUnsubscribeVehicleData();
 						} else if (adapter.getItem(which) == Names.GetVehicleData) {
 							//GetVehicleData
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
 							builder.setAdapter(_vehicleDataType, new DialogInterface.OnClickListener() {
 
 								public void onClick(DialogInterface dialog, int which) {
-									boolean needToSubscribe = !isVehicleDataSubscribed[which];
 									try {
 										GetVehicleData msg = new GetVehicleData();
 										msg.setDataType(VehicleDataType.values()[which]);
@@ -2052,7 +1917,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
-									isVehicleDataSubscribed[which] = !isVehicleDataSubscribed[which];
 								}
 							});
 							AlertDialog dlg = builder.create();
@@ -2323,6 +2187,140 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							curCount = 0;
 						}
 						messageSelectCount.put(function, curCount + 1);
+					}
+
+					private void sendSubscribeVehicleData() {
+						AlertDialog.Builder builder;
+						final Context mContext = adapter.getContext();
+						
+						// the local copy of isVehicleDataSubscribed
+						final boolean[] checkedVehicleDataTypes = isVehicleDataSubscribed.clone();
+						
+						builder = new AlertDialog.Builder(mContext);
+						builder.setMultiChoiceItems(vehicleDataTypeNames(), checkedVehicleDataTypes, new OnMultiChoiceClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+								// don't save unchecking of values that have been checked before
+								// as this message is only about subscribing
+								boolean checked = isChecked;
+								boolean changed = false;
+								if ((!checked) && isVehicleDataSubscribed[which]) {
+									checked = true;
+									changed = true;
+								}
+								checkedVehicleDataTypes[which] = checked;
+								if (changed) {
+									((ArrayAdapter<?>) ((AlertDialog) dialog).getListView().getAdapter()).
+										notifyDataSetChanged();
+								}
+							}
+						});
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								Vector<VehicleDataType> dataType = new Vector<VehicleDataType>();
+								VehicleDataType[] dataTypes = VehicleDataType.values();
+								// subscribe to new checked items only
+								for (int i = 0; i < checkedVehicleDataTypes.length; i++) {
+									boolean checked = checkedVehicleDataTypes[i];
+									if (checked && (!isVehicleDataSubscribed[i])) {
+										dataType.add(dataTypes[i]);
+									}
+								}
+								
+								if (dataType.size() > 0) {
+									try {
+										SubscribeVehicleData msg = new SubscribeVehicleData();
+										msg.setDataType(dataType);
+										msg.setCorrelationID(autoIncCorrId++);
+										_msgAdapter.logMessage(msg, true);
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (SyncException e) {
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									}
+									isVehicleDataSubscribed = checkedVehicleDataTypes.clone();
+								} else {
+									Toast.makeText(mContext, "Nothing new selected", Toast.LENGTH_LONG).show();
+								}
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+						builder.show();
+					}
+
+					private void sendUnsubscribeVehicleData() {
+						AlertDialog.Builder builder;
+						final Context mContext = adapter.getContext();
+						
+						// the local copy of isVehicleDataSubscribed
+						final boolean[] checkedVehicleDataTypes = isVehicleDataSubscribed.clone();
+						
+						builder = new AlertDialog.Builder(mContext);
+						builder.setMultiChoiceItems(vehicleDataTypeNames(), checkedVehicleDataTypes, new OnMultiChoiceClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+								/**
+								 * NB! This method is intentionally left empty. If the 3rd
+								 * parameter to setMultiChoiceItems() is null, the user's
+								 * changes to checked items don't save.
+								 **/
+							}
+						});
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								Vector<VehicleDataType> dataType = new Vector<VehicleDataType>();
+								VehicleDataType[] dataTypes = VehicleDataType.values();
+								// unsubscribe from new unchecked items only
+								for (int i = 0; i < checkedVehicleDataTypes.length; i++) {
+									boolean checked = checkedVehicleDataTypes[i];
+									if (checked) {
+										if (isVehicleDataSubscribed[i]) {
+											dataType.add(dataTypes[i]);
+										}
+										checkedVehicleDataTypes[i] = false;
+									} else {
+										if (isVehicleDataSubscribed[i]) {
+											checkedVehicleDataTypes[i] = true;
+										}
+									}
+								}
+								
+								if (dataType.size() > 0) {
+									try {
+										UnsubscribeVehicleData msg = new UnsubscribeVehicleData();
+										msg.setDataType(dataType);
+										msg.setCorrelationID(autoIncCorrId++);
+										_msgAdapter.logMessage(msg, true);
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (SyncException e) {
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									}
+								} else {
+									Toast.makeText(mContext, "Nothing new unselected", Toast.LENGTH_LONG).show();
+								}
+								isVehicleDataSubscribed = checkedVehicleDataTypes.clone();
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+						builder.show();
+					}
+
+					private String[] vehicleDataTypeNames() {
+						final String[] vehicleDataTypeNames = new String[] {
+								"GPS", "Speed", "Fuel Level", "Fuel Economy",
+								"Engine RPM", "Battery Voltage", "Rain Sensor",
+								"Odometer", "VIN", "External Temp", "PRNDL Status",
+								"Tire Pressure", "Battery Voltage", "Battery Current",
+								"Battery Temperature", "Satellite ESN"
+						};
+						return vehicleDataTypeNames;
 					}
 
 					private void sendSetGlobalProperties() {

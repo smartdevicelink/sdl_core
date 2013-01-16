@@ -5,13 +5,13 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/SamplingRate.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/AudioCaptureQuality.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/AudioType.h"
 
 /*
-  interface	NsRPC2Communication::TTS
+  interface	NsRPC2Communication::UI
   version	1.2
   generated at	Fri Dec 14 06:14:25 2012
   source stamp	Fri Dec 14 06:14:23 2012
@@ -20,24 +20,24 @@
 
 namespace NsRPC2Communication
 {
-  namespace TTS
+  namespace UI
   {
 
     class PerformAudioPassThru : public ::NsRPC2Communication::RPC2Request
     {
     public:
-    
+
       PerformAudioPassThru(const PerformAudioPassThru& c);
       PerformAudioPassThru(void);
-    
+
       PerformAudioPassThru& operator =(const PerformAudioPassThru&);
-    
+
       virtual ~PerformAudioPassThru(void);
-    
+
       bool checkIntegrity(void);
-    
+
 // getters
-      const std::vector< NsAppLinkRPC::TTSChunk>& get_initialPrompt(void);
+      const std::vector< NsAppLinkRPCV2::TTSChunk>& get_initialPrompt(void);
 
       const std::string* get_audioPassThruDisplayText1(void);
       const std::string* get_audioPassThruDisplayText2(void);
@@ -54,7 +54,7 @@ namespace NsRPC2Communication
 
 // setters
 /// 1 <= size <= 100
-      bool set_initialPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& initialPrompt);
+      bool set_initialPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& initialPrompt);
 
 /// audioPassThruDisplayText1 <= 500
       bool set_audioPassThruDisplayText1(const std::string& audioPassThruDisplayText1);
@@ -82,7 +82,7 @@ namespace NsRPC2Communication
 
       friend class PerformAudioPassThruMarshaller;
 
-      std::vector< NsAppLinkRPC::TTSChunk> initialPrompt;
+      std::vector< NsAppLinkRPCV2::TTSChunk> initialPrompt;
       std::string* audioPassThruDisplayText1;
       std::string* audioPassThruDisplayText2;
       NsAppLinkRPCV2::SamplingRate samplingRate;
