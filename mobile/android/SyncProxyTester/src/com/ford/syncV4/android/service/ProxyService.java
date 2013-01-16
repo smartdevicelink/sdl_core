@@ -811,6 +811,15 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
+		
+		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+		final Result result = response.getResultCode();
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.onEndAudioPassThruResponse(result);
+			}
+		});
 	}
 	@Override
 	public void onOnAudioPassThru(OnAudioPassThru notification) {

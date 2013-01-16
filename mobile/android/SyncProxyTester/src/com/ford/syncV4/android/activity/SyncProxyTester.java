@@ -2642,6 +2642,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		}
 	}
 
+	/**
+	 * Called when an EndAudioPassThru response comes. The logic is the same as
+	 * when a PerformAudioPassThru response comes.
+	 */
+	public void onEndAudioPassThruResponse(Result result) {
+		onPerformAudioPassThruResponse(result);
+	}
+
 	private void closeAudioPassThruStream() {
 		if (audioPassThruOutStream != null) {
 			Log.d(logTag, "closing audioPassThruOutStream");
