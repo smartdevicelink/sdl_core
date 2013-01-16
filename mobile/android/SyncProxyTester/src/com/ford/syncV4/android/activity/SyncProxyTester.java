@@ -118,6 +118,7 @@ import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.SamplingRate;
 import com.ford.syncV4.proxy.rpc.enums.SoftButtonType;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
@@ -191,7 +192,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 */
 	private Map<String, Integer> messageSelectCount;
 	private static final String MSC_PREFIX = "msc_";
-	
+
+	/** The output stream to write audioPassThru data. */
+	private OutputStream audioPassThruOutStream = null;
+
 	/**
 	 * In onCreate() specifies if it is the first time the activity is created
 	 * during this app launch.
@@ -500,6 +504,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		if (service != null) {
 			service.setCurrentActivity(null);
 		}
+		closeAudioPassThruStream();
 	}
 	
 	public Dialog onCreateDialog(int id) {
@@ -2599,14 +2604,16 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	public void onAudioPassThru(byte[] aptData) {
 		Log.i(logTag, "data len " + aptData.length);
 		if (isExtStorageWritable()) {
-			OutputStream out = null;
 			File outFile = null;
 			try {
-				outFile = new File(Environment.getExternalStorageDirectory(),
-						AUDIOPASSTHRU_OUTPUT_FILE);
-				out = new BufferedOutputStream(new FileOutputStream(outFile,
-						false));
-				out.write(aptData);
+				if (audioPassThruOutStream == null) {
+					outFile = new File(
+							Environment.getExternalStorageDirectory(),
+							AUDIOPASSTHRU_OUTPUT_FILE);
+					audioPassThruOutStream = new BufferedOutputStream(
+							new FileOutputStream(outFile, false));
+				}
+				audioPassThruOutStream.write(aptData);
 			} catch (FileNotFoundException e) {
 				logToConsoleAndUI(
 						"Output file "
@@ -2615,19 +2622,27 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								+ " can't be opened for writing", e);
 			} catch (IOException e) {
 				logToConsoleAndUI("Can't write to output file", e);
-			} finally {
-				if (out != null) {
-					try {
-						out.flush();
-						out.close();
-					} catch (IOException e) {
-						logToConsoleAndUI("Can't close output file", e);
-					}
-					out = null;
-				}
 			}
 		} else {
 			logToConsoleAndUI("External storage is not available", null);
+		}
+	}
+
+	/** Called when a PerformAudioPassThru response comes. */
+	public void onPerformAudioPassThruResponse(Result result) {
+		closeAudioPassThruStream();
+	}
+
+	private void closeAudioPassThruStream() {
+		if (audioPassThruOutStream != null) {
+			Log.d(logTag, "closing audioPassThruOutStream");
+			try {
+				audioPassThruOutStream.flush();
+				audioPassThruOutStream.close();
+			} catch (IOException e) {
+				Log.w(logTag, "Can't close output file", e);
+			}
+			audioPassThruOutStream = null;
 		}
 	}
 
