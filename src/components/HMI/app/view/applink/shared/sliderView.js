@@ -29,7 +29,8 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 	
 	footerLabel: MFT.Label.extend({
 		classNames:	'slider-footer',
-		content:	'Footer Label'
+		content:	'Footer Label',
+		data:       []
 	}),
 	
 	/**
@@ -80,13 +81,26 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 	}),
 	
     loadData: function( data ){
-		this.set( 'headerLabel.content', data.sliderHeader );
-		this.set( 'footerLabel.content', data.sliderFooter[0] );
+        this.set( 'headerLabel.content', data.sliderHeader );
+        this.set( 'footerLabel.content', data.sliderFooter[0] );
 		this.get( 'adjustControl.sliderValue').set('range',data.numTicks);
 		this.get( 'adjustControl.sliderValue').set('value',data.position);
-
+        
+        this.footerLabel.data = data.sliderFooter;
+        
 		setTimeout(function(){
 			MFT.SliderView.adjustControl.rerender();
 		},1);
-    }
+    },
+    
+    
+    /**
+     * Change footer text depends on current slider position
+     * works only for dynamic footer mode
+     */
+    changeFooterText: function() {
+        if ( this.footerLabel.data.length > 1 ) {
+             this.set( 'footerLabel.content', this.footerLabel.data[this.adjustControl.sliderValue.value-1] );
+        }
+    }.observes('adjustControl.sliderValue.value')
 });
