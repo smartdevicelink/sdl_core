@@ -41,6 +41,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -48,6 +49,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CheckedTextView;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioGroup;
@@ -1518,91 +1520,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
 						} else if (adapter.getItem(which) == Names.Slider) {
-							//something
-							AlertDialog.Builder builder;
-							AlertDialog dlg;
-
-							Context mContext = adapter.getContext();
-							LayoutInflater inflater = (LayoutInflater) mContext
-									.getSystemService(LAYOUT_INFLATER_SERVICE);
-							View layout = inflater.inflate(R.layout.slider, null);
-							final EditText txtNumTicks = (EditText) layout.findViewById(R.id.txtNumTicks);
-							final EditText txtPosititon = (EditText) layout.findViewById(R.id.txtPosition);
-							final EditText txtSliderHeader = (EditText) layout.findViewById(R.id.txtSliderHeader);
-							final EditText txtSliderFooter = (EditText) layout.findViewById(R.id.txtSliderFooter);
-							final EditText txtTimeout = (EditText) layout.findViewById(R.id.txtTimeout);
-							
-							final Button btnStaticFooter = (Button) layout.findViewById(R.id.slider_staticFooter);
-							btnStaticFooter.setOnClickListener(new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									// set default static text
-									txtSliderFooter.setText(R.string.slider_footer);
-								}
-							});
-							
-							// string to join/split footer strings
-							final String joinString = ",";
-							final Button btnDynamicFooter = (Button) layout.findViewById(R.id.slider_dynamicFooter);
-							btnDynamicFooter.setOnClickListener(new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									// set numTicks comma-separated strings
-									int numTicks = 0;
-									try {
-										numTicks = Integer.parseInt(txtNumTicks.getText().toString());
-									} catch (NumberFormatException e) {
-										// do nothing, leave 0
-									}
-									if (numTicks > 0) {
-										StringBuilder b = new StringBuilder();
-										for (int i = 0; i < numTicks; ++i) {
-											b.append(joinString).append(i);
-										}
-										txtSliderFooter.setText(b.toString().substring(joinString.length()));
-									} else {
-										txtSliderFooter.setText("");
-									}
-								}
-							});
-							
-							builder = new AlertDialog.Builder(mContext);
-							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									Slider msg = new Slider();
-									msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
-									msg.setNumTicks(Integer.parseInt(txtNumTicks.getText().toString()));
-									msg.setSliderHeader(txtSliderHeader.getText().toString());
-									
-									Vector<String> footerelements = null;
-									String footer = txtSliderFooter.getText().toString();
-									// if footer has 1+ join strings, split it to array, otherwise use as is
-									if (footer.indexOf(joinString) != -1) {
-										footerelements = new Vector<String>(Arrays.asList(footer.split(joinString)));
-									} else {
-										footerelements = new Vector<String>();
-										footerelements.add(footer);
-									}
-									msg.setSliderFooter(footerelements);
-									
-									msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
-									msg.setCorrelationID(autoIncCorrId++);
-									_msgAdapter.logMessage(msg, true);
-									try {
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-								}
-							});
-							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									dialog.cancel();
-								}
-							});
-							builder.setView(layout);
-							dlg = builder.create();
-							dlg.show();
+							sendSlider();
 						} else if (adapter.getItem(which) == Names.ScrollableMessage) {
 							//something
 							AlertDialog.Builder builder;
@@ -2212,6 +2130,105 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							curCount = 0;
 						}
 						messageSelectCount.put(function, curCount + 1);
+					}
+					
+					private void updateDynamicFooter(EditText txtNumTicks,
+							EditText txtSliderFooter, String joinString) {
+						// set numTicks comma-separated strings
+						int numTicks = 0;
+						try {
+							numTicks = Integer.parseInt(txtNumTicks.getText().toString());
+						} catch (NumberFormatException e) {
+							// do nothing, leave 0
+						}
+						if (numTicks > 0) {
+							StringBuilder b = new StringBuilder();
+							for (int i = 0; i < numTicks; ++i) {
+								b.append(joinString).append(i + 1);
+							}
+							txtSliderFooter.setText(b.toString().substring(joinString.length()));
+						} else {
+							txtSliderFooter.setText("");
+						}
+					}
+
+					private void sendSlider() {
+						AlertDialog.Builder builder;
+
+						Context mContext = adapter.getContext();
+						LayoutInflater inflater = (LayoutInflater) mContext
+								.getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.slider, null);
+						final EditText txtNumTicks = (EditText) layout.findViewById(R.id.txtNumTicks);
+						final EditText txtPosititon = (EditText) layout.findViewById(R.id.txtPosition);
+						final EditText txtSliderHeader = (EditText) layout.findViewById(R.id.txtSliderHeader);
+						final EditText txtSliderFooter = (EditText) layout.findViewById(R.id.txtSliderFooter);
+						final EditText txtTimeout = (EditText) layout.findViewById(R.id.txtTimeout);
+
+						// string to join/split footer strings
+						final String joinString = ",";
+
+						final CheckBox chkDynamicFooter = (CheckBox) layout.findViewById(R.id.slider_chkDynamicFooter);
+						chkDynamicFooter.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+							@Override
+							public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+								if (!isChecked) {
+									// set default static text
+									txtSliderFooter.setText(R.string.slider_footer);
+								} else {
+									updateDynamicFooter(txtNumTicks, txtSliderFooter, joinString);
+								}
+							}
+						});
+						
+						txtNumTicks.setOnFocusChangeListener(new OnFocusChangeListener() {
+							@Override
+							public void onFocusChange(View v, boolean hasFocus) {
+								if ((!hasFocus) && chkDynamicFooter.isChecked()) {
+									updateDynamicFooter(txtNumTicks, txtSliderFooter, joinString);
+								}
+							}
+						});
+						
+						builder = new AlertDialog.Builder(mContext);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								if (chkDynamicFooter.isChecked()) {
+									updateDynamicFooter(txtNumTicks, txtSliderFooter, joinString);
+								}
+								
+								Slider msg = new Slider();
+								msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
+								msg.setNumTicks(Integer.parseInt(txtNumTicks.getText().toString()));
+								msg.setSliderHeader(txtSliderHeader.getText().toString());
+								
+								Vector<String> footerelements = null;
+								String footer = txtSliderFooter.getText().toString();
+								if (chkDynamicFooter.isChecked()) {
+									footerelements = new Vector<String>(Arrays.asList(footer.split(joinString)));
+								} else {
+									footerelements = new Vector<String>();
+									footerelements.add(footer);
+								}
+								msg.setSliderFooter(footerelements);
+								
+								msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
+								msg.setCorrelationID(autoIncCorrId++);
+								_msgAdapter.logMessage(msg, true);
+								try {
+									ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+								} catch (SyncException e) {
+									_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+								}
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+						builder.setView(layout);
+						builder.show();
 					}
 
 					private void sendSubscribeVehicleData() {

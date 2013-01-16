@@ -1,4 +1,5 @@
 [CW3]
+* Slider dialog: automatically update dynamic footer when enabled and the number of ticks changes.
 + Save the data from OnAudioPassThru notifications to the audiopassthru.bin file on SD card. The file is deleted if the result is not SUCCESS. Resend the request if the result is RETRY.
 + SyncProxyAndroid SDK: add RETRY value to the Result enum.
 * The subscribed vehicle data items now persist between launches of SubscribeVehicleData and UnsubscribeVehicleData dialogs. 
