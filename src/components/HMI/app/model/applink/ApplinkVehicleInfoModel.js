@@ -63,11 +63,11 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             type:   'rpm'
         },
         'VEHICLEDATA_FUELLEVEL':{
-            data:   'F',
+            data:   0.2,
             type:   'fuelLevel'
         },
         'VEHICLEDATA_FUELECONOMY':{
-            data:   true,
+            data:   0.1,
             type:   'avgFuelEconomy'
         },
         'VEHICLEDATA_BATTVOLTS':{
@@ -87,11 +87,16 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             type:   'prndl'
         },
         'VEHICLEDATA_TIREPRESSURE':{
-            data:   2,
+            data:   {
+                'leftFront': {
+                    'status':   'NORMAL',
+                    'pressure': 2
+                }
+            },
             type:   'tirePressure'
         },
         'VEHICLEDATA_BATTERYPACKVOLTAGE':{
-            data:   12,
+            data:   12.5,
             type:   'batteryPackVoltage'
         },
         'VEHICLEDATA_BATTERYCURRENT':{
@@ -103,7 +108,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             type:   'batteryPackTemperature'
         },
         'VEHICLEDATA_ENGINETORQUE':{
-            data:   0,
+            data:   650,
             type:   'engineTorque'
         },
         'VEHICLEDATA_ODOMETER':{
@@ -203,7 +208,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
      */
     getVehicleData: function( message ){
 
-        return this.vehicleData[message.dataType];
+        return this.vehicleData[message.dataType].data;
 
     },
 
@@ -219,21 +224,6 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
         }
         FFW.VehicleInfo.OnVehicleData(jsonData);
 
-    }.observes('this.vehicleData.speed',
-        'this.vehicleData.rpm',
-        'this.vehicleData.fuelLevel',
-        'this.vehicleData.avgFuelEconomy',
-        'this.vehicleData.batteryVoltage',
-        'this.vehicleData.externalTemperature',
-        'this.vehicleData.vin',
-        'this.vehicleData.prndl',
-        'this.vehicleData.tirePressure', 
-        'this.vehicleData.batteryPackVoltage',
-        'this.vehicleData.batteryPackCurrent',
-        'this.vehicleData.batteryPackTemperature',
-        'this.vehicleData.engineTorque',
-        'this.vehicleData.odometer',
-        'this.vehicleData.tripOdometer',
-        'this.vehicleData.genericbinary' )
+    }.observes('this.vehicleData.VEHICLEDATA_PRNDLSTATUS.data')
 });
  
