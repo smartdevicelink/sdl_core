@@ -38,7 +38,7 @@ bool ButtonNameMarshaller::fromJSON(const Json::Value& s,ButtonName& e)
 
 Json::Value ButtonNameMarshaller::toJSON(const ButtonName& e)
 {
-  if(e.mInternal==ButtonName::INVALID_ENUM) 
+  if(e.mInternal==ButtonName::INVALID_ENUM)
     return Json::Value(Json::nullValue);
   const char* s=getName(e.mInternal);
   return s ? Json::Value(s) : Json::Value(Json::nullValue);
@@ -69,7 +69,7 @@ const std::string ButtonNameMarshaller::toString(const ButtonName& e)
 
 }
 
-const PerfectHashTable ButtonNameMarshaller::mHashTable[15]=
+const PerfectHashTable ButtonNameMarshaller::mHashTable[16]=
 {
   {"OK",0},
   {"SEEKLEFT",1},
@@ -85,5 +85,6 @@ const PerfectHashTable ButtonNameMarshaller::mHashTable[15]=
   {"PRESET_6",11},
   {"PRESET_7",12},
   {"PRESET_8",13},
-  {"PRESET_9",14}
+  {"PRESET_9",14},
+  {"CUSTOM_BUTTON",15}
 };
