@@ -3164,6 +3164,42 @@ namespace NsAppManager
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::GetVehicleDataID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleData request has been invoked");
+                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
+                        NsAppLinkRPCV2::GetVehicleData_response* response = new NsAppLinkRPCV2::GetVehicleData_response();
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::GetVehicleDataID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::GetVehicleData_response* response = new NsAppLinkRPCV2::GetVehicleData_response;
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::GetVehicleDataID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    NsAppLinkRPCV2::GetVehicleData_request* object = static_cast<NsAppLinkRPCV2::GetVehicleData_request*>(mobileMsg);
+                    NsRPC2Communication::VehicleInfo::GetVehicleData* getVehicleDataRPC2Request = new NsRPC2Communication::VehicleInfo::GetVehicleData();
+                    getVehicleDataRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    LOG4CPLUS_INFO_EXT(mLogger, "getVehicleDataRPC2Request created");
+                    getVehicleDataRPC2Request->set_dataType(object->get_dataType());
+                    getVehicleDataRPC2Request->set_appId(sessionKey);
+                    LOG4CPLUS_INFO_EXT(mLogger, "GetVehicleData request almost handled" );
+                    core->mMessageMapping.addMessage(getVehicleDataRPC2Request->getId(), sessionKey);
+                    HMIHandler::getInstance().sendRequest(getVehicleDataRPC2Request);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::ReadDIDID:
                 case NsAppLinkRPCV2::FunctionID::GetDTCsID:
                 {
@@ -5163,6 +5199,98 @@ namespace NsAppManager
                 NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse* getVehType = (NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse*)msg;
                 core->mVehicleType = getVehType->get_vehicleType();
                 return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLEDATARESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleData response has been income");
+                NsRPC2Communication::VehicleInfo::GetVehicleDataResponse* object = static_cast<NsRPC2Communication::VehicleInfo::GetVehicleDataResponse*>(msg);
+                Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+
+                if (2 == app->getProtocolVersion())
+                {
+                    NsAppLinkRPCV2::GetVehicleData_response* response = new NsAppLinkRPCV2::GetVehicleData_response();
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::ShowID);
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    response->set_success(true);
+                    if (object->get_gps())
+                    {
+                        response->set_gps(*(object->get_gps()));
+                    } else if (object->get_speed())
+                    {
+                        response->set_speed(*(object->get_speed()));
+                    } else if (object->get_rpm())
+                    {
+                        response->set_rpm(*(object->get_rpm()));
+                    } else if (object->get_fuelLevel())
+                    {
+                        response->set_fuelLevel(*(object->get_fuelLevel()));
+                    } else if (object->get_avgFuelEconomy())
+                    {
+                        response->set_avgFuelEconomy(*(object->get_avgFuelEconomy()));
+                    } else if (object->get_batteryVoltage())
+                    {
+                        response->set_batteryVoltage(*(object->get_batteryVoltage()));
+                    } else if (object->get_externalTemperature())
+                    {
+                        response->set_externalTemperature(*(object->get_externalTemperature()));
+                    } else if (object->get_vin())
+                    {
+                        response->set_vin(*(object->get_vin()));
+                    } else if (object->get_prndl())
+                    {
+                        response->set_prndl(*(object->get_prndl()));
+                    } else if (object->get_tirePressure())
+                    {
+                        response->set_tirePressure(*(object->get_tirePressure()));
+                    } else if (object->get_batteryPackVoltage())
+                    {
+                        response->set_batteryPackVoltage(*(object->get_batteryPackVoltage()));
+                    } else if (object->get_batteryPackCurrent())
+                    {
+                        response->set_batteryPackCurrent(*(object->get_batteryPackCurrent()));
+                    } else if (object->get_batteryPackTemperature())
+                    {
+                        response->set_batteryPackTemperature(*(object->get_batteryPackTemperature()));
+                    } else if (object->get_engineTorque())
+                    {
+                        response->set_engineTorque(*(object->get_engineTorque()));
+                    } else if (object->get_odometer())
+                    {
+                        response->set_odometer(*(object->get_odometer()));
+                    } else if (object->get_tripOdometer())
+                    {
+                        response->set_tripOdometer(*(object->get_tripOdometer()));
+                    } else if (object->get_satRadioESN())
+                    {
+                        response->set_satRadioESN(*(object->get_satRadioESN()));
+                    } else
+                    {
+                        response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                        response->set_success(false);
+                    }
+                    core->mMessageMapping.removeMessage(object->getId());
+                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                        << " application id " << appId);
+                    MobileHandler::getInstance().sendRPCMessage(response, appId);
+                } else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "GetVehicleData is present in Protocol V1 only!!!");
+                }
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETDTCSRESPONSE:
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__READDIDRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "VehicleData COMMANDS. TODO!!!");
+                break;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not VehicleInfo RPC message " << msg->getMethod() << " has been received!");
