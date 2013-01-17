@@ -308,7 +308,7 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager
                                      0,
                                      sessionID,
                                      FIRST_FRAME_DATA_SIZE,
-                                     mMessageCounters[sessionID]++,
+                                     ++mMessageCounters[sessionID],
                                      outDataFirstFrame);
 
     retVal = sendFrame( connectionHandle, firstPacket );
