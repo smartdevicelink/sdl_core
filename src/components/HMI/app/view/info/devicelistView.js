@@ -54,8 +54,8 @@ MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
                         text:                   params.deviceList[i],
                         classNames:             'ffw-button notpressed list-item',
                         templateName:           params.icon ? 'rightIcon' : 'text',
-                        actionUp: function( element ){
-                            MFT.ApplinkController.onDeviceChoosed( element );
+                        actionUp: function(){
+                            MFT.ApplinkController.onDeviceChoosed( this );
                         }
                     })
                 );
@@ -71,7 +71,7 @@ MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
                     this.get('listOfDevices.list.childViews')[0]
                 );
             }
-        }
+        } 
     }.observes('this.stateObj.active'),
 
     /**

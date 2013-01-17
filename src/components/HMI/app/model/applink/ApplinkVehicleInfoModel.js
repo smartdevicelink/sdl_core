@@ -54,22 +54,83 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
      * Stored VehicleInfo Data
      */
     vehicleData: {
-        'speed':                    80,
-        'rpm':                      5000,
-        'fuelLevel':                'F',
-        'avgFuelEconomy':           true,
-        'batteryVoltage':           12.5,
-        'externalTemperature':      40,
-        'vin':                      '52-452-52-752',
-        'prndl':                    'PARK',
-        'tirePressure':             2,
-        'batteryPackVoltage':       12,
-        'batteryPackCurrent':       7,
-        'batteryPackTemperature':   30,
-        'engineTorque':             0,
-        'odometer':                 0,
-        'tripOdometer':             0,
-        'genericbinary':            165165650
+        'VEHICLEDATA_SPEED':{
+            data:   80,
+            type:   'speed'
+        },
+        'VEHICLEDATA_ENGINERPM':{
+            data:   5000,
+            type:   'rpm'
+        },
+        'VEHICLEDATA_FUELLEVEL':{
+            data:   'F',
+            type:   'fuelLevel'
+        },
+        'VEHICLEDATA_FUELECONOMY':{
+            data:   true,
+            type:   'avgFuelEconomy'
+        },
+        'VEHICLEDATA_BATTVOLTS':{
+            data:   12.5,
+            type:   'batteryVoltage'
+        },
+        'VEHICLEDATA_EXTERNTEMP':{
+            data:   40,
+            type:   'externalTemperature'
+        },
+        'VEHICLEDATA_VIN':{
+            data:   '52-452-52-752',
+            type:   'vin'
+        },
+        'VEHICLEDATA_PRNDLSTATUS':{
+            data:   'PARK',
+            type:   'prndl'
+        },
+        'VEHICLEDATA_TIREPRESSURE':{
+            data:   2,
+            type:   'tirePressure'
+        },
+        'VEHICLEDATA_BATTERYPACKVOLTAGE':{
+            data:   12,
+            type:   'batteryPackVoltage'
+        },
+        'VEHICLEDATA_BATTERYCURRENT':{
+            data:   7,
+            type:   'batteryPackCurrent'
+        },
+        'VEHICLEDATA_BATTERYTEMPERATURE':{
+            data:   30,
+            type:   'batteryPackTemperature'
+        },
+        'VEHICLEDATA_ENGINETORQUE':{
+            data:   0,
+            type:   'engineTorque'
+        },
+        'VEHICLEDATA_ODOMETER':{
+            data:   0,
+            type:   'odometer'
+        },
+        'VEHICLEDATA_TRIPODOMETER':{
+            data:   0,
+            type:   'tripOdometer'
+        },
+        'VEHICLEDATA_GENERICBINARY':{
+            data:   165165650,
+            type:   'genericbinary'
+        },
+        'VEHICLEDATA_SATESN':{
+            data:   165165650,
+            type:   'satRadioESN'
+        },
+        'VEHICLEDATA_GPS':{
+            data:   165165650,
+            type:   'gps'
+        },
+        'VEHICLEDATA_RAINSENSOR':{
+            data:   165165650,
+            type:   'rainSensor'
+        }
+
     },
 
     /**
