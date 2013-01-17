@@ -24,10 +24,6 @@ MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
                             'deviceListLabel'
                         ],
 
-    afterRender: function(){
-        this.ShowDeviceList();
-    },
-
     /** Button to return to previous view*/
     backButton: MFT.Button.extend({
         classNames:        ['backButton','button'],     
@@ -45,13 +41,38 @@ MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
         content:            'Change Devices'
     }),
 
-    ShowDeviceList: function( ){
+    ShowDeviceList: function( params ){
 
-        this.listOfDevices.items = MFT.ApplinkModel.devicesList.slice();
+        this.clearDeviceList();
 
-        this.listOfDevices.list.refresh();
-
+        if( !(params.deviceList.length == 1 && params.deviceList[0] == "") ){
+            for(var i = 0; i < params.deviceList.length; i++){
+                this.get('listOfDevices.list.childViews').pushObject(
+                    MFT.Button.create({
+                        deviceName:             params.deviceList[i],
+                        icon:                   params.icon,
+                        text:                   params.deviceList[i],
+                        classNames:             'ffw-button notpressed list-item',
+                        templateName:           params.icon ? 'rightIcon' : 'text',
+                        actionUp: function( element ){
+                            MFT.ApplinkController.onDeviceChoosed( element );
+                        }
+                    })
+                );
+            }
+        }
     },
+
+    clearDeviceList: function(){
+        if( this.stateObj.active ){
+            var count = this.get('listOfDevices.list.childViews').length - 1;
+            for(var i = count; i>=0; i--){
+                this.get('listOfDevices.list.childViews').removeObject(
+                    this.get('listOfDevices.list.childViews')[0]
+                );
+            }
+        }
+    }.observes('this.stateObj.active'),
 
     /**
       * List for option on ApplinkOptionsView screen

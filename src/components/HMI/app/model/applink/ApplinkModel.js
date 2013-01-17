@@ -220,25 +220,8 @@ MFT.ApplinkModel = Em.Object.create({
 
     onGetDeviceList: function( params ){
         if (null == params.resultCode || (null != params.resultCode && "SUCCESS" == params.resultCode)) {
-            this.devicesList.splice(0, this.devicesList.length);
-            for(var i = 0; i < params.deviceList.length; i++){
-                this.devicesList.push({
-                    type:       MFT.Button,
-                    params:     {
-                        text:           params.deviceList[i],
-                        deviceName:     params.deviceList[i],
-                        className:      'scrollButtons button notpressed',
-                        icon:           params.icon,
-                        templateName:   'rightIcon',
-                        actionUp:     function(){
-                           MFT.ApplinkController.onDeviceChoosed(this);
-                        }
-                    }                                   
-                });
-            }
-            
-            if( MFT.States.info.devicelist.active ){
-                MFT.DeviceLilstView.ShowDeviceList();
+            if( MFT.States.info.devicelist.active && params.deviceList){
+                MFT.DeviceLilstView.ShowDeviceList( params );
             }
         }
     },
