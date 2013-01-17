@@ -10,7 +10,7 @@ import com.ford.syncV4.util.DebugTool;
 public class ChangeRegistration extends RPCRequest {
 
     public ChangeRegistration() {
-        super("ChangeLanguageRegistration");
+        super("ChangeRegistration");
     }
     public ChangeRegistration(Hashtable hash) {
         super(hash);

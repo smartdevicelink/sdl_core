@@ -44,8 +44,9 @@ const std::string OnDeviceListUpdatedMarshaller::toString(const OnDeviceListUpda
 
 bool OnDeviceListUpdatedMarshaller::checkIntegrityConst(const OnDeviceListUpdated& s)
 {
+  if (s.deviceList)
   {
-    unsigned int i=s.deviceList.size();
+    unsigned int i=s.deviceList->size();
     if(i<1)  return false;
     if(i>100)  return false;
   }
@@ -64,12 +65,13 @@ Json::Value OnDeviceListUpdatedMarshaller::toJSON(const OnDeviceListUpdated& e)
   json["method"]=Json::Value("AppLinkCore.OnDeviceListUpdated");
   json["params"]=Json::Value(Json::objectValue);
 
+  if (e.deviceList)
   {
-    unsigned int i=e.deviceList.size();
+    unsigned int i=e.deviceList->size();
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=Json::Value(e.deviceList[i]);
+      j[i]=Json::Value(e.deviceList[0][i]);
 
     json["params"]["deviceList"]=j;
   }
@@ -79,6 +81,7 @@ Json::Value OnDeviceListUpdatedMarshaller::toJSON(const OnDeviceListUpdated& e)
 
 bool OnDeviceListUpdatedMarshaller::fromJSON(const Json::Value& json,OnDeviceListUpdated& c)
 {
+  delete c.deviceList;
   try
   {
     if(!json.isObject())  return false;
@@ -89,19 +92,18 @@ bool OnDeviceListUpdatedMarshaller::fromJSON(const Json::Value& json,OnDeviceLis
     Json::Value js=json["params"];
     if(!js.isObject())  return false;
 
-    if(!js.isMember("deviceList") || !js["deviceList"].isArray())
-      return false;
+    if(js.isMember("deviceList")) 
     {
-      c.deviceList.clear();
+      if (!js["deviceList"].isArray()) return false;
       unsigned int i=js["deviceList"].size();
       if(i<1)  return false;
       if(i>100)  return false;
-      c.deviceList.resize(i);
+      c.deviceList = new std::vector<std::string> (i);
       while(i--)
       {
         if(!js["deviceList"][i].isString())
           return false;
-        c.deviceList[i]=js["deviceList"][i].asString();
+        c.deviceList[0][i]=js["deviceList"][i].asString();
         
       }
     }
