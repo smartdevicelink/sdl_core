@@ -212,7 +212,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 
     /** Applink AddCommand handler */
     onApplinkAddCommand: function(params){
-        if( params.menuParams.parentID == 0 ){
+        if( params.menuParams.parentID == 0 || params.menuParams.parentID == null ){
             this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams, params.cmdIcon, params.appId);
         }else{
             this.subMenuCommands.push(params);
