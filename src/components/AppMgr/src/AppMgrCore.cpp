@@ -1555,23 +1555,33 @@ namespace NsAppManager
                     appRegistered->set_languageDesired(core->mVrLanguageV1);
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
                     appRegistered->set_appId(app->getAppID());
-                    appRegistered->set_appType(app->getAppType());
                     appRegistered->set_hmiDisplayLanguageDesired(core->mUiLanguageV1);
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
                     appRegistered->set_deviceName(currentDeviceName);
                     appRegistered->set_versionNumber(2);
-                    std::vector< NsAppLinkRPC::TTSChunk> ttsName;
-                    for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = app->getTtsName().begin(); it != app->getTtsName().end(); it++)
+
+                    if (!app->getAppType().empty())
                     {
-                        const NsAppLinkRPCV2::TTSChunk& chunk = *it;
-                        NsAppLinkRPC::TTSChunk chunkV1;
-                        chunkV1.set_text(chunk.get_text());
-                        NsAppLinkRPC::SpeechCapabilities caps;
-                        caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
-                        chunkV1.set_type(caps);
-                        ttsName.push_back(chunkV1);
+                        appRegistered->set_appType(app->getAppType());
                     }
-                    appRegistered->set_ttsName(ttsName);
+
+                    if (!app->getTtsName().empty())
+                    {
+                        std::vector< NsAppLinkRPC::TTSChunk> ttsName;
+                        for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = app->getTtsName().begin();it != app->getTtsName().end(); it++)
+                        {
+                            const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                            NsAppLinkRPC::TTSChunk chunkV1;
+                            chunkV1.set_text(chunk.get_text());
+                            NsAppLinkRPC::SpeechCapabilities caps;
+                            caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                            chunkV1.set_type(caps);
+
+                            ttsName.push_back(chunkV1);
+                        }
+                        appRegistered->set_ttsName(ttsName);
+                    }
+
                     HMIHandler::getInstance().sendNotification(appRegistered);
                     LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                     break;
