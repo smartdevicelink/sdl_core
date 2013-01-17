@@ -221,8 +221,6 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
             }
 
         }
-
-        // appId
     },
 
     /** Applink Setter for Media Clock Timer */
@@ -272,8 +270,6 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
         }
 
         MFT.applinkView.innerMenu.content.AddSoftButton(params.softButtons);
-
-        // appId
     },
 
 });
