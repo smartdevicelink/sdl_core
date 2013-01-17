@@ -3084,12 +3084,60 @@ namespace NsAppManager
                             , NsAppLinkRPC::ALRPCMessage::RESPONSE
                             , false
                             , sessionKey);
-
                         break;
                     }                    
 
                     NsAppLinkRPCV2::ChangeRegistration_request* request
                         = static_cast<NsAppLinkRPCV2::ChangeRegistration_request*>(mobileMsg);
+                    bool hasActuallyChanged = false;
+                    if ( app->getHMIDisplayLanguageDesired().get() != request->get_hmiDisplayLanguage().get())
+                    {
+                        app->setHMIDisplayLanguageDesired(request->get_hmiDisplayLanguage());
+
+                        if (app->getApplicationHMIStatusLevel() != NsAppLinkRPCV2::HMILevel::HMI_NONE)
+                        {
+                            NsRPC2Communication::UI::ChangeRegistration * changeUIRegistration = 
+                                new NsRPC2Communication::UI::ChangeRegistration;
+                            changeUIRegistration->set_hmiDisplayLanguage(request->get_hmiDisplayLanguage());
+                            changeUIRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                            changeUIRegistration->set_appId(app->getAppID());
+                            HMIHandler::getInstance().sendRequest(changeUIRegistration);
+                        }
+                        hasActuallyChanged = true;
+                    }
+                    if (app->getLanguageDesired().get() != request->get_language().get())
+                    {
+                        app->setLanguageDesired(request->get_language());
+
+                        if (app->getApplicationHMIStatusLevel() != NsAppLinkRPCV2::HMILevel::HMI_NONE)
+                        {
+                            NsRPC2Communication::VR::ChangeRegistration * changeVrRegistration = 
+                                new NsRPC2Communication::VR::ChangeRegistration;
+                            changeVrRegistration->set_language(request->get_language());
+                            changeVrRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                            changeVrRegistration->set_appId(app->getAppID());
+                            HMIHandler::getInstance().sendRequest(changeVrRegistration);
+
+                            NsRPC2Communication::TTS::ChangeRegistration * changeTtsRegistration = 
+                                new NsRPC2Communication::TTS::ChangeRegistration;
+                            changeTtsRegistration->set_language(request->get_language());
+                            changeTtsRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                            changeTtsRegistration->set_appId(app->getAppID());
+                            HMIHandler::getInstance().sendRequest(changeTtsRegistration);
+                        }
+                        hasActuallyChanged = true;
+                    }
+
+                    if ( !hasActuallyChanged )
+                    {
+                        sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                            NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                            , NsAppLinkRPCV2::Result::SUCCESS
+                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                            , true
+                            , sessionKey);
+                    }
+                    break;                        
                 }
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
