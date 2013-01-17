@@ -212,7 +212,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 
     /** Applink AddCommand handler */
     onApplinkAddCommand: function(params){
-        if( params.menuParams.parentID == 0 ){
+        if( params.menuParams.parentID == 0 || params.menuParams.parentID == null ){
             this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams, params.cmdIcon, params.appId);
         }else{
             this.subMenuCommands.push(params);
@@ -221,8 +221,6 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
             }
 
         }
-
-        // appId
     },
 
     /** Applink Setter for Media Clock Timer */
@@ -272,8 +270,6 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
         }
 
         MFT.applinkView.innerMenu.content.AddSoftButton(params.softButtons);
-
-        // appId
     },
 
 });

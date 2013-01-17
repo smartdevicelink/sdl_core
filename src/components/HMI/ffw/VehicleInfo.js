@@ -108,6 +108,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                     //request.params.dataType:    vehicleData
                 }
             };
+            JSONMessage.result[MFT.ApplinkVehicleInfoModel.vehicleData[request.params.dataType].type] = vehicleData;
             this.client.send(JSONMessage);
         }
 
