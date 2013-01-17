@@ -157,7 +157,7 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {"TTS.SpeakResponse",39,&Marshaller::mNsRPC2Communication_TTS__SpeakResponse},
       {""},
 #line 114 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.GetDTCs",96,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCs},
+      {"VehicleInfo.GetDTCs",96,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCs},
       {""},
 #line 63 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"UI.AlertResponse",45,&Marshaller::mNsRPC2Communication_UI__AlertResponse},
@@ -167,9 +167,9 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {"TTS.GetLanguageResponse",33,&Marshaller::mNsRPC2Communication_TTS__GetLanguageResponse},
       {""}, {""},
 #line 118 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.GetVehicleType",100,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleType},
+      {"VehicleInfo.GetVehicleType",100,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleType},
 #line 115 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.GetDTCsResponse",97,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCsResponse},
+      {"VehicleInfo.GetDTCsResponse",97,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCsResponse},
 #line 60 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"UI.AddSubMenu",42,&Marshaller::mNsRPC2Communication_UI__AddSubMenu},
 #line 48 "../src/RPC2ObjectsImpl/Marshaller.gp"
@@ -177,12 +177,12 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
 #line 24 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"AppLinkCore.GetDeviceList",6,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceList},
 #line 116 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.GetVehicleData",98,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleData},
+      {"VehicleInfo.GetVehicleData",98,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleData},
       {""},
 #line 74 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"UI.GetCapabilities",56,&Marshaller::mNsRPC2Communication_UI__GetCapabilities},
 #line 119 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.GetVehicleTypeResponse",101,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse},
+      {"VehicleInfo.GetVehicleTypeResponse",101,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse},
 #line 46 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"UI.EndAudioPassThru",28,&Marshaller::mNsRPC2Communication_UI__EndAudioPassThru},
 #line 61 "../src/RPC2ObjectsImpl/Marshaller.gp"
@@ -190,14 +190,14 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
 #line 49 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"TTS.GetCapabilitiesResponse",31,&Marshaller::mNsRPC2Communication_TTS__GetCapabilitiesResponse},
 #line 25 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.GetDeviceListResponse",7,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceListResponse},
+      {"VehicleInfo.GetDeviceListResponse",7,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceListResponse},
 #line 117 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.GetVehicleDataResponse",99,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse},
+      {"VehicleInfo.GetVehicleDataResponse",99,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse},
       {""}, {""}, {""},
 #line 47 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"UI.EndAudioPassThruResponse",29,&Marshaller::mNsRPC2Communication_UI__EndAudioPassThruResponse},
 #line 121 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.ReadDID",103,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDID},
+      {"VehicleInfo.ReadDID",103,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDID},
 #line 20 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"AppLinkCore.DeactivateApp",2,&Marshaller::mNsRPC2Communication_AppLinkCore__DeactivateApp},
 #line 75 "../src/RPC2ObjectsImpl/Marshaller.gp"
@@ -211,7 +211,7 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {"AppLinkCore.GetAppListResponse",5,&Marshaller::mNsRPC2Communication_AppLinkCore__GetAppListResponse},
       {""},
 #line 122 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.ReadDIDResponse",104,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDIDResponse},
+      {"VehicleInfo.ReadDIDResponse",104,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDIDResponse},
 #line 21 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"AppLinkCore.DeactivateAppResponse",3,&Marshaller::mNsRPC2Communication_AppLinkCore__DeactivateAppResponse},
 #line 70 "../src/RPC2ObjectsImpl/Marshaller.gp"
@@ -329,7 +329,7 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
 #line 39 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"Navigation.ShowConstantTBTResponse",21,&Marshaller::mNsRPC2Communication_Navigation__ShowConstantTBTResponse},
 #line 120 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.OnVehicleData",102,&Marshaller::mNsRPC2Communication_VehicleInfo__OnVehicleData},
+      {"VehicleInfo.OnVehicleData",102,&Marshaller::mNsRPC2Communication_VehicleInfo__OnVehicleData},
 #line 19 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"AppLinkCore.ActivateAppResponse",1,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse},
 #line 55 "../src/RPC2ObjectsImpl/Marshaller.gp"
@@ -367,7 +367,7 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {"UI.SetDisplayLayoutResponse",75,&Marshaller::mNsRPC2Communication_UI__SetDisplayLayoutResponse},
       {""},
 #line 125 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.UnsubscribeVehicleData",107,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData},
+      {"VehicleInfo.UnsubscribeVehicleData",107,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData},
       {""}, {""},
 #line 37 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"Navigation.OnTBTClientState",19,&Marshaller::mNsRPC2Communication_Navigation__OnTBTClientState},
@@ -376,7 +376,7 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {"UI.DeleteSubMenuResponse",55,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenuResponse},
       {""}, {""},
 #line 126 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.UnsubscribeVehicleDataResponse",108,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse},
+      {"VehicleInfo.UnsubscribeVehicleDataResponse",108,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse},
       {""},
 #line 107 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"VR.DeleteCommandResponse",89,&Marshaller::mNsRPC2Communication_VR__DeleteCommandResponse},
@@ -396,10 +396,10 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {"Navigation.AlertManeuverResponse",18,&Marshaller::mNsRPC2Communication_Navigation__AlertManeuverResponse},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
 #line 123 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.SubscribeVehicleData",105,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleData},
+      {"VehicleInfo.SubscribeVehicleData",105,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleData},
       {""}, {""}, {""}, {""}, {""}, {""}, {""},
 #line 124 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.SubscribeVehicleDataResponse",106,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse},
+      {"VehicleInfo.SubscribeVehicleDataResponse",106,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse},
       {""}, {""}, {""}, {""}, {""}, {""},
 #line 44 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"TTS.ChangeRegistration",26,&Marshaller::mNsRPC2Communication_TTS__ChangeRegistration},
