@@ -5216,7 +5216,7 @@ namespace NsAppManager
                 if (2 == app->getProtocolVersion())
                 {
                     NsAppLinkRPCV2::GetVehicleData_response* response = new NsAppLinkRPCV2::GetVehicleData_response();
-                    response->setMethodId(NsAppLinkRPCV2::FunctionID::ShowID);
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::GetVehicleDataID);
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     response->set_success(true);

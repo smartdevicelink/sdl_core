@@ -118,6 +118,7 @@
   source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
+#include <iostream>
 using namespace NsRPC2Communication;
 
 
@@ -1283,4 +1284,4 @@ NsRPC2Communication::VehicleInfo::SubscribeVehicleDataResponseMarshaller Marshal
 NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData;
 NsRPC2Communication::VehicleInfo::UnsubscribeVehicleDataResponseMarshaller Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse;
 NsRPC2Communication::UI::GetSupportedLanguagesMarshaller Marshaller::mNsRPC2Communication_UI__GetSupportedLanguages;
-NsRPC2Communication::UI::GetSupportedLanguagesResponseMarshaller Marshaller::mNsRPC2Communication_UI__GetSupportedLanguagesResponse;
+NsRPC2Communication::UI::GetSupportedLanguagesResponseMarshaller Marshaller::mNsRPC2Communication_UI__GetSupportedLanguagesResponse; 
