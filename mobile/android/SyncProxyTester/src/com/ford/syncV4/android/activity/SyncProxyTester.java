@@ -877,27 +877,27 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText txtDuration = (EditText) layout.findViewById(R.id.txtDuration);
 							final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
 							final CheckBox chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
-							
+
+							SoftButton sb1 = new SoftButton();
+							sb1.setSoftButtonID(5400);
+							sb1.setText("ReRoute");
+							sb1.setType(SoftButtonType.SBT_TEXT);
+							sb1.setIsHighlighted(false);
+							sb1.setSystemAction(SystemAction.STEAL_FOCUS);
+							SoftButton sb2 = new SoftButton();
+							sb2.setSoftButtonID(5399);
+							sb2.setText("Close");
+							sb2.setType(SoftButtonType.SBT_TEXT);
+							sb2.setIsHighlighted(false);
+							sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
+							currentSoftButtons = new Vector<SoftButton>();
+							currentSoftButtons.add(sb1);
+							currentSoftButtons.add(sb2);
+
 							Button btnSoftButtons = (Button) layout.findViewById(R.id.alert_btnSoftButtons);
 							btnSoftButtons.setOnClickListener(new OnClickListener() {
 								@Override
 								public void onClick(View v) {
-									SoftButton sb1 = new SoftButton();
-									sb1.setSoftButtonID(5400);
-									sb1.setText("ReRoute");
-									sb1.setType(SoftButtonType.SBT_TEXT);
-									sb1.setIsHighlighted(false);
-									sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-									SoftButton sb2 = new SoftButton();
-									sb2.setSoftButtonID(5399);
-									sb2.setText("Close");
-									sb2.setType(SoftButtonType.SBT_TEXT);
-									sb2.setIsHighlighted(false);
-									sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
-									currentSoftButtons = new Vector<SoftButton>();
-									currentSoftButtons.add(sb1);
-									currentSoftButtons.add(sb2);
-									
 									IntentHelper.addObjectForKey(currentSoftButtons,
 											Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
 									Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
@@ -1033,34 +1033,34 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText mediaTrack = (EditText) layout.findViewById(R.id.txtMediaTrack);
 							final CheckBox chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.show_chkIncludeSBs);
 							final EditText editCustomPresets = (EditText) layout.findViewById(R.id.show_customPresets);
-							
+
+							SoftButton sb1 = new SoftButton();
+							sb1.setSoftButtonID(5432);
+							sb1.setText("KeepContext");
+							sb1.setType(SoftButtonType.SBT_TEXT);
+							sb1.setIsHighlighted(false);
+							sb1.setSystemAction(SystemAction.KEEP_CONTEXT);
+							SoftButton sb2 = new SoftButton();
+							sb2.setSoftButtonID(5431);
+							sb2.setText("StealFocus");
+							sb2.setType(SoftButtonType.SBT_TEXT);
+							sb2.setIsHighlighted(false);
+							sb2.setSystemAction(SystemAction.STEAL_FOCUS);
+							SoftButton sb3 = new SoftButton();
+							sb3.setSoftButtonID(5430);
+							sb3.setText("Default");
+							sb3.setType(SoftButtonType.SBT_TEXT);
+							sb3.setIsHighlighted(false);
+							sb3.setSystemAction(SystemAction.DEFAULT_ACTION);
+							currentSoftButtons = new Vector<SoftButton>();
+							currentSoftButtons.add(sb1);
+							currentSoftButtons.add(sb2);
+							currentSoftButtons.add(sb3);
+
 							Button btnSoftButtons = (Button) layout.findViewById(R.id.show_btnSoftButtons);
 							btnSoftButtons.setOnClickListener(new OnClickListener() {
 								@Override
 								public void onClick(View v) {
-									SoftButton sb1 = new SoftButton();
-									sb1.setSoftButtonID(5432);
-									sb1.setText("KeepContext");
-									sb1.setType(SoftButtonType.SBT_TEXT);
-									sb1.setIsHighlighted(false);
-									sb1.setSystemAction(SystemAction.KEEP_CONTEXT);
-									SoftButton sb2 = new SoftButton();
-									sb2.setSoftButtonID(5431);
-									sb2.setText("StealFocus");
-									sb2.setType(SoftButtonType.SBT_TEXT);
-									sb2.setIsHighlighted(false);
-									sb2.setSystemAction(SystemAction.STEAL_FOCUS);
-									SoftButton sb3 = new SoftButton();
-									sb3.setSoftButtonID(5430);
-									sb3.setText("Default");
-									sb3.setType(SoftButtonType.SBT_TEXT);
-									sb3.setIsHighlighted(false);
-									sb3.setSystemAction(SystemAction.DEFAULT_ACTION);
-									currentSoftButtons = new Vector<SoftButton>();
-									currentSoftButtons.add(sb1);
-									currentSoftButtons.add(sb2);
-									currentSoftButtons.add(sb3);
-									
 									IntentHelper.addObjectForKey(currentSoftButtons,
 											Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
 									Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
@@ -1533,27 +1533,27 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText txtScrollableMessageBody = (EditText) layout.findViewById(R.id.txtScrollableMessageBody);
 							final CheckBox chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 							final EditText txtTimeout = (EditText) layout.findViewById(R.id.scrollablemessage_editTimeout);
-							
+
+							SoftButton sb1 = new SoftButton();
+							sb1.setSoftButtonID(5400);
+							sb1.setText("Reply");
+							sb1.setType(SoftButtonType.SBT_TEXT);
+							sb1.setIsHighlighted(false);
+							sb1.setSystemAction(SystemAction.STEAL_FOCUS);
+							SoftButton sb2 = new SoftButton();
+							sb2.setSoftButtonID(5399);
+							sb2.setText("Close");
+							sb2.setType(SoftButtonType.SBT_TEXT);
+							sb2.setIsHighlighted(false);
+							sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
+							currentSoftButtons = new Vector<SoftButton>();
+							currentSoftButtons.add(sb1);
+							currentSoftButtons.add(sb2);
+
 							Button btnSoftButtons = (Button) layout.findViewById(R.id.scrollablemessage_btnSoftButtons);
 							btnSoftButtons.setOnClickListener(new OnClickListener() {
 								@Override
 								public void onClick(View v) {
-									SoftButton sb1 = new SoftButton();
-									sb1.setSoftButtonID(5400);
-									sb1.setText("Reply");
-									sb1.setType(SoftButtonType.SBT_TEXT);
-									sb1.setIsHighlighted(false);
-									sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-									SoftButton sb2 = new SoftButton();
-									sb2.setSoftButtonID(5399);
-									sb2.setText("Close");
-									sb2.setType(SoftButtonType.SBT_TEXT);
-									sb2.setIsHighlighted(false);
-									sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
-									currentSoftButtons = new Vector<SoftButton>();
-									currentSoftButtons.add(sb1);
-									currentSoftButtons.add(sb2);
-									
 									IntentHelper.addObjectForKey(currentSoftButtons,
 											Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
 									Intent intent = new Intent(mContext, SoftButtonsListActivity.class);

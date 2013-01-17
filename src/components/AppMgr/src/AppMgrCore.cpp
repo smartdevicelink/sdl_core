@@ -1603,10 +1603,6 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    std::string appName = app->getName();
-
-                    core->removeAppFromHmi(app, sessionKey);
-                    core->unregisterApplication( sessionKey );
 
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
@@ -1617,12 +1613,17 @@ namespace NsAppManager
                     msgUnregistered->setMethodId(NsAppLinkRPCV2::FunctionID::OnAppInterfaceUnregisteredID);
                     msgUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
                     MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionKey);
+
+                    std::string appName = app->getName();
+                    core->removeAppFromHmi(app, sessionKey);
+
                     NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                     appUnregistered->set_appName(appName);
                     appUnregistered->set_appId(app->getAppID());
                     appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT);
                     HMIHandler::getInstance().sendNotification(appUnregistered);
                     LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
+                    core->unregisterApplication( sessionKey );
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::SubscribeButtonID:
@@ -3195,7 +3196,7 @@ namespace NsAppManager
 
                         if (app->getApplicationHMIStatusLevel() != NsAppLinkRPCV2::HMILevel::HMI_NONE)
                         {
-                            NsRPC2Communication::UI::ChangeRegistration * changeUIRegistration = 
+                            NsRPC2Communication::UI::ChangeRegistration * changeUIRegistration =
                                 new NsRPC2Communication::UI::ChangeRegistration;
                             changeUIRegistration->set_hmiDisplayLanguage(request->get_hmiDisplayLanguage());
                             changeUIRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
@@ -3210,14 +3211,14 @@ namespace NsAppManager
 
                         if (app->getApplicationHMIStatusLevel() != NsAppLinkRPCV2::HMILevel::HMI_NONE)
                         {
-                            NsRPC2Communication::VR::ChangeRegistration * changeVrRegistration = 
+                            NsRPC2Communication::VR::ChangeRegistration * changeVrRegistration =
                                 new NsRPC2Communication::VR::ChangeRegistration;
                             changeVrRegistration->set_language(request->get_language());
                             changeVrRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                             changeVrRegistration->set_appId(app->getAppID());
                             HMIHandler::getInstance().sendRequest(changeVrRegistration);
 
-                            NsRPC2Communication::TTS::ChangeRegistration * changeTtsRegistration = 
+                            NsRPC2Communication::TTS::ChangeRegistration * changeTtsRegistration =
                                 new NsRPC2Communication::TTS::ChangeRegistration;
                             changeTtsRegistration->set_language(request->get_language());
                             changeTtsRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
@@ -3236,7 +3237,7 @@ namespace NsAppManager
                             , true
                             , sessionKey);
                     }
-                    break;                        
+                    break;
                 }
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
