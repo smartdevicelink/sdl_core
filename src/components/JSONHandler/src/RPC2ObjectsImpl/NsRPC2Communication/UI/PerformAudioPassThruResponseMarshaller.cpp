@@ -59,7 +59,7 @@ Json::Value PerformAudioPassThruResponseMarshaller::toJSON(const PerformAudioPas
   json["result"]=Json::Value(Json::objectValue);
   NsAppLinkRPC::Result r(static_cast<NsAppLinkRPC::Result::ResultInternal>(e.getResult()));
   json["result"]["resultCode"]=NsAppLinkRPC::ResultMarshaller::toJSON(r);
-  json["result"]["method"]=Json::Value("TTS.PerformAudioPassThruResponse");
+  json["result"]["method"]=Json::Value("UI.PerformAudioPassThruResponse");
 
   return json;
 }
@@ -82,7 +82,7 @@ bool PerformAudioPassThruResponseMarshaller::fromJSON(const Json::Value& json,Pe
     NsAppLinkRPC::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
-    if(js["method"].asString().compare("TTS.PerformAudioPassThruResponse")) return false;
+    if(js["method"].asString().compare("UI.PerformAudioPassThruResponse")) return false;
 
     if(!NsAppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());

@@ -55,7 +55,7 @@ Json::Value EndAudioPassThruMarshaller::toJSON(const EndAudioPassThru& e)
     return Json::Value(Json::nullValue);
 
   json["jsonrpc"]=Json::Value("2.0");
-  json["method"]=Json::Value("TTS.EndAudioPassThru");
+  json["method"]=Json::Value("UI.EndAudioPassThru");
 
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
@@ -70,7 +70,7 @@ bool EndAudioPassThruMarshaller::fromJSON(const Json::Value& json,EndAudioPassTh
   {
     if(!json.isObject())  return false;
     if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return false;
-    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("TTS.EndAudioPassThru"))  return false;
+    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("UI.EndAudioPassThru"))  return false;
     if(!json.isMember("id") || !json["id"].isInt()) return false;
     c.setId(json["id"].asInt());
 
@@ -80,7 +80,7 @@ bool EndAudioPassThruMarshaller::fromJSON(const Json::Value& json,EndAudioPassTh
     if(!js.isObject())  return false;
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;
     c.appId=js["appId"].asInt();
-    
+
   }
   catch(...)
   {
