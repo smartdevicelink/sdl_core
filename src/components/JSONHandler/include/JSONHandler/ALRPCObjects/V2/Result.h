@@ -139,20 +139,21 @@ namespace NsAppLinkRPCV2
       ENCRYPTED=27,
 
 ///  The RPC (e.g. SubscribeVehicleData) executed successfully but one or more items have a warning or failure.
-      WARNINGS=28
+      WARNINGS=28,
+      RETRY = 29
     };
-  
+
     Result() : mInternal(INVALID_ENUM)				{}
     Result(ResultInternal e) : mInternal(e)		{}
-  
+
     ResultInternal get(void) const	{ return mInternal; }
     void set(ResultInternal e)		{ mInternal=e; }
-  
+
   private:
     ResultInternal mInternal;
     friend class ResultMarshaller;
   };
-  
+
 }
 
 #endif

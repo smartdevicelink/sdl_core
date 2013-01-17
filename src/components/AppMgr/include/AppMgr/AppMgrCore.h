@@ -169,6 +169,15 @@ namespace NsAppManager
         bool getAudioPassThruFlag() const;
         void setAudioPassThruFlag(bool flag);
 
+        const MessageMapping& getMessageMapping() const;
+
+        /**
+         * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
+         * \param item a RegistryItem from which to retrieve an app pointer
+         * \return Application instance retrieved from item
+         */
+        Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
+
     private:
 
         /**
@@ -218,13 +227,6 @@ namespace NsAppManager
          * \param sessionID session id
          */
         void removeAppFromHmi(Application* currentApp, int appId);
-
-        /**
-         * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
-         * \param item a RegistryItem from which to retrieve an app pointer
-         * \return Application instance retrieved from item
-         */
-        Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
 
         /**
          * \brief serialize a string value to the text file

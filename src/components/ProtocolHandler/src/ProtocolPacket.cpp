@@ -70,10 +70,10 @@ RESULT_CODE ProtocolPacket::serializePacket(unsigned char version,
     unsigned char firstByte = ( (version << 4) & 0xF0 )
                       | ( (compressF << 3) & 0x08)
                       | (frameType & 0x07);
-         
+
     mPacket[offset++] = firstByte;
-    mPacket[offset++] = serviceType;    
-    mPacket[offset++] = frameData;    
+    mPacket[offset++] = serviceType;
+    mPacket[offset++] = frameData;
     mPacket[offset++] = sessionID;
 
     mPacket[offset++] = dataSize >> 24;
@@ -97,7 +97,7 @@ RESULT_CODE ProtocolPacket::serializePacket(unsigned char version,
         {
             memcpy(mPacket + offset, data, dataSize);
             mTotalPacketSize += dataSize;
-        }            
+        }
         else
         {
             delete [] mPacket;
@@ -114,14 +114,14 @@ unsigned char * ProtocolPacket::getPacket() const
 {
     return mPacket;
 }
-    
+
 unsigned int ProtocolPacket::getPacketSize() const
 {
     return mTotalPacketSize;
 }
 
 
-RESULT_CODE ProtocolPacket::appendData( unsigned char * chunkData, 
+RESULT_CODE ProtocolPacket::appendData( unsigned char * chunkData,
                     unsigned int chunkDataSize )
 {
     if ( mDataOffset + chunkDataSize <= mPacketData.totalDataBytes )
@@ -140,7 +140,7 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char * message, uns
     unsigned char offset = 0;
     unsigned char firstByte = message[offset];
     offset++;
-    
+
     mPacketHeader.version = firstByte >> 4u;
 
     //std::cout << "ProtocolPacket::deserializePacket: version " << mPacketHeader.version << std::endl;
@@ -154,19 +154,19 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char * message, uns
     {
         mPacketHeader.compress = false;
     }
-    
+
     mPacketHeader.frameType = firstByte & 0x07u;
 
     //std::cout << "ProtocolPacket::deserializePacket: frameType " << mPacketHeader.frameType << std::endl;
     //std::cout.flush();
 
-    mPacketHeader.serviceType = message[offset++];        
-    mPacketHeader.frameData = message[offset++];        
+    mPacketHeader.serviceType = message[offset++];
+    mPacketHeader.frameData = message[offset++];
     mPacketHeader.sessionID = message[offset++];
 
     //std::cout << "ProtocolPacket::deserializePacket: sessionID " << mPacketHeader.sessionID << std::endl;
     //std::cout.flush();
-    
+
     mPacketHeader.dataSize  = message[offset++] << 24u;
     mPacketHeader.dataSize |= message[offset++] << 16u;
     mPacketHeader.dataSize |= message[offset++] << 8u;
@@ -174,7 +174,7 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char * message, uns
 
     //std::cout << "ProtocolPacket::deserializePacket: dataSize " << mPacketHeader.dataSize << std::endl;
     //std::cout.flush();
-    
+
     if (mPacketHeader.version == PROTOCOL_VERSION_2)
     {
         mPacketHeader.messageId  = message[offset++] << 24u;
@@ -186,14 +186,14 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char * message, uns
     {
         mPacketHeader.messageId = 0u;
     }
-    
+
     const unsigned int dataPayloadSize = messageSize - offset;
-    
+
     if (dataPayloadSize != mPacketHeader.dataSize)
-    {        
+    {
         return RESULT_FAIL;
     }
-    
+
     unsigned char * data = 0;
     if (dataPayloadSize != 0u)
     {
@@ -263,11 +263,11 @@ void ProtocolPacket::setTotalDataBytes(unsigned int dataBytes)
         }
         mPacketData.data = new unsigned char[dataBytes];
         mPacketData.totalDataBytes = dataBytes;
-    }    
+    }
 }
 
 unsigned int ProtocolPacket::getTotalDataBytes() const
 {
     return mPacketData.totalDataBytes;
 }
-/*End of Deserialization*/    
+/*End of Deserialization*/
