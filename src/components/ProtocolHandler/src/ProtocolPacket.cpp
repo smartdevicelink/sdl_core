@@ -62,7 +62,7 @@ RESULT_CODE ProtocolPacket::serializePacket(unsigned char version,
 
     unsigned char offset = 0;
     unsigned char compressF = 0x0;
-    mPacket = new unsigned char[MAXIMUM_FRAME_SIZE];
+    mPacket = new unsigned char[MAXIMUM_FRAME_DATA_SIZE];
     if (compress)
     {
         compressF = 0x1;
@@ -93,7 +93,7 @@ RESULT_CODE ProtocolPacket::serializePacket(unsigned char version,
 
     if (data)
     {
-        if ( (offset + dataSize) <= MAXIMUM_FRAME_SIZE)
+        if ( (offset + dataSize) <= MAXIMUM_FRAME_DATA_SIZE)
         {
             memcpy(mPacket + offset, data, dataSize);
             mTotalPacketSize += dataSize;

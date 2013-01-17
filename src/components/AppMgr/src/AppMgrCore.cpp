@@ -1474,7 +1474,8 @@ namespace NsAppManager
 
                     response->set_hmiDisplayLanguage(core->mUiLanguageV2);
                     response->set_language(core->mVrLanguageV2);
-                    if ( object->get_languageDesired().get() != core->mVrLanguageV2.get() )
+                    if ( object->get_languageDesired().get() != core->mVrLanguageV2.get() 
+                            || object->get_hmiDisplayLanguageDesired().get() != core->mUiLanguageV2.get())
                     {
                         LOG4CPLUS_WARN(mLogger, "Wrong language on registering application " << appName);
                         response->set_resultCode(NsAppLinkRPCV2::Result::WRONG_LANGUAGE);
@@ -1493,16 +1494,11 @@ namespace NsAppManager
                     appRegistered->set_appName(app->getName());
                     appRegistered->set_isMediaApplication(app->getIsMediaApplication());
                     const NsAppLinkRPCV2::Language& languageDesired = app->getLanguageDesired();
-                    NsAppLinkRPC::Language languageDesiredV1;
-                    languageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)languageDesired.get());
-                    appRegistered->set_languageDesired(languageDesiredV1);
+                    appRegistered->set_languageDesired(core->mVrLanguageV1);
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
                     appRegistered->set_appId(app->getAppID());
                     appRegistered->set_appType(app->getAppType());
-                    const NsAppLinkRPCV2::Language& hmiLanguageDesired = app->getHMIDisplayLanguageDesired();
-                    NsAppLinkRPC::Language hmiLanguageDesiredV1;
-                    hmiLanguageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)hmiLanguageDesired.get());
-                    appRegistered->set_hmiDisplayLanguageDesired(hmiLanguageDesiredV1);
+                    appRegistered->set_hmiDisplayLanguageDesired(core->mUiLanguageV1);
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
                     appRegistered->set_deviceName(currentDeviceName);
                     appRegistered->set_versionNumber(2);
@@ -3302,23 +3298,32 @@ namespace NsAppManager
                 HMIHandler::getInstance().setReadyState(true);
 
                 NsRPC2Communication::UI::GetCapabilities* getUiCapsRequest = new NsRPC2Communication::UI::GetCapabilities();
+                getUiCapsRequest->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getUiCapsRequest);
                 NsRPC2Communication::VR::GetCapabilities* getVrCapsRequest = new NsRPC2Communication::VR::GetCapabilities();
+                getVrCapsRequest->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getVrCapsRequest);
                 NsRPC2Communication::TTS::GetCapabilities* getTtsCapsRequest = new NsRPC2Communication::TTS::GetCapabilities();
+                getTtsCapsRequest->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getTtsCapsRequest);
                 NsRPC2Communication::Buttons::GetCapabilities* getButtonsCapsRequest = new NsRPC2Communication::Buttons::GetCapabilities();
+                getButtonsCapsRequest->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getButtonsCapsRequest);
                 NsRPC2Communication::VehicleInfo::GetVehicleType* getVehicleType = new NsRPC2Communication::VehicleInfo::GetVehicleType;
+                getVehicleType->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getVehicleType);
                 NsRPC2Communication::UI::GetSupportedLanguages * getUISupportedLanguages = new NsRPC2Communication::UI::GetSupportedLanguages;
+                getUISupportedLanguages->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getUISupportedLanguages);
 
                 NsRPC2Communication::UI::GetLanguage* getUiLang = new NsRPC2Communication::UI::GetLanguage;
+                getUiLang->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getUiLang);
                 NsRPC2Communication::VR::GetLanguage* getVrLang = new NsRPC2Communication::VR::GetLanguage;
+                getVrLang->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getVrLang);
                 NsRPC2Communication::TTS::GetLanguage* getTtsLang = new NsRPC2Communication::TTS::GetLanguage;
+                getTtsLang->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getTtsLang);
                 return;
             }
@@ -4228,7 +4233,7 @@ namespace NsAppManager
                         }
                     }
                 }
-                break;
+                return;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
@@ -4429,7 +4434,7 @@ namespace NsAppManager
                         }
                     }
                 }
-                break;
+                return;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not VR RPC message " << msg->getMethod() << " has been received!");
@@ -4535,7 +4540,7 @@ namespace NsAppManager
                         }
                     }
                 }
-                break;
+                return;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not TTS RPC message " << msg->getMethod() << " has been received!");
@@ -4959,23 +4964,7 @@ namespace NsAppManager
                 NsRPC2Communication::AppLinkCore::GetDeviceList* getDevList = (NsRPC2Communication::AppLinkCore::GetDeviceList*)msg;
                 NsRPC2Communication::AppLinkCore::GetDeviceListResponse* response = new NsRPC2Communication::AppLinkCore::GetDeviceListResponse;
                 response->setId(getDevList->getId());
-                DeviceNamesList list;
-                const NsConnectionHandler::tDeviceList& devList = core->mDeviceList.getDeviceList();
-                for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
-                {
-                    const NsConnectionHandler::CDevice& device = it->second;
-                    list.push_back(device.getUserFriendlyName());
-                }
-                if ( list.empty() )
-                {
-                    list.push_back("");
-                    response->setResult(NsAppLinkRPC::Result::GENERIC_ERROR);
-                }
-                else
-                {
-                    response->setResult(NsAppLinkRPC::Result::SUCCESS);
-                }
-                response->set_deviceList(list);
+                response->setResult(NsAppLinkRPC::Result::GENERIC_ERROR);
                 ConnectionHandler::getInstance().startDevicesDiscovery();
                 HMIHandler::getInstance().sendResponse(response);
                 return;
@@ -5386,19 +5375,17 @@ namespace NsAppManager
         LOG4CPLUS_INFO_EXT(mLogger, " Updating device list: " << deviceList.size() << " devices");
         mDeviceList.setDeviceList(deviceList);
         NsRPC2Communication::AppLinkCore::OnDeviceListUpdated* deviceListUpdated = new NsRPC2Communication::AppLinkCore::OnDeviceListUpdated;
-        DeviceNamesList list;
-        const NsConnectionHandler::tDeviceList& devList = mDeviceList.getDeviceList();
-        for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
+        if ( !deviceList.empty() ) 
         {
-            const NsConnectionHandler::CDevice& device = it->second;
-            list.push_back(device.getUserFriendlyName());
+            DeviceNamesList list;
+            const NsConnectionHandler::tDeviceList& devList = mDeviceList.getDeviceList();
+            for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
+            {
+                const NsConnectionHandler::CDevice& device = it->second;
+                list.push_back(device.getUserFriendlyName());
+            }
+            deviceListUpdated->set_deviceList(list);
         }
-        if ( list.empty() )
-        {
-            list.push_back("");
-        }
-
-        deviceListUpdated->set_deviceList(list);
         HMIHandler::getInstance().sendNotification(deviceListUpdated);
     }
 

@@ -609,9 +609,9 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
 
             unsigned int maxDataSize = 0;
             if ( PROTOCOL_VERSION_1 == message -> getProtocolVersion() )
-                maxDataSize = MAXIMUM_FRAME_SIZE - PROTOCOL_HEADER_V1_SIZE;
+                maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V1_SIZE;
             else if ( PROTOCOL_VERSION_2 == message -> getProtocolVersion() )
-                maxDataSize = MAXIMUM_FRAME_SIZE - PROTOCOL_HEADER_V2_SIZE;
+                maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V2_SIZE;
 
             NsAppLink::NsTransportManager::tConnectionHandle connectionHandle = 0;
             unsigned char sessionID = 0;
