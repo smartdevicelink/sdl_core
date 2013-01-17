@@ -140,7 +140,8 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 	},
 
 	setDuration: function() {
-        var number;
+        var number,
+            str;
 		if(this.countUp){
 			number = this.duration + this.currTime;
 			//this.appInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
@@ -148,7 +149,10 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 			number = this.duration - this.currTime;
 			//this.appInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}
-		this.appInfo.set('mediaClock', Math.ceil((number+1)/60)-1 + ":" + ((number % 60) < 10 ? '0' : '') + (number % 60) );
+        str = (Math.ceil(number/3600) -1) < 10 ? '0' : '';
+        str += (Math.ceil(number/3600) -1) + ':';
+        str += Math.ceil( (number+1)/60%60)-1 + ":" + ((number % 60) < 10 ? '0' : '') + (number % 60);
+		this.appInfo.set('mediaClock', str );
 	}.observes('this.currTime'),
 
 	changeDuration: function() {
