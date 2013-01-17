@@ -36,20 +36,21 @@ namespace NsAppLinkRPC
       PRESET_6=11,
       PRESET_7=12,
       PRESET_8=13,
-      PRESET_9=14
+      PRESET_9=14,
+      CUSTOM_BUTTON=15
     };
-  
+
     ButtonName() : mInternal(INVALID_ENUM)				{}
     ButtonName(ButtonNameInternal e) : mInternal(e)		{}
-  
+
     ButtonNameInternal get(void) const	{ return mInternal; }
     void set(ButtonNameInternal e)		{ mInternal=e; }
-  
+
   private:
     ButtonNameInternal mInternal;
     friend class ButtonNameMarshaller;
   };
-  
+
 }
 
 #endif

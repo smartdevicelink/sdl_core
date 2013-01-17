@@ -30,12 +30,12 @@
 #endif
 
 
-#define TOTAL_KEYWORDS 15
+#define TOTAL_KEYWORDS 16
 #define MIN_WORD_LENGTH 2
-#define MAX_WORD_LENGTH 9
+#define MAX_WORD_LENGTH 13
 #define MIN_HASH_VALUE 2
-#define MAX_HASH_VALUE 23
-/* maximum key range = 22, duplicates = 0 */
+#define MAX_HASH_VALUE 38
+/* maximum key range = 37, duplicates = 0 */
 
 class ButtonName_intHash
 {
@@ -50,32 +50,32 @@ ButtonName_intHash::hash (register const char *str, register unsigned int len)
 {
   static const unsigned char asso_values[] =
     {
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24,  7,  2,
-      13,  8,  3, 14,  9,  4, 15, 10, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24,  0, 24, 24, 24, 24, 24,  5, 24,
-      24, 24, 24, 24,  0, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 28, 23,
+      18, 13,  8,  3, 30, 25, 20, 15, 39, 39,
+      39, 39, 39, 39, 39, 39,  5, 39, 39, 39,
+      39, 39,  0, 39, 39, 39, 39, 39,  5, 39,
+      39, 39, 39, 39,  0, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39, 39, 39, 39, 39,
+      39, 39, 39, 39, 39, 39
     };
   register int hval = len;
 
@@ -100,8 +100,9 @@ ButtonName_intHash::getPointer (register const char *str, register unsigned int 
 {
   static const unsigned char lengthtable[] =
     {
-       0,  0,  2,  0,  0,  0,  6,  0,  8,  9,  8,  8,  8,  8,
-       0,  8,  8,  8,  8,  0,  0,  8,  8,  8
+       0,  0,  2,  0,  0,  0,  6,  0,  8,  9,  0,  8,  0,  8,
+       0,  0,  8,  0, 13,  0,  0,  8,  0,  8,  0,  0,  8,  0,
+       8,  0,  0,  8,  0,  8,  0,  0,  8,  0,  8
     };
   static const struct NsAppLinkRPC::PerfectHashTable wordlist[] =
     {
@@ -116,30 +117,42 @@ ButtonName_intHash::getPointer (register const char *str, register unsigned int 
       {"SEEKLEFT",1},
 #line 19 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
       {"SEEKRIGHT",2},
-#line 23 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
-      {"PRESET_1",6},
-#line 26 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
-      {"PRESET_4",9},
-#line 29 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
-      {"PRESET_7",12},
+      {""},
+#line 27 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
+      {"PRESET_5",10},
+      {""},
 #line 21 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
       {"TUNEDOWN",4},
+      {""}, {""},
+#line 26 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
+      {"PRESET_4",9},
       {""},
-#line 22 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
-      {"PRESET_0",5},
+#line 32 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
+      {"CUSTOM_BUTTON",15},
+      {""}, {""},
 #line 25 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
       {"PRESET_3",8},
-#line 28 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
-      {"PRESET_6",11},
+      {""},
 #line 31 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
       {"PRESET_9",14},
       {""}, {""},
 #line 24 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
       {"PRESET_2",7},
-#line 27 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
-      {"PRESET_5",10},
+      {""},
 #line 30 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
-      {"PRESET_8",13}
+      {"PRESET_8",13},
+      {""}, {""},
+#line 23 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
+      {"PRESET_1",6},
+      {""},
+#line 29 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
+      {"PRESET_7",12},
+      {""}, {""},
+#line 22 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
+      {"PRESET_0",5},
+      {""},
+#line 28 "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.gp"
+      {"PRESET_6",11}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
