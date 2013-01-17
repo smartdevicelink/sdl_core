@@ -4,11 +4,11 @@
 #include <string>
 #include <json/json.h>
 
-#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/PerformAudioPassThru.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/PerformAudioPassThru.h"
 
 namespace NsRPC2Communication
 {
-  namespace TTS
+  namespace UI
   {
 
     struct PerformAudioPassThruMarshaller

@@ -32,8 +32,8 @@ public class ReadDID extends RPCRequest {
     	}
     }
     public Vector<Integer> getDidLocation() {
-        if (store.get(Names.didLocation) instanceof Vector<?>) {
-        	Vector<?> list = (Vector<?>)store.get(Names.didLocation);
+        if (parameters.get(Names.didLocation) instanceof Vector<?>) {
+        	Vector<?> list = (Vector<?>)parameters.get(Names.didLocation);
         	if (list != null && list.size() > 0) {
         		Object obj = list.get(0);
         		if (obj instanceof Integer) {
@@ -45,12 +45,12 @@ public class ReadDID extends RPCRequest {
     }
     public void setEncrypted(Boolean encrypted) {
     	if (encrypted != null) {
-    		store.put(Names.encrypted, encrypted);
+    		parameters.put(Names.encrypted, encrypted);
     	} else {
-    		store.remove(Names.encrypted);
+    		parameters.remove(Names.encrypted);
     	}
     }
     public Boolean getEncrypted() {
-    	return (Boolean) store.get(Names.encrypted);
+    	return (Boolean) parameters.get(Names.encrypted);
     }
 }

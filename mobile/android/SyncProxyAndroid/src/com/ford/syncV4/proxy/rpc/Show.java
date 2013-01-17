@@ -110,13 +110,13 @@ public class Show extends RPCRequest {
     }
     public void setGraphic(Image graphic) {
         if (graphic != null) {
-            store.put(Names.graphic, graphic);
+            parameters.put(Names.graphic, graphic);
         } else {
-        	store.remove(Names.graphic);
+        	parameters.remove(Names.graphic);
         }
     }
     public Image getGraphic() {
-    	Object obj = store.get(Names.graphic);
+    	Object obj = parameters.get(Names.graphic);
         if (obj instanceof Image) {
             return (Image) obj;
         } else if (obj instanceof Hashtable) {

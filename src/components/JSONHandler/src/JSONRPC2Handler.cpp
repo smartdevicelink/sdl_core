@@ -57,6 +57,9 @@ void JSONRPC2Handler::subscribeToNotifications()
     subscribeTo( "UI.OnAppActivated" );
     subscribeTo( "UI.OnAppDeactivated" );
     subscribeTo( "UI.OnDeviceChosen");
+    subscribeTo( "UI.OnLanguageChange" );
+    subscribeTo( "VR.OnLanguageChange" );
+    subscribeTo( "TTS.OnLanguageChange" );
 }
 
 void JSONRPC2Handler::setRPC2CommandsObserver( 

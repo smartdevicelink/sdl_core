@@ -11,14 +11,21 @@
  */
  
 MFT.ApplinkController = Em.Object.create({
-	
-	/**
-	 * List of registered applications
-	 * @type object
-	 */
-	registeredApps: {
-	},
-	
+
+    /**
+     * Driver Distraction State
+     *
+     * @type bool
+     */
+    driverDistractionState:		false,
+
+    /**
+     * Protocol Version 2 State
+     *
+     * @type bool
+     */
+    protocolVersion2State:		false,
+
 	/** 
 	 * List of Applink application models
 	 *
@@ -28,6 +35,48 @@ MFT.ApplinkController = Em.Object.create({
 		0:	'ApplinkMediaModel',
 		1:	'ApplinkNonMediaModel'
 	},
+
+    /**
+     * Method to set selected state of vehicle transmission to vehicleData
+     * @param {string} prndl Vehicle transmission state
+     */
+	onPRNDLSelected: function( prndl ){
+        MFT.ApplinkVehicleInfoModel.set('vehicleData.prndl', prndl);
+    },
+
+    /**
+     * Method to call performAudioPassThruResponse with Result code parameters
+     * @param {Object} element Button object
+     */
+	callPerformAudioPassThruPopUpResponse: function( element ){
+        this.performAudioPassThruResponse( element.responseResult );
+    },
+
+    /**
+     * Method close PerformAudioPassThruPopUp and call response from UIRPC back to ApplinkCore
+     * @param {string} result Result code
+     */
+	performAudioPassThruResponse: function( result ){
+        MFT.ApplinkModel.set('AudioPassThruState', false);
+        FFW.UI.sendUIResult( result, FFW.UI.performAudioPassThruRequestId, "UI.PerformAudioPassThru" );
+    },
+
+    /**
+     * Method to set language for UI component with parameters sent from ApplinkCore to UIRPC
+     * @param {string} lang Language code
+     */
+    onLanguageChangeUI: function( lang ){
+        FFW.UI.OnLanguageChange( lang );
+    },
+
+    /**
+     * Method to set language for TTS and VR components with parameters sent from ApplinkCore to UIRPC
+     * @param {string} lang Language code
+     */
+    onLanguageChangeTTSVR: function( lang ){
+        FFW.TTS.OnLanguageChange( lang );
+        FFW.VR.OnLanguageChange( lang );
+    },
 	
 	/**
 	 * Register application
@@ -37,15 +86,15 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param applicationType: Number
 	 */
 	registerApplication: function( applicationId, applicationType ) {
-		if ( this.registeredApps[ applicationId ] ) {
+		if ( MFT.ApplinkModel.registeredApps[ applicationId ] ) {
 			//Em.Logger.error('Application ['+ applicationId +'] already registered!');
 			return;
 		}
 		
-		this.registeredApps[ applicationId ] = applicationType;
+		MFT.ApplinkModel.registeredApps[ applicationId ] = applicationType;
 		//Em.Logger.log('Application ['+ applicationId +'] registered!');
 	},
-	
+
 	/**
 	 * Unregister application
 	 * @desc ...
@@ -53,9 +102,39 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param applicationId: Number
 	 */
 	unRegisterApplication: function( applicationId ) {
-		delete this.registeredApps[ applicationId ];
+		delete MFT.ApplinkModel.registeredApps[ applicationId ];
 	},
-	
+
+    /**
+     * Applink Driver Distraction ON/OFF switcher
+     * 
+     * @param checked: bool
+     */
+    selectDriverDistraction: function(checked){
+        if(checked){
+            FFW.UI.onDriverDistraction( "DD_ON" );
+            this.set('driverDistractionState', true);
+        }else{
+            FFW.UI.onDriverDistraction( "DD_OFF" );
+            this.set('driverDistractionState', false);
+        }
+    },
+
+    /**
+     * Applink Protocol Version 2 ON/OFF switcher
+     * 
+     * @param checked: bool
+     */
+    selectProtocolVersion: function(checked){
+        if(checked){
+            FFW.AppLinkCoreClient.OnVersionChanged( 2 );
+            this.set('protocolVersion2State', true);
+        }else{
+            FFW.AppLinkCoreClient.OnVersionChanged( 1 );
+            this.set('protocolVersion2State', false);
+        }
+    },
+
 	/**
 	 * Get application model
 	 * @desc ...
@@ -64,7 +143,7 @@ MFT.ApplinkController = Em.Object.create({
 	 * @return Object Model
 	 */
 	getApplicationModel: function( applicationId ) {
-		return MFT[ this.applicationModels[ this.registeredApps[ applicationId ] ] ];
+		return MFT[ this.applicationModels[ MFT.ApplinkModel.registeredApps[ applicationId ] ] ];
 	},
 
 	/* Function returns ChangeDeviceView 
@@ -97,9 +176,12 @@ MFT.ApplinkController = Em.Object.create({
 	/**
 	 * Method creates list of Application ID's
 	 * Then call HMI method for display a list of Applications
+	 * @param {Object}
 	 */
 	onGetAppList: function( appList ){
-		for(var i = 0; i < appList.length; i++){
+		var i = 0,
+			len = appList.length;
+		for(i = 0; i < len; i++){
 			if( appList[i].isMediaApplication ){
 				MFT.ApplinkController.registerApplication(appList[i].appId, 0);
 			}else{
@@ -117,10 +199,58 @@ MFT.ApplinkController = Em.Object.create({
 	},
 
 	/**
-	 *  Method activates selected registered application
+	 * Method activates selected registered application
+	 * @param {Object}
 	 */
 	onActivateApplinkApp: function(element){
 		this.getApplicationModel(element.appId).turnOnApplink( element.appName, element.appId );
-	}
+	},
 
+	/**
+	 * Method sent custom softButtons pressed and event status to RPC
+	 * @param {Object}
+	 */
+	onSoftButtonActionUpCustom: function( element ){
+        if(element.time > 0){
+            FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "LONG", element.softButtonID);
+        }else{
+            FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "SHORT", element.softButtonID);
+        }
+		FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
+        element.time = 0;
+    },
+
+	/**
+	 * Method sent custom softButtons pressed and event status to RPC 
+	 * @param {Object}
+	 */
+	onSoftButtonActionDownCustom: function( element ){
+        FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", element.softButtonID);
+        element.time = 0;
+        setTimeout(function(){ element.time ++; }, 1000);
+	},
+	
+	/**
+	 * Method sent softButtons pressed and event status to RPC
+	 * @param {Object}
+	 */
+	onSoftButtonActionUp: function( name, element ){
+        if(element.time > 0){
+            FFW.Buttons.buttonPressed( name, "LONG" );
+        }else{
+            FFW.Buttons.buttonPressed( name, "SHORT" );
+        }
+		FFW.Buttons.buttonEvent( name, "BUTTONUP" );
+        element.time = 0;
+    },
+
+	/**
+	 * Method sent softButtons pressed and event status to RPC 
+	 * @param {Object}
+	 */
+	onSoftButtonActionDown: function( name, element ){
+        FFW.Buttons.buttonEvent( name, "BUTTONDOWN" );
+        element.time = 0;
+        setTimeout(function(){ element.time ++; }, 1000);
+	}
 });

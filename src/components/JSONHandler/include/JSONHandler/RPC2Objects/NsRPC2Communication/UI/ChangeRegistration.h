@@ -3,7 +3,7 @@
 
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/Language.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/Language.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -32,13 +32,13 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const NsAppLinkRPC::Language& get_hmiDisplayLanguage(void);
+      const NsAppLinkRPCV2::Language& get_hmiDisplayLanguage(void);
 
       int get_appId(void);
 
 
 // setters
-      bool set_hmiDisplayLanguage(const NsAppLinkRPC::Language& hmiDisplayLanguage);
+      bool set_hmiDisplayLanguage(const NsAppLinkRPCV2::Language& hmiDisplayLanguage);
 
       bool set_appId(int appId);
 
@@ -47,7 +47,7 @@ namespace NsRPC2Communication
 
       friend class ChangeRegistrationMarshaller;
 
-      NsAppLinkRPC::Language hmiDisplayLanguage;
+      NsAppLinkRPCV2::Language hmiDisplayLanguage;
       int appId;
 
     };

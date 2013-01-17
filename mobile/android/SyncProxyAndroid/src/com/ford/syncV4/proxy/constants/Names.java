@@ -233,7 +233,7 @@ public class Names {
 	public static final String mediaTrack = "mediaTrack";
 	public static final String properties = "properties";
 	public static final String choiceID = "choiceID";
-	public static final String audioQuality = "audioQuality";
+	public static final String bitsPerSample = "bitsPerSample";
 	public static final String hmiLevel = "hmiLevel";
 	public static final String audioStreamingState = "audioStreamingState";
 	public static final String systemContext = "systemContext";

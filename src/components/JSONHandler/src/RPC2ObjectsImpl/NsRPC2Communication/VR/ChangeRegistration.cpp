@@ -37,12 +37,12 @@ ChangeRegistration::ChangeRegistration(const ChangeRegistration& c) : RPC2Reques
 }
 
 
-const NsAppLinkRPC::Language& ChangeRegistration::get_language(void)
+const NsAppLinkRPCV2::Language& ChangeRegistration::get_language(void)
 {
   return language;
 }
 
-bool ChangeRegistration::set_language(const NsAppLinkRPC::Language& language_)
+bool ChangeRegistration::set_language(const NsAppLinkRPCV2::Language& language_)
 {
   language=language_;
   return true;

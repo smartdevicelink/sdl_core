@@ -1,12 +1,9 @@
 /*
- * Reference implementation of ButtonsBackend component.
+ * Reference implementation of Buttons component.
  * 
- * Interface to get or set some essential information from OS.
- * Since web application is not able to access some OS feature through WebKit
- * it is necessary to use communication with native code to get some or set values 
- * and execute some functions. 
+ *  Buttons sends to ApplinkCore press and hold events of
+ * soft buttons, presets and some hard keys. 
  * 
- *
  * @author Andriy Melnik
  */
 
@@ -206,6 +203,8 @@ FFW.Buttons = FFW.RPCObserver.create({
 	 */
 	buttonPressed: function(id, type) {
 
+		Em.Logger.log("FFW.Buttons.buttonPressed " + type);
+
 		var JSONMessage = {
 			"jsonrpc" :	"2.0",
 			"method"  :	"Buttons.OnButtonPress",
@@ -224,6 +223,8 @@ FFW.Buttons = FFW.RPCObserver.create({
 	 * and all the views are rendered.
 	 */
 	buttonEvent: function(id, type) {
+
+		Em.Logger.log("FFW.Buttons.buttonEvent " + type);
 
 		var JSONMessage = {
 			"jsonrpc" :	"2.0",
@@ -245,6 +246,8 @@ FFW.Buttons = FFW.RPCObserver.create({
 	 */
 	buttonPressedCustom: function(name, type, softButtonID) {
 
+		//Em.Logger.log("FFW.Buttons.buttonPressedCustom " + type);
+
 		var JSONMessage = {
 			"jsonrpc" :	"2.0",
 			"method"  :	"Buttons.OnButtonPress",
@@ -264,6 +267,8 @@ FFW.Buttons = FFW.RPCObserver.create({
 	 * and all the views are rendered.
 	 */
 	buttonEventCustom: function(name, type, softButtonID) {
+
+		//Em.Logger.log("FFW.Buttons.buttonEventCustom " + type);
 
 		var JSONMessage = {
 			"jsonrpc" :	"2.0",

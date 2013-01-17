@@ -25,12 +25,12 @@ public class GetDTCs extends RPCRequest {
     }
     public void setEncrypted(Boolean encrypted) {
     	if (encrypted != null) {
-    		store.put(Names.encrypted, encrypted);
+    		parameters.put(Names.encrypted, encrypted);
     	} else {
-    		store.remove(Names.encrypted);
+    		parameters.remove(Names.encrypted);
     	}
     }
     public Boolean getEncrypted() {
-    	return (Boolean) store.get(Names.encrypted);
+    	return (Boolean) parameters.get(Names.encrypted);
     }
 }

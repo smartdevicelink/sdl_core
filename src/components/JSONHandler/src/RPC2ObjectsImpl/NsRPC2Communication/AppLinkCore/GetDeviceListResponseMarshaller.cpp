@@ -44,8 +44,9 @@ const std::string GetDeviceListResponseMarshaller::toString(const GetDeviceListR
 
 bool GetDeviceListResponseMarshaller::checkIntegrityConst(const GetDeviceListResponse& s)
 {
+  if (s.deviceList)
   {
-    unsigned int i=s.deviceList.size();
+    unsigned int i=s.deviceList->size();
     if(i<1)  return false;
     if(i>100)  return false;
   }
@@ -67,12 +68,13 @@ Json::Value GetDeviceListResponseMarshaller::toJSON(const GetDeviceListResponse&
   json["result"]["resultCode"]=NsAppLinkRPC::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("AppLinkCore.GetDeviceListResponse");
 
+  if (e.deviceList)
   {
-    unsigned int i=e.deviceList.size();
+    unsigned int i=e.deviceList->size();
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=Json::Value(e.deviceList[i]);
+      j[i]=Json::Value(e.deviceList[0][i]);
 
     json["result"]["deviceList"]=j;
   }
@@ -82,6 +84,7 @@ Json::Value GetDeviceListResponseMarshaller::toJSON(const GetDeviceListResponse&
 
 bool GetDeviceListResponseMarshaller::fromJSON(const Json::Value& json,GetDeviceListResponse& c)
 {
+  delete c.deviceList;
   try
   {
     if(!json.isObject())  return false;
@@ -101,19 +104,18 @@ bool GetDeviceListResponseMarshaller::fromJSON(const Json::Value& json,GetDevice
 
     if(!NsAppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
-    if(!js.isMember("deviceList") || !js["deviceList"].isArray())
-      return false;
+    if(js.isMember("deviceList")) 
     {
-      c.deviceList.clear();
+      if (!js["deviceList"].isArray()) return false;
       unsigned int i=js["deviceList"].size();
       if(i<1)  return false;
       if(i>100)  return false;
-      c.deviceList.resize(i);
+      c.deviceList = new std::vector<std::string> (i);
       while(i--)
       {
         if(!js["deviceList"][i].isString())
           return false;
-        c.deviceList[i]=js["deviceList"][i].asString();
+        c.deviceList[0][i]=js["deviceList"][i].asString();
         
       }
     }

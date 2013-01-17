@@ -62,7 +62,6 @@ Json::Value OnLanguageChangeMarshaller::toJSON(const OnLanguageChange& e)
   json["params"]=Json::Value(Json::objectValue);
 
   json["params"]["hmiDisplayLanguage"]=NsAppLinkRPC::LanguageMarshaller::toJSON(e.hmiDisplayLanguage);;
-  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -81,8 +80,6 @@ bool OnLanguageChangeMarshaller::fromJSON(const Json::Value& json,OnLanguageChan
 
     if(!js.isMember("hmiDisplayLanguage") || !NsAppLinkRPC::LanguageMarshaller::fromJSON(js["hmiDisplayLanguage"],c.hmiDisplayLanguage))  return false;
 
-    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
-    c.appId=js["appId"].asInt();
     
   }
   catch(...)

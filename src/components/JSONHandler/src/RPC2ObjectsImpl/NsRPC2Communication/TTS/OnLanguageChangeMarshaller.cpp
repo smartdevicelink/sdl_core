@@ -62,7 +62,6 @@ Json::Value OnLanguageChangeMarshaller::toJSON(const OnLanguageChange& e)
   json["params"]=Json::Value(Json::objectValue);
 
   json["params"]["language"]=NsAppLinkRPC::LanguageMarshaller::toJSON(e.language);;
-  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -81,9 +80,7 @@ bool OnLanguageChangeMarshaller::fromJSON(const Json::Value& json,OnLanguageChan
 
     if(!js.isMember("language") || !NsAppLinkRPC::LanguageMarshaller::fromJSON(js["language"],c.language))  return false;
 
-    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
-    c.appId=js["appId"].asInt();
-    
+       
   }
   catch(...)
   {

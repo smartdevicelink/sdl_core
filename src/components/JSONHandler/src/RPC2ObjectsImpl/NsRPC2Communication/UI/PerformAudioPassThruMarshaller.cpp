@@ -1,20 +1,20 @@
-#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/PerformAudioPassThru.h"
-#include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/PerformAudioPassThru.h"
+#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/SamplingRateMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/AudioCaptureQualityMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/AudioTypeMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/PerformAudioPassThruMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/PerformAudioPassThruMarshaller.h"
 
 /*
-  interface	NsRPC2Communication::TTS
+  interface	NsRPC2Communication::UI
   version	1.2
   generated at	Fri Dec 14 06:14:25 2012
   source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
-using namespace NsRPC2Communication::TTS;
+using namespace NsRPC2Communication::UI;
 
 bool PerformAudioPassThruMarshaller::checkIntegrity(PerformAudioPassThru& s)
 {
@@ -77,7 +77,7 @@ Json::Value PerformAudioPassThruMarshaller::toJSON(const PerformAudioPassThru& e
     return Json::Value(Json::nullValue);
 
   json["jsonrpc"]=Json::Value("2.0");
-  json["method"]=Json::Value("TTS.PerformAudioPassThru");
+  json["method"]=Json::Value("UI.PerformAudioPassThru");
 
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
@@ -86,7 +86,7 @@ Json::Value PerformAudioPassThruMarshaller::toJSON(const PerformAudioPassThru& e
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::TTSChunkMarshaller::toJSON(e.initialPrompt[i]);
+      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.initialPrompt[i]);
 
     json["params"]["initialPrompt"]=j;
   }
@@ -109,7 +109,7 @@ bool PerformAudioPassThruMarshaller::fromJSON(const Json::Value& json,PerformAud
   {
     if(!json.isObject())  return false;
     if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return false;
-    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("TTS.PerformAudioPassThru"))  return false;
+    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("UI.PerformAudioPassThru"))  return false;
     if(!json.isMember("id") || !json["id"].isInt()) return false;
     c.setId(json["id"].asInt());
 
@@ -125,8 +125,8 @@ bool PerformAudioPassThruMarshaller::fromJSON(const Json::Value& json,PerformAud
       c.initialPrompt.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::TTSChunk t;
-        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["initialPrompt"][i],t))
+        NsAppLinkRPCV2::TTSChunk t;
+        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["initialPrompt"][i],t))
           return false;
          c.initialPrompt[i]=t;
       }
@@ -166,7 +166,7 @@ bool PerformAudioPassThruMarshaller::fromJSON(const Json::Value& json,PerformAud
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;
     c.appId=js["appId"].asInt();
-    
+
   }
   catch(...)
   {

@@ -4,7 +4,7 @@
  * @desc TTSPopUp module visual representation
  * 
  * @category	View
- * @filesource	app/view/home/TTSPopUp.js
+ * @filesource	app/view/applink/TTSPopUp.js
  * @version		2.0
  *
  * @author		Andriy Melnik
@@ -26,6 +26,8 @@ MFT.TTSPopUp = Em.ContainerView.create({
 	content:			'Messaage',
 
 	active: 			false,
+
+	timer:				null,
 
 	popUp : Em.View.extend({
 
@@ -51,6 +53,7 @@ MFT.TTSPopUp = Em.ContainerView.create({
 		
 		this.set('content', msg);
 		this.set('active', true);
-		setTimeout(function(){self.set('active', false);}, 10000);
+        clearTimeout(this.timer);
+		this.timer = setTimeout(function(){self.set('active', false);}, 10000);
 	}
 });

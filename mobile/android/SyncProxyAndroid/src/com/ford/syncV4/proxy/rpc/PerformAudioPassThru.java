@@ -97,13 +97,13 @@ public class PerformAudioPassThru extends RPCRequest {
     }
     public void setBitsPerSample(AudioCaptureQuality audioQuality) {
     	if (audioQuality != null) {
-    		parameters.put(Names.audioQuality, audioQuality);
+    		parameters.put(Names.bitsPerSample, audioQuality);
     	} else {
-    		parameters.remove(Names.audioQuality);
+    		parameters.remove(Names.bitsPerSample);
     	}
     }
     public AudioCaptureQuality getBitsPerSample() {
-    	Object obj = parameters.get(Names.audioQuality);
+    	Object obj = parameters.get(Names.bitsPerSample);
     	if (obj instanceof AudioCaptureQuality) {
     		return (AudioCaptureQuality) obj;
     	} else if (obj instanceof String) {
@@ -111,7 +111,7 @@ public class PerformAudioPassThru extends RPCRequest {
             try {
                 theCode = AudioCaptureQuality.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.audioQuality, e);
+            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.bitsPerSample, e);
             }
             return theCode;
     	}

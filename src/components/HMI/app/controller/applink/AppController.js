@@ -20,6 +20,15 @@ MFT.ApplinkAppController = Em.Object.create({
 	onCommand: function( element ) {
 		FFW.UI.onCommand( element.commandId, element.appId );
 	},
+
+	/**
+	 * Handeler for command button press
+	 * 
+	 * @param element:	MFT.Button
+	 */
+	onVRCommand: function( element ) {
+		FFW.VR.onCommand( element.commandId, element.appId );
+	},
 	
 	/**
 	 * Handeler for command submenu press

@@ -3,7 +3,7 @@
 
 #include "OnLanguageChangeMarshaller.h"
 
-
+#include <iostream>
 /*
   interface	Ford Sync RAPI
   version	2.0O
@@ -48,7 +48,9 @@ const std::string OnLanguageChangeMarshaller::toString(const OnLanguageChange& e
 
 bool OnLanguageChangeMarshaller::checkIntegrityConst(const OnLanguageChange& s)
 {
+  std::cout<<"OnLanguageChangeMarshaller::checkIntegrityConst: " << s.language.get() << "\n";
   if(!LanguageMarshaller::checkIntegrityConst(s.language))  return false;
+  std::cout<<"OnLanguageChangeMarshaller::checkIntegrityConst\n";
   if(!LanguageMarshaller::checkIntegrityConst(s.hmiDisplayLanguage))  return false;
   return true;
 }
@@ -56,8 +58,11 @@ bool OnLanguageChangeMarshaller::checkIntegrityConst(const OnLanguageChange& s)
 Json::Value OnLanguageChangeMarshaller::toJSON(const OnLanguageChange& e)
 {
   Json::Value json(Json::objectValue);
+  std::cout<<"\t\tOnLanguageChangeMarshaller::toJSON\n";
   if(!checkIntegrityConst(e))
     return Json::Value(Json::nullValue);
+
+  std::cout<<"\t\tOnLanguageChangeMarshaller::toJSON:: integrity.\n";
 
   json["language"]=LanguageMarshaller::toJSON(e.language);
 

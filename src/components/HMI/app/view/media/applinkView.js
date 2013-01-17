@@ -11,16 +11,38 @@
  */
 MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 	
-	/** View Id */	
+	/**
+	 * View Id
+	 */	
 	elementId: 'applink_view_container',
 
-	/** View Components*/
+	/**
+	 * View Components
+	 */
 	childViews: [
-		'controlls',
-		'innerMenu'
+		'innerMenu',
+		'controlls'
 	],
 	
-	controlls: MFT.ApplinkMediaControllsV2,
+	controlls: MFT.ApplinkMediaControllsV1,
+
+	/**
+	 * Function to choose appropriate view
+	 * to current version of protocol
+	 */
+	changeControlls: function(){
+		if(MFT.ApplinkController.protocolVersion2State){
+			this.get('childViews').removeObjects(
+                this.get('childViews').filterProperty( 'applinkMediaControlls' , 'V1' )
+            );
+			MFT.applinkView.get('childViews').pushObject(MFT.ApplinkMediaControllsV2);
+		}else{
+			this.get('childViews').removeObjects(
+                this.get('childViews').filterProperty( 'applinkMediaControlls' , 'V2' )
+            );
+			MFT.applinkView.get('childViews').pushObject(MFT.ApplinkMediaControllsV1);
+		}
+	}.observes('MFT.ApplinkController.protocolVersion2State'),
 
 	innerMenu: MFT.MenuList.extend({
 

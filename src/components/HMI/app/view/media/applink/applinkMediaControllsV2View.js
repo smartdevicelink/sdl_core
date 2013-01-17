@@ -18,6 +18,11 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
             'tuneButtons'
         ],
 
+        /**
+         * Verification paramiter
+         */
+        applinkMediaControlls: "V2",
+
         info:   Em.View.extend({
             
             elementId: 'app_view_info',
@@ -39,7 +44,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
 
          Controls:   Em.ContainerView.create({
 
-            elementId: 'app_view_controlls',
+            elementId: 'app_view_controllsV2',
 
             /** View components*/
             childViews: [
@@ -51,47 +56,29 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
             classNames: 'player_controlls',
             
             PrevTrackButton: MFT.Button.extend({
-                elementId:          'app_view_controlls_prev_track_button',
+                elementId:          'app_view_controlls_prev_track_button_v2',
                 classNames:         ['bc-item-big', 'prevcd'],
                 classNames:         ['bc-item-big', 'prevcd'],
                 actionDown:     function(){
                     this._super();
-                    FFW.Buttons.buttonEvent( 'SEEKLEFT', "BUTTONDOWN");
-                    var self = this;
-                    this.time = 0;
-                    setTimeout(function(){ self.time ++; }, 1000);
+                    MFT.ApplinkController.onSoftButtonActionDown('SEEKLEFT', this);
                 },
                 actionUp:       function(){
                     this._super();
-                    if(this.time > 0){
-                        FFW.Buttons.buttonPressed( 'SEEKLEFT', "LONG");
-                    }else{
-                        FFW.Buttons.buttonPressed( 'SEEKLEFT', "SHORT");
-                    }
-                    FFW.Buttons.buttonEvent( 'SEEKLEFT', "BUTTONUP");
-                    this.time = 0;
+                    MFT.ApplinkController.onSoftButtonActionUp('SEEKLEFT', this);
                 },
                 icon:               'images/media/ico_prew.png',
             }),
             PlayButton: MFT.Button.extend({
-                elementId:          'app_view_controlls_play_button',
+                elementId:          'app_view_controlls_play_button_v2',
                 classNames:         ['bc-item-big', 'playcd'],
                 actionDown:     function(){
                     this._super();
-                    FFW.Buttons.buttonEvent( 'OK', "BUTTONDOWN");
-                    var self = this;
-                    this.time = 0;
-                    setTimeout(function(){ self.time ++; }, 1000);
+                    MFT.ApplinkController.onSoftButtonActionDown('OK', this);
                 },
                 actionUp:       function(){
                     this._super();
-                    if(this.time > 0){
-                        FFW.Buttons.buttonPressed( 'OK', "LONG");
-                    }else{
-                        FFW.Buttons.buttonPressed( 'OK', "SHORT");
-                    }
-                    FFW.Buttons.buttonEvent( 'OK', "BUTTONUP");
-                    this.time = 0;
+                    MFT.ApplinkController.onSoftButtonActionUp('OK', this);
                 },
                 /** Define button template */
                 template: Ember.Handlebars.compile(
@@ -100,24 +87,15 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 )
             }),
             NextTrackButton: MFT.Button.extend({
-                elementId:          'app_view_controlls_next_track_button',
+                elementId:          'app_view_controlls_next_track_button_v2',
                 classNames:         ['bc-item-big', 'nextcd'],
                 actionDown:     function(){
                     this._super();
-                    FFW.Buttons.buttonEvent( 'SEEKRIGHT', "BUTTONDOWN");
-                    var self = this;
-                    this.time = 0;
-                    setTimeout(function(){ self.time ++; }, 1000);
+                    MFT.ApplinkController.onSoftButtonActionDown('SEEKRIGHT', this);
                 },
                 actionUp:       function(){
                     this._super();
-                    if(this.time > 0){
-                        FFW.Buttons.buttonPressed( 'SEEKRIGHT', "LONG");
-                    }else{
-                        FFW.Buttons.buttonPressed( 'SEEKRIGHT', "SHORT");
-                    }
-                    FFW.Buttons.buttonEvent( 'SEEKRIGHT', "BUTTONUP");
-                    this.time = 0;
+                    MFT.ApplinkController.onSoftButtonActionUp('SEEKRIGHT', this);
                 },
                 icon:                 'images/media/ico_next.png',
             })

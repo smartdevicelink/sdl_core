@@ -1,16 +1,16 @@
-#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/EndAudioPassThruResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/EndAudioPassThruResponse.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/EndAudioPassThruResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/EndAudioPassThruResponseMarshaller.h"
 
 /*
-  interface	NsRPC2Communication::TTS
+  interface	NsRPC2Communication::UI
   version	1.2
   generated at	Fri Dec 14 06:14:25 2012
   source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
 
-using namespace NsRPC2Communication::TTS;
+using namespace NsRPC2Communication::UI;
 
 bool EndAudioPassThruResponseMarshaller::checkIntegrity(EndAudioPassThruResponse& s)
 {
@@ -59,7 +59,7 @@ Json::Value EndAudioPassThruResponseMarshaller::toJSON(const EndAudioPassThruRes
   json["result"]=Json::Value(Json::objectValue);
   NsAppLinkRPC::Result r(static_cast<NsAppLinkRPC::Result::ResultInternal>(e.getResult()));
   json["result"]["resultCode"]=NsAppLinkRPC::ResultMarshaller::toJSON(r);
-  json["result"]["method"]=Json::Value("TTS.EndAudioPassThruResponse");
+  json["result"]["method"]=Json::Value("UI.EndAudioPassThruResponse");
 
   return json;
 }
@@ -82,7 +82,7 @@ bool EndAudioPassThruResponseMarshaller::fromJSON(const Json::Value& json,EndAud
     NsAppLinkRPC::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
-    if(js["method"].asString().compare("TTS.EndAudioPassThruResponse")) return false;
+    if(js["method"].asString().compare("UI.EndAudioPassThruResponse")) return false;
 
     if(!NsAppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());

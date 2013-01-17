@@ -4,7 +4,7 @@
  * @desc VRPopUp module visual representation
  * 
  * @category    View
- * @filesource  app/view/home/VRPopUp.js
+ * @filesource  app/view/applink/VRPopUp.js
  * @version     2.0
  *
  * @author      Andriy Melnik
@@ -59,10 +59,18 @@ MFT.VRPopUp = Em.ContainerView.create({
                 target:                 'MFT.ApplinkController',
                 text:                   appName,
                 appName:                appName,
-                appId:                  appId,
+                activeAppId:            appId,
                 classNames:             'list-item',
                 templateName:           'text'
             })
+        );
+
+    },
+
+    DeleteActivateApp: function( appId ){
+
+        this.get('listOfCommands.list.childViews').removeObjects(
+            this.get('listOfCommands.list.childViews').filterProperty( 'activeAppId' , appId )
         );
 
     },
@@ -72,7 +80,7 @@ MFT.VRPopUp = Em.ContainerView.create({
         for(var j = 0; j < vrCommands.length; j++){
             this.get('listOfCommands.list.childViews').pushObject(
                 MFT.Button.create({
-                    action:                 'onCommand',
+                    action:                 'onVRCommand',
                     target:                 'MFT.ApplinkAppController',
                     appId:					appId,
                     commandId:              commandId,

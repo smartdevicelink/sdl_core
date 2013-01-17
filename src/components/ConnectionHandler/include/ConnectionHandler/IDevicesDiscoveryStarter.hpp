@@ -27,6 +27,10 @@ namespace NsConnectionHandler
          */
         virtual void startDevicesDiscovery()=0;
 
+        /**
+         * \brief Connects to all services of device
+         * \param deviceHandle Handle of device to connect to
+         */
         virtual void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle ) = 0;
 
     protected:

@@ -40,7 +40,7 @@ void ProtocolHandler::setProtocolObserver( IProtocolObserver * observer )
 
     mProtocolObserver = observer;
 }
-        
+
 void ProtocolHandler::setSessionObserver( ISessionObserver * observer )
 {
     if ( !observer )
@@ -54,7 +54,7 @@ void ProtocolHandler::setSessionObserver( ISessionObserver * observer )
 
 void ProtocolHandler::sendEndSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned int sessionID,
-              unsigned char protocolVersion, 
+              unsigned char protocolVersion,
               unsigned int hashCode,
               unsigned char serviceType )
 {
@@ -78,7 +78,7 @@ void ProtocolHandler::sendEndSessionAck( NsAppLink::NsTransportManager::tConnect
         LOG4CPLUS_ERROR(mLogger, "sendStartSessionAck() - BT write FAIL");
     }
 }
-        
+
 void ProtocolHandler::sendEndSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned int sessionID,
               unsigned char serviceType )
@@ -139,7 +139,7 @@ void ProtocolHandler::sendStartSessionNAck( NsAppLink::NsTransportManager::tConn
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
 
     unsigned char versionFlag = PROTOCOL_VERSION_1;
-    
+
     ProtocolPacket packet(versionFlag,
                                 COMPRESS_OFF,
                                 FRAME_TYPE_CONTROL,
@@ -168,7 +168,7 @@ void ProtocolHandler::sendData(const AppLinkRawMessage * message)
         LOG4CPLUS_ERROR(mLogger, "Invalid message for sending to mobile app is received.");
         return;
     }
-    mMessagesToMobileApp.push(message);    
+    mMessagesToMobileApp.push(message);
 }
 
 void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
@@ -185,13 +185,13 @@ void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnection
         message -> mConnectionHandle = connectionHandle;
         mMessagesFromMobileApp.push( message );
     }
-    else 
+    else
     {
         LOG4CPLUS_ERROR( mLogger, "Invalid incoming message received in ProtocolHandler from Transport Manager." );
     }
 }
 
-void ProtocolHandler::onFrameSendCompleted(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+void ProtocolHandler::onFrameSendCompleted(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
             int userData, NsAppLink::NsTransportManager::ESendStatus sendStatus)
 {
     if ( NsAppLink::NsTransportManager::SendStatusOK != sendStatus )
@@ -251,9 +251,9 @@ RESULT_CODE ProtocolHandler::sendSingleFrameMessage(NsAppLink::NsTransportManage
                         mMessageCounters[sessionID]++,
                         data);
 
-    return sendFrame( connectionHandle, packet );   
+    return sendFrame( connectionHandle, packet );
 }
-        
+
 RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
                                          const unsigned char sessionID,
                                          unsigned int protocolVersion,
@@ -283,7 +283,10 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager
         lastDataSize = dataSize % maxDataSize;
     }
     else
+    {
         numOfFrames = dataSize / maxDataSize;
+        lastDataSize = maxDataSize;
+    }
 
     LOG4CPLUS_INFO_EXT(mLogger, "Data size " << dataSize << " of " << numOfFrames << " frames with last frame " << lastDataSize);
 
@@ -306,7 +309,7 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager
                                      sessionID,
                                      FIRST_FRAME_DATA_SIZE,
                                      mMessageCounters[sessionID]++,
-                                     outDataFirstFrame);  
+                                     outDataFirstFrame);
 
     retVal = sendFrame( connectionHandle, firstPacket );
 
@@ -330,7 +333,7 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager
                                         sessionID,
                                         maxDataSize,
                                         mMessageCounters[sessionID],
-                                        outDataFrame);            
+                                        outDataFrame);
 
             retVal = sendFrame( connectionHandle, packet );
             if ( RESULT_FAIL == retVal)
@@ -350,7 +353,7 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager
                                         sessionID,
                                         lastDataSize,
                                         mMessageCounters[sessionID],
-                                        outDataFrame);            
+                                        outDataFrame);
 
             retVal = sendFrame( connectionHandle, packet );
         }
@@ -386,7 +389,7 @@ RESULT_CODE ProtocolHandler::handleMessage( NsAppLink::NsTransportManager::tConn
 
             int connectionKey = mSessionObserver -> keyFromPair( connectionHandle,
                                         packet -> getSessionId() );
-            
+
             AppLinkRawMessage * rawMessage = new AppLinkRawMessage( connectionKey,
                                         packet -> getVersion(),
                                         packet -> getData(),
@@ -402,7 +405,7 @@ RESULT_CODE ProtocolHandler::handleMessage( NsAppLink::NsTransportManager::tConn
         {
             LOG4CPLUS_INFO(mLogger, "handleMessage() - case FRAME_TYPE_CONSECUTIVE");
 
-            return handleMultiFrameMessage( connectionHandle, packet ); 
+            return handleMultiFrameMessage( connectionHandle, packet );
         }
         default:
         {
@@ -431,7 +434,7 @@ RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportMana
     if (packet -> getFrameType() == FRAME_TYPE_FIRST)
     {
         LOG4CPLUS_INFO(mLogger, "handleMultiFrameMessage() - FRAME_TYPE_FIRST");
-        
+
         //const unsigned char * data = packet -> getData();
         unsigned int totalDataBytes = packet -> getData()[0] << 24;
         totalDataBytes |= packet -> getData()[1] << 16;
@@ -461,7 +464,7 @@ RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportMana
             LOG4CPLUS_ERROR(mLogger, "Failed to append frame for multiframe message.");
             return RESULT_FAIL;
         }
-                
+
         if ( packet -> getFrameData() == FRAME_DATA_LAST_FRAME )
         {
             if ( !mProtocolObserver )
@@ -496,7 +499,7 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager
         LOG4CPLUS_ERROR(mLogger, "ISessionObserver is not set.");
         return RESULT_FAIL;
     }
-    
+
     if (packet -> getFrameData() == FRAME_DATA_END_SESSION)
     {
         LOG4CPLUS_INFO(mLogger, "handleControlMessage() - FRAME_DATA_END_SESSION");
@@ -512,8 +515,8 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager
         int sesionHashCode = mSessionObserver -> onSessionEndedCallback( connectionHandle, currentSessionID, hashCode );
         if ( -1 != sesionHashCode )
         {
-            sendEndSessionAck(connectionHandle, currentSessionID, 
-                    packet -> getVersion(), sesionHashCode, packet -> getServiceType());            
+            sendEndSessionAck(connectionHandle, currentSessionID,
+                    packet -> getVersion(), sesionHashCode, packet -> getServiceType());
         }
         else
         {
@@ -563,7 +566,7 @@ void * ProtocolHandler::handleMessagesFromMobileApp( void * params )
             //@TODO check for ConnectionHandle.
             //@TODO check for data size - crash is possible.
             if ((0 != message -> mData) && (0 != message -> mDataSize) && (MAXIMUM_FRAME_DATA_SIZE + PROTOCOL_HEADER_V2_SIZE >= message -> mDataSize))
-            {        
+            {
                 ProtocolPacket * packet = new ProtocolPacket;
                 LOG4CPLUS_INFO_EXT(mLogger ,"Data: " << packet -> getData());
                 if ( packet -> deserializePacket( message -> mData, message -> mDataSize ) == RESULT_FAIL )
@@ -571,7 +574,7 @@ void * ProtocolHandler::handleMessagesFromMobileApp( void * params )
                     LOG4CPLUS_ERROR(mLogger, "Failed to parse received message.");
                     delete packet;
                 }
-                else 
+                else
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "Packet: dataSize " << packet -> getDataSize());
                     handler -> handleMessage( message -> mConnectionHandle, packet );
@@ -609,9 +612,9 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
 
             unsigned int maxDataSize = 0;
             if ( PROTOCOL_VERSION_1 == message -> getProtocolVersion() )
-                maxDataSize = MAXIMUM_FRAME_SIZE - PROTOCOL_HEADER_V1_SIZE;
+                maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V1_SIZE;
             else if ( PROTOCOL_VERSION_2 == message -> getProtocolVersion() )
-                maxDataSize = MAXIMUM_FRAME_SIZE - PROTOCOL_HEADER_V2_SIZE;
+                maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V2_SIZE;
 
             NsAppLink::NsTransportManager::tConnectionHandle connectionHandle = 0;
             unsigned char sessionID = 0;
@@ -626,15 +629,15 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
             if ( message -> getDataSize() <= maxDataSize )
             {
                 if (handler -> sendSingleFrameMessage(connectionHandle,
-                                            sessionID, 
+                                            sessionID,
                                             message -> getProtocolVersion(),
-                                            SERVICE_TYPE_RPC, 
-                                            message -> getDataSize(), 
-                                            message -> getData(), 
+                                            SERVICE_TYPE_RPC,
+                                            message -> getDataSize(),
+                                            message -> getData(),
                                             false) != RESULT_OK)
                 {
                     LOG4CPLUS_ERROR(mLogger, "ProtocolHandler failed to send single frame message.");
-                }                    
+                }
             }
             else
             {
@@ -643,8 +646,8 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
                                             sessionID,
                                             message -> getProtocolVersion(),
                                             SERVICE_TYPE_BULK, // TODO : check if this is correct assumption
-                                            message -> getDataSize(), 
-                                            message -> getData(), 
+                                            message -> getDataSize(),
+                                            message -> getData(),
                                             false,
                                             maxDataSize) != RESULT_OK)
                 {

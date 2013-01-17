@@ -16,23 +16,9 @@ MFT.ApplinkMediaController = Em.Object.create({
     modelBinding: 'MFT.ApplinkMediaModel',
 
     /**
-     * Indicates Applink media application button
-     */
-    hideApplinkMediaButton: true,
-
-    /**
       * Text for label on Perform Interaction screen
       */
     subMenuLabel: '',
-
-    /*
-     *  Driver Distraction State 
-     *  may be "DD_OFF" or "DD_ON"
-     */
-    eDriverDistractionState:{
-        on : "DD_ON",
-        off : "DD_OFF"
-    },
 
     /*
      * Enumeraction that describes possible contexts
@@ -67,35 +53,28 @@ MFT.ApplinkMediaController = Em.Object.create({
 
     /** Switching on Applink Sub Mennu */
     turnOnApplinkSubMenu: function(el){
-        this.set('currentApplinkSubMenuid', el.menuId);
-        this.set('subMenuLabel', el.text);
-        MFT.States.goToState('media.applink.applinkoptions.applinkoptionssubmenu');
+        if( MFT.ApplinkController.driverDistractionState ){
+            MFT.DriverDistraction.activate();
+        }else{
+            this.set('currentApplinkSubMenuid', el.menuId);
+            this.set('subMenuLabel', el.text);
+            MFT.States.goToState('media.applink.applinkoptions.applinkoptionssubmenu');
+        }
     },
 
     /** Switching on Application */
     turnOnApplink: function(element){
 
-        MFT.ApplinkMediaModel.appInfo.set('appName', element.appName);
+        this.model.appInfo.set('appName', element.appName);
         FFW.AppLinkCoreClient.ActivateApp(element.appId);
-        MFT.ApplinkMediaModel.set('activeAppId', element.appId);
+        this.model.set('activeAppId', element.appId);
 
         /* Show Applink application in media left menu */
-        MFT.ApplinkMediaController.set('hideApplinkMediaButton', false);
+        this.model.set('hideApplinkButton', false);
         MFT.MediaController.listDown();
 
         MFT.MediaController.turnOnApplink();
         
-    },
-
-    /** Applink Driver Distraction ON/OFF switcher */
-    selectdDriverDistraction: function(checked){
-        if(checked){
-            FFW.UI.onDriverDistraction( this.eDriverDistractionState.on );
-            MFT.DriverDistraction.activate();
-        }else{
-            FFW.UI.onDriverDistraction( this.eDriverDistractionState.off );
-            MFT.DriverDistraction.deactivate();
-        }
     },
 
     /** Applink perform interaction action from VR */

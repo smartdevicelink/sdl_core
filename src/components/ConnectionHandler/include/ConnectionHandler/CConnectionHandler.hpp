@@ -19,7 +19,7 @@
 #include "ConnectionHandler/CDevice.hpp"
 #include "ConnectionHandler/CConnection.hpp"
 #include "ConnectionHandler/IDevicesDiscoveryStarter.hpp"
-
+#include "ConnectionHandler/IConnectionHandler.hpp"
 /**
  * \namespace NsConnectionHandler
  * \brief AppLink ConnectionHandler namespace.
@@ -30,7 +30,10 @@ namespace NsConnectionHandler
     * \class CConnectionHandler
     * \brief AppLink ConnectionHandler main class
     */
-    class CConnectionHandler: public NsAppLink::NsTransportManager::ITransportManagerDeviceListener, public NsProtocolHandler::ISessionObserver, public IDevicesDiscoveryStarter
+    class CConnectionHandler: public NsAppLink::NsTransportManager::ITransportManagerDeviceListener,
+                              public NsProtocolHandler::ISessionObserver,
+                              public IDevicesDiscoveryStarter,
+                              public IConnectionHandler
     {
     public:
         /**
@@ -88,10 +91,21 @@ namespace NsConnectionHandler
         virtual void pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle, 
                                                unsigned char & sessionId);
 
+        /**
+         * \brief Sets pointer to TransportManager.
+         * \param transportManager Pointer to TransportManager object.
+         **/
         void setTransportManager( NsAppLink::NsTransportManager::ITransportManager * transportManager );
 
+        /**
+         * \brief Method which should start devices discoveryng
+         */
         virtual void startDevicesDiscovery();
 
+        /**
+         * \brief Connects to all services of device
+         * \param deviceHandle Handle of device to connect to
+         */
         virtual void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle );
 
     private:

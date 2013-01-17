@@ -1,12 +1,11 @@
 /*
- * Reference implementation of UIBackend component.
+ * Reference implementation of AppLinkCoreClient component.
  * 
  * Interface to get or set some essential information from OS.
- * Since web application is not able to access some OS feature through WebKit
- * it is necessary to use communication with native code to get some or set values 
- * and execute some functions. 
+ * AppLinkCoreClient responsible for handling the basic commands of non-graphical part
+ * such as the registration of mobile apps, geting the list of devices and applications
+ * and data transfer.
  * 
- *
  * @author Andriy Melnik
  */
 
@@ -81,7 +80,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * Client disconnected.
 	 */
 	onRPCDisconnected: function() {
-		MFT.ApplinkMediaModel.onApplicationDisconected();
+		//MFT.ApplinkMediaModel.onApplicationDisconected();
 	},
 
 	/*
@@ -137,7 +136,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			}
 			MFT.VRPopUp.AddActivateApp(notification.params.appId, notification.params.appName);
 			// add new app to the list
-			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " connected!");
+			//MFT.TTSPopUp.ActivateTTS(notification.params.appName + " connected!");
 			MFT.ApplinkController.getApplicationModel(notification.params.appId).appInfo.set('appName', notification.params.appName);
 			
 			this.getAppList();
@@ -146,9 +145,10 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		if (notification.method == this.onAppUnregisteredNotification)
 		{	
 			//  remove app from list
-			MFT.TTSPopUp.ActivateTTS(notification.params.appName + " disconnected!");
-			MFT.ApplinkMediaModel.appInfo.set('appName', "<No app>");
-			MFT.ApplinkMediaController.set('hideApplinkMediaButton', true);
+			//MFT.TTSPopUp.ActivateTTS(notification.params.appName + " disconnected!");
+			MFT.ApplinkController.getApplicationModel(notification.params.appId).appInfo.set('appName', "<No app>");
+			MFT.ApplinkController.getApplicationModel(notification.params.appId).set('hideApplinkButton', true);
+			MFT.VRPopUp.DeleteActivateApp(notification.params.appId);
 			MFT.ApplinkController.unRegisterApplication(notification.params.appId);
 		}
 
@@ -185,6 +185,21 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	},
 
 	/*
+	 * send notification when DriverDistraction PopUp is visible
+ 	 */	
+	OnVersionChanged: function( version ) {
+		Em.Logger.log("FFW.AppLinkCore.OnVersionChanged");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"AppLinkCore.OnVersionChanged",
+			"params":	{"versionNumber":	version}
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
 	 * Request for list of avaliable devices
 	 */
 	getDeviceList: function() {
@@ -201,18 +216,21 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	},
 
     /** Sending data from HMI for processing in ApplinkCore */
-    SendData: function(){
+    SendData: function( data ){
     	Em.Logger.log("FFW.ALCore.SendData");
 
-		// send request
+    	if(!data){
+    		data = ["Data for sending from HMI to Mobile application."];
+    	}
 
+		// send request
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.SendData",
 			"params"	:	{
-				"data": ["Data for sending from HMI to Mobile application."],
-				"url":	"ftp://appsurv:appsurv@ftp.drivehq.com/",
+				"data": 	data,
+				"url":		"ftp://appsurv:appsurv@ftp.drivehq.com/",
 				"timeout":	10000
 			}
 		};

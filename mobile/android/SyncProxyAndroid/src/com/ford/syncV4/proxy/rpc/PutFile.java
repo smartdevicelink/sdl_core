@@ -59,12 +59,12 @@ public class PutFile extends RPCRequest {
     }
     public void setFileData(byte[] fileData) {
         if (fileData != null) {
-            store.put(Names.bulkData, fileData);
+            parameters.put(Names.bulkData, fileData);
         } else {
-        	store.remove(Names.bulkData);
+        	parameters.remove(Names.bulkData);
         }
     }
     public byte[] getFileData() {
-        return (byte[]) store.get(Names.bulkData);
+        return (byte[]) parameters.get(Names.bulkData);
     }
 }

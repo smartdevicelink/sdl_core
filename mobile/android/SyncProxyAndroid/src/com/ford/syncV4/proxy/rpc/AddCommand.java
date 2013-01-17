@@ -66,7 +66,7 @@ public class AddCommand extends RPCRequest {
         }
     }
     public Image getCmdIcon() {
-    	Object obj = store.get(Names.cmdIcon);
+    	Object obj = parameters.get(Names.cmdIcon);
         if (obj instanceof Image) {
             return (Image) obj;
         } else if (obj instanceof Hashtable) {
@@ -80,9 +80,9 @@ public class AddCommand extends RPCRequest {
     }
     public void setCmdIcon(Image cmdIcon) {
         if (cmdIcon != null) {
-            store.put(Names.cmdIcon, cmdIcon);
+            parameters.put(Names.cmdIcon, cmdIcon);
         } else {
-        	store.remove(Names.cmdIcon);
+        	parameters.remove(Names.cmdIcon);
         }
     }
 }

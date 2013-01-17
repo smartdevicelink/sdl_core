@@ -15,19 +15,118 @@ MFT.ControlButtons = Em.ContainerView.create({
 	elementId:		'app_controlButtons',
 
 	childViews: [
+		'VRButton',
 		'buttonControls',
 		'driverDistractionControl',
+		'protocolVersion',
 		'infoTable',
-		'sendData'
+		'sendData',
+		'vehicleInfo',
+		'UILanguages',
+		'TTSVRLanguages',
+		'UILanguagesLabel',
+		'TTSVRLanguagesLabel'
 	],
 
-	/** Sending data from HMI for processing in ApplinkCore */
+	/*
+     * Label with name of UILanguages select
+     */ 
+	UILanguagesLabel : MFT.Label.extend({
+
+		elementId:			'UILanguagesLabel',
+
+		classNames:			'UILanguagesLabel',
+
+		content:			'UI Languages'
+	}),
+
+	/*
+     * Label with name of TTSVRLanguages select
+     */ 
+	TTSVRLanguagesLabel : MFT.Label.extend({
+
+		elementId:			'TTSVRLanguagesLabel',
+
+		classNames:			'TTSVRLanguagesLabel',
+
+		content:			'TTS + VR Languages'
+	}),	
+
+	/*
+     * HMI element Select with list of supported UI component languages
+     */ 
+    UILanguages : Em.Select.extend({
+
+        elementId:          'UILanguages',
+
+        classNames:         'languageSelect',
+
+        contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
+
+        valueBinding:		'MFT.ApplinkModel.UILanguage',
+
+        click: function(){
+
+    		MFT.ApplinkController.onLanguageChangeUI( this.selection );
+
+        }
+    }),
+
+	/*
+     * HMI element Select with list of supported TTS and VR component languages
+     */ 
+    TTSVRLanguages : Em.Select.extend({
+
+        elementId:          'TTSVRLanguages',
+
+        classNames:         'languageSelect',
+
+        contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
+
+        valueBinding:		'MFT.ApplinkModel.TTSVRLanguage',
+
+        click: function(){
+
+            MFT.ApplinkController.onLanguageChangeTTSVR( this.selection );
+
+        }
+    }),
+
+	/**
+	 * Sending data from HMI for processing in ApplinkCore
+	 */
 	sendData: MFT.Button.create({
 		elementId:	'sendData',
 		classNames:	'sendData btnNotPressed',
-		action:		'SendData',
-		target:		'FFW.AppLinkCoreClient',
+		action:		function(){
+			FFW.AppLinkCoreClient.SendData( null );
+		},
 		text:		'Send Data'
+	}),
+
+	/**
+	 * Voice Recognition button
+	 */
+	vehicleInfo: MFT.Button.create({
+		elementId:	'vehicleInfoButton',
+		classNames:	'vehicleInfoButton btn',
+		text:		'Vehicle Info', 
+		actionUp:		function(){
+			this._super();
+			MFT.VehicleInfo.toggleActivity();
+		}
+	}),
+
+	/**
+	 * Voice Recognition button
+	 */
+	VRButton: MFT.Button.create({
+		elementId:	'VRButton',
+		classNames:	'VRButton',
+		actionUp:		function(){
+			this._super();
+			MFT.VRPopUp.activateVRPopUp();
+		}
 	}),
 
 	infoTable: Em.ContainerView.extend({
@@ -55,20 +154,25 @@ MFT.ControlButtons = Em.ContainerView.create({
 
 			classNames:			'applinkGPData',
 
-			content:			'Some text for help prompt',
+			contentBinding:		'this.propertiesData',
 			
 			propertiesData: function(){
-				var i=0,
+				var str='';
+				if( MFT.ApplinkModel.globalProperties.helpPrompt && MFT.ApplinkModel.globalProperties.timeoutPrompt ){
+					var i=0;
+					
 					str='HELP_PROMPT: ';
-				for(i = 0; i < MFT.ApplinkModel.globalProperties.helpPrompt.length; i++){
-					str += MFT.ApplinkModel.globalProperties.helpPrompt[i].text + ' ';
+					for(i = 0; i < MFT.ApplinkModel.globalProperties.helpPrompt.length; i++){
+						str += MFT.ApplinkModel.globalProperties.helpPrompt[i].text + ' ';
+					}
+					str += 'TIMEOUT_PROMPT: ';
+					for(i = 0; i < MFT.ApplinkModel.globalProperties.timeoutPrompt.length; i++){
+						str += MFT.ApplinkModel.globalProperties.timeoutPrompt[i].text + ' ';
+					}
 				}
-				str += 'TIMEOUT_PROMPT: ';
-				for(i = 0; i < MFT.ApplinkModel.globalProperties.timeoutPrompt.length; i++){
-					str += MFT.ApplinkModel.globalProperties.timeoutPrompt[i].text + ' ';
-				}
-				this.set('content', str);
-			}
+				
+				return str;
+			}.property( 'MFT.ApplinkModel.globalProperties.helpPrompt.@each.text', 'MFT.ApplinkModel.globalProperties.timeoutPrompt.@each.text' )
 		})
 	}),
 
@@ -98,7 +202,40 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:			'driverDistractionControlCheckBox',
 
 			onCheckBoxSelected:	function(){
-				MFT.ApplinkMediaController.selectdDriverDistraction(this.checked);
+				MFT.ApplinkController.selectDriverDistraction(this.checked);
+			}.observes('this.checked')
+
+		})
+	}),
+
+
+	protocolVersion: Em.ContainerView.extend({
+		elementId:	'protocolVersion',
+		
+		classNames:	'protocolVersion',
+
+		childViews: [
+			'protocolVersionLabel',
+			'protocolVersionCheckBox'
+		],
+
+		protocolVersionLabel : MFT.Label.extend({
+
+			elementId:			'protocolVersionLabel',
+
+			classNames:			'protocolVersionLabel',
+
+			content:			'Protocol version V2'
+		}),		
+
+		protocolVersionCheckBox : Em.Checkbox.extend({
+
+			elementId:			'protocolVersionCheckBox',
+
+			classNames:			'protocolVersionCheckBox',
+
+			onCheckBoxSelected:	function(){
+				MFT.ApplinkController.selectProtocolVersion(this.checked);
 			}.observes('this.checked')
 
 		})
@@ -120,8 +257,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			'SevenBtn',
 			'EightBtn',
 			'NineBtn',
-			'ZiroBtn',
-			'VRButton'
+			'ZiroBtn'
 		],
 		
 		ContainerControlls: Em.ContainerView.extend({
@@ -144,20 +280,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 				actionDown:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-					var self = this;
-					this.time = 0;
-					setTimeout(function(){ self.time ++; }, 1000);
+					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 				},
 				actionUp:		function(){
 					this._super();
-					if(this.time > 0){
-						FFW.Buttons.buttonPressed( this.elementId, "LONG");
-					}else{
-						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-					}
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-					this.time = 0;
+					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 				}
 			}),
 			
@@ -168,20 +295,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 				actionDown:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-					var self = this;
-					this.time = 0;
-					setTimeout(function(){ self.time ++; }, 1000);
+					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 				},
 				actionUp:		function(){
 					this._super();
-					if(this.time > 0){
-						FFW.Buttons.buttonPressed( this.elementId, "LONG");
-					}else{
-						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-					}
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-					this.time = 0;
+					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 				}
 			}),
 			
@@ -192,20 +310,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 				actionDown:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-					var self = this;
-					this.time = 0;
-					setTimeout(function(){ self.time ++; }, 1000);
+					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 				},
 				actionUp:		function(){
 					this._super();
-					if(this.time > 0){
-						FFW.Buttons.buttonPressed( this.elementId, "LONG");
-					}else{
-						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-					}
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-					this.time = 0;
+					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 				}
 			}),
 			
@@ -216,20 +325,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 				actionDown:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-					var self = this;
-					this.time = 0;
-					setTimeout(function(){ self.time ++; }, 1000);
+					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 				},
 				actionUp:		function(){
 					this._super();
-					if(this.time > 0){
-						FFW.Buttons.buttonPressed( this.elementId, "LONG");
-					}else{
-						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-					}
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-					this.time = 0;
+					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 				}
 			}),
 			
@@ -240,20 +340,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 				time:		0,
 				actionDown:		function(){
 					this._super();
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-					var self = this;
-					this.time = 0;
-					setTimeout(function(){ self.time ++; }, 1000);
+					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 				},
 				actionUp:		function(){
 					this._super();
-					if(this.time > 0){
-						FFW.Buttons.buttonPressed( this.elementId, "LONG");
-					}else{
-						FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-					}
-					FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-					this.time = 0;
+					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 				}
 			})
 		}),
@@ -266,20 +357,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -291,20 +373,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -316,20 +389,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -341,20 +405,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -366,20 +421,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -391,20 +437,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -416,20 +453,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -441,20 +469,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -466,20 +485,11 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
 		}),
 		
@@ -491,31 +501,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 			time:		0,
 			actionDown:		function(){
 				this._super();
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONDOWN");
-				var self = this;
-				this.time = 0;
-				setTimeout(function(){ self.time ++; }, 1000);
+				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
 			},
 			actionUp:		function(){
 				this._super();
-				if(this.time > 0){
-					FFW.Buttons.buttonPressed( this.elementId, "LONG");
-				}else{
-					FFW.Buttons.buttonPressed( this.elementId, "SHORT");
-				}
-				FFW.Buttons.buttonEvent( this.elementId, "BUTTONUP");
-				this.time = 0;
+				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
 			}
-		}),
-
-		/** Voice Recognition button */
-		VRButton: MFT.Button.create({
-			elementId:	'VRButton',
-			classNames:	'VRButton',
-			actionUp:		function(){
-				this._super();
-				MFT.VRPopUp.activateVRPopUp();
-			}
-		}),
+		})
 	})
 });

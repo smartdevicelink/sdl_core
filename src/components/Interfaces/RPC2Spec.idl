@@ -72,7 +72,7 @@ Show(string(500) * mainField1,
 Alert(
   string(500) * AlertText1,
   string(500) * AlertText2,
-  string(500) * alertText3,
+  string(500) * AlertText3,
   TTSChunk * ttsChunks[1:100],
   unsigned int(3000:10000) * duration,
   bool * playTone,
@@ -274,6 +274,18 @@ GetCapabilities(
   );
 
 /*
+  * @descr
+  * method should be invoked at system startup
+  *  provides information about UI supported languages
+  * @returns
+  *   UI supported languages
+  */
+GetSupportedLanguages(
+  ->
+  Language [1:100] languages
+);
+
+/*
   * @descr 
    *      Notification is sent from HMI to AppManager on showing warning
    *  to user.
@@ -332,7 +344,6 @@ SetAppIcon(
    */
 notification OnLanguageChange(
   Language hmiDisplayLanguage, //  data type from AppLink protocol specification
-  int appId
 );
 
 /*
@@ -382,6 +393,46 @@ ScrollableMessage(
    */
 SetDisplayLayout(
   string displayLayout, //Predefined or dynamically created screen layout, Currently only predefined screen layouts are defined: ONSCREEN_PRESETS
+  int appId
+  -> // return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+  * @descr 
+   *      Request from AppLink to HMI to start audio pass through session
+   *  to user.
+   *  
+   */
+PerformAudioPassThru(
+  TTSChunk initialPrompt[1:100], //SYNC will speak this prompt before opening the audio pass thru sessio
+  string(500) * audioPassThruDisplayText1, //Line of text displayed during audio capture
+  string(500) * audioPassThruDisplayText2, //Line of text displayed during audio capture
+  SamplingRate samplingRate, //This value shall be allowed at 8 khz or 16 or 22 or 44 khz.
+  unsigned int(1000000) maxDuration, //The maximum duration of audio recording in milliseconds
+  AudioCaptureQuality bitsPerSample, //Specifies the quality the audio is recorded. Currently 8 bit or 16 bit
+  AudioType audioType, //Specifies the type of audio data being requested
+  int appId
+  ->// return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+  * @descr 
+   *      Request from AppLink to HMI: when this request is invoked, the audio capture stops
+   *  to user.
+   *  
+   */
+EndAudioPassThru(
+  int appId
+  -> // return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+  * @descr 
+   *      Request HMI to Applink to restart audio pass through session
+   *  to user.
+   *  
+   */
+RetryPerformAudioPassThru(
   int appId
   -> // return value is provided in corresponding response object, id of request and response should be equal
 );
@@ -475,7 +526,18 @@ ChangeRegistration(
    */
 notification OnLanguageChange(
   Language language, //  data type from AppLink protocol specification
-  int appId
+);
+
+/*
+  * @descr
+  * method should be invoked at system startup
+  *  provides information about VR supported languages
+  * @returns
+  *   VR supported languages
+  */
+GetSupportedLanguages(
+  ->
+  Language [1:100] languages
 );
 
 /*
@@ -555,7 +617,6 @@ ChangeRegistration(
    */
 notification OnLanguageChange(
   Language language, //  data type from AppLink protocol specification
-  int appId
 );
 
 /*
@@ -569,39 +630,15 @@ GetLanguage(
 );
 
 /*
-  * @descr 
-   *      Request from AppLink to HMI to start audio pass through session
-   *  to user.
-   *  
-   */
-PerformAudioPassThru(
-  TTSChunk initialPrompt[1:100], //SYNC will speak this prompt before opening the audio pass thru sessio
-  string(500) * audioPassThruDisplayText1, //Line of text displayed during audio capture
-  string(500) * audioPassThruDisplayText2, //Line of text displayed during audio capture
-  SamplingRate samplingRate, //This value shall be allowed at 8 khz or 16 or 22 or 44 khz.
-  unsigned int(1000000) maxDuration, //The maximum duration of audio recording in milliseconds
-  AudioCaptureQuality bitsPerSample, //Specifies the quality the audio is recorded. Currently 8 bit or 16 bit
-  AudioType audioType, //Specifies the type of audio data being requested
-  int appId
-  ->// return value is provided in corresponding response object, id of request and response should be equal
-);
-
-/*
-  * @descr 
-   *      Request from AppLink to HMI: when this request is invoked, the audio capture stops
-   *  to user.
-   *  
-   */
-EndAudioPassThru(
-  int appId
-  -> // return value is provided in corresponding response object, id of request and response should be equal
-);
-
-/*
-  * @descr Notification from HMI to Applink
-   */
-notification OnAudioPassThru(
-  int appId
+  * @descr
+  * method should be invoked at system startup
+  *  provides information about TTS supported languages
+  * @returns
+  *   TTS supported languages
+  */
+GetSupportedLanguages(
+  ->
+  Language [1:100] languages
 );
 
 }
@@ -704,7 +741,7 @@ GetAppList(
    */
 GetDeviceList(
   ->
-  string deviceList [1:100]
+  string * deviceList [1:100]
 );
 
 /*
@@ -758,7 +795,7 @@ DeactivateApp(
 SendData(
   string data[1:100],
   string(1000) * url,
-  long int (-2000000000:2000000000) * timeout
+  int (-2000000000:2000000000) * timeout
   -> //return value is provided in corresponding response object, id of request and response should be equal
 );
 
@@ -795,7 +832,7 @@ version "1.2";
 
 //using AppLinkRPC;
 
-prefix "AppLinkCore.";
+prefix "VehicleInfo.";
  /*
      * @descr Request from ApplinkCore to HMI to get info about the vehicle.
     */ 
@@ -803,29 +840,7 @@ GetVehicleType(
     ->
     VehicleType vehicleType // manufacturer, model, year etc of the vehicle.
   ); 
-/*
-  * @descr Request from ApplinkCore to HMI
-  * Subscribes for specific published data items
-  * The data will be only sent if it has changed
-  * The application will be notified by the onVehicleData notification whenever new data is available.
-  */
-SubscribeVehicleData(
-  VehicleDataType dataType[1:100],
-  int appId
-  -> //return value is provided in corresponding response object, id of request and response should be equal
-  VehicleDataResult * dataResult[1:100] //Permission status of vehicle data element
-);
 
-/*
-  * @descr Request from ApplinkCore to HMI
-  * This function is used to unsubscribe the notifications from the subscribeVehicleData function
-  */
-UnsubscribeVehicleData(
-  VehicleDataType dataType[1:100],
-  int appId
-  -> 
-  VehicleDataResult * dataResult[1:100] //Permission status of vehicle data element
-); //return value is provided in corresponding response object, id of request and response should be equal
 
 /*
   * @descr Request from ApplinkCore to HMI

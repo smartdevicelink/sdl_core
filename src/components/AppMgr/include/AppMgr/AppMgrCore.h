@@ -10,6 +10,7 @@
 #include <string>
 #include "AppMgr/Application.h"
 #include "AppMgr/ButtonMapping.h"
+#include "AppMgr/VehicleDataMapping.h"
 #include "AppMgr/MessageMapping.h"
 #include "AppMgr/RequestMapping.h"
 #include "AppMgr/CapabilitesContainer.h"
@@ -165,6 +166,18 @@ namespace NsAppManager
          */
         void removeDevice(const int& sessionKey);
 
+        bool getAudioPassThruFlag() const;
+        void setAudioPassThruFlag(bool flag);
+
+        const MessageMapping& getMessageMapping() const;
+
+        /**
+         * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
+         * \param item a RegistryItem from which to retrieve an app pointer
+         * \return Application instance retrieved from item
+         */
+        Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
+
     private:
 
         /**
@@ -216,13 +229,6 @@ namespace NsAppManager
         void removeAppFromHmi(Application* currentApp, int appId);
 
         /**
-         * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
-         * \param item a RegistryItem from which to retrieve an app pointer
-         * \return Application instance retrieved from item
-         */
-        Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
-
-        /**
          * \brief serialize a string value to the text file
          * \param fileName name of the file to serialize to
          * \param value a value to serialize
@@ -245,11 +251,12 @@ namespace NsAppManager
         CapabilitiesContainer<NsAppLinkRPCV2::VrCapabilities> mVrCapabilitiesV2;
         CapabilitiesContainer<NsAppLinkRPCV2::SpeechCapabilities> mSpeechCapabilitiesV2;
         CapabilitiesContainer<NsAppLinkRPCV2::SoftButtonCapabilities> mSoftButtonCapabilities;
-        ButtonMapping    mButtonsMapping;
-        MessageMapping   mMessageMapping;
-        RequestMapping   mRequestMapping;
-        DeviceList       mDeviceList;
-        DeviceHandler    mDeviceHandler;
+        ButtonMapping       mButtonsMapping;
+        VehicleDataMapping  mVehicleDataMapping;
+        MessageMapping      mMessageMapping;
+        RequestMapping      mRequestMapping;
+        DeviceList          mDeviceList;
+        DeviceHandler       mDeviceHandler;
 
         NsAppLinkRPC::OnDriverDistraction* mDriverDistractionV1;
         NsAppLinkRPCV2::OnDriverDistraction* mDriverDistractionV2;
@@ -260,8 +267,10 @@ namespace NsAppManager
         NsAppLinkRPCV2::Language mUiLanguageV2;
         NsAppLinkRPCV2::Language mVrLanguageV2;
         NsAppLinkRPCV2::Language mTtsLanguageV2;
+        std::vector<NsAppLinkRPC::Language> mUISupportedLanguages;
 
         NsAppLinkRPCV2::VehicleType mVehicleType;
+        bool mAudioPassThruFlag;
 
         SyncPManager     mSyncPManager;
 

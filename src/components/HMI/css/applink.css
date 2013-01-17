@@ -42,7 +42,7 @@
  
 .applink-window .back-button {
 	top: 80px;
-	left: 20px;
+	left: 5px;
 	width: 48px;
 	height: 48px;
 	border: 1px solid #333;
@@ -56,7 +56,7 @@
 
 .applink-window .caption-text {
 	top: 80px;
-	left: 100px;
+	left: 75px;
 	width: 620px;
 	height: 20px;
 	background: #393939;
@@ -168,16 +168,16 @@
 	width: 155px;
 }
 
-#applink_view_container .player_controlls{
+#applink_view_container #app_view_controllsV2.player_controlls{
 	top: 241px;
 	height: 48px;
 }
 
-#applink_view_container #app_view_controlls .ffw-button{
+#applink_view_container #app_view_controllsV2 .ffw-button{
 	height: 48px;
 }
 
-#applink_view_container #app_view_controlls img{
+#applink_view_container #app_view_controllsV2 img{
 	margin-top: -26px;
 }
 
@@ -220,7 +220,7 @@
 	height: 251px;
 	border-radius: 2px;
 	left: 200px;
-	top: 150px;
+	top: 154px;
 	overflow: hidden;
 }
 
@@ -239,7 +239,7 @@
 }
 
 #ScrollableMessage .ffw_list_menu {
-	top: 150px !important;
+	top: 154px !important;
 	left: 25px !important;
 }
 
@@ -337,8 +337,8 @@
 	width: 650px;
 	height: 251px;
 	border-radius: 2px;
-	left: 100px;
-	top: 150px;
+	left: 75px;
+	top: 154px;
 }
 
 #perform_interaction_view .list span{
@@ -353,4 +353,281 @@
 	width: 460px;
 	text-overflow: ellipsis;
 	overflow: hidden;
+}
+#VRButton.VRButton{
+	background: url(../images/home/controlButtons/vr.png) no-repeat;
+	width: 89px;
+	height: 90px;
+	left: 1024px;;
+	top: 2px;
+	-webkit-transition: 0.2s;
+}
+#VRButton.pressed{
+	background: url(../images/home/controlButtons/vr_pressed.png) no-repeat;
+}
+#vehicleInfoButton.vehicleInfoButton{
+	width: 117px;
+	height: 48px;
+	left: 1059px;
+	top: 206px;
+	text-align: center;
+	line-height: 48px;
+}
+#VehicleInfo{
+	opacity: 0;
+	left: 50px;
+	width: 700px;
+	height: 340px;
+	background-color: black;
+	z-index: 2;
+	border-radius: 10PX;
+	top: 70px;
+	-webkit-transition: opacity 1s ease-in-out;
+	display: none;
+	border: 1px solid white;
+}
+#VehicleInfo .vehicleInfoLabel{
+	top: 10px;
+	width: 600px;
+	left: 35px;
+	height: 20px;
+	padding: 15px;
+	background: #393939;
+}
+#VehicleInfo.active{
+	opacity: 1;
+	display: block;
+}
+#VehicleInfo .prndl{
+	top: 70px;
+	width: 600px;
+	left: 40px;
+	height: 20px;
+	padding: 10px;
+	background: #535353;
+}
+#VehicleInfo .prndlSelect{
+	top: 125px;
+	position: absolute;
+	width: 150px;
+	left: 275px;
+	height: 40px;
+	color: white;
+	background: #393939;
+}
+#VehicleInfo .prndlSelect option{
+	background: #393939;
+}
+#VehicleInfo .ecu1Title{
+	top: 180px;
+	width: 600px;
+	left: 40px;
+	height: 20px;
+	padding: 10px;
+	background: #535353;
+}
+#VehicleInfo .ecu1{
+	top: 233px;
+	width: 80px;
+	left: 65px;
+	height: 20px;
+	padding: 10px;
+}
+#VehicleInfo .ecu2{
+	top: 265px;
+	width: 80px;
+	left: 65px;
+	height: 20px;
+	padding: 10px;
+}
+#VehicleInfo .ecu1Data{
+	top: 233px;
+	width: 485px;
+	left: 155px;
+	height: 20px;
+	padding: 10px;
+}
+#VehicleInfo .ecu2Data{
+	top: 265px;
+	width: 485px;
+	left: 155px;
+	height: 20px;
+	padding: 10px;
+}
+
+/* Alert, AudioPassThruPopUp popup*/
+#AudioPassThruPopUp.AudioPassThruPopUp,
+#AlertPopUp.AlertPopUp{
+	opacity: 0;
+	left: 200px;
+	width: 400px;
+	height: 245px;
+	z-index: 2;
+	top: 110px;
+	-webkit-transition: opacity 1s ease-in-out;
+	background-color: black;
+	border: #A6A6A6 solid 2px;
+	border-radius: 6px;
+	display: none;
+}
+#AudioPassThruPopUp .applicationName,
+#AlertPopUp .applicationName{
+	width: 380px;
+	left: 10px;
+	text-align: center;
+	font-size: 25px;
+	line-height: 30px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#AlertPopUp .alertPopUpImage{
+	width: 83px;
+	height: 74px;
+	background: url(../images/applink/Warning.png) no-repeat;
+	top: 45px;
+	left: 10px;
+}
+#AudioPassThruPopUp .audioPassThruImage{
+	width: 83px;
+	height: 74px;
+	background: url(../images/home/controlButtons/vrImage.png) no-repeat;
+	top: 45px;
+	left: 25px;
+}
+#AudioPassThruPopUp .message1,
+#AlertPopUp .message1{
+	top: 37px;
+	left: 105px;
+	width: 285px;
+	height: 30px;
+	text-align: center;
+	font-size: 23px;
+	line-height: 30px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#AudioPassThruPopUp .message2,
+#AlertPopUp .message2{
+	top: 70px;
+	left: 105px;
+	width: 285px;
+	height: 28px;
+	text-align: center;
+	font-size: 23px;
+	line-height: 30px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#AudioPassThruPopUp .message3,
+#AlertPopUp .message3{
+	top: 100px;
+	left: 105px;
+	width: 285px;
+	height: 28px;
+	text-align: center;
+	font-size: 23px;
+	line-height: 30px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#AudioPassThruPopUp.AudioPassThruActive,
+#AlertPopUp.AlertActive{
+	opacity: 1;
+	display: block;
+}
+#AudioPassThruPopUp .softButton,
+#AlertPopUp .softButton{
+	border: 1px solid #393939;
+	border-radius: 3px;
+	height: 42px;
+	line-height: 42px;
+	text-align: center;
+	float: left;
+	margin: 10px;
+	position: relative;
+}
+
+#AlertPopUp .alertSoftButtons{
+	margin-left: 8px;
+	top: 120px;
+}
+#softButton0.one{
+	margin-top: 42px;
+	width: 362px;
+}
+#softButton0.two{
+	margin-top: 42px;
+	width: 170px;
+}
+#softButton1.two{
+	margin-top: 42px;
+	width: 170px;
+}
+#softButton0.three{
+	width: 170px;
+}
+#AudioPassThruPopUp .buttonDone,
+#softButton1.three{
+	width: 170px;
+}
+#AudioPassThruPopUp .buttonCancel,
+#softButton2.three{
+	width: 362px;
+}
+#softButton0.four{
+	width: 170px;
+}
+#softButton1.four{
+	width: 170px;
+}
+#softButton2.four{
+	width: 170px;
+}
+#softButton3.four{
+	width: 170px;
+}
+#AudioPassThruPopUp .buttonRetry{
+	top: 120px;
+	width: 175px;
+}
+#AudioPassThruPopUp .buttonDone{
+	top: 120px;
+	width: 175px;
+}
+#AudioPassThruPopUp .buttonCancel{
+	top: 120px;
+	width: 372px;
+}
+
+
+
+#app_controlButtons .languageSelect{
+	position: absolute;
+	width: 150px;
+	height: 30px;
+	color: white;
+	background: #393939;
+}
+
+#app_controlButtons .languageSelect option{
+	background: #393939;
+}
+#UILanguages.languageSelect{
+	top: 110px;
+	left: 1028px;
+}
+#TTSVRLanguages.languageSelect{
+	top: 170px;
+	left: 1028px;
+}
+
+#app_controlButtons .UILanguagesLabel{
+	top: 91px;
+	left: 1028px;
+	width: 150px;
+}
+#app_controlButtons .TTSVRLanguagesLabel{
+	top: 151px;
+	left: 1028px;
+	width: 160px;
 }

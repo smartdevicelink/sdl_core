@@ -17,6 +17,7 @@ import android.util.Pair;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.logAdapter;
+import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.receivers.SyncReceiver;
@@ -38,9 +39,7 @@ import com.ford.syncV4.proxy.rpc.DialNumberResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
-import com.ford.syncV4.proxy.rpc.GetDTCs;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
-import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
@@ -57,7 +56,6 @@ import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
-import com.ford.syncV4.proxy.rpc.ReadDID;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
@@ -70,10 +68,8 @@ import com.ford.syncV4.proxy.rpc.ShowResponse;
 import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
-import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
-import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
@@ -145,28 +141,38 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		
 		if (_syncProxy == null) {
 			try {
-				SharedPreferences settings = getSharedPreferences("SyncProxyTesterPrefs", 0);
-				boolean isMediaApp = true;// settings.getBoolean("isMediaApp", false);
-				
-				int versionNumber = settings.getInt("VersionNumber",1);
+				SharedPreferences settings = getSharedPreferences(
+						Const.PREFS_NAME, 0);
+				boolean isMediaApp = settings.getBoolean(
+						Const.PREFS_KEY_ISMEDIAAPP,
+						Const.PREFS_DEFAULT_ISMEDIAAPP);
+				int versionNumber = settings.getInt(
+						Const.PREFS_KEY_PROTOCOLVERSION,
+						Const.PREFS_DEFAULT_PROTOCOLVERSION);
+				String appName = settings.getString(Const.PREFS_KEY_APPNAME,
+						Const.PREFS_DEFAULT_APPNAME);
+				Language lang = Language.valueOf(settings.getString(
+						Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
+				Language hmiLang = Language.valueOf(settings.getString(
+						Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
+				Log.i(TAG, "Using protocol version " + versionNumber);
 
 				//_syncProxy = new SyncProxyALM(this, "SyncProxyTester", true);
 				_syncProxy = new SyncProxyALM(this,
 						/*sync proxy configuration resources*/null,
 						/*enable advanced lifecycle management true,*/
-						"SyncProxyTester",
+						appName,
 						/*ngn media app*/null,
 						/*vr synonyms*/null,
 						/*is media app*/isMediaApp,
 						/*syncMsgVersion*/null,
-						/*language desired*/Language.EN_US,
-						/*HMI Display Language Desired*/Language.EN_US,
+						/*language desired*/lang,
+						/*HMI Display Language Desired*/hmiLang,
 						/*App ID*/"8675309",
 						/*autoActivateID*/null,
 						/*callbackToUIThread*/ false,
 						/*preRegister*/ false,
 						versionNumber);
-						//2);
 			} catch (SyncException e) {
 				e.printStackTrace();
 				//error creating proxy, returned proxy = null
@@ -388,6 +394,18 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter != null) _msgAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e);
 		else Log.e(TAG, "onProxyClosed: " + info, e);
 		
+		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+		if (mainActivity != null) {
+			mainActivity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					mainActivity.onProxyClosed();
+				}
+			});
+		} else {
+			Log.w(TAG, "mainActivity not found");
+		}
+		
 		if(((SyncException) e).getSyncExceptionCause() != SyncExceptionCause.SYNC_PROXY_CYCLED
 				&& ((SyncException) e).getSyncExceptionCause() != SyncExceptionCause.BLUETOOTH_DISABLED) {
 			reset();
@@ -438,6 +456,15 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
+		
+		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+		final boolean success = response.getSuccess();
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.onCreateChoiceSetResponse(success);
+			}
+		});
 		
 		if (waitingForResponse && _testerMain.getThreadContext() != null) {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
@@ -764,6 +791,15 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
+		
+		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+		final Result result = response.getResultCode();
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.onPerformAudioPassThruResponse(result);
+			}
+		});
 	}
 	@Override
 	public void onEndAudioPassThruResponse(EndAudioPassThruResponse response) {
@@ -775,12 +811,30 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
 		}
+		
+		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+		final Result result = response.getResultCode();
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.onEndAudioPassThruResponse(result);
+			}
+		});
 	}
 	@Override
 	public void onOnAudioPassThru(OnAudioPassThru notification) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
 		else Log.i(TAG, "" + notification);
+		
+		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+		final byte[] aptData = notification.getAPTData();
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.onAudioPassThru(aptData);
+			}
+		});
 	}
 
 	/*********************************

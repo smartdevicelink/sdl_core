@@ -67,17 +67,45 @@ namespace NsConnectionHandler
     {
         LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onApplicationConnected()" );
         tDeviceListIterator it = mDeviceList.find(ConnectedDevice.mDeviceHandle);
-        if (it == mDeviceList.end())
+        if (mDeviceList.end() == it)
         {
             LOG4CPLUS_ERROR( mLogger, "Unknown device!");
+            return;
         }
-        LOG4CPLUS_INFO( mLogger, "Add Connection:" << Connection << "to the list." );
+        LOG4CPLUS_INFO( mLogger, "Add Connection:" << Connection << " to the list." );
         mConnectionList.insert(tConnectionList::value_type(Connection, CConnection(Connection, ConnectedDevice.mDeviceHandle)));
     }
 
     void CConnectionHandler::onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection)
     {
-        
+        LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onApplicationDisconnected()" );
+        tDeviceListIterator it = mDeviceList.find(DisconnectedDevice.mDeviceHandle);
+        if (mDeviceList.end() == it)
+        {
+            LOG4CPLUS_ERROR( mLogger, "Unknown device!");
+            return;
+        }
+        LOG4CPLUS_INFO( mLogger, "Delete Connection:" << (int)Connection << "from the list." );
+        tConnectionListIterator itr = mConnectionList.find(Connection);
+        if (mConnectionList.end() == itr)
+        {
+            LOG4CPLUS_ERROR( mLogger, "Connection not found!");
+            return;
+        } else
+        {
+            if (0 != mpConnectionHandlerObserver)
+            {
+                int firstSessionID = (itr->second).getFirstSessionID();
+                if (0 < firstSessionID)
+                {
+                    firstSessionID = keyFromPair(Connection, firstSessionID);
+                    // In case bot parameters of onSessionEndedCallback are the same AppMgr knows
+                    // that Application with id=firstSessionID should be closed.
+                    mpConnectionHandlerObserver->onSessionEndedCallback(firstSessionID, firstSessionID);
+                }
+            }
+            mConnectionList.erase(itr);
+        }
     }
 
     int CConnectionHandler::onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle)
@@ -85,19 +113,19 @@ namespace NsConnectionHandler
         LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onSessionStartedCallback()" );
         int newSessionID = -1;
         tConnectionListIterator it = mConnectionList.find(connectionHandle);
-        if (it == mConnectionList.end())
+        if (mConnectionList.end() == it)
         {
             LOG4CPLUS_ERROR( mLogger, "Unknown connection!");
         } else
         {
-            int firstSessionID = (it->second).getFirstSessionKey();
+            int firstSessionID = (it->second).getFirstSessionID();
             newSessionID = (it->second).addNewSession();
             if (0 > newSessionID)
             {
                 LOG4CPLUS_ERROR( mLogger, "Not possible to start session!");
             } else
             {
-                LOG4CPLUS_INFO( mLogger, "New session ID:" << newSessionID );
+                LOG4CPLUS_INFO( mLogger, "New session ID:" << (int)newSessionID );
                 if (0 != mpConnectionHandlerObserver)
                 {
                     if (0 < firstSessionID)
@@ -120,19 +148,19 @@ namespace NsConnectionHandler
         LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onSessionEndedCallback()" );
         int result = -1;
         tConnectionListIterator it = mConnectionList.find(connectionHandle);
-        if (it == mConnectionList.end())
+        if (mConnectionList.end() == it)
         {
             LOG4CPLUS_ERROR( mLogger, "Unknown connection!");
         } else
         {
-            int firstSessionID = (it->second).getFirstSessionKey();
+            int firstSessionID = (it->second).getFirstSessionID();
             result = (it->second).removeSession(sessionId);
             if (0 > result)
             {
                 LOG4CPLUS_ERROR( mLogger, "Not possible to remove session!");
             } else
             {
-                LOG4CPLUS_INFO( mLogger, "Session removed:" << result );
+                LOG4CPLUS_INFO( mLogger, "Session removed:" << (int)result );
                 if (0 != mpConnectionHandlerObserver)
                 {
                     if (0 < firstSessionID)
@@ -151,7 +179,7 @@ namespace NsConnectionHandler
                                            unsigned char sessionId)
     {
         int key = connectionHandle|(sessionId << 16);
-        LOG4CPLUS_INFO( mLogger, "Key for ConnectionHandle:" << connectionHandle << " Session:" << sessionId << " is: " << key );
+        LOG4CPLUS_INFO( mLogger, "Key for ConnectionHandle:" << (int)connectionHandle << " Session:" << (int)sessionId << " is: " << (int)key );
         return key;
     }
     
@@ -160,7 +188,7 @@ namespace NsConnectionHandler
     {
         connectionHandle = key & 0xFF00FFFF;
         sessionId = key >> 16;
-        LOG4CPLUS_INFO( mLogger, "ConnectionHandle:" << connectionHandle << " Session:" << sessionId << " for key:" << key );
+        LOG4CPLUS_INFO( mLogger, "ConnectionHandle:" << (int)connectionHandle << " Session:" << (int)sessionId << " for key:" << (int)key );
     }
 
     void CConnectionHandler::setTransportManager( NsAppLink::NsTransportManager::ITransportManager * transportManager )
@@ -190,7 +218,7 @@ namespace NsConnectionHandler
         it_in = mDeviceList.find( deviceHandle );
         if ( mDeviceList.end() != it_in )
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "Connecting to device with handle " << deviceHandle );
+            LOG4CPLUS_INFO_EXT(mLogger, "Connecting to device with handle " << (int)deviceHandle );
             if ( mpTransportManager )
             {
                 mpTransportManager -> connectDevice( deviceHandle );

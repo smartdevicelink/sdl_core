@@ -3,87 +3,167 @@
  * 
  * @desc AlertPopUp module visual representation
  * 
- * @category	View
- * @filesource	app/view/home/AlertPopUp.js
- * @version		2.0
+ * @category    View
+ * @filesource    app/view/applink/AlertPopUp.js
+ * @version        2.0
  *
- * @author		Andriy Melnik
+ * @author        Andriy Melnik
  */
 
 MFT.AlertPopUp = Em.ContainerView.create({
 
-	elementId:			'AlertPopUp',
+    elementId:            	'AlertPopUp',
 
-	classNames:			'AlertPopUp',
+    classNames:            	'AlertPopUp',
 
-	classNameBindings:		['activate:AlertActive'],
+    classNameBindings:      ['activate:AlertActive'],
 
-	childViews: [
-		'applicationName',
-		'message1',
-		'message2',
-		'message3'
-	],
+    childViews: [
+        'applicationName',
+        'image',
+        'message1',
+        'message2',
+        'message3',
+        'softbuttons'
+    ],
 
-	content1:			'Title',
+    content1:         	'Title',
 
-	content2:			'Text',
+    content2:           'Text',
 
-	activate: 			false,
+    activate:           false,
 
+    timer:              null,
 
-	applicationName :	MFT.Label.extend({
+    /**
+     * Wagning image on Alert PopUp
+     */
+    image:  Em.View.extend({
+        elementId:              'alertPopUpImage',
 
-		elementId:			'applicationName',
+        classNames:             'alertPopUpImage',
+    }),
 
-		classNames:			'applicationName',
+    applicationName :    MFT.Label.extend({
 
-		contentBinding:		'parentView.appName'
-	}),
+        elementId:            	'applicationName',
 
-	message1 : MFT.Label.extend({
+        classNames:            	'applicationName',
 
-		elementId:			'message1',
+        contentBinding:        	'parentView.appName'
+    }),
 
-		classNames:			'message1',
+    message1 : MFT.Label.extend({
 
-		contentBinding:		'parentView.content1'
-	}),
+        elementId:            	'message1',
 
-	message2 : MFT.Label.extend({
+        classNames:            	'message1',
 
-		elementId:			'message2',
+        contentBinding:        	'parentView.content1'
+    }),
 
-		classNames:			'message2',
+    message2 : MFT.Label.extend({
 
-		contentBinding:		'parentView.content2'
-	}),
+        elementId:            	'message2',
 
-	message3 : MFT.Label.extend({
+        classNames:            	'message2',
 
-		elementId:			'message3',
+        contentBinding:        	'parentView.content2'
+    }),
 
-		classNames:			'message3',
+    message3 : MFT.Label.extend({
 
-		contentBinding:		'parentView.content3'
-	}),
+        elementId:           	'message3',
 
-	AlertActive: function( appId, msg1, msg2, msg3, tts, duration, playTone){
-		var self = this;
+        classNames:				'message3',
 
-		// play audio alert
-		if ( playTone ) {
-			MFT.Audio.play('audio/alert.wav');
-		}
+        contentBinding:     	'parentView.content3'
+    }),
 
-		MFT.ApplinkModel.onPrompt(tts);
-		
-		this.set('appName',		MFT.ApplinkController.getApplicationModel(appId).appInfo.appName);
-		this.set('content1',	msg1);
-		this.set('content2',	msg2);
-		this.set('content3',	msg3);
-		this.set('activate',	true);
-		
-		setTimeout(function(){self.set('activate', false);}, duration);
-	}
+    /**
+     * Container for softbuttons
+     */
+    softbuttons: Em.ContainerView.extend({
+        elementId:		'alertSoftButtons',
+
+        classNames:		'alertSoftButtons'
+    }),
+
+    /**
+     *
+     * @desc Function creates Soft Buttons on AlertPoUp
+     * 
+     * @param {Object} params
+     */
+    addSoftButtons: function( params ){
+
+        var count = this.get('softbuttons.childViews').length - 1;
+        for(var i = count; i>=0; i--){
+            this.get('softbuttons.childViews').removeObject(
+                this.get('softbuttons.childViews')[0]
+            );
+        }
+
+        if( params ){
+
+            var softButtonsClass;
+            switch(params.length){
+                case 1 : softButtonsClass = 'one';
+                    break;
+                case 2 : softButtonsClass = 'two';
+                    break;
+                case 3 : softButtonsClass = 'three';
+                    break;
+                case 4 : softButtonsClass = 'four';
+                    break;
+            }
+
+            for(var i=0; i<params.length; i++){
+                this.get('softbuttons.childViews').pushObject(
+                    MFT.Button.create({
+                        actionDown:        function(){
+                            this._super();
+                            MFT.ApplinkController.onSoftButtonActionDownCustom(this);
+                        },
+                        actionUp:        function(){
+                            this._super();
+                            MFT.ApplinkController.onSoftButtonActionUpCustom(this);
+                        },
+                        softButtonID:           params[i].softButtonID,
+                        icon:                   params[i].image,
+                        text:                   params[i].text,
+                        classNames:             'list-item softButton ' + softButtonsClass,
+                        elementId:              'softButton' + i,
+                        templateName:           params[i].image ? 'rightIcon' : 'text'
+                    })
+                );
+            }
+        }
+    },
+
+    AlertActive: function( message ){
+        var self = this;
+
+        FFW.UI.OnSystemContext('ALERT');
+
+        // play audio alert
+        if ( message.playTone ) {
+            MFT.Audio.play('audio/alert.wav');
+        }
+
+        this.addSoftButtons(message.softButtons);
+        if( message.ttsChunks ){
+            MFT.ApplinkModel.onPrompt(message.ttsChunks.ttsChunks);
+        }
+
+        this.set('appName',    MFT.ApplinkController.getApplicationModel(message.appId).appInfo.appName);
+
+        this.set('content1',    message.AlertText1);
+        this.set('content2',    message.AlertText2);
+        this.set('content3',    message.AlertText3);
+        this.set('activate',    true);
+        
+        clearTimeout(this.timer);
+        this.timer = setTimeout(function(){self.set('activate', false);}, message.duration);
+    }
 });

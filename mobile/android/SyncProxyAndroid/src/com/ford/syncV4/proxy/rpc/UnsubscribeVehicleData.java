@@ -24,8 +24,8 @@ public class UnsubscribeVehicleData extends RPCRequest {
     	}
     }
     public Vector<VehicleDataType> getDataType() {
-        if (store.get(Names.dataType) instanceof Vector<?>) {
-	    	Vector<?> list = (Vector<?>)store.get(Names.dataType);
+        if (parameters.get(Names.dataType) instanceof Vector<?>) {
+	    	Vector<?> list = (Vector<?>)parameters.get(Names.dataType);
 	        if (list != null && list.size() > 0) {
 	            Object obj = list.get(0);
 	            if (obj instanceof VehicleDataType) {

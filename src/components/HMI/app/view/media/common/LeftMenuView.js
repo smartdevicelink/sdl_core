@@ -144,7 +144,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 		/** APPLINK Button*/
 		applinkButton:  MFT.Button.extend({
 			classNameBindings:	[
-									'MFT.ApplinkMediaController.hideApplinkMediaButton:hidden',
+									'MFT.ApplinkMediaModel.hideApplinkButton:hidden',
 									'MFT.States.media.applink.active:active_state',
 									'MFT.MediaController.isTopListMenu:displayed'
 								],

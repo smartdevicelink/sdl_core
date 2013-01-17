@@ -1,11 +1,8 @@
 /*
- * Reference implementation of TTSBackend component.
+ * Reference implementation of TTS component.
  * 
- * Interface to get or set some essential information from OS.
- * Since web application is not able to access some OS feature through WebKit
- * it is necessary to use communication with native code to get some or set values 
- * and execute some functions. 
- * 
+ * TTS is responsible for playing sound data sent from ApplinkCore
+ * to notify user about some events happened.
  *
  * @author Andriy Melnik
  */
@@ -22,9 +19,6 @@ FFW.TTS = FFW.RPCObserver.create({
    	 * connect to RPC bus
  	 */
 	connect: function() {
-		// to be removed
-		//this.stubGetValues();
-		
 		this.client.connect(this, 300);
 	},
 
@@ -39,7 +33,7 @@ FFW.TTS = FFW.RPCObserver.create({
      * Client is registered - we can send request starting from this point of time
  	 */	
 	onRPCRegistered: function () {
-		Em.Logger.log("FFW.TTSBackend.onRPCRegistered");
+		Em.Logger.log("FFW.TTS.onRPCRegistered");
 		this._super();
 	},
 	
@@ -47,7 +41,7 @@ FFW.TTS = FFW.RPCObserver.create({
      * Client is unregistered - no more requests
  	 */	
 	onRPCUnregistered: function () {
-		Em.Logger.log("FFW.TTSBackend.onRPCUnregistered");
+		Em.Logger.log("FFW.TTS.onRPCUnregistered");
 		this._super();
 	},
 
@@ -64,7 +58,7 @@ FFW.TTS = FFW.RPCObserver.create({
 	 * Please use previously store reuqestID to determine to which request repsonse belongs to
  	 */	
 	onRPCResult: function(response) {
-		Em.Logger.log("FFW.TTSBackend.onRPCResult");
+		Em.Logger.log("FFW.TTS.onRPCResult");
 		this._super();
 	 },
 	
@@ -72,7 +66,7 @@ FFW.TTS = FFW.RPCObserver.create({
 	 * handle RPC erros here
  	 */	
 	onRPCError: function(error) {
-		Em.Logger.log("FFW.TTSBackend.onRPCError");
+		Em.Logger.log("FFW.TTS.onRPCError");
 		this._super();
 	},
 
@@ -80,7 +74,7 @@ FFW.TTS = FFW.RPCObserver.create({
 	 * handle RPC notifications here 
  	 */	
 	onRPCNotification: function(notification) {
-		Em.Logger.log("FFW.TTSBackend.onRPCNotification");
+		Em.Logger.log("FFW.TTS.onRPCNotification");
 		this._super();
 	},
 	
@@ -88,40 +82,111 @@ FFW.TTS = FFW.RPCObserver.create({
 	 * handle RPC requests here
  	 */	
 	onRPCRequest: function(request) {
-		Em.Logger.log("FFW.TTSBackend.onRPCRequest");
+		Em.Logger.log("FFW.TTS.onRPCRequest");
 		this._super();
 		
-		if (request.method == "TTS.Speak") {
-
-			MFT.ApplinkModel.onPrompt(request.params.ttsChunks.splice(0, 3));
-
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result":	{
-					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
-					"method"   :    "TTS.SpeakResponse"
-				}
-			};
-			this.client.send(JSONMessage);
-		}
-
 		
-		if (request.method == "TTS.GetCapabilities") {
+		switch (request.method) {
+		    case "TTS.Speak":{
+		    	MFT.ApplinkModel.onPrompt(request.params.ttsChunks.splice(0, 1));
 
-			// send repsonse
-			var JSONMessage = {
-				"jsonrpc"	:	"2.0",
-				"id"		: 	request.id,
-				"result"	:	{
-					"capabilities":["TEXT"],
+				// send repsonse
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result":	{
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method"   :    "TTS.SpeakResponse"
+					}
+				};
+				this.client.send(JSONMessage);
 
-					"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
-					"method" : "TTS.GetCapabilitiesResponse"
-				}
-			};
-			this.client.send(JSONMessage);
+		    	break;
+		    }
+			case "TTS.GetCapabilities":{
+
+				// send repsonse
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result"	:	{
+						"capabilities":["TEXT"],
+
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method" : "TTS.GetCapabilitiesResponse"
+					}
+				};
+				this.client.send(JSONMessage);
+
+		    	break;
+			}
+			case "TTS.GetSupportedLanguages":{
+
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result":	{
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method" : "TTS.GetSupportedLanguagesResponse",
+						"languages" : MFT.ApplinkModel.applinkLanguagesList
+					}
+				};
+				this.client.send(JSONMessage);
+
+		    	break;
+		    }
+		    case "TTS.GetLanguage":{
+
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result":	{
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method" : "TTS.GetLanguageResponse",
+						"language" : MFT.ApplinkModel.TTSVRLanguage
+					}
+				};
+				this.client.send(JSONMessage);
+
+		    	break;
+		    }
+			case "TTS.ChangeRegistration":{
+
+				MFT.ApplinkModel.changeRegistrationTTSVR(request.params.language);
+
+				// send repsonse
+				var JSONMessage = {
+					"jsonrpc"	:	"2.0",
+					"id"		: 	request.id,
+					"result":	{
+						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"method"   :    "TTS.ChangeRegistrationResponse"
+					}
+				};
+				this.client.send(JSONMessage);
+
+		    	break;
+			}
+
+			default:{
+				//statements_def
+				break;
+			}
 		}
+	},
+
+	/*
+	 * Notifies if applink TTS components language was changed
+ 	 */	
+	OnLanguageChange: function( lang ) {
+		Em.Logger.log("FFW.TTS.OnLanguageChange");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"TTS.OnLanguageChange",
+			"params":	{"language":	lang}
+		};
+		this.client.send(JSONMessage);
 	}
 })

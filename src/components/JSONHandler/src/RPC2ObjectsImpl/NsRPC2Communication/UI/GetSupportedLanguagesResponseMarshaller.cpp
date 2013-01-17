@@ -1,24 +1,16 @@
-#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/PerformAudioPassThruResponse.h"
+#include "GetSupportedLanguagesResponseMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/PerformAudioPassThruResponseMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V1/LanguageMarshaller.h"
 
-/*
-  interface	NsRPC2Communication::TTS
-  version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
-  author	robok0der
-*/
+using namespace NsRPC2Communication::UI;
 
-using namespace NsRPC2Communication::TTS;
-
-bool PerformAudioPassThruResponseMarshaller::checkIntegrity(PerformAudioPassThruResponse& s)
+bool GetSupportedLanguagesResponseMarshaller::checkIntegrity(GetSupportedLanguagesResponse& s)
 {
   return checkIntegrityConst(s);
 }
 
 
-bool PerformAudioPassThruResponseMarshaller::fromString(const std::string& s,PerformAudioPassThruResponse& e)
+bool GetSupportedLanguagesResponseMarshaller::fromString(const std::string& s,GetSupportedLanguagesResponse& e)
 {
   try
   {
@@ -35,20 +27,20 @@ bool PerformAudioPassThruResponseMarshaller::fromString(const std::string& s,Per
 }
 
 
-const std::string PerformAudioPassThruResponseMarshaller::toString(const PerformAudioPassThruResponse& e)
+const std::string GetSupportedLanguagesResponseMarshaller::toString(const GetSupportedLanguagesResponse& e)
 {
   Json::FastWriter writer;
   return checkIntegrityConst(e) ? writer.write(toJSON(e)) : "";
 }
 
 
-bool PerformAudioPassThruResponseMarshaller::checkIntegrityConst(const PerformAudioPassThruResponse& s)
+bool GetSupportedLanguagesResponseMarshaller::checkIntegrityConst(const GetSupportedLanguagesResponse& s)
 {
   return true;
 }
 
 
-Json::Value PerformAudioPassThruResponseMarshaller::toJSON(const PerformAudioPassThruResponse& e)
+Json::Value GetSupportedLanguagesResponseMarshaller::toJSON(const GetSupportedLanguagesResponse& e)
 {
   Json::Value json(Json::objectValue);
   if(!checkIntegrityConst(e))
@@ -59,13 +51,23 @@ Json::Value PerformAudioPassThruResponseMarshaller::toJSON(const PerformAudioPas
   json["result"]=Json::Value(Json::objectValue);
   NsAppLinkRPC::Result r(static_cast<NsAppLinkRPC::Result::ResultInternal>(e.getResult()));
   json["result"]["resultCode"]=NsAppLinkRPC::ResultMarshaller::toJSON(r);
-  json["result"]["method"]=Json::Value("TTS.PerformAudioPassThruResponse");
+  json["result"]["method"]=Json::Value("UI.GetSupportedLanguagesResponse");
 
+  {
+    unsigned int i=e.languages.size();
+    Json::Value j=Json::Value(Json::arrayValue);
+    j.resize(i);
+    while(i--)
+      j[i]=NsAppLinkRPC::LanguageMarshaller::toJSON(e.languages[i]);
+
+    json["result"]["languages"]=j;
+  }
+  
   return json;
 }
 
 
-bool PerformAudioPassThruResponseMarshaller::fromJSON(const Json::Value& json,PerformAudioPassThruResponse& c)
+bool GetSupportedLanguagesResponseMarshaller::fromJSON(const Json::Value& json,GetSupportedLanguagesResponse& c)
 {
   try
   {
@@ -82,10 +84,26 @@ bool PerformAudioPassThruResponseMarshaller::fromJSON(const Json::Value& json,Pe
     NsAppLinkRPC::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
-    if(js["method"].asString().compare("TTS.PerformAudioPassThruResponse")) return false;
+    if(js["method"].asString().compare("UI.GetSupportedLanguagesResponse")) return false;
 
     if(!NsAppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
+    
+    if(!js.isMember("languages") || !js["languages"].isArray())  return false;
+    {
+      unsigned int i=js["languages"].size();
+      if(i<1)  return false;
+      if(i>100)  return false;
+      c.languages.resize(i);
+      while(i--)
+      {
+        NsAppLinkRPC::Language t;
+        if(!NsAppLinkRPC::LanguageMarshaller::fromJSON(js["languages"][i],t))
+          return false;
+         c.languages[i]=t;
+      }
+    }
+
   }
   catch(...)
   {

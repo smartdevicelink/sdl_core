@@ -1,4 +1,34 @@
-[R5.1.0]
+[CW3]
+* Slider dialog: automatically update dynamic footer when enabled and the number of ticks changes.
++ Save the data from OnAudioPassThru notifications to the audiopassthru.bin file on SD card. The file is deleted if the result is not SUCCESS. Resend the request if the result is RETRY.
++ SyncProxyAndroid SDK: add RETRY value to the Result enum.
+* The subscribed vehicle data items now persist between launches of SubscribeVehicleData and UnsubscribeVehicleData dialogs. 
+* Fix: SubscribeVehicleData and UnsubscribeVehicleData now sends a list of selected items.
+
+[CW2]
+* SyncProxyAndroid SDK: fix PerformAudioPassThru's property name for audio capture quality.
+* Fix a crash when sending ReadDID or GetDTCs requests.
+* Display the source JSON for all requests (added for Speak, SubscribeButton, UnsubscribeButton, DeleteCommand, AddSubMenu, DeleteSubMenu, SetMediaClockTimer, CreateInteractionChoiceSet, DeleteInteractionChoiceSet, and PerformInteraction).
++ "Pick a Function" list: Sort the functions by most-popular usage. Functions that are used more frequently will appear closer to the top of the list. Add an options menu item to clear the usage stats.
++ Show dialog: allow to set custom presets (as a comma-separated string).
++ AddCommand dialog: allow to set icon.
+* SyncProxyAndroid SDK: fix getters and setters of AddCommand, ReadDID, GetDTCs, PutFile, Show, SubscribeVehicleData, UnsubscribeVehicleData requests.
++ Alert, ScrollableMessage, Show dialogs: allow to set soft buttons.
+* Set the current release version in the app's manifest to be displayed in system settings.
+
+[CW52]
++ Slider message: allow to specify dynamic footer.
++ ScrollableMessage dialog: the user can specify timeout.
++ Experimental: select protocol properties (protocol version, is media app, app name, desired language and HMI language) at app launch. The proxy service starts only when the app's activity launches.
+* Clear the lists of button subscriptions, vehicle data subscriptions, created submenus, commands, choice sets, and put files when SYNC is disconnected.
+* Don't allow to delete the top-level menu.
+* Stop the whole process when clicking the Exit options menu item.
+* Fix the crashes when sending SetGlobalProperties and ResetGlobalProperties commands.
+* Fix the list of commands available for protocol v1.
+* Fix: the user can set Alert command's ttsChunk parameter.
+* Fix: don't show choiceSetId in the app until a successful response has come.
+
+[R6.0.0]
 SyncProxyTester:
 + When the v1 protocol is active, the user can only send a command supported by version 1.
 + Add the possibility to set the parameters of SetGlobalProperties and ResetGlobalProperties commands with GUI.
