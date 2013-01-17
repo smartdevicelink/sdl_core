@@ -105,4 +105,13 @@ public abstract class SyncTransport {
 
 	public abstract void openConnection() throws SyncException;
 	public abstract void disconnect();
+	
+	/**
+	 * Abstract method which should be implemented by subclasses in order to return actual type of the transport. 
+	 * 
+	 * @return One of {@link TransportType} enumeration values.
+	 * 
+	 * @see TransportType
+	 */
+	public abstract TransportType getTransportType();
 } // end-class

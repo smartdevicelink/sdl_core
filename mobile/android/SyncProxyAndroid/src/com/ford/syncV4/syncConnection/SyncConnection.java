@@ -6,9 +6,8 @@ import com.ford.syncV4.protocol.IProtocolListener;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.SessionType;
-import com.ford.syncV4.transport.BTTransport;
-import com.ford.syncV4.transport.ITransportListener;
-import com.ford.syncV4.transport.SyncTransport;
+import com.ford.syncV4.transport.*;
+import com.ford.syncV4.transport.TCPTransport;
 
 public class SyncConnection implements IProtocolListener, ITransportListener {
 
@@ -20,7 +19,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 	Object TRANSPORT_REFERENCE_LOCK = new Object();
 	Object PROTOCOL_REFERENCE_LOCK = new Object();
 	
-	public SyncConnection(ISyncConnectionListener listener) {
+	/**
+	 * Constructor.
+	 * 
+	 * @param listener Sync connection listener.
+	 * @param transportConfig Transport configuration for this connection.
+	 */
+	public SyncConnection(ISyncConnectionListener listener, BaseTransportConfig transportConfig) {
 		_connectionListener = listener;
 		
 		// Initialize the transport
@@ -33,7 +38,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 				_transport = null;
 			}
 			
-			_transport = new BTTransport(this);
+			if (transportConfig.getTransportType() == TransportType.BLUETOOTH)
+			{
+				_transport = new BTTransport(this);	
+			}
+			else if (transportConfig.getTransportType() == TransportType.TCP)
+			{
+                _transport = new TCPTransport((TCPTransportConfig) transportConfig, this);
+            }
 		}
 		
 		// Initialize the protocol
@@ -157,5 +169,16 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 	@Override
 	public void onProtocolError(String info, Exception e) {
 		_connectionListener.onProtocolError(info, e);
+	}
+	
+	/**
+	 * Gets type of transport currently used by this connection.
+	 * 
+	 * @return One of TransportType enumeration values.
+	 * 
+	 * @see TransportType
+	 */
+	public TransportType getCurrentTransportType() {
+		return _transport.getTransportType();
 	}
 }

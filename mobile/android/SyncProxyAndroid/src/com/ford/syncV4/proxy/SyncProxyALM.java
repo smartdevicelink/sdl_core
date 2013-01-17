@@ -17,6 +17,9 @@ import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SyncDisconnectedReason;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
 import com.ford.syncV4.trace.SyncTrace;
+import com.ford.syncV4.transport.BTTransportConfig;
+import com.ford.syncV4.transport.BaseTransportConfig;
+import com.ford.syncV4.transport.TransportType;
 
 public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	
@@ -47,9 +50,10 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				/*App Type*/null,
 				/*App ID*/appID,
 				/*autoActivateID*/null,
-				/*callbackToUIThread*/ false);
+				/*callbackToUIThread*/ false,
+				new BTTransportConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM instance passing in: IProxyListener, appName, and isMediaApp.", SYNC_LIB_TRACE_KEY);
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, appName, and isMediaApp.", SYNC_LIB_TRACE_KEY);
 	}
 	
 	/**
@@ -87,9 +91,10 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				/*App Type*/null,
 				/*App ID*/appID,
 				autoActivateID,
-				/*callbackToUIThread*/ false);
+				/*callbackToUIThread*/ false,
+				new BTTransportConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM instance passing in: IProxyListener, appName, ngnMediaScreenAppName, " +
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, appName, ngnMediaScreenAppName, " +
 				"vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, and autoActivateID.", SYNC_LIB_TRACE_KEY);
 	}
 	
@@ -129,9 +134,10 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				/*App Type*/null,
 				/*App ID*/appID,
 				autoActivateID,
-				/*callbackToUIThread*/ false);
+				/*callbackToUIThread*/ false,
+				new BTTransportConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, and autoActivateID.", SYNC_LIB_TRACE_KEY);
 	}
 	
@@ -171,9 +177,10 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				/*App Type*/null,
 				/*App ID*/appID,
 				autoActivateID,
-				callbackToUIThread);
+				callbackToUIThread,
+				new BTTransportConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM instance passing in: IProxyListener, " +
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
 				"and callbackToUIThread", SYNC_LIB_TRACE_KEY);
 	}
@@ -216,9 +223,10 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				/*App Type*/null,
 				/*App ID*/appID,
 				autoActivateID,
-				callbackToUIThread);
+				callbackToUIThread,
+				new BTTransportConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
 				"and callbackToUIThread", SYNC_LIB_TRACE_KEY);
 	}
@@ -243,12 +251,285 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				autoActivateID,
 				callbackToUIThread,
 				preRegister,
-				version);
+				version,
+				new BTTransportConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
 				"callbackToUIThread and version", SYNC_LIB_TRACE_KEY);
 	}
+	
+	/********************************************** TRANSPORT SWITCHING SUPPORT *****************************************/
+
+	/**
+	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC via specified transport.
+	 * 
+	 * Takes advantage of the advanced lifecycle management.
+	 * 
+	 * @param listener Reference to the object in the App listening to callbacks from SYNC. 
+	 * @param appName Name of the application displayed on SYNC. 
+	 * @param isMediaApp Indicates if the app is a media application.
+	 * @param transportConfig Initial configuration for transport.
+	 * @throws SyncException
+	 */
+	public SyncProxyALM(IProxyListenerALM listener, String appName, Boolean isMediaApp, 
+			Language languageDesired, Language hmiDisplayLanguageDesired, String appID,
+			BaseTransportConfig transportConfig) throws SyncException {
+		super(	listener, 
+				/*sync proxy configuration resources*/null, 
+				/*enable advanced lifecycle management*/true, 
+				appName,
+				/*TTS Name*/null,
+				/*ngn media app*/null,
+				/*vr synonyms*/null,
+				/*is media app*/isMediaApp,
+				/*syncMsgVersion*/null,
+				/*language desired*/languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/null,
+				/*App ID*/appID,
+				/*autoActivateID*/null,
+				/*callbackToUIThread*/ false,
+				transportConfig);
+		
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, appName, and isMediaApp.", SYNC_LIB_TRACE_KEY);
+	}
+	
+	/**
+	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC via specified transport.
+	 * 
+	 * Takes advantage of the advanced lifecycle management. 
+	 * 
+	 * @param listener Reference to the object in the App listening to callbacks from SYNC. 
+	 * @param appName Name of the application displayed on SYNC. 
+	 * @param ngnMediaScreenAppName Name of the application displayed on SYNC for Navigation equipped 
+	 * vehicles. Limited to five characters. 
+	 * @param vrSynonyms A vector of strings, all of which can be used as voice commands to 
+	 * @param isMediaApp Indicates if the app is a media application.
+	 * @param syncMsgVersion Indicates the version of SYNC AppLink Messages desired. Must be less than
+	 * or equal to the version of SYNC AppLink running on the vehicle. 
+	 * @param languageDesired Indicates the language desired for the SYNC interface.
+	 * @param autoActivateID ID used to re-register previously registered application.
+	 * @param transportConfig Initial configuration for transport. 
+	 * @throws SyncException
+	 */
+	public SyncProxyALM(IProxyListenerALM listener, String appName, String ngnMediaScreenAppName, 
+			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
+			String autoActivateID, TransportType transportType, BaseTransportConfig transportConfig) throws SyncException {
+		super(	listener, 
+				/*sync proxy configuration resources*/null, 
+				/*enable advanced lifecycle management*/true, 
+				appName,
+				/*TTS Name*/null,
+				ngnMediaScreenAppName,
+				vrSynonyms,
+				isMediaApp,
+				syncMsgVersion,
+				languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/null,
+				/*App ID*/appID,
+				autoActivateID,
+				/*callbackToUIThread*/ false,
+				transportConfig);
+		
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, appName, ngnMediaScreenAppName, " +
+				"vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, and autoActivateID.", SYNC_LIB_TRACE_KEY);
+	}
+	
+	/**
+	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC via specified transport.
+	 * 
+	 * Takes advantage of the advanced lifecycle management. 
+	 * 
+	 * @param listener Reference to the object in the App listening to callbacks from SYNC. 
+	 * @param applicationContext Context of the application. Used to access application specific resources.
+	 * @param appName Name of the application displayed on SYNC. 
+	 * @param ngnMediaScreenAppName Name of the application displayed on SYNC for Navigation equipped 
+	 * vehicles. Limited to five characters. 
+	 * @param vrSynonyms A vector of strings, all of which can be used as voice commands to 
+	 * @param isMediaApp Indicates if the app is a media application.
+	 * @param syncMsgVersion Indicates the version of SYNC AppLink Messages desired. Must be less than
+	 * or equal to the version of SYNC AppLink running on the vehicle. 
+	 * @param languageDesired Indicates the language desired for the SYNC interface.
+	 * @param autoActivateID ID used to re-register previously registered application.
+	 * @param transportConfig Initial configuration for transport. 
+	 * @throws SyncException
+	 */
+	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
+			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, 
+			Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, 
+			Language hmiDisplayLanguageDesired, String appID, String autoActivateID,
+			BaseTransportConfig transportConfig) throws SyncException {
+		super(	listener, 
+				syncProxyConfigurationResources, 
+				/*enable advanced lifecycle management*/true, 
+				appName,
+				/*TTS Name*/null,
+				ngnMediaScreenAppName,
+				vrSynonyms,
+				isMediaApp,
+				syncMsgVersion,
+				languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/null,
+				/*App ID*/appID,
+				autoActivateID,
+				/*callbackToUIThread*/ false,
+				transportConfig);
+		
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, and autoActivateID.", SYNC_LIB_TRACE_KEY);
+	}
+	
+	/**
+	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC via specified transport.
+	 * 
+	 * Takes advantage of the advanced lifecycle management. 
+	 * 
+	 * @param listener Reference to the object in the App listening to callbacks from SYNC. 
+	 * @param appName Name of the application displayed on SYNC. 
+	 * @param ngnMediaScreenAppName Name of the application displayed on SYNC for Navigation equipped 
+	 * vehicles. Limited to five characters. 
+	 * @param vrSynonyms A vector of strings, all of which can be used as voice commands to 
+	 * @param isMediaApp Indicates if the app is a media application.
+	 * @param syncMsgVersion Indicates the version of SYNC AppLink Messages desired. Must be less than
+	 * or equal to the version of SYNC AppLink running on the vehicle. 
+	 * @param languageDesired Indicates the language desired for the SYNC interface.
+	 * @param autoActivateID ID used to re-register previously registered application.
+	 * @param callbackToUIThread If true, all callbacks will occur on the UI thread.
+	 * @param transportConfig Initial configuration for transport. 
+	 * @throws SyncException
+	 */
+	public SyncProxyALM(IProxyListenerALM listener, String appName, String ngnMediaScreenAppName, 
+			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
+			String autoActivateID, boolean callbackToUIThread, 
+			BaseTransportConfig transportConfig) throws SyncException {
+		super(	listener, 
+				/*sync proxy configuration resources*/null,
+				/*enable advanced lifecycle management*/true, 
+				appName,
+				/*TTS Name*/null,
+				ngnMediaScreenAppName,
+				vrSynonyms,
+				isMediaApp,
+				syncMsgVersion,
+				languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/null,
+				/*App ID*/appID,
+				autoActivateID,
+				callbackToUIThread,
+				transportConfig);
+		
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, " +
+				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
+				"and callbackToUIThread", SYNC_LIB_TRACE_KEY);
+	}
+	
+	/**
+	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC via specified transport.
+	 * 
+	 * Takes advantage of the advanced lifecycle management. 
+	 * 
+	 * @param listener Reference to the object in the App listening to callbacks from SYNC. 
+	 * @param applicationContext Context of the application. Used to access application specific resources.
+	 * @param appName Name of the application displayed on SYNC. 
+	 * @param ngnMediaScreenAppName Name of the application displayed on SYNC for Navigation equipped 
+	 * vehicles. Limited to five characters.
+	 * @param vrSynonyms A vector of strings, all of which can be used as voice commands too
+	 * @param isMediaApp Indicates if the app is a media application.
+	 * @param syncMsgVersion Indicates the version of SYNC AppLink Messages desired. Must be less than
+	 * or equal to the version of SYNC AppLink running on the vehicle. 
+	 * @param languageDesired Indicates the language desired for the SYNC interface.
+	 * @param autoActivateID ID used to re-register previously registered application.
+	 * @param callbackToUIThread If true, all callbacks will occur on the UI thread.
+	 * @param transportConfig Initial configuration for transport. 
+	 * @throws SyncException
+	 */
+	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
+			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
+			String appID, String autoActivateID, 
+			boolean callbackToUIThread, BaseTransportConfig transportConfig) throws SyncException {
+		super(	listener, 
+				syncProxyConfigurationResources,
+				/*enable advanced lifecycle management*/true, 
+				appName,
+				/*TTS Name*/null,
+				ngnMediaScreenAppName,
+				vrSynonyms,
+				isMediaApp,
+				syncMsgVersion,
+				languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/null,
+				/*App ID*/appID,
+				autoActivateID,
+				callbackToUIThread,
+				transportConfig);
+		
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
+				"and callbackToUIThread", SYNC_LIB_TRACE_KEY);
+	}
+
+	/**
+	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC via specified transport.
+	 * 
+	 * Takes advantage of the advanced lifecycle management. 
+	 * 
+	 * @param listener Reference to the object in the App listening to callbacks from SYNC.
+	 * @param syncProxyConfigurationResources Proxy configuration resources.
+	 * @param appName Name of the application displayed on SYNC.
+	 * @param ngnMediaScreenAppName Name of the application displayed on SYNC for Navigation equipped 
+	 * vehicles. Limited to five characters.
+	 * @param vrSynonyms A vector of strings, all of which can be used as voice commands too
+	 * @param isMediaApp Indicates if the app is a media application.
+	 * @param syncMsgVersion Indicates the version of SYNC AppLink Messages desired. Must be less than
+	 * or equal to the version of SYNC AppLink running on the vehicle.
+	 * @param languageDesired Indicates the language desired for the SYNC interface.
+	 * @param hmiDisplayLanguageDesired Desired language in HMI.
+	 * @param appID Identifier of the client application.
+	 * @param autoActivateID ID used to re-register previously registered application.
+	 * @param callbackToUIThread If true, all callbacks will occur on the UI thread.
+	 * @param preRegister Flag that indicates that client should be pre-registred or not
+	 * @param version Desired version of SYNC protocol.
+	 * @param transportConfig Initial configuration for transport. 
+	 * @throws SyncException
+	 */
+	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
+			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
+			String appID, String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
+			BaseTransportConfig transportConfig) throws SyncException {
+		super(	listener, 
+				syncProxyConfigurationResources,
+				/*enable advanced lifecycle management*/true, 
+				appName,
+				/*TTS Name*/null,
+				ngnMediaScreenAppName,
+				vrSynonyms,
+				isMediaApp,
+				syncMsgVersion,
+				languageDesired,
+				/*HMI Display Language Desired*/hmiDisplayLanguageDesired,
+				/*App Type*/null,
+				/*App ID*/appID,
+				autoActivateID,
+				callbackToUIThread,
+				preRegister,
+				version,
+				transportConfig);
+		
+		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
+				"callbackToUIThread and version", SYNC_LIB_TRACE_KEY);
+	}
+		
+	/***************************************** END OF TRANSPORT SWITCHING SUPPORT ***************************************/
 	
 	// Allow applications using ALM to reset the proxy (dispose and reinstantiate)
 	/**
