@@ -1,4 +1,5 @@
 [CW3]
+* Fix the inability to add 6+ soft buttons on devices with small screens.
 + Add TCP transport support (over WiFi).
 * SyncProxyAndroid SDK: fix receiving multiframe messages.
 * Fix a crash when clicking a request/response after relaunching the main activity.
