@@ -67,7 +67,7 @@ Json::Value GetDTCsResponseMarshaller::toJSON(const GetDTCsResponse& e)
   json["result"]=Json::Value(Json::objectValue);
   NsAppLinkRPC::Result r(static_cast<NsAppLinkRPC::Result::ResultInternal>(e.getResult()));
   json["result"]["resultCode"]=NsAppLinkRPC::ResultMarshaller::toJSON(r);
-  json["result"]["method"]=Json::Value("AppLinkCore.GetDTCsResponse");
+  json["result"]["method"]=Json::Value("VehicleInfo.GetDTCsResponse");
 
   if(e.dtcList)
   {
@@ -100,7 +100,7 @@ bool GetDTCsResponseMarshaller::fromJSON(const Json::Value& json,GetDTCsResponse
     NsAppLinkRPC::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
-    if(js["method"].asString().compare("AppLinkCore.GetDTCsResponse")) return false;
+    if(js["method"].asString().compare("VehicleInfo.GetDTCsResponse")) return false;
 
     if(!NsAppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
