@@ -194,8 +194,8 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             info = '',
             dataResult = [],
             resultCode = "";
-        if(this.ecuDIDData[params.ecuName].data){
-            info = this.ecuDIDData[params.ecuName].data;
+        if(this.ecuDIDData[1].data){
+            info = this.ecuDIDData[1].data;
             result = "SUCCESS";
         }else{
             info = "";
