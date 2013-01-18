@@ -553,8 +553,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				Const.PREFS_DEFAULT_PROTOCOLVERSION);
 		boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
 				Const.PREFS_DEFAULT_ISMEDIAAPP);
+		String transportType = prefs.getInt(
+				Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
+				Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE) == Const.Transport.KEY_TCP ? "WiFi"
+				: "BT";
 		setTitle(getResources().getString(R.string.app_name) + " (v"
-				+ protocolVersion + ", " + (isMedia ? "" : "non-") + "media)");
+				+ protocolVersion + ", " + (isMedia ? "" : "non-") + "media, "
+				+ transportType + ")");
 	}
 
 	protected void onDestroy() {
