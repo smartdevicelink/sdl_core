@@ -155,7 +155,9 @@ FFW.UI = FFW.RPCObserver.create({
 				for (var i=0;i<request.params.properties.length;i++)
 				{
 				    MFT.ApplinkModel.resetProperties(request.params.properties[i]);
-					MFT.TTSPopUp.ActivateTTS("Reset property: " + request.params.properties[i]);
+					if( request.params.properties[i] ){
+						MFT.TTSPopUp.ActivateTTS("Reset property: " + request.params.properties[i]);
+					}
 				}
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
