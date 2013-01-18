@@ -149,7 +149,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
     private static SyncProxyTester _activity;
     private static ArrayList<Object> _logMessages = new ArrayList<Object>();
 	private static logAdapter _msgAdapter;
-	private ProxyService _applinkService;
 	private ModuleTest _testerMain;
 	
 	private ScrollView _scroller = null;
@@ -490,7 +489,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private void startSyncProxy() {
 		// Publish an SDP record and create a SYNC proxy.
 		// startSyncProxyService();
-		_applinkService = new ProxyService();
 		if (ProxyService.getInstance() == null) {
 			Intent startIntent = new Intent(this, ProxyService.class);
 			startService(startIntent);
@@ -643,8 +641,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	        BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 	        if (!mBtAdapter.isEnabled()) mBtAdapter.enable();
 	        
-	        if (_applinkService == null) _applinkService = new ProxyService();
-	        
 	        if (ProxyService.getInstance() == null) {
                 Intent startIntent = new Intent(this, ProxyService.class);
                 startService(startIntent);
@@ -729,8 +725,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			endSyncProxyInstance();
         	startSyncProxyService();
         	*/		       
-	        if (_applinkService == null) { 		        	
-	        	_applinkService = new ProxyService();
 	    		if (ProxyService.getInstance() == null) {
 	    			Intent startIntent = new Intent(this, ProxyService.class);
 	    			startService(startIntent);
@@ -739,7 +733,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	    			// need to get the instance and add myself as a listener
 	    			ProxyService.getInstance().setCurrentActivity(this);
 	    		}
-	        }
 	        if (ProxyService.getInstance().getProxyInstance() != null) {
 				try {
 					ProxyService.getInstance().getProxyInstance().resetProxy();
