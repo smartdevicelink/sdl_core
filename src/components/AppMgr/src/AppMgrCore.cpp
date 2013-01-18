@@ -5286,6 +5286,72 @@ namespace NsAppManager
                 }
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__ONVEHICLEDATA:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " An OnVehicleData notification has been income");
+                NsRPC2Communication::VehicleInfo::OnVehicleData* object = static_cast<NsRPC2Communication::VehicleInfo::OnVehicleData*>(msg);
+
+                if (object->get_gps())
+                {
+                } else if (object->get_speed())
+                {
+                } else if (object->get_rpm())
+                {
+                } else if (object->get_fuelLevel())
+                {
+                } else if (object->get_avgFuelEconomy())
+                {
+                } else if (object->get_batteryVoltage())
+                {
+                } else if (object->get_externalTemperature())
+                {
+                } else if (object->get_vin())
+                {
+                } else if (object->get_prndl())
+                {
+                    NsAppLinkRPCV2::VehicleDataType vehicleDataName = NsAppLinkRPCV2::VehicleDataType(NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal::VEHICLEDATA_PRNDLSTATUS);
+                    std::vector<RegistryItem*> result;
+                    result.clear(); 
+                    core->mVehicleDataMapping.findRegistryItemsSubscribedToVehicleData(vehicleDataName, result);
+                    if (0 < result.size())
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, " There are " << result.size() <<" subscribers on PRNDL notification!");
+                        for (std::vector<RegistryItem*>::iterator it = result.begin(); it != result.end(); it++)
+                        {
+                            Application_v2* app = (Application_v2*)(*it)->getApplication();
+                            if(!app)
+                            {
+                                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item" );
+                                continue;
+                            }
+                            int appId = app->getAppID();
+                            LOG4CPLUS_INFO_EXT(mLogger, " An OnVehicleData PRNDL notification sending to " << appId);
+                            NsAppLinkRPCV2::OnVehicleData* notification = new NsAppLinkRPCV2::OnVehicleData();
+                            notification->setMethodId(NsAppLinkRPCV2::FunctionID::OnVehicleDataID);
+                            notification->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                            notification->set_prndl(*(object->get_prndl()));
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                                                        << " application id " << appId);
+                            MobileHandler::getInstance().sendRPCMessage(notification, appId);
+                        }
+                    }
+                } else if (object->get_tirePressure())
+                {
+                } else if (object->get_batteryPackVoltage())
+                {
+                } else if (object->get_batteryPackCurrent())
+                {
+                } else if (object->get_batteryPackTemperature())
+                {
+                } else if (object->get_engineTorque())
+                {
+                } else if (object->get_odometer())
+                {
+                } else if (object->get_tripOdometer())
+                {
+                }
+                return;
+            }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETDTCSRESPONSE:
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__READDIDRESPONSE:
             {
