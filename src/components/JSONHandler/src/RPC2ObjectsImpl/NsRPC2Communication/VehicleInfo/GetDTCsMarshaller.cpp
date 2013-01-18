@@ -57,7 +57,7 @@ Json::Value GetDTCsMarshaller::toJSON(const GetDTCs& e)
     return Json::Value(Json::nullValue);
 
   json["jsonrpc"]=Json::Value("2.0");
-  json["method"]=Json::Value("AppLinkCore.GetDTCs");
+  json["method"]=Json::Value("VehicleInfo.GetDTCs");
 
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
@@ -75,7 +75,7 @@ bool GetDTCsMarshaller::fromJSON(const Json::Value& json,GetDTCs& c)
   {
     if(!json.isObject())  return false;
     if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return false;
-    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("AppLinkCore.GetDTCs"))  return false;
+    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("VehicleInfo.GetDTCs"))  return false;
     if(!json.isMember("id") || !json["id"].isInt()) return false;
     c.setId(json["id"].asInt());
 

@@ -177,6 +177,7 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
     if(!json.isMember("method") || !json["method"].isString())  return 0;
 
     Methods m=getIndex(json["method"].asString().c_str());
+    printf ("\t\t\tNotification m = %d\n", m);
 
     switch(m)
     {
@@ -262,6 +263,7 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       }
       case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__ONVEHICLEDATA:
       {
+        printf ("\t\t\tNotification OnVehicleData\n");
         NsRPC2Communication::VehicleInfo::OnVehicleData *rv=new NsRPC2Communication::VehicleInfo::OnVehicleData;
         return NsRPC2Communication::VehicleInfo::OnVehicleDataMarshaller::fromJSON(json,*rv) ? rv : 0;
       }

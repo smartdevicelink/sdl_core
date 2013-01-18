@@ -419,6 +419,22 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {"TTS.ChangeRegistrationResponse",27,&Marshaller::mNsRPC2Communication_TTS__ChangeRegistrationResponse}
     };
 
+  printf("str = %s\n", str);
+  // check GetVehicleData response
+  register const char *strn = wordlist[39].name;
+  if (*str == *strn && !memcmp (str + 1, strn + 1, len - 1))
+  {
+    printf("wordlist[39].name = %s\n", strn);
+    return &wordlist[39];
+  }
+  //check OnVehicleData notification
+  strn = wordlist[125].name;
+  if (*str == *strn && !memcmp (str + 1, strn + 1, len - 1))
+  {
+    printf("wordlist[125].name = %s\n", strn);
+    return &wordlist[125];
+  }
+
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
     {
       register int key = hash (str, len);

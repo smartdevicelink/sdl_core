@@ -51,6 +51,18 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
     ],
 
     /**
+     * Type of current vehicle: make of the vehicle, model of the vehicle,
+     * model Year of the vehicle, trim of the vehicle.
+     * @type {Object}
+     */ 
+    vehicleType:{
+      make:       "Ford",
+      model:      "Fiesta",
+      modelYear:  2013,
+      trim:       "SE"  
+    },
+
+    /**
      * Stored VehicleInfo Data
      */
     vehicleData: {
@@ -139,6 +151,13 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
     },
 
     /**
+     * Method calls GetVehicleType response
+     */
+    getVehicleType: function( id ){
+        FFW.VehicleInfo.GetVehicleTypeResponse( this.vehicleType, id );
+    },
+
+    /**
      * Applink VehicleInfo.GetDTCs handler
      * fill data for response about vehicle errors
      */
@@ -220,7 +239,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
 
         var jsonData = {};
         for(var i  in this.vehicleData) {
-          jsonData[i] = this.vehicleData[i];
+          jsonData[this.vehicleData[i].type] = this.vehicleData[i].data;
         }
         FFW.VehicleInfo.OnVehicleData(jsonData);
 

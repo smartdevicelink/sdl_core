@@ -67,7 +67,7 @@ Json::Value ReadDIDMarshaller::toJSON(const ReadDID& e)
     return Json::Value(Json::nullValue);
 
   json["jsonrpc"]=Json::Value("2.0");
-  json["method"]=Json::Value("AppLinkCore.ReadDID");
+  json["method"]=Json::Value("VehicleInfo.ReadDID");
 
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
@@ -94,7 +94,7 @@ bool ReadDIDMarshaller::fromJSON(const Json::Value& json,ReadDID& c)
   {
     if(!json.isObject())  return false;
     if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return false;
-    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("AppLinkCore.ReadDID"))  return false;
+    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("VehicleInfo.ReadDID"))  return false;
     if(!json.isMember("id") || !json["id"].isInt()) return false;
     c.setId(json["id"].asInt());
 

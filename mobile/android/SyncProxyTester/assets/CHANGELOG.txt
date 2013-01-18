@@ -1,4 +1,5 @@
 [CW3]
+* SyncProxyAndroid SDK: fix receiving multiframe messages.
 * Fix a crash when clicking a request/response after relaunching the main activity.
 * Alert, Show, ScrollableMessage dialogs fix: send the soft buttons if the user checked the Include checkbox without pushing the Soft Buttons button.
 * Slider dialog: automatically update dynamic footer when enabled and the number of ticks changes.

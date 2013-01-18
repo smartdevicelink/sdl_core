@@ -2020,8 +2020,8 @@ namespace NsAppManager
                     getcwd(currentAppPath, FILENAME_MAX);
                     const std::string& syncFileName = request->get_syncFileName();
                     // TODO(akandul): We look for icon in current app dir.
-                    snprintf(fullPathToSyncFileName, FILENAME_MAX - 1, "%s/%s"
-                        , currentAppPath, syncFileName.c_str());
+                    snprintf(fullPathToSyncFileName, FILENAME_MAX - 1, "%s/%s/%s"
+                        , currentAppPath, app->getName().c_str(), syncFileName.c_str());
 
                     LOG4CPLUS_INFO_EXT(mLogger, "Full path to sync file name: " << fullPathToSyncFileName);
 
@@ -4483,7 +4483,7 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__CHANGEREGISTRATIONRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "UI::ChangeRegistrationResponse is received from HMI.");
-                NsRPC2Communication::UI::ChangeRegistrationResponse * response = 
+                NsRPC2Communication::UI::ChangeRegistrationResponse * response =
                     static_cast<NsRPC2Communication::UI::ChangeRegistrationResponse*>(msg);
                 Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
                 if(!app)
@@ -4492,7 +4492,7 @@ namespace NsAppManager
                     return;
                 }
 
-                int appId = app->getAppID();                
+                int appId = app->getAppID();
 
                 //TODO: exchange when result is not succes.
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(response->getId());
@@ -4734,7 +4734,7 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__CHANGEREGISTRATIONRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "VR::ChangeRegistrationResponse is received from HMI.");
-                NsRPC2Communication::VR::ChangeRegistrationResponse * response = 
+                NsRPC2Communication::VR::ChangeRegistrationResponse * response =
                     static_cast<NsRPC2Communication::VR::ChangeRegistrationResponse*>(msg);
                 Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
                 if(!app)
@@ -4743,7 +4743,7 @@ namespace NsAppManager
                     return;
                 }
 
-                int appId = app->getAppID();                
+                int appId = app->getAppID();
 
                 //TODO: exchange when result is not succes.
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(response->getId());
@@ -4891,7 +4891,7 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATIONRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "TTS::ChangeRegistrationResponse is received from HMI.");
-                NsRPC2Communication::TTS::ChangeRegistrationResponse * response = 
+                NsRPC2Communication::TTS::ChangeRegistrationResponse * response =
                     static_cast<NsRPC2Communication::TTS::ChangeRegistrationResponse*>(msg);
                 Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
                 if(!app)
@@ -4900,7 +4900,7 @@ namespace NsAppManager
                     return;
                 }
 
-                int appId = app->getAppID();                
+                int appId = app->getAppID();
 
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(response->getId());
                 if ( -1 != cmdId )
@@ -5487,6 +5487,72 @@ namespace NsAppManager
                 } else
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "GetVehicleData is present in Protocol V1 only!!!");
+                }
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__ONVEHICLEDATA:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " An OnVehicleData notification has been income");
+                NsRPC2Communication::VehicleInfo::OnVehicleData* object = static_cast<NsRPC2Communication::VehicleInfo::OnVehicleData*>(msg);
+
+                if (object->get_gps())
+                {
+                } else if (object->get_speed())
+                {
+                } else if (object->get_rpm())
+                {
+                } else if (object->get_fuelLevel())
+                {
+                } else if (object->get_avgFuelEconomy())
+                {
+                } else if (object->get_batteryVoltage())
+                {
+                } else if (object->get_externalTemperature())
+                {
+                } else if (object->get_vin())
+                {
+                } else if (object->get_prndl())
+                {
+                    NsAppLinkRPCV2::VehicleDataType vehicleDataName = NsAppLinkRPCV2::VehicleDataType(NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal::VEHICLEDATA_PRNDLSTATUS);
+                    std::vector<RegistryItem*> result;
+                    result.clear(); 
+                    core->mVehicleDataMapping.findRegistryItemsSubscribedToVehicleData(vehicleDataName, result);
+                    if (0 < result.size())
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, " There are " << result.size() <<" subscribers on PRNDL notification!");
+                        for (std::vector<RegistryItem*>::iterator it = result.begin(); it != result.end(); it++)
+                        {
+                            Application_v2* app = (Application_v2*)(*it)->getApplication();
+                            if(!app)
+                            {
+                                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item" );
+                                continue;
+                            }
+                            int appId = app->getAppID();
+                            LOG4CPLUS_INFO_EXT(mLogger, " An OnVehicleData PRNDL notification sending to " << appId);
+                            NsAppLinkRPCV2::OnVehicleData* notification = new NsAppLinkRPCV2::OnVehicleData();
+                            notification->setMethodId(NsAppLinkRPCV2::FunctionID::OnVehicleDataID);
+                            notification->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                            notification->set_prndl(*(object->get_prndl()));
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                                                        << " application id " << appId);
+                            MobileHandler::getInstance().sendRPCMessage(notification, appId);
+                        }
+                    }
+                } else if (object->get_tirePressure())
+                {
+                } else if (object->get_batteryPackVoltage())
+                {
+                } else if (object->get_batteryPackCurrent())
+                {
+                } else if (object->get_batteryPackTemperature())
+                {
+                } else if (object->get_engineTorque())
+                {
+                } else if (object->get_odometer())
+                {
+                } else if (object->get_tripOdometer())
+                {
                 }
                 return;
             }
