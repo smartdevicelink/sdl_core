@@ -194,6 +194,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             info = '',
             dataResult = [],
             resultCode = "";
+        //magic number used because there is no huge database on HMI of vehicle data
         if(this.ecuDIDData[1].data){
             info = this.ecuDIDData[1].data;
             result = "SUCCESS";

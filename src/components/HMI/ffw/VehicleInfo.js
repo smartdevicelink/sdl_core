@@ -183,11 +183,9 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "result":   {
                     "resultCode":       result, //  type (enum) from AppLink protocol
                     "method":           "VehicleInfo.ReadDIDResponse",
-                    "params":{
-                        "info":         info,
-                        "dataResult":   dataResult,
-                        "data":         data
-                    }
+                    "info":         info,
+                    "dataResult":   dataResult,
+                    "data":         data
                 }
             };
         }else{
@@ -197,9 +195,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "result":   {
                     "resultCode":       result, //  type (enum) from AppLink protocol
                     "method":           "VehicleInfo.ReadDIDResponse",
-                    "params":{
-                        "info":         info
-                    }
+                    "info":         info
                 }
             }; 
         }
@@ -221,10 +217,8 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "result":   {
                     "resultCode":       result, //  type (enum) from AppLink protocol
                     "method":           "VehicleInfo.GetDTCsResponse",
-                    "params":{
-                        "info":         info,
-                        "dtcList":      data
-                    }
+                    "info":         info,
+                    "dtcList":      data
                 }
             };
         }else{
@@ -234,9 +228,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "result":   {
                     "resultCode":       result, //  type (enum) from AppLink protocol
                     "method":           "VehicleInfo.GetDTCsResponse",
-                    "params":{
-                        "info":         info
-                    }
+                    "info":         info
                 }
             }; 
         }
