@@ -207,10 +207,10 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
         for(i = 0; i < params.didLocation.length; i++) {
             if(i < 10){
                 dataResult[i] = 'SUCCESS';
-                data[i] =       0;
+                data[i] =       '0';
             }else{
                 dataResult[i] = "INVALID_DATA";
-                data[i] =       0;
+                data[i] =       '0';
             }
         }
 
