@@ -26,12 +26,12 @@ GetSupportedLanguagesResponse::GetSupportedLanguagesResponse(const GetSupportedL
   *this=c;
 }
 
-const std::vector<NsAppLinkRPC::Language>& GetSupportedLanguagesResponse::get_languages() const
+const std::vector<NsAppLinkRPCV2::Language>& GetSupportedLanguagesResponse::get_languages() const
 {
     return languages;
 }
 
-bool GetSupportedLanguagesResponse::set_languages(const std::vector<NsAppLinkRPC::Language> & c)
+bool GetSupportedLanguagesResponse::set_languages(const std::vector<NsAppLinkRPCV2::Language> & c)
 {
     languages = c;
     return true;

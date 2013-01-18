@@ -4,7 +4,7 @@
 #include <vector>
 #include "JSONHandler/RPC2Response.h"
 
-#include "JSONHandler/ALRPCObjects/V1/Language.h"
+#include "JSONHandler/ALRPCObjects/V2/Language.h"
 
 namespace NsRPC2Communication
 {
@@ -19,11 +19,11 @@ namespace NsRPC2Communication
 
         GetSupportedLanguagesResponse & operator=(const GetSupportedLanguagesResponse&);
 
-        const std::vector<NsAppLinkRPC::Language>& get_languages() const;
+        const std::vector<NsAppLinkRPCV2::Language>& get_languages() const;
 
-        bool set_languages(const std::vector<NsAppLinkRPC::Language> &);
+        bool set_languages(const std::vector<NsAppLinkRPCV2::Language> &);
     private:
-        std::vector<NsAppLinkRPC::Language> languages;
+        std::vector<NsAppLinkRPCV2::Language> languages;
         friend class GetSupportedLanguagesResponseMarshaller;
     };
   }

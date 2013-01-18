@@ -4528,7 +4528,7 @@ namespace NsAppManager
                     }
                 }
                 core->mMessageMapping.removeMessage(response->getId());
-                break;
+                return;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
@@ -4780,7 +4780,7 @@ namespace NsAppManager
                 }
 
                 core->mMessageMapping.removeMessage(response->getId());
-                break;
+                return;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not VR RPC message " << msg->getMethod() << " has been received!");
@@ -4936,7 +4936,7 @@ namespace NsAppManager
                 }
 
                 core->mMessageMapping.removeMessage(response->getId());
-                break;
+                return;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not TTS RPC message " << msg->getMethod() << " has been received!");

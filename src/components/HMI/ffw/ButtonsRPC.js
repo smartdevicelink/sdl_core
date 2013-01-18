@@ -188,7 +188,7 @@ FFW.Buttons = FFW.RPCObserver.create({
 						}
 					],
 					"presetBankCapabilities": {"onScreenPresetsAvailable": true},
-
+					"method"	:	"Buttons.GetCapabilitiesResponse",
 					"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 				}
 			};

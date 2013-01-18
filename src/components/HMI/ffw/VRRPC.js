@@ -174,8 +174,8 @@ FFW.VR = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result"	:	{
-						"capabilities": ["TEXT"],
-
+						"capabilities": ["Text"],
+						"method"	:	"VR.GetCapabilitiesResponse",
 						"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
 					}
 				};
