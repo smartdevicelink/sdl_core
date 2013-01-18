@@ -3201,6 +3201,58 @@ namespace NsAppManager
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::ReadDIDID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "ReadDID is received from moblie app.");
+                    NsAppLinkRPCV2::ReadDID_request * request = static_cast<NsAppLinkRPCV2::ReadDID_request*>(mobileMsg);
+                    NsAppManager::Application_v2* app = static_cast<NsAppManager::Application_v2*>(core->
+                            getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey)));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " is not registered." );
+                        NsAppLinkRPCV2::ReadDID_response* response = new NsAppLinkRPCV2::ReadDID_response;
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::ReadDIDID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        std::vector<NsAppLinkRPCV2::Result> resultCodes(request->get_didLocation().size());
+                        for ( int i = 0; i < request->get_didLocation().size(); ++i )
+                        {
+                            resultCodes[i] = NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED;
+                        }
+                        response->set_resultCode(resultCodes);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::ReadDID_response* response = new NsAppLinkRPCV2::ReadDID_response;
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::ReadDIDID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        std::vector<NsAppLinkRPCV2::Result> resultCodes(request->get_didLocation().size());
+                        for ( int i = 0; i < request->get_didLocation().size(); ++i )
+                        {
+                            resultCodes[i] = NsAppLinkRPCV2::Result::REJECTED;
+                        }
+                        response->set_resultCode(resultCodes);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    
+                    NsRPC2Communication::VehicleInfo::ReadDID * readDIDRequest = 
+                        new NsRPC2Communication::VehicleInfo::ReadDID;
+                    readDIDRequest->set_appId(app->getAppID());
+                    readDIDRequest->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    core->mMessageMapping.addMessage(readDIDRequest->getId(), sessionKey);
+                    readDIDRequest->set_ecuName(request->get_ecuName());
+                    readDIDRequest->set_didLocation(request->get_didLocation());
+                    if ( request->get_encrypted() )
+                    {
+                        readDIDRequest->set_encrypted( *request->get_encrypted() );
+                    }
+                    HMIHandler::getInstance().sendRequest(readDIDRequest);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::GetDTCsID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A given command id " << mobileMsg->getMethodId() << " RECEIVED! TODO!!!");
@@ -5559,8 +5611,48 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETDTCSRESPONSE:
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__READDIDRESPONSE:
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "VehicleData COMMANDS. TODO!!!");
-                break;
+                LOG4CPLUS_INFO_EXT(mLogger, "ReadDID response is received from HMI.");
+                NsRPC2Communication::VehicleInfo::ReadDIDResponse * response = 
+                    static_cast<NsRPC2Communication::VehicleInfo::ReadDIDResponse*>(msg);
+                Application* app = core->getApplicationFromItemCheckNotNull(
+                        core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+
+                if (2 == app->getProtocolVersion())
+                {
+                    NsAppLinkRPCV2::ReadDID_response * readDIDResponse = new NsAppLinkRPCV2::ReadDID_response;
+                    readDIDResponse->setMethodId(NsAppLinkRPCV2::FunctionID::ReadDIDID);
+                    readDIDResponse->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    bool isSuccess = true;
+                    if ( NsAppLinkRPCV2::Result::SUCCESS != response->getResult() )
+                    {
+                        isSuccess = false;
+                    }
+                    readDIDResponse->set_success( isSuccess );
+                    std::vector<NsAppLinkRPCV2::Result> resultCodes;
+                    resultCodes.push_back(
+                            static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult()));
+                    readDIDResponse->set_resultCode( resultCodes );
+
+                    if ( response->get_dataResult() )
+                    {
+                        readDIDResponse->set_dataResult( *response->get_dataResult() );
+                    }
+
+                    if ( response->get_data() )
+                    {
+                        readDIDResponse->set_data( *response->get_data() );
+                    }
+                    MobileHandler::getInstance().sendRPCMessage(readDIDResponse, appId);
+                }
+                core->mMessageMapping.removeMessage(response->getId());
+                return;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not VehicleInfo RPC message " << msg->getMethod() << " has been received!");
