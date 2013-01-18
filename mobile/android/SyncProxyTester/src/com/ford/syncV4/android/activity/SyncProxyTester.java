@@ -127,6 +127,7 @@ import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
+import com.ford.syncV4.transport.TransportType;
 
 public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final String VERSION = "$Version:$";
@@ -490,12 +491,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		// Publish an SDP record and create a SYNC proxy.
 		// startSyncProxyService();
 		if (ProxyService.getInstance() == null) {
-			Intent startIntent = new Intent(this, ProxyService.class);
+			Intent startIntent = new Intent(SyncProxyTester._activity, ProxyService.class);
 			startService(startIntent);
 			// bindService(startIntent, this, Context.BIND_AUTO_CREATE);
 		} else {
 			// need to get the instance and add myself as a listener
-			ProxyService.getInstance().setCurrentActivity(this);
+			ProxyService.getInstance().setCurrentActivity(SyncProxyTester._activity);
 		}
 	}
 
@@ -2627,8 +2628,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		if (serviceInstance != null){
 			SyncProxyALM proxyInstance = serviceInstance.getProxyInstance();
 			//if proxy exists, reset it
-			if(proxyInstance != null){			
-				serviceInstance.reset();
+			if(proxyInstance != null){
+				if (proxyInstance.getCurrentTransportType() == TransportType.BLUETOOTH) {
+					serviceInstance.reset();
+				} else {
+					Log.e(logTag, "endSyncProxyInstance. No reset required if transport is TCP");
+				}
 			//if proxy == null create proxy
 			} else {
 				serviceInstance.startProxy();
