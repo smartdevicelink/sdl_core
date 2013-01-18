@@ -645,7 +645,7 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
                 if (handler -> sendMultiFrameMessage(connectionHandle,
                                             sessionID,
                                             message -> getProtocolVersion(),
-                                            SERVICE_TYPE_BULK, // TODO : check if this is correct assumption
+                                            SERVICE_TYPE_RPC, // TODO : check if this is correct assumption; and remove this hot fix because it is not supposed to be so.
                                             message -> getDataSize(),
                                             message -> getData(),
                                             false,
