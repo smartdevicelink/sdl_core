@@ -322,7 +322,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 	/**
 	 * Shows a dialog where the user can select connection features (protocol
-	 * version and media flag). Starts the proxy after selecting.
+	 * version, media flag, app name, language, HMI language, and transport
+	 * settings). Starts the proxy after selecting.
 	 */
 	private void selectProtocolUI() {
 		Context context = this;
@@ -337,16 +338,36 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 		final RadioGroup protocolVersionGroup = (RadioGroup) view
-				.findViewById(R.id.selectProtocol_radioGroupProtocolVersion);
+				.findViewById(R.id.selectprotocol_radioGroupProtocolVersion);
 		final CheckBox mediaCheckBox = (CheckBox) view
 				.findViewById(R.id.selectprotocol_checkMedia);
 		final EditText appNameEditText = (EditText) view
-				.findViewById(R.id.selectProtocol_appName);
+				.findViewById(R.id.selectprotocol_appName);
 		final Spinner langSpinner = (Spinner) view
 				.findViewById(R.id.selectprotocol_lang);
 		final Spinner hmiLangSpinner = (Spinner) view
 				.findViewById(R.id.selectprotocol_hmiLang);
-		
+		final RadioGroup transportGroup = (RadioGroup) view
+				.findViewById(R.id.selectprotocol_radioGroupTransport);
+		final EditText ipAddressEditText = (EditText) view
+				.findViewById(R.id.selectprotocol_ipAddr);
+		final EditText tcpPortEditText = (EditText) view
+				.findViewById(R.id.selectprotocol_tcpPort);
+		final CheckBox autoReconnectCheckBox = (CheckBox) view
+				.findViewById(R.id.selectprotocol_checkAutoReconnect);
+
+		transportGroup
+				.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+					@Override
+					public void onCheckedChanged(RadioGroup group, int checkedId) {
+						boolean transportOptionsEnabled = checkedId == R.id.selectprotocol_radioWiFi;
+						ipAddressEditText.setEnabled(transportOptionsEnabled);
+						tcpPortEditText.setEnabled(transportOptionsEnabled);
+						autoReconnectCheckBox
+								.setEnabled(transportOptionsEnabled);
+					}
+				});
+
 		langSpinner.setAdapter(langAdapter);
 		hmiLangSpinner.setAdapter(langAdapter);
 
@@ -363,6 +384,17 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				Const.PREFS_DEFAULT_LANG));
 		Language hmiLang = Language.valueOf(prefs.getString(
 				Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
+		int transportType = prefs.getInt(
+				Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
+				Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE);
+		String ipAddress = prefs.getString(
+				Const.Transport.PREFS_KEY_TRANSPORT_IP,
+				Const.Transport.PREFS_DEFAULT_TRANSPORT_IP);
+		int tcpPort = prefs.getInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT,
+				Const.Transport.PREFS_DEFAULT_TRANSPORT_PORT);
+		boolean autoReconnect = prefs.getBoolean(
+				Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
+				Const.Transport.PREFS_DEFAULT_TRANSPORT_RECONNECT_DEFAULT);
 
 		int radioButtonId = R.id.selectprotocol_radioV1;
 		switch (protocolVersion) {
@@ -383,6 +415,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		appNameEditText.setText(appName);
 		langSpinner.setSelection(langAdapter.getPosition(lang));
 		hmiLangSpinner.setSelection(langAdapter.getPosition(hmiLang));
+		transportGroup
+				.check(transportType == Const.Transport.KEY_TCP ? R.id.selectprotocol_radioWiFi
+						: R.id.selectprotocol_radioBT);
+		ipAddressEditText.setText(ipAddress);
+		tcpPortEditText.setText(String.valueOf(tcpPort));
+		autoReconnectCheckBox.setChecked(autoReconnect);
 
 		new AlertDialog.Builder(context)
 				.setTitle("Please select protocol properties")
@@ -406,7 +444,17 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						String appName = appNameEditText.getText().toString();
 						String lang = ((Language) langSpinner.getSelectedItem())
 								.name();
-						String hmiLang = ((Language) hmiLangSpinner.getSelectedItem()).name();
+						String hmiLang = ((Language) hmiLangSpinner
+								.getSelectedItem()).name();
+						int transportType = transportGroup
+								.getCheckedRadioButtonId() == R.id.selectprotocol_radioWiFi ? Const.Transport.KEY_TCP
+								: Const.Transport.KEY_BLUETOOTH;
+						String ipAddress = ipAddressEditText.getText()
+								.toString();
+						int tcpPort = Integer.parseInt(tcpPortEditText
+								.getText().toString());
+						boolean autoReconnect = autoReconnectCheckBox
+								.isChecked();
 
 						// save the configs
 						boolean success = prefs
@@ -417,12 +465,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								.putString(Const.PREFS_KEY_APPNAME, appName)
 								.putString(Const.PREFS_KEY_LANG, lang)
 								.putString(Const.PREFS_KEY_HMILANG, hmiLang)
-								.commit();
+								.putInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
+										transportType)
+								.putString(
+										Const.Transport.PREFS_KEY_TRANSPORT_IP,
+										ipAddress)
+								.putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT,
+										tcpPort)
+								.putBoolean(
+										Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
+										autoReconnect).commit();
 						if (!success) {
 							Log.w(logTag,
 									"Can't save selected protocol properties");
 						}
-						
+
 						showProtocolPropertiesInTitle();
 						startSyncProxy();
 					}
