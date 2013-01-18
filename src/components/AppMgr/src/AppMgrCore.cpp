@@ -219,7 +219,7 @@ namespace {
         if (data_->bitsPerSample.get() == NsAppLinkRPCV2::AudioCaptureQuality::FIX_8_BIT)
         {
             filename = "audio.8bit.wav";
-            audioLength = 1000;
+            audioLength = 5000;
         }
         else if (data_->bitsPerSample.get() == NsAppLinkRPCV2::AudioCaptureQuality::FIX_16_BIT)
         {
@@ -317,12 +317,11 @@ namespace {
             signal(SIGALRM, AudioPassThruTimerProc);
 
             pthread_cond_wait(&cv, &audioPassThruMutex);
-            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 
+            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
             NsAppLinkRPCV2::OnAudioPassThru* onAudioPassThru = new NsAppLinkRPCV2::OnAudioPassThru;
             if (!onAudioPassThru)
             {
-                pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
                 std::cout << "OUT_OF_MEMORY: new NsAppLinkRPCV2::OnAudioPassThru." << std::endl;
                 if (sendEndAudioPassThruToHMI(data_->sessionKey))
                 {
@@ -336,14 +335,7 @@ namespace {
 
                 delete onAudioPassThru;
                 NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
-                pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
                 pthread_exit(NULL);
-            }
-
-            std::vector<unsigned char>::iterator i = from;
-            for (i; i != to; ++i)
-            {
-                std::cout << *i;
             }
 
             onAudioPassThru->setBinaryData(std::vector<unsigned char>(from, to));
@@ -351,16 +343,16 @@ namespace {
             onAudioPassThru->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
 
             NsAppManager::MobileHandler::getInstance().sendRPCMessage(onAudioPassThru, data_->sessionKey);
+            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 
             from = to;
             to = to + step;
-
-            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
         }
 
         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 
-        if (sendEndAudioPassThruToHMI(data_->sessionKey))
+        sendEndAudioPassThruToHMI(data_->sessionKey);
+        /*if (sendEndAudioPassThruToHMI(data_->sessionKey))
         {
             // Send response to mobile.
             sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
@@ -369,7 +361,7 @@ namespace {
                 , NsAppLinkRPC::ALRPCMessage::RESPONSE
                 , true
                 , data_->sessionKey);
-        }
+        }*/
 
         NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
