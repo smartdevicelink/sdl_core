@@ -220,7 +220,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
 
         var jsonData = {};
         for(var i  in this.vehicleData) {
-          jsonData[i] = this.vehicleData[i];
+          jsonData[this.vehicleData[i].type] = this.vehicleData[i].data;
         }
         FFW.VehicleInfo.OnVehicleData(jsonData);
 
