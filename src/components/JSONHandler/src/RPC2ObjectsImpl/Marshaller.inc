@@ -434,6 +434,13 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
     printf("wordlist[125].name = %s\n", strn);
     return &wordlist[125];
   }
+  // check GetDTCs response
+  strn = wordlist[27].name;
+  if (*str == *strn && !memcmp (str + 1, strn + 1, len - 1))
+  {
+    printf("wordlist[27].name = %s\n", strn);
+    return &wordlist[27];
+  }
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
     {
