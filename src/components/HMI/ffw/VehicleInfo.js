@@ -126,7 +126,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 
         if (request.method == "VehicleInfo.GetVehicleType") {
 
-            MFT.ApplinkModel.getVehicleType();
+            MFT.ApplinkVehicleInfoModel.getVehicleType( request.id );
 
         }
     },
@@ -150,7 +150,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
     /*
      * GetVehicleType Response 
      */ 
-    GetVehicleTypeResponse: function( vehicleType ) {
+    GetVehicleTypeResponse: function( vehicleType, id ) {
         Em.Logger.log("FFW.VehicleInfo.GetVehicleType");
 
             var JSONMessage = {

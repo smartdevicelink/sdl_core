@@ -113,18 +113,6 @@ MFT.ApplinkModel = Em.Object.create({
     TTSVRLanguage: '',
 
     /**
-     * Type of current vehicle: make of the vehicle, model of the vehicle,
-     * model Year of the vehicle, trim of the vehicle.
-     * @type {Object}
-     */ 
-    vehicleType:{
-      make:       "Ford",
-      model:      "Fiesta",
-      modelYear:  2013,
-      trim:       "SE"  
-    },
-
-    /**
      * List of supported languages
      * @type {Array}
      */
@@ -150,13 +138,6 @@ MFT.ApplinkModel = Em.Object.create({
         'AR',
         'KO-KR'
     ],
-
-    /**
-     * Method calls GetVehicleType response
-     */
-    getVehicleType: function(){
-        FFW.VehicleInfo.GetVehicleTypeResponse( this.vehicleType );
-    },
 
     /**
      * Method to set language for UI component with parameters sent from ApplinkCore to UIRPC

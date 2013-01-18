@@ -51,6 +51,18 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
     ],
 
     /**
+     * Type of current vehicle: make of the vehicle, model of the vehicle,
+     * model Year of the vehicle, trim of the vehicle.
+     * @type {Object}
+     */ 
+    vehicleType:{
+      make:       "Ford",
+      model:      "Fiesta",
+      modelYear:  2013,
+      trim:       "SE"  
+    },
+
+    /**
      * Stored VehicleInfo Data
      */
     vehicleData: {
@@ -136,6 +148,13 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             type:   'rainSensor'
         }
 
+    },
+
+    /**
+     * Method calls GetVehicleType response
+     */
+    getVehicleType: function( id ){
+        FFW.VehicleInfo.GetVehicleTypeResponse( this.vehicleType, id );
     },
 
     /**
