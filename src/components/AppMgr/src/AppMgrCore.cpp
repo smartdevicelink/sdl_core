@@ -3201,8 +3201,52 @@ namespace NsAppManager
                     HMIHandler::getInstance().sendRequest(getVehicleDataRPC2Request);
                     break;
                 }
-                case NsAppLinkRPCV2::FunctionID::ReadDIDID:
                 case NsAppLinkRPCV2::FunctionID::GetDTCsID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleData request has been invoked");
+                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
+                        NsAppLinkRPCV2::GetDTCs_response* response = new NsAppLinkRPCV2::GetDTCs_response();
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::GetDTCsID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        std::vector<NsAppLinkRPCV2::Result> resultCode;
+                        resultCode.push_back(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        response->set_resultCode(resultCode);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::GetDTCs_response* response = new NsAppLinkRPCV2::GetDTCs_response;
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::GetDTCsID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        std::vector<NsAppLinkRPCV2::Result> resultCode;
+                        resultCode.push_back(NsAppLinkRPCV2::Result::REJECTED);
+                        response->set_resultCode(resultCode);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    NsAppLinkRPCV2::GetDTCs_request* object = static_cast<NsAppLinkRPCV2::GetDTCs_request*>(mobileMsg);
+                    NsRPC2Communication::VehicleInfo::GetDTCs* getDTCsRPC2Request = new NsRPC2Communication::VehicleInfo::GetDTCs();
+                    getDTCsRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    LOG4CPLUS_INFO_EXT(mLogger, "getDTCsRPC2Request created");
+                    getDTCsRPC2Request->set_ecuName(object->get_ecuName());
+                    if (object->get_encrypted())
+                    {
+                        getDTCsRPC2Request->set_encrypted(*(object->get_encrypted()));
+                    }
+                    getDTCsRPC2Request->set_appId(sessionKey);
+                    LOG4CPLUS_INFO_EXT(mLogger, "GetDTCs request almost handled" );
+                    core->mMessageMapping.addMessage(getDTCsRPC2Request->getId(), sessionKey);
+                    HMIHandler::getInstance().sendRequest(getDTCsRPC2Request);
+                    break;
+                }
+                case NsAppLinkRPCV2::FunctionID::ReadDIDID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A given command id " << mobileMsg->getMethodId() << " RECEIVED! TODO!!!");
                     break;
@@ -5488,7 +5532,7 @@ namespace NsAppManager
                     MobileHandler::getInstance().sendRPCMessage(response, appId);
                 } else
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "GetVehicleData is present in Protocol V1 only!!!");
+                    LOG4CPLUS_ERROR_EXT(mLogger, "GetVehicleData is present in Protocol V2 only!!!");
                 }
                 return;
             }
@@ -5559,6 +5603,42 @@ namespace NsAppManager
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETDTCSRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A GetDTCs response has been income");
+                NsRPC2Communication::VehicleInfo::GetDTCsResponse* object = static_cast<NsRPC2Communication::VehicleInfo::GetDTCsResponse*>(msg);
+                Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+
+                if (2 == app->getProtocolVersion())
+                {
+                    NsAppLinkRPCV2::GetDTCs_response* response = new NsAppLinkRPCV2::GetDTCs_response();
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::GetDTCsID);
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    std::vector<NsAppLinkRPCV2::Result> resultCode;
+                    resultCode.push_back(NsAppLinkRPCV2::Result::SUCCESS);
+                    response->set_resultCode(resultCode);
+                    response->set_success(true);
+                    if (object->get_dtcList())
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, " dtcList is present! ");
+                        response->set_dtcList(*(object->get_dtcList()));
+                    }
+                    core->mMessageMapping.removeMessage(object->getId());
+                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                        << " application id " << appId);
+                    MobileHandler::getInstance().sendRPCMessage(response, appId);
+                } else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "GetVehicleData is present in Protocol V2 only!!!");
+                }
+                return;
+            }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__READDIDRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "VehicleData COMMANDS. TODO!!!");
