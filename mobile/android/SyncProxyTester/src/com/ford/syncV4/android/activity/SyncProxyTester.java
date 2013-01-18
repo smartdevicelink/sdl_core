@@ -127,6 +127,7 @@ import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
+import com.ford.syncV4.transport.TransportType;
 
 public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final String VERSION = "$Version:$";
@@ -149,7 +150,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
     private static SyncProxyTester _activity;
     private static ArrayList<Object> _logMessages = new ArrayList<Object>();
 	private static logAdapter _msgAdapter;
-	private ProxyService _applinkService;
 	private ModuleTest _testerMain;
 	
 	private ScrollView _scroller = null;
@@ -322,7 +322,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 	/**
 	 * Shows a dialog where the user can select connection features (protocol
-	 * version and media flag). Starts the proxy after selecting.
+	 * version, media flag, app name, language, HMI language, and transport
+	 * settings). Starts the proxy after selecting.
 	 */
 	private void selectProtocolUI() {
 		Context context = this;
@@ -337,16 +338,36 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 		final RadioGroup protocolVersionGroup = (RadioGroup) view
-				.findViewById(R.id.selectProtocol_radioGroupProtocolVersion);
+				.findViewById(R.id.selectprotocol_radioGroupProtocolVersion);
 		final CheckBox mediaCheckBox = (CheckBox) view
 				.findViewById(R.id.selectprotocol_checkMedia);
 		final EditText appNameEditText = (EditText) view
-				.findViewById(R.id.selectProtocol_appName);
+				.findViewById(R.id.selectprotocol_appName);
 		final Spinner langSpinner = (Spinner) view
 				.findViewById(R.id.selectprotocol_lang);
 		final Spinner hmiLangSpinner = (Spinner) view
 				.findViewById(R.id.selectprotocol_hmiLang);
-		
+		final RadioGroup transportGroup = (RadioGroup) view
+				.findViewById(R.id.selectprotocol_radioGroupTransport);
+		final EditText ipAddressEditText = (EditText) view
+				.findViewById(R.id.selectprotocol_ipAddr);
+		final EditText tcpPortEditText = (EditText) view
+				.findViewById(R.id.selectprotocol_tcpPort);
+		final CheckBox autoReconnectCheckBox = (CheckBox) view
+				.findViewById(R.id.selectprotocol_checkAutoReconnect);
+
+		transportGroup
+				.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+					@Override
+					public void onCheckedChanged(RadioGroup group, int checkedId) {
+						boolean transportOptionsEnabled = checkedId == R.id.selectprotocol_radioWiFi;
+						ipAddressEditText.setEnabled(transportOptionsEnabled);
+						tcpPortEditText.setEnabled(transportOptionsEnabled);
+						autoReconnectCheckBox
+								.setEnabled(transportOptionsEnabled);
+					}
+				});
+
 		langSpinner.setAdapter(langAdapter);
 		hmiLangSpinner.setAdapter(langAdapter);
 
@@ -363,6 +384,17 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				Const.PREFS_DEFAULT_LANG));
 		Language hmiLang = Language.valueOf(prefs.getString(
 				Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
+		int transportType = prefs.getInt(
+				Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
+				Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE);
+		String ipAddress = prefs.getString(
+				Const.Transport.PREFS_KEY_TRANSPORT_IP,
+				Const.Transport.PREFS_DEFAULT_TRANSPORT_IP);
+		int tcpPort = prefs.getInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT,
+				Const.Transport.PREFS_DEFAULT_TRANSPORT_PORT);
+		boolean autoReconnect = prefs.getBoolean(
+				Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
+				Const.Transport.PREFS_DEFAULT_TRANSPORT_RECONNECT_DEFAULT);
 
 		int radioButtonId = R.id.selectprotocol_radioV1;
 		switch (protocolVersion) {
@@ -383,6 +415,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		appNameEditText.setText(appName);
 		langSpinner.setSelection(langAdapter.getPosition(lang));
 		hmiLangSpinner.setSelection(langAdapter.getPosition(hmiLang));
+		transportGroup
+				.check(transportType == Const.Transport.KEY_TCP ? R.id.selectprotocol_radioWiFi
+						: R.id.selectprotocol_radioBT);
+		ipAddressEditText.setText(ipAddress);
+		tcpPortEditText.setText(String.valueOf(tcpPort));
+		autoReconnectCheckBox.setChecked(autoReconnect);
 
 		new AlertDialog.Builder(context)
 				.setTitle("Please select protocol properties")
@@ -406,7 +444,17 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						String appName = appNameEditText.getText().toString();
 						String lang = ((Language) langSpinner.getSelectedItem())
 								.name();
-						String hmiLang = ((Language) hmiLangSpinner.getSelectedItem()).name();
+						String hmiLang = ((Language) hmiLangSpinner
+								.getSelectedItem()).name();
+						int transportType = transportGroup
+								.getCheckedRadioButtonId() == R.id.selectprotocol_radioWiFi ? Const.Transport.KEY_TCP
+								: Const.Transport.KEY_BLUETOOTH;
+						String ipAddress = ipAddressEditText.getText()
+								.toString();
+						int tcpPort = Integer.parseInt(tcpPortEditText
+								.getText().toString());
+						boolean autoReconnect = autoReconnectCheckBox
+								.isChecked();
 
 						// save the configs
 						boolean success = prefs
@@ -417,12 +465,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								.putString(Const.PREFS_KEY_APPNAME, appName)
 								.putString(Const.PREFS_KEY_LANG, lang)
 								.putString(Const.PREFS_KEY_HMILANG, hmiLang)
-								.commit();
+								.putInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
+										transportType)
+								.putString(
+										Const.Transport.PREFS_KEY_TRANSPORT_IP,
+										ipAddress)
+								.putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT,
+										tcpPort)
+								.putBoolean(
+										Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
+										autoReconnect).commit();
 						if (!success) {
 							Log.w(logTag,
 									"Can't save selected protocol properties");
 						}
-						
+
 						showProtocolPropertiesInTitle();
 						startSyncProxy();
 					}
@@ -433,14 +490,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private void startSyncProxy() {
 		// Publish an SDP record and create a SYNC proxy.
 		// startSyncProxyService();
-		_applinkService = new ProxyService();
 		if (ProxyService.getInstance() == null) {
-			Intent startIntent = new Intent(this, ProxyService.class);
+			Intent startIntent = new Intent(SyncProxyTester._activity, ProxyService.class);
 			startService(startIntent);
 			// bindService(startIntent, this, Context.BIND_AUTO_CREATE);
 		} else {
 			// need to get the instance and add myself as a listener
-			ProxyService.getInstance().setCurrentActivity(this);
+			ProxyService.getInstance().setCurrentActivity(SyncProxyTester._activity);
 		}
 	}
 
@@ -498,8 +554,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				Const.PREFS_DEFAULT_PROTOCOLVERSION);
 		boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
 				Const.PREFS_DEFAULT_ISMEDIAAPP);
+		String transportType = prefs.getInt(
+				Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
+				Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE) == Const.Transport.KEY_TCP ? "WiFi"
+				: "BT";
 		setTitle(getResources().getString(R.string.app_name) + " (v"
-				+ protocolVersion + ", " + (isMedia ? "" : "non-") + "media)");
+				+ protocolVersion + ", " + (isMedia ? "" : "non-") + "media, "
+				+ transportType + ")");
 	}
 
 	protected void onDestroy() {
@@ -586,8 +647,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	        BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 	        if (!mBtAdapter.isEnabled()) mBtAdapter.enable();
 	        
-	        if (_applinkService == null) _applinkService = new ProxyService();
-	        
 	        if (ProxyService.getInstance() == null) {
                 Intent startIntent = new Intent(this, ProxyService.class);
                 startService(startIntent);
@@ -672,8 +731,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			endSyncProxyInstance();
         	startSyncProxyService();
         	*/		       
-	        if (_applinkService == null) { 		        	
-	        	_applinkService = new ProxyService();
 	    		if (ProxyService.getInstance() == null) {
 	    			Intent startIntent = new Intent(this, ProxyService.class);
 	    			startService(startIntent);
@@ -682,7 +739,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	    			// need to get the instance and add myself as a listener
 	    			ProxyService.getInstance().setCurrentActivity(this);
 	    		}
-	        }
 	        if (ProxyService.getInstance().getProxyInstance() != null) {
 				try {
 					ProxyService.getInstance().getProxyInstance().resetProxy();
@@ -2572,8 +2628,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		if (serviceInstance != null){
 			SyncProxyALM proxyInstance = serviceInstance.getProxyInstance();
 			//if proxy exists, reset it
-			if(proxyInstance != null){			
-				serviceInstance.reset();
+			if(proxyInstance != null){
+				if (proxyInstance.getCurrentTransportType() == TransportType.BLUETOOTH) {
+					serviceInstance.reset();
+				} else {
+					Log.e(logTag, "endSyncProxyInstance. No reset required if transport is TCP");
+				}
 			//if proxy == null create proxy
 			} else {
 				serviceInstance.startProxy();

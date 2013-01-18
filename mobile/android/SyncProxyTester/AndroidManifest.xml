@@ -8,7 +8,9 @@
     <!-- Required to pair Bluetooth devices -->
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <!-- Required to check if WiFi is enabled -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
     <application
         android:debuggable="true"
         android:icon="@drawable/fiesta"

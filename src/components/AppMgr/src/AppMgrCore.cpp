@@ -2992,6 +2992,7 @@ namespace NsAppManager
 
                     performAudioPassThru->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     performAudioPassThru->set_appId(app->getAppID());
+                    core->mMessageMapping.addMessage(performAudioPassThru->getId(), sessionKey);
                     HMIHandler::getInstance().sendRequest(performAudioPassThru);
                     LOG4CPLUS_INFO_EXT(mLogger, "Request PerformAudioPassThru sent to HMI ...");
 
@@ -3605,6 +3606,7 @@ namespace NsAppManager
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
                     return;
                 }
 
@@ -5567,7 +5569,7 @@ namespace NsAppManager
                 {
                     NsAppLinkRPCV2::VehicleDataType vehicleDataName = NsAppLinkRPCV2::VehicleDataType(NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal::VEHICLEDATA_PRNDLSTATUS);
                     std::vector<RegistryItem*> result;
-                    result.clear(); 
+                    result.clear();
                     core->mVehicleDataMapping.findRegistryItemsSubscribedToVehicleData(vehicleDataName, result);
                     if (0 < result.size())
                     {
