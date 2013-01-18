@@ -303,6 +303,8 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		}
 		
 		this._mainInstance = currentActivity;
+		// update the _msgAdapter
+		_msgAdapter = SyncProxyTester.getMessageAdapter();
 	}
 	
 	protected int nextCorrID() {
