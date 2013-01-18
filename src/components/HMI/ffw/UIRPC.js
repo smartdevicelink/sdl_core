@@ -37,25 +37,6 @@ FFW.UI = FFW.RPCObserver.create({
 	endAudioPassThruRequestId:			-1,
 
 	/*
-   	 * Default values for global properties
- 	 */
-	globalPropertiesDefault : {
-		helpPrompt	: [ 
-			{
-				"text" 	: "Some text for help prompt",
-				"type"	: "TEXT"
-			}
-		],
-		
-		timeoutPrompt	: [
-			{
-				"text" 	: "Some text for timeout prompt",
-				"type"	: "TEXT"
-			}
-		]
-	},
-
-	/*
    	 * connect to RPC bus
  	 */
 	connect: function() {
@@ -104,7 +85,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 	/*
      * when result is received from RPC component this function is called
-	 * It is the propriate place to check results of reuqest execution
+	 * It is the propriate place to check results of request execution
 	 * Please use previously store reuqestID to determine to which request repsonse belongs to
  	 */
 	onRPCResult: function(response) {
@@ -171,10 +152,10 @@ FFW.UI = FFW.RPCObserver.create({
 		    case "UI.ResetGlobalProperties":{
 
 			    // reset all requested properties
-				for (var i=0;i<request.params.length;i++)
+				for (var i=0;i<request.params.properties.length;i++)
 				{
-				    MFT.ApplinkModel.resetProperties(reuqest.params[i]);
-					MFT.TTSPopUp.ActivateTTS("Reset property: " + reuqest.params[i]);
+				    MFT.ApplinkModel.resetProperties(request.params.properties[i]);
+					MFT.TTSPopUp.ActivateTTS("Reset property: " + request.params.properties[i]);
 				}
 
 				this.sendUIResult("SUCCESS", request.id, request.method);

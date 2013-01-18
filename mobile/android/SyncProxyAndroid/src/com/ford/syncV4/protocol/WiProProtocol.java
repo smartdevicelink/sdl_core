@@ -287,14 +287,42 @@ public class WiProProtocol extends AbstractProtocol {
 				message.setSessionID(header.getSessionID());
 				//If it is WiPro 2.0 it must have binary header
 				if (_version == 2) {
+					//BinaryFrameHeader binFrameHeader = new BinaryFrameHeader();
+					//binFrameHeader.parseBinaryHeader(accumulator.toByteArray());
+					
 					BinaryFrameHeader binFrameHeader = new BinaryFrameHeader();
-					binFrameHeader.parseBinaryHeader(accumulator.toByteArray());
+					
+					byte RPC_Type = (byte) (accumulator.toByteArray()[0] >>> 4);
+					binFrameHeader.setRPCType(RPC_Type);
+					
+					int _functionID = (BitConverter.intFromByteArray(accumulator.toByteArray(), 0) & 0x0FFFFFFF);
+					binFrameHeader.setFunctionID(_functionID);
+					
+					int corrID = BitConverter.intFromByteArray(accumulator.toByteArray(), 4);
+					binFrameHeader.setCorrID(corrID);
+					
+					int _jsonSize = BitConverter.intFromByteArray(accumulator.toByteArray(), 8);
+					binFrameHeader.setJsonSize(_jsonSize);
+					
+					byte[] _jsonData = new byte[_jsonSize];
+					System.arraycopy(accumulator.toByteArray(), 12, _jsonData, 0, _jsonSize);
+					binFrameHeader.setJsonData(_jsonData);
+					
+					if ( accumulator.toByteArray().length - _jsonSize - 12 > 0 )
+					{
+						int l = accumulator.toByteArray().length;
+						byte[] _bulkData = new byte[accumulator.toByteArray().length - _jsonSize];
+						System.arraycopy(accumulator.toByteArray(), 12 + _jsonSize, _bulkData, 0, accumulator.toByteArray().length - _jsonSize -12 );
+						binFrameHeader.setBulkData(_bulkData);
+						message.setBulkData(_bulkData);
+					}	
+					
 					message.setVersion(_version);
-					message.setRPCType(binFrameHeader.getRPCType());
-					message.setFunctionID(binFrameHeader.getFunctionID());
-					message.setCorrID(binFrameHeader.getCorrID());
-					message.setData(binFrameHeader.getJsonData());
-					if (binFrameHeader.getBulkData() !=null) message.setBulkData(binFrameHeader.getBulkData());
+					message.setRPCType(RPC_Type);
+					message.setFunctionID(_functionID);
+					message.setCorrID(corrID);
+					message.setData(_jsonData);
+					//if (binFrameHeader.getBulkData() !=null) message.setBulkData(binFrameHeader.getBulkData());
 				} else message.setData(accumulator.toByteArray());
 				
 				_assemblerForMessageID.remove(header.getMessageID());

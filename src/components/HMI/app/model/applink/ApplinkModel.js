@@ -26,6 +26,25 @@ MFT.ApplinkModel = Em.Object.create({
      */
     AudioPassThruState:     false,
 
+    /*
+     * Default values for global properties
+     */
+    globalPropertiesDefault : {
+        helpPrompt  : [ 
+            {
+                "text"  : "Some text for help prompt",
+                "type"  : "TEXT"
+            }
+        ],
+        
+        timeoutPrompt   : [
+            {
+                "text"  : "Some text for timeout prompt",
+                "type"  : "TEXT"
+            }
+        ]
+    },
+
 
     /**
      * Data for AudioPassThruPopUp that contains params for visualisation
@@ -94,18 +113,6 @@ MFT.ApplinkModel = Em.Object.create({
     TTSVRLanguage: '',
 
     /**
-     * Type of current vehicle: make of the vehicle, model of the vehicle,
-     * model Year of the vehicle, trim of the vehicle.
-     * @type {Object}
-     */ 
-    vehicleType:{
-      make:       "Ford",
-      model:      "Fiesta",
-      modelYear:  2013,
-      trim:       "SE"  
-    },
-
-    /**
      * List of supported languages
      * @type {Array}
      */
@@ -131,13 +138,6 @@ MFT.ApplinkModel = Em.Object.create({
         'AR',
         'KO-KR'
     ],
-
-    /**
-     * Method calls GetVehicleType response
-     */
-    getVehicleType: function(){
-        FFW.VehicleInfo.GetVehicleTypeResponse( this.vehicleType );
-    },
 
     /**
      * Method to set language for UI component with parameters sent from ApplinkCore to UIRPC
@@ -175,12 +175,12 @@ MFT.ApplinkModel = Em.Object.create({
      * @param {String} propertyName Name of propety to reset.
      */
     resetProperties: function(propertyName) {
-        if (propertyName == "HELPPROMPT" || propertyName == ""){
+        if (propertyName == "HELPPROMPT"){
             this.set('globalProperties.helpPrompt', this.globalPropertiesDefault.helpPrompt);
         }
-    
-        if (propertyName == "TIMEOUTPROMPT" || propertyName == ""){
-            this.set('globalProperties.timeoutPrompt', this.globalPropertiesDefault.timoutPrompt);
+
+        if (propertyName == "TIMEOUTPROMPT"){
+            this.set('globalProperties.timeoutPrompt', this.globalPropertiesDefault.timeoutPrompt);
         }
     },
 

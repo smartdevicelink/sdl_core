@@ -2020,8 +2020,8 @@ namespace NsAppManager
                     getcwd(currentAppPath, FILENAME_MAX);
                     const std::string& syncFileName = request->get_syncFileName();
                     // TODO(akandul): We look for icon in current app dir.
-                    snprintf(fullPathToSyncFileName, FILENAME_MAX - 1, "%s/%s"
-                        , currentAppPath, syncFileName.c_str());
+                    snprintf(fullPathToSyncFileName, FILENAME_MAX - 1, "%s/%s/%s"
+                        , currentAppPath, app->getName().c_str(), syncFileName.c_str());
 
                     LOG4CPLUS_INFO_EXT(mLogger, "Full path to sync file name: " << fullPathToSyncFileName);
 
@@ -3230,14 +3230,26 @@ namespace NsAppManager
                     {
                         app->setHMIDisplayLanguageDesired(request->get_hmiDisplayLanguage());
 
-                        if (app->getApplicationHMIStatusLevel() != NsAppLinkRPCV2::HMILevel::HMI_NONE)
+                        if (app->getApplicationHMIStatusLevel() == NsAppLinkRPCV2::HMILevel::HMI_FULL)
                         {
                             NsRPC2Communication::UI::ChangeRegistration * changeUIRegistration =
                                 new NsRPC2Communication::UI::ChangeRegistration;
                             changeUIRegistration->set_hmiDisplayLanguage(request->get_hmiDisplayLanguage());
                             changeUIRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                             changeUIRegistration->set_appId(app->getAppID());
+                            core->mMessageMapping.addMessage(changeUIRegistration->getId(), sessionKey);
+                            app->incrementUnrespondedRequestCount(app->getAppID());
+                            core->mRequestMapping.addMessage(changeUIRegistration->getId(), app->getAppID());
                             HMIHandler::getInstance().sendRequest(changeUIRegistration);
+                        }
+                        else if ( app->getApplicationHMIStatusLevel() == NsAppLinkRPCV2::HMILevel::HMI_NONE )
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                , NsAppLinkRPCV2::Result::SUCCESS
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , true
+                                , sessionKey);
                         }
                         hasActuallyChanged = true;
                     }
@@ -3252,6 +3264,9 @@ namespace NsAppManager
                             changeVrRegistration->set_language(request->get_language());
                             changeVrRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                             changeVrRegistration->set_appId(app->getAppID());
+                            core->mMessageMapping.addMessage(changeVrRegistration->getId(), sessionKey);
+                            app->incrementUnrespondedRequestCount(app->getAppID());
+                            core->mRequestMapping.addMessage(changeVrRegistration->getId(), app->getAppID());
                             HMIHandler::getInstance().sendRequest(changeVrRegistration);
 
                             NsRPC2Communication::TTS::ChangeRegistration * changeTtsRegistration =
@@ -3259,7 +3274,19 @@ namespace NsAppManager
                             changeTtsRegistration->set_language(request->get_language());
                             changeTtsRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                             changeTtsRegistration->set_appId(app->getAppID());
+                            core->mMessageMapping.addMessage(changeTtsRegistration->getId(), sessionKey);
+                            app->incrementUnrespondedRequestCount(app->getAppID());
+                            core->mRequestMapping.addMessage(changeTtsRegistration->getId(), app->getAppID());
                             HMIHandler::getInstance().sendRequest(changeTtsRegistration);
+                        }
+                        else
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                , NsAppLinkRPCV2::Result::SUCCESS
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , true
+                                , sessionKey);
                         }
                         hasActuallyChanged = true;
                     }
@@ -4453,6 +4480,56 @@ namespace NsAppManager
                 }
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__CHANGEREGISTRATIONRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "UI::ChangeRegistrationResponse is received from HMI.");
+                NsRPC2Communication::UI::ChangeRegistrationResponse * response =
+                    static_cast<NsRPC2Communication::UI::ChangeRegistrationResponse*>(msg);
+                Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+
+                //TODO: exchange when result is not succes.
+                unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(response->getId());
+                if ( -1 != cmdId )
+                {
+                    app->decrementUnrespondedRequestCount(cmdId);
+                    if(app->getUnrespondedRequestCount(cmdId) == 0)
+                    {
+                        if ( NsAppLinkRPCV2::Result::SUCCESS != response->getResult() )
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                    , false
+                                    , appId);
+                            core->mRequestMapping.removeRequest(response->getId());
+                            //TODO: not sure if this is correct behaviour
+                            app->setHMIDisplayLanguageDesired(core->mUiLanguageV2);
+                        }
+                        else
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                    , true
+                                    , appId);
+                            core->mRequestMapping.removeRequest(response->getId());
+                        }
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                    }
+                }
+                core->mMessageMapping.removeMessage(response->getId());
+                break;
+            }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
         }
@@ -4654,6 +4731,57 @@ namespace NsAppManager
                 }
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__CHANGEREGISTRATIONRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "VR::ChangeRegistrationResponse is received from HMI.");
+                NsRPC2Communication::VR::ChangeRegistrationResponse * response =
+                    static_cast<NsRPC2Communication::VR::ChangeRegistrationResponse*>(msg);
+                Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+
+                //TODO: exchange when result is not succes.
+                unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(response->getId());
+                if ( -1 != cmdId )
+                {
+                    app->decrementUnrespondedRequestCount(cmdId);
+                    if(app->getUnrespondedRequestCount(cmdId) == 0)
+                    {
+                        if ( NsAppLinkRPCV2::Result::SUCCESS != response->getResult() )
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                    , false
+                                    , appId);
+                            core->mRequestMapping.removeRequest(response->getId());
+                            //TODO: not sure if this is correct behaviour
+                            app->setLanguageDesired(core->mVrLanguageV2);
+                        }
+                        else
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                    , true
+                                    , appId);
+                            core->mRequestMapping.removeRequest(response->getId());
+                        }
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                    }
+                }
+
+                core->mMessageMapping.removeMessage(response->getId());
+                break;
+            }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not VR RPC message " << msg->getMethod() << " has been received!");
         }
@@ -4759,6 +4887,56 @@ namespace NsAppManager
                     }
                 }
                 return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATIONRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "TTS::ChangeRegistrationResponse is received from HMI.");
+                NsRPC2Communication::TTS::ChangeRegistrationResponse * response =
+                    static_cast<NsRPC2Communication::TTS::ChangeRegistrationResponse*>(msg);
+                Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+
+                unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(response->getId());
+                if ( -1 != cmdId )
+                {
+                    app->decrementUnrespondedRequestCount(cmdId);
+                    if(app->getUnrespondedRequestCount(cmdId) == 0)
+                    {
+                        if ( NsAppLinkRPCV2::Result::SUCCESS != response->getResult() )
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                    , false
+                                    , appId);
+                            core->mRequestMapping.removeRequest(response->getId());
+                            //TODO: not sure if this is correct behaviour
+                            app->setLanguageDesired(core->mVrLanguageV2);
+                        }
+                        else
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                    , true
+                                    , appId);
+                            core->mRequestMapping.removeRequest(response->getId());
+                        }
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                    }
+                }
+
+                core->mMessageMapping.removeMessage(response->getId());
+                break;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not TTS RPC message " << msg->getMethod() << " has been received!");
@@ -4997,6 +5175,32 @@ namespace NsAppManager
                     case 2:
                     {
                         Application_v2* appv2 = (Application_v2*)app;
+                        //Methods for changing language:
+                        NsRPC2Communication::VR::ChangeRegistration * changeVrRegistration =
+                            new NsRPC2Communication::VR::ChangeRegistration;
+                        changeVrRegistration->set_language(appv2->getLanguageDesired());
+                        changeVrRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        changeVrRegistration->set_appId(appv2->getAppID());
+                        core->mMessageMapping.addMessage(changeVrRegistration->getId(), appId);
+                        HMIHandler::getInstance().sendRequest(changeVrRegistration);
+
+                        NsRPC2Communication::TTS::ChangeRegistration * changeTtsRegistration =
+                            new NsRPC2Communication::TTS::ChangeRegistration;
+                        changeTtsRegistration->set_language(appv2->getLanguageDesired());
+                        changeTtsRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        changeTtsRegistration->set_appId(appv2->getAppID());
+                        core->mMessageMapping.addMessage(changeTtsRegistration->getId(), appId);
+                        HMIHandler::getInstance().sendRequest(changeTtsRegistration);
+
+                        NsRPC2Communication::UI::ChangeRegistration * changeUIRegistration =
+                            new NsRPC2Communication::UI::ChangeRegistration;
+                        changeUIRegistration->set_hmiDisplayLanguage(appv2->getHMIDisplayLanguageDesired());
+                        changeUIRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        changeUIRegistration->set_appId(appv2->getAppID());
+                        core->mMessageMapping.addMessage(changeUIRegistration->getId(), appId);
+                        HMIHandler::getInstance().sendRequest(changeUIRegistration);
+                        //End of methods for languages.
+
                         NsAppLinkRPCV2::OnHMIStatus * hmiStatus = new NsAppLinkRPCV2::OnHMIStatus;
                         hmiStatus->setMethodId(NsAppLinkRPCV2::FunctionID::OnHMIStatusID);
                         hmiStatus->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
