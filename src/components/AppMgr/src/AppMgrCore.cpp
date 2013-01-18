@@ -2020,8 +2020,8 @@ namespace NsAppManager
                     getcwd(currentAppPath, FILENAME_MAX);
                     const std::string& syncFileName = request->get_syncFileName();
                     // TODO(akandul): We look for icon in current app dir.
-                    snprintf(fullPathToSyncFileName, FILENAME_MAX - 1, "%s/%s"
-                        , currentAppPath, syncFileName.c_str());
+                    snprintf(fullPathToSyncFileName, FILENAME_MAX - 1, "%s/%s/%s"
+                        , currentAppPath, app->getName().c_str(), syncFileName.c_str());
 
                     LOG4CPLUS_INFO_EXT(mLogger, "Full path to sync file name: " << fullPathToSyncFileName);
 
@@ -4483,7 +4483,7 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__CHANGEREGISTRATIONRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "UI::ChangeRegistrationResponse is received from HMI.");
-                NsRPC2Communication::UI::ChangeRegistrationResponse * response = 
+                NsRPC2Communication::UI::ChangeRegistrationResponse * response =
                     static_cast<NsRPC2Communication::UI::ChangeRegistrationResponse*>(msg);
                 Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
                 if(!app)
@@ -4492,7 +4492,7 @@ namespace NsAppManager
                     return;
                 }
 
-                int appId = app->getAppID();                
+                int appId = app->getAppID();
 
                 //TODO: exchange when result is not succes.
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(response->getId());
@@ -4734,7 +4734,7 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__CHANGEREGISTRATIONRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "VR::ChangeRegistrationResponse is received from HMI.");
-                NsRPC2Communication::VR::ChangeRegistrationResponse * response = 
+                NsRPC2Communication::VR::ChangeRegistrationResponse * response =
                     static_cast<NsRPC2Communication::VR::ChangeRegistrationResponse*>(msg);
                 Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
                 if(!app)
@@ -4743,7 +4743,7 @@ namespace NsAppManager
                     return;
                 }
 
-                int appId = app->getAppID();                
+                int appId = app->getAppID();
 
                 //TODO: exchange when result is not succes.
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(response->getId());
@@ -4891,7 +4891,7 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATIONRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "TTS::ChangeRegistrationResponse is received from HMI.");
-                NsRPC2Communication::TTS::ChangeRegistrationResponse * response = 
+                NsRPC2Communication::TTS::ChangeRegistrationResponse * response =
                     static_cast<NsRPC2Communication::TTS::ChangeRegistrationResponse*>(msg);
                 Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
                 if(!app)
@@ -4900,7 +4900,7 @@ namespace NsAppManager
                     return;
                 }
 
-                int appId = app->getAppID();                
+                int appId = app->getAppID();
 
                 unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(response->getId());
                 if ( -1 != cmdId )
