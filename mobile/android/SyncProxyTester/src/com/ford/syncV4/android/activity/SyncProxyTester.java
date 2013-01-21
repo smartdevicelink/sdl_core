@@ -187,6 +187,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * {@link SoftButtonsListActivity} and this activity.
 	 */
 	private Vector<SoftButton> currentSoftButtons;
+	/**
+	 * The Include Soft Buttons checkbox in the current dialog. Kept here to
+	 * check it when the user has explicitly set the soft buttons.
+	 */
+	private CheckBox chkIncludeSoftButtons;
 	
 	/**
 	 * Stores the number of selections of each message to sort them by
@@ -935,7 +940,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText txtAlertField3 = (EditText) layout.findViewById(R.id.txtAlertField3);
 							final EditText txtDuration = (EditText) layout.findViewById(R.id.txtDuration);
 							final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
-							final CheckBox chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
+							chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 
 							SoftButton sb1 = new SoftButton();
 							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
@@ -988,6 +993,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 											msg.setSoftButtons(currentSoftButtons);
 										}
 										currentSoftButtons = null;
+										chkIncludeSoftButtons = null;
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
@@ -998,6 +1004,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
 									currentSoftButtons = null;
+									chkIncludeSoftButtons = null;
 									dialog.cancel();
 								}
 							});
@@ -1090,7 +1097,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText statusBar = (EditText) layout.findViewById(R.id.txtStatusBar);
 							final EditText mediaClock = (EditText) layout.findViewById(R.id.txtMediaClock);
 							final EditText mediaTrack = (EditText) layout.findViewById(R.id.txtMediaTrack);
-							final CheckBox chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.show_chkIncludeSBs);
+							chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.show_chkIncludeSBs);
 							final EditText editCustomPresets = (EditText) layout.findViewById(R.id.show_customPresets);
 
 							SoftButton sb1 = new SoftButton();
@@ -1148,6 +1155,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 											msg.setSoftButtons(currentSoftButtons);
 										}
 										currentSoftButtons = null;
+										chkIncludeSoftButtons = null;
 										if (editCustomPresets.length() > 0) {
 											String splitter = ",";
 											String[] customPresets = editCustomPresets.getText().
@@ -1165,6 +1173,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
 									currentSoftButtons = null;
+									chkIncludeSoftButtons = null;
 									dialog.cancel();
 								}
 							});
@@ -1590,7 +1599,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									.getSystemService(LAYOUT_INFLATER_SERVICE);
 							View layout = inflater.inflate(R.layout.scrollablemessage, null);
 							final EditText txtScrollableMessageBody = (EditText) layout.findViewById(R.id.txtScrollableMessageBody);
-							final CheckBox chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
+							chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 							final EditText txtTimeout = (EditText) layout.findViewById(R.id.scrollablemessage_editTimeout);
 
 							SoftButton sb1 = new SoftButton();
@@ -1640,6 +1649,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 											msg.setSoftButtons(currentSoftButtons);
 										}
 										currentSoftButtons = null;
+										chkIncludeSoftButtons = null;
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
@@ -1650,6 +1660,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
 									currentSoftButtons = null;
+									chkIncludeSoftButtons = null;
 									dialog.cancel();
 								}
 							});
@@ -2793,6 +2804,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			if (resultCode == RESULT_OK) {
 				currentSoftButtons = (Vector<SoftButton>) IntentHelper.
 						getObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+				if (chkIncludeSoftButtons != null) {
+					chkIncludeSoftButtons.setChecked(true);
+				}
 			}
 			IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
 			break;

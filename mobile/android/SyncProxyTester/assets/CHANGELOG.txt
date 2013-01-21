@@ -1,4 +1,5 @@
 [CW4]
++ Alert, Show, ScrollableMessage dialogs: automatically check the Include Soft Buttons checkbox when the user has explicitly set the soft buttons.
 * Fix: don't save the edited list of soft buttons when clicked Cancel in the SoftButtons List activity.
 * Auto increment soft button id when creating a new one.
 
