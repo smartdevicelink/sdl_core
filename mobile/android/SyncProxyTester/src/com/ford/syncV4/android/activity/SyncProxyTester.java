@@ -135,6 +135,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final String logTag = "SyncProxyTester";
 	
 	private static final String ButtonSubscriptions = "ButtonSubscriptions";
+	private static final String VehicleDataSubscriptions = "VehicleDataSubscriptions";
 
 	/**
 	 * The name of the file where all the data coming with
@@ -897,8 +898,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			addToFunctionsAdapter(adapter, protocolVersion, Names.SetAppIcon);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.PerformAudioPassThru);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.EndAudioPassThru);
-			addToFunctionsAdapter(adapter, protocolVersion, Names.SubscribeVehicleData);
-			addToFunctionsAdapter(adapter, protocolVersion, Names.UnsubscribeVehicleData);
+			addToFunctionsAdapter(adapter, protocolVersion, VehicleDataSubscriptions);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.GetVehicleData);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.ReadDID);
 			addToFunctionsAdapter(adapter, protocolVersion, Names.GetDTCs);
@@ -1911,10 +1911,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							} catch (SyncException e) {
 								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
-						} else if (adapter.getItem(which) == Names.SubscribeVehicleData) {
-							sendSubscribeVehicleData();
-						} else if (adapter.getItem(which) == Names.UnsubscribeVehicleData) {
-							sendUnsubscribeVehicleData();
+						} else if (adapter.getItem(which) == VehicleDataSubscriptions) {
+							sendVehicleDataSubscriptions();
 						} else if (adapter.getItem(which) == Names.GetVehicleData) {
 							//GetVehicleData
 							AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
@@ -2301,69 +2299,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						builder.show();
 					}
 
-					private void sendSubscribeVehicleData() {
-						AlertDialog.Builder builder;
-						final Context mContext = adapter.getContext();
-						
-						// the local copy of isVehicleDataSubscribed
-						final boolean[] checkedVehicleDataTypes = isVehicleDataSubscribed.clone();
-						
-						builder = new AlertDialog.Builder(mContext);
-						builder.setMultiChoiceItems(vehicleDataTypeNames(), checkedVehicleDataTypes, new OnMultiChoiceClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-								// don't save unchecking of values that have been checked before
-								// as this message is only about subscribing
-								boolean checked = isChecked;
-								boolean changed = false;
-								if ((!checked) && isVehicleDataSubscribed[which]) {
-									checked = true;
-									changed = true;
-								}
-								checkedVehicleDataTypes[which] = checked;
-								if (changed) {
-									((ArrayAdapter<?>) ((AlertDialog) dialog).getListView().getAdapter()).
-										notifyDataSetChanged();
-								}
-							}
-						});
-						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								Vector<VehicleDataType> dataType = new Vector<VehicleDataType>();
-								VehicleDataType[] dataTypes = VehicleDataType.values();
-								// subscribe to new checked items only
-								for (int i = 0; i < checkedVehicleDataTypes.length; i++) {
-									boolean checked = checkedVehicleDataTypes[i];
-									if (checked && (!isVehicleDataSubscribed[i])) {
-										dataType.add(dataTypes[i]);
-									}
-								}
-								
-								if (dataType.size() > 0) {
-									try {
-										SubscribeVehicleData msg = new SubscribeVehicleData();
-										msg.setDataType(dataType);
-										msg.setCorrelationID(autoIncCorrId++);
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-									}
-									isVehicleDataSubscribed = checkedVehicleDataTypes.clone();
-								} else {
-									Toast.makeText(mContext, "Nothing new selected", Toast.LENGTH_LONG).show();
-								}
-							}
-						});
-						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
-						builder.show();
-					}
-
-					private void sendUnsubscribeVehicleData() {
+					private void sendVehicleDataSubscriptions() {
 						AlertDialog.Builder builder;
 						final Context mContext = adapter.getContext();
 						
@@ -2383,37 +2319,49 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						});
 						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								Vector<VehicleDataType> dataType = new Vector<VehicleDataType>();
+								Vector<VehicleDataType> subscribeVehicleData = new Vector<VehicleDataType>();
+								Vector<VehicleDataType> unsubscribeVehicleData = new Vector<VehicleDataType>();
 								VehicleDataType[] dataTypes = VehicleDataType.values();
-								// unsubscribe from new unchecked items only
+								
+								// subscribe and unsubscribe to new checked/unchecked items only
 								for (int i = 0; i < checkedVehicleDataTypes.length; i++) {
 									boolean checked = checkedVehicleDataTypes[i];
-									if (checked) {
-										if (isVehicleDataSubscribed[i]) {
-											dataType.add(dataTypes[i]);
-										}
-										checkedVehicleDataTypes[i] = false;
-									} else {
-										if (isVehicleDataSubscribed[i]) {
-											checkedVehicleDataTypes[i] = true;
-										}
+									boolean wasChecked = isVehicleDataSubscribed[i];
+									if (checked && !wasChecked) {
+										subscribeVehicleData.add(dataTypes[i]);
+									} else if (!checked && wasChecked) {
+										unsubscribeVehicleData.add(dataTypes[i]);
 									}
 								}
 								
-								if (dataType.size() > 0) {
+								if (!subscribeVehicleData.isEmpty()) {
 									try {
-										UnsubscribeVehicleData msg = new UnsubscribeVehicleData();
-										msg.setDataType(dataType);
+										SubscribeVehicleData msg = new SubscribeVehicleData();
+										msg.setDataType(subscribeVehicleData);
 										msg.setCorrelationID(autoIncCorrId++);
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
-								} else {
-									Toast.makeText(mContext, "Nothing new unselected", Toast.LENGTH_LONG).show();
+								}
+								
+								if (!unsubscribeVehicleData.isEmpty()) {
+									try {
+										UnsubscribeVehicleData msg = new UnsubscribeVehicleData();
+										msg.setDataType(unsubscribeVehicleData);
+										msg.setCorrelationID(autoIncCorrId++);
+										_msgAdapter.logMessage(msg, true);
+										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (SyncException e) {
+										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									}
 								}
 								isVehicleDataSubscribed = checkedVehicleDataTypes.clone();
+								
+								if (subscribeVehicleData.isEmpty() && unsubscribeVehicleData.isEmpty()) {
+									Toast.makeText(mContext, "Nothing new here", Toast.LENGTH_LONG).show();
+								}
 							}
 						});
 						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
