@@ -766,11 +766,10 @@ ActivateApp(
      *      result
      *  
      */ 
-DeactivateApp(
+OnAppDeactivated(
     string(100) appName,
     DeactivateReason reason, //DeactivateReason : audio, Phone Call, Navigation map, Phone Menu, Sync settings, general
     int appId
-    -> // return value is provided in corresponding response object, id of request and response should be equal
 );
 
 /*
