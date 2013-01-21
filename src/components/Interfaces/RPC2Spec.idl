@@ -426,17 +426,6 @@ EndAudioPassThru(
   -> // return value is provided in corresponding response object, id of request and response should be equal
 );
 
-/*
-  * @descr 
-   *      Request HMI to Applink to restart audio pass through session
-   *  to user.
-   *  
-   */
-RetryPerformAudioPassThru(
-  int appId
-  -> // return value is provided in corresponding response object, id of request and response should be equal
-);
-
 }
 
 
@@ -750,7 +739,7 @@ GetDeviceList(
    *  
    */
 notification OnDeviceListUpdated(
-  string deviceList [1:100]
+  string * deviceList [1:100]
 );
 
 /*
@@ -803,17 +792,7 @@ SendData(
      * @descr Notifies if new application is registered
      */
 notification OnAppRegistered(
-    string(100) appName,
-    string appIcon,
-    string deviceName,
-    string(40) * vrSynonym[1:100], // sysnonyms assossiated with app to start it
-    bool isMediaApplication,
-    Language languageDesired,  // language for VR and TTS
-    Language * hmiDisplayLanguageDesired, // language for UI
-    TTSChunk * ttsName[1:100], // TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green". Meant to overcome any failing on speech engine in properly pronouncing, understanding app name
-    AppType * appType[1:100], // List of all applicable app types stating which classifications to be given to the app
-    unsigned int versionNumber,
-    int appId
+  HMIApplication application
 );
 
 /*

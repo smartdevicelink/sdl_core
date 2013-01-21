@@ -1155,9 +1155,15 @@
                 <param name="appName" type="String" maxlength="100"/>
                 <param name="ngnMediaScreenAppName" type="String" maxlength="100" mandatory="false"/>
                 <param name="icon" type="String" mandatory="false"/>
-		<param name="appId" type="Integer"/>
-		<param name="isMediaApplication" type="Boolean"/>
-        </struct>
+				<param name="deviceName" type="String"/>
+				<param name="vrSynonyms" type="String" array="true" minsize="1" maxsize="100" maxlength="40" mandatory="false"/>
+				<param name="appId" type="Integer"/>
+				<param name="languageDesired" type="Language"/>
+				<param name="hmiDisplayLanguageDesired" type="Language"/>
+				<param name="ttsName" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false"/>
+				<param name="isMediaApplication" type="Boolean"/>
+				<param name="appType" type="AppType" minsize="1" maxsize="100" array="true" mandatory="false"/>
+</struct>
 
 <enum name="DeactivateReason">
 	<description>Enum of reasons of user navigating from application used by HMI.</description>
