@@ -288,7 +288,7 @@ public class WiProProtocol extends AbstractProtocol {
 				//If it is WiPro 2.0 it must have binary header
 				if (_version == 2) {
 					BinaryFrameHeader binFrameHeader = new BinaryFrameHeader();
-					binFrameHeader.parseBinaryHeader(accumulator.toByteArray());
+					binFrameHeader = binFrameHeader.parseBinaryHeader(accumulator.toByteArray());
 					message.setVersion(_version);
 					message.setRPCType(binFrameHeader.getRPCType());
 					message.setFunctionID(binFrameHeader.getFunctionID());

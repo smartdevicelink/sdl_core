@@ -55,7 +55,7 @@ Json::Value GetVehicleTypeMarshaller::toJSON(const GetVehicleType& e)
     return Json::Value(Json::nullValue);
 
   json["jsonrpc"]=Json::Value("2.0");
-  json["method"]=Json::Value("AppLinkCore.GetVehicleType");
+  json["method"]=Json::Value("VehicleInfo.GetVehicleType");
 
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
@@ -70,7 +70,7 @@ bool GetVehicleTypeMarshaller::fromJSON(const Json::Value& json,GetVehicleType& 
   {
     if(!json.isObject())  return false;
     if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return false;
-    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("AppLinkCore.GetVehicleType"))  return false;
+    if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("VehicleInfo.GetVehicleType"))  return false;
     if(!json.isMember("id") || !json["id"].isInt()) return false;
     c.setId(json["id"].asInt());
 

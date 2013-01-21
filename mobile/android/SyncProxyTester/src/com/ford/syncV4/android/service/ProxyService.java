@@ -5,10 +5,13 @@ import java.util.Vector;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -75,6 +78,7 @@ import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+import com.ford.syncV4.transport.TCPTransportConfig;
 
 public class ProxyService extends Service implements IProxyListenerALM {	
 	static final String TAG = "SyncProxyTester";
@@ -121,19 +125,69 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter != null) _msgAdapter.logMessage("ProxyService.onStartCommand()", Log.INFO);
 		else Log.i(TAG, "ProxyService.onStartCommand()");
 		
-        if (intent != null) {
-        	mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-    		if (mBtAdapter != null){
-    			if (mBtAdapter.isEnabled()){
-    				startProxy();
-    			}
-    		}
-		}
+		startProxyIfNetworkConnected();
+		
         setCurrentActivity(SyncProxyTester.getInstance());
 			
         return START_STICKY;
 	}
-	
+
+	/**
+	 * Function checks if WiFi enabled.
+	 * Manifest permission is required:
+	 * <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	 * 
+	 * @return true if enabled
+	 */
+	private boolean hasWiFiConnection() {
+		boolean result = false;
+
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (cm != null) {
+			NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+			if (netInfo != null) {
+				for (NetworkInfo ni : netInfo) {
+					if (ni.getTypeName().equalsIgnoreCase("WIFI")) {
+						Log.d(TAG, ni.getTypeName());
+						if (ni.isConnected()) {
+							Log.d(TAG,
+									"ProxyService().hasWiFiConnection(): wifi conncetion found");
+							result = true;
+						}
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	private void startProxyIfNetworkConnected() {
+		final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME,
+				MODE_PRIVATE);
+		final int transportType = prefs.getInt(
+				Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
+				Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE);
+
+		if (transportType == Const.Transport.KEY_BLUETOOTH) {
+			Log.d(TAG, "ProxyService. onStartCommand(). Transport = Bluetooth.");
+			mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+			if (mBtAdapter != null) {
+				if (mBtAdapter.isEnabled()) {
+					startProxy();
+				}
+			}
+		} else {
+			Log.d(TAG, "ProxyService. onStartCommand(). Transport = WiFi.");
+			if (hasWiFiConnection() == true) {
+				Log.d(TAG, "ProxyService. onStartCommand(). WiFi enabled.");
+				startProxy();
+			} else {
+				Log.w(TAG,
+						"ProxyService. onStartCommand(). WiFi is not enabled.");
+			}
+		}
+	}
+
 	public void startProxy() {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage("ProxyService.startProxy()", true);
@@ -156,23 +210,54 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				Language hmiLang = Language.valueOf(settings.getString(
 						Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
 				Log.i(TAG, "Using protocol version " + versionNumber);
+				int transportType = settings.getInt(
+						Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
+						Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE);
+				String ipAddress = settings.getString(
+						Const.Transport.PREFS_KEY_TRANSPORT_IP,
+						Const.Transport.PREFS_DEFAULT_TRANSPORT_IP);
+				int tcpPort = settings.getInt(
+						Const.Transport.PREFS_KEY_TRANSPORT_PORT,
+						Const.Transport.PREFS_DEFAULT_TRANSPORT_PORT);
+				boolean autoReconnect = settings
+						.getBoolean(
+								Const.Transport.PREFS_KEY_TRANSPORT_RECONNECT,
+								Const.Transport.PREFS_DEFAULT_TRANSPORT_RECONNECT_DEFAULT);
 
-				//_syncProxy = new SyncProxyALM(this, "SyncProxyTester", true);
-				_syncProxy = new SyncProxyALM(this,
-						/*sync proxy configuration resources*/null,
-						/*enable advanced lifecycle management true,*/
-						appName,
-						/*ngn media app*/null,
-						/*vr synonyms*/null,
-						/*is media app*/isMediaApp,
-						/*syncMsgVersion*/null,
-						/*language desired*/lang,
-						/*HMI Display Language Desired*/hmiLang,
-						/*App ID*/"8675309",
-						/*autoActivateID*/null,
-						/*callbackToUIThread*/ false,
-						/*preRegister*/ false,
-						versionNumber);
+				if (transportType == Const.Transport.KEY_BLUETOOTH) {
+					_syncProxy = new SyncProxyALM(this,
+							/*sync proxy configuration resources*/null,
+							/*enable advanced lifecycle management true,*/
+							appName,
+							/*ngn media app*/null,
+							/*vr synonyms*/null,
+							/*is media app*/isMediaApp,
+							/*syncMsgVersion*/null,
+							/*language desired*/lang,
+							/*HMI Display Language Desired*/hmiLang,
+							/*App ID*/"8675309",
+							/*autoActivateID*/null,
+							/*callbackToUIThread*/ false,
+							/*preRegister*/ false,
+							versionNumber);
+				} else {
+					_syncProxy = new SyncProxyALM(this,
+							/*sync proxy configuration resources*/null,
+							/*enable advanced lifecycle management true,*/
+							appName,
+							/*ngn media app*/null,
+							/*vr synonyms*/null,
+							/*is media app*/isMediaApp,
+							/*syncMsgVersion*/null,
+							/*language desired*/lang,
+							/*HMI Display Language Desired*/hmiLang,
+							/*App ID*/"8675308",
+							/*autoActivateID*/null,
+							/*callbackToUIThre1ad*/ false,
+							/*preRegister*/ false,
+							versionNumber,
+							new TCPTransportConfig(tcpPort, ipAddress, autoReconnect));
+				}
 			} catch (SyncException e) {
 				e.printStackTrace();
 				//error creating proxy, returned proxy = null
@@ -303,6 +388,8 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		}
 		
 		this._mainInstance = currentActivity;
+		// update the _msgAdapter
+		_msgAdapter = SyncProxyTester.getMessageAdapter();
 	}
 	
 	protected int nextCorrID() {
@@ -424,7 +511,16 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			}
 		}
 	}
-	  
+	
+	/**
+	 * Restarting SyncProxyALM. For example after changing transport type
+	 */
+	public void restart() {
+		Log.i(TAG, "ProxyService.Restart SyncProxyALM.");
+		disposeSyncProxy();
+		startProxyIfNetworkConnected();
+	}
+	
 	@Override
 	public void onError(String info, Exception e) {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();

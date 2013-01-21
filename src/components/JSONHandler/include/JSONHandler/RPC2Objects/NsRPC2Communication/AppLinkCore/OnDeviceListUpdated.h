@@ -33,7 +33,7 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const std::vector< std::string>& get_deviceList(void);
+      const std::vector< std::string>* get_deviceList(void);
 
 
 // setters
@@ -45,7 +45,7 @@ namespace NsRPC2Communication
 
       friend class OnDeviceListUpdatedMarshaller;
 
-      std::vector< std::string> deviceList;
+      std::vector< std::string> * deviceList;
 
     };
   }

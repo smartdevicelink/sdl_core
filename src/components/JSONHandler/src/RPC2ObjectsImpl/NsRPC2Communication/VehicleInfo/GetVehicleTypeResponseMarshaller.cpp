@@ -62,7 +62,7 @@ Json::Value GetVehicleTypeResponseMarshaller::toJSON(const GetVehicleTypeRespons
   json["result"]=Json::Value(Json::objectValue);
   NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
   json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
-  json["result"]["method"]=Json::Value("AppLinkCore.GetVehicleTypeResponse");
+  json["result"]["method"]=Json::Value("VehicleInfo.GetVehicleTypeResponse");
 
   json["result"]["vehicleType"]=NsAppLinkRPCV2::VehicleTypeMarshaller::toJSON(e.vehicleType);;
   return json;
@@ -86,7 +86,7 @@ bool GetVehicleTypeResponseMarshaller::fromJSON(const Json::Value& json,GetVehic
     NsAppLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
-    if(js["method"].asString().compare("AppLinkCore.GetVehicleTypeResponse")) return false;
+    if(js["method"].asString().compare("VehicleInfo.GetVehicleTypeResponse")) return false;
 
     if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());

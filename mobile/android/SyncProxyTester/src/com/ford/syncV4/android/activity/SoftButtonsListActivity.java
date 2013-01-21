@@ -181,6 +181,7 @@ public class SoftButtonsListActivity extends ListActivity {
 
 		softButtons = (Vector<SoftButton>) IntentHelper
 				.getObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+		softButtons = (Vector<SoftButton>) softButtons.clone();
 		maxSoftButtonsNumber = getIntent().getIntExtra(
 				Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER, MAXBUTTONS_DEFAULT);
 		if (softButtons.size() > maxSoftButtonsNumber) {
@@ -200,7 +201,7 @@ public class SoftButtonsListActivity extends ListActivity {
 			img.setImageType(ImageType.STATIC);
 
 			SoftButton sb = new SoftButton();
-			sb.setSoftButtonID(5402);
+			sb.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 			sb.setText("Close");
 			sb.setType(SoftButtonType.SBT_BOTH);
 			sb.setImage(img);

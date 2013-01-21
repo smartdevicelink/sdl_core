@@ -12,7 +12,7 @@
   source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
-
+#include <iostream>
 using namespace NsRPC2Communication::VehicleInfo;
 
 bool GetVehicleDataResponseMarshaller::checkIntegrity(GetVehicleDataResponse& s)
@@ -96,7 +96,7 @@ Json::Value GetVehicleDataResponseMarshaller::toJSON(const GetVehicleDataRespons
   json["result"]=Json::Value(Json::objectValue);
   NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
   json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
-  json["result"]["method"]=Json::Value("AppLinkCore.GetVehicleDataResponse");
+  json["result"]["method"]=Json::Value("VehicleInfo.GetVehicleDataResponse");
 
   if(e.gps)
     json["result"]["gps"]=NsAppLinkRPCV2::GPSDataMarshaller::toJSON(e.gps[0]);;
@@ -140,20 +140,30 @@ bool GetVehicleDataResponseMarshaller::fromJSON(const Json::Value& json,GetVehic
 {
   try
   {
+    std::cout<<"GetVehicleDataResponseMarshaller::fromJSON\n";
     if(!json.isObject())  return false;
     if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return false;
     if(!json.isMember("id") || !json["id"].isInt()) return false;
     c.setId(json["id"].asInt());
+
+    std::cout<<"GetVehicleDataResponseMarshaller::fromJSON: id\n";
+    std::cout.flush();
 
     if(!json.isMember("result")) return false;
 
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
+    std::cout<<"GetVehicleDataResponseMarshaller::fromJSON: result\n";
+    std::cout.flush();
+
     NsAppLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
-    if(js["method"].asString().compare("AppLinkCore.GetVehicleDataResponse")) return false;
+    if(js["method"].asString().compare("VehicleInfo.GetVehicleDataResponse")) return false;
+
+    std::cout<<"GetVehicleDataResponseMarshaller::fromJSON: method\n";
+    std::cout.flush();
 
     if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
@@ -164,6 +174,8 @@ bool GetVehicleDataResponseMarshaller::fromJSON(const Json::Value& json,GetVehic
       c.gps=new NsAppLinkRPCV2::GPSData();
       if(!NsAppLinkRPCV2::GPSDataMarshaller::fromJSON(js["gps"],c.gps[0]))  return false;
     }
+    std::cout<<"GetVehicleDataResponseMarshaller::fromJSON: gps\n";
+    std::cout.flush();
 
     if(c.speed)  delete c.speed;
     c.speed=0;

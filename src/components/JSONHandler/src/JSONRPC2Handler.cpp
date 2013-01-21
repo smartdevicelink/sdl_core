@@ -60,6 +60,7 @@ void JSONRPC2Handler::subscribeToNotifications()
     subscribeTo( "UI.OnLanguageChange" );
     subscribeTo( "VR.OnLanguageChange" );
     subscribeTo( "TTS.OnLanguageChange" );
+    subscribeTo( "VehicleInfo.OnVehicleData" );
 }
 
 void JSONRPC2Handler::setRPC2CommandsObserver( 

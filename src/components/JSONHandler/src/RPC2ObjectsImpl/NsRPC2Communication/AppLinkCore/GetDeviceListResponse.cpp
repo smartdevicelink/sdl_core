@@ -14,36 +14,55 @@ using namespace NsRPC2Communication::AppLinkCore;
 
 GetDeviceListResponse& GetDeviceListResponse::operator =(const GetDeviceListResponse& c)
 {
-  deviceList=c.deviceList;
+  if (deviceList)
+  {
+    delete deviceList;
+  }
+  if (c.deviceList)
+  {
+    deviceList=new std::vector<std::string> (*c.deviceList);  
+  }
+  
   return *this;
 }
 
 
 GetDeviceListResponse::~GetDeviceListResponse(void)
 {
+  if (deviceList)
+  {
+    delete deviceList;
+    deviceList = 0;
+  }
 }
 
 
 GetDeviceListResponse::GetDeviceListResponse(void) : 
   RPC2Response(Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELISTRESPONSE)
+  ,deviceList(0)
 {
 }
 
 
 GetDeviceListResponse::GetDeviceListResponse(const GetDeviceListResponse& c) : RPC2Response(Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELISTRESPONSE,c.getId(),c.getResult())
+,deviceList(0)
 {
   *this=c;
 }
 
 
-const std::vector< std::string>& GetDeviceListResponse::get_deviceList(void)
+const std::vector< std::string>* GetDeviceListResponse::get_deviceList(void)
 {
   return deviceList;
 }
 
 bool GetDeviceListResponse::set_deviceList(const std::vector< std::string>& deviceList_)
 {
-  deviceList=deviceList_;
+  if (deviceList)
+  {
+    delete deviceList;
+  }
+  deviceList=new std::vector<std::string> (deviceList_);
   return true;
 }
 

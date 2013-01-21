@@ -169,6 +169,15 @@ namespace NsAppManager
         bool getAudioPassThruFlag() const;
         void setAudioPassThruFlag(bool flag);
 
+        const MessageMapping& getMessageMapping() const;
+
+        /**
+         * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
+         * \param item a RegistryItem from which to retrieve an app pointer
+         * \return Application instance retrieved from item
+         */
+        Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
+
     private:
 
         /**
@@ -220,13 +229,6 @@ namespace NsAppManager
         void removeAppFromHmi(Application* currentApp, int appId);
 
         /**
-         * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
-         * \param item a RegistryItem from which to retrieve an app pointer
-         * \return Application instance retrieved from item
-         */
-        Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
-
-        /**
          * \brief serialize a string value to the text file
          * \param fileName name of the file to serialize to
          * \param value a value to serialize
@@ -265,7 +267,7 @@ namespace NsAppManager
         NsAppLinkRPCV2::Language mUiLanguageV2;
         NsAppLinkRPCV2::Language mVrLanguageV2;
         NsAppLinkRPCV2::Language mTtsLanguageV2;
-        std::vector<NsAppLinkRPC::Language> mUISupportedLanguages;
+        std::vector<NsAppLinkRPCV2::Language> mUISupportedLanguages;
 
         NsAppLinkRPCV2::VehicleType mVehicleType;
         bool mAudioPassThruFlag;

@@ -7,6 +7,9 @@ import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.trace.SyncTrace;
+import com.ford.syncV4.transport.BTTransportConfig;
+import com.ford.syncV4.transport.BaseTransportConfig;
+import com.ford.syncV4.transport.TransportType;
 
 public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	
@@ -34,7 +37,8 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*App Type*/null,
 				/*App ID*/null,
 				/*autoActivateID*/null,
-				/*callbackToUIThread*/ true);
+				/*callbackToUIThread*/ true,
+				new BTTransportConfig());
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener.", SYNC_LIB_TRACE_KEY);
 	}
@@ -62,7 +66,8 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*App Type*/null,
 				/*App ID*/null,
 				/*autoActivateID*/null,
-				/*callbackToUIThread*/ true);
+				/*callbackToUIThread*/ true,
+				new BTTransportConfig());
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, SyncProxyConfigurationResources.", SYNC_LIB_TRACE_KEY);
 	}
@@ -89,7 +94,8 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*App Type*/null,
 				/*App ID*/null,
 				/*autoActivateID*/null,
-				callbackToUIThread);
+				callbackToUIThread,
+				new BTTransportConfig());
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.", SYNC_LIB_TRACE_KEY);
 	}
@@ -118,14 +124,133 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*App Type*/null,
 				/*App ID*/null,
 				/*autoActivateID*/null,
-				callbackToUIThread);
+				callbackToUIThread,
+				new BTTransportConfig());
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.", SYNC_LIB_TRACE_KEY);
 	}
 	
+	/********************************************** TRANSPORT SWITCHING SUPPORT *****************************************/
+
+	/**
+	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC. 
+	 * 
+	 * @param listener - Reference to the object in the App listening to callbacks from SYNC.
+	 * @param transportConfig Initial configuration for transport.
+	 * @throws SyncException
+	 */
+	public SyncProxy(IProxyListener listener, BaseTransportConfig transportConfig) throws SyncException {
+		super(	listener, 
+				/*application context*/null, 
+				/*enable advanced lifecycle management*/false, 
+				/*app name*/ null,
+				/*TTS Name*/null,
+				/*ngn media screen app name*/null,
+				/*vr synonyms*/null,
+				/*is media app*/ null,
+				/*syncMsgVersion*/null,
+				/*language desired*/null,
+				/*HMI Display Language Desired*/null,
+				/*App Type*/null,
+				/*App ID*/null,
+				/*autoActivateID*/null,
+				/*callbackToUIThread*/ true,
+				transportConfig);
+		
+		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener.", SYNC_LIB_TRACE_KEY);
+	}
 	
+	/**
+	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC. 
+	 * 
+	 * @param listener - Reference to the object in the App listening to callbacks from SYNC. 
+	 * @param applicationContext - Context of the application. Used to access application specific resources.
+	 * @param transportConfig Initial configuration for transport.
+	 * @throws SyncException
+	 */
+	public SyncProxy(IProxyListener listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
+					BaseTransportConfig transportConfig) 
+		throws SyncException {
+		super(	listener, 
+				syncProxyConfigurationResources, 
+				/*enable advanced lifecycle management*/false, 
+				/*app name*/ null,
+				/*TTS Name*/null,
+				/*ngn media screen app name*/null,
+				/*vr synonyms*/null,
+				/*is media app*/ null,
+				/*syncMsgVersion*/null,
+				/*language desired*/null,
+				/*HMI Display Language Desired*/null,
+				/*App Type*/null,
+				/*App ID*/null,
+				/*autoActivateID*/null,
+				/*callbackToUIThread*/ true,
+				transportConfig);
+		
+		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, SyncProxyConfigurationResources.", SYNC_LIB_TRACE_KEY);
+	}
 	
+	/**
+	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC.
+	 * 
+	 * @param listener - Reference to the object in the App listening to callbacks from SYNC. 
+	 * @param callbackToUIThread - If true, all callbacks will occur on the UI thread.
+	 * @param transportConfig Initial configuration for transport.
+	 * @throws SyncException
+	 */
+	public SyncProxy(IProxyListener listener, boolean callbackToUIThread, BaseTransportConfig transportConfig) throws SyncException {
+		super(	listener,  
+				/*sync proxy configuration resources*/null,
+				/*enable advanced lifecycle management*/false, 
+				/*app name*/ null,
+				/*TTS Name*/null,
+				/*ngn media screen app name*/null,
+				/*vr synonyms*/null,
+				/*is media app*/ null,
+				/*syncMsgVersion*/null,
+				/*language desired*/null,
+				/*HMI Display Language Desired*/null,
+				/*App Type*/null,
+				/*App ID*/null,
+				/*autoActivateID*/null,
+				callbackToUIThread,
+				transportConfig);
+		
+		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.", SYNC_LIB_TRACE_KEY);
+	}
 	
+	/**
+	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC.
+	 * 
+	 * @param listener - Reference to the object in the App listening to callbacks from SYNC.
+	 * @param applicationContext - Context of the application. Used to access application specific resources. 
+	 * @param callbackToUIThread - If true, all callbacks will occur on the UI thread.
+	 * @param transportConfig Initial configuration for transport.
+	 * @throws SyncException
+	 */
+	public SyncProxy(IProxyListener listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
+			boolean callbackToUIThread, BaseTransportConfig transportConfig) throws SyncException {
+		super(	listener,  
+				syncProxyConfigurationResources,
+				/*enable advanced lifecycle management*/false, 
+				/*app name*/ null,
+				/*TTS Name*/null,
+				/*ngn media screen app name*/null,
+				/*vr synonyms*/null,
+				/*is media app*/ null,
+				/*syncMsgVersion*/null,
+				/*language desired*/null,
+				/*HMI Display Language Desired*/null,
+				/*App Type*/null,
+				/*App ID*/null,
+				/*autoActivateID*/null,
+				callbackToUIThread,
+				transportConfig);
+		
+		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.", SYNC_LIB_TRACE_KEY);
+	}
+		
 	/******************** Public Helper Methods *************************/
 	
 	

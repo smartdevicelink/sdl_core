@@ -741,7 +741,7 @@ GetAppList(
    */
 GetDeviceList(
   ->
-  string deviceList [1:100]
+  string * deviceList [1:100]
 );
 
 /*

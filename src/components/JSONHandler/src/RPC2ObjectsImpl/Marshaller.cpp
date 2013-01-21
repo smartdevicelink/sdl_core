@@ -118,7 +118,7 @@
   source stamp	Fri Dec 14 06:14:23 2012
   author	robok0der
 */
-
+#include <iostream>
 using namespace NsRPC2Communication;
 
 
@@ -177,6 +177,7 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
     if(!json.isMember("method") || !json["method"].isString())  return 0;
 
     Methods m=getIndex(json["method"].asString().c_str());
+    printf ("\t\t\tNotification m = %d\n", m);
 
     switch(m)
     {
@@ -262,6 +263,7 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       }
       case METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__ONVEHICLEDATA:
       {
+        printf ("\t\t\tNotification OnVehicleData\n");
         NsRPC2Communication::VehicleInfo::OnVehicleData *rv=new NsRPC2Communication::VehicleInfo::OnVehicleData;
         return NsRPC2Communication::VehicleInfo::OnVehicleDataMarshaller::fromJSON(json,*rv) ? rv : 0;
       }
@@ -526,7 +528,6 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
 // here is extension of protocol, two fields added: _Result and _Method
   if(!json["result"].isMember("resultCode") || !json["result"]["resultCode"].isString())  return 0;
   if(!json["result"].isMember("method") || !json["result"]["method"].isString())  return 0;
-
   Methods m=getIndex(json["result"]["method"].asString().c_str());
 
   switch(m)
@@ -1155,19 +1156,19 @@ const Marshaller::localHash Marshaller::mHashTable[111]=
   {"VR.GetLanguageResponse",93,&Marshaller::mNsRPC2Communication_VR__GetLanguageResponse},
   {"VR.OnCommand",94,&Marshaller::mNsRPC2Communication_VR__OnCommand},
   {"VR.OnLanguageChange",95,&Marshaller::mNsRPC2Communication_VR__OnLanguageChange},
-  {"AppLinkCore.GetDTCs",96,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCs},
-  {"AppLinkCore.GetDTCsResponse",97,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCsResponse},
-  {"AppLinkCore.GetVehicleData",98,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleData},
-  {"AppLinkCore.GetVehicleDataResponse",99,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse},
-  {"AppLinkCore.GetVehicleType",100,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleType},
-  {"AppLinkCore.GetVehicleTypeResponse",101,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse},
-  {"AppLinkCore.OnVehicleData",102,&Marshaller::mNsRPC2Communication_VehicleInfo__OnVehicleData},
-  {"AppLinkCore.ReadDID",103,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDID},
-  {"AppLinkCore.ReadDIDResponse",104,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDIDResponse},
-  {"AppLinkCore.SubscribeVehicleData",105,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleData},
-  {"AppLinkCore.SubscribeVehicleDataResponse",106,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse},
-  {"AppLinkCore.UnsubscribeVehicleData",107,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData},
-  {"AppLinkCore.UnsubscribeVehicleDataResponse",108,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse},
+  {"VehicleInfo.GetDTCs",96,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCs},
+  {"VehicleInfo.GetDTCsResponse",97,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCsResponse},
+  {"VehicleInfo.GetVehicleData",98,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleData},
+  {"VehicleInfo.GetVehicleDataResponse",99,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse},
+  {"VehicleInfo.GetVehicleType",100,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleType},
+  {"VehicleInfo.GetVehicleTypeResponse",101,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse},
+  {"VehicleInfo.OnVehicleData",102,&Marshaller::mNsRPC2Communication_VehicleInfo__OnVehicleData},
+  {"VehicleInfo.ReadDID",103,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDID},
+  {"VehicleInfo.ReadDIDResponse",104,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDIDResponse},
+  {"VehicleInfo.SubscribeVehicleData",105,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleData},
+  {"VehicleInfo.SubscribeVehicleDataResponse",106,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse},
+  {"VehicleInfo.UnsubscribeVehicleData",107,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData},
+  {"VehicleInfo.UnsubscribeVehicleDataResponse",108,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse},
   {"UI.GetSupportedLanguages",109,&Marshaller::mNsRPC2Communication_UI__GetSupportedLanguages},
   {"UI.GetSupportedLanguagesResponse",110,&Marshaller::mNsRPC2Communication_UI__GetSupportedLanguagesResponse}
 

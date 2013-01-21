@@ -140,7 +140,8 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 	},
 
 	setDuration: function() {
-        var number;
+        var number,
+            str;
 		if(this.countUp){
 			number = this.duration + this.currTime;
 			//this.appInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
@@ -148,7 +149,10 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 			number = this.duration - this.currTime;
 			//this.appInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}
-		this.appInfo.set('mediaClock', Math.ceil((number+1)/60)-1 + ":" + ((number % 60) < 10 ? '0' : '') + (number % 60) );
+        str = (Math.ceil(number/3600) -1) < 10 ? '0' : '';
+        str += (Math.ceil(number/3600) -1) + ':';
+        str += Math.ceil( (number+1)/60%60)-1 + ":" + ((number % 60) < 10 ? '0' : '') + (number % 60);
+		this.appInfo.set('mediaClock', str );
 	}.observes('this.currTime'),
 
 	changeDuration: function() {
@@ -212,7 +216,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
 
     /** Applink AddCommand handler */
     onApplinkAddCommand: function(params){
-        if( params.menuParams.parentID == 0 ){
+        if( params.menuParams.parentID == 0 || params.menuParams.parentID == null ){
             this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams, params.cmdIcon, params.appId);
         }else{
             this.subMenuCommands.push(params);
@@ -221,8 +225,6 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
             }
 
         }
-
-        // appId
     },
 
     /** Applink Setter for Media Clock Timer */
@@ -272,8 +274,6 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
         }
 
         MFT.applinkView.innerMenu.content.AddSoftButton(params.softButtons);
-
-        // appId
     },
 
 });

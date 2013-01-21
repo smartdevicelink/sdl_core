@@ -140,7 +140,9 @@ import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.trace.TraceDeviceInfo;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
+import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.SiphonServer;
+import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.DebugTool;
 
 public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase> {
@@ -200,6 +202,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	private String _autoActivateIdDesired = null;
 	private SyncMsgVersion _syncMsgVersionRequest = null;
 	private Vector<String> _vrSynonyms = null;
+	
+	/**
+	 * Contains current configuration for the transport that was selected during 
+	 * construction of this object
+	 */
+	private BaseTransportConfig _transportConfig = null;
 	// Proxy State Variables
 	protected Boolean _appInterfaceRegisterd = false;
 	private Boolean _haveReceivedFirstNonNoneHMILevel = false;
@@ -457,11 +465,32 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		}
 	}
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param listener Type of listener for this proxy base.
+	 * @param syncProxyConfigurationResources Configuration resources for this proxy.
+	 * @param enableAdvancedLifecycleManagement Flag that ALM should be enabled or not.
+	 * @param appName Client application name.
+	 * @param ttsName TTS name.
+	 * @param ngnMediaScreenAppName Media Screen Application name.
+	 * @param vrSynonyms List of synonyms.
+	 * @param isMediaApp Flag that indicates that client application if media application or not.
+	 * @param syncMsgVersion Version of Sync Message.
+	 * @param languageDesired Desired language.
+	 * @param hmiDisplayLanguageDesired Desired language for HMI. 
+	 * @param appType Type of application.
+	 * @param appID Application identifier.
+	 * @param autoActivateID Auto activation identifier.
+	 * @param callbackToUIThread Flag that indicates that this proxy should send callback to UI thread or not.
+	 * @param transportConfig Configuration of transport to be used by underlying connection.
+	 * @throws SyncException
+	 */
 	protected SyncProxyBase(proxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
 			boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName, 
 			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppType> appType, String appID, 
-			String autoActivateID, boolean callbackToUIThread) 
+			String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig) 
 			throws SyncException {
 		
 		_interfaceBroker = new SyncInterfaceBroker();
@@ -485,6 +514,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		_appType = appType;
 		_appID = appID;
 		_autoActivateIdDesired = autoActivateID;
+		_transportConfig = transportConfig;
 		
 		// Test conditions to invalidate the proxy
 		if (listener == null) {
@@ -631,11 +661,35 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
 	}
 	
+	/**
+	 * Constructor.
+	 * 
+	 * @param listener Type of listener for this proxy base.
+	 * @param syncProxyConfigurationResources Configuration resources for this proxy.
+	 * @param enableAdvancedLifecycleManagement Flag that ALM should be enabled or not.
+	 * @param appName Client application name.
+	 * @param ttsName TTS name.
+	 * @param ngnMediaScreenAppName Media Screen Application name.
+	 * @param vrSynonyms List of synonyms.
+	 * @param isMediaApp Flag that indicates that client application if media application or not.
+	 * @param syncMsgVersion Version of Sync Message.
+	 * @param languageDesired Desired language.
+	 * @param hmiDisplayLanguageDesired Desired language for HMI. 
+	 * @param appType Type of application.
+	 * @param appID Application identifier.
+	 * @param autoActivateID Auto activation identifier.
+	 * @param callbackToUIThread Flag that indicates that this proxy should send callback to UI thread or not.
+	 * @param preRegister Flag that indicates that this proxy should be pre-registerd or not.
+	 * @param version Version of Sync protocol to be used by the underlying connection.
+	 * @param transportConfig Configuration of transport to be used by underlying connection.
+	 * @throws SyncException
+	 */	
 	protected SyncProxyBase(proxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
 			boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName, 
 			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppType> appType, String appID, 
-			String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version) 
+			String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version, 
+			BaseTransportConfig transportConfig) 
 			throws SyncException {
 		
 		setWiProVersion((byte)version);
@@ -662,6 +716,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		_appType = appType;
 		_appID = appID;
 		_autoActivateIdDesired = autoActivateID;
+		_transportConfig = transportConfig;
 		
 		// Test conditions to invalidate the proxy
 		if (listener == null) {
@@ -993,7 +1048,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 				_syncConnection.closeConnection(_rpcSessionID);
 				_syncConnection = null;
 			}
-			_syncConnection = new SyncConnection(_interfaceBroker);
+			_syncConnection = new SyncConnection(_interfaceBroker, _transportConfig);
 			WiProProtocol protocol = (WiProProtocol)_syncConnection.getWiProProtocol();
 			protocol.setVersion(_wiproVersion);
 		}
@@ -2231,8 +2286,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 								
 				if (_advancedLifecycleManagementEnabled) {
 					// This requires the proxy to be cycled
-					cycleProxy(SyncDisconnectedReason.convertAppInterfaceUnregisteredReason(msg.getReason()));
-				} else {
+                    if (this.getCurrentTransportType() == TransportType.BLUETOOTH) {
+                        cycleProxy(SyncDisconnectedReason.convertAppInterfaceUnregisteredReason(msg.getReason()));
+                    } else {
+                        Log.e(this.getClass().getName(), "HandleRPCMessage. No cycle required if transport is TCP");
+                    }
+                } else {
 					if (_callbackToUIThread) {
 						// Run in UI thread
 						_mainUIHandler.post(new Runnable() {
@@ -3046,6 +3105,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	}
 	
 	/******************** END Public Helper Methods *************************/
+	
+	/**
+	 * Gets type of transport currently used by this SyncProxy.
+	 * 
+	 * @return One of TransportType enumeration values.
+	 * 
+	 * @see TransportType
+	 */
+	public TransportType getCurrentTransportType() throws IllegalStateException {
+		if (_syncConnection == null) {
+			throw new IllegalStateException("Incorrect state of SyncProxyBase: Calling for getCurrentTransportType() while connection is not initialized");
+		}
+			
+		return _syncConnection.getCurrentTransportType();
+	}
 	
 	
 } // end-class

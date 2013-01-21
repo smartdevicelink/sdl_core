@@ -156,6 +156,38 @@ namespace {
     pthread_mutex_t audioPassThruMutex = PTHREAD_MUTEX_INITIALIZER;
     pthread_t audioPassThruThread;
 
+    // Don't send PerformAudioPassThru_response to mobile if false.
+    bool sendEndAudioPassThruToHMI(unsigned int sessionKey)
+    {
+        // Send respons to HMI.
+        NsRPC2Communication::UI::EndAudioPassThru* endAudioPassThru
+            = new NsRPC2Communication::UI::EndAudioPassThru;
+        if (!endAudioPassThru)
+        {
+            std::cout << "OUT_OF_MEMORY: new NsRPC2Communication::UI::EndAudioPassThru." << std::endl;
+            sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                    , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
+                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                    , false
+                    , sessionKey);
+            return false;
+        }
+
+        NsAppManager::Application* app = NsAppManager::AppMgrCore::getInstance().getApplicationFromItemCheckNotNull(
+            NsAppManager::AppMgrRegistry::getInstance().getItem(sessionKey));
+        if(!app)
+        {
+            std::cout << "No application associated with this registry item!" << std::endl;
+            return false;
+        }
+
+        endAudioPassThru->setId(NsAppManager::HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+        endAudioPassThru->set_appId(app->getAppID());
+        NsAppManager::HMIHandler::getInstance().sendRequest(endAudioPassThru);
+        return true;
+    }
+
     void AudioPassThruTimerProc(int i)
     {
         pthread_cond_signal(&cv);
@@ -164,6 +196,7 @@ namespace {
     struct AudioPassThruData
     {
         unsigned int sessionKey;  // For error reports
+        unsigned int id;  // For error reports
 
         unsigned int maxDuration;
         NsAppLinkRPCV2::SamplingRate samplingRate;
@@ -177,8 +210,8 @@ namespace {
         if (!data_)
         {
             NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
-            std::cout << "AudioPassThru thread -> AudioPassThruData empty..." << std::endl;
-            pthread_exit(NULL);  // TODO(akandul): How can we send error information to mobile from here?
+            std::cout << "AudioPassThruData empty." << std::endl;
+            pthread_exit(NULL);
         }
 
         unsigned int audioLength = 0;
@@ -186,7 +219,7 @@ namespace {
         if (data_->bitsPerSample.get() == NsAppLinkRPCV2::AudioCaptureQuality::FIX_8_BIT)
         {
             filename = "audio.8bit.wav";
-            audioLength = 1000;
+            audioLength = 5000;
         }
         else if (data_->bitsPerSample.get() == NsAppLinkRPCV2::AudioCaptureQuality::FIX_16_BIT)
         {
@@ -196,12 +229,15 @@ namespace {
         else
         {
             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-            sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
-                , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+            if (sendEndAudioPassThruToHMI(data_->sessionKey))
+            {
+                sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                    , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                     , NsAppLinkRPCV2::Result::GENERIC_ERROR
                     , NsAppLinkRPC::ALRPCMessage::RESPONSE
                     , false
                     , data_->sessionKey);
+            }
 
             NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
             pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
@@ -212,13 +248,16 @@ namespace {
         if (!WorkWithOS::readFileAsBinary(filename, binaryData))
         {
             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-            std::cout << "AudioPassThru thread -> can't read from file..." << std::endl;
-            sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
-                , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+            std::cout << "Can't read from file." << std::endl;
+            if (sendEndAudioPassThruToHMI(data_->sessionKey))
+            {
+                sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                    , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                     , NsAppLinkRPCV2::Result::GENERIC_ERROR
                     , NsAppLinkRPC::ALRPCMessage::RESPONSE
                     , false
                     , data_->sessionKey);
+            }
 
             NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
             pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
@@ -228,39 +267,46 @@ namespace {
         if (binaryData.empty())
         {
             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-            std::cout << "AudioPassThru thread -> binary data empty..." << std::endl;
-            sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
-                , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+            std::cout << "Binary data empty." << std::endl;
+            if (sendEndAudioPassThruToHMI(data_->sessionKey))
+            {
+                sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                    , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                     , NsAppLinkRPCV2::Result::GENERIC_ERROR
                     , NsAppLinkRPC::ALRPCMessage::RESPONSE
                     , false
                     , data_->sessionKey);
+            }
 
             NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
             pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
             pthread_exit(NULL);
         }
 
-        unsigned int audioPart = 0;
-        unsigned int dataLength = 0;
+        unsigned int percentOfAudioLength = 0;  // % of audio file.
+        unsigned int dataLength = 0;  // part of file data.
 
         // Send only part of file
         if (data_->maxDuration != 0 && data_->maxDuration < audioLength)
         {
-            audioPart = (data_->maxDuration * 100) / audioLength; // % of audio file.
-            dataLength = (binaryData.size() * audioPart) / 100;  // part of file data.
+            percentOfAudioLength = (data_->maxDuration * 100) / audioLength;
+            dataLength = (binaryData.size() * percentOfAudioLength) / 100;
         }
         else
         {
-            audioPart = audioLength;
+            percentOfAudioLength = 100;
             dataLength = binaryData.size();
         }
 
-        unsigned int step = (dataLength * (audioPart / 1000)) / 100;
+        // Part of file in seconds = audio length in seconds * (%) of audio length / 100%
+        unsigned int seconds = ((audioLength / 1000) * percentOfAudioLength) / 100;
+        // Step is data length * AUDIO_PASS_THRU_TIMEOUT / seconds
+        unsigned int step = dataLength * AUDIO_PASS_THRU_TIMEOUT / seconds;
+
         std::vector<unsigned char>::iterator from = binaryData.begin();
         std::vector<unsigned char>::iterator to = from + step;
 
-        for (int i = 0; i <= (audioPart / 1000); ++i)  // minimal timeout is 1 sec now.
+        for (int i = 0; i != seconds; i += AUDIO_PASS_THRU_TIMEOUT)  // minimal timeout is 1 sec now.
         {
             struct itimerval tout_val;
             tout_val.it_interval.tv_sec = 0;
@@ -271,49 +317,53 @@ namespace {
             signal(SIGALRM, AudioPassThruTimerProc);
 
             pthread_cond_wait(&cv, &audioPassThruMutex);
-            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 
+            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
             NsAppLinkRPCV2::OnAudioPassThru* onAudioPassThru = new NsAppLinkRPCV2::OnAudioPassThru;
             if (!onAudioPassThru)
             {
-                pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-                std::cout << "AudioPassThru thread -> OUT_OF_MEMORY -> new NsAppLinkRPCV2::OnAudioPassThru" << std::endl;
-                sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
-                    , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                std::cout << "OUT_OF_MEMORY: new NsAppLinkRPCV2::OnAudioPassThru." << std::endl;
+                if (sendEndAudioPassThruToHMI(data_->sessionKey))
+                {
+                    sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                        , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                         , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
                         , NsAppLinkRPC::ALRPCMessage::RESPONSE
                         , false
                         , data_->sessionKey);
+                }
 
                 delete onAudioPassThru;
                 NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
-                pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
                 pthread_exit(NULL);
             }
 
             onAudioPassThru->setBinaryData(std::vector<unsigned char>(from, to));
             onAudioPassThru->setMethodId(NsAppLinkRPCV2::FunctionID::OnAudioPassThruID);
             onAudioPassThru->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+
             NsAppManager::MobileHandler::getInstance().sendRPCMessage(onAudioPassThru, data_->sessionKey);
+            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 
             from = to;
             to = to + step;
-
-            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
         }
 
         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-        if (data_)
-            delete data_;
+
+        sendEndAudioPassThruToHMI(data_->sessionKey);
+        /*if (sendEndAudioPassThruToHMI(data_->sessionKey))
+        {
+            // Send response to mobile.
+            sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                , NsAppLinkRPCV2::Result::SUCCESS
+                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                , true
+                , data_->sessionKey);
+        }*/
+
         NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
-
-        sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
-                            , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
-                                , NsAppLinkRPCV2::Result::SUCCESS
-                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
-                                , true
-                                , data_->sessionKey);
-
         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
         pthread_exit(NULL);
     }
@@ -516,7 +566,7 @@ namespace NsAppManager
                         response->set_resultCode(NsAppLinkRPC::Result::WRONG_LANGUAGE);
                     }
                     response->set_syncMsgVersion(app->getSyncMsgVersion());
-                    
+
 
                     LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface response for the app "  << app->getName()
                         << " connection/session key " << app->getAppID()
@@ -1474,7 +1524,8 @@ namespace NsAppManager
 
                     response->set_hmiDisplayLanguage(core->mUiLanguageV2);
                     response->set_language(core->mVrLanguageV2);
-                    if ( object->get_languageDesired().get() != core->mVrLanguageV2.get() )
+                    if ( object->get_languageDesired().get() != core->mVrLanguageV2.get()
+                            || object->get_hmiDisplayLanguageDesired().get() != core->mUiLanguageV2.get())
                     {
                         LOG4CPLUS_WARN(mLogger, "Wrong language on registering application " << appName);
                         response->set_resultCode(NsAppLinkRPCV2::Result::WRONG_LANGUAGE);
@@ -1493,31 +1544,36 @@ namespace NsAppManager
                     appRegistered->set_appName(app->getName());
                     appRegistered->set_isMediaApplication(app->getIsMediaApplication());
                     const NsAppLinkRPCV2::Language& languageDesired = app->getLanguageDesired();
-                    NsAppLinkRPC::Language languageDesiredV1;
-                    languageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)languageDesired.get());
-                    appRegistered->set_languageDesired(languageDesiredV1);
+                    appRegistered->set_languageDesired(core->mVrLanguageV1);
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
                     appRegistered->set_appId(app->getAppID());
-                    appRegistered->set_appType(app->getAppType());
-                    const NsAppLinkRPCV2::Language& hmiLanguageDesired = app->getHMIDisplayLanguageDesired();
-                    NsAppLinkRPC::Language hmiLanguageDesiredV1;
-                    hmiLanguageDesiredV1.set((NsAppLinkRPC::Language::LanguageInternal)hmiLanguageDesired.get());
-                    appRegistered->set_hmiDisplayLanguageDesired(hmiLanguageDesiredV1);
+                    appRegistered->set_hmiDisplayLanguageDesired(core->mUiLanguageV1);
                     appRegistered->set_vrSynonym(app->getVrSynonyms());
                     appRegistered->set_deviceName(currentDeviceName);
                     appRegistered->set_versionNumber(2);
-                    std::vector< NsAppLinkRPC::TTSChunk> ttsName;
-                    for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = app->getTtsName().begin(); it != app->getTtsName().end(); it++)
+
+                    if (!app->getAppType().empty())
                     {
-                        const NsAppLinkRPCV2::TTSChunk& chunk = *it;
-                        NsAppLinkRPC::TTSChunk chunkV1;
-                        chunkV1.set_text(chunk.get_text());
-                        NsAppLinkRPC::SpeechCapabilities caps;
-                        caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
-                        chunkV1.set_type(caps);
-                        ttsName.push_back(chunkV1);
+                        appRegistered->set_appType(app->getAppType());
                     }
-                    appRegistered->set_ttsName(ttsName);
+
+                    if (!app->getTtsName().empty())
+                    {
+                        std::vector< NsAppLinkRPC::TTSChunk> ttsName;
+                        for(std::vector< NsAppLinkRPCV2::TTSChunk>::const_iterator it = app->getTtsName().begin();it != app->getTtsName().end(); it++)
+                        {
+                            const NsAppLinkRPCV2::TTSChunk& chunk = *it;
+                            NsAppLinkRPC::TTSChunk chunkV1;
+                            chunkV1.set_text(chunk.get_text());
+                            NsAppLinkRPC::SpeechCapabilities caps;
+                            caps.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)chunk.get_type().get());
+                            chunkV1.set_type(caps);
+
+                            ttsName.push_back(chunkV1);
+                        }
+                        appRegistered->set_ttsName(ttsName);
+                    }
+
                     HMIHandler::getInstance().sendNotification(appRegistered);
                     LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
                     break;
@@ -1539,10 +1595,6 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    std::string appName = app->getName();
-
-                    core->removeAppFromHmi(app, sessionKey);
-                    core->unregisterApplication( sessionKey );
 
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
@@ -1553,12 +1605,17 @@ namespace NsAppManager
                     msgUnregistered->setMethodId(NsAppLinkRPCV2::FunctionID::OnAppInterfaceUnregisteredID);
                     msgUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
                     MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionKey);
+
+                    std::string appName = app->getName();
+                    core->removeAppFromHmi(app, sessionKey);
+
                     NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                     appUnregistered->set_appName(appName);
                     appUnregistered->set_appId(app->getAppID());
                     appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT);
                     HMIHandler::getInstance().sendNotification(appUnregistered);
                     LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
+                    core->unregisterApplication( sessionKey );
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::SubscribeButtonID:
@@ -1955,8 +2012,8 @@ namespace NsAppManager
                     getcwd(currentAppPath, FILENAME_MAX);
                     const std::string& syncFileName = request->get_syncFileName();
                     // TODO(akandul): We look for icon in current app dir.
-                    snprintf(fullPathToSyncFileName, FILENAME_MAX - 1, "%s/%s"
-                        , currentAppPath, syncFileName.c_str());
+                    snprintf(fullPathToSyncFileName, FILENAME_MAX - 1, "%s/%s/%s"
+                        , currentAppPath, app->getName().c_str(), syncFileName.c_str());
 
                     LOG4CPLUS_INFO_EXT(mLogger, "Full path to sync file name: " << fullPathToSyncFileName);
 
@@ -2869,7 +2926,7 @@ namespace NsAppManager
 
                     if (core->getAudioPassThruFlag())
                     {
-                        LOG4CPLUS_INFO_EXT(mLogger, "PerformAudioPassThru::TOO_MANY_PENDING_REQUESTS");
+                        LOG4CPLUS_ERROR_EXT(mLogger, "PerformAudioPassThru::TOO_MANY_PENDING_REQUESTS");
                         sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
                             , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                                 , NsAppLinkRPCV2::Result::TOO_MANY_PENDING_REQUESTS
@@ -2894,7 +2951,7 @@ namespace NsAppManager
                         = new NsRPC2Communication::UI::PerformAudioPassThru;
                     if (!performAudioPassThru)
                     {
-                        LOG4CPLUS_INFO_EXT(mLogger, "PerformAudioPassThru::OUT_OF_MEMORY");
+                        LOG4CPLUS_ERROR_EXT(mLogger, "PerformAudioPassThru::OUT_OF_MEMORY");
                         sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
                             , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                                 , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
@@ -2905,11 +2962,17 @@ namespace NsAppManager
                         break;
                     }
 
-                    performAudioPassThru->set_initialPrompt(request->get_initialPrompt());
-                    performAudioPassThru->set_samplingRate(request->get_samplingRate());
-                    performAudioPassThru->set_maxDuration(request->get_maxDuration());
-                    performAudioPassThru->set_bitsPerSample(request->get_bitsPerSample());
-                    performAudioPassThru->set_audioType(request->get_audioType());
+                    const std::vector<NsAppLinkRPCV2::TTSChunk>& initialPrompt = request->get_initialPrompt();
+                    const NsAppLinkRPCV2::SamplingRate& samplingRate = request->get_samplingRate();
+                    unsigned int maxDuration = request->get_maxDuration();
+                    const NsAppLinkRPCV2::AudioCaptureQuality& bitsPerSample = request->get_bitsPerSample();
+                    const NsAppLinkRPCV2::AudioType& audioType = request->get_audioType();
+
+                    performAudioPassThru->set_initialPrompt(initialPrompt);
+                    performAudioPassThru->set_samplingRate(samplingRate);
+                    performAudioPassThru->set_maxDuration(maxDuration);
+                    performAudioPassThru->set_bitsPerSample(bitsPerSample);
+                    performAudioPassThru->set_audioType(audioType);
 
                     const std::string* firstDisplayText = request->get_audioPassThruDisplayText1();
                     if(firstDisplayText)
@@ -2921,14 +2984,14 @@ namespace NsAppManager
 
                     performAudioPassThru->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     performAudioPassThru->set_appId(app->getAppID());
+                    core->mMessageMapping.addMessage(performAudioPassThru->getId(), sessionKey);
                     HMIHandler::getInstance().sendRequest(performAudioPassThru);
-
-                    LOG4CPLUS_INFO_EXT(mLogger, "Request to HMI sent...");
+                    LOG4CPLUS_INFO_EXT(mLogger, "Request PerformAudioPassThru sent to HMI ...");
 
                     AudioPassThruData* data = new AudioPassThruData;
                     if (!data)
                     {
-                        LOG4CPLUS_INFO_EXT(mLogger, "PerformAudioPassThru::OUT_OF_MEMORY");
+                        LOG4CPLUS_ERROR_EXT(mLogger, "PerformAudioPassThru::OUT_OF_MEMORY");
                         sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
                             , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                                 , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
@@ -2940,10 +3003,10 @@ namespace NsAppManager
                     }
 
                     //  Thread for audio record operation
-                    data->samplingRate = request->get_samplingRate();
-                    data->maxDuration = request->get_maxDuration();
-                    data->bitsPerSample = request->get_bitsPerSample();
-                    data->audioType = request->get_audioType();
+                    data->samplingRate = samplingRate;
+                    data->maxDuration = maxDuration;
+                    data->bitsPerSample = bitsPerSample;
+                    data->audioType = audioType;
                     data->sessionKey = sessionKey;
                     pthread_create(&audioPassThruThread, 0, AudioPassThru, static_cast<void*>(data));
 
@@ -2959,6 +3022,32 @@ namespace NsAppManager
 
                     pthread_cond_signal(&cv);
                     pthread_cancel(audioPassThruThread);
+
+                    Application_v2* app
+                        = getApplicationV2AndCheckHMIStatus<NsAppLinkRPCV2::PerformAudioPassThru_response>(sessionKey,
+                            NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID);
+                    if (!app)
+                        break;
+
+                    NsRPC2Communication::UI::EndAudioPassThru* EndAudioPassThru
+                        = new NsRPC2Communication::UI::EndAudioPassThru;
+                    if (!EndAudioPassThru)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "EndAudioPassThru::OUT_OF_MEMORY");
+                        sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                            , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                                , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , false
+                                , sessionKey);
+                        core->setAudioPassThruFlag(false);
+                        break;
+                    }
+
+                    EndAudioPassThru->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    EndAudioPassThru->set_appId(app->getAppID());
+                    HMIHandler::getInstance().sendRequest(EndAudioPassThru);
+                    LOG4CPLUS_INFO_EXT(mLogger, "Request EndAudioPassThru sent to HMI ...");
 
                     sendResponse<NsAppLinkRPCV2::EndAudioPassThru_response
                             , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::EndAudioPassThruID
@@ -3068,10 +3157,138 @@ namespace NsAppManager
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::GetVehicleDataID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleData request has been invoked");
+                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
+                        NsAppLinkRPCV2::GetVehicleData_response* response = new NsAppLinkRPCV2::GetVehicleData_response();
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::GetVehicleDataID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::GetVehicleData_response* response = new NsAppLinkRPCV2::GetVehicleData_response;
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::GetVehicleDataID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    NsAppLinkRPCV2::GetVehicleData_request* object = static_cast<NsAppLinkRPCV2::GetVehicleData_request*>(mobileMsg);
+                    NsRPC2Communication::VehicleInfo::GetVehicleData* getVehicleDataRPC2Request = new NsRPC2Communication::VehicleInfo::GetVehicleData();
+                    getVehicleDataRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    LOG4CPLUS_INFO_EXT(mLogger, "getVehicleDataRPC2Request created");
+                    getVehicleDataRPC2Request->set_dataType(object->get_dataType());
+                    getVehicleDataRPC2Request->set_appId(sessionKey);
+                    LOG4CPLUS_INFO_EXT(mLogger, "GetVehicleData request almost handled" );
+                    core->mMessageMapping.addMessage(getVehicleDataRPC2Request->getId(), sessionKey);
+                    HMIHandler::getInstance().sendRequest(getVehicleDataRPC2Request);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::ReadDIDID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "ReadDID is received from moblie app.");
+                    NsAppLinkRPCV2::ReadDID_request * request = static_cast<NsAppLinkRPCV2::ReadDID_request*>(mobileMsg);
+                    NsAppManager::Application_v2* app = static_cast<NsAppManager::Application_v2*>(core->
+                            getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey)));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " is not registered." );
+                        NsAppLinkRPCV2::ReadDID_response* response = new NsAppLinkRPCV2::ReadDID_response;
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::ReadDIDID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        std::vector<NsAppLinkRPCV2::Result> resultCodes(request->get_didLocation().size());
+                        for ( int i = 0; i < request->get_didLocation().size(); ++i )
+                        {
+                            resultCodes[i] = NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED;
+                        }
+                        response->set_resultCode(resultCodes);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::ReadDID_response* response = new NsAppLinkRPCV2::ReadDID_response;
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::ReadDIDID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        std::vector<NsAppLinkRPCV2::Result> resultCodes(request->get_didLocation().size());
+                        for ( int i = 0; i < request->get_didLocation().size(); ++i )
+                        {
+                            resultCodes[i] = NsAppLinkRPCV2::Result::REJECTED;
+                        }
+                        response->set_resultCode(resultCodes);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    
+                    NsRPC2Communication::VehicleInfo::ReadDID * readDIDRequest = 
+                        new NsRPC2Communication::VehicleInfo::ReadDID;
+                    readDIDRequest->set_appId(app->getAppID());
+                    readDIDRequest->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    core->mMessageMapping.addMessage(readDIDRequest->getId(), sessionKey);
+                    readDIDRequest->set_ecuName(request->get_ecuName());
+                    readDIDRequest->set_didLocation(request->get_didLocation());
+                    if ( request->get_encrypted() )
+                    {
+                        readDIDRequest->set_encrypted( *request->get_encrypted() );
+                    }
+                    HMIHandler::getInstance().sendRequest(readDIDRequest);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::GetDTCsID:
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, " A given command id " << mobileMsg->getMethodId() << " RECEIVED! TODO!!!");
+                    LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleData request has been invoked");
+                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
+                        NsAppLinkRPCV2::GetDTCs_response* response = new NsAppLinkRPCV2::GetDTCs_response();
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::GetDTCsID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        std::vector<NsAppLinkRPCV2::Result> resultCode;
+                        resultCode.push_back(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        response->set_resultCode(resultCode);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::GetDTCs_response* response = new NsAppLinkRPCV2::GetDTCs_response;
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::GetDTCsID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        std::vector<NsAppLinkRPCV2::Result> resultCode;
+                        resultCode.push_back(NsAppLinkRPCV2::Result::REJECTED);
+                        response->set_resultCode(resultCode);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    NsAppLinkRPCV2::GetDTCs_request* object = static_cast<NsAppLinkRPCV2::GetDTCs_request*>(mobileMsg);
+                    NsRPC2Communication::VehicleInfo::GetDTCs* getDTCsRPC2Request = new NsRPC2Communication::VehicleInfo::GetDTCs();
+                    getDTCsRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    LOG4CPLUS_INFO_EXT(mLogger, "getDTCsRPC2Request created");
+                    getDTCsRPC2Request->set_ecuName(object->get_ecuName());
+                    if (object->get_encrypted())
+                    {
+                        getDTCsRPC2Request->set_encrypted(*(object->get_encrypted()));
+                    }
+                    getDTCsRPC2Request->set_appId(sessionKey);
+                    LOG4CPLUS_INFO_EXT(mLogger, "GetDTCs request almost handled" );
+                    core->mMessageMapping.addMessage(getDTCsRPC2Request->getId(), sessionKey);
+                    HMIHandler::getInstance().sendRequest(getDTCsRPC2Request);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::ChangeRegistrationID:
@@ -3088,12 +3305,87 @@ namespace NsAppManager
                             , NsAppLinkRPC::ALRPCMessage::RESPONSE
                             , false
                             , sessionKey);
-
                         break;
-                    }                    
+                    }
 
                     NsAppLinkRPCV2::ChangeRegistration_request* request
                         = static_cast<NsAppLinkRPCV2::ChangeRegistration_request*>(mobileMsg);
+                    bool hasActuallyChanged = false;
+                    if ( app->getHMIDisplayLanguageDesired().get() != request->get_hmiDisplayLanguage().get())
+                    {
+                        app->setHMIDisplayLanguageDesired(request->get_hmiDisplayLanguage());
+
+                        if (app->getApplicationHMIStatusLevel() == NsAppLinkRPCV2::HMILevel::HMI_FULL)
+                        {
+                            NsRPC2Communication::UI::ChangeRegistration * changeUIRegistration =
+                                new NsRPC2Communication::UI::ChangeRegistration;
+                            changeUIRegistration->set_hmiDisplayLanguage(request->get_hmiDisplayLanguage());
+                            changeUIRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                            changeUIRegistration->set_appId(app->getAppID());
+                            core->mMessageMapping.addMessage(changeUIRegistration->getId(), sessionKey);
+                            app->incrementUnrespondedRequestCount(app->getAppID());
+                            core->mRequestMapping.addMessage(changeUIRegistration->getId(), app->getAppID());
+                            HMIHandler::getInstance().sendRequest(changeUIRegistration);
+                        }
+                        else if ( app->getApplicationHMIStatusLevel() == NsAppLinkRPCV2::HMILevel::HMI_NONE )
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                , NsAppLinkRPCV2::Result::SUCCESS
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , true
+                                , sessionKey);
+                        }
+                        hasActuallyChanged = true;
+                    }
+                    if (app->getLanguageDesired().get() != request->get_language().get())
+                    {
+                        app->setLanguageDesired(request->get_language());
+
+                        if (app->getApplicationHMIStatusLevel() != NsAppLinkRPCV2::HMILevel::HMI_NONE)
+                        {
+                            NsRPC2Communication::VR::ChangeRegistration * changeVrRegistration =
+                                new NsRPC2Communication::VR::ChangeRegistration;
+                            changeVrRegistration->set_language(request->get_language());
+                            changeVrRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                            changeVrRegistration->set_appId(app->getAppID());
+                            core->mMessageMapping.addMessage(changeVrRegistration->getId(), sessionKey);
+                            app->incrementUnrespondedRequestCount(app->getAppID());
+                            core->mRequestMapping.addMessage(changeVrRegistration->getId(), app->getAppID());
+                            HMIHandler::getInstance().sendRequest(changeVrRegistration);
+
+                            NsRPC2Communication::TTS::ChangeRegistration * changeTtsRegistration =
+                                new NsRPC2Communication::TTS::ChangeRegistration;
+                            changeTtsRegistration->set_language(request->get_language());
+                            changeTtsRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                            changeTtsRegistration->set_appId(app->getAppID());
+                            core->mMessageMapping.addMessage(changeTtsRegistration->getId(), sessionKey);
+                            app->incrementUnrespondedRequestCount(app->getAppID());
+                            core->mRequestMapping.addMessage(changeTtsRegistration->getId(), app->getAppID());
+                            HMIHandler::getInstance().sendRequest(changeTtsRegistration);
+                        }
+                        else
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                , NsAppLinkRPCV2::Result::SUCCESS
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , true
+                                , sessionKey);
+                        }
+                        hasActuallyChanged = true;
+                    }
+
+                    if ( !hasActuallyChanged )
+                    {
+                        sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                            NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                            , NsAppLinkRPCV2::Result::SUCCESS
+                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                            , true
+                            , sessionKey);
+                    }
+                    break;
                 }
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
@@ -3302,25 +3594,69 @@ namespace NsAppManager
                 HMIHandler::getInstance().setReadyState(true);
 
                 NsRPC2Communication::UI::GetCapabilities* getUiCapsRequest = new NsRPC2Communication::UI::GetCapabilities();
+                getUiCapsRequest->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getUiCapsRequest);
                 NsRPC2Communication::VR::GetCapabilities* getVrCapsRequest = new NsRPC2Communication::VR::GetCapabilities();
+                getVrCapsRequest->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getVrCapsRequest);
                 NsRPC2Communication::TTS::GetCapabilities* getTtsCapsRequest = new NsRPC2Communication::TTS::GetCapabilities();
+                getTtsCapsRequest->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getTtsCapsRequest);
                 NsRPC2Communication::Buttons::GetCapabilities* getButtonsCapsRequest = new NsRPC2Communication::Buttons::GetCapabilities();
+                getButtonsCapsRequest->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getButtonsCapsRequest);
                 NsRPC2Communication::VehicleInfo::GetVehicleType* getVehicleType = new NsRPC2Communication::VehicleInfo::GetVehicleType;
+                getVehicleType->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getVehicleType);
                 NsRPC2Communication::UI::GetSupportedLanguages * getUISupportedLanguages = new NsRPC2Communication::UI::GetSupportedLanguages;
+                getUISupportedLanguages->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getUISupportedLanguages);
 
                 NsRPC2Communication::UI::GetLanguage* getUiLang = new NsRPC2Communication::UI::GetLanguage;
+                getUiLang->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getUiLang);
                 NsRPC2Communication::VR::GetLanguage* getVrLang = new NsRPC2Communication::VR::GetLanguage;
+                getVrLang->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getVrLang);
                 NsRPC2Communication::TTS::GetLanguage* getTtsLang = new NsRPC2Communication::TTS::GetLanguage;
+                getTtsLang->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getTtsLang);
                 return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__PERFORMAUDIOPASSTHRURESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A PerformAudioPassThru response has been invoked");
+
+                pthread_cond_signal(&cv);
+                pthread_cancel(audioPassThruThread);
+
+                NsRPC2Communication::UI::PerformAudioPassThruResponse* response
+                    = static_cast<NsRPC2Communication::UI::PerformAudioPassThruResponse*>(msg);
+
+                Application* app = core->getApplicationFromItemCheckNotNull(
+                    core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
+                    return;
+                }
+
+                sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                        , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                            , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                            , true
+                            , app->getAppID());
+
+                // We wait for new PerformAudioPassThru request.
+                NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
+                break;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ENDAUDIOPASSTHRURESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A EndAudioPassThru response has been invoked");
+                break;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE:
             {
@@ -4191,7 +4527,7 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETSUPPORTEDLANGUAGESRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "Get Supported Languages for UI response is received.");
-                NsRPC2Communication::UI::GetSupportedLanguagesResponse * languages = 
+                NsRPC2Communication::UI::GetSupportedLanguagesResponse * languages =
                     static_cast<NsRPC2Communication::UI::GetSupportedLanguagesResponse*>(msg);
                 if (NsAppLinkRPC::Result::SUCCESS == languages->getResult())
                 {
@@ -4202,7 +4538,7 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONLANGUAGECHANGE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "UI::OnLanguageChange is received from HMI.");
-                NsRPC2Communication::UI::OnLanguageChange * languageChange = 
+                NsRPC2Communication::UI::OnLanguageChange * languageChange =
                     static_cast<NsRPC2Communication::UI::OnLanguageChange*>(msg);
                 if ( languageChange->get_hmiDisplayLanguage().get() != core->mUiLanguageV1.get() )
                 {
@@ -4211,7 +4547,7 @@ namespace NsAppManager
                     core->mUiLanguageV2.set(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_hmiDisplayLanguage().get()));
                     // = NsAppLinkRPCV2::Language(
                             //static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_hmiDisplayLanguage().get()));
-                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp = 
+                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
                         new NsAppLinkRPCV2::OnLanguageChange;
                     languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                     languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
@@ -4228,7 +4564,57 @@ namespace NsAppManager
                         }
                     }
                 }
-                break;
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__CHANGEREGISTRATIONRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "UI::ChangeRegistrationResponse is received from HMI.");
+                NsRPC2Communication::UI::ChangeRegistrationResponse * response =
+                    static_cast<NsRPC2Communication::UI::ChangeRegistrationResponse*>(msg);
+                Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+
+                //TODO: exchange when result is not succes.
+                unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(response->getId());
+                if ( -1 != cmdId )
+                {
+                    app->decrementUnrespondedRequestCount(cmdId);
+                    if(app->getUnrespondedRequestCount(cmdId) == 0)
+                    {
+                        if ( NsAppLinkRPCV2::Result::SUCCESS != response->getResult() )
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                    , false
+                                    , appId);
+                            core->mRequestMapping.removeRequest(response->getId());
+                            //TODO: not sure if this is correct behaviour
+                            app->setHMIDisplayLanguageDesired(core->mUiLanguageV2);
+                        }
+                        else
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                    , true
+                                    , appId);
+                            core->mRequestMapping.removeRequest(response->getId());
+                        }
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                    }
+                }
+                core->mMessageMapping.removeMessage(response->getId());
+                return;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
@@ -4403,7 +4789,7 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ONLANGUAGECHANGE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "VR::OnLanguageChange is received from HMI.");
-                NsRPC2Communication::VR::OnLanguageChange * languageChange = 
+                NsRPC2Communication::VR::OnLanguageChange * languageChange =
                     static_cast<NsRPC2Communication::VR::OnLanguageChange*>(msg);
                 if ( languageChange->get_language().get() != core->mVrLanguageV2.get() )
                 {
@@ -4412,7 +4798,7 @@ namespace NsAppManager
                     core->mVrLanguageV2.set(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_language().get()));
                     // = NsAppLinkRPCV2::Language(
                             //static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_language().get()));
-                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp = 
+                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
                         new NsAppLinkRPCV2::OnLanguageChange;
                     languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                     languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
@@ -4429,7 +4815,58 @@ namespace NsAppManager
                         }
                     }
                 }
-                break;
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__CHANGEREGISTRATIONRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "VR::ChangeRegistrationResponse is received from HMI.");
+                NsRPC2Communication::VR::ChangeRegistrationResponse * response =
+                    static_cast<NsRPC2Communication::VR::ChangeRegistrationResponse*>(msg);
+                Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+
+                //TODO: exchange when result is not succes.
+                unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(response->getId());
+                if ( -1 != cmdId )
+                {
+                    app->decrementUnrespondedRequestCount(cmdId);
+                    if(app->getUnrespondedRequestCount(cmdId) == 0)
+                    {
+                        if ( NsAppLinkRPCV2::Result::SUCCESS != response->getResult() )
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                    , false
+                                    , appId);
+                            core->mRequestMapping.removeRequest(response->getId());
+                            //TODO: not sure if this is correct behaviour
+                            app->setLanguageDesired(core->mVrLanguageV2);
+                        }
+                        else
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                    , true
+                                    , appId);
+                            core->mRequestMapping.removeRequest(response->getId());
+                        }
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                    }
+                }
+
+                core->mMessageMapping.removeMessage(response->getId());
+                return;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not VR RPC message " << msg->getMethod() << " has been received!");
@@ -4509,7 +4946,7 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__ONLANGUAGECHANGE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "TTS::OnLanguageChange is received from HMI.");
-                NsRPC2Communication::TTS::OnLanguageChange * languageChange = 
+                NsRPC2Communication::TTS::OnLanguageChange * languageChange =
                     static_cast<NsRPC2Communication::TTS::OnLanguageChange*>(msg);
                 if ( languageChange->get_language().get() != core->mTtsLanguageV2.get() )
                 {
@@ -4518,7 +4955,7 @@ namespace NsAppManager
                     core->mTtsLanguageV2.set(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_language().get()));
                     // = NsAppLinkRPCV2::Language(
                             //static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_language().get()));
-                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp = 
+                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
                         new NsAppLinkRPCV2::OnLanguageChange;
                     languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                     languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
@@ -4535,7 +4972,57 @@ namespace NsAppManager
                         }
                     }
                 }
-                break;
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__CHANGEREGISTRATIONRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "TTS::ChangeRegistrationResponse is received from HMI.");
+                NsRPC2Communication::TTS::ChangeRegistrationResponse * response =
+                    static_cast<NsRPC2Communication::TTS::ChangeRegistrationResponse*>(msg);
+                Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+
+                unsigned int cmdId = core->mRequestMapping.findRequestIdAssignedToMessage(response->getId());
+                if ( -1 != cmdId )
+                {
+                    app->decrementUnrespondedRequestCount(cmdId);
+                    if(app->getUnrespondedRequestCount(cmdId) == 0)
+                    {
+                        if ( NsAppLinkRPCV2::Result::SUCCESS != response->getResult() )
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                    , false
+                                    , appId);
+                            core->mRequestMapping.removeRequest(response->getId());
+                            //TODO: not sure if this is correct behaviour
+                            app->setLanguageDesired(core->mVrLanguageV2);
+                        }
+                        else
+                        {
+                            sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                    , true
+                                    , appId);
+                            core->mRequestMapping.removeRequest(response->getId());
+                        }
+                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                            << " application id " << appId);
+                    }
+                }
+
+                core->mMessageMapping.removeMessage(response->getId());
+                return;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not TTS RPC message " << msg->getMethod() << " has been received!");
@@ -4774,6 +5261,32 @@ namespace NsAppManager
                     case 2:
                     {
                         Application_v2* appv2 = (Application_v2*)app;
+                        //Methods for changing language:
+                        NsRPC2Communication::VR::ChangeRegistration * changeVrRegistration =
+                            new NsRPC2Communication::VR::ChangeRegistration;
+                        changeVrRegistration->set_language(appv2->getLanguageDesired());
+                        changeVrRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        changeVrRegistration->set_appId(appv2->getAppID());
+                        core->mMessageMapping.addMessage(changeVrRegistration->getId(), appId);
+                        HMIHandler::getInstance().sendRequest(changeVrRegistration);
+
+                        NsRPC2Communication::TTS::ChangeRegistration * changeTtsRegistration =
+                            new NsRPC2Communication::TTS::ChangeRegistration;
+                        changeTtsRegistration->set_language(appv2->getLanguageDesired());
+                        changeTtsRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        changeTtsRegistration->set_appId(appv2->getAppID());
+                        core->mMessageMapping.addMessage(changeTtsRegistration->getId(), appId);
+                        HMIHandler::getInstance().sendRequest(changeTtsRegistration);
+
+                        NsRPC2Communication::UI::ChangeRegistration * changeUIRegistration =
+                            new NsRPC2Communication::UI::ChangeRegistration;
+                        changeUIRegistration->set_hmiDisplayLanguage(appv2->getHMIDisplayLanguageDesired());
+                        changeUIRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        changeUIRegistration->set_appId(appv2->getAppID());
+                        core->mMessageMapping.addMessage(changeUIRegistration->getId(), appId);
+                        HMIHandler::getInstance().sendRequest(changeUIRegistration);
+                        //End of methods for languages.
+
                         NsAppLinkRPCV2::OnHMIStatus * hmiStatus = new NsAppLinkRPCV2::OnHMIStatus;
                         hmiStatus->setMethodId(NsAppLinkRPCV2::FunctionID::OnHMIStatusID);
                         hmiStatus->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
@@ -4959,23 +5472,7 @@ namespace NsAppManager
                 NsRPC2Communication::AppLinkCore::GetDeviceList* getDevList = (NsRPC2Communication::AppLinkCore::GetDeviceList*)msg;
                 NsRPC2Communication::AppLinkCore::GetDeviceListResponse* response = new NsRPC2Communication::AppLinkCore::GetDeviceListResponse;
                 response->setId(getDevList->getId());
-                DeviceNamesList list;
-                const NsConnectionHandler::tDeviceList& devList = core->mDeviceList.getDeviceList();
-                for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
-                {
-                    const NsConnectionHandler::CDevice& device = it->second;
-                    list.push_back(device.getUserFriendlyName());
-                }
-                if ( list.empty() )
-                {
-                    list.push_back("");
-                    response->setResult(NsAppLinkRPC::Result::GENERIC_ERROR);
-                }
-                else
-                {
-                    response->setResult(NsAppLinkRPC::Result::SUCCESS);
-                }
-                response->set_deviceList(list);
+                response->setResult(NsAppLinkRPC::Result::GENERIC_ERROR);
                 ConnectionHandler::getInstance().startDevicesDiscovery();
                 HMIHandler::getInstance().sendResponse(response);
                 return;
@@ -4991,6 +5488,241 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleType response has been income");
                 NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse* getVehType = (NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse*)msg;
                 core->mVehicleType = getVehType->get_vehicleType();
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLEDATARESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleData response has been income");
+                NsRPC2Communication::VehicleInfo::GetVehicleDataResponse* object = static_cast<NsRPC2Communication::VehicleInfo::GetVehicleDataResponse*>(msg);
+                Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+
+                if (2 == app->getProtocolVersion())
+                {
+                    NsAppLinkRPCV2::GetVehicleData_response* response = new NsAppLinkRPCV2::GetVehicleData_response();
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::GetVehicleDataID);
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    response->set_success(true);
+                    if (object->get_gps())
+                    {
+                        response->set_gps(*(object->get_gps()));
+                    } else if (object->get_speed())
+                    {
+                        response->set_speed(*(object->get_speed()));
+                    } else if (object->get_rpm())
+                    {
+                        response->set_rpm(*(object->get_rpm()));
+                    } else if (object->get_fuelLevel())
+                    {
+                        response->set_fuelLevel(*(object->get_fuelLevel()));
+                    } else if (object->get_avgFuelEconomy())
+                    {
+                        response->set_avgFuelEconomy(*(object->get_avgFuelEconomy()));
+                    } else if (object->get_batteryVoltage())
+                    {
+                        response->set_batteryVoltage(*(object->get_batteryVoltage()));
+                    } else if (object->get_externalTemperature())
+                    {
+                        response->set_externalTemperature(*(object->get_externalTemperature()));
+                    } else if (object->get_vin())
+                    {
+                        response->set_vin(*(object->get_vin()));
+                    } else if (object->get_prndl())
+                    {
+                        response->set_prndl(*(object->get_prndl()));
+                    } else if (object->get_tirePressure())
+                    {
+                        response->set_tirePressure(*(object->get_tirePressure()));
+                    } else if (object->get_batteryPackVoltage())
+                    {
+                        response->set_batteryPackVoltage(*(object->get_batteryPackVoltage()));
+                    } else if (object->get_batteryPackCurrent())
+                    {
+                        response->set_batteryPackCurrent(*(object->get_batteryPackCurrent()));
+                    } else if (object->get_batteryPackTemperature())
+                    {
+                        response->set_batteryPackTemperature(*(object->get_batteryPackTemperature()));
+                    } else if (object->get_engineTorque())
+                    {
+                        response->set_engineTorque(*(object->get_engineTorque()));
+                    } else if (object->get_odometer())
+                    {
+                        response->set_odometer(*(object->get_odometer()));
+                    } else if (object->get_tripOdometer())
+                    {
+                        response->set_tripOdometer(*(object->get_tripOdometer()));
+                    } else if (object->get_satRadioESN())
+                    {
+                        response->set_satRadioESN(*(object->get_satRadioESN()));
+                    } else
+                    {
+                        response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                        response->set_success(false);
+                    }
+                    core->mMessageMapping.removeMessage(object->getId());
+                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                        << " application id " << appId);
+                    MobileHandler::getInstance().sendRPCMessage(response, appId);
+                } else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "GetVehicleData is present in Protocol V2 only!!!");
+                }
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__ONVEHICLEDATA:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " An OnVehicleData notification has been income");
+                NsRPC2Communication::VehicleInfo::OnVehicleData* object = static_cast<NsRPC2Communication::VehicleInfo::OnVehicleData*>(msg);
+
+                if (object->get_gps())
+                {
+                } else if (object->get_speed())
+                {
+                } else if (object->get_rpm())
+                {
+                } else if (object->get_fuelLevel())
+                {
+                } else if (object->get_avgFuelEconomy())
+                {
+                } else if (object->get_batteryVoltage())
+                {
+                } else if (object->get_externalTemperature())
+                {
+                } else if (object->get_vin())
+                {
+                } else if (object->get_prndl())
+                {
+                    NsAppLinkRPCV2::VehicleDataType vehicleDataName = NsAppLinkRPCV2::VehicleDataType(NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal::VEHICLEDATA_PRNDLSTATUS);
+                    std::vector<RegistryItem*> result;
+                    result.clear();
+                    core->mVehicleDataMapping.findRegistryItemsSubscribedToVehicleData(vehicleDataName, result);
+                    if (0 < result.size())
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, " There are " << result.size() <<" subscribers on PRNDL notification!");
+                        for (std::vector<RegistryItem*>::iterator it = result.begin(); it != result.end(); it++)
+                        {
+                            Application_v2* app = (Application_v2*)(*it)->getApplication();
+                            if(!app)
+                            {
+                                LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item" );
+                                continue;
+                            }
+                            int appId = app->getAppID();
+                            LOG4CPLUS_INFO_EXT(mLogger, " An OnVehicleData PRNDL notification sending to " << appId);
+                            NsAppLinkRPCV2::OnVehicleData* notification = new NsAppLinkRPCV2::OnVehicleData();
+                            notification->setMethodId(NsAppLinkRPCV2::FunctionID::OnVehicleDataID);
+                            notification->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                            notification->set_prndl(*(object->get_prndl()));
+                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                                                        << " application id " << appId);
+                            MobileHandler::getInstance().sendRPCMessage(notification, appId);
+                        }
+                    }
+                } else if (object->get_tirePressure())
+                {
+                } else if (object->get_batteryPackVoltage())
+                {
+                } else if (object->get_batteryPackCurrent())
+                {
+                } else if (object->get_batteryPackTemperature())
+                {
+                } else if (object->get_engineTorque())
+                {
+                } else if (object->get_odometer())
+                {
+                } else if (object->get_tripOdometer())
+                {
+                }
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETDTCSRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A GetDTCs response has been income");
+                NsRPC2Communication::VehicleInfo::GetDTCsResponse* object = static_cast<NsRPC2Communication::VehicleInfo::GetDTCsResponse*>(msg);
+                Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+
+                if (2 == app->getProtocolVersion())
+                {
+                    NsAppLinkRPCV2::GetDTCs_response* response = new NsAppLinkRPCV2::GetDTCs_response();
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::GetDTCsID);
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    std::vector<NsAppLinkRPCV2::Result> resultCode;
+                    resultCode.push_back(NsAppLinkRPCV2::Result::SUCCESS);
+                    response->set_resultCode(resultCode);
+                    response->set_success(true);
+                    if (object->get_dtcList())
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, " dtcList is present! ");
+                        response->set_dtcList(*(object->get_dtcList()));
+                    }
+                    core->mMessageMapping.removeMessage(object->getId());
+                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                        << " application id " << appId);
+                    MobileHandler::getInstance().sendRPCMessage(response, appId);
+                } else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "GetVehicleData is present in Protocol V2 only!!!");
+                }
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__READDIDRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "ReadDID response is received from HMI.");
+                NsRPC2Communication::VehicleInfo::ReadDIDResponse * response = 
+                    static_cast<NsRPC2Communication::VehicleInfo::ReadDIDResponse*>(msg);
+                Application* app = core->getApplicationFromItemCheckNotNull(
+                        core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+
+                if (2 == app->getProtocolVersion())
+                {
+                    NsAppLinkRPCV2::ReadDID_response * readDIDResponse = new NsAppLinkRPCV2::ReadDID_response;
+                    readDIDResponse->setMethodId(NsAppLinkRPCV2::FunctionID::ReadDIDID);
+                    readDIDResponse->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    bool isSuccess = true;
+                    if ( NsAppLinkRPCV2::Result::SUCCESS != response->getResult() &&
+                            NsAppLinkRPCV2::Result::ENCRYPTED != response->getResult() )
+                    {
+                        isSuccess = false;
+                    }
+                    readDIDResponse->set_success( isSuccess );
+                    std::vector<NsAppLinkRPCV2::Result> resultCodes;
+                    resultCodes.push_back(
+                            static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult()));
+                    readDIDResponse->set_resultCode( resultCodes );
+
+                    if ( response->get_dataResult() )
+                    {
+                        readDIDResponse->set_dataResult( *response->get_dataResult() );
+                    }
+
+                    if ( response->get_data() )
+                    {
+                        readDIDResponse->set_data( *response->get_data() );
+                    }
+                    MobileHandler::getInstance().sendRPCMessage(readDIDResponse, appId);
+                }
+                core->mMessageMapping.removeMessage(response->getId());
                 return;
             }
             default:
@@ -5095,7 +5827,7 @@ namespace NsAppManager
 
                 NsAppLinkRPC::RegisterAppInterface_request* registerRequest = (NsAppLinkRPC::RegisterAppInterface_request*) request;
                 bool isMediaApplication = registerRequest->get_isMediaApplication();
-                
+
                 const NsAppLinkRPC::SyncMsgVersion& syncMsgVersion = registerRequest->get_syncMsgVersion();
 
                 if ( registerRequest -> get_ngnMediaScreenAppName() )
@@ -5386,19 +6118,17 @@ namespace NsAppManager
         LOG4CPLUS_INFO_EXT(mLogger, " Updating device list: " << deviceList.size() << " devices");
         mDeviceList.setDeviceList(deviceList);
         NsRPC2Communication::AppLinkCore::OnDeviceListUpdated* deviceListUpdated = new NsRPC2Communication::AppLinkCore::OnDeviceListUpdated;
-        DeviceNamesList list;
-        const NsConnectionHandler::tDeviceList& devList = mDeviceList.getDeviceList();
-        for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
+        if ( !deviceList.empty() )
         {
-            const NsConnectionHandler::CDevice& device = it->second;
-            list.push_back(device.getUserFriendlyName());
+            DeviceNamesList list;
+            const NsConnectionHandler::tDeviceList& devList = mDeviceList.getDeviceList();
+            for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
+            {
+                const NsConnectionHandler::CDevice& device = it->second;
+                list.push_back(device.getUserFriendlyName());
+            }
+            deviceListUpdated->set_deviceList(list);
         }
-        if ( list.empty() )
-        {
-            list.push_back("");
-        }
-
-        deviceListUpdated->set_deviceList(list);
         HMIHandler::getInstance().sendNotification(deviceListUpdated);
     }
 
@@ -5440,4 +6170,8 @@ namespace NsAppManager
         mAudioPassThruFlag = flag;
     }
 
+    const MessageMapping& AppMgrCore::getMessageMapping() const
+    {
+        return mMessageMapping;
+    }
 }

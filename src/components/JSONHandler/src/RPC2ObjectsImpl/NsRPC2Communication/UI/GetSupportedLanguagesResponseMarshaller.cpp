@@ -1,6 +1,6 @@
 #include "GetSupportedLanguagesResponseMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/LanguageMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/LanguageMarshaller.h"
 
 using namespace NsRPC2Communication::UI;
 
@@ -49,8 +49,8 @@ Json::Value GetSupportedLanguagesResponseMarshaller::toJSON(const GetSupportedLa
   json["jsonrpc"]=Json::Value("2.0");
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
-  NsAppLinkRPC::Result r(static_cast<NsAppLinkRPC::Result::ResultInternal>(e.getResult()));
-  json["result"]["resultCode"]=NsAppLinkRPC::ResultMarshaller::toJSON(r);
+  NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
+  json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("UI.GetSupportedLanguagesResponse");
 
   {
@@ -58,7 +58,7 @@ Json::Value GetSupportedLanguagesResponseMarshaller::toJSON(const GetSupportedLa
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::LanguageMarshaller::toJSON(e.languages[i]);
+      j[i]=NsAppLinkRPCV2::LanguageMarshaller::toJSON(e.languages[i]);
 
     json["result"]["languages"]=j;
   }
@@ -81,12 +81,12 @@ bool GetSupportedLanguagesResponseMarshaller::fromJSON(const Json::Value& json,G
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    NsAppLinkRPC::Result r;
+    NsAppLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("UI.GetSupportedLanguagesResponse")) return false;
 
-    if(!NsAppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
+    if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
     
     if(!js.isMember("languages") || !js["languages"].isArray())  return false;
@@ -97,8 +97,8 @@ bool GetSupportedLanguagesResponseMarshaller::fromJSON(const Json::Value& json,G
       c.languages.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::Language t;
-        if(!NsAppLinkRPC::LanguageMarshaller::fromJSON(js["languages"][i],t))
+        NsAppLinkRPCV2::Language t;
+        if(!NsAppLinkRPCV2::LanguageMarshaller::fromJSON(js["languages"][i],t))
           return false;
          c.languages[i]=t;
       }

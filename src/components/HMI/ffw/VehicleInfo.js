@@ -108,6 +108,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                     //request.params.dataType:    vehicleData
                 }
             };
+            JSONMessage.result[MFT.ApplinkVehicleInfoModel.vehicleData[request.params.dataType].type] = vehicleData;
             this.client.send(JSONMessage);
         }
 
@@ -125,7 +126,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 
         if (request.method == "VehicleInfo.GetVehicleType") {
 
-            MFT.ApplinkModel.getVehicleType();
+            MFT.ApplinkVehicleInfoModel.getVehicleType( request.id );
 
         }
     },
@@ -149,7 +150,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
     /*
      * GetVehicleType Response 
      */ 
-    GetVehicleTypeResponse: function( vehicleType ) {
+    GetVehicleTypeResponse: function( vehicleType, id ) {
         Em.Logger.log("FFW.VehicleInfo.GetVehicleType");
 
             var JSONMessage = {
@@ -182,11 +183,9 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "result":   {
                     "resultCode":       result, //  type (enum) from AppLink protocol
                     "method":           "VehicleInfo.ReadDIDResponse",
-                    "params":{
-                        "info":         info,
-                        "dataResult":   dataResult,
-                        "data":         data
-                    }
+                    "info":         info,
+                    "dataResult":   dataResult,
+                    "data":         data
                 }
             };
         }else{
@@ -196,9 +195,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "result":   {
                     "resultCode":       result, //  type (enum) from AppLink protocol
                     "method":           "VehicleInfo.ReadDIDResponse",
-                    "params":{
-                        "info":         info
-                    }
+                    "info":         info
                 }
             }; 
         }
@@ -220,10 +217,8 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "result":   {
                     "resultCode":       result, //  type (enum) from AppLink protocol
                     "method":           "VehicleInfo.GetDTCsResponse",
-                    "params":{
-                        "info":         info,
-                        "dtcList":      data
-                    }
+                    "info":         info,
+                    "dtcList":      data
                 }
             };
         }else{
@@ -233,9 +228,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "result":   {
                     "resultCode":       result, //  type (enum) from AppLink protocol
                     "method":           "VehicleInfo.GetDTCsResponse",
-                    "params":{
-                        "info":         info
-                    }
+                    "info":         info
                 }
             }; 
         }

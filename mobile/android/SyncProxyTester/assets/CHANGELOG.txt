@@ -1,4 +1,14 @@
+[CW4]
++ Alert, Show, ScrollableMessage dialogs: automatically check the Include Soft Buttons checkbox when the user has explicitly set the soft buttons.
+* Fix: don't save the edited list of soft buttons when clicked Cancel in the SoftButtons List activity.
+* Auto increment soft button id when creating a new one.
+
 [CW3]
+* Fix the inability to add 6+ soft buttons on devices with small screens.
++ Add TCP transport support (over WiFi).
+* SyncProxyAndroid SDK: fix receiving multiframe messages.
+* Fix a crash when clicking a request/response after relaunching the main activity.
+* Alert, Show, ScrollableMessage dialogs fix: send the soft buttons if the user checked the Include checkbox without pushing the Soft Buttons button.
 * Slider dialog: automatically update dynamic footer when enabled and the number of ticks changes.
 + Save the data from OnAudioPassThru notifications to the audiopassthru.bin file on SD card. The file is deleted if the result is not SUCCESS. Resend the request if the result is RETRY.
 + SyncProxyAndroid SDK: add RETRY value to the Result enum.
