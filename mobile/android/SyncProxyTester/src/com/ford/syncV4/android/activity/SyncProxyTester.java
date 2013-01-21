@@ -203,6 +203,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 */
 	private PerformAudioPassThru latestPerformAudioPassThruMsg = null;
 
+	/** Autoincrementing id for new softbuttons. */
+	private static int autoIncSoftButtonId = 5500;
+
 	/**
 	 * In onCreate() specifies if it is the first time the activity is created
 	 * during this app launch.
@@ -935,13 +938,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final CheckBox chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 
 							SoftButton sb1 = new SoftButton();
-							sb1.setSoftButtonID(5400);
+							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 							sb1.setText("ReRoute");
 							sb1.setType(SoftButtonType.SBT_TEXT);
 							sb1.setIsHighlighted(false);
 							sb1.setSystemAction(SystemAction.STEAL_FOCUS);
 							SoftButton sb2 = new SoftButton();
-							sb2.setSoftButtonID(5399);
+							sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 							sb2.setText("Close");
 							sb2.setType(SoftButtonType.SBT_TEXT);
 							sb2.setIsHighlighted(false);
@@ -1091,19 +1094,19 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText editCustomPresets = (EditText) layout.findViewById(R.id.show_customPresets);
 
 							SoftButton sb1 = new SoftButton();
-							sb1.setSoftButtonID(5432);
+							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 							sb1.setText("KeepContext");
 							sb1.setType(SoftButtonType.SBT_TEXT);
 							sb1.setIsHighlighted(false);
 							sb1.setSystemAction(SystemAction.KEEP_CONTEXT);
 							SoftButton sb2 = new SoftButton();
-							sb2.setSoftButtonID(5431);
+							sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 							sb2.setText("StealFocus");
 							sb2.setType(SoftButtonType.SBT_TEXT);
 							sb2.setIsHighlighted(false);
 							sb2.setSystemAction(SystemAction.STEAL_FOCUS);
 							SoftButton sb3 = new SoftButton();
-							sb3.setSoftButtonID(5430);
+							sb3.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 							sb3.setText("Default");
 							sb3.setType(SoftButtonType.SBT_TEXT);
 							sb3.setIsHighlighted(false);
@@ -1591,13 +1594,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText txtTimeout = (EditText) layout.findViewById(R.id.scrollablemessage_editTimeout);
 
 							SoftButton sb1 = new SoftButton();
-							sb1.setSoftButtonID(5400);
+							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 							sb1.setText("Reply");
 							sb1.setType(SoftButtonType.SBT_TEXT);
 							sb1.setIsHighlighted(false);
 							sb1.setSystemAction(SystemAction.STEAL_FOCUS);
 							SoftButton sb2 = new SoftButton();
-							sb2.setSoftButtonID(5399);
+							sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 							sb2.setText("Close");
 							sb2.setType(SoftButtonType.SBT_TEXT);
 							sb2.setIsHighlighted(false);
@@ -2036,13 +2039,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setCorrelationID(autoIncCorrId++);
 										if (chkIncludeSoftButtons.isChecked()) {
 											SoftButton sb1 = new SoftButton();
-											sb1.setSoftButtonID(5400);
+											sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 											sb1.setText("Reply");
 											sb1.setType(SoftButtonType.SBT_TEXT);
 											sb1.setIsHighlighted(false);
 											sb1.setSystemAction(SystemAction.STEAL_FOCUS);
 											SoftButton sb2 = new SoftButton();
-											sb2.setSoftButtonID(5399);
+											sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 											sb2.setText("Close");
 											sb2.setType(SoftButtonType.SBT_TEXT);
 											sb2.setIsHighlighted(false);
@@ -2092,13 +2095,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setCorrelationID(autoIncCorrId++);
 										if (chkIncludeSoftButtons.isChecked()) {
 											SoftButton sb1 = new SoftButton();
-											sb1.setSoftButtonID(5400);
+											sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 											sb1.setText("Reply");
 											sb1.setType(SoftButtonType.SBT_TEXT);
 											sb1.setIsHighlighted(false);
 											sb1.setSystemAction(SystemAction.STEAL_FOCUS);
 											SoftButton sb2 = new SoftButton();
-											sb2.setSoftButtonID(5399);
+											sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 											sb2.setText("Close");
 											sb2.setType(SoftButtonType.SBT_TEXT);
 											sb2.setIsHighlighted(false);
@@ -2144,13 +2147,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							msg.setTurnList(tarray);
 							
 							SoftButton sb1 = new SoftButton();
-							sb1.setSoftButtonID(5400);
+							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 							sb1.setText("Reply");
 							sb1.setType(SoftButtonType.SBT_TEXT);
 							sb1.setIsHighlighted(false);
 							sb1.setSystemAction(SystemAction.STEAL_FOCUS);
 							SoftButton sb2 = new SoftButton();
-							sb2.setSoftButtonID(5399);
+							sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 							sb2.setText("Close");
 							sb2.setType(SoftButtonType.SBT_TEXT);
 							sb2.setIsHighlighted(false);
@@ -2797,6 +2800,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			Log.i(logTag, "Unknown request code: " + requestCode);
 			break;
 		}
+	}
+	
+	public static int getNewSoftButtonId() {
+		return autoIncSoftButtonId++;
 	}
 }
 

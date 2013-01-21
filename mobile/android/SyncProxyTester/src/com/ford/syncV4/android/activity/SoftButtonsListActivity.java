@@ -200,7 +200,7 @@ public class SoftButtonsListActivity extends ListActivity {
 			img.setImageType(ImageType.STATIC);
 
 			SoftButton sb = new SoftButton();
-			sb.setSoftButtonID(5402);
+			sb.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
 			sb.setText("Close");
 			sb.setType(SoftButtonType.SBT_BOTH);
 			sb.setImage(img);
