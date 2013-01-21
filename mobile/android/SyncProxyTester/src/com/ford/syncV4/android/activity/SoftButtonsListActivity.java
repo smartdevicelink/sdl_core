@@ -181,6 +181,7 @@ public class SoftButtonsListActivity extends ListActivity {
 
 		softButtons = (Vector<SoftButton>) IntentHelper
 				.getObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+		softButtons = (Vector<SoftButton>) softButtons.clone();
 		maxSoftButtonsNumber = getIntent().getIntExtra(
 				Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER, MAXBUTTONS_DEFAULT);
 		if (softButtons.size() > maxSoftButtonsNumber) {
