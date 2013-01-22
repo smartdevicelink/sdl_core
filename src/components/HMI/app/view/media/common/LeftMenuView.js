@@ -144,19 +144,19 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 		/** APPLINK Button*/
 		applinkButton:  MFT.Button.extend({
 			classNameBindings:	[
-									'MFT.ApplinkMediaModel.hideApplinkButton:hidden',
+									//'MFT.ApplinkMediaController.model.hideApplinkButton:hidden',
 									'MFT.States.media.applink.active:active_state',
 									'MFT.MediaController.isTopListMenu:displayed'
 								],
 			elementId:			'media_applinkButton',
 			classNames:			['media-ls-item'],
 			action:				'turnOnApplink',
-			iconBinding:		'appIcon',
-			appIcon:			function(){
-				return MFT.ApplinkModel.listOfIcons[MFT.ApplinkMediaModel.activeAppId];
-			}.property('MFT.ApplinkMediaModel.activeAppId'),
-			target:				'MFT.MediaController',
-			textBinding:		'MFT.ApplinkMediaModel.appInfo.appName'
+			iconBinding:		'MFT.ApplinkMediaController.model.appIcon',
+			hidden: function() {
+				return MFT.ApplinkMediaController.model ? false : true;
+			}.property('MFT.ApplinkMediaController.model'),
+			textBinding:        'MFT.ApplinkMediaController.model.appInfo.appName',
+			target:				'MFT.MediaController'
 		})
 			
 	});

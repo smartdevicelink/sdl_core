@@ -114,12 +114,16 @@ MFT.InfoView = Em.ContainerView.create( MFT.LoadableView, {
 			
 			appLinkButton: MFT.Button.extend({
 				elementId:			 'info_leftMenu_appLink',
-				goToState:   			 'nonMedia',	
+				goToState:   			'nonMedia',	
 				classNames:			'menu-item lsp1_p',
-				classNameBindings:	 ['MFT.States.info.nonMedia.active:info_active'],
-				//textBinding:		   'AppLink',
-				textBinding:		'MFT.ApplinkNonMediaModel.appInfo.appName',
-				icon:				  'images/info/info_leftMenu_apps_ico.png',
+				classNameBindings:	 [
+				    'MFT.States.info.nonMedia.active:info_active'
+				],
+				hidden: function() {
+				    return MFT.NonMediaController.model ? false : true;
+				}.property('MFT.NonMediaController.model'),
+				textBinding:		'MFT.NonMediaController.model.appInfo.appName',
+				iconBinding:		'MFT.NonMediaController.model.appIcon',
 				action:				'onState',
 				target:				'MFT.InfoController',
 			})

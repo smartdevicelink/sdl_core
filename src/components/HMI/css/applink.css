@@ -631,3 +631,10 @@
 	left: 1028px;
 	width: 160px;
 }
+#info_leftMenu_appLink.ffw-button{
+	font-size: 18px;
+	line-height: 48px;
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

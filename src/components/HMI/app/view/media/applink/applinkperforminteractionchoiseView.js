@@ -42,13 +42,13 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
     /** Applink Sub Mennu activate handler */
     applinkPerformInteractionChoise: function(){
         if(MFT.States.media.applink.applinkperforminteractionchoise.active){
-            MFT.AppPerformInteractionChoise.PerformInteraction(MFT.ApplinkMediaModel.currentApplinkPerformInteractionChoiseId);
+            MFT.AppPerformInteractionChoise.PerformInteraction(MFT.ApplinkMediaController.model.currentApplinkPerformInteractionChoiseId);
         }
     }.observes('MFT.States.media.applink.applinkperforminteractionchoise.active'),
 
     showPerformInteraction: function(){
         if(MFT.States.media.applink.applinkperforminteractionchoise.active){
-            this.listOfChoises.items =  MFT.ApplinkMediaModel.voiceRecognitionCommands.slice();
+            this.listOfChoises.items =  MFT.ApplinkMediaController.model.voiceRecognitionCommands.slice();
             this.listOfChoises.list.refresh();
         }
     },
@@ -64,19 +64,19 @@ MFT.AppPerformInteractionChoise = Em.ContainerView.create(MFT.LoadableView, {
 
         for(var IDList = 0; IDList< interactionChoiceSetIDList.length; IDList++){
 
-            for(var ChoisesVal = 0; ChoisesVal < MFT.ApplinkMediaModel.interactionChoises.length; ChoisesVal++){
+            for(var ChoisesVal = 0; ChoisesVal < MFT.ApplinkMediaController.model.interactionChoises.length; ChoisesVal++){
 
-                if( interactionChoiceSetIDList[IDList] == MFT.ApplinkMediaModel.interactionChoises[ChoisesVal].interactionChoiceSetID ){
+                if( interactionChoiceSetIDList[IDList] == MFT.ApplinkMediaController.model.interactionChoises[ChoisesVal].interactionChoiceSetID ){
                     
-                    for(var ChoiseSet = 0; ChoiseSet < MFT.ApplinkMediaModel.interactionChoises[ChoisesVal].choiceSet.length; ChoiseSet++){
+                    for(var ChoiseSet = 0; ChoiseSet < MFT.ApplinkMediaController.model.interactionChoises[ChoisesVal].choiceSet.length; ChoiseSet++){
 
                         this.listOfChoises.items.push({
                                 type:       MFT.Button,
                                 params:     {
                                     action:                 'onPerformInteractionChoosed',
                                     target:                 'MFT.ApplinkMediaController',
-                                    choiceID:               MFT.ApplinkMediaModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID,
-                                    text:                   MFT.ApplinkMediaModel.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
+                                    choiceID:               MFT.ApplinkMediaController.model.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].choiceID,
+                                    text:                   MFT.ApplinkMediaController.model.interactionChoises[ChoisesVal].choiceSet[ChoiseSet].menuName,
                                     className:              'rs-item',
                                     templateName:           'text'
                                 }                                   

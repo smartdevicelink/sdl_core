@@ -12,12 +12,12 @@
 
 MFT.ApplinkModel = Em.Object.create({
 
-    /*
+    /**
      * init object
      */
     init: function() {
         // init global properties
-        this.resetProperties();
+        //this.resetProperties();
     },
 
     /**
@@ -26,7 +26,7 @@ MFT.ApplinkModel = Em.Object.create({
      */
     AudioPassThruState:     false,
 
-    /*
+    /**
      * Default values for global properties
      */
     globalPropertiesDefault : {
@@ -58,8 +58,8 @@ MFT.ApplinkModel = Em.Object.create({
      * @type object
      */
     registeredApps: {
-        "-1": 0,            // Used for media applications
-        "-2": 1             // Used for non media applications
+        "-1": MFT.ApplinkMediaModel.create(),            // Used for media applications
+        "-2": MFT.ApplinkNonMediaModel.create(),         // Used for non media applications
     },
 
     /**
@@ -148,6 +148,24 @@ MFT.ApplinkModel = Em.Object.create({
     },
 
     /**
+     * Method to add activation button to VR commands and set device parameters to model
+     * @param {Object} params
+     */
+    onAppRegistered: function( params ){
+
+        if( params.isMediaApplication ){
+            MFT.ApplinkController.registerApplication(params.appId, 0);
+        }else{
+            MFT.ApplinkController.registerApplication(params.appId, 1);
+        }
+        MFT.VRPopUp.AddActivateApp(params.appId, params.appName);
+        // add new app to the list
+        MFT.ApplinkController.getApplicationModel(params.appId).appInfo.set('appName', params.appName);
+        MFT.ApplinkController.getApplicationModel(params.appId).set('appId', params.appId);
+
+    },
+
+    /**
      * Method to set language for TTS and VR components with parameters sent from ApplinkCore to UIRPC
      * @param {string} lang Language code
      */
@@ -174,13 +192,18 @@ MFT.ApplinkModel = Em.Object.create({
      * resetGlobalProperties
      * @param {String} propertyName Name of propety to reset.
      */
-    resetProperties: function(propertyName) {
-        if (propertyName == "HELPPROMPT"){
-            this.set('globalProperties.helpPrompt', this.globalPropertiesDefault.helpPrompt);
-        }
+    resetProperties: function( params ) {
 
-        if (propertyName == "TIMEOUTPROMPT"){
-            this.set('globalProperties.timeoutPrompt', this.globalPropertiesDefault.timeoutPrompt);
+        var i,
+            len = params.properties.length;
+        for (i=0; i < len; i++){
+            if ( params.properties[i] == "HELPPROMPT" ){
+                this.set('globalProperties.helpPrompt', this.globalPropertiesDefault.helpPrompt);
+            }
+
+            if ( params.properties[i] == "TIMEOUTPROMPT" ){
+                this.set('globalProperties.timeoutPrompt', this.globalPropertiesDefault.timeoutPrompt);
+            }
         }
     },
 
@@ -220,7 +243,7 @@ MFT.ApplinkModel = Em.Object.create({
 
     onGetDeviceList: function( params ){
         if (null == params.resultCode || (null != params.resultCode && "SUCCESS" == params.resultCode)) {
-            if( MFT.States.info.devicelist.active && params.deviceList){
+            if( MFT.States.info.devicelist.active && params.deviceList && params.deviceList.length){
                 MFT.DeviceLilstView.ShowDeviceList( params );
             }
         }
@@ -231,10 +254,7 @@ MFT.ApplinkModel = Em.Object.create({
      * @param {Object} message Object with parameters come from ApplinkCore.
      */
     onApplinkSetAppIcon: function( message ){
-        this.set('listOfIcons.' + message.appId, message.syncFileName );
-        var tempId = MFT.ApplinkMediaModel.activeAppId;
-        MFT.ApplinkMediaModel.activeAppId = -1;
-        MFT.ApplinkMediaModel.set('activeAppId', tempId);
+        MFT.ApplinkController.getApplicationModel(message.appId).set('appIcon', message.syncFileName );
     },
 
     /**
@@ -303,6 +323,37 @@ MFT.ApplinkModel = Em.Object.create({
     * @param {Number}
     */
     deleteCommandVR: function ( commandId ) {    
-      MFT.VRPopUp.DeleteCommand( commandId );
+        MFT.VRPopUp.DeleteCommand( commandId );
+    },
+
+    onDeactivateApp: function ( target, appId, appName ) {    
+
+        var dest = target.split('.'),
+            reason;
+
+        switch( dest[0] ){
+            case 'media' :{
+                reason = 'AUDIO';
+                break;
+            }
+            case "phone" :{
+                reason = 'PHONEMENU';
+                break;
+            }
+            case "navigation" :{
+                reason = 'NAVIGATIONMAP';
+                break;
+            }
+            case "settings" :{
+                reason = 'SYNCSETTINGS';
+                break;
+            }
+            default:{
+                reason = 'GENERAL';
+                break;
+            }
+        }
+
+        FFW.AppLinkCoreClient.DeactivateApp( appName, reason, appId );
     }
 });

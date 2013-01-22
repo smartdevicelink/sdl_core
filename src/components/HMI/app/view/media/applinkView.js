@@ -44,6 +44,15 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 		}
 	}.observes('MFT.ApplinkController.protocolVersion2State'),
 
+    /*
+     * Sends notification to model with name of destination view
+     */
+    deactivateApplication: function(){
+     	if( !MFT.States.media.applink.active ){
+     		MFT.ApplinkModel.onDeactivateApp( MFT.TransitionIterator.finalPath, MFT.ApplinkMediaController.model.appId, MFT.ApplinkMediaController.model.appInfo.appName );
+     	}
+    }.observes('MFT.States.media.applink.active'),
+
 	innerMenu: MFT.MenuList.extend({
 
 		content: Em.ContainerView.extend({
@@ -127,11 +136,11 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 	}),
 
 	/** Calls Applink SystemContext switcher when turn On/Of Applink application */
-	onTurnOnApplinkApp: function(systemContextValue){
+	/*onTurnOnApplinkApp: function(systemContextValue){
 		if(MFT.States.media.applink.active){
             MFT.ApplinkMediaController.onSystemContextSwitcher(MFT.ApplinkMediaController.eSystemContext.application);
 		}else{
             MFT.ApplinkMediaController.onSystemContextSwitcher(MFT.ApplinkMediaController.eSystemContext.main);
 		}
-	}.observes('MFT.States.media.applink.active')
+	}.observes('MFT.States.media.applink.active')*/
 });

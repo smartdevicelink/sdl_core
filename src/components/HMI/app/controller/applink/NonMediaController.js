@@ -13,7 +13,7 @@
 MFT.NonMediaController = Em.Object.create({
 	
 	// Model binding
-	modelBinding: 'MFT.ApplinkNonMediaModel',
+	model: null,
 	
     /**
       * Text for label on Perform Interaction screen
@@ -27,14 +27,20 @@ MFT.NonMediaController = Em.Object.create({
 		MFT.States.goToState('info.nonMedia.options.subMenu');
 	},
 
-    /** Switching on Application */
+    /**
+     * Switching on Application
+     *
+     */
     turnOnApplink: function(element){
-
-        MFT.ApplinkNonMediaModel.appInfo.set('appName', element.appName);
-        FFW.AppLinkCoreClient.ActivateApp(element.appId);
-
-        MFT.MediaController.turnOnApplinkNonMedia();
         
+        this.set('model', MFT.ApplinkController.getApplicationModel(element.appId) );
+        
+        FFW.AppLinkCoreClient.ActivateApp(element.appId);
+        
+        // Set Applink Data active
+        //MFT.ApplinkNonMediaModel.set('active',true);
+        
+        // Go to Applink state
+        MFT.States.goToState('info.nonMedia');
     }
-
 });

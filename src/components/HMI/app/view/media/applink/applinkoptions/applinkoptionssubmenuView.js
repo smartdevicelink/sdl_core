@@ -66,22 +66,22 @@ MFT.ApplinkOptionsSubMenuView = Em.ContainerView.create(MFT.LoadableView,{
 
         this.listOfSubmenuButtons.list.refresh();
 
-        count = MFT.ApplinkMediaModel.subMenuCommands.length;
+        count = MFT.ApplinkMediaController.model.subMenuCommands.length;
         for(var i = 0; i < count; i++){
-            if( MFT.ApplinkMediaController.currentApplinkSubMenuid == MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.parentID ){
+            if( MFT.ApplinkMediaController.currentApplinkSubMenuid == MFT.ApplinkMediaController.model.subMenuCommands[i].menuParams.parentID ){
 
                 this.listOfSubmenuButtons.items.push({
                     type:       MFT.Button,
                     params:     {
                         action:                 'onCommand',
                         target:                 'MFT.ApplinkMediaController',
-                        commandId:              MFT.ApplinkMediaModel.subMenuCommands[i].cmdId,
-                        text:                   MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.menuName,
-                        parentID:               MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.parentID,
-                        appId:                  MFT.ApplinkMediaModel.subMenuCommands[i].appId,
-                        icon:                   MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.icon,
+                        commandId:              MFT.ApplinkMediaController.model.subMenuCommands[i].cmdId,
+                        text:                   MFT.ApplinkMediaController.model.subMenuCommands[i].menuParams.menuName,
+                        parentID:               MFT.ApplinkMediaController.model.subMenuCommands[i].menuParams.parentID,
+                        appId:                  MFT.ApplinkMediaController.model.subMenuCommands[i].appId,
+                        icon:                   MFT.ApplinkMediaController.model.subMenuCommands[i].menuParams.icon,
                         className:              'rs-item',
-                        templateName:           MFT.ApplinkMediaModel.subMenuCommands[i].menuParams.icon ? 'rightIcon' : 'text'
+                        templateName:           MFT.ApplinkMediaController.model.subMenuCommands[i].menuParams.icon ? 'rightIcon' : 'text'
                     }                                   
                 });
             }

@@ -17,11 +17,32 @@ using namespace NsAppLinkRPCV2;
 
 SoftButton::SoftButton(const SoftButton& c)
 {
-  *this=c;
+  this->isHighlighted = c.get_isHighlighted();
+  this->softButtonID = c.get_softButtonID();
+  this->systemAction = c.get_systemAction();
+  this->text = c.get_text();
+  this->type = c.get_type();
+
   this->image = 0;
- 
-  if (c.image)
-    this->image = new Image(*c.image); 
+
+  if (c.get_image())
+    this->image = new Image(*(c.get_image()));
+}
+
+SoftButton& SoftButton::operator=(const SoftButton& c)
+{
+  this->isHighlighted = c.get_isHighlighted();
+  this->softButtonID = c.get_softButtonID();
+  this->systemAction = c.get_systemAction();
+  this->text = c.get_text();
+  this->type = c.get_type();
+
+  this->image = 0;
+
+  if (c.get_image())
+    this->image = new Image(*(c.get_image()));
+
+  return *this;
 }
 
 
@@ -86,7 +107,7 @@ bool SoftButton::set_type(const SoftButtonType& type_)
 
 
 
-const Image* SoftButton::get_image(void) const 
+const Image* SoftButton::get_image(void) const
 {
   return image;
 }
@@ -104,19 +125,19 @@ unsigned int SoftButton::get_softButtonID(void) const
 }
 
 
-const SystemAction& SoftButton::get_systemAction(void) const 
+const SystemAction& SoftButton::get_systemAction(void) const
 {
   return systemAction;
 }
 
 
-const std::string& SoftButton::get_text(void) const 
+const std::string& SoftButton::get_text(void) const
 {
   return text;
 }
 
 
-const SoftButtonType& SoftButton::get_type(void) const 
+const SoftButtonType& SoftButton::get_type(void) const
 {
   return type;
 }

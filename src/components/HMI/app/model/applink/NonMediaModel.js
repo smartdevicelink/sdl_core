@@ -10,7 +10,7 @@
  * @author		Artem Petrosyan
  */
 
-MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.create({
+MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
 
     /**
      * Info data

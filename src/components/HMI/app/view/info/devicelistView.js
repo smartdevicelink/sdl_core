@@ -14,17 +14,23 @@ MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
 
     classNames:        ['info_apps_deviceList_view'],
 
-	/** View Id */	
+	/**
+     * View Id
+     */	
     elementId:          'info_apps_deviceList_view',
 
-	/** View Components*/
+	/**
+     * View Components
+     */
     childViews:         [
                             'backButton',
                             'listOfDevices',
                             'deviceListLabel'
                         ],
 
-    /** Button to return to previous view*/
+    /** 
+     * Button to return to previous view
+     */
     backButton: MFT.Button.extend({
         classNames:        ['backButton','button'],     
         action:            'turnChangeDeviceViewBack',
@@ -32,6 +38,9 @@ MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
         icon:              'images/media/ico_back.png',   
     }),
 
+    /** 
+     * Label in title
+     */
     deviceListLabel:    MFT.Label.extend({
 
         elementId:          'deviceListLabel',
@@ -41,37 +50,37 @@ MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
         content:            'Change Devices'
     }),
 
+    /*
+     * Function calls when notification from RPC comes
+     * and creates buttons to choose devices
+     */
     ShowDeviceList: function( params ){
 
-        this.clearDeviceList();
-
-        if( !(params.deviceList.length == 1 && params.deviceList[0] == "") ){
-            for(var i = 0; i < params.deviceList.length; i++){
-                this.get('listOfDevices.list.childViews').pushObject(
-                    MFT.Button.create({
-                        deviceName:             params.deviceList[i],
-                        icon:                   params.icon,
-                        text:                   params.deviceList[i],
-                        classNames:             'ffw-button notpressed list-item',
-                        templateName:           params.icon ? 'rightIcon' : 'text',
-                        actionUp: function(){
-                            MFT.ApplinkController.onDeviceChoosed( this );
-                        }
-                    })
-                );
-            }
+        var i,
+            len = params.deviceList.length;
+        for(i = 0; i < len; i++){
+            this.get('listOfDevices.list.childViews').pushObject(
+                MFT.Button.create({
+                    deviceName:             params.deviceList[i],
+                    icon:                   params.icon,
+                    text:                   params.deviceList[i],
+                    classNames:             'ffw-button notpressed list-item',
+                    templateName:           params.icon ? 'rightIcon' : 'text',
+                    action:                 'onDeviceChoosed',
+                    target:                 'MFT.ApplinkController',
+                    onDown:                 false
+                })
+            );
         }
     },
 
+    /*
+     * Function calls each time when user enters Change Device menu
+     * and clear all old data about devices
+     */
     clearDeviceList: function(){
-        if( this.stateObj.active ){
-            var count = this.get('listOfDevices.list.childViews').length - 1;
-            for(var i = count; i>=0; i--){
-                this.get('listOfDevices.list.childViews').removeObject(
-                    this.get('listOfDevices.list.childViews')[0]
-                );
-            }
-        }
+        this.get('listOfDevices.list').removeAllChildren();
+        this.listOfDevices.rerender();
     }.observes('this.stateObj.active'),
 
     /**
@@ -84,6 +93,6 @@ MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
         itemsOnPage:    5,
                 
         /** Items array */
-        items:          new Array()
+        items:          []
     })
 });

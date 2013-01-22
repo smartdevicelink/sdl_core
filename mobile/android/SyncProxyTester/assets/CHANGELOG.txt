@@ -1,4 +1,7 @@
 [CW4]
+* ShowConstantTBT dialog: allow to customize soft buttons.
++ Create DialNumber dialog.
+* Amend AlertManeuver dialog: remove Maneuver complete checkbox and add customizable Soft Buttons.
 * Unify SubscribeVehicleData and UnsubscribeVehicleData dialogs.
 + Alert, Show, ScrollableMessage dialogs: automatically check the Include Soft Buttons checkbox when the user has explicitly set the soft buttons.
 * Fix: don't save the edited list of soft buttons when clicked Cancel in the SoftButtons List activity.

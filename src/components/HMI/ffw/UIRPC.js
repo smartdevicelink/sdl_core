@@ -151,10 +151,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    case "UI.ResetGlobalProperties":{
 
 			    // reset all requested properties
-				for (var i=0;i<request.params.properties.length;i++)
-				{
-				    MFT.ApplinkModel.resetProperties(request.params.properties[i]);
-				}
+				MFT.ApplinkModel.resetProperties(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 

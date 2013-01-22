@@ -32,8 +32,8 @@ MFT.ApplinkController = Em.Object.create({
 	 * @type object
 	 */
 	applicationModels: {
-		0:	'ApplinkMediaModel',
-		1:	'ApplinkNonMediaModel'
+		0:	MFT.ApplinkMediaModel,
+		1:	MFT.ApplinkNonMediaModel
 	},
 
     /**
@@ -80,10 +80,9 @@ MFT.ApplinkController = Em.Object.create({
 	
 	/**
 	 * Register application
-	 * @desc ...
 	 *
-	 * @param applicationId: Number
-	 * @param applicationType: Number
+	 * @param {Number} applicationId
+	 * @param {Number} applicationType
 	 */
 	registerApplication: function( applicationId, applicationType ) {
 		if ( MFT.ApplinkModel.registeredApps[ applicationId ] ) {
@@ -91,7 +90,7 @@ MFT.ApplinkController = Em.Object.create({
 			return;
 		}
 		
-		MFT.ApplinkModel.registeredApps[ applicationId ] = applicationType;
+		MFT.ApplinkModel.registeredApps[ applicationId ] = this.applicationModels[applicationType].create();
 		//Em.Logger.log('Application ['+ applicationId +'] registered!');
 	},
 
@@ -137,13 +136,12 @@ MFT.ApplinkController = Em.Object.create({
 
 	/**
 	 * Get application model
-	 * @desc ...
 	 *
-	 * @param applicationId: Number
-	 * @return Object Model
+	 * @param {Number} Application id
+	 * @return {Object} Application model
 	 */
 	getApplicationModel: function( applicationId ) {
-		return MFT[ this.applicationModels[ MFT.ApplinkModel.registeredApps[ applicationId ] ] ];
+		return MFT.ApplinkModel.registeredApps[ applicationId ];
 	},
 
 	/* Function returns ChangeDeviceView 
