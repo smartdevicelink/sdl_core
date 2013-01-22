@@ -1,3 +1,9 @@
+/**
+* \file AppLinkRawMessage.cpp
+* \brief AppLinkRawMessage class source file.
+* \author PVyshnevska
+*/
+
 #include "ProtocolHandler/AppLinkRawMessage.h"
 
 using namespace NsProtocolHandler;

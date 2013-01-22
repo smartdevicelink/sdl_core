@@ -1,3 +1,9 @@
+/**
+* \file ProtocolHandler.cpp
+* \brief ProtocolHandler class source file.
+* \author PVyshnevska
+*/
+
 #include <pthread.h>
 #include <signal.h>
 #include <memory.h>
@@ -50,33 +56,6 @@ void ProtocolHandler::setSessionObserver( ISessionObserver * observer )
     }
 
     mSessionObserver = observer;
-}
-
-void ProtocolHandler::sendEndSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              unsigned int sessionID,
-              unsigned char protocolVersion,
-              unsigned int hashCode,
-              unsigned char serviceType )
-{
-    LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-
-    ProtocolPacket packet(protocolVersion,
-                                COMPRESS_OFF,
-                                FRAME_TYPE_CONTROL,
-                                serviceType,
-                                FRAME_DATA_END_SESSION,
-                                sessionID,
-                                0,
-                                hashCode);
-
-    if (RESULT_OK == sendFrame(connectionHandle, packet))
-    {
-        LOG4CPLUS_INFO(mLogger, "sendStartSessionAck() - BT write OK");
-    }
-    else
-    {
-        LOG4CPLUS_ERROR(mLogger, "sendStartSessionAck() - BT write FAIL");
-    }
 }
 
 void ProtocolHandler::sendEndSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
@@ -133,7 +112,6 @@ void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConne
 }
 
 void ProtocolHandler::sendStartSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-              unsigned char sessionID,
               unsigned char serviceType )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -145,7 +123,7 @@ void ProtocolHandler::sendStartSessionNAck( NsAppLink::NsTransportManager::tConn
                                 FRAME_TYPE_CONTROL,
                                 serviceType,
                                 FRAME_DATA_START_SESSION_NACK,
-                                sessionID,
+                                0x0,
                                 0,
                                 0);
 
@@ -512,11 +490,27 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager
             hashCode = packet -> getMessageId();
         }
 
-        int sesionHashCode = mSessionObserver -> onSessionEndedCallback( connectionHandle, currentSessionID, hashCode );
-        if ( -1 != sesionHashCode )
+        bool success = true;
+        int sessionHashCode = mSessionObserver -> onSessionEndedCallback( connectionHandle, currentSessionID, hashCode );
+
+        if ( -1 != sessionHashCode )
         {
-            sendEndSessionAck(connectionHandle, currentSessionID,
-                    packet -> getVersion(), sesionHashCode, packet -> getServiceType());
+            if ( 2 == packet -> getVersion() ) // check hash code only for second version of protocol.
+            {
+                if ( packet -> getMessageId() != sessionHashCode )
+                {
+                    success = false;
+                }
+            }
+        }
+        else
+        {
+            success = false;
+        }
+
+        if  ( success )
+        {
+            mMessageCounters.erase( sessionID );
         }
         else
         {
@@ -541,7 +535,7 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager
         else
         {
             LOG4CPLUS_INFO_EXT(mLogger, "Refused to create session " << packet -> getServiceType() << " type.");
-            sendStartSessionNAck(connectionHandle, 0x0, packet -> getServiceType());
+            sendStartSessionNAck(connectionHandle, packet -> getServiceType());
         }
     }
 

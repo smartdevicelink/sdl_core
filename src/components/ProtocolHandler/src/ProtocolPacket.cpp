@@ -1,3 +1,9 @@
+/**
+* \file ProtocolPacket.cpp
+* \brief ProtocolPacket class source file.
+* \author PVyshnevska
+*/
+
 #include <memory.h>
 #include "ProtocolHandler/ProtocolPacket.h"
 
@@ -206,7 +212,6 @@ RESULT_CODE ProtocolPacket::deserializePacket(const unsigned char * message, uns
     return RESULT_OK;
 }
 
-void pushConsecutiveFrame();
 unsigned char ProtocolPacket::getVersion() const
 {
     return mPacketHeader.version;

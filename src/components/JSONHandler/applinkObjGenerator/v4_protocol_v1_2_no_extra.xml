@@ -1168,7 +1168,7 @@
 <enum name="DeactivateReason">
 	<description>Enum of reasons of user navigating from application used by HMI.</description>
 	<element name="AUDIO">
-			<description>Navigated to audion(radio, etc)</description>
+			<description>Navigated to audio(radio, etc)</description>
 	</element>
 	<element name="PHONECALL">
 			<description>Navigated to make a call.</description>

@@ -169,6 +169,7 @@ namespace NsConnectionHandler
                     }
                     int sessionKey = keyFromPair(connectionHandle, sessionId);
                     mpConnectionHandlerObserver->onSessionEndedCallback(sessionKey, firstSessionID);
+                    result = sessionKey;
                 }
             }
         }
