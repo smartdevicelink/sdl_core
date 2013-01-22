@@ -2200,16 +2200,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 							}
 						} else if (adapter.getItem(which) == Names.DialNumber) {
-							DialNumber msg = new DialNumber();
-							msg.setNumber("3138675309");
-							
-							_msgAdapter.logMessage(msg, true);
-							
-							try {
-								ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-							} catch (SyncException e) {
-								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-							}
+							sendDialNumber();
 						}
 						
 						String function = adapter.getItem(which);
@@ -2218,6 +2209,39 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							curCount = 0;
 						}
 						messageSelectCount.put(function, curCount + 1);
+					}
+
+					private void sendDialNumber() {
+						AlertDialog.Builder builder;
+
+						Context mContext = adapter.getContext();
+						LayoutInflater inflater = (LayoutInflater) mContext
+								.getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.dialnumber, null);
+						final EditText txtPhoneNumber = (EditText) layout.findViewById(R.id.dialNumber_editPhoneNumber);
+						
+						builder = new AlertDialog.Builder(mContext);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								DialNumber msg = new DialNumber();
+								msg.setNumber(txtPhoneNumber.getText().toString());
+								
+								_msgAdapter.logMessage(msg, true);
+								
+								try {
+									ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+								} catch (SyncException e) {
+									_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+								}
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+						builder.setView(layout);
+						builder.show();
 					}
 					
 					private void updateDynamicFooter(EditText txtNumTicks,
