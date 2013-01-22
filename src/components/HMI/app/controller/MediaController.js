@@ -406,24 +406,6 @@ MFT.MediaController = Em.Object.create({
 
     },
 
-    /** Switching on Application */
-    turnOnApplinkNonMedia: function(element){
-
-        // Exit form player or radio
-        this.onPlayerExit();
-        this.onRadioExit();
-        // Set Applink Data active
-        MFT.ApplinkNonMediaModel.set('active',true);
-        // Go to Applink state
-        MFT.States.goToState('info.nonMedia');
-        // hide directTune
-        this.offDirectTune();
-        if(this.directTuneSelected){
-            this.set('directTuneSelected', false);
-        }
-
-    },
-
 	optionsBack: function(){
 		if(MFT.AmModel.active || MFT.FmModel.active || MFT.SiriusModel.active){
 			MFT.States.goToState('media.radio');
