@@ -619,7 +619,7 @@ namespace NsAppManager
                     NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
                     msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
                     MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionKey);
-                    NsRPC2Communication::UI::Show* show = new NsRPC2Communication::UI::Show;
+                    /*NsRPC2Communication::UI::Show* show = new NsRPC2Communication::UI::Show;
                     show->set_alignment(NsAppLinkRPC::TextAlignment());
                     show->set_appId(appId);
                     std::vector<std::string> customPresets;
@@ -634,7 +634,7 @@ namespace NsAppManager
                     std::vector<NsAppLinkRPCV2::SoftButton> softButtons;
                     show->set_softButtons(softButtons);
                     show->set_statusBar("");
-                    HMIHandler::getInstance().sendRequest(show);
+                    HMIHandler::getInstance().sendRequest(show);*/
 
                     NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                     appUnregistered->set_appName(appName);
@@ -1607,7 +1607,7 @@ namespace NsAppManager
                     MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionKey);
 
                     std::string appName = app->getName();
-                    core->removeAppFromHmi(app, sessionKey);
+                    // core->removeAppFromHmi(app, sessionKey);
 
                     NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                     appUnregistered->set_appName(appName);
@@ -3231,8 +3231,8 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    
-                    NsRPC2Communication::VehicleInfo::ReadDID * readDIDRequest = 
+
+                    NsRPC2Communication::VehicleInfo::ReadDID * readDIDRequest =
                         new NsRPC2Communication::VehicleInfo::ReadDID;
                     readDIDRequest->set_appId(app->getAppID());
                     readDIDRequest->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
@@ -5682,7 +5682,7 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__READDIDRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "ReadDID response is received from HMI.");
-                NsRPC2Communication::VehicleInfo::ReadDIDResponse * response = 
+                NsRPC2Communication::VehicleInfo::ReadDIDResponse * response =
                     static_cast<NsRPC2Communication::VehicleInfo::ReadDIDResponse*>(msg);
                 Application* app = core->getApplicationFromItemCheckNotNull(
                         core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
