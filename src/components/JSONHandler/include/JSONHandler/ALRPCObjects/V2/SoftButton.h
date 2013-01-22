@@ -24,11 +24,12 @@ namespace NsAppLinkRPCV2
   class SoftButton
   {
   public:
-  
+
     SoftButton(const SoftButton& c);
+    SoftButton& operator=(const SoftButton& c);
     SoftButton(void);
     virtual ~SoftButton();
-  
+
     bool checkIntegrity(void);
   // getters
 

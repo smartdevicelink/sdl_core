@@ -16,7 +16,17 @@ using namespace NsAppLinkRPCV2;
 
 Image::Image(const Image& c)
 {
-  *this=c;
+  this->imageType = c.get_imageType();
+  this->value = c.get_value();
+}
+
+
+Image& Image::operator=(const Image& c)
+{
+  this->imageType = c.get_imageType();
+  this->value = c.get_value();
+
+  return *this;
 }
 
 
@@ -49,13 +59,13 @@ bool Image::set_value(const std::string& value_)
 
 
 
-const ImageType& Image::get_imageType(void) const 
+const ImageType& Image::get_imageType(void) const
 {
   return imageType;
 }
 
 
-const std::string& Image::get_value(void) const 
+const std::string& Image::get_value(void) const
 {
   return value;
 }

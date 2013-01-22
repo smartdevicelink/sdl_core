@@ -22,10 +22,11 @@ namespace NsAppLinkRPCV2
   class Image
   {
   public:
-  
+
     Image(const Image& c);
+    Image& operator=(const Image& c);
     Image(void);
-  
+
     bool checkIntegrity(void);
   // getters
 
