@@ -149,6 +149,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final int SHOW_MAXSOFTBUTTONS = 8;
 	private static final int ALERTMANEUVER_MAXSOFTBUTTONS = 3;
 	private static final int SHOWCONSTANTTBT_MAXSOFTBUTTONS = 3;
+	private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
 
     private static SyncProxyTester _activity;
     private static ArrayList<Object> _logMessages = new ArrayList<Object>();
@@ -2177,49 +2178,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							dlg = builder.create();
 							dlg.show();
 						} else if (adapter.getItem(which) == Names.UpdateTurnList) {
-							UpdateTurnList msg = new UpdateTurnList();
-							
-							Turn t1 = new Turn();
-							t1.setNavigationText("Turn 1");
-							Image ti1 = new Image();
-							ti1.setValue("Turn1");
-							ti1.setImageType(ImageType.STATIC);
-							t1.setTurnIcon(ti1);
-							Turn t2 = new Turn();
-							t2.setNavigationText("Turn 2");
-							Image ti2 = new Image();
-							ti2.setValue("Turn2");
-							ti2.setImageType(ImageType.STATIC);
-							t2.setTurnIcon(ti2);
-							Vector<Turn> tarray = new Vector<Turn>();
-							tarray.add(t1);
-							tarray.add(t2);
-							msg.setTurnList(tarray);
-							
-							SoftButton sb1 = new SoftButton();
-							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-							sb1.setText("Reply");
-							sb1.setType(SoftButtonType.SBT_TEXT);
-							sb1.setIsHighlighted(false);
-							sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-							SoftButton sb2 = new SoftButton();
-							sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-							sb2.setText("Close");
-							sb2.setType(SoftButtonType.SBT_TEXT);
-							sb2.setIsHighlighted(false);
-							sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
-							Vector<SoftButton> sbarray = new Vector<SoftButton>();
-							sbarray.add(sb1);
-							sbarray.add(sb2);
-							msg.setSoftButtons(sbarray);
-							
-							_msgAdapter.logMessage(msg, true);
-							
-							try {
-								ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-							} catch (SyncException e) {
-								_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-							}
+							sendUpdateTurnList();
 						} else if (adapter.getItem(which) == Names.DialNumber) {
 							sendDialNumber();
 						}
@@ -2230,6 +2189,93 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							curCount = 0;
 						}
 						messageSelectCount.put(function, curCount + 1);
+					}
+
+					private void sendUpdateTurnList() {
+						AlertDialog.Builder builder;
+
+						final Context mContext = adapter.getContext();
+						LayoutInflater inflater = (LayoutInflater) mContext
+								.getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.updateturnlist, null);
+						final EditText txtTurnList = (EditText) layout.findViewById(R.id.updateturnlist_txtTurnList);
+						chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
+						
+						SoftButton sb1 = new SoftButton();
+						sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+						sb1.setText("Reply");
+						sb1.setType(SoftButtonType.SBT_TEXT);
+						sb1.setIsHighlighted(false);
+						sb1.setSystemAction(SystemAction.STEAL_FOCUS);
+						SoftButton sb2 = new SoftButton();
+						sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+						sb2.setText("Close");
+						sb2.setType(SoftButtonType.SBT_TEXT);
+						sb2.setIsHighlighted(false);
+						sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
+						currentSoftButtons = new Vector<SoftButton>();
+						currentSoftButtons.add(sb1);
+						currentSoftButtons.add(sb2);
+
+						Button btnSoftButtons = (Button) layout.findViewById(R.id.updateturnlist_btnSoftButtons);
+						btnSoftButtons.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								IntentHelper.addObjectForKey(currentSoftButtons,
+										Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
+								Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
+								intent.putExtra(Const.INTENT_KEY_SOFTBUTTONS_MAXNUMBER,
+										UPDATETURNLIST_MAXSOFTBUTTONS);
+								startActivityForResult(intent, Const.REQUEST_LIST_SOFTBUTTONS);
+							}
+						});
+						
+						builder = new AlertDialog.Builder(mContext);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								UpdateTurnList msg = new UpdateTurnList();
+								
+								String turnListString = txtTurnList.getText().toString();
+								// string to join/split footer turnList string
+								final String joinString = ",";
+								
+								Vector<Turn> tarray = new Vector<Turn>();
+								for (String turn : turnListString.split(joinString)) {
+									Turn t = new Turn();
+									t.setNavigationText(turn);
+									Image ti1 = new Image();
+									ti1.setValue("Turn");
+									ti1.setImageType(ImageType.STATIC);
+									t.setTurnIcon(ti1);
+									tarray.add(t);
+								}
+								msg.setTurnList(tarray);
+								if (chkIncludeSoftButtons.isChecked() &&
+										(currentSoftButtons != null) &&
+										(currentSoftButtons.size() > 0)) {
+									msg.setSoftButtons(currentSoftButtons);
+								}
+								currentSoftButtons = null;
+								chkIncludeSoftButtons = null;
+								
+								_msgAdapter.logMessage(msg, true);
+								
+								try {
+									ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+								} catch (SyncException e) {
+									_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+								}
+							}
+						});
+						builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								currentSoftButtons = null;
+								chkIncludeSoftButtons = null;
+								dialog.cancel();
+							}
+						});
+						builder.setView(layout);
+						builder.show();
 					}
 
 					private void sendDialNumber() {
