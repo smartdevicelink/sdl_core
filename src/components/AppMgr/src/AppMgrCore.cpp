@@ -2692,7 +2692,24 @@ namespace NsAppManager
 
                         if(object->get_cmdIcon())
                         {
-                            addCmd->set_cmdIcon(*object->get_cmdIcon());
+                            NsAppLinkRPCV2::Image* cmdIcon = const_cast<NsAppLinkRPCV2::Image*>(object->get_cmdIcon());
+
+                            char currentAppPath[FILENAME_MAX];
+                            char fullPathToIcon[FILENAME_MAX];
+
+                            memset(currentAppPath, 0, FILENAME_MAX);
+                            memset(fullPathToIcon, 0, FILENAME_MAX);
+
+                            getcwd(currentAppPath, FILENAME_MAX);
+                            snprintf(fullPathToIcon, FILENAME_MAX - 1, "%s/%s/%s"
+                                , currentAppPath, app->getName().c_str(), cmdIcon->get_value().c_str());
+
+                            LOG4CPLUS_INFO_EXT(mLogger, "Full path to sync file name: " << fullPathToIcon);
+
+                            cmdIcon->set_value(fullPathToIcon);
+                            addCmd->set_cmdIcon(*cmdIcon);
+
+                            // addCmd->set_cmdIcon(*object->get_cmdIcon());
                         }
 
                         CommandParams params;
