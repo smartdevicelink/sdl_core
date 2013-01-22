@@ -10,7 +10,7 @@
  * @author		Andriy Melnik
  */
 
-MFT.ApplinkMediaModel = MFT.ApplinkAppModel.create({
+MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 	
 	active: false,
 

@@ -58,8 +58,8 @@ MFT.ApplinkModel = Em.Object.create({
      * @type object
      */
     registeredApps: {
-        "-1": 0,            // Used for media applications
-        "-2": 1             // Used for non media applications
+        "-1": MFT.ApplinkMediaModel.create(),            // Used for media applications
+        "-2": MFT.ApplinkNonMediaModel.create(),         // Used for non media applications
     },
 
     /**
