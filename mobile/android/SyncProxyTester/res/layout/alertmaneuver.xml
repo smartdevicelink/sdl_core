@@ -18,12 +18,25 @@
         android:layout_width="fill_parent" android:layout_height="wrap_content"
         android:visibility="visible" android:freezesText="true">
     </EditText>
-    <CheckBox android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:id="@+id/chkManeuverComplete"
-        android:text="Maneuver Complete?" android:checked="false">
-    </CheckBox>
-    <CheckBox android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:id="@+id/chkIncludeSBs"
-        android:text="Include SoftButtons?" android:checked="false">
-    </CheckBox>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" >
+
+        <CheckBox
+            android:id="@+id/chkIncludeSBs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="Include" />
+
+        <Button
+            android:id="@+id/alertManeuver_btnSoftButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Soft Buttons" />
+
+    </LinearLayout>
+
 </LinearLayout>
