@@ -1,15 +1,15 @@
 /**
  * @name MFT.ApplinkVehicleInfoModel
- *
- * @desc Applink model with vehicle information used instead of CAN network. VehicleInfoModel is simulation of real CAN network.
- *
+ * 
+ * @desc Applink model with vehicle information used instead of CAN network. VehicleInfoModel is simulation of real CAN network. 
+ * 
  * @category    Model
  * @filesource  app/model/applink/ApplinkVehicleInfoModel.js
  * @version     1.0
  *
  * @author      Andriy Melnik
  */
-
+ 
 MFT.ApplinkVehicleInfoModel = Em.Object.create({
 
     /**
@@ -54,12 +54,12 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
      * Type of current vehicle: make of the vehicle, model of the vehicle,
      * model Year of the vehicle, trim of the vehicle.
      * @type {Object}
-     */
+     */ 
     vehicleType:{
       make:       "Ford",
       model:      "Fiesta",
       modelYear:  2013,
-      trim:       "SE"
+      trim:       "SE"  
     },
 
     /**
@@ -152,6 +152,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
 
     /**
      * Method calls GetVehicleType response
+     * @type {int}
      */
     getVehicleType: function( id ){
         FFW.VehicleInfo.GetVehicleTypeResponse( this.vehicleType, id );
@@ -160,6 +161,8 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
     /**
      * Applink VehicleInfo.GetDTCs handler
      * fill data for response about vehicle errors
+     * @type {Object} params
+     * @type {int} id
      */
     vehicleInfoGetDTCs: function( params, id ){
         var data = [],
@@ -185,6 +188,8 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
     /**
      * Applink VehicleInfo.ReadDID handler
      * send response about vehicle conditions
+     * @type {Object} params
+     * @type {int} id
      */
     vehicleInfoReadDID: function( params, id ){
         var data = [],
@@ -197,11 +202,10 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             info = this.ecuDIDData[1].data;
             result = "SUCCESS";
         }else{
-            info = "";
             result = "INVALID_DATA";
         }
 
-
+        
         for(i = 0; i < params.didLocation.length; i++) {
             if(i < 10){
                 dataResult[i] = 'SUCCESS';
@@ -221,8 +225,9 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
         }
     },
 
-    /**
+    /** 
      * Function returns response message to VehicleInfoRPC
+     * @type {Object} message
      */
     getVehicleData: function( message ){
 
@@ -230,7 +235,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
 
     },
 
-    /**
+    /** 
      * Function send all vehicle conditions on FFW.VehicleInfo.OnVehicleData
      * fo notification when data changes
      */
@@ -244,4 +249,4 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
 
     }.observes('this.vehicleData.VEHICLEDATA_PRNDLSTATUS.data')
 });
-
+ 

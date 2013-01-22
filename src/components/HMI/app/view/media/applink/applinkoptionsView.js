@@ -41,7 +41,7 @@ MFT.ApplinkOptionsView = Em.ContainerView.create(MFT.LoadableView,{
         content:            'Options'
     }),
 
-    AddCommand: function( commandId, params, appId, icon ){
+    AddCommand: function( commandId, params, icon, appId ){
 
         this.get('listOfOptions.list.childViews').pushObject(
             MFT.Button.create({

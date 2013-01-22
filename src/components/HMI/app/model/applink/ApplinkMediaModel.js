@@ -17,32 +17,34 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 	applinkConnectionStatus: true,
 
 	/**
-	  * RangedValue for Slider
-	  */
+	 * RangedValue for Slider
+	 */
 	applinkSliderContent:		MFT.RangedValue.create({range: 10, value:3, cycle: false, minValue: 0}),
 
 	/**
-	  * Array of commands in ApplinkOptionsView
-	  */
+	 * Array of commands in ApplinkOptionsView
+	 */
     optionsCommands:			new Array(),
 
     /**
-	  * Array of commands for VR
-	  */
+	 * Array of commands for VR
+	 */
     voiceRecognitionCommands:	new Array(),
 
     /**
-      * Set of params of Slider View
-      */
+     * Set of params of Slider View
+     */
     sliderParams: {
         headerLabel: "headerLabel",
         footerLabel: "footerLabel"
     },
 
 	/**
-	  * Timer for Media Clock
-	  */
+	 * Timer for Media Clock
+	 */
 	timer:			null,
+
+
 
     newCommandId:   null, 
 
@@ -127,7 +129,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 	startTimer: function(){
 		if(!this.pause){
 			this.timer = setInterval(function(){
-				MFT.ApplinkMediaModel.set('currTime', MFT.ApplinkMediaModel.currTime+1);
+				MFT.ApplinkMediaController.model.set('currTime', MFT.ApplinkMediaController.model.currTime+1);
 			}, 1000);
 		}else{
 			clearInterval(this.timer);
@@ -164,7 +166,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
     /** Add command to Options list */
     onApplinkOptionsAddCommand: function( commandId, params, icon, appId ){
 
-       MFT.ApplinkOptionsView.AddCommand( commandId, params, appId );
+       MFT.ApplinkOptionsView.AddCommand( commandId, params, icon, appId );
 
     },
 
@@ -216,8 +218,8 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 
     /** Applink AddCommand handler */
     onApplinkAddCommand: function(params){
-        if( params.menuParams.parentID == 0 || params.menuParams.parentID == null ){
-            this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams, params.cmdIcon, params.appId);
+        if( params.menuParams.parentID == 0 || !params.menuParams.parentID ){
+            this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams, params.cmdIcon ? params.cmdIcon.value : null , params.appId);
         }else{
             this.subMenuCommands.push(params);
             if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){

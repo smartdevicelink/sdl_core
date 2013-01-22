@@ -80,7 +80,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * Client disconnected.
 	 */
 	onRPCDisconnected: function() {
-		//MFT.ApplinkMediaModel.onApplicationDisconected();
+		//MFT.ApplinkMediaController.model.onApplicationDisconected();
 	},
 
 	/*
@@ -128,17 +128,8 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		this._super();
 
 		if (notification.method == this.onAppRegisteredNotification)
-		{	
-			if( notification.params.isMediaApplication ){
-				MFT.ApplinkController.registerApplication(notification.params.appId, 0);
-			}else{
-				MFT.ApplinkController.registerApplication(notification.params.appId, 1);
-			}
-			MFT.VRPopUp.AddActivateApp(notification.params.appId, notification.params.appName);
-			// add new app to the list
-			//MFT.TTSPopUp.ActivateTTS(notification.params.appName + " connected!");
-			MFT.ApplinkController.getApplicationModel(notification.params.appId).appInfo.set('appName', notification.params.appName);
-			
+		{
+			MFT.ApplinkModel.onAppRegistered( notification.params );
 			this.getAppList();
 		}
 
@@ -252,6 +243,26 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"params"	:	{
 				"appName":	MFT.ApplinkController.getApplicationModel(appId).appInfo.appName,
 				"appId":	appId
+			}
+		};
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * handle RPC requests here
+ 	 */	
+	DeactivateApp: function( appName, reason, appId ) {
+		Em.Logger.log("FFW.ALCore.DeactivateApp");
+
+		// send request
+
+		var JSONMessage = {
+			"jsonrpc"	:	"2.0",
+			"method"	:	"AppLinkCore.DeactivateApp",
+			"params"	:	{
+				"appName":	appName,
+				"appId":	appId,
+				"reason":	reason
 			}
 		};
 		this.client.send(JSONMessage);

@@ -119,8 +119,8 @@ MFT.MediaController = Em.Object.create({
 			MFT.BTModel.set('active',false);
 		}
 
-        if(MFT.ApplinkMediaModel.active){
-        	MFT.ApplinkMediaModel.set('active',false);
+        if(MFT.ApplinkMediaController.model.active){
+        	MFT.ApplinkMediaController.model.set('active',false);
         }
 	},
 	
@@ -395,7 +395,7 @@ MFT.MediaController = Em.Object.create({
         this.onPlayerExit();
         this.onRadioExit();
         // Set Applink Data active
-        MFT.ApplinkMediaModel.set('active',true);
+        //MFT.ApplinkMediaController.model.set('active',true);
         // Go to Applink state
         MFT.States.goToState('media.applink');
         // hide directTune

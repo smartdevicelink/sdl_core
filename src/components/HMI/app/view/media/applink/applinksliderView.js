@@ -37,7 +37,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
 
         classNames:         'initialText',
 
-        contentBinding:     'MFT.ApplinkMediaModel.appInfo.appName'
+        contentBinding:     'MFT.ApplinkMediaController.model.appInfo.appName'
     }),
 
     headerLabel:    MFT.Label.extend({
@@ -46,7 +46,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
 
         classNames:         'headerLabel',
 
-        contentBinding:     'MFT.ApplinkMediaModel.sliderParams.headerLabel'
+        contentBinding:     'MFT.ApplinkMediaController.model.sliderParams.headerLabel'
     }),
 
     footerLabel:    MFT.Label.extend({
@@ -55,12 +55,12 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
 
         classNames:         'footerLabel',
 
-        contentBinding:     'MFT.ApplinkMediaModel.sliderParams.footerLabel'
+        contentBinding:     'MFT.ApplinkMediaController.model.sliderParams.footerLabel'
     }),
 
     footerText: function(){
-        return MFT.ApplinkMediaModel.sliderParams.footerLabel[MFT.ApplinkMediaModel.applinkSliderContent.value];
-    }.property('MFT.ApplinkMediaModel.applinkSliderContent.value'),
+        return MFT.ApplinkMediaController.model.sliderParams.footerLabel[MFT.ApplinkMediaController.model.applinkSliderContent.value];
+    }.property('MFT.ApplinkMediaController.model.applinkSliderContent.value'),
 
     afterRender: function(){
         //this.activate();
@@ -95,7 +95,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                     icon:       'images/common/minus-ico.png',
                     actionDown: function() {
                         this._super();
-                        MFT.ApplinkMediaModel.applinkSliderContent.decrease();
+                        MFT.ApplinkMediaController.model.applinkSliderContent.decrease();
                         FFW.UI.sendSliderResult("SUCCESS");
                     }
                 }),
@@ -103,7 +103,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                 /** adjust */
                 led: MFT.Indicator.create({
                     classNames:         'ledContainer ico',
-                    contentBinding:     'MFT.ApplinkMediaModel.applinkSliderContent',
+                    contentBinding:     'MFT.ApplinkMediaController.model.applinkSliderContent',
                     indActiveClass:     'led',
                     indDefaultClass:    'led-inactive',
                 }),
@@ -114,7 +114,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                     icon:       'images/common/plus-ico.png',
                     actionDown: function() {
                         this._super();
-                        MFT.ApplinkMediaModel.applinkSliderContent.increase();
+                        MFT.ApplinkMediaController.model.applinkSliderContent.increase();
                         FFW.UI.sendSliderResult("SUCCESS");
                     }
                 })
@@ -123,7 +123,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
         );
 
         this.get('childViews')[4].set( 'style', 
-            'width:' + (MFT.ApplinkMediaModel.applinkSliderContent.range * 12 + 118) + 'px; left:' + ( 340 - MFT.ApplinkMediaModel.applinkSliderContent.range * 6) + 'px;' );
+            'width:' + (MFT.ApplinkMediaController.model.applinkSliderContent.range * 12 + 118) + 'px; left:' + ( 340 - MFT.ApplinkMediaController.model.applinkSliderContent.range * 6) + 'px;' );
 
     },
 /*
@@ -191,7 +191,7 @@ MFT.ApplinkSliderView = Em.ContainerView.create(MFT.LoadableView, {
                 //action:             'select',
                 //target:             'MFT.MCSController',
                 //contentBinding:     'MFT.MCSController.activeSeat.' + (this.get('index') - 1),
-                contentBinding:     'MFT.ApplinkMediaModel.applinkSliderContent',
+                contentBinding:     'MFT.ApplinkMediaController.model.applinkSliderContent',
                 indActiveClass:     'led',
                 indDefaultClass:    'led-inactive',
 /*

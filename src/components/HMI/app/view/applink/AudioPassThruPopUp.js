@@ -1,8 +1,8 @@
 /**
  * @name MFT.AudioPassThruPopUp
- *
+ * 
  * @desc AudioPassThruPopUp module visual representation
- *
+ * 
  * @category    View
  * @filesource    app/view/applink/AudioPassThruPopUp.js
  * @version        2.0
@@ -117,9 +117,9 @@ MFT.AudioPassThruPopUp = Em.ContainerView.create({
      * and show PopUp with data come from ApplinkCorel when activity flag become true
      */
     AudioPassThruActivity: function(){
-
+        
         if( this.activate ){
-
+            
             var self = this,
                 data = MFT.ApplinkModel.AudioPassThruData;
 
@@ -129,7 +129,7 @@ MFT.AudioPassThruPopUp = Em.ContainerView.create({
 
             this.set('content1',    data.audioPassThruDisplayText1);
             this.set('content2',    data.audioPassThruDisplayText2);
-
+            
             clearTimeout(this.timer);
             this.timer = setTimeout(function(){
                 MFT.ApplinkController.performAudioPassThruResponse("SUCCESS");

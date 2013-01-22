@@ -123,7 +123,7 @@ MFT.InfoView = Em.ContainerView.create( MFT.LoadableView, {
 				    return MFT.NonMediaController.model ? false : true;
 				}.property('MFT.NonMediaController.model'),
 				textBinding:		'MFT.NonMediaController.model.appInfo.appName',
-				icon:				  'images/info/info_leftMenu_apps_ico.png',
+				iconBinding:		'MFT.NonMediaController.model.appIcon',
 				action:				'onState',
 				target:				'MFT.InfoController',
 			})

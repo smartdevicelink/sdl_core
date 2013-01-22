@@ -11,27 +11,27 @@
 
 FFW.VehicleInfo = FFW.RPCObserver.create({
         
-    /*
+    /**
      *  access to basic RPC functionality
      */     
      client:        FFW.RPCClient.create({ componentName: "VehicleInfo" }),
     
     
-    /*
+    /**
      * connect to RPC bus
      */
     connect: function() {
         this.client.connect(this, 600);
     },
 
-    /*
+    /**
      * disconnect from RPC bus
      */
     disconnect: function() {
         this.client.disconnect();
     },
 
-    /*
+    /**
      * Client is registered - we can send request starting from this point of time
      */ 
     onRPCRegistered: function () {
@@ -39,7 +39,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
         this._super();
     },
     
-    /*
+    /**
      * Client is unregistered - no more requests
      */ 
     onRPCUnregistered: function () {
@@ -47,14 +47,14 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
         this._super();
     },
 
-    /*
+    /**
      * Client disconnected.
      */
     onRPCDisconnected: function() {
 
     },
 
-    /*
+    /**
      * when result is received from RPC component this function is called
      * It is the propriate place to check results of reuqest execution
      * Please use previously store reuqestID to determine to which request repsonse belongs to
@@ -64,7 +64,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
         this._super();
      },
     
-    /*
+    /**
      * handle RPC erros here
      */ 
     onRPCError: function(error) {
@@ -72,7 +72,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
         this._super();
     },
 
-    /*
+    /**
      * handle RPC notifications here 
      */ 
     onRPCNotification: function(notification) {
@@ -80,8 +80,9 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
         this._super();
     },
     
-    /*
+    /**
      * handle RPC requests here
+     * @type {Object} request
      */ 
     onRPCRequest: function(request) {
         Em.Logger.log("FFW.VehicleInfo.onRPCRequest");
@@ -131,8 +132,9 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
         }
     },
 
-    /*
+    /**
      * Notifies if data was changed
+     * @type {Object} params
      */ 
     OnVehicleData: function( params ) {
         Em.Logger.log("FFW.VehicleInfo.OnVehicleData");
@@ -147,8 +149,10 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
     },
 
 
-    /*
+    /**
      * GetVehicleType Response 
+     * @type {string} vehicleType
+     * @type {int} id
      */ 
     GetVehicleTypeResponse: function( vehicleType, id ) {
         Em.Logger.log("FFW.VehicleInfo.GetVehicleType");
@@ -168,8 +172,13 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
             this.client.send(JSONMessage);
     },
 
-    /*
+    /**
      * ReadDID Response
+     * @type {array} dataResult
+     * @type {array} data
+     * @type {string} info
+     * @type {string} result
+     * @type {int} id
      */ 
     vehicleInfoReadDIDResponse: function( dataResult, data, info, result, id ) {
         Em.Logger.log("FFW.VehicleInfo.ReadDID");
@@ -202,8 +211,12 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
         this.client.send(JSONMessage);
     },
 
-    /*
+    /**
      * GetDTCs Response
+     * @type {array} data
+     * @type {string} info
+     * @type {string} result
+     * @type {int} id
      */ 
     vehicleInfoGetDTCsResponse: function( data, info, result, id ) {
         Em.Logger.log("FFW.VehicleInfo.GetDTCs");

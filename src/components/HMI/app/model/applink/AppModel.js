@@ -19,11 +19,18 @@ MFT.ApplinkAppModel = Em.Object.extend({
     hideApplinkButton: true,
 
 	/**
-     * Active Application Id
+     * Application Id
      *
      * @type: int
      */
-    activeAppId: 0,
+    appId: 0,
+
+    /**
+     * URL to application Icon
+     *
+     * @type:	String
+     */
+    appIcon: 'images/info/info_leftMenu_apps_ico.png',
 	
 	/**
      * Submenu commands list

@@ -12,13 +12,15 @@
 
 MFT.ApplinkMediaController = Em.Object.create({
     
-    // Model binding
-    modelBinding: 'MFT.ApplinkMediaModel',
+    /**
+      * Model binding
+      */
+    model:          null,
 
     /**
       * Text for label on Perform Interaction screen
       */
-    subMenuLabel: '',
+    subMenuLabel:   '',
 
     /*
      * Enumeraction that describes possible contexts
@@ -65,9 +67,19 @@ MFT.ApplinkMediaController = Em.Object.create({
     /** Switching on Application */
     turnOnApplink: function(element){
 
-        this.model.appInfo.set('appName', element.appName);
+        this.set('model', MFT.ApplinkController.getApplicationModel(element.appId) );
+        
         FFW.AppLinkCoreClient.ActivateApp(element.appId);
-        this.model.set('activeAppId', element.appId);
+
+        // Go to Applink state
+        MFT.States.goToState('info.nonMedia');
+
+
+
+
+        //this.model.appInfo.set('appName', element.appName);
+        //FFW.AppLinkCoreClient.ActivateApp(element.appId);
+        //this.model.set('activeAppId', element.appId);
 
         /* Show Applink application in media left menu */
         this.model.set('hideApplinkButton', false);
