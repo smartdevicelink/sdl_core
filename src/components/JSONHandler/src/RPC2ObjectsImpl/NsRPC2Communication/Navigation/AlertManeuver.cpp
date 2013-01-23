@@ -26,7 +26,7 @@ AlertManeuver::~AlertManeuver(void)
 }
 
 
-AlertManeuver::AlertManeuver(void) : 
+AlertManeuver::AlertManeuver(void) :
   RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATION_NAVIGATION__ALERTMANEUVER)
 {
 }
@@ -38,12 +38,12 @@ AlertManeuver::AlertManeuver(const AlertManeuver& c) : RPC2Request(Marshaller::M
 }
 
 
-const std::vector< NsAppLinkRPC::TTSChunk>& AlertManeuver::get_ttsChunks(void)
+const std::vector< NsAppLinkRPCV2::TTSChunk>& AlertManeuver::get_ttsChunks(void)
 {
   return ttsChunks;
 }
 
-bool AlertManeuver::set_ttsChunks(const std::vector< NsAppLinkRPC::TTSChunk>& ttsChunks_)
+bool AlertManeuver::set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks_)
 {
   ttsChunks=ttsChunks_;
   return true;

@@ -4,7 +4,7 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/SoftButton.h"
 
 /*
@@ -23,18 +23,18 @@ namespace NsRPC2Communication
     class AlertManeuver : public ::NsRPC2Communication::RPC2Request
     {
     public:
-    
+
       AlertManeuver(const AlertManeuver& c);
       AlertManeuver(void);
-    
+
       AlertManeuver& operator =(const AlertManeuver&);
-    
+
       virtual ~AlertManeuver(void);
-    
+
       bool checkIntegrity(void);
-    
+
 // getters
-      const std::vector< NsAppLinkRPC::TTSChunk>& get_ttsChunks(void);
+      const std::vector< NsAppLinkRPCV2::TTSChunk>& get_ttsChunks(void);
 
       const std::vector< NsAppLinkRPCV2::SoftButton>& get_softButtons(void);
 
@@ -43,7 +43,7 @@ namespace NsRPC2Communication
 
 // setters
 /// 1 <= size <= 100
-      bool set_ttsChunks(const std::vector< NsAppLinkRPC::TTSChunk>& ttsChunks);
+      bool set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks);
 
 /// 0 <= size <= 3
       bool set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons);
@@ -55,7 +55,7 @@ namespace NsRPC2Communication
 
       friend class AlertManeuverMarshaller;
 
-      std::vector< NsAppLinkRPC::TTSChunk> ttsChunks;
+      std::vector< NsAppLinkRPCV2::TTSChunk> ttsChunks;
       std::vector< NsAppLinkRPCV2::SoftButton> softButtons;
       int appId;
 

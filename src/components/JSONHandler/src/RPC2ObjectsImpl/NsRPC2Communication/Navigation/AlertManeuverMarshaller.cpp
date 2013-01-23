@@ -1,7 +1,7 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Navigation/AlertManeuver.h"
-#include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/SoftButtonMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Navigation/AlertManeuverMarshaller.h"
 
 /*
@@ -78,7 +78,7 @@ Json::Value AlertManeuverMarshaller::toJSON(const AlertManeuver& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::TTSChunkMarshaller::toJSON(e.ttsChunks[i]);
+      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.ttsChunks[i]);
 
     json["params"]["ttsChunks"]=j;
   }
@@ -118,8 +118,8 @@ bool AlertManeuverMarshaller::fromJSON(const Json::Value& json,AlertManeuver& c)
       c.ttsChunks.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::TTSChunk t;
-        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["ttsChunks"][i],t))
+        NsAppLinkRPCV2::TTSChunk t;
+        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["ttsChunks"][i],t))
           return false;
          c.ttsChunks[i]=t;
       }
@@ -142,7 +142,7 @@ bool AlertManeuverMarshaller::fromJSON(const Json::Value& json,AlertManeuver& c)
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;
     c.appId=js["appId"].asInt();
-    
+
   }
   catch(...)
   {
