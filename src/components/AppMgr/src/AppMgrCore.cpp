@@ -5836,6 +5836,41 @@ namespace NsAppManager
                 break;
             }
         }
+
+        switch(msg->getMethod())
+        {
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_PHONE__DIALNUMBERRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A DialNambor response has been income");
+                NsRPC2Communication::Phone::DialNumberResponse* object = static_cast<NsRPC2Communication::Phone::DialNumberResponse*>(msg);
+                Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+                core->mMessageMapping.removeMessage(object->getId());
+
+                if (2 == app->getProtocolVersion())
+                {
+                    NsAppLinkRPCV2::DialNumber_response* response = new NsAppLinkRPCV2::DialNumber_response();
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
+                    response->set_success(true);
+                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                        << " application id " << appId);
+                    MobileHandler::getInstance().sendRPCMessage(response, appId);
+                } else
+                {
+
+                }
+                return;
+            }
+            default:
+                LOG4CPLUS_INFO_EXT(mLogger, " Not Phone RPC message " << msg->getMethod() << " has been received!");
+        }
         LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message " << msg->getMethod() << " has been invoked!");
     }
 
