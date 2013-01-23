@@ -17,5 +17,9 @@
     <string name="delete_icon_desc">Delete icon</string>
     <string name="softbutton_id">Id:</string>
     <string name="dialNumber_phoneNumber">Phone Number:</string>
+    <string name="updateturnlist_turnList">Turn List (comma-separated)</string>
+    <string name="updateturnlist_defaultTurnList">Turn1,Turn2</string>
+    <string name="includeSoftButtons">Include</string>
+    <string name="softButtons">Soft Buttons</string>
     
 </resources>
