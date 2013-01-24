@@ -2307,6 +2307,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							public void onClick(DialogInterface dialog, int id) {
 								DialNumber msg = new DialNumber();
 								msg.setNumber(txtPhoneNumber.getText().toString());
+								msg.setCorrelationID(autoIncCorrId++);
 								
 								_msgAdapter.logMessage(msg, true);
 								
