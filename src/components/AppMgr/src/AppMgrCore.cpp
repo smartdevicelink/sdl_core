@@ -18,7 +18,6 @@
 #include "AppMgr/AppPolicy.h"
 #include "AppMgr/RegistryItem.h"
 #include "AppMgr/AppMgrCoreQueues.h"
-#include "AppMgr/SubscribeButton.h"
 #include "AppMgr/HMIHandler.h"
 #include "AppMgr/MobileHandler.h"
 #include "AppMgr/ConnectionHandler.h"

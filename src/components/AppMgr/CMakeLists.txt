@@ -13,8 +13,6 @@ include_directories (
 )
 
 set (SOURCES
-    ./src/SubscribeButton.cpp
-    ./src/IAppCommand.cpp
     ./src/AppMgr.cpp
     ./src/AppMgrRegistry.cpp
     ./src/Application.cpp

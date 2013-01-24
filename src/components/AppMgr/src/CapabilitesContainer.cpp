@@ -74,12 +74,8 @@ namespace NsAppManager
     {
     }
 
-    template class CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities>;
     template class CapabilitiesContainer<NsAppLinkRPCV2::ButtonCapabilities>;
-    template class CapabilitiesContainer<NsAppLinkRPC::HmiZoneCapabilities>;
     template class CapabilitiesContainer<NsAppLinkRPCV2::HmiZoneCapabilities>;
-    template class CapabilitiesContainer<NsAppLinkRPC::VrCapabilities>;
-    template class CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities>;
     template class CapabilitiesContainer<NsAppLinkRPCV2::VrCapabilities>;
     template class CapabilitiesContainer<NsAppLinkRPCV2::SpeechCapabilities>;
     template class CapabilitiesContainer<NsAppLinkRPCV2::SoftButtonCapabilities>;
