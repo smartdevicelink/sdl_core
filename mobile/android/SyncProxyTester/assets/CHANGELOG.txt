@@ -1,5 +1,5 @@
 [CW4]
-* Fix a crash when sending DialNumber message.
+* Fix a crash when sending DialNumber or UpdateTurnList messages.
 * Show dialog in non-media app: hide and don't send Media Track and Media Clock parameters.
 + Set app icon after app registration (on first OnHMIStatus notification).
 * ShowConstantTBT dialog: allow to customize soft buttons.
