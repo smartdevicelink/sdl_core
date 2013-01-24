@@ -574,13 +574,15 @@ namespace NsAppManager
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
 
                     NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
-                    appRegistered->set_appName(app->getName());
-                    appRegistered->set_appId(app->getAppID());
-                    appRegistered->set_isMediaApplication(app->getIsMediaApplication());
-                    appRegistered->set_languageDesired(app->getLanguageDesired());
-                    appRegistered->set_vrSynonym(app->getVrSynonyms());
-                    appRegistered->set_deviceName(currentDeviceName);
-                    appRegistered->set_versionNumber(1);
+                    NsAppLinkRPCV2::HMIApplication hmiApp;
+                    hmiApp.set_appName(app->getName());
+                    hmiApp.set_appId(app->getAppID());
+                    hmiApp.set_isMediaApplication(app->getIsMediaApplication());
+                    hmiApp.set_deviceName(currentDeviceName);
+                    hmiApp.set_hmiDisplayLanguageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app->getHMIDisplayLanguageDesired().get()));
+                    hmiApp.set_languageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app->getLanguageDesired().get()));
+
+                    appRegistered->set_application(hmiApp);
                     HMIHandler::getInstance().sendNotification(appRegistered);
                     LOG4CPLUS_INFO_EXT(mLogger, " An AppLinkCore::OnAppRegistered notofocation for the app " << app->getName()
                         << " application id " << app->getAppID()
@@ -639,7 +641,7 @@ namespace NsAppManager
                     NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                     appUnregistered->set_appName(appName);
                     appUnregistered->set_appId(app->getAppID());
-                    appUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
+                    appUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
                     HMIHandler::getInstance().sendNotification(appUnregistered);
 
                     LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
@@ -1541,20 +1543,17 @@ namespace NsAppManager
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
 
                     NsRPC2Communication::AppLinkCore::OnAppRegistered* appRegistered = new NsRPC2Communication::AppLinkCore::OnAppRegistered();
-                    appRegistered->set_appName(app->getName());
-                    appRegistered->set_isMediaApplication(app->getIsMediaApplication());
-                    const NsAppLinkRPCV2::Language& languageDesired = app->getLanguageDesired();
-                    appRegistered->set_languageDesired(core->mVrLanguageV1);
-                    appRegistered->set_vrSynonym(app->getVrSynonyms());
-                    appRegistered->set_appId(app->getAppID());
-                    appRegistered->set_hmiDisplayLanguageDesired(core->mUiLanguageV1);
-                    appRegistered->set_vrSynonym(app->getVrSynonyms());
-                    appRegistered->set_deviceName(currentDeviceName);
-                    appRegistered->set_versionNumber(2);
+                    NsAppLinkRPCV2::HMIApplication hmiApp;
+                    hmiApp.set_appName(app->getName());
+                    hmiApp.set_appId(app->getAppID());
+                    hmiApp.set_isMediaApplication(app->getIsMediaApplication());
+                    hmiApp.set_deviceName(currentDeviceName);
+                    hmiApp.set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
+                    hmiApp.set_languageDesired(app->getLanguageDesired());
 
                     if (!app->getAppType().empty())
                     {
-                        appRegistered->set_appType(app->getAppType());
+                        hmiApp.set_appType(app->getAppType());
                     }
 
                     if (!app->getTtsName().empty())
@@ -1571,8 +1570,9 @@ namespace NsAppManager
 
                             ttsName.push_back(chunkV1);
                         }
-                        appRegistered->set_ttsName(ttsName);
+                        hmiApp.set_ttsName(ttsName);
                     }
+                    appRegistered->set_application(hmiApp);
 
                     HMIHandler::getInstance().sendNotification(appRegistered);
                     LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName());
@@ -5499,6 +5499,7 @@ namespace NsAppManager
                 response->setId(object->getId());
                 const AppMgrRegistry::ItemsMap& registeredApps = AppMgrRegistry::getInstance().getItems();
                 std::vector< NsAppLinkRPC::HMIApplication> hmiApps;
+
                 for(AppMgrRegistry::ItemsMap::const_iterator it = registeredApps.begin(); it != registeredApps.end(); it++)
                 {
                     NsAppLinkRPC::HMIApplication hmiApp;
@@ -5513,10 +5514,33 @@ namespace NsAppManager
                         << " application id " << app->getAppID()
                         << " is media? " << app->getIsMediaApplication() );
 
+                    const NsConnectionHandler::tDeviceHandle& deviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(app->getAppID());
+                    const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByHandle(deviceHandle);
+                    if(!device)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, " Cannot retreive current device name for the message with session key " << sessionKey << " !");
+                        return;
+                    }
+                    const std::string& deviceName = device->getUserFriendlyName();
+
                     hmiApp.set_appName(app->getName());
-                    hmiApp.set_ngnMediaScreenAppName(app->getNgnMediaScreenAppName());
                     hmiApp.set_appId(app->getAppID());
                     hmiApp.set_isMediaApplication(app->getIsMediaApplication());
+                    hmiApp.set_deviceName(deviceName);
+
+                    if ( 1 == app->getProtocolVersion() )
+                    {
+                        Application_v1 * app1 = static_cast<Application_v1*>(app);
+                        hmiApp.set_hmiDisplayLanguageDesired(app1->getHMIDisplayLanguageDesired());
+                        hmiApp.set_languageDesired(app1->getLanguageDesired());
+                    }
+                    if ( 2 == app->getProtocolVersion() )
+                    {
+                        Application_v2 * app2 = static_cast<Application_v2*>(app);
+                        hmiApp.set_hmiDisplayLanguage(app2->getHMIDisplayLanguageDesired());
+                        hmiApp.set_languageDesired(app2->getLanguageDesired());
+                        hmiApp.set_appType(app2->getAppType());
+                    }
 
                     LOG4CPLUS_INFO_EXT(mLogger, "Added an application " << hmiApp.get_appName()
                         << " application id " << hmiApp.get_appId()
