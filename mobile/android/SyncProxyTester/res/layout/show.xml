@@ -49,6 +49,7 @@
         android:layout_weight="1"
         android:text="Status Bar"
         android:textStyle="bold" >
+
     </TextView>
 
     <EditText
@@ -61,6 +62,7 @@
     </EditText>
 
     <TextView
+        android:id="@+id/lblMediaTrack"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -78,11 +80,13 @@
     </EditText>
 
     <TextView
+        android:id="@+id/lblMediaClock"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="Media Clock"
         android:textStyle="bold" >
+
     </TextView>
 
     <EditText
