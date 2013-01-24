@@ -5,7 +5,7 @@
  * 
  * @category    View
  * @filesource  app/view/home/scrollableMessage.js
- * @version     2.0
+ * @version     1.0
  *
  * @author      Andriy Melnik
  */

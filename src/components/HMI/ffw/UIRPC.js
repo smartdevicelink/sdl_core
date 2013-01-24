@@ -303,6 +303,22 @@ FFW.UI = FFW.RPCObserver.create({
 
 		    	break;
 		    }
+		    case "UI.ShowConstantTBT":{
+
+				MFT.ApplinkModel.tbtActivate( request.params );
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
+
+		    	break;
+		    }
+		    case "UI.UpdateTurnList":{
+
+				MFT.ApplinkModel.tbtTurnListUpdate( request.params );
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
+
+		    	break;
+		    }
 		    case  "UI.GetCapabilities":{
 				// send repsonse
 				var JSONMessage = {

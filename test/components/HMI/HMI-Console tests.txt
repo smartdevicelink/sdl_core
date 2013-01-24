@@ -15,3 +15,5 @@ UI.PerformAudioPassThru FFW.UI.client.onWSMessage({data:'{"method":"UI.PerformAu
 UI.EndAudioPassThru     FFW.UI.client.onWSMessage({data:'{"method":"UI.EndAudioPassThru", "params":{"appId":-1}}, "id": 6000}'})
 
 UI.Slider               FFW.UI.client.onWSMessage({data:'{"method":"UI.Slider","params":{"appId":-1,"numTicks":2,"position":1,"sliderFooter":["Line 1","Line 2"],"sliderHeader":"Slider Header","timeout":5000},"id": 6000}'});
+
+UI.ShowConstantTBT      FFW.UI.client.onWSMessage({data:'{"method":"UI.ShowConstantTBT","params":{"softButtons":[{"isHighlighted":false,"softButtonID":5432,"systemAction":"KEEP_CONTEXT","text":"KeepContext","type":"TEXT"},{"isHighlighted":false,"softButtonID":5431,"systemAction":"STEAL_FOCUS","text":"StealFocus","type":"TEXT"},{"isHighlighted":false,"softButtonID":5430,"systemAction":"DEFAULT_ACTION","text":"Default","type":"TEXT"}],"navigationText1":"Text","navigationText2":"Text2","eta":"100","totalDistance":"5000","distanceToManeuver":"50","distanceToManeuverScale":"20","maneuverComplete":true, "appId": 65537, "turnIcon":"/home/dev/Projects/Ford/source/build/src/appMain/SyncProxyTester/syncFileName" },"id": 6000}'});

@@ -137,7 +137,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		{	
 			//  remove app from list
 			//MFT.TTSPopUp.ActivateTTS(notification.params.appName + " disconnected!");
-			MFT.ApplinkController.getApplicationModel(notification.params.appId).appInfo.set('appName', "<No app>");
+			MFT.ApplinkController.getApplicationModel(notification.params.appId).set('appName', "<No app>");
 			MFT.ApplinkController.getApplicationModel(notification.params.appId).set('hideApplinkButton', true);
 			MFT.VRPopUp.DeleteActivateApp(notification.params.appId);
 			MFT.ApplinkController.unRegisterApplication(notification.params.appId);
@@ -241,7 +241,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.ActivateApp",
 			"params"	:	{
-				"appName":	MFT.ApplinkController.getApplicationModel(appId).appInfo.appName,
+				"appName":	MFT.ApplinkController.getApplicationModel(appId).appName,
 				"appId":	appId
 			}
 		};

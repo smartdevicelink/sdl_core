@@ -28,7 +28,7 @@ MFT.ApplinkModel = Em.Object.create({
                 "type"  : "TEXT"
             }
         ],
-        
+
         timeoutPrompt   : [
             {
                 "text"  : "Some text for timeout prompt",
@@ -132,6 +132,24 @@ MFT.ApplinkModel = Em.Object.create({
     ],
 
     /**
+     * Method to open Turn By Turn view
+     * @param {Object} params
+     */
+    tbtActivate: function( params ){
+        MFT.TurnByTurnView.activate( params );
+    },
+
+    /**
+     * Method to set data for Turn List in applications model
+     * @param {Object} params
+     */
+    tbtTurnListUpdate: function( params ){
+        MFT.ApplinkController.getApplicationModel( params.appId ).turnList = [];
+        MFT.ApplinkController.getApplicationModel( params.appId ).turnList = params.turnList;
+        MFT.TBTTurnList.updateList( params.appId );
+    },
+
+    /**
      * Method to set language for UI component with parameters sent from ApplinkCore to UIRPC
      * @param {string} lang Language code.
      */
@@ -171,7 +189,7 @@ MFT.ApplinkModel = Em.Object.create({
         if( MFT.ApplinkController.driverDistractionState ){
             MFT.DriverDistraction.activate();
         }else{
-            MFT.ScrollableMessage.activate( MFT.ApplinkController.getApplicationModel(params.appId).appInfo.appName , params );
+            MFT.ScrollableMessage.activate( MFT.ApplinkController.getApplicationModel(params.appId).appName , params );
         }
 
     },
@@ -214,10 +232,9 @@ MFT.ApplinkModel = Em.Object.create({
             this.applicationsList.push({
                 type:       MFT.Button,
                 params:     {
-                    action:         'turnOnApplink',
-                    target:         appList[i].isMediaApplication ? 'MFT.ApplinkMediaController' : 'MFT.NonMediaController',
+                    action:         'onActivateApplinkApp',
+                    target:         'MFT.ApplinkController',
                     text:           appList[i].appName,
-                    appName:        appList[i].appName,
                     appId:          appList[i].appId,
                     className:      'scrollButtons button notpressed',
                     icon:           appList[i].icon,

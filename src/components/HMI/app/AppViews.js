@@ -25,6 +25,8 @@ MFT.AppViews = Em.ContainerView.extend({
 		MFT.InteractionChoicesView,
 		MFT.ScrollableMessage,
 		MFT.SliderView,
+		MFT.TurnByTurnView,
+		MFT.TBTTurnList,
 		MFT.SelectSystempopup,
 		//MFT.WOSkippButtonView,
 		MFT.StatusClimateView,

@@ -156,7 +156,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
             MFT.ApplinkModel.onPrompt(message.ttsChunks.ttsChunks);
         }
 
-        this.set('appName',    MFT.ApplinkController.getApplicationModel(message.appId).appInfo.appName);
+        this.set('appName',    MFT.ApplinkController.getApplicationModel(message.appId).appName);
 
         this.set('content1',    message.AlertText1);
         this.set('content2',    message.AlertText2);

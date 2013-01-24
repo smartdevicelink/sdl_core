@@ -125,7 +125,7 @@ MFT.AudioPassThruPopUp = Em.ContainerView.create({
 
             MFT.ApplinkModel.onPrompt(data.initialPrompt.ttsChunks);
 
-            this.set('appName',    MFT.ApplinkController.getApplicationModel(data.appId).appInfo.appName);
+            this.set('appName',    MFT.ApplinkController.getApplicationModel(data.appId).appName);
 
             this.set('content1',    data.audioPassThruDisplayText1);
             this.set('content2',    data.audioPassThruDisplayText2);

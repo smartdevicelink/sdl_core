@@ -46,6 +46,13 @@ MFT.ApplinkAppModel = Em.Object.extend({
     appInfo: null,
     
     /**
+     * Array of Objects for TBTTurnList
+     *
+     * @type: array
+     */
+    turnList: [],
+
+    /**
      * URL to application Icon
      *
      * @type {String}
@@ -157,7 +164,7 @@ MFT.ApplinkAppModel = Em.Object.extend({
 		
 		MFT.SliderView.loadData( message );
 		
-		MFT.SliderView.activate( this.appInfo.appName );
+		MFT.SliderView.activate( this.appName );
 			 
 		setTimeout( function() {
 			if ( MFT.SliderView.active ) {

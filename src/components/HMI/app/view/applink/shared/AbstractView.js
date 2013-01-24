@@ -24,7 +24,7 @@ MFT.ApplinkAbstractView = Em.ContainerView.extend({
 	active: false,
     
     /**
-     * Activate preform interaction window
+     * Activate window
      * and set caption text
      *
      * @param text: String

@@ -37,6 +37,14 @@ MFT.ApplinkController = Em.Object.create({
 	},
 
     /**
+     * Method to open Turn List view from TBT
+     * @param {Number} appId AppId of activated applink application
+     */
+	tbtTurnList: function( appId ){
+        MFT.TBTTurnList.activate( appId );
+    },
+
+    /**
      * Method to set selected state of vehicle transmission to vehicleData
      * @param {string} prndl Vehicle transmission state
      */
@@ -180,7 +188,7 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param {Object}
 	 */
 	onGetAppList: function( appList ){
-		var i = 0,
+		/*var i = 0,
 			len = appList.length;
 		for(i = 0; i < len; i++){
 			if( appList[i].isMediaApplication ){
@@ -188,7 +196,7 @@ MFT.ApplinkController = Em.Object.create({
 			}else{
 				MFT.ApplinkController.registerApplication(appList[i].appId, 1);
 			}
-		}
+		}*/
 		MFT.ApplinkModel.onGetAppList( appList );
 	},
 
