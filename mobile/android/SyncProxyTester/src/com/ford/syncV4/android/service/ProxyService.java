@@ -535,18 +535,21 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter != null) _msgAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e);
 		else Log.e(TAG, "onProxyClosed: " + info, e);
 		
+		boolean wasConnected = !firstHMIStatusChange;
 		firstHMIStatusChange = true;
 		
-		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-		if (mainActivity != null) {
-			mainActivity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					mainActivity.onProxyClosed();
-				}
-			});
-		} else {
-			Log.w(TAG, "mainActivity not found");
+		if (wasConnected) {
+			final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+			if (mainActivity != null) {
+				mainActivity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						mainActivity.onProxyClosed();
+					}
+				});
+			} else {
+				Log.w(TAG, "mainActivity not found");
+			}
 		}
 		
 		if(((SyncException) e).getSyncExceptionCause() != SyncExceptionCause.SYNC_PROXY_CYCLED
