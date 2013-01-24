@@ -49,7 +49,7 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
      */
     deactivateApplication: function(){
      	if( !MFT.States.media.applink.active ){
-     		MFT.ApplinkModel.onDeactivateApp( MFT.TransitionIterator.finalPath, MFT.ApplinkMediaController.model.appId, MFT.ApplinkMediaController.model.appInfo.appName );
+     		MFT.ApplinkModel.onDeactivateApp( MFT.TransitionIterator.finalPath, MFT.ApplinkMediaController.model.appId, MFT.ApplinkMediaController.model.appName );
      	}
     }.observes('MFT.States.media.applink.active'),
 

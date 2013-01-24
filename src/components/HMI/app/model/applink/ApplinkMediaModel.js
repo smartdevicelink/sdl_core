@@ -24,7 +24,6 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
             mediaClock:		'<mediaClock>',
             statusBar:		'<statusBar',
             appName:		'<App name>',
-            deviceName:		'<Device name>',
             customPresets:[
                 '<no definition>',
                 '<no definition>',
@@ -69,14 +68,10 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 	currTime:		0,
 
     /**
-      *  Function that calls from VR to activate application
-      */
-    turnOnApplink: function(appName, appId){
-        var params = {
-            "appName":  appName,
-            "appId":    appId
-        };
-        MFT.MediaController.turnOnApplink(params);
+	 * Activate current application model
+	 */
+    turnOnApplink: function(){
+        MFT.ApplinkMediaController.turnOnApplink( this );
     },
 
 	startTimer: function(){

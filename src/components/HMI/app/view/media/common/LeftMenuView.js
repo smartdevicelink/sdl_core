@@ -155,7 +155,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 			hidden: function() {
 				return MFT.ApplinkMediaController.model ? false : true;
 			}.property('MFT.ApplinkMediaController.model'),
-			textBinding:        'MFT.ApplinkMediaController.model.appInfo.appName',
+			textBinding:        'MFT.ApplinkMediaController.model.appName',
 			target:				'MFT.MediaController'
 		})
 			

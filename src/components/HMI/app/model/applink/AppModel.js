@@ -11,8 +11,7 @@
  */
  
 MFT.ApplinkAppModel = Em.Object.extend({
-
-
+    
     /**
      * Indicates Applink media application button
      */
@@ -21,57 +20,63 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	/**
      * Application Id
      *
-     * @type: Number
+     * @type {Number}
      */
     appId: null,
     
     /**
      * Application name
      *
-     * @type: String
+     * @type {String}
      */
-    appName: null,
+    appName: '',
     
+    /**
+     * Statusbar text
+     *
+     * @type {String}
+     */
+    statusText: '',
     
     /**
      * Info data
      *
-     * @type: Em.Object
+     * @type: {Em.Object}
      */
     appInfo: null,
     
     /**
      * URL to application Icon
      *
-     * @type:	String
+     * @type {String}
      */
     appIcon: 'images/info/info_leftMenu_apps_ico.png',
 	
 	/**
      * Submenu commands list
      *
-     * @type: Array
+     * @type {Array}
      */
     subMenuCommands: [],
     
 	/**
 	 * Current command submenu identificator
 	 *
-	 * @type:	Number
+	 * @type {Number}
 	 */
 	currentSubMenuId:		0,
 	
 	/**
 	 * Current command submenu text label
 	 *
-	 * @type:	String
+	 * @type {String}
 	 */	
 	currentSubMenuLabel:	'',
 	
 	/**
 	 * Interaction chooses data
 	 *
-	 * @type:	Object
+	 * @type {Object}
 	 */	
 	interactionChoices: {},
 
@@ -79,7 +84,7 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 * Applink UI PreformInteraction response handeler
 	 * open Perform Interaction screen and show choices
 	 *
-	 * @param message:Object
+	 * @param {Object}
 	 */
 	onPreformInteraction: function( message ) {
 		/* test message
@@ -116,7 +121,7 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 * Applink UI CreateInteraction response handeler
 	 * push set of commands to voice recognition list
 	 *
-	 * @param message:Object
+	 * @param {Object}
 	 */
 	onCreateInteraction: function( message ) {
 		
@@ -134,7 +139,7 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 * close current interaction set window (if opened)
 	 * and delete current set commands from voice recognition list
 	 *
-	 * @param message:Object
+	 * @param {Object}
 	 */
 	onDeleteInteraction: function( message ) {		
 		delete this.interactionChoices[message.interactionChoiceSetID];
@@ -146,7 +151,7 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 * Applink UI Slider response handeler
 	 * open Slider window with received parameters
 	 *
-	 * @param message:Object
+	 * @param {Object}
 	 */
 	onSlider: function( message ) {
 		

@@ -204,7 +204,7 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param {Object}
 	 */
 	onActivateApplinkApp: function(element){
-		this.getApplicationModel(element.appId).turnOnApplink( element.appName, element.appId );
+		this.getApplicationModel(element.appId).turnOnApplink();
 	},
 
 	/**

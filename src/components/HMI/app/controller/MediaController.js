@@ -118,10 +118,6 @@ MFT.MediaController = Em.Object.create({
 		if(MFT.BTModel.active){
 			MFT.BTModel.set('active',false);
 		}
-
-        if(MFT.ApplinkMediaController.model.active){
-        	MFT.ApplinkMediaController.model.set('active',false);
-        }
 	},
 	
 	/**  On player module enter event */

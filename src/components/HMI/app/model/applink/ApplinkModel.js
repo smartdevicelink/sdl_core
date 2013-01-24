@@ -13,14 +13,6 @@
 MFT.ApplinkModel = Em.Object.create({
 
     /**
-     * init object
-     */
-    init: function() {
-        // init global properties
-        //this.resetProperties();
-    },
-
-    /**
      * Flag to indicate AudioPassThruPopUp activity
      * @type {Bool}
      */
@@ -67,7 +59,7 @@ MFT.ApplinkModel = Em.Object.create({
      *
      * @type {String}
      */
-    deviceName: null,
+    deviceName: '<Device Name>',
 
     /**
      * List of icons

@@ -18,23 +18,20 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
 	   
 	   // init properties here
 	   this.set('appInfo', Em.Object.create({
-                appName:        '<App name>',
                 field1:         '<field1>',
                 field2:         '<field2>',
                 field3:         '<field3>',
                 field4:         '<field4>',
-                statusBar:      '<statusBar',
                 image:			''
             })
         );
 	},
 	
-    turnOnApplink: function(appName, appId){
-        var params = {
-            "appName":  appName,
-            "appId":    appId
-        };
-        MFT.NonMediaController.turnOnApplink(params);
+	/**
+	 * Activate current application model
+	 */
+    turnOnApplink: function(){
+        MFT.NonMediaController.turnOnApplink( this );
     },
     
     /** Applin UI Show handler */
@@ -97,15 +94,5 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         MFT.InfoNonMediaOptions.commands.DeleteSubMenu( menuId );
 
         return "SUCCESS";
-    },
-    
-    /** Applink Setter for Media Clock Timer */
-    applinkSetMediaClockTimer: function(params){
-		return;
-    },
-    
-    /** Applink Slider activation */
-    onApplinkSlider: function(params){
-    	return;
     }
 });

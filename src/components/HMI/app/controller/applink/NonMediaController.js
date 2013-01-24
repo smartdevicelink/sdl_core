@@ -31,14 +31,11 @@ MFT.NonMediaController = Em.Object.create({
      * Switching on Application
      *
      */
-    turnOnApplink: function(element){
+    turnOnApplink: function( applicationModel ){
         
-        this.set('model', MFT.ApplinkController.getApplicationModel(element.appId) );
+        this.set('model', applicationModel);
         
-        FFW.AppLinkCoreClient.ActivateApp(element.appId);
-        
-        // Set Applink Data active
-        //MFT.ApplinkNonMediaModel.set('active',true);
+        FFW.AppLinkCoreClient.ActivateApp( applicationModel.appId );
         
         // Go to Applink state
         MFT.States.goToState('info.nonMedia');
