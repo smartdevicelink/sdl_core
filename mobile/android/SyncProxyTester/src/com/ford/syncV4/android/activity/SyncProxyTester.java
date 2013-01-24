@@ -15,6 +15,8 @@ import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 import org.json.JSONException;
@@ -34,7 +36,6 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -776,15 +777,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	
 	/** Closes the activity and stops the proxy service. */
 	private void exitApp() {
+		stopService(new Intent(this, ProxyService.class));
 		finish();
-		if (ProxyService.getInstance() != null) {
-			ProxyService.getInstance().stopSelf();
-		}
 		saveMessageSelectCount();
-		new Handler().postDelayed(new Runnable() {
+		new Timer().schedule(new TimerTask() {
 			@Override
 			public void run() {
-				System.exit(0);
+				android.os.Process.killProcess(android.os.Process.myPid());
 			}
 		}, 1000);
 	}
