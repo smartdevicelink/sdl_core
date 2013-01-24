@@ -23,16 +23,16 @@ namespace NsRPC2Communication
     class AlertManeuver : public ::NsRPC2Communication::RPC2Request
     {
     public:
-    
+
       AlertManeuver(const AlertManeuver& c);
       AlertManeuver(void);
-    
+
       AlertManeuver& operator =(const AlertManeuver&);
-    
+
       virtual ~AlertManeuver(void);
-    
+
       bool checkIntegrity(void);
-    
+
 // getters
       const std::vector< NsAppLinkRPCV2::TTSChunk>& get_ttsChunks(void);
 

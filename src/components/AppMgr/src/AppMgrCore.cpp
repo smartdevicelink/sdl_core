@@ -3404,6 +3404,62 @@ namespace NsAppManager
                     }
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::AlertManeuverID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "A AlertManeuver request has been invoked." );
+                    NsAppLinkRPCV2::AlertManeuver_request* request
+                        = static_cast<NsAppLinkRPCV2::AlertManeuver_request*>(mobileMsg);
+
+                    Application_v2* app = static_cast<Application_v2*>(
+                        core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey)));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger,
+                            "No application associated with the registry item with session key " << sessionKey );
+                        sendResponse<NsAppLinkRPCV2::AlertManeuver_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                            NsAppLinkRPCV2::FunctionID::AlertManeuverID
+                            , NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED
+                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                            , false
+                            , app->getAppID());
+                        break;
+                    }
+
+                    if((NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                        || (NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel()))
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName()
+                            << " with session key " << sessionKey << " has not been activated yet!" );
+                        sendResponse<NsAppLinkRPCV2::AlertManeuver_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                            NsAppLinkRPCV2::FunctionID::AlertManeuverID
+                            , NsAppLinkRPCV2::Result::REJECTED
+                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                            , false
+                            , app->getAppID());
+                        break;
+                    }
+
+                    NsRPC2Communication::Navigation::AlertManeuver* alert
+                        = new NsRPC2Communication::Navigation::AlertManeuver;
+                    if (!alert)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "new NsRPC2Communication::Navigation::AlertManeuver() failed");
+                        NsAppLinkRPCV2::AlertManeuver_response* response = new NsAppLinkRPCV2::AlertManeuver_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::OUT_OF_MEMORY);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+
+                    alert->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    alert->set_appId(sessionKey);
+                    alert->set_ttsChunks(request->get_ttsChunks());
+                    alert->set_softButtons(request->get_softButtons());
+
+                    core->mMessageMapping.addMessage(alert->getId(), sessionKey);
+                    HMIHandler::getInstance().sendRequest(alert);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
                 {
@@ -5744,6 +5800,38 @@ namespace NsAppManager
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not VehicleInfo RPC message " << msg->getMethod() << " has been received!");
+        }
+
+        switch(msg->getMethod())
+        {
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_NAVIGATION__ALERTMANEUVERRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "ReadDID response is received from HMI.");
+                NsRPC2Communication::Navigation::AlertManeuverResponse * response =
+                    static_cast<NsRPC2Communication::Navigation::AlertManeuverResponse*>(msg);
+                Application* app = core->getApplicationFromItemCheckNotNull(
+                        core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    sendResponse<NsAppLinkRPCV2::AlertManeuver_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                        NsAppLinkRPCV2::FunctionID::AlertManeuverID
+                        , NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED
+                        , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                        , false
+                        , app->getAppID());
+                    return;
+                }
+
+                sendResponse<NsAppLinkRPCV2::AlertManeuver_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                    NsAppLinkRPCV2::FunctionID::AlertManeuverID
+                    , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                    , NsAppLinkRPCV2::Result::SUCCESS == response->getResult()
+                    , app->getAppID());
+
+                break;
+            }
         }
         LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message " << msg->getMethod() << " has been invoked!");
     }

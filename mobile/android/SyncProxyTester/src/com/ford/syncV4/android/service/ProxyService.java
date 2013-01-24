@@ -1,5 +1,8 @@
 package com.ford.syncV4.android.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -58,10 +61,12 @@ import com.ford.syncV4.proxy.rpc.OnTBTClientState;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
+import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
+import com.ford.syncV4.proxy.rpc.SetAppIcon;
 import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
 import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
 import com.ford.syncV4.proxy.rpc.SetGlobalPropertiesResponse;
@@ -76,6 +81,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
+import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.transport.TCPTransportConfig;
@@ -83,6 +89,8 @@ import com.ford.syncV4.transport.TCPTransportConfig;
 public class ProxyService extends Service implements IProxyListenerALM {	
 	static final String TAG = "SyncProxyTester";
 	private Integer autoIncCorrId = 1;
+	
+	private static final String ICON_SYNC_FILENAME = "icon.png";
 
 	private static SyncProxyTester _mainInstance;	
 	private static ProxyService _instance;
@@ -93,6 +101,8 @@ public class ProxyService extends Service implements IProxyListenerALM {
 	private MediaPlayer embeddedAudioPlayer;
 	private Boolean playingAudio = false;
 	protected SyncReceiver mediaButtonReceiver;
+	
+	private boolean firstHMIStatusChange = true;
 	
 	private static boolean waitingForResponse = false;
 	
@@ -425,6 +435,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				return;
 		}
 		
+		boolean hmiChange = false;
 		switch(notification.getHmiLevel()) {
 			case HMI_FULL:
 				if (notification.getFirstRun()) {
@@ -444,15 +455,58 @@ public class ProxyService extends Service implements IProxyListenerALM {
 						else Log.e(TAG, "Error sending show", e);
 					}
 				}
+				hmiChange = true;
 				break;
 			case HMI_LIMITED:
+				hmiChange = true;
 				break;
 			case HMI_BACKGROUND:
+				hmiChange = true;
 				break;
 			case HMI_NONE:
 				break;
 			default:
 				return;
+		}
+		
+		if (hmiChange && firstHMIStatusChange) {
+			firstHMIStatusChange = false;
+			
+			InputStream is = null;
+			try {
+				is = getResources().openRawResource(R.drawable.fiesta);
+				ByteArrayOutputStream os = new ByteArrayOutputStream(is.available());
+				final int buffersize = 4096;
+				final byte[] buffer = new byte[buffersize];
+				int available = 0;
+				while ((available = is.read(buffer)) >= 0) {
+					os.write(buffer, 0, available);
+				}
+				
+				PutFile putFile = new PutFile();
+				putFile.setFileType(FileType.GRAPHIC_PNG);
+				putFile.setSyncFileName(ICON_SYNC_FILENAME);
+				putFile.setCorrelationID(nextCorrID());
+				putFile.setBulkData(os.toByteArray());
+				getProxyInstance().sendRPCRequest(putFile);
+				
+				SetAppIcon setAppIcon = new SetAppIcon();
+				setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
+				setAppIcon.setCorrelationID(nextCorrID());
+				getProxyInstance().sendRPCRequest(setAppIcon);
+			} catch (IOException e) {
+				Log.w(TAG, "Can't read icon file", e);
+			} catch (SyncException e) {
+				Log.w(TAG, "Failed to set app icon", e);
+			} finally {
+				if (is != null) {
+					try {
+						is.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
 		}
 	}
 	
@@ -480,6 +534,8 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e);
 		else Log.e(TAG, "onProxyClosed: " + info, e);
+		
+		firstHMIStatusChange = true;
 		
 		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
 		if (mainActivity != null) {
