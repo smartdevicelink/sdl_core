@@ -25,6 +25,13 @@ MFT.ApplinkAppModel = Em.Object.extend({
      */
     appId: null,
     
+    /**
+     * Application name
+     *
+     * @type: String
+     */
+    appName: null,
+    
     
     /**
      * Info data

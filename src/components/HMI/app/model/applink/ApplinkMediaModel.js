@@ -42,11 +42,6 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 	applinkConnectionStatus: true,
 
 	/**
-	 * RangedValue for Slider
-	 */
-	applinkSliderContent:		MFT.RangedValue.create({range: 10, value:3, cycle: false, minValue: 0}),
-
-	/**
 	 * Array of commands in ApplinkOptionsView
 	 */
     optionsCommands:			new Array(),
@@ -56,24 +51,10 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 	 */
     voiceRecognitionCommands:	new Array(),
 
-    /**
-     * Set of params of Slider View
-     */
-    sliderParams: {
-        headerLabel: "headerLabel",
-        footerLabel: "footerLabel"
-    },
-
 	/**
 	 * Timer for Media Clock
 	 */
 	timer:			null,
-
-
-
-    newCommandId:   null, 
-
-    newParams:  null,
 
     /** Current applink Sub Menu identificator*/
     currentApplinkSubMenuid: null,
@@ -81,30 +62,11 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
     /** Current applink Perform Interaction Choise identificator*/
     currentApplinkPerformInteractionChoiseId: null,
 
-    /**
-      * Text for label on Perform Interaction screen
-      */
-    performInteractionInitialText: '',
-
 	countUp:		true,
 	pause:			false,
 	maxTimeValue:	68400, // 19 hours
 	duration:		0,
 	currTime:		0,
-
-    /**
-      * Info data
-      */
-    alertInfo: Em.Object.create({
-        text1:          '<text1>',
-        text2:          '<text2>',
-        text3:          '<text3>',
-        ttsChunks:      null,
-        duration:       0,
-        playTone:       null,
-        softButtons:    null,
-        tryAgainTime:   0
-    }),
 
     /**
       *  Function that calls from VR to activate application
@@ -117,22 +79,13 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
         MFT.MediaController.turnOnApplink(params);
     },
 
-    /**
-	  * Calls when websocket connection is closed
-      */
-	onApplicationDisconected: function(){
-		this.set('applinkConnectionStatus', false);
-		this.interactionChoises 		= [];
-		this.subMenuCommands 			= [];
-		this.voiceRecognitionCommands	= [];
-		this.applicationsList			= [];
-
-	},
-
 	startTimer: function(){
+	
+	   var self = this;
+	   
 		if(!this.pause){
 			this.timer = setInterval(function(){
-				MFT.ApplinkMediaController.model.set('currTime', MFT.ApplinkMediaController.model.currTime+1);
+				self.set('currTime', self.currTime+1);
 			}, 1000);
 		}else{
 			clearInterval(this.timer);
@@ -279,6 +232,5 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
         }
 
         MFT.applinkView.innerMenu.content.AddSoftButton(params.softButtons);
-    },
-
+    }
 });

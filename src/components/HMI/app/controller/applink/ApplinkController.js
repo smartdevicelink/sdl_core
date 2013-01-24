@@ -81,17 +81,18 @@ MFT.ApplinkController = Em.Object.create({
 	/**
 	 * Register application
 	 *
-	 * @param {Number} applicationId
+	 * @param {Object} params
 	 * @param {Number} applicationType
 	 */
-	registerApplication: function( applicationId, applicationType ) {
-		if ( MFT.ApplinkModel.registeredApps[ applicationId ] ) {
+	registerApplication: function( params, applicationType ) {
+		if ( MFT.ApplinkModel.registeredApps[ params.appId ] ) {
 			//Em.Logger.error('Application ['+ applicationId +'] already registered!');
 			return;
 		}
 		
-		MFT.ApplinkModel.registeredApps[ applicationId ] = this.applicationModels[applicationType].create({
-            appId: applicationId
+		MFT.ApplinkModel.registeredApps[ params.appId ] = this.applicationModels[applicationType].create({
+            appId:      params.appId,
+            appName:    params.appName
 		});
 		//Em.Logger.log('Application ['+ applicationId +'] registered!');
 	},

@@ -58,8 +58,8 @@ MFT.ApplinkModel = Em.Object.create({
      * @type object
      */
     registeredApps: {
-        "-1": MFT.ApplinkMediaModel.create(),            // Used for media applications
-        "-2": MFT.ApplinkNonMediaModel.create(),         // Used for non media applications
+        "-1": MFT.ApplinkMediaModel.create({appId:-1,appName:'Test Media'}),            // Used for media applications
+        "-2": MFT.ApplinkNonMediaModel.create({appId:-2,appName:'Test Non Media'}),         // Used for non media applications
     },
 
     /**
@@ -154,15 +154,11 @@ MFT.ApplinkModel = Em.Object.create({
     onAppRegistered: function( params ){
 
         if( params.isMediaApplication ){
-            MFT.ApplinkController.registerApplication(params.appId, 0);
+            MFT.ApplinkController.registerApplication(params, 0 );
         }else{
-            MFT.ApplinkController.registerApplication(params.appId, 1);
+            MFT.ApplinkController.registerApplication(params, 1 );
         }
         MFT.VRPopUp.AddActivateApp(params.appId, params.appName);
-        // add new app to the list
-        MFT.ApplinkController.getApplicationModel(params.appId).appInfo.set('appName', params.appName);
-        //MFT.ApplinkController.getApplicationModel(params.appId).set('appId', params.appId);
-
     },
 
     /**
