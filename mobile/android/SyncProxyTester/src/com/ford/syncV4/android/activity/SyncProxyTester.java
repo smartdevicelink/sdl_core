@@ -2249,6 +2249,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								UpdateTurnList msg = new UpdateTurnList();
+								msg.setCorrelationID(autoIncCorrId++);
 								
 								String turnListString = txtTurnList.getText().toString();
 								// string to join/split footer turnList string
@@ -2307,6 +2308,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							public void onClick(DialogInterface dialog, int id) {
 								DialNumber msg = new DialNumber();
 								msg.setNumber(txtPhoneNumber.getText().toString());
+								msg.setCorrelationID(autoIncCorrId++);
 								
 								_msgAdapter.logMessage(msg, true);
 								

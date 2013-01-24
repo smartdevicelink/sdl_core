@@ -11,22 +11,24 @@
  */
 
 MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
-
-    /**
-     * Info data
-     *
-     * @type: Em.Object
-     */
-    appInfo: Em.Object.create({
-    	appName:        '<App name>',
-        field1:         '<field1>',
-        field2:         '<field2>',
-        field3:         '<field3>',
-        field4:         '<field4>',
-        statusBar:      '<statusBar',
-        image:			''
-    }),
-
+    
+    init: function() {
+	   
+	   this._super();
+	   
+	   // init properties here
+	   this.set('appInfo', Em.Object.create({
+                appName:        '<App name>',
+                field1:         '<field1>',
+                field2:         '<field2>',
+                field3:         '<field3>',
+                field4:         '<field4>',
+                statusBar:      '<statusBar',
+                image:			''
+            })
+        );
+	},
+	
     turnOnApplink: function(appName, appId){
         var params = {
             "appName":  appName,

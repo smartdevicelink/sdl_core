@@ -161,7 +161,7 @@ MFT.ApplinkModel = Em.Object.create({
         MFT.VRPopUp.AddActivateApp(params.appId, params.appName);
         // add new app to the list
         MFT.ApplinkController.getApplicationModel(params.appId).appInfo.set('appName', params.appName);
-        MFT.ApplinkController.getApplicationModel(params.appId).set('appId', params.appId);
+        //MFT.ApplinkController.getApplicationModel(params.appId).set('appId', params.appId);
 
     },
 

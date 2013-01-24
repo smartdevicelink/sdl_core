@@ -21,10 +21,18 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	/**
      * Application Id
      *
-     * @type: int
+     * @type: Number
      */
-    appId: 0,
-
+    appId: null,
+    
+    
+    /**
+     * Info data
+     *
+     * @type: Em.Object
+     */
+    appInfo: null,
+    
     /**
      * URL to application Icon
      *
