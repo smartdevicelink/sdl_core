@@ -90,7 +90,9 @@ MFT.ApplinkController = Em.Object.create({
 			return;
 		}
 		
-		MFT.ApplinkModel.registeredApps[ applicationId ] = this.applicationModels[applicationType].create();
+		MFT.ApplinkModel.registeredApps[ applicationId ] = this.applicationModels[applicationType].create({
+            appId: applicationId
+		});
 		//Em.Logger.log('Application ['+ applicationId +'] registered!');
 	},
 

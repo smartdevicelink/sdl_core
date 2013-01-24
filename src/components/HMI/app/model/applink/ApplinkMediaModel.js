@@ -11,7 +11,32 @@
  */
 
 MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
-	
+    
+    init: function() {
+	   
+	   this._super();
+	   
+	   // init properties here
+	   this.set('appInfo', Em.Object.create({
+            field1:			'<field1>',
+            field2:			'<field2>',
+            field3:			'<field3>',
+            mediaClock:		'<mediaClock>',
+            statusBar:		'<statusBar',
+            appName:		'<App name>',
+            deviceName:		'<Device name>',
+            customPresets:[
+                '<no definition>',
+                '<no definition>',
+                '<no definition>',
+                '<no definition>',
+                '<no definition>',
+                '<no definition>'
+                ]
+            })
+        );
+	},
+    
 	active: false,
 
 	applinkConnectionStatus: true,
@@ -67,27 +92,6 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 	duration:		0,
 	currTime:		0,
 
- 	/**
-	  * Info data
-	  */
-	appInfo: Em.Object.create({
-		field1:			'<field1>',
-		field2:			'<field2>',
-		field3:			'<field3>',
-		mediaClock:		'<mediaClock>',
-		statusBar:		'<statusBar',
-		appName:		'<App name>',
-		deviceName:		'<Device name>',
-        customPresets:[
-            '<no definition>',
-            '<no definition>',
-            '<no definition>',
-            '<no definition>',
-            '<no definition>',
-            '<no definition>'
-        ]
-	}),
-
     /**
       * Info data
       */
@@ -111,7 +115,6 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
             "appId":    appId
         };
         MFT.MediaController.turnOnApplink(params);
-        MFT.MediaView.leftMenu.applinkButton.set('icon', 'sdfsdf');
     },
 
     /**
