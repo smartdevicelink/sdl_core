@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -41,23 +41,23 @@ OnButtonPress::OnButtonPress(const OnButtonPress& c) : RPC2Notification(Marshall
 }
 
 
-const NsAppLinkRPC::ButtonName& OnButtonPress::get_name(void)
+const NsAppLinkRPCV2::ButtonName& OnButtonPress::get_name(void)
 {
   return name;
 }
 
-bool OnButtonPress::set_name(const NsAppLinkRPC::ButtonName& name_)
+bool OnButtonPress::set_name(const NsAppLinkRPCV2::ButtonName& name_)
 {
   name=name_;
   return true;
 }
 
-const NsAppLinkRPC::ButtonPressMode& OnButtonPress::get_mode(void)
+const NsAppLinkRPCV2::ButtonPressMode& OnButtonPress::get_mode(void)
 {
   return mode;
 }
 
-bool OnButtonPress::set_mode(const NsAppLinkRPC::ButtonPressMode& mode_)
+bool OnButtonPress::set_mode(const NsAppLinkRPCV2::ButtonPressMode& mode_)
 {
   mode=mode_;
   return true;

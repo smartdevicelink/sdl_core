@@ -10,8 +10,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Thu Dec 13 14:18:29 2012
-  source stamp	Thu Dec 13 14:18:27 2012
+  generated at	Thu Jan 24 06:36:23 2013
+  source stamp	Thu Jan 24 06:35:41 2013
   author	robok0der
 */
 
@@ -21,7 +21,7 @@ PutFile_request& PutFile_request::operator =(const PutFile_request& c)
   syncFileName= c.syncFileName;
   fileType= c.fileType;
   persistentFile= c.persistentFile ? new bool(c.persistentFile[0]) : 0;
-//  fileData= c.fileData;
+  fileData= c.fileData ? new std::string(c.fileData[0]) : 0;
 
   return *this;
 }
@@ -31,6 +31,8 @@ PutFile_request::~PutFile_request(void)
 {
   if(persistentFile)
     delete persistentFile;
+  if(fileData)
+    delete fileData;
 }
 
 
@@ -47,7 +49,8 @@ bool PutFile_request::checkIntegrity(void)
 
 
 PutFile_request::PutFile_request(void) : NsAppLinkRPC::ALRPCMessage(PROTOCOL_VERSION),
-      persistentFile(0)
+      persistentFile(0),
+    fileData(0)
 {
 }
 
@@ -83,7 +86,21 @@ void PutFile_request::reset_persistentFile(void)
   persistentFile=0;
 }
 
+bool PutFile_request::set_fileData(const std::string& fileData_)
+{
+  delete fileData;
+  fileData=0;
 
+  fileData=new std::string(fileData_);
+  return true;
+}
+
+void PutFile_request::reset_fileData(void)
+{
+  if(fileData)
+    delete fileData;
+  fileData=0;
+}
 
 
 
@@ -103,5 +120,8 @@ const bool* PutFile_request::get_persistentFile(void) const
   return persistentFile;
 }
 
-
+const std::string* PutFile_request::get_fileData(void) const 
+{
+  return fileData;
+}
 

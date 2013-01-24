@@ -5,12 +5,13 @@
 
 #include "SoftButtonMarshaller.h"
 
+
 /*
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Thu Dec 13 14:18:29 2012
-  source stamp	Thu Dec 13 14:18:27 2012
+  generated at	Thu Jan 24 06:36:23 2013
+  source stamp	Thu Jan 24 06:35:41 2013
   author	robok0der
 */
 
@@ -52,7 +53,7 @@ bool SoftButtonMarshaller::checkIntegrityConst(const SoftButton& s)
   if(s.image && !ImageMarshaller::checkIntegrityConst(*s.image))  return false;
   if(s.softButtonID>65536)  return false;
   if(!SystemActionMarshaller::checkIntegrityConst(s.systemAction))  return false;
-  if(s.text.length()>500)  return false;
+  if(s.text && s.text->length()>500)  return false;
   if(!SoftButtonTypeMarshaller::checkIntegrityConst(s.type))  return false;
   return true;
 }
@@ -63,11 +64,8 @@ Json::Value SoftButtonMarshaller::toJSON(const SoftButton& e)
   if(!checkIntegrityConst(e))
     return Json::Value(Json::nullValue);
 
-  if (e.image)
-  {
+  if(e.image)
     json["image"]=ImageMarshaller::toJSON(*e.image);
-  }
-  
 
   json["isHighlighted"]=Json::Value(e.isHighlighted);
 
@@ -75,7 +73,8 @@ Json::Value SoftButtonMarshaller::toJSON(const SoftButton& e)
 
   json["systemAction"]=SystemActionMarshaller::toJSON(e.systemAction);
 
-  json["text"]=Json::Value(e.text);
+  if(e.text)
+    json["text"]=Json::Value(*e.text);
 
   json["type"]=SoftButtonTypeMarshaller::toJSON(e.type);
 
@@ -86,19 +85,22 @@ Json::Value SoftButtonMarshaller::toJSON(const SoftButton& e)
 
 bool SoftButtonMarshaller::fromJSON(const Json::Value& json,SoftButton& c)
 {
-  delete c.image;
-  c.image = 0;
+  if(c.image)  delete c.image;
+  c.image=0;
+
+  if(c.text)  delete c.text;
+  c.text=0;
+
   try
   {
     if(!json.isObject())  return false;
 
-    if(json.isMember("image"))  
+    if(json.isMember("image"))
     {
       const Json::Value& j=json["image"];
-      Image m;
-      if(!ImageMarshaller::fromJSON(j,m))
+      c.image=new Image();
+      if(!ImageMarshaller::fromJSON(j,c.image[0]))
         return false;
-      c.image = new Image(m);
     }
     if(!json.isMember("isHighlighted"))  return false;
     {
@@ -118,11 +120,11 @@ bool SoftButtonMarshaller::fromJSON(const Json::Value& json,SoftButton& c)
       if(!SystemActionMarshaller::fromJSON(j,c.systemAction))
         return false;
     }
-    if(!json.isMember("text"))  return false;
+    if(json.isMember("text"))
     {
       const Json::Value& j=json["text"];
       if(!j.isString())  return false;
-      c.text=j.asString();
+      c.text=new std::string(j.asString());
     }
     if(!json.isMember("type"))  return false;
     {

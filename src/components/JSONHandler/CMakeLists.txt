@@ -41,7 +41,7 @@ set (GENERATED_SOURCES2
 ./src/ALRPCObjectsImpl/V1/CreateInteractionChoiceSet_requestMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/CreateInteractionChoiceSet_response.cpp
 ./src/ALRPCObjectsImpl/V1/CreateInteractionChoiceSet_responseMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/DeactivateReasonMarshaller.cpp
+./src/ALRPCObjectsImpl/V2/DeactivateReasonMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/DeleteCommand_request.cpp
 ./src/ALRPCObjectsImpl/V1/DeleteCommand_requestMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/DeleteCommand_response.cpp
@@ -61,8 +61,8 @@ set (GENERATED_SOURCES2
 ./src/ALRPCObjectsImpl/V1/EncodedSyncPData_response.cpp
 ./src/ALRPCObjectsImpl/V1/EncodedSyncPData_responseMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/GlobalPropertyMarshaller.cpp
-./src/ALRPCObjectsImpl/V1/HMIApplication.cpp
-./src/ALRPCObjectsImpl/V1/HMIApplicationMarshaller.cpp
+./src/ALRPCObjectsImpl/V2/HMIApplication.cpp
+./src/ALRPCObjectsImpl/V2/HMIApplicationMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/HmiZoneCapabilitiesMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/OnEncodedSyncPData.cpp
 ./src/ALRPCObjectsImpl/V1/OnEncodedSyncPDataMarshaller.cpp
@@ -481,8 +481,6 @@ set (GENERATED_RPC_SOURCES
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/GetLanguageMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/GetLanguageResponse.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/GetLanguageResponseMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/OnAudioPassThru.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/OnAudioPassThruMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/OnLanguageChange.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/OnLanguageChangeMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/Speak.cpp
@@ -493,10 +491,8 @@ set (GENERATED_RPC_SOURCES
 ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/ActivateAppMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/ActivateAppResponse.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/ActivateAppResponseMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/DeactivateApp.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/DeactivateAppMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/DeactivateAppResponse.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/DeactivateAppResponseMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/OnAppDeactivated.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/OnAppDeactivatedMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetAppList.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetAppListMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/AppLinkCore/GetAppListResponse.cpp
@@ -565,32 +561,24 @@ set (GENERATED_RPC_SOURCES
 ./src/RPC2ObjectsImpl/NsRPC2Communication/VehicleInfo/ReadDIDMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/VehicleInfo/ReadDIDResponse.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/VehicleInfo/ReadDIDResponseMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/VehicleInfo/SubscribeVehicleData.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/VehicleInfo/SubscribeVehicleDataMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/VehicleInfo/SubscribeVehicleDataResponse.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/VehicleInfo/SubscribeVehicleDataResponseMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/VehicleInfo/UnsubscribeVehicleData.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataResponse.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataResponseMarshaller.cpp
-  ./src/RPC2ObjectsImpl/NsRPC2Communication/Phone/DialNumber.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Phone/DialNumberMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Phone/DialNumberResponse.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Phone/DialNumberResponseMarshaller.cpp
-  ./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/AlertManeuver.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/AlertManeuverMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/AlertManeuverResponse.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/AlertManeuverResponseMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/OnTBTClientState.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/OnTBTClientStateMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/ShowConstantTBT.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/ShowConstantTBTMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/ShowConstantTBTResponse.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/ShowConstantTBTResponseMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/UpdateTurnList.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/UpdateTurnListMarshaller.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/UpdateTurnListResponse.cpp
-./src/RPC2ObjectsImpl/NsRPC2Communication/Navigation/UpdateTurnListResponseMarshaller.cpp
+  ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/DialNumber.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/DialNumberMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/DialNumberResponse.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/DialNumberResponseMarshaller.cpp
+  ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AlertManeuver.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AlertManeuverMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AlertManeuverResponse.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/AlertManeuverResponseMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnTBTClientState.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/OnTBTClientStateMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/ShowConstantTBT.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/ShowConstantTBTMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/ShowConstantTBTResponse.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/ShowConstantTBTResponseMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/UpdateTurnList.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/UpdateTurnListMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/UpdateTurnListResponse.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/UI/UpdateTurnListResponseMarshaller.cpp
 )
 
 

@@ -4,13 +4,13 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
 
 /*
   interface	NsRPC2Communication::TTS
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -33,14 +33,14 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const std::vector< NsAppLinkRPC::TTSChunk>& get_ttsChunks(void);
+      const std::vector< NsAppLinkRPCV2::TTSChunk>& get_ttsChunks(void);
 
       int get_appId(void);
 
 
 // setters
 /// 1 <= size <= 100
-      bool set_ttsChunks(const std::vector< NsAppLinkRPC::TTSChunk>& ttsChunks);
+      bool set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks);
 
       bool set_appId(int appId);
 
@@ -49,7 +49,7 @@ namespace NsRPC2Communication
 
       friend class SpeakMarshaller;
 
-      std::vector< NsAppLinkRPC::TTSChunk> ttsChunks;
+      std::vector< NsAppLinkRPCV2::TTSChunk> ttsChunks;
       int appId;
 
     };

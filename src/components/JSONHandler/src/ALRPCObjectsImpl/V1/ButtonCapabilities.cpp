@@ -5,8 +5,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Fri Dec 14 08:11:37 2012
-  source stamp	Fri Dec 14 08:11:34 2012
+  generated at	Thu Jan 24 06:36:21 2013
+  source stamp	Thu Jan 24 06:35:34 2013
   author	robok0der
 */
 

@@ -28,16 +28,16 @@
 /* The character set is not based on ISO-646.  */
 #error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
 #endif
-
-
-#define TOTAL_KEYWORDS 111
-#define MIN_WORD_LENGTH 7
-#define MAX_WORD_LENGTH 42
-#define MIN_HASH_VALUE 12
-#define MAX_HASH_VALUE 245
-/* maximum key range = 234, duplicates = 0 */
 namespace NsRPC2Communication
 {
+
+#define TOTAL_KEYWORDS 110
+#define MIN_WORD_LENGTH 7
+#define MAX_WORD_LENGTH 37
+#define MIN_HASH_VALUE 7
+#define MAX_HASH_VALUE 184
+/* maximum key range = 178, duplicates = 0 */
+
 class Marshaller_intHash
 {
 private:
@@ -51,32 +51,32 @@ Marshaller_intHash::hash (register const char *str, register unsigned int len)
 {
   static const unsigned char asso_values[] =
     {
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246,  45, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246,   5, 246,
-      246, 246, 246, 246, 246,   0,  90,  30,   5,  55,
-      246,   0, 246, 246, 246, 246,  20,  95,   0,   0,
-       15, 246,  55,  10,   0,   5,   0, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246,  10, 105,  60,
-       90,   0, 246, 115,  50,   0, 246, 246,   0,  50,
-       70,  20,   0, 246,   0,  25,   0,  30,  85, 246,
-        0,  45, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246, 246, 246, 246, 246,
-      246, 246, 246, 246, 246, 246
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185,  20, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185,   0,  40,  80,  15,  75,
+      185,  15, 185, 185, 185, 185,   0,  20, 185,   0,
+       45, 185,  40,   0,   5,   0,  35, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185,   5, 185,  80,
+       10,   0, 185,  30,  45,   0, 185, 185,  35,  10,
+        0,  55,   0, 185,  10,  40,   5,  80, 105, 185,
+        0,  45, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185, 185, 185, 185, 185,
+      185, 185, 185, 185, 185, 185
     };
   register int hval = len;
 
@@ -124,323 +124,288 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
 {
   static const unsigned char lengthtable[] =
     {
-       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 12,  8,
-       0, 10,  0, 12, 18, 19,  0,  0,  7, 18,  9, 25, 26, 27,
-       0,  0,  0, 26, 17, 33, 34,  0, 21, 22,  0, 34,  0, 16,
-      22, 18, 29, 25, 26, 27, 13, 29, 25, 26, 22, 33,  9, 20,
-      21,  0, 33, 29, 20, 21, 17,  0, 19,  0, 21, 37,  0, 29,
-      15, 16, 27,  0, 29,  0, 16,  0, 23, 19,  0,  0,  0,  0,
-      29, 25,  0, 27, 28, 19,  0,  0, 37, 28, 19,  0, 26,  0,
-      13, 19, 15, 21, 32, 13, 34, 30, 21, 27, 13, 29, 40, 21,
-       0,  0, 24, 30, 21,  0,  0, 24,  0, 16, 32,  0, 19,  0,
-      21, 32, 23, 14,  0,  0,  0,  0, 14,  0, 31, 27,  0, 19,
-       0,  0, 17,  0, 34,  0,  0, 27, 23,  0,  0, 16, 42,  0,
-       0,  0, 31,  0,  0, 24,  0, 31, 22,  0, 24,  0, 21, 22,
-       0,  0, 25,  0,  0, 23,  0,  0,  0,  0, 33,  0,  0, 31,
-      22,  0,  0,  0,  0,  0,  0,  0, 20,  0,  0,  0,  0,  0,
-       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 24,
-       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-       0, 24,  0,  0,  0,  0,  0, 30
+       0,  0,  0,  0,  0,  0,  0,  7,  8,  9, 10,  0, 12, 13,
+       0, 15,  0, 17,  0, 19,  0, 21, 17, 13, 19,  0,  0, 22,
+      28, 29, 25, 21, 27,  0,  9, 20, 36, 22, 13,  0, 25, 16,
+      17,  0, 19, 15, 21, 12, 33, 24,  0, 16, 27, 23, 19,  0,
+       0, 32, 13, 14, 20, 21, 17, 18,  0,  0, 21, 22, 18, 29,
+       0, 16,  0, 18, 19,  0, 16,  0,  0,  0, 20, 26, 27, 28,
+      24, 30,  0, 22,  0, 34, 25, 26, 32, 13, 14,  0, 16,  0,
+      33, 34,  0, 21,  0, 18, 29,  0, 21, 22, 28, 19, 25,  0,
+      37, 23, 29, 30, 21, 27,  0, 19,  0, 31,  0,  0, 24,  0,
+      26, 27, 23, 24,  0, 26, 32,  0,  0, 30, 31,  0,  0, 24,
+       0, 21, 22,  0, 19,  0, 21,  0,  0, 29,  0, 21, 27,  0,
+       0,  0,  0,  0,  0, 29,  0,  0,  0, 23, 24,  0, 26,  0,
+       0, 29,  0, 31,  0,  0,  0,  0, 31, 37,  0,  0,  0,  0,
+       0,  0, 24
     };
   static const struct Marshaller::localHash wordlist[] =
     {
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""},
-#line 112 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VR.OnCommand",94,&Marshaller::mNsRPC2Communication_VR__OnCommand},
-#line 62 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.Alert",44,&Marshaller::mNsRPC2Communication_UI__Alert},
-      {""},
-#line 82 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.OnReady",64,&Marshaller::mNsRPC2Communication_UI__OnReady},
-      {""},
-#line 78 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.OnCommand",60,&Marshaller::mNsRPC2Communication_UI__OnCommand},
-#line 108 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VR.GetCapabilities",90,&Marshaller::mNsRPC2Communication_VR__GetCapabilities},
-#line 114 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.GetDTCs",96,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCs},
-      {""}, {""},
-#line 98 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.Show",80,&Marshaller::mNsRPC2Communication_UI__Show},
-#line 74 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.GetCapabilities",56,&Marshaller::mNsRPC2Communication_UI__GetCapabilities},
-#line 100 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.Slider",82,&Marshaller::mNsRPC2Communication_UI__Slider},
-#line 40 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"Navigation.UpdateTurnList",22,&Marshaller::mNsRPC2Communication_Navigation__UpdateTurnList},
-#line 118 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.GetVehicleType",100,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleType},
-#line 115 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.GetDTCsResponse",97,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCsResponse},
-      {""}, {""}, {""},
-#line 116 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.GetVehicleData",98,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleData},
-#line 101 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.SliderResponse",83,&Marshaller::mNsRPC2Communication_UI__SliderResponse},
-#line 41 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"Navigation.UpdateTurnListResponse",23,&Marshaller::mNsRPC2Communication_Navigation__UpdateTurnListResponse},
-#line 119 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.GetVehicleTypeResponse",101,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse},
-      {""},
-#line 96 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.SetMediaClockTimer",78,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimer},
-#line 80 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.OnDriverDistraction",62,&Marshaller::mNsRPC2Communication_UI__OnDriverDistraction},
-      {""},
-#line 117 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.GetVehicleDataResponse",99,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse},
-      {""},
-#line 63 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.AlertResponse",45,&Marshaller::mNsRPC2Communication_UI__AlertResponse},
-#line 22 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.GetAppList",4,&Marshaller::mNsRPC2Communication_AppLinkCore__GetAppList},
-#line 83 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.OnSystemContext",65,&Marshaller::mNsRPC2Communication_UI__OnSystemContext},
+      {""}, {""}, {""}, {""}, {""}, {""}, {""},
 #line 97 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.SetMediaClockTimerResponse",79,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimerResponse},
-#line 24 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.GetDeviceList",6,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceList},
-#line 109 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VR.GetCapabilitiesResponse",91,&Marshaller::mNsRPC2Communication_VR__GetCapabilitiesResponse},
-#line 26 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.OnAppRegistered",8,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered},
-#line 60 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.AddSubMenu",42,&Marshaller::mNsRPC2Communication_UI__AddSubMenu},
-#line 27 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.OnAppUnregistered",9,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered},
-#line 20 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.DeactivateApp",2,&Marshaller::mNsRPC2Communication_AppLinkCore__DeactivateApp},
-#line 75 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.GetCapabilitiesResponse",57,&Marshaller::mNsRPC2Communication_UI__GetCapabilitiesResponse},
-#line 94 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.SetGlobalProperties",76,&Marshaller::mNsRPC2Communication_UI__SetGlobalProperties},
-#line 25 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.GetDeviceListResponse",7,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceListResponse},
-#line 56 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.Speak",38,&Marshaller::mNsRPC2Communication_TTS__Speak},
-#line 29 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.SendData",11,&Marshaller::mNsRPC2Communication_AppLinkCore__SendData},
-#line 61 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.AddSubMenuResponse",43,&Marshaller::mNsRPC2Communication_UI__AddSubMenuResponse},
-      {""},
-#line 21 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.DeactivateAppResponse",3,&Marshaller::mNsRPC2Communication_AppLinkCore__DeactivateAppResponse},
-#line 70 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.DeleteInteractionChoiceSet",52,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSet},
-#line 88 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.ScrollableMessage",70,&Marshaller::mNsRPC2Communication_UI__ScrollableMessage},
-#line 104 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VR.ChangeRegistration",86,&Marshaller::mNsRPC2Communication_VR__ChangeRegistration},
-#line 57 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.SpeakResponse",39,&Marshaller::mNsRPC2Communication_TTS__SpeakResponse},
-      {""},
-#line 48 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.GetCapabilities",30,&Marshaller::mNsRPC2Communication_TTS__GetCapabilities},
-      {""},
-#line 64 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.ChangeRegistration",46,&Marshaller::mNsRPC2Communication_UI__ChangeRegistration},
-#line 71 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.DeleteInteractionChoiceSetResponse",53,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSetResponse},
-      {""},
-#line 105 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VR.ChangeRegistrationResponse",87,&Marshaller::mNsRPC2Communication_VR__ChangeRegistrationResponse},
+      {"UI.Show",79,&Marshaller::mNsRPC2Communication_UI__Show},
 #line 50 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.GetLanguage",32,&Marshaller::mNsRPC2Communication_TTS__GetLanguage},
-#line 106 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VR.DeleteCommand",88,&Marshaller::mNsRPC2Communication_VR__DeleteCommand},
-#line 49 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.GetCapabilitiesResponse",31,&Marshaller::mNsRPC2Communication_TTS__GetCapabilitiesResponse},
+      {"UI.Alert",32,&Marshaller::mNsRPC2Communication_UI__Alert},
+#line 101 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.Slider",83,&Marshaller::mNsRPC2Communication_UI__Slider},
+#line 78 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.OnReady",60,&Marshaller::mNsRPC2Communication_UI__OnReady},
       {""},
-#line 65 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.ChangeRegistrationResponse",47,&Marshaller::mNsRPC2Communication_UI__ChangeRegistrationResponse},
-      {""},
-#line 68 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.DeleteCommand",50,&Marshaller::mNsRPC2Communication_UI__DeleteCommand},
-      {""},
-#line 51 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.GetLanguageResponse",33,&Marshaller::mNsRPC2Communication_TTS__GetLanguageResponse},
-#line 121 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.ReadDID",103,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDID},
-      {""}, {""}, {""}, {""},
-#line 66 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.CreateInteractionChoiceSet",48,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSet},
-#line 120 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.OnVehicleData",102,&Marshaller::mNsRPC2Communication_VehicleInfo__OnVehicleData},
-      {""},
-#line 122 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.ReadDIDResponse",104,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDIDResponse},
-#line 30 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.SendDataResponse",12,&Marshaller::mNsRPC2Communication_AppLinkCore__SendDataResponse},
-#line 113 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VR.OnLanguageChange",95,&Marshaller::mNsRPC2Communication_VR__OnLanguageChange},
-      {""}, {""},
-#line 67 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.CreateInteractionChoiceSetResponse",49,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse},
+#line 74 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.OnCommand",56,&Marshaller::mNsRPC2Communication_UI__OnCommand},
 #line 89 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.ScrollableMessageResponse",71,&Marshaller::mNsRPC2Communication_UI__ScrollableMessageResponse},
-#line 81 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.OnLanguageChange",63,&Marshaller::mNsRPC2Communication_UI__OnLanguageChange},
+      {"UI.SetAppIcon",71,&Marshaller::mNsRPC2Communication_UI__SetAppIcon},
       {""},
-#line 38 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"Navigation.ShowConstantTBT",20,&Marshaller::mNsRPC2Communication_Navigation__ShowConstantTBT},
+#line 98 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.ShowResponse",80,&Marshaller::mNsRPC2Communication_UI__ShowResponse},
+      {""},
+#line 102 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.SliderResponse",84,&Marshaller::mNsRPC2Communication_UI__SliderResponse},
+      {""},
+#line 77 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.OnLanguageChange",59,&Marshaller::mNsRPC2Communication_UI__OnLanguageChange},
       {""},
 #line 90 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.SetAppIcon",72,&Marshaller::mNsRPC2Communication_UI__SetAppIcon},
-#line 92 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.SetDisplayLayout",74,&Marshaller::mNsRPC2Communication_UI__SetDisplayLayout},
-#line 99 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.ShowResponse",81,&Marshaller::mNsRPC2Communication_UI__ShowResponse},
-#line 84 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.PerformInteraction",66,&Marshaller::mNsRPC2Communication_UI__PerformInteraction},
-#line 123 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.SubscribeVehicleData",105,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleData},
-#line 102 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VR.AddCommand",84,&Marshaller::mNsRPC2Communication_VR__AddCommand},
-#line 39 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"Navigation.ShowConstantTBTResponse",21,&Marshaller::mNsRPC2Communication_Navigation__ShowConstantTBTResponse},
-#line 23 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.GetAppListResponse",5,&Marshaller::mNsRPC2Communication_AppLinkCore__GetAppListResponse},
-#line 91 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.SetAppIconResponse",73,&Marshaller::mNsRPC2Communication_UI__SetAppIconResponse},
-#line 93 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.SetDisplayLayoutResponse",75,&Marshaller::mNsRPC2Communication_UI__SetDisplayLayoutResponse},
-#line 58 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.AddCommand",40,&Marshaller::mNsRPC2Communication_UI__AddCommand},
-#line 85 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.PerformInteractionResponse",67,&Marshaller::mNsRPC2Communication_UI__PerformInteractionResponse},
-#line 124 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.SubscribeVehicleDataResponse",106,&Marshaller::mNsRPC2Communication_VehicleInfo__SubscribeVehicleDataResponse},
+      {"UI.SetAppIconResponse",72,&Marshaller::mNsRPC2Communication_UI__SetAppIconResponse},
 #line 103 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VR.AddCommandResponse",85,&Marshaller::mNsRPC2Communication_VR__AddCommandResponse},
+      {"UI.UpdateTurnList",85,&Marshaller::mNsRPC2Communication_UI__UpdateTurnList},
+#line 46 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.AddCommand",28,&Marshaller::mNsRPC2Communication_UI__AddCommand},
+#line 80 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.OnTBTClientState",62,&Marshaller::mNsRPC2Communication_UI__OnTBTClientState},
       {""}, {""},
-#line 86 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.ResetGlobalProperties",68,&Marshaller::mNsRPC2Communication_UI__ResetGlobalProperties},
-#line 95 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.SetGlobalPropertiesResponse",77,&Marshaller::mNsRPC2Communication_UI__SetGlobalPropertiesResponse},
-#line 59 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.AddCommandResponse",41,&Marshaller::mNsRPC2Communication_UI__AddCommandResponse},
-      {""}, {""},
-#line 35 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"Navigation.AlertManeuver",17,&Marshaller::mNsRPC2Communication_Navigation__AlertManeuver},
+#line 76 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.OnDriverDistraction",58,&Marshaller::mNsRPC2Communication_UI__OnDriverDistraction},
+#line 24 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.OnAppDeactivated",6,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppDeactivated},
+#line 27 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.OnAppUnregistered",9,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered},
+#line 104 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.UpdateTurnListResponse",86,&Marshaller::mNsRPC2Communication_UI__UpdateTurnListResponse},
+#line 47 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.AddCommandResponse",29,&Marshaller::mNsRPC2Communication_UI__AddCommandResponse},
+#line 26 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.OnAppRegistered",8,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered},
       {""},
+#line 44 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"TTS.Speak",26,&Marshaller::mNsRPC2Communication_TTS__Speak},
+#line 29 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.SendData",11,&Marshaller::mNsRPC2Communication_AppLinkCore__SendData},
+#line 25 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.OnAppDeactivatedResponse",7,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppDeactivatedResponse},
+#line 20 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.GetAppList",2,&Marshaller::mNsRPC2Communication_AppLinkCore__GetAppList},
+#line 64 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.DialNumber",46,&Marshaller::mNsRPC2Communication_UI__DialNumber},
+      {""},
+#line 22 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.GetDeviceList",4,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceList},
+#line 58 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.DeleteCommand",40,&Marshaller::mNsRPC2Communication_UI__DeleteCommand},
+#line 45 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"TTS.SpeakResponse",27,&Marshaller::mNsRPC2Communication_TTS__SpeakResponse},
+      {""},
+#line 37 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"TTS.GetCapabilities",19,&Marshaller::mNsRPC2Communication_TTS__GetCapabilities},
+#line 39 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"TTS.GetLanguage",21,&Marshaller::mNsRPC2Communication_TTS__GetLanguage},
+#line 65 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.DialNumberResponse",47,&Marshaller::mNsRPC2Communication_UI__DialNumberResponse},
+#line 117 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.OnCommand",99,&Marshaller::mNsRPC2Communication_VR__OnCommand},
+#line 23 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.GetDeviceListResponse",5,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceListResponse},
 #line 72 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.DeleteSubMenu",54,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenu},
+      {"UI.GetSupportedLanguages",54,&Marshaller::mNsRPC2Communication_UI__GetSupportedLanguages},
+      {""},
+#line 62 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.DeleteSubMenu",44,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenu},
+#line 38 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"TTS.GetCapabilitiesResponse",20,&Marshaller::mNsRPC2Communication_TTS__GetCapabilitiesResponse},
+#line 40 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"TTS.GetLanguageResponse",22,&Marshaller::mNsRPC2Communication_TTS__GetLanguageResponse},
+#line 118 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.OnLanguageChange",100,&Marshaller::mNsRPC2Communication_VR__OnLanguageChange},
+      {""}, {""},
+#line 73 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.GetSupportedLanguagesResponse",55,&Marshaller::mNsRPC2Communication_UI__GetSupportedLanguagesResponse},
+#line 105 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.AddCommand",87,&Marshaller::mNsRPC2Communication_VR__AddCommand},
+#line 70 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.GetLanguage",52,&Marshaller::mNsRPC2Communication_UI__GetLanguage},
 #line 87 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.ResetGlobalPropertiesResponse",69,&Marshaller::mNsRPC2Communication_UI__ResetGlobalPropertiesResponse},
+      {"UI.ScrollableMessage",69,&Marshaller::mNsRPC2Communication_UI__ScrollableMessage},
+#line 95 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.SetMediaClockTimer",77,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimer},
+#line 75 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.OnDeviceChosen",57,&Marshaller::mNsRPC2Communication_UI__OnDeviceChosen},
+#line 99 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.ShowConstantTBT",81,&Marshaller::mNsRPC2Communication_UI__ShowConstantTBT},
+      {""}, {""},
+#line 106 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.AddCommandResponse",88,&Marshaller::mNsRPC2Communication_VR__AddCommandResponse},
+#line 93 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.SetGlobalProperties",75,&Marshaller::mNsRPC2Communication_UI__SetGlobalProperties},
+#line 68 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.GetCapabilities",50,&Marshaller::mNsRPC2Communication_UI__GetCapabilities},
+#line 96 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.SetMediaClockTimerResponse",78,&Marshaller::mNsRPC2Communication_UI__SetMediaClockTimerResponse},
+      {""},
+#line 51 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.AlertResponse",33,&Marshaller::mNsRPC2Communication_UI__AlertResponse},
+      {""},
+#line 79 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.OnSystemContext",61,&Marshaller::mNsRPC2Communication_UI__OnSystemContext},
+#line 119 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VehicleInfo.GetDTCs",101,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCs},
+      {""},
+#line 109 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.DeleteCommand",91,&Marshaller::mNsRPC2Communication_VR__DeleteCommand},
+      {""}, {""}, {""},
+#line 43 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"TTS.OnLanguageChange",25,&Marshaller::mNsRPC2Communication_TTS__OnLanguageChange},
+#line 123 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VehicleInfo.GetVehicleType",105,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleType},
+#line 120 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VehicleInfo.GetDTCsResponse",102,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCsResponse},
+#line 30 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.SendDataResponse",12,&Marshaller::mNsRPC2Communication_AppLinkCore__SendDataResponse},
+#line 115 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.GetSupportedLanguages",97,&Marshaller::mNsRPC2Communication_VR__GetSupportedLanguages},
+#line 21 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.GetAppListResponse",3,&Marshaller::mNsRPC2Communication_AppLinkCore__GetAppListResponse},
+      {""},
+#line 35 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"TTS.ChangeRegistration",17,&Marshaller::mNsRPC2Communication_TTS__ChangeRegistration},
+      {""},
+#line 124 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VehicleInfo.GetVehicleTypeResponse",106,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleTypeResponse},
+#line 41 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"TTS.GetSupportedLanguages",23,&Marshaller::mNsRPC2Communication_TTS__GetSupportedLanguages},
+#line 121 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VehicleInfo.GetVehicleData",103,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleData},
+#line 116 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.GetSupportedLanguagesResponse",98,&Marshaller::mNsRPC2Communication_VR__GetSupportedLanguagesResponse},
+#line 48 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.AddSubMenu",30,&Marshaller::mNsRPC2Communication_UI__AddSubMenu},
+#line 113 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.GetLanguage",95,&Marshaller::mNsRPC2Communication_VR__GetLanguage},
       {""},
 #line 52 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.OnAudioPassThru",34,&Marshaller::mNsRPC2Communication_TTS__OnAudioPassThru},
+      {"UI.AlertManeuver",34,&Marshaller::mNsRPC2Communication_UI__AlertManeuver},
       {""},
-#line 34 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"Buttons.OnButtonPress",16,&Marshaller::mNsRPC2Communication_Buttons__OnButtonPress},
-#line 36 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"Navigation.AlertManeuverResponse",18,&Marshaller::mNsRPC2Communication_Navigation__AlertManeuverResponse},
-#line 18 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.ActivateApp",0,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateApp},
-#line 110 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VR.GetLanguage",92,&Marshaller::mNsRPC2Communication_VR__GetLanguage},
-      {""}, {""}, {""}, {""},
-#line 76 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.GetLanguage",58,&Marshaller::mNsRPC2Communication_UI__GetLanguage},
+#line 42 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"TTS.GetSupportedLanguagesResponse",24,&Marshaller::mNsRPC2Communication_TTS__GetSupportedLanguagesResponse},
+#line 122 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VehicleInfo.GetVehicleDataResponse",104,&Marshaller::mNsRPC2Communication_VehicleInfo__GetVehicleDataResponse},
       {""},
-#line 19 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.ActivateAppResponse",1,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse},
-#line 37 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"Navigation.OnTBTClientState",19,&Marshaller::mNsRPC2Communication_Navigation__OnTBTClientState},
+#line 49 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.AddSubMenuResponse",31,&Marshaller::mNsRPC2Communication_UI__AddSubMenuResponse},
       {""},
-#line 46 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.EndAudioPassThru",28,&Marshaller::mNsRPC2Communication_UI__EndAudioPassThru},
-      {""}, {""},
-#line 79 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.OnDeviceChosen",61,&Marshaller::mNsRPC2Communication_UI__OnDeviceChosen},
+#line 111 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.GetCapabilities",93,&Marshaller::mNsRPC2Communication_VR__GetCapabilities},
+#line 60 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.DeleteInteractionChoiceSet",42,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSet},
       {""},
+#line 54 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.ChangeRegistration",36,&Marshaller::mNsRPC2Communication_UI__ChangeRegistration},
+#line 71 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.GetLanguageResponse",53,&Marshaller::mNsRPC2Communication_UI__GetLanguageResponse},
+#line 88 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.ScrollableMessageResponse",70,&Marshaller::mNsRPC2Communication_UI__ScrollableMessageResponse},
+#line 126 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VehicleInfo.ReadDID",108,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDID},
 #line 125 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.UnsubscribeVehicleData",107,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleData},
-      {""}, {""},
-#line 47 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.EndAudioPassThruResponse",29,&Marshaller::mNsRPC2Communication_UI__EndAudioPassThruResponse},
+      {"VehicleInfo.OnVehicleData",107,&Marshaller::mNsRPC2Communication_VehicleInfo__OnVehicleData},
+      {""},
+#line 61 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.DeleteInteractionChoiceSetResponse",43,&Marshaller::mNsRPC2Communication_UI__DeleteInteractionChoiceSetResponse},
 #line 31 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"Buttons.GetCapabilities",13,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilities},
-      {""}, {""},
-#line 42 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"Phone.DialNumber",24,&Marshaller::mNsRPC2Communication_Phone__DialNumber},
-#line 126 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VehicleInfo.UnsubscribeVehicleDataResponse",108,&Marshaller::mNsRPC2Communication_VehicleInfo__UnsubscribeVehicleDataResponse},
-      {""}, {""}, {""},
+#line 55 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.ChangeRegistrationResponse",37,&Marshaller::mNsRPC2Communication_UI__ChangeRegistrationResponse},
+#line 94 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.SetGlobalPropertiesResponse",76,&Marshaller::mNsRPC2Communication_UI__SetGlobalPropertiesResponse},
+#line 34 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"Buttons.OnButtonPress",16,&Marshaller::mNsRPC2Communication_Buttons__OnButtonPress},
+#line 127 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VehicleInfo.ReadDIDResponse",109,&Marshaller::mNsRPC2Communication_VehicleInfo__ReadDIDResponse},
+      {""},
+#line 91 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.SetDisplayLayout",73,&Marshaller::mNsRPC2Communication_UI__SetDisplayLayout},
+      {""},
 #line 32 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"Buttons.GetCapabilitiesResponse",14,&Marshaller::mNsRPC2Communication_Buttons__GetCapabilitiesResponse},
       {""}, {""},
-#line 107 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VR.DeleteCommandResponse",89,&Marshaller::mNsRPC2Communication_VR__DeleteCommandResponse},
+#line 85 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.ResetGlobalProperties",67,&Marshaller::mNsRPC2Communication_UI__ResetGlobalProperties},
       {""},
-#line 28 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.OnDeviceListUpdated",10,&Marshaller::mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated},
-#line 111 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"VR.GetLanguageResponse",93,&Marshaller::mNsRPC2Communication_VR__GetLanguageResponse},
+#line 100 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.ShowConstantTBTResponse",82,&Marshaller::mNsRPC2Communication_UI__ShowConstantTBTResponse},
+#line 92 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.SetDisplayLayoutResponse",74,&Marshaller::mNsRPC2Communication_UI__SetDisplayLayoutResponse},
+#line 18 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.ActivateApp",0,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateApp},
+#line 59 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.DeleteCommandResponse",41,&Marshaller::mNsRPC2Communication_UI__DeleteCommandResponse},
       {""},
 #line 69 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.DeleteCommandResponse",51,&Marshaller::mNsRPC2Communication_UI__DeleteCommandResponse},
+      {"UI.GetCapabilitiesResponse",51,&Marshaller::mNsRPC2Communication_UI__GetCapabilitiesResponse},
+#line 86 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.ResetGlobalPropertiesResponse",68,&Marshaller::mNsRPC2Communication_UI__ResetGlobalPropertiesResponse},
+      {""}, {""},
+#line 36 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"TTS.ChangeRegistrationResponse",18,&Marshaller::mNsRPC2Communication_TTS__ChangeRegistrationResponse},
+#line 19 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.ActivateAppResponse",1,&Marshaller::mNsRPC2Communication_AppLinkCore__ActivateAppResponse},
+      {""}, {""},
+#line 63 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.DeleteSubMenuResponse",45,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenuResponse},
+      {""},
+#line 107 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.ChangeRegistration",89,&Marshaller::mNsRPC2Communication_VR__ChangeRegistration},
+#line 114 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.GetLanguageResponse",96,&Marshaller::mNsRPC2Communication_VR__GetLanguageResponse},
+      {""},
+#line 66 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.EndAudioPassThru",48,&Marshaller::mNsRPC2Communication_UI__EndAudioPassThru},
       {""},
 #line 33 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"Buttons.OnButtonEvent",15,&Marshaller::mNsRPC2Communication_Buttons__OnButtonEvent},
-#line 77 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.GetLanguageResponse",59,&Marshaller::mNsRPC2Communication_UI__GetLanguageResponse},
       {""}, {""},
-#line 127 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI::GetSupportedLanguages", 109, &Marshaller::mNsRPC2Communication_UI__GetSupportedLanguages},
+#line 108 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.ChangeRegistrationResponse",90,&Marshaller::mNsRPC2Communication_VR__ChangeRegistrationResponse},
+      {""},
+#line 83 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.PerformInteraction",65,&Marshaller::mNsRPC2Communication_UI__PerformInteraction},
+#line 67 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.EndAudioPassThruResponse",49,&Marshaller::mNsRPC2Communication_UI__EndAudioPassThruResponse},
+      {""}, {""}, {""}, {""}, {""}, {""},
+#line 84 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.PerformInteractionResponse",66,&Marshaller::mNsRPC2Communication_UI__PerformInteractionResponse},
+      {""}, {""}, {""},
+#line 81 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.PerformAudioPassThru",63,&Marshaller::mNsRPC2Communication_UI__PerformAudioPassThru},
+#line 110 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.DeleteCommandResponse",92,&Marshaller::mNsRPC2Communication_VR__DeleteCommandResponse},
+      {""},
+#line 112 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"VR.GetCapabilitiesResponse",94,&Marshaller::mNsRPC2Communication_VR__GetCapabilitiesResponse},
       {""}, {""},
-#line 54 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.PerformAudioPassThru",36,&Marshaller::mNsRPC2Communication_UI__PerformAudioPassThru},
+#line 56 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.CreateInteractionChoiceSet",38,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSet},
+      {""},
+#line 82 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.PerformAudioPassThruResponse",64,&Marshaller::mNsRPC2Communication_UI__PerformAudioPassThruResponse},
       {""}, {""}, {""}, {""},
-#line 128 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI::GetSupportedLanguagesResponse", 110, &Marshaller::mNsRPC2Communication_UI__GetSupportedLanguagesResponse},
-      {""}, {""},
-#line 55 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.PerformAudioPassThruResponse",37,&Marshaller::mNsRPC2Communication_UI__PerformAudioPassThruResponse},
-#line 44 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.ChangeRegistration",26,&Marshaller::mNsRPC2Communication_TTS__ChangeRegistration},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""},
+#line 28 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"AppLinkCore.OnDeviceListUpdated",10,&Marshaller::mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated},
+#line 57 "../src/RPC2ObjectsImpl/Marshaller.gp"
+      {"UI.CreateInteractionChoiceSetResponse",39,&Marshaller::mNsRPC2Communication_UI__CreateInteractionChoiceSetResponse},
+      {""}, {""}, {""}, {""}, {""}, {""},
 #line 53 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.OnLanguageChange",35,&Marshaller::mNsRPC2Communication_TTS__OnLanguageChange},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 73 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"UI.DeleteSubMenuResponse",55,&Marshaller::mNsRPC2Communication_UI__DeleteSubMenuResponse},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""},
-#line 43 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"Phone.DialNumberResponse",25,&Marshaller::mNsRPC2Communication_Phone__DialNumberResponse},
-      {""}, {""}, {""}, {""}, {""},
-#line 45 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"TTS.ChangeRegistrationResponse",27,&Marshaller::mNsRPC2Communication_TTS__ChangeRegistrationResponse}
+      {"UI.AlertManeuverResponse",35,&Marshaller::mNsRPC2Communication_UI__AlertManeuverResponse}
     };
-
-  printf("str = %s\n", str);
-  // check GetVehicleData response
-  register const char *strn = wordlist[39].name;
-  if (*str == *strn && !memcmp (str + 1, strn + 1, len - 1))
-  {
-    printf("wordlist[39].name = %s\n", strn);
-    return &wordlist[39];
-  }
-  //check OnVehicleData notification
-  strn = wordlist[125].name;
-  if (*str == *strn && !memcmp (str + 1, strn + 1, len - 1))
-  {
-    printf("wordlist[125].name = %s\n", strn);
-    return &wordlist[125];
-  }
-  // check GetDTCs response
-  strn = wordlist[27].name;
-  if (*str == *strn && !memcmp (str + 1, strn + 1, len - 1))
-  {
-    printf("wordlist[27].name = %s\n", strn);
-    return &wordlist[27];
-  }
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
     {

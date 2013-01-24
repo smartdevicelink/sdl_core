@@ -4,13 +4,13 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/GlobalProperty.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/GlobalProperty.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -33,14 +33,14 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const std::vector< NsAppLinkRPC::GlobalProperty>& get_properties(void);
+      const std::vector< NsAppLinkRPCV2::GlobalProperty>& get_properties(void);
 
       int get_appId(void);
 
 
 // setters
 /// 1 <= size <= 100
-      bool set_properties(const std::vector< NsAppLinkRPC::GlobalProperty>& properties);
+      bool set_properties(const std::vector< NsAppLinkRPCV2::GlobalProperty>& properties);
 
       bool set_appId(int appId);
 
@@ -49,7 +49,7 @@ namespace NsRPC2Communication
 
       friend class ResetGlobalPropertiesMarshaller;
 
-      std::vector< NsAppLinkRPC::GlobalProperty> properties;
+      std::vector< NsAppLinkRPCV2::GlobalProperty> properties;
       int appId;
 
     };

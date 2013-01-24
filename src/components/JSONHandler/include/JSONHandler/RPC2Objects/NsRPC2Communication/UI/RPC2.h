@@ -10,6 +10,8 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/AddSubMenuResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/Alert.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/AlertResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/AlertManeuver.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/AlertManeuverResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ChangeRegistration.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ChangeRegistrationResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/CreateInteractionChoiceSet.h"
@@ -20,16 +22,25 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/DeleteInteractionChoiceSetResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/DeleteSubMenu.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/DeleteSubMenuResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/DialNumber.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/DialNumberResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/EndAudioPassThru.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/EndAudioPassThruResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetCapabilities.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetCapabilitiesResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetLanguage.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetLanguageResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetSupportedLanguages.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/GetSupportedLanguagesResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnCommand.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnDeviceChosen.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnDriverDistraction.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnLanguageChange.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnReady.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnSystemContext.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/OnTBTClientState.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/PerformAudioPassThru.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/PerformAudioPassThruResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/PerformInteraction.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/PerformInteractionResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ResetGlobalProperties.h"
@@ -46,8 +57,12 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/SetMediaClockTimerResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/Show.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ShowResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ShowConstantTBT.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/ShowConstantTBTResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/Slider.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/SliderResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/UpdateTurnList.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/UI/UpdateTurnListResponse.h"
 
 #include "../src/../include/JSONHandler/RPC2Objects/Marshaller.h"
 
@@ -55,8 +70,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 

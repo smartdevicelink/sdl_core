@@ -1,12 +1,12 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/DeleteInteractionChoiceSetResponse.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/DeleteInteractionChoiceSetResponseMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -57,8 +57,8 @@ Json::Value DeleteInteractionChoiceSetResponseMarshaller::toJSON(const DeleteInt
   json["jsonrpc"]=Json::Value("2.0");
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
-  NsAppLinkRPC::Result r(static_cast<NsAppLinkRPC::Result::ResultInternal>(e.getResult()));
-  json["result"]["resultCode"]=NsAppLinkRPC::ResultMarshaller::toJSON(r);
+  NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
+  json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("UI.DeleteInteractionChoiceSetResponse");
 
   return json;
@@ -79,12 +79,12 @@ bool DeleteInteractionChoiceSetResponseMarshaller::fromJSON(const Json::Value& j
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    NsAppLinkRPC::Result r;
+    NsAppLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("UI.DeleteInteractionChoiceSetResponse")) return false;
 
-    if(!NsAppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
+    if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
   }
   catch(...)

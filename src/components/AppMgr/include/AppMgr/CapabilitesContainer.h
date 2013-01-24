@@ -23,6 +23,7 @@ namespace log4cplus
 #include "JSONHandler/ALRPCObjects/V2/SpeechCapabilities.h"
 #include "JSONHandler/ALRPCObjects/V2/VrCapabilities.h"
 #include "JSONHandler/ALRPCObjects/V2/HmiZoneCapabilities.h"
+#include "JSONHandler/ALRPCObjects/V1/ButtonCapabilities.h"
 
 namespace NsAppManager
 {

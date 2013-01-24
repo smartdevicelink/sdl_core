@@ -9,8 +9,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -35,17 +35,18 @@ namespace NsRPC2Communication
 // getters
       const std::vector< std::string>* get_deviceList(void);
 
-
 // setters
 /// 1 <= size <= 100
       bool set_deviceList(const std::vector< std::string>& deviceList);
+
+      void reset_deviceList(void);
 
 
     private:
 
       friend class OnDeviceListUpdatedMarshaller;
 
-      std::vector< std::string> * deviceList;
+      std::vector< std::string>* deviceList;
 
     };
   }

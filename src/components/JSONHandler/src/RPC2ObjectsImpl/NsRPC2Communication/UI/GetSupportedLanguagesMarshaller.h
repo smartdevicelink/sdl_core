@@ -1,10 +1,10 @@
-#ifndef NSRPC2COMMUNICATION_UI_GETSUPPORTEDLANGUAGEMARSHALLER
-#define NSRPC2COMMUNICATION_UI_GETSUPPORTEDLANGUAGEMARSHALLER
+#ifndef NSRPC2COMMUNICATION_UI_GETSUPPORTEDLANGUAGESMARSHALLER_INCLUDE
+#define NSRPC2COMMUNICATION_UI_GETSUPPORTEDLANGUAGESMARSHALLER_INCLUDE
 
 #include <string>
 #include <json/json.h>
 
-#include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetSupportedLanguages.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetSupportedLanguages.h"
 
 namespace NsRPC2Communication
 {

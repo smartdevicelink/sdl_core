@@ -36,8 +36,7 @@
 #define MIN_HASH_VALUE 10
 #define MAX_HASH_VALUE 16
 /* maximum key range = 7, duplicates = 0 */
-namespace NsAppLinkRPCV2
-{
+
 class GlobalProperty_intHash
 {
 private:
@@ -119,5 +118,4 @@ GlobalProperty_intHash::getPointer (register const char *str, register unsigned 
           }
     }
   return 0;
-}
 }

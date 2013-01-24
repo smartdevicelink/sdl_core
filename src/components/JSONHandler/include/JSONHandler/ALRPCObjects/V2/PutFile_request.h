@@ -11,8 +11,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Thu Dec 13 14:18:29 2012
-  source stamp	Thu Dec 13 14:18:27 2012
+  generated at	Thu Jan 24 06:36:23 2013
+  source stamp	Thu Jan 24 06:35:41 2013
   author	robok0der
 */
 
@@ -40,13 +40,14 @@ namespace NsAppLinkRPCV2
     const std::string& get_syncFileName(void) const;
     const FileType& get_fileType(void) const;
     const bool* get_persistentFile(void) const;
-    
+    const std::string* get_fileData(void) const;
 
     bool set_syncFileName(const std::string& syncFileName_);
     bool set_fileType(const FileType& fileType_);
     void reset_persistentFile(void);
     bool set_persistentFile(bool persistentFile_);
-    
+    void reset_fileData(void);
+    bool set_fileData(const std::string& fileData_);
 
   private:
   
@@ -69,7 +70,7 @@ namespace NsAppLinkRPCV2
       bool* persistentFile;
 
 ///  Binary data.
-      //std::string fileData;
+      std::string* fileData;
   };
 
 }

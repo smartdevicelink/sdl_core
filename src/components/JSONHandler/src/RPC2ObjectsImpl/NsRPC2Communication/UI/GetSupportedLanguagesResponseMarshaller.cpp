@@ -1,6 +1,15 @@
-#include "GetSupportedLanguagesResponseMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetSupportedLanguagesResponse.h"
 #include "../src/ALRPCObjectsImpl/V2/LanguageMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetSupportedLanguagesResponseMarshaller.h"
+
+/*
+  interface	NsRPC2Communication::UI
+  version	1.2
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
+  author	robok0der
+*/
 
 using namespace NsRPC2Communication::UI;
 
@@ -36,6 +45,12 @@ const std::string GetSupportedLanguagesResponseMarshaller::toString(const GetSup
 
 bool GetSupportedLanguagesResponseMarshaller::checkIntegrityConst(const GetSupportedLanguagesResponse& s)
 {
+  {
+    unsigned int i=s.languages.size();
+    if(i<1)  return false;
+    if(i>100)  return false;
+  }
+
   return true;
 }
 
@@ -62,7 +77,6 @@ Json::Value GetSupportedLanguagesResponseMarshaller::toJSON(const GetSupportedLa
 
     json["result"]["languages"]=j;
   }
-  
   return json;
 }
 
@@ -88,7 +102,6 @@ bool GetSupportedLanguagesResponseMarshaller::fromJSON(const Json::Value& json,G
 
     if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
-    
     if(!js.isMember("languages") || !js["languages"].isArray())  return false;
     {
       unsigned int i=js["languages"].size();

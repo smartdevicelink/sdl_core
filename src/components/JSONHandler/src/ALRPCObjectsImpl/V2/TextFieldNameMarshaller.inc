@@ -36,8 +36,7 @@
 #define MIN_HASH_VALUE 3
 #define MAX_HASH_VALUE 50
 /* maximum key range = 48, duplicates = 0 */
-namespace NsAppLinkRPCV2
-{
+
 class TextFieldName_intHash
 {
 private:
@@ -177,5 +176,4 @@ TextFieldName_intHash::getPointer (register const char *str, register unsigned i
           }
     }
   return 0;
-}
 }

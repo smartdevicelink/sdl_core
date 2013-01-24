@@ -1,7 +1,16 @@
-#include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetSupportedLanguagesResponse.h"
-#include "JSONHandler/RPC2Objects/Marshaller.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetSupportedLanguagesResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects/Marshaller.h"
+
+/*
+  interface	NsRPC2Communication::UI
+  version	1.2
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
+  author	robok0der
+*/
 
 using namespace NsRPC2Communication::UI;
+
 
 GetSupportedLanguagesResponse& GetSupportedLanguagesResponse::operator =(const GetSupportedLanguagesResponse& c)
 {
@@ -26,13 +35,19 @@ GetSupportedLanguagesResponse::GetSupportedLanguagesResponse(const GetSupportedL
   *this=c;
 }
 
-const std::vector<NsAppLinkRPCV2::Language>& GetSupportedLanguagesResponse::get_languages() const
+
+const std::vector< NsAppLinkRPCV2::Language>& GetSupportedLanguagesResponse::get_languages(void)
 {
-    return languages;
+  return languages;
 }
 
-bool GetSupportedLanguagesResponse::set_languages(const std::vector<NsAppLinkRPCV2::Language> & c)
+bool GetSupportedLanguagesResponse::set_languages(const std::vector< NsAppLinkRPCV2::Language>& languages_)
 {
-    languages = c;
-    return true;
+  languages=languages_;
+  return true;
+}
+
+bool GetSupportedLanguagesResponse::checkIntegrity(void)
+{
+  return GetSupportedLanguagesResponseMarshaller::checkIntegrity(*this);
 }

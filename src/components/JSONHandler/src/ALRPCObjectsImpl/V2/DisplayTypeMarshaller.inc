@@ -36,8 +36,7 @@
 #define MIN_HASH_VALUE 3
 #define MAX_HASH_VALUE 20
 /* maximum key range = 18, duplicates = 0 */
-namespace NsAppLinkRPCV2
-{
+
 class DisplayType_intHash
 {
 private:
@@ -141,5 +140,4 @@ DisplayType_intHash::getPointer (register const char *str, register unsigned int
           }
     }
   return 0;
-}
 }

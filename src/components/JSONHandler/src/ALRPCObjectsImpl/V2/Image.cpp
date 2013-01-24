@@ -5,8 +5,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Thu Dec 13 14:18:29 2012
-  source stamp	Thu Dec 13 14:18:27 2012
+  generated at	Thu Jan 24 06:36:23 2013
+  source stamp	Thu Jan 24 06:35:41 2013
   author	robok0der
 */
 
@@ -16,17 +16,7 @@ using namespace NsAppLinkRPCV2;
 
 Image::Image(const Image& c)
 {
-  this->imageType = c.get_imageType();
-  this->value = c.get_value();
-}
-
-
-Image& Image::operator=(const Image& c)
-{
-  this->imageType = c.get_imageType();
-  this->value = c.get_value();
-
-  return *this;
+  *this=c;
 }
 
 
@@ -59,13 +49,13 @@ bool Image::set_value(const std::string& value_)
 
 
 
-const ImageType& Image::get_imageType(void) const
+const ImageType& Image::get_imageType(void) const 
 {
   return imageType;
 }
 
 
-const std::string& Image::get_value(void) const
+const std::string& Image::get_value(void) const 
 {
   return value;
 }

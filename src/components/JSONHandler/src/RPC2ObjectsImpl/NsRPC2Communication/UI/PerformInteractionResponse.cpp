@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -17,7 +17,7 @@ PerformInteractionResponse& PerformInteractionResponse::operator =(const Perform
   if(choiceID)  delete choiceID;
   choiceID= c.choiceID ? new unsigned int(c.choiceID[0]) : 0;
   if(triggerSource)  delete triggerSource;
-  triggerSource= c.triggerSource ? new NsAppLinkRPC::TriggerSource(c.triggerSource[0]) : 0;
+  triggerSource= c.triggerSource ? new NsAppLinkRPCV2::TriggerSource(c.triggerSource[0]) : 0;
   return *this;
 }
 
@@ -61,15 +61,15 @@ void PerformInteractionResponse::reset_choiceID(void)
   choiceID=0;
 }
 
-const NsAppLinkRPC::TriggerSource* PerformInteractionResponse::get_triggerSource(void)
+const NsAppLinkRPCV2::TriggerSource* PerformInteractionResponse::get_triggerSource(void)
 {
   return triggerSource;
 }
 
-bool PerformInteractionResponse::set_triggerSource(const NsAppLinkRPC::TriggerSource& triggerSource_)
+bool PerformInteractionResponse::set_triggerSource(const NsAppLinkRPCV2::TriggerSource& triggerSource_)
 {
   if(triggerSource)  delete triggerSource;
-  triggerSource=new NsAppLinkRPC::TriggerSource(triggerSource_);
+  triggerSource=new NsAppLinkRPCV2::TriggerSource(triggerSource_);
   return true;
 }
 

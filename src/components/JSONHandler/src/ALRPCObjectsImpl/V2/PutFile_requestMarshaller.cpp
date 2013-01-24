@@ -8,8 +8,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Thu Dec 13 14:18:29 2012
-  source stamp	Thu Dec 13 14:18:27 2012
+  generated at	Thu Jan 24 06:36:23 2013
+  source stamp	Thu Jan 24 06:35:41 2013
   author	robok0der
 */
 
@@ -66,7 +66,8 @@ Json::Value PutFile_requestMarshaller::toJSON(const PutFile_request& e)
   if(e.persistentFile)
     json["persistentFile"]=Json::Value(*e.persistentFile);
 
-  //json["fileData"]=Json::Value(e.fileData);
+  if(e.fileData)
+    json["fileData"]=Json::Value(*e.fileData);
 
   return json;
 }
@@ -76,6 +77,9 @@ bool PutFile_requestMarshaller::fromJSON(const Json::Value& json,PutFile_request
 {
   if(c.persistentFile)  delete c.persistentFile;
   c.persistentFile=0;
+
+  if(c.fileData)  delete c.fileData;
+  c.fileData=0;
 
   try
   {
@@ -99,12 +103,12 @@ bool PutFile_requestMarshaller::fromJSON(const Json::Value& json,PutFile_request
       if(!j.isBool())  return false;
       c.persistentFile=new bool(j.asBool());
     }
-    /*if(!json.isMember("fileData"))  return false;
+    if(json.isMember("fileData"))
     {
       const Json::Value& j=json["fileData"];
       if(!j.isString())  return false;
-      c.fileData=j.asString();
-    }*/
+      c.fileData=new std::string(j.asString());
+    }
 
   }
   catch(...)

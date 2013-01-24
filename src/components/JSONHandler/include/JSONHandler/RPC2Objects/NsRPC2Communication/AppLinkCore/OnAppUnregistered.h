@@ -4,13 +4,13 @@
 #include <string>
 #include "JSONHandler/RPC2Notification.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/AppInterfaceUnregisteredReason.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/AppInterfaceUnregisteredReason.h"
 
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -35,7 +35,7 @@ namespace NsRPC2Communication
 // getters
       const std::string& get_appName(void);
 
-      const NsAppLinkRPC::AppInterfaceUnregisteredReason* get_reason(void);
+      const NsAppLinkRPCV2::AppInterfaceUnregisteredReason* get_reason(void);
       int get_appId(void);
 
 
@@ -43,7 +43,7 @@ namespace NsRPC2Communication
 /// appName <= 100
       bool set_appName(const std::string& appName);
 
-      bool set_reason(const NsAppLinkRPC::AppInterfaceUnregisteredReason& reason);
+      bool set_reason(const NsAppLinkRPCV2::AppInterfaceUnregisteredReason& reason);
 
       void reset_reason(void);
 
@@ -55,7 +55,7 @@ namespace NsRPC2Communication
       friend class OnAppUnregisteredMarshaller;
 
       std::string appName;
-      NsAppLinkRPC::AppInterfaceUnregisteredReason* reason;
+      NsAppLinkRPCV2::AppInterfaceUnregisteredReason* reason;
       int appId;
 
     };

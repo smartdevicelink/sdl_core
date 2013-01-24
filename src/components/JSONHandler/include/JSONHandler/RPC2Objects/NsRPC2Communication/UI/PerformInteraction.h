@@ -5,15 +5,17 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/V1/InteractionMode.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/InteractionMode.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/VrHelpItem.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -38,14 +40,14 @@ namespace NsRPC2Communication
 // getters
       const std::string& get_initialText(void);
 
-      const std::vector< NsAppLinkRPC::TTSChunk>& get_initialPrompt(void);
+      const std::vector< NsAppLinkRPCV2::TTSChunk>& get_initialPrompt(void);
 
-      const NsAppLinkRPC::InteractionMode& get_interactionMode(void);
+      const NsAppLinkRPCV2::InteractionMode& get_interactionMode(void);
 
       const std::vector< unsigned int>& get_interactionChoiceSetIDList(void);
 
-      const std::vector< NsAppLinkRPC::TTSChunk>* get_helpPrompt(void);
-      const std::vector< NsAppLinkRPC::TTSChunk>* get_timeoutPrompt(void);
+      const std::vector< NsAppLinkRPCV2::TTSChunk>* get_helpPrompt(void);
+      const std::vector< NsAppLinkRPCV2::TTSChunk>* get_timeoutPrompt(void);
       const unsigned int* get_timeout(void);
       const std::vector< NsAppLinkRPCV2::VrHelpItem>* get_vrHelp(void);
       int get_appId(void);
@@ -56,20 +58,20 @@ namespace NsRPC2Communication
       bool set_initialText(const std::string& initialText);
 
 /// 1 <= size <= 100
-      bool set_initialPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& initialPrompt);
+      bool set_initialPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& initialPrompt);
 
-      bool set_interactionMode(const NsAppLinkRPC::InteractionMode& interactionMode);
+      bool set_interactionMode(const NsAppLinkRPCV2::InteractionMode& interactionMode);
 
 /// interactionChoiceSetIDList[] <= 2000000000 ; 1 <= size <= 100
       bool set_interactionChoiceSetIDList(const std::vector< unsigned int>& interactionChoiceSetIDList);
 
 /// 1 <= size <= 100
-      bool set_helpPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& helpPrompt);
+      bool set_helpPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& helpPrompt);
 
       void reset_helpPrompt(void);
 
 /// 1 <= size <= 100
-      bool set_timeoutPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& timeoutPrompt);
+      bool set_timeoutPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& timeoutPrompt);
 
       void reset_timeoutPrompt(void);
 
@@ -91,11 +93,11 @@ namespace NsRPC2Communication
       friend class PerformInteractionMarshaller;
 
       std::string initialText;
-      std::vector< NsAppLinkRPC::TTSChunk> initialPrompt;
-      NsAppLinkRPC::InteractionMode interactionMode;
+      std::vector< NsAppLinkRPCV2::TTSChunk> initialPrompt;
+      NsAppLinkRPCV2::InteractionMode interactionMode;
       std::vector< unsigned int> interactionChoiceSetIDList;
-      std::vector< NsAppLinkRPC::TTSChunk>* helpPrompt;
-      std::vector< NsAppLinkRPC::TTSChunk>* timeoutPrompt;
+      std::vector< NsAppLinkRPCV2::TTSChunk>* helpPrompt;
+      std::vector< NsAppLinkRPCV2::TTSChunk>* timeoutPrompt;
       unsigned int* timeout;
       std::vector< NsAppLinkRPCV2::VrHelpItem>* vrHelp;
       int appId;

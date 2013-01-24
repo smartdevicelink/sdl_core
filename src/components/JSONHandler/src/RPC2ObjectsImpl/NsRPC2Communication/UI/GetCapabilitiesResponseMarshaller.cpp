@@ -1,15 +1,15 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetCapabilitiesResponse.h"
-#include "../src/ALRPCObjectsImpl/V1/DisplayCapabilitiesMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/HmiZoneCapabilitiesMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/DisplayCapabilitiesMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/HmiZoneCapabilitiesMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/SoftButtonCapabilitiesMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetCapabilitiesResponseMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -47,7 +47,7 @@ const std::string GetCapabilitiesResponseMarshaller::toString(const GetCapabilit
 
 bool GetCapabilitiesResponseMarshaller::checkIntegrityConst(const GetCapabilitiesResponse& s)
 {
-  if(!NsAppLinkRPC::DisplayCapabilitiesMarshaller::checkIntegrityConst(s.displayCapabilities))  return false;
+  if(!NsAppLinkRPCV2::DisplayCapabilitiesMarshaller::checkIntegrityConst(s.displayCapabilities))  return false;
 
   {
     unsigned int i=s.hmiZoneCapabilities.size();
@@ -75,17 +75,17 @@ Json::Value GetCapabilitiesResponseMarshaller::toJSON(const GetCapabilitiesRespo
   json["jsonrpc"]=Json::Value("2.0");
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
-  NsAppLinkRPC::Result r(static_cast<NsAppLinkRPC::Result::ResultInternal>(e.getResult()));
-  json["result"]["resultCode"]=NsAppLinkRPC::ResultMarshaller::toJSON(r);
+  NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
+  json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("UI.GetCapabilitiesResponse");
 
-  json["result"]["displayCapabilities"]=NsAppLinkRPC::DisplayCapabilitiesMarshaller::toJSON(e.displayCapabilities);;
+  json["result"]["displayCapabilities"]=NsAppLinkRPCV2::DisplayCapabilitiesMarshaller::toJSON(e.displayCapabilities);;
   {
     unsigned int i=e.hmiZoneCapabilities.size();
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::HmiZoneCapabilitiesMarshaller::toJSON(e.hmiZoneCapabilities[i]);
+      j[i]=NsAppLinkRPCV2::HmiZoneCapabilitiesMarshaller::toJSON(e.hmiZoneCapabilities[i]);
 
     json["result"]["hmiZoneCapabilities"]=j;
   }
@@ -117,14 +117,14 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    NsAppLinkRPC::Result r;
+    NsAppLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("UI.GetCapabilitiesResponse")) return false;
 
-    if(!NsAppLinkRPC::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
+    if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
-    if(!js.isMember("displayCapabilities") || !NsAppLinkRPC::DisplayCapabilitiesMarshaller::fromJSON(js["displayCapabilities"],c.displayCapabilities))  return false;
+    if(!js.isMember("displayCapabilities") || !NsAppLinkRPCV2::DisplayCapabilitiesMarshaller::fromJSON(js["displayCapabilities"],c.displayCapabilities))  return false;
 
     if(!js.isMember("hmiZoneCapabilities") || !js["hmiZoneCapabilities"].isArray())  return false;
     {
@@ -134,8 +134,8 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
       c.hmiZoneCapabilities.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::HmiZoneCapabilities t;
-        if(!NsAppLinkRPC::HmiZoneCapabilitiesMarshaller::fromJSON(js["hmiZoneCapabilities"][i],t))
+        NsAppLinkRPCV2::HmiZoneCapabilities t;
+        if(!NsAppLinkRPCV2::HmiZoneCapabilitiesMarshaller::fromJSON(js["hmiZoneCapabilities"][i],t))
           return false;
          c.hmiZoneCapabilities[i]=t;
       }

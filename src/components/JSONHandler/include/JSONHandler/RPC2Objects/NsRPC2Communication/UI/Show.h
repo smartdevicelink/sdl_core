@@ -5,15 +5,15 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/TextAlignment.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/TextAlignment.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/Image.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/SoftButton.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -40,7 +40,7 @@ namespace NsRPC2Communication
       const std::string* get_mainField2(void);
       const std::string* get_mainField3(void);
       const std::string* get_mainField4(void);
-      const NsAppLinkRPC::TextAlignment* get_alignment(void);
+      const NsAppLinkRPCV2::TextAlignment* get_alignment(void);
       const std::string* get_statusBar(void);
       const std::string* get_mediaClock(void);
       const std::string* get_mediaTrack(void);
@@ -71,7 +71,7 @@ namespace NsRPC2Communication
 
       void reset_mainField4(void);
 
-      bool set_alignment(const NsAppLinkRPC::TextAlignment& alignment);
+      bool set_alignment(const NsAppLinkRPCV2::TextAlignment& alignment);
 
       void reset_alignment(void);
 
@@ -115,7 +115,7 @@ namespace NsRPC2Communication
       std::string* mainField2;
       std::string* mainField3;
       std::string* mainField4;
-      NsAppLinkRPC::TextAlignment* alignment;
+      NsAppLinkRPCV2::TextAlignment* alignment;
       std::string* statusBar;
       std::string* mediaClock;
       std::string* mediaTrack;

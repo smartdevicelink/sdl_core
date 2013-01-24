@@ -9,8 +9,7 @@
 #define MIN_HASH_VALUE 5
 #define MAX_HASH_VALUE 6
 /* maximum key range = 2, duplicates = 0 */
-namespace NsAppLinkRPCV2
-{
+
 class DriverDistractionState_intHash
 {
 private:
@@ -56,5 +55,4 @@ DriverDistractionState_intHash::getPointer (register const char *str, register u
           }
     }
   return 0;
-}
 }

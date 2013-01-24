@@ -1,12 +1,12 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/AppLinkCore/OnDeviceListUpdated.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnDeviceListUpdatedMarshaller.h"
 
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -44,9 +44,9 @@ const std::string OnDeviceListUpdatedMarshaller::toString(const OnDeviceListUpda
 
 bool OnDeviceListUpdatedMarshaller::checkIntegrityConst(const OnDeviceListUpdated& s)
 {
-  if (s.deviceList)
+  if(s.deviceList)
   {
-    unsigned int i=s.deviceList->size();
+    unsigned int i=s.deviceList[0].size();
     if(i<1)  return false;
     if(i>100)  return false;
   }
@@ -65,9 +65,9 @@ Json::Value OnDeviceListUpdatedMarshaller::toJSON(const OnDeviceListUpdated& e)
   json["method"]=Json::Value("AppLinkCore.OnDeviceListUpdated");
   json["params"]=Json::Value(Json::objectValue);
 
-  if (e.deviceList)
+  if(e.deviceList)
   {
-    unsigned int i=e.deviceList->size();
+    unsigned int i=e.deviceList[0].size();
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
@@ -81,7 +81,6 @@ Json::Value OnDeviceListUpdatedMarshaller::toJSON(const OnDeviceListUpdated& e)
 
 bool OnDeviceListUpdatedMarshaller::fromJSON(const Json::Value& json,OnDeviceListUpdated& c)
 {
-  delete c.deviceList;
   try
   {
     if(!json.isObject())  return false;
@@ -92,20 +91,25 @@ bool OnDeviceListUpdatedMarshaller::fromJSON(const Json::Value& json,OnDeviceLis
     Json::Value js=json["params"];
     if(!js.isObject())  return false;
 
-    if(js.isMember("deviceList")) 
+    if(c.deviceList)  delete c.deviceList;
+    c.deviceList=0;
+    if(js.isMember("deviceList"))
     {
-      if (!js["deviceList"].isArray()) return false;
+      if(!js["deviceList"].isArray()) return false;
       unsigned int i=js["deviceList"].size();
       if(i<1)  return false;
       if(i>100)  return false;
-      c.deviceList = new std::vector<std::string> (i);
+
+      c.deviceList=new std::vector<std::string>();
+      c.deviceList->resize(js["deviceList"].size());
+
       while(i--)
       {
         if(!js["deviceList"][i].isString())
           return false;
+
         c.deviceList[0][i]=js["deviceList"][i].asString();
-        
-      }
+              }
     }
 
 

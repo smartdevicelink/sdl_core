@@ -5,15 +5,15 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/VrHelpItem.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -36,8 +36,8 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const std::vector< NsAppLinkRPC::TTSChunk>* get_helpPrompt(void);
-      const std::vector< NsAppLinkRPC::TTSChunk>* get_timeoutPrompt(void);
+      const std::vector< NsAppLinkRPCV2::TTSChunk>* get_helpPrompt(void);
+      const std::vector< NsAppLinkRPCV2::TTSChunk>* get_timeoutPrompt(void);
       const std::string* get_vrHelpTitle(void);
       const std::vector< NsAppLinkRPCV2::VrHelpItem>* get_vrHelp(void);
       int get_appId(void);
@@ -45,12 +45,12 @@ namespace NsRPC2Communication
 
 // setters
 /// 1 <= size <= 100
-      bool set_helpPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& helpPrompt);
+      bool set_helpPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& helpPrompt);
 
       void reset_helpPrompt(void);
 
 /// 1 <= size <= 100
-      bool set_timeoutPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& timeoutPrompt);
+      bool set_timeoutPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& timeoutPrompt);
 
       void reset_timeoutPrompt(void);
 
@@ -71,8 +71,8 @@ namespace NsRPC2Communication
 
       friend class SetGlobalPropertiesMarshaller;
 
-      std::vector< NsAppLinkRPC::TTSChunk>* helpPrompt;
-      std::vector< NsAppLinkRPC::TTSChunk>* timeoutPrompt;
+      std::vector< NsAppLinkRPCV2::TTSChunk>* helpPrompt;
+      std::vector< NsAppLinkRPCV2::TTSChunk>* timeoutPrompt;
       std::string* vrHelpTitle;
       std::vector< NsAppLinkRPCV2::VrHelpItem>* vrHelp;
       int appId;

@@ -510,7 +510,7 @@ RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager
 
         if  ( success )
         {
-            mMessageCounters.erase( sessionID );
+            mMessageCounters.erase( currentSessionID );
         }
         else
         {

@@ -1,14 +1,14 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/OnButtonPress.h"
-#include "../src/ALRPCObjectsImpl/V1/ButtonNameMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ButtonPressModeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ButtonNameMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ButtonPressModeMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/OnButtonPressMarshaller.h"
 
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -46,9 +46,9 @@ const std::string OnButtonPressMarshaller::toString(const OnButtonPress& e)
 
 bool OnButtonPressMarshaller::checkIntegrityConst(const OnButtonPress& s)
 {
-  if(!NsAppLinkRPC::ButtonNameMarshaller::checkIntegrityConst(s.name))  return false;
+  if(!NsAppLinkRPCV2::ButtonNameMarshaller::checkIntegrityConst(s.name))  return false;
 
-  if(!NsAppLinkRPC::ButtonPressModeMarshaller::checkIntegrityConst(s.mode))  return false;
+  if(!NsAppLinkRPCV2::ButtonPressModeMarshaller::checkIntegrityConst(s.mode))  return false;
 
   if(s.customButtonID && (s.customButtonID[0]>65536))  return false;
 
@@ -66,8 +66,8 @@ Json::Value OnButtonPressMarshaller::toJSON(const OnButtonPress& e)
   json["method"]=Json::Value("Buttons.OnButtonPress");
   json["params"]=Json::Value(Json::objectValue);
 
-  json["params"]["name"]=NsAppLinkRPC::ButtonNameMarshaller::toJSON(e.name);;
-  json["params"]["mode"]=NsAppLinkRPC::ButtonPressModeMarshaller::toJSON(e.mode);;
+  json["params"]["name"]=NsAppLinkRPCV2::ButtonNameMarshaller::toJSON(e.name);;
+  json["params"]["mode"]=NsAppLinkRPCV2::ButtonPressModeMarshaller::toJSON(e.mode);;
   if(e.customButtonID)
     json["params"]["customButtonID"]=Json::Value(e.customButtonID[0]);;
   return json;
@@ -86,9 +86,9 @@ bool OnButtonPressMarshaller::fromJSON(const Json::Value& json,OnButtonPress& c)
     Json::Value js=json["params"];
     if(!js.isObject())  return false;
 
-    if(!js.isMember("name") || !NsAppLinkRPC::ButtonNameMarshaller::fromJSON(js["name"],c.name))  return false;
+    if(!js.isMember("name") || !NsAppLinkRPCV2::ButtonNameMarshaller::fromJSON(js["name"],c.name))  return false;
 
-    if(!js.isMember("mode") || !NsAppLinkRPC::ButtonPressModeMarshaller::fromJSON(js["mode"],c.mode))  return false;
+    if(!js.isMember("mode") || !NsAppLinkRPCV2::ButtonPressModeMarshaller::fromJSON(js["mode"],c.mode))  return false;
 
     if(c.customButtonID)  delete c.customButtonID;
     c.customButtonID=0;

@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -36,12 +36,12 @@ GetLanguageResponse::GetLanguageResponse(const GetLanguageResponse& c) : RPC2Res
 }
 
 
-const NsAppLinkRPC::Language& GetLanguageResponse::get_hmiDisplayLanguage(void)
+const NsAppLinkRPCV2::Language& GetLanguageResponse::get_hmiDisplayLanguage(void)
 {
   return hmiDisplayLanguage;
 }
 
-bool GetLanguageResponse::set_hmiDisplayLanguage(const NsAppLinkRPC::Language& hmiDisplayLanguage_)
+bool GetLanguageResponse::set_hmiDisplayLanguage(const NsAppLinkRPCV2::Language& hmiDisplayLanguage_)
 {
   hmiDisplayLanguage=hmiDisplayLanguage_;
   return true;

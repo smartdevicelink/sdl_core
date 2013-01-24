@@ -36,8 +36,7 @@
 #define MIN_HASH_VALUE 9
 #define MAX_HASH_VALUE 31
 /* maximum key range = 23, duplicates = 0 */
-namespace NsAppLinkRPCV2
-{
+
 class AppInterfaceUnregisteredReason_intHash
 {
 private:
@@ -137,5 +136,4 @@ AppInterfaceUnregisteredReason_intHash::getPointer (register const char *str, re
           }
     }
   return 0;
-}
 }

@@ -8,11 +8,11 @@
 /*
   interface	NsRPC2Communication::VehicleInfo
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
-#include <iostream>
+
 using namespace NsRPC2Communication::VehicleInfo;
 
 bool GetVehicleDataResponseMarshaller::checkIntegrity(GetVehicleDataResponse& s)
@@ -140,30 +140,20 @@ bool GetVehicleDataResponseMarshaller::fromJSON(const Json::Value& json,GetVehic
 {
   try
   {
-    std::cout<<"GetVehicleDataResponseMarshaller::fromJSON\n";
     if(!json.isObject())  return false;
     if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return false;
     if(!json.isMember("id") || !json["id"].isInt()) return false;
     c.setId(json["id"].asInt());
-
-    std::cout<<"GetVehicleDataResponseMarshaller::fromJSON: id\n";
-    std::cout.flush();
 
     if(!json.isMember("result")) return false;
 
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    std::cout<<"GetVehicleDataResponseMarshaller::fromJSON: result\n";
-    std::cout.flush();
-
     NsAppLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("VehicleInfo.GetVehicleDataResponse")) return false;
-
-    std::cout<<"GetVehicleDataResponseMarshaller::fromJSON: method\n";
-    std::cout.flush();
 
     if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
@@ -174,8 +164,6 @@ bool GetVehicleDataResponseMarshaller::fromJSON(const Json::Value& json,GetVehic
       c.gps=new NsAppLinkRPCV2::GPSData();
       if(!NsAppLinkRPCV2::GPSDataMarshaller::fromJSON(js["gps"],c.gps[0]))  return false;
     }
-    std::cout<<"GetVehicleDataResponseMarshaller::fromJSON: gps\n";
-    std::cout.flush();
 
     if(c.speed)  delete c.speed;
     c.speed=0;

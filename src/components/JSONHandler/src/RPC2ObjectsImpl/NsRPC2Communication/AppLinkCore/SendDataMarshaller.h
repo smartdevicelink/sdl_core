@@ -4,7 +4,7 @@
 #include <string>
 #include <json/json.h>
 
-#include "../src/include/JSONHandler/RPC2Objects/NsRPC2Communication/AppLinkCore/SendData.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/AppLinkCore/SendData.h"
 
 namespace NsRPC2Communication
 {

@@ -1,13 +1,13 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/OnLanguageChange.h"
-#include "../src/ALRPCObjectsImpl/V1/LanguageMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/LanguageMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/OnLanguageChangeMarshaller.h"
 
 /*
   interface	NsRPC2Communication::TTS
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -45,7 +45,7 @@ const std::string OnLanguageChangeMarshaller::toString(const OnLanguageChange& e
 
 bool OnLanguageChangeMarshaller::checkIntegrityConst(const OnLanguageChange& s)
 {
-  if(!NsAppLinkRPC::LanguageMarshaller::checkIntegrityConst(s.language))  return false;
+  if(!NsAppLinkRPCV2::LanguageMarshaller::checkIntegrityConst(s.language))  return false;
 
   return true;
 }
@@ -61,7 +61,7 @@ Json::Value OnLanguageChangeMarshaller::toJSON(const OnLanguageChange& e)
   json["method"]=Json::Value("TTS.OnLanguageChange");
   json["params"]=Json::Value(Json::objectValue);
 
-  json["params"]["language"]=NsAppLinkRPC::LanguageMarshaller::toJSON(e.language);;
+  json["params"]["language"]=NsAppLinkRPCV2::LanguageMarshaller::toJSON(e.language);;
   return json;
 }
 
@@ -78,9 +78,8 @@ bool OnLanguageChangeMarshaller::fromJSON(const Json::Value& json,OnLanguageChan
     Json::Value js=json["params"];
     if(!js.isObject())  return false;
 
-    if(!js.isMember("language") || !NsAppLinkRPC::LanguageMarshaller::fromJSON(js["language"],c.language))  return false;
+    if(!js.isMember("language") || !NsAppLinkRPCV2::LanguageMarshaller::fromJSON(js["language"],c.language))  return false;
 
-       
   }
   catch(...)
   {

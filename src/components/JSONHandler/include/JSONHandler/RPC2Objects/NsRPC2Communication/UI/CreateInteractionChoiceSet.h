@@ -4,13 +4,13 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/Choice.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/Choice.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -35,7 +35,7 @@ namespace NsRPC2Communication
 // getters
       unsigned int get_interactionChoiceSetID(void);
 
-      const std::vector< NsAppLinkRPC::Choice>& get_choiceSet(void);
+      const std::vector< NsAppLinkRPCV2::Choice>& get_choiceSet(void);
 
       int get_appId(void);
 
@@ -45,7 +45,7 @@ namespace NsRPC2Communication
       bool set_interactionChoiceSetID(unsigned int interactionChoiceSetID);
 
 /// 1 <= size <= 100
-      bool set_choiceSet(const std::vector< NsAppLinkRPC::Choice>& choiceSet);
+      bool set_choiceSet(const std::vector< NsAppLinkRPCV2::Choice>& choiceSet);
 
       bool set_appId(int appId);
 
@@ -55,7 +55,7 @@ namespace NsRPC2Communication
       friend class CreateInteractionChoiceSetMarshaller;
 
       unsigned int interactionChoiceSetID;
-      std::vector< NsAppLinkRPC::Choice> choiceSet;
+      std::vector< NsAppLinkRPCV2::Choice> choiceSet;
       int appId;
 
     };

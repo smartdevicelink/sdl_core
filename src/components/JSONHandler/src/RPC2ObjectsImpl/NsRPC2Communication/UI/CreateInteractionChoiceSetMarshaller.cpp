@@ -1,13 +1,13 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/CreateInteractionChoiceSet.h"
-#include "../src/ALRPCObjectsImpl/V1/ChoiceMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ChoiceMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/CreateInteractionChoiceSetMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -74,7 +74,7 @@ Json::Value CreateInteractionChoiceSetMarshaller::toJSON(const CreateInteraction
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::ChoiceMarshaller::toJSON(e.choiceSet[i]);
+      j[i]=NsAppLinkRPCV2::ChoiceMarshaller::toJSON(e.choiceSet[i]);
 
     json["params"]["choiceSet"]=j;
   }
@@ -109,8 +109,8 @@ bool CreateInteractionChoiceSetMarshaller::fromJSON(const Json::Value& json,Crea
       c.choiceSet.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::Choice t;
-        if(!NsAppLinkRPC::ChoiceMarshaller::fromJSON(js["choiceSet"][i],t))
+        NsAppLinkRPCV2::Choice t;
+        if(!NsAppLinkRPCV2::ChoiceMarshaller::fromJSON(js["choiceSet"][i],t))
           return false;
          c.choiceSet[i]=t;
       }

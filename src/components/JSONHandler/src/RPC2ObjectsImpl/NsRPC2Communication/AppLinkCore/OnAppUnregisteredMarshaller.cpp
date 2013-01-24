@@ -1,13 +1,13 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/AppLinkCore/OnAppUnregistered.h"
-#include "../src/ALRPCObjectsImpl/V1/AppInterfaceUnregisteredReasonMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/AppInterfaceUnregisteredReasonMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppUnregisteredMarshaller.h"
 
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -47,7 +47,7 @@ bool OnAppUnregisteredMarshaller::checkIntegrityConst(const OnAppUnregistered& s
 {
   if(s.appName.length()>100)  return false;
 
-  if(s.reason && (!NsAppLinkRPC::AppInterfaceUnregisteredReasonMarshaller::checkIntegrityConst(s.reason[0])))  return false;
+  if(s.reason && (!NsAppLinkRPCV2::AppInterfaceUnregisteredReasonMarshaller::checkIntegrityConst(s.reason[0])))  return false;
 
   return true;
 }
@@ -65,7 +65,7 @@ Json::Value OnAppUnregisteredMarshaller::toJSON(const OnAppUnregistered& e)
 
   json["params"]["appName"]=Json::Value(e.appName);;
   if(e.reason)
-    json["params"]["reason"]=NsAppLinkRPC::AppInterfaceUnregisteredReasonMarshaller::toJSON(e.reason[0]);;
+    json["params"]["reason"]=NsAppLinkRPCV2::AppInterfaceUnregisteredReasonMarshaller::toJSON(e.reason[0]);;
   json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
@@ -91,8 +91,8 @@ bool OnAppUnregisteredMarshaller::fromJSON(const Json::Value& json,OnAppUnregist
     c.reason=0;
     if(js.isMember("reason"))
     {
-      c.reason=new NsAppLinkRPC::AppInterfaceUnregisteredReason();
-      if(!NsAppLinkRPC::AppInterfaceUnregisteredReasonMarshaller::fromJSON(js["reason"],c.reason[0]))  return false;
+      c.reason=new NsAppLinkRPCV2::AppInterfaceUnregisteredReason();
+      if(!NsAppLinkRPCV2::AppInterfaceUnregisteredReasonMarshaller::fromJSON(js["reason"],c.reason[0]))  return false;
     }
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;

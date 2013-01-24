@@ -9,8 +9,7 @@
 #define MIN_HASH_VALUE 4
 #define MAX_HASH_VALUE 11
 /* maximum key range = 8, duplicates = 0 */
-namespace NsAppLinkRPCV2
-{
+
 class InteractionMode_intHash
 {
 private:
@@ -60,5 +59,4 @@ InteractionMode_intHash::getPointer (register const char *str, register unsigned
           }
     }
   return 0;
-}
 }

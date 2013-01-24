@@ -1,11 +1,11 @@
-#include "../src/include/JSONHandler/RPC2Objects/NsRPC2Communication/AppLinkCore/SendData.h"
-#include "../src/include/JSONHandler/RPC2Objects//Marshaller.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/AppLinkCore/SendData.h"
+#include "../src/../include/JSONHandler/RPC2Objects//Marshaller.h"
 
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Fri Dec 14 12:58:14 2012
-  source stamp	Fri Dec 14 12:58:07 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -19,7 +19,6 @@ SendData& SendData::operator =(const SendData& c)
   url= c.url ? new std::string(c.url[0]) : 0;
   if(timeout)  delete timeout;
   timeout= c.timeout ? new int(c.timeout[0]) : 0;
-  appId=c.appId;
   return *this;
 }
 
@@ -90,17 +89,6 @@ void SendData::reset_timeout(void)
 {
   if(timeout)  delete timeout;
   timeout=0;
-}
-
-int SendData::get_appId(void)
-{
-  return appId;
-}
-
-bool SendData::set_appId(int appId_)
-{
-  appId=appId_;
-  return true;
 }
 
 bool SendData::checkIntegrity(void)

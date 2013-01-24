@@ -1,15 +1,15 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/Show.h"
-#include "../src/ALRPCObjectsImpl/V1/TextAlignmentMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/TextAlignmentMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/ImageMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/SoftButtonMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ShowMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -55,7 +55,7 @@ bool ShowMarshaller::checkIntegrityConst(const Show& s)
 
   if(s.mainField4 && (s.mainField4[0].length()>500))  return false;
 
-  if(s.alignment && (!NsAppLinkRPC::TextAlignmentMarshaller::checkIntegrityConst(s.alignment[0])))  return false;
+  if(s.alignment && (!NsAppLinkRPCV2::TextAlignmentMarshaller::checkIntegrityConst(s.alignment[0])))  return false;
 
   if(s.statusBar && (s.statusBar[0].length()>500))  return false;
 
@@ -107,7 +107,7 @@ Json::Value ShowMarshaller::toJSON(const Show& e)
   if(e.mainField4)
     json["params"]["mainField4"]=Json::Value(e.mainField4[0]);;
   if(e.alignment)
-    json["params"]["alignment"]=NsAppLinkRPC::TextAlignmentMarshaller::toJSON(e.alignment[0]);;
+    json["params"]["alignment"]=NsAppLinkRPCV2::TextAlignmentMarshaller::toJSON(e.alignment[0]);;
   if(e.statusBar)
     json["params"]["statusBar"]=Json::Value(e.statusBar[0]);;
   if(e.mediaClock)
@@ -203,8 +203,8 @@ bool ShowMarshaller::fromJSON(const Json::Value& json,Show& c)
     c.alignment=0;
     if(js.isMember("alignment"))
     {
-      c.alignment=new NsAppLinkRPC::TextAlignment();
-      if(!NsAppLinkRPC::TextAlignmentMarshaller::fromJSON(js["alignment"],c.alignment[0]))  return false;
+      c.alignment=new NsAppLinkRPCV2::TextAlignment();
+      if(!NsAppLinkRPCV2::TextAlignmentMarshaller::fromJSON(js["alignment"],c.alignment[0]))  return false;
     }
 
     if(c.statusBar)  delete c.statusBar;

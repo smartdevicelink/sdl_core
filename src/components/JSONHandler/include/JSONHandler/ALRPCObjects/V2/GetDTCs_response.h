@@ -13,8 +13,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Thu Dec 13 14:18:29 2012
-  source stamp	Thu Dec 13 14:18:27 2012
+  generated at	Thu Jan 24 06:36:23 2013
+  source stamp	Thu Jan 24 06:35:41 2013
   author	robok0der
 */
 
@@ -35,12 +35,12 @@ namespace NsAppLinkRPCV2
     bool checkIntegrity(void);
 
     bool get_success(void) const;
-    const std::vector<Result>& get_resultCode(void) const;
+    const Result& get_resultCode(void) const;
     const std::string* get_info(void) const;
     const std::vector<DTC>* get_dtcList(void) const;
 
     bool set_success(bool success_);
-    bool set_resultCode(const std::vector<Result>& resultCode_);
+    bool set_resultCode(const Result& resultCode_);
     void reset_info(void);
     bool set_info(const std::string& info_);
     void reset_dtcList(void);
@@ -58,7 +58,7 @@ namespace NsAppLinkRPCV2
       bool success;
 
 ///  See Result
-      std::vector<Result> resultCode;	//!<   [%s..%s] 
+      Result resultCode;
 
 ///  Provides additional human readable info regarding the result.
       std::string* info;	//!< (1000)

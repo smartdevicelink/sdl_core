@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -36,12 +36,12 @@ OnDriverDistraction::OnDriverDistraction(const OnDriverDistraction& c) : RPC2Not
 }
 
 
-const NsAppLinkRPC::DriverDistractionState& OnDriverDistraction::get_state(void)
+const NsAppLinkRPCV2::DriverDistractionState& OnDriverDistraction::get_state(void)
 {
   return state;
 }
 
-bool OnDriverDistraction::set_state(const NsAppLinkRPC::DriverDistractionState& state_)
+bool OnDriverDistraction::set_state(const NsAppLinkRPCV2::DriverDistractionState& state_)
 {
   state=state_;
   return true;

@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::TTS
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -15,7 +15,6 @@ using namespace NsRPC2Communication::TTS;
 OnLanguageChange& OnLanguageChange::operator =(const OnLanguageChange& c)
 {
   language=c.language;
-  appId=c.appId;
   return *this;
 }
 
@@ -37,25 +36,14 @@ OnLanguageChange::OnLanguageChange(const OnLanguageChange& c) : RPC2Notification
 }
 
 
-const NsAppLinkRPC::Language& OnLanguageChange::get_language(void)
+const NsAppLinkRPCV2::Language& OnLanguageChange::get_language(void)
 {
   return language;
 }
 
-bool OnLanguageChange::set_language(const NsAppLinkRPC::Language& language_)
+bool OnLanguageChange::set_language(const NsAppLinkRPCV2::Language& language_)
 {
   language=language_;
-  return true;
-}
-
-int OnLanguageChange::get_appId(void)
-{
-  return appId;
-}
-
-bool OnLanguageChange::set_appId(int appId_)
-{
-  appId=appId_;
   return true;
 }
 

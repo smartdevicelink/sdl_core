@@ -17,6 +17,7 @@
 #include "Choice.h"
 #include "CompassDirection.h"
 #include "DTC.h"
+#include "DeactivateReason.h"
 #include "Dimension.h"
 #include "DisplayCapabilities.h"
 #include "DisplayType.h"
@@ -25,6 +26,7 @@
 #include "FunctionID.h"
 #include "GPSData.h"
 #include "GlobalProperty.h"
+#include "HMIApplication.h"
 #include "HMILevel.h"
 #include "HMIPermissions.h"
 #include "HmiZoneCapabilities.h"
@@ -162,8 +164,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Thu Dec 13 14:18:29 2012
-  source stamp	Thu Dec 13 14:18:27 2012
+  generated at	Thu Jan 24 06:36:23 2013
+  source stamp	Thu Jan 24 06:35:41 2013
   author	robok0der
 */
 

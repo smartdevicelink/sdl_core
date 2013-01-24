@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::TTS
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -37,12 +37,12 @@ Speak::Speak(const Speak& c) : RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATIO
 }
 
 
-const std::vector< NsAppLinkRPC::TTSChunk>& Speak::get_ttsChunks(void)
+const std::vector< NsAppLinkRPCV2::TTSChunk>& Speak::get_ttsChunks(void)
 {
   return ttsChunks;
 }
 
-bool Speak::set_ttsChunks(const std::vector< NsAppLinkRPC::TTSChunk>& ttsChunks_)
+bool Speak::set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks_)
 {
   ttsChunks=ttsChunks_;
   return true;

@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -49,12 +49,12 @@ bool CreateInteractionChoiceSet::set_interactionChoiceSetID(unsigned int interac
   return true;
 }
 
-const std::vector< NsAppLinkRPC::Choice>& CreateInteractionChoiceSet::get_choiceSet(void)
+const std::vector< NsAppLinkRPCV2::Choice>& CreateInteractionChoiceSet::get_choiceSet(void)
 {
   return choiceSet;
 }
 
-bool CreateInteractionChoiceSet::set_choiceSet(const std::vector< NsAppLinkRPC::Choice>& choiceSet_)
+bool CreateInteractionChoiceSet::set_choiceSet(const std::vector< NsAppLinkRPCV2::Choice>& choiceSet_)
 {
   choiceSet=choiceSet_;
   return true;

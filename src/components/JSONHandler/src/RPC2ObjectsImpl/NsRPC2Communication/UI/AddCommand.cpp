@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -53,12 +53,12 @@ bool AddCommand::set_cmdId(unsigned int cmdId_)
   return true;
 }
 
-const NsAppLinkRPC::MenuParams& AddCommand::get_menuParams(void)
+const NsAppLinkRPCV2::MenuParams& AddCommand::get_menuParams(void)
 {
   return menuParams;
 }
 
-bool AddCommand::set_menuParams(const NsAppLinkRPC::MenuParams& menuParams_)
+bool AddCommand::set_menuParams(const NsAppLinkRPCV2::MenuParams& menuParams_)
 {
   menuParams=menuParams_;
   return true;

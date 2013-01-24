@@ -1,5 +1,5 @@
-#ifndef NSRPC2COMMUNICATION_TTS_PERFORMAUDIOPASSTHRU_INCLUDE
-#define NSRPC2COMMUNICATION_TTS_PERFORMAUDIOPASSTHRU_INCLUDE
+#ifndef NSRPC2COMMUNICATION_UI_PERFORMAUDIOPASSTHRU_INCLUDE
+#define NSRPC2COMMUNICATION_UI_PERFORMAUDIOPASSTHRU_INCLUDE
 
 #include <string>
 #include <vector>
@@ -13,8 +13,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -26,16 +26,16 @@ namespace NsRPC2Communication
     class PerformAudioPassThru : public ::NsRPC2Communication::RPC2Request
     {
     public:
-
+    
       PerformAudioPassThru(const PerformAudioPassThru& c);
       PerformAudioPassThru(void);
-
+    
       PerformAudioPassThru& operator =(const PerformAudioPassThru&);
-
+    
       virtual ~PerformAudioPassThru(void);
-
+    
       bool checkIntegrity(void);
-
+    
 // getters
       const std::vector< NsAppLinkRPCV2::TTSChunk>& get_initialPrompt(void);
 

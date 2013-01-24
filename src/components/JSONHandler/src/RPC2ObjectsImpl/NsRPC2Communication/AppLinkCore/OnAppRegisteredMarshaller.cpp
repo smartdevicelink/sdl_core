@@ -1,16 +1,13 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/AppLinkCore/OnAppRegistered.h"
-#include "../src/ALRPCObjectsImpl/V1/LanguageMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/LanguageMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/AppTypeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/HMIApplicationMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppRegisteredMarshaller.h"
 
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -48,36 +45,7 @@ const std::string OnAppRegisteredMarshaller::toString(const OnAppRegistered& e)
 
 bool OnAppRegisteredMarshaller::checkIntegrityConst(const OnAppRegistered& s)
 {
-  if(s.appName.length()>100)  return false;
-
-  if(s.vrSynonym)
-  {
-    unsigned int i=s.vrSynonym[0].size();
-    if(i<1)  return false;
-    if(i>100)  return false;
-    while(i--)
-    {
-      if(s.vrSynonym[0][i].length()>40)  return false;
-    }
-  }
-
-  if(!NsAppLinkRPC::LanguageMarshaller::checkIntegrityConst(s.languageDesired))  return false;
-
-  if(s.hmiDisplayLanguageDesired && (!NsAppLinkRPC::LanguageMarshaller::checkIntegrityConst(s.hmiDisplayLanguageDesired[0])))  return false;
-
-  if(s.ttsName)
-  {
-    unsigned int i=s.ttsName[0].size();
-    if(i<1)  return false;
-    if(i>100)  return false;
-  }
-
-  if(s.appType)
-  {
-    unsigned int i=s.appType[0].size();
-    if(i<1)  return false;
-    if(i>100)  return false;
-  }
+  if(!NsAppLinkRPCV2::HMIApplicationMarshaller::checkIntegrityConst(s.application))  return false;
 
   return true;
 }
@@ -93,45 +61,7 @@ Json::Value OnAppRegisteredMarshaller::toJSON(const OnAppRegistered& e)
   json["method"]=Json::Value("AppLinkCore.OnAppRegistered");
   json["params"]=Json::Value(Json::objectValue);
 
-  json["params"]["appName"]=Json::Value(e.appName);;
-  json["params"]["appIcon"]=Json::Value(e.appIcon);;
-  json["params"]["deviceName"]=Json::Value(e.deviceName);;
-  if(e.vrSynonym)
-  {
-    unsigned int i=e.vrSynonym[0].size();
-    Json::Value j=Json::Value(Json::arrayValue);
-    j.resize(i);
-    while(i--)
-      j[i]=Json::Value(e.vrSynonym[0][i]);
-
-    json["params"]["vrSynonym"]=j;
-  }
-  json["params"]["isMediaApplication"]=Json::Value(e.isMediaApplication);;
-  json["params"]["languageDesired"]=NsAppLinkRPC::LanguageMarshaller::toJSON(e.languageDesired);;
-  if(e.hmiDisplayLanguageDesired)
-    json["params"]["hmiDisplayLanguageDesired"]=NsAppLinkRPC::LanguageMarshaller::toJSON(e.hmiDisplayLanguageDesired[0]);;
-  if(e.ttsName)
-  {
-    unsigned int i=e.ttsName[0].size();
-    Json::Value j=Json::Value(Json::arrayValue);
-    j.resize(i);
-    while(i--)
-      j[i]=NsAppLinkRPC::TTSChunkMarshaller::toJSON(e.ttsName[0][i]);
-
-    json["params"]["ttsName"]=j;
-  }
-  if(e.appType)
-  {
-    unsigned int i=e.appType[0].size();
-    Json::Value j=Json::Value(Json::arrayValue);
-    j.resize(i);
-    while(i--)
-      j[i]=NsAppLinkRPCV2::AppTypeMarshaller::toJSON(e.appType[0][i]);
-
-    json["params"]["appType"]=j;
-  }
-  json["params"]["versionNumber"]=Json::Value(e.versionNumber);;
-  json["params"]["appId"]=Json::Value(e.appId);;
+  json["params"]["application"]=NsAppLinkRPCV2::HMIApplicationMarshaller::toJSON(e.application);;
   return json;
 }
 
@@ -148,92 +78,8 @@ bool OnAppRegisteredMarshaller::fromJSON(const Json::Value& json,OnAppRegistered
     Json::Value js=json["params"];
     if(!js.isObject())  return false;
 
-    if(!js.isMember("appName") || !js["appName"].isString())  return false;
-    c.appName=js["appName"].asString();
-    if(c.appName.length()>100)  return false;
+    if(!js.isMember("application") || !NsAppLinkRPCV2::HMIApplicationMarshaller::fromJSON(js["application"],c.application))  return false;
 
-    if(!js.isMember("appIcon") || !js["appIcon"].isString())  return false;
-    c.appIcon=js["appIcon"].asString();
-    
-    if(!js.isMember("deviceName") || !js["deviceName"].isString())  return false;
-    c.deviceName=js["deviceName"].asString();
-    
-    if(c.vrSynonym)  delete c.vrSynonym;
-    c.vrSynonym=0;
-    if(js.isMember("vrSynonym"))
-    {
-      if(!js["vrSynonym"].isArray()) return false;
-      unsigned int i=js["vrSynonym"].size();
-      if(i<1)  return false;
-      if(i>100)  return false;
-
-      c.vrSynonym=new std::vector<std::string>();
-      c.vrSynonym->resize(js["vrSynonym"].size());
-
-      while(i--)
-      {
-        if(!js["vrSynonym"][i].isString())
-          return false;
-
-        c.vrSynonym[0][i]=js["vrSynonym"][i].asString();
-        if(c.vrSynonym[0][i].length()>40)  return false;
-      }
-    }
-
-
-    if(!js.isMember("isMediaApplication") || !js["isMediaApplication"].isBool())  return false;
-    c.isMediaApplication=js["isMediaApplication"].asBool();
-    
-    if(!js.isMember("languageDesired") || !NsAppLinkRPC::LanguageMarshaller::fromJSON(js["languageDesired"],c.languageDesired))  return false;
-
-    if(c.hmiDisplayLanguageDesired)  delete c.hmiDisplayLanguageDesired;
-    c.hmiDisplayLanguageDesired=0;
-    if(js.isMember("hmiDisplayLanguageDesired"))
-    {
-      c.hmiDisplayLanguageDesired=new NsAppLinkRPC::Language();
-      if(!NsAppLinkRPC::LanguageMarshaller::fromJSON(js["hmiDisplayLanguageDesired"],c.hmiDisplayLanguageDesired[0]))  return false;
-    }
-
-    if(c.ttsName)  delete c.ttsName;
-    c.ttsName=0;
-    if(js.isMember("ttsName"))
-    {
-      if(!js["ttsName"].isArray()) return false;
-      unsigned int i=js["ttsName"].size();
-      if(i<1)  return false;
-      if(i>100)  return false;
-
-      c.ttsName=new std::vector<NsAppLinkRPC::TTSChunk>();
-      c.ttsName->resize(js["ttsName"].size());
-
-      while(i--)
-        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["ttsName"][i],c.ttsName[0][i]))  return false;
-    }
-
-
-    if(c.appType)  delete c.appType;
-    c.appType=0;
-    if(js.isMember("appType"))
-    {
-      if(!js["appType"].isArray()) return false;
-      unsigned int i=js["appType"].size();
-      if(i<1)  return false;
-      if(i>100)  return false;
-
-      c.appType=new std::vector<NsAppLinkRPCV2::AppType>();
-      c.appType->resize(js["appType"].size());
-
-      while(i--)
-        if(!NsAppLinkRPCV2::AppTypeMarshaller::fromJSON(js["appType"][i],c.appType[0][i]))  return false;
-    }
-
-
-    if(!js.isMember("versionNumber") || !js["versionNumber"].isInt())  return false;
-    c.versionNumber=js["versionNumber"].asInt();
-    
-    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
-    c.appId=js["appId"].asInt();
-    
   }
   catch(...)
   {

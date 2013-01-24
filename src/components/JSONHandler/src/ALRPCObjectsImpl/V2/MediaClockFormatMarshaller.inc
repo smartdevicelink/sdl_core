@@ -36,8 +36,7 @@
 #define MIN_HASH_VALUE 6
 #define MAX_HASH_VALUE 15
 /* maximum key range = 10, duplicates = 0 */
-namespace NsAppLinkRPCV2
-{
+
 class MediaClockFormat_intHash
 {
 private:
@@ -120,5 +119,4 @@ MediaClockFormat_intHash::getPointer (register const char *str, register unsigne
           }
     }
   return 0;
-}
 }

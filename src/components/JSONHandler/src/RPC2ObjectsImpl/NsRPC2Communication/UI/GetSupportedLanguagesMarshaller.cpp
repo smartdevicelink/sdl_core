@@ -1,6 +1,14 @@
-#include "JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetSupportedLanguages.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
-#include "GetSupportedLanguagesMarshaller.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/GetSupportedLanguages.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/GetSupportedLanguagesMarshaller.h"
+
+/*
+  interface	NsRPC2Communication::UI
+  version	1.2
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
+  author	robok0der
+*/
 
 using namespace NsRPC2Communication::UI;
 

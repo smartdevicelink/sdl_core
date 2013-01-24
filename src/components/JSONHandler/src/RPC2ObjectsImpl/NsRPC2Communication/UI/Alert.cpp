@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -21,7 +21,7 @@ Alert& Alert::operator =(const Alert& c)
   if(AlertText3)  delete AlertText3;
   AlertText3= c.AlertText3 ? new std::string(c.AlertText3[0]) : 0;
   if(ttsChunks)  delete ttsChunks;
-  ttsChunks= c.ttsChunks ? new std::vector<NsAppLinkRPC::TTSChunk>(c.ttsChunks[0]) : 0;
+  ttsChunks= c.ttsChunks ? new std::vector<NsAppLinkRPCV2::TTSChunk>(c.ttsChunks[0]) : 0;
   if(duration)  delete duration;
   duration= c.duration ? new unsigned int(c.duration[0]) : 0;
   if(playTone)  delete playTone;
@@ -100,33 +100,33 @@ void Alert::reset_AlertText2(void)
   AlertText2=0;
 }
 
-const std::string* Alert::get_alertText3(void)
+const std::string* Alert::get_AlertText3(void)
 {
   return AlertText3;
 }
 
-bool Alert::set_alertText3(const std::string& alertText3_)
+bool Alert::set_AlertText3(const std::string& AlertText3_)
 {
   if(AlertText3)  delete AlertText3;
-  AlertText3=new std::string(alertText3_);
+  AlertText3=new std::string(AlertText3_);
   return true;
 }
 
-void Alert::reset_alertText3(void)
+void Alert::reset_AlertText3(void)
 {
   if(AlertText3)  delete AlertText3;
   AlertText3=0;
 }
 
-const std::vector< NsAppLinkRPC::TTSChunk>* Alert::get_ttsChunks(void)
+const std::vector< NsAppLinkRPCV2::TTSChunk>* Alert::get_ttsChunks(void)
 {
   return ttsChunks;
 }
 
-bool Alert::set_ttsChunks(const std::vector< NsAppLinkRPC::TTSChunk>& ttsChunks_)
+bool Alert::set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks_)
 {
   if(ttsChunks)  delete ttsChunks;
-  ttsChunks=new std::vector< NsAppLinkRPC::TTSChunk>(ttsChunks_);
+  ttsChunks=new std::vector< NsAppLinkRPCV2::TTSChunk>(ttsChunks_);
   return true;
 }
 

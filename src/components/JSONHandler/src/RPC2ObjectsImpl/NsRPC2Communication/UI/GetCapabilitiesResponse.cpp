@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -41,23 +41,23 @@ GetCapabilitiesResponse::GetCapabilitiesResponse(const GetCapabilitiesResponse& 
 }
 
 
-const NsAppLinkRPC::DisplayCapabilities& GetCapabilitiesResponse::get_displayCapabilities(void)
+const NsAppLinkRPCV2::DisplayCapabilities& GetCapabilitiesResponse::get_displayCapabilities(void)
 {
   return displayCapabilities;
 }
 
-bool GetCapabilitiesResponse::set_displayCapabilities(const NsAppLinkRPC::DisplayCapabilities& displayCapabilities_)
+bool GetCapabilitiesResponse::set_displayCapabilities(const NsAppLinkRPCV2::DisplayCapabilities& displayCapabilities_)
 {
   displayCapabilities=displayCapabilities_;
   return true;
 }
 
-const std::vector< NsAppLinkRPC::HmiZoneCapabilities>& GetCapabilitiesResponse::get_hmiZoneCapabilities(void)
+const std::vector< NsAppLinkRPCV2::HmiZoneCapabilities>& GetCapabilitiesResponse::get_hmiZoneCapabilities(void)
 {
   return hmiZoneCapabilities;
 }
 
-bool GetCapabilitiesResponse::set_hmiZoneCapabilities(const std::vector< NsAppLinkRPC::HmiZoneCapabilities>& hmiZoneCapabilities_)
+bool GetCapabilitiesResponse::set_hmiZoneCapabilities(const std::vector< NsAppLinkRPCV2::HmiZoneCapabilities>& hmiZoneCapabilities_)
 {
   hmiZoneCapabilities=hmiZoneCapabilities_;
   return true;

@@ -101,8 +101,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Thu Dec 13 14:18:29 2012
-  source stamp	Thu Dec 13 14:18:27 2012
+  generated at	Thu Jan 24 06:36:23 2013
+  source stamp	Thu Jan 24 06:35:41 2013
   author	robok0der
 */
 
@@ -117,11 +117,13 @@ namespace NsAppLinkRPCV2
     
     static NsAppLinkRPC::ALRPCMessage* fromString(const std::string&,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
     static std::string toString(const NsAppLinkRPC::ALRPCMessage* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
-  
+
     static NsAppLinkRPC::ALRPCMessage* fromJSON(const Json::Value&,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
     static Json::Value toJSON(const NsAppLinkRPC::ALRPCMessage* msg,FunctionID::FunctionIDInternal fid, messageType::messageTypeInternal mt);
-
+  
   protected:
+    
+
 // RegisterAppInterface_request
     static bool fromString(const std::string& str, RegisterAppInterface_request& res)
     {

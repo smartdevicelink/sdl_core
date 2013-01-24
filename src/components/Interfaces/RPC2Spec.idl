@@ -282,7 +282,7 @@ GetCapabilities(
   */
 GetSupportedLanguages(
   ->
-  Language [1:100] languages
+  Language  languages[1:100]
 );
 
 /*
@@ -343,7 +343,7 @@ SetAppIcon(
    *  
    */
 notification OnLanguageChange(
-  Language hmiDisplayLanguage, //  data type from AppLink protocol specification
+  Language hmiDisplayLanguage //  data type from AppLink protocol specification
 );
 
 /*
@@ -424,6 +424,60 @@ PerformAudioPassThru(
 EndAudioPassThru(
   int appId
   -> // return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+     * @descr Request from ApplinkCore to HMI to show info about navigation.
+     */ 
+ShowConstantTBT(
+  string (500) * navigationText1,
+  string (500) * navigationText2,
+  string (500) * eta,
+  string (500) * totalDistance,
+  Image turnIcon,
+  float (0:1000000000) distanceToManeuver,
+  float (0:1000000000) distanceToManeuverScale,
+  bool * maneuverComplete,
+  SoftButton softButtons[0:3],
+  int appId
+  -> //return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+     * @descr Request from ApplinkCore to HMI to announce navigation maneuver
+     */ 
+AlertManeuver(
+  TTSChunk ttsChunks[1:100],
+  SoftButton softButtons[0:3],
+  int appId
+  -> //return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+     * @descr Request from ApplinkCore to HMI to update turn list.
+     */ 
+UpdateTurnList(
+  Turn turnList[1:100],
+  SoftButton softButtons[0:1],
+  int appId
+  -> //return value is provided in corresponding response object, id of request and response should be equal
+);
+
+/*
+     * @descr Notification from HMI to ApplinkCore
+     * Provides applications with notifications specific to the current TBT client status on the module
+     */
+notification OnTBTClientState(
+  TBTState state
+);
+
+/*
+     * @descr Request from ApplinkCore to HMI to make a call.
+     */ 
+DialNumber(
+  string(500) number, //Phone number is a string consisting of only the digits and "+", which can be up to 40 chars
+  int appId
+  -> //return value is provided in corresponding response object, id of request and response should be equal
 );
 
 }
@@ -514,7 +568,7 @@ ChangeRegistration(
    *  
    */
 notification OnLanguageChange(
-  Language language, //  data type from AppLink protocol specification
+  Language language //  data type from AppLink protocol specification
 );
 
 /*
@@ -526,7 +580,7 @@ notification OnLanguageChange(
   */
 GetSupportedLanguages(
   ->
-  Language [1:100] languages
+  Language  languages [1:100]
 );
 
 /*
@@ -605,7 +659,7 @@ ChangeRegistration(
    *  
    */
 notification OnLanguageChange(
-  Language language, //  data type from AppLink protocol specification
+  Language language //  data type from AppLink protocol specification
 );
 
 /*
@@ -627,7 +681,7 @@ GetLanguage(
   */
 GetSupportedLanguages(
   ->
-  Language [1:100] languages
+  Language languages [1:100]
 );
 
 }
@@ -895,76 +949,6 @@ GetDTCs(
   int appId
   ->
   DTC * dtcList[1:100] 
-);
-
-}
-
-
-interface NsRPC2Communication::Phone
-{
-  version "2.0";
-
-  prefix "Phone.";
-/*
-     * @descr Request from ApplinkCore to HMI to make a call.
-     */ 
-DialNumber(
-  string(500) number, //Phone number is a string consisting of only the digits and "+", which can be up to 40 chars
-  int appId
-  -> //return value is provided in corresponding response object, id of request and response should be equal
-);
-
-}
-
-interface NsRPC2Communication::Navigation
-{
-  version "2.0";
-
-  prefix "Navigation.";
-
-/*
-     * @descr Request from ApplinkCore to HMI to show info about navigation.
-     */ 
-ShowConstantTBT(
-  string (500) * navigationText1,
-  string (500) * navigationText2,
-  string (500) * eta,
-  string (500) * totalDistance,
-  Image turnIcon,
-  float (0:1000000000) distanceToManeuver,
-  float (0:1000000000) distanceToManeuverScale,
-  bool * maneuverComplete,
-  SoftButton softButtons[0:3],
-  int appId
-  -> //return value is provided in corresponding response object, id of request and response should be equal
-);
-
-/*
-     * @descr Request from ApplinkCore to HMI to announce navigation maneuver
-     */ 
-AlertManeuver(
-  TTSChunk ttsChunks[1:100],
-  SoftButton softButtons[0:3],
-  int appId
-  -> //return value is provided in corresponding response object, id of request and response should be equal
-);
-
-/*
-     * @descr Request from ApplinkCore to HMI to update turn list.
-     */ 
-UpdateTurnList(
-  Turn turnList[1:100],
-  SoftButton softButtons[0:1],
-  int appId
-  -> //return value is provided in corresponding response object, id of request and response should be equal
-);
-
-/*
-     * @descr Notification from HMI to ApplinkCore
-     * Provides applications with notifications specific to the current TBT client status on the module
-     */
-notification OnTBTClientState(
-  TBTState state
 );
 
 }

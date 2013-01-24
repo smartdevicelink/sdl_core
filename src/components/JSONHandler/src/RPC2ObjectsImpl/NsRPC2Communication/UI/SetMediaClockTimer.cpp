@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -15,7 +15,7 @@ using namespace NsRPC2Communication::UI;
 SetMediaClockTimer& SetMediaClockTimer::operator =(const SetMediaClockTimer& c)
 {
   if(startTime)  delete startTime;
-  startTime= c.startTime ? new NsAppLinkRPC::StartTime(c.startTime[0]) : 0;
+  startTime= c.startTime ? new NsAppLinkRPCV2::StartTime(c.startTime[0]) : 0;
   updateMode=c.updateMode;
   appId=c.appId;
   return *this;
@@ -41,15 +41,15 @@ SetMediaClockTimer::SetMediaClockTimer(const SetMediaClockTimer& c) : RPC2Reques
 }
 
 
-const NsAppLinkRPC::StartTime* SetMediaClockTimer::get_startTime(void)
+const NsAppLinkRPCV2::StartTime* SetMediaClockTimer::get_startTime(void)
 {
   return startTime;
 }
 
-bool SetMediaClockTimer::set_startTime(const NsAppLinkRPC::StartTime& startTime_)
+bool SetMediaClockTimer::set_startTime(const NsAppLinkRPCV2::StartTime& startTime_)
 {
   if(startTime)  delete startTime;
-  startTime=new NsAppLinkRPC::StartTime(startTime_);
+  startTime=new NsAppLinkRPCV2::StartTime(startTime_);
   return true;
 }
 

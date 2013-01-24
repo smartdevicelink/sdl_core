@@ -13,10 +13,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/OnVehicleData.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/ReadDID.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/ReadDIDResponse.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/SubscribeVehicleData.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/SubscribeVehicleDataResponse.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/UnsubscribeVehicleData.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/UnsubscribeVehicleDataResponse.h"
 
 #include "../src/../include/JSONHandler/RPC2Objects/Marshaller.h"
 
@@ -24,8 +20,8 @@
 /*
   interface	NsRPC2Communication::VehicleInfo
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 

@@ -5,14 +5,14 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/TTSChunk.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
 #include "../include/JSONHandler/ALRPCObjects/V2/SoftButton.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -37,8 +37,8 @@ namespace NsRPC2Communication
 // getters
       const std::string* get_AlertText1(void);
       const std::string* get_AlertText2(void);
-      const std::string* get_alertText3(void);
-      const std::vector< NsAppLinkRPC::TTSChunk>* get_ttsChunks(void);
+      const std::string* get_AlertText3(void);
+      const std::vector< NsAppLinkRPCV2::TTSChunk>* get_ttsChunks(void);
       const unsigned int* get_duration(void);
       const bool* get_playTone(void);
       const std::vector< NsAppLinkRPCV2::SoftButton>* get_softButtons(void);
@@ -56,13 +56,13 @@ namespace NsRPC2Communication
 
       void reset_AlertText2(void);
 
-/// alertText3 <= 500
-      bool set_alertText3(const std::string& alertText3);
+/// AlertText3 <= 500
+      bool set_AlertText3(const std::string& AlertText3);
 
-      void reset_alertText3(void);
+      void reset_AlertText3(void);
 
 /// 1 <= size <= 100
-      bool set_ttsChunks(const std::vector< NsAppLinkRPC::TTSChunk>& ttsChunks);
+      bool set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks);
 
       void reset_ttsChunks(void);
 
@@ -90,7 +90,7 @@ namespace NsRPC2Communication
       std::string* AlertText1;
       std::string* AlertText2;
       std::string* AlertText3;
-      std::vector< NsAppLinkRPC::TTSChunk>* ttsChunks;
+      std::vector< NsAppLinkRPCV2::TTSChunk>* ttsChunks;
       unsigned int* duration;
       bool* playTone;
       std::vector< NsAppLinkRPCV2::SoftButton>* softButtons;

@@ -3,13 +3,13 @@
 
 #include "JSONHandler/RPC2Response.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/TriggerSource.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/TriggerSource.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -33,7 +33,7 @@ namespace NsRPC2Communication
     
 // getters
       const unsigned int* get_choiceID(void);
-      const NsAppLinkRPC::TriggerSource* get_triggerSource(void);
+      const NsAppLinkRPCV2::TriggerSource* get_triggerSource(void);
 
 // setters
 /// choiceID <= 2000000000
@@ -41,7 +41,7 @@ namespace NsRPC2Communication
 
       void reset_choiceID(void);
 
-      bool set_triggerSource(const NsAppLinkRPC::TriggerSource& triggerSource);
+      bool set_triggerSource(const NsAppLinkRPCV2::TriggerSource& triggerSource);
 
       void reset_triggerSource(void);
 
@@ -51,7 +51,7 @@ namespace NsRPC2Communication
       friend class PerformInteractionResponseMarshaller;
 
       unsigned int* choiceID;
-      NsAppLinkRPC::TriggerSource* triggerSource;
+      NsAppLinkRPCV2::TriggerSource* triggerSource;
 
     };
   }

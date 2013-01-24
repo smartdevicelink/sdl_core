@@ -1,14 +1,14 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/AddCommand.h"
-#include "../src/ALRPCObjectsImpl/V1/MenuParamsMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/MenuParamsMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/ImageMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AddCommandMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -48,7 +48,7 @@ bool AddCommandMarshaller::checkIntegrityConst(const AddCommand& s)
 {
   if(s.cmdId>2000000000)  return false;
 
-  if(!NsAppLinkRPC::MenuParamsMarshaller::checkIntegrityConst(s.menuParams))  return false;
+  if(!NsAppLinkRPCV2::MenuParamsMarshaller::checkIntegrityConst(s.menuParams))  return false;
 
   if(s.cmdIcon && (!NsAppLinkRPCV2::ImageMarshaller::checkIntegrityConst(s.cmdIcon[0])))  return false;
 
@@ -68,7 +68,7 @@ Json::Value AddCommandMarshaller::toJSON(const AddCommand& e)
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
   json["params"]["cmdId"]=Json::Value(e.cmdId);;
-  json["params"]["menuParams"]=NsAppLinkRPC::MenuParamsMarshaller::toJSON(e.menuParams);;
+  json["params"]["menuParams"]=NsAppLinkRPCV2::MenuParamsMarshaller::toJSON(e.menuParams);;
   if(e.cmdIcon)
     json["params"]["cmdIcon"]=NsAppLinkRPCV2::ImageMarshaller::toJSON(e.cmdIcon[0]);;
   json["params"]["appId"]=Json::Value(e.appId);;
@@ -94,7 +94,7 @@ bool AddCommandMarshaller::fromJSON(const Json::Value& json,AddCommand& c)
     c.cmdId=js["cmdId"].asInt();
     if(c.cmdId>2000000000)  return false;
 
-    if(!js.isMember("menuParams") || !NsAppLinkRPC::MenuParamsMarshaller::fromJSON(js["menuParams"],c.menuParams))  return false;
+    if(!js.isMember("menuParams") || !NsAppLinkRPCV2::MenuParamsMarshaller::fromJSON(js["menuParams"],c.menuParams))  return false;
 
     if(c.cmdIcon)  delete c.cmdIcon;
     c.cmdIcon=0;

@@ -6,8 +6,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Thu Dec 13 14:18:29 2012
-  source stamp	Thu Dec 13 14:18:27 2012
+  generated at	Thu Jan 24 06:36:23 2013
+  source stamp	Thu Jan 24 06:35:41 2013
   author	robok0der
 */
 
@@ -139,21 +139,20 @@ namespace NsAppLinkRPCV2
       ENCRYPTED=27,
 
 ///  The RPC (e.g. SubscribeVehicleData) executed successfully but one or more items have a warning or failure.
-      WARNINGS=28,
-      RETRY = 29
+      WARNINGS=28
     };
-
+  
     Result() : mInternal(INVALID_ENUM)				{}
     Result(ResultInternal e) : mInternal(e)		{}
-
+  
     ResultInternal get(void) const	{ return mInternal; }
     void set(ResultInternal e)		{ mInternal=e; }
-
+  
   private:
     ResultInternal mInternal;
     friend class ResultMarshaller;
   };
-
+  
 }
 
 #endif

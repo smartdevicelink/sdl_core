@@ -9,8 +9,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Fri Dec 14 12:58:14 2012
-  source stamp	Fri Dec 14 12:58:07 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -37,8 +37,6 @@ namespace NsRPC2Communication
 
       const std::string* get_url(void);
       const int* get_timeout(void);
-      int get_appId(void);
-
 
 // setters
 /// 1 <= size <= 100
@@ -54,8 +52,6 @@ namespace NsRPC2Communication
 
       void reset_timeout(void);
 
-      bool set_appId(int appId);
-
 
     private:
 
@@ -64,7 +60,6 @@ namespace NsRPC2Communication
       std::vector< std::string> data;
       std::string* url;
       int* timeout;
-      int appId;
 
     };
   }

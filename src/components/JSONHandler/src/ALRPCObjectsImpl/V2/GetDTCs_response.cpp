@@ -11,8 +11,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Thu Dec 13 14:18:29 2012
-  source stamp	Thu Dec 13 14:18:27 2012
+  generated at	Thu Jan 24 06:36:23 2013
+  source stamp	Thu Jan 24 06:35:41 2013
   author	robok0der
 */
 
@@ -63,13 +63,9 @@ bool GetDTCs_response::set_success(bool success_)
   return true;
 }
 
-bool GetDTCs_response::set_resultCode(const std::vector<Result>& resultCode_)
+bool GetDTCs_response::set_resultCode(const Result& resultCode_)
 {
-  unsigned int i=resultCode_.size();
-  while(i--)
-  {
-    if(!ResultMarshaller::checkIntegrityConst(resultCode_[i]))   return false;
-  }
+  if(!ResultMarshaller::checkIntegrityConst(resultCode_))   return false;
   resultCode=resultCode_;
   return true;
 }
@@ -121,7 +117,7 @@ bool GetDTCs_response::get_success(void) const
   return success;
 }
 
-const std::vector<Result>& GetDTCs_response::get_resultCode(void) const 
+const Result& GetDTCs_response::get_resultCode(void) const 
 {
   return resultCode;
 }

@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -23,7 +23,7 @@ Show& Show::operator =(const Show& c)
   if(mainField4)  delete mainField4;
   mainField4= c.mainField4 ? new std::string(c.mainField4[0]) : 0;
   if(alignment)  delete alignment;
-  alignment= c.alignment ? new NsAppLinkRPC::TextAlignment(c.alignment[0]) : 0;
+  alignment= c.alignment ? new NsAppLinkRPCV2::TextAlignment(c.alignment[0]) : 0;
   if(statusBar)  delete statusBar;
   statusBar= c.statusBar ? new std::string(c.statusBar[0]) : 0;
   if(mediaClock)  delete mediaClock;
@@ -152,15 +152,15 @@ void Show::reset_mainField4(void)
   mainField4=0;
 }
 
-const NsAppLinkRPC::TextAlignment* Show::get_alignment(void)
+const NsAppLinkRPCV2::TextAlignment* Show::get_alignment(void)
 {
   return alignment;
 }
 
-bool Show::set_alignment(const NsAppLinkRPC::TextAlignment& alignment_)
+bool Show::set_alignment(const NsAppLinkRPCV2::TextAlignment& alignment_)
 {
   if(alignment)  delete alignment;
-  alignment=new NsAppLinkRPC::TextAlignment(alignment_);
+  alignment=new NsAppLinkRPCV2::TextAlignment(alignment_);
   return true;
 }
 

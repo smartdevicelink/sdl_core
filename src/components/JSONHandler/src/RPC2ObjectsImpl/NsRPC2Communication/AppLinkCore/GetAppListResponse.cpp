@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -36,12 +36,12 @@ GetAppListResponse::GetAppListResponse(const GetAppListResponse& c) : RPC2Respon
 }
 
 
-const std::vector< NsAppLinkRPC::HMIApplication>& GetAppListResponse::get_appList(void)
+const std::vector< NsAppLinkRPCV2::HMIApplication>& GetAppListResponse::get_appList(void)
 {
   return appList;
 }
 
-bool GetAppListResponse::set_appList(const std::vector< NsAppLinkRPC::HMIApplication>& appList_)
+bool GetAppListResponse::set_appList(const std::vector< NsAppLinkRPCV2::HMIApplication>& appList_)
 {
   appList=appList_;
   return true;

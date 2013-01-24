@@ -3,14 +3,14 @@
 
 #include "JSONHandler/RPC2Notification.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V1/ButtonName.h"
-#include "../include/JSONHandler/ALRPCObjects/V1/ButtonEventMode.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/ButtonName.h"
+#include "../include/JSONHandler/ALRPCObjects/V2/ButtonEventMode.h"
 
 /*
   interface	NsRPC2Communication::Buttons
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -33,16 +33,16 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const NsAppLinkRPC::ButtonName& get_name(void);
+      const NsAppLinkRPCV2::ButtonName& get_name(void);
 
-      const NsAppLinkRPC::ButtonEventMode& get_mode(void);
+      const NsAppLinkRPCV2::ButtonEventMode& get_mode(void);
 
       const unsigned int* get_customButtonID(void);
 
 // setters
-      bool set_name(const NsAppLinkRPC::ButtonName& name);
+      bool set_name(const NsAppLinkRPCV2::ButtonName& name);
 
-      bool set_mode(const NsAppLinkRPC::ButtonEventMode& mode);
+      bool set_mode(const NsAppLinkRPCV2::ButtonEventMode& mode);
 
 /// customButtonID <= 65536
       bool set_customButtonID(const unsigned int& customButtonID);
@@ -54,8 +54,8 @@ namespace NsRPC2Communication
 
       friend class OnButtonEventMarshaller;
 
-      NsAppLinkRPC::ButtonName name;
-      NsAppLinkRPC::ButtonEventMode mode;
+      NsAppLinkRPCV2::ButtonName name;
+      NsAppLinkRPCV2::ButtonEventMode mode;
       unsigned int* customButtonID;
 
     };

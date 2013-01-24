@@ -1,12 +1,12 @@
-#include "../src/include/JSONHandler/RPC2Objects/NsRPC2Communication/AppLinkCore/SendData.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
-#include "../src/src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/SendDataMarshaller.h"
+#include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/AppLinkCore/SendData.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/SendDataMarshaller.h"
 
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Fri Dec 14 12:58:14 2012
-  source stamp	Fri Dec 14 12:58:07 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -82,7 +82,6 @@ Json::Value SendDataMarshaller::toJSON(const SendData& e)
     json["params"]["url"]=Json::Value(e.url[0]);;
   if(e.timeout)
     json["params"]["timeout"]=Json::Value(e.timeout[0]);;
-  json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
 
@@ -141,9 +140,6 @@ bool SendDataMarshaller::fromJSON(const Json::Value& json,SendData& c)
 
     }
 
-    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
-    c.appId=js["appId"].asInt();
-    
   }
   catch(...)
   {

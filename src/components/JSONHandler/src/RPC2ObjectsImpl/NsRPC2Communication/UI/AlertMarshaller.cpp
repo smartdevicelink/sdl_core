@@ -1,14 +1,14 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/Alert.h"
-#include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/SoftButtonMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AlertMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -95,7 +95,7 @@ Json::Value AlertMarshaller::toJSON(const Alert& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::TTSChunkMarshaller::toJSON(e.ttsChunks[0][i]);
+      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.ttsChunks[0][i]);
 
     json["params"]["ttsChunks"]=j;
   }
@@ -174,11 +174,11 @@ bool AlertMarshaller::fromJSON(const Json::Value& json,Alert& c)
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.ttsChunks=new std::vector<NsAppLinkRPC::TTSChunk>();
+      c.ttsChunks=new std::vector<NsAppLinkRPCV2::TTSChunk>();
       c.ttsChunks->resize(js["ttsChunks"].size());
 
       while(i--)
-        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["ttsChunks"][i],c.ttsChunks[0][i]))  return false;
+        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["ttsChunks"][i],c.ttsChunks[0][i]))  return false;
     }
 
 

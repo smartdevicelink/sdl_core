@@ -6,8 +6,8 @@
   interface	Ford Sync RAPI
   version	1.2
   date		2011-05-17
-  generated at	Fri Dec 14 08:11:37 2012
-  source stamp	Fri Dec 14 08:11:34 2012
+  generated at	Thu Jan 24 06:36:21 2013
+  source stamp	Thu Jan 24 06:35:34 2013
   author	robok0der
 */
 
@@ -36,21 +36,20 @@ namespace NsAppLinkRPC
       PRESET_6=11,
       PRESET_7=12,
       PRESET_8=13,
-      PRESET_9=14,
-      CUSTOM_BUTTON=15
+      PRESET_9=14
     };
-
+  
     ButtonName() : mInternal(INVALID_ENUM)				{}
     ButtonName(ButtonNameInternal e) : mInternal(e)		{}
-
+  
     ButtonNameInternal get(void) const	{ return mInternal; }
     void set(ButtonNameInternal e)		{ mInternal=e; }
-
+  
   private:
     ButtonNameInternal mInternal;
     friend class ButtonNameMarshaller;
   };
-
+  
 }
 
 #endif

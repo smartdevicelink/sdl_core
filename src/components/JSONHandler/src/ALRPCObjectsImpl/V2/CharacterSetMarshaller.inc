@@ -36,8 +36,7 @@
 #define MIN_HASH_VALUE 7
 #define MAX_HASH_VALUE 13
 /* maximum key range = 7, duplicates = 0 */
-namespace NsAppLinkRPCV2
-{
+
 class CharacterSet_intHash
 {
 private:
@@ -116,5 +115,4 @@ CharacterSet_intHash::getPointer (register const char *str, register unsigned in
           }
     }
   return 0;
-}
 }

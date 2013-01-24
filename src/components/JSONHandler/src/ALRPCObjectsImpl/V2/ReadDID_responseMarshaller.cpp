@@ -9,8 +9,8 @@
   interface	Ford Sync RAPI
   version	2.0O
   date		2012-11-02
-  generated at	Thu Dec 13 14:18:29 2012
-  source stamp	Thu Dec 13 14:18:27 2012
+  generated at	Thu Jan 24 06:36:23 2013
+  source stamp	Thu Jan 24 06:35:41 2013
   author	robok0der
 */
 
@@ -49,13 +49,7 @@ const std::string ReadDID_responseMarshaller::toString(const ReadDID_response& e
 
 bool ReadDID_responseMarshaller::checkIntegrityConst(const ReadDID_response& s)
 {
-  {
-    unsigned int i=s.resultCode.size();
-    while(i--)
-    {
-    if(!ResultMarshaller::checkIntegrityConst(s.resultCode[i]))   return false;
-    }
-  }
+  if(!ResultMarshaller::checkIntegrityConst(s.resultCode))  return false;
   if(s.info && s.info->length()>1000)  return false;
   if(s.dataResult)
   {
@@ -86,10 +80,7 @@ Json::Value ReadDID_responseMarshaller::toJSON(const ReadDID_response& e)
 
   json["success"]=Json::Value(e.success);
 
-  json["resultCode"]=Json::Value(Json::arrayValue);
-  json["resultCode"].resize(e.resultCode.size());
-  for(unsigned int i=0;i<e.resultCode.size();i++)
-    json["resultCode"][i]=ResultMarshaller::toJSON(e.resultCode[i]);
+  json["resultCode"]=ResultMarshaller::toJSON(e.resultCode);
 
   if(e.info)
     json["info"]=Json::Value(*e.info);
@@ -140,16 +131,8 @@ bool ReadDID_responseMarshaller::fromJSON(const Json::Value& json,ReadDID_respon
     if(!json.isMember("resultCode"))  return false;
     {
       const Json::Value& j=json["resultCode"];
-      if(!j.isArray())  return false;
-      c.resultCode.resize(j.size());
-      for(unsigned int i=0;i<j.size();i++)
-        {
-          Result t;
-          if(!ResultMarshaller::fromJSON(j[i],t))
-            return false;
-          c.resultCode[i]=t;
-        }
-
+      if(!ResultMarshaller::fromJSON(j,c.resultCode))
+        return false;
     }
     if(json.isMember("info"))
     {

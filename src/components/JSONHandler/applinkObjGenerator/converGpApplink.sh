@@ -1,4 +1,4 @@
-x=`ls ../src/ALRPCObjectsImpl/V1/*.gp`
+x=`ls ../src/ALRPCObjectsImpl/V2/*.gp`
 echo $x
 for fx in $x
 do

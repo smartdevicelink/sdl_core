@@ -6,12 +6,12 @@
 
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/ActivateApp.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/ActivateAppResponse.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/DeactivateApp.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/DeactivateAppResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetAppList.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetAppListResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetDeviceList.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetDeviceListResponse.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppDeactivated.h"
+#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppDeactivatedResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppRegistered.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppUnregistered.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnDeviceListUpdated.h"
@@ -24,8 +24,8 @@
 /*
   interface	NsRPC2Communication::AppLinkCore
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 

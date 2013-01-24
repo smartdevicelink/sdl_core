@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -15,9 +15,9 @@ using namespace NsRPC2Communication::UI;
 SetGlobalProperties& SetGlobalProperties::operator =(const SetGlobalProperties& c)
 {
   if(helpPrompt)  delete helpPrompt;
-  helpPrompt= c.helpPrompt ? new std::vector<NsAppLinkRPC::TTSChunk>(c.helpPrompt[0]) : 0;
+  helpPrompt= c.helpPrompt ? new std::vector<NsAppLinkRPCV2::TTSChunk>(c.helpPrompt[0]) : 0;
   if(timeoutPrompt)  delete timeoutPrompt;
-  timeoutPrompt= c.timeoutPrompt ? new std::vector<NsAppLinkRPC::TTSChunk>(c.timeoutPrompt[0]) : 0;
+  timeoutPrompt= c.timeoutPrompt ? new std::vector<NsAppLinkRPCV2::TTSChunk>(c.timeoutPrompt[0]) : 0;
   if(vrHelpTitle)  delete vrHelpTitle;
   vrHelpTitle= c.vrHelpTitle ? new std::string(c.vrHelpTitle[0]) : 0;
   if(vrHelp)  delete vrHelp;
@@ -52,15 +52,15 @@ SetGlobalProperties::SetGlobalProperties(const SetGlobalProperties& c) : RPC2Req
 }
 
 
-const std::vector< NsAppLinkRPC::TTSChunk>* SetGlobalProperties::get_helpPrompt(void)
+const std::vector< NsAppLinkRPCV2::TTSChunk>* SetGlobalProperties::get_helpPrompt(void)
 {
   return helpPrompt;
 }
 
-bool SetGlobalProperties::set_helpPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& helpPrompt_)
+bool SetGlobalProperties::set_helpPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& helpPrompt_)
 {
   if(helpPrompt)  delete helpPrompt;
-  helpPrompt=new std::vector< NsAppLinkRPC::TTSChunk>(helpPrompt_);
+  helpPrompt=new std::vector< NsAppLinkRPCV2::TTSChunk>(helpPrompt_);
   return true;
 }
 
@@ -70,15 +70,15 @@ void SetGlobalProperties::reset_helpPrompt(void)
   helpPrompt=0;
 }
 
-const std::vector< NsAppLinkRPC::TTSChunk>* SetGlobalProperties::get_timeoutPrompt(void)
+const std::vector< NsAppLinkRPCV2::TTSChunk>* SetGlobalProperties::get_timeoutPrompt(void)
 {
   return timeoutPrompt;
 }
 
-bool SetGlobalProperties::set_timeoutPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& timeoutPrompt_)
+bool SetGlobalProperties::set_timeoutPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& timeoutPrompt_)
 {
   if(timeoutPrompt)  delete timeoutPrompt;
-  timeoutPrompt=new std::vector< NsAppLinkRPC::TTSChunk>(timeoutPrompt_);
+  timeoutPrompt=new std::vector< NsAppLinkRPCV2::TTSChunk>(timeoutPrompt_);
   return true;
 }
 

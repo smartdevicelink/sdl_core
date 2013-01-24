@@ -4,8 +4,8 @@
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -19,9 +19,9 @@ PerformInteraction& PerformInteraction::operator =(const PerformInteraction& c)
   interactionMode=c.interactionMode;
   interactionChoiceSetIDList=c.interactionChoiceSetIDList;
   if(helpPrompt)  delete helpPrompt;
-  helpPrompt= c.helpPrompt ? new std::vector<NsAppLinkRPC::TTSChunk>(c.helpPrompt[0]) : 0;
+  helpPrompt= c.helpPrompt ? new std::vector<NsAppLinkRPCV2::TTSChunk>(c.helpPrompt[0]) : 0;
   if(timeoutPrompt)  delete timeoutPrompt;
-  timeoutPrompt= c.timeoutPrompt ? new std::vector<NsAppLinkRPC::TTSChunk>(c.timeoutPrompt[0]) : 0;
+  timeoutPrompt= c.timeoutPrompt ? new std::vector<NsAppLinkRPCV2::TTSChunk>(c.timeoutPrompt[0]) : 0;
   if(timeout)  delete timeout;
   timeout= c.timeout ? new unsigned int(c.timeout[0]) : 0;
   if(vrHelp)  delete vrHelp;
@@ -67,23 +67,23 @@ bool PerformInteraction::set_initialText(const std::string& initialText_)
   return true;
 }
 
-const std::vector< NsAppLinkRPC::TTSChunk>& PerformInteraction::get_initialPrompt(void)
+const std::vector< NsAppLinkRPCV2::TTSChunk>& PerformInteraction::get_initialPrompt(void)
 {
   return initialPrompt;
 }
 
-bool PerformInteraction::set_initialPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& initialPrompt_)
+bool PerformInteraction::set_initialPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& initialPrompt_)
 {
   initialPrompt=initialPrompt_;
   return true;
 }
 
-const NsAppLinkRPC::InteractionMode& PerformInteraction::get_interactionMode(void)
+const NsAppLinkRPCV2::InteractionMode& PerformInteraction::get_interactionMode(void)
 {
   return interactionMode;
 }
 
-bool PerformInteraction::set_interactionMode(const NsAppLinkRPC::InteractionMode& interactionMode_)
+bool PerformInteraction::set_interactionMode(const NsAppLinkRPCV2::InteractionMode& interactionMode_)
 {
   interactionMode=interactionMode_;
   return true;
@@ -100,15 +100,15 @@ bool PerformInteraction::set_interactionChoiceSetIDList(const std::vector< unsig
   return true;
 }
 
-const std::vector< NsAppLinkRPC::TTSChunk>* PerformInteraction::get_helpPrompt(void)
+const std::vector< NsAppLinkRPCV2::TTSChunk>* PerformInteraction::get_helpPrompt(void)
 {
   return helpPrompt;
 }
 
-bool PerformInteraction::set_helpPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& helpPrompt_)
+bool PerformInteraction::set_helpPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& helpPrompt_)
 {
   if(helpPrompt)  delete helpPrompt;
-  helpPrompt=new std::vector< NsAppLinkRPC::TTSChunk>(helpPrompt_);
+  helpPrompt=new std::vector< NsAppLinkRPCV2::TTSChunk>(helpPrompt_);
   return true;
 }
 
@@ -118,15 +118,15 @@ void PerformInteraction::reset_helpPrompt(void)
   helpPrompt=0;
 }
 
-const std::vector< NsAppLinkRPC::TTSChunk>* PerformInteraction::get_timeoutPrompt(void)
+const std::vector< NsAppLinkRPCV2::TTSChunk>* PerformInteraction::get_timeoutPrompt(void)
 {
   return timeoutPrompt;
 }
 
-bool PerformInteraction::set_timeoutPrompt(const std::vector< NsAppLinkRPC::TTSChunk>& timeoutPrompt_)
+bool PerformInteraction::set_timeoutPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& timeoutPrompt_)
 {
   if(timeoutPrompt)  delete timeoutPrompt;
-  timeoutPrompt=new std::vector< NsAppLinkRPC::TTSChunk>(timeoutPrompt_);
+  timeoutPrompt=new std::vector< NsAppLinkRPCV2::TTSChunk>(timeoutPrompt_);
   return true;
 }
 

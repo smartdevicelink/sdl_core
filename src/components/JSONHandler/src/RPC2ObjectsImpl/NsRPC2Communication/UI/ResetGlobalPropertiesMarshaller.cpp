@@ -1,13 +1,13 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/ResetGlobalProperties.h"
-#include "../src/ALRPCObjectsImpl/V1/GlobalPropertyMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/GlobalPropertyMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/ResetGlobalPropertiesMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -71,7 +71,7 @@ Json::Value ResetGlobalPropertiesMarshaller::toJSON(const ResetGlobalProperties&
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::GlobalPropertyMarshaller::toJSON(e.properties[i]);
+      j[i]=NsAppLinkRPCV2::GlobalPropertyMarshaller::toJSON(e.properties[i]);
 
     json["params"]["properties"]=j;
   }
@@ -102,8 +102,8 @@ bool ResetGlobalPropertiesMarshaller::fromJSON(const Json::Value& json,ResetGlob
       c.properties.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::GlobalProperty t;
-        if(!NsAppLinkRPC::GlobalPropertyMarshaller::fromJSON(js["properties"][i],t))
+        NsAppLinkRPCV2::GlobalProperty t;
+        if(!NsAppLinkRPCV2::GlobalPropertyMarshaller::fromJSON(js["properties"][i],t))
           return false;
          c.properties[i]=t;
       }

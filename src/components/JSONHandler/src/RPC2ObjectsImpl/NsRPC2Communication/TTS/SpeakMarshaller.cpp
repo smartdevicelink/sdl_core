@@ -1,13 +1,13 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/Speak.h"
-#include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/SpeakMarshaller.h"
 
 /*
   interface	NsRPC2Communication::TTS
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -71,7 +71,7 @@ Json::Value SpeakMarshaller::toJSON(const Speak& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::TTSChunkMarshaller::toJSON(e.ttsChunks[i]);
+      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.ttsChunks[i]);
 
     json["params"]["ttsChunks"]=j;
   }
@@ -102,8 +102,8 @@ bool SpeakMarshaller::fromJSON(const Json::Value& json,Speak& c)
       c.ttsChunks.resize(i);
       while(i--)
       {
-        NsAppLinkRPC::TTSChunk t;
-        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["ttsChunks"][i],t))
+        NsAppLinkRPCV2::TTSChunk t;
+        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["ttsChunks"][i],t))
           return false;
          c.ttsChunks[i]=t;
       }

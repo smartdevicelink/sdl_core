@@ -1,15 +1,15 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/SetGlobalProperties.h"
-#include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/TTSChunkMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
 #include "../src/ALRPCObjectsImpl/V2/VrHelpItemMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V1/ResultMarshaller.h"
+#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetGlobalPropertiesMarshaller.h"
 
 /*
   interface	NsRPC2Communication::UI
   version	1.2
-  generated at	Fri Dec 14 06:14:25 2012
-  source stamp	Fri Dec 14 06:14:23 2012
+  generated at	Thu Jan 24 06:41:15 2013
+  source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
 
@@ -91,7 +91,7 @@ Json::Value SetGlobalPropertiesMarshaller::toJSON(const SetGlobalProperties& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::TTSChunkMarshaller::toJSON(e.helpPrompt[0][i]);
+      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.helpPrompt[0][i]);
 
     json["params"]["helpPrompt"]=j;
   }
@@ -101,7 +101,7 @@ Json::Value SetGlobalPropertiesMarshaller::toJSON(const SetGlobalProperties& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPC::TTSChunkMarshaller::toJSON(e.timeoutPrompt[0][i]);
+      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.timeoutPrompt[0][i]);
 
     json["params"]["timeoutPrompt"]=j;
   }
@@ -145,11 +145,11 @@ bool SetGlobalPropertiesMarshaller::fromJSON(const Json::Value& json,SetGlobalPr
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.helpPrompt=new std::vector<NsAppLinkRPC::TTSChunk>();
+      c.helpPrompt=new std::vector<NsAppLinkRPCV2::TTSChunk>();
       c.helpPrompt->resize(js["helpPrompt"].size());
 
       while(i--)
-        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["helpPrompt"][i],c.helpPrompt[0][i]))  return false;
+        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["helpPrompt"][i],c.helpPrompt[0][i]))  return false;
     }
 
 
@@ -162,11 +162,11 @@ bool SetGlobalPropertiesMarshaller::fromJSON(const Json::Value& json,SetGlobalPr
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.timeoutPrompt=new std::vector<NsAppLinkRPC::TTSChunk>();
+      c.timeoutPrompt=new std::vector<NsAppLinkRPCV2::TTSChunk>();
       c.timeoutPrompt->resize(js["timeoutPrompt"].size());
 
       while(i--)
-        if(!NsAppLinkRPC::TTSChunkMarshaller::fromJSON(js["timeoutPrompt"][i],c.timeoutPrompt[0][i]))  return false;
+        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["timeoutPrompt"][i],c.timeoutPrompt[0][i]))  return false;
     }
 
 
