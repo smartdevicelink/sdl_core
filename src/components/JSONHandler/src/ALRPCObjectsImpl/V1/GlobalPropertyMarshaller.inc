@@ -9,7 +9,8 @@
 #define MIN_HASH_VALUE 10
 #define MAX_HASH_VALUE 13
 /* maximum key range = 4, duplicates = 0 */
-
+namespace NsAppLinkRPC
+{
 class GlobalProperty_intHash
 {
 private:
@@ -57,4 +58,5 @@ GlobalProperty_intHash::getPointer (register const char *str, register unsigned 
           }
     }
   return 0;
+}
 }

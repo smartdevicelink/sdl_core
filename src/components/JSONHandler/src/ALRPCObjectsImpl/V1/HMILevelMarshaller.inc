@@ -36,7 +36,8 @@
 #define MIN_HASH_VALUE 4
 #define MAX_HASH_VALUE 10
 /* maximum key range = 7, duplicates = 0 */
-
+namespace NsAppLinkRPC
+{
 class HMILevel_intHash
 {
 private:
@@ -116,4 +117,5 @@ HMILevel_intHash::getPointer (register const char *str, register unsigned int le
           }
     }
   return 0;
+}
 }

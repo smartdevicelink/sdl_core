@@ -36,7 +36,8 @@
 #define MIN_HASH_VALUE 4
 #define MAX_HASH_VALUE 9
 /* maximum key range = 6, duplicates = 0 */
-
+namespace NsAppLinkRPC
+{
 class SystemContext_intHash
 {
 private:
@@ -113,4 +114,5 @@ SystemContext_intHash::getPointer (register const char *str, register unsigned i
           }
     }
   return 0;
+}
 }

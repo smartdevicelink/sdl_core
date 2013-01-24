@@ -9,7 +9,8 @@
 #define MIN_HASH_VALUE 8
 #define MAX_HASH_VALUE 13
 /* maximum key range = 6, duplicates = 0 */
-
+namespace NsAppLinkRPC
+{
 class TextAlignment_intHash
 {
 private:
@@ -58,4 +59,5 @@ TextAlignment_intHash::getPointer (register const char *str, register unsigned i
           }
     }
   return 0;
+}
 }

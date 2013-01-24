@@ -36,7 +36,8 @@
 #define MIN_HASH_VALUE 2
 #define MAX_HASH_VALUE 23
 /* maximum key range = 22, duplicates = 0 */
-
+namespace NsAppLinkRPC
+{
 class ButtonName_intHash
 {
 private:
@@ -156,4 +157,5 @@ ButtonName_intHash::getPointer (register const char *str, register unsigned int 
           }
     }
   return 0;
+}
 }

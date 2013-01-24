@@ -36,7 +36,8 @@
 #define MIN_HASH_VALUE 5
 #define MAX_HASH_VALUE 7
 /* maximum key range = 3, duplicates = 0 */
-
+namespace NsAppLinkRPC
+{
 class Language_intHash
 {
 private:
@@ -112,4 +113,5 @@ Language_intHash::getPointer (register const char *str, register unsigned int le
           }
     }
   return 0;
+}
 }

@@ -9,7 +9,8 @@
 #define MIN_HASH_VALUE 5
 #define MAX_HASH_VALUE 9
 /* maximum key range = 5, duplicates = 0 */
-
+namespace NsAppLinkRPC
+{
 class UpdateMode_intHash
 {
 private:
@@ -60,4 +61,5 @@ UpdateMode_intHash::getPointer (register const char *str, register unsigned int 
           }
     }
   return 0;
+}
 }
