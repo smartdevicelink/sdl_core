@@ -651,6 +651,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				Const.PREFS_DEFAULT_PROTOCOLVERSION);
 	}
 
+	private boolean getIsMedia() {
+		return getSharedPreferences(Const.PREFS_NAME, 0).getBoolean(
+				Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
+	}
+
 	/* Handles item selections */
 	public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -1102,6 +1107,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText mediaTrack = (EditText) layout.findViewById(R.id.txtMediaTrack);
 							chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.show_chkIncludeSBs);
 							final EditText editCustomPresets = (EditText) layout.findViewById(R.id.show_customPresets);
+							
+							if (!getIsMedia()) {
+								int visibility = android.view.View.GONE;
+								mediaClock.setVisibility(visibility);
+								mediaTrack.setVisibility(visibility);
+								layout.findViewById(R.id.lblMediaTrack).setVisibility(visibility);
+								layout.findViewById(R.id.lblMediaClock).setVisibility(visibility);
+							}
 
 							SoftButton sb1 = new SoftButton();
 							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
@@ -1150,8 +1163,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setMainField3("MainField3_test");
 										msg.setMainField4("MainField4_test");
 										msg.setStatusBar(statusBar.getText().toString());
-										msg.setMediaClock(mediaClock.getText().toString());
-										msg.setMediaTrack(mediaTrack.getText().toString());
+										if (getIsMedia()) {
+											msg.setMediaClock(mediaClock.getText().toString());
+											msg.setMediaTrack(mediaTrack.getText().toString());
+										}
 										if (chkIncludeSoftButtons.isChecked() &&
 												(currentSoftButtons != null) &&
 												(currentSoftButtons.size() > 0)) {

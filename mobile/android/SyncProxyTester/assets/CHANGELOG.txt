@@ -1,4 +1,5 @@
 [CW4]
+* Show dialog in non-media app: hide and don't send Media Track and Media Clock parameters.
 + Set app icon after app registration (on first OnHMIStatus notification).
 * ShowConstantTBT dialog: allow to customize soft buttons.
 + Create DialNumber and UpdateTurnList dialogs.
