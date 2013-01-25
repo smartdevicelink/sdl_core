@@ -35,6 +35,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -589,6 +590,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			service.setCurrentActivity(null);
 		}
 		closeAudioPassThruStream();
+		closeAudioPassThruMediaPlayer();
 	}
 	
 	public Dialog onCreateDialog(int id) {
@@ -2844,6 +2846,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 */
 	public void onPerformAudioPassThruResponse(Result result) {
 		closeAudioPassThruStream();
+		closeAudioPassThruMediaPlayer();
 		if (Result.SUCCESS != result) {
 			File outFile = audioPassThruOutputFile();
 			if ((outFile != null) && outFile.exists()) {
@@ -2885,6 +2888,26 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				Log.w(logTag, "Can't close output file", e);
 			}
 			audioPassThruOutStream = null;
+		}
+	}
+	
+	private void closeAudioPassThruMediaPlayer() {
+		if (audioPassThruMediaPlayer == null) {
+			return;
+		}
+		
+		if (audioPassThruMediaPlayer.isPlaying()) {
+			audioPassThruMediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+				@Override
+				public void onCompletion(MediaPlayer mp) {
+					audioPassThruMediaPlayer.release();
+					audioPassThruMediaPlayer = null;
+				}
+			});
+		} else {
+			// the player has stopped
+			audioPassThruMediaPlayer.release();
+			audioPassThruMediaPlayer = null;
 		}
 	}
 
