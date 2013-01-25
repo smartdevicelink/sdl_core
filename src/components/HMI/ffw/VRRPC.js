@@ -234,7 +234,7 @@ FFW.VR = FFW.RPCObserver.create({
 			"jsonrpc"	:	"2.0",
 			"method"	:	"VR.OnCommand",
 			"params"	:	{
-				"commandId":	commandId,
+				"cmdID":	commandId,
 				"appId":		appId
 			}
 		};
