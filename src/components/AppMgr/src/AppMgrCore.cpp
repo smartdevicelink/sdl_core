@@ -3487,6 +3487,43 @@ namespace NsAppManager
                     HMIHandler::getInstance().sendRequest(alert);
                     break;
                 }
+                case NsAppLinkRPCV2::FunctionID::DialNumberID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, " A DialNumber request has been invoked");
+                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
+                        NsAppLinkRPCV2::DialNumber_response* response = new NsAppLinkRPCV2::DialNumber_response();
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::DialNumber_response* response = new NsAppLinkRPCV2::DialNumber_response;
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    NsAppLinkRPCV2::DialNumber_request* object = static_cast<NsAppLinkRPCV2::DialNumber_request*>(mobileMsg);
+                    NsRPC2Communication::Phone::DialNumber* dialNumberRPC2Request = new NsRPC2Communication::Phone::DialNumber();
+                    dialNumberRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    LOG4CPLUS_INFO_EXT(mLogger, "dialNumberRPC2Request created");
+                    dialNumberRPC2Request->set_number(object->get_number());
+                    dialNumberRPC2Request->set_appId(sessionKey);
+                    LOG4CPLUS_INFO_EXT(mLogger, "DialNumber request almost handled" );
+                    core->mMessageMapping.addMessage(dialNumberRPC2Request->getId(), sessionKey);
+                    HMIHandler::getInstance().sendRequest(dialNumberRPC2Request);
+                    break;
+                }
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
                 {
