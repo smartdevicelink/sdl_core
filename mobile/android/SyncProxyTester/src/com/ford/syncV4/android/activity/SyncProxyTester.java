@@ -628,8 +628,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		boolean result = super.onCreateOptionsMenu(menu);
 		if (result) {
 			menu.add(0, PROXY_START, 0, "Proxy Start");
-			menu.add(0, XML_TEST, 0, "XML Test");
-			menu.add(0, POLICIES_TEST, 0, "Policies Test");
 			menu.add(0, MNU_TOGGLE_CONSOLE, 0, "Toggle Console");
 			menu.add(0, MNU_CLEAR, 0, "Clear Messages");
 			menu.add(0, MNU_EXIT, 0, "Exit");
@@ -637,9 +635,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			menu.add(0, MNU_TOGGLE_PROTOCOL_VERSION, 0,
 					"Toggle Protocol Ver. (cur " + String.valueOf(
 							getCurrentProtocolVersion()) + ")");*/
-			menu.add(0, MNU_UNREGISTER, 0, "Unregister");
 			menu.add(0, MNU_APP_VERSION, 0, "App version");
+			menu.add(0, MNU_UNREGISTER, 0, "Unregister");
 			menu.add(0, MNU_CLEAR_FUNCTIONS_USAGE, 0, "Reset functions usage");
+			menu.add(0, XML_TEST, 0, "XML Test");
+			menu.add(0, POLICIES_TEST, 0, "Policies Test");
 			return true;
 		} else {
 			return false;
