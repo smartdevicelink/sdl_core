@@ -34,6 +34,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -207,6 +208,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 	/** The output stream to write audioPassThru data. */
 	private OutputStream audioPassThruOutStream = null;
+	/** Media player for the stream of audio pass thru. */
+	private MediaPlayer audioPassThruMediaPlayer = null;
 	/**
 	 * The most recent sent PerformAudioPassThru message, saved in case we need
 	 * to retry the request.
@@ -2787,14 +2790,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	public void onAudioPassThru(byte[] aptData) {
 		Log.i(logTag, "data len " + aptData.length);
 		if (isExtStorageWritable()) {
-			File outFile = null;
+			File outFile = audioPassThruOutputFile();
 			try {
 				if (audioPassThruOutStream == null) {
-					outFile = audioPassThruOutputFile();
 					audioPassThruOutStream = new BufferedOutputStream(
 							new FileOutputStream(outFile, false));
 				}
 				audioPassThruOutStream.write(aptData);
+				audioPassThruOutStream.flush();
 			} catch (FileNotFoundException e) {
 				logToConsoleAndUI(
 						"Output file "
@@ -2803,6 +2806,31 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								+ " can't be opened for writing", e);
 			} catch (IOException e) {
 				logToConsoleAndUI("Can't write to output file", e);
+			}
+			
+			/*
+			 * if there is current player, save the current position, stop and
+			 * release it, so that we recreate it with the appended file and
+			 * jump to that position, emulating seamless stream playing
+			 */
+			int audioPosition = -1;
+			if (audioPassThruMediaPlayer != null) {
+				audioPosition = audioPassThruMediaPlayer.getCurrentPosition();
+				audioPassThruMediaPlayer.stop();
+				audioPassThruMediaPlayer.release();
+				audioPassThruMediaPlayer = null;
+			}
+			
+			audioPassThruMediaPlayer = new MediaPlayer();
+			try {
+				audioPassThruMediaPlayer.setDataSource(outFile.toString());
+				audioPassThruMediaPlayer.prepare();
+				if (audioPosition != -1) {
+					audioPassThruMediaPlayer.seekTo(audioPosition);
+				}
+				audioPassThruMediaPlayer.start();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		} else {
 			logToConsoleAndUI("External storage is not available", null);
