@@ -52,8 +52,8 @@ namespace {
         }
     }
 
-    template<typename Response, typename Result>
-    void sendResponse(int responseId, Result result)
+    template<typename Response>
+    void sendResponse(int responseId, NsAppLinkRPCV2::Result::ResultInternal result)
     {
         Response* response = new Response;
         if (!response)
@@ -5132,8 +5132,8 @@ namespace NsAppManager
                 if ( !object )
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't cast object to ActivateApp type");
-                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPC::Result::ResultInternal>(object->getId(), NsAppLinkRPC::Result::GENERIC_ERROR);
+                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse>(
+                        object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
                     return;
                 }
 
@@ -5146,8 +5146,8 @@ namespace NsAppManager
                 if(items.empty())
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application with the name " << appName << " found!");
-                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPC::Result::ResultInternal>(object->getId(), NsAppLinkRPC::Result::INVALID_DATA);
+                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse>(
+                        object->getId(), NsAppLinkRPCV2::Result::INVALID_DATA);
                     return;
                 }
 
@@ -5155,8 +5155,8 @@ namespace NsAppManager
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
-                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPC::Result::ResultInternal>(object->getId(), NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse>(
+                        object->getId(), NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
                     return;
                 }
 
@@ -5172,8 +5172,8 @@ namespace NsAppManager
                     if (currentApp == app)
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, "App is currently active");
-                        sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                    NsAppLinkRPC::Result::ResultInternal>(object->getId(), NsAppLinkRPC::Result::GENERIC_ERROR);
+                        sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse>(
+                            object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
                         return;
                     }
 
@@ -5188,8 +5188,8 @@ namespace NsAppManager
                     LOG4CPLUS_ERROR_EXT(mLogger, "Application " << app->getName()
                         << " application id " << appId);
 
-                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse,
-                                NsAppLinkRPC::Result::ResultInternal>(object->getId(), NsAppLinkRPC::Result::GENERIC_ERROR);
+                    sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse>(
+                        object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
                     return;
                 }
 
@@ -5342,7 +5342,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage( hmiStatus, appId );
                         NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
                         response->setId(object->getId());
-                        response->setResult(NsAppLinkRPC::Result::SUCCESS);
+                        response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
                         HMIHandler::getInstance().sendResponse(response);
 
                         if(core->mDriverDistractionV1)
@@ -5398,7 +5398,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage( hmiStatus, appId );
                         NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
                         response->setId(object->getId());
-                        response->setResult(NsAppLinkRPC::Result::SUCCESS);
+                        response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
                         HMIHandler::getInstance().sendResponse(response);
 
                         if(core->mDriverDistractionV2)
@@ -5466,7 +5466,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage( encodedNotification, appId );
                         NsRPC2Communication::AppLinkCore::SendDataResponse* response = new NsRPC2Communication::AppLinkCore::SendDataResponse;
                         response->setId(object->getId());
-                        response->setResult(NsAppLinkRPC::Result::SUCCESS);
+                        response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
                         HMIHandler::getInstance().sendResponse(response);
                         break;
                     }
@@ -5571,12 +5571,12 @@ namespace NsAppManager
                 if(!hmiApps.empty())
                 {
                     response->set_appList(hmiApps);
-                    response->setResult(NsAppLinkRPC::Result::SUCCESS);
+                    response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
                 }
                 else
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, " Application list is empty!");
-                    response->setResult(NsAppLinkRPC::Result::GENERIC_ERROR);
+                    response->setResult(NsAppLinkRPCV2::Result::GENERIC_ERROR);
                 }
 
                 Json::Value commandJson = NsRPC2Communication::Marshaller::toJSON( response );
@@ -5590,7 +5590,7 @@ namespace NsAppManager
                 NsRPC2Communication::AppLinkCore::GetDeviceList* getDevList = (NsRPC2Communication::AppLinkCore::GetDeviceList*)msg;
                 NsRPC2Communication::AppLinkCore::GetDeviceListResponse* response = new NsRPC2Communication::AppLinkCore::GetDeviceListResponse;
                 response->setId(getDevList->getId());
-                response->setResult(NsAppLinkRPC::Result::GENERIC_ERROR);
+                response->setResult(NsAppLinkRPCV2::Result::GENERIC_ERROR);
                 ConnectionHandler::getInstance().startDevicesDiscovery();
                 HMIHandler::getInstance().sendResponse(response);
                 return;
