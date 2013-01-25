@@ -3514,7 +3514,7 @@ namespace NsAppManager
                         break;
                     }
                     NsAppLinkRPCV2::DialNumber_request* object = static_cast<NsAppLinkRPCV2::DialNumber_request*>(mobileMsg);
-                    NsRPC2Communication::Phone::DialNumber* dialNumberRPC2Request = new NsRPC2Communication::Phone::DialNumber();
+                    NsRPC2Communication::UI::DialNumber* dialNumberRPC2Request = new NsRPC2Communication::UI::DialNumber();
                     dialNumberRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     LOG4CPLUS_INFO_EXT(mLogger, "dialNumberRPC2Request created");
                     dialNumberRPC2Request->set_number(object->get_number());
@@ -5876,10 +5876,10 @@ namespace NsAppManager
 
         switch(msg->getMethod())
         {
-            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_PHONE__DIALNUMBERRESPONSE:
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DIALNUMBERRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A DialNambor response has been income");
-                NsRPC2Communication::Phone::DialNumberResponse* object = static_cast<NsRPC2Communication::Phone::DialNumberResponse*>(msg);
+                NsRPC2Communication::UI::DialNumberResponse* object = static_cast<NsRPC2Communication::UI::DialNumberResponse*>(msg);
                 Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
                 if(!app)
                 {
