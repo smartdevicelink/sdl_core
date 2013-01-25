@@ -389,6 +389,14 @@ set (GENERATED_RPC_SOURCES
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetSupportedLanguagesMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetSupportedLanguagesResponse.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/GetSupportedLanguagesResponseMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/GetSupportedLanguages.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/GetSupportedLanguagesMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/GetSupportedLanguagesResponse.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/TTS/GetSupportedLanguagesResponseMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/VR/GetSupportedLanguages.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/VR/GetSupportedLanguagesMarshaller.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/VR/GetSupportedLanguagesResponse.cpp
+./src/RPC2ObjectsImpl/NsRPC2Communication/VR/GetSupportedLanguagesResponseMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/CreateInteractionChoiceSet.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/CreateInteractionChoiceSetMarshaller.cpp
 ./src/RPC2ObjectsImpl/NsRPC2Communication/UI/CreateInteractionChoiceSetResponse.cpp

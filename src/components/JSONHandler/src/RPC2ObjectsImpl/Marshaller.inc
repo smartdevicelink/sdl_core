@@ -192,7 +192,7 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
 #line 29 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"AppLinkCore.SendData",11,&Marshaller::mNsRPC2Communication_AppLinkCore__SendData},
 #line 25 "../src/RPC2ObjectsImpl/Marshaller.gp"
-      {"AppLinkCore.OnAppDeactivatedResponse",7,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppDeactivatedResponse},
+      {"AppLinkCore.OnAppDeactivatedResponse",7,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppDeactivated},
 #line 20 "../src/RPC2ObjectsImpl/Marshaller.gp"
       {"AppLinkCore.GetAppList",2,&Marshaller::mNsRPC2Communication_AppLinkCore__GetAppList},
 #line 64 "../src/RPC2ObjectsImpl/Marshaller.gp"

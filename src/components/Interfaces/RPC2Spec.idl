@@ -1,9 +1,9 @@
 /*
- * 
+ *
  * @name RPC2Spec
- * 
+ *
  * @desc UI, VR, TTS, Buttons, ApplinkCore functionality
- * 
+ *
  * @category    HMI
  * @version 1.0
  *
@@ -40,20 +40,20 @@ envelope "JSON-RPC 2.0";
 #endif
 
 /*
-   * @descr 
+   * @descr
    *      Show information in app window, in predefined positions
-   *  
+   *
    * @returns
    *  result of command execution
-   *  
-   */ 
+   *
+   */
 Show(string(500) * mainField1,
-    string(500) * mainField2, 
+    string(500) * mainField2,
     string(500) * mainField3,
     string(500) * mainField4,
-    TextAlignment * alignment,  //data type from AppLink protocol specification  
+    TextAlignment * alignment,  //data type from AppLink protocol specification
     string(500) * statusBar,
-    string(500) *mediaClock, 
+    string(500) *mediaClock,
     string(500) *mediaTrack,
     Image * graphic, // Image struct determining whether static or dynamic image to display in app
     SoftButton * softButtons[0:8], // App defined SoftButtons
@@ -62,13 +62,13 @@ Show(string(500) * mainField1,
     -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
-   * @descr 
+   * @descr
    *       Show Alert to the user and play sound tone if necessary
-   *  
+   *
    * @returns
    *   result of command execution
-   *  
-   */ 
+   *
+   */
 Alert(
   string(500) * AlertText1,
   string(500) * AlertText2,
@@ -78,17 +78,17 @@ Alert(
   bool * playTone,
   SoftButton * softButtons[0:4], // App defined SoftButtons
   int appId
-  -> 
+  ->
   unsigned int (2000000000) * tryAgainTime  // Amount of time (in seconds) that an app must wait before resending an alert.
 );  // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
-   * @descr 
+   * @descr
    *      add new command to UI
-   *  
+   *
    * @returns
    *  result code
-   */ 
+   */
 AddCommand(
   unsigned int (2000000000) cmdId,  // cmdID from addCommand request in AppLink protocol
   MenuParams menuParams,   //data type from AppLink protocol specification
@@ -97,12 +97,12 @@ AddCommand(
   -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
-   * @descr 
+   * @descr
    *      add new command to UI
-   *  
+   *
    * @returns
    *  result code
-   */ 
+   */
 DeleteCommand(
   unsigned int (2000000000) cmdId,  // cmdID from addCommand request in AppLink protocol
   int appId
@@ -110,13 +110,13 @@ DeleteCommand(
 
 
 /*
-   * @descr 
+   * @descr
    *      add sub menu
    *      parameters are copied from AddSubMenu in AppLink protocol
-   *  
+   *
    * @returns
    *  result code
-   */ 
+   */
 AddSubMenu(
   unsigned int (2000000000) menuId,
   unsigned int (1000) * position,
@@ -125,27 +125,27 @@ AddSubMenu(
   -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
-   * @descr 
+   * @descr
    *      delete sub menu
    *      parameters are copied from DeleteSubMenu in AppLink protocol
-   *  
+   *
    * @returns
    *  result code
-   */ 
+   */
 DeleteSubMenu(
   unsigned int (2000000000) menuId,
   int appId
   -> );  //// return value is provided in corresponding response object, id of request and response should be equal
 
 /*
-   * @descr 
+   * @descr
    *      create new interaction choice set
    *      parameters are copied from CreateInteractionChoiceSet in AppLink protocol
    *  // TODO: clarify if it is correct approach
-   *  
+   *
    * @returns
    *  result code
-   */ 
+   */
 CreateInteractionChoiceSet(
   unsigned int (2000000000) interactionChoiceSetID,
   Choice choiceSet[1:100],   // data type from AppLink protocol specification
@@ -153,29 +153,29 @@ CreateInteractionChoiceSet(
   -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
-   * @descr 
+   * @descr
    *      delete new interaction choice set
    *      parameters are copied from DeleteInteractionChoiceSet in AppLink protocol
    *  // TODO: clarify if it is correct approach
-   *  
+   *
    * @returns
    *  result code
-   */ 
+   */
 DeleteInteractionChoiceSet(
   unsigned int(2000000000) interactionChoiceSetID,
   int appId
   -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
-   * @descr 
+   * @descr
    *      Triggers an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow
    *      parameters are copied from PerformInteraction in AppLink protocol
-   * 
+   *
    *  // TODO: clarify if it is correct approach
-   *  
+   *
    * @returns
    *  result code
-   */ 
+   */
 PerformInteraction(
   string(500) initialText,
   TTSChunk initialPrompt[1:100], //data type from AppLink protocol specification
@@ -186,21 +186,21 @@ PerformInteraction(
   unsigned int (5000:100000) * timeout, //in milliseconds
   VrHelpItem * vrHelp[1:100], // Ability to send suggested VR Help Items to display on-screen during Perform Interaction
   int appId
-  -> 
+  ->
   unsigned int (2000000000) * choiceID, // ID of the choice that was selected in response to PerformInteraction
   TriggerSource * triggerSource //data type from AppLink protocol specification
   );
 
 /*
-   * @descr 
+   * @descr
    *      start media clock timer
    *      parameters are copied from SetMediaClockTimer in AppLink protocol
-   * 
+   *
    *  // TODO: clarify if it is correct approach
-   *  
+   *
    * @returns
    *  result code
-   */ 
+   */
 SetMediaClockTimer(
   StartTime * startTime, // data type from AppLink protocol specification
   UpdateMode updateMode,  // data type from AppLink protocol specification
@@ -208,33 +208,33 @@ SetMediaClockTimer(
   -> );// return value is provided in corresponding response object, id of request and response should be equal
 
 /*
-   * @descr 
+   * @descr
    *      set global properties for timeout prompt and help prompt
    *      parameters are copied from SetGlobalProperties in AppLink protocol
-   * 
+   *
    *  // TODO: clarify if it is correct approach
-   *  
+   *
    * @returns
    *  result code
-   */ 
+   */
 SetGlobalProperties(
   TTSChunk * helpPrompt[1:100], // data type from AppLink protocol specification
   TTSChunk * timeoutPrompt[1:100], // data type from AppLink protocol specification
-  string(500) * vrHelpTitle, // VR Help Title text 
+  string(500) * vrHelpTitle, // VR Help Title text
   VrHelpItem * vrHelp[1:100], // VR Help Items
   int appId
   -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
-   * @descr 
+   * @descr
    *      reset global properties for timeout prompt and help prompt
    *      parameters are copied from SetGlobalProperties in AppLink protocol
-   * 
+   *
    *  // TODO: clarify if it is correct approach
-   *  
+   *
    * @returns
    *  result code
-   */ 
+   */
 ResetGlobalProperties(
   GlobalProperty properties[1:100], // enum, data type from AppLink protocol specification
   int appId
@@ -259,10 +259,10 @@ notification OnSystemContext(
   );
 
 /*
-   * @descr 
+   * @descr
    *      method should be invoked at system startup
    *  provides information about UI capabilities
-   *  
+   *
    * @returns
    *    UI Display capabilites
    */
@@ -286,29 +286,29 @@ GetSupportedLanguages(
 );
 
 /*
-  * @descr 
+  * @descr
    *      Notification is sent from HMI to AppManager on showing warning
    *  to user.
-   *  
+   *
    */
 notification OnDriverDistraction(
     DriverDistractionState state // data type from AppLink protocol specification
   );
 
 /*
-  * @descr 
+  * @descr
    *      HMI notifies AppManager about its readiness.
    *  to user.
-   *  
+   *
    */
 notification OnReady(
 );
 
 /*
-  * @descr 
+  * @descr
    *      Request from AppLink to HMI to change display language for app.
    *  to user.
-   *  
+   *
    */
 ChangeRegistration(
   Language hmiDisplayLanguage, //  data type from AppLink protocol specification
@@ -317,18 +317,18 @@ ChangeRegistration(
 );
 
 /*
-  * @descr 
+  * @descr
    *      Request from Applink to HMI to get the currently active  UI language
-   *  
+   *
    */
 GetLanguage(
   ->
   Language hmiDisplayLanguage
 );
 /*
-  * @descr 
+  * @descr
    *      Used to set existing local file on SYNC as the app's icon.
-   *  
+   *
    */
 SetAppIcon(
   string(500) syncFileName, // path to file to be used as app icon
@@ -337,28 +337,28 @@ SetAppIcon(
 );
 
 /*
-  * @descr 
+  * @descr
    *      Notification from HMI to AppLink about change of display language for app.
    *  to user.
-   *  
+   *
    */
 notification OnLanguageChange(
   Language hmiDisplayLanguage //  data type from AppLink protocol specification
 );
 
 /*
-  * @descr 
+  * @descr
    *      Notification from HMI to AppLink when user chooses device
-   *  
+   *
    */
 notification OnDeviceChosen(
     string deviceName
 );
 
 /*
-  * @descr 
+  * @descr
    *      Request from AppLink to HMI to show slider. Returns position.
-   *  
+   *
    */
 Slider(
   unsigned int (2:26) numTicks,
@@ -372,9 +372,9 @@ Slider(
 );
 
 /*
-  * @descr 
+  * @descr
    *      Request from AppLink to HMI:
-   * Creates a full screen overlay containing a large block of 
+   * Creates a full screen overlay containing a large block of
    * formatted text that can be scrolled with up to 8 SoftButtons defined
    */
 ScrollableMessage(
@@ -386,9 +386,9 @@ ScrollableMessage(
 );
 
 /*
-  * @descr 
+  * @descr
    *      Request from AppLink to HMI:
-   * Used to set an alternate display layou 
+   * Used to set an alternate display layou
    * If not sent, default screen for given platform will be shown
    */
 SetDisplayLayout(
@@ -398,10 +398,10 @@ SetDisplayLayout(
 );
 
 /*
-  * @descr 
+  * @descr
    *      Request from AppLink to HMI to start audio pass through session
    *  to user.
-   *  
+   *
    */
 PerformAudioPassThru(
   TTSChunk initialPrompt[1:100], //SYNC will speak this prompt before opening the audio pass thru sessio
@@ -416,10 +416,10 @@ PerformAudioPassThru(
 );
 
 /*
-  * @descr 
+  * @descr
    *      Request from AppLink to HMI: when this request is invoked, the audio capture stops
    *  to user.
-   *  
+   *
    */
 EndAudioPassThru(
   int appId
@@ -428,7 +428,7 @@ EndAudioPassThru(
 
 /*
      * @descr Request from ApplinkCore to HMI to show info about navigation.
-     */ 
+     */
 ShowConstantTBT(
   string (500) * navigationText1,
   string (500) * navigationText2,
@@ -445,7 +445,7 @@ ShowConstantTBT(
 
 /*
      * @descr Request from ApplinkCore to HMI to announce navigation maneuver
-     */ 
+     */
 AlertManeuver(
   TTSChunk ttsChunks[1:100],
   SoftButton softButtons[0:3],
@@ -455,7 +455,7 @@ AlertManeuver(
 
 /*
      * @descr Request from ApplinkCore to HMI to update turn list.
-     */ 
+     */
 UpdateTurnList(
   Turn turnList[1:100],
   SoftButton softButtons[0:1],
@@ -473,7 +473,7 @@ notification OnTBTClientState(
 
 /*
      * @descr Request from ApplinkCore to HMI to make a call.
-     */ 
+     */
 DialNumber(
   string(500) number, //Phone number is a string consisting of only the digits and "+", which can be up to 40 chars
   int appId
@@ -505,25 +505,25 @@ envelope "JSON-RPC 2.0";
 #endif
 
 /*
-     * @descr 
+     * @descr
      *      method should be invoked at system startup
      *  provides information about voice recognition capabilities
-     *  
+     *
      * @returns
      *      VR capabilites
-     */ 
+     */
 GetCapabilities(
     ->
     VrCapabilities capabilities[1:100] // data type from AppLink protocol specification
 );
 
 /*
-     * @descr 
+     * @descr
      *      add new command to VR
-     *  
+     *
      * @returns
      *  result code
-     */ 
+     */
 AddCommand(
     unsigned int (2000000000) cmdId, // cmdID from addCommand request in AppLink protocol
     string (99) vrCommands [1:100], //An array of strings to be used as VR sysnonyms for this command
@@ -531,12 +531,12 @@ AddCommand(
     -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
-     * @descr 
+     * @descr
      *      delete commands from VR
-     *  
+     *
      * @returns
      *  result code
-     */ 
+     */
 DeleteCommand(
     unsigned int (2000000000) cmdId, // cmdID from addCommand request in AppLink protocol
     int appId
@@ -551,10 +551,10 @@ notification OnCommand(
     );
 
   /*
-  * @descr 
+  * @descr
    *      Request from AppLink to HMI to change language for app.
    *  to user.
-   *  
+   *
    */
 ChangeRegistration(
   Language language, //  data type from AppLink protocol specification
@@ -562,10 +562,10 @@ ChangeRegistration(
   ->
 );
 /*
-  * @descr 
+  * @descr
    *      Notification from HMI to AppLink about change of  language for app.
    *  to user.
-   *  
+   *
    */
 notification OnLanguageChange(
   Language language //  data type from AppLink protocol specification
@@ -584,9 +584,9 @@ GetSupportedLanguages(
 );
 
 /*
-  * @descr 
+  * @descr
    *      Request from Applink to HMI to get currently active  VR language
-   *  
+   *
    */
 GetLanguage(
   ->
@@ -617,35 +617,35 @@ envelope "JSON-RPC 2.0";
 #endif
 
 /*
-     * @descr 
+     * @descr
      *      method should be invoked at application registration
      *  provides information about TTS capabilities
-     *  
+     *
      * @returns
      *      TTS capabilites
-     */ 
+     */
 GetCapabilities(
-    -> 
+    ->
     SpeechCapabilities capabilities[1:100] // data type from AppLink protocol specification
     );
 
 /*
-     * @descr 
+     * @descr
      *      method should be invoked to perform text to speech
-     *  
+     *
      * @returns
      *      result code of execution
-     */ 
+     */
 Speak(
     TTSChunk ttsChunks [1:100], // data type from AppLink protocol specification
     int appId
     -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
  /*
-  * @descr 
+  * @descr
    *      Request from AppLink to HMI to change language for app.
    *  to user.
-   *  
+   *
    */
 ChangeRegistration(
   Language language, //  data type from AppLink protocol specification
@@ -653,19 +653,19 @@ ChangeRegistration(
   -> // return value is provided in corresponding response object, id of request and response should be equal
 );
 /*
-  * @descr 
+  * @descr
    *      Notification from HMI to AppLink about change of  language for app.
    *  to user.
-   *  
+   *
    */
 notification OnLanguageChange(
   Language language //  data type from AppLink protocol specification
 );
 
 /*
-  * @descr 
+  * @descr
    *      Request from Applink to HMI to get currently active TTS language
-   *  
+   *
    */
 GetLanguage(
   ->
@@ -709,10 +709,10 @@ envelope "JSON-RPC 2.0";
 #endif
 
 /*
-     * @descr 
+     * @descr
      *      method should be invoked at system startup
      *  provides information about all supported hardware buttons and their capabilites
-     *  
+     *
      * @returns
      *      button capabilites
      *      array of supported buttons
@@ -764,13 +764,13 @@ envelope "JSON-RPC 2.0";
 #endif
 
 /*
-     * @descr 
-     *     this methos is usually invoked by HMI to get list of registered apps 
-     *  
-     *  
+     * @descr
+     *     this methos is usually invoked by HMI to get list of registered apps
+     *
+     *
      * @returns
      *      the array of rehgistered apps
-     *  
+     *
      */
 GetAppList(
     ->
@@ -778,9 +778,9 @@ GetAppList(
     );
 
     /*
-  * @descr 
+  * @descr
    *      Request from HMI to AppLink to get the list of devices.
-   *  
+   *
    */
 GetDeviceList(
   ->
@@ -788,23 +788,23 @@ GetDeviceList(
 );
 
 /*
-  * @descr 
+  * @descr
    *      Notification from AppLink to HMI about changes in device list.
-   *  
+   *
    */
 notification OnDeviceListUpdated(
   string * deviceList [1:100]
 );
 
 /*
-     * @descr 
-     *      Activate app 
+     * @descr
+     *      Activate app
      *  Usually invoked by UI component when user click on app in the list of registered apps
-     *  
+     *
      * @returns
      *      result
-     *  
-     */ 
+     *
+     */
 ActivateApp(
     string(100) appName,
     int appId
@@ -812,27 +812,27 @@ ActivateApp(
 );
 
 /*
-     * @descr 
-     *      Deactivate app 
+     * @descr
+     *      Deactivate app
      *  Usually invoked by UI component when user chooses non-mobile application on HMI
-     *  
+     *
      * @returns
      *      result
-     *  
-     */ 
-OnAppDeactivated(
+     *
+     */
+notification OnAppDeactivated(
     string(100) appName,
     DeactivateReason reason, //DeactivateReason : audio, Phone Call, Navigation map, Phone Menu, Sync settings, general
     int appId
 );
 
 /*
-     * @descr 
+     * @descr
      *      Send some data from HMI to AppManager.
-     *  
+     *
      * @returns
      *      result
-     *  
+     *
      */
 SendData(
   string data[1:100],
@@ -867,11 +867,11 @@ version "1.2";
 prefix "VehicleInfo.";
  /*
      * @descr Request from ApplinkCore to HMI to get info about the vehicle.
-    */ 
+    */
 GetVehicleType(
     ->
     VehicleType vehicleType // manufacturer, model, year etc of the vehicle.
-  ); 
+  );
 
 
 /*
@@ -948,7 +948,7 @@ GetDTCs(
   bool * encrypted,
   int appId
   ->
-  DTC * dtcList[1:100] 
+  DTC * dtcList[1:100]
 );
 
 }

@@ -8,7 +8,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetDeviceList.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/GetDeviceListResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppDeactivated.h"
-#include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppDeactivatedResponse.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppRegistered.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnAppUnregistered.h"
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/AppLinkCore/OnDeviceListUpdated.h"
@@ -542,11 +541,6 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
       NsRPC2Communication::AppLinkCore::GetDeviceListResponse *rv=new NsRPC2Communication::AppLinkCore::GetDeviceListResponse;
       return NsRPC2Communication::AppLinkCore::GetDeviceListResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
     }
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPDEACTIVATEDRESPONSE:
-    {
-      NsRPC2Communication::AppLinkCore::OnAppDeactivatedResponse *rv=new NsRPC2Communication::AppLinkCore::OnAppDeactivatedResponse;
-      return NsRPC2Communication::AppLinkCore::OnAppDeactivatedResponseMarshaller::fromJSON(json,*rv) ? rv : 0;
-    }
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATARESPONSE:
     {
       NsRPC2Communication::AppLinkCore::SendDataResponse *rv=new NsRPC2Communication::AppLinkCore::SendDataResponse;
@@ -933,8 +927,6 @@ Json::Value Marshaller::Response2JSON(const NsRPC2Communication::RPC2Response* m
       return NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::GetAppListResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELISTRESPONSE:
       return NsRPC2Communication::AppLinkCore::GetDeviceListResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::GetDeviceListResponse*>(msg));
-    case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPDEACTIVATEDRESPONSE:
-      return NsRPC2Communication::AppLinkCore::OnAppDeactivatedResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::OnAppDeactivatedResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATARESPONSE:
       return NsRPC2Communication::AppLinkCore::SendDataResponseMarshaller::toJSON(*static_cast<const NsRPC2Communication::AppLinkCore::SendDataResponse*>(msg));
     case METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
@@ -1060,7 +1052,7 @@ const Marshaller::localHash Marshaller::mHashTable[110]=
   {"AppLinkCore.GetDeviceList",4,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceList},
   {"AppLinkCore.GetDeviceListResponse",5,&Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceListResponse},
   {"AppLinkCore.OnAppDeactivated",6,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppDeactivated},
-  {"AppLinkCore.OnAppDeactivatedResponse",7,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppDeactivatedResponse},
+  {"AppLinkCore.OnAppDeactivatedResponse",7,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppDeactivated},
   {"AppLinkCore.OnAppRegistered",8,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered},
   {"AppLinkCore.OnAppUnregistered",9,&Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered},
   {"AppLinkCore.OnDeviceListUpdated",10,&Marshaller::mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated},
@@ -1175,7 +1167,6 @@ NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller Marshaller::mNsRP
 NsRPC2Communication::AppLinkCore::GetDeviceListMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceList;
 NsRPC2Communication::AppLinkCore::GetDeviceListResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__GetDeviceListResponse;
 NsRPC2Communication::AppLinkCore::OnAppDeactivatedMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnAppDeactivated;
-NsRPC2Communication::AppLinkCore::OnAppDeactivatedResponseMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnAppDeactivatedResponse;
 NsRPC2Communication::AppLinkCore::OnAppRegisteredMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnAppRegistered;
 NsRPC2Communication::AppLinkCore::OnAppUnregisteredMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnAppUnregistered;
 NsRPC2Communication::AppLinkCore::OnDeviceListUpdatedMarshaller Marshaller::mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated;

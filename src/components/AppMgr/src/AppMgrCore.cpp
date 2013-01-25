@@ -566,11 +566,46 @@ namespace NsAppManager
                         << " connection/session key " << app->getAppID()
                         << " gets sent to a mobile side... ");
 
-                    response->set_buttonCapabilities(core->mButtonCapabilitiesV1.get());
+                    std::vector<NsAppLinkRPC::ButtonCapabilities> buttonCapsResult;
+                    std::vector<NsAppLinkRPCV2::ButtonCapabilities> buttonCapsOrig = core->mButtonCapabilitiesV2.get();
+                    for ( int i = 0; i < buttonCapsOrig.size(); ++i )
+                    {
+                        NsAppLinkRPC::ButtonCapabilities buttonCaps;
+                        buttonCaps.set_longPressAvailable(buttonCapsOrig[i].get_longPressAvailable());
+                        buttonCaps.set_name(
+                            static_cast<NsAppLinkRPC::ButtonName::ButtonNameInternal>(
+                                buttonCapsOrig[i].get_name().get()));
+                        buttonCaps.set_shortPressAvailable(buttonCapsOrig[i].get_shortPressAvailable());
+                        buttonCaps.set_upDownAvailable(buttonCapsOrig[i].get_upDownAvailable());
+                        buttonCapsResult.push_back(buttonCaps);
+                    }
+                    response->set_buttonCapabilities(buttonCapsResult);
+
+                    std::vector<NsAppLinkRPC::HmiZoneCapabilities> hmiCapsResult;
+                    convert<NsAppLinkRPC::HmiZoneCapabilities,
+                            NsAppLinkRPCV2::HmiZoneCapabilities,
+                            NsAppLinkRPC::HmiZoneCapabilities::HmiZoneCapabilitiesInternal>(
+                        core->mHmiZoneCapabilitiesV2.get(),
+                        hmiCapsResult);
+                    response->set_hmiZoneCapabilities(hmiCapsResult);
+
+                    std::vector<NsAppLinkRPC::SpeechCapabilities> speechCapsResult;
+                    convert<NsAppLinkRPC::SpeechCapabilities,
+                            NsAppLinkRPCV2::SpeechCapabilities,
+                            NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal>(
+                        core->mSpeechCapabilitiesV2.get(),
+                        speechCapsResult);
+                    response->set_speechCapabilities(speechCapsResult);
+
+                    std::vector<NsAppLinkRPC::VrCapabilities> vrCapsResult;
+                    convert<NsAppLinkRPC::VrCapabilities,
+                            NsAppLinkRPCV2::VrCapabilities,
+                            NsAppLinkRPC::VrCapabilities::VrCapabilitiesInternal>(
+                        core->mVrCapabilitiesV2.get(),
+                        vrCapsResult);
+                    response->set_vrCapabilities(vrCapsResult);
+
                     response->set_displayCapabilities(core->mDisplayCapabilitiesV1);
-                    response->set_hmiZoneCapabilities(core->mHmiZoneCapabilitiesV1.get());
-                    response->set_speechCapabilities(core->mSpeechCapabilitiesV1.get());
-                    response->set_vrCapabilities(core->mVrCapabilitiesV1.get());
                     response->set_language(core->mUiLanguageV1);
                     if (object->get_languageDesired().get() != core->mUiLanguageV1.get())
                     {
@@ -3744,13 +3779,6 @@ namespace NsAppManager
                 }
                 displayCaps.set_textFields(txtFields);
                 core->mDisplayCapabilitiesV1 = displayCaps;
-                std::vector<NsAppLinkRPC::HmiZoneCapabilities> hmiCaps;
-                convert<NsAppLinkRPC::HmiZoneCapabilities,
-                        NsAppLinkRPCV2::HmiZoneCapabilities,
-                        NsAppLinkRPC::HmiZoneCapabilities::HmiZoneCapabilitiesInternal>(
-                    uiCaps->get_hmiZoneCapabilities(),
-                    hmiCaps);
-                core->mHmiZoneCapabilitiesV1.set( hmiCaps );
                 core->mHmiZoneCapabilitiesV2.set( uiCaps->get_hmiZoneCapabilities() );
                 if(uiCaps->get_softButtonCapabilities())
                 {
@@ -4678,23 +4706,8 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetVRCapabilities response has been income");
                 NsRPC2Communication::VR::GetCapabilitiesResponse * vrCaps =
                     (NsRPC2Communication::VR::GetCapabilitiesResponse*)msg;
-                std::vector<NsAppLinkRPC::VrCapabilities> capsV1;
-                convert<NsAppLinkRPC::VrCapabilities
-                                                , NsAppLinkRPCV2::VrCapabilities
-                                                , NsAppLinkRPC::VrCapabilities::VrCapabilitiesInternal>(
-                        vrCaps->get_capabilities(), capsV1);
-                core->mVrCapabilitiesV1.set(capsV1);
                 core->mVrCapabilitiesV2.set(vrCaps->get_capabilities());
-                /*core->mVrCapabilitiesV1.set(vrCaps->get_capabilities());
-                std::vector< NsAppLinkRPCV2::VrCapabilities> vrCapsV2;
-                for(std::vector<NsAppLinkRPC::VrCapabilities>::const_iterator it = vrCaps->get_capabilities().begin(); it != vrCaps->get_capabilities().end(); it++)
-                {
-                    const NsAppLinkRPC::VrCapabilities& caps = *it;
-                    NsAppLinkRPCV2::VrCapabilities capsV2;
-                    capsV2.set((NsAppLinkRPCV2::VrCapabilities::VrCapabilitiesInternal)caps.get());
-                    vrCapsV2.push_back(capsV2);
-                }
-                */
+
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__GETLANGUAGERESPONSE:
@@ -4936,17 +4949,6 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetTTSCapabilities response has been income");
                 NsRPC2Communication::TTS::GetCapabilitiesResponse * ttsCaps = (NsRPC2Communication::TTS::GetCapabilitiesResponse*)msg;
                 core->mSpeechCapabilitiesV2.set(ttsCaps->get_capabilities());
-                std::vector< NsAppLinkRPC::SpeechCapabilities> speechCapsV1;
-                for(std::vector< NsAppLinkRPCV2::SpeechCapabilities>::const_iterator it = ttsCaps->get_capabilities().begin();
-                        it != ttsCaps->get_capabilities().end();
-                        it++)
-                {
-                    const NsAppLinkRPCV2::SpeechCapabilities& caps = *it;
-                    NsAppLinkRPC::SpeechCapabilities capsV1;
-                    capsV1.set((NsAppLinkRPC::SpeechCapabilities::SpeechCapabilitiesInternal)caps.get());
-                    speechCapsV1.push_back(capsV1);
-                }
-                core->mSpeechCapabilitiesV1.set(speechCapsV1);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__GETLANGUAGERESPONSE:
