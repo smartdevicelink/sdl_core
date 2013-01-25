@@ -129,7 +129,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 
 		if (notification.method == this.onAppRegisteredNotification)
 		{
-			MFT.ApplinkModel.onAppRegistered( notification.params );
+			MFT.ApplinkModel.onAppRegistered( notification.params.application );
 			this.getAppList();
 		}
 
