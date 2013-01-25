@@ -61,6 +61,7 @@
         android:visibility="visible" />
 
     <LinearLayout
+        android:id="@+id/setglobalproperties_vrHelpItemLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 

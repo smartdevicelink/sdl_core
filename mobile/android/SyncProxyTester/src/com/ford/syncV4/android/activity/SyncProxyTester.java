@@ -2529,6 +2529,17 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceTimeoutPrompt);
 						final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpTitle);
 						final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpItem);
+						
+						final boolean vrHelpEnabled = getCurrentProtocolVersion() >= 2;
+						if (!vrHelpEnabled) {
+							// disable VR help title and VR help item
+							int visibility = android.view.View.GONE;
+							choiceVRHelpTitle.setVisibility(visibility);
+							vrHelpTitle.setVisibility(visibility);
+							layout.findViewById(R.id.setglobalproperties_vrHelpItemLayout).setVisibility(visibility);
+							vrHelpItemText.setVisibility(visibility);
+							vrHelpItemImage.setVisibility(visibility);
+						}
 
 						builder = new AlertDialog.Builder(mContext);
 						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -2550,12 +2561,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									++numberOfChoices;
 								}
 
-								if (choiceVRHelpTitle.isChecked()) {
+								if (vrHelpEnabled && choiceVRHelpTitle.isChecked()) {
 									msg.setVrHelpTitle(vrHelpTitle.getText().toString());
 									++numberOfChoices;
 								}
 								
-								if (choiceVRHelpItem.isChecked()) {
+								if (vrHelpEnabled && choiceVRHelpItem.isChecked()) {
 									Vector<VrHelpItem> vrHelp = new Vector<VrHelpItem>();
 									
 									VrHelpItem helpItem = new VrHelpItem();
