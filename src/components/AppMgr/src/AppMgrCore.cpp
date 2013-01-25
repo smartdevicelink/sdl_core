@@ -626,7 +626,7 @@ namespace NsAppManager
                     hmiApp.set_appId(app->getAppID());
                     hmiApp.set_isMediaApplication(app->getIsMediaApplication());
                     hmiApp.set_deviceName(currentDeviceName);
-                    hmiApp.set_hmiDisplayLanguageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app->getHMIDisplayLanguageDesired().get()));
+                    hmiApp.set_hmiDisplayLanguageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app->getLanguageDesired().get()));
                     hmiApp.set_languageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app->getLanguageDesired().get()));
 
                     appRegistered->set_application(hmiApp);
