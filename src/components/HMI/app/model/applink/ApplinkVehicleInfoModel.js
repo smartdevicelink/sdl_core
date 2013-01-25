@@ -67,7 +67,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
      */
     vehicleData: {
         'VEHICLEDATA_SPEED':{
-            data:   80,
+            data:   80.0,
             type:   'speed'
         },
         'VEHICLEDATA_ENGINERPM':{
@@ -87,7 +87,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             type:   'batteryVoltage'
         },
         'VEHICLEDATA_EXTERNTEMP':{
-            data:   40,
+            data:   40.0,
             type:   'externalTemperature'
         },
         'VEHICLEDATA_VIN':{
@@ -98,21 +98,12 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             data:   'PARK',
             type:   'prndl'
         },
-        'VEHICLEDATA_TIREPRESSURE':{
-            data:   {
-                'leftFront': {
-                    'status':   'NORMAL',
-                    'pressure': 2
-                }
-            },
-            type:   'tirePressure'
-        },
         'VEHICLEDATA_BATTERYPACKVOLTAGE':{
             data:   12.5,
             type:   'batteryPackVoltage'
         },
         'VEHICLEDATA_BATTERYCURRENT':{
-            data:   7,
+            data:   7.0,
             type:   'batteryPackCurrent'
         },
         'VEHICLEDATA_BATTERYTEMPERATURE':{
@@ -132,22 +123,32 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             type:   'tripOdometer'
         },
         'VEHICLEDATA_GENERICBINARY':{
-            data:   165165650,
+            data:   '165165650',
             type:   'genericbinary'
         },
         'VEHICLEDATA_SATESN':{
             data:   165165650,
             type:   'satRadioESN'
         },
-        'VEHICLEDATA_GPS':{
-            data:   165165650,
-            type:   'gps'
-        },
         'VEHICLEDATA_RAINSENSOR':{
             data:   165165650,
             type:   'rainSensor'
         }
-
+/*,
+        'VEHICLEDATA_GPS':{
+            data:   165165650,
+            type:   'gps'
+        },
+        'VEHICLEDATA_TIREPRESSURE':{
+            data:   {
+                'leftFront': {
+                    'status':   'NORMAL',
+                    'pressure': 2
+                }
+            },
+            type:   'tirePressure'
+        }
+        */
     },
 
     /**
