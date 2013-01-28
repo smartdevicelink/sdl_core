@@ -119,7 +119,9 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param applicationId: Number
 	 */
 	unRegisterApplication: function( applicationId ) {
+        MFT.States.goToState('info.apps');
 		delete MFT.ApplinkModel.registeredApps[ applicationId ];
+        this.findNewApps();
 	},
 
     /**
