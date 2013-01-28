@@ -37,6 +37,13 @@ MFT.ApplinkController = Em.Object.create({
 	},
 
     /**
+     * Method to close AlertMeneuverPopUp view
+     */
+    closeAlertMeneuverPopUp: function(){
+        MFT.AlertManeuverPopUp.set('activate', false);
+    },
+
+    /**
      * Method to open Turn List view from TBT
      * @param {Number} appId AppId of activated applink application
      */

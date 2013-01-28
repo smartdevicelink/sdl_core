@@ -551,7 +551,11 @@
 	margin: 10px;
 	position: relative;
 }
-
+#AlertManeuverPopUp .closeButton{
+	width: 170px;
+	top: 180px;
+	left: 110px;
+}
 #AlertPopUp .alertSoftButtons{
 	margin-left: 8px;
 	top: 120px;

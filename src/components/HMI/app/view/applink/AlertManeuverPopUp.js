@@ -24,7 +24,8 @@ MFT.AlertManeuverPopUp = Em.ContainerView.create({
         //'message1',
         //'message2',
         //'message3',
-        'softbuttons'
+        'softbuttons',
+        'closeButton'
     ],
 
     content1:           'Title',
@@ -87,6 +88,17 @@ MFT.AlertManeuverPopUp = Em.ContainerView.create({
         elementId:      'alertManeuverSoftButtons',
 
         classNames:     'alertManeuverSoftButtons'
+    }),
+
+    /**
+     * Close button
+     */
+    closeButton: MFT.Button.create({
+        text:                   'Close',
+        classNames:             'closeButton softButton',
+        action:                 'closeAlertMeneuverPopUp',
+        target:                 'MFT.ApplinkController',
+        templateName:           'text'
     }),
 
     /**
