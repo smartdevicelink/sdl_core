@@ -2819,6 +2819,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			if (audioPassThruMediaPlayer != null) {
 				audioPosition = audioPassThruMediaPlayer.getCurrentPosition();
 				audioPassThruMediaPlayer.stop();
+				audioPassThruMediaPlayer.reset();
 				audioPassThruMediaPlayer.release();
 				audioPassThruMediaPlayer = null;
 			}
@@ -2900,12 +2901,15 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			audioPassThruMediaPlayer.setOnCompletionListener(new OnCompletionListener() {
 				@Override
 				public void onCompletion(MediaPlayer mp) {
+					Log.d(logTag, "mediaPlayer completed");
+					audioPassThruMediaPlayer.reset();
 					audioPassThruMediaPlayer.release();
 					audioPassThruMediaPlayer = null;
 				}
 			});
 		} else {
 			// the player has stopped
+			Log.d(logTag, "mediaPlayer is stopped");
 			audioPassThruMediaPlayer.release();
 			audioPassThruMediaPlayer = null;
 		}
