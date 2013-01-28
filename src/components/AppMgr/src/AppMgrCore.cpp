@@ -5698,24 +5698,31 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnVehicleData notification has been income");
                 NsRPC2Communication::VehicleInfo::OnVehicleData* object = static_cast<NsRPC2Communication::VehicleInfo::OnVehicleData*>(msg);
-
                 if (object->get_gps())
                 {
-                } else if (object->get_speed())
+                }
+                if (object->get_speed())
                 {
-                } else if (object->get_rpm())
+                }
+                if (object->get_rpm())
                 {
-                } else if (object->get_fuelLevel())
+                }
+                if (object->get_fuelLevel())
                 {
-                } else if (object->get_avgFuelEconomy())
+                }
+                if (object->get_avgFuelEconomy())
                 {
-                } else if (object->get_batteryVoltage())
+                }
+                if (object->get_batteryVoltage())
                 {
-                } else if (object->get_externalTemperature())
+                }
+                if (object->get_externalTemperature())
                 {
-                } else if (object->get_vin())
+                }
+                if (object->get_vin())
                 {
-                } else if (object->get_prndl())
+                }
+                if (object->get_prndl())
                 {
                     NsAppLinkRPCV2::VehicleDataType vehicleDataName = NsAppLinkRPCV2::VehicleDataType(NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal::VEHICLEDATA_PRNDLSTATUS);
                     std::vector<RegistryItem*> result;
@@ -5742,20 +5749,30 @@ namespace NsAppManager
                                                         << " application id " << appId);
                             MobileHandler::getInstance().sendRPCMessage(notification, appId);
                         }
+                    } else
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, " No subscribers found!");
                     }
-                } else if (object->get_tirePressure())
+                }
+                if (object->get_tirePressure())
                 {
-                } else if (object->get_batteryPackVoltage())
+                }
+                if (object->get_batteryPackVoltage())
                 {
-                } else if (object->get_batteryPackCurrent())
+                }
+                if (object->get_batteryPackCurrent())
                 {
-                } else if (object->get_batteryPackTemperature())
+                }
+                if (object->get_batteryPackTemperature())
                 {
-                } else if (object->get_engineTorque())
+                }
+                if (object->get_engineTorque())
                 {
-                } else if (object->get_odometer())
+                }
+                if (object->get_odometer())
                 {
-                } else if (object->get_tripOdometer())
+                }
+                if (object->get_tripOdometer())
                 {
                 }
                 return;
