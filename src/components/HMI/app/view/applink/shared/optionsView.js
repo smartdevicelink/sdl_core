@@ -31,6 +31,7 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
 		
 		items: [],
 		
+		/*
 		itemsDefault: [
 			{
 				type:	MFT.Button,
@@ -52,13 +53,14 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
 				}
 			}
 		],
+		*/
 		
 		refreshItems: function() {
             var commands = MFT.ApplinkAppController.model.get('currentCommandsList'),
                 i, len;
             
             
-            this.items = [];//this.itemsDefault;
+            this.items = [];
             
             len = commands.length;
             

@@ -48,18 +48,6 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         this.appInfo.set('field4',        params.mainField4);
         //this.appInfo.set('image',         params.graphic);
     },
-	
-	/** 
-	 * Add command to Options list
-	 *
-     * @param {Number} commandId
-     * @param {Object} params
-	 */
-    onApplinkOptionsAddCommand: function( commandId, params ){
-        //this.get('commandsList').pushObject({id:commandId, params:params});
-        //MFT.InfoNonMediaOptions.commands.AddCommand( commandId, params );
-
-    },
     
     /**
      * Add command to list
@@ -74,19 +62,6 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
             parent:     params.menuParams.parentID,
             position:   params.menuParams.position
         });
-        
-        /*
-        if( params.menuParams.parentID ) {
-        	this.subMenuCommands.push( params );
-            
-            if( MFT.States.info.nonMedia.options.subMenu.active ) {
-                MFT.InfoNonMediaOptionsSubMenu.SubMenuActivate( this.currentSubMenuId );
-            }
-        
-        } else {
-        	this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams);
-        }
-        */
     },
     
     /**
@@ -97,19 +72,8 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
     onApplinkOptionsDeleteCommand: function(commandId){
                 
         this.get('commandsList').removeObjects(
-            this.get('commandsList').filterProperty('id',commandId)
+            this.get('commandsList').filterProperty('commandId',commandId)
         );
-        
-        /*
-        MFT.InfoNonMediaOptions.commands.DeleteCommand( commandId );
-
-        var  count = this.subMenuCommands.length;
-        for(var i = count-1; i >= 0; i--){
-            if(this.subMenuCommands[i].cmdId == commandId){
-               this.subMenuCommands.splice(i, 1);
-            }
-        }
-        */
     },
     
     /**
@@ -127,16 +91,27 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         });
     },
     
-    /** Delete subMenu button from Options list */
+    /**
+     * Delete submenu and related commands from list
+     *
+     * @param {Number}
+     */
     onApplinkDeleteSubMenu: function( menuId ){
         
-        return;
+        // remove submenu
+        this.get('commandsList').removeObjects(
+            this.get('commandsList').filterProperty('menuId',menuId)
+        );
         
-        if( MFT.NonMediaController.currentApplinkSubMenuid == menuId ){
-            MFT.States.back();
+        // remove commands from deleted submenu
+        this.get('commandsList').removeObjects(
+            this.get('commandsList').filterProperty('parent',menuId)
+        );
+        
+        // return to root commands list if necessary
+        if( this.get('currentSubMenuId') == menuId ){
+            MFT.ApplinkAppController.onSubMenu(0);
         }
-
-        MFT.InfoNonMediaOptions.commands.DeleteSubMenu( menuId );
 
         return "SUCCESS";
     }
