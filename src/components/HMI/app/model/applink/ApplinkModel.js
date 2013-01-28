@@ -144,7 +144,6 @@ MFT.ApplinkModel = Em.Object.create({
      * @param {Object} params
      */
     tbtTurnListUpdate: function( params ){
-        MFT.ApplinkController.getApplicationModel( params.appId ).turnList = [];
         MFT.ApplinkController.getApplicationModel( params.appId ).turnList = params.turnList;
         MFT.TBTTurnList.updateList( params.appId );
     },
