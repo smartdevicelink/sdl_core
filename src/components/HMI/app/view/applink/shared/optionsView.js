@@ -20,6 +20,9 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
 		'commands'
 	],
 	
+	// Menu caption text
+    captionBinding: 'MFT.ApplinkAppController.model.currentSubMenuLabel',
+	
 	commands: MFT.ApplinkCommandsList.extend({
 		
 		elementId:		'info_nonMedia_options_list',
@@ -51,7 +54,7 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
 		],
 		
 		refreshItems: function() {
-            var commands = MFT.NonMediaController.model.get('commandsList'),
+            var commands = MFT.ApplinkAppController.model.get('currentCommandsList'),
                 i, len;
             
             
@@ -64,11 +67,13 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
                 this.items.push({
                     type: MFT.Button,
                     params: {
-    					//templateName:	'text',
-    					text:			commands[i].name,
-    					//target:		'this.parentView.parentView.parentView',
-    		            //action:		'deactivate',
-    		            onDown:     false
+    					templateName:  commands[i].menuId ? 'arrow' : '',
+    					text:          commands[i].name,
+    					commandId:     commands[i].commandId,
+    					menuId:        commands[i].menuId,
+    					target:		   'MFT.ApplinkAppController',
+    		            action:        'onCommand',
+    		            onDown:        false
 				    }
                 })
             }
@@ -76,12 +81,15 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
             this.list.refresh();
             
                 
-		}.observes('MFT.NonMediaController.model.commandsList.@each')
+		}.observes('MFT.ApplinkAppController.model.currentCommandsList')
 	}),
 	
-	init: function() {
-	   this._super();
-	   
-	   this.set('captionText.content','Options');
-	}
+    // Extend deactivate window
+    deactivate: function() {
+        if ( MFT.ApplinkAppController.model.get('currentSubMenuId') ) {
+            MFT.ApplinkAppController.onSubMenu(0);
+        } else {
+            this._super();
+        }
+    }
 });

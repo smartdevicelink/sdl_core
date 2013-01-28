@@ -22,6 +22,8 @@ MFT.ApplinkAbstractView = Em.ContainerView.extend({
 	],
 	
 	active: false,
+	
+	caption: 'Caption Text',
     
     /**
      * Activate window
@@ -31,7 +33,7 @@ MFT.ApplinkAbstractView = Em.ContainerView.extend({
      */
     activate: function( text ) {
     	if (text) {
-    		this.set('captionText.content',text);
+    		this.set('caption',text);
     	}
     	this.set('active',true);
     },
@@ -58,6 +60,6 @@ MFT.ApplinkAbstractView = Em.ContainerView.extend({
         	'caption-text'
         ],
         
-        content:	'Caption Text'
+        contentBinding:	'this.parentView.caption'
     })
 });

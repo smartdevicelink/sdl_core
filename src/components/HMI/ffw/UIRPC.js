@@ -175,7 +175,7 @@ FFW.UI = FFW.RPCObserver.create({
 			}
 		    case "UI.AddSubMenu":{
 
-				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkAddSubMenu(request.params.menuId, request.params);
+				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkAddSubMenu(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 

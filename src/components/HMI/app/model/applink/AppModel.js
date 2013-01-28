@@ -59,29 +59,38 @@ MFT.ApplinkAppModel = Em.Object.extend({
      */
     appIcon: 'images/info/info_leftMenu_apps_ico.png',
     
-    
-    commandsList: [],
-	
-	/**
-     * Submenu commands list
+    /**
+     * Application commands list
      *
      * @type {Array}
      */
-    subMenuCommands: [],
+    commandsList: [],
+    
+    /**
+     * Return current menu commands
+     *
+     * @return {Array}
+     */
+    currentCommandsList: function() {
+        return this.get('commandsList').filterProperty( 'parent', this.get('currentSubMenuId') );
+    }.property('this.commandsList.@each','this.currentSubMenuId'),
     
 	/**
 	 * Current command submenu identificator
 	 *
 	 * @type {Number}
 	 */
-	currentSubMenuId:		0,
+	currentSubMenuId: 0,
 	
 	/**
-	 * Current command submenu text label
+	 * Return current submenu name
 	 *
-	 * @type {String}
+	 * @return {String}
 	 */	
-	currentSubMenuLabel:	'',
+	currentSubMenuLabel: function() {
+	   var submenu = this.get('commandsList').filterProperty( 'menuId', this.get('currentSubMenuId') );
+	   return submenu.length ? submenu[0].name : 'Options';
+	}.property('this.currentSubMenuId'),
 	
 	/**
 	 * Interaction chooses data

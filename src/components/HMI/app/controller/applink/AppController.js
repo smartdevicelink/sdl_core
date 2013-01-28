@@ -13,12 +13,34 @@
 MFT.ApplinkAppController = Em.Object.create({
 	
 	/**
+	 * Active application model binding
+	 *
+	 * type {ApplinkAppModel}
+	 */
+	model: null,
+	
+	/**
 	 * Handeler for command button press
 	 * 
 	 * @param element:	MFT.Button
 	 */
 	onCommand: function( element ) {
+        if ( element.menuId ) {
+            this.onSubMenu( element.menuId );
+            //MFT.ApplinkController.getApplicationModel( element.appId ).set('currentSubMenuId',		element.menuId );
+            return;
+        }
+        
 		FFW.UI.onCommand( element.commandId, element.appId );
+	},
+	
+	/**
+	 * Open commands submenu
+	 *
+	 * @param {Number}
+	 */
+	onSubMenu: function( id ) {
+	   this.model.set('currentSubMenuId', id );
 	},
 
 	/**

@@ -69,7 +69,7 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
     onApplinkAddCommand: function( params ) {
         
         this.get('commandsList').pushObject({
-            id:         params.cmdId,
+            commandId:  params.cmdId,
             name:       params.menuParams.menuName,
             parent:     params.menuParams.parentID,
             position:   params.menuParams.position
@@ -112,13 +112,19 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         */
     },
     
-    /** Add subMenu button to Options list */
-    onApplinkAddSubMenu: function( menuId, params ){
+    /**
+     * Add submenu to commands list
+     *
+     * @param {Object}
+     */
+    onApplinkAddSubMenu: function( params ){        
         
-        return;
-        
-        MFT.InfoNonMediaOptions.commands.AddSubMenu( menuId, params );
-
+        this.get('commandsList').pushObject({
+            menuId:     params.menuId,
+            name:       params.menuName,
+            parent:     0,
+            position:   params.position
+        });
     },
     
     /** Delete subMenu button from Options list */
