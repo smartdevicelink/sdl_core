@@ -34,6 +34,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -207,6 +209,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 	/** The output stream to write audioPassThru data. */
 	private OutputStream audioPassThruOutStream = null;
+	/** Media player for the stream of audio pass thru. */
+	private MediaPlayer audioPassThruMediaPlayer = null;
 	/**
 	 * The most recent sent PerformAudioPassThru message, saved in case we need
 	 * to retry the request.
@@ -586,6 +590,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			service.setCurrentActivity(null);
 		}
 		closeAudioPassThruStream();
+		closeAudioPassThruMediaPlayer();
 	}
 	
 	public Dialog onCreateDialog(int id) {
@@ -2785,16 +2790,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * audio data sent in it.
 	 */
 	public void onAudioPassThru(byte[] aptData) {
+		if (aptData == null) {
+			Log.w(logTag, "onAudioPassThru aptData is null");
+			return;
+		}
+		
 		Log.i(logTag, "data len " + aptData.length);
 		if (isExtStorageWritable()) {
-			File outFile = null;
+			File outFile = audioPassThruOutputFile();
 			try {
 				if (audioPassThruOutStream == null) {
-					outFile = audioPassThruOutputFile();
 					audioPassThruOutStream = new BufferedOutputStream(
 							new FileOutputStream(outFile, false));
 				}
 				audioPassThruOutStream.write(aptData);
+				audioPassThruOutStream.flush();
 			} catch (FileNotFoundException e) {
 				logToConsoleAndUI(
 						"Output file "
@@ -2803,6 +2813,32 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								+ " can't be opened for writing", e);
 			} catch (IOException e) {
 				logToConsoleAndUI("Can't write to output file", e);
+			}
+			
+			/*
+			 * if there is current player, save the current position, stop and
+			 * release it, so that we recreate it with the appended file and
+			 * jump to that position, emulating seamless stream playing
+			 */
+			int audioPosition = -1;
+			if (audioPassThruMediaPlayer != null) {
+				audioPosition = audioPassThruMediaPlayer.getCurrentPosition();
+				audioPassThruMediaPlayer.stop();
+				audioPassThruMediaPlayer.reset();
+				audioPassThruMediaPlayer.release();
+				audioPassThruMediaPlayer = null;
+			}
+			
+			audioPassThruMediaPlayer = new MediaPlayer();
+			try {
+				audioPassThruMediaPlayer.setDataSource(outFile.toString());
+				audioPassThruMediaPlayer.prepare();
+				if (audioPosition != -1) {
+					audioPassThruMediaPlayer.seekTo(audioPosition);
+				}
+				audioPassThruMediaPlayer.start();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		} else {
 			logToConsoleAndUI("External storage is not available", null);
@@ -2816,6 +2852,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 */
 	public void onPerformAudioPassThruResponse(Result result) {
 		closeAudioPassThruStream();
+		closeAudioPassThruMediaPlayer();
 		if (Result.SUCCESS != result) {
 			File outFile = audioPassThruOutputFile();
 			if ((outFile != null) && outFile.exists()) {
@@ -2857,6 +2894,29 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				Log.w(logTag, "Can't close output file", e);
 			}
 			audioPassThruOutStream = null;
+		}
+	}
+	
+	private void closeAudioPassThruMediaPlayer() {
+		if (audioPassThruMediaPlayer == null) {
+			return;
+		}
+		
+		if (audioPassThruMediaPlayer.isPlaying()) {
+			audioPassThruMediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+				@Override
+				public void onCompletion(MediaPlayer mp) {
+					Log.d(logTag, "mediaPlayer completed");
+					audioPassThruMediaPlayer.reset();
+					audioPassThruMediaPlayer.release();
+					audioPassThruMediaPlayer = null;
+				}
+			});
+		} else {
+			// the player has stopped
+			Log.d(logTag, "mediaPlayer is stopped");
+			audioPassThruMediaPlayer.release();
+			audioPassThruMediaPlayer = null;
 		}
 	}
 
