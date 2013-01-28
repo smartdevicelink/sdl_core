@@ -120,10 +120,10 @@ MFT.InfoView = Em.ContainerView.create( MFT.LoadableView, {
 				    'MFT.States.info.nonMedia.active:info_active'
 				],
 				hidden: function() {
-				    return MFT.NonMediaController.model ? false : true;
-				}.property('MFT.NonMediaController.model'),
-				textBinding:		'MFT.NonMediaController.model.appName',
-				iconBinding:		'MFT.NonMediaController.model.appIcon',
+				    return !MFT.NonMediaController.currentAppId;
+				}.property('MFT.NonMediaController.currentAppId'),
+				textBinding:		'MFT.NonMediaController.currentAppName',
+				iconBinding:		'MFT.NonMediaController.currentAppIcon',
 				action:				'onState',
 				target:				'MFT.InfoController',
 			})

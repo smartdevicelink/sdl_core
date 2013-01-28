@@ -34,7 +34,7 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
 	 * Activate current application model
 	 */
     turnOnApplink: function(){
-        MFT.NonMediaController.turnOnApplink( this );
+        MFT.NonMediaController.activateApp( this );
     },
     
     /** 
@@ -47,72 +47,5 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         this.appInfo.set('field3',        params.mainField3);
         this.appInfo.set('field4',        params.mainField4);
         //this.appInfo.set('image',         params.graphic);
-    },
-    
-    /**
-     * Add command to list
-     *
-     * @param {Object}
-     */
-    onApplinkAddCommand: function( params ) {
-        
-        this.get('commandsList').pushObject({
-            commandId:  params.cmdId,
-            name:       params.menuParams.menuName,
-            parent:     params.menuParams.parentID,
-            position:   params.menuParams.position
-        });
-    },
-    
-    /**
-     * Delete command from list
-     *
-     * @param {Number}
-     */
-    onApplinkOptionsDeleteCommand: function(commandId){
-                
-        this.get('commandsList').removeObjects(
-            this.get('commandsList').filterProperty('commandId',commandId)
-        );
-    },
-    
-    /**
-     * Add submenu to commands list
-     *
-     * @param {Object}
-     */
-    onApplinkAddSubMenu: function( params ){        
-        
-        this.get('commandsList').pushObject({
-            menuId:     params.menuId,
-            name:       params.menuName,
-            parent:     0,
-            position:   params.position
-        });
-    },
-    
-    /**
-     * Delete submenu and related commands from list
-     *
-     * @param {Number}
-     */
-    onApplinkDeleteSubMenu: function( menuId ){
-        
-        // remove submenu
-        this.get('commandsList').removeObjects(
-            this.get('commandsList').filterProperty('menuId',menuId)
-        );
-        
-        // remove commands from deleted submenu
-        this.get('commandsList').removeObjects(
-            this.get('commandsList').filterProperty('parent',menuId)
-        );
-        
-        // return to root commands list if necessary
-        if( this.get('currentSubMenuId') == menuId ){
-            MFT.ApplinkAppController.onSubMenu(0);
-        }
-
-        return "SUCCESS";
     }
 });

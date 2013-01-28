@@ -14,7 +14,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 	
 	elementId: 'info_nonMedia',
 	
-	controller: MFT.NonMediaController,
+	controller: MFT.ApplinkAppController,
 	
 	childViews: [
 		'content'

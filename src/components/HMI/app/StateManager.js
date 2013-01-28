@@ -128,7 +128,11 @@ var StateManager = Em.StateManager.extend({
 		}),
 		
 		nonMedia: Em.State.create({
-
+            enter: function() {
+                this._super();
+                
+                MFT.NonMediaController.restoreCurrentApp();
+            }
 		})
 	}),
 	

@@ -159,7 +159,7 @@ FFW.UI = FFW.RPCObserver.create({
 			}
 		    case "UI.AddCommand":{
 
-			    MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkAddCommand(request.params);
+			    MFT.ApplinkController.getApplicationModel(request.params.appId).addCommand(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 
@@ -167,7 +167,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.DeleteCommand":{
 
-				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkOptionsDeleteCommand(request.params.cmdId);
+				MFT.ApplinkController.getApplicationModel(request.params.appId).deleteCommand(request.params.cmdId);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 
@@ -175,7 +175,7 @@ FFW.UI = FFW.RPCObserver.create({
 			}
 		    case "UI.AddSubMenu":{
 
-				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkAddSubMenu(request.params);
+				MFT.ApplinkController.getApplicationModel(request.params.appId).addSubMenu(request.params);
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 
@@ -183,7 +183,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.DeleteSubMenu":{
 
-				var resultCode =  MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkDeleteSubMenu(request.params.menuId);
+				var resultCode =  MFT.ApplinkController.getApplicationModel(request.params.appId).deleteSubMenu(request.params.menuId);
 
 				this.sendUIResult(resultCode, request.id, request.method);
 

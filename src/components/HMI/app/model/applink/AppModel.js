@@ -11,11 +11,6 @@
  */
  
 MFT.ApplinkAppModel = Em.Object.extend({
-    
-    /**
-     * Indicates Applink media application button
-     */
-    hideApplinkButton: true,
 
 	/**
      * Application Id
@@ -98,6 +93,73 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 * @type {Object}
 	 */	
 	interactionChoices: {},
+    
+    /**
+     * Add command to list
+     *
+     * @param {Object}
+     */
+    addCommand: function( params ) {
+        
+        this.get('commandsList').pushObject({
+            commandId:  params.cmdId,
+            name:       params.menuParams.menuName,
+            parent:     params.menuParams.parentID,
+            position:   params.menuParams.position
+        });
+    },
+    
+    /**
+     * Delete command from list
+     *
+     * @param {Number}
+     */
+    deleteCommand: function(commandId){
+                
+        this.get('commandsList').removeObjects(
+            this.get('commandsList').filterProperty('commandId',commandId)
+        );
+    },
+    
+    /**
+     * Add submenu to commands list
+     *
+     * @param {Object}
+     */
+    addSubMenu: function( params ){        
+        
+        this.get('commandsList').pushObject({
+            menuId:     params.menuId,
+            name:       params.menuName,
+            parent:     0,
+            position:   params.position
+        });
+    },
+    
+    /**
+     * Delete submenu and related commands from list
+     *
+     * @param {Number}
+     */
+    deleteSubMenu: function( menuId ){
+        
+        // remove submenu
+        this.get('commandsList').removeObjects(
+            this.get('commandsList').filterProperty('menuId',menuId)
+        );
+        
+        // remove commands from deleted submenu
+        this.get('commandsList').removeObjects(
+            this.get('commandsList').filterProperty('parent',menuId)
+        );
+        
+        // return to root commands list if necessary
+        if( this.get('currentSubMenuId') == menuId ){
+            MFT.ApplinkAppController.onSubMenu(0);
+        }
+
+        return "SUCCESS";
+    },
 
 	/**
 	 * Applink UI PreformInteraction response handeler

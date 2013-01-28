@@ -25,9 +25,11 @@ MFT.ApplinkAppController = Em.Object.create({
 	 * @param element:	MFT.Button
 	 */
 	onCommand: function( element ) {
+        
+        // if submenu
         if ( element.menuId ) {
             this.onSubMenu( element.menuId );
-            //MFT.ApplinkController.getApplicationModel( element.appId ).set('currentSubMenuId',		element.menuId );
+            
             return;
         }
         
