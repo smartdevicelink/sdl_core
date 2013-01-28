@@ -103,36 +103,21 @@
 	margin-bottom: 5px;
 }
 
-#info_nonMedia_options {
-	z-index: 10001;
-	width: 800px;
-	height: 480px;
-	background-color: #000;
-}
-
-#info_nonMedia_options .options_title {
-	top: 80px;
-	left: 100px;
-	width: 640px;
-	padding: 15px;
-	background-color: #393939;
-}
-
-#info_nonMedia_options .list{
-	width: 669px;
+#applink_options .list{
+	width: 650px;
 	height: 251px;
 	border-radius: 2px;
-	left: 100px;
+	left: 75px;
 	top: 150px;
 }
 
 /*#applink_view_container .list-content,*/
-#info_nonMedia_options .list-content{
-	width: 610px;
+#applink_options .list-content{
+	width: 590px;
 }
 #info_apps_deviceList_list .list-content span,
 #applink_view_container .list-content span,
-#info_nonMedia_options .list-content span{
+#applink_options .list-content span{
 	margin-left: 15px;
 }
 

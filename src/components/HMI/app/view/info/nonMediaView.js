@@ -93,9 +93,8 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 					
 					templateName: 'arrow',
 					
-					goToState:	'options',
-					action:		'onChildState',
-					target:		'MFT.InfoController'
+					action:		'openCommandsList',
+					target:		'MFT.ApplinkAppController'
 				}),
 				
 				routeInfoButton: MFT.Button.extend({

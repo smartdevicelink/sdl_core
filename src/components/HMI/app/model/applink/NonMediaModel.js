@@ -15,7 +15,7 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
     init: function() {
 	   
 	   this._super();
-	   
+        	   
 	   // init properties here
 	   this.set('appInfo', Em.Object.create({
                 field1:         '<field1>',
@@ -25,7 +25,10 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
                 image:			''
             })
         );
+        
+        this.set('commandsList',[]);
 	},
+	
 	
 	/**
 	 * Activate current application model
@@ -34,7 +37,10 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         MFT.NonMediaController.turnOnApplink( this );
     },
     
-    /** Applin UI Show handler */
+    /** 
+     * Applin UI Show handler
+     * @param {Object}
+     */
     onApplinkUIShow: function(params){
         this.appInfo.set('field1',        params.mainField1);
         this.appInfo.set('field2',        params.mainField2);
@@ -43,15 +49,33 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         //this.appInfo.set('image',         params.graphic);
     },
 	
-	/** Add command to Options list */
+	/** 
+	 * Add command to Options list
+	 *
+     * @param {Number} commandId
+     * @param {Object} params
+	 */
     onApplinkOptionsAddCommand: function( commandId, params ){
-
-       MFT.InfoNonMediaOptions.commands.AddCommand( commandId, params );
+        //this.get('commandsList').pushObject({id:commandId, params:params});
+        //MFT.InfoNonMediaOptions.commands.AddCommand( commandId, params );
 
     },
     
-    /** Applink AddCommand handler */
+    /**
+     * Add command to list
+     *
+     * @param {Object}
+     */
     onApplinkAddCommand: function( params ) {
+        
+        this.get('commandsList').pushObject({
+            id:         params.cmdId,
+            name:       params.menuParams.menuName,
+            parent:     params.menuParams.parentID,
+            position:   params.menuParams.position
+        });
+        
+        /*
         if( params.menuParams.parentID ) {
         	this.subMenuCommands.push( params );
             
@@ -62,11 +86,21 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         } else {
         	this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams);
         }
+        */
     },
     
-    /** Delete command to Options list */
+    /**
+     * Delete command from list
+     *
+     * @param {Number}
+     */
     onApplinkOptionsDeleteCommand: function(commandId){
-
+                
+        this.get('commandsList').removeObjects(
+            this.get('commandsList').filterProperty('id',commandId)
+        );
+        
+        /*
         MFT.InfoNonMediaOptions.commands.DeleteCommand( commandId );
 
         var  count = this.subMenuCommands.length;
@@ -75,18 +109,23 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
                this.subMenuCommands.splice(i, 1);
             }
         }
+        */
     },
     
     /** Add subMenu button to Options list */
     onApplinkAddSubMenu: function( menuId, params ){
-
+        
+        return;
+        
         MFT.InfoNonMediaOptions.commands.AddSubMenu( menuId, params );
 
     },
     
     /** Delete subMenu button from Options list */
     onApplinkDeleteSubMenu: function( menuId ){
-
+        
+        return;
+        
         if( MFT.NonMediaController.currentApplinkSubMenuid == menuId ){
             MFT.States.back();
         }

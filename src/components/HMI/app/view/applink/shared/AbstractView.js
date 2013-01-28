@@ -50,6 +50,7 @@ MFT.ApplinkAbstractView = Em.ContainerView.extend({
 		target:		'this.parentView',
 		action:		'deactivate',
 		icon:		'images/media/ico_back.png',
+		onDown:     false
 	}),
 	
 	captionText: MFT.Label.extend({

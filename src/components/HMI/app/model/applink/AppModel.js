@@ -58,6 +58,9 @@ MFT.ApplinkAppModel = Em.Object.extend({
      * @type {String}
      */
     appIcon: 'images/info/info_leftMenu_apps_ico.png',
+    
+    
+    commandsList: [],
 	
 	/**
      * Submenu commands list

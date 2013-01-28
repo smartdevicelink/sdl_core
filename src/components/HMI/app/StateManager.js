@@ -128,13 +128,7 @@ var StateManager = Em.StateManager.extend({
 		}),
 		
 		nonMedia: Em.State.create({
-			
-			options: Em.State.create({
-				
-				subMenu: Em.State.create({
-				
-				})
-			})
+
 		})
 	}),
 	

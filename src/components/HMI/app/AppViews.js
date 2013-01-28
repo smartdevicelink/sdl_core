@@ -22,6 +22,7 @@ MFT.AppViews = Em.ContainerView.extend({
 	
 	childViews: [
 		//MFT.WelcomeOrientationView,
+		MFT.OptionsView,
 		MFT.InteractionChoicesView,
 		MFT.ScrollableMessage,
 		MFT.SliderView,
@@ -79,8 +80,6 @@ MFT.AppViews = Em.ContainerView.extend({
 		FFW.AppendScript.pushScript('media.applink.applinkslider');
 		
 		FFW.AppendScript.pushScript('info');
-		FFW.AppendScript.pushScript('info.nonMedia');
-		FFW.AppendScript.pushScript('info.nonMedia.options');
 
 		// preload big images
 		// to resolve blinking issue

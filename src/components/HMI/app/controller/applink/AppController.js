@@ -53,5 +53,12 @@ MFT.ApplinkAppController = Em.Object.create({
 		FFW.UI.onChoosed( element.choiceId );
 		
 		MFT.InteractionChoicesView.deactivate();
+	},
+	
+	/**
+	 * Open commands list
+	 */
+	openCommandsList: function() {
+	   MFT.OptionsView.activate();
 	}
 });
