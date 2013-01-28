@@ -45,6 +45,12 @@ MFT.ApplinkAbstractView = Em.ContainerView.extend({
     	this.set('active',false);
     },
     
+    onStateChange: function() {
+        if ( this.active ) {
+            this.deactivate();
+        }
+    }.observes('MFT.TransitionIterator.ready'),
+    
 	backButton: MFT.Button.extend({
 		classNames:	[
 			'back-button'

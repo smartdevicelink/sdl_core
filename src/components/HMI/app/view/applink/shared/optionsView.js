@@ -86,10 +86,14 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
 	
     // Extend deactivate window
     deactivate: function() {
-        if ( MFT.ApplinkAppController.model.get('currentSubMenuId') ) {
-            MFT.ApplinkAppController.onSubMenu(0);
-        } else {
-            this._super();
+        
+        if ( MFT.ApplinkAppController.model ) {
+                    
+            if ( MFT.ApplinkAppController.model.get('currentSubMenuId') ) {
+                MFT.ApplinkAppController.onSubMenu(0);
+            } else {
+                this._super();
+            }
         }
     }
 });
