@@ -457,6 +457,7 @@
 }
 
 /* Alert, AudioPassThruPopUp popup*/
+#AlertManeuverPopUp.AlertManeuverPopUp,
 #AudioPassThruPopUp.AudioPassThruPopUp,
 #AlertPopUp.AlertPopUp{
 	opacity: 0;
@@ -471,6 +472,7 @@
 	border-radius: 6px;
 	display: none;
 }
+#AlertManeuverPopUp .applicationName,
 #AudioPassThruPopUp .applicationName,
 #AlertPopUp .applicationName{
 	width: 380px;
@@ -531,11 +533,13 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+#AlertManeuverPopUp.AlertManeuverActive,
 #AudioPassThruPopUp.AudioPassThruActive,
 #AlertPopUp.AlertActive{
 	opacity: 1;
 	display: block;
 }
+#AlertManeuverPopUp .softButton,
 #AudioPassThruPopUp .softButton,
 #AlertPopUp .softButton{
 	border: 1px solid #393939;
@@ -552,6 +556,7 @@
 	margin-left: 8px;
 	top: 120px;
 }
+#AlertManeuverPopUp .one,
 #softButton0.one{
 	margin-top: 42px;
 	width: 362px;

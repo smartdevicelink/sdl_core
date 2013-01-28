@@ -319,6 +319,14 @@ FFW.UI = FFW.RPCObserver.create({
 
 		    	break;
 		    }
+		    case "UI.AlertManeuver":{
+
+				MFT.ApplinkModel.onUIAlertManeuver( request.params );
+
+				this.sendUIResult("SUCCESS", request.id, request.method);
+
+		    	break;
+		    }
 		    case  "UI.GetCapabilities":{
 				// send repsonse
 				var JSONMessage = {

@@ -188,7 +188,8 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param {Object}
 	 */
 	onGetAppList: function( appList ){
-		/*var i = 0,
+		//to be removed
+        /*var i = 0,
 			len = appList.length;
 		for(i = 0; i < len; i++){
 			if( appList[i].isMediaApplication ){

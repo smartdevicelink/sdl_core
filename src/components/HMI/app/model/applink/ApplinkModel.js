@@ -263,6 +263,17 @@ MFT.ApplinkModel = Em.Object.create({
     },
 
     /**
+     * Applink UI Alert Maneuver response handeler
+     * show popup window 
+     *
+     * @param {Object} message Object with parameters come from ApplinkCore.
+     */
+    onUIAlertManeuver: function( message ) {
+
+        MFT.AlertManeuverPopUp.AlertManeuverActive( message );
+    },
+
+    /**
      * Applink UI Alert response handeler
      * show popup window 
      *
