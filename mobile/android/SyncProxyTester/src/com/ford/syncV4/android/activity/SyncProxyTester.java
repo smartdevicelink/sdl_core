@@ -2794,54 +2794,60 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			Log.w(logTag, "onAudioPassThru aptData is null");
 			return;
 		}
-		
 		Log.i(logTag, "data len " + aptData.length);
-		if (isExtStorageWritable()) {
-			File outFile = audioPassThruOutputFile();
-			try {
-				if (audioPassThruOutStream == null) {
-					audioPassThruOutStream = new BufferedOutputStream(
-							new FileOutputStream(outFile, false));
-				}
-				audioPassThruOutStream.write(aptData);
-				audioPassThruOutStream.flush();
-			} catch (FileNotFoundException e) {
-				logToConsoleAndUI(
-						"Output file "
-								+ (outFile != null ? outFile.toString()
-										: "'unknown'")
-								+ " can't be opened for writing", e);
-			} catch (IOException e) {
-				logToConsoleAndUI("Can't write to output file", e);
+
+		File outFile = audioPassThruOutputFile();
+		try {
+			if (audioPassThruOutStream == null) {
+				audioPassThruOutStream = new BufferedOutputStream(
+						new FileOutputStream(outFile, false));
 			}
-			
-			/*
-			 * if there is current player, save the current position, stop and
-			 * release it, so that we recreate it with the appended file and
-			 * jump to that position, emulating seamless stream playing
-			 */
-			int audioPosition = -1;
-			if (audioPassThruMediaPlayer != null) {
-				audioPosition = audioPassThruMediaPlayer.getCurrentPosition();
-				audioPassThruMediaPlayer.stop();
-				audioPassThruMediaPlayer.reset();
-				audioPassThruMediaPlayer.release();
-				audioPassThruMediaPlayer = null;
-			}
-			
-			audioPassThruMediaPlayer = new MediaPlayer();
-			try {
+			audioPassThruOutStream.write(aptData);
+			audioPassThruOutStream.flush();
+		} catch (FileNotFoundException e) {
+			logToConsoleAndUI(
+					"Output file "
+							+ (outFile != null ? outFile.toString()
+									: "'unknown'")
+							+ " can't be opened for writing", e);
+		} catch (IOException e) {
+			logToConsoleAndUI("Can't write to output file", e);
+		}
+
+		/*
+		 * if there is current player, save the current position, stop and
+		 * release it, so that we recreate it with the appended file and jump to
+		 * that position, emulating seamless stream playing
+		 */
+		int audioPosition = -1;
+		if (audioPassThruMediaPlayer != null) {
+			audioPosition = audioPassThruMediaPlayer.getCurrentPosition();
+			audioPassThruMediaPlayer.stop();
+			audioPassThruMediaPlayer.reset();
+			audioPassThruMediaPlayer.release();
+			audioPassThruMediaPlayer = null;
+		}
+
+		audioPassThruMediaPlayer = new MediaPlayer();
+		try {
+			if (isExtStorageWritable()) {
 				audioPassThruMediaPlayer.setDataSource(outFile.toString());
-				audioPassThruMediaPlayer.prepare();
-				if (audioPosition != -1) {
-					audioPassThruMediaPlayer.seekTo(audioPosition);
-				}
-				audioPassThruMediaPlayer.start();
-			} catch (IOException e) {
-				e.printStackTrace();
+			} else {
+				/*
+				 * setDataSource with a filename on the internal storage throws
+				 * "java.io.IOException: Prepare failed.: status=0x1", so we
+				 * open the file with a special method
+				 */
+				audioPassThruMediaPlayer.setDataSource(openFileInput(
+						AUDIOPASSTHRU_OUTPUT_FILE).getFD());
 			}
-		} else {
-			logToConsoleAndUI("External storage is not available", null);
+			audioPassThruMediaPlayer.prepare();
+			if (audioPosition != -1) {
+				audioPassThruMediaPlayer.seekTo(audioPosition);
+			}
+			audioPassThruMediaPlayer.start();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -2921,8 +2927,9 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	}
 
 	private File audioPassThruOutputFile() {
-		File outFile = new File(Environment.getExternalStorageDirectory(),
-				AUDIOPASSTHRU_OUTPUT_FILE);
+		File baseDir = isExtStorageWritable() ? Environment
+				.getExternalStorageDirectory() : getFilesDir();
+		File outFile = new File(baseDir, AUDIOPASSTHRU_OUTPUT_FILE);
 		return outFile;
 	}
 
