@@ -3448,7 +3448,7 @@ namespace NsAppManager
                             , NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED
                             , NsAppLinkRPC::ALRPCMessage::RESPONSE
                             , false
-                            , app->getAppID());
+                            , sessionKey);
                         break;
                     }
 
@@ -3462,7 +3462,7 @@ namespace NsAppManager
                             , NsAppLinkRPCV2::Result::REJECTED
                             , NsAppLinkRPC::ALRPCMessage::RESPONSE
                             , false
-                            , app->getAppID());
+                            , sessionKey);
                         break;
                     }
 
@@ -3470,16 +3470,18 @@ namespace NsAppManager
                         = new NsRPC2Communication::UI::AlertManeuver;
                     if (!alert)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "new NsRPC2Communication::UI::AlertManeuver() failed");
-                        NsAppLinkRPCV2::AlertManeuver_response* response = new NsAppLinkRPCV2::AlertManeuver_response;
-                        response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::OUT_OF_MEMORY);
-                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        LOG4CPLUS_ERROR_EXT(mLogger, "new NsRPC2Communication::Navigation::AlertManeuver() failed");
+                        sendResponse<NsAppLinkRPCV2::AlertManeuver_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                            NsAppLinkRPCV2::FunctionID::AlertManeuverID
+                            , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
+                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                            , false
+                            , sessionKey);
                         break;
                     }
 
                     alert->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    alert->set_appId(sessionKey);
+                    alert->set_appId(app->getAppID());
                     alert->set_ttsChunks(request->get_ttsChunks());
                     alert->set_softButtons(request->get_softButtons());
 
@@ -3522,6 +3524,82 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, "DialNumber request almost handled" );
                     core->mMessageMapping.addMessage(dialNumberRPC2Request->getId(), sessionKey);
                     HMIHandler::getInstance().sendRequest(dialNumberRPC2Request);
+                    break;
+                }
+                case NsAppLinkRPCV2::FunctionID::ShowConstantTBTID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "A ShowConstantTBT request has been invoked." );
+                    NsAppLinkRPCV2::ShowConstantTBT_request* request
+                        = static_cast<NsAppLinkRPCV2::ShowConstantTBT_request*>(mobileMsg);
+
+                    Application_v2* app = static_cast<Application_v2*>(
+                        core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey)));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger,
+                            "No application associated with the registry item with session key " << sessionKey );
+                        sendResponse<NsAppLinkRPCV2::ShowConstantTBT_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                            NsAppLinkRPCV2::FunctionID::ShowConstantTBTID
+                            , NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED
+                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                            , false
+                            , sessionKey);
+                        break;
+                    }
+
+                    if((NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                        || (NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel()))
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName()
+                            << " with session key " << sessionKey << " has not been activated yet!" );
+                        sendResponse<NsAppLinkRPCV2::ShowConstantTBT_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                            NsAppLinkRPCV2::FunctionID::ShowConstantTBTID
+                            , NsAppLinkRPCV2::Result::REJECTED
+                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                            , false
+                            , sessionKey);
+                        break;
+                    }
+
+                    NsRPC2Communication::UI::ShowConstantTBT* showConstantTBT
+                        = new NsRPC2Communication::UI::ShowConstantTBT;
+                    if (!showConstantTBT)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "new NsRPC2Communication::UI::ShowConstantTBT() failed");
+                        sendResponse<NsAppLinkRPCV2::ShowConstantTBT_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                            NsAppLinkRPCV2::FunctionID::ShowConstantTBTID
+                            , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
+                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                            , false
+                            , sessionKey);
+                        break;
+                    }
+
+                    showConstantTBT->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    showConstantTBT->set_appId(app->getAppID());
+                    showConstantTBT->set_softButtons(request->get_softButtons());
+                    showConstantTBT->set_distanceToManeuver(request->get_distanceToManeuver());
+                    showConstantTBT->set_distanceToManeuverScale(request->get_distanceToManeuverScale());
+
+                    const std::string* firstNavigationText = request->get_navigationText1();
+                    const std::string* secondNavigationText = request->get_navigationText2();
+                    const std::string* eta = request->get_eta();
+                    const std::string* totalDistance = request->get_totalDistance();
+                    const bool* maneuverComplete = request->get_maneuverComplete();
+
+                    if (firstNavigationText)
+                        showConstantTBT->set_navigationText1(*firstNavigationText);
+                    if (secondNavigationText)
+                        showConstantTBT->set_navigationText2(*secondNavigationText);
+                    if (eta)
+                        showConstantTBT->set_eta(*eta);
+                    if (totalDistance)
+                        showConstantTBT->set_totalDistance(*totalDistance);
+                    if (maneuverComplete)
+                        showConstantTBT->set_maneuverComplete(maneuverComplete);
+
+                    core->mMessageMapping.addMessage(showConstantTBT->getId(), sessionKey);
+                    HMIHandler::getInstance().sendRequest(showConstantTBT);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
@@ -4731,6 +4809,32 @@ namespace NsAppManager
                 }
                 core->mMessageMapping.removeMessage(response->getId());
                 return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SHOWCONSTANTTBTRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "UI::ShowConstantTBTResponse is received from HMI.");
+                NsRPC2Communication::UI::ShowConstantTBTResponse * response =
+                    static_cast<NsRPC2Communication::UI::ShowConstantTBTResponse*>(msg);
+
+                Application_v2* app = static_cast<Application_v2*>(
+                    core->getApplicationFromItemCheckNotNull(
+                        core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId())));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                sendResponse<NsAppLinkRPCV2::ShowConstantTBT_response
+                    , NsAppLinkRPCV2::Result::ResultInternal>(
+                        NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                        , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                        , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                        , response->getResult() == NsAppLinkRPCV2::Result::SUCCESS
+                        , app->getAppID());
+
+                core->mRequestMapping.removeRequest(response->getId());
+                break;
             }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
