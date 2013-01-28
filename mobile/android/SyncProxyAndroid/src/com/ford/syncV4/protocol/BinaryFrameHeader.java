@@ -13,7 +13,7 @@ public class BinaryFrameHeader {
 	
 	public BinaryFrameHeader() {}
 	
-	public BinaryFrameHeader parseBinaryHeader(byte[] binHeader) {
+	public static BinaryFrameHeader parseBinaryHeader(byte[] binHeader) {
 		BinaryFrameHeader msg = new BinaryFrameHeader();
 		
 		byte RPC_Type = (byte) (binHeader[0] >>> 4);
@@ -33,7 +33,6 @@ public class BinaryFrameHeader {
 		msg.setJsonData(_jsonData);
 		
 		if (binHeader.length - _jsonSize - 12 > 0) {
-			int l = binHeader.length;
 			byte[] _bulkData = new byte[binHeader.length - _jsonSize - 12];
 			System.arraycopy(binHeader, 12 + _jsonSize, _bulkData, 0, _bulkData.length);
 			msg.setBulkData(_bulkData);

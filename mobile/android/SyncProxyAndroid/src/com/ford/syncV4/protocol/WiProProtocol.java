@@ -287,8 +287,8 @@ public class WiProProtocol extends AbstractProtocol {
 				message.setSessionID(header.getSessionID());
 				//If it is WiPro 2.0 it must have binary header
 				if (_version == 2) {
-					BinaryFrameHeader binFrameHeader = new BinaryFrameHeader();
-					binFrameHeader = binFrameHeader.parseBinaryHeader(accumulator.toByteArray());
+					BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
+							parseBinaryHeader(accumulator.toByteArray());
 					message.setVersion(_version);
 					message.setRPCType(binFrameHeader.getRPCType());
 					message.setFunctionID(binFrameHeader.getFunctionID());
@@ -384,9 +384,8 @@ public class WiProProtocol extends AbstractProtocol {
 			message.setSessionID(header.getSessionID());
 			//If it is WiPro 2.0 it must have binary header
 			if (_version == 2) {
-				BinaryFrameHeader binFrameHeader = new BinaryFrameHeader();
-				binFrameHeader = binFrameHeader.parseBinaryHeader(data);
-				
+				BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
+						parseBinaryHeader(data);
 				message.setVersion(_version);
 				message.setRPCType(binFrameHeader.getRPCType());
 				message.setFunctionID(binFrameHeader.getFunctionID());
