@@ -3532,34 +3532,11 @@ namespace NsAppManager
                     NsAppLinkRPCV2::ShowConstantTBT_request* request
                         = static_cast<NsAppLinkRPCV2::ShowConstantTBT_request*>(mobileMsg);
 
-                    Application_v2* app = static_cast<Application_v2*>(
-                        core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey)));
-                    if(!app)
-                    {
-                        LOG4CPLUS_ERROR_EXT(mLogger,
-                            "No application associated with the registry item with session key " << sessionKey );
-                        sendResponse<NsAppLinkRPCV2::ShowConstantTBT_response, NsAppLinkRPCV2::Result::ResultInternal>(
-                            NsAppLinkRPCV2::FunctionID::ShowConstantTBTID
-                            , NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED
-                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
-                            , false
-                            , sessionKey);
-                        break;
-                    }
-
-                    if((NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
-                        || (NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel()))
-                    {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName()
-                            << " with session key " << sessionKey << " has not been activated yet!" );
-                        sendResponse<NsAppLinkRPCV2::ShowConstantTBT_response, NsAppLinkRPCV2::Result::ResultInternal>(
-                            NsAppLinkRPCV2::FunctionID::ShowConstantTBTID
-                            , NsAppLinkRPCV2::Result::REJECTED
-                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
-                            , false
-                            , sessionKey);
-                        break;
-                    }
+                    Application_v2* app = getApplicationV2AndCheckHMIStatus<NsAppLinkRPCV2::ShowConstantTBT_response>(
+                        sessionKey,
+                        NsAppLinkRPCV2::FunctionID::ShowConstantTBTID);
+                    if (!app)
+                        return;
 
                     NsRPC2Communication::UI::ShowConstantTBT* showConstantTBT
                         = new NsRPC2Communication::UI::ShowConstantTBT;
@@ -3572,7 +3549,7 @@ namespace NsAppManager
                             , NsAppLinkRPC::ALRPCMessage::RESPONSE
                             , false
                             , sessionKey);
-                        break;
+                        return;
                     }
 
                     showConstantTBT->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
@@ -3580,6 +3557,7 @@ namespace NsAppManager
                     showConstantTBT->set_softButtons(request->get_softButtons());
                     showConstantTBT->set_distanceToManeuver(request->get_distanceToManeuver());
                     showConstantTBT->set_distanceToManeuverScale(request->get_distanceToManeuverScale());
+                    showConstantTBT->set_turnIcon(request->get_turnIcon());
 
                     const std::string* firstNavigationText = request->get_navigationText1();
                     const std::string* secondNavigationText = request->get_navigationText2();
@@ -3600,6 +3578,41 @@ namespace NsAppManager
 
                     core->mMessageMapping.addMessage(showConstantTBT->getId(), sessionKey);
                     HMIHandler::getInstance().sendRequest(showConstantTBT);
+                    break;
+                }
+                case NsAppLinkRPCV2::FunctionID::UpdateTurnListID:
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "A UpdateTurnList request has been invoked." );
+                    NsAppLinkRPCV2::UpdateTurnList_request* request
+                        = static_cast<NsAppLinkRPCV2::UpdateTurnList_request*>(mobileMsg);
+
+                    Application_v2* app = getApplicationV2AndCheckHMIStatus<NsAppLinkRPCV2::ShowConstantTBT_response>(
+                        sessionKey,
+                        NsAppLinkRPCV2::FunctionID::ShowConstantTBTID);
+                    if (!app)
+                        return;
+
+                    NsRPC2Communication::UI::UpdateTurnList* updateTurnList = new NsRPC2Communication::UI::UpdateTurnList;
+                    if (!updateTurnList)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "new NsRPC2Communication::UI::UpdateTurnList() failed");
+                        sendResponse<NsAppLinkRPCV2::UpdateTurnList_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                            NsAppLinkRPCV2::FunctionID::ShowConstantTBTID
+                            , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
+                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                            , false
+                            , sessionKey);
+                        return;
+                    }
+
+                    updateTurnList->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    updateTurnList->set_appId(app->getAppID());
+                    updateTurnList->set_turnList(request->get_turnList());
+                    updateTurnList->set_softButtons(request->get_softButtons());
+
+                    core->mMessageMapping.addMessage(updateTurnList->getId(), sessionKey);
+                    HMIHandler::getInstance().sendRequest(updateTurnList);
+
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
@@ -4827,7 +4840,33 @@ namespace NsAppManager
 
                 sendResponse<NsAppLinkRPCV2::ShowConstantTBT_response
                     , NsAppLinkRPCV2::Result::ResultInternal>(
-                        NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                        NsAppLinkRPCV2::FunctionID::ShowConstantTBTID
+                        , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                        , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                        , response->getResult() == NsAppLinkRPCV2::Result::SUCCESS
+                        , app->getAppID());
+
+                core->mRequestMapping.removeRequest(response->getId());
+                break;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__UPDATETURNLISTRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "UI::UpdateTurnListResponse is received from HMI.");
+                NsRPC2Communication::UI::UpdateTurnListResponse * response =
+                    static_cast<NsRPC2Communication::UI::UpdateTurnListResponse*>(msg);
+
+                Application_v2* app = static_cast<Application_v2*>(
+                    core->getApplicationFromItemCheckNotNull(
+                        core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId())));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                sendResponse<NsAppLinkRPCV2::UpdateTurnList_response
+                    , NsAppLinkRPCV2::Result::ResultInternal>(
+                        NsAppLinkRPCV2::FunctionID::UpdateTurnListID
                         , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
                         , NsAppLinkRPC::ALRPCMessage::RESPONSE
                         , response->getResult() == NsAppLinkRPCV2::Result::SUCCESS
