@@ -2790,6 +2790,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * audio data sent in it.
 	 */
 	public void onAudioPassThru(byte[] aptData) {
+		if (aptData == null) {
+			Log.w(logTag, "onAudioPassThru aptData is null");
+			return;
+		}
+		
 		Log.i(logTag, "data len " + aptData.length);
 		if (isExtStorageWritable()) {
 			File outFile = audioPassThruOutputFile();
