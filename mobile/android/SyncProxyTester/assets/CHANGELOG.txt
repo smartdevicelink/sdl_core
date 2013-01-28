@@ -1,3 +1,6 @@
+[CW5]
+* SyncProxyAndroid SDK: fix getting bulk data from incoming messages.
+
 [CW4]
 * Fix a glitch when the app fails to connect over WiFi.
 * Put more popular options menu items first.

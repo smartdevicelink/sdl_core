@@ -34,8 +34,8 @@ public class BinaryFrameHeader {
 		
 		if (binHeader.length - _jsonSize - 12 > 0) {
 			int l = binHeader.length;
-			byte[] _bulkData = new byte[binHeader.length - _jsonSize];
-			System.arraycopy(binHeader, 12 + _jsonSize, _bulkData, 0, binHeader.length - _jsonSize -12 );
+			byte[] _bulkData = new byte[binHeader.length - _jsonSize - 12];
+			System.arraycopy(binHeader, 12 + _jsonSize, _bulkData, 0, _bulkData.length);
 			msg.setBulkData(_bulkData);
 		}		
 		
