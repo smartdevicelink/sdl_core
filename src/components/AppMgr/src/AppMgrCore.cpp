@@ -5590,7 +5590,7 @@ namespace NsAppManager
                 NsRPC2Communication::AppLinkCore::GetDeviceList* getDevList = (NsRPC2Communication::AppLinkCore::GetDeviceList*)msg;
                 NsRPC2Communication::AppLinkCore::GetDeviceListResponse* response = new NsRPC2Communication::AppLinkCore::GetDeviceListResponse;
                 response->setId(getDevList->getId());
-                response->setResult(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
                 ConnectionHandler::getInstance().startDevicesDiscovery();
                 HMIHandler::getInstance().sendResponse(response);
                 return;
