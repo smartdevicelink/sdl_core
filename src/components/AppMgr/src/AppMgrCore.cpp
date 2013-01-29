@@ -5706,7 +5706,7 @@ namespace NsAppManager
                     if ( 1 == app->getProtocolVersion() )
                     {
                         Application_v1 * app1 = static_cast<Application_v1*>(app);
-                        hmiApp.set_hmiDisplayLanguageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app1->getHMIDisplayLanguageDesired().get()));
+                        hmiApp.set_hmiDisplayLanguageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app1->getLanguageDesired().get()));
                         hmiApp.set_languageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app1->getLanguageDesired().get()));
                     }
                     if ( 2 == app->getProtocolVersion() )
