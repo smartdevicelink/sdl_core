@@ -119,6 +119,7 @@ namespace {
         return app;
     }
 
+    pthread_t sendingThread;
     struct thread_data
     {
         int timeout;
@@ -135,7 +136,7 @@ namespace {
         std::string url = my_data->url;
         NsAppManager::SyncPManager::PData pData = my_data->pdata;
         LOG4CPLUS_INFO_EXT(logger, " Sending params: url " << url << " timeout " << timeout << " data of " << pData.size() << " lines");
-        sleep(timeout);
+        sleep(timeout);  // TODO(akandul): Why we use it?
         int port = 80;
         size_t pos = url.find(":");
         if(pos != std::string::npos)
@@ -148,13 +149,24 @@ namespace {
         }
         std::string host = url.substr(0, pos);
         LOG4CPLUS_INFO_EXT(logger, " Sending at " << host << " port " << port);
-        ClientSocket client_socket( host, port );
-  //      std::string reply;
-        for(NsAppManager::SyncPManager::PData::iterator it = pData.begin(); it != pData.end(); it++)
+        try
         {
-            LOG4CPLUS_INFO_EXT(logger, " Sending data " << *it);
-            client_socket << *it;
-  //          client_socket >> reply;
+            ClientSocket client_socket( host, port );
+      //      std::string reply;
+            for(NsAppManager::SyncPManager::PData::iterator it = pData.begin(); it != pData.end(); it++)
+            {
+                LOG4CPLUS_INFO_EXT(logger, " Sending data " << *it);
+                client_socket << *it;
+      //          client_socket >> reply;
+            }
+        }
+        catch (SocketException& ex)
+        {
+            LOG4CPLUS_ERROR_EXT(logger, "ClientSocket error: " << ex.description());
+        }
+        catch (...)
+        {
+            LOG4CPLUS_ERROR_EXT(logger, "Unknown ClientSocket error...");
         }
         LOG4CPLUS_INFO_EXT(logger, " All data sent to host " << host << " port " << port);
         pthread_exit(NULL);
@@ -5624,12 +5636,11 @@ namespace NsAppManager
                             const std::string& url = *urlPtr;
                             const int& timeout = timeoutPtr ? *timeoutPtr : 0;
                             LOG4CPLUS_INFO_EXT(mLogger, "SendData about to send at " << url << " timeout " << timeout);
-                            pthread_t* sendingThread = 0;
                             thread_data* data = new thread_data;
                             data->pdata = core->mSyncPManager.getPData();
                             data->timeout = timeout;
                             data->url = url;
-                            int rc = pthread_create(sendingThread, 0, SendPData,
+                            int rc = pthread_create(&sendingThread, 0, SendPData,
                                            (void *) data);
                             if (rc)
                             {
