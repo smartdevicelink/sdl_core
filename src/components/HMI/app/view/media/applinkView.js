@@ -118,8 +118,8 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 						
 						templateName: 'arrow',
 						
-						action:		'turnOnApplinkOptions',
-						target:		'MFT.ApplinkMediaController'
+						action:		'openCommandsList',
+						target:		'MFT.ApplinkAppController'
 					})
 				);
 			},
