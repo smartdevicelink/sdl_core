@@ -135,7 +135,7 @@ MFT.ApplinkModel = Em.Object.create({
      * Method to open Phone view and dial phone number
      * @param {Object} params
      */
-    DialNumber: function( params ){
+    dialNumber: function( params ){
         MFT.States.goToState('phone.dialpad');
         MFT.PhoneModel.set('dialpadNumber', params.number);
         MFT.PhoneController.onDialCall();

@@ -329,7 +329,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.DialNumber":{
 
-				MFT.ApplinkModel.DialNumber( request.params );
+				MFT.ApplinkModel.dialNumber( request.params );
 
 				this.sendUIResult("SUCCESS", request.id, request.method);
 
