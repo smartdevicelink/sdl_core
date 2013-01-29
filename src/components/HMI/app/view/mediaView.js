@@ -19,8 +19,7 @@ MFT.MediaView = Em.ContainerView.create(MFT.LoadableView,{
 		'presets',
 		'rightMenu',
 		'SavePresetPopup',
-		'directTune',
-		'applinkSoftButtons'
+		'directTune'
 	],
 	/** Left Menu view component */
 	leftMenu: MFT.LeftMenuView,
@@ -30,8 +29,6 @@ MFT.MediaView = Em.ContainerView.create(MFT.LoadableView,{
 	presets: MFT.PresetsView,
 	
 	directTune: MFT.DirectTune,
-
-	applinkSoftButtons: MFT.ApplinkSoftButtons,
 	
 	/** Save Preset Popup*/
 	SavePresetPopup: Em.View.extend({
