@@ -15,7 +15,7 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
     init: function() {
 	   
 	   this._super();
-	   
+        	   
 	   // init properties here
 	   this.set('appInfo', Em.Object.create({
                 field1:         '<field1>',
@@ -25,74 +25,27 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
                 image:			''
             })
         );
+        
+        this.set('commandsList',[]);
 	},
+	
 	
 	/**
 	 * Activate current application model
 	 */
     turnOnApplink: function(){
-        MFT.NonMediaController.turnOnApplink( this );
+        MFT.NonMediaController.activateApp( this );
     },
     
-    /** Applin UI Show handler */
+    /** 
+     * Applin UI Show handler
+     * @param {Object}
+     */
     onApplinkUIShow: function(params){
         this.appInfo.set('field1',        params.mainField1);
         this.appInfo.set('field2',        params.mainField2);
         this.appInfo.set('field3',        params.mainField3);
         this.appInfo.set('field4',        params.mainField4);
         //this.appInfo.set('image',         params.graphic);
-    },
-	
-	/** Add command to Options list */
-    onApplinkOptionsAddCommand: function( commandId, params ){
-
-       MFT.InfoNonMediaOptions.commands.AddCommand( commandId, params );
-
-    },
-    
-    /** Applink AddCommand handler */
-    onApplinkAddCommand: function( params ) {
-        if( params.menuParams.parentID ) {
-        	this.subMenuCommands.push( params );
-            
-            if( MFT.States.info.nonMedia.options.subMenu.active ) {
-                MFT.InfoNonMediaOptionsSubMenu.SubMenuActivate( this.currentSubMenuId );
-            }
-        
-        } else {
-        	this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams);
-        }
-    },
-    
-    /** Delete command to Options list */
-    onApplinkOptionsDeleteCommand: function(commandId){
-
-        MFT.InfoNonMediaOptions.commands.DeleteCommand( commandId );
-
-        var  count = this.subMenuCommands.length;
-        for(var i = count-1; i >= 0; i--){
-            if(this.subMenuCommands[i].cmdId == commandId){
-               this.subMenuCommands.splice(i, 1);
-            }
-        }
-    },
-    
-    /** Add subMenu button to Options list */
-    onApplinkAddSubMenu: function( menuId, params ){
-
-        MFT.InfoNonMediaOptions.commands.AddSubMenu( menuId, params );
-
-    },
-    
-    /** Delete subMenu button from Options list */
-    onApplinkDeleteSubMenu: function( menuId ){
-
-        if( MFT.NonMediaController.currentApplinkSubMenuid == menuId ){
-            MFT.States.back();
-        }
-
-        MFT.InfoNonMediaOptions.commands.DeleteSubMenu( menuId );
-
-        return "SUCCESS";
     }
 });

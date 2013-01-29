@@ -32,9 +32,9 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 '<div class="track-info">'+
                     '<div class="device">{{MFT.ApplinkModel.deviceName}}</div>'+
                     '<div class="divider_o"></div>'+
-                    '<div class="title textLimit">{{MFT.ApplinkMediaController.model.appInfo.field1}}</div>'+
-                    '<div class="album textLimit">{{MFT.ApplinkMediaController.model.appInfo.field2}}</div>'+
-                    '<div class="artist textLimit">{{MFT.ApplinkMediaController.model.appInfo.mediaClock}}</div>'+
+                    '<div class="title textLimit">{{MFT.ApplinkAppController.model.appInfo.field1}}</div>'+
+                    '<div class="album textLimit">{{MFT.ApplinkAppController.model.appInfo.field2}}</div>'+
+                    '<div class="artist textLimit">{{MFT.ApplinkAppController.model.appInfo.mediaClock}}</div>'+
     //              '<div id="cd_logo" {{bindAttr class="MFT.CDModel.active:visible_display MFT.AppModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
     //              '<div id="usb_logo" {{bindAttr class="MFT.USBModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
                 '</div>'+
@@ -130,7 +130,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
             1: MFT.Button.extend({
                 elementId: 'applink_media_preset_button1',
                 classNames: 'a0 preset-item',
-                textBinding:    'MFT.ApplinkMediaController.model.appInfo.customPresets.0',
+                textBinding:    'MFT.ApplinkAppController.model.appInfo.customPresets.0',
                 templateName:   'text',
                 actionDown:       function(){
                     this._super();
@@ -153,7 +153,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
             2: MFT.Button.extend({
                 elementId:      'applink_media_preset_button2',
                 classNames:     'a1 preset-item',
-                textBinding:    'MFT.ApplinkMediaController.model.appInfo.customPresets.1',
+                textBinding:    'MFT.ApplinkAppController.model.appInfo.customPresets.1',
                 templateName:   'text',
                 actionDown:       function(){
                     this._super();
@@ -176,7 +176,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
             3: MFT.Button.extend({
                 elementId: 'applink_media_preset_button3',
                 classNames: 'a2 preset-item',
-                textBinding:    'MFT.ApplinkMediaController.model.appInfo.customPresets.2',
+                textBinding:    'MFT.ApplinkAppController.model.appInfo.customPresets.2',
                 templateName:   'text',
                 actionDown:       function(){
                     this._super();
@@ -199,7 +199,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
             4: MFT.Button.extend({
                 elementId: 'applink_media_preset_button4',
                 classNames: 'a3 preset-item',
-                textBinding:    'MFT.ApplinkMediaController.model.appInfo.customPresets.3',
+                textBinding:    'MFT.ApplinkAppController.model.appInfo.customPresets.3',
                 templateName:   'text',
                 actionDown:       function(){
                     this._super();
@@ -222,7 +222,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
             5: MFT.Button.extend({
                 elementId: 'applink_media_preset_button5',
                 classNames: 'a4 preset-item',
-                textBinding:    'MFT.ApplinkMediaController.model.appInfo.customPresets.4',
+                textBinding:    'MFT.ApplinkAppController.model.appInfo.customPresets.4',
                 templateName:   'text',
                 actionDown:       function(){
                     this._super();
@@ -245,7 +245,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
             6: MFT.Button.extend({
                 elementId: 'applink_media_preset_button6',
                 classNames: 'a5 preset-item',
-                textBinding:    'MFT.ApplinkMediaController.model.appInfo.customPresets.5',
+                textBinding:    'MFT.ApplinkAppController.model.appInfo.customPresets.5',
                 templateName:   'text',
                 actionDown:       function(){
                     this._super();

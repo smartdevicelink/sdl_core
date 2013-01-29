@@ -49,7 +49,7 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
      */
     deactivateApplication: function(){
      	if( !MFT.States.media.applink.active ){
-     		MFT.ApplinkModel.onDeactivateApp( MFT.TransitionIterator.finalPath, MFT.ApplinkMediaController.model.appId, MFT.ApplinkMediaController.model.appName );
+     		MFT.ApplinkModel.onDeactivateApp( MFT.TransitionIterator.finalPath, MFT.ApplinkAppController.model.appId, MFT.ApplinkAppController.model.appName );
      	}
     }.observes('MFT.States.media.applink.active'),
 
@@ -118,8 +118,8 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 						
 						templateName: 'arrow',
 						
-						action:		'turnOnApplinkOptions',
-						target:		'MFT.ApplinkMediaController'
+						action:		'openCommandsList',
+						target:		'MFT.ApplinkAppController'
 					})
 				);
 			},
@@ -129,8 +129,8 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 				
 				templateName: 'arrow',
 				
-				action:		'turnOnApplinkOptions',
-				target:		'MFT.ApplinkMediaController'
+				action:		'openCommandsList',
+				target:		'MFT.ApplinkAppController'
 			})
 		})
 	}),

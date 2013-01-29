@@ -10,7 +10,7 @@
  * @author		Artem Petrosyan
  */
 
-MFT.TransitionIterator = {
+MFT.TransitionIterator = Em.Object.create({
 	
 	// this flag determine that some of views is loading now
 	// need to prevent next state transition, before finish loading
@@ -40,9 +40,10 @@ MFT.TransitionIterator = {
 		if ( FLAGS.DEBUG_MODE ) {
 			this.startTime = Date.now();
 		}
-		
-		this.finalPath = path;
-		this.ready = false;
+		if ( path ) {
+			this.set('finalPath', path);
+		}
+		this.set('ready', false);
 	},
 	
 	/**
@@ -54,22 +55,22 @@ MFT.TransitionIterator = {
 	start: function(state) {
 		
 		// transition will start only in final state		
-		if( this.finalPath != state.get('path') ) {
+		if( this.get('finalPath') != state.get('path') ) {
 			return;
 		}
 		
 		// activation states
-		while ( this.stateOnEnter.length ) {
-			this.stateOnEnter.pop().set('active',true);
+		while ( this.get('stateOnEnter.length') ) {
+			this.get('stateOnEnter').pop().set('active',true);
 		}
 		
 		// deactivation states
-		while ( this.stateOnExit.length ) {
-			this.stateOnExit.pop().set('active',false);
+		while ( this.get('stateOnExit.length') ) {
+			this.get('stateOnExit').pop().set('active',false);
 		}
 		
 		// unblock transition
-		this.ready = true;
+		this.set('ready', true);
 		
 		// show transition time
 		// used in DEBUG_MODE
@@ -77,4 +78,4 @@ MFT.TransitionIterator = {
 			MFT.set('debugText', ((Date.now() - this.startTime)/1000).toFixed(2) );
 		}
 	}
-};
+});

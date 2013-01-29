@@ -114,7 +114,6 @@ MFT.ApplinkController = Em.Object.create({
 
 	/**
 	 * Unregister application
-	 * @desc ...
 	 *
 	 * @param applicationId: Number
 	 */

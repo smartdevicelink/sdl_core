@@ -12,32 +12,60 @@
 
 MFT.NonMediaController = Em.Object.create({
 	
-	// Model binding
-	model: null,
-	
+	/**
+	 * Current NonMedia application id
+	 *
+	 * @type {Number}
+	 */
+	currentAppId: 0,
+    
     /**
-      * Text for label on Perform Interaction screen
-      */
-    subMenuLabel: '',
-	
-	// Switching on Applink Sub Mennu
-	turnOnApplinkSubMenu: function(el){
-		this.set('currentApplinkSubMenuid', el.menuId);
-		this.set('subMenuLabel', el.text);
-		MFT.States.goToState('info.nonMedia.options.subMenu');
-	},
-
-    /**
-     * Switching on Application
-     *
+     * Return current NonMedia application name
+     * used for application button
      */
-    turnOnApplink: function( applicationModel ){
+    currentAppName: function() {
+        if ( this.currentAppId ) {
+            return MFT.ApplinkController.getApplicationModel(this.currentAppId).appName;
+        }
+    }.property('this.currentAppId'),
+    
+    /**
+     * Return current NonMedia application icon
+     * used for application button
+     */
+    currentAppIcon: function() {
+        if ( this.currentAppId ) {
+            return MFT.ApplinkController.getApplicationModel(this.currentAppId).appIcon;
+        }
+    }.property('this.currentAppId'),
+    
+    /**
+     * Activate application model
+     *
+     * @param {ApplinkAppModel}
+     */
+    activateApp: function( applicationModel ){
+            
+        // set active model
+        MFT.ApplinkAppController.set('model',applicationModel);
         
-        this.set('model', applicationModel);
+        // store active application id
+        this.set( 'currentAppId' , applicationModel.appId);
         
+        // send response
         FFW.AppLinkCoreClient.ActivateApp( applicationModel.appId );
         
         // Go to Applink state
         MFT.States.goToState('info.nonMedia');
+    },
+    
+    /**
+     * Restore current application to active state
+     */
+    restoreCurrentApp: function() {
+        if ( MFT.ApplinkAppController.model.appId === this.currentAppId ) {
+            return;
+        }
+        this.activateApp( MFT.ApplinkController.getApplicationModel( this.currentAppId ) );
     }
 });

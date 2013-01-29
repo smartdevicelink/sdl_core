@@ -72,7 +72,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 	 * Activate current application model
 	 */
     turnOnApplink: function(){
-        MFT.ApplinkMediaController.turnOnApplink( this );
+        MFT.ApplinkMediaController.activateApp( this );
     },
 
 	startTimer: function(){

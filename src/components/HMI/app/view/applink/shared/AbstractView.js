@@ -22,6 +22,8 @@ MFT.ApplinkAbstractView = Em.ContainerView.extend({
 	],
 	
 	active: false,
+	
+	caption: 'Caption Text',
     
     /**
      * Activate window
@@ -31,7 +33,7 @@ MFT.ApplinkAbstractView = Em.ContainerView.extend({
      */
     activate: function( text ) {
     	if (text) {
-    		this.set('captionText.content',text);
+    		this.set('caption',text);
     	}
     	this.set('active',true);
     },
@@ -43,6 +45,12 @@ MFT.ApplinkAbstractView = Em.ContainerView.extend({
     	this.set('active',false);
     },
     
+    onStateChange: function() {
+        if ( this.active ) {
+            this.deactivate();
+        }
+    }.observes('MFT.TransitionIterator.ready'),
+    
 	backButton: MFT.Button.extend({
 		classNames:	[
 			'back-button'
@@ -50,6 +58,7 @@ MFT.ApplinkAbstractView = Em.ContainerView.extend({
 		target:		'this.parentView',
 		action:		'deactivate',
 		icon:		'images/media/ico_back.png',
+		onDown:     false
 	}),
 	
 	captionText: MFT.Label.extend({
@@ -57,6 +66,6 @@ MFT.ApplinkAbstractView = Em.ContainerView.extend({
         	'caption-text'
         ],
         
-        content:	'Caption Text'
+        contentBinding:	'this.parentView.caption'
     })
 });

@@ -20,16 +20,13 @@ Em.State.reopen({
 	viewLoaded: false,
 	
 	enter: function() {
-		MFT.TransitionIterator.stateOnEnter.push(this);
+		MFT.TransitionIterator.get('stateOnEnter').push(this);
 		
 		MFT.StateVisitor.visit(this);
-
-		// Switch off video player if active
-		MFT.VideoPlayerController.close();
 	},
 	
 	exit: function() {
-		MFT.TransitionIterator.stateOnExit.push(this);
+		MFT.TransitionIterator.get('stateOnExit').push(this);
 	}
 });
 
@@ -47,12 +44,12 @@ var StateManager = Em.StateManager.extend({
 			return false;
 		}
 		// init transition if ready
-    	if( MFT.TransitionIterator.ready ) {
+    	if( MFT.TransitionIterator.get('ready') ) {
     		MFT.TransitionIterator.init( arguments[0] );
     		return this.transitionTo.apply( this, arguments );
     	}
   	},
-	
+  	
 	/** Go to parent state */
 	back: function() {		
 		if ( this.currentState.parentState.hasOwnProperty('name') ) {
@@ -128,13 +125,11 @@ var StateManager = Em.StateManager.extend({
 		}),
 		
 		nonMedia: Em.State.create({
-			
-			options: Em.State.create({
-				
-				subMenu: Em.State.create({
-				
-				})
-			})
+            enter: function() {
+                this._super();
+                
+                MFT.NonMediaController.restoreCurrentApp();
+            }
 		})
 	}),
 	
@@ -334,17 +329,11 @@ var StateManager = Em.StateManager.extend({
 		
 		applink: Em.State.create({
 
-			applinkperforminteractionchoise: Em.State.create({
-			}),
-
-			applinkoptions: Em.State.create({
-
-				applinkoptionssubmenu: Em.State.create({
-				})
-			}),
-
-			applinkslider: Em.State.create({
-			})		
+			enter: function() {
+                this._super();
+                
+                MFT.ApplinkMediaController.restoreCurrentApp();
+            }	
 
 		}),
 
