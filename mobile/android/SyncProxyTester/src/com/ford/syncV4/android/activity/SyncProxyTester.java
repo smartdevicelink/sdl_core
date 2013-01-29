@@ -2166,23 +2166,35 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
-									Vector<TTSChunk> ttsChunks = TTSChunkFactory
-											.createSimpleTTSChunks(txtTtsChunks.getText().toString());
-									try {
-										AlertManeuver msg = new AlertManeuver();
-										msg.setTtsChunks(ttsChunks);
-										msg.setCorrelationID(autoIncCorrId++);
-										if (chkIncludeSoftButtons.isChecked() &&
-												(currentSoftButtons != null) &&
-												(currentSoftButtons.size() > 0)) {
-											msg.setSoftButtons(currentSoftButtons);
+									Vector<TTSChunk> ttsChunks = new Vector<TTSChunk>();
+									// string to join/split ttsChunks string
+									final String joinString = ",";
+									
+									String ttsChunksString = txtTtsChunks.getText().toString();
+									for (String ttsChunk : ttsChunksString.split(joinString)) {
+										TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, ttsChunk);
+										ttsChunks.add(chunk);
+									}
+
+									if (!ttsChunks.isEmpty()) {
+										try {
+											AlertManeuver msg = new AlertManeuver();
+											msg.setTtsChunks(ttsChunks);
+											msg.setCorrelationID(autoIncCorrId++);
+											if (chkIncludeSoftButtons.isChecked() &&
+													(currentSoftButtons != null) &&
+													(currentSoftButtons.size() > 0)) {
+												msg.setSoftButtons(currentSoftButtons);
+											}
+											currentSoftButtons = null;
+											chkIncludeSoftButtons = null;
+											_msgAdapter.logMessage(msg, true);
+											ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+										} catch (SyncException e) {
+											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 										}
-										currentSoftButtons = null;
-										chkIncludeSoftButtons = null;
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									} else {
+										Toast.makeText(mContext, "No TTS Chunks entered", Toast.LENGTH_SHORT).show();
 									}
 								}
 							});

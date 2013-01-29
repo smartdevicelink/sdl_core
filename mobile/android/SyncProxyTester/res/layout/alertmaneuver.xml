@@ -10,13 +10,23 @@
     android:paddingLeft="20dip"
     android:paddingRight="20dip" >
     
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:layout_weight="1"
-        android:textStyle="bold" android:text="TTSChunks">
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="TTSChunks (comma-separated)"
+        android:textStyle="bold" >
+
     </TextView>
-    <EditText android:text="TTSChunks" android:id="@+id/txtTtsChunks"
-        android:layout_width="fill_parent" android:layout_height="wrap_content"
-        android:visibility="visible" android:freezesText="true">
+
+    <EditText
+        android:id="@+id/txtTtsChunks"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:freezesText="true"
+        android:text="TTSChunk1,TTSChunk2,AnotherTTSChunk"
+        android:visibility="visible" >
+
     </EditText>
 
     <LinearLayout
