@@ -99,8 +99,27 @@
 #info_nonMedia .app_fields .label {
 	position: relative;
 	border: 1px solid #393939;
-	padding: 10px;
+	padding: 7px;
 	margin-bottom: 5px;
+}
+
+#info_nonMedia .persets {
+    top: 220px;
+    width: 420px;
+    height: 80px;
+}
+
+#info_nonMedia .persets .ffw-button {
+    width: 138px;
+    height: 38px;
+    position: relative;
+    float: left;
+    line-height: 40px;
+    border-bottom: 1px solid #393939;
+    border-right: 1px solid #393939;
+    border-top: 1px solid #222;
+    border-left: 1px solid #222;
+    text-align: center;
 }
 
 #applink_options .list{

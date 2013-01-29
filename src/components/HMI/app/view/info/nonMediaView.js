@@ -27,7 +27,8 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 			'deviceName',
 			'image',
 			'fields',
-			'innerMenu'
+			'innerMenu',
+			'persets'
 		],
 		
 		deviceName: MFT.Label.extend({
@@ -111,6 +112,26 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 					templateName: 'arrow'
 				})
 			})
+		}),
+		
+		persets: Em.ContainerView.extend({
+            classNames: ['persets'],
+            
+            childViews: [
+    			'perset1',
+    			'perset2',
+    			'perset3',
+    			'perset4',
+    			'perset5',
+    			'perset6'
+            ],
+            
+            perset1: MFT.Button.extend({text:'Perset 1'}),
+            perset2: MFT.Button.extend({text:'Perset 2'}),
+            perset3: MFT.Button.extend({text:'Perset 3'}),
+            perset4: MFT.Button.extend({text:'Perset 4'}),
+            perset5: MFT.Button.extend({text:'Perset 5'}),
+            perset6: MFT.Button.extend({text:'Perset 6'})
 		})
 	})
 });
