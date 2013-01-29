@@ -28,8 +28,14 @@ MFT.ApplinkAppController = Em.Object.create({
         
         // if submenu
         if ( element.menuId ) {
-            this.onSubMenu( element.menuId );
             
+            // activate driver destruction if necessary
+            if ( MFT.ApplinkController.driverDistractionState ) {
+                MFT.DriverDistraction.activate();
+            } else {
+                this.onSubMenu( element.menuId );
+            }
+                        
             return;
         }
         
