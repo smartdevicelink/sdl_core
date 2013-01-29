@@ -45,12 +45,12 @@ MFT.NonMediaController = Em.Object.create({
      * @param {ApplinkAppModel}
      */
     activateApp: function( applicationModel ){
-            
-        // set active model
-        MFT.ApplinkAppController.set('model',applicationModel);
         
         // store active application id
         this.set( 'currentAppId' , applicationModel.appId);
+        
+        // set active model
+        MFT.ApplinkAppController.set('model',applicationModel);
         
         // send response
         FFW.AppLinkCoreClient.ActivateApp( applicationModel.appId );

@@ -27,6 +27,7 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         );
         
         this.set('commandsList',[]);
+        this.set('softButtons',[]);
 	},
 	
 	
@@ -47,5 +48,10 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         this.appInfo.set('field3',        params.mainField3);
         this.appInfo.set('field4',        params.mainField4);
         //this.appInfo.set('image',         params.graphic);
+        
+        // Get soft buttons if exists
+        if ( params.softButtons ) {
+            this.updateSoftButtons( params.softButtons );
+        }
     }
 });

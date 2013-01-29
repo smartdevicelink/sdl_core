@@ -52,15 +52,13 @@ MFT.MenuList = Em.ContainerView.extend({
 	},
 	
 	/**
-	 * Delete items from container
-	 * 
+	 * Delete existing Soft Buttons from container
 	 */
 	deleteItems: function() {
-		var i,
-			count = this.get('content.childViews').length;
-		for( i=0; i < count; i++){
-			this.get('content.childViews').popObject();
-		}
+	   
+	   this.get('content.childViews').removeObjects(
+	       this.get('content.childViews').filterProperty('softButtonId')
+	   );
 	},
 
 	classNames: ['ffw_list_menu'],

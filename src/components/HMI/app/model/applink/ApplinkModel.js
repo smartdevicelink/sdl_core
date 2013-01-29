@@ -258,7 +258,7 @@ MFT.ApplinkModel = Em.Object.create({
     onGetDeviceList: function( params ){
         if (null == params.resultCode || (null != params.resultCode && "SUCCESS" == params.resultCode)) {
             if( MFT.States.info.devicelist.active && params.deviceList && params.deviceList.length){
-                MFT.DeviceLilstView.ShowDeviceList( params );
+                MFT.DeviceListView.ShowDeviceList( params );
             }
         }
     },

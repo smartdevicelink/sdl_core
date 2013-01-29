@@ -41,9 +41,16 @@ MFT.ApplinkAppModel = Em.Object.extend({
     appInfo: null,
     
     /**
+     * Array of Soft Buttons
+     *
+     * @type {Array}
+     */
+    softButtons: [],
+    
+    /**
      * Array of Objects for TBTTurnList
      *
-     * @type: array
+     * @type {Array}
      */
     turnList: [],
 
@@ -93,6 +100,20 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 * @type {Object}
 	 */	
 	interactionChoices: {},
+	
+	/**
+	 * Update Soft Buttons
+	 * will handle on command Show
+	 *
+	 * @param {Array}
+	 */
+	updateSoftButtons: function( buttons ) {
+        // delete existing buttons from array
+        this.softButtons.splice(0);
+        
+        // push new buttons to array
+        this.get('softButtons').pushObjects( buttons );
+	},
     
     /**
      * Add command to list

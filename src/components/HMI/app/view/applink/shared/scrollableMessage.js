@@ -22,6 +22,8 @@ MFT.ScrollableMessage = MFT.ApplinkAbstractView.create({
 
     appId:              null,
 
+    timer:              null,
+
     childViews: [
         'backButton',
         'captionText',
@@ -31,10 +33,15 @@ MFT.ScrollableMessage = MFT.ApplinkAbstractView.create({
 
     activate: function( appName, params ){
         if(appName){
+            
+            var self = this;
+            
             this.set('captionText.content',appName);
             this.softButtons.addItems( params.softButtons );
             this.set('listOfCommands.items', params.scrollableMessageBody );
             this.set('active',true);
+            clearTimeout(this.timer);
+            this.timer = setTimeout(function(){self.set('active', false);}, params.timeout);
         }
     },
 

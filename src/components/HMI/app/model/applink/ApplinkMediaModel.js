@@ -12,7 +12,6 @@
 
 MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 
-
     init: function() {
 	   
 	   this._super();
@@ -38,16 +37,6 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 	active: false,
 
 	applinkConnectionStatus: true,
-
-	/**
-	 * Array of commands in ApplinkOptionsView
-	 */
-    optionsCommands:			new Array(),
-
-    /**
-	 * Array of commands for VR
-	 */
-    voiceRecognitionCommands:	new Array(),
 
 	/**
 	 * Timer for Media Clock
@@ -115,89 +104,12 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 		this.startTimer();
 	}.observes('this.duration'),
 
-    /** Add command to Options list */
-    onApplinkOptionsAddCommand: function( commandId, params, icon, appId ){
-
-       MFT.ApplinkOptionsView.AddCommand( commandId, params, icon, appId );
-
-    },
-
-    /** 
-     * Delete command to Options list
-     */
-    onApplinkOptionsDeleteCommand: function(commandId){
-
-        MFT.ApplinkOptionsView.DeleteCommand( commandId );
-
-        var  count = this.subMenuCommands.length;
-        for(var i = count-1; i >= 0; i--){
-            if(this.subMenuCommands[i].cmdId == commandId){
-               this.subMenuCommands.splice(i, 1);
-            }
-        }
-    },
-
-    /**
-     * Add subMenu button to Options list
-     */
-    onApplinkAddSubMenu: function( menuId, params ){
-
-        MFT.ApplinkOptionsView.AddSubMenu( menuId, params.menuName, params.position );
-
-    },
-
-    /**
-     * Delete subMenu button from Options list
-     */
-    onApplinkDeleteSubMenu: function( menuId ){
-
-        if( MFT.ApplinkMediaController.currentApplinkSubMenuid == menuId ){
-            MFT.States.back();
-        }
-
-        MFT.ApplinkOptionsView.DeleteSubMenu( menuId );
-
-        return "SUCCESS";
-    },
-
-    /**
-     * Add command to VRPopUp list
-     */
-    onApplinkVRAddCommand: function( commandId, vrCommands ){
-        MFT.VRPopUp.AddCommand( commandId, vrCommands );
-    },
-
-    /**
-     * Delete command from VRPopUp list
-     */
-    onApplinkVRDeleteCommand: function( commandId ){
-
-        MFT.VRPopUp.DeleteCommand( commandId );
-
-    },
-
-    /**
-     * Applink AddCommand handler
-     */
-    onApplinkAddCommand: function(params){
-        if( !params.menuParams.parentID ){
-            this.onApplinkOptionsAddCommand(params.cmdId, params.menuParams, params.cmdIcon ? params.cmdIcon.value : null , params.appId);
-        }else{
-            this.subMenuCommands.push(params);
-            if(MFT.States.media.applink.applinkoptions.applinkoptionssubmenu.active){
-                MFT.ApplinkOptionsSubMenuView.SubMenuActivate(MFT.ApplinkMediaController.currentApplinkSubMenuid);
-            }
-
-        }
-    },
-
     /**
      * Applink Setter for Media Clock Timer
      */
     applinkSetMediaClockTimer: function(params){
 		if(params.updateMode == "CLEAR" ) {
 			this.stopTimer();
-			return;
 		}
         if(params.updateMode == "COUNTUP"){
             this.set('countUp', true);
@@ -215,6 +127,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
             this.set('pause', false);
         }
         
+        return 'SUCCCESS';
     },
 
     /**

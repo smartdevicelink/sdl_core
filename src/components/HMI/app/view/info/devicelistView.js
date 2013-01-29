@@ -1,16 +1,16 @@
 /**
- * @name MFT.ApplinkOptionsView
+ * @name MFT.DeviceListView
  * 
  * @desc Media App Options module visual representation
  * 
  * @category    View
- * @filesource  app/view/media/ApplinkOptionsView.js
+ * @filesource  app/view/media/devicelistView.js
  * @version     2.0
  *
  * @author      Andriy Melnik
  */
  
-MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
+MFT.DeviceListView = Em.ContainerView.create(MFT.LoadableView,{
 
     classNames:        ['info_apps_deviceList_view'],
 
@@ -84,7 +84,7 @@ MFT.DeviceLilstView = Em.ContainerView.create(MFT.LoadableView,{
     }.observes('this.stateObj.active'),
 
     /**
-      * List for option on ApplinkOptionsView screen
+      * List for option on DeviceListView screen
       */
     listOfDevices: MFT.List.extend({
 
