@@ -329,17 +329,11 @@ var StateManager = Em.StateManager.extend({
 		
 		applink: Em.State.create({
 
-			applinkperforminteractionchoise: Em.State.create({
-			}),
-
-			applinkoptions: Em.State.create({
-
-				applinkoptionssubmenu: Em.State.create({
-				})
-			}),
-
-			applinkslider: Em.State.create({
-			})		
+			enter: function() {
+                this._super();
+                
+                MFT.ApplinkMediaController.restoreCurrentApp();
+            }	
 
 		}),
 

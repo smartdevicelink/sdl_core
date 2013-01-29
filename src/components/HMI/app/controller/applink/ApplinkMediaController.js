@@ -13,14 +13,31 @@
 MFT.ApplinkMediaController = Em.Object.create({
     
     /**
-      * Model binding
-      */
-    model:          null,
-
+	 * Current Media application id
+	 *
+	 * @type {Number}
+	 */
+	currentAppId: 0,
+    
     /**
-      * Text for label on Perform Interaction screen
-      */
-    subMenuLabel:   '',
+     * Return current Media application name
+     * used for application button
+     */
+    currentAppName: function() {
+        if ( this.currentAppId ) {
+            return MFT.ApplinkController.getApplicationModel(this.currentAppId).appName;
+        }
+    }.property('this.currentAppId'),
+    
+    /**
+     * Return current Media application icon
+     * used for application button
+     */
+    currentAppIcon: function() {
+        if ( this.currentAppId ) {
+            return MFT.ApplinkController.getApplicationModel(this.currentAppId).appIcon;
+        }
+    }.property('this.currentAppId'),
 
     /*
      * Enumeraction that describes possible contexts
@@ -43,36 +60,14 @@ MFT.ApplinkMediaController = Em.Object.create({
        FFW.UI.onCommandSoftButton(element.softButtonID, element.appId);
     },
 
-    /** Switching on Applink Options */
-    turnOnApplinkOptions: function(el){
-        MFT.States.goToState('media.applink.applinkoptions');
-    },
-
-    /** Switching on Applink Slider */
-    turnOnApplinkSlider: function(el){
-        MFT.States.goToState('media.applink.applinkslider');
-    },
-
-    /** Switching on Applink Sub Mennu */
-    turnOnApplinkSubMenu: function(el){
-        if( MFT.ApplinkController.driverDistractionState ){
-            MFT.DriverDistraction.activate();
-        }else{
-            this.set('currentApplinkSubMenuid', el.menuId);
-            this.set('subMenuLabel', el.text);
-            MFT.States.goToState('media.applink.applinkoptions.applinkoptionssubmenu');
-        }
-    },
-
     /** Switching on Application */
-    turnOnApplink: function( applicationModel ){
+    activateApp: function( applicationModel ){
 
         // set active model
         MFT.ApplinkAppController.set('model',applicationModel);
         
-        // TO BE REMOVED LATER
-        this.set('model', applicationModel);
-        // TO BE REMOVED LATER
+        // store active application id
+        this.set( 'currentAppId' , applicationModel.appId);
         
         FFW.AppLinkCoreClient.ActivateApp( applicationModel.appId );
 
@@ -80,6 +75,16 @@ MFT.ApplinkMediaController = Em.Object.create({
 
         MFT.MediaController.turnOnApplink();
         
+    },
+    
+    /**
+     * Restore current application to active state
+     */
+    restoreCurrentApp: function() {
+        if ( MFT.ApplinkAppController.model.appId === this.currentAppId ) {
+            return;
+        }
+        this.activateApp( MFT.ApplinkController.getApplicationModel( this.currentAppId ) );
     },
 
     /** Applink perform interaction action from VR */

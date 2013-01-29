@@ -45,9 +45,7 @@ MFT.NonMediaController = Em.Object.create({
      * @param {ApplinkAppModel}
      */
     activateApp: function( applicationModel ){
-        
-        console.log('Activate application: '+applicationModel.appId);
-        
+            
         // set active model
         MFT.ApplinkAppController.set('model',applicationModel);
         

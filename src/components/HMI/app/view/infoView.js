@@ -125,7 +125,7 @@ MFT.InfoView = Em.ContainerView.create( MFT.LoadableView, {
 				textBinding:		'MFT.NonMediaController.currentAppName',
 				iconBinding:		'MFT.NonMediaController.currentAppIcon',
 				action:				'onState',
-				target:				'MFT.InfoController',
+				target:				'MFT.InfoController'
 			})
 		})
 	})		
