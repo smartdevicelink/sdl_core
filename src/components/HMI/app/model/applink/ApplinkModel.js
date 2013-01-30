@@ -37,6 +37,52 @@ MFT.ApplinkModel = Em.Object.create({
         ]
     },
 
+    /**
+     * List of states for OnTBTClientState notification
+     */
+    tbtClientStates: [
+        {
+            name:   "ROUTE_UPDATE_REQUEST",
+            id:     0
+        },
+        {
+            name:   "ROUTE_ACCEPTED",
+            id:     1
+        },
+        {
+            name:   "ROUTE_REFUSED",
+            id:     2
+        },
+        {
+            name:   "ROUTE_CANCELLED",
+            id:     3
+        },
+        {
+            name:   "ETA_REQUEST",
+            id:     4
+        },
+        {
+            name:   "NEXT_TURN_REQUEST",
+            id:     5
+        },
+        {
+            name:   "ROUTE_STATUS_REQUEST",
+            id:     6
+        },
+        {
+            name:   "ROUTE_SUMMARY_REQUEST",
+            id:     7
+        },
+        {
+            name:   "TRIP_STATUS_REQUEST",
+            id:     8
+        },
+        {
+            name:   "ROUTE_UPDATE_REQUEST_TIMEOUT",
+            id:     9
+        }
+    ],
+
 
     /**
      * Data for AudioPassThruPopUp that contains params for visualisation

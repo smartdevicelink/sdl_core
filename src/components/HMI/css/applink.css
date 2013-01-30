@@ -378,6 +378,15 @@
 	text-align: center;
 	line-height: 48px;
 }
+#tbtClientStateButton.tbtClientStateButton{
+	width: 158px;
+	height: 48px;
+	left: 1018px;
+	top: 418px;
+	text-align: center;
+	line-height: 48px;
+}
+#tbtClientStateView,
 #VehicleInfo{
 	opacity: 0;
 	left: 50px;
@@ -391,6 +400,7 @@
 	display: none;
 	border: 1px solid white;
 }
+#tbtClientStateView .tbtClientStateLabel,
 #VehicleInfo .vehicleInfoLabel{
 	top: 10px;
 	width: 600px;
@@ -399,10 +409,12 @@
 	padding: 15px;
 	background: #393939;
 }
+#tbtClientStateView.active,
 #VehicleInfo.active{
 	opacity: 1;
 	display: block;
 }
+#tbtClientStateView .tbtClientState, 
 #VehicleInfo .prndl{
 	top: 70px;
 	width: 600px;
@@ -411,6 +423,7 @@
 	padding: 10px;
 	background: #535353;
 }
+#tbtClientStateView .tbtClientStateSelect,
 #VehicleInfo .prndlSelect{
 	top: 125px;
 	position: absolute;
@@ -420,6 +433,7 @@
 	color: white;
 	background: #393939;
 }
+#tbtClientStateView .tbtClientStateSelect option,
 #VehicleInfo .prndlSelect option{
 	background: #393939;
 }

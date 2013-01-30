@@ -43,6 +43,7 @@ MFT.AppViews = Em.ContainerView.extend({
 		MFT.AudioPassThruPopUp,
 		MFT.VRPopUp,
 		MFT.VehicleInfo,
+		MFT.TBTClientStateView,
 		MFT.DriverDistraction,
 		//MFT.PlayerControllsView,
 		//MFT.VideoErrorPopupView,

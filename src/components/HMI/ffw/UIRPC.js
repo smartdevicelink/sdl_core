@@ -584,6 +584,20 @@ FFW.UI = FFW.RPCObserver.create({
 			"params":	{"hmiDisplayLanguage":	lang}
 		};
 		this.client.send(JSONMessage);
-	}
+	},
 
+	/*
+	 * Notifies if TBTClientState was activated
+ 	 */
+	onTBTClientState: function( state ) {
+		Em.Logger.log("FFW.UI.OnTBTClientState");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc":	"2.0",
+			"method":	"UI.OnTBTClientState",
+			"params":	{"state":	state}
+		};
+		this.client.send(JSONMessage);
+	},
 })

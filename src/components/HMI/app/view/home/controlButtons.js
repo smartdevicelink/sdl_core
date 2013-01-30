@@ -22,6 +22,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 		'infoTable',
 		'sendData',
 		'vehicleInfo',
+		'tbtClientState',
 		'UILanguages',
 		'TTSVRLanguages',
 		'UILanguagesLabel',
@@ -105,15 +106,28 @@ MFT.ControlButtons = Em.ContainerView.create({
 	}),
 
 	/**
-	 * Voice Recognition button
+	 * VehicleInfo button
 	 */
 	vehicleInfo: MFT.Button.create({
 		elementId:	'vehicleInfoButton',
 		classNames:	'vehicleInfoButton btn',
 		text:		'Vehicle Info', 
-		actionUp:		function(){
-			this._super();
+		action:		function(){
+			//this._super();
 			MFT.VehicleInfo.toggleActivity();
+		}
+	}),
+
+	/**
+	 * TBT Client State button
+	 */
+	tbtClientState: MFT.Button.create({
+		elementId:	'tbtClientStateButton',
+		classNames:	'tbtClientStateButton btn',
+		text:		'TBT Client State', 
+		action:		function(){
+			//this._super();
+			MFT.TBTClientStateView.toggleActivity();
 		}
 	}),
 
@@ -123,8 +137,8 @@ MFT.ControlButtons = Em.ContainerView.create({
 	VRButton: MFT.Button.create({
 		elementId:	'VRButton',
 		classNames:	'VRButton',
-		actionUp:		function(){
-			this._super();
+		action:		function(){
+			//this._super();
 			MFT.VRPopUp.activateVRPopUp();
 		}
 	}),
