@@ -112,7 +112,7 @@
 #include "../src/../include/JSONHandler/RPC2Objects//NsRPC2Communication/VehicleInfo/ReadDIDResponse.h"
 
 #include "../src/../src/RPC2ObjectsImpl/Marshaller.inc"
-#include <iostream>
+
 /*
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
@@ -174,19 +174,14 @@ RPC2Command* Marshaller::fromJSON(const Json::Value& json)
 
   if(!json.isMember("id"))				// notification
   {
-    std::cout << " \t\t\tMarshaller: fromJSON\n";
-    std::cout.flush();
     if(!json.isMember("method") || !json["method"].isString())  return 0;
 
     Methods m=getIndex(json["method"].asString().c_str());
-std::cout << " \t\t\tMarshaller: fromJSON " << json["method"].asString() << " " << m << "\n";
-    std::cout.flush();
+
     switch(m)
     {
       case METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPDEACTIVATED:
       {
-        std::cout<<"\t\t\t\tETHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPDEACTIVATED\n";
-        std::cout.flush();
         NsRPC2Communication::AppLinkCore::OnAppDeactivated *rv=new NsRPC2Communication::AppLinkCore::OnAppDeactivated;
         return NsRPC2Communication::AppLinkCore::OnAppDeactivatedMarshaller::fromJSON(json,*rv) ? rv : 0;
       }

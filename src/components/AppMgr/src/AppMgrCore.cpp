@@ -744,7 +744,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -776,7 +776,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -809,7 +809,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::Show_response* response = new NsAppLinkRPC::Show_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
@@ -867,7 +867,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::Speak_response* response = new NsAppLinkRPC::Speak_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
@@ -917,7 +917,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::SetGlobalProperties_response* response = new NsAppLinkRPC::SetGlobalProperties_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
@@ -983,7 +983,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::ResetGlobalProperties_response* response = new NsAppLinkRPC::ResetGlobalProperties_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
@@ -1025,7 +1025,7 @@ namespace NsAppManager
                     if((NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel()) 
                         || (NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel()))
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::Alert_response* response = new NsAppLinkRPC::Alert_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
@@ -1084,7 +1084,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::AddCommand_response* response = new NsAppLinkRPC::AddCommand_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
@@ -1168,7 +1168,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
@@ -1237,7 +1237,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::AddSubMenu_response* response = new NsAppLinkRPC::AddSubMenu_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
@@ -1277,7 +1277,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::DeleteSubMenu_response* response = new NsAppLinkRPC::DeleteSubMenu_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
@@ -1287,7 +1287,7 @@ namespace NsAppManager
                     const unsigned int& menuId = object->get_menuID();
                     if(!app->findMenu(menuId))
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " menuId " << menuId
+                        LOG4CPLUS_WARN(mLogger, " menuId " << menuId
                                             << " hasn't been associated with the application " << app->getName() << " id " << app->getAppID() << " !");
                         NsAppLinkRPC::DeleteSubMenu_response* response = new NsAppLinkRPC::DeleteSubMenu_response;
                         response->set_success(false);
@@ -1352,7 +1352,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::CreateInteractionChoiceSet_response* response = new NsAppLinkRPC::CreateInteractionChoiceSet_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
@@ -1396,7 +1396,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPC::DeleteInteractionChoiceSet_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
@@ -1407,7 +1407,7 @@ namespace NsAppManager
                     const ChoiceSetV1* choiceSetFound = app->findChoiceSet(choiceSetId);
                     if(!choiceSetFound)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " a choice set " << choiceSetId
+                        LOG4CPLUS_WARN(mLogger, " a choice set " << choiceSetId
                                             << " hasn't been registered within the application " << app->getName() << " id" << app->getAppID() << " !");
                         NsAppLinkRPC::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPC::DeleteInteractionChoiceSet_response;
                         response->set_success(false);
@@ -1442,7 +1442,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName()
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName()
                             << " with session key "
                             << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::PerformInteraction_response* response = new NsAppLinkRPC::PerformInteraction_response;
@@ -1458,7 +1458,7 @@ namespace NsAppManager
                         const ChoiceSetV1* choiceSetFound = app->findChoiceSet(choiceSetId);
                         if(!choiceSetFound)
                         {
-                            LOG4CPLUS_ERROR_EXT(mLogger, " a choice set " << choiceSetId
+                            LOG4CPLUS_WARN(mLogger, " a choice set " << choiceSetId
                                                 << " hasn't been registered within the application " << app->getName()
                                                 << " id" << app->getAppID() << " !");
                             NsAppLinkRPC::PerformInteraction_response* response = new NsAppLinkRPC::PerformInteraction_response;
@@ -1545,7 +1545,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::SetMediaClockTimer_response* response = new NsAppLinkRPC::SetMediaClockTimer_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
@@ -1589,7 +1589,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -1810,7 +1810,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -1841,7 +1841,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -1869,7 +1869,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::SetMediaClockTimer_response* response = new NsAppLinkRPCV2::SetMediaClockTimer_response;
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::SetMediaClockTimerID);
@@ -1911,7 +1911,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -1990,7 +1990,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -2051,7 +2051,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -2102,7 +2102,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::Slider_response* response = new NsAppLinkRPCV2::Slider_response;
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::SliderID);
@@ -2149,7 +2149,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::SetAppIcon_response* response = new NsAppLinkRPCV2::SetAppIcon_response;
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::SetAppIconID);
@@ -2201,7 +2201,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::ScrollableMessage_response* response = new NsAppLinkRPCV2::ScrollableMessage_response;
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::ScrollableMessageID);
@@ -2252,7 +2252,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::EncodedSyncPDataID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -2286,7 +2286,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         mobileResponse->set_success(false);
                         mobileResponse->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
@@ -2339,7 +2339,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         mobileResponse->set_success(false);
                         mobileResponse->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
@@ -2376,7 +2376,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::CreateInteractionChoiceSet_response* response = new NsAppLinkRPCV2::CreateInteractionChoiceSet_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::CreateInteractionChoiceSetID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -2415,7 +2415,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPCV2::DeleteInteractionChoiceSet_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteInteractionChoiceSetID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -2428,7 +2428,7 @@ namespace NsAppManager
                     const ChoiceSetV2* choiceSetFound = app->findChoiceSet(choiceSetId);
                     if(!choiceSetFound)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " a choice set " << choiceSetId
+                        LOG4CPLUS_WARN(mLogger, " a choice set " << choiceSetId
                                             << " hasn't been registered within the application " << app->getName() << " id" << app->getAppID() << " !");
                         NsAppLinkRPCV2::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPCV2::DeleteInteractionChoiceSet_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteInteractionChoiceSetID);
@@ -2467,7 +2467,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::PerformInteraction_response* response = new NsAppLinkRPCV2::PerformInteraction_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::PerformInteractionID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -2483,7 +2483,7 @@ namespace NsAppManager
                         const ChoiceSetV2* choiceSetFound = app->findChoiceSet(choiceSetId);
                         if(!choiceSetFound)
                         {
-                            LOG4CPLUS_ERROR_EXT(mLogger, " a choice set " << choiceSetId
+                            LOG4CPLUS_WARN(mLogger, " a choice set " << choiceSetId
                                                 << " hasn't been registered within the application " << app->getName() << " id" << app->getAppID() << " !");
                             NsAppLinkRPCV2::PerformInteraction_response* response = new NsAppLinkRPCV2::PerformInteraction_response;
                             response->setMethodId(NsAppLinkRPCV2::FunctionID::PerformInteractionID);
@@ -2538,7 +2538,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::Alert_response* response = new NsAppLinkRPCV2::Alert_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::AlertID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -2597,7 +2597,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::Show_response* response = new NsAppLinkRPCV2::Show_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::ShowID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -2678,7 +2678,7 @@ namespace NsAppManager
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel()
                         || NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::Speak_response* response = new NsAppLinkRPCV2::Speak_response;
                         response->set_success(false);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -2719,7 +2719,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::AddCommand_response* response = new NsAppLinkRPCV2::AddCommand_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::AddCommandID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -2817,7 +2817,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::DeleteCommand_response* response = new NsAppLinkRPCV2::DeleteCommand_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteCommandID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -2891,7 +2891,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::AddSubMenu_response* response = new NsAppLinkRPCV2::AddSubMenu_response;
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::AddSubMenuID);
@@ -2934,7 +2934,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::DeleteSubMenu_response* response = new NsAppLinkRPCV2::DeleteSubMenu_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteSubMenuID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -3002,7 +3002,7 @@ namespace NsAppManager
 
                     if (core->getAudioPassThruFlag())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "PerformAudioPassThru::TOO_MANY_PENDING_REQUESTS");
+                        LOG4CPLUS_WARN(mLogger, "PerformAudioPassThru::TOO_MANY_PENDING_REQUESTS");
                         sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
                             , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                                 , NsAppLinkRPCV2::Result::TOO_MANY_PENDING_REQUESTS
@@ -3026,7 +3026,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::PerformAudioPassThru_response* response = new NsAppLinkRPCV2::PerformAudioPassThru_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -3188,7 +3188,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -3220,7 +3220,7 @@ namespace NsAppManager
                         response->set_info("Application was already subscribed on some VehicleData which it is trying to subscribe!");
                     } else
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "Wrong command sequence!" );
+                        LOG4CPLUS_WARN(mLogger, "Wrong command sequence!" );
                         break;
                     }
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -3254,7 +3254,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -3286,7 +3286,7 @@ namespace NsAppManager
                         response->set_info("Application was subscribed not to all VehicleData which it is trying to unsubscribe!");
                     } else
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "Wrong command sequence!" );
+                        LOG4CPLUS_WARN(mLogger, "Wrong command sequence!" );
                         break;
                     }
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -3309,7 +3309,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::GetVehicleData_response* response = new NsAppLinkRPCV2::GetVehicleData_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::GetVehicleDataID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -3348,7 +3348,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::ReadDID_response* response = new NsAppLinkRPCV2::ReadDID_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::ReadDIDID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -3389,7 +3389,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::GetDTCs_response* response = new NsAppLinkRPCV2::GetDTCs_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::GetDTCsID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -3548,7 +3548,7 @@ namespace NsAppManager
                         = new NsRPC2Communication::UI::AlertManeuver;
                     if (!alert)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "new NsRPC2Communication::Navigation::AlertManeuver() failed");
+                        LOG4CPLUS_INFO_EXT(mLogger, "new NsRPC2Communication::Navigation::AlertManeuver() failed");
                         sendResponse<NsAppLinkRPCV2::AlertManeuver_response, NsAppLinkRPCV2::Result::ResultInternal>(
                             NsAppLinkRPCV2::FunctionID::AlertManeuverID
                             , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
@@ -3584,7 +3584,7 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::DialNumber_response* response = new NsAppLinkRPCV2::DialNumber_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -3625,7 +3625,7 @@ namespace NsAppManager
                     if(NsAppLinkRPCV2::HMILevel::HMI_LIMITED == app->getApplicationHMIStatusLevel()
                         || NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::ShowConstantTBT_response* response = new NsAppLinkRPCV2::ShowConstantTBT_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::ShowConstantTBTID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -4985,7 +4985,7 @@ namespace NsAppManager
                     MobileHandler::getInstance().sendRPCMessage(response, appId);
                 } else
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "This command is available in protocol V2 only!");
+                    LOG4CPLUS_WARN(mLogger, "This command is available in protocol V2 only!");
                 }
                 return;
             }
@@ -5388,7 +5388,7 @@ namespace NsAppManager
                 NsRPC2Communication::AppLinkCore::ActivateApp* object = static_cast<NsRPC2Communication::AppLinkCore::ActivateApp*>(msg);
                 if ( !object )
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't cast object to ActivateApp type");
+                    LOG4CPLUS_WARN(mLogger, "Couldn't cast object to ActivateApp type");
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse>(
                         object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
                     return;
@@ -5457,7 +5457,7 @@ namespace NsAppManager
                 Application* app = AppMgrRegistry::getInstance().getActiveItem();
                 if(!app)
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, " No active application found!");
+                    LOG4CPLUS_WARN(mLogger, " No active application found!");
                     return;
                 }
 
@@ -5532,7 +5532,7 @@ namespace NsAppManager
                     Application* app = core->getApplicationFromItemCheckNotNull(it->second);
                     if(!app)
                     {
-                        LOG4CPLUS_ERROR_EXT(mLogger, " null-application found!");
+                        LOG4CPLUS_WARN(mLogger, " null-application found!");
                         continue;
                     }
 
@@ -5580,7 +5580,7 @@ namespace NsAppManager
                 }
                 else
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, " Application list is empty!");
+                    LOG4CPLUS_WARN(mLogger, " Application list is empty!");
                     response->setResult(NsAppLinkRPCV2::Result::GENERIC_ERROR);
                 }
 
@@ -5769,7 +5769,7 @@ namespace NsAppManager
                     MobileHandler::getInstance().sendRPCMessage(response, appId);
                 } else
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "GetVehicleData is present in Protocol V2 only!!!");
+                    LOG4CPLUS_WARN(mLogger, "GetVehicleData is present in Protocol V2 only!!!");
                 }
                 return;
             }
@@ -5887,7 +5887,7 @@ namespace NsAppManager
                     MobileHandler::getInstance().sendRPCMessage(response, appId);
                 } else
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "GetVehicleData is present in Protocol V2 only!!!");
+                    LOG4CPLUS_WARN(mLogger, "GetVehicleData is present in Protocol V2 only!!!");
                 }
                 return;
             }
@@ -5932,7 +5932,7 @@ namespace NsAppManager
                     MobileHandler::getInstance().sendRPCMessage(readDIDResponse, appId);
                 } else
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "ReadDID is present in Protocol V2 only!!!");
+                    LOG4CPLUS_WARN(mLogger, "ReadDID is present in Protocol V2 only!!!");
                 }
                 core->mMessageMapping.removeMessage(response->getId());
                 return;

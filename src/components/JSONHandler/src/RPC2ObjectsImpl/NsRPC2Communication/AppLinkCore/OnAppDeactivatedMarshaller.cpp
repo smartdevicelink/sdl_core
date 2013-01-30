@@ -10,7 +10,7 @@
   source stamp	Wed Jan 23 13:56:28 2013
   author	robok0der
 */
-#include <iostream>
+
 using namespace NsRPC2Communication::AppLinkCore;
 
 bool OnAppDeactivatedMarshaller::checkIntegrity(OnAppDeactivated& s)
@@ -72,16 +72,12 @@ Json::Value OnAppDeactivatedMarshaller::toJSON(const OnAppDeactivated& e)
 
 bool OnAppDeactivatedMarshaller::fromJSON(const Json::Value& json,OnAppDeactivated& c)
 {
-  std::cout<<"OnAppDeactivatedMarshaller::fromJSON\n";
-  std::cout.flush();
   try
   {
     if(!json.isObject())  return false;
     if(!json.isMember("jsonrpc") || !json["jsonrpc"].isString() || json["jsonrpc"].asString().compare("2.0"))  return false;
     if(!json.isMember("method") || !json["method"].isString() || json["method"].asString().compare("AppLinkCore.OnAppDeactivated"))  return false;
-    std::cout<<"OnAppDeactivatedMarshaller::fromJSON: " << json["method"].asString() << "\n";
-  std::cout.flush();
-
+    
     if(!json.isMember("params")) return false;
 
     Json::Value js=json["params"];
@@ -89,15 +85,11 @@ bool OnAppDeactivatedMarshaller::fromJSON(const Json::Value& json,OnAppDeactivat
     if(!js.isMember("appName") || !js["appName"].isString())  return false;
     c.appName=js["appName"].asString();
     if(c.appName.length()>100)  return false;
-std::cout<<"OnAppDeactivatedMarshaller::fromJSON : " << c.appName << "\n";
-  std::cout.flush();
     if(!js.isMember("reason") || !NsAppLinkRPCV2::DeactivateReasonMarshaller::fromJSON(js["reason"],c.reason))  return false;
-std::cout<<"OnAppDeactivatedMarshaller::fromJSON : " << js["reason"].asString() << "\n";
-  std::cout.flush();
+
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;
     c.appId=js["appId"].asInt();
-    std::cout<<"OnAppDeactivatedMarshaller::fromJSON : " << js["appId"].asInt() << "\n";
-  std::cout.flush();
+    
   }
   catch(...)
   {
