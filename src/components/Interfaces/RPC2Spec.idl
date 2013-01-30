@@ -468,7 +468,8 @@ UpdateTurnList(
      * Provides applications with notifications specific to the current TBT client status on the module
      */
 notification OnTBTClientState(
-  TBTState state
+  TBTState state,
+  int appId
 );
 
 /*

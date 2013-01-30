@@ -24,7 +24,7 @@ OnTBTClientState::~OnTBTClientState(void)
 }
 
 
-OnTBTClientState::OnTBTClientState(void) : 
+OnTBTClientState::OnTBTClientState(void) :
   RPC2Notification(Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONTBTCLIENTSTATE)
 {
 }
@@ -44,6 +44,17 @@ const NsAppLinkRPCV2::TBTState& OnTBTClientState::get_state(void)
 bool OnTBTClientState::set_state(const NsAppLinkRPCV2::TBTState& state_)
 {
   state=state_;
+  return true;
+}
+
+int OnTBTClientState::get_appId(void)
+{
+  return appId;
+}
+
+bool OnTBTClientState::set_appId(int appId_)
+{
+  appId=appId_;
   return true;
 }
 

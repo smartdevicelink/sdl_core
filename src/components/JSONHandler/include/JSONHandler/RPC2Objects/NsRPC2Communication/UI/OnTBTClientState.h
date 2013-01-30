@@ -21,29 +21,29 @@ namespace NsRPC2Communication
     class OnTBTClientState : public ::NsRPC2Communication::RPC2Notification
     {
     public:
-    
+
       OnTBTClientState(const OnTBTClientState& c);
       OnTBTClientState(void);
-    
+
       OnTBTClientState& operator =(const OnTBTClientState&);
-    
+
       virtual ~OnTBTClientState(void);
-    
+
       bool checkIntegrity(void);
-    
+
 // getters
       const NsAppLinkRPCV2::TBTState& get_state(void);
-
+      int get_appId(void);
 
 // setters
       bool set_state(const NsAppLinkRPCV2::TBTState& state);
-
+      bool set_appId(int appId);
 
     private:
-
       friend class OnTBTClientStateMarshaller;
 
       NsAppLinkRPCV2::TBTState state;
+      int appId;
 
     };
   }

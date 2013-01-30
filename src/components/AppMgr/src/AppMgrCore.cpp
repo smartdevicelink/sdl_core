@@ -3512,7 +3512,14 @@ namespace NsAppManager
                 case NsAppLinkRPCV2::FunctionID::AlertManeuverID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "A AlertManeuver request has been invoked." );
-                    NsAppLinkRPCV2::AlertManeuver_request* request
+                    sendResponse<NsAppLinkRPCV2::AlertManeuver_response, NsAppLinkRPCV2::Result::ResultInternal>(
+                            NsAppLinkRPCV2::FunctionID::AlertManeuverID
+                            , NsAppLinkRPCV2::Result::IGNORED
+                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                            , false
+                            , sessionKey);
+
+                    /*NsAppLinkRPCV2::AlertManeuver_request* request
                         = static_cast<NsAppLinkRPCV2::AlertManeuver_request*>(mobileMsg);
 
                     Application_v2* app = static_cast<Application_v2*>(
@@ -3564,7 +3571,7 @@ namespace NsAppManager
                     alert->set_softButtons(request->get_softButtons());
 
                     core->mMessageMapping.addMessage(alert->getId(), sessionKey);
-                    HMIHandler::getInstance().sendRequest(alert);
+                    HMIHandler::getInstance().sendRequest(alert);*/
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::DialNumberID:
@@ -4989,6 +4996,34 @@ namespace NsAppManager
                 }
                 return;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONTBTCLIENTSTATE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "UI::OnTBTClientState is received from HMI.");
+                NsRPC2Communication::UI::OnTBTClientState * notification =
+                    static_cast<NsRPC2Communication::UI::OnTBTClientState*>(msg);
+
+                Application* app = core->getApplicationFromItemCheckNotNull(
+                    AppMgrRegistry::getInstance().getItem(notification->get_appId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                if (2 == app->getProtocolVersion())
+                {
+                    NsAppLinkRPCV2::OnTBTClientState* onTBTClientState = new NsAppLinkRPCV2::OnTBTClientState;
+                    onTBTClientState->set_state(notification-> get_state());
+                    onTBTClientState->setMethodId(NsAppLinkRPCV2::FunctionID::OnTBTClientStateID);
+                    onTBTClientState->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                    MobileHandler::getInstance().sendRPCMessage(onTBTClientState, app->getAppID());
+                }
+                else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "This command is available in protocol V2 only!");
+                }
+                break;
+            }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
         }
@@ -5945,7 +5980,7 @@ namespace NsAppManager
         {
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ALERTMANEUVERRESPONSE:
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "ReadDID response is received from HMI.");
+                /*LOG4CPLUS_INFO_EXT(mLogger, "ReadDID response is received from HMI.");
                 NsRPC2Communication::UI::AlertManeuverResponse * response =
                     static_cast<NsRPC2Communication::UI::AlertManeuverResponse*>(msg);
                 Application* app = core->getApplicationFromItemCheckNotNull(
@@ -5967,7 +6002,7 @@ namespace NsAppManager
                     , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
                     , NsAppLinkRPC::ALRPCMessage::RESPONSE
                     , NsAppLinkRPCV2::Result::SUCCESS == response->getResult()
-                    , app->getAppID());
+                    , app->getAppID());*/
 
                 break;
             }

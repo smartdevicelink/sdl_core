@@ -61,7 +61,8 @@ Json::Value OnTBTClientStateMarshaller::toJSON(const OnTBTClientState& e)
   json["method"]=Json::Value("UI.OnTBTClientState");
   json["params"]=Json::Value(Json::objectValue);
 
-  json["params"]["state"]=NsAppLinkRPCV2::TBTStateMarshaller::toJSON(e.state);;
+  json["params"]["state"]=NsAppLinkRPCV2::TBTStateMarshaller::toJSON(e.state);
+  json["params"]["appId"]=Json::Value(e.appId);
   return json;
 }
 
@@ -80,6 +81,8 @@ bool OnTBTClientStateMarshaller::fromJSON(const Json::Value& json,OnTBTClientSta
 
     if(!js.isMember("state") || !NsAppLinkRPCV2::TBTStateMarshaller::fromJSON(js["state"],c.state))  return false;
 
+    if(!js.isMember("appId") || !js["appId"].isInt())  return false;
+    c.appId=js["appId"].asInt();
   }
   catch(...)
   {
