@@ -121,9 +121,6 @@ MFT.ApplinkAppModel = Em.Object.extend({
      * @param {Object}
      */
     addCommand: function( params ) {
-        
-        //Add command's VR synonims to VRPopUp
-        MFT.ApplinkModel.addCommandVR( params );
 
         this.get('commandsList').pushObject({
             commandId:  params.cmdId,
@@ -139,9 +136,6 @@ MFT.ApplinkAppModel = Em.Object.extend({
      * @param {Number}
      */
     deleteCommand: function(commandId){
-
-        //Delete command's VR synonims from VRPopUp
-        MFT.ApplinkModel.deleteCommandVR( commandId );
 
         this.get('commandsList').removeObjects(
             this.get('commandsList').filterProperty('commandId',commandId)
@@ -174,9 +168,6 @@ MFT.ApplinkAppModel = Em.Object.extend({
         this.get('commandsList').removeObjects(
             this.get('commandsList').filterProperty('menuId',menuId)
         );
-
-        //Delete command's from VRPopUp
-        MFT.ApplinkModel.deleteCommandsVR( this.get('commandsList').filterProperty('parent',menuId) );
         
         // remove commands from deleted submenu
         this.get('commandsList').removeObjects(
