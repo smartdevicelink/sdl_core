@@ -89,6 +89,7 @@ NsAppLink::NsTransportManager::EDeviceType NsAppLink::NsTransportManager::CBluet
 void NsAppLink::NsTransportManager::CBluetoothAdapter::createConnectionsListForDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, std::vector< NsAppLink::NsTransportManager::CDeviceAdapter::SConnection* >& ConnectionsList)
 {
     bdaddr_t deviceAddress;
+    tRFCOMMChannelVector rfcommChannels;
     bool isDeviceValid = false;
 
     ConnectionsList.clear();
@@ -104,6 +105,7 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::createConnectionsListForD
         if (0 != device)
         {
             memcpy(&deviceAddress, &device->mAddress, sizeof(bdaddr_t));
+            rfcommChannels = device->mAppLinkRFCOMMChannels;
             isDeviceValid = true;
         }
         else
@@ -120,12 +122,6 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::createConnectionsListForD
 
     if (true == isDeviceValid)
     {
-        LOG4CPLUS_INFO(mLogger, "Searching for AppLink service on device " << DeviceHandle);
-
-        tRFCOMMChannelVector rfcommChannels;
-
-        discoverAppLinkRFCOMMChannels(deviceAddress, rfcommChannels);
-
         if (false == rfcommChannels.empty())
         {
             pthread_mutex_lock(&mConnectionsMutex);
