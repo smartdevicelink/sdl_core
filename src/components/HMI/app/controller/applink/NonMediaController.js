@@ -53,7 +53,7 @@ MFT.NonMediaController = Em.Object.create({
         MFT.ApplinkAppController.set('model',applicationModel);
         
         // send response
-        FFW.AppLinkCoreClient.ActivateApp( applicationModel.appId );
+        //FFW.AppLinkCoreClient.ActivateApp( applicationModel.appId );
         
         // Go to Applink state
         MFT.States.goToState('info.nonMedia');
@@ -64,6 +64,7 @@ MFT.NonMediaController = Em.Object.create({
      */
     restoreCurrentApp: function() {
         if ( MFT.ApplinkAppController.model.appId === this.currentAppId ) {
+            FFW.AppLinkCoreClient.ActivateApp( this.currentAppId );
             return;
         }
         this.activateApp( MFT.ApplinkController.getApplicationModel( this.currentAppId ) );

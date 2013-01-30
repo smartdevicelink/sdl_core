@@ -25,6 +25,13 @@ MFT.ApplinkAppModel = Em.Object.extend({
      * @type {String}
      */
     appName: '',
+
+    /**
+     * Chosen device name
+     *
+     * @type {String}
+     */
+    deviceName: '',
     
     /**
      * Statusbar text

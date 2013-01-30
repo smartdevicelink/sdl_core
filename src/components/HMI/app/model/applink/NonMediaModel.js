@@ -26,12 +26,33 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
                 customPresets:  []
             })
         );
+
+        this.set('appIcon', 'images/info/info_leftMenu_apps_ico.png'),
         
         this.set('commandsList',[]);
         this.set('softButtons',[]);
 	},
-	
-	
+
+    /**
+     * Notification of deactivation of current application model
+     * initiated in StateManager
+     */
+    deactivateApp: function(){
+
+        MFT.ApplinkModel.onDeactivateApp( MFT.TransitionIterator.finalPath, this.appId, this.appName );
+
+    },
+
+    /**
+     * Method hides applink activation button
+     * @param {Number}
+     */
+    onDeleteApplication: function( appId ){
+        if( MFT.NonMediaController.currentAppId == appId ){
+            MFT.NonMediaController.currentAppId = 0;
+        }
+    },
+
 	/**
 	 * Activate current application model
 	 */

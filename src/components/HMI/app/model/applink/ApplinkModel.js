@@ -50,16 +50,7 @@ MFT.ApplinkModel = Em.Object.create({
      * @type object
      */
     registeredApps: {
-        "-1": MFT.ApplinkMediaModel.create({appId:-1,appName:'Test Media'}),            // Used for media applications
-        "-2": MFT.ApplinkNonMediaModel.create({appId:-2,appName:'Test Non Media'}),         // Used for non media applications
     },
-
-    /**
-     * Chosen device name
-     *
-     * @type {String}
-     */
-    deviceName: '<Device Name>',
 
     /**
      * List of icons
@@ -181,6 +172,28 @@ MFT.ApplinkModel = Em.Object.create({
     },
 
     /**
+     * Method to delete activation button from VR commands and delete device parameters from model
+     * @param {Object} params
+     */
+    onAppUnregistered: function( params ){
+        //MFT.ApplinkController.getApplicationModel(params.appId).set('appName', "<No app>");
+        //MFT.ApplinkController.getApplicationModel(params.appId).set('hideApplinkButton', true);
+        MFT.VRPopUp.DeleteActivateApp(params.appId);
+
+        MFT.States.goToState('info.apps');
+
+        MFT.ApplinkModel.get('applicationsList').removeObjects(
+            MFT.ApplinkModel.applicationsList.filterProperty( params.appId )
+        );
+
+        delete MFT.ApplinkModel.registeredApps[ params.appId ];
+
+        MFT.ApplinkModel.getApplicationModel( params.appId ).onDeleteApplication( params.appId );
+
+        MFT.ApplinkController.findNewApps();
+    },
+
+    /**
      * Method to set language for TTS and VR components with parameters sent from ApplinkCore to UIRPC
      * @param {string} lang Language code
      */
@@ -235,23 +248,11 @@ MFT.ApplinkModel = Em.Object.create({
 
     onGetAppList: function( appList ){
 
-        this.applicationsList.splice(0, this.applicationsList.length);
-        for(var i = 0; i < appList.length; i++){
-            this.set('listOfIcons.' + appList[i].appId, appList[i].icon );    
-            this.applicationsList.push({
-                type:       MFT.Button,
-                params:     {
-                    action:         'onActivateApplinkApp',
-                    target:         'MFT.ApplinkController',
-                    text:           appList[i].appName,
-                    appId:          appList[i].appId,
-                    className:      'scrollButtons button notpressed',
-                    icon:           appList[i].icon,
-                    templateName:   appList[i].icon ? 'rightIcon' : 'text'
-                }                                   
-            });
+        var i=0,
+            len = appList.length;
+        for(i = 0; i < len; i++){
+            MFT.ApplinkModel.onAppRegistered( appList[i] );
         }
-        MFT.InfoAppsView.ShowAppList();
 
     },
 

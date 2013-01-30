@@ -136,11 +136,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		if (notification.method == this.onAppUnregisteredNotification)
 		{	
 			//  remove app from list
-			//MFT.TTSPopUp.ActivateTTS(notification.params.appName + " disconnected!");
-			MFT.ApplinkController.getApplicationModel(notification.params.appId).set('appName', "<No app>");
-			MFT.ApplinkController.getApplicationModel(notification.params.appId).set('hideApplinkButton', true);
-			MFT.VRPopUp.DeleteActivateApp(notification.params.appId);
-			MFT.ApplinkController.unRegisterApplication(notification.params.appId);
+			MFT.ApplinkModel.onAppUnregistered( notification.params );
 		}
 
 		if (notification.method == this.onDeviceListUpdatedNotification)

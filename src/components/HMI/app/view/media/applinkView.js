@@ -44,96 +44,43 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 		}
 	}.observes('MFT.ApplinkController.protocolVersion2State'),
 
-    /*
-     * Sends notification to model with name of destination view
-     */
-    deactivateApplication: function(){
-     	if( !MFT.States.media.applink.active ){
-     		MFT.ApplinkModel.onDeactivateApp( MFT.TransitionIterator.finalPath, MFT.ApplinkAppController.model.appId, MFT.ApplinkAppController.model.appName );
-     	}
-    }.observes('MFT.States.media.applink.active'),
-
 	innerMenu: MFT.MenuList.extend({
-
+			
+		refreshItems: function() {
+            if ( MFT.ApplinkAppController.model.appId == MFT.NonMediaController.currentAppId ) {
+                this.addItems(MFT.ApplinkAppController.model.softButtons);
+            }                    
+        }.observes('MFT.ApplinkAppController.model.softButtons.@each'),
+		
 		content: Em.ContainerView.extend({
-
+			
 			classNames: ['content'],
-
+			
 			attributeBindings: ['parentView.contentPositon:style'],
 			
 			childViews: [
-				'softButtons'
+				'optionsButton',
+				'routeInfoButton'
 			],
-
-		    AddSoftButton: function( params ){
-
-		    	this.deleteItems();
-
-		    	if(params){
-					for(var i=0; i < params.length; i++){
-						this.get('childViews').pushObject(
-							MFT.Button.create({
-								actionDown:		function(){
-									this._super();
-									FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", this.softButtonID);
-									var self = this;
-									this.time = 0;
-									setTimeout(function(){ self.time ++; }, 1000);
-								},
-								actionUp:		function(){
-									this._super();
-									FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", this.softButtonID);
-									if(this.time > 0){
-										FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "LONG", this.softButtonID);
-									}else{
-										FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "SHORT", this.softButtonID);
-									}
-									this.time = 0;
-								},
-								softButtonID:           params[i].softButtonID,
-				                //appId:                  appId,
-				                icon:                   params[i].image,
-				                text:                   params[i].text,
-				                classNames:             'list-item',
-				                templateName:           params[i].image ? 'rightIcon' : 'text'
-				            })
-				        );
-				    }
-				}
-		    },
-
-		    /**
-			 * Delete items from container
-			 * 
-			 */
-			deleteItems: function() {
-				var i,
-					count = this.get('childViews').length;
-				for( i=0; i < count; i++){
-					this.get('childViews').popObject();
-				}
-				this.get('childViews').pushObject(
-					MFT.Button.create({
-						text: 'Options',
-						
-						templateName: 'arrow',
-						
-						action:		'openCommandsList',
-						target:		'MFT.ApplinkAppController'
-					})
-				);
-			},
-
-			softButtons: MFT.Button.extend({
+			
+			optionsButton: MFT.Button.extend({
 				text: 'Options',
 				
 				templateName: 'arrow',
 				
 				action:		'openCommandsList',
 				target:		'MFT.ApplinkAppController'
+			}),
+			
+			routeInfoButton: MFT.Button.extend({
+				text: 'Route Info',
+				
+				//hidden:	true,
+				
+				templateName: 'arrow'
 			})
 		})
-	}),
+	})
 
 	/** Calls Applink SystemContext switcher when turn On/Of Applink application */
 	/*onTurnOnApplinkApp: function(systemContextValue){

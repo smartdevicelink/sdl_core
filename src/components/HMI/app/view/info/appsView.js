@@ -31,24 +31,36 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
         'getDeviceList',
 		'listOfApplications'
 	],
-/*
-    afterRender: function(){
-        /*
-         * Request, get List of applications
-         */
-       /* FFW.AppLinkCoreClient.getAppList();
-    },
-*/
-    /** 
-      * Function to add application to application list
-      */
-    ShowAppList: function( ){
 
-        this.listOfApplications.items = MFT.ApplinkModel.applicationsList.slice();
+    /** 
+     * Function to add application to application list
+     */
+    showAppList: function( ){
+
+        this.get('listOfApplications.list').removeAllChildren();
 
         this.listOfApplications.list.refresh();
 
-    },
+        var i=0,
+            apps = MFT.ApplinkModel.registeredApps;
+
+        for( i in apps){
+            this.get('listOfApplications.list.childViews').pushObject(
+                MFT.Button.create({
+                    action:                 'onActivateApplinkApp',
+                    target:                 'MFT.ApplinkController',
+                    text:                   apps[i].appName + " - " + apps[i].deviceName,
+                    appName:                apps[i].appName,
+                    appId:                  apps[i].appId,
+                    classNames:             'list-item button',
+                    iconBinding:            'MFT.ApplinkModel.registeredApps.' + apps[i].appId + '.appIcon'
+                })
+            );
+        }
+
+        //MFT.InfoAppsView.listOfApplications.list.refresh();
+
+    }.observes('MFT.ApplinkModel.applicationsList.@each'),
 	
 	vehicleHealthReport:   MFT.Button.extend({
 		goToState:			'vehicle.healthReport',
