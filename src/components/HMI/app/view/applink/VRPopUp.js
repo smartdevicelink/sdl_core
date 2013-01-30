@@ -101,6 +101,17 @@ MFT.VRPopUp = Em.ContainerView.create({
 
     },
 
+    deleteCommandsVR: function( commands ){
+
+        var i=0,
+            len=commands.length;
+
+        for( i=0; i<len; i++){
+            this.DeleteCommand( commands.commandId );
+        }
+
+    },
+
     CreateInteractionChoise: function( params ){
 
         for(var i = 0; i<params.choiceSet.length; i++){
