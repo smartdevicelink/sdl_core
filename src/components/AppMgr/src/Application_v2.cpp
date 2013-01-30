@@ -85,41 +85,7 @@ namespace NsAppManager
         mHMIDisplayLanguageDesired = value;
     }
 
-    /**
-     * \brief retrieve application audio streaming state
-     * \return application audio streaming state
-     */
-    const NsAppLinkRPCV2::AudioStreamingState& Application_v2::getApplicationAudioStreamingState( ) const
-    {
-        return mAudioStreamingState;
-    }
-
-    /**
-     * \brief Set application audio streaming state
-     * \param streamingState audio streaming state of application
-     */
-    void Application_v2::setApplicationAudioStreamingState( const NsAppLinkRPCV2::AudioStreamingState& streamingState )
-    {
-        mAudioStreamingState = streamingState;
-    }
-
-    /**
-     * \brief retrieve application system context
-     * \return application system context
-     */
-    const NsAppLinkRPCV2::SystemContext &Application_v2::getSystemContext() const
-    {
-        return mSystemContext;
-    }
-
-    /**
-     * \brief set application system context
-     * \param application system context
-     */
-    void Application_v2::setSystemContext(NsAppLinkRPCV2::SystemContext value)
-    {
-        mSystemContext = value;
-    }
+   
 
     /**
      * \brief Set application type
@@ -139,23 +105,7 @@ namespace NsAppManager
         return mAppType;
     }
 
-    /**
-     * \brief retrieve aplication HMI status level
-     * \return HMI status level of application
-     */
-    const NsAppLinkRPCV2::HMILevel::HMILevelInternal& Application_v2::getApplicationHMIStatusLevel( ) const
-    {
-        return mHMIStatusLevel;
-    }
-
-    /**
-     * \brief Set application HMI status level
-     * \param hmiLevel HMI status level of application
-     */
-    void Application_v2::setApplicationHMIStatusLevel( const NsAppLinkRPCV2::HMILevel::HMILevelInternal& hmiLevel )
-    {
-        mHMIStatusLevel = hmiLevel;
-    }
+    
 
     /**
      * \brief retrieve application sync message version

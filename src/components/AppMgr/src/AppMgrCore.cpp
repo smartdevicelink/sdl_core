@@ -558,9 +558,13 @@ namespace NsAppManager
                     }
 
                     NsAppLinkRPC::OnHMIStatus* status = new NsAppLinkRPC::OnHMIStatus();
-                    status->set_hmiLevel(app->getApplicationHMIStatusLevel());
-                    status->set_audioStreamingState(app->getApplicationAudioStreamingState());
-                    status->set_systemContext(app->getSystemContext());
+                    status->set_hmiLevel(
+                        static_cast<NsAppLinkRPC::HMILevel::HMILevelInternal>(app->getApplicationHMIStatusLevel()));
+                    status->set_audioStreamingState(
+                        static_cast<NsAppLinkRPC::AudioStreamingState::AudioStreamingStateInternal>(
+                            app->getApplicationAudioStreamingState().get()));
+                    status->set_systemContext(
+                        static_cast<NsAppLinkRPC::SystemContext::SystemContextInternal>(app->getSystemContext().get()));
                     MobileHandler::getInstance().sendRPCMessage(status, sessionKey);
                     LOG4CPLUS_INFO_EXT(mLogger, " An OnHMIStatus notification for the app "  << app->getName()
                         << " connection/session key " << app->getAppID()
@@ -726,7 +730,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
@@ -758,7 +762,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
@@ -791,7 +795,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::Show_response* response = new NsAppLinkRPC::Show_response;
@@ -849,7 +853,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::Speak_response* response = new NsAppLinkRPC::Speak_response;
@@ -899,7 +903,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::SetGlobalProperties_response* response = new NsAppLinkRPC::SetGlobalProperties_response;
@@ -965,7 +969,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::ResetGlobalProperties_response* response = new NsAppLinkRPC::ResetGlobalProperties_response;
@@ -1006,7 +1010,8 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if((NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel()) || (NsAppLinkRPC::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel()))
+                    if((NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel()) 
+                        || (NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel()))
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::Alert_response* response = new NsAppLinkRPC::Alert_response;
@@ -1065,7 +1070,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::AddCommand_response* response = new NsAppLinkRPC::AddCommand_response;
@@ -1149,7 +1154,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response;
@@ -1218,7 +1223,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::AddSubMenu_response* response = new NsAppLinkRPC::AddSubMenu_response;
@@ -1258,7 +1263,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::DeleteSubMenu_response* response = new NsAppLinkRPC::DeleteSubMenu_response;
@@ -1333,7 +1338,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::CreateInteractionChoiceSet_response* response = new NsAppLinkRPC::CreateInteractionChoiceSet_response;
@@ -1377,7 +1382,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPC::DeleteInteractionChoiceSet_response;
@@ -1423,7 +1428,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName()
                             << " with session key "
@@ -1526,7 +1531,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::SetMediaClockTimer_response* response = new NsAppLinkRPC::SetMediaClockTimer_response;
@@ -1570,7 +1575,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPC::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         response->set_success(false);
@@ -4583,53 +4588,25 @@ namespace NsAppManager
                 Application* app = AppMgrRegistry::getInstance().getActiveItem();
                 if(!app)
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, " null-application found as an active item!");
+                    LOG4CPLUS_INFO_EXT(mLogger, " null-application found as an active item!");
                     return;
                 }
 
                 LOG4CPLUS_INFO_EXT(mLogger, " About to send OnHMIStatus to a mobile side...");
                 int appId = app->getAppID();
-                switch(app->getProtocolVersion())
+
+                app->setSystemContext(object->get_systemContext());
+
+                if ( NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN == object->get_systemContext().get() 
+                    && NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel() )
                 {
-                    case 1:
-                    {
-                        if (NsAppLinkRPC::SystemContext::SYSCTXT_MAIN == object->get_systemContext().get())
-                        {
-                            Application_v1* appv1 = (Application_v1*)app;
-                            appv1->setSystemContext(
-                                static_cast<NsAppLinkRPC::SystemContext::SystemContextInternal>(
-                                    object->get_systemContext().get()));
-                            NsAppLinkRPC::OnHMIStatus* event = new NsAppLinkRPC::OnHMIStatus;
-                            event->set_systemContext(
-                                static_cast<NsAppLinkRPC::SystemContext::SystemContextInternal>(
-                                    object->get_systemContext().get()));
-                            event->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
-                            event->set_audioStreamingState(appv1->getApplicationAudioStreamingState());
-
-                            LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
-                            MobileHandler::getInstance().sendRPCMessage(event, appId);
-                        }
-                        break;
-                    }
-                    case 2:
-                    {
-                        if (NsAppLinkRPC::SystemContext::SYSCTXT_MAIN == object->get_systemContext().get())
-                        {
-                            Application_v2* appv2 = (Application_v2*)app;
-                            appv2->setSystemContext(object->get_systemContext());
-                            NsAppLinkRPCV2::OnHMIStatus* event = new NsAppLinkRPCV2::OnHMIStatus;
-                            event->setMethodId(NsAppLinkRPCV2::FunctionID::OnHMIStatusID);
-                            event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                            event->set_systemContext(appv2->getSystemContext());
-                            event->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
-                            event->set_audioStreamingState(appv2->getApplicationAudioStreamingState());
-
-                            LOG4CPLUS_INFO_EXT(mLogger, " An NsAppLinkRPC::OnHMIStatus UI notification has been sent to a mobile side!");
-                            MobileHandler::getInstance().sendRPCMessage(event, appId);
-                        }
-                        break;
-                    }
+                    core->performActivitiesForActivatingApp(app);
                 }
+                else
+                {
+                    core->sendHMINotificationToMobile(app);
+                }
+
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SLIDERRESPONSE:
@@ -4748,7 +4725,7 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, "UI::OnLanguageChange is received from HMI.");
                 NsRPC2Communication::UI::OnLanguageChange * languageChange =
                     static_cast<NsRPC2Communication::UI::OnLanguageChange*>(msg);
-                if ( languageChange->get_hmiDisplayLanguage().get() != core->mUiLanguageV1.get() )
+                if ( languageChange->get_hmiDisplayLanguage().get() != core->mUiLanguageV2.get() )
                 {
                     //TODO (pVysh): clear mess around versions up.
                     core->mUiLanguageV2 = languageChange->get_hmiDisplayLanguage();
@@ -5280,278 +5257,27 @@ namespace NsAppManager
                     return;
                 }
 
-                //  a silly workaround!!!
-                //  Until the object starts supplying some sort of connection id + session id
-                //  instead of just a name (there may me MORE than one app of the same name
-                //  registered on HMI simultaneously).
-                const std::string& appName = object->get_appName();
-                AppMgrRegistry::Items items = AppMgrRegistry::getInstance().getItems(appName);
-                if(items.empty())
+                Application * app = core->getApplicationFromItemCheckNotNull(
+                    AppMgrRegistry::getInstance().getItem(object->get_appId()));
+                if ( !app )
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "No application with the name " << appName << " found!");
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application with id " << object->get_appId() << " found!");
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse>(
                         object->getId(), NsAppLinkRPCV2::Result::INVALID_DATA);
                     return;
                 }
 
-                Application* app = core->getApplicationFromItemCheckNotNull(items[0]);
-                if(!app)
+                if ( !core->performActivitiesForActivatingApp(app) )
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse>(
-                        object->getId(), NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
-                    return;
-                }
-
-                int appId = app->getAppID();
-
-                Application* currentApp = AppMgrRegistry::getInstance().getActiveItem();
-                if (!currentApp)
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, "No application is currently active");
+                        object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
                 }
                 else
                 {
-                    if (currentApp == app)
-                    {
-                        LOG4CPLUS_INFO_EXT(mLogger, "App is currently active");
-                        sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse>(
-                            object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
-                        return;
-                    }
-
-                    LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application  " << currentApp->getName()
-                        << " ID " << currentApp->getAppID()
-                        << " - about to remove it from HMI first");
-                    core->removeAppFromHmi(currentApp, appId);
-                }
-
-                if(!AppMgrRegistry::getInstance().activateApp(app))
-                {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "Application " << app->getName()
-                        << " application id " << appId);
-
                     sendResponse<NsRPC2Communication::AppLinkCore::ActivateAppResponse>(
-                        object->getId(), NsAppLinkRPCV2::Result::GENERIC_ERROR);
-                    return;
+                        object->getId(), NsAppLinkRPCV2::Result::SUCCESS);
                 }
 
-                switch(app->getProtocolVersion())
-                {
-                    case 1:
-                    {
-                        Application_v1* appV1 = (Application_v1*)app;
-                        const ChoiceSetItems& newChoiceSets = appV1->getAllChoiceSets();
-                        if(!newChoiceSets.empty())
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
-                            for(ChoiceSetItems::const_iterator it = newChoiceSets.begin(); it != newChoiceSets.end(); it++)
-                            {
-                                const unsigned int& choiceSetId = it->first;
-                                const ChoiceSetV1& choiceSet = it->second.choiceSetV1;
-                                ChoiceSetV2 choiceSetV2;
-                                for(ChoiceSetV1::const_iterator it = choiceSet.begin(); it != choiceSet.end(); it++)
-                                {
-                                    const NsAppLinkRPC::Choice& choice = *it;
-                                    NsAppLinkRPCV2::Choice choiceV2;
-                                    choiceV2.set_choiceID(choice.get_choiceID());
-                                    choiceV2.set_menuName(choice.get_menuName());
-                                    choiceV2.set_vrCommands(choice.get_vrCommands());
-                                    choiceSetV2.push_back(choiceV2);
-                                }
-                                NsRPC2Communication::UI::CreateInteractionChoiceSet* addCmd = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
-                                addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                                addCmd->set_interactionChoiceSetID(choiceSetId);
-                                addCmd->set_choiceSet(choiceSetV2);
-                                addCmd->set_appId(app->getAppID());
-                                core->mMessageMapping.addMessage(addCmd->getId(), appId);
-
-                                HMIHandler::getInstance().sendRequest(addCmd);
-                            }
-                            LOG4CPLUS_INFO_EXT(mLogger, "New app's interaction choice sets added!");
-                        }
-                        break;
-                    }
-                    case 2:
-                    {
-                        Application_v2* appV2 = (Application_v2*)app;
-                        const ChoiceSetItems& newChoiceSets = appV2->getAllChoiceSets();
-                        if(!newChoiceSets.empty())
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
-                            for(ChoiceSetItems::const_iterator it = newChoiceSets.begin(); it != newChoiceSets.end(); it++)
-                            {
-                                const unsigned int& choiceSetId = it->first;
-                                NsRPC2Communication::UI::CreateInteractionChoiceSet* addCmd = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
-                                addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                                addCmd->set_interactionChoiceSetID(choiceSetId);
-                                addCmd->set_choiceSet(it->second.choiceSetV2);
-                                addCmd->set_appId(app->getAppID());
-                                core->mMessageMapping.addMessage(addCmd->getId(), appId);
-
-                                HMIHandler::getInstance().sendRequest(addCmd);
-                            }
-                            LOG4CPLUS_INFO_EXT(mLogger, "New app's interaction choice sets added!");
-                        }
-                        break;
-                    }
-                }
-
-                const MenuItems& newMenus = app->getAllMenus();
-                if(!newMenus.empty())
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's menus to HMI due to a new application activation");
-                    for(MenuItems::const_iterator it = newMenus.begin(); it != newMenus.end(); it++)
-                    {
-                        const unsigned int& menuId = it->first;
-                        const MenuValue& menuVal = it->second;
-                        const std::string& menuName = menuVal.first;
-                        const unsigned int* position = menuVal.second;
-                        NsRPC2Communication::UI::AddSubMenu* addCmd = new NsRPC2Communication::UI::AddSubMenu();
-                        addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                        addCmd->set_menuId(menuId);
-                        addCmd->set_menuName(menuName);
-                        if(position)
-                        {
-                            addCmd->set_position(*position);
-                        }
-                        addCmd->set_appId(app->getAppID());
-                        core->mMessageMapping.addMessage(addCmd->getId(), appId);
-
-                        HMIHandler::getInstance().sendRequest(addCmd);
-                    }
-                    LOG4CPLUS_INFO_EXT(mLogger, "New app's menus added!");
-                }
-
-                const Commands& newCommands = app->getAllCommands();
-                if(!newCommands.empty())
-                {
-                    LOG4CPLUS_INFO_EXT(mLogger, "Adding a new application's commands to HMI due to a new application activation");
-                    for(Commands::const_iterator it = newCommands.begin(); it != newCommands.end(); it++)
-                    {
-                        const Command& key = *it;
-                        const CommandParams& params = key.second;
-                        const NsAppLinkRPCV2::MenuParams* menuParams = params.menuParamsV2;
-                        const std::vector<std::string>* vrCommands = params.vrCommands;
-                        const CommandBase& base = key.first;
-                        const CommandType& type = std::get<1>(base);
-                        unsigned int cmdId = std::get<0>(base);
-
-                        NsRPC2Communication::RPC2Request* addCmd = 0;
-                        if(type == CommandType::UI)
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "Adding UI command");
-                            addCmd = new NsRPC2Communication::UI::AddCommand();
-                            ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_menuParams(*menuParams);
-                        }
-                        else if(type == CommandType::VR)
-                        {
-                            LOG4CPLUS_INFO_EXT(mLogger, "Adding VR command");
-                            addCmd = new NsRPC2Communication::VR::AddCommand();
-                            ((NsRPC2Communication::VR::AddCommand*)addCmd)->set_vrCommands(*vrCommands);
-                        }
-                        else
-                        {
-                            LOG4CPLUS_ERROR_EXT(mLogger, "An unindentified command type - " << type.getType());
-                            continue;
-                        }
-                        addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                        ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
-                        ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_appId(app->getAppID());
-                        core->mMessageMapping.addMessage(addCmd->getId(), appId);
-
-                        HMIHandler::getInstance().sendRequest(addCmd);
-                    }
-                    LOG4CPLUS_INFO_EXT(mLogger, "New app's commands added!");
-                }
-
-                switch(app->getProtocolVersion())
-                {
-                    case 1:
-                    {
-                        Application_v1* appv1 = (Application_v1*)app;
-                        NsAppLinkRPC::OnHMIStatus * hmiStatus = new NsAppLinkRPC::OnHMIStatus;
-                        hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
-                        if ( appv1->getIsMediaApplication() )
-                        {
-                            appv1->setApplicationAudioStreamingState(NsAppLinkRPC::AudioStreamingState::AUDIBLE);
-                        }
-                        else
-                        {
-                            appv1->setApplicationAudioStreamingState(NsAppLinkRPC::AudioStreamingState::NOT_AUDIBLE);
-                        }
-                        hmiStatus->set_audioStreamingState(appv1->getApplicationAudioStreamingState());
-                        hmiStatus->set_systemContext(appv1->getSystemContext());
-                        MobileHandler::getInstance().sendRPCMessage( hmiStatus, appId );
-                        NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
-                        response->setId(object->getId());
-                        response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
-                        HMIHandler::getInstance().sendResponse(response);
-
-                        if(core->mDriverDistractionV1)
-                        {
-                            MobileHandler::getInstance().sendRPCMessage(core->mDriverDistractionV1, appId);
-                        }
-
-                        break;
-                    }
-                    case 2:
-                    {
-                        Application_v2* appv2 = (Application_v2*)app;
-                        //Methods for changing language:
-                        NsRPC2Communication::VR::ChangeRegistration * changeVrRegistration =
-                            new NsRPC2Communication::VR::ChangeRegistration;
-                        changeVrRegistration->set_language(appv2->getLanguageDesired());
-                        changeVrRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                        changeVrRegistration->set_appId(appv2->getAppID());
-                        core->mMessageMapping.addMessage(changeVrRegistration->getId(), appId);
-                        HMIHandler::getInstance().sendRequest(changeVrRegistration);
-
-                        NsRPC2Communication::TTS::ChangeRegistration * changeTtsRegistration =
-                            new NsRPC2Communication::TTS::ChangeRegistration;
-                        changeTtsRegistration->set_language(appv2->getLanguageDesired());
-                        changeTtsRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                        changeTtsRegistration->set_appId(appv2->getAppID());
-                        core->mMessageMapping.addMessage(changeTtsRegistration->getId(), appId);
-                        HMIHandler::getInstance().sendRequest(changeTtsRegistration);
-
-                        NsRPC2Communication::UI::ChangeRegistration * changeUIRegistration =
-                            new NsRPC2Communication::UI::ChangeRegistration;
-                        changeUIRegistration->set_hmiDisplayLanguage(appv2->getHMIDisplayLanguageDesired());
-                        changeUIRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                        changeUIRegistration->set_appId(appv2->getAppID());
-                        core->mMessageMapping.addMessage(changeUIRegistration->getId(), appId);
-                        HMIHandler::getInstance().sendRequest(changeUIRegistration);
-                        //End of methods for languages.
-
-                        NsAppLinkRPCV2::OnHMIStatus * hmiStatus = new NsAppLinkRPCV2::OnHMIStatus;
-                        hmiStatus->setMethodId(NsAppLinkRPCV2::FunctionID::OnHMIStatusID);
-                        hmiStatus->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                        hmiStatus->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
-                        if ( appv2->getIsMediaApplication() )
-                        {
-                            appv2->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::AUDIBLE);
-                        }
-                        else
-                        {
-                            appv2->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
-                        }
-                        hmiStatus->set_audioStreamingState(appv2->getApplicationAudioStreamingState());
-                        hmiStatus->set_systemContext(appv2->getSystemContext());
-                        MobileHandler::getInstance().sendRPCMessage( hmiStatus, appId );
-                        NsRPC2Communication::AppLinkCore::ActivateAppResponse * response = new NsRPC2Communication::AppLinkCore::ActivateAppResponse;
-                        response->setId(object->getId());
-                        response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
-                        HMIHandler::getInstance().sendResponse(response);
-
-                        if(core->mDriverDistractionV2)
-                        {
-                            MobileHandler::getInstance().sendRPCMessage(core->mDriverDistractionV2, appId);
-                        }
-
-                        break;
-                    }
-                }
                 LOG4CPLUS_INFO_EXT(mLogger, "New app  " << app->getName() << " id " << app->getAppID() << " activated!");
                 return;
             }
@@ -5736,6 +5462,68 @@ namespace NsAppManager
                 response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
                 ConnectionHandler::getInstance().startDevicesDiscovery();
                 HMIHandler::getInstance().sendResponse(response);
+                return;
+            }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPDEACTIVATED:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "OnAppDeactivated has been received.");
+                NsRPC2Communication::AppLinkCore::OnAppDeactivated * appDeacivated =
+                    static_cast<NsRPC2Communication::AppLinkCore::OnAppDeactivated*>(msg);
+
+                Application* currentApp = AppMgrRegistry::getInstance().getActiveItem();
+                if ( !currentApp )
+                {
+                    LOG4CPLUS_INFO(mLogger, "No application is currently acitve.");
+                    return;
+                }
+                if ( currentApp->getAppID() != appDeacivated->get_appId() )
+                {
+                    LOG4CPLUS_WARN(mLogger, "Currently active application is not the same as on HMI.");
+                    return;
+                }
+
+                // TODO (pvysh): don't forget after refactoring: get to this switch only if not in NONE
+                switch ( appDeacivated->get_reason().get() )
+                {
+                    case NsAppLinkRPCV2::DeactivateReason::AUDIO:
+                    case NsAppLinkRPCV2::DeactivateReason::PHONECALL:
+                    {
+                        if ( currentApp->getIsMediaApplication() )
+                        {
+                            currentApp->setApplicationAudioStreamingState(
+                                NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
+                        }
+                        currentApp->setApplicationHMIStatusLevel(
+                            NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
+
+                    } 
+                    case NsAppLinkRPCV2::DeactivateReason::NAVIGATIONMAP:
+                    case NsAppLinkRPCV2::DeactivateReason::PHONEMENU:
+                    case NsAppLinkRPCV2::DeactivateReason::SYNCSETTINGS:
+                    {
+                        if ( currentApp->getIsMediaApplication() )
+                        {
+                            // TODO (pvysh): for media it seems for FULL it is neccessarily that its audio is AUDIBLE.
+                            if ( NsAppLinkRPCV2::HMILevel::HMI_FULL == 
+                                currentApp->getApplicationHMIStatusLevel() )
+                            {
+                                currentApp->setApplicationHMIStatusLevel(
+                                    NsAppLinkRPCV2::HMILevel::HMI_LIMITED);
+                            }
+                        }
+                        else
+                        {
+                            currentApp->setApplicationHMIStatusLevel(
+                                NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
+                        }
+                    }
+                    case NsAppLinkRPCV2::DeactivateReason::GENERAL:
+                    default:
+                    {
+                        // TODO (pvysh): what should be done in this case?
+                    }
+                }
+                core->sendHMINotificationToMobile( currentApp );
                 return;
             }
             default:
@@ -6141,7 +5929,8 @@ namespace NsAppManager
                 application->setHMIDisplayLanguageDesired(mUiLanguageV2);
                 application->setIsMediaApplication(isMediaApplication);
                 application->setSyncMsgVersion(syncMsgVersion);
-                application->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);
+                application->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MENU);
+                application->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
 
                 if(registerRequest->get_ttsName())
                 {
@@ -6192,9 +5981,9 @@ namespace NsAppManager
                 application->setLanguageDesired(mUiLanguageV1);
 
                 application->setSyncMsgVersion(syncMsgVersion);
-                application->setSystemContext(NsAppLinkRPC::SystemContext::SYSCTXT_MAIN);
-
-                application->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_NONE);
+                application->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MENU);
+                application->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
+                application->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_NONE);
 
                 LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
                 return AppMgrRegistry::getInstance().registerApplication( application );
@@ -6238,6 +6027,273 @@ namespace NsAppManager
             << "!");
     }
 
+    void AppMgrCore::sendHMINotificationToMobile( Application * application )
+    {
+        if (1 == application->getProtocolVersion())
+        {
+            NsAppLinkRPC::OnHMIStatus* hmiStatus = new NsAppLinkRPC::OnHMIStatus;
+            hmiStatus->set_audioStreamingState(
+                static_cast<NsAppLinkRPC::AudioStreamingState::AudioStreamingStateInternal>(
+                    application->getApplicationAudioStreamingState().get()));
+            hmiStatus->set_systemContext(
+                static_cast<NsAppLinkRPC::SystemContext::SystemContextInternal>(application->getSystemContext().get()));
+            hmiStatus->set_hmiLevel(
+                static_cast<NsAppLinkRPC::HMILevel::HMILevelInternal>(application->getApplicationHMIStatusLevel()));
+            MobileHandler::getInstance().sendRPCMessage(hmiStatus, application->getAppID());
+        }
+        else
+        {
+            NsAppLinkRPCV2::OnHMIStatus* hmiStatus = new NsAppLinkRPCV2::OnHMIStatus;
+            hmiStatus->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+            hmiStatus->setMethodId(NsAppLinkRPCV2::FunctionID::OnHMIStatusID);
+            hmiStatus->set_audioStreamingState(application->getApplicationAudioStreamingState());
+            hmiStatus->set_systemContext(application->getSystemContext());
+            hmiStatus->set_hmiLevel(application->getApplicationHMIStatusLevel());
+            MobileHandler::getInstance().sendRPCMessage(hmiStatus, application->getAppID());
+        }
+    }
+
+    bool AppMgrCore::performActivitiesForActivatingApp( Application * app )
+    {
+        int appId = app->getAppID();
+
+        Application* currentApp = AppMgrRegistry::getInstance().getActiveItem();
+        if (!currentApp)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "No application is currently active");
+        }
+        else
+        {
+            if (currentApp->getAppID() == appId)
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "App is currently active");
+                return false;
+            }
+
+            LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application  " << currentApp->getName()
+                << " ID " << currentApp->getAppID()
+                << " - about to remove it from HMI first");
+            removeAppFromHmi(currentApp, appId);
+        }
+
+        if(!AppMgrRegistry::getInstance().activateApp(app))
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "Application " << app->getName()
+                << " application id " << appId << " cannot be activated.");
+            return false;
+        }
+
+        switch(app->getProtocolVersion())
+        {
+            case 1:
+            {
+                Application_v1* appV1 = (Application_v1*)app;
+                const ChoiceSetItems& newChoiceSets = appV1->getAllChoiceSets();
+                if(!newChoiceSets.empty())
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
+                    for(ChoiceSetItems::const_iterator it = newChoiceSets.begin(); it != newChoiceSets.end(); it++)
+                    {
+                        const unsigned int& choiceSetId = it->first;
+                        const ChoiceSetV1& choiceSet = it->second.choiceSetV1;
+                        ChoiceSetV2 choiceSetV2;
+                        for(ChoiceSetV1::const_iterator it = choiceSet.begin(); it != choiceSet.end(); it++)
+                        {
+                            const NsAppLinkRPC::Choice& choice = *it;
+                            NsAppLinkRPCV2::Choice choiceV2;
+                            choiceV2.set_choiceID(choice.get_choiceID());
+                            choiceV2.set_menuName(choice.get_menuName());
+                            choiceV2.set_vrCommands(choice.get_vrCommands());
+                            choiceSetV2.push_back(choiceV2);
+                        }
+                        NsRPC2Communication::UI::CreateInteractionChoiceSet* addCmd = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
+                        addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        addCmd->set_interactionChoiceSetID(choiceSetId);
+                        addCmd->set_choiceSet(choiceSetV2);
+                        addCmd->set_appId(app->getAppID());
+                        mMessageMapping.addMessage(addCmd->getId(), appId);
+
+                        HMIHandler::getInstance().sendRequest(addCmd);
+                    }
+                    LOG4CPLUS_INFO_EXT(mLogger, "New app's interaction choice sets added!");
+                }
+                break;
+            }
+            case 2:
+            {
+                Application_v2* appV2 = (Application_v2*)app;
+                const ChoiceSetItems& newChoiceSets = appV2->getAllChoiceSets();
+                if(!newChoiceSets.empty())
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's interaction choice sets to HMI due to a new application activation");
+                    for(ChoiceSetItems::const_iterator it = newChoiceSets.begin(); it != newChoiceSets.end(); it++)
+                    {
+                        const unsigned int& choiceSetId = it->first;
+                        NsRPC2Communication::UI::CreateInteractionChoiceSet* addCmd = new NsRPC2Communication::UI::CreateInteractionChoiceSet();
+                        addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        addCmd->set_interactionChoiceSetID(choiceSetId);
+                        addCmd->set_choiceSet(it->second.choiceSetV2);
+                        addCmd->set_appId(app->getAppID());
+                        mMessageMapping.addMessage(addCmd->getId(), appId);
+
+                        HMIHandler::getInstance().sendRequest(addCmd);
+                    }
+                    LOG4CPLUS_INFO_EXT(mLogger, "New app's interaction choice sets added!");
+                }
+                break;
+            }
+        }
+
+        const MenuItems& newMenus = app->getAllMenus();
+        if(!newMenus.empty())
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Adding new application's menus to HMI due to a new application activation");
+            for(MenuItems::const_iterator it = newMenus.begin(); it != newMenus.end(); it++)
+            {
+                const unsigned int& menuId = it->first;
+                const MenuValue& menuVal = it->second;
+                const std::string& menuName = menuVal.first;
+                const unsigned int* position = menuVal.second;
+                NsRPC2Communication::UI::AddSubMenu* addCmd = new NsRPC2Communication::UI::AddSubMenu();
+                addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                addCmd->set_menuId(menuId);
+                addCmd->set_menuName(menuName);
+                if(position)
+                {
+                    addCmd->set_position(*position);
+                }
+                addCmd->set_appId(app->getAppID());
+                mMessageMapping.addMessage(addCmd->getId(), appId);
+
+                HMIHandler::getInstance().sendRequest(addCmd);
+            }
+            LOG4CPLUS_INFO_EXT(mLogger, "New app's menus added!");
+        }
+
+        const Commands& newCommands = app->getAllCommands();
+        if(!newCommands.empty())
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Adding a new application's commands to HMI due to a new application activation");
+            for(Commands::const_iterator it = newCommands.begin(); it != newCommands.end(); it++)
+            {
+                const Command& key = *it;
+                const CommandParams& params = key.second;
+                const NsAppLinkRPCV2::MenuParams* menuParams = params.menuParamsV2;
+                const std::vector<std::string>* vrCommands = params.vrCommands;
+                const CommandBase& base = key.first;
+                const CommandType& type = std::get<1>(base);
+                unsigned int cmdId = std::get<0>(base);
+
+                NsRPC2Communication::RPC2Request* addCmd = 0;
+                if(type == CommandType::UI)
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "Adding UI command");
+                    addCmd = new NsRPC2Communication::UI::AddCommand();
+                    ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_menuParams(*menuParams);
+                }
+                else if(type == CommandType::VR)
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "Adding VR command");
+                    addCmd = new NsRPC2Communication::VR::AddCommand();
+                    ((NsRPC2Communication::VR::AddCommand*)addCmd)->set_vrCommands(*vrCommands);
+                }
+                else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "An unindentified command type - " << type.getType());
+                    continue;
+                }
+                addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_cmdId(cmdId); //doesn't matter, of which type- VR or UI is thye cmd = eather has the set_cmdId method within
+                ((NsRPC2Communication::UI::AddCommand*)addCmd)->set_appId(app->getAppID());
+                mMessageMapping.addMessage(addCmd->getId(), appId);
+
+                HMIHandler::getInstance().sendRequest(addCmd);
+            }
+            LOG4CPLUS_INFO_EXT(mLogger, "New app's commands added!");
+        }
+
+        switch(app->getProtocolVersion())
+        {
+            case 1:
+            {
+                /*Application_v1* appv1 = (Application_v1*)app;
+                NsAppLinkRPC::OnHMIStatus * hmiStatus = new NsAppLinkRPC::OnHMIStatus;
+                hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
+                if ( appv1->getIsMediaApplication() )
+                {
+                    appv1->setApplicationAudioStreamingState(NsAppLinkRPC::AudioStreamingState::AUDIBLE);
+                }
+                else
+                {
+                    appv1->setApplicationAudioStreamingState(NsAppLinkRPC::AudioStreamingState::NOT_AUDIBLE);
+                }
+                hmiStatus->set_audioStreamingState(appv1->getApplicationAudioStreamingState());
+                hmiStatus->set_systemContext(appv1->getSystemContext());
+                MobileHandler::getInstance().sendRPCMessage( hmiStatus, appId );*/
+                
+                if(mDriverDistractionV1)
+                {
+                    MobileHandler::getInstance().sendRPCMessage(mDriverDistractionV1, appId);
+                }
+
+                break;
+            }
+            case 2:
+            {
+                Application_v2* appv2 = (Application_v2*)app;
+                //Methods for changing language:
+                NsRPC2Communication::VR::ChangeRegistration * changeVrRegistration =
+                    new NsRPC2Communication::VR::ChangeRegistration;
+                changeVrRegistration->set_language(appv2->getLanguageDesired());
+                changeVrRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                changeVrRegistration->set_appId(appv2->getAppID());
+                mMessageMapping.addMessage(changeVrRegistration->getId(), appId);
+                HMIHandler::getInstance().sendRequest(changeVrRegistration);
+
+                NsRPC2Communication::TTS::ChangeRegistration * changeTtsRegistration =
+                    new NsRPC2Communication::TTS::ChangeRegistration;
+                changeTtsRegistration->set_language(appv2->getLanguageDesired());
+                changeTtsRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                changeTtsRegistration->set_appId(appv2->getAppID());
+                mMessageMapping.addMessage(changeTtsRegistration->getId(), appId);
+                HMIHandler::getInstance().sendRequest(changeTtsRegistration);
+
+                NsRPC2Communication::UI::ChangeRegistration * changeUIRegistration =
+                    new NsRPC2Communication::UI::ChangeRegistration;
+                changeUIRegistration->set_hmiDisplayLanguage(appv2->getHMIDisplayLanguageDesired());
+                changeUIRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                changeUIRegistration->set_appId(appv2->getAppID());
+                mMessageMapping.addMessage(changeUIRegistration->getId(), appId);
+                HMIHandler::getInstance().sendRequest(changeUIRegistration);
+                //End of methods for languages.
+
+                /*NsAppLinkRPCV2::OnHMIStatus * hmiStatus = new NsAppLinkRPCV2::OnHMIStatus;
+                hmiStatus->setMethodId(NsAppLinkRPCV2::FunctionID::OnHMIStatusID);
+                hmiStatus->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                hmiStatus->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
+                if ( appv2->getIsMediaApplication() )
+                {
+                    appv2->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::AUDIBLE);
+                }
+                else
+                {
+                    appv2->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
+                }
+                hmiStatus->set_audioStreamingState(appv2->getApplicationAudioStreamingState());
+                hmiStatus->set_systemContext(appv2->getSystemContext());
+                MobileHandler::getInstance().sendRPCMessage( hmiStatus, appId );*/
+                
+                if(mDriverDistractionV2)
+                {
+                    MobileHandler::getInstance().sendRPCMessage(mDriverDistractionV2, appId);
+                }
+
+                break;
+            }
+        }
+        return true;
+    }
+
     /**
      * \brief Remove all app components from HMI
      * \param currentApp app which components to be removed
@@ -6247,29 +6303,6 @@ namespace NsAppManager
     {
         const Commands& currentCommands = currentApp->getAllCommands();
         LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's commands from HMI");
-
-        if (1 == currentApp->getProtocolVersion())
-        {
-            NsAppLinkRPC::OnHMIStatus* hmiStatus = new NsAppLinkRPC::OnHMIStatus;
-            NsAppManager::Application_v1* currentAppV1 = static_cast<NsAppManager::Application_v1*>(currentApp);
-            currentAppV1->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_BACKGROUND);
-            hmiStatus->set_audioStreamingState(currentAppV1->getApplicationAudioStreamingState());
-            hmiStatus->set_systemContext(currentAppV1->getSystemContext());
-            hmiStatus->set_hmiLevel(NsAppLinkRPC::HMILevel::HMI_BACKGROUND);
-            MobileHandler::getInstance().sendRPCMessage(hmiStatus, appId);
-        }
-        else
-        {
-            NsAppLinkRPCV2::OnHMIStatus* hmiStatus = new NsAppLinkRPCV2::OnHMIStatus;
-            hmiStatus->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-            hmiStatus->setMethodId(NsAppLinkRPCV2::FunctionID::OnHMIStatusID);
-            NsAppManager::Application_v2* currentAppV2 = static_cast<NsAppManager::Application_v2*>(currentApp);
-            currentAppV2->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
-            hmiStatus->set_audioStreamingState(currentAppV2->getApplicationAudioStreamingState());
-            hmiStatus->set_systemContext(currentAppV2->getSystemContext());
-            hmiStatus->set_hmiLevel(NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
-            MobileHandler::getInstance().sendRPCMessage(hmiStatus, appId);
-        }
 
         for(Commands::const_iterator it = currentCommands.begin(); it != currentCommands.end(); it++)
         {

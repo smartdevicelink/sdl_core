@@ -178,6 +178,20 @@ namespace NsAppManager
          */
         Application* getApplicationFromItemCheckNotNull( const RegistryItem* item ) const;
 
+        /**
+         * \brief Sends notification to Mobile Application about changes in its HMI status
+         * ie in system context/hmi level/audio streaming state.
+         * \param application Mobile app to be notified about changes
+         */
+        void sendHMINotificationToMobile( Application * application );
+
+        /**
+         * \brief Activates app and deactivates others.
+         * \param app Application to be activated.
+         * \return bool Success of operation
+         */
+        bool performActivitiesForActivatingApp( Application * app );
+
     private:
 
         /**

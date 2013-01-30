@@ -6,6 +6,7 @@
 
 #include "AppMgr/AppMgrRegistry.h"
 #include "LoggerHelper.hpp"
+#include "AppMgr/AppMgrCore.h"
 
 namespace NsAppManager
 {
@@ -79,7 +80,7 @@ namespace NsAppManager
                 case 1:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " application id " << app->getAppID() << " has HMI_LEVEL " << ((Application_v1*)app)->getApplicationHMIStatusLevel());
-                    if(NsAppLinkRPC::HMILevel::HMI_FULL == ((Application_v1*)app)->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_FULL == ((Application_v1*)app)->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, "An application " << app->getName() << " application id " << app->getAppID() << " is HMI_FULL");
                         return app;
@@ -196,19 +197,21 @@ namespace NsAppManager
      * \param item registered application to activate
      * \return result success
      */
-    bool AppMgrRegistry::activateApp(Application *app)
+    bool AppMgrRegistry::activateApp(Application *appToBeActivated)
     {
-        if(!app)
+        if(!appToBeActivated)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " Cannot activate null-application!");
             return false;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Activating an app " << app->getName() << " application id " << app->getAppID());
+        LOG4CPLUS_INFO_EXT(mLogger, "Activating an app " << appToBeActivated->getName() << " application id " << appToBeActivated->getAppID());
         if(mRegistryItems.empty())
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " Cannot activate an application: no applications registered!");
             return false;
         }
+
+        bool isCurrentAudible = false;
         for(ItemsMap::iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
         {
             RegistryItem* item_ = it->second;
@@ -217,55 +220,47 @@ namespace NsAppManager
                 LOG4CPLUS_ERROR_EXT(mLogger, " Item is empty in registry!");
                 return false;
             }
-            Application* app_ = item_->getApplication();
-            if(!app_)
+            Application* tempApplication = item_->getApplication();
+            if(!tempApplication)
             {
                 LOG4CPLUS_ERROR_EXT(mLogger, "No application for the item!");
                 return false;
             }
-            switch(app_->getProtocolVersion())
+
+            //TODO (pvysh): at this point it is assumed that behaviour is correct and
+            // when app is not in HMI_FULL/HMI_LIMITED it is not audible.
+            if ( tempApplication->getIsMediaApplication() 
+                    && NsAppLinkRPCV2::AudioStreamingState::AUDIBLE == tempApplication->getApplicationAudioStreamingState().get()
+                    && appToBeActivated->getIsMediaApplication() )
             {
-                case 1:
-                {
-                    if(NsAppLinkRPC::HMILevel::HMI_FULL == ((Application_v1*)app_)->getApplicationHMIStatusLevel())
-                    {
-                        LOG4CPLUS_INFO_EXT(mLogger, " Deactivating application " << app_->getName());
-                        ((Application_v1*)app_)->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_BACKGROUND);
-                    }
-                    break;
-                }
-                case 2:
-                {
-                    if(NsAppLinkRPCV2::HMILevel::HMI_FULL == ((Application_v2*)app_)->getApplicationHMIStatusLevel())
-                    {
-                        LOG4CPLUS_INFO_EXT(mLogger, " Deactivating application " << app_->getName());
-                        ((Application_v2*)app_)->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
-                    }
-                    break;
-                }
+                tempApplication->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
+            }
+            
+            if ( NsAppLinkRPCV2::HMILevel::HMI_FULL == tempApplication->getApplicationHMIStatusLevel()
+                || ( NsAppLinkRPCV2::HMILevel::HMI_LIMITED == tempApplication->getApplicationHMIStatusLevel()
+                    && appToBeActivated->getIsMediaApplication() ) )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " Deactivating application " << tempApplication->getName());
+                tempApplication -> setApplicationHMIStatusLevel(
+                    NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
+                AppMgrCore::getInstance().sendHMINotificationToMobile(tempApplication);
             }
         }
 
-        switch(app->getProtocolVersion())
+        LOG4CPLUS_INFO_EXT(mLogger, " Activating application " << appToBeActivated->getName());
+        appToBeActivated->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
+        appToBeActivated->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);
+        if ( appToBeActivated->getIsMediaApplication() )
         {
-            case 1:
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " Activating application " << app->getName());
-                ((Application_v1*)app)->setApplicationHMIStatusLevel(NsAppLinkRPC::HMILevel::HMI_FULL);
-                ((Application_v1*)app)->setSystemContext(NsAppLinkRPC::SystemContext::SYSCTXT_MAIN);
-                return true;
-            }
-            case 2:
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " Activating application " << app->getName());
-                ((Application_v2*)app)->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
-                ((Application_v2*)app)->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);
-                return true;
-            }
+            appToBeActivated->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::AUDIBLE);    
         }
+        else
+        {
+            appToBeActivated->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
+        }
+        AppMgrCore::getInstance().sendHMINotificationToMobile(appToBeActivated);
 
-        LOG4CPLUS_ERROR_EXT(mLogger, " Unsupported protocol version " << app->getProtocolVersion());
-        return false;
+        return true;
     }
 
     /**

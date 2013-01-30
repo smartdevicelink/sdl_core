@@ -55,7 +55,7 @@ void JSONRPC2Handler::subscribeToNotifications()
     subscribeTo( "UI.OnDriverDistraction" );
     subscribeTo( "UI.OnSystemContext" );
     subscribeTo( "UI.OnAppActivated" );
-    subscribeTo( "UI.OnAppDeactivated" );
+    subscribeTo( "AppLinkCore.OnAppDeactivated" );
     subscribeTo( "UI.OnDeviceChosen");
     subscribeTo( "UI.OnLanguageChange" );
     subscribeTo( "VR.OnLanguageChange" );

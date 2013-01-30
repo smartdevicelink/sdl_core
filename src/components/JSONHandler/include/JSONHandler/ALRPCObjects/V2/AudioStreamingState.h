@@ -23,8 +23,8 @@ namespace NsAppLinkRPCV2
     {
       INVALID_ENUM=-1,
       AUDIBLE=0,
-      ATTENUATED=1,
-      NOT_AUDIBLE=2
+      ATTENUATED=2,
+      NOT_AUDIBLE=1
     };
   
     AudioStreamingState() : mInternal(INVALID_ENUM)				{}

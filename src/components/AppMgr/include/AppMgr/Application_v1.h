@@ -3,11 +3,8 @@
 
 #include "AppMgr/Application.h"
 #include "AppMgr/AppChoiceSets.h"
-#include "JSONHandler/ALRPCObjects/V1/AudioStreamingState.h"
-#include "JSONHandler/ALRPCObjects/V1/SystemContext.h"
 #include "JSONHandler/ALRPCObjects/V1/Language.h"
 #include "JSONHandler/ALRPCObjects/V1/SyncMsgVersion.h"
-#include "JSONHandler/ALRPCObjects/V1/HMILevel.h"
 
 namespace NsAppManager
 {
@@ -66,41 +63,7 @@ namespace NsAppManager
          */
         const NsAppLinkRPC::Language& getHMIDisplayLanguageDesired( ) const;
 
-        /**
-         * \brief set application system context
-         * \param application system context
-         */
-        void setSystemContext( NsAppLinkRPC::SystemContext value );
-
-        /**
-         * \brief retrieve application system context
-         * \return application system context
-         */
-        const NsAppLinkRPC::SystemContext& getSystemContext() const;
-
-        /**
-         * \brief Set application audio streaming state
-         * \param streamingState audio streaming state of application
-         */
-        void setApplicationAudioStreamingState( const NsAppLinkRPC::AudioStreamingState& hmiLevel );
-
-        /**
-         * \brief retrieve application audio streaming state
-         * \return application audio streaming state
-         */
-        const NsAppLinkRPC::AudioStreamingState& getApplicationAudioStreamingState( ) const;
-
-        /**
-         * \brief Set application HMI status level
-         * \param hmiLevel HMI status level of application
-         */
-        void setApplicationHMIStatusLevel( const NsAppLinkRPC::HMILevel::HMILevelInternal& hmiLevel );
-
-        /**
-         * \brief retrieve aplication HMI status level
-         * \return HMI status level of application
-         */
-        const NsAppLinkRPC::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
+        
 
         /**
          * \brief Set application sync message version
@@ -154,10 +117,9 @@ namespace NsAppManager
         Application_v1(const Application_v1& );
 
         NsAppLinkRPC::Language mLanguageDesired;
-        NsAppLinkRPC::AudioStreamingState mAudioStreamingState;
+        
         NsAppLinkRPC::Language mHMIDisplayLanguageDesired;
-        NsAppLinkRPC::SystemContext mSystemContext;
-        NsAppLinkRPC::HMILevel::HMILevelInternal mHMIStatusLevel;
+        
         NsAppLinkRPC::SyncMsgVersion mSyncMsgVersion;
         AppChoiceSets mChoiceSets;
         bool m_bUsesVehicleData;

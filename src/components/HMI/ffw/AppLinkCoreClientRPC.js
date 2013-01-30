@@ -252,13 +252,13 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * handle RPC requests here
  	 */	
 	DeactivateApp: function( appName, reason, appId ) {
-		Em.Logger.log("FFW.ALCore.DeactivateApp");
+		Em.Logger.log("FFW.ALCore.OnAppDeactivated");
 
 		// send request
 
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
-			"method"	:	"AppLinkCore.DeactivateApp",
+			"method"	:	"AppLinkCore.OnAppDeactivated",
 			"params"	:	{
 				"appName":	appName,
 				"appId":	appId,

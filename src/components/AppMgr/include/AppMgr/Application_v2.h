@@ -3,11 +3,9 @@
 
 #include "AppMgr/Application.h"
 #include "AppMgr/AppChoiceSets.h"
-#include "JSONHandler/ALRPCObjects/V2/AudioStreamingState.h"
-#include "JSONHandler/ALRPCObjects/V2/SystemContext.h"
+
 #include "JSONHandler/ALRPCObjects/V2/Language.h"
 #include "JSONHandler/ALRPCObjects/V2/AppType.h"
-#include "JSONHandler/ALRPCObjects/V2/HMILevel.h"
 #include "JSONHandler/ALRPCObjects/V2/SyncMsgVersion.h"
 #include "JSONHandler/ALRPCObjects/V2/TTSChunk.h"
 
@@ -43,18 +41,6 @@ namespace NsAppManager
         virtual ~Application_v2( );
 
         /**
-         * \brief Set application ID
-         * \param value application ID
-         */
-   //     void setAppID( const std::string& value );
-
-        /**
-         * \brief retrieve application ID
-         * \return application ID
-         */
-    //    const std::string& getAppID( ) const;
-
-        /**
          * \brief Set application desired languuage
          * \param value application desired language
          */
@@ -79,30 +65,6 @@ namespace NsAppManager
         const NsAppLinkRPCV2::Language& getHMIDisplayLanguageDesired( ) const;
 
         /**
-         * \brief set application system context
-         * \param application system context
-         */
-        void setSystemContext( NsAppLinkRPCV2::SystemContext value );
-
-        /**
-         * \brief retrieve application system context
-         * \return application system context
-         */
-        const NsAppLinkRPCV2::SystemContext& getSystemContext() const;
-
-        /**
-         * \brief Set application audio streaming state
-         * \param streamingState audio streaming state of application
-         */
-        void setApplicationAudioStreamingState( const NsAppLinkRPCV2::AudioStreamingState& hmiLevel );
-
-        /**
-         * \brief retreive application audio streaming state
-         * \return application audio streaming state
-         */
-        const NsAppLinkRPCV2::AudioStreamingState& getApplicationAudioStreamingState( ) const;
-
-        /**
          * \brief Set application type
          * \param appType application type
          */
@@ -113,18 +75,6 @@ namespace NsAppManager
          * \param appId application type
          */
         const AppTypes& getAppType() const;
-
-        /**
-         * \brief Set application HMI status level
-         * \param hmiLevel HMI status level of application
-         */
-        void setApplicationHMIStatusLevel( const NsAppLinkRPCV2::HMILevel::HMILevelInternal& hmiLevel );
-
-        /**
-         * \brief retrieve aplication HMI status level
-         * \return HMI status level of application
-         */
-        const NsAppLinkRPCV2::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
 
         /**
          * \brief Set application sync message version
@@ -190,10 +140,9 @@ namespace NsAppManager
         Application_v2(const Application_v2& );
 
         NsAppLinkRPCV2::Language mLanguageDesired;
-        NsAppLinkRPCV2::AudioStreamingState mAudioStreamingState;
+        
         NsAppLinkRPCV2::Language mHMIDisplayLanguageDesired;
-        NsAppLinkRPCV2::SystemContext mSystemContext;
-        NsAppLinkRPCV2::HMILevel::HMILevelInternal mHMIStatusLevel;
+
         NsAppLinkRPCV2::SyncMsgVersion mSyncMsgVersion;
 
    //     std::string mAppID;

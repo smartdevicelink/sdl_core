@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/V2/AudioStreamingStateMarshaller.inc ../src/ALRPCObjectsImpl/V2/AudioStreamingStateMarshaller.gp  */
+/* Command-line: gperf --output-file=src/ALRPCObjectsImpl/V2/AudioStreamingStateMarshaller.inc src/ALRPCObjectsImpl/V2/AudioStreamingStateMarshaller.gp  */
 /* Computed positions: -k'' */
 
 
@@ -35,13 +35,13 @@ AudioStreamingState_intHash::getPointer (register const char *str, register unsi
   static const struct NsAppLinkRPCV2::PerfectHashTable wordlist[] =
     {
       {""}, {""}, {""}, {""}, {""}, {""}, {""},
-#line 17 "../src/ALRPCObjectsImpl/V2/AudioStreamingStateMarshaller.gp"
+#line 17 "src/ALRPCObjectsImpl/V2/AudioStreamingStateMarshaller.gp"
       {"AUDIBLE",0},
       {""}, {""},
-#line 18 "../src/ALRPCObjectsImpl/V2/AudioStreamingStateMarshaller.gp"
-      {"ATTENUATED",1},
-#line 19 "../src/ALRPCObjectsImpl/V2/AudioStreamingStateMarshaller.gp"
-      {"NOT_AUDIBLE",2}
+#line 18 "src/ALRPCObjectsImpl/V2/AudioStreamingStateMarshaller.gp"
+      {"ATTENUATED",2},
+#line 19 "src/ALRPCObjectsImpl/V2/AudioStreamingStateMarshaller.gp"
+      {"NOT_AUDIBLE",1}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)

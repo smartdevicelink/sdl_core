@@ -10,6 +10,12 @@
 #include "AppMgr/MenuMapping.h"
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/AppMenus.h"
+#include "JSONHandler/ALRPCObjects/V2/AudioStreamingState.h"
+#include "JSONHandler/ALRPCObjects/V2/SystemContext.h"
+#include "JSONHandler/ALRPCObjects/V2/HMILevel.h"
+#include "JSONHandler/ALRPCObjects/V1/AudioStreamingState.h"
+#include "JSONHandler/ALRPCObjects/V1/SystemContext.h"
+#include "JSONHandler/ALRPCObjects/V1/HMILevel.h"
 #include <string>
 #include <vector>
 #include <tuple>
@@ -248,6 +254,43 @@ namespace NsAppManager
          */
         void removeSessionKey(const int& sessionKey);
 
+        /**
+         * \brief set application system context
+         * \param application system context
+         */
+        virtual void setSystemContext( NsAppLinkRPCV2::SystemContext value );
+
+        /**
+         * \brief retrieve application system context
+         * \return application system context
+         */
+        virtual const NsAppLinkRPCV2::SystemContext& getSystemContext() const;
+
+        /**
+         * \brief Set application audio streaming state
+         * \param streamingState audio streaming state of application
+         */
+        virtual void setApplicationAudioStreamingState( const NsAppLinkRPCV2::AudioStreamingState& hmiLevel );
+
+        /**
+         * \brief retreive application audio streaming state
+         * \return application audio streaming state
+         */
+        virtual const NsAppLinkRPCV2::AudioStreamingState& getApplicationAudioStreamingState( ) const;
+
+        /**
+         * \brief Set application HMI status level
+         * \param hmiLevel HMI status level of application
+         */
+        virtual void setApplicationHMIStatusLevel( const NsAppLinkRPCV2::HMILevel::HMILevelInternal& hmiLevel );
+
+        /**
+         * \brief retrieve aplication HMI status level
+         * \return HMI status level of application
+         */
+        virtual const NsAppLinkRPCV2::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
+
+
     protected:
         static log4cplus::Logger mLogger;
 
@@ -266,6 +309,10 @@ namespace NsAppManager
         MenuMapping mMenuMapping;
         CommandMapping   mCommandMapping;
         AppMenus mMenus;
+
+        NsAppLinkRPCV2::SystemContext mSystemContext;
+        NsAppLinkRPCV2::AudioStreamingState mAudioStreamingState;
+        NsAppLinkRPCV2::HMILevel::HMILevelInternal mHMIStatusLevel;
     };
 
 } // namespace NsAppManager

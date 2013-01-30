@@ -335,4 +335,58 @@ namespace NsAppManager
         mSessionKeys.remove(sessionKey);
     }
 
+     /**
+     * \brief retrieve application audio streaming state
+     * \return application audio streaming state
+     */
+    const NsAppLinkRPCV2::AudioStreamingState& Application::getApplicationAudioStreamingState( ) const
+    {
+        return mAudioStreamingState;
+    }
+
+    /**
+     * \brief retrieve application system context
+     * \return application system context
+     */
+    const NsAppLinkRPCV2::SystemContext &Application::getSystemContext() const
+    {
+        return mSystemContext;
+    }
+
+    /**
+     * \brief retrieve aplication HMI status level
+     * \return HMI status level of application
+     */
+    const NsAppLinkRPCV2::HMILevel::HMILevelInternal& Application::getApplicationHMIStatusLevel( ) const
+    {
+        return mHMIStatusLevel;
+    }
+
+    /**
+     * \brief Set application audio streaming state
+     * \param streamingState audio streaming state of application
+     */
+    void Application::setApplicationAudioStreamingState( const NsAppLinkRPCV2::AudioStreamingState& streamingState )
+    {
+        mAudioStreamingState = streamingState;
+    }
+
+    /**
+     * \brief set application system context
+     * \param application system context
+     */
+    void Application::setSystemContext(NsAppLinkRPCV2::SystemContext value)
+    {
+        mSystemContext = value;
+    }
+
+    /**
+     * \brief Set application HMI status level
+     * \param hmiLevel HMI status level of application
+     */
+    void Application::setApplicationHMIStatusLevel( const NsAppLinkRPCV2::HMILevel::HMILevelInternal& hmiLevel )
+    {
+        mHMIStatusLevel = hmiLevel;
+    }
+
 }
