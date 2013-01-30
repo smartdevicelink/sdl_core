@@ -961,10 +961,6 @@ namespace NsAppManager
 
                     setGPRPC2Request->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(setGPRPC2Request);
-                    NsAppLinkRPC::SetGlobalProperties_response * mobileResponse = new NsAppLinkRPC::SetGlobalProperties_response;
-                    mobileResponse->set_success(true);
-                    mobileResponse->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_RESETGLOBALPROPERTIES_REQUEST:
@@ -1002,10 +998,6 @@ namespace NsAppManager
                     resetGPRPC2Request->set_properties(propertyResult);
                     resetGPRPC2Request->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(resetGPRPC2Request);
-                    NsAppLinkRPC::ResetGlobalProperties_response * mobileResponse = new NsAppLinkRPC::ResetGlobalProperties_response;
-                    mobileResponse->set_success(true);
-                    mobileResponse->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_ALERT_REQUEST:
@@ -1543,7 +1535,8 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel()
+                        || !app->getIsMediaApplication() )
                     {
                         LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPC::SetMediaClockTimer_response* response = new NsAppLinkRPC::SetMediaClockTimer_response;
@@ -1867,9 +1860,11 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel()
+                        || !app->getIsMediaApplication())
                     {
-                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " 
+                            << sessionKey << " has not been activated yet or not media!" );
                         NsAppLinkRPCV2::SetMediaClockTimer_response* response = new NsAppLinkRPCV2::SetMediaClockTimer_response;
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::SetMediaClockTimerID);
@@ -2317,9 +2312,6 @@ namespace NsAppManager
 
                     setGPRPC2Request->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(setGPRPC2Request);
-                    mobileResponse->set_success(true);
-                    mobileResponse->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::ResetGlobalPropertiesID:
@@ -2352,9 +2344,6 @@ namespace NsAppManager
                     resetGPRPC2Request->set_properties(object->get_properties());
                     resetGPRPC2Request->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(resetGPRPC2Request);
-                    mobileResponse->set_success(true);
-                    mobileResponse->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
-                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::CreateInteractionChoiceSetID:
