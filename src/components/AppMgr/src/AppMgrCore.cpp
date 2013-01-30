@@ -3171,13 +3171,34 @@ namespace NsAppManager
                         break;
                     }
                     std::vector<NsAppLinkRPCV2::VehicleDataType> vdVector = object->get_dataType();
+                    int countOfItems = vdVector.size();
                     std::vector<NsAppLinkRPCV2::VehicleDataType>::iterator it;
                     for (it = vdVector.begin(); it != vdVector.end(); it++)
                     {
-                        core->mVehicleDataMapping.addVehicleDataMapping(*it, item);
+                        if (core->mVehicleDataMapping.addVehicleDataMapping(*it, item))
+                        {
+                            countOfItems--;
+                        }
                     }
-                    response->set_success(true);
-                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    if (0 == countOfItems)
+                    {
+                        response->set_success(true);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    } else if (countOfItems == vdVector.size())
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        response->set_info("Application is already subscribed on all VehicleData which it is trying to subscribe!");
+                    } else if (countOfItems < vdVector.size())
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::WARNINGS);
+                        response->set_info("Application was already subscribed on some VehicleData which it is trying to subscribe!");
+                    } else
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "Wrong command sequence!" );
+                        break;
+                    }
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
@@ -3216,13 +3237,34 @@ namespace NsAppManager
                         break;
                     }
                     std::vector<NsAppLinkRPCV2::VehicleDataType> vdVector = object->get_dataType();
+                    int countOfItems = vdVector.size();
                     std::vector<NsAppLinkRPCV2::VehicleDataType>::iterator it;
                     for (it = vdVector.begin(); it != vdVector.end(); it++)
                     {
-                        core->mVehicleDataMapping.removeVehicleDataMapping(*it, item);
+                        if (core->mVehicleDataMapping.removeVehicleDataMapping(*it, item))
+                        {
+                            countOfItems--;
+                        }
                     }
-                    response->set_success(true);
-                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    if (0 == countOfItems)
+                    {
+                        response->set_success(true);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    } else if (countOfItems == vdVector.size())
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        response->set_info("Application was not subscribed on any VehicleData which it is trying to unsubscribe!");
+                    } else if (countOfItems < vdVector.size())
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::WARNINGS);
+                        response->set_info("Application was subscribed not to all VehicleData which it is trying to unsubscribe!");
+                    } else
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "Wrong command sequence!" );
+                        break;
+                    }
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }

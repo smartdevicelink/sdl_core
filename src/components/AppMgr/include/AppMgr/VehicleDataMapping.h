@@ -57,14 +57,16 @@ namespace NsAppManager
          * \brief add a VehicleData to a mapping
          * \param vehicleDataName button name
          * \param app application to map a button to
+         * \return false if such subscribe already exists.
          */
-        void addVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, RegistryItem* app);
+        bool addVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, RegistryItem* app);
 
         /**
          * \brief remove a VehicleData from a mapping
          * \param vehicleDataName button name
+         * \return false if no such subscribe found.
          */
-        void removeVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, RegistryItem* app);
+        bool removeVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, RegistryItem* app);
 
         /**
          * \brief remove an application from a mapping
