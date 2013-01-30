@@ -5581,7 +5581,7 @@ namespace NsAppManager
                 else
                 {
                     LOG4CPLUS_WARN(mLogger, " Application list is empty!");
-                    response->setResult(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                    response->setResult(NsAppLinkRPCV2::Result::SUCCESS);
                 }
 
                 Json::Value commandJson = NsRPC2Communication::Marshaller::toJSON( response );

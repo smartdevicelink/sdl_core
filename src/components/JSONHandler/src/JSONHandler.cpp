@@ -79,10 +79,8 @@ void JSONHandler::onDataReceivedCallback( const NsProtocolHandler::AppLinkRawMes
 
 std::string JSONHandler::clearEmptySpaces( const std::string & input )
 {
-    LOG4CPLUS_INFO_EXT(mLogger, "Input string: " << input);
     std::string str = input;
     str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
-    LOG4CPLUS_INFO_EXT(mLogger, "After clearing new lines: " << str);
     return str;
 }
 
