@@ -2100,7 +2100,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::Slider_response* response = new NsAppLinkRPCV2::Slider_response;
@@ -2199,7 +2199,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::ScrollableMessage_response* response = new NsAppLinkRPCV2::ScrollableMessage_response;
@@ -2536,7 +2536,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if((NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel()) || (NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel()))
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::Alert_response* response = new NsAppLinkRPCV2::Alert_response;
@@ -2675,7 +2675,8 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel()
+                        || NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::Speak_response* response = new NsAppLinkRPCV2::Speak_response;
@@ -3011,13 +3012,31 @@ namespace NsAppManager
                         break;
                     }
 
-                    core->setAudioPassThruFlag(true);
-
-                    Application_v2* app
-                        = getApplicationV2AndCheckHMIStatus<NsAppLinkRPCV2::PerformAudioPassThru_response>(sessionKey,
-                            NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID);
-                    if (!app)
+                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
+                        NsAppLinkRPCV2::PerformAudioPassThru_response* response = new NsAppLinkRPCV2::PerformAudioPassThru_response();
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
+                    }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::PerformAudioPassThru_response* response = new NsAppLinkRPCV2::PerformAudioPassThru_response;
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+
+                    core->setAudioPassThruFlag(true);
 
                     NsAppLinkRPCV2::PerformAudioPassThru_request* request
                         = static_cast<NsAppLinkRPCV2::PerformAudioPassThru_request*>(mobileMsg);
@@ -3563,7 +3582,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::DialNumber_response* response = new NsAppLinkRPCV2::DialNumber_response;
@@ -3591,11 +3610,31 @@ namespace NsAppManager
                     NsAppLinkRPCV2::ShowConstantTBT_request* request
                         = static_cast<NsAppLinkRPCV2::ShowConstantTBT_request*>(mobileMsg);
 
-                    Application_v2* app = getApplicationV2AndCheckHMIStatus<NsAppLinkRPCV2::ShowConstantTBT_response>(
-                        sessionKey,
-                        NsAppLinkRPCV2::FunctionID::ShowConstantTBTID);
-                    if (!app)
-                        return;
+                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    if(!app)
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
+                        NsAppLinkRPCV2::ShowConstantTBT_response* response = new NsAppLinkRPCV2::ShowConstantTBT_response();
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::ShowConstantTBTID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+                    if(NsAppLinkRPCV2::HMILevel::HMI_LIMITED == app->getApplicationHMIStatusLevel()
+                        || NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        NsAppLinkRPCV2::ShowConstantTBT_response* response = new NsAppLinkRPCV2::ShowConstantTBT_response;
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::ShowConstantTBTID);
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        break;
+                    }
+
 
                     NsRPC2Communication::UI::ShowConstantTBT* showConstantTBT
                         = new NsRPC2Communication::UI::ShowConstantTBT;
@@ -3733,7 +3772,14 @@ namespace NsAppManager
                 Application* app = core->getApplicationFromItemCheckNotNull(core->mButtonsMapping.findRegistryItemSubscribedToButton(btnName));
                 if(!app)
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    LOG4CPLUS_INFO_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                if ( NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel()
+                    && NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel() )
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "Application cannot receive notification because in inappropriate hmi level.");
                     return;
                 }
 
