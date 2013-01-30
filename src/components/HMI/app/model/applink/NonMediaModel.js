@@ -79,5 +79,9 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         if ( params.softButtons ) {
             this.updateSoftButtons( params.softButtons );
         }
-    }
+    },
+    
+	applinkSetMediaClockTimer: function() {
+	   return;
+	}
 });
