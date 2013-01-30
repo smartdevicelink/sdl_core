@@ -119,6 +119,7 @@ namespace {
         return app;
     }
 
+    pthread_t sendingThread;
     struct thread_data
     {
         int timeout;
@@ -135,7 +136,7 @@ namespace {
         std::string url = my_data->url;
         NsAppManager::SyncPManager::PData pData = my_data->pdata;
         LOG4CPLUS_INFO_EXT(logger, " Sending params: url " << url << " timeout " << timeout << " data of " << pData.size() << " lines");
-        sleep(timeout);
+        sleep(timeout);  // TODO(akandul): Why we use it?
         int port = 80;
         size_t pos = url.find(":");
         if(pos != std::string::npos)
@@ -148,13 +149,24 @@ namespace {
         }
         std::string host = url.substr(0, pos);
         LOG4CPLUS_INFO_EXT(logger, " Sending at " << host << " port " << port);
-        ClientSocket client_socket( host, port );
-  //      std::string reply;
-        for(NsAppManager::SyncPManager::PData::iterator it = pData.begin(); it != pData.end(); it++)
+        try
         {
-            LOG4CPLUS_INFO_EXT(logger, " Sending data " << *it);
-            client_socket << *it;
-  //          client_socket >> reply;
+            ClientSocket client_socket( host, port );
+      //      std::string reply;
+            for(NsAppManager::SyncPManager::PData::iterator it = pData.begin(); it != pData.end(); it++)
+            {
+                LOG4CPLUS_INFO_EXT(logger, " Sending data " << *it);
+                client_socket << *it;
+      //          client_socket >> reply;
+            }
+        }
+        catch (SocketException& ex)
+        {
+            LOG4CPLUS_ERROR_EXT(logger, "ClientSocket error: " << ex.description());
+        }
+        catch (...)
+        {
+            LOG4CPLUS_ERROR_EXT(logger, "Unknown ClientSocket error...");
         }
         LOG4CPLUS_INFO_EXT(logger, " All data sent to host " << host << " port " << port);
         pthread_exit(NULL);
@@ -3164,13 +3176,34 @@ namespace NsAppManager
                         break;
                     }
                     std::vector<NsAppLinkRPCV2::VehicleDataType> vdVector = object->get_dataType();
+                    int countOfItems = vdVector.size();
                     std::vector<NsAppLinkRPCV2::VehicleDataType>::iterator it;
                     for (it = vdVector.begin(); it != vdVector.end(); it++)
                     {
-                        core->mVehicleDataMapping.addVehicleDataMapping(*it, item);
+                        if (core->mVehicleDataMapping.addVehicleDataMapping(*it, item))
+                        {
+                            countOfItems--;
+                        }
                     }
-                    response->set_success(true);
-                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    if (0 == countOfItems)
+                    {
+                        response->set_success(true);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    } else if (countOfItems == vdVector.size())
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        response->set_info("Application is already subscribed on all VehicleData which it is trying to subscribe!");
+                    } else if (countOfItems < vdVector.size())
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::WARNINGS);
+                        response->set_info("Application was already subscribed on some VehicleData which it is trying to subscribe!");
+                    } else
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "Wrong command sequence!" );
+                        break;
+                    }
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
@@ -3209,13 +3242,34 @@ namespace NsAppManager
                         break;
                     }
                     std::vector<NsAppLinkRPCV2::VehicleDataType> vdVector = object->get_dataType();
+                    int countOfItems = vdVector.size();
                     std::vector<NsAppLinkRPCV2::VehicleDataType>::iterator it;
                     for (it = vdVector.begin(); it != vdVector.end(); it++)
                     {
-                        core->mVehicleDataMapping.removeVehicleDataMapping(*it, item);
+                        if (core->mVehicleDataMapping.removeVehicleDataMapping(*it, item))
+                        {
+                            countOfItems--;
+                        }
                     }
-                    response->set_success(true);
-                    response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    if (0 == countOfItems)
+                    {
+                        response->set_success(true);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
+                    } else if (countOfItems == vdVector.size())
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
+                        response->set_info("Application was not subscribed on any VehicleData which it is trying to unsubscribe!");
+                    } else if (countOfItems < vdVector.size())
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::WARNINGS);
+                        response->set_info("Application was subscribed not to all VehicleData which it is trying to unsubscribe!");
+                    } else
+                    {
+                        LOG4CPLUS_ERROR_EXT(mLogger, "Wrong command sequence!" );
+                        break;
+                    }
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                     break;
                 }
@@ -4852,6 +4906,43 @@ namespace NsAppManager
                 core->mRequestMapping.removeRequest(response->getId());
                 break;
             }
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DIALNUMBERRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " A DialNambor response has been income");
+                NsRPC2Communication::UI::DialNumberResponse* object = static_cast<NsRPC2Communication::UI::DialNumberResponse*>(msg);
+                Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    return;
+                }
+
+                int appId = app->getAppID();
+                core->mMessageMapping.removeMessage(object->getId());
+
+                if (2 == app->getProtocolVersion())
+                {
+                    NsAppLinkRPCV2::DialNumber_response* response = new NsAppLinkRPCV2::DialNumber_response();
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
+                    NsAppLinkRPCV2::Result::ResultInternal result = static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult());
+                    response->set_resultCode(result);
+                    if (NsAppLinkRPCV2::Result::SUCCESS == result)
+                    {
+                        response->set_success(true);
+                    } else
+                    {
+                        response->set_success(false);
+                    }
+                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                        << " application id " << appId);
+                    MobileHandler::getInstance().sendRPCMessage(response, appId);
+                } else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "This command is available in protocol V2 only!");
+                }
+                return;
+            }
             default:
                 LOG4CPLUS_INFO_EXT(mLogger, " Not UI RPC message " << msg->getMethod() << " has been received!");
         }
@@ -5350,12 +5441,11 @@ namespace NsAppManager
                             const std::string& url = *urlPtr;
                             const int& timeout = timeoutPtr ? *timeoutPtr : 0;
                             LOG4CPLUS_INFO_EXT(mLogger, "SendData about to send at " << url << " timeout " << timeout);
-                            pthread_t* sendingThread = 0;
                             thread_data* data = new thread_data;
                             data->pdata = core->mSyncPManager.getPData();
                             data->timeout = timeout;
                             data->url = url;
-                            int rc = pthread_create(sendingThread, 0, SendPData,
+                            int rc = pthread_create(&sendingThread, 0, SendPData,
                                            (void *) data);
                             if (rc)
                             {
@@ -5421,7 +5511,7 @@ namespace NsAppManager
                     if ( 1 == app->getProtocolVersion() )
                     {
                         Application_v1 * app1 = static_cast<Application_v1*>(app);
-                        hmiApp.set_hmiDisplayLanguageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app1->getHMIDisplayLanguageDesired().get()));
+                        hmiApp.set_hmiDisplayLanguageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app1->getLanguageDesired().get()));
                         hmiApp.set_languageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app1->getLanguageDesired().get()));
                     }
                     if ( 2 == app->getProtocolVersion() )
@@ -5562,58 +5652,70 @@ namespace NsAppManager
                     if (object->get_gps())
                     {
                         response->set_gps(*(object->get_gps()));
-                    } else if (object->get_speed())
+                    }
+                    if (object->get_speed())
                     {
                         response->set_speed(*(object->get_speed()));
-                    } else if (object->get_rpm())
+                    }
+                    if (object->get_rpm())
                     {
                         response->set_rpm(*(object->get_rpm()));
-                    } else if (object->get_fuelLevel())
+                    }
+                    if (object->get_fuelLevel())
                     {
                         response->set_fuelLevel(*(object->get_fuelLevel()));
-                    } else if (object->get_avgFuelEconomy())
+                    }
+                    if (object->get_avgFuelEconomy())
                     {
                         response->set_avgFuelEconomy(*(object->get_avgFuelEconomy()));
-                    } else if (object->get_batteryVoltage())
+                    }
+                    if (object->get_batteryVoltage())
                     {
                         response->set_batteryVoltage(*(object->get_batteryVoltage()));
-                    } else if (object->get_externalTemperature())
+                    }
+                    if (object->get_externalTemperature())
                     {
                         response->set_externalTemperature(*(object->get_externalTemperature()));
-                    } else if (object->get_vin())
+                    }
+                    if (object->get_vin())
                     {
                         response->set_vin(*(object->get_vin()));
-                    } else if (object->get_prndl())
+                    }
+                    if (object->get_prndl())
                     {
                         response->set_prndl(*(object->get_prndl()));
-                    } else if (object->get_tirePressure())
+                    }
+                    if (object->get_tirePressure())
                     {
                         response->set_tirePressure(*(object->get_tirePressure()));
-                    } else if (object->get_batteryPackVoltage())
+                    }
+                    if (object->get_batteryPackVoltage())
                     {
                         response->set_batteryPackVoltage(*(object->get_batteryPackVoltage()));
-                    } else if (object->get_batteryPackCurrent())
+                    }
+                    if (object->get_batteryPackCurrent())
                     {
                         response->set_batteryPackCurrent(*(object->get_batteryPackCurrent()));
-                    } else if (object->get_batteryPackTemperature())
+                    }
+                    if (object->get_batteryPackTemperature())
                     {
                         response->set_batteryPackTemperature(*(object->get_batteryPackTemperature()));
-                    } else if (object->get_engineTorque())
+                    }
+                    if (object->get_engineTorque())
                     {
                         response->set_engineTorque(*(object->get_engineTorque()));
-                    } else if (object->get_odometer())
+                    }
+                    if (object->get_odometer())
                     {
                         response->set_odometer(*(object->get_odometer()));
-                    } else if (object->get_tripOdometer())
+                    }
+                    if (object->get_tripOdometer())
                     {
                         response->set_tripOdometer(*(object->get_tripOdometer()));
-                    } else if (object->get_satRadioESN())
+                    }
+                    if (object->get_satRadioESN())
                     {
                         response->set_satRadioESN(*(object->get_satRadioESN()));
-                    } else
-                    {
-                        response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
-                        response->set_success(false);
                     }
                     core->mMessageMapping.removeMessage(object->getId());
                     LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
@@ -5782,6 +5884,9 @@ namespace NsAppManager
                         readDIDResponse->set_data( *response->get_data() );
                     }
                     MobileHandler::getInstance().sendRPCMessage(readDIDResponse, appId);
+                } else
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "ReadDID is present in Protocol V2 only!!!");
                 }
                 core->mMessageMapping.removeMessage(response->getId());
                 return;
@@ -5822,40 +5927,6 @@ namespace NsAppManager
             }
         }
 
-        switch(msg->getMethod())
-        {
-            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DIALNUMBERRESPONSE:
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, " A DialNambor response has been income");
-                NsRPC2Communication::UI::DialNumberResponse* object = static_cast<NsRPC2Communication::UI::DialNumberResponse*>(msg);
-                Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
-                if(!app)
-                {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
-                    return;
-                }
-
-                int appId = app->getAppID();
-                core->mMessageMapping.removeMessage(object->getId());
-
-                if (2 == app->getProtocolVersion())
-                {
-                    NsAppLinkRPCV2::DialNumber_response* response = new NsAppLinkRPCV2::DialNumber_response();
-                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
-                    response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
-                    response->set_success(true);
-                    LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
-                        << " application id " << appId);
-                    MobileHandler::getInstance().sendRPCMessage(response, appId);
-                } else
-                {
-
-                }
-                return;
-            }
-            default:
-                LOG4CPLUS_INFO_EXT(mLogger, " Not Phone RPC message " << msg->getMethod() << " has been received!");
-        }
         LOG4CPLUS_INFO_EXT(mLogger, " A RPC2 bus message " << msg->getMethod() << " has been invoked!");
     }
 

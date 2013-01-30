@@ -27,7 +27,8 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 			'deviceName',
 			'image',
 			'fields',
-			'innerMenu'
+			'innerMenu',
+			'presets'
 		],
 		
 		deviceName: MFT.Label.extend({
@@ -111,6 +112,34 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 					templateName: 'arrow'
 				})
 			})
+		}),
+		
+		presets: Em.ContainerView.extend({
+            classNames: ['presets'],
+            
+            classNameBindings: ['hidden'],
+            
+            hidden: function() {
+            
+                return !Boolean(MFT.ApplinkAppController.model.get('appInfo.customPresets').length);
+            
+            }.property('MFT.ApplinkAppController.model.appInfo.customPresets.@each'),
+            
+            childViews: [
+    			'perset1',
+    			'perset2',
+    			'perset3',
+    			'perset4',
+    			'perset5',
+    			'perset6'
+            ],
+            
+            perset1: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.0'}),
+            perset2: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.1'}),
+            perset3: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.2'}),
+            perset4: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.3'}),
+            perset5: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.4'}),
+            perset6: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.5'})
 		})
 	})
 });

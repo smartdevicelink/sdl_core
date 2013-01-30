@@ -22,7 +22,8 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
                 field2:         '<field2>',
                 field3:         '<field3>',
                 field4:         '<field4>',
-                image:			''
+                image:			'',
+                customPresets:  []
             })
         );
         
@@ -48,6 +49,10 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         this.appInfo.set('field3',        params.mainField3);
         this.appInfo.set('field4',        params.mainField4);
         //this.appInfo.set('image',         params.graphic);
+        
+        if ( params.customPresets ) {
+            this.appInfo.set('customPresets', params.customPresets);
+        }
         
         // Get soft buttons if exists
         if ( params.softButtons ) {
