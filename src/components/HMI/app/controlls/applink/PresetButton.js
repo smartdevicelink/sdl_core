@@ -14,7 +14,7 @@ MFT.ApplinkPresetButton = MFT.Button.extend({
     actionDown: function(){
         this._super();
         
-        FFW.Buttons.buttonEvent( "PRESET_1", "BUTTONDOWN");
+        FFW.Buttons.buttonEvent( this.presetName, "BUTTONDOWN");
         var self = this;
         this.time = 0;
         setTimeout(function(){ self.time ++; }, 1000);
@@ -23,12 +23,12 @@ MFT.ApplinkPresetButton = MFT.Button.extend({
     actionUp: function(){
         this._super();
         
-        FFW.Buttons.buttonEvent( "PRESET_1", "BUTTONUP");
+        FFW.Buttons.buttonEvent( this.presetName, "BUTTONUP");
         
         if(this.time > 0){
-            FFW.Buttons.buttonPressed( "PRESET_1", "LONG");
+            FFW.Buttons.buttonPressed( this.presetName, "LONG");
         }else{
-            FFW.Buttons.buttonPressed( "PRESET_1", "SHORT");
+            FFW.Buttons.buttonPressed( this.presetName, "SHORT");
         }
         this.time = 0;
     }
