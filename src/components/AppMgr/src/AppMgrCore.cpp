@@ -5666,11 +5666,13 @@ namespace NsAppManager
                         }
                         currentApp->setApplicationHMIStatusLevel(
                             NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
+                        break;
 
                     } 
                     case NsAppLinkRPCV2::DeactivateReason::NAVIGATIONMAP:
                     case NsAppLinkRPCV2::DeactivateReason::PHONEMENU:
                     case NsAppLinkRPCV2::DeactivateReason::SYNCSETTINGS:
+                    case NsAppLinkRPCV2::DeactivateReason::GENERAL:
                     {
                         if ( currentApp->getIsMediaApplication() )
                         {
@@ -5687,13 +5689,18 @@ namespace NsAppManager
                             currentApp->setApplicationHMIStatusLevel(
                                 NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
                         }
+                        break;
                     }
-                    case NsAppLinkRPCV2::DeactivateReason::GENERAL:
                     default:
                     {
                         // TODO (pvysh): what should be done in this case?
+                        return;
                     }
                 }
+                //TODO (pvysh): seems to be correct assumption...
+                currentApp->setSystemContext(
+                    NsAppLinkRPCV2::SystemContext::SYSCTXT_MENU);
+                
                 core->sendHMINotificationToMobile( currentApp );
                 return;
             }
@@ -6228,12 +6235,62 @@ namespace NsAppManager
             removeAppFromHmi(currentApp, appId);
         }
 
+        NsAppLinkRPCV2::HMILevel::HMILevelInternal previousState = app->getApplicationHMIStatusLevel();
+
         if(!AppMgrRegistry::getInstance().activateApp(app))
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "Application " << app->getName()
                 << " application id " << appId << " cannot be activated.");
             return false;
         }
+
+        if ( NsAppLinkRPCV2::HMILevel::HMI_NONE == previousState )
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "First time activating - sending stuff.");
+            
+            if ( 1== app->getProtocolVersion() )
+            {                
+                if(mDriverDistractionV1)
+                {
+                    MobileHandler::getInstance().sendRPCMessage(mDriverDistractionV1, appId);
+                }
+            }
+            else
+            {
+                Application_v2* appv2 = (Application_v2*)app;
+                //Methods for changing language:
+                NsRPC2Communication::VR::ChangeRegistration * changeVrRegistration =
+                    new NsRPC2Communication::VR::ChangeRegistration;
+                changeVrRegistration->set_language(appv2->getLanguageDesired());
+                changeVrRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                changeVrRegistration->set_appId(appv2->getAppID());
+                mMessageMapping.addMessage(changeVrRegistration->getId(), appId);
+                HMIHandler::getInstance().sendRequest(changeVrRegistration);
+
+                NsRPC2Communication::TTS::ChangeRegistration * changeTtsRegistration =
+                    new NsRPC2Communication::TTS::ChangeRegistration;
+                changeTtsRegistration->set_language(appv2->getLanguageDesired());
+                changeTtsRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                changeTtsRegistration->set_appId(appv2->getAppID());
+                mMessageMapping.addMessage(changeTtsRegistration->getId(), appId);
+                HMIHandler::getInstance().sendRequest(changeTtsRegistration);
+
+                NsRPC2Communication::UI::ChangeRegistration * changeUIRegistration =
+                    new NsRPC2Communication::UI::ChangeRegistration;
+                changeUIRegistration->set_hmiDisplayLanguage(appv2->getHMIDisplayLanguageDesired());
+                changeUIRegistration->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                changeUIRegistration->set_appId(appv2->getAppID());
+                mMessageMapping.addMessage(changeUIRegistration->getId(), appId);
+                HMIHandler::getInstance().sendRequest(changeUIRegistration);
+                //End of methods for languages.
+                
+                if(mDriverDistractionV2)
+                {
+                    MobileHandler::getInstance().sendRPCMessage(mDriverDistractionV2, appId);
+                }
+            }
+        }
+
         return true;
     }
 

@@ -72,7 +72,7 @@ namespace NsAppManager
             Application* app = item->getApplication();
             if(!app)
             {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No application for the item!");
+                LOG4CPLUS_WARN(mLogger, "No application for the item!");
                 continue;
             }
             switch(app->getProtocolVersion())
@@ -104,7 +104,7 @@ namespace NsAppManager
                 }
             }
         }
-        LOG4CPLUS_ERROR_EXT(mLogger, " No active application found!");
+        LOG4CPLUS_WARN(mLogger, " No active application found!");
         return 0;
     }
 
@@ -217,14 +217,19 @@ namespace NsAppManager
             RegistryItem* item_ = it->second;
             if(!item_)
             {
-                LOG4CPLUS_ERROR_EXT(mLogger, " Item is empty in registry!");
+                LOG4CPLUS_WARN(mLogger, " Item is empty in registry!");
                 return false;
             }
             Application* tempApplication = item_->getApplication();
             if(!tempApplication)
             {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No application for the item!");
+                LOG4CPLUS_WARN(mLogger, "No application for the item!");
                 return false;
+            }
+
+            if ( tempApplication->getAppID() == appToBeActivated->getAppID() )
+            {
+                continue;
             }
 
             //TODO (pvysh): at this point it is assumed that behaviour is correct and
@@ -324,7 +329,7 @@ namespace NsAppManager
                 }
             }
         }
-        LOG4CPLUS_ERROR_EXT(mLogger, " No applications found for the command " << cmdId);
+        LOG4CPLUS_WARN(mLogger, " No applications found for the command " << cmdId);
         return 0;
     }
 
