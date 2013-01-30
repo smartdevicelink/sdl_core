@@ -28,7 +28,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 			'image',
 			'fields',
 			'innerMenu',
-			'persets'
+			'presets'
 		],
 		
 		deviceName: MFT.Label.extend({
@@ -114,8 +114,16 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 			})
 		}),
 		
-		persets: Em.ContainerView.extend({
-            classNames: ['persets'],
+		presets: Em.ContainerView.extend({
+            classNames: ['presets'],
+            
+            classNameBindings: ['hidden'],
+            
+            hidden: function() {
+            
+                return !Boolean(MFT.ApplinkAppController.model.get('appInfo.customPresets').length);
+            
+            }.property('MFT.ApplinkAppController.model.appInfo.customPresets.@each'),
             
             childViews: [
     			'perset1',
@@ -126,12 +134,12 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
     			'perset6'
             ],
             
-            perset1: MFT.Button.extend({text:'Perset 1'}),
-            perset2: MFT.Button.extend({text:'Perset 2'}),
-            perset3: MFT.Button.extend({text:'Perset 3'}),
-            perset4: MFT.Button.extend({text:'Perset 4'}),
-            perset5: MFT.Button.extend({text:'Perset 5'}),
-            perset6: MFT.Button.extend({text:'Perset 6'})
+            perset1: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.0'}),
+            perset2: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.1'}),
+            perset3: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.2'}),
+            perset4: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.3'}),
+            perset5: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.4'}),
+            perset6: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.5'})
 		})
 	})
 });
