@@ -350,7 +350,7 @@ MFT.ApplinkModel = Em.Object.create({
     deleteCommandVR: function ( commandId ) {    
         MFT.VRPopUp.DeleteCommand( commandId );
     },
-
+    
     onDeactivateApp: function ( target, appId, appName ) {    
 
         var dest = target.split('.'),
