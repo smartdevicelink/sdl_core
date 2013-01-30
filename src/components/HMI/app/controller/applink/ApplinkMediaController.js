@@ -69,7 +69,7 @@ MFT.ApplinkMediaController = Em.Object.create({
         // set active model
         MFT.ApplinkAppController.set('model',applicationModel);
                 
-        FFW.AppLinkCoreClient.ActivateApp( applicationModel.appId );
+        //FFW.AppLinkCoreClient.ActivateApp( applicationModel.appId );
 
         MFT.MediaController.listDown();
 
@@ -81,7 +81,9 @@ MFT.ApplinkMediaController = Em.Object.create({
      * Restore current application to active state
      */
     restoreCurrentApp: function() {
+
         if ( MFT.ApplinkAppController.model.appId === this.currentAppId ) {
+            FFW.AppLinkCoreClient.ActivateApp( this.currentAppId );
             return;
         }
         this.activateApp( MFT.ApplinkController.getApplicationModel( this.currentAppId ) );

@@ -326,6 +326,10 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			_syncProxy.subscribeButton(ButtonName.SEEKRIGHT, nextCorrID());
 			_syncProxy.subscribeButton(ButtonName.TUNEUP, nextCorrID());
 			_syncProxy.subscribeButton(ButtonName.TUNEDOWN, nextCorrID());
+			Vector<ButtonName> buttons = new Vector<ButtonName>(Arrays.asList(new ButtonName[] {
+					ButtonName.OK, ButtonName.SEEKLEFT, ButtonName.SEEKRIGHT, ButtonName.TUNEUP,
+					ButtonName.TUNEDOWN }));
+			SyncProxyTester.getInstance().buttonsSubscribed(buttons);
 		} catch (SyncException e) {
 			if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 			if (_msgAdapter != null) _msgAdapter.logMessage("Error subscribing to buttons", Log.ERROR, e, true);

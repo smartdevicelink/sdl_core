@@ -129,6 +129,12 @@ var StateManager = Em.StateManager.extend({
                 this._super();
                 
                 MFT.NonMediaController.restoreCurrentApp();
+            },
+
+            exit: function() {
+                this._super();
+                
+		     	MFT.ApplinkAppController.model.deactivateApp();
             }
 		})
 	}),
@@ -333,7 +339,13 @@ var StateManager = Em.StateManager.extend({
                 this._super();
                 
                 MFT.ApplinkMediaController.restoreCurrentApp();
-            }	
+            },
+
+            exit: function() {
+                this._super();
+                
+		     	MFT.ApplinkAppController.model.deactivateApp();
+            }
 
 		}),
 

@@ -107,20 +107,12 @@ MFT.ApplinkController = Em.Object.create({
 		
 		MFT.ApplinkModel.registeredApps[ params.appId ] = this.applicationModels[applicationType].create({
             appId:      params.appId,
-            appName:    params.appName
+            appName:    params.appName,
+            deviceName: params.deviceName,
 		});
-		//Em.Logger.log('Application ['+ applicationId +'] registered!');
-	},
 
-	/**
-	 * Unregister application
-	 *
-	 * @param applicationId: Number
-	 */
-	unRegisterApplication: function( applicationId ) {
-        MFT.States.goToState('info.apps');
-		delete MFT.ApplinkModel.registeredApps[ applicationId ];
-        this.findNewApps();
+        MFT.ApplinkModel.get('applicationsList').pushObject( params.appId );
+		//Em.Logger.log('Application ['+ applicationId +'] registered!');
 	},
 
     /**
@@ -186,7 +178,6 @@ MFT.ApplinkController = Em.Object.create({
 	 */
 	onDeviceChoosed: function( element ) {
 		FFW.UI.OnDeviceChosen( element.deviceName );
-		MFT.ApplinkModel.set( 'deviceName', element.deviceName );
 		this.turnChangeDeviceViewBack();
 	},
 

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Timer;
@@ -2991,6 +2992,18 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	
 	public static int getNewSoftButtonId() {
 		return autoIncSoftButtonId++;
+	}
+	
+	/**
+	 * Called when the app is acivated from HMI for the first time. ProxyService
+	 * automatically subscribes to buttons, so we reflect that in the
+	 * subscription list.
+	 */
+	public void buttonsSubscribed(Vector<ButtonName> buttons) {
+		List<ButtonName> buttonNames = Arrays.asList(ButtonName.values());
+		for (ButtonName buttonName : buttons) {
+			isButtonSubscribed[buttonNames.indexOf(buttonName)] = true;
+		}
 	}
 }
 

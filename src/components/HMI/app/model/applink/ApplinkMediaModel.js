@@ -13,9 +13,9 @@
 MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 
     init: function() {
-	   
+
 	   this._super();
-	   
+
 	   // init properties here
 	   this.set('appInfo', Em.Object.create({
             field1:			'<field1>',
@@ -32,6 +32,11 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
                 ]
             })
         );
+
+        this.set('appIcon', 'images/info/info_leftMenu_apps_ico.png'),
+
+        this.set('commandsList',[]);
+        this.set('softButtons',[]);
 	},
 
 	active: false,
@@ -56,6 +61,26 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 	maxTimeValue:	68400, // 19 hours
 	duration:		0,
 	currTime:		0,
+
+    /**
+     * Notification of deactivation of current application model
+     * initiated in StateManager
+     */
+    deactivateApp: function(){
+
+        MFT.ApplinkModel.onDeactivateApp( MFT.TransitionIterator.finalPath, this.appId, this.appName );
+
+    },
+
+    /**
+     * Method hides applink activation button
+     * @param {Number}
+     */
+    onDeleteApplication: function( appId ){
+        if( MFT.ApplinkMediaController.currentAppId == appId ){
+            MFT.ApplinkMediaController.currentAppId = 0;
+        }
+    },
 
     /**
 	 * Activate current application model
@@ -106,6 +131,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 
     /**
      * Applink Setter for Media Clock Timer
+     * @param {Object}
      */
     applinkSetMediaClockTimer: function(params){
 		if(params.updateMode == "CLEAR" ) {
@@ -132,6 +158,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 
     /**
      * Applin UI Show handler
+     * @param {Object}
      */
     onApplinkUIShow: function(params){
         clearInterval(this.timer);
@@ -144,7 +171,9 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
         this.appInfo.set('mediaClock',    params.mediaClock);
         this.appInfo.set('mediaTrack',    params.mediaTrack);
         this.appInfo.set('image',         params.graphic);
-        this.appInfo.set('softButtons',   params.softButtons);
+        if ( params.softButtons ) {
+            this.updateSoftButtons( params.softButtons );
+        }
         if(params.customPresets){
             var i=0;
             for(i=0; i<params.customPresets.length; i++){
@@ -153,7 +182,5 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
                 }
             }
         }
-
-        MFT.applinkView.innerMenu.content.AddSoftButton(params.softButtons);
     }
 });

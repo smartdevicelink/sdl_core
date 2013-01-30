@@ -29,7 +29,7 @@ MFT.ApplinkMediaControllsV1 = Em.ContainerView.create({
             template: Em.Handlebars.compile(
                 '{{#with view}}'+
                 '<div class="track-info">'+
-                    '<div class="device">{{MFT.ApplinkModel.deviceName}}</div>'+
+                    '<div class="device">{{MFT.ApplinkAppController.model.deviceName}}</div>'+
                             '<div class="divider_o"></div>'+
                     '<div class="title textLimit">{{MFT.ApplinkAppController.model.appInfo.field1}}</div>'+
                     '<div class="album textLimit">{{MFT.ApplinkAppController.model.appInfo.field2}}</div>'+

@@ -741,3 +741,7 @@
 	height: 50px;
 	float: left;
 }
+#info_apps_list .ffw-button{
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
