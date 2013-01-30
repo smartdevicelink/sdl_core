@@ -41,3 +41,27 @@
   Application opens all available ports on devices and starts communication.
   Returning to the App menu all applications will be shown in a list.
 
+* Colorized logs
+  ==============
+  You can have colorized log output of appLinkCore's messages in the terminal with the help of grc:
+
+  1. Make sure grc is installed:
+  sudo apt-get install grc
+
+  2. Copy the config files from the grc/ directory into ~/.grc/ directory:
+  mkdir ~/.grc
+  cp grc/* ~/.grc/
+
+  3. Add an alias to your shell's config (usually, ~/.bashrc or ~/.zshrc):
+  alias grca='grc -es --colour=auto'
+
+  Either restart the shell session or source the edited file:
+  source ~/.bashrc
+  or
+  source ~/.zshrc
+
+  4. Start the applink core with the following command:
+  grca ./appLinkCore
+
+  5. PROFIT
+
