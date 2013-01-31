@@ -78,7 +78,10 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
      */
     onDeleteApplication: function( appId ){
         if( MFT.ApplinkMediaController.currentAppId == appId ){
-            MFT.ApplinkMediaController.currentAppId = 0;
+            if( MFT.applinkView.stateObj.active ){
+                MFT.MediaController.turnOnAVin();
+            }
+            MFT.ApplinkMediaController.set('currentAppId', 0);
         }
     },
 

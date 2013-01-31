@@ -222,21 +222,15 @@ MFT.ApplinkModel = Em.Object.create({
      * @param {Object} params
      */
     onAppUnregistered: function( params ){
-        //MFT.ApplinkController.getApplicationModel(params.appId).set('appName', "<No app>");
-        //MFT.ApplinkController.getApplicationModel(params.appId).set('hideApplinkButton', true);
         MFT.VRPopUp.DeleteActivateApp(params.appId);
 
-        MFT.States.goToState('info.apps');
-
-        MFT.ApplinkModel.get('applicationsList').removeObjects(
-            MFT.ApplinkModel.applicationsList.filterProperty( params.appId )
-        );
+        MFT.ApplinkController.getApplicationModel( params.appId ).onDeleteApplication( params.appId );
 
         delete MFT.ApplinkModel.registeredApps[ params.appId ];
 
-        MFT.ApplinkModel.getApplicationModel( params.appId ).onDeleteApplication( params.appId );
+        MFT.ApplinkModel.get('applicationsList').shiftObject( params.appId );
 
-        MFT.ApplinkController.findNewApps();
+        //MFT.States.goToState('info.apps');
     },
 
     /**
