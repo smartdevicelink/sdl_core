@@ -39,7 +39,7 @@ MFT.ApplinkAppController = Em.Object.create({
             return;
         }
         
-		FFW.UI.onCommand( element.commandId, element.appId );
+		FFW.UI.onCommand( element.commandId, this.model.appId );
 	},
 	
 	/**
