@@ -72,6 +72,6 @@ const std::string AudioStreamingStateMarshaller::toString(const AudioStreamingSt
 const PerfectHashTable AudioStreamingStateMarshaller::mHashTable[3]=
 {
   {"AUDIBLE",0},
-  {"ATTENUATED",2},
-  {"NOT_AUDIBLE",1}
+  {"NOT_AUDIBLE",1},
+  {"ATTENUATED",2}
 };
