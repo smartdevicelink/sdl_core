@@ -23,7 +23,7 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
 	// Menu caption text
     captionBinding: 'MFT.ApplinkAppController.model.currentSubMenuLabel',
 	
-	commands: MFT.ApplinkCommandsList.extend({
+	commands: MFT.List.extend({
 		
 		elementId:		'info_nonMedia_options_list',
 				
