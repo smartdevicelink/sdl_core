@@ -125,9 +125,12 @@ FFW.UI = FFW.RPCObserver.create({
 
 		switch (request.method) {
 		    case "UI.Show":{
-
+                
+                // Close TBT
+                MFT.TurnByTurnView.deactivate();
+                
 				MFT.ApplinkController.getApplicationModel(request.params.appId).onApplinkUIShow(request.params);
-
+                
 				this.sendUIResult("SUCCESS", request.id, request.method);
 
 		    	break;
