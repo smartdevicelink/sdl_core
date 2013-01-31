@@ -3339,7 +3339,7 @@ namespace NsAppManager
                 }
                 case NsAppLinkRPCV2::FunctionID::ReadDIDID:
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "ReadDID is received from moblie app.");
+                    LOG4CPLUS_INFO_EXT(mLogger, "ReadDID is received from mobile app.");
                     NsAppLinkRPCV2::ReadDID_request * request = static_cast<NsAppLinkRPCV2::ReadDID_request*>(mobileMsg);
                     NsAppManager::Application_v2* app = static_cast<NsAppManager::Application_v2*>(core->
                             getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey)));
@@ -3382,7 +3382,7 @@ namespace NsAppManager
                 }
                 case NsAppLinkRPCV2::FunctionID::GetDTCsID:
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleData request has been invoked");
+                    LOG4CPLUS_INFO_EXT(mLogger, " A GetDTCs request has been invoked");
                     Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
                     if(!app)
                     {
@@ -4793,7 +4793,7 @@ namespace NsAppManager
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETAPPICONRESPONSE:
             {
-                LOG4CPLUS_INFO_EXT(mLogger, " A SetAppId response has been income");
+                LOG4CPLUS_INFO_EXT(mLogger, " A SetAppIcon response has been income");
                 NsRPC2Communication::UI::SetAppIconResponse* uiResponse = static_cast<NsRPC2Communication::UI::SetAppIconResponse*>(msg);
 
                 Application* app = core->getApplicationFromItemCheckNotNull(
