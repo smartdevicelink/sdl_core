@@ -3787,17 +3787,30 @@ namespace NsAppManager
                 Application* app = core->getApplicationFromItemCheckNotNull(core->mButtonsMapping.findRegistryItemSubscribedToButton(btnName));
                 if(!app)
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "No application associated with this registry item!");
-                    return;
+                    LOG4CPLUS_WARN_EXT(mLogger, "No application associated with this registry item!");
+                    if(object->get_customButtonID())
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, "No subscription for custom buttons is required.");
+                        app = AppMgrRegistry::getInstance().getActiveItem();
+                        if (!app)
+                        {
+                            LOG4CPLUS_WARN_EXT(mLogger, "OnButtonPress came but no app is active.");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        return;    
+                    }                    
                 }
 
-                if ( NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel()
-                    && NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel() )
+                if ( NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel()
+                        && NsAppLinkRPCV2::HMILevel::HMI_LIMITED != app->getApplicationHMIStatusLevel() )
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "Application cannot receive notification because in inappropriate hmi level.");
+                    LOG4CPLUS_WARN_EXT(mLogger, "Application is not supposed to receive OnButtonPress when in HMI_BACKGROUND or NONE");
                     return;
                 }
-
+                
                 int appId = app->getAppID();
 
                 switch(app->getProtocolVersion())
@@ -3847,7 +3860,27 @@ namespace NsAppManager
                 Application* app = core->getApplicationFromItemCheckNotNull(core->mButtonsMapping.findRegistryItemSubscribedToButton(btnName));
                 if(!app)
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    LOG4CPLUS_WARN_EXT(mLogger, "No application associated with this registry item!");
+                    if(object->get_customButtonID())
+                    {
+                        LOG4CPLUS_INFO_EXT(mLogger, "No subscription for custom buttons is required.");
+                        app = AppMgrRegistry::getInstance().getActiveItem();
+                        if (!app)
+                        {
+                            LOG4CPLUS_WARN_EXT(mLogger, "OnButtonPress came but no app is active.");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        return;    
+                    }                    
+                }
+
+                if ( NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel()
+                        && NsAppLinkRPCV2::HMILevel::HMI_LIMITED != app->getApplicationHMIStatusLevel() )
+                {
+                    LOG4CPLUS_WARN_EXT(mLogger, "Application is not supposed to receive OnButtonPress when in HMI_BACKGROUND or NONE");
                     return;
                 }
 
