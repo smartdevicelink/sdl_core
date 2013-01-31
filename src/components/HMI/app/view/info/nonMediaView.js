@@ -91,8 +91,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 				attributeBindings: ['parentView.contentPositon:style'],
 				
 				childViews: [
-					'optionsButton',
-					'routeInfoButton'
+					'optionsButton'
 				],
 				
 				optionsButton: MFT.Button.extend({
@@ -102,14 +101,6 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 					
 					action:		'openCommandsList',
 					target:		'MFT.ApplinkAppController'
-				}),
-				
-				routeInfoButton: MFT.Button.extend({
-					text: 'Route Info',
-					
-					//hidden:	true,
-					
-					templateName: 'arrow'
 				})
 			})
 		}),
