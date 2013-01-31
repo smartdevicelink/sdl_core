@@ -1043,6 +1043,21 @@ namespace NsAppManager
                     {
                         alert->set_playTone(*object->get_playTone());
                     }
+                    if(object->get_ttsChunks())
+                    {
+                        const std::vector<NsAppLinkRPC::TTSChunk> &oldChunks = *object->get_ttsChunks();
+                        std::vector<NsAppLinkRPCV2::TTSChunk> chunks(oldChunks.size());
+                        for(int i = 0; i < oldChunks.size(); ++i)
+                        {
+                            NsAppLinkRPCV2::TTSChunk chunk;
+                            chunk.set_text(oldChunks[i].get_text());
+                            chunk.set_type(
+                                static_cast<NsAppLinkRPCV2::SpeechCapabilities::SpeechCapabilitiesInternal>(
+                                    oldChunks[i].get_type().get()));
+                            chunks[i] = chunk;
+                        }
+                        alert->set_ttsChunks(chunks);
+                    }
                     alert->set_appId(sessionKey);
                     HMIHandler::getInstance().sendRequest(alert);
                     break;
@@ -2559,6 +2574,10 @@ namespace NsAppManager
                     if(object->get_playTone())
                     {
                         alert->set_playTone(*object->get_playTone());
+                    }
+                    if(object->get_ttsChunks())
+                    {
+                        alert->set_ttsChunks(*object->get_ttsChunks());
                     }
                     if(object->get_softButtons())
                     {
