@@ -64,7 +64,7 @@ MFT.ApplinkController = Em.Object.create({
      * @param {String}
      */
     tbtClientStateSeleced: function( state ){
-        FFW.UI.onTBTClientState(state);
+        FFW.UI.onTBTClientState( state, MFT.ApplinkAppController.model.appId );
     },
 
     /**
