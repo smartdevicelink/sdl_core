@@ -100,7 +100,7 @@ MFT.TurnByTurnView = MFT.ApplinkAbstractView.create({
         elementId:      'homeScreen',
         classNames:     'homeScreen btn',
         text:           'Home Screen',
-        iconBinding:    'MFT.ApplinkMediaController.model.appIcon',
+        iconBinding:    'MFT.ApplinkAppController.model.appIcon',
         target:         'this.parentView',
         action:         'deactivate',
         onDown:         false

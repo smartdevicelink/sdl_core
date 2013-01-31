@@ -54,6 +54,8 @@ MFT.TBTTurnList = MFT.ApplinkAbstractView.create({
     updateList: function( appId ) {
         this.get('tbtTurnListList.list').removeAllChildren();
 
+        this.tbtTurnListList.list.refresh();
+
         var i=0,
             turnListArray = MFT.ApplinkController.getApplicationModel( appId ).turnList;
             length = turnListArray.length;
