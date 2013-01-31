@@ -4707,8 +4707,15 @@ namespace NsAppManager
                     return;
                 }
 
-                LOG4CPLUS_INFO_EXT(mLogger, " About to send OnHMIStatus to a mobile side...");
                 int appId = app->getAppID();
+
+                if ( (NsAppLinkRPCV2::SystemContext::SYSCTXT_HMI_OBSCURED || 
+                     NsAppLinkRPCV2::SystemContext::SYSCTXT_ALERT) &&
+                     1 == app->getProtocolVersion() )
+                {
+                    LOG4CPLUS_INFO_EXT(mLogger, "This system context is not supported for first generation of RPC.");
+                    return;
+                }
 
                 app->setSystemContext(object->get_systemContext());
 
@@ -4859,6 +4866,10 @@ namespace NsAppManager
                     {
                         if ( 0 != it->second && 0 != it->second->getApplication() )
                         {
+                            if ( NsAppLinkRPCV2::HMILevel::HMI_NONE != 
+                                        it->second->getApplication()->getApplicationHMIStatusLevel()
+                                    &&
+                                    1 != it->second->getApplication()->getProtocolVersion() )
                             MobileHandler::getInstance().sendRPCMessage(languageChangeToApp, it->first);
                         }
                     }
@@ -6097,7 +6108,8 @@ namespace NsAppManager
                 application->setIsMediaApplication(isMediaApplication);
                 application->setSyncMsgVersion(syncMsgVersion);
                 application->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MENU);
-                application->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
+                application->setApplicationAudioStreamingState(
+                    static_cast<NsAppLinkRPCV2::AudioStreamingState::AudioStreamingStateInternal>(1));//NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE
 
                 if(registerRequest->get_ttsName())
                 {

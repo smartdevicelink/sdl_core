@@ -153,7 +153,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
             this.set('pause', false);
         }
         
-        return 'SUCCCESS';
+        return 'SUCCESS';
     },
 
     /**
