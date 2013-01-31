@@ -49,7 +49,11 @@ const std::string ChoiceMarshaller::toString(const Choice& e)
 bool ChoiceMarshaller::checkIntegrityConst(const Choice& s)
 {
   if(s.choiceID>65535)  return false;
-  if(!ImageMarshaller::checkIntegrityConst(s.image))  return false;
+
+  // TODO(akandul): Quick fix for HMI communication with app(v1)
+  if (s.image.get_imageType().get() != NsAppLinkRPCV2::ImageType::INVALID_ENUM)
+    if(!ImageMarshaller::checkIntegrityConst(s.image))  return false;
+
   if(s.menuName.length()>500)  return false;
   {
     unsigned int i=s.vrCommands.size();
@@ -70,7 +74,9 @@ Json::Value ChoiceMarshaller::toJSON(const Choice& e)
 
   json["choiceID"]=Json::Value(e.choiceID);
 
-  json["image"]=ImageMarshaller::toJSON(e.image);
+  // TODO(akandul): Quick fix for HMI communication with app(v1)
+  if (e.image.get_imageType().get() != NsAppLinkRPCV2::ImageType::INVALID_ENUM)
+    json["image"]=ImageMarshaller::toJSON(e.image);
 
   json["menuName"]=Json::Value(e.menuName);
 
