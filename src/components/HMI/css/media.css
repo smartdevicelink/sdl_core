@@ -2716,6 +2716,7 @@
 .sdIco { background:url(../images/media/ico_sd.png) no-repeat !important}
 .btIco { background:url(../images/media/ico_bt.png) no-repeat !important}
 .avIco { background:url(../images/media/ico_li.png) no-repeat !important}
+.appIco { background:url(../images/info/info_leftMenu_apps_ico.png) no-repeat !important}
 
 #media_player_view_container{
 	left:152px;
