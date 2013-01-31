@@ -2283,10 +2283,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									tarray.add(t);
 								}
 								msg.setTurnList(tarray);
-								if (chkIncludeSoftButtons.isChecked() &&
-										(currentSoftButtons != null) &&
-										(currentSoftButtons.size() > 0)) {
+								if (currentSoftButtons != null) {
 									msg.setSoftButtons(currentSoftButtons);
+								} else {
+									msg.setSoftButtons(new Vector<SoftButton>());
 								}
 								currentSoftButtons = null;
 								chkIncludeSoftButtons = null;

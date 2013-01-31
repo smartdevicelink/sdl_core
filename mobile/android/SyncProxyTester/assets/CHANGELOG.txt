@@ -1,6 +1,6 @@
 [CW5]
 * Don't set app icon for protocol version v1.
-* ShowConstantTBT message: always send soft buttons even if an empty array.
+* ShowConstantTBT and UpdateTurnList messages: always send soft buttons even if an empty array.
 * Properly display subscribed buttons after first HMI status notification.
 * ResetGlobalProperties dialog for v1 protocol: hide and don't send VR help title and VR help item properties.
 * AlertManeuver message: an array of TTS Chunks can be sent now.
