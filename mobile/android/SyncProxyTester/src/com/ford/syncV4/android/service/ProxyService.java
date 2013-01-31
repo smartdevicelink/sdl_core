@@ -280,6 +280,12 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter != null) _msgAdapter.logMessage("ProxyService.startProxy() returning", Log.INFO);
 		else Log.i(TAG, "ProxyService.startProxy() returning");
 	}
+
+	private int getCurrentProtocolVersion() {
+		return getSharedPreferences(Const.PREFS_NAME, 0).getInt(
+				Const.PREFS_KEY_PROTOCOLVERSION,
+				Const.PREFS_DEFAULT_PROTOCOLVERSION);
+	}
 	
 	public void onDestroy() {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -473,7 +479,8 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				return;
 		}
 		
-		if (hmiChange && firstHMIStatusChange) {
+		boolean setAppIconSupported = getCurrentProtocolVersion() >= 2;
+		if (setAppIconSupported && hmiChange && firstHMIStatusChange) {
 			firstHMIStatusChange = false;
 			
 			InputStream is = null;
