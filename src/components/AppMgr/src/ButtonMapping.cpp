@@ -106,6 +106,11 @@ namespace NsAppManager
         return 0;
     }
 
+    ResultRange ButtonMapping::findSubscribedToButton(const NsAppLinkRPCV2::ButtonName &btnName) const
+    {
+        return mButtonsMapping.equal_range(btnName);
+    }
+
     /**
      * \brief Copy constructor
      */

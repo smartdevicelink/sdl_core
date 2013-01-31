@@ -31,12 +31,17 @@ namespace NsAppManager
     /**
      * \brief a button_name-registered-app map
      */
-    typedef std::map<NsAppLinkRPCV2::ButtonName, RegistryItem*, Comparer> ButtonMap;
+    typedef std::multimap<NsAppLinkRPCV2::ButtonName, RegistryItem*, Comparer> ButtonMap;
 
     /**
      * \brief a button_name-registered-app map item
      */
     typedef std::pair<NsAppLinkRPCV2::ButtonName, RegistryItem*> ButtonMapItem;
+
+    /**
+      *\brief Iterators of beginning and end of result range 
+    */
+    typedef std::pair<ButtonMap::const_iterator, ButtonMap::const_iterator> ResultRange;
 
     /**
      * \brief ButtonMapping acts as a mapping of buttons to registered application which subscribes to them
@@ -86,6 +91,12 @@ namespace NsAppManager
          */
         RegistryItem *findRegistryItemSubscribedToButton(const NsAppLinkRPCV2::ButtonName &btnName) const;
 
+        /**
+         * \brief Find all apps subscribed to button
+         * \param btnName Button name
+         * \return @ResultRange Results range
+         */
+        ResultRange findSubscribedToButton(const NsAppLinkRPCV2::ButtonName &btnName) const;
     private:
 
         /**
