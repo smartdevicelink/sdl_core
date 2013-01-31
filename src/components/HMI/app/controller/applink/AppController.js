@@ -61,18 +61,6 @@ MFT.ApplinkAppController = Em.Object.create({
 	},
 	
 	/**
-	 * Handeler for command submenu press
-	 * 
-	 * @param element:	MFT.Button
-	 */
-	onCommandSubMenu: function( element ) {
-		MFT.ApplinkController.getApplicationModel( element.appId ).set('currentSubMenuId',		element.menuId );
-		MFT.ApplinkController.getApplicationModel( element.appId ).set('currentSubMenuLabel',	element.text );
-		
-		MFT.States.goToState( MFT.States.get('currentState.path') + '.subMenu' );
-	},
-	
-	/**
 	 * Handeler for preform interaction choice
 	 * send response to device and deactivate interactions window
 	 *
