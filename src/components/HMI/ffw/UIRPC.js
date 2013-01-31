@@ -589,14 +589,17 @@ FFW.UI = FFW.RPCObserver.create({
 	/*
 	 * Notifies if TBTClientState was activated
  	 */
-	onTBTClientState: function( state ) {
+	onTBTClientState: function( state, appId ) {
 		Em.Logger.log("FFW.UI.OnTBTClientState");
 
 		// send repsonse
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
 			"method":	"UI.OnTBTClientState",
-			"params":	{"state":	state}
+			"params":	{
+				"state":	state,
+				"appId":	appId
+			}
 		};
 		this.client.send(JSONMessage);
 	},
