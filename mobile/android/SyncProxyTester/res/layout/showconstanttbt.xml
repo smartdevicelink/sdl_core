@@ -77,7 +77,8 @@
 	            android:id="@+id/chkIncludeSBs"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:checked="false"
+	            android:checked="true"
+	            android:clickable="false"
 	            android:text="Include" />
 
 	        <Button
