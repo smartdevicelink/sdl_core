@@ -2098,10 +2098,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setDistanceToManeuverScale((float) Integer.parseInt(txtDistanceToManeuverScale.getText().toString()));
 										msg.setManeuverComplete(chkManeuverComplete.isChecked());
 										msg.setCorrelationID(autoIncCorrId++);
-										if (chkIncludeSoftButtons.isChecked() &&
-												(currentSoftButtons != null) &&
-												(currentSoftButtons.size() > 0)) {
+										if (currentSoftButtons != null) {
 											msg.setSoftButtons(currentSoftButtons);
+										} else {
+											msg.setSoftButtons(new Vector<SoftButton>());
 										}
 										currentSoftButtons = null;
 										chkIncludeSoftButtons = null;
@@ -2235,19 +2235,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						
 						SoftButton sb1 = new SoftButton();
 						sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-						sb1.setText("Reply");
+						sb1.setText("Close");
 						sb1.setType(SoftButtonType.SBT_TEXT);
 						sb1.setIsHighlighted(false);
-						sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-						SoftButton sb2 = new SoftButton();
-						sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-						sb2.setText("Close");
-						sb2.setType(SoftButtonType.SBT_TEXT);
-						sb2.setIsHighlighted(false);
-						sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
+						sb1.setSystemAction(SystemAction.DEFAULT_ACTION);
 						currentSoftButtons = new Vector<SoftButton>();
 						currentSoftButtons.add(sb1);
-						currentSoftButtons.add(sb2);
 
 						Button btnSoftButtons = (Button) layout.findViewById(R.id.updateturnlist_btnSoftButtons);
 						btnSoftButtons.setOnClickListener(new OnClickListener() {
@@ -2283,10 +2276,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									tarray.add(t);
 								}
 								msg.setTurnList(tarray);
-								if (chkIncludeSoftButtons.isChecked() &&
-										(currentSoftButtons != null) &&
-										(currentSoftButtons.size() > 0)) {
+								if (currentSoftButtons != null) {
 									msg.setSoftButtons(currentSoftButtons);
+								} else {
+									msg.setSoftButtons(new Vector<SoftButton>());
 								}
 								currentSoftButtons = null;
 								chkIncludeSoftButtons = null;
