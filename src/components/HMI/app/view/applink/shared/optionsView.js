@@ -71,6 +71,7 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
     					text:          commands[i].name,
     					commandId:     commands[i].commandId,
     					menuId:        commands[i].menuId,
+    					icon:          commands[i].icon,
     					target:		   'MFT.ApplinkAppController',
     		            action:        'onCommand',
     		            onDown:        false

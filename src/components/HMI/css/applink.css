@@ -140,6 +140,10 @@
 	margin-left: 15px;
 }
 
+#applink_options .list-content .ico {
+    float: left;
+}
+
 #info_nonMedia_options_submenu {
 	z-index: 11000;
 	width: 800px;

@@ -133,7 +133,8 @@ MFT.ApplinkAppModel = Em.Object.extend({
             commandId:  params.cmdId,
             name:       params.menuParams.menuName,
             parent:     params.menuParams.parentID,
-            position:   params.menuParams.position
+            position:   params.menuParams.position,
+            icon:       params.cmdIcon ? params.cmdIcon.value : null
         });
     },
     
