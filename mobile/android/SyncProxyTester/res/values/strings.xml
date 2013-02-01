@@ -21,5 +21,7 @@
     <string name="updateturnlist_defaultTurnList">Turn1,Turn2</string>
     <string name="includeSoftButtons">Include</string>
     <string name="softButtons">Soft Buttons</string>
+    <string name="updateturnlist_iconList">Icon List (comma-separated, one for each turn)</string>
+    <string name="updateturnlist_defaultIconList">turn_left,turn_right</string>
     
 </resources>

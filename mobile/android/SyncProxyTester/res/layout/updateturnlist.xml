@@ -9,14 +9,13 @@
     android:orientation="vertical"
     android:paddingLeft="20dip"
     android:paddingRight="20dip" >
-    
+
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="@string/updateturnlist_turnList"
         android:textStyle="bold" >
-
     </TextView>
 
     <EditText
@@ -27,8 +26,25 @@
         android:inputType="textCapSentences"
         android:text="@string/updateturnlist_defaultTurnList"
         android:visibility="visible" >
-
     </EditText>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/updateturnlist_iconList"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/updateturnlist_txtIconList"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ems="10"
+        android:freezesText="true"
+        android:inputType="textCapSentences"
+        android:text="@string/updateturnlist_defaultIconList"
+        android:visibility="visible" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -48,7 +64,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/softButtons" />
-
     </LinearLayout>
 
 </LinearLayout>

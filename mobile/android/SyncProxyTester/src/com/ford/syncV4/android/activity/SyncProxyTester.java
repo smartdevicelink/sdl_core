@@ -2231,6 +2231,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								.getSystemService(LAYOUT_INFLATER_SERVICE);
 						View layout = inflater.inflate(R.layout.updateturnlist, null);
 						final EditText txtTurnList = (EditText) layout.findViewById(R.id.updateturnlist_txtTurnList);
+						final EditText txtIconList = (EditText) layout.findViewById(R.id.updateturnlist_txtIconList);
 						chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 						
 						SoftButton sb1 = new SoftButton();
@@ -2262,18 +2263,30 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								msg.setCorrelationID(autoIncCorrId++);
 								
 								String turnListString = txtTurnList.getText().toString();
-								// string to join/split footer turnList string
+								String iconListString = txtIconList.getText().toString();
+								// string to split turnList/iconList strings
 								final String joinString = ",";
 								
+								/*
+								 * the main string is the turn list, so we iterate over it.
+								 * if the icon list is shorter, we set the default icon for
+								 * the last turns. if longer, skip the icons w/o turns.
+								 */
 								Vector<Turn> tarray = new Vector<Turn>();
+								String[] iconNames = iconListString.split(joinString);
+								int iconNumber = 0;
 								for (String turn : turnListString.split(joinString)) {
 									Turn t = new Turn();
 									t.setNavigationText(turn);
 									Image ti1 = new Image();
-									ti1.setValue("Turn");
+									ti1.setValue((iconNumber < iconNames.length) ?
+											iconNames[iconNumber] :
+											"Turn");
 									ti1.setImageType(ImageType.STATIC);
 									t.setTurnIcon(ti1);
 									tarray.add(t);
+									
+									++iconNumber;
 								}
 								msg.setTurnList(tarray);
 								if (currentSoftButtons != null) {

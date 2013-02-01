@@ -1,5 +1,5 @@
 [CW5]
-* UpdateTurnList dialog: fix the number of soft buttons sent by default.
+* UpdateTurnList dialog: fix the number of soft buttons sent by default, allow to specify image for each turn.
 * Don't set app icon for protocol version v1.
 * ShowConstantTBT and UpdateTurnList messages: always send soft buttons even if an empty array.
 * Properly display subscribed buttons after first HMI status notification.
