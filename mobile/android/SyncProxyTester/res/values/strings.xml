@@ -18,10 +18,10 @@
     <string name="softbutton_id">Id:</string>
     <string name="dialNumber_phoneNumber">Phone Number:</string>
     <string name="updateturnlist_turnList">Turn List (comma-separated)</string>
-    <string name="updateturnlist_defaultTurnList">Turn1,Turn2</string>
+    <string name="updateturnlist_defaultTurnList">Turn Left,Turn Right,Go Forward</string>
     <string name="includeSoftButtons">Include</string>
     <string name="softButtons">Edit Soft Buttons</string>
     <string name="updateturnlist_iconList">Icon List (comma-separated, one for each turn)</string>
-    <string name="updateturnlist_defaultIconList">turn_left,turn_right</string>
+    <string name="updateturnlist_defaultIconList">turn_left.png,turn_right.png,turn_forward.png</string>
     
 </resources>

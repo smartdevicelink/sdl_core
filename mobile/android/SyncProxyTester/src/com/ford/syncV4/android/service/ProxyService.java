@@ -91,6 +91,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 	private Integer autoIncCorrId = 1;
 	
 	private static final String ICON_SYNC_FILENAME = "icon.png";
+	private static final String ICON_FILENAME_SUFFIX = ".png";
 
 	private static SyncProxyTester _mainInstance;	
 	private static ProxyService _instance;
@@ -485,40 +486,68 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			
 			InputStream is = null;
 			try {
-				is = getResources().openRawResource(R.drawable.fiesta);
-				ByteArrayOutputStream os = new ByteArrayOutputStream(is.available());
-				final int buffersize = 4096;
-				final byte[] buffer = new byte[buffersize];
-				int available = 0;
-				while ((available = is.read(buffer)) >= 0) {
-					os.write(buffer, 0, available);
-				}
-				
 				PutFile putFile = new PutFile();
 				putFile.setFileType(FileType.GRAPHIC_PNG);
 				putFile.setSyncFileName(ICON_SYNC_FILENAME);
 				putFile.setCorrelationID(nextCorrID());
-				putFile.setBulkData(os.toByteArray());
+				putFile.setBulkData(contentsOfResource(R.drawable.fiesta));
 				getProxyInstance().sendRPCRequest(putFile);
 				
 				SetAppIcon setAppIcon = new SetAppIcon();
 				setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
 				setAppIcon.setCorrelationID(nextCorrID());
 				getProxyInstance().sendRPCRequest(setAppIcon);
-			} catch (IOException e) {
-				Log.w(TAG, "Can't read icon file", e);
+				
+				// upload turn icons
+				sendIconFromResource(R.drawable.turn_left);
+				sendIconFromResource(R.drawable.turn_right);
+				sendIconFromResource(R.drawable.turn_forward);
 			} catch (SyncException e) {
 				Log.w(TAG, "Failed to set app icon", e);
-			} finally {
-				if (is != null) {
-					try {
-						is.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+			}
+		}
+	}
+	
+	/**
+	 * Returns the file contents from the specified resource.
+	 * 
+	 * @param resource Resource id (in res/ directory)
+	 * @return The resource file's contents
+	 */
+	private byte[] contentsOfResource(int resource) {
+		InputStream is = null;
+		try {
+			is = getResources().openRawResource(resource);
+			ByteArrayOutputStream os = new ByteArrayOutputStream(is.available());
+			final int buffersize = 4096;
+			final byte[] buffer = new byte[buffersize];
+			int available = 0;
+			while ((available = is.read(buffer)) >= 0) {
+				os.write(buffer, 0, available);
+			}
+			return os.toByteArray();
+		} catch (IOException e) {
+			Log.w(TAG, "Can't read icon file", e);
+			return null;
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
 		}
+	}
+	
+	private void sendIconFromResource(int resource) throws SyncException {
+		PutFile putFile = new PutFile();
+		putFile.setFileType(FileType.GRAPHIC_PNG);
+		putFile.setSyncFileName(getResources().getResourceEntryName(resource)
+				+ ICON_FILENAME_SUFFIX);
+		putFile.setCorrelationID(nextCorrID());
+		putFile.setBulkData(contentsOfResource(resource));
+		getProxyInstance().sendRPCRequest(putFile);
 	}
 	
 	@Override
