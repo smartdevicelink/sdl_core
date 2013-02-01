@@ -1,4 +1,5 @@
 [CW5]
+* Reduce the app icon size for faster transfer (on Android 2.*).
 + Upload turn left, right, and forward icons after app registration for UpdateTurnList.
 * UpdateTurnList dialog: fix the number of soft buttons sent by default, allow to specify image for each turn.
 * Don't set app icon for protocol version v1.
