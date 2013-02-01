@@ -26,60 +26,8 @@ MFT.ControlButtons = Em.ContainerView.create({
 		'UILanguages',
 		'TTSVRLanguages',
 		'UILanguagesLabel',
-		'TTSVRLanguagesLabel',
-		'appUILanguagesLabel',
-		'appTTSVRLanguagesLabel',
-		'appUILang',
-		'appTTSVRLang'
+		'TTSVRLanguagesLabel'
 	],
-
-	/*
-     * Label with name of UILanguages select
-     */ 
-	appUILang : MFT.Label.extend({
-
-		elementId:			'appUILang',
-
-		classNames:			'appUILang',
-
-		contentBinding:		'MFT.ApplinkAppController.model.UILanguage'
-	}),
-
-	/*
-     * Label with name of TTSVRLanguages select
-     */ 
-	appTTSVRLang : MFT.Label.extend({
-
-		elementId:			'appTTSVRLang',
-
-		classNames:			'appTTSVRLang',
-
-		contentBinding:		'MFT.ApplinkAppController.model.TTSVRLanguage'
-	}),	
-
-	/*
-     * Label with name of UILanguages select
-     */ 
-	appUILanguagesLabel : MFT.Label.extend({
-
-		elementId:			'appUILanguagesLabel',
-
-		classNames:			'appUILanguagesLabel',
-
-		content:			'application UI Languages'
-	}),
-
-	/*
-     * Label with name of TTSVRLanguages select
-     */ 
-	appTTSVRLanguagesLabel : MFT.Label.extend({
-
-		elementId:			'appTTSVRLanguagesLabel',
-
-		classNames:			'appTTSVRLanguagesLabel',
-
-		content:			'application (TTS + VR) Languages'
-	}),	
 
 	/*
      * Label with name of UILanguages select
@@ -116,6 +64,8 @@ MFT.ControlButtons = Em.ContainerView.create({
 
         contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
 
+        valueBinding:		'MFT.ApplinkModel.UILanguage',
+
         click: function(){
 
     		MFT.ApplinkController.onLanguageChangeUI( this.selection );
@@ -133,6 +83,8 @@ MFT.ControlButtons = Em.ContainerView.create({
         classNames:         'languageSelect',
 
         contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
+
+        valueBinding:		'MFT.ApplinkModel.TTSVRLanguage',
 
         click: function(){
 
@@ -198,8 +150,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 
 		childViews: [
 			'globalPropertiesLabel',
-			'gpHelpData',
-			'gpTimeoutData'
+			'globalPropertiesData'
 		],
 
 		globalPropertiesLabel : MFT.Label.extend({
@@ -208,12 +159,12 @@ MFT.ControlButtons = Em.ContainerView.create({
 
 			classNames:			'applinkGPLabel',
 
-			content:			'HELP_PROMPT: TIMEOUT_PROMPT:'
+			content:			'applinkGPLabel'
 		}),		
 
-		gpHelpData : MFT.Label.extend({
+		globalPropertiesData : MFT.Label.extend({
 
-			elementId:			'applinkGPHData',
+			elementId:			'applinkGPData',
 
 			classNames:			'applinkGPData',
 
@@ -221,37 +172,21 @@ MFT.ControlButtons = Em.ContainerView.create({
 			
 			propertiesData: function(){
 				var str='';
-				if( MFT.ApplinkModel.globalProperties.helpPrompt ){
+				if( MFT.ApplinkModel.globalProperties.helpPrompt && MFT.ApplinkModel.globalProperties.timeoutPrompt ){
 					var i=0;
 					
+					str='HELP_PROMPT: ';
 					for(i = 0; i < MFT.ApplinkModel.globalProperties.helpPrompt.length; i++){
 						str += MFT.ApplinkModel.globalProperties.helpPrompt[i].text + ' ';
 					}
-				}
-				return str;
-			}.property( 'MFT.ApplinkModel.globalProperties.helpPrompt.@each.text' )
-		}),
-
-		gpTimeoutData : MFT.Label.extend({
-
-			elementId:			'applinkGPTData',
-
-			classNames:			'applinkGPData',
-
-			contentBinding:		'this.propertiesData',
-			
-			propertiesData: function(){
-				var str='';
-				if( MFT.ApplinkModel.globalProperties.timeoutPrompt ){
-					var i=0;
-					
+					str += 'TIMEOUT_PROMPT: ';
 					for(i = 0; i < MFT.ApplinkModel.globalProperties.timeoutPrompt.length; i++){
 						str += MFT.ApplinkModel.globalProperties.timeoutPrompt[i].text + ' ';
 					}
 				}
 				
 				return str;
-			}.property( 'MFT.ApplinkModel.globalProperties.timeoutPrompt.@each.text' )
+			}.property( 'MFT.ApplinkModel.globalProperties.helpPrompt.@each.text', 'MFT.ApplinkModel.globalProperties.timeoutPrompt.@each.text' )
 		})
 	}),
 
