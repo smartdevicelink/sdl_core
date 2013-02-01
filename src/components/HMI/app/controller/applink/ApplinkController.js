@@ -116,8 +116,7 @@ MFT.ApplinkController = Em.Object.create({
 		MFT.ApplinkModel.registeredApps[ params.appId ] = this.applicationModels[applicationType].create({
             appId:      params.appId,
             appName:    params.appName,
-            deviceName: params.deviceName,
-            appIcon:    params.appIcon
+            deviceName: params.deviceName
 		});
 
         MFT.ApplinkModel.get('applicationsList').pushObject( params.appId );

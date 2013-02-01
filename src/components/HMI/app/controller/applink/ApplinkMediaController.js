@@ -37,7 +37,7 @@ MFT.ApplinkMediaController = Em.Object.create({
         if ( this.currentAppId ) {
             return MFT.ApplinkController.getApplicationModel(this.currentAppId).appIcon;
         }
-    }.property('this.currentAppId'),
+    }.property('this.currentAppId','MFT.ApplinkAppController.model.appIcon'),
 
     /*
      * Enumeraction that describes possible contexts
