@@ -490,7 +490,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				putFile.setFileType(FileType.GRAPHIC_PNG);
 				putFile.setSyncFileName(ICON_SYNC_FILENAME);
 				putFile.setCorrelationID(nextCorrID());
-				putFile.setBulkData(contentsOfResource(R.drawable.fiesta));
+				putFile.setBulkData(contentsOfResource(R.raw.fiesta));
 				getProxyInstance().sendRPCRequest(putFile);
 				
 				SetAppIcon setAppIcon = new SetAppIcon();
