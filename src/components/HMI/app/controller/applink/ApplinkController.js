@@ -117,6 +117,7 @@ MFT.ApplinkController = Em.Object.create({
             appId:      params.appId,
             appName:    params.appName,
             deviceName: params.deviceName,
+            appIcon:    params.appIcon
 		});
 
         MFT.ApplinkModel.get('applicationsList').pushObject( params.appId );
@@ -269,5 +270,12 @@ MFT.ApplinkController = Em.Object.create({
         FFW.Buttons.buttonEvent( name, "BUTTONDOWN" );
         element.time = 0;
         setTimeout(function(){ element.time ++; }, 1000);
+	},
+	
+	/**
+	 * Handle system context change state
+	 */
+	onSystemContextChange: function() {
+        
 	}
 });

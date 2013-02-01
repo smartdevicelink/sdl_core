@@ -27,7 +27,7 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
             })
         );
 
-        this.set('appIcon', 'images/info/info_leftMenu_apps_ico.png'),
+        //this.set('appIcon', 'images/info/info_leftMenu_apps_ico.png'),
         
         this.set('commandsList',[]);
         this.set('softButtons',[]);
