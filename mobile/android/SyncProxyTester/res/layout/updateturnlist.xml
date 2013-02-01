@@ -46,24 +46,11 @@
         android:text="@string/updateturnlist_defaultIconList"
         android:visibility="visible" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/updateturnlist_btnSoftButtons"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
-
-        <CheckBox
-            android:id="@+id/chkIncludeSBs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:clickable="false"
-            android:text="@string/includeSoftButtons" />
-
-        <Button
-            android:id="@+id/updateturnlist_btnSoftButtons"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/softButtons" />
-    </LinearLayout>
+        android:layout_weight="1"
+        android:text="@string/softButtons" />
 
 </LinearLayout>
