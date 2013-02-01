@@ -46,6 +46,18 @@ MFT.ApplinkAppModel = Em.Object.extend({
      * @type: {Em.Object}
      */
     appInfo: null,
+
+    /**
+     * Current language of applications UI component
+     * @type {String}
+     */
+    UILanguage: 'EN-US',
+
+    /**
+     * Current language of applications TTS and applications VR component
+     * @type {String}
+     */
+    TTSVRLanguage: 'EN-US',
     
     /**
      * Array of Soft Buttons

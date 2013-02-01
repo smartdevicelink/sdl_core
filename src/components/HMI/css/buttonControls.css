@@ -36,7 +36,7 @@
 }
 
 #infoTable.infoTable{
-	width: 337px;
+	width: 375px;
 	height: 96px;
 	top: 308px;
 	left: 801px;
@@ -46,12 +46,18 @@
 	overflow: hidden;
 }
 #infoTable .applinkGPLabel{
-	width: 125px;
+	width: 157px;
 	border-right: 1px solid #14100F;
 	height: 96px;
+	position: relative;
+	float: left;
 }
 #infoTable .applinkGPData{
-	left: 130px;
+	position: relative;
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: 203px;
 }
 #buttonControls .ContainerControlls{
 	left: 34px;
@@ -172,3 +178,54 @@
 	box-shadow: inset 5px 5px 10px black, inset -3px -3px 10px #383737;
 	line-height: 45px;
 }
+
+#app_controlButtons .languageSelect{
+	position: absolute;
+	width: 150px;
+	height: 30px;
+	color: white;
+	background: #393939;
+}
+
+#app_controlButtons .languageSelect option{
+	background: #393939;
+}
+#UILanguages.languageSelect{
+	top: 110px;
+	left: 1028px;
+}
+#TTSVRLanguages.languageSelect{
+	top: 170px;
+	left: 1028px;
+}
+
+#app_controlButtons .UILanguagesLabel{
+	top: 91px;
+	left: 1028px;
+	width: 150px;
+}
+#app_controlButtons .TTSVRLanguagesLabel{
+	top: 151px;
+	left: 1028px;
+	width: 160px;
+}
+#app_controlButtons .appUILanguagesLabel{
+	top: 91px;
+	left: 1195px;
+	width: 250px;
+}
+#app_controlButtons .appTTSVRLanguagesLabel{
+	top: 151px;
+	left: 1195px;
+	width: 250px;
+}#app_controlButtons .appUILang{
+	top: 117px;
+	left: 1195px;
+	width: 150px;
+}
+#app_controlButtons .appTTSVRLang{
+	top: 176px;
+	left: 1195px;
+	width: 150px;
+}
+
