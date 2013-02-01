@@ -375,7 +375,7 @@ namespace {
 
         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 
-        sendEndAudioPassThruToHMI(data_->sessionKey);
+        //sendEndAudioPassThruToHMI(data_->sessionKey);
         /*if (sendEndAudioPassThruToHMI(data_->sessionKey))
         {
             // Send response to mobile.
@@ -1014,7 +1014,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if((NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel()) 
+                    if((NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                         || (NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == app->getApplicationHMIStatusLevel()))
                     {
                         LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
@@ -1878,7 +1878,7 @@ namespace NsAppManager
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel()
                         || !app->getIsMediaApplication())
                     {
-                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " 
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key "
                             << sessionKey << " has not been activated yet or not media!" );
                         NsAppLinkRPCV2::SetMediaClockTimer_response* response = new NsAppLinkRPCV2::SetMediaClockTimer_response;
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -3150,22 +3150,6 @@ namespace NsAppManager
                     EndAudioPassThru->set_appId(app->getAppID());
                     HMIHandler::getInstance().sendRequest(EndAudioPassThru);
                     LOG4CPLUS_INFO_EXT(mLogger, "Request EndAudioPassThru sent to HMI ...");
-
-                    sendResponse<NsAppLinkRPCV2::EndAudioPassThru_response
-                            , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::EndAudioPassThruID
-                                , NsAppLinkRPCV2::Result::SUCCESS
-                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
-                                , true
-                                , sessionKey);
-
-                    sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
-                            , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
-                                , NsAppLinkRPCV2::Result::SUCCESS
-                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
-                                , true
-                                , sessionKey);
-
-                    core->setAudioPassThruFlag(false);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::SubscribeVehicleDataID:
@@ -3803,8 +3787,8 @@ namespace NsAppManager
                     }
                     else
                     {
-                        return;    
-                    }                    
+                        return;
+                    }
                 }
 
                 for( ButtonMap::const_iterator it=subscribedApps.first; it!=subscribedApps.second; ++it )
@@ -3823,7 +3807,7 @@ namespace NsAppManager
                             to receive OnButtonPress when in HMI_BACKGROUND or NONE");
                         return;
                     }
-                    
+
                     int appId = app->getAppID();
 
                     switch(app->getProtocolVersion())
@@ -3862,7 +3846,7 @@ namespace NsAppManager
                         }
                     }
                 }
-                
+
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONPRESS:
@@ -3888,8 +3872,8 @@ namespace NsAppManager
                     }
                     else
                     {
-                        return;    
-                    }                    
+                        return;
+                    }
                 }
 
                 if ( NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel()
@@ -4021,10 +4005,10 @@ namespace NsAppManager
 
                 sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
                         , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
-                            , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
-                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
-                            , true
-                            , app->getAppID());
+                        , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                        , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                        , true
+                        , app->getAppID());
 
                 // We wait for new PerformAudioPassThru request.
                 NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
@@ -4033,6 +4017,35 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ENDAUDIOPASSTHRURESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A EndAudioPassThru response has been invoked");
+                NsRPC2Communication::UI::EndAudioPassThruResponse* response =
+                    static_cast<NsRPC2Communication::UI::EndAudioPassThruResponse*>(msg);
+
+                Application* app = core->getApplicationFromItemCheckNotNull(
+                core->mMessageMapping.findRegistryItemAssignedToCommand(response->getId()));
+                if(!app)
+                {
+                    LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+                    NsAppManager::AppMgrCore::getInstance().setAudioPassThruFlag(false);
+                    return;
+                }
+
+                sendResponse<NsAppLinkRPCV2::EndAudioPassThru_response
+                    , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::EndAudioPassThruID
+                        , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                        , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                        , NsAppLinkRPCV2::Result::SUCCESS == static_cast<NsAppLinkRPCV2::Result::ResultInternal>(
+                            response->getResult())
+                        , app->getAppID());
+
+                sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                    , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
+                        , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
+                        , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                        , NsAppLinkRPCV2::Result::SUCCESS == static_cast<NsAppLinkRPCV2::Result::ResultInternal>(
+                            response->getResult())
+                        , app->getAppID());
+
+                core->setAudioPassThruFlag(false);
                 break;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETCAPABILITIESRESPONSE:
@@ -4757,7 +4770,7 @@ namespace NsAppManager
 
                 int appId = app->getAppID();
 
-                if ( (NsAppLinkRPCV2::SystemContext::SYSCTXT_HMI_OBSCURED || 
+                if ( (NsAppLinkRPCV2::SystemContext::SYSCTXT_HMI_OBSCURED ||
                      NsAppLinkRPCV2::SystemContext::SYSCTXT_ALERT) &&
                      1 == app->getProtocolVersion() )
                 {
@@ -4767,7 +4780,7 @@ namespace NsAppManager
 
                 app->setSystemContext(object->get_systemContext());
 
-                if ( NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN == object->get_systemContext().get() 
+                if ( NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN == object->get_systemContext().get()
                     && NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel() )
                 {
                     core->performActivitiesForActivatingApp(app);
@@ -4914,7 +4927,7 @@ namespace NsAppManager
                     {
                         if ( 0 != it->second && 0 != it->second->getApplication() )
                         {
-                            if ( NsAppLinkRPCV2::HMILevel::HMI_NONE != 
+                            if ( NsAppLinkRPCV2::HMILevel::HMI_NONE !=
                                         it->second->getApplication()->getApplicationHMIStatusLevel()
                                     &&
                                     1 != it->second->getApplication()->getProtocolVersion() )
@@ -5735,7 +5748,7 @@ namespace NsAppManager
                             NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
                         break;
 
-                    } 
+                    }
                     case NsAppLinkRPCV2::DeactivateReason::NAVIGATIONMAP:
                     case NsAppLinkRPCV2::DeactivateReason::PHONEMENU:
                     case NsAppLinkRPCV2::DeactivateReason::SYNCSETTINGS:
@@ -5744,7 +5757,7 @@ namespace NsAppManager
                         if ( currentApp->getIsMediaApplication() )
                         {
                             // TODO (pvysh): for media it seems for FULL it is neccessarily that its audio is AUDIBLE.
-                            if ( NsAppLinkRPCV2::HMILevel::HMI_FULL == 
+                            if ( NsAppLinkRPCV2::HMILevel::HMI_FULL ==
                                 currentApp->getApplicationHMIStatusLevel() )
                             {
                                 currentApp->setApplicationHMIStatusLevel(
@@ -5767,7 +5780,7 @@ namespace NsAppManager
                 //TODO (pvysh): seems to be correct assumption...
                 currentApp->setSystemContext(
                     NsAppLinkRPCV2::SystemContext::SYSCTXT_MENU);
-                
+
                 core->sendHMINotificationToMobile( currentApp );
                 return;
             }
@@ -6315,9 +6328,9 @@ namespace NsAppManager
         if ( NsAppLinkRPCV2::HMILevel::HMI_NONE == previousState )
         {
             LOG4CPLUS_INFO_EXT(mLogger, "First time activating - sending stuff.");
-            
+
             if ( 1== app->getProtocolVersion() )
-            {                
+            {
                 if(mDriverDistractionV1)
                 {
                     MobileHandler::getInstance().sendRPCMessage(mDriverDistractionV1, appId);
@@ -6351,7 +6364,7 @@ namespace NsAppManager
                 mMessageMapping.addMessage(changeUIRegistration->getId(), appId);
                 HMIHandler::getInstance().sendRequest(changeUIRegistration);
                 //End of methods for languages.
-                
+
                 if(mDriverDistractionV2)
                 {
                     MobileHandler::getInstance().sendRPCMessage(mDriverDistractionV2, appId);
