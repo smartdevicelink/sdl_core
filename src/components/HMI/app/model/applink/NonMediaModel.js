@@ -49,6 +49,9 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
      */
     onDeleteApplication: function( appId ){
         if( MFT.NonMediaController.currentAppId == appId ){
+            if( MFT.InfoNonMedia.stateObj.active ){
+                MFT.States.goToState('info.apps');
+            }
             MFT.NonMediaController.currentAppId = 0;
         }
     },

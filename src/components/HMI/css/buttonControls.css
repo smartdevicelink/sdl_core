@@ -43,6 +43,7 @@
 	background-color: #383737;
 	color: white;
 	border: 1px solid gray;
+	overflow: hidden;
 }
 #infoTable .applinkGPLabel{
 	width: 125px;

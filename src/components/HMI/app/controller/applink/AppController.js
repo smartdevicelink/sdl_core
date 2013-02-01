@@ -78,5 +78,18 @@ MFT.ApplinkAppController = Em.Object.create({
 	 */
 	openCommandsList: function() {
 	   MFT.OptionsView.activate();
+	},
+	
+	/**
+	 * Method clears all applications data
+	 * and unregister models
+	 */
+	onApplinkDisconected: function() {
+		var i=0,
+            apps = MFT.ApplinkModel.registeredApps;
+
+        for( i in apps){
+			MFT.ApplinkModel.onAppUnregistered( { "appId" : apps[i].appId } );
+		}
 	}
 });
