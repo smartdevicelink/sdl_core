@@ -307,6 +307,8 @@ MFT.ApplinkModel = Em.Object.create({
     /**
      * Applink UI SetAppIcon handler
      * @param {Object} message Object with parameters come from ApplinkCore.
+     * @param {Number}
+     * @param {String}
      */
     onApplinkSetAppIcon: function( message, id, method ){
         var img = new Image();

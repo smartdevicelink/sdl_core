@@ -52,7 +52,7 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
             if( MFT.InfoNonMedia.stateObj.active ){
                 MFT.States.goToState('info.apps');
             }
-            MFT.NonMediaController.currentAppId = 0;
+            MFT.NonMediaController.set('currentAppId', 0);
         }
     },
 

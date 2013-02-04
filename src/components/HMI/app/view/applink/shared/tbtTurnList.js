@@ -62,9 +62,9 @@ MFT.TBTTurnList = MFT.ApplinkAbstractView.create({
         for ( i=0; i < length; i++ ) {
             this.get('tbtTurnListList.list.childViews').pushObject(
                 MFT.Label.create({
-                    icon:                   turnListArray[i].turnIcon,
+                    icon:                   turnListArray[i].turnIcon.value,
                     content:                turnListArray[i].navigationText,
-                    templateName:           turnListArray[i].turnIcon ? 'icon' : 'text',
+                    templateName:           turnListArray[i].turnIcon.value ? 'icon' : 'text',
                     classNames:             'list-item'
                 })
             );

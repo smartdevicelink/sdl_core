@@ -113,8 +113,8 @@ MFT.InfoView = Em.ContainerView.create( MFT.LoadableView, {
 			}),
 			
 			appLinkButton: MFT.Button.extend({
-				elementId:			 'info_leftMenu_appLink',
-				goToState:   			'nonMedia',	
+				elementId:			'info_leftMenu_appLink',
+				goToState:   		'nonMedia',	
 				classNames:			'menu-item lsp1_p',
 				classNameBindings:	 [
 				    'MFT.States.info.nonMedia.active:info_active'
