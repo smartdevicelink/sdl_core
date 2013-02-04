@@ -222,7 +222,8 @@ NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV2( const
     if ( message -> getDataSize() > offset + jsonSize )
     {
         unsigned int binarySize = message->getDataSize() - offset - jsonSize;
-        std::vector<unsigned char> binaryData( receivedData+offset+jsonSize, receivedData + binarySize -1 );
+        std::vector<unsigned char> binaryData( receivedData+offset+jsonSize, 
+            receivedData + message->getDataSize() );
         LOG4CPLUS_INFO_EXT(mLogger, "Binary data is present in message.");
         messageObject -> setBinaryData( binaryData );
     }
