@@ -3704,7 +3704,28 @@ namespace NsAppManager
 
                     updateTurnList->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     updateTurnList->set_appId(app->getAppID());
-                    updateTurnList->set_turnList(request->get_turnList());
+                    std::vector<NsAppLinkRPCV2::Turn> toHMI;
+                    const std::vector<NsAppLinkRPCV2::Turn> fromMobile = request->get_turnList();
+                    std::vector<NsAppLinkRPCV2::Turn>::const_iterator i = fromMobile.begin();
+                    for (i; i != fromMobile.end(); ++i)
+                    {
+                        NsAppLinkRPCV2::Turn turn;
+                        turn.set_navigationText(*(i->get_navigationText()));
+
+                        NsAppLinkRPCV2::Image image;
+                        image.set_imageType(i->get_turnIcon().get_imageType());
+
+                        std::string relativeFilePath = app->getName();
+                        relativeFilePath += "/";
+                        relativeFilePath += i->get_turnIcon().get_value();
+
+                        std::string fullFilePath = WorkWithOS::getFullPath( relativeFilePath );
+                        image.set_value(fullFilePath);
+                        turn.set_turnIcon(image);
+                        toHMI.push_back(turn);
+                    }
+
+                    updateTurnList->set_turnList(toHMI);
                     updateTurnList->set_softButtons(request->get_softButtons());
 
                     core->mMessageMapping.addMessage(updateTurnList->getId(), sessionKey);
@@ -4387,6 +4408,7 @@ namespace NsAppManager
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETECOMMANDRESPONSE:
             {
+                std::cout << "\n\t\t<< METHOD_NSRPC2COMMUNICATION_UI__DELETECOMMANDRESPONSE" << std::endl;
                 LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand UI response has been income");
                 NsRPC2Communication::UI::DeleteCommandResponse* object = (NsRPC2Communication::UI::DeleteCommandResponse*)msg;
                 Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
@@ -5180,6 +5202,7 @@ namespace NsAppManager
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMANDRESPONSE:
             {
+                std::cout << "\n\t\t<<< METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMANDRESPONSE" << std::endl;
                 LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand VR response has been income");
                 NsRPC2Communication::VR::DeleteCommandResponse* object = (NsRPC2Communication::VR::DeleteCommandResponse*)msg;
                 Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
