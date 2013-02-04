@@ -667,9 +667,17 @@
 #info_leftMenu_appLink{
 	font-size: 18px;
 	line-height: 48px;
-	display: block;
-	overflow: hidden;
+}
+#info_leftMenu_appLink img{
+	float: left;
+}
+#info_leftMenu_appLink span{
+	float: left;
+	position: relative;
+	width: 100px;
 	text-overflow: ellipsis;
+	overflow: hidden;
+	left: 0;
 }
 
 /* TurnByTurnView */
@@ -720,6 +728,9 @@
 	margin-bottom: 5px;
 	text-align: center;
 	font-size: 20px;
+}
+#turnList img{
+    margin-top: -10px;
 }
 #TurnByTurnView .homeScreen{
 	left: 440px;
