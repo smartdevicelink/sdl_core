@@ -3724,12 +3724,12 @@ namespace NsAppManager
                         {
                             LOG4CPLUS_ERROR_EXT(mLogger, "UpdateTurnList file doesn't exist");
                                 sendResponse<NsAppLinkRPCV2::UpdateTurnList_response
-                                , NsAppLinkRPCV2::Result::ResultInternal>(
-                                    NsAppLinkRPCV2::FunctionID::UpdateTurnListID
-                                        , NsAppLinkRPCV2::Result::FILE_NOT_FOUND
-                                        , NsAppLinkRPC::ALRPCMessage::RESPONSE
-                                        , false
-                                        , sessionKey);
+                                    , NsAppLinkRPCV2::Result::ResultInternal>(
+                                        NsAppLinkRPCV2::FunctionID::UpdateTurnListID
+                                            , NsAppLinkRPCV2::Result::FILE_NOT_FOUND
+                                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                            , false
+                                            , sessionKey);
                         }
 
                         image.set_value(fullFilePath);
@@ -4420,7 +4420,6 @@ namespace NsAppManager
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETECOMMANDRESPONSE:
             {
-                std::cout << "\n\t\t<< METHOD_NSRPC2COMMUNICATION_UI__DELETECOMMANDRESPONSE" << std::endl;
                 LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand UI response has been income");
                 NsRPC2Communication::UI::DeleteCommandResponse* object = (NsRPC2Communication::UI::DeleteCommandResponse*)msg;
                 Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
@@ -5214,7 +5213,6 @@ namespace NsAppManager
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMANDRESPONSE:
             {
-                std::cout << "\n\t\t<<< METHOD_NSRPC2COMMUNICATION_VR__DELETECOMMANDRESPONSE" << std::endl;
                 LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand VR response has been income");
                 NsRPC2Communication::VR::DeleteCommandResponse* object = (NsRPC2Communication::VR::DeleteCommandResponse*)msg;
                 Application* app = core->getApplicationFromItemCheckNotNull(core->mMessageMapping.findRegistryItemAssignedToCommand(object->getId()));
