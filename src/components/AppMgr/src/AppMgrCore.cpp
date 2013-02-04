@@ -1,4 +1,3 @@
-
 /**
  * \file AppMgrCore.cpp
  * \brief App manager core functionality
@@ -3131,9 +3130,9 @@ namespace NsAppManager
                     if (!app)
                         break;
 
-                    NsRPC2Communication::UI::EndAudioPassThru* EndAudioPassThru
+                    NsRPC2Communication::UI::EndAudioPassThru* endAudioPassThru
                         = new NsRPC2Communication::UI::EndAudioPassThru;
-                    if (!EndAudioPassThru)
+                    if (!endAudioPassThru)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "EndAudioPassThru::OUT_OF_MEMORY");
                         sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
@@ -3146,9 +3145,10 @@ namespace NsAppManager
                         break;
                     }
 
-                    EndAudioPassThru->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    EndAudioPassThru->set_appId(app->getAppID());
-                    HMIHandler::getInstance().sendRequest(EndAudioPassThru);
+                    endAudioPassThru->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    endAudioPassThru->set_appId(app->getAppID());
+                    core->mMessageMapping.addMessage(endAudioPassThru->getId(), sessionKey);
+                    HMIHandler::getInstance().sendRequest(endAudioPassThru);
                     LOG4CPLUS_INFO_EXT(mLogger, "Request EndAudioPassThru sent to HMI ...");
                     break;
                 }
@@ -4058,13 +4058,13 @@ namespace NsAppManager
                             response->getResult())
                         , app->getAppID());
 
-                sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
+                /*sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
                     , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                         , static_cast<NsAppLinkRPCV2::Result::ResultInternal>(response->getResult())
                         , NsAppLinkRPC::ALRPCMessage::RESPONSE
                         , NsAppLinkRPCV2::Result::SUCCESS == static_cast<NsAppLinkRPCV2::Result::ResultInternal>(
                             response->getResult())
-                        , app->getAppID());
+                        , app->getAppID());*/
 
                 core->setAudioPassThruFlag(false);
                 break;
