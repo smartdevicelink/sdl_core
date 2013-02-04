@@ -163,9 +163,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "result":   {
                     "resultCode":       "SUCCESS", //  type (enum) from AppLink protocol
                     "method":           "VehicleInfo.GetVehicleTypeResponse",
-                    "params":{
-                        "vehicleType":         vehicleType
-                    }
+                    "vehicleType":      vehicleType
                 }
             }; 
 

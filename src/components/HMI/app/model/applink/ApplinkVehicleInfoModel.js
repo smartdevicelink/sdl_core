@@ -58,7 +58,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
     vehicleType:{
       make:       "Ford",
       model:      "Fiesta",
-      modelYear:  2013,
+      modelYear:  "2013",
       trim:       "SE"  
     },
 
