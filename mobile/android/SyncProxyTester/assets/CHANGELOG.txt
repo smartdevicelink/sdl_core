@@ -1,3 +1,6 @@
+[CW6]
+* AlertManeuver message: always send soft buttons even if an empty array.
+
 [CW5]
 * Reduce the app icon size for faster transfer (on Android 2.*).
 + Upload turn left, right, and forward icons after app registration for UpdateTurnList.

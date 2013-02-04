@@ -2130,7 +2130,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							View layout = inflater.inflate(R.layout.alertmaneuver, null);
 
 							final EditText txtTtsChunks = (EditText) layout.findViewById(R.id.txtTtsChunks);
-							chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 							
 							SoftButton sb1 = new SoftButton();
 							sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
@@ -2179,13 +2178,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 											AlertManeuver msg = new AlertManeuver();
 											msg.setTtsChunks(ttsChunks);
 											msg.setCorrelationID(autoIncCorrId++);
-											if (chkIncludeSoftButtons.isChecked() &&
-													(currentSoftButtons != null) &&
-													(currentSoftButtons.size() > 0)) {
+											if (currentSoftButtons != null) {
 												msg.setSoftButtons(currentSoftButtons);
+											} else {
+												msg.setSoftButtons(new Vector<SoftButton>());
 											}
 											currentSoftButtons = null;
-											chkIncludeSoftButtons = null;
 											_msgAdapter.logMessage(msg, true);
 											ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
 										} catch (SyncException e) {
@@ -2199,7 +2197,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
 									currentSoftButtons = null;
-									chkIncludeSoftButtons = null;
 									dialog.cancel();
 								}
 							});
