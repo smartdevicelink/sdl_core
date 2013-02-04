@@ -3694,7 +3694,7 @@ namespace NsAppManager
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "new NsRPC2Communication::UI::UpdateTurnList() failed");
                         sendResponse<NsAppLinkRPCV2::UpdateTurnList_response, NsAppLinkRPCV2::Result::ResultInternal>(
-                            NsAppLinkRPCV2::FunctionID::ShowConstantTBTID
+                            NsAppLinkRPCV2::FunctionID::UpdateTurnListID
                             , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
                             , NsAppLinkRPC::ALRPCMessage::RESPONSE
                             , false
@@ -3720,6 +3720,18 @@ namespace NsAppManager
                         relativeFilePath += i->get_turnIcon().get_value();
 
                         std::string fullFilePath = WorkWithOS::getFullPath( relativeFilePath );
+                        if (!WorkWithOS::checkIfFileExists(fullFilePath))
+                        {
+                            LOG4CPLUS_ERROR_EXT(mLogger, "UpdateTurnList file doesn't exist");
+                                sendResponse<NsAppLinkRPCV2::UpdateTurnList_response
+                                , NsAppLinkRPCV2::Result::ResultInternal>(
+                                    NsAppLinkRPCV2::FunctionID::UpdateTurnListID
+                                        , NsAppLinkRPCV2::Result::FILE_NOT_FOUND
+                                        , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                        , false
+                                        , sessionKey);
+                        }
+
                         image.set_value(fullFilePath);
                         turn.set_turnIcon(image);
                         toHMI.push_back(turn);
