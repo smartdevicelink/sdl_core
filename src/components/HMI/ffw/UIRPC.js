@@ -254,9 +254,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.SetAppIcon":{
 
-				MFT.ApplinkModel.onApplinkSetAppIcon( request.params );
-
-				this.sendUIResult("SUCCESS", request.id, request.method);
+				MFT.ApplinkModel.onApplinkSetAppIcon( request.params, request.id, request.method );
 
 		    	break;
 		    }

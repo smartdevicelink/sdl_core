@@ -308,8 +308,20 @@ MFT.ApplinkModel = Em.Object.create({
      * Applink UI SetAppIcon handler
      * @param {Object} message Object with parameters come from ApplinkCore.
      */
-    onApplinkSetAppIcon: function( message ){
-        MFT.ApplinkController.getApplicationModel(message.appId).set('appIcon', message.syncFileName );
+    onApplinkSetAppIcon: function( message, id, method ){
+        var img = new Image();
+        img.onload = function() {
+            //code to set the src on success
+            MFT.ApplinkController.getApplicationModel(message.appId).set('appIcon', message.syncFileName );
+            FFW.UI.sendUIResult("SUCCESS", id, method);
+        };
+        img.onerror = function( ev ) {
+            //doesn't exist or error loading
+            FFW.UI.sendUIResult("INVALID_DATA", id, method);
+            return false;
+        };
+
+        img.src = message.syncFileName;
     },
 
     /**
