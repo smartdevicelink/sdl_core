@@ -3801,28 +3801,21 @@ namespace NsAppManager
 
                 NsAppLinkRPCV2::ButtonName btnName;
                 btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)object->get_name().get());
-                Application* app = core->getApplicationFromItemCheckNotNull(core->mButtonsMapping.findRegistryItemSubscribedToButton(btnName));
 
-                ResultRange subscribedApps = core->mButtonsMapping.findSubscribedToButton(btnName);
-
-                if( subscribedApps.first == subscribedApps.second )
+                if(object->get_customButtonID())
                 {
-                    LOG4CPLUS_WARN_EXT(mLogger, "No application associated with this registry item!");
-                    if(object->get_customButtonID())
+                    LOG4CPLUS_INFO_EXT(mLogger, "No subscription for custom buttons is required.");
+                    Application* app = AppMgrRegistry::getInstance().getActiveItem();
+                    if (!app)
                     {
-                        LOG4CPLUS_INFO_EXT(mLogger, "No subscription for custom buttons is required.");
-                        app = AppMgrRegistry::getInstance().getActiveItem();
-                        if (!app)
-                        {
-                            LOG4CPLUS_WARN_EXT(mLogger, "OnButtonPress came but no app is active.");
-                            return;
-                        }
-                    }
-                    else
-                    {
+                        LOG4CPLUS_WARN_EXT(mLogger, "OnButtonPress came but no app is active.");
                         return;
                     }
+                    core->sendButtonEvent(app, object);
+                    return;
                 }
+
+                ResultRange subscribedApps = core->mButtonsMapping.findSubscribedToButton(btnName);
 
                 for( ButtonMap::const_iterator it=subscribedApps.first; it!=subscribedApps.second; ++it )
                 {
@@ -3838,46 +3831,9 @@ namespace NsAppManager
                     {
                         LOG4CPLUS_WARN_EXT(mLogger, "Application is not supposed \
                             to receive OnButtonPress when in HMI_BACKGROUND or NONE");
-                        return;
+                        continue;
                     }
-
-                    int appId = app->getAppID();
-
-                    switch(app->getProtocolVersion())
-                    {
-                        case 1:
-                        {
-                            NsAppLinkRPC::OnButtonEvent* event = new NsAppLinkRPC::OnButtonEvent();
-                            event->set_buttonEventMode(static_cast<NsAppLinkRPC::ButtonEventMode::ButtonEventModeInternal>(object->get_mode().get()));
-                            event->set_buttonName(
-                                static_cast<NsAppLinkRPC::ButtonName::ButtonNameInternal>(
-                                    object->get_name().get()));
-                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " Application id " << appId);
-                            MobileHandler::getInstance().sendRPCMessage(event, appId);
-                            break;
-                        }
-                        case 2:
-                        {
-                            NsAppLinkRPCV2::OnButtonEvent* event = new NsAppLinkRPCV2::OnButtonEvent();
-                            event->setMethodId(NsAppLinkRPCV2::FunctionID::OnButtonEventID);
-                            event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                            event->set_buttonEventMode(object->get_mode());
-                            event->set_buttonName(object->get_name());
-                            if(object->get_customButtonID())
-                            {
-                                event->set_customButtonID(*object->get_customButtonID());
-                            }
-                            else
-                            {
-                                event->set_customButtonID(0);
-                            }
-                            event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                            event->setMethodId(NsAppLinkRPCV2::FunctionID::OnButtonEventID);
-                            LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " application id " << appId);
-                            MobileHandler::getInstance().sendRPCMessage(event, appId);
-                            break;
-                        }
-                    }
+                    core->sendButtonEvent(app, object);
                 }
 
                 return;
@@ -3889,80 +3845,41 @@ namespace NsAppManager
                 const NsAppLinkRPC::ButtonName & name = static_cast<NsAppLinkRPC::ButtonName::ButtonNameInternal>(object->get_name().get());
                 NsAppLinkRPCV2::ButtonName btnName;
                 btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)name.get());
-                Application* app = core->getApplicationFromItemCheckNotNull(core->mButtonsMapping.findRegistryItemSubscribedToButton(btnName));
-                if(!app)
+
+                if(object->get_customButtonID())
                 {
-                    LOG4CPLUS_WARN_EXT(mLogger, "No application associated with this registry item!");
-                    if(object->get_customButtonID())
+                    LOG4CPLUS_INFO_EXT(mLogger, "No subscription for custom buttons is required.");
+                    Application* app = AppMgrRegistry::getInstance().getActiveItem();
+                    if (!app)
                     {
-                        LOG4CPLUS_INFO_EXT(mLogger, "No subscription for custom buttons is required.");
-                        app = AppMgrRegistry::getInstance().getActiveItem();
-                        if (!app)
-                        {
-                            LOG4CPLUS_WARN_EXT(mLogger, "OnButtonPress came but no app is active.");
-                            return;
-                        }
-                    }
-                    else
-                    {
+                        LOG4CPLUS_WARN_EXT(mLogger, "OnButtonPress came but no app is active.");
                         return;
                     }
-                }
-
-                if ( NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel()
-                        && NsAppLinkRPCV2::HMILevel::HMI_LIMITED != app->getApplicationHMIStatusLevel() )
-                {
-                    LOG4CPLUS_WARN_EXT(mLogger, "Application is not supposed to receive OnButtonPress when in HMI_BACKGROUND or NONE");
+                    core->sendButtonPress(app, object);
                     return;
                 }
 
-                int appId = app->getAppID();
+                ResultRange subscribedApps = core->mButtonsMapping.findSubscribedToButton(btnName);
 
-                switch(app->getProtocolVersion())
+                for( ButtonMap::const_iterator it=subscribedApps.first; it!=subscribedApps.second; ++it )
                 {
-                    case 1:
+                    Application* app = core->getApplicationFromItemCheckNotNull( it -> second ) ;
+                    if (!app)
                     {
-                        NsAppLinkRPC::OnButtonPress* event = new NsAppLinkRPC::OnButtonPress();
-
-                        event->set_buttonName(name);
-                        event->set_buttonPressMode(static_cast<NsAppLinkRPC::ButtonPressMode::ButtonPressModeInternal>(object->get_mode().get()));
-                        LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
-
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
-                            << " application id " << appId);
-                        MobileHandler::getInstance().sendRPCMessage(event, appId);
-                        break;
+                        LOG4CPLUS_WARN(mLogger, "Null pointer to subscribed app.");
+                        continue;
                     }
-                    case 2:
+
+                    if ( NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel()
+                            && NsAppLinkRPCV2::HMILevel::HMI_LIMITED != app->getApplicationHMIStatusLevel() )
                     {
-                        NsAppLinkRPCV2::OnButtonPress* event = new NsAppLinkRPCV2::OnButtonPress();
-                        event->setMethodId(NsAppLinkRPCV2::FunctionID::OnButtonPressID);
-                        event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                        NsAppLinkRPCV2::ButtonName btnName;
-                        btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)name.get());
-                        event->set_buttonName(btnName);
-                        NsAppLinkRPCV2::ButtonPressMode pressMode;
-                        pressMode.set((NsAppLinkRPCV2::ButtonPressMode::ButtonPressModeInternal)object->get_mode().get());
-                        event->set_buttonPressMode(pressMode);
-                        if(object->get_customButtonID())
-                        {
-                            event->set_customButtonID(*object->get_customButtonID());
-                        }
-                        else
-                        {
-                            event->set_customButtonID(0);
-                        }
-                        LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
-
-                        event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                        event->setMethodId(NsAppLinkRPCV2::FunctionID::OnButtonPressID);
-
-                        LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()
-                            << " application id " << appId);
-                        MobileHandler::getInstance().sendRPCMessage(event, appId);
-                        break;
+                        LOG4CPLUS_WARN_EXT(mLogger, "Application is not supposed \
+                            to receive OnButtonPress when in HMI_BACKGROUND or NONE");
+                        continue;
                     }
+                    core->sendButtonPress(app, object);
                 }
+                
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
@@ -6660,5 +6577,96 @@ namespace NsAppManager
     const MessageMapping& AppMgrCore::getMessageMapping() const
     {
         return mMessageMapping;
+    }
+
+    void AppMgrCore::sendButtonEvent( Application * app, NsRPC2Communication::Buttons::OnButtonEvent * object )
+    {
+        int appId = app->getAppID();
+
+        switch(app->getProtocolVersion())
+        {
+            case 1:
+            {
+                NsAppLinkRPC::OnButtonEvent* event = new NsAppLinkRPC::OnButtonEvent();
+                event->set_buttonEventMode(static_cast<NsAppLinkRPC::ButtonEventMode::ButtonEventModeInternal>(object->get_mode().get()));
+                event->set_buttonName(
+                    static_cast<NsAppLinkRPC::ButtonName::ButtonNameInternal>(
+                        object->get_name().get()));
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " Application id " << appId);
+                MobileHandler::getInstance().sendRPCMessage(event, appId);
+                break;
+            }
+            case 2:
+            {
+                NsAppLinkRPCV2::OnButtonEvent* event = new NsAppLinkRPCV2::OnButtonEvent();
+                event->setMethodId(NsAppLinkRPCV2::FunctionID::OnButtonEventID);
+                event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                event->set_buttonEventMode(object->get_mode());
+                event->set_buttonName(object->get_name());
+                if(object->get_customButtonID())
+                {
+                    event->set_customButtonID(*object->get_customButtonID());
+                }
+                else
+                {
+                    event->set_customButtonID(0);
+                }
+                event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                event->setMethodId(NsAppLinkRPCV2::FunctionID::OnButtonEventID);
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName() << " application id " << appId);
+                MobileHandler::getInstance().sendRPCMessage(event, appId);
+                break;
+            }
+        }
+    }
+
+    void AppMgrCore::sendButtonPress( Application * app, NsRPC2Communication::Buttons::OnButtonPress * object )
+    {
+        int appId = app->getAppID();
+
+        switch(app->getProtocolVersion())
+        {
+            case 1:
+            {
+                NsAppLinkRPC::OnButtonPress* event = new NsAppLinkRPC::OnButtonPress();
+
+                event->set_buttonName(static_cast<NsAppLinkRPC::ButtonName::ButtonNameInternal>(
+                        object->get_name().get()));
+                event->set_buttonPressMode(static_cast<NsAppLinkRPC::ButtonPressMode::ButtonPressModeInternal>(object->get_mode().get()));
+                LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
+
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
+                    << " application id " << appId);
+                MobileHandler::getInstance().sendRPCMessage(event, appId);
+                break;
+            }
+            case 2:
+            {
+                NsAppLinkRPCV2::OnButtonPress* event = new NsAppLinkRPCV2::OnButtonPress();
+                event->setMethodId(NsAppLinkRPCV2::FunctionID::OnButtonPressID);
+                event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                event->set_buttonName(object->get_name());
+                NsAppLinkRPCV2::ButtonPressMode pressMode;
+                pressMode.set((NsAppLinkRPCV2::ButtonPressMode::ButtonPressModeInternal)object->get_mode().get());
+                event->set_buttonPressMode(pressMode);
+                if(object->get_customButtonID())
+                {
+                    event->set_customButtonID(*object->get_customButtonID());
+                }
+                else
+                {
+                    event->set_customButtonID(0);
+                }
+                LOG4CPLUS_INFO_EXT(mLogger, "before we find sessionID");
+
+                event->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                event->setMethodId(NsAppLinkRPCV2::FunctionID::OnButtonPressID);
+
+                LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app "<< app->getName()
+                    << " application id " << appId);
+                MobileHandler::getInstance().sendRPCMessage(event, appId);
+                break;
+            }
+        }
     }
 }

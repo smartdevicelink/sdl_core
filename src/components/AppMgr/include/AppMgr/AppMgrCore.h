@@ -19,6 +19,8 @@
 #include "AppMgr/DeviceHandler.h"
 #include "JSONHandler/ALRPCObjects/V2/DisplayCapabilities.h"
 #include "JSONHandler/ALRPCObjects/V2/OnDriverDistraction.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/OnButtonEvent.h"
+#include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/OnButtonPress.h"
 #include "JSONHandler/ALRPCObjects/V2/VehicleType.h"
 #include "JSONHandler/ALRPCObjects/V1/Language.h"
 #include "JSONHandler/ALRPCObjects/V2/Language.h"
@@ -249,6 +251,20 @@ namespace NsAppManager
          * \return success of an operation - true or false
          */
         bool serializeToFile(const std::string& fileName, const std::string &value) const;
+
+        /**
+         * \brief Sends notification to mobile app about button event.
+         * \param app Application to receive notification
+         * \param object Notification received from HMI.
+         */
+        void sendButtonEvent( Application * app, NsRPC2Communication::Buttons::OnButtonEvent * object );
+
+        /**
+         * \brief Send notification to mobile app about button press event
+         * \param app Application to receive notification
+         * \param object Notification received from HMI.
+         */
+        void sendButtonPress( Application * app, NsRPC2Communication::Buttons::OnButtonPress * object );
 
         AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
         AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
