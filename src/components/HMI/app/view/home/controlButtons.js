@@ -116,6 +116,8 @@ MFT.ControlButtons = Em.ContainerView.create({
 
         contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
 
+        valeuBinding:		'MFT.ApplinkModel.hmiUILanguage',
+
         click: function(){
 
     		MFT.ApplinkController.onLanguageChangeUI( this.selection );
@@ -133,6 +135,8 @@ MFT.ControlButtons = Em.ContainerView.create({
         classNames:         'languageSelect',
 
         contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
+
+        valeuBinding:		'MFT.ApplinkModel.hmiTTSVRLanguage',
 
         click: function(){
 
