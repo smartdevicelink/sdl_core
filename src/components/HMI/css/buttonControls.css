@@ -168,6 +168,16 @@
 	margin-left: 10px;
 	margin-top: 10px;
 }
+#app_controlButtons .sendDataCheckBox{
+	left: 1158px;
+	position: absolute;
+	top: 275px;
+}
+#app_controlButtons .sendDataLabel{
+	top: 275px;
+	left: 1180px;
+	width: 160px;
+}
 #buttonControls .btnNotPressed.pressed{
 	box-shadow: inset 5px 5px 10px black, inset -3px -3px 10px #383737;
 	line-height: 45px;

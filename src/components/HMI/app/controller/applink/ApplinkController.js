@@ -171,6 +171,19 @@ MFT.ApplinkController = Em.Object.create({
     },
 
     /**
+     * Applink Send Data ON/OFF extended param switcher
+     * 
+     * @param checked: bool
+     */
+    selectSendData: function(checked){
+        if(checked){
+            MFT.ApplinkModel.set('sendDataExtend', true);
+        }else{
+            MFT.ApplinkModel.set('sendDataExtend', false);
+        }
+    },
+
+    /**
      * Applink Protocol Version 2 ON/OFF switcher
      * 
      * @param checked: bool
