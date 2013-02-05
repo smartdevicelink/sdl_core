@@ -25,6 +25,12 @@ MFT.ApplinkModel = Em.Object.create({
     sendDataExtend:     false,
 
     /**
+     * Flag to be set true when phone call is  initialised
+     * @type {Bool}
+     */
+    phoneCall:     false,
+
+    /**
      * Default values for global properties
      */
     globalPropertiesDefault : {
@@ -179,6 +185,7 @@ MFT.ApplinkModel = Em.Object.create({
      * @param {Object} params
      */
     dialNumber: function( params ){
+        this.set('phoneCall', true);
         MFT.States.goToState('phone.dialpad');
         MFT.PhoneModel.set('dialpadNumber', params.number);
         MFT.PhoneController.onDialCall();

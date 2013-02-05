@@ -47,6 +47,11 @@ MFT.PhoneModel = Em.Object.create({
 		this.dialpadHold.off();
 		this.dialpadMute.off();
 		this.set('statusModeText', null);
+
+		if( MFT.ApplinkModel.phoneCall ){
+			MFT.ApplinkModel.set('phoneCall', false);
+			MFT.ApplinkController.getApplicationModel( MFT.ApplinkAppController.model.appId ).turnOnApplink();
+		}
 	},
 	
 	/** Add symbol to dial pad number */
