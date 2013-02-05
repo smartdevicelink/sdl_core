@@ -143,9 +143,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
     AlertActive: function( message ){
         var self = this;
-
-        FFW.UI.OnSystemContext('ALERT');
-
+        
         // play audio alert
         if ( message.playTone ) {
             MFT.Audio.play('audio/alert.wav');
@@ -163,7 +161,12 @@ MFT.AlertPopUp = Em.ContainerView.create({
         this.set('content3',    message.AlertText3);
         this.set('activate',    true);
         
+        MFT.ApplinkController.onSystemContextChange();
+        
         clearTimeout(this.timer);
-        this.timer = setTimeout(function(){self.set('activate', false);}, message.duration);
+        this.timer = setTimeout(function(){
+            self.set('activate', false);
+            MFT.ApplinkController.onSystemContextChange();
+        }, message.duration);
     }
 });

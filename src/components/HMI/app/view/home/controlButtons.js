@@ -21,6 +21,8 @@ MFT.ControlButtons = Em.ContainerView.create({
 		'protocolVersion',
 		'infoTable',
 		'sendData',
+		'sendDataCheckBox',
+		'sendDataLabel',
 		'vehicleInfo',
 		'tbtClientState',
 		'UILanguages',
@@ -104,6 +106,33 @@ MFT.ControlButtons = Em.ContainerView.create({
 		},
 		text:		'Send Data'
 	}),
+
+	/**
+	 * Select for extended param of SendData
+	 */
+	sendDataCheckBox: Em.Checkbox.extend({
+
+		elementId:			'sendDataCheckBox',
+
+		classNames:			'sendDataCheckBox',
+
+		onCheckBoxSelected:	function(){
+			MFT.ApplinkController.selectSendData(this.checked);
+		}.observes('this.checked')
+
+	}),
+
+	/*
+     * Label for sendDataCheckBox 
+     */
+	sendDataLabel: MFT.Label.extend({
+
+		elementId:			'sendDataLabel',
+
+		classNames:			'sendDataLabel',
+
+		content:			'Use URL'
+	}),	
 
 	/**
 	 * VehicleInfo button

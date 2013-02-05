@@ -47,13 +47,18 @@ MFT.TTSPopUp = Em.ContainerView.create({
 
 	ActivateTTS: function(msg){
 		var self = this;
-		
+				
 		// play audio alert
 		MFT.Audio.play('audio/initial.wav');
 		
 		this.set('content', msg);
 		this.set('active', true);
+		MFT.ApplinkController.onSystemContextChange();
+		
         clearTimeout(this.timer);
-		this.timer = setTimeout(function(){self.set('active', false);}, 10000);
+		this.timer = setTimeout(function(){
+            self.set('active', false);
+            MFT.ApplinkController.onSystemContextChange();
+        }, 10000);
 	}
 });

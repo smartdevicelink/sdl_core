@@ -19,6 +19,12 @@ MFT.ApplinkModel = Em.Object.create({
     AudioPassThruState:     false,
 
     /**
+     * Flag to sent Send Data extended params
+     * @type {Bool}
+     */
+    sendDataExtend:     false,
+
+    /**
      * Default values for global properties
      */
     globalPropertiesDefault : {

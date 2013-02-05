@@ -80,7 +80,9 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * Client disconnected.
 	 */
 	onRPCDisconnected: function() {
-		MFT.ApplinkAppController.onApplinkDisconected();
+		if( MFT.ApplinkAppController ){
+			MFT.ApplinkAppController.onApplinkDisconected();
+		}
 	},
 
 	/*
@@ -216,11 +218,15 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"id"		: 	this.client.idStart,
 			"method"	:	"AppLinkCore.SendData",
 			"params"	:	{
-				"data": 	data,
-				"url":		"ftp://appsurv:appsurv@ftp.drivehq.com/",
-				"timeout":	10000
+				"data": 	data
 			}
 		};
+
+		if( MFT.ApplinkModel.sendDataExtend ){
+			JSONMessage.params["url"] = "ftp://appsurv:appsurv@ftp.drivehq.com/";
+			JSONMessage.params["timeout"] = 10000;
+		}
+
 		this.client.send(JSONMessage);
     },
 
