@@ -213,7 +213,7 @@ MFT.ApplinkModel = Em.Object.create({
      * @param {string} lang Language code.
      */
     changeRegistrationUI: function( lang ){
-        this.set( 'UILanguage', lang );
+        MFT.ApplinkAppController.model.set( 'UILanguage', lang );
     },
 
     /**
