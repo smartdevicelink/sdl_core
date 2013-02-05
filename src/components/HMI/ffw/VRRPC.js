@@ -160,7 +160,7 @@ FFW.VR = FFW.RPCObserver.create({
 					"result":	{
 						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
 						"method" : "VR.GetLanguageResponse",
-						"language" : MFT.ApplinkModel.TTSVRLanguage
+						"language" : MFT.ApplinkModel.hmiTTSVRLanguage
 					}
 				};
 				this.client.send(JSONMessage);

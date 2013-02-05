@@ -66,7 +66,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 
         contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
 
-        valueBinding:		'MFT.ApplinkModel.UILanguage',
+        valeuBinding:		'MFT.ApplinkModel.hmiUILanguage',
 
         click: function(){
 
@@ -86,7 +86,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 
         contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
 
-        valueBinding:		'MFT.ApplinkModel.TTSVRLanguage',
+        valeuBinding:		'MFT.ApplinkModel.hmiTTSVRLanguage',
 
         click: function(){
 

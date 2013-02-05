@@ -142,16 +142,16 @@ MFT.ApplinkModel = Em.Object.create({
     },
 
     /**
-     * Current language of UI component
+     * TTS + VR language
      * @type {String}
      */
-    UILanguage: '',
+    hmiTTSVRLanguage:           'EN-US',
 
     /**
-     * Current language of TTS and VR component
+     * UI language
      * @type {String}
      */
-    TTSVRLanguage: '',
+    hmiUILanguage:              'EN-US',
 
     /**
      * List of supported languages
@@ -251,7 +251,7 @@ MFT.ApplinkModel = Em.Object.create({
      * @param {string} lang Language code
      */
     changeRegistrationTTSVR: function( lang ){
-        this.set( 'TTSVRLanguage', lang );
+        MFT.ApplinkAppController.model.set( 'TTSVRLanguage', lang );
     },
 
     /**

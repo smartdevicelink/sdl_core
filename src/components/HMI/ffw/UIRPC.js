@@ -297,7 +297,7 @@ FFW.UI = FFW.RPCObserver.create({
 					"result":	{
 						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
 						"method" : "UI.GetLanguageResponse",
-						"hmiDisplayLanguage" : MFT.ApplinkModel.UILanguage
+						"hmiDisplayLanguage" : MFT.ApplinkModel.hmiUILanguage
 					}
 				};
 				this.client.send(JSONMessage);
