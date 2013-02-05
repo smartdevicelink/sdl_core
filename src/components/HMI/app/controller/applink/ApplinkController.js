@@ -25,7 +25,39 @@ MFT.ApplinkController = Em.Object.create({
      * @type bool
      */
     protocolVersion2State:		false,
-
+    
+    /**
+     * Current system context
+     *
+     * @type {String}
+     */
+    sysContext: function() {
+        
+        if ( MFT.VRPopUp.VRActive ) {
+            return 'VRSESSION';
+        }
+        
+        if ( MFT.AlertPopUp.activate ) {
+            return 'ALERT';
+        }
+        
+        if ( MFT.TTSPopUp.active ) {
+            return 'HMI_OBSCURED';
+        }
+        
+        if ( MFT.States.info.nonMedia.active || MFT.States.media.applink.active ) {
+            return 'MAIN';
+        } else {
+            return 'MENU';
+        }
+    }.property(
+        'MFT.TTSPopUp.active',
+        'MFT.VRPopUp.VRActive',
+        'MFT.AlertPopUp.activate',
+        'MFT.States.info.nonMedia.active',
+        'MFT.States.media.applink.active'
+    ),
+    
 	/** 
 	 * List of Applink application models
 	 *
@@ -272,9 +304,9 @@ MFT.ApplinkController = Em.Object.create({
 	},
 	
 	/**
-	 * Handle system context change state
+	 * Send system context
 	 */
 	onSystemContextChange: function() {
-        
+        FFW.UI.OnSystemContext( this.get('sysContext') );
 	}
 });

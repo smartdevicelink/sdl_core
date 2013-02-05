@@ -39,21 +39,10 @@ MFT.ApplinkMediaController = Em.Object.create({
         }
     }.property('this.currentAppId','MFT.ApplinkAppController.model.appIcon'),
 
-    /*
-     * Enumeraction that describes possible contexts
-     * and app's HMI might be in.
-     */
-    eSystemContext:{
-        main:           "MENU",
-        VR:             "VRSESSION",
-        application:    "MAIN"
-    },
-
     /** Call notification OnCommand on UIRPC */
     onCommand: function(element){
        FFW.UI.onCommand(element.commandId, element.appId);
     },
-
 
     /** Call notification OnCommandSoftButton on UIRPC */
     onCommandSoftButton: function(element){
@@ -107,11 +96,5 @@ MFT.ApplinkMediaController = Em.Object.create({
             MFT.States.back();
         }
 
-    },
-
-    /** Applink SystemContext switcher */
-    onSystemContextSwitcher: function(systemContextValue){
-        FFW.UI.OnSystemContext(systemContextValue);
     }
-
 });

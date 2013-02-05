@@ -131,20 +131,17 @@ MFT.VRPopUp = Em.ContainerView.create({
 
     activateVRPopUp: function(){
         var self = this;
+        
         if(this.VRActive){
-            this.set('VRActive', false);
-            if(MFT.States.media.applink.active){
-                MFT.ApplinkMediaController.onSystemContextSwitcher(MFT.ApplinkMediaController.eSystemContext.application);
-            }else{
-                MFT.ApplinkMediaController.onSystemContextSwitcher(MFT.ApplinkMediaController.eSystemContext.main);
-            }
+            this.set('VRActive', false);          
         }else{
         	// play audio alert
 			MFT.Audio.play('audio/say.wav');
             
             this.set('VRActive', true);
-            MFT.ApplinkMediaController.onSystemContextSwitcher(MFT.ApplinkMediaController.eSystemContext.VR);
         }
+        
+        MFT.ApplinkController.onSystemContextChange();
     },
 
      /**
@@ -158,5 +155,12 @@ MFT.VRPopUp = Em.ContainerView.create({
                 
         /** Items array */
         items:          new Array()
-    })
+    }),
+    
+    // deactivate VR on change application state
+    onStateChange: function() {
+        if ( this.VRActive ) {
+            this.set('VRActive', false);
+        }
+    }.observes('MFT.TransitionIterator.ready'),
 });
