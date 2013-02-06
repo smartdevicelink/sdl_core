@@ -11,24 +11,43 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.Alert;
+import com.ford.syncV4.proxy.rpc.AlertManeuver;
+import com.ford.syncV4.proxy.rpc.ChangeRegistration;
 import com.ford.syncV4.proxy.rpc.Choice;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteCommand;
+import com.ford.syncV4.proxy.rpc.DeleteFile;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
+import com.ford.syncV4.proxy.rpc.DialNumber;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
+import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
+import com.ford.syncV4.proxy.rpc.GetDTCs;
+import com.ford.syncV4.proxy.rpc.GetVehicleData;
+import com.ford.syncV4.proxy.rpc.ListFiles;
+import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
+import com.ford.syncV4.proxy.rpc.PutFile;
+import com.ford.syncV4.proxy.rpc.ReadDID;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
+import com.ford.syncV4.proxy.rpc.ScrollableMessage;
+import com.ford.syncV4.proxy.rpc.SetAppIcon;
+import com.ford.syncV4.proxy.rpc.SetDisplayLayout;
 import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimer;
 import com.ford.syncV4.proxy.rpc.Show;
+import com.ford.syncV4.proxy.rpc.ShowConstantTBT;
+import com.ford.syncV4.proxy.rpc.Slider;
 import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
+import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
@@ -43,12 +62,10 @@ public class TestRPC {
 			rpc = new RegisterAppInterface();
 		} else if (functionName.equalsIgnoreCase(Names.UnregisterAppInterface)) {
 			rpc = new UnregisterAppInterface();
-		} else if (functionName.equalsIgnoreCase(Names.Alert)) {
-			rpc = new Alert();
-		} else if (functionName.equalsIgnoreCase(Names.Show)) {
-			rpc = new Show();
-		} else if (functionName.equalsIgnoreCase(Names.Speak)) {
-			rpc = new Speak();
+		} else if (functionName.equalsIgnoreCase(Names.SetGlobalProperties)) {
+			rpc = new SetGlobalProperties();
+		} else if (functionName.equalsIgnoreCase(Names.ResetGlobalProperties)) {
+			rpc = new ResetGlobalProperties();
 		} else if (functionName.equalsIgnoreCase(Names.AddCommand)) {
 			rpc = new AddCommand();
 		} else if (functionName.equalsIgnoreCase(Names.DeleteCommand)) {
@@ -59,22 +76,62 @@ public class TestRPC {
 			rpc = new DeleteSubMenu();
 		} else if (functionName.equalsIgnoreCase(Names.CreateInteractionChoiceSet)) {
 			rpc = new CreateInteractionChoiceSet();
-		} else if (functionName.equalsIgnoreCase(Names.DeleteInteractionChoiceSet)) {
-			rpc = new DeleteInteractionChoiceSet();
 		} else if (functionName.equalsIgnoreCase(Names.PerformInteraction)) {
 			rpc = new PerformInteraction();
+		} else if (functionName.equalsIgnoreCase(Names.DeleteInteractionChoiceSet)) {
+			rpc = new DeleteInteractionChoiceSet();
+		} else if (functionName.equalsIgnoreCase(Names.Alert)) {
+			rpc = new Alert();
+		} else if (functionName.equalsIgnoreCase(Names.Show)) {
+			rpc = new Show();
+		} else if (functionName.equalsIgnoreCase(Names.Speak)) {
+			rpc = new Speak();
+		} else if (functionName.equalsIgnoreCase(Names.SetMediaClockTimer)) {
+			rpc = new SetMediaClockTimer();
 		} else if (functionName.equalsIgnoreCase(Names.EncodedSyncPData)) {
 			rpc = new EncodedSyncPData();
+		} else if (functionName.equalsIgnoreCase(Names.DialNumber)) {
+			rpc = new DialNumber();
+		} else if (functionName.equalsIgnoreCase(Names.PerformAudioPassThru)) {
+			rpc = new PerformAudioPassThru();
+		} else if (functionName.equalsIgnoreCase(Names.EndAudioPassThru)) {
+			rpc = new EndAudioPassThru();
 		} else if (functionName.equalsIgnoreCase(Names.SubscribeButton)) {
 			rpc = new SubscribeButton();
 		} else if (functionName.equalsIgnoreCase(Names.UnsubscribeButton)) {
 			rpc = new UnsubscribeButton();
-		} else if (functionName.equalsIgnoreCase(Names.SetMediaClockTimer)) {
-			rpc = new SetMediaClockTimer();
-		} else if (functionName.equalsIgnoreCase(Names.SetGlobalProperties)) {
-			rpc = new SetGlobalProperties();
-		} else if (functionName.equalsIgnoreCase(Names.ResetGlobalProperties)) {
-			rpc = new ResetGlobalProperties();
+		} else if (functionName.equalsIgnoreCase(Names.SubscribeVehicleData)) {
+			rpc = new SubscribeVehicleData();
+	    } else if (functionName.equalsIgnoreCase(Names.UnsubscribeVehicleData)) {
+			rpc = new UnsubscribeVehicleData();
+	    } else if (functionName.equalsIgnoreCase(Names.GetVehicleData)) {
+			rpc = new GetVehicleData();
+	    } else if (functionName.equalsIgnoreCase(Names.ReadDID)) {
+			rpc = new ReadDID();
+	    } else if (functionName.equalsIgnoreCase(Names.GetDTCs)) {
+			rpc = new GetDTCs();
+	    } else if (functionName.equalsIgnoreCase(Names.ScrollableMessage)) {
+			rpc = new ScrollableMessage();
+	    } else if (functionName.equalsIgnoreCase(Names.Slider)) {
+			rpc = new Slider();
+	    } else if (functionName.equalsIgnoreCase(Names.ShowConstantTBT)) {
+			rpc = new ShowConstantTBT();
+	    } else if (functionName.equalsIgnoreCase(Names.AlertManeuver)) {
+			rpc = new AlertManeuver();
+	    } else if (functionName.equalsIgnoreCase(Names.UpdateTurnList)) {
+			rpc = new UpdateTurnList();
+	    } else if (functionName.equalsIgnoreCase(Names.ChangeRegistration)) {
+			rpc = new ChangeRegistration();
+	    } else if (functionName.equalsIgnoreCase(Names.PutFile)) {
+			rpc = new PutFile();
+	    } else if (functionName.equalsIgnoreCase(Names.DeleteFile)) {
+			rpc = new DeleteFile();
+	    } else if (functionName.equalsIgnoreCase(Names.ListFiles)) {
+			rpc = new ListFiles();
+	    } else if (functionName.equalsIgnoreCase(Names.SetAppIcon)) {
+			rpc = new SetAppIcon();
+	    } else if (functionName.equalsIgnoreCase(Names.SetDisplayLayout)) {
+			rpc = new SetDisplayLayout();
 		} else if (functionName.equalsIgnoreCase("ClearMediaClockTimer")) {
 			rpc = new Show();
 			((Show) rpc).setMainField1(null);
@@ -100,31 +157,6 @@ public class TestRPC {
 			((SetMediaClockTimer) rpc).setStartTime(startTime);
 			((SetMediaClockTimer) rpc).setUpdateMode(UpdateMode.RESUME);
 		}
-		
-
-		/* Maybe later?
-		}  else if (functionName.equalsIgnoreCase(Names.DialNumber)) {
-			rpc = new DialNumber();
-		} else if (functionName.equalsIgnoreCase(Names.SubscribeVehicleData)) {
-			rpc = new SubscribeVehicleData();
-		} else if (functionName.equalsIgnoreCase(Names.UnsubscribeVehicleData)) {
-			rpc = new UnsubscribeVehicleData();
-		} else if (functionName.equalsIgnoreCase(Names.GetDID)) {
-			rpc = new GetDID();
-		} else if (functionName.equalsIgnoreCase(Names.GetDTCs)) {
-			rpc = new GetDTCs();
-		} else if (functionName.equalsIgnoreCase(Names.GetFile)) {
-			rpc = new GetFile();
-		} else if (functionName.equalsIgnoreCase(Names.PutFile)) {
-			rpc = new GetFile();
-		} else if (functionName.equalsIgnoreCase(Names.EndAudioCapture)) {
-			rpc = new EndAudioCapture();
-		} else if (functionName.equalsIgnoreCase(Names.GetVehicleData)) {
-			rpc = new GetVehicleData();
-		} else if (functionName.equalsIgnoreCase(Names.PerformAudioCapture)) {
-			rpc = new PerformAudioCapture();
-		}
-		*/
 	}
 	
 	public RPCMessage getRPC() {
@@ -203,6 +235,8 @@ public class TestRPC {
 			((RPCMessage) rpc).setParameters(field, TextAlignment.valueForString(value));
 		} else if (field.equalsIgnoreCase(Names.updateMode)) {
 			((RPCMessage) rpc).setParameters(field, UpdateMode.valueForString(value));
+		} else {
+			((RPCMessage) rpc).setParameters(field, value);
 		}
 	}
 	

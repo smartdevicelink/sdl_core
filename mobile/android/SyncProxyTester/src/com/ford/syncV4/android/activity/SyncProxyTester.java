@@ -66,7 +66,7 @@ import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
 import com.ford.syncV4.android.module.ModuleTest;
-import com.ford.syncV4.android.policies.PoliciesTest;
+import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCMessage;
@@ -116,8 +116,8 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.VrHelpItem;
-import com.ford.syncV4.proxy.rpc.enums.AudioCaptureQuality;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
+import com.ford.syncV4.proxy.rpc.enums.BitsPerSample;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
@@ -146,7 +146,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * {@link OnAudioPassThru} notifications is saved. The root directory is the
 	 * external storage.
 	 */
-	private static final String AUDIOPASSTHRU_OUTPUT_FILE = "audiopassthru.bin";
+	private static final String AUDIOPASSTHRU_OUTPUT_FILE = "audiopassthru.wav";
 
 	private static final int ALERT_MAXSOFTBUTTONS = 4;
 	private static final int SCROLLABLEMESSAGE_MAXSOFTBUTTONS = 8;
@@ -159,6 +159,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
     private static ArrayList<Object> _logMessages = new ArrayList<Object>();
 	private static logAdapter _msgAdapter;
 	private ModuleTest _testerMain;
+	private static byte[] _ESN;
 	
 	private ScrollView _scroller = null;
 	private ListView _listview = null;
@@ -373,6 +374,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				.findViewById(R.id.selectprotocol_tcpPort);
 		final CheckBox autoReconnectCheckBox = (CheckBox) view
 				.findViewById(R.id.selectprotocol_checkAutoReconnect);
+
+		ipAddressEditText.setEnabled(false);
+		tcpPortEditText.setEnabled(false);
+		autoReconnectCheckBox.setEnabled(false);
 
 		transportGroup
 				.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -699,11 +704,20 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				_testerMain.restart();
 				Toast.makeText(getApplicationContext(), "start your engines", Toast.LENGTH_SHORT).show();
 			}else {
+				ProxyService.getInstance().startModuleTest();
+				_testerMain.restart();
 				Toast.makeText(getApplicationContext(), "Start the app on SYNC first", Toast.LENGTH_LONG).show();
 			}
 			break;
 		case POLICIES_TEST:
-			PoliciesTest.runPoliciesTest(getApplicationContext());
+			if(PoliciesTesterActivity.getInstance() == null) {
+				Intent i = new Intent(this, PoliciesTesterActivity.class);
+				i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				i.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
+				startActivity(i);
+				if (_ESN != null) PoliciesTesterActivity.setESN(_ESN);
+			}	
+			//PoliciesTest.runPoliciesTest();
 			break;
 		case MNU_EXIT:
 			exitApp();
@@ -1885,8 +1899,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							final EditText txtMaxDuration = (EditText) layout.findViewById(R.id.txtMaxDuration);
 							
 							final Spinner spnBitsPerSample = (Spinner) layout.findViewById(R.id.spnBitsPerSample);
-							ArrayAdapter<AudioCaptureQuality> spinnerAdapterBitsPerSample = new ArrayAdapter<AudioCaptureQuality>(adapter.getContext(),
-									android.R.layout.simple_spinner_item, AudioCaptureQuality.values());
+							ArrayAdapter<BitsPerSample> spinnerAdapterBitsPerSample = new ArrayAdapter<BitsPerSample>(adapter.getContext(),
+									android.R.layout.simple_spinner_item, BitsPerSample.values());
 							spinnerAdapterBitsPerSample.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 							spnBitsPerSample.setAdapter(spinnerAdapterBitsPerSample);
 
@@ -1908,7 +1922,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setAudioPassThruDisplayText2(txtAudioPassThruDisplayText2.getText().toString());
 										msg.setSamplingRate((SamplingRate) spnSamplingRate.getSelectedItem());
 										msg.setMaxDuration(Integer.parseInt(txtMaxDuration.getText().toString()));
-										msg.setBitsPerSample((AudioCaptureQuality) spnBitsPerSample.getSelectedItem());
+										msg.setBitsPerSample((BitsPerSample) spnBitsPerSample.getSelectedItem());
 										msg.setAudioType((AudioType) spnAudioType.getSelectedItem());
 										msg.setCorrelationID(autoIncCorrId++);
 										latestPerformAudioPassThruMsg = msg;
@@ -2779,6 +2793,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		this._testerMain = _instance;
 	}
 	
+	public static void setESN(byte[] ESN) {
+		_ESN = ESN;
+	}
+
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();

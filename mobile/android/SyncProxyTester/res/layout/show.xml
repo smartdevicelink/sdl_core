@@ -1,135 +1,141 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/itemRoot"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="10dip"
-    android:layout_marginRight="10dip"
-    android:minWidth="300px"
-    android:orientation="vertical"
-    android:paddingLeft="20dip"
-    android:paddingRight="20dip" >
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Line 1"
-        android:textStyle="bold" >
-    </TextView>
-
-    <EditText
-        android:id="@+id/txtShowField1"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:freezesText="true"
-        android:text="Show Line 1"
-        android:visibility="visible" >
-    </EditText>
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Line 2"
-        android:textStyle="bold" >
-    </TextView>
-
-    <EditText
-        android:id="@+id/txtShowField2"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:freezesText="true"
-        android:text="Show Line 2"
-        android:visibility="visible" >
-    </EditText>
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Status Bar"
-        android:textStyle="bold" >
-
-    </TextView>
-
-    <EditText
-        android:id="@+id/txtStatusBar"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:freezesText="true"
-        android:text="status bar"
-        android:visibility="visible" >
-    </EditText>
-
-    <TextView
-        android:id="@+id/lblMediaTrack"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Media Track"
-        android:textStyle="bold" >
-    </TextView>
-
-    <EditText
-        android:id="@+id/txtMediaTrack"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:freezesText="true"
-        android:text="Media Track"
-        android:visibility="visible" >
-    </EditText>
-
-    <TextView
-        android:id="@+id/lblMediaClock"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Media Clock"
-        android:textStyle="bold" >
-
-    </TextView>
-
-    <EditText
-        android:id="@+id/txtMediaClock"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="12:34" >
-    </EditText>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <CheckBox
-            android:id="@+id/show_chkIncludeSBs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="false"
-            android:text="Include" />
-
-        <Button
-            android:id="@+id/show_btnSoftButtons"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Soft Buttons" />
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Custom Presets (comma-separated)"
-        android:textStyle="bold" />
-
-    <EditText
-        android:id="@+id/show_customPresets"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:ems="10"
-        android:freezesText="true"
-        android:inputType="textCapWords"
-        android:text="GEN0,GEN1,GEN2,GEN3,GEN4,GEN5"
-        android:visibility="visible" />
-
-</LinearLayout>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+    
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/itemRoot"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_marginLeft="10dip"
+	    android:layout_marginRight="10dip"
+	    android:minWidth="300px"
+	    android:orientation="vertical"
+	    android:paddingLeft="20dip"
+	    android:paddingRight="20dip" >
+	
+	    <TextView
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:text="Line 1"
+	        android:textStyle="bold" >
+	    </TextView>
+	
+	    <EditText
+	        android:id="@+id/txtShowField1"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:freezesText="true"
+	        android:text="Show Line 1"
+	        android:visibility="visible" >
+	    </EditText>
+	
+	    <TextView
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:text="Line 2"
+	        android:textStyle="bold" >
+	    </TextView>
+	
+	    <EditText
+	        android:id="@+id/txtShowField2"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:freezesText="true"
+	        android:text="Show Line 2"
+	        android:visibility="visible" >
+	    </EditText>
+	
+	    <TextView
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:text="Status Bar"
+	        android:textStyle="bold" >
+	
+	    </TextView>
+	
+	    <EditText
+	        android:id="@+id/txtStatusBar"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:freezesText="true"
+	        android:text="status bar"
+	        android:visibility="visible" >
+	    </EditText>
+	
+	    <TextView
+	        android:id="@+id/lblMediaTrack"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:text="Media Track"
+	        android:textStyle="bold" >
+	    </TextView>
+	
+	    <EditText
+	        android:id="@+id/txtMediaTrack"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:freezesText="true"
+	        android:text="Media Track"
+	        android:visibility="visible" >
+	    </EditText>
+	
+	    <TextView
+	        android:id="@+id/lblMediaClock"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:text="Media Clock"
+	        android:textStyle="bold" >
+	
+	    </TextView>
+	
+	    <EditText
+	        android:id="@+id/txtMediaClock"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="12:34" >
+	    </EditText>
+	
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" >
+	
+	        <CheckBox
+	            android:id="@+id/show_chkIncludeSBs"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:checked="false"
+	            android:text="Include" />
+	
+	        <Button
+	            android:id="@+id/show_btnSoftButtons"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="Soft Buttons" />
+	    </LinearLayout>
+	
+	    <TextView
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:text="Custom Presets (comma-separated)"
+	        android:textStyle="bold" />
+	
+	    <EditText
+	        android:id="@+id/show_customPresets"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:ems="10"
+	        android:freezesText="true"
+	        android:inputType="textCapWords"
+	        android:text="GEN0,GEN1,GEN2,GEN3,GEN4,GEN5"
+	        android:visibility="visible" />
+	
+	</LinearLayout>
+</ScrollView>

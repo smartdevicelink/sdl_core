@@ -26,6 +26,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:label="Locked" android:screenOrientation="portrait" android:name="com.ford.syncV4.android.policies.PoliciesTesterActivity"></activity>
+        
         <service android:name=".service.ProxyService" >
         </service>
 

@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file>
+    <type type = "unit"/>
+    
+    <test testName = "AddCommand">
+        <AddCommand correlationID = "1">
+            <Vector name = "vrCommands">
+                <String add = "AddCommand" />
+                <String add = "Add Command" />
+            </Vector>
+            <Integer cmdID = "1" />
+            <menuParams>
+                <Integer position = "0" />
+                <String menuName = "AddCommand" />
+                <Integer parentID = "0" />
+            </menuParams>
+        </AddCommand>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+    
+    <test testName = "AddSubMenu">
+        <AddSubMenu correlationID = "1">
+            <Integer menuID = "100" />
+            <String menuName = "addSubMenu" />
+        </AddSubMenu>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+    
+    <test testName = "SetMediaClockTimer">
+        <SetMediaClockTimer correlationID = "1">
+            <startTime>
+                <Integer seconds = "56" />
+                <Integer hours = "12" />
+                <Integer minutes = "34" />
+            </startTime>
+            <String updateMode = "COUNTUP" />
+        </SetMediaClockTimer>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+    
+    <test testName = "CreateInteractionChoiceSet">
+        <CreateInteractionChoiceSet correlationID = "1">
+            <Vector name = "choiceSet">
+                <choiceSet>
+                    <Integer choiceID = "1" />
+                    <String menuName = "CreateInteractionChoiceSet" />
+                    <Vector name = "vrCommands">
+                        <String add = "CreateInteractionChoiceSet" />
+                        <String add = "Create Interaction Choice Set" />
+                    </Vector>
+                </choiceSet>
+            </Vector>
+            <Integer interactionChoiceSetID = "101" />
+        </CreateInteractionChoiceSet>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+    
+    <test testName = "PerformInteraction">
+        <PerformInteraction  correlationID = "1">
+            <String initialText = "PerformInteraction" />
+            <Vector name = "initialPrompt">
+                <TTSChunk>
+                    <String text = "Perform Interaction" />
+                    <String type = "TEXT" />
+                </TTSChunk>
+            </Vector>
+            <String interactionMode = "BOTH" />
+            <Vector name = "interactionChoiceSetIDList">
+                <Integer add = "101" />
+            </Vector>
+            <Vector name = "helpPrompt">
+                <TTSChunk>
+                    <String text = "Perform Interaction" />
+                    <String type = "TEXT" />
+                </TTSChunk>
+            </Vector>
+            <Vector name = "timeoutPrompt">
+                <TTSChunk>
+                    <String text = "Perform Interaction" />
+                    <String type = "TEXT" />
+                </TTSChunk>
+            </Vector>
+        </PerformInteraction>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+    
+    <test testName = "DeleteCommand">
+        <DeleteCommand correlationID = "1">
+            <Integer cmdID = "1" />
+        </DeleteCommand>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+
+    <test testName = "DeleteInteractionChoiceSet">
+        <DeleteInteractionChoiceSet correlationID = "1">
+            <Integer interactionChoiceSetID = "101" />
+        </DeleteInteractionChoiceSet>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+
+    <test testName = "DeleteSubMenu">
+        <DeleteSubMenu correlationID = "1">
+            <Integer menuID = "100" />
+        </DeleteSubMenu>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+
+    <test testName = "EncodedSyncPData">
+        <EncodedSyncPData correlationID = "1">
+            <Vector name = "data">
+                <String add = "AAM4AAkAAAAAAAAAAAA=" />
+            </Vector>
+        </EncodedSyncPData>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+
+    <test testName = "PauseMediaClockTimer">
+        <PauseMediaClockTimer correlationID = "1"/>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+
+    <test testName = "ResumeMediaClockTimer">
+        <ResumeMediaClockTimer correlationID = "1"/>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+
+    <test testName = "ClearMediaClockTimer">
+        <ClearMediaClockTimer correlationID = "1"/>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+
+    <test testName = "SetGlobalProperties">
+        <SetGlobalProperties correlationID = "1">
+            helpPrompt = "setGlobalProperties" timeoutPrompt = "setGlobalProperties" 
+            <Vector name = "helpPrompt">
+                <TTSChunk>
+                    <String text = "Set Global Properties Help Prompt" />
+                    <String type = "TEXT" />
+                </TTSChunk>
+            </Vector>
+            <Vector name = "timeoutPrompt">
+                <TTSChunk>
+                    <String text = "Set Global Properties Timeout Prompt" />
+                    <String type = "TEXT" />
+                </TTSChunk>
+            </Vector>
+        </SetGlobalProperties>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+
+    <test testName = "ResetGlobalProperties">
+        <ResetGlobalProperties correlationID = "1">
+            <Vector name = "properties">
+                <String add = "HELPPROMPT" />
+            </Vector>
+        </ResetGlobalProperties>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+
+    <test testName = "Show">
+        <Show correlationID = "1">
+            <String mainField1 = "Show line 1" />
+            <String mainField2 = "Show line 2" />
+            <String mainField3 = "Show line 3" />
+            <String mainField4 = "Show line 4" />
+            <String mediaClock = "12:34" />
+            <String mediaTrack = "Media Track" />
+            <String statusBar = "Status Bar" />
+            <Vector name = "customPresets">
+                <String add = "GEN0" />
+                <String add = "GEN1" />
+                <String add = "GEN2" />
+                <String add = "GEN3" />
+                <String add = "GEN4" />
+                <String add = "GEN5" />
+            </Vector>
+            <Vector name = "softButtons">
+                <SoftButton>
+                    <Integer softButtonID = "5432" />
+                    <String text = "KeepContext" />
+                    <String type = "TEXT" />
+                    <Boolean isHighlighted = "false" />
+                    <String systemAction = "KEEP_CONTEXT" />
+                </SoftButton>
+                <SoftButton>
+                    <Integer softButtonID = "5431" />
+                    <String text = "StealFocus" />
+                    <String type = "TEXT" />
+                    <Boolean isHighlighted = "false" />
+                    <String systemAction = "STEAL_FOCUS" />
+                </SoftButton>
+                <SoftButton>
+                    <Integer softButtonID = "5430" />
+                    <String text = "Default" />
+                    <String type = "TEXT" />
+                    <Boolean isHighlighted = "false" />
+                    <String systemAction = "DEFAULT_ACTION" />
+                </SoftButton>
+            </Vector>
+        </Show>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+    
+    <test testName = "Speak">
+        <Speak correlationID = "1">
+            <Vector name = "ttsChunks">
+                <TTSChunk>
+                    <String text = "This is the third T T S" />
+                    <String type = "TEXT" />
+                </TTSChunk>
+                <TTSChunk>
+                    <String text = "This is the fourth T T S" />
+                    <String type = "TEXT" />
+                </TTSChunk>
+            </Vector>
+        </Speak>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+
+    <test testName = "SubscribeButton">
+        <SubscribeButton correlationID = "1">
+            <String buttonName = "PRESET_0" />
+        </SubscribeButton>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+
+    <test testName = "UnsubscribeButton">
+        <UnsubscribeButton correlationID = "1">
+            <String buttonName = "PRESET_0" />
+        </UnsubscribeButton>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+    
+    <test testName = "AlertTest">
+        <Alert correlationID = "1">
+            <String alertText1 = "Alert 1" />
+            <String alertText2 = "Alert 1" />
+            <Vector name = "ttsChunks">
+                <TTSChunk>
+                    <String text = "This is the first T T S" />
+                    <String type = "TEXT" />
+                </TTSChunk>
+                <TTSChunk>
+                    <String text = "This is the second T T S" />
+                    <String type = "TEXT" />
+                </TTSChunk>
+            </Vector>
+            <Integer duration = "5000" />
+            <Boolean playtone = "false" />
+        </Alert>
+        <Alert correlationID = "2">
+            <String alertText1 = "Alert 2" />
+            <String alertText2 = "Alert 2" />
+            <Vector name = "ttsChunks">
+                <TTSChunk>
+                    <String text = "This is the third T T S" />
+                    <String type = "TEXT" />
+                </TTSChunk>
+                <TTSChunk>
+                    <String text = "This is the fourth T T S" />
+                    <String type = "TEXT" />
+                </TTSChunk>
+            </Vector>
+            <Integer duration = "5000" />
+            <Boolean playtone = "false" />
+        </Alert>
+        <result correlationID = "2" return = "REJECTED"/>
+        <result correlationID = "1" return = "SUCCESS"/>
+    </test>
+</file>

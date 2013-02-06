@@ -2,8 +2,6 @@ package com.ford.syncV4.proxy;
 
 import java.util.Hashtable;
 
-import com.ford.syncV4.protocol.ProtocolMessage;
-import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.proxy.constants.Names;
 
 public class RPCMessage extends RPCStruct  {

@@ -34,7 +34,8 @@ public class Const {
 		public static final int KEY_TCP = 1;
 		public static final int KEY_BLUETOOTH = 2;
 
-		public static final int PREFS_DEFAULT_TRANSPORT_TYPE = KEY_TCP;
+		//public static final int PREFS_DEFAULT_TRANSPORT_TYPE = KEY_TCP;
+		public static final int PREFS_DEFAULT_TRANSPORT_TYPE = KEY_BLUETOOTH;
 		public static final int PREFS_DEFAULT_TRANSPORT_PORT = 12345;
 		public static final String PREFS_DEFAULT_TRANSPORT_IP = "10.10.0.1";
 		public static final boolean PREFS_DEFAULT_TRANSPORT_RECONNECT_DEFAULT = false;

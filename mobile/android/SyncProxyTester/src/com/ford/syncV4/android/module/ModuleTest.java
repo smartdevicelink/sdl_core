@@ -6,19 +6,57 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.xmlpull.v1.XmlPullParser;
-
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.Choice;
+import com.ford.syncV4.proxy.rpc.AddCommand;
+import com.ford.syncV4.proxy.rpc.AddSubMenu;
+import com.ford.syncV4.proxy.rpc.Alert;
+import com.ford.syncV4.proxy.rpc.AlertManeuver;
+import com.ford.syncV4.proxy.rpc.ChangeRegistration;
+import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
+import com.ford.syncV4.proxy.rpc.DeleteCommand;
+import com.ford.syncV4.proxy.rpc.DeleteFile;
+import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
+import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
+import com.ford.syncV4.proxy.rpc.DialNumber;
+import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
+import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
+import com.ford.syncV4.proxy.rpc.GetDTCs;
+import com.ford.syncV4.proxy.rpc.GetVehicleData;
+import com.ford.syncV4.proxy.rpc.ListFiles;
+import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
+import com.ford.syncV4.proxy.rpc.PerformInteraction;
+import com.ford.syncV4.proxy.rpc.PutFile;
+import com.ford.syncV4.proxy.rpc.ReadDID;
+import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
+import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
+import com.ford.syncV4.proxy.rpc.ScrollableMessage;
+import com.ford.syncV4.proxy.rpc.SetAppIcon;
+import com.ford.syncV4.proxy.rpc.SetDisplayLayout;
+import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
+import com.ford.syncV4.proxy.rpc.SetMediaClockTimer;
+import com.ford.syncV4.proxy.rpc.Show;
+import com.ford.syncV4.proxy.rpc.ShowConstantTBT;
+import com.ford.syncV4.proxy.rpc.Slider;
+import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
+import com.ford.syncV4.proxy.rpc.SubscribeButton;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
+import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
+import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.AcceptedRPC;
-import com.ford.syncV4.android.constants.TestRPC;
 import com.ford.syncV4.android.service.ProxyService;
 
 import android.app.AlertDialog;
@@ -47,7 +85,7 @@ public class ModuleTest {
 	private int numIterations;
 	
 	private ArrayList<Pair<Integer, Result>> expecting = new ArrayList<Pair<Integer, Result>>();
-	private ArrayList<Pair<String, ArrayList<TestRPC>>> testList = new ArrayList<Pair<String, ArrayList<TestRPC>>> ();
+	private ArrayList<Pair<String, ArrayList<RPCRequest>>> testList = new ArrayList<Pair<String, ArrayList<RPCRequest>>> ();
 	
 	public static ArrayList<Pair<Integer, Result>> responses = new ArrayList<Pair<Integer, Result>>();
 	
@@ -175,6 +213,7 @@ public class ModuleTest {
 				if (mChosenFile != null) {
 					AcceptedRPC acceptedRPC = new AcceptedRPC();
 					XmlPullParser parser = Xml.newPullParser();
+					RPCRequest rpc;
 					try {
 						//FileInputStream fin = new FileInputStream("/sdcard/test.xml");
 						FileInputStream fin = new FileInputStream("/sdcard/" + mChosenFile);
@@ -187,108 +226,217 @@ public class ModuleTest {
 						
 						parser.setInput(isr);
 						int eventType = parser.getEventType();
+						String name;
 						boolean done = false;
 						while (eventType != XmlPullParser.END_DOCUMENT && !done) {
-							String name = null;
+							name = parser.getName();
+							
 							switch (eventType) {
-								case XmlPullParser.START_DOCUMENT:
-									break;
-								case XmlPullParser.START_TAG:
-									name = parser.getName();
-									if (name.equalsIgnoreCase("test")) {
-										_msgAdapter.logMessage("test " + parser.getAttributeValue(0), true);
-										testList.add(new Pair<String, ArrayList<TestRPC>> (parser.getAttributeValue(0), new ArrayList<TestRPC> ()));
-										expecting.clear();
-										responses.clear();
-										try {
-											if (parser.getAttributeName(1) != null) {
-												if (parser.getAttributeName(1).equalsIgnoreCase("iterations")) {
-													try {numIterations = Integer.parseInt(parser.getAttributeValue(1));} 
-													catch (Exception e) {Log.e("parser", "Unable to parse number of iterations");}
-												} else numIterations = 1;
+							case XmlPullParser.START_DOCUMENT:
+								Log.e("TESTING", "START_DOCUMENT, name: " + name);
+								break;
+							case XmlPullParser.END_DOCUMENT:
+								Log.e("TESTING", "END_DOCUMENT, name: " + name);
+								break;
+							case XmlPullParser.START_TAG:
+								name = parser.getName();
+								if (name.equalsIgnoreCase("test")) {
+									_msgAdapter.logMessage("test " + parser.getAttributeValue(0), true);
+									testList.add(new Pair<String, ArrayList<RPCRequest>> (parser.getAttributeValue(0), new ArrayList<RPCRequest> ()));
+									expecting.clear();
+									responses.clear();
+									try {
+										if (parser.getAttributeName(1) != null) {
+											if (parser.getAttributeName(1).equalsIgnoreCase("iterations")) {
+												try {numIterations = Integer.parseInt(parser.getAttributeValue(1));} 
+												catch (Exception e) {Log.e("parser", "Unable to parse number of iterations");}
 											} else numIterations = 1;
-										} catch (Exception e) {
-											numIterations = 1;
-										}
-									} else if (name.equalsIgnoreCase("type")) {
-										if (parser.getAttributeValue(0).equalsIgnoreCase("integration")) integration = true;
-										else if (parser.getAttributeValue(0).equalsIgnoreCase("unit")) integration = false;
-									//} else if (name.equalsIgnoreCase("alert")) {
-									} else if (acceptedRPC.isAcceptedRPC(name)) {
-										//TestObj testObj = new TestObj();
-										//testObj.RPC = name;
-										TestRPC testrpc = new TestRPC(name);
-										int i = 0;
-										try {
-											while (parser.getAttributeName(i) != null) {
-												if (parser.getAttributeName(i).equalsIgnoreCase(Names.choiceSet)) {
-													Choice choice = new Choice();
-													choice.setChoiceID(Integer.parseInt(parser.getAttributeValue(i)));
-													if (parser.getAttributeName(i + 1).equalsIgnoreCase("choiceSetName")) {
-														i++;
-														choice.setMenuName(parser.getAttributeValue(i));
-													}
-													if (parser.getAttributeName(i + 1).equalsIgnoreCase("choiceSetVrCommands")) {
-														i++;
-														Vector<String> choiceSetVrCommands = new Vector<String>();
-														choiceSetVrCommands.add(parser.getAttributeValue(i));
-														choice.setVrCommands(choiceSetVrCommands);
-													}
-													Vector<Choice> choiceSet = new Vector<Choice>();
-													choiceSet.add(choice);
-													testrpc.setChoiceSet(choiceSet);
-												} else if (parser.getAttributeName(i).equalsIgnoreCase(Names.hours)) {
-													StartTime startTime = new StartTime();
-													startTime.setHours(Integer.parseInt(parser.getAttributeValue(i)));
-													if (parser.getAttributeName(i + 1).equalsIgnoreCase(Names.minutes)) {
-														i++;
-														startTime.setMinutes(Integer.parseInt(parser.getAttributeValue(i)));
-													}
-													if (parser.getAttributeName(i + 1).equalsIgnoreCase(Names.seconds)) {
-														i++;
-														startTime.setSeconds(Integer.parseInt(parser.getAttributeValue(i)));
-													}
-													testrpc.setStartTime(startTime);
-												} else {
-													testrpc.setField(parser.getAttributeName(i), parser.getAttributeValue(i));
-												}
-												i++;
-											}
-										} catch (Exception e) {}
-										Pair<String, ArrayList<TestRPC>> temp = testList.get(testList.size()-1);
-										temp.second.add(testrpc);
-										testList.set(testList.size()-1, temp);
-									} else if (name.equalsIgnoreCase("result")) {
-										expecting.add(new Pair<Integer, Result>(Integer.parseInt(parser.getAttributeValue(0)), (Result.valueForString(parser.getAttributeValue(1)))));
-									} else if (name.equalsIgnoreCase("userPrompt") && integration) {
-										userPrompt = parser.getAttributeValue(0);
+										} else numIterations = 1;
+									} catch (Exception e) {
+										numIterations = 1;
 									}
-									break;
-								case XmlPullParser.END_TAG:
-									name = parser.getName();
-									if (name.equalsIgnoreCase("test")) {
-										try {
-											boolean localPass = true;
-											int i = numIterations;
-											int numPass = 0;
-											while (i > 0) {
-												xmlTest();
-												if (pass) numPass++;
-												else localPass = false;
-												i--;
-											}
-											if (localPass) writer.write("" + testList.get(testList.size()-1).first + ", Pass, " + numPass + ", " + numIterations + "\n");
-											if (!localPass) writer.write("" + testList.get(testList.size()-1).first + ", Fail, " + numPass + ", " + numIterations + "\n");
-											Log.i("Test App Result", "" + testList.get(testList.size()-1).first + ", " + localPass + ", " + numPass + ", " + numIterations);
-											_msgAdapter.logMessage("" + testList.get(testList.size()-1).first + ", " + localPass + ", " + numPass + ", " + numIterations, true);
-										} catch (Exception e) {
-											_msgAdapter.logMessage("Test " + testList.get(testList.size()-1).first + " Failed! ", Log.ERROR, e);
-										}
+								} else if (name.equalsIgnoreCase("type")) {
+									if (parser.getAttributeValue(0).equalsIgnoreCase("integration")) integration = true;
+									else if (parser.getAttributeValue(0).equalsIgnoreCase("unit")) integration = false;
+								} else if (acceptedRPC.isAcceptedRPC(name)) {
+									//Create correct object
+									if (name.equalsIgnoreCase(Names.RegisterAppInterface)) {
+										rpc = new RegisterAppInterface();
+									} else if (name.equalsIgnoreCase(Names.UnregisterAppInterface)) {
+										rpc = new UnregisterAppInterface();
+									} else if (name.equalsIgnoreCase(Names.SetGlobalProperties)) {
+										rpc = new SetGlobalProperties();
+									} else if (name.equalsIgnoreCase(Names.ResetGlobalProperties)) {
+										rpc = new ResetGlobalProperties();
+									} else if (name.equalsIgnoreCase(Names.AddCommand)) {
+										rpc = new AddCommand();
+									} else if (name.equalsIgnoreCase(Names.DeleteCommand)) {
+										rpc = new DeleteCommand();
+									} else if (name.equalsIgnoreCase(Names.AddSubMenu)) {
+										rpc = new AddSubMenu();
+									} else if (name.equalsIgnoreCase(Names.DeleteSubMenu)) {
+										rpc = new DeleteSubMenu();
+									} else if (name.equalsIgnoreCase(Names.CreateInteractionChoiceSet)) {
+										rpc = new CreateInteractionChoiceSet();
+									} else if (name.equalsIgnoreCase(Names.PerformInteraction)) {
+										rpc = new PerformInteraction();
+									} else if (name.equalsIgnoreCase(Names.DeleteInteractionChoiceSet)) {
+										rpc = new DeleteInteractionChoiceSet();
+									} else if (name.equalsIgnoreCase(Names.Alert)) {
+										rpc = new Alert();
+									} else if (name.equalsIgnoreCase(Names.Show)) {
+										rpc = new Show();
+									} else if (name.equalsIgnoreCase(Names.Speak)) {
+										rpc = new Speak();
+									} else if (name.equalsIgnoreCase(Names.SetMediaClockTimer)) {
+										rpc = new SetMediaClockTimer();
+									} else if (name.equalsIgnoreCase(Names.EncodedSyncPData)) {
+										rpc = new EncodedSyncPData();
+									} else if (name.equalsIgnoreCase(Names.DialNumber)) {
+										rpc = new DialNumber();
+									} else if (name.equalsIgnoreCase(Names.PerformAudioPassThru)) {
+										rpc = new PerformAudioPassThru();
+									} else if (name.equalsIgnoreCase(Names.EndAudioPassThru)) {
+										rpc = new EndAudioPassThru();
+									} else if (name.equalsIgnoreCase(Names.SubscribeButton)) {
+										rpc = new SubscribeButton();
+									} else if (name.equalsIgnoreCase(Names.UnsubscribeButton)) {
+										rpc = new UnsubscribeButton();
+									} else if (name.equalsIgnoreCase(Names.SubscribeVehicleData)) {
+										rpc = new SubscribeVehicleData();
+								    } else if (name.equalsIgnoreCase(Names.UnsubscribeVehicleData)) {
+										rpc = new UnsubscribeVehicleData();
+								    } else if (name.equalsIgnoreCase(Names.GetVehicleData)) {
+										rpc = new GetVehicleData();
+								    } else if (name.equalsIgnoreCase(Names.ReadDID)) {
+										rpc = new ReadDID();
+								    } else if (name.equalsIgnoreCase(Names.GetDTCs)) {
+										rpc = new GetDTCs();
+								    } else if (name.equalsIgnoreCase(Names.ScrollableMessage)) {
+										rpc = new ScrollableMessage();
+								    } else if (name.equalsIgnoreCase(Names.Slider)) {
+										rpc = new Slider();
+								    } else if (name.equalsIgnoreCase(Names.ShowConstantTBT)) {
+										rpc = new ShowConstantTBT();
+								    } else if (name.equalsIgnoreCase(Names.AlertManeuver)) {
+										rpc = new AlertManeuver();
+								    } else if (name.equalsIgnoreCase(Names.UpdateTurnList)) {
+										rpc = new UpdateTurnList();
+								    } else if (name.equalsIgnoreCase(Names.ChangeRegistration)) {
+										rpc = new ChangeRegistration();
+								    } else if (name.equalsIgnoreCase(Names.PutFile)) {
+										rpc = new PutFile();
+								    } else if (name.equalsIgnoreCase(Names.DeleteFile)) {
+										rpc = new DeleteFile();
+								    } else if (name.equalsIgnoreCase(Names.ListFiles)) {
+										rpc = new ListFiles();
+								    } else if (name.equalsIgnoreCase(Names.SetAppIcon)) {
+										rpc = new SetAppIcon();
+								    } else if (name.equalsIgnoreCase(Names.SetDisplayLayout)) {
+										rpc = new SetDisplayLayout();
+									} else if (name.equalsIgnoreCase("ClearMediaClockTimer")) {
+										rpc = new Show();
+										((Show) rpc).setMainField1(null);
+										((Show) rpc).setMainField2(null);
+										((Show) rpc).setStatusBar(null);
+										((Show) rpc).setMediaClock("     ");
+										((Show) rpc).setMediaTrack(null);
+										((Show) rpc).setAlignment(null);
+									} else if (name.equalsIgnoreCase("PauseMediaClockTimer")) {
+										rpc = new SetMediaClockTimer();
+										StartTime startTime = new StartTime();
+										startTime.setHours(0);
+										startTime.setMinutes(0);
+										startTime.setSeconds(0);
+										((SetMediaClockTimer) rpc).setStartTime(startTime);
+										((SetMediaClockTimer) rpc).setUpdateMode(UpdateMode.PAUSE);
+									} else if (name.equalsIgnoreCase("ResumeMediaClockTimer")) {
+										rpc = new SetMediaClockTimer();
+										StartTime startTime = new StartTime();
+										startTime.setHours(0);
+										startTime.setMinutes(0);
+										startTime.setSeconds(0);
+										((SetMediaClockTimer) rpc).setStartTime(startTime);
+										((SetMediaClockTimer) rpc).setUpdateMode(UpdateMode.RESUME);
+									} else {
+										rpc = new SetGlobalProperties();
 									}
-									break;
-								default:
-									break;
+
+									if (parser.getAttributeName(0) != null && 
+											parser.getAttributeName(0).equalsIgnoreCase("correlationID")) {
+										try {rpc.setCorrelationID(Integer.parseInt(parser.getAttributeValue(0)));} 
+										catch (Exception e) {Log.e("parser", "Unable to parse Integer");}
+									}
+									
+									//TODO: Set rpc parameters
+									Hashtable hash = setParams(name, parser);
+									Log.e("TESTING", "" + hash);
+									//TODO: Iterate through hash table and add it to parameters
+									for (Object key : hash.keySet()) {
+										rpc.setParameters((String) key, hash.get(key));
+									}
+									
+								    Iterator it = hash.entrySet().iterator();
+								    while (it.hasNext()) {
+								    	Hashtable.Entry pairs = (Hashtable.Entry)it.next();
+								        System.out.println(pairs.getKey() + " = " + pairs.getValue());
+								    }
+									
+									Pair<String, ArrayList<RPCRequest>> temp = testList.get(testList.size()-1);
+									temp.second.add(rpc);
+									testList.set(testList.size()-1, temp);
+								} else if (name.equalsIgnoreCase("result")) {
+									expecting.add(new Pair<Integer, Result>(Integer.parseInt(parser.getAttributeValue(0)), (Result.valueForString(parser.getAttributeValue(1)))));
+								} else if (name.equalsIgnoreCase("userPrompt") && integration) {
+									userPrompt = parser.getAttributeValue(0);
 								}
+								break;
+							case XmlPullParser.END_TAG:
+								name = parser.getName();
+								if (name.equalsIgnoreCase("test")) {
+									try {
+										boolean localPass = true;
+										int i = numIterations;
+										int numPass = 0;
+										while (i > 0) {
+											xmlTest();
+											if (pass) numPass++;
+											else localPass = false;
+											i--;
+										}
+										if (localPass) writer.write("" + testList.get(testList.size()-1).first + ", Pass, " + numPass + ", " + numIterations + "\n");
+										if (!localPass) writer.write("" + testList.get(testList.size()-1).first + ", Fail, " + numPass + ", " + numIterations + "\n");
+										Log.i("Test App Result", "" + testList.get(testList.size()-1).first + ", " + localPass + ", " + numPass + ", " + numIterations);
+										_msgAdapter.logMessage("" + testList.get(testList.size()-1).first + ", " + localPass + ", " + numPass + ", " + numIterations, true);
+									} catch (Exception e) {
+										_msgAdapter.logMessage("Test " + testList.get(testList.size()-1).first + " Failed! ", Log.ERROR, e);
+									}
+								}
+								break;
+							case XmlPullParser.TEXT:
+								//Log.e("TESTING", "TEXT, name: " + name);
+								break;
+							case XmlPullParser.CDSECT:
+								Log.e("TESTING", "CDSECT, name: " + name);
+								break;
+							case XmlPullParser.ENTITY_REF:
+								Log.e("TESTING", "ENTITY_REF, name: " + name);
+								break;
+							case XmlPullParser.IGNORABLE_WHITESPACE:
+								Log.e("TESTING", "IGNORABLE_WHITESPACE, name: " + name);
+								break;
+							case XmlPullParser.PROCESSING_INSTRUCTION:
+								Log.e("TESTING", "PROCESSING_INSTRUCTION, name: " + name);
+								break;
+							case XmlPullParser.COMMENT:
+								Log.e("TESTING", "COMMENT, name: " + name);
+								break;
+							case XmlPullParser.DOCDECL:
+								Log.e("TESTING", "DOCDECL, name: " + name);
+								break;
+							default:
+								break;
+							}
 							eventType = parser.next();
 						}
 						writer.close();
@@ -309,6 +457,163 @@ public class ModuleTest {
 		});
 	}
 	
+	private Hashtable setParams(String name, XmlPullParser parser) {
+
+		Log.e("TESTING", "setParams start name: " + name);
+		
+		Hashtable hash = new Hashtable();
+		
+		int eventType = 0;
+		Boolean done = false;
+		String tempName = null;
+		String vectorName = null;
+
+		try {
+			while (eventType != XmlPullParser.END_DOCUMENT && !done) {
+				tempName = parser.getName();
+				
+				switch (eventType) {
+				case XmlPullParser.START_DOCUMENT:
+					Log.e("TESTING", "START_DOCUMENT, tempName: " + tempName);
+					break;
+				case XmlPullParser.END_DOCUMENT:
+					Log.e("TESTING", "END_DOCUMENT, tempName: " + tempName);
+					break;
+				case XmlPullParser.START_TAG:
+					if (tempName.equalsIgnoreCase("Vector")) {
+						Log.e("TESTING", "In Vector");
+						Vector<Object> vector = new Vector<Object>();
+						
+						if (parser.getAttributeName(0) != null) vectorName = parser.getAttributeValue(0);
+
+						eventType = parser.next();
+						while (eventType != XmlPullParser.START_TAG) eventType = parser.next();
+
+						Boolean nestedWhileDone = false;
+						while (eventType != XmlPullParser.END_DOCUMENT && !nestedWhileDone) {
+							tempName = parser.getName();
+							Log.e("TESTING", "In Vector Loop, tempName: " + tempName);
+
+							switch (eventType) {
+							case XmlPullParser.START_DOCUMENT:
+								Log.e("TESTING", "In Vector Loop, START_DOCUMENT, name: " + name);
+								break;
+							case XmlPullParser.END_DOCUMENT:
+								Log.e("TESTING", "In Vector Loop, END_DOCUMENT, name: " + name);
+								break;
+							case XmlPullParser.START_TAG:
+								if (tempName.equalsIgnoreCase("Integer")) {
+									Log.e("TESTING", "In Nested Vector Integer");
+									if (parser.getAttributeName(0) != null) {
+										try {vector.add(Integer.parseInt(parser.getAttributeValue(0)));} 
+										catch (Exception e) {Log.e("parser", "Unable to parse Integer");}
+									}
+								} else if (tempName.equalsIgnoreCase("String")) {
+									Log.e("TESTING", "In Nested Vector String");
+									if (parser.getAttributeName(0) != null) {
+										vector.add(parser.getAttributeValue(0));
+									}
+								} else {
+									vector.add(setParams(tempName, parser));
+								}
+								break;
+							case XmlPullParser.END_TAG:
+								Log.e("TESTING", "In Vector Loop, END_TAG, name: " + name);
+								if (tempName.equalsIgnoreCase("Vector")) {
+									Log.e("TESTING", "In Vector Loop, nestedWhileDone == true, END_TAG, name: " + name);
+									nestedWhileDone = true;
+								}
+								break;
+							case XmlPullParser.TEXT:
+								//Log.e("TESTING", "TEXT, name: " + name);
+								break;
+							case XmlPullParser.CDSECT:
+								Log.e("TESTING", "In Vector Loop, CDSECT, name: " + name);
+								break;
+							case XmlPullParser.ENTITY_REF:
+								Log.e("TESTING", "In Vector Loop, ENTITY_REF, name: " + name);
+								break;
+							case XmlPullParser.IGNORABLE_WHITESPACE:
+								Log.e("TESTING", "In Vector Loop, IGNORABLE_WHITESPACE, name: " + name);
+								break;
+							case XmlPullParser.PROCESSING_INSTRUCTION:
+								Log.e("TESTING", "In Vector Loop, PROCESSING_INSTRUCTION, name: " + name);
+								break;
+							case XmlPullParser.COMMENT:
+								Log.e("TESTING", "In Vector Loop, COMMENT, name: " + name);
+								break;
+							case XmlPullParser.DOCDECL:
+								Log.e("TESTING", "In Vector Loop, DOCDECL, name: " + name);
+								break;
+							default:
+								break;
+							}
+							eventType = parser.next();
+						}
+						Log.e("TESTING", "out of Vector loop");
+						hash.put(vectorName, vector);
+					} else if (tempName.equalsIgnoreCase("Integer")) {
+						Log.e("TESTING", "In Integer");
+						if (parser.getAttributeName(0) != null) {
+							try {hash.put(parser.getAttributeName(0), Integer.parseInt(parser.getAttributeValue(0)));} 
+							catch (Exception e) {Log.e("parser", "Unable to parse Integer");}
+						}
+					} else if (tempName.equalsIgnoreCase("Boolean")) {
+						Log.e("TESTING", "In Boolean");
+						if (parser.getAttributeName(0) != null) {
+							if (parser.getAttributeValue(0).equalsIgnoreCase("true")) hash.put(parser.getAttributeName(0), true);
+							else if (parser.getAttributeValue(0).equalsIgnoreCase("false")) hash.put(parser.getAttributeName(0), false);
+						}
+					} else if (tempName.equalsIgnoreCase("String")) {
+						Log.e("TESTING", "In String");
+						if (parser.getAttributeName(0) != null) {
+							hash.put(parser.getAttributeName(0), parser.getAttributeValue(0));
+						}
+					} else {
+						Log.e("TESTING", "Returning in else statement");
+						//return setParams(tempName, parser);
+						hash.put(tempName, setParams(tempName, parser));
+					}
+					break;
+				case XmlPullParser.END_TAG:
+					if (tempName.equalsIgnoreCase(name)) {
+						done = true;
+					}
+					break;
+				case XmlPullParser.TEXT:
+					//Log.e("TESTING", "TEXT, tempName: " + tempName);
+					break;
+				case XmlPullParser.CDSECT:
+					Log.e("TESTING", "CDSECT, tempName: " + tempName);
+					break;
+				case XmlPullParser.ENTITY_REF:
+					Log.e("TESTING", "ENTITY_REF, tempName: " + tempName);
+					break;
+				case XmlPullParser.IGNORABLE_WHITESPACE:
+					Log.e("TESTING", "IGNORABLE_WHITESPACE, tempName: " + tempName);
+					break;
+				case XmlPullParser.PROCESSING_INSTRUCTION:
+					Log.e("TESTING", "PROCESSING_INSTRUCTION, tempName: " + tempName);
+					break;
+				case XmlPullParser.COMMENT:
+					Log.e("TESTING", "COMMENT, tempName: " + tempName);
+					break;
+				case XmlPullParser.DOCDECL:
+					Log.e("TESTING", "DOCDECL, tempName: " + tempName);
+					break;
+				default:
+					break;
+				}
+				eventType = parser.next();
+			}
+		} catch (Exception e) {
+			_msgAdapter.logMessage("Parser Failed!!", Log.ERROR, e);
+		}
+		
+		Log.e("TESTING", "Returning at end of setParams function");
+		return hash;
+	}
+	
 	private Boolean xmlTest() {
 		pass = false;
 		
@@ -319,10 +624,10 @@ public class ModuleTest {
 				int numResponses = expecting.size();
 				if (numResponses > 0) ProxyService.waiting(true);
 				
-				for (TestRPC testrpc : testList.get(testList.size()-1).second) {
-					_msgAdapter.logMessage(testrpc.getRPC(), true);
+				for (RPCRequest rpc : testList.get(testList.size()-1).second) {
+					_msgAdapter.logMessage(rpc, true);
 					try {
-						ProxyService.getProxyInstance().sendRPCRequest(testrpc.getRPC());
+						ProxyService.getProxyInstance().sendRPCRequest(rpc);
 					} catch (SyncException e) {
 						_msgAdapter.logMessage("Error sending RPC", Log.ERROR, e, true);
 					}

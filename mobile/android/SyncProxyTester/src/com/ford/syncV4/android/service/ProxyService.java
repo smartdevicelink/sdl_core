@@ -26,6 +26,7 @@ import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
+import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.receivers.SyncReceiver;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
@@ -85,6 +86,7 @@ import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.transport.TCPTransportConfig;
+import com.ford.syncV4.util.Base64;
 
 public class ProxyService extends Service implements IProxyListenerALM {	
 	static final String TAG = "SyncProxyTester";
@@ -398,6 +400,10 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		return _mainInstance;
 	}
 
+	public void startModuleTest() {
+		_testerMain = new ModuleTest();
+	}
+	
 	public static void waiting(boolean waiting) {
 		waitingForResponse = waiting;
 	}
@@ -562,7 +568,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				_testerMain.restart();
 				break;
 			case 101: //Policies Test
-				PoliciesTest.runPoliciesTest(getApplicationContext());
+				PoliciesTest.runPoliciesTest();
 				break;
 			default:
 				break;
@@ -1154,6 +1160,69 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
 		else Log.i(TAG, "" + notification);
+		
+		EncodedSyncPDataHeader encodedSyncPDataHeader;
+		encodedSyncPDataHeader = EncodedSyncPDataHeader.parseEncodedSyncPDataHeader(
+				Base64.decode(notification.getData().get(0)));
+
+		Log.i("EncodedSyncPDataHeader", "Protocol Version: " + encodedSyncPDataHeader.getProtocolVersion());
+		Log.i("EncodedSyncPDataHeader", "Response Required: " + encodedSyncPDataHeader.getResponseRequired());
+		Log.i("EncodedSyncPDataHeader", "High Bandwidth: " + encodedSyncPDataHeader.getHighBandwidth());
+		Log.i("EncodedSyncPDataHeader", "Signed: " + encodedSyncPDataHeader.getSigned());
+		Log.i("EncodedSyncPDataHeader", "Encrypted: " + encodedSyncPDataHeader.getEncrypted());
+		Log.i("EncodedSyncPDataHeader", "Payload Size: " + encodedSyncPDataHeader.getPayloadSize());
+		Log.i("EncodedSyncPDataHeader", "Has ESN: " + encodedSyncPDataHeader.getHasESN());
+		Log.i("EncodedSyncPDataHeader", "Service Type: " + encodedSyncPDataHeader.getServiceType());
+		Log.i("EncodedSyncPDataHeader", "Command Type: " + encodedSyncPDataHeader.getCommandType());
+		Log.i("EncodedSyncPDataHeader", "CPU Destination: " + encodedSyncPDataHeader.getCPUDestination());
+		Log.i("EncodedSyncPDataHeader", "Encryption Key Index: " + encodedSyncPDataHeader.getEncryptionKeyIndex());
+		
+		byte[] tempESN = encodedSyncPDataHeader.getESN();
+		String stringESN = "";
+		for (int i = 0; i < 8; i++) stringESN += tempESN[i];
+		Log.i("EncodedSyncPDataHeader", "ESN: " + stringESN);
+		
+		try {Log.i("EncodedSyncPDataHeader", "Module Message ID: " + encodedSyncPDataHeader.getModuleMessageID());}
+		catch (Exception e) {}
+		try {Log.i("EncodedSyncPDataHeader", "Server Message ID: " + encodedSyncPDataHeader.getServerMessageID());}
+		catch (Exception e) {}
+		try {Log.i("EncodedSyncPDataHeader", "Message Status: " + encodedSyncPDataHeader.getMessageStatus());}
+		catch (Exception e) {}
+		
+		if (encodedSyncPDataHeader.getHighBandwidth()) {
+			byte[] tempIV = encodedSyncPDataHeader.getIV();
+			String stringIV = "";
+			for (int i = 0; i < 16; i++) stringIV += tempIV[i];
+			Log.i("EncodedSyncPDataHeader", "IV: " + stringIV);
+
+			byte[] tempPayload = encodedSyncPDataHeader.getPayload();
+			String stringPayload = "";
+			for (int i = 0; i < encodedSyncPDataHeader.getPayloadSize(); i++) stringPayload += tempPayload[i];
+			Log.i("EncodedSyncPDataHeader", "Payload: " + stringPayload);
+
+			byte[] tempSignatureTag = encodedSyncPDataHeader.getSignatureTag();
+			String stringSignatureTag = "";
+			for (int i = 0; i < 16; i++) stringSignatureTag += tempSignatureTag[i];
+			Log.i("EncodedSyncPDataHeader", "Signature Tag: " + stringSignatureTag);
+		} else {
+			byte[] tempIV = encodedSyncPDataHeader.getIV();
+			String stringIV = "";
+			for (int i = 0; i < 8; i++) stringIV += tempIV[i];
+			Log.i("EncodedSyncPDataHeader", "IV: " + stringIV);
+
+			byte[] tempPayload = encodedSyncPDataHeader.getPayload();
+			String stringPayload = "";
+			for (int i = 0; i < encodedSyncPDataHeader.getPayloadSize(); i++) stringPayload += tempPayload[i];
+			Log.i("EncodedSyncPDataHeader", "Payload: " + stringPayload);
+
+			byte[] tempSignatureTag = encodedSyncPDataHeader.getSignatureTag();
+			String stringSignatureTag = "";
+			for (int i = 0; i < 8; i++) stringSignatureTag += tempSignatureTag[i];
+			Log.i("EncodedSyncPDataHeader", "Signature Tag: " + stringSignatureTag);
+		}
+		
+		if (_msgAdapter != null) SyncProxyTester.setESN(tempESN);
+		if(PoliciesTesterActivity.getInstance() == null) PoliciesTesterActivity.setESN(tempESN);
 	}
 
 	@Override

@@ -288,7 +288,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			}
 			if (sessionType.eq(SessionType.RPC)) {			
 				startRPCProtocolSession(sessionID, correlationID);
-			} else {
+			} else if (_wiproVersion == 2) {
+				//If version 2 then don't need to specify a Session Type
+				startRPCProtocolSession(sessionID, correlationID);
+			}  else {
 				// Handle other protocol session types here
 			}
 		}
@@ -1220,14 +1223,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					if (_wiproVersion == 1) {
 						if (message.getVersion() == 2) setWiProVersion(message.getVersion());
 					}
-					final Hashtable<String, Object> mhash = JsonRPCMarshaller.unmarshall(message.getData());
+					
 					Hashtable hash = new Hashtable();
 					if (_wiproVersion == 2) {
 						Hashtable hashTemp = new Hashtable();
 						hashTemp.put(Names.correlationID, message.getCorrID());
-						hashTemp.put(Names.parameters, mhash.get(Names.parameters));
+						if (message.getJsonSize() > 0) {
+							final Hashtable<String, Object> mhash = JsonRPCMarshaller.unmarshall(message.getData());
+							//hashTemp.put(Names.parameters, mhash.get(Names.parameters));
+							hashTemp.put(Names.parameters, mhash);
+						}
 						FunctionID functionID = new FunctionID();
-						hashTemp.put(Names.function_name, functionID.getFunctionName(message.getFunctionID() + 4));
+						hashTemp.put(Names.function_name, functionID.getFunctionName(message.getFunctionID()));
 						if (message.getRPCType() == 0x00) {
 							hash.put(Names.request, hashTemp);
 						} else if (message.getRPCType() == 0x01) {
@@ -1236,7 +1243,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 							hash.put(Names.notification, hashTemp);
 						}
 						if (message.getBulkData() != null) hash.put(Names.bulkData, message.getBulkData());
-					} else hash = mhash;
+					} else {
+						final Hashtable<String, Object> mhash = JsonRPCMarshaller.unmarshall(message.getData());
+						hash = mhash;
+					}
 					handleRPCMessage(hash);							
 				} catch (final Exception excp) {
 					DebugTool.logError("Failure handling protocol message: " + excp.toString(), excp);
@@ -1370,7 +1380,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 		pm.setSessionID(_rpcSessionID);
 		pm.setMessageType(MessageType.RPC);
 		pm.setSessionType(SessionType.RPC);
-		pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()) - 4);
+		pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
 		pm.setCorrID(request.getCorrelationID());
 		if (request.getBulkData() != null) 
 			pm.setBulkData(request.getBulkData());

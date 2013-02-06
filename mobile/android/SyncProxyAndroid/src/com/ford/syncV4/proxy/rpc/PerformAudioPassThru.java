@@ -5,7 +5,7 @@ import java.util.Vector;
 
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.AudioCaptureQuality;
+import com.ford.syncV4.proxy.rpc.enums.BitsPerSample;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
 import com.ford.syncV4.proxy.rpc.enums.SamplingRate;
 import com.ford.syncV4.util.DebugTool;
@@ -95,21 +95,21 @@ public class PerformAudioPassThru extends RPCRequest {
     public int getMaxDuration() {
     	return (Integer) parameters.get(Names.maxDuration);
     }
-    public void setBitsPerSample(AudioCaptureQuality audioQuality) {
+    public void setBitsPerSample(BitsPerSample audioQuality) {
     	if (audioQuality != null) {
     		parameters.put(Names.bitsPerSample, audioQuality);
     	} else {
     		parameters.remove(Names.bitsPerSample);
     	}
     }
-    public AudioCaptureQuality getBitsPerSample() {
+    public BitsPerSample getBitsPerSample() {
     	Object obj = parameters.get(Names.bitsPerSample);
-    	if (obj instanceof AudioCaptureQuality) {
-    		return (AudioCaptureQuality) obj;
+    	if (obj instanceof BitsPerSample) {
+    		return (BitsPerSample) obj;
     	} else if (obj instanceof String) {
-    		AudioCaptureQuality theCode = null;
+    		BitsPerSample theCode = null;
             try {
-                theCode = AudioCaptureQuality.valueForString((String) obj);
+                theCode = BitsPerSample.valueForString((String) obj);
             } catch (Exception e) {
             	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.bitsPerSample, e);
             }
