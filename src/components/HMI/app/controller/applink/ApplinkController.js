@@ -71,6 +71,13 @@ MFT.ApplinkController = Em.Object.create({
 	},
 
     /**
+     * Handler for SoftButtons default action
+     */
+    defaultActionSoftButton: function(element){
+        element._parentView._parentView._parentView.deactivate();
+    },
+
+    /**
      * Method to close AlertMeneuverPopUp view
      */
     closeAlertMeneuverPopUp: function(){

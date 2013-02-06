@@ -19,7 +19,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 	childViews: [
 		'content'
 	],
-	
+
 	content: Em.ContainerView.extend({
 		classNames: ['inner_content'],
 		
@@ -30,14 +30,21 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 			'innerMenu',
 			'presets'
 		],
-		
+
+	    /**
+	     * Deactivate View
+	     */
+	    deactivate: function() {
+	        MFT.States.goToState('info.apps');
+	    },
+
 		deviceName: MFT.Label.extend({
 		
 			classNames: ['app_title'],
 			
 			contentBinding: 'MFT.ApplinkAppController.model.deviceName'
 		}),
-		
+
 		image: Em.View.extend({
 			
 			classNames: ['app_image'],

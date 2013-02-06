@@ -582,6 +582,7 @@
 #AlertPopUp .alertSoftButtons{
 	margin-left: 8px;
 	top: 120px;
+	width: 386px;
 }
 #AlertManeuverPopUp .one,
 #softButton0.one{

@@ -31,6 +31,14 @@ MFT.ScrollableMessage = MFT.ApplinkAbstractView.create({
         'listOfCommands'
     ],
 
+    /**
+     * Deactivate View
+     */
+    deactivate: function() {
+        clearTimeout(this.timer);
+        this.set('active',false);
+    },
+
     activate: function( appName, params ){
         if(appName){
             

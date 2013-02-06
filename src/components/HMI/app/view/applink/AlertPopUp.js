@@ -16,7 +16,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
     classNames:            	'AlertPopUp',
 
-    classNameBindings:      ['activate:AlertActive'],
+    classNameBindings:      ['active:AlertActive'],
 
     childViews: [
         'applicationName',
@@ -31,7 +31,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
     content2:           'Text',
 
-    activate:           false,
+    active:           false,
 
     timer:              null,
 
@@ -81,13 +81,29 @@ MFT.AlertPopUp = Em.ContainerView.create({
     }),
 
     /**
+     * Deactivate PopUp
+     */
+    deactivate: function() {
+        this.set('active',false);
+    },
+
+    /**
      * Container for softbuttons
      */
     softbuttons: Em.ContainerView.extend({
-        elementId:		'alertSoftButtons',
+        
+        childViews: [
+            'buttons'
+        ],
+   
+        buttons: Em.ContainerView.extend({
+            elementId:      'alertSoftButtons',
 
-        classNames:		'alertSoftButtons'
+            classNames:     'alertSoftButtons'
+        }),
     }),
+
+
 
     /**
      *
@@ -97,10 +113,10 @@ MFT.AlertPopUp = Em.ContainerView.create({
      */
     addSoftButtons: function( params ){
 
-        var count = this.get('softbuttons.childViews').length - 1;
+        var count = this.get('softbuttons.buttons.childViews').length - 1;
         for(var i = count; i>=0; i--){
-            this.get('softbuttons.childViews').removeObject(
-                this.get('softbuttons.childViews')[0]
+            this.get('softbuttons.buttons.childViews').removeObject(
+                this.get('softbuttons.buttons.childViews')[0]
             );
         }
 
@@ -119,7 +135,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
             }
 
             for(var i=0; i<params.length; i++){
-                this.get('softbuttons.childViews').pushObject(
+                this.get('softbuttons.buttons.childViews').pushObject(
                     MFT.Button.create({
                         actionDown:        function(){
                             this._super();
@@ -128,7 +144,11 @@ MFT.AlertPopUp = Em.ContainerView.create({
                         actionUp:        function(){
                             this._super();
                             MFT.ApplinkController.onSoftButtonActionUpCustom(this);
+                            if( this.systemAction == 'DEFAULT_ACTION' ){
+                                MFT.ApplinkController.defaultActionSoftButton(this);
+                            }
                         },
+                        systemAction:           params[i].systemAction,
                         softButtonID:           params[i].softButtonID,
                         icon:                   params[i].image,
                         text:                   params[i].text,
@@ -159,13 +179,13 @@ MFT.AlertPopUp = Em.ContainerView.create({
         this.set('content1',    message.AlertText1);
         this.set('content2',    message.AlertText2);
         this.set('content3',    message.AlertText3);
-        this.set('activate',    true);
+        this.set('active',    true);
         
         MFT.ApplinkController.onSystemContextChange();
         
         clearTimeout(this.timer);
         this.timer = setTimeout(function(){
-            self.set('activate', false);
+            self.set('active', false);
             MFT.ApplinkController.onSystemContextChange();
         }, message.duration);
     }
