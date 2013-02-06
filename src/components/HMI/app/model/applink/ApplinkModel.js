@@ -227,7 +227,6 @@ MFT.ApplinkModel = Em.Object.create({
         }else{
             MFT.ApplinkController.registerApplication(params, 1 );
         }
-        MFT.VRPopUp.AddActivateApp(params.appId, params.appName);
     },
 
     /**

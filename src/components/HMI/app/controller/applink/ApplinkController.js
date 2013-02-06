@@ -141,7 +141,6 @@ MFT.ApplinkController = Em.Object.create({
 	 */
 	registerApplication: function( params, applicationType ) {
 		if ( MFT.ApplinkModel.registeredApps[ params.appId ] ) {
-			//Em.Logger.error('Application ['+ applicationId +'] already registered!');
 			return;
 		}
 		
@@ -152,7 +151,8 @@ MFT.ApplinkController = Em.Object.create({
 		});
 
         MFT.ApplinkModel.get('applicationsList').pushObject( params.appId );
-		//Em.Logger.log('Application ['+ applicationId +'] registered!');
+
+        MFT.VRPopUp.AddActivateApp(params.appId, params.appName);
 	},
 
     /**
