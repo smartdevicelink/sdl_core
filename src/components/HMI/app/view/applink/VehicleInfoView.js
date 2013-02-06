@@ -155,5 +155,6 @@ MFT.VehicleInfo = Em.ContainerView.create({
      */
     toggleActivity: function(){
         this.set('active', !this.active);
+        MFT.ApplinkController.onSystemContextChange();
     }
 });
