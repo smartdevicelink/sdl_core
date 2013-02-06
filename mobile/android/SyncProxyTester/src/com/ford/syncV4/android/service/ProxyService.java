@@ -562,7 +562,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				_testerMain.restart();
 				break;
 			case 101: //Policies Test
-				PoliciesTest.runPoliciesTest();
+				PoliciesTest.runPoliciesTest(getApplicationContext());
 				break;
 			default:
 				break;

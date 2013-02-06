@@ -127,18 +127,36 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             type:   'genericbinary'
         },
         'VEHICLEDATA_SATESN':{
-            data:   165165650,
+            data:   "165165650",
             type:   'satRadioESN'
         },
         'VEHICLEDATA_RAINSENSOR':{
             data:   165165650,
             type:   'rainSensor'
-        }
-/*,
-        'VEHICLEDATA_GPS':{
-            data:   165165650,
-            type:   'gps'
         },
+        'VEHICLEDATA_GPS':{
+            data:{
+                'longitudeDegrees':     423293,
+                'latitudeDegrees':      -830464,
+                'utcYear':              2013,
+                'utcMonth':             2,
+                'utcDay':               14,
+                'utcHours':             13,
+                'utcMinutes':           16,
+                'utcSeconds':           54,
+                'compassDirection':     'SOUTHWEST',
+                'pdop':                 15,
+                'hdop':                 5,
+                'vdop':                 30,
+                'actual':               false,
+                'satellites':           8,
+                'dimension':            '2D',
+                'altitude':             7,
+                'heading':              173,
+                'speed':                2
+            },
+            type:   'gps'
+        }/*
         'VEHICLEDATA_TIREPRESSURE':{
             data:   {
                 'leftFront': {
@@ -147,8 +165,7 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
                 }
             },
             type:   'tirePressure'
-        }
-        */
+        }*/
     },
 
     /**

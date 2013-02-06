@@ -57,6 +57,13 @@ MFT.TurnByTurnView = MFT.ApplinkAbstractView.create({
         }
     },
 
+    /**
+     * Deactivate View
+     */
+    deactivate: function() {
+        this.set('active',false);
+    },
+
     totalDistanceLabel: MFT.Label.extend({
         classNames:         'totalDistanceLabel',
         contentBinding:     'parentView.totalDistance'

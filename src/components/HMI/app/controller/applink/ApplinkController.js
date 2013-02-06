@@ -41,7 +41,7 @@ MFT.ApplinkController = Em.Object.create({
             return 'ALERT';
         }
         
-        if ( MFT.TTSPopUp.active ) {
+        if ( MFT.TTSPopUp.active || MFT.TBTClientStateView.active || MFT.VehicleInfo.active ) {
             return 'HMI_OBSCURED';
         }
         
@@ -54,6 +54,8 @@ MFT.ApplinkController = Em.Object.create({
         'MFT.TTSPopUp.active',
         'MFT.VRPopUp.VRActive',
         'MFT.AlertPopUp.activate',
+        'MFT.TBTClientStateView.active',
+        'MFT.VehicleInfo.active',
         'MFT.States.info.nonMedia.active',
         'MFT.States.media.applink.active'
     ),
@@ -67,6 +69,13 @@ MFT.ApplinkController = Em.Object.create({
 		0:	MFT.ApplinkMediaModel,
 		1:	MFT.ApplinkNonMediaModel
 	},
+
+    /**
+     * Handler for SoftButtons default action
+     */
+    defaultActionSoftButton: function(element){
+        element._parentView._parentView._parentView.deactivate();
+    },
 
     /**
      * Method to close AlertMeneuverPopUp view
@@ -141,7 +150,6 @@ MFT.ApplinkController = Em.Object.create({
 	 */
 	registerApplication: function( params, applicationType ) {
 		if ( MFT.ApplinkModel.registeredApps[ params.appId ] ) {
-			//Em.Logger.error('Application ['+ applicationId +'] already registered!');
 			return;
 		}
 		
@@ -152,7 +160,8 @@ MFT.ApplinkController = Em.Object.create({
 		});
 
         MFT.ApplinkModel.get('applicationsList').pushObject( params.appId );
-		//Em.Logger.log('Application ['+ applicationId +'] registered!');
+
+        MFT.VRPopUp.AddActivateApp(params.appId, params.appName);
 	},
 
     /**

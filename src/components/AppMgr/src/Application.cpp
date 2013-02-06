@@ -389,4 +389,30 @@ namespace NsAppManager
         mHMIStatusLevel = hmiLevel;
     }
 
+    void Application::addPersistentFile(const std::string& file)
+    {
+        persistentFiles.push_back(file);
+    }
+
+    void Application::removePersistentFile(const std::string& file)
+    {
+        std::vector<std::string>::iterator i = std::find(persistentFiles.begin()
+            , persistentFiles.end(), file);
+        if (i != persistentFiles.end())
+        {
+            persistentFiles.erase(i);
+        }
+    }
+
+    bool Application::isPersistentFile(const std::string& file)
+    {
+        std::vector<std::string>::iterator i = std::find(persistentFiles.begin()
+            , persistentFiles.end(), file);
+        if (i != persistentFiles.end())
+        {
+            return true;
+        }
+        return false;
+    }
+
 }

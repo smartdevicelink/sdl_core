@@ -184,6 +184,12 @@ MFT.ApplinkAppModel = Em.Object.extend({
      */
     deleteSubMenu: function( menuId ){
         
+        // don't delete if current submenu active
+        if( this.get('currentSubMenuId') == menuId ){
+            return 'IN_USE';
+            //MFT.ApplinkAppController.onSubMenu(0);
+        }
+        
         // remove submenu
         this.get('commandsList').removeObjects(
             this.get('commandsList').filterProperty('menuId',menuId)
@@ -193,13 +199,8 @@ MFT.ApplinkAppModel = Em.Object.extend({
         this.get('commandsList').removeObjects(
             this.get('commandsList').filterProperty('parent',menuId)
         );
-        
-        // return to root commands list if necessary
-        if( this.get('currentSubMenuId') == menuId ){
-            MFT.ApplinkAppController.onSubMenu(0);
-        }
 
-        return "SUCCESS";
+        return 'SUCCESS';
     },
 
 	/**

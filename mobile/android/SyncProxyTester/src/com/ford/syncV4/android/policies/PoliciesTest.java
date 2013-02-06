@@ -5,18 +5,20 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Scanner;
 
-import com.ford.syncV4.proxy.SyncProxyALM;
+import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
+
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.service.ProxyService;
-
-import android.util.Log;
+import com.ford.syncV4.proxy.SyncProxyALM;
 
 public class PoliciesTest {
 	private static logAdapter _msgAdapter;
 	private static SyncProxyALM _syncProxy;
 	
-	public static void runPoliciesTest() {
+	public static void runPoliciesTest(Context context) {
 		_msgAdapter = SyncProxyTester.getMessageAdapter();
 		_syncProxy = ProxyService.getProxyInstance();
 		
@@ -34,7 +36,9 @@ public class PoliciesTest {
 			Log.e("TestApp", jsonData);
 			scanner.close();
 		} catch (Exception e) {
-			_msgAdapter.logMessage("Error reading policiesRequest.txt", Log.ERROR, e, true);
+			String s = "Error reading policiesRequest.txt";
+			_msgAdapter.logMessage(s, Log.ERROR, e, false);
+			Toast.makeText(context, s, Toast.LENGTH_LONG).show();
 		}
 		
 		encodedSyncPDataReceived = _syncProxy.sendEncodedSyncPDataToUrl(url, jsonData);
@@ -53,9 +57,15 @@ public class PoliciesTest {
 				writer.write(encodedSyncPDataReceived);
 				writer.close();
 			} catch (Exception e) {
-				_msgAdapter.logMessage("Error writing to policiesResponse.txt", Log.ERROR, e, true);
+				String s = "Error writing to policiesResponse.txt";
+				_msgAdapter.logMessage(s, Log.ERROR, e, false);
+				Toast.makeText(context, s, Toast.LENGTH_LONG).show();
 			}
-		} else _msgAdapter.logMessage("Error communicating with server", Log.ERROR, true);
+		} else {
+			String s = "Error communicating with server";
+			_msgAdapter.logMessage(s, Log.ERROR, false);
+			Toast.makeText(context, s, Toast.LENGTH_LONG).show();
+		}
 	}
 	
 	/*

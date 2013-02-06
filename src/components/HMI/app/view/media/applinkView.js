@@ -26,6 +26,13 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	controlls: MFT.ApplinkMediaControllsV1,
 
+    /**
+     * Deactivate View
+     */
+    deactivate: function() {
+        MFT.States.goToState('info.apps');
+    },
+
 	/**
 	 * Function to choose appropriate view
 	 * to current version of protocol

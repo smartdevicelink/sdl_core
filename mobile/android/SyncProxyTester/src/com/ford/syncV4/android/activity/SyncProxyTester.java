@@ -703,7 +703,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			}
 			break;
 		case POLICIES_TEST:
-			PoliciesTest.runPoliciesTest();
+			PoliciesTest.runPoliciesTest(getApplicationContext());
 			break;
 		case MNU_EXIT:
 			exitApp();

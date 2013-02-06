@@ -28,6 +28,7 @@ MFT.MenuList = Em.ContainerView.extend({
 						text:			buttons[i].text,
 						icon:			buttons[i].image,
 						softButtonId:	buttons[i].softButtonID,
+                        systemAction:   buttons[i].systemAction,
 						actionDown:       function(){
 		                    this._super();
 		                    FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", this.softButtonId);
@@ -44,6 +45,9 @@ MFT.MenuList = Em.ContainerView.extend({
 		                        FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "SHORT", this.softButtonId);
 		                    }
 		                    this.time = 0;
+		                    if( this.systemAction == 'DEFAULT_ACTION' ){
+                                MFT.ApplinkController.defaultActionSoftButton(this);
+                            }
 		                }
 					})
 				);

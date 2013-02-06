@@ -1924,6 +1924,10 @@ namespace NsAppManager
                             {
                                 LOG4CPLUS_INFO_EXT(mLogger, "Saving to file " << fullFilePath);
                                 flag = WorkWithOS::createFileAndWrite(fullFilePath, *fileData);
+                                if (persistentFile)
+                                {
+                                    app->addPersistentFile(syncFileName);
+                                }
                             }
                         }
 
@@ -1991,6 +1995,7 @@ namespace NsAppManager
                             response->set_success(true);
                             response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                             response->set_spaceAvailable(freeSpace);
+                            app->removePersistentFile(syncFileName);
                         }
                         else
                         {
@@ -2962,7 +2967,7 @@ namespace NsAppManager
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
                         NsAppLinkRPCV2::PerformAudioPassThru_response* response = new NsAppLinkRPCV2::PerformAudioPassThru_response();
-                        response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
@@ -2973,7 +2978,7 @@ namespace NsAppManager
                     {
                         LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::PerformAudioPassThru_response* response = new NsAppLinkRPCV2::PerformAudioPassThru_response;
-                        response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
@@ -3817,7 +3822,7 @@ namespace NsAppManager
                     }
                     core->sendButtonPress(app, object);
                 }
-                
+
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
@@ -4667,8 +4672,8 @@ namespace NsAppManager
 
                 int appId = app->getAppID();
 
-                if ( (NsAppLinkRPCV2::SystemContext::SYSCTXT_HMI_OBSCURED ||
-                     NsAppLinkRPCV2::SystemContext::SYSCTXT_ALERT) &&
+                if ( (NsAppLinkRPCV2::SystemContext::SYSCTXT_HMI_OBSCURED == object->get_systemContext().get() ||
+                     NsAppLinkRPCV2::SystemContext::SYSCTXT_ALERT == object->get_systemContext().get()) &&
                      1 == app->getProtocolVersion() )
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "This system context is not supported for first generation of RPC.");
@@ -4811,12 +4816,6 @@ namespace NsAppManager
                     core->mUiLanguageV2 = languageChange->get_hmiDisplayLanguage();
                     core->mUiLanguageV1.set(static_cast<NsAppLinkRPC::Language::LanguageInternal>(languageChange->get_hmiDisplayLanguage().get()));
 
-                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
-                        new NsAppLinkRPCV2::OnLanguageChange;
-                    languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                    languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
-                    languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
-                    languageChangeToApp->set_language(core->mVrLanguageV2);
                     const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
                     for( AppMgrRegistry::ItemsMap::const_iterator it = allRegisteredApplications.begin();
                             it != allRegisteredApplications.end();
@@ -4824,11 +4823,18 @@ namespace NsAppManager
                     {
                         if ( 0 != it->second && 0 != it->second->getApplication() )
                         {
-                            if ( NsAppLinkRPCV2::HMILevel::HMI_NONE !=
-                                        it->second->getApplication()->getApplicationHMIStatusLevel()
-                                    &&
+                            if (NsAppLinkRPCV2::HMILevel::HMI_NONE
+                                != it->second->getApplication()->getApplicationHMIStatusLevel() &&
                                     1 != it->second->getApplication()->getProtocolVersion() )
-                            MobileHandler::getInstance().sendRPCMessage(languageChangeToApp, it->first);
+                            {
+                                NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
+                                    new NsAppLinkRPCV2::OnLanguageChange;
+                                languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                                languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
+                                languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
+                                languageChangeToApp->set_language(core->mVrLanguageV2);
+                                MobileHandler::getInstance().sendRPCMessage(languageChangeToApp, it->first);
+                            }
                         }
                     }
                 }
@@ -5174,19 +5180,21 @@ namespace NsAppManager
                     //TODO(pvysh): clear mess around versions up.
                     core->mVrLanguageV2 = languageChange->get_language();
                     core->mVrLanguageV1.set(static_cast<NsAppLinkRPC::Language::LanguageInternal>(languageChange->get_language().get()));
-                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
-                        new NsAppLinkRPCV2::OnLanguageChange;
-                    languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                    languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
-                    languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
-                    languageChangeToApp->set_language(core->mVrLanguageV2);
+
                     const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
                     for( AppMgrRegistry::ItemsMap::const_iterator it = allRegisteredApplications.begin();
                             it != allRegisteredApplications.end();
                             ++it )
                     {
-                        if ( 0 != it->second && 0 != it->second->getApplication() )
+                        if ( 0 != it->second && 0 != it->second->getApplication() &&
+                                1 != it->second->getApplication()->getProtocolVersion() )
                         {
+                            NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
+                                new NsAppLinkRPCV2::OnLanguageChange;
+                            languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                            languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
+                            languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
+                            languageChangeToApp->set_language(core->mVrLanguageV2);
                             MobileHandler::getInstance().sendRPCMessage(languageChangeToApp, it->first);
                         }
                     }
@@ -5314,24 +5322,24 @@ namespace NsAppManager
                     static_cast<NsRPC2Communication::TTS::OnLanguageChange*>(msg);
                 if ( languageChange->get_language().get() != core->mTtsLanguageV2.get() )
                 {
-                    //TODO: clear mess around versions up.
+                    //TODO (pvysh): clear mess around versions up.
                     core->mTtsLanguageV2 = languageChange->get_language();
                     core->mTtsLanguageV1.set(static_cast<NsAppLinkRPC::Language::LanguageInternal>(languageChange->get_language().get()));
-                    // = NsAppLinkRPCV2::Language(
-                            //static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_language().get()));
-                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
-                        new NsAppLinkRPCV2::OnLanguageChange;
-                    languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                    languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
-                    languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
-                    languageChangeToApp->set_language(core->mTtsLanguageV2);
+
                     const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
                     for( AppMgrRegistry::ItemsMap::const_iterator it = allRegisteredApplications.begin();
                             it != allRegisteredApplications.end();
                             ++it )
                     {
-                        if ( 0 != it->second && 0 != it->second->getApplication() )
+                        if ( 0 != it->second && 0 != it->second->getApplication() &&
+                                1 != it->second->getApplication()->getProtocolVersion() )
                         {
+                            NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
+                                new NsAppLinkRPCV2::OnLanguageChange;
+                            languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                            languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
+                            languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
+                            languageChangeToApp->set_language(core->mTtsLanguageV2);
                             MobileHandler::getInstance().sendRPCMessage(languageChangeToApp, it->first);
                         }
                     }
@@ -6150,6 +6158,34 @@ namespace NsAppManager
             return;
         }
 
+        // Delete app files
+        std::string fullPath = WorkWithOS::getFullPath(app->getName());
+        std::string fullFilePath;
+        LOG4CPLUS_INFO_EXT(mLogger, "Full path to app folder: " << fullPath);
+        if (WorkWithOS::checkIfDirectoryExists(fullPath))
+        {
+            std::vector<std::string> files = WorkWithOS::listFilesInDirectory(fullPath);
+            std::vector<std::string>::const_iterator i = files.begin();
+            for (i; i != files.end(); ++i)
+            {
+                if (app->isPersistentFile(*i))
+                {
+                    continue;
+                }
+
+                fullFilePath = fullPath;
+                fullFilePath += "/";
+                fullFilePath += *i;
+                LOG4CPLUS_INFO_EXT(mLogger, "File to be removed: " << fullFilePath);
+                if (WorkWithOS::checkIfFileExists(fullFilePath))
+                {
+                    WorkWithOS::deleteFile(fullFilePath);
+                }
+            }
+
+            WorkWithOS::deleteFile(fullPath);
+        }
+
         const std::string& appName = app->getName();
         LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName
             << " application id " << appId
@@ -6379,13 +6415,13 @@ namespace NsAppManager
     {
         if(!item)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+            LOG4CPLUS_WARN_EXT(mLogger, "No registry item found!");
             return 0;
         }
         Application* app = item->getApplication();
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+            LOG4CPLUS_WARN_EXT(mLogger, "No application associated with this registry item!");
             return 0;
         }
         return app;
