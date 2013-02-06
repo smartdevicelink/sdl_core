@@ -111,19 +111,24 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 	},
 
 	setDuration: function() {
+        
         var number,
-            str;
+            str = '';
 		if(this.countUp){
 			number = this.duration + this.currTime;
-			//this.appInfo.set('mediaClock', Math.ceil((this.duration + this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}else{
 			number = this.duration - this.currTime;
-			//this.appInfo.set('mediaClock', Math.ceil((this.duration - this.currTime+1)/60)-1 + ":" + (number < 10 ? '0' : '') + number );
 		}
-        str = (Math.ceil(number/3600) -1) < 10 ? '0' : '';
-        str += (Math.ceil(number/3600) -1) + ':';
-        str += Math.ceil( (number+1)/60%60)-1 + ":" + ((number % 60) < 10 ? '0' : '') + (number % 60);
+        str =  (parseInt(number/3600) < 10 ? '0' : '') + parseInt(number/3600) + ':'; //hours
+        str += (parseInt(number/60)%60 < 10 ? '0' : '') + parseInt(number/60)%60 +  ":"; //minutes
+        str += ((number % 60) < 10 ? '0' : '') + (number % 60); // seconds
 		this.appInfo.set('mediaClock', str );
+
+        if( !this.get('countUp') && this.duration == this.currTime ){
+            clearInterval(this.timer);
+            return;
+        }
+
 	}.observes('this.currTime'),
 
 	changeDuration: function() {

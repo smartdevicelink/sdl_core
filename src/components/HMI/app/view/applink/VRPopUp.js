@@ -59,7 +59,7 @@ MFT.VRPopUp = Em.ContainerView.create({
                 target:                 'MFT.ApplinkController',
                 text:                   appName,
                 appName:                appName,
-                activeAppId:            appId,
+                appId:                  appId,
                 classNames:             'list-item',
                 templateName:           'text'
             })
