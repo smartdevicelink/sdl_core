@@ -6215,6 +6215,29 @@ namespace NsAppManager
         LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName
             << " application id " << appId
             << "!");
+
+        // Delete app files
+        std::string fullPath = WorkWithOS::getFullPath(app->getName());
+        std::string fullFilePath;
+        LOG4CPLUS_INFO_EXT(mLogger, "Full path to app folder: " << fullPath);
+        if (WorkWithOS::checkIfDirectoryExists(fullPath))
+        {
+            std::vector<std::string> files = WorkWithOS::listFilesInDirectory(fullPath);
+            std::vector<std::string>::const_iterator i = files.begin();
+            for (i; i != files.end(); ++i)
+            {
+                fullFilePath = fullPath;
+                fullFilePath += "/";
+                fullFilePath += *i;
+                LOG4CPLUS_INFO_EXT(mLogger, "File to be removed: " << fullFilePath);
+                if (WorkWithOS::checkIfFileExists(fullFilePath))
+                {
+                    WorkWithOS::deleteFile(fullFilePath);
+                }
+            }
+
+            WorkWithOS::deleteFile(fullPath);
+        }
     }
 
     void AppMgrCore::sendHMINotificationToMobile( Application * application )
