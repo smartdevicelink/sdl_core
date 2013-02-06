@@ -1,3 +1,6 @@
+[CW7]
+* Policies test: show errors as toasts, instead of adding to the console.
+
 [CW6]
 * ButtonSubscriptions dialog: exclude ButtonName.CUSTOM_NAME value.
 * AlertManeuver message: always send soft buttons even if an empty array.
