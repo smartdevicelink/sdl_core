@@ -3024,7 +3024,7 @@ namespace NsAppManager
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
                         NsAppLinkRPCV2::PerformAudioPassThru_response* response = new NsAppLinkRPCV2::PerformAudioPassThru_response();
-                        response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
@@ -3035,7 +3035,7 @@ namespace NsAppManager
                     {
                         LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::PerformAudioPassThru_response* response = new NsAppLinkRPCV2::PerformAudioPassThru_response;
-                        response->setMethodId(NsAppLinkRPCV2::FunctionID::DialNumberID);
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::REJECTED);
@@ -3879,7 +3879,7 @@ namespace NsAppManager
                     }
                     core->sendButtonPress(app, object);
                 }
-                
+
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE:
@@ -6432,13 +6432,13 @@ namespace NsAppManager
     {
         if(!item)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "No registry item found!");
+            LOG4CPLUS_WARN_EXT(mLogger, "No registry item found!");
             return 0;
         }
         Application* app = item->getApplication();
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+            LOG4CPLUS_WARN_EXT(mLogger, "No application associated with this registry item!");
             return 0;
         }
         return app;
