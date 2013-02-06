@@ -1955,6 +1955,10 @@ namespace NsAppManager
                             {
                                 LOG4CPLUS_INFO_EXT(mLogger, "Saving to file " << fullFilePath);
                                 flag = WorkWithOS::createFileAndWrite(fullFilePath, *fileData);
+                                if (persistentFile)
+                                {
+                                    app->addPersistentFile(syncFileName);
+                                }
                             }
                         }
 
@@ -2022,6 +2026,7 @@ namespace NsAppManager
                             response->set_success(true);
                             response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                             response->set_spaceAvailable(freeSpace);
+                            app->removePersistentFile(syncFileName);
                         }
                         else
                         {
@@ -6206,19 +6211,6 @@ namespace NsAppManager
             return;
         }
 
-        const std::string& appName = app->getName();
-        LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName
-            << " application id " << appId
-            << "!");
-
-        mButtonsMapping.removeItem(item);
-        mMessageMapping.removeItem(item);
-        AppMgrRegistry::getInstance().unregisterApplication(item);
-
-        LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName
-            << " application id " << appId
-            << "!");
-
         // Delete app files
         std::string fullPath = WorkWithOS::getFullPath(app->getName());
         std::string fullFilePath;
@@ -6229,6 +6221,11 @@ namespace NsAppManager
             std::vector<std::string>::const_iterator i = files.begin();
             for (i; i != files.end(); ++i)
             {
+                if (app->isPersistentFile(*i))
+                {
+                    continue;
+                }
+
                 fullFilePath = fullPath;
                 fullFilePath += "/";
                 fullFilePath += *i;
@@ -6241,6 +6238,19 @@ namespace NsAppManager
 
             WorkWithOS::deleteFile(fullPath);
         }
+
+        const std::string& appName = app->getName();
+        LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << appName
+            << " application id " << appId
+            << "!");
+
+        mButtonsMapping.removeItem(item);
+        mMessageMapping.removeItem(item);
+        AppMgrRegistry::getInstance().unregisterApplication(item);
+
+        LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName
+            << " application id " << appId
+            << "!");
     }
 
     void AppMgrCore::sendHMINotificationToMobile( Application * application )

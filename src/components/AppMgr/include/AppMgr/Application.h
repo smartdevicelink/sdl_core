@@ -290,6 +290,10 @@ namespace NsAppManager
          */
         virtual const NsAppLinkRPCV2::HMILevel::HMILevelInternal& getApplicationHMIStatusLevel( ) const;
 
+        void addPersistentFile(const std::string& file);
+        void removePersistentFile(const std::string& file);
+        bool isPersistentFile(const std::string& file);
+
 
     protected:
         static log4cplus::Logger mLogger;
@@ -305,6 +309,7 @@ namespace NsAppManager
         SessionKeys mSessionKeys;
         std::string mNgnMediaScreenAppName;
         std::vector<std::string> mVrSynonyms;
+        std::vector<std::string> persistentFiles;
         bool m_bIsMediaApplication;
         MenuMapping mMenuMapping;
         CommandMapping   mCommandMapping;
