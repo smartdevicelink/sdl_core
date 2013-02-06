@@ -4720,8 +4720,8 @@ namespace NsAppManager
 
                 int appId = app->getAppID();
 
-                if ( (NsAppLinkRPCV2::SystemContext::SYSCTXT_HMI_OBSCURED ||
-                     NsAppLinkRPCV2::SystemContext::SYSCTXT_ALERT) &&
+                if ( (NsAppLinkRPCV2::SystemContext::SYSCTXT_HMI_OBSCURED == object->get_systemContext().get() ||
+                     NsAppLinkRPCV2::SystemContext::SYSCTXT_ALERT == object->get_systemContext().get()) &&
                      1 == app->getProtocolVersion() )
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "This system context is not supported for first generation of RPC.");
@@ -4864,12 +4864,6 @@ namespace NsAppManager
                     core->mUiLanguageV2 = languageChange->get_hmiDisplayLanguage();
                     core->mUiLanguageV1.set(static_cast<NsAppLinkRPC::Language::LanguageInternal>(languageChange->get_hmiDisplayLanguage().get()));
 
-                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
-                        new NsAppLinkRPCV2::OnLanguageChange;
-                    languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                    languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
-                    languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
-                    languageChangeToApp->set_language(core->mVrLanguageV2);
                     const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
                     for( AppMgrRegistry::ItemsMap::const_iterator it = allRegisteredApplications.begin();
                             it != allRegisteredApplications.end();
@@ -4877,11 +4871,18 @@ namespace NsAppManager
                     {
                         if ( 0 != it->second && 0 != it->second->getApplication() )
                         {
-                            if ( NsAppLinkRPCV2::HMILevel::HMI_NONE !=
-                                        it->second->getApplication()->getApplicationHMIStatusLevel()
-                                    &&
+                            if (NsAppLinkRPCV2::HMILevel::HMI_NONE
+                                != it->second->getApplication()->getApplicationHMIStatusLevel() &&
                                     1 != it->second->getApplication()->getProtocolVersion() )
-                            MobileHandler::getInstance().sendRPCMessage(languageChangeToApp, it->first);
+                            {
+                                NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
+                                    new NsAppLinkRPCV2::OnLanguageChange;
+                                languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                                languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
+                                languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
+                                languageChangeToApp->set_language(core->mVrLanguageV2);
+                                MobileHandler::getInstance().sendRPCMessage(languageChangeToApp, it->first);
+                            }
                         }
                     }
                 }
@@ -5227,19 +5228,21 @@ namespace NsAppManager
                     //TODO(pvysh): clear mess around versions up.
                     core->mVrLanguageV2 = languageChange->get_language();
                     core->mVrLanguageV1.set(static_cast<NsAppLinkRPC::Language::LanguageInternal>(languageChange->get_language().get()));
-                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
-                        new NsAppLinkRPCV2::OnLanguageChange;
-                    languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                    languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
-                    languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
-                    languageChangeToApp->set_language(core->mVrLanguageV2);
+
                     const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
                     for( AppMgrRegistry::ItemsMap::const_iterator it = allRegisteredApplications.begin();
                             it != allRegisteredApplications.end();
                             ++it )
                     {
-                        if ( 0 != it->second && 0 != it->second->getApplication() )
+                        if ( 0 != it->second && 0 != it->second->getApplication() &&
+                                1 != it->second->getApplication()->getProtocolVersion() )
                         {
+                            NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
+                                new NsAppLinkRPCV2::OnLanguageChange;
+                            languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                            languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
+                            languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
+                            languageChangeToApp->set_language(core->mVrLanguageV2);
                             MobileHandler::getInstance().sendRPCMessage(languageChangeToApp, it->first);
                         }
                     }
@@ -5367,24 +5370,24 @@ namespace NsAppManager
                     static_cast<NsRPC2Communication::TTS::OnLanguageChange*>(msg);
                 if ( languageChange->get_language().get() != core->mTtsLanguageV2.get() )
                 {
-                    //TODO: clear mess around versions up.
+                    //TODO (pvysh): clear mess around versions up.
                     core->mTtsLanguageV2 = languageChange->get_language();
                     core->mTtsLanguageV1.set(static_cast<NsAppLinkRPC::Language::LanguageInternal>(languageChange->get_language().get()));
-                    // = NsAppLinkRPCV2::Language(
-                            //static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(languageChange->get_language().get()));
-                    NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
-                        new NsAppLinkRPCV2::OnLanguageChange;
-                    languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                    languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
-                    languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
-                    languageChangeToApp->set_language(core->mTtsLanguageV2);
+
                     const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
                     for( AppMgrRegistry::ItemsMap::const_iterator it = allRegisteredApplications.begin();
                             it != allRegisteredApplications.end();
                             ++it )
                     {
-                        if ( 0 != it->second && 0 != it->second->getApplication() )
+                        if ( 0 != it->second && 0 != it->second->getApplication() &&
+                                1 != it->second->getApplication()->getProtocolVersion() )
                         {
+                            NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
+                                new NsAppLinkRPCV2::OnLanguageChange;
+                            languageChangeToApp->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                            languageChangeToApp->setMethodId(NsAppLinkRPCV2::FunctionID::OnLanguageChangeID);
+                            languageChangeToApp->set_hmiDisplayLanguage(core->mUiLanguageV2);
+                            languageChangeToApp->set_language(core->mTtsLanguageV2);
                             MobileHandler::getInstance().sendRPCMessage(languageChangeToApp, it->first);
                         }
                     }
