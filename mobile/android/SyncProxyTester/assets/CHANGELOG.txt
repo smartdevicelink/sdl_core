@@ -1,4 +1,5 @@
 [CW7]
+* Don't remove submenu from SubMenu list until a successful DeleteSubMenuResponse has come.
 * Ford Commit:
   1) Update module test functionality and example xml script. Place xml script on root of sdcard to deploy.
   2) AudioCaptureQuality has been renamed to BitsPerSample (effects PerformAudioPassThru)

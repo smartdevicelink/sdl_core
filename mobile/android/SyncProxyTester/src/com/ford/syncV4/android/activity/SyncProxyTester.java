@@ -175,6 +175,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * CreateInteractionChoiceSetResponse comes.
 	 */
 	private int _latestChoiceSetId = CHOICESETID_UNSET;
+	/**
+	 * Latest SyncSubMenu, required to delete the submenu from the adapter
+	 * when a successful DeleteSubMenuResponse comes.
+	 */
+	private SyncSubMenu _latestDeleteSubmenu = null;
 	
 	/** List of function names supported in protocol v1. */
 	private Vector<String> v1Functions = null;
@@ -1402,7 +1407,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 										}
 	
-										_submenuAdapter.remove(menu);
+										if (_latestDeleteSubmenu != null) {
+											Log.w(logTag, "Latest deleteSubmenu should be null, but equals to " + _latestDeleteSubmenu);
+										}
+										_latestDeleteSubmenu = menu;
 									} else {
 										Toast.makeText(getApplicationContext(),
 												"Sorry, can't delete top-level menu",
@@ -2811,7 +2819,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	
 	/**
 	 * Called when a CreateChoiceSetResponse comes. If successful, add it to the
-	 * adapter. In any case, remove the key from the map.
+	 * adapter.
 	 */
 	public void onCreateChoiceSetResponse(boolean success) {
 		if (_latestChoiceSetId != CHOICESETID_UNSET) {
@@ -2821,6 +2829,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			_latestChoiceSetId = CHOICESETID_UNSET;
 		} else {
 			Log.w(logTag, "Latest choiceSetId is unset");
+		}
+	}
+	
+	/**
+	 * Called when a DeleteSubMenuResponse comes. If successful, add it to the
+	 * adapter.
+	 */
+	public void onDeleteSubMenuResponse(boolean success) {
+		if (_latestDeleteSubmenu != null) {
+			if (success) {
+				_submenuAdapter.remove(_latestDeleteSubmenu);
+			}
+			_latestDeleteSubmenu = null;
+		} else {
+			Log.w(logTag, "Latest deleteSubMenu is unset");
 		}
 	}
 
