@@ -647,6 +647,15 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
 		
+		final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+		final boolean success = response.getSuccess();
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.onAddSubMenuResponse(success);
+			}
+		});
+		
 		if (waitingForResponse && _testerMain.getThreadContext() != null) {
 			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
 			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};

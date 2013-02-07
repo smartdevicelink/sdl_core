@@ -180,6 +180,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * when a successful DeleteSubMenuResponse comes.
 	 */
 	private SyncSubMenu _latestDeleteSubmenu = null;
+	/**
+	 * Latest SyncSubMenu, required to add the submenu from the adapter when a
+	 * successful AddSubMenuResponse comes.
+	 */
+	private SyncSubMenu _latestAddSubmenu = null;
 	
 	/** List of function names supported in protocol v1. */
 	private Vector<String> v1Functions = null;
@@ -1369,7 +1374,6 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									SyncSubMenu sm = new SyncSubMenu();
 									sm.setName(subMenu.getText().toString());
 									sm.setSubMenuId(submenucmdID++);
-									addSubMenuToList(sm);
 									msg.setMenuID(sm.getSubMenuId());
 									msg.setMenuName(sm.getName());
 									msg.setPosition(null);
@@ -1379,6 +1383,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
+									
+									if (_latestAddSubmenu != null) {
+										Log.w(logTag, "Latest addSubmenu should be null, but equals to " + _latestAddSubmenu);
+									}
+									_latestAddSubmenu = sm;
 								}
 							});
 							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -2833,8 +2842,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * Called when a DeleteSubMenuResponse comes. If successful, add it to the
-	 * adapter.
+	 * Called when a DeleteSubMenuResponse comes. If successful, remove it from
+	 * the adapter.
 	 */
 	public void onDeleteSubMenuResponse(boolean success) {
 		if (_latestDeleteSubmenu != null) {
@@ -2844,6 +2853,21 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			_latestDeleteSubmenu = null;
 		} else {
 			Log.w(logTag, "Latest deleteSubMenu is unset");
+		}
+	}
+	
+	/**
+	 * Called when a AddSubMenuResponse comes. If successful, add it to the
+	 * adapter.
+	 */
+	public void onAddSubMenuResponse(boolean success) {
+		if (_latestAddSubmenu != null) {
+			if (success) {
+				addSubMenuToList(_latestAddSubmenu);
+			}
+			_latestAddSubmenu = null;
+		} else {
+			Log.w(logTag, "Latest addSubMenu is unset");
 		}
 	}
 
