@@ -1,4 +1,5 @@
 [CW7]
+- SyncProxyAndroid SDK: remove MP3 and WAV values from the AudioType enum (affects AudioPassThru).
 * Don't add/remove submenu from SubMenu list until a successful AddSubMenuResponse/DeleteSubMenuResponse has come.
 * Ford Commit:
   1) Update module test functionality and example xml script. Place xml script on root of sdcard to deploy.
