@@ -1,4 +1,9 @@
 [CW7]
+* Ford Commit:
+  1) Update module test functionality and example xml script. Place xml script on root of sdcard to deploy.
+  2) AudioCaptureQuality has been renamed to BitsPerSample (effects PerformAudioPassThru)
+  3) AudioType enum - WAV and MP3 have been removed from (effects PerformAudioPassThru)
+  4) Incorrect AppLink Protocol 2 JSON message. Current code includes a "parameters" key that shouldn't be there. Ex. current: {"parameters":{…}} should be {…} This effects all AppLink Protocol 2 messages and is particularly harmful to OnAudioPassThru notification because it will ONLY have binary data and no JSON anymore.
 * Policies test: show errors as toasts, instead of adding to the console.
 
 [CW6]
