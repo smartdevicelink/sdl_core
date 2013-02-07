@@ -81,18 +81,21 @@ namespace NsAppLinkRPCV2
 ///  Korean
       KO_KR=19
     };
-  
+
     Language() : mInternal(INVALID_ENUM)				{}
     Language(LanguageInternal e) : mInternal(e)		{}
-  
+    Language& operator=(const Language& lng) { set(lng.get()); return *this; }
+
+    bool operator== (const Language& lng) { return mInternal == lng.get(); }
+
     LanguageInternal get(void) const	{ return mInternal; }
     void set(LanguageInternal e)		{ mInternal=e; }
-  
+
   private:
     LanguageInternal mInternal;
     friend class LanguageMarshaller;
   };
-  
+
 }
 
 #endif

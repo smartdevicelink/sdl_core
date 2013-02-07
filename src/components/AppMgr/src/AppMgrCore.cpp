@@ -3367,6 +3367,53 @@ namespace NsAppManager
 
                     NsAppLinkRPCV2::ChangeRegistration_request* request
                         = static_cast<NsAppLinkRPCV2::ChangeRegistration_request*>(mobileMsg);
+
+                    // -------------------------------------------------------------------------------------------------
+                    // Is it supported HMI, VR and TTS language?
+                    NsAppLinkRPCV2::Language hmiLanguage = request->get_hmiDisplayLanguage();
+                    std::vector<NsAppLinkRPCV2::Language>::iterator it = std::find(
+                        core->mUISupportedLanguages.begin(), core->mUISupportedLanguages.end(), hmiLanguage);
+                    if (it == core->mUISupportedLanguages.end())
+                    {
+                        sendResponse<NsAppLinkRPCV2::ChangeRegistration_response
+                            , NsAppLinkRPCV2::Result::ResultInternal>(
+                                NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                , NsAppLinkRPCV2::Result::INVALID_DATA
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , false
+                                , sessionKey);
+                        return;
+                    }
+
+                    NsAppLinkRPCV2::Language language = request->get_language();
+                    it = std::find(core->mVRSupportedLanguages.begin(), core->mVRSupportedLanguages.end(), language);
+                    if (it == core->mVRSupportedLanguages.end())
+                    {
+                        sendResponse<NsAppLinkRPCV2::ChangeRegistration_response
+                            , NsAppLinkRPCV2::Result::ResultInternal>(
+                                NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                , NsAppLinkRPCV2::Result::INVALID_DATA
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , false
+                                , sessionKey);
+                        return;
+                    }
+
+                    it = std::find(core->mTTSSupportedLanguages.begin(), core->mTTSSupportedLanguages.end(),
+                        language);
+                    if (it == core->mTTSSupportedLanguages.end())
+                    {
+                        sendResponse<NsAppLinkRPCV2::ChangeRegistration_response
+                            , NsAppLinkRPCV2::Result::ResultInternal>(
+                                NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
+                                , NsAppLinkRPCV2::Result::INVALID_DATA
+                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , false
+                                , sessionKey);
+                        return;
+                    }
+                    // -------------------------------------------------------------------------------------------------
+
                     bool hasActuallyChanged = false;
                     if ( app->getHMIDisplayLanguageDesired().get() != request->get_hmiDisplayLanguage().get())
                     {
@@ -3862,9 +3909,21 @@ namespace NsAppManager
                 NsRPC2Communication::VehicleInfo::GetVehicleType* getVehicleType = new NsRPC2Communication::VehicleInfo::GetVehicleType;
                 getVehicleType->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getVehicleType);
-                NsRPC2Communication::UI::GetSupportedLanguages * getUISupportedLanguages = new NsRPC2Communication::UI::GetSupportedLanguages;
+
+                NsRPC2Communication::UI::GetSupportedLanguages * getUISupportedLanguages
+                    = new NsRPC2Communication::UI::GetSupportedLanguages;
                 getUISupportedLanguages->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                 HMIHandler::getInstance().sendRequest(getUISupportedLanguages);
+
+                NsRPC2Communication::TTS::GetSupportedLanguages * getTTSSupportedLanguages
+                    = new NsRPC2Communication::TTS::GetSupportedLanguages;
+                getTTSSupportedLanguages->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                HMIHandler::getInstance().sendRequest(getTTSSupportedLanguages);
+
+                NsRPC2Communication::VR::GetSupportedLanguages* getVRSupportedLanguages
+                    = new NsRPC2Communication::VR::GetSupportedLanguages;
+                getVRSupportedLanguages->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                HMIHandler::getInstance().sendRequest(getVRSupportedLanguages);
 
                 NsRPC2Communication::UI::GetLanguage* getUiLang = new NsRPC2Communication::UI::GetLanguage;
                 getUiLang->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
@@ -4389,7 +4448,7 @@ namespace NsAppManager
                     {
                         NsAppLinkRPC::DeleteSubMenu_response* response = new NsAppLinkRPC::DeleteSubMenu_response();
                         response->set_success(true);
-                        if (NsAppLinkRPCV2::Result::SUCCESS != 
+                        if (NsAppLinkRPCV2::Result::SUCCESS !=
                                 static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()))
                         {
                             response->set_success(false);
@@ -4405,7 +4464,7 @@ namespace NsAppManager
                     {
                         NsAppLinkRPCV2::DeleteSubMenu_response* response = new NsAppLinkRPCV2::DeleteSubMenu_response();
                         response->set_success(true);
-                        if (NsAppLinkRPCV2::Result::SUCCESS != 
+                        if (NsAppLinkRPCV2::Result::SUCCESS !=
                                 static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()))
                         {
                             response->set_success(false);
@@ -5013,6 +5072,17 @@ namespace NsAppManager
 
         switch(msg->getMethod())
         {
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__GETSUPPORTEDLANGUAGESRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "Get Supported Languages for UI response is received.");
+                NsRPC2Communication::VR::GetSupportedLanguagesResponse * languages =
+                    static_cast<NsRPC2Communication::VR::GetSupportedLanguagesResponse*>(msg);
+                if (NsAppLinkRPC::Result::SUCCESS == languages->getResult())
+                {
+                    core->mVRSupportedLanguages = languages->get_languages();
+                }
+                return;
+            }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__GETCAPABILITIESRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetVRCapabilities response has been income");
@@ -5258,6 +5328,17 @@ namespace NsAppManager
 
         switch(msg->getMethod())
         {
+            case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__GETSUPPORTEDLANGUAGESRESPONSE:
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "Get Supported Languages for UI response is received.");
+                NsRPC2Communication::TTS::GetSupportedLanguagesResponse * languages =
+                    static_cast<NsRPC2Communication::TTS::GetSupportedLanguagesResponse*>(msg);
+                if (NsAppLinkRPC::Result::SUCCESS == languages->getResult())
+                {
+                    core->mTTSSupportedLanguages = languages->get_languages();
+                }
+                return;
+            }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIESRESPONSE:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetTTSCapabilities response has been income");

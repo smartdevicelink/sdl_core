@@ -298,6 +298,8 @@ namespace NsAppManager
         NsAppLinkRPCV2::Language mVrLanguageV2;
         NsAppLinkRPCV2::Language mTtsLanguageV2;
         std::vector<NsAppLinkRPCV2::Language> mUISupportedLanguages;
+        std::vector<NsAppLinkRPCV2::Language> mVRSupportedLanguages;
+        std::vector<NsAppLinkRPCV2::Language> mTTSSupportedLanguages;
 
         NsAppLinkRPCV2::VehicleType mVehicleType;
         bool mAudioPassThruFlag;
