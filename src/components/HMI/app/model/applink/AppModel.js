@@ -133,7 +133,7 @@ MFT.ApplinkAppModel = Em.Object.extend({
         // push new buttons to array
         this.get('softButtons').pushObjects( buttons );
 	},
-    
+
     /**
      * Add command to list
      *

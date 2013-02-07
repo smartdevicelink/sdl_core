@@ -167,8 +167,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"jsonrpc":	"2.0",
 			"id": 		this.getAppListRequestId,
 			"method":	"AppLinkCore.GetAppList",
-			"params":	{
-			}
+			"params":	{}
 		};
 		this.client.send(JSONMessage);
 	},
@@ -198,8 +197,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 			"jsonrpc":	"2.0",
 			"id": 		this.getDeviceListRequestId,
 			"method":	"AppLinkCore.GetDeviceList",
-			"params":	{
-			}
+			"params":	{}
 		};
 		this.client.send(JSONMessage);
 	},

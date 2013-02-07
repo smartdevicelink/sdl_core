@@ -22,6 +22,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
             field2:			'<field2>',
             field3:			'<field3>',
             mediaClock:		'<mediaClock>',
+            trackIcon:      'images/applink/audio_icon.jpg',
             customPresets:[
                 '<no definition>',
                 '<no definition>',
@@ -33,22 +34,33 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
             })
         );
 
-        //this.set('appIcon', 'images/info/info_leftMenu_apps_ico.png'),
+        this.set('isPlaying', true);
 
         this.set('commandsList',[]);
         this.set('softButtons',[]);
 	},
 
-	active: false,
+    /**
+     * Flag for media playing state
+     * @param {Bool}
+     */
+    isPlaying:  false,
 
-	applinkConnectionStatus: true,
+    /**
+     * Flag for model active state
+     * currently used for status bar
+     * @param {Bool}
+     */
+	active: false,
 
 	/**
 	 * Timer for Media Clock
 	 */
 	timer:			null,
 
-    /** Current applink Sub Menu identificator*/
+    /**
+     * Current applink Sub Menu identificator
+     */
     currentApplinkSubMenuid: null,
 
     /**
@@ -175,20 +187,27 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
         this.appInfo.set('field3',        params.mainField3);
         this.appInfo.set('field4',        params.mainField4);
         this.appInfo.set('alignment',     params.alignment);
-        this.set('statusText',     params.statusBar);
+        this.set('statusText',            params.statusBar);
         this.appInfo.set('mediaClock',    params.mediaClock);
         this.appInfo.set('mediaTrack',    params.mediaTrack);
-        this.appInfo.set('image',         params.graphic);
+        if( params.graphic ){
+            this.appInfo.set('trackIcon', params.graphic);
+        }else{
+            this.appInfo.set('trackIcon', 'images/applink/audio_icon.jpg');
+        }
         if ( params.softButtons ) {
             this.updateSoftButtons( params.softButtons );
         }
-        if(params.customPresets){
+        if( params.customPresets ){
             var i=0;
             for(i=0; i<params.customPresets.length; i++){
                 if(params.customPresets[i] != '' || params.customPresets[i] != null){
                     this.appInfo.set('customPresets.' + i, params.customPresets[i]);
                 }
             }
+            MFT.ApplinkController.set('protocolVersion2State', true);
+        }else{
+            MFT.ApplinkController.set('protocolVersion2State', false);
         }
     }
 });

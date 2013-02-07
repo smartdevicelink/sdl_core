@@ -222,11 +222,12 @@ MFT.ApplinkModel = Em.Object.create({
      */
     onAppRegistered: function( params ){
 
-        if( params.isMediaApplication ){
-            MFT.ApplinkController.registerApplication(params, 0 );
-        }else{
-            MFT.ApplinkController.registerApplication(params, 1 );
-        }
+            if( params.isMediaApplication ){
+                MFT.ApplinkController.registerApplication(params, 0 );
+            }else{
+                MFT.ApplinkController.registerApplication(params, 1 );
+            }
+
     },
 
     /**
@@ -303,7 +304,9 @@ MFT.ApplinkModel = Em.Object.create({
         var i=0,
             len = appList.length;
         for(i = 0; i < len; i++){
-            MFT.ApplinkModel.onAppRegistered( appList[i] );
+            if(appList[i]){
+                MFT.ApplinkModel.onAppRegistered( appList[i] );
+            }
         }
 
     },

@@ -122,6 +122,10 @@
     text-align: center;
 }
 
+#info_nonMedia .app_image img{
+	border: 1px solid #393939;
+}
+
 #applink_options .list{
 	width: 650px;
 	height: 251px;
@@ -358,7 +362,24 @@
 #perform_interaction_view .list-content{
 	width: 578px;
 }
-
+#applink_view_container .cd_logo{
+	position: absolute;
+	top: 90px;
+	right: 10px;
+	border: 1px solid #393939;
+	-webkit-border-radius: 2px;
+	width: 109px;
+	height: 109px;
+}
+#applink_view_container .cd_logoV2{
+	position: absolute;
+	top: 70px;
+	right: 10px;
+	border: 1px solid #393939;
+	-webkit-border-radius: 2px;
+	width: 109px;
+	height: 109px;
+}
 #applink_view_container .textLimit{
 	width: 460px;
 	text-overflow: ellipsis;
@@ -742,4 +763,135 @@
 #info_apps_list .ffw-button{
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+#applink_view_container{
+	z-index:501;
+}
+
+#applink_view_container .title{
+	top: 79px;
+	font-size: 38px;
+	left: 7px;
+	width: 340px;
+}
+
+#applink_view_container .album{
+	top: 123px;
+	font-size: 26px;
+	left: 10px;
+	width: 330px;
+}
+
+#applink_view_container .artist{
+	top: 155px;
+	font-size: 26px;
+	left: 10px;
+	width: 330px;
+}
+
+#applink_view_container .player_controlls{
+	top: 292px;
+	left: 165px;
+}
+
+/* Applink Slider*/
+#media_applink_slider_view{
+	width: 800px;
+	height: 480px;
+	z-index: 1000;
+	background: url(../images/media/bg.png) no-repeat;
+}
+
+#media_applink_slider_view .backButton {
+	top: 80px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+#media_applink_slider_view .initialText{
+	top: 80px;
+	left: 75px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
+
+/* Applink Perform Interaction Choise */
+#media_app_perform_interaction_view{
+	width: 800px;
+	height: 480px;
+	z-index: 1000;
+	background: url(../images/media/bg.png) no-repeat;
+}
+
+#media_app_perform_interaction_view .backButton {
+	top: 80px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+#media_app_perform_interaction_view .list{
+	position: absolute;
+	width: 629px;
+	height: 251px;
+	border-radius: 2px;
+	left: 100px;
+	top: 154px;
+}
+
+#media_app_perform_interaction_view .initialText{
+	top: 80px;
+	left: 75px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
+
+#media_app_perform_interaction_view .list-content{
+	width: 578px;
+}
+
+/* Applink Media Options */
+#media_app_options_view{
+	width: 800px;
+	height: 480px;
+	z-index: 2002;
+	background: url(../images/media/bg.png) no-repeat;
+}
+
+#media_app_options_view .backButton {
+	top: 80px;
+	width: 48px;
+	height: 48px;
+	border: 1px solid #333;
+	border-radius: 2px;
+}
+
+#media_app_options_view .list{
+	position: absolute;
+	width: 650px;
+	height: 251px;
+	border-radius: 2px;
+	left: 75px;
+	top: 154px;
+}
+
+#media_app_options_view .optionsLabel{
+	top: 80px;
+	left: 75px;
+	width: 620px;
+	height: 20px;
+	background: #393939;
+	padding: 15px;
+}
+
+#media_app_options_view .list-content{
+	width: 578px;
 }

@@ -35,7 +35,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                     '<div class="title textLimit">{{MFT.ApplinkAppController.model.appInfo.field1}}</div>'+
                     '<div class="album textLimit">{{MFT.ApplinkAppController.model.appInfo.field2}}</div>'+
                     '<div class="artist textLimit">{{MFT.ApplinkAppController.model.appInfo.mediaClock}}</div>'+
-    //              '<div id="cd_logo" {{bindAttr class="MFT.CDModel.active:visible_display MFT.AppModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
+                    '<img class="cd_logoV2" {{bindAttr src="MFT.ApplinkAppController.model.appInfo.trackIcon"}} />'+
     //              '<div id="usb_logo" {{bindAttr class="MFT.USBModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
                 '</div>'+
                 '{{/with}}'
@@ -79,11 +79,14 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 actionUp:       function(){
                     this._super();
                     MFT.ApplinkController.onSoftButtonActionUp('OK', this);
+                   // MFT.ApplinkAppController.model.set('isPlaying', !MFT.ApplinkAppController.model.isPlaying);
                 },
                 /** Define button template */
                 template: Ember.Handlebars.compile(
-                    '<img class="playIcon hideicon"{{bindAttr class="MFT.MediaController.currentSelectedPlayer.isPlaying:visible"}} src="images/media/ico_pause.png" />'+
-                    '<img class="playIcon showicon"{{bindAttr class="MFT.MediaController.currentSelectedPlayer.isPlaying:not-visible"}} src="images/media/ico-play.png" />'
+                    '<img class="playIcon hideicon"{{bindAttr class="MFT.ApplinkAppController.model.isPlaying:visible"}} src="images/media/ico_pause.png" />'+
+                    '<img class="playIcon showicon"{{bindAttr class="MFT.ApplinkAppController.model.isPlaying:not-visible"}} src="images/media/ico-play.png" />'
+                    //'<img class="playIcon" {{bindAttr class="MFT.ApplinkAppController.model.isPlaying:visible:not-visible"}} src="images/media/ico_pause.png" />'+
+                   // '<img class="playIcon" {{bindAttr class="MFT.ApplinkAppController.model.isPlaying:not-visible:visible"}} src="images/media/ico-play.png" />'
                 )
             }),
             NextTrackButton: MFT.Button.extend({

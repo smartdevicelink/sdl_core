@@ -22,6 +22,7 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
                 field2:         '<field2>',
                 field3:         '<field3>',
                 field4:         '<field4>',
+                trackIcon:      'images/applink/audio_icon.jpg',
                 image:			'',
                 customPresets:  []
             })
@@ -72,7 +73,11 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
         this.appInfo.set('field2',        params.mainField2);
         this.appInfo.set('field3',        params.mainField3);
         this.appInfo.set('field4',        params.mainField4);
-        //this.appInfo.set('image',         params.graphic);
+        if( params.graphic ){
+            this.appInfo.set('trackIcon', params.graphic);
+        }else{
+            this.appInfo.set('trackIcon', 'images/applink/audio_icon.jpg');
+        }
         
         if ( params.customPresets ) {
             this.appInfo.set('customPresets', params.customPresets);
