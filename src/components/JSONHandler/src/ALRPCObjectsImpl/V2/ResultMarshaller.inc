@@ -1,5 +1,5 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: gperf --output-file=../src/ALRPCObjectsImpl/V2/ResultMarshaller.inc ../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp  */
+/* Command-line: gperf --output-file=ResultMarshaller.inc ResultMarshaller.gp  */
 /* Computed positions: -k'1,13' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -30,12 +30,12 @@
 #endif
 
 
-#define TOTAL_KEYWORDS 29
-#define MIN_WORD_LENGTH 6
+#define TOTAL_KEYWORDS 30
+#define MIN_WORD_LENGTH 5
 #define MAX_WORD_LENGTH 30
-#define MIN_HASH_VALUE 6
+#define MIN_HASH_VALUE 5
 #define MAX_HASH_VALUE 50
-/* maximum key range = 45, duplicates = 0 */
+/* maximum key range = 46, duplicates = 0 */
 
 class Result_intHash
 {
@@ -107,76 +107,78 @@ Result_intHash::getPointer (register const char *str, register unsigned int len)
 {
   static const unsigned char lengthtable[] =
     {
-       0,  0,  0,  0,  0,  0,  6,  7,  8,  9, 10,  0, 12,  8,
+       0,  0,  0,  0,  0,  5,  6,  7,  8,  9, 10,  0, 12,  8,
       14, 10,  6,  7, 13, 19, 15, 21, 12, 18, 19,  0,  0,  7,
       18, 24, 25, 26,  9, 13, 14,  0,  0,  0,  0, 14,  0,  0,
        0,  0,  0,  0, 26,  0,  0,  0, 30
     };
   static const struct NsAppLinkRPCV2::PerfectHashTable wordlist[] =
     {
-      {""}, {""}, {""}, {""}, {""}, {""},
-#line 29 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+      {""}, {""}, {""}, {""}, {""},
+#line 46 "ResultMarshaller.gp"
+      {"RETRY",29},
+#line 29 "ResultMarshaller.gp"
       {"IN_USE",12},
-#line 35 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 35 "ResultMarshaller.gp"
       {"IGNORED",18},
-#line 33 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 33 "ResultMarshaller.gp"
       {"REJECTED",16},
-#line 41 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 41 "ResultMarshaller.gp"
       {"TIMED_OUT",24},
-#line 22 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 22 "ResultMarshaller.gp"
       {"INVALID_ID",5},
       {""},
-#line 18 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 18 "ResultMarshaller.gp"
       {"INVALID_DATA",1},
-#line 45 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 45 "ResultMarshaller.gp"
       {"WARNINGS",28},
-#line 37 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 37 "ResultMarshaller.gp"
       {"FILE_NOT_FOUND",20},
-#line 39 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 39 "ResultMarshaller.gp"
       {"DISALLOWED",22},
-#line 43 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 43 "ResultMarshaller.gp"
       {"CLOSED",26},
-#line 17 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 17 "ResultMarshaller.gp"
       {"SUCCESS",0},
-#line 20 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 20 "ResultMarshaller.gp"
       {"OUT_OF_MEMORY",3},
-#line 19 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 19 "ResultMarshaller.gp"
       {"UNSUPPORTED_REQUEST",2},
-#line 40 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 40 "ResultMarshaller.gp"
       {"USER_DISALLOWED",23},
-#line 24 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 24 "ResultMarshaller.gp"
       {"TOO_MANY_APPLICATIONS",7},
-#line 42 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 42 "ResultMarshaller.gp"
       {"CANCEL_ROUTE",25},
-#line 36 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 36 "ResultMarshaller.gp"
       {"UNSUPPORTED_BUTTON",19},
-#line 26 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 26 "ResultMarshaller.gp"
       {"UNSUPPORTED_VERSION",9},
       {""}, {""},
-#line 34 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 34 "ResultMarshaller.gp"
       {"ABORTED",17},
-#line 30 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 30 "ResultMarshaller.gp"
       {"SUBSCRIBED_ALREADY",13},
-#line 31 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 31 "ResultMarshaller.gp"
       {"VEHICLE_DATA_NOT_ALLOWED",14},
-#line 21 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 21 "ResultMarshaller.gp"
       {"TOO_MANY_PENDING_REQUESTS",4},
-#line 32 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 32 "ResultMarshaller.gp"
       {"VEHICLE_DATA_NOT_AVAILABLE",15},
-#line 44 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 44 "ResultMarshaller.gp"
       {"ENCRYPTED",27},
-#line 38 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 38 "ResultMarshaller.gp"
       {"GENERIC_ERROR",21},
-#line 23 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 23 "ResultMarshaller.gp"
       {"DUPLICATE_NAME",6},
       {""}, {""}, {""}, {""},
-#line 27 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 27 "ResultMarshaller.gp"
       {"WRONG_LANGUAGE",10},
       {""}, {""}, {""}, {""}, {""}, {""},
-#line 28 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 28 "ResultMarshaller.gp"
       {"APPLICATION_NOT_REGISTERED",11},
       {""}, {""}, {""},
-#line 25 "../src/ALRPCObjectsImpl/V2/ResultMarshaller.gp"
+#line 25 "ResultMarshaller.gp"
       {"APPLICATION_REGISTERED_ALREADY",8}
     };
 

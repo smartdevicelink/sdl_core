@@ -38,7 +38,7 @@ bool ResultMarshaller::fromJSON(const Json::Value& s,Result& e)
 
 Json::Value ResultMarshaller::toJSON(const Result& e)
 {
-  if(e.mInternal==Result::INVALID_ENUM) 
+  if(e.mInternal==Result::INVALID_ENUM)
     return Json::Value(Json::nullValue);
   const char* s=getName(e.mInternal);
   return s ? Json::Value(s) : Json::Value(Json::nullValue);
@@ -69,7 +69,7 @@ const std::string ResultMarshaller::toString(const Result& e)
 
 }
 
-const PerfectHashTable ResultMarshaller::mHashTable[29]=
+const PerfectHashTable ResultMarshaller::mHashTable[30]=
 {
   {"SUCCESS",0},
   {"INVALID_DATA",1},
@@ -99,5 +99,6 @@ const PerfectHashTable ResultMarshaller::mHashTable[29]=
   {"CANCEL_ROUTE",25},
   {"CLOSED",26},
   {"ENCRYPTED",27},
-  {"WARNINGS",28}
+  {"WARNINGS",28},
+  {"RETRY", 29}
 };
