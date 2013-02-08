@@ -7006,8 +7006,6 @@ namespace NsAppManager
 
     bool AppMgrCore::decreaseMessageChain(const MessageChains::iterator & chain)
     {
-        LOG4CPLUS_TRACE(mLogger, __PRETTY_FUNCTION__);
-        LOG4CPLUS_INFO_EXT(mLogger,"\n\n\n\t\t\t\tdecreaseMessageChain");
         chain->second->counter--;
         MessageChaining * currentChain = chain->second;        
         mMessageChaining.erase(chain);
@@ -7021,8 +7019,6 @@ namespace NsAppManager
 
     MessageChaining * AppMgrCore::addChain(MessageChaining * chain, int sessionKey, unsigned int correlationID)
     {
-        LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
-        LOG4CPLUS_INFO_EXT(mLogger,"\n\n\n\t\t\t\taddChain");
         if (!chain)
         {
             chain = new MessageChaining(
