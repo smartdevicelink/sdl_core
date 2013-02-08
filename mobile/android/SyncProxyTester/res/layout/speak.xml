@@ -4,9 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
     
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:minWidth="400px" android:orientation="vertical" android:id="@+id/itemRoot"
-		android:paddingLeft="20dip" android:paddingRight="20dip">
+	<LinearLayout
+	    xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/itemRoot"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:minWidth="400px"
+	    android:orientation="vertical"
+	    android:paddingLeft="20dip"
+	    android:paddingRight="20dip" >
+
 			<EditText android:text="speak" android:id="@+id/txtSpeakText1"
 				android:layout_width="fill_parent" android:layout_height="wrap_content"
 				android:visibility="visible" android:freezesText="true">
