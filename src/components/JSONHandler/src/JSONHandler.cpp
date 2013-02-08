@@ -192,7 +192,7 @@ NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV2( const
     correlationId |= receivedData[offset++] << 8u;
     correlationId |= receivedData[offset++];
 
-    LOG4CPLUS_INFO_EXT(mLogger, "Correlation id " << correlationId);
+    LOG4CPLUS_INFO_EXT(mLogger, "\t\t\tCorrelation id " << correlationId);
 
     unsigned int jsonSize = receivedData[offset++] << 24u;
     jsonSize |= receivedData[offset++] << 16u;
@@ -231,10 +231,10 @@ NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV2( const
     if ( messageObject )
     {
         messageObject->setMethodId( functionId );
-        /*if ( RPC_REQUEST == rpcTypeFlag || RPC_RESPONSE == rpcTypeFlag )
+        if ( RPC_REQUEST == rpcTypeFlag || RPC_RESPONSE == rpcTypeFlag )
         {
             messageObject->setCorrelationID( correlationId );
-        } */
+        }
     }
 
     return messageObject;
@@ -361,7 +361,8 @@ NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtoco
     dataForSending[offset++] = functionId >> 8;
     dataForSending[offset++] = functionId;
 
-    unsigned int correlationId = 4567;//message->getCorrelationId();
+    unsigned int correlationId = message->getCorrelationID();
+    LOG4CPLUS_INFO_EXT(mLogger, "\t\t\tCorrelation ID is " << correlationId);
     dataForSending[offset++] = correlationId >> 24;
     dataForSending[offset++] = correlationId >> 16;
     dataForSending[offset++] = correlationId >> 8;

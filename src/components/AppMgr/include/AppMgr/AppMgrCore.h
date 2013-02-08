@@ -24,6 +24,7 @@
 #include "JSONHandler/ALRPCObjects/V2/VehicleType.h"
 #include "JSONHandler/ALRPCObjects/V1/Language.h"
 #include "JSONHandler/ALRPCObjects/V2/Language.h"
+#include "AppMgr/MessageChaining.hpp"
 
 namespace NsAppLinkRPC
 {
@@ -70,6 +71,11 @@ namespace NsAppManager
      * \brief a list of device names
      */
     typedef std::vector<std::string> DeviceNamesList;
+
+    /**
+      *\brief Map of messages between mobile app and hmi
+    */
+    typedef std::map<int, MessageChaining*> MessageChains;
 
     /**
      * \brief Core app manager class which acts as a core for application manager
@@ -248,7 +254,7 @@ namespace NsAppManager
          * \brief serialize a string value to the text file
          * \param fileName name of the file to serialize to
          * \param value a value to serialize
-         * \return success of an operation - true or false
+         * \return bool success of an operation - true or false
          */
         bool serializeToFile(const std::string& fileName, const std::string &value) const;
 
@@ -265,6 +271,23 @@ namespace NsAppManager
          * \param object Notification received from HMI.
          */
         void sendButtonPress( Application * app, NsRPC2Communication::Buttons::OnButtonPress * object );
+
+        /**
+         * \brief Remove message from message chain between mobile app and hmi.
+         * If counter == 0 then remove message completely.
+         * \param chain Iterator in message map
+         * \return bool True if chain was deleted otherwise false
+         */
+        bool decreaseMessageChain(const MessageChains::iterator & chain);
+
+        /**
+         * \brief Inserts message chain
+         * \param chain Pointer to @MessageChain
+         * \param connectionKey Id of connection for Mobile side 
+         * \param correlationID Correlation id for response for Mobile side
+         * \return @MessageChaining* pointer to result chain
+         */
+        MessageChaining * addChain(MessageChaining * chain, int connectionKey, unsigned int correlationID);
 
         AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
         AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
@@ -287,6 +310,8 @@ namespace NsAppManager
         RequestMapping      mRequestMapping;
         DeviceList          mDeviceList;
         DeviceHandler       mDeviceHandler;
+        
+        MessageChains mMessageChaining;
 
         NsAppLinkRPC::OnDriverDistraction* mDriverDistractionV1;
         NsAppLinkRPCV2::OnDriverDistraction* mDriverDistractionV2;
