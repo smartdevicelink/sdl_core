@@ -195,9 +195,9 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
         }else{
             this.appInfo.set('trackIcon', 'images/applink/audio_icon.jpg');
         }
-        if ( params.softButtons ) {
-            this.updateSoftButtons( params.softButtons );
-        }
+
+        this.updateSoftButtons( params.softButtons );
+
         if( params.customPresets ){
             var i=0;
             for(i=0; i<params.customPresets.length; i++){

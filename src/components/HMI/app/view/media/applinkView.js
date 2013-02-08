@@ -24,7 +24,7 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 		'controlls'
 	],
 	
-	controlls: MFT.ApplinkMediaControllsV1,
+	controlls: MFT.ApplinkMediaControllsV2,
 
     /**
      * Deactivate View
@@ -49,7 +49,7 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
             );
 			MFT.applinkView.get('childViews').pushObject(MFT.ApplinkMediaControllsV1);
 		}
-	}.observes('MFT.ApplinkController.protocolVersion2State'),
+	},//.observes('MFT.ApplinkController.protocolVersion2State'),
 
 	innerMenu: MFT.MenuList.extend({
 			

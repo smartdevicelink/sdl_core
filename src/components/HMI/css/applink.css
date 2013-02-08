@@ -181,16 +181,16 @@
 	width: 155px;
 }
 
-#applink_view_container #app_view_controllsV2.player_controlls{
-	top: 241px;
+#applink_view_container .player_controllsV2{
+	top: 241px !important;
 	height: 48px;
 }
 
-#applink_view_container #app_view_controllsV2 .ffw-button{
+#applink_view_container .player_controllsV2 .ffw-button{
 	height: 48px;
 }
 
-#applink_view_container #app_view_controllsV2 img{
+#applink_view_container .player_controllsV2 img{
 	margin-top: -26px;
 }
 
@@ -774,6 +774,7 @@
 	font-size: 38px;
 	left: 7px;
 	width: 340px;
+	height: 44px;
 }
 
 #applink_view_container .album{
@@ -781,6 +782,7 @@
 	font-size: 26px;
 	left: 10px;
 	width: 330px;
+	height: 32px;
 }
 
 #applink_view_container .artist{
@@ -788,6 +790,7 @@
 	font-size: 26px;
 	left: 10px;
 	width: 330px;
+	height: 32px;
 }
 
 #applink_view_container .player_controlls{

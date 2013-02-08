@@ -35,8 +35,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                     '<div class="title textLimit">{{MFT.ApplinkAppController.model.appInfo.field1}}</div>'+
                     '<div class="album textLimit">{{MFT.ApplinkAppController.model.appInfo.field2}}</div>'+
                     '<div class="artist textLimit">{{MFT.ApplinkAppController.model.appInfo.mediaClock}}</div>'+
-                    '<img class="cd_logoV2" {{bindAttr src="MFT.ApplinkAppController.model.appInfo.trackIcon"}} />'+
-    //              '<div id="usb_logo" {{bindAttr class="MFT.USBModel.active:visible_display MFT.helpMode:helpmode"}}></div>'+
+                    '<img class="cd_logo" {{bindAttr src="MFT.ApplinkAppController.model.appInfo.trackIcon" class="MFT.ApplinkController.protocolVersion2State:cd_logoV2"}} />'+
                 '</div>'+
                 '{{/with}}'
             )
@@ -44,7 +43,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
 
          Controls:   Em.ContainerView.create({
 
-            elementId: 'app_view_controllsV2',
+            elementId: 'app_view_controlls',
 
             /** View components*/
             childViews: [
@@ -53,7 +52,9 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 'NextTrackButton'
             ],
 
-            classNames: 'player_controlls',
+            classNames:         'player_controlls',
+
+            classNameBindings:  'MFT.ApplinkController.protocolVersion2State:player_controllsV2',
             
             PrevTrackButton: MFT.Button.extend({
                 elementId:          'app_view_controlls_prev_track_button_v2',
@@ -79,14 +80,14 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 actionUp:       function(){
                     this._super();
                     MFT.ApplinkController.onSoftButtonActionUp('OK', this);
-                   // MFT.ApplinkAppController.model.set('isPlaying', !MFT.ApplinkAppController.model.isPlaying);
+                    MFT.ApplinkAppController.model.set('isPlaying', !MFT.ApplinkAppController.model.isPlaying);
                 },
                 /** Define button template */
                 template: Ember.Handlebars.compile(
-                    '<img class="playIcon hideicon"{{bindAttr class="MFT.ApplinkAppController.model.isPlaying:visible"}} src="images/media/ico_pause.png" />'+
-                    '<img class="playIcon showicon"{{bindAttr class="MFT.ApplinkAppController.model.isPlaying:not-visible"}} src="images/media/ico-play.png" />'
-                    //'<img class="playIcon" {{bindAttr class="MFT.ApplinkAppController.model.isPlaying:visible:not-visible"}} src="images/media/ico_pause.png" />'+
-                   // '<img class="playIcon" {{bindAttr class="MFT.ApplinkAppController.model.isPlaying:not-visible:visible"}} src="images/media/ico-play.png" />'
+                    //'<img class="playIcon hideicon"{{bindAttr class="MFT.ApplinkAppController.model.isPlaying:visible"}} src="images/media/ico_pause.png" />'+
+                    //'<img class="playIcon showicon"{{bindAttr class="MFT.ApplinkAppController.model.isPlaying:not-visible"}} src="images/media/ico-play.png" />'
+                    '<img class="playIcon" {{bindAttr class="MFT.ApplinkAppController.model.isPlaying:visible:not-visible"}} src="images/media/ico_pause.png" />'+
+                    '<img class="playIcon not-visible" {{bindAttr class="MFT.ApplinkAppController.model.isPlaying:not-visible:visible"}} src="images/media/ico-play.png" />'
                 )
             }),
             NextTrackButton: MFT.Button.extend({
@@ -100,7 +101,7 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                     this._super();
                     MFT.ApplinkController.onSoftButtonActionUp('SEEKRIGHT', this);
                 },
-                icon:                 'images/media/ico_next.png',
+                icon:               'images/media/ico_next.png',
             })
         }),
 
@@ -109,7 +110,9 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
     
         elementId: 'applink_media_presetButtons',
         
-        classNameBindings:  ['MFT.States.media.applink.active:active_state'],
+        classNameBindings:  [
+                                'MFT.ApplinkController.protocolVersion2State::hidden'
+                            ],
         
         classNames: ['main-preset-buttons-wraper'],
         

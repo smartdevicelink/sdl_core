@@ -92,7 +92,7 @@ MFT.ApplinkMediaController = Em.Object.create({
     onPerformInteractionChoosed: function(element){
 
         if(MFT.States.media.applink.applinkperforminteractionchoise.active){
-            FFW.UI.onChoosed(element.choiceID);
+            FFW.UI.interactionResponse( "SUCCESS", element.choiceID );
             MFT.States.back();
         }
 

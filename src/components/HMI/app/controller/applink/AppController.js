@@ -68,7 +68,7 @@ MFT.ApplinkAppController = Em.Object.create({
 	 */
 	onChoiceInteraction: function( element ) {
 	
-		FFW.UI.onChoosed( element.choiceId );
+		FFW.UI.interactionResponse( "SUCCESS", element.choiceId );
 		
 		MFT.InteractionChoicesView.deactivate();
 	},

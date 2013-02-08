@@ -109,6 +109,20 @@ MFT.ApplinkController = Em.Object.create({
     },
 
     /**
+     * Method to sent notification ABORTED for PerformInteractionChoise
+     */
+    interactionChoiseCloseResponse: function(){
+        FFW.UI.interactionResponse( "ABORTED" );
+    },
+
+    /**
+     * Method to sent notification for Alert
+     */
+    alertResponse: function( result ){
+        FFW.UI.alertResponse( result );
+    },
+
+    /**
      * Method to call performAudioPassThruResponse with Result code parameters
      * @param {Object} element Button object
      */
@@ -200,10 +214,8 @@ MFT.ApplinkController = Em.Object.create({
     selectProtocolVersion: function(checked){
         if(checked){
             FFW.AppLinkCoreClient.OnVersionChanged( 2 );
-            this.set('protocolVersion2State', true);
         }else{
             FFW.AppLinkCoreClient.OnVersionChanged( 1 );
-            this.set('protocolVersion2State', false);
         }
     },
 
@@ -282,12 +294,12 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param {Object}
 	 */
 	onSoftButtonActionUpCustom: function( element ){
+        FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
         if(element.time > 0){
             FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "LONG", element.softButtonID);
         }else{
             FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "SHORT", element.softButtonID);
         }
-		FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
         element.time = 0;
     },
 
@@ -306,12 +318,12 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param {Object}
 	 */
 	onSoftButtonActionUp: function( name, element ){
+        FFW.Buttons.buttonEvent( name, "BUTTONUP" );
         if(element.time > 0){
             FFW.Buttons.buttonPressed( name, "LONG" );
         }else{
             FFW.Buttons.buttonPressed( name, "SHORT" );
         }
-		FFW.Buttons.buttonEvent( name, "BUTTONUP" );
         element.time = 0;
     },
 

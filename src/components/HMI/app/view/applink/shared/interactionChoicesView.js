@@ -27,6 +27,26 @@ MFT.InteractionChoicesView = MFT.ApplinkAbstractView.create({
     }),
     
     /**
+     * Deactivate window
+     */
+    deactivate: function() {
+        this.set('active',false);
+    },
+
+    backButton: MFT.Button.extend({
+        classNames: [
+            'back-button'
+        ],
+        target:     'this.parentView',
+        action:     'deactivate',
+        icon:       'images/media/ico_back.png',
+        onDown:     false,
+        click: function(){
+            MFT.ApplinkController.interactionChoiseCloseResponse();
+        }
+    }),
+    
+    /**
      * Clean choices caption and list before new proform
      */
     clean: function() {

@@ -109,7 +109,7 @@ MFT.VRPopUp = Em.ContainerView.create({
                     MFT.Button.create({
                         action:                 'onChoiceInteraction',
                         target:                 'MFT.ApplinkAppController',
-                        choiceID:               params.choiceSet[i].choiceID,
+                        choiceId:               params.choiceSet[i].choiceID,
                         interactionChoiceSetID: params.interactionChoiceSetID,
                         text:                   params.choiceSet[i].vrCommands[j],
                         classNames:             'list-item',

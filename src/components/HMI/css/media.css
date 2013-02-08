@@ -2679,6 +2679,10 @@
 .statusInfo .station {
 	top: 12px;
 	left: 11px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	height: 21px;
+	width: 220px;
 }
 
 .statusInfo .station span{

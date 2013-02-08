@@ -85,6 +85,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
      */
     deactivate: function() {
         this.set('active',false);
+        clearTimeout(this.timer);
     },
 
     /**
@@ -146,6 +147,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
                             MFT.ApplinkController.onSoftButtonActionUpCustom(this);
                             if( this.systemAction == 'DEFAULT_ACTION' ){
                                 MFT.ApplinkController.defaultActionSoftButton(this);
+                                MFT.ApplinkController.alertResponse( "ABORTED" );
                             }
                         },
                         systemAction:           params[i].systemAction,
@@ -171,7 +173,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
         this.addSoftButtons(message.softButtons);
         if( message.ttsChunks ){
-            MFT.ApplinkModel.onPrompt(message.ttsChunks.ttsChunks);
+            MFT.ApplinkModel.onPrompt(message.ttsChunks);
         }
 
         this.set('appName',    MFT.ApplinkController.getApplicationModel(message.appId).appName);
@@ -187,6 +189,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
         this.timer = setTimeout(function(){
             self.set('active', false);
             MFT.ApplinkController.onSystemContextChange();
+            MFT.ApplinkController.alertResponse( "SUCCESS" );
         }, message.duration);
     }
 });

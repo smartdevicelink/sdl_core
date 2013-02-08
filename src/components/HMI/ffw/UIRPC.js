@@ -31,6 +31,11 @@ FFW.UI = FFW.RPCObserver.create({
  	performInteractionRequestId: -1,
 
 	/*
+	 *	id for request Alert
+ 	 */
+ 	alertRequestId: -1,
+
+	/*
 	 *	ids for requests AudioPassThru
  	 */
 	performAudioPassThruRequestId:		-1,
@@ -110,7 +115,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 		if (notification.method == this.onVRChoiseNotification)
 		{
-			this.onChoosed(notification.params.choiceID);
+			this.interactionResponse( "SUCCESS", notification.params.choiceId );
 		}
 	},
 
@@ -139,7 +144,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 				MFT.ApplinkModel.onUIAlert( request.params );
 
-				this.sendUIResult("SUCCESS", request.id, request.method);
+				this.alertRequestId = request.id;
 
 		    	break;
 		    }
@@ -482,7 +487,7 @@ FFW.UI = FFW.RPCObserver.create({
 	/*
 	 * send notification when command was triggered
  	 */
-	onChoosed: function(commandId) {
+	interactionResponse: function( resultCode, commandId ) {
 		Em.Logger.log("FFW.UI.PerformInteractionResponse");
 
 		// send repsonse
@@ -490,11 +495,34 @@ FFW.UI = FFW.RPCObserver.create({
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.performInteractionRequestId,
 			"result":	{
-				"resultCode":		"SUCCESS",
-				"choiceID":			commandId,
+				"resultCode":		resultCode,
 				"method":			"UI.PerformInteractionResponse"
 			}
 		};
+
+		if( commandId ){
+			JSONMessage.result.choiceID = commandId;
+		}
+
+		this.client.send(JSONMessage);
+	},
+
+	/*
+	 * send notification when alert was closed
+ 	 */
+	alertResponse: function( resultCode ) {
+		Em.Logger.log("FFW.UI.AlertResponse");
+
+		// send repsonse
+		var JSONMessage = {
+			"jsonrpc"	:	"2.0",
+			"id"		: 	this.alertRequestId,
+			"result":	{
+				"resultCode":		resultCode,
+				"method":			"UI.AlertResponse"
+			}
+		};
+
 		this.client.send(JSONMessage);
 	},
 
