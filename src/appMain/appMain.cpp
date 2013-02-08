@@ -12,6 +12,8 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <signal.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "appMain.hpp"
 
@@ -244,12 +246,27 @@ int main(int argc, char** argv)
                     }
                     case 0: /* Child process */
                     {
+                        int fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
+                        if (0 > fd_dev0)
+                        {
+                            LOG4CPLUS_WARN(logger, "Open dev0 failed!");
+                        } else
+                        {
+                            //close input/output file descriptors.
+                            close(STDIN_FILENO);
+                            close(STDOUT_FILENO);
+                            close(STDERR_FILENO);
+                            // move input/output to /dev/null
+                            dup2(fd_dev0, STDIN_FILENO);
+                            dup2(fd_dev0, STDOUT_FILENO);
+                            dup2(fd_dev0, STDERR_FILENO);
+                        }
                         execlp("/usr/bin/chromium-browser",
                               "chromium-browser",
                               "--auth-schemes=basic,digest,ntlm",
                               hmi_link.c_str(),
                               (char *) 0); /* Execute the program */
-                        LOG4CPLUS_INFO(logger, "execl() failed! Install chromium-browser!");
+                        LOG4CPLUS_WARN(logger, "execl() failed! Install chromium-browser!");
                         return EXIT_SUCCESS;
                     }
                     default: /* Parent process */
