@@ -293,7 +293,7 @@ public class WiProProtocol extends AbstractProtocol {
 					message.setRPCType(binFrameHeader.getRPCType());
 					message.setFunctionID(binFrameHeader.getFunctionID());
 					message.setCorrID(binFrameHeader.getCorrID());
-					if (binFrameHeader.getJsonSize() > 0) message.setData(binFrameHeader.getJsonData());
+					message.setData(binFrameHeader.getJsonData());
 					if (binFrameHeader.getBulkData() != null) message.setBulkData(binFrameHeader.getBulkData());
 				} else message.setData(accumulator.toByteArray());
 				
