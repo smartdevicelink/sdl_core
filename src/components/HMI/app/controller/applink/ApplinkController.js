@@ -181,16 +181,10 @@ MFT.ApplinkController = Em.Object.create({
     /**
      * Applink Driver Distraction ON/OFF switcher
      * 
-     * @param checked: bool
+     * @param {Boolean}
      */
     selectDriverDistraction: function(checked){
-        if(checked){
-            FFW.UI.onDriverDistraction( "DD_ON" );
-            this.set('driverDistractionState', true);
-        }else{
-            FFW.UI.onDriverDistraction( "DD_OFF" );
-            this.set('driverDistractionState', false);
-        }
+        this.set('driverDistractionState', checked);
     },
 
     /**
