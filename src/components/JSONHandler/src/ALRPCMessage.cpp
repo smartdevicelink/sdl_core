@@ -14,6 +14,7 @@ ALRPCMessage::ALRPCMessage( unsigned int protocolVersion, MessageType messageTyp
 ,mMessageType( messageType )
 ,mMethodId(-1)
 ,mBinaryData( 0 )
+,mCorrelationID( 0 )
 {
 }
 
@@ -22,6 +23,7 @@ ALRPCMessage::ALRPCMessage( unsigned int protocolVersion, MessageType messageTyp
 ,mMessageType( messageType )
 ,mMethodId( methodId )
 ,mBinaryData( 0 )
+,mCorrelationID( 0 )
 {}
 
 ALRPCMessage::~ALRPCMessage()
@@ -75,4 +77,14 @@ void ALRPCMessage::setBinaryData( const std::vector<unsigned char> & binaryData 
 const std::vector<unsigned char> * ALRPCMessage::getBinaryData() const
 {
     return mBinaryData;
+}
+
+unsigned int ALRPCMessage::getCorrelationID() const 
+{ 
+    return mCorrelationID; 
+}
+
+void ALRPCMessage::setCorrelationID( unsigned int correlationID ) 
+{ 
+    mCorrelationID = correlationID; 
 }

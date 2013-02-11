@@ -91,6 +91,20 @@ namespace NsAppLinkRPC
          */
         virtual const std::vector<unsigned char> * getBinaryData() const;
 
+        /**
+         * \brief Getter for correlation id of JSON message.
+         * TODO (pvysh) it is not supposed to be in base class.
+         * \return correlation id of JSON message.
+         */
+        virtual unsigned int getCorrelationID() const;
+
+        /**
+         * \brief Setter for correlation id of JSON message.
+         * TODO (pvysh) it is not supposed to be in base class.
+         * \param correlationID Correlation ID of JSON message.
+         * \return type description
+         */
+        virtual void setCorrelationID( unsigned int correlationID );
     private:
         /**
          * \brief Applink protocol version (currently 1,2)
@@ -113,6 +127,12 @@ namespace NsAppLinkRPC
           *\brief Array of binary data if it exists
         */
         std::vector<unsigned char> * mBinaryData;
+
+        /**
+          *\brief Correlation id of JSON message 
+          * TODO not supposed to be in base class.
+        */
+        unsigned int    mCorrelationID;
     };
 
 }
