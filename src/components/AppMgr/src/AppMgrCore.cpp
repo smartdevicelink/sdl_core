@@ -102,7 +102,7 @@ namespace {
 
     template<typename Response>
     NsAppManager::Application_v2* getApplicationV2AndCheckHMIStatus(unsigned int sessionKey
-        , NsAppLinkRPCV2::FunctionID::FunctionIDInternal functionId)
+        , NsAppLinkRPC::ALRPCMessage * request)
     {
         NsAppManager::Application_v2* app = static_cast<NsAppManager::Application_v2*>(
             NsAppManager::AppMgrRegistry::getInstance().getApplication(sessionKey));
@@ -111,9 +111,9 @@ namespace {
             /*LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
                 << " hasn't been associated with any application!");*/
 
-            sendResponse<Response, NsAppLinkRPCV2::Result::ResultInternal>(functionId
+            sendResponse<Response, NsAppLinkRPCV2::Result::ResultInternal>(
+                request
                 , NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED
-                , NsAppLinkRPC::ALRPCMessage::RESPONSE
                 , false
                 , sessionKey);
 
@@ -125,9 +125,9 @@ namespace {
             /*LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " with session key "
                 << sessionKey << " has not been activated yet!" );*/
 
-            sendResponse<Response, NsAppLinkRPCV2::Result::ResultInternal>(functionId
+            sendResponse<Response, NsAppLinkRPCV2::Result::ResultInternal>(
+                request
                 , NsAppLinkRPCV2::Result::REJECTED
-                , NsAppLinkRPC::ALRPCMessage::RESPONSE
                 , false
                 , sessionKey);
 
@@ -199,7 +199,7 @@ namespace {
     pthread_t audioPassThruThread;
 
     // Don't send PerformAudioPassThru_response to mobile if false.
-    bool sendEndAudioPassThruToHMI(unsigned int sessionKey)
+    bool sendEndAudioPassThruToHMI(unsigned int sessionKey, unsigned int correlationID)
     {
         // Send respons to HMI.
         NsRPC2Communication::UI::EndAudioPassThru* endAudioPassThru
@@ -210,7 +210,7 @@ namespace {
             sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
                 , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                     , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
-                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                    , correlationID
                     , false
                     , sessionKey);
             return false;
@@ -271,12 +271,12 @@ namespace {
         else
         {
             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-            if (sendEndAudioPassThruToHMI(data_->sessionKey))
+            if (sendEndAudioPassThruToHMI(data_->sessionKey, data_->id))
             {
                 sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
                     , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                     , NsAppLinkRPCV2::Result::GENERIC_ERROR
-                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                    , data_->id
                     , false
                     , data_->sessionKey);
             }
@@ -291,12 +291,12 @@ namespace {
         {
             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
             std::cout << "Can't read from file." << std::endl;
-            if (sendEndAudioPassThruToHMI(data_->sessionKey))
+            if (sendEndAudioPassThruToHMI(data_->sessionKey, data_->id))
             {
                 sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
                     , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                     , NsAppLinkRPCV2::Result::GENERIC_ERROR
-                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                    , data_->id
                     , false
                     , data_->sessionKey);
             }
@@ -310,12 +310,12 @@ namespace {
         {
             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
             std::cout << "Binary data empty." << std::endl;
-            if (sendEndAudioPassThruToHMI(data_->sessionKey))
+            if (sendEndAudioPassThruToHMI(data_->sessionKey, data_->id))
             {
                 sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
                     , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                     , NsAppLinkRPCV2::Result::GENERIC_ERROR
-                    , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                    , data_->id
                     , false
                     , data_->sessionKey);
             }
@@ -365,12 +365,12 @@ namespace {
             if (!onAudioPassThru)
             {
                 std::cout << "OUT_OF_MEMORY: new NsAppLinkRPCV2::OnAudioPassThru." << std::endl;
-                if (sendEndAudioPassThruToHMI(data_->sessionKey))
+                if (sendEndAudioPassThruToHMI(data_->sessionKey, data_->id))
                 {
                     sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
                         , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                         , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
-                        , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                        , data_->id
                         , false
                         , data_->sessionKey);
                 }
@@ -565,6 +565,7 @@ namespace NsAppManager
                     const std::string& appName = object->get_appName();
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
+                    response->setCorrelationID(object->getCorrelationID());
 
                     if(AppMgrRegistry::getInstance().getItem(sessionKey))
                     {
@@ -576,7 +577,6 @@ namespace NsAppManager
                     }
 
                     Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, sessionKey ));
-                    response->setCorrelationID(object->getCorrelationID());
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     if(!app)
                     {
@@ -680,6 +680,7 @@ namespace NsAppManager
                     NsAppLinkRPC::UnregisterAppInterface_request * object = (NsAppLinkRPC::UnregisterAppInterface_request*)mobileMsg;
                     Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
                     NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
+                    response->setCorrelationID(object->getCorrelationID());
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -694,7 +695,6 @@ namespace NsAppManager
                     core->removeAppFromHmi(app, sessionKey);
                     core->unregisterApplication( sessionKey );
 
-                    response->setCorrelationID(object->getCorrelationID());
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
@@ -703,23 +703,7 @@ namespace NsAppManager
                     NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
                     msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
                     MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionKey);
-                    /*NsRPC2Communication::UI::Show* show = new NsRPC2Communication::UI::Show;
-                    show->set_alignment(NsAppLinkRPC::TextAlignment());
-                    show->set_appId(appId);
-                    std::vector<std::string> customPresets;
-                    show->set_customPresets(customPresets);
-                    show->set_graphic(NsAppLinkRPCV2::Image());
-                    show->set_mainField1("");
-                    show->set_mainField2("");
-                    show->set_mainField3("");
-                    show->set_mainField4("");
-                    show->set_mediaClock("");
-                    show->set_mediaTrack("");
-                    std::vector<NsAppLinkRPCV2::SoftButton> softButtons;
-                    show->set_softButtons(softButtons);
-                    show->set_statusBar("");
-                    HMIHandler::getInstance().sendRequest(show);*/
-
+                    
                     NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
                     appUnregistered->set_appName(appName);
                     appUnregistered->set_appId(app->getAppID());
@@ -733,16 +717,10 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A SubscribeButton request has been invoked");
 
-                    /* RegistryItem* registeredApp = AppMgrRegistry::getInstance().getItem(sessionID);
-                ButtonParams* params = new ButtonParams();
-                params->mMessage = message;
-                IAppCommand* command = new SubscribeButtonCmd(registeredApp, params);
-                command->execute();
-                delete command; */
-
                     NsAppLinkRPC::SubscribeButton_request * object = (NsAppLinkRPC::SubscribeButton_request*)mobileMsg;
                     NsAppLinkRPC::SubscribeButton_response* response = new NsAppLinkRPC::SubscribeButton_response();
                     RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
+                    response->setCorrelationID(object->getCorrelationID());
                     if(!item)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -773,7 +751,6 @@ namespace NsAppManager
                     btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)object->get_buttonName().get());
                     core->mButtonsMapping.addButton( btnName, item );
 
-                    response->setCorrelationID(object->getCorrelationID());
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -784,6 +761,7 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeButton request has been invoked");
                     NsAppLinkRPC::UnsubscribeButton_request * object = (NsAppLinkRPC::UnsubscribeButton_request*)mobileMsg;
                     NsAppLinkRPC::UnsubscribeButton_response* response = new NsAppLinkRPC::UnsubscribeButton_response();
+                    response->setCorrelationID(object->getCorrelationID());
                     Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
                     if(!app)
                     {
@@ -804,7 +782,6 @@ namespace NsAppManager
                     NsAppLinkRPCV2::ButtonName btnName;
                     btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)object->get_buttonName().get());
                     core->mButtonsMapping.removeButton( btnName );
-                    response->setCorrelationID(object->getCorrelationID());
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
@@ -1573,6 +1550,7 @@ namespace NsAppManager
                 case NsAppLinkRPC::Marshaller::METHOD_SETMEDIACLOCKTIMER_REQUEST:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
+                    NsAppLinkRPC::SetMediaClockTimer_request* object = (NsAppLinkRPC::SetMediaClockTimer_request*)mobileMsg;
                     Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
                     if(!app)
                     {
@@ -1580,6 +1558,7 @@ namespace NsAppManager
                         NsAppLinkRPC::SetMediaClockTimer_response* response = new NsAppLinkRPC::SetMediaClockTimer_response();
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
+                        response->setCorrelationID(object->getCorrelationID());
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
@@ -1590,6 +1569,7 @@ namespace NsAppManager
                         NsAppLinkRPC::SetMediaClockTimer_response* response = new NsAppLinkRPC::SetMediaClockTimer_response;
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::REJECTED);
+                        response->setCorrelationID(object->getCorrelationID());
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
@@ -1597,7 +1577,6 @@ namespace NsAppManager
                     setTimer->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     setTimer->set_appId(sessionKey);
                     
-                    NsAppLinkRPC::SetMediaClockTimer_request* object = (NsAppLinkRPC::SetMediaClockTimer_request*)mobileMsg;
                     if(object->get_startTime())
                     {
                         NsAppLinkRPCV2::StartTime to;
@@ -3189,7 +3168,7 @@ namespace NsAppManager
                         sendResponse<NsAppLinkRPCV2::PerformAudioPassThru_response
                             , NsAppLinkRPCV2::Result::ResultInternal>(NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID
                                 , NsAppLinkRPCV2::Result::OUT_OF_MEMORY
-                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , request->getCorrelationID()
                                 , false
                                 , sessionKey);
                         core->setAudioPassThruFlag(false);
@@ -3202,6 +3181,7 @@ namespace NsAppManager
                     data->bitsPerSample = bitsPerSample;
                     data->audioType = audioType;
                     data->sessionKey = sessionKey;
+                    data->id = request->getCorrelationID();
                     pthread_create(&audioPassThruThread, 0, AudioPassThru, static_cast<void*>(data));
 
                     LOG4CPLUS_INFO_EXT(mLogger, "AudioPassThru thread created...");
@@ -3219,7 +3199,7 @@ namespace NsAppManager
 
                     Application_v2* app
                         = getApplicationV2AndCheckHMIStatus<NsAppLinkRPCV2::PerformAudioPassThru_response>(sessionKey,
-                            NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID);
+                            mobileMsg);
                     if (!app)
                         break;
 
@@ -3543,7 +3523,7 @@ namespace NsAppManager
                             , NsAppLinkRPCV2::Result::ResultInternal>(
                                 NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
                                 , NsAppLinkRPCV2::Result::INVALID_DATA
-                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , request->getCorrelationID()
                                 , false
                                 , sessionKey);
                         return;
@@ -3557,7 +3537,7 @@ namespace NsAppManager
                             , NsAppLinkRPCV2::Result::ResultInternal>(
                                 NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
                                 , NsAppLinkRPCV2::Result::INVALID_DATA
-                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , request->getCorrelationID()
                                 , false
                                 , sessionKey);
                         return;
@@ -3571,7 +3551,7 @@ namespace NsAppManager
                             , NsAppLinkRPCV2::Result::ResultInternal>(
                                 NsAppLinkRPCV2::FunctionID::ChangeRegistrationID
                                 , NsAppLinkRPCV2::Result::INVALID_DATA
-                                , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                , request->getCorrelationID()
                                 , false
                                 , sessionKey);
                         return;
@@ -3846,7 +3826,7 @@ namespace NsAppManager
 
                     Application_v2* app = getApplicationV2AndCheckHMIStatus<NsAppLinkRPCV2::ShowConstantTBT_response>(
                         sessionKey,
-                        NsAppLinkRPCV2::FunctionID::ShowConstantTBTID);
+                        request);
                     if (!app)
                         return;
 
@@ -3887,7 +3867,7 @@ namespace NsAppManager
                                     , NsAppLinkRPCV2::Result::ResultInternal>(
                                         NsAppLinkRPCV2::FunctionID::UpdateTurnListID
                                             , NsAppLinkRPCV2::Result::FILE_NOT_FOUND
-                                            , NsAppLinkRPC::ALRPCMessage::RESPONSE
+                                            , request->getCorrelationID()
                                             , false
                                             , sessionKey);
                         }
@@ -4647,6 +4627,7 @@ namespace NsAppManager
                         break;
                     }
                 }
+                core->decreaseMessageChain(it);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__DELETESUBMENURESPONSE:
@@ -4902,7 +4883,7 @@ namespace NsAppManager
                         break;
                     }
                 }
-
+                core->decreaseMessageChain(it);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETMEDIACLOCKTIMERRESPONSE:
@@ -5081,6 +5062,7 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                     << " application id " << appId);
                 MobileHandler::getInstance().sendRPCMessage(response, appId);
+                core->decreaseMessageChain(it);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SETAPPICONRESPONSE:
@@ -5733,6 +5715,7 @@ namespace NsAppManager
                         break;
                     }
                 }
+                core->decreaseMessageChain(it);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__ONLANGUAGECHANGE:
