@@ -14,19 +14,19 @@ MFT.ApplinkModel = Em.Object.create({
 
     /**
      * Flag to indicate AudioPassThruPopUp activity
-     * @type {Bool}
+     * @param {Boolean}
      */
     AudioPassThruState:     false,
 
     /**
      * Flag to sent Send Data extended params
-     * @type {Bool}
+     * @param {Boolean}
      */
     sendDataExtend:     false,
 
     /**
      * Flag to be set true when phone call is  initialised
-     * @type {Bool}
+     * @param {Boolean}
      */
     phoneCall:     false,
 

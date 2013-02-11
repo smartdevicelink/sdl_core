@@ -181,7 +181,7 @@ MFT.ApplinkController = Em.Object.create({
     /**
      * Applink Driver Distraction ON/OFF switcher
      * 
-     * @param checked: bool
+     * @param {Boolean} params
      */
     selectDriverDistraction: function(checked){
         if(checked){
@@ -196,20 +196,16 @@ MFT.ApplinkController = Em.Object.create({
     /**
      * Applink Send Data ON/OFF extended param switcher
      * 
-     * @param checked: bool
+     * @param {Boolean} params
      */
-    selectSendData: function(checked){
-        if(checked){
-            MFT.ApplinkModel.set('sendDataExtend', true);
-        }else{
-            MFT.ApplinkModel.set('sendDataExtend', false);
-        }
+    selectSendData: function( checked ){
+        MFT.ApplinkModel.set('sendDataExtend', checked);
     },
 
     /**
      * Applink Protocol Version 2 ON/OFF switcher
      * 
-     * @param checked: bool
+     * @param {Boolean} params
      */
     selectProtocolVersion: function(checked){
         if(checked){
@@ -261,16 +257,6 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param {Object}
 	 */
 	onGetAppList: function( appList ){
-		//to be removed
-        /*var i = 0,
-			len = appList.length;
-		for(i = 0; i < len; i++){
-			if( appList[i].isMediaApplication ){
-				MFT.ApplinkController.registerApplication(appList[i].appId, 0);
-			}else{
-				MFT.ApplinkController.registerApplication(appList[i].appId, 1);
-			}
-		}*/
 		MFT.ApplinkModel.onGetAppList( appList );
 	},
 

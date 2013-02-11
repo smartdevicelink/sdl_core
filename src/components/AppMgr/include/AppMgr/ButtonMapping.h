@@ -39,7 +39,7 @@ namespace NsAppManager
     typedef std::pair<NsAppLinkRPCV2::ButtonName, RegistryItem*> ButtonMapItem;
 
     /**
-      *\brief Iterators of beginning and end of result range 
+      *\brief Iterators of beginning and end of result range
     */
     typedef std::pair<ButtonMap::const_iterator, ButtonMap::const_iterator> ResultRange;
 
@@ -97,6 +97,8 @@ namespace NsAppManager
          * \return @ResultRange Results range
          */
         ResultRange findSubscribedToButton(const NsAppLinkRPCV2::ButtonName &btnName) const;
+
+        bool exist(const NsAppLinkRPCV2::ButtonName& buttonName, RegistryItem* item);
     private:
 
         /**

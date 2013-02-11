@@ -118,6 +118,23 @@ namespace NsAppManager
     {
     }
 
+    bool ButtonMapping::exist(const NsAppLinkRPCV2::ButtonName& buttonName, RegistryItem* item)
+    {
+        ButtonMap::const_iterator it = mButtonsMapping.find(buttonName);
+        if (it != mButtonsMapping.end())
+        {
+            if (it->second && it->second->getApplication())
+            {
+                if (*(it->second->getApplication()) == *(item->getApplication()))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     /**
      * \brief comparison operator
      * \param b1 button name 1

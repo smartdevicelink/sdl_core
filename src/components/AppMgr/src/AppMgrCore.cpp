@@ -749,6 +749,15 @@ namespace NsAppManager
                     }
                     NsAppLinkRPCV2::ButtonName btnName;
                     btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)object->get_buttonName().get());
+
+                    if (core->mButtonsMapping.exist(btnName, item))
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::GENERIC_ERROR);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        return;
+                    }
+
                     core->mButtonsMapping.addButton( btnName, item );
 
                     response->set_success(true);
@@ -1847,6 +1856,15 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
+
+                    if (core->mButtonsMapping.exist(object->get_buttonName(), item))
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        return;
+                    }
+
                     core->mButtonsMapping.addButton( object->get_buttonName(), item );
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
@@ -3104,7 +3122,7 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPCV2::HMILevel::HMI_FULL != app->getApplicationHMIStatusLevel())
+                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
                         LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::PerformAudioPassThru_response* response = new NsAppLinkRPCV2::PerformAudioPassThru_response;
