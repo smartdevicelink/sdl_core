@@ -283,7 +283,7 @@ namespace NsAppManager
         /**
          * \brief Inserts message chain
          * \param chain Pointer to @MessageChain
-         * \param connectionKey Id of connection for Mobile side 
+         * \param connectionKey Id of connection for Mobile side
          * \param correlationID Correlation id for response for Mobile side
          * \return @MessageChaining* pointer to result chain
          */
@@ -310,7 +310,7 @@ namespace NsAppManager
         RequestMapping      mRequestMapping;
         DeviceList          mDeviceList;
         DeviceHandler       mDeviceHandler;
-        
+
         MessageChains mMessageChaining;
 
         NsAppLinkRPC::OnDriverDistraction* mDriverDistractionV1;
@@ -328,6 +328,7 @@ namespace NsAppManager
 
         NsAppLinkRPCV2::VehicleType mVehicleType;
         bool mAudioPassThruFlag;
+        bool mPerformInteractionFlag;
 
         SyncPManager     mSyncPManager;
 
