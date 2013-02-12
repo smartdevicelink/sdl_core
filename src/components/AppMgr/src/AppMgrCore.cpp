@@ -1346,7 +1346,8 @@ namespace NsAppManager
                     delSubMenu->set_menuId(menuId);
                     delSubMenu->set_appId(app->getAppID());
                     HMIHandler::getInstance().sendRequest(delSubMenu);
-                    app->removeMenu(menuId);
+                    core->menuMapping[delSubMenu->getId()] = menuId;
+                    // app->removeMenu(menuId);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_CREATEINTERACTIONCHOICESET_REQUEST:
@@ -3128,7 +3129,8 @@ namespace NsAppManager
                     delSubMenu->set_menuId(menuId);
                     delSubMenu->set_appId(app->getAppID());
                     HMIHandler::getInstance().sendRequest(delSubMenu);
-                    app->removeMenu(menuId);
+                    core->menuMapping[delSubMenu->getId()] = menuId;
+                    // app->removeMenu(menuId);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::PerformAudioPassThruID:
@@ -4718,6 +4720,15 @@ namespace NsAppManager
                         {
                             response->set_success(false);
                         }
+                        else
+                        {
+                            std::map<int, int>::iterator menuId = core->menuMapping.find(object->getId());
+                            if (menuId != core->menuMapping.end())
+                            {
+                                app->removeMenu(menuId->second);
+                                core->menuMapping.erase(menuId);
+                            }
+                        }
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
                         response->setCorrelationID(it->second->correlationID);
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
@@ -4733,6 +4744,15 @@ namespace NsAppManager
                                 static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()))
                         {
                             response->set_success(false);
+                        }
+                        else
+                        {
+                            std::map<int, int>::iterator menuId = core->menuMapping.find(object->getId());
+                            if (menuId != core->menuMapping.end())
+                            {
+                                app->removeMenu(menuId->second);
+                                core->menuMapping.erase(menuId);
+                            }
                         }
                         response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteSubMenuID);

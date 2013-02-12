@@ -330,6 +330,8 @@ namespace NsAppManager
         bool mAudioPassThruFlag;
         int mPerformInteractionFlag;
 
+        std::map<int, int> menuMapping;  // map<request_id, menu_id>
+
         SyncPManager     mSyncPManager;
 
         static log4cplus::Logger mLogger;
