@@ -87,9 +87,11 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 			
 			refreshItems: function() {
                 if ( MFT.ApplinkAppController.model.appId == MFT.NonMediaController.currentAppId ) {
-                    this.addItems(MFT.ApplinkAppController.model.softButtons);
+                    this.addItems(MFT.ApplinkAppController.model.softButtons, MFT.ApplinkAppController.model.appId );
                 }                    
             }.observes('MFT.ApplinkAppController.model.softButtons.@each'),
+
+        	groupName:      "info_nonMedia",
 			
 			content: Em.ContainerView.extend({
 				

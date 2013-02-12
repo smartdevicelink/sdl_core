@@ -221,13 +221,11 @@ MFT.ApplinkModel = Em.Object.create({
      * @param {Object} params
      */
     onAppRegistered: function( params ){
-
-            if( params.isMediaApplication ){
-                MFT.ApplinkController.registerApplication(params, 0 );
-            }else{
-                MFT.ApplinkController.registerApplication(params, 1 );
-            }
-
+        if( params.isMediaApplication ){
+            MFT.ApplinkController.registerApplication(params, 0 );
+        }else{
+            MFT.ApplinkController.registerApplication(params, 1 );
+        }
     },
 
     /**

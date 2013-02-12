@@ -384,239 +384,134 @@ MFT.ControlButtons = Em.ContainerView.create({
 			],
 
 			/** Up button */
-			UpBtn: MFT.Button.create({
+			UpBtn: MFT.Button.create(MFT.PresetEvents, {
 				elementId:	'TUNEUP',
 				classNames:	'UpBtn',
 				time:		0,
-				actionDown:		function(){
-					this._super();
-					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-				},
-				actionUp:		function(){
-					this._super();
-					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-				}
+				presetName: 'TUNEUP'
 			}),
 			
 			/** Down button */
-			DownBtn: MFT.Button.create({
+			DownBtn: MFT.Button.create(MFT.PresetEvents, {
 				elementId:	'TUNEDOWN',
 				classNames:	'DownBtn',
 				time:		0,
-				actionDown:		function(){
-					this._super();
-					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-				},
-				actionUp:		function(){
-					this._super();
-					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-				}
+				presetName: 'TUNEDOWN'
 			}),
 			
 			/** Left button */
-			LeftBtn: MFT.Button.create({
+			LeftBtn: MFT.Button.create(MFT.PresetEvents, {
 				elementId:	'SEEKLEFT',
 				classNames:	'LeftBtn',
 				time:		0,
-				actionDown:		function(){
-					this._super();
-					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-				},
-				actionUp:		function(){
-					this._super();
-					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-				}
+				presetName: 'SEEKLEFT'
 			}),
 			
 			/** Right button */
-			RightBtn: MFT.Button.create({
+			RightBtn: MFT.Button.create(MFT.PresetEvents, {
 				elementId:	'SEEKRIGHT',
 				classNames:	'RightBtn',
 				time:		0,
-				actionDown:		function(){
-					this._super();
-					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-				},
-				actionUp:		function(){
-					this._super();
-					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-				}
+				presetName: 'SEEKRIGHT'
 			}),
 			
 			/** Ok button */
-			OkBtn: MFT.Button.create({
+			OkBtn: MFT.Button.create(MFT.PresetEvents, {
 				elementId:	'OK',
 				classNames:	'OkBtn',
 				time:		0,
-				actionDown:		function(){
-					this._super();
-					MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-				},
-				actionUp:		function(){
-					this._super();
-					MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-				}
+				presetName: 'OK'
 			})
 		}),
 		
 		/** One button */
-		OneBtn: MFT.Button.create({
+		OneBtn: MFT.Button.create(MFT.PresetEvents, {
 			elementId:	'PRESET_1',
 			classNames:	'OneBtn btnNotPressed',
 			text:		'1',
 			time:		0,
-			actionDown:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-			},
-			actionUp:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-			}
+			presetName: 'PRESET_1'
 		}),
 		
 		/** Two button */
-		TwoBtn: MFT.Button.create({
+		TwoBtn: MFT.Button.create(MFT.PresetEvents, {
 			elementId:	'PRESET_2',
 			classNames:	'TwoBtn btnNotPressed',
 			text:		'2',
 			time:		0,
-			actionDown:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-			},
-			actionUp:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-			}
+			presetName: 'PRESET_2'
 		}),
 		
 		/** Three button */
-		ThreeBtn: MFT.Button.create({
+		ThreeBtn: MFT.Button.create(MFT.PresetEvents, {
 			elementId:	'PRESET_3',
 			classNames:	'ThreeBtn btnNotPressed',
 			text:		'3',
 			time:		0,
-			actionDown:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-			},
-			actionUp:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-			}
+			presetName: 'PRESET_3'
 		}),
 		
 		/** Four button */
-		FourBtn: MFT.Button.create({
+		FourBtn: MFT.Button.create(MFT.PresetEvents, {
 			elementId:	'PRESET_4',
 			classNames:	'FourBtn btnNotPressed',
 			text:		'4',
 			time:		0,
-			actionDown:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-			},
-			actionUp:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-			}
+			presetName: 'PRESET_4'
 		}),
 		
 		/** Five button */
-		FiveBtn: MFT.Button.create({
+		FiveBtn: MFT.Button.create(MFT.PresetEvents, {
 			elementId:	'PRESET_5',
 			classNames:	'FiveBtn btnNotPressed',
 			text:		'5',
 			time:		0,
-			actionDown:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-			},
-			actionUp:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-			}
+			presetName: 'PRESET_5'
 		}),
 		
 		/** One button */
-		SixBtn: MFT.Button.create({
+		SixBtn: MFT.Button.create(MFT.PresetEvents, {
 			elementId:	'PRESET_6',
 			classNames:	'SixBtn btnNotPressed',
 			text:		'6',
 			time:		0,
-			actionDown:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-			},
-			actionUp:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-			}
+			presetName: 'PRESET_6'
 		}),
 		
 		/** One button */
-		SevenBtn: MFT.Button.create({
+		SevenBtn: MFT.Button.create(MFT.PresetEvents, {
 			elementId:	'PRESET_7',
 			classNames:	'SevenBtn btnNotPressed',
 			text:		'7',
 			time:		0,
-			actionDown:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-			},
-			actionUp:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-			}
+			presetName: 'PRESET_7'
 		}),
 		
 		/** One button */
-		EightBtn: MFT.Button.create({
+		EightBtn: MFT.Button.create(MFT.PresetEvents, {
 			elementId:	'PRESET_8',
 			classNames:	'EightBtn btnNotPressed',
 			text:		'8',
 			time:		0,
-			actionDown:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-			},
-			actionUp:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-			}
+			presetName: 'PRESET_8'
 		}),
 		
 		/** One button */
-		NineBtn: MFT.Button.create({
+		NineBtn: MFT.Button.create(MFT.PresetEvents, {
 			elementId:	'PRESET_9',
 			classNames:	'NineBtn btnNotPressed',
 			text:		'9',
 			time:		0,
-			actionDown:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-			},
-			actionUp:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-			}
+			presetName: 'PRESET_9'
 		}),
 		
 		/** One button */
-		ZiroBtn: MFT.Button.create({
+		ZiroBtn: MFT.Button.create(MFT.PresetEvents, {
 			elementId:	'PRESET_0',
 			classNames:	'ZiroBtn btnNotPressed',
 			text:		'0',
 			time:		0,
-			actionDown:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionDown(this.elementId, this);
-			},
-			actionUp:		function(){
-				this._super();
-				MFT.ApplinkController.onSoftButtonActionUp(this.elementId, this);
-			}
+			presetName: 'PRESET_0'
 		})
 	})
 });

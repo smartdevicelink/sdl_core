@@ -83,9 +83,12 @@ MFT.AlertPopUp = Em.ContainerView.create({
     /**
      * Deactivate PopUp
      */
-    deactivate: function() {
+    deactivate: function( ABORTED ) {
         this.set('active',false);
         clearTimeout(this.timer);
+        if( ABORTED ){
+            MFT.ApplinkController.alertResponse( "ABORTED" );
+        }
     },
 
     /**
@@ -112,7 +115,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
      * 
      * @param {Object} params
      */
-    addSoftButtons: function( params ){
+    addSoftButtons: function( params, appId ){
 
         var count = this.get('softbuttons.buttons.childViews').length - 1;
         for(var i = count; i>=0; i--){
@@ -137,26 +140,16 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
             for(var i=0; i<params.length; i++){
                 this.get('softbuttons.buttons.childViews').pushObject(
-                    MFT.Button.create({
-                        actionDown:        function(){
-                            this._super();
-                            MFT.ApplinkController.onSoftButtonActionDownCustom(this);
-                        },
-                        actionUp:        function(){
-                            this._super();
-                            MFT.ApplinkController.onSoftButtonActionUpCustom(this);
-                            if( this.systemAction == 'DEFAULT_ACTION' ){
-                                MFT.ApplinkController.defaultActionSoftButton(this);
-                                MFT.ApplinkController.alertResponse( "ABORTED" );
-                            }
-                        },
+                    MFT.Button.create(MFT.PresetEventsCustom, {
                         systemAction:           params[i].systemAction,
+                        groupName:              "AlertPopUp",
                         softButtonID:           params[i].softButtonID,
                         icon:                   params[i].image,
                         text:                   params[i].text,
                         classNames:             'list-item softButton ' + softButtonsClass,
                         elementId:              'softButton' + i,
-                        templateName:           params[i].image ? 'rightIcon' : 'text'
+                        templateName:           params[i].image ? 'rightIcon' : 'text',
+                        appId:                  appId
                     })
                 );
             }
@@ -171,7 +164,8 @@ MFT.AlertPopUp = Em.ContainerView.create({
             MFT.Audio.play('audio/alert.wav');
         }
 
-        this.addSoftButtons(message.softButtons);
+        this.addSoftButtons( message.softButtons, message.appId );
+
         if( message.ttsChunks ){
             MFT.ApplinkModel.onPrompt(message.ttsChunks);
         }

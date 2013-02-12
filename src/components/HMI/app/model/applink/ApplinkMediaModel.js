@@ -177,6 +177,29 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
     },
 
     /**
+     * Method to clear App OverLay
+     */
+    clearAppOverLay: function(){
+
+        clearInterval(this.timer);
+        this.appInfo.set('field1',        '');
+        this.appInfo.set('field2',        '');
+        this.appInfo.set('field3',        '');
+        this.appInfo.set('field4',        '');
+        this.appInfo.set('alignment',     '');
+        this.set('statusText',            '');
+        this.appInfo.set('mediaClock',    '');
+        this.appInfo.set('mediaTrack',    '');
+        this.appInfo.set('trackIcon', 'images/applink/audio_icon.jpg');
+        this.updateSoftButtons();
+        for(i=0; i< 6; i++){
+            this.appInfo.set('customPresets.' + i, '');
+        }
+        MFT.ApplinkController.set('protocolVersion2State', false);
+
+    },
+
+    /**
      * Applin UI Show handler
      * @param {Object}
      */
@@ -200,9 +223,11 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 
         if( params.customPresets ){
             var i=0;
-            for(i=0; i<params.customPresets.length; i++){
+            for(i=0; i< 6; i++){
                 if(params.customPresets[i] != '' || params.customPresets[i] != null){
                     this.appInfo.set('customPresets.' + i, params.customPresets[i]);
+                }else{
+                    this.appInfo.set('customPresets.' + i, '');
                 }
             }
             MFT.ApplinkController.set('protocolVersion2State', true);
