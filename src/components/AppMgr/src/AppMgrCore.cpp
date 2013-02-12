@@ -2387,32 +2387,43 @@ namespace NsAppManager
                         break;
                     }
 
-                    NsRPC2Communication::UI::SetGlobalProperties* setGPRPC2Request = new NsRPC2Communication::UI::SetGlobalProperties();
-                    setGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                    core->mMessageChaining[setGPRPC2Request->getId()] = new MessageChaining(
-                        sessionKey,
-                        object->getCorrelationID());
-                    if(object->get_helpPrompt())
+                    if ((object->get_vrHelp() && object->get_vrHelpTitle()) ||
+                        (!object->get_vrHelp() && !object->get_vrHelpTitle()))
                     {
-                        setGPRPC2Request->set_helpPrompt(*object->get_helpPrompt());
+                        NsRPC2Communication::UI::SetGlobalProperties* setGPRPC2Request = new NsRPC2Communication::UI::SetGlobalProperties();
+                        setGPRPC2Request->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                        core->mMessageChaining[setGPRPC2Request->getId()] = new MessageChaining(
+                            sessionKey,
+                            object->getCorrelationID());
+                        if(object->get_helpPrompt())
+                        {
+                            setGPRPC2Request->set_helpPrompt(*object->get_helpPrompt());
+                        }
+
+                        if(object->get_timeoutPrompt())
+                        {
+                            setGPRPC2Request->set_timeoutPrompt(*object->get_timeoutPrompt());
+                        }
+
+                        if(object->get_vrHelp())
+                        {
+                            setGPRPC2Request->set_vrHelp(*object->get_vrHelp());
+                        }
+                        if(object->get_vrHelpTitle())
+                        {
+                            setGPRPC2Request->set_vrHelpTitle(*object->get_vrHelpTitle());
+                        }
+
+                        setGPRPC2Request->set_appId(sessionKey);
+                        HMIHandler::getInstance().sendRequest(setGPRPC2Request);
+                    }
+                    else
+                    {
+                        mobileResponse->set_success(false);
+                        mobileResponse->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+                        MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
                     }
 
-                    if(object->get_timeoutPrompt())
-                    {
-                        setGPRPC2Request->set_timeoutPrompt(*object->get_timeoutPrompt());
-                    }
-
-                    if(object->get_vrHelp())
-                    {
-                        setGPRPC2Request->set_vrHelp(*object->get_vrHelp());
-                    }
-                    if(object->get_vrHelpTitle())
-                    {
-                        setGPRPC2Request->set_vrHelpTitle(*object->get_vrHelpTitle());
-                    }
-
-                    setGPRPC2Request->set_appId(sessionKey);
-                    HMIHandler::getInstance().sendRequest(setGPRPC2Request);
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::ResetGlobalPropertiesID:
