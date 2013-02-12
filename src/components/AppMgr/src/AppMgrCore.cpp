@@ -755,7 +755,7 @@ namespace NsAppManager
                     if (core->mButtonsMapping.exist(btnName, item))
                     {
                         response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPC::Result::GENERIC_ERROR);
+                        response->set_resultCode(NsAppLinkRPC::Result::IGNORED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         return;
                     }
@@ -1875,7 +1875,7 @@ namespace NsAppManager
                     if (core->mButtonsMapping.exist(object->get_buttonName(), item))
                     {
                         response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::GENERIC_ERROR);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::IGNORED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         return;
                     }
