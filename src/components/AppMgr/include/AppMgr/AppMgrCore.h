@@ -328,7 +328,7 @@ namespace NsAppManager
 
         NsAppLinkRPCV2::VehicleType mVehicleType;
         bool mAudioPassThruFlag;
-        bool mPerformInteractionFlag;
+        int mPerformInteractionFlag;
 
         SyncPManager     mSyncPManager;
 

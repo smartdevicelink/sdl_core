@@ -434,7 +434,7 @@ namespace NsAppManager
         , mDriverDistractionV1(0)
         , mDriverDistractionV2(0)
         , mAudioPassThruFlag(false)
-        , mPerformInteractionFlag(false)
+        , mPerformInteractionFlag(-1)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
 
@@ -1401,6 +1401,17 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet request has been invoked");
                     NsAppLinkRPC::DeleteInteractionChoiceSet_request* object = (NsAppLinkRPC::DeleteInteractionChoiceSet_request*)mobileMsg;
+
+                    if (core->mPerformInteractionFlag == object->get_interactionChoiceSetID())
+                    {
+                        NsAppLinkRPC::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPC::DeleteInteractionChoiceSet_response;
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::IN_USE);
+                        response->setCorrelationID(object->getCorrelationID());
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        return;
+                    }
+
                     Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(sessionKey);
                     if(!app)
                     {
@@ -1556,7 +1567,7 @@ namespace NsAppManager
                         performInteraction->set_timeoutPrompt(chunkRes);
                     }
                     HMIHandler::getInstance().sendRequest(performInteraction);
-                    core->mPerformInteractionFlag = true;
+                    core->mPerformInteractionFlag = choiceSets[0];
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_SETMEDIACLOCKTIMER_REQUEST:
@@ -2487,7 +2498,7 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteInteractionChoiceSet request has been invoked");
                     NsAppLinkRPCV2::DeleteInteractionChoiceSet_request* object = (NsAppLinkRPCV2::DeleteInteractionChoiceSet_request*)mobileMsg;
 
-                    if (core->mPerformInteractionFlag)
+                    if (core->mPerformInteractionFlag == object->get_interactionChoiceSetID())
                     {
                         NsAppLinkRPCV2::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPCV2::DeleteInteractionChoiceSet_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteInteractionChoiceSetID);
@@ -2629,7 +2640,7 @@ namespace NsAppManager
                         performInteraction->set_vrHelp(*object->get_vrHelp());
                     }
                     HMIHandler::getInstance().sendRequest(performInteraction);
-                    core->mPerformInteractionFlag = true;
+                    core->mPerformInteractionFlag = choiceSets[0];
                     break;
                 }
                 case NsAppLinkRPCV2::FunctionID::AlertID:
@@ -4888,7 +4899,7 @@ namespace NsAppManager
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                             << " application id " << appId);
                         MobileHandler::getInstance().sendRPCMessage(response, appId);
-                        core->mPerformInteractionFlag = false;
+                        core->mPerformInteractionFlag = -1;
                         break;
                     }
                     case 2:
@@ -4917,7 +4928,7 @@ namespace NsAppManager
                         LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                             << " application id " << appId);
                         MobileHandler::getInstance().sendRPCMessage(response, appId);
-                        core->mPerformInteractionFlag = false;
+                        core->mPerformInteractionFlag = -1;
                         break;
                     }
                 }
