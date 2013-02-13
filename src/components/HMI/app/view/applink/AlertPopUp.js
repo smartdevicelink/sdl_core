@@ -181,7 +181,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
         }, message.duration);
         
         if( message.ttsChunks ){
-            MFT.ApplinkModel.onPrompt(message.ttsChunks, message.duration);
+            MFT.ApplinkModel.onPrompt(message.ttsChunks, message.duration-100);
         }
     }
 });
