@@ -1333,7 +1333,7 @@ namespace NsAppManager
                                             << " hasn't been associated with the application " << app->getName() << " id " << app->getAppID() << " !");
                         NsAppLinkRPC::DeleteSubMenu_response* response = new NsAppLinkRPC::DeleteSubMenu_response;
                         response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_ID);
                         response->setCorrelationID(object->getCorrelationID());
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
@@ -3116,7 +3116,7 @@ namespace NsAppManager
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteSubMenuID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_ID);
                         response->setCorrelationID(object->getCorrelationID());
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
