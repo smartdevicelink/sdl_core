@@ -154,9 +154,19 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
      * @param {Object}
      */
     applinkSetMediaClockTimer: function(params){
-		if(params.updateMode == "CLEAR" ) {
+
+        if( params.updateMode == "PAUSE" && this.pause){
+            return 'IGNORED';
+        }
+
+        if( params.updateMode == "RESUME" && !this.pause){
+            return 'IGNORED';
+        }
+
+        if(params.updateMode == "CLEAR" ) {
 			this.stopTimer();
 		}
+
         if(params.updateMode == "COUNTUP"){
             this.set('countUp', true);
         }else if(params.updateMode == "COUNTDOWN"){
@@ -168,11 +178,13 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
         }else if(params.updateMode == "RESUME"){
             this.set('pause', false);
         }else{
-            this.set('duration', 0);
-            this.set('duration', params.startTime.hours*3600 + params.startTime.minutes*60 + params.startTime.seconds );
+            if( params.startTime ){
+                this.set('duration', 0);
+                this.set('duration', params.startTime.hours*3600 + params.startTime.minutes*60 + params.startTime.seconds );
+            }
             this.set('pause', false);
         }
-        
+
         return 'SUCCESS';
     },
 
