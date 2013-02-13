@@ -1,4 +1,5 @@
 [CW7]
+* Update the turn list icons.
 * SyncProxyAndroid SDK: when serializing a JSON RPCMessage, serialize hashtable as RPCStruct. Fix for the XML Test feature in SyncProxyTester.
 - Revert: "SyncProxyAndroid SDK: Interim fix: revert the change of protocol v2 JSON messages (the "parameters" key) until the AppLinkCore has changed the parser."
 * Fix a crash when trying to open Speak dialog.
