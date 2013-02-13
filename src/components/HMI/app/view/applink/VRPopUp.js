@@ -140,7 +140,7 @@ MFT.VRPopUp = Em.ContainerView.create({
             
             this.set('VRActive', true);
         }
-        
+
         MFT.ApplinkController.onSystemContextChange();
     },
 

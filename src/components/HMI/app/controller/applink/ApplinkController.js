@@ -44,13 +44,19 @@ MFT.ApplinkController = Em.Object.create({
         if ( MFT.TTSPopUp.active || MFT.TBTClientStateView.active || MFT.VehicleInfo.active ) {
             return 'HMI_OBSCURED';
         }
+
+        if ( MFT.OptionsView.active ) {
+            return 'MENU';
+        }
         
         if ( MFT.States.info.nonMedia.active || MFT.States.media.applink.active ) {
             return 'MAIN';
         } else {
             return 'MENU';
         }
+
     }.property(
+        'MFT.OptionsView.active',
         'MFT.TTSPopUp.active',
         'MFT.VRPopUp.VRActive',
         'MFT.AlertPopUp.activate',

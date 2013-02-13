@@ -19,7 +19,8 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
 		'captionText',
 		'commands'
 	],
-	
+
+
 	// Menu caption text
     captionBinding: 'MFT.ApplinkAppController.model.currentSubMenuLabel',
 	
@@ -84,6 +85,12 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
                 
 		}.observes('MFT.ApplinkAppController.model.currentCommandsList')
 	}),
+
+    activate: function( text ) {
+       this._super();
+
+        MFT.ApplinkController.onSystemContextChange();
+    },
 	
     // Extend deactivate window
     deactivate: function() {
@@ -96,5 +103,7 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
                 this._super();
             }
         }
+
+        MFT.ApplinkController.onSystemContextChange();
     }
 });
