@@ -90,10 +90,17 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
      */
     onDeleteApplication: function( appId ){
         if( MFT.ApplinkMediaController.currentAppId == appId ){
-            if( MFT.applinkView.stateObj.active || MFT.ApplinkAppController.model.active ){
-                MFT.MediaController.turnOnAVin();
-            }
+
             MFT.ApplinkMediaController.set('currentAppId', 0);
+
+            if( MFT.applinkView.stateObj.active || MFT.ApplinkAppController.model.active ){
+
+                MFT.States.goToState('info.apps');
+
+                MFT.ApplinkAppController.model.set('active', false);
+
+                MFT.MediaController.set('activeState', 'media.avin');
+            }
         }
     },
 
