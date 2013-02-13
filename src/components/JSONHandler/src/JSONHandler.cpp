@@ -216,8 +216,33 @@ NsAppLinkRPC::ALRPCMessage * JSONHandler::handleIncomingMessageProtocolV2( const
 
     std::string jsonCleanMessage = clearEmptySpaces( jsonMessage );
 
-    NsAppLinkRPC::ALRPCMessage * messageObject = NsAppLinkRPCV2::Marshaller::fromString( jsonCleanMessage, static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(functionId), static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(rpcType) );
-    LOG4CPLUS_INFO_EXT(mLogger, "Received a message from mobile side: " << std::endl << NsAppLinkRPCV2::Marshaller::toJSON(messageObject, static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(functionId), static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(rpcType)));
+    Json::Reader reader;
+    Json::Value json;
+
+    if( !reader.parse( jsonCleanMessage, json, false ) )
+    {
+        LOG4CPLUS_ERROR(mLogger, "Received invalid json string.");
+        return 0;
+    }
+    //TODO (pvysh): temporary solution, will be fixed after changes to codegeneration
+    LOG4CPLUS_INFO_EXT(mLogger, "Received from mobile side: " << std::endl << json);
+
+    Json::Value tempSolution;
+    tempSolution["parameters"] = json;
+
+    LOG4CPLUS_INFO_EXT(mLogger, "Added params: " << std::endl << tempSolution);
+
+    /*NsAppLinkRPC::ALRPCMessage * messageObject = NsAppLinkRPCV2::Marshaller::fromString( 
+        jsonCleanMessage, 
+        static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(functionId), 
+        static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(rpcType) );*/
+
+    NsAppLinkRPC::ALRPCMessage * messageObject = NsAppLinkRPCV2::Marshaller::fromJSON( 
+        tempSolution, 
+        static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(functionId), 
+        static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(rpcType) );
+
+    //LOG4CPLUS_INFO_EXT(mLogger, "Received a message from mobile side: " << std::endl << NsAppLinkRPCV2::Marshaller::toJSON(messageObject, static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(functionId), static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(rpcType)));
 
     if ( message -> getDataSize() > offset + jsonSize )
     {
@@ -319,12 +344,25 @@ NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtoco
 NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtocolV2( int connectionKey, const NsAppLinkRPC::ALRPCMessage *  message )
 {
     LOG4CPLUS_INFO_EXT(mLogger, "handling a message " << message->getMethodId() << " protocol 2");
-    LOG4CPLUS_INFO_EXT(mLogger, "message text: " << std::endl << NsAppLinkRPCV2::Marshaller::toJSON( message,
-                                                                     static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId()),
-                                                                     static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType())) );
-    std::string messageString = NsAppLinkRPCV2::Marshaller::toString( message,
+    Json::Value json = NsAppLinkRPCV2::Marshaller::toJSON( message,
+         static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId()),
+         static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()));
+
+    if( json.isNull() )
+    {
+        LOG4CPLUS_ERROR(mLogger, "Failed to serialize ALRPCMessage object version 2.");
+        return 0;
+    }
+
+    LOG4CPLUS_INFO_EXT(mLogger, "Message to be sent to mobile app \n" << json["parameters"]);
+
+    //TODO (pvysh): temporary solution, will be fixed after changes to codegeneration
+    Json::FastWriter writer;
+    std::string messageString = writer.write(json["parameters"]);/*NsAppLinkRPCV2::Marshaller::toString( message,
                         static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId()),
-                        static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()) );
+                        static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()) );*/
+
+    //LOG4CPLUS_INFO_EXT(mLogger, "message text: " << std::endl << json );                        
     if ( messageString.length() == 0 )
     {
         LOG4CPLUS_ERROR(mLogger, "Failed to serialize ALRPCMessage object version 2.");

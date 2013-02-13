@@ -122,18 +122,18 @@ namespace NsAppManager
             RegistryItem* item = it->second;
             if(!item)
             {
-                LOG4CPLUS_ERROR_EXT(mLogger, " Null-item found!");
+                LOG4CPLUS_WARN_EXT(mLogger, " Null-item found!");
                 break;
             }
             Application* app = item->getApplication();
             if(!app)
             {
-                LOG4CPLUS_ERROR_EXT(mLogger, "No application for the item!");
+                LOG4CPLUS_WARN_EXT(mLogger, "No application for the item!");
                 break;
             }
             if(appName == app->getName())
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "Adding an application from application id " << app->getAppID());
+                LOG4CPLUS_WARN_EXT(mLogger, "Adding an application from application id " << app->getAppID());
                 items.push_back(item);
             }
         }
@@ -156,12 +156,12 @@ namespace NsAppManager
             RegistryItem* item = it->second;
             if(!item)
             {
-                LOG4CPLUS_ERROR_EXT(mLogger, " NULL-application registered for the application id " << appId);
+                LOG4CPLUS_WARN_EXT(mLogger, " NULL-application registered for the application id " << appId);
                 return 0;
             }
             return item;
         }
-        LOG4CPLUS_ERROR_EXT(mLogger, " No application found with the application id " << appId);
+        LOG4CPLUS_WARN_EXT(mLogger, " No application found with the application id " << appId);
         return 0;
     }
 
@@ -217,13 +217,13 @@ namespace NsAppManager
             RegistryItem* item_ = it->second;
             if(!item_)
             {
-                LOG4CPLUS_WARN(mLogger, " Item is empty in registry!");
+                LOG4CPLUS_WARN_EXT(mLogger, " Item is empty in registry!");
                 return false;
             }
             Application* tempApplication = item_->getApplication();
             if(!tempApplication)
             {
-                LOG4CPLUS_WARN(mLogger, "No application for the item!");
+                LOG4CPLUS_WARN_EXT(mLogger, "No application for the item!");
                 return false;
             }
 

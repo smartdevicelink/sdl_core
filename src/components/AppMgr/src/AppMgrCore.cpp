@@ -6103,9 +6103,6 @@ namespace NsAppManager
                         return;
                     }
                 }
-                //TODO (pvysh): seems to be correct assumption...
-                currentApp->setSystemContext(
-                    NsAppLinkRPCV2::SystemContext::SYSCTXT_MENU);
 
                 core->sendHMINotificationToMobile( currentApp );
                 return;
