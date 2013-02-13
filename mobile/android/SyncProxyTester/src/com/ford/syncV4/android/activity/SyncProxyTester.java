@@ -70,6 +70,8 @@ import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCMessage;
+import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
@@ -269,6 +271,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 				Object listObj = parent.getItemAtPosition(position);
 				if (listObj instanceof RPCMessage) {
 					String rawJSON = "";
+					
+					Integer corrId = -1;
+					if (listObj instanceof RPCRequest) {
+						corrId = ((RPCRequest) listObj).getCorrelationID();
+					} else if (listObj instanceof RPCResponse) {
+						corrId = ((RPCResponse) listObj).getCorrelationID();
+					}
+					
 					try {
 						rawJSON = ((RPCMessage) listObj).serializeJSON(
 								ProxyService.getInstance().getProxyInstance().getWiProVersion()).toString(2);
@@ -277,7 +287,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						e.printStackTrace();
 					}
 					AlertDialog.Builder builder = new AlertDialog.Builder(SyncProxyTester.this);
-					builder.setTitle("Raw JSON");
+					builder.setTitle("Raw JSON" + (corrId != -1 ? " (Corr ID " + corrId + ")" : ""));
 					builder.setMessage(rawJSON);
 					builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
