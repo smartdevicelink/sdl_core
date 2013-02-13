@@ -54,12 +54,19 @@ MFT.TTSPopUp = Em.ContainerView.create({
 		this.set('content', msg);
 		this.set('active', true);
 		
-		MFT.ApplinkController.onSystemContextChange();
+				
 		
         clearTimeout(this.timer);
 		this.timer = setTimeout(function(){
             self.set('active', false);
-            MFT.ApplinkController.onSystemContextChange();
+            
         }, delay ? delay :10000 );
-	}
+	},
+	
+	// send context notification
+	onStateChange: function() {
+        if ( !MFT.AlertPopUp.activate ) {
+            MFT.ApplinkController.onSystemContextChange();
+        }
+	}.observes('this.active')
 });

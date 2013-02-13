@@ -37,7 +37,7 @@ MFT.ApplinkController = Em.Object.create({
             return 'VRSESSION';
         }
         
-        if ( MFT.AlertPopUp.activate ) {
+        if ( MFT.AlertPopUp.active ) {
             return 'ALERT';
         }
         
@@ -59,7 +59,7 @@ MFT.ApplinkController = Em.Object.create({
         'MFT.OptionsView.active',
         'MFT.TTSPopUp.active',
         'MFT.VRPopUp.VRActive',
-        'MFT.AlertPopUp.activate',
+        'MFT.AlertPopUp.active',
         'MFT.TBTClientStateView.active',
         'MFT.VehicleInfo.active',
         'MFT.States.info.nonMedia.active',
