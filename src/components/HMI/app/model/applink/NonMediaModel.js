@@ -63,6 +63,25 @@ MFT.ApplinkNonMediaModel = MFT.ApplinkAppModel.extend({
     turnOnApplink: function(){
         MFT.NonMediaController.activateApp( this );
     },
+
+    /**
+     * Method to clear App OverLay
+     */
+    clearAppOverLay: function(){
+
+        clearInterval(this.timer);
+        this.appInfo.set('field1',        '');
+        this.appInfo.set('field2',        '');
+        this.appInfo.set('field3',        '');
+        this.appInfo.set('field4',        '');
+        this.appInfo.set('alignment',     '');
+        this.appInfo.set('trackIcon', 'images/applink/audio_icon.jpg');
+        this.updateSoftButtons();
+        for(i=0; i< 6; i++){
+            this.appInfo.set('customPresets.' + i, '');
+        }
+
+    },
     
     /** 
      * Applin UI Show handler

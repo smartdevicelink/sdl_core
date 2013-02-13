@@ -78,7 +78,6 @@ MFT.ApplinkMediaControllsV1 = Em.ContainerView.create({
                 actionUp:       function(){
                     this._super();
                     MFT.ApplinkController.onSoftButtonActionUp('OK', this);
-                    //MFT.ApplinkAppController.model.set('isPlaying', !MFT.ApplinkAppController.model.isPlaying);
                 },
                 /** Define button template */
                 template: Ember.Handlebars.compile(

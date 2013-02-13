@@ -380,6 +380,9 @@
 	width: 109px;
 	height: 109px;
 }
+#applink_view_container .timeV2{
+	top: 155px;
+}
 #applink_view_container .textLimit{
 	width: 460px;
 	text-overflow: ellipsis;

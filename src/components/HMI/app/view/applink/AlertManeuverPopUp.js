@@ -132,21 +132,14 @@ MFT.AlertManeuverPopUp = Em.ContainerView.create({
 
             for(var i=0; i<params.length; i++){
                 this.get('softbuttons.childViews').pushObject(
-                    MFT.Button.create({
-                        actionDown:        function(){
-                            this._super();
-                            MFT.ApplinkController.onSoftButtonActionDownCustom(this);
-                        },
-                        actionUp:        function(){
-                            this._super();
-                            MFT.ApplinkController.onSoftButtonActionUpCustom(this);
-                        },
+                    MFT.Button.create(MFT.PresetEventsCustom, {
                         softButtonID:           params[i].softButtonID,
                         icon:                   params[i].image,
                         text:                   params[i].text,
                         classNames:             'list-item softButton ' + softButtonsClass,
                         elementId:              'softButton' + i,
-                        templateName:           params[i].image ? 'rightIcon' : 'text'
+                        templateName:           params[i].image ? 'rightIcon' : 'text',
+                        systemAction:           params[i].systemAction
                     })
                 );
             }

@@ -55,9 +55,11 @@ MFT.applinkView = Em.ContainerView.create(MFT.LoadableView,{
 			
 		refreshItems: function() {
             if ( MFT.ApplinkAppController.model.appId == MFT.ApplinkMediaController.currentAppId ) {
-                this.addItems(MFT.ApplinkAppController.model.softButtons);
+                this.addItems( MFT.ApplinkAppController.model.softButtons, MFT.ApplinkAppController.model.appId );
             }                    
         }.observes('MFT.ApplinkAppController.model.softButtons.@each'),
+
+        groupName:      "applink_view_container",
 		
 		content: Em.ContainerView.extend({
 			

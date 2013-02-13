@@ -17,38 +17,20 @@ MFT.MenuList = Em.ContainerView.extend({
 	 *
 	 * @param buttons: SoftButton[]
 	 */
-	addItems: function( buttons ) {
+	addItems: function( buttons, appId ) {
 
 		this.deleteItems();
 
 		if(buttons){
 			for(var i=0; i<buttons.length; i++){
 				this.get('content.childViews').pushObject( 
-					MFT.Button.create({
+					MFT.Button.create(MFT.PresetEventsCustom, {
 						text:			buttons[i].text,
 						icon:			buttons[i].image,
 						softButtonId:	buttons[i].softButtonID,
                         systemAction:   buttons[i].systemAction,
-						actionDown:       function(){
-		                    this._super();
-		                    FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", this.softButtonId);
-		                    var self = this;
-		                    this.time = 0;
-		                    setTimeout(function(){ self.time ++; }, 1000);
-		                },
-		                actionUp:       function(){
-		                    this._super();
-		                    FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", this.softButtonId);
-		                    if(this.time > 0){
-		                        FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "LONG", this.softButtonId);
-		                    }else{
-		                        FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "SHORT", this.softButtonId);
-		                    }
-		                    this.time = 0;
-		                    if( this.systemAction == 'DEFAULT_ACTION' ){
-                                MFT.ApplinkController.defaultActionSoftButton(this);
-                            }
-		                }
+                        groupName:      this.groupName,
+                        appId:          appId
 					})
 				);
 			}

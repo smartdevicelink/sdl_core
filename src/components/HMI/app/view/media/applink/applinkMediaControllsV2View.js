@@ -34,14 +34,15 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                     '<div class="divider_o"></div>'+
                     '<div class="title textLimit">{{MFT.ApplinkAppController.model.appInfo.field1}}</div>'+
                     '<div class="album textLimit">{{MFT.ApplinkAppController.model.appInfo.field2}}</div>'+
-                    '<div class="artist textLimit">{{MFT.ApplinkAppController.model.appInfo.mediaClock}}</div>'+
+                    '<div class="artist textLimit"{{bindAttr class="MFT.ApplinkController.protocolVersion2State:hidden"}}>{{MFT.ApplinkAppController.model.appInfo.field3}}</div>'+
+                    '<div class="time"{{bindAttr class="MFT.ApplinkController.protocolVersion2State:timeV2"}}>{{MFT.ApplinkAppController.model.appInfo.mediaClock}}</div>'+
                     '<img class="cd_logo" {{bindAttr src="MFT.ApplinkAppController.model.appInfo.trackIcon" class="MFT.ApplinkController.protocolVersion2State:cd_logoV2"}} />'+
                 '</div>'+
                 '{{/with}}'
             )
         }),
 
-         Controls:   Em.ContainerView.create({
+        Controls:   Em.ContainerView.create({
 
             elementId: 'app_view_controlls',
 
@@ -56,52 +57,31 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
 
             classNameBindings:  'MFT.ApplinkController.protocolVersion2State:player_controllsV2',
             
-            PrevTrackButton: MFT.Button.extend({
+            PrevTrackButton: MFT.Button.extend(MFT.PresetEvents, {
                 elementId:          'app_view_controlls_prev_track_button_v2',
                 classNames:         ['bc-item-big', 'prevcd'],
                 classNames:         ['bc-item-big', 'prevcd'],
-                actionDown:     function(){
-                    this._super();
-                    MFT.ApplinkController.onSoftButtonActionDown('SEEKLEFT', this);
-                },
-                actionUp:       function(){
-                    this._super();
-                    MFT.ApplinkController.onSoftButtonActionUp('SEEKLEFT', this);
-                },
                 icon:               'images/media/ico_prew.png',
+                presetName:         'SEEKLEFT'
             }),
-            PlayButton: MFT.Button.extend({
+            PlayButton: MFT.Button.extend(MFT.PresetEvents, {
                 elementId:          'app_view_controlls_play_button_v2',
                 classNames:         ['bc-item-big', 'playcd'],
-                actionDown:     function(){
-                    this._super();
-                    MFT.ApplinkController.onSoftButtonActionDown('OK', this);
-                },
-                actionUp:       function(){
-                    this._super();
-                    MFT.ApplinkController.onSoftButtonActionUp('OK', this);
-                    MFT.ApplinkAppController.model.set('isPlaying', !MFT.ApplinkAppController.model.isPlaying);
+                presetName:         'OK',
+                actionUp: function(){
+                    MFT.ApplinkController.onSoftButtonOkActionUp( this.presetName );
                 },
                 /** Define button template */
                 template: Ember.Handlebars.compile(
-                    //'<img class="playIcon hideicon"{{bindAttr class="MFT.ApplinkAppController.model.isPlaying:visible"}} src="images/media/ico_pause.png" />'+
-                    //'<img class="playIcon showicon"{{bindAttr class="MFT.ApplinkAppController.model.isPlaying:not-visible"}} src="images/media/ico-play.png" />'
                     '<img class="playIcon" {{bindAttr class="MFT.ApplinkAppController.model.isPlaying:visible:not-visible"}} src="images/media/ico_pause.png" />'+
                     '<img class="playIcon not-visible" {{bindAttr class="MFT.ApplinkAppController.model.isPlaying:not-visible:visible"}} src="images/media/ico-play.png" />'
                 )
             }),
-            NextTrackButton: MFT.Button.extend({
+            NextTrackButton: MFT.Button.extend(MFT.PresetEvents, {
                 elementId:          'app_view_controlls_next_track_button_v2',
                 classNames:         ['bc-item-big', 'nextcd'],
-                actionDown:     function(){
-                    this._super();
-                    MFT.ApplinkController.onSoftButtonActionDown('SEEKRIGHT', this);
-                },
-                actionUp:       function(){
-                    this._super();
-                    MFT.ApplinkController.onSoftButtonActionUp('SEEKRIGHT', this);
-                },
                 icon:               'images/media/ico_next.png',
+                presetName:         'SEEKRIGHT'
             })
         }),
 

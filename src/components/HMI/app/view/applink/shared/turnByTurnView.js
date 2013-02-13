@@ -117,6 +117,8 @@ MFT.TurnByTurnView = MFT.ApplinkAbstractView.create({
 
         itemsOnPage:    3,
 
+        groupName:      "TurnByTurnView",
+
         content: Em.ContainerView.extend({
 
             classNames: ['content']

@@ -45,7 +45,7 @@ MFT.ScrollableMessage = MFT.ApplinkAbstractView.create({
             var self = this;
             
             this.set('captionText.content',appName);
-            this.softButtons.addItems( params.softButtons );
+            this.softButtons.addItems( params.softButtons, params.appId );
             this.set('listOfCommands.items', params.scrollableMessageBody );
             this.set('active',true);
             clearTimeout(this.timer);
@@ -56,6 +56,8 @@ MFT.ScrollableMessage = MFT.ApplinkAbstractView.create({
     softButtons: MFT.MenuList.extend({
 
         itemsOnPage:    4,
+
+        groupName:      "ScrollableMessage",
 
         content: Em.ContainerView.extend({
 

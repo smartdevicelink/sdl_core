@@ -44,13 +44,19 @@ MFT.ApplinkController = Em.Object.create({
         if ( MFT.TTSPopUp.active || MFT.TBTClientStateView.active || MFT.VehicleInfo.active ) {
             return 'HMI_OBSCURED';
         }
+
+        if ( MFT.OptionsView.active ) {
+            return 'MENU';
+        }
         
         if ( MFT.States.info.nonMedia.active || MFT.States.media.applink.active ) {
             return 'MAIN';
         } else {
             return 'MENU';
         }
+
     }.property(
+        'MFT.OptionsView.active',
         'MFT.TTSPopUp.active',
         'MFT.VRPopUp.VRActive',
         'MFT.AlertPopUp.activate',
@@ -73,8 +79,69 @@ MFT.ApplinkController = Em.Object.create({
     /**
      * Handler for SoftButtons default action
      */
-    defaultActionSoftButton: function(element){
-        element._parentView._parentView._parentView.deactivate();
+    defaultActionSoftButton: function( element ){
+        switch( element.groupName ){
+
+            case "AlertPopUp" :{
+                MFT.AlertPopUp.deactivate( true );
+                break;
+            }
+            case "ScrollableMessage" :{
+                MFT.ScrollableMessage.deactivate();
+                break;
+            }
+            case "TurnByTurnView" :{
+                MFT.TurnByTurnView.deactivate();
+                break;
+            }
+            case "info_nonMedia" :{
+                MFT.ApplinkController.getApplicationModel( element.appId ).clearAppOverLay();
+                break;
+            }
+            case "applink_view_container" :{
+                MFT.ApplinkController.getApplicationModel( element.appId ).clearAppOverLay();
+                break;
+            }
+
+        }
+    },
+
+    /**
+     * Handler for SoftButtons stealFocus action
+     */
+    stealFocusSoftButton: function( element ){
+        switch( element.groupName ){
+
+            case "AlertPopUp" :{
+                MFT.AlertPopUp.deactivate();
+                MFT.ApplinkController.getApplicationModel( element.appId ).turnOnApplink();
+                break;
+            }
+            case "ScrollableMessage" :{
+                MFT.ScrollableMessage.deactivate();
+                MFT.ApplinkController.getApplicationModel( element.appId ).turnOnApplink();
+                break;
+            }
+
+        }
+    },
+
+    /**
+     * Handler for SoftButtons keepContext action
+     */
+    keepContextSoftButton: function( element ){
+        switch( element.groupName ){
+
+            case "AlertPopUp" :{
+                MFT.AlertPopUp.set('timer', 0);
+                break;
+            }
+            case "ScrollableMessage" :{
+                MFT.ScrollableMessage.set('timer', 0);
+                break;
+            }
+
+        }
     },
 
     /**
@@ -181,7 +248,7 @@ MFT.ApplinkController = Em.Object.create({
     /**
      * Applink Driver Distraction ON/OFF switcher
      * 
-     * @param {Boolean} params
+     * @param {Boolean}
      */
     selectDriverDistraction: function(checked){
         if(checked){
@@ -196,7 +263,7 @@ MFT.ApplinkController = Em.Object.create({
     /**
      * Applink Send Data ON/OFF extended param switcher
      * 
-     * @param {Boolean} params
+     * @param {Boolean}
      */
     selectSendData: function( checked ){
         MFT.ApplinkModel.set('sendDataExtend', checked);
@@ -205,7 +272,7 @@ MFT.ApplinkController = Em.Object.create({
     /**
      * Applink Protocol Version 2 ON/OFF switcher
      * 
-     * @param {Boolean} params
+     * @param {Boolean}
      */
     selectProtocolVersion: function(checked){
         if(checked){
@@ -280,10 +347,11 @@ MFT.ApplinkController = Em.Object.create({
 	 * @param {Object}
 	 */
 	onSoftButtonActionUpCustom: function( element ){
-        FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
         if(element.time > 0){
             FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "LONG", element.softButtonID);
+            FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
         }else{
+            FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
             FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "SHORT", element.softButtonID);
         }
         element.time = 0;
@@ -296,31 +364,45 @@ MFT.ApplinkController = Em.Object.create({
 	onSoftButtonActionDownCustom: function( element ){
         FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", element.softButtonID);
         element.time = 0;
-        setTimeout(function(){ element.time ++; }, 1000);
+        setTimeout(function(){ element.time ++; }, 2000);
 	},
 	
 	/**
 	 * Method sent softButtons pressed and event status to RPC
-	 * @param {Object}
+     * @param {String}
+     * @param {Object}
 	 */
 	onSoftButtonActionUp: function( name, element ){
-        FFW.Buttons.buttonEvent( name, "BUTTONUP" );
         if(element.time > 0){
             FFW.Buttons.buttonPressed( name, "LONG" );
+            FFW.Buttons.buttonEvent( name, "BUTTONUP" );
         }else{
+            FFW.Buttons.buttonEvent( name, "BUTTONUP" );
             FFW.Buttons.buttonPressed( name, "SHORT" );
         }
         element.time = 0;
     },
 
+    /**
+     * Method sent softButton OK pressed and event status to RPC
+     * @param {String}
+     */
+    onSoftButtonOkActionUp: function( name ){
+        FFW.Buttons.buttonEvent( name, "BUTTONUP" );
+        FFW.Buttons.buttonPressed( name, "SHORT" );
+        MFT.ApplinkAppController.model.set('isPlaying', !MFT.ApplinkAppController.model.isPlaying);
+    },
+        
+
 	/**
 	 * Method sent softButtons pressed and event status to RPC 
-	 * @param {Object}
+     * @param {String}
+     * @param {Object}
 	 */
 	onSoftButtonActionDown: function( name, element ){
         FFW.Buttons.buttonEvent( name, "BUTTONDOWN" );
         element.time = 0;
-        setTimeout(function(){ element.time ++; }, 1000);
+        setTimeout(function(){ element.time ++; }, 2000);
 	},
 	
 	/**
