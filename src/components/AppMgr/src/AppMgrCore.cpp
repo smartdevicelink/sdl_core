@@ -752,7 +752,7 @@ namespace NsAppManager
                     NsAppLinkRPCV2::ButtonName btnName;
                     btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)object->get_buttonName().get());
 
-                    if (core->mButtonsMapping.exist(btnName, item))
+                    if (core->mButtonsMapping.exist(btnName, app))
                     {
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::IGNORED);
@@ -792,6 +792,15 @@ namespace NsAppManager
                     }
                     NsAppLinkRPCV2::ButtonName btnName;
                     btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)object->get_buttonName().get());
+
+                    if (!core->mButtonsMapping.exist(btnName, app))
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::IGNORED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        return;
+                    }
+
                     core->mButtonsMapping.removeButton( btnName );
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->set_success(true);
@@ -1872,7 +1881,7 @@ namespace NsAppManager
                         break;
                     }
 
-                    if (core->mButtonsMapping.exist(object->get_buttonName(), item))
+                    if (core->mButtonsMapping.exist(object->get_buttonName(), app))
                     {
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::IGNORED);
@@ -1913,6 +1922,15 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
+
+                    if (!core->mButtonsMapping.exist(object->get_buttonName(), app))
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::IGNORED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        return;
+                    }
+
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);

@@ -118,14 +118,14 @@ namespace NsAppManager
     {
     }
 
-    bool ButtonMapping::exist(const NsAppLinkRPCV2::ButtonName& buttonName, RegistryItem* item)
+    bool ButtonMapping::exist(const NsAppLinkRPCV2::ButtonName& buttonName, Application* item)
     {
         ButtonMap::const_iterator it = mButtonsMapping.find(buttonName);
         if (it != mButtonsMapping.end())
         {
             if (it->second && it->second->getApplication())
             {
-                if (*(it->second->getApplication()) == *(item->getApplication()))
+                if (*(it->second->getApplication()) == *item)
                 {
                     return true;
                 }
