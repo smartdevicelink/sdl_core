@@ -166,10 +166,6 @@ MFT.AlertPopUp = Em.ContainerView.create({
 
         this.addSoftButtons( message.softButtons, message.appId );
 
-        if( message.ttsChunks ){
-            MFT.ApplinkModel.onPrompt(message.ttsChunks);
-        }
-
         this.set('appName',    MFT.ApplinkController.getApplicationModel(message.appId).appName);
 
         this.set('content1',    message.AlertText1);
@@ -185,5 +181,9 @@ MFT.AlertPopUp = Em.ContainerView.create({
             MFT.ApplinkController.onSystemContextChange();
             MFT.ApplinkController.alertResponse( "SUCCESS" );
         }, message.duration);
+        
+        if( message.ttsChunks ){
+            MFT.ApplinkModel.onPrompt(message.ttsChunks, message.duration-100);
+        }
     }
 });
