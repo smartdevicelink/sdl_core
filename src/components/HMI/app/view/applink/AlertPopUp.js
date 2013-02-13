@@ -86,9 +86,10 @@ MFT.AlertPopUp = Em.ContainerView.create({
     deactivate: function( ABORTED ) {
         this.set('active',false);
         clearTimeout(this.timer);
-        if( ABORTED ){
-            MFT.ApplinkController.alertResponse( "ABORTED" );
-        }
+        
+        MFT.ApplinkController.alertResponse( ABORTED ? 'ABORTED' : 'SUCCESS' );
+        
+        MFT.ApplinkController.onSystemContextChange();
     },
 
     /**
@@ -176,13 +177,11 @@ MFT.AlertPopUp = Em.ContainerView.create({
         
         clearTimeout(this.timer);
         this.timer = setTimeout(function(){
-            self.set('active', false);
-            MFT.ApplinkController.alertResponse( "SUCCESS" );
+            self.deactivate();
         }, message.duration);
         
         if( message.ttsChunks ){
             MFT.ApplinkModel.onPrompt(message.ttsChunks, message.duration);
-            MFT.ApplinkController.onSystemContextChange();
         }
     }
 });
