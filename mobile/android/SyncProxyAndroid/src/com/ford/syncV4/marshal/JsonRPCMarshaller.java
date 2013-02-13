@@ -134,6 +134,10 @@ public class JsonRPCMarshaller {
 					if (anObject instanceof RPCStruct) {
 						RPCStruct toSerialize = (RPCStruct) anObject;
 						toPut.put(toSerialize.serializeJSON());
+					} else if (anObject instanceof Hashtable) {
+						Hashtable hashtable = (Hashtable) anObject;
+						RPCStruct toSerialize = new RPCStruct(hashtable);
+						toPut.put(toSerialize.serializeJSON());
 					} else {
 						toPut.put(anObject);
 					}
