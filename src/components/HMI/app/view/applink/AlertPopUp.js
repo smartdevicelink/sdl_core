@@ -173,17 +173,20 @@ MFT.AlertPopUp = Em.ContainerView.create({
         this.set('content3',    message.AlertText3);
         this.set('active',    true);
         
-        MFT.ApplinkController.onSystemContextChange();
         
         clearTimeout(this.timer);
         this.timer = setTimeout(function(){
             self.set('active', false);
-            MFT.ApplinkController.onSystemContextChange();
             MFT.ApplinkController.alertResponse( "SUCCESS" );
         }, message.duration);
         
         if( message.ttsChunks ){
             MFT.ApplinkModel.onPrompt(message.ttsChunks, message.duration-100);
         }
-    }
+    },
+    
+    // send context notification
+	onStateChange: function() {
+        MFT.ApplinkController.onSystemContextChange();
+	}.observes('this.active')
 });
