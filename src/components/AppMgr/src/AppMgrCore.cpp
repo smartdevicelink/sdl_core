@@ -1452,7 +1452,7 @@ namespace NsAppManager
                                             << " hasn't been registered within the application " << app->getName() << " id" << app->getAppID() << " !");
                         NsAppLinkRPC::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPC::DeleteInteractionChoiceSet_response;
                         response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_ID);
                         response->setCorrelationID(object->getCorrelationID());
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         return;
@@ -2577,7 +2577,7 @@ namespace NsAppManager
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteInteractionChoiceSetID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_ID);
                         response->setCorrelationID(object->getCorrelationID());
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         return;
