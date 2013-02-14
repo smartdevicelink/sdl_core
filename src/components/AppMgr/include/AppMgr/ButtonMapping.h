@@ -10,6 +10,7 @@
 #include <map>
 #include "JSONHandler/ALRPCObjects/V1/ButtonName.h"
 #include "JSONHandler/ALRPCObjects/V2/ButtonName.h"
+#include "AppMgr/Application.h"
 
 namespace log4cplus
 {
@@ -98,7 +99,7 @@ namespace NsAppManager
          */
         ResultRange findSubscribedToButton(const NsAppLinkRPCV2::ButtonName &btnName) const;
 
-        bool exist(const NsAppLinkRPCV2::ButtonName& buttonName, RegistryItem* item);
+        bool exist(const NsAppLinkRPCV2::ButtonName& buttonName, Application* item);
     private:
 
         /**

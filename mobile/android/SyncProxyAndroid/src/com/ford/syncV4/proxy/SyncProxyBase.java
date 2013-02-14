@@ -1223,13 +1223,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 					if (_wiproVersion == 1) {
 						if (message.getVersion() == 2) setWiProVersion(message.getVersion());
 					}
-					final Hashtable<String, Object> mhash = JsonRPCMarshaller.unmarshall(message.getData());
 					
 					Hashtable hash = new Hashtable();
 					if (_wiproVersion == 2) {
 						Hashtable hashTemp = new Hashtable();
 						hashTemp.put(Names.correlationID, message.getCorrID());
-						hashTemp.put(Names.parameters, mhash.get(Names.parameters));
+						if (message.getJsonSize() > 0) {
+							final Hashtable<String, Object> mhash = JsonRPCMarshaller.unmarshall(message.getData());
+							//hashTemp.put(Names.parameters, mhash.get(Names.parameters));
+							hashTemp.put(Names.parameters, mhash);
+						}
 						FunctionID functionID = new FunctionID();
 						hashTemp.put(Names.function_name, functionID.getFunctionName(message.getFunctionID()));
 						if (message.getRPCType() == 0x00) {
@@ -1241,6 +1244,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 						}
 						if (message.getBulkData() != null) hash.put(Names.bulkData, message.getBulkData());
 					} else {
+						final Hashtable<String, Object> mhash = JsonRPCMarshaller.unmarshall(message.getData());
 						hash = mhash;
 					}
 					handleRPCMessage(hash);							

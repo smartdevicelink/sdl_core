@@ -45,7 +45,7 @@ MFT.TTSPopUp = Em.ContainerView.create({
 		contentBinding:		'parentView.content'
 	}),
 
-	ActivateTTS: function(msg){
+	ActivateTTS: function(msg, delay){
 		var self = this;
 				
 		// play audio alert
@@ -53,12 +53,20 @@ MFT.TTSPopUp = Em.ContainerView.create({
 		
 		this.set('content', msg);
 		this.set('active', true);
-		MFT.ApplinkController.onSystemContextChange();
+		
+		this.onStateChange();
 		
         clearTimeout(this.timer);
 		this.timer = setTimeout(function(){
             self.set('active', false);
+            self.onStateChange();
+        }, delay ? delay : 10000 );
+	},
+	
+	// send context notification
+	onStateChange: function() {
+        if ( !MFT.AlertPopUp.active ) {
             MFT.ApplinkController.onSystemContextChange();
-        }, 10000);
+        }
 	}
 });

@@ -388,14 +388,15 @@ MFT.ApplinkModel = Em.Object.create({
     /** 
      * Prompt activation
      * @param {Object}
+     * @param {Number}
      */
-    onPrompt: function(ttsChunks){
+    onPrompt: function(ttsChunks, delay){
         var message = '';
         if(ttsChunks){
             for(var i = 0; i < ttsChunks.length; i++){
               message += ttsChunks[i].text + '\n';
             }
-            MFT.TTSPopUp.ActivateTTS(message);
+            MFT.TTSPopUp.ActivateTTS(message, delay);
         }
     },
   

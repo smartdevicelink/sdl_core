@@ -752,7 +752,7 @@ namespace NsAppManager
                     NsAppLinkRPCV2::ButtonName btnName;
                     btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)object->get_buttonName().get());
 
-                    if (core->mButtonsMapping.exist(btnName, item))
+                    if (core->mButtonsMapping.exist(btnName, app))
                     {
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPC::Result::IGNORED);
@@ -792,6 +792,15 @@ namespace NsAppManager
                     }
                     NsAppLinkRPCV2::ButtonName btnName;
                     btnName.set((NsAppLinkRPCV2::ButtonName::ButtonNameInternal)object->get_buttonName().get());
+
+                    if (!core->mButtonsMapping.exist(btnName, app))
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPC::Result::IGNORED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        return;
+                    }
+
                     core->mButtonsMapping.removeButton( btnName );
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->set_success(true);
@@ -1280,6 +1289,25 @@ namespace NsAppManager
                         break;
                     }
 
+                    const MenuValue* menu = app->findMenu(object->get_menuID());
+                    if (menu)
+                    {
+                        NsAppLinkRPC::AddSubMenu_response* response = new NsAppLinkRPC::AddSubMenu_response;
+                        response->set_success(false);
+                        response->setCorrelationID(object->getCorrelationID());
+
+                        if (menu->first == object->get_menuName())
+                        {
+                            response->set_resultCode(NsAppLinkRPC::Result::DUPLICATE_NAME);
+                            MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                            return;
+                        }
+
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_ID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        return;
+                    }
+
                     NsRPC2Communication::UI::AddSubMenu* addSubMenu = new NsRPC2Communication::UI::AddSubMenu();
                     addSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     core->mMessageChaining[addSubMenu->getId()] = new MessageChaining(
@@ -1329,7 +1357,7 @@ namespace NsAppManager
                                             << " hasn't been associated with the application " << app->getName() << " id " << app->getAppID() << " !");
                         NsAppLinkRPC::DeleteSubMenu_response* response = new NsAppLinkRPC::DeleteSubMenu_response;
                         response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_ID);
                         response->setCorrelationID(object->getCorrelationID());
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
@@ -1439,7 +1467,7 @@ namespace NsAppManager
                                             << " hasn't been registered within the application " << app->getName() << " id" << app->getAppID() << " !");
                         NsAppLinkRPC::DeleteInteractionChoiceSet_response* response = new NsAppLinkRPC::DeleteInteractionChoiceSet_response;
                         response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_DATA);
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_ID);
                         response->setCorrelationID(object->getCorrelationID());
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         return;
@@ -1868,7 +1896,7 @@ namespace NsAppManager
                         break;
                     }
 
-                    if (core->mButtonsMapping.exist(object->get_buttonName(), item))
+                    if (core->mButtonsMapping.exist(object->get_buttonName(), app))
                     {
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::IGNORED);
@@ -1909,6 +1937,15 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
+
+                    if (!core->mButtonsMapping.exist(object->get_buttonName(), app))
+                    {
+                        response->set_success(false);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::IGNORED);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        return;
+                    }
+
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -2555,7 +2592,7 @@ namespace NsAppManager
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteInteractionChoiceSetID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_ID);
                         response->setCorrelationID(object->getCorrelationID());
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         return;
@@ -3057,6 +3094,26 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
+
+                    const MenuValue* menu = app->findMenu(object->get_menuID());
+                    if (menu)
+                    {
+                        NsAppLinkRPC::AddSubMenu_response* response = new NsAppLinkRPC::AddSubMenu_response;
+                        response->set_success(false);
+                        response->setCorrelationID(object->getCorrelationID());
+
+                        if (menu->first == object->get_menuName())
+                        {
+                            response->set_resultCode(NsAppLinkRPC::Result::DUPLICATE_NAME);
+                            MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                            return;
+                        }
+
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_ID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        return;
+                    }
+
                     NsRPC2Communication::UI::AddSubMenu* addSubMenu = new NsRPC2Communication::UI::AddSubMenu();
                     addSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     core->mMessageChaining[addSubMenu->getId()] = new MessageChaining(
@@ -3112,7 +3169,7 @@ namespace NsAppManager
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteSubMenuID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_success(false);
-                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_ID);
                         response->setCorrelationID(object->getCorrelationID());
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
