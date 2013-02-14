@@ -910,10 +910,6 @@ namespace NsAppManager
                         sessionKey,
                         object->getCorrelationID());
                     HMIHandler::getInstance().sendRequest(speakRPC2Request);
-                    NsAppLinkRPC::Speak_response * mobileResponse = new NsAppLinkRPC::Speak_response;
-                    mobileResponse->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
-                    mobileResponse->set_success(true);
-                    MobileHandler::getInstance().sendRPCMessage(mobileResponse, sessionKey);
                     break;
                 }
                 case NsAppLinkRPC::Marshaller::METHOD_SETGLOBALPROPERTIES_REQUEST:
@@ -5770,9 +5766,8 @@ namespace NsAppManager
                     case 1:
                     {
                         NsAppLinkRPC::Speak_response* response = new NsAppLinkRPC::Speak_response();
-                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        //response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->set_resultCode(static_cast<NsAppLinkRPC::Result::ResultInternal>(object->getResult()));
-                        response->setMethodId(NsAppLinkRPCV2::FunctionID::SpeakID);
                         NsAppLinkRPCV2::Result::SUCCESS == static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult())
                                     ? response->set_success(true) : response->set_success(false);
                         response->setCorrelationID(it->second->correlationID);
