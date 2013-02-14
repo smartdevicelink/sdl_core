@@ -1293,6 +1293,25 @@ namespace NsAppManager
                         break;
                     }
 
+                    const MenuValue* menu = app->findMenu(object->get_menuID());
+                    if (menu)
+                    {
+                        NsAppLinkRPC::AddSubMenu_response* response = new NsAppLinkRPC::AddSubMenu_response;
+                        response->set_success(false);
+                        response->setCorrelationID(object->getCorrelationID());
+
+                        if (menu->first == object->get_menuName())
+                        {
+                            response->set_resultCode(NsAppLinkRPC::Result::DUPLICATE_NAME);
+                            MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                            return;
+                        }
+
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_ID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        return;
+                    }
+
                     NsRPC2Communication::UI::AddSubMenu* addSubMenu = new NsRPC2Communication::UI::AddSubMenu();
                     addSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     core->mMessageChaining[addSubMenu->getId()] = new MessageChaining(
@@ -3079,6 +3098,26 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
+
+                    const MenuValue* menu = app->findMenu(object->get_menuID());
+                    if (menu)
+                    {
+                        NsAppLinkRPC::AddSubMenu_response* response = new NsAppLinkRPC::AddSubMenu_response;
+                        response->set_success(false);
+                        response->setCorrelationID(object->getCorrelationID());
+
+                        if (menu->first == object->get_menuName())
+                        {
+                            response->set_resultCode(NsAppLinkRPC::Result::DUPLICATE_NAME);
+                            MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                            return;
+                        }
+
+                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_ID);
+                        MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                        return;
+                    }
+
                     NsRPC2Communication::UI::AddSubMenu* addSubMenu = new NsRPC2Communication::UI::AddSubMenu();
                     addSubMenu->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
                     core->mMessageChaining[addSubMenu->getId()] = new MessageChaining(
