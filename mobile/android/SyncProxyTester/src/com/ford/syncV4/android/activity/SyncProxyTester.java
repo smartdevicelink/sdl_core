@@ -611,7 +611,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 	protected void onDestroy() {
 		super.onDestroy();
-		endSyncProxyInstance();
+//		endSyncProxyInstance();
 		saveMessageSelectCount();
 		_activity = null;
 		ProxyService service = ProxyService.getInstance();

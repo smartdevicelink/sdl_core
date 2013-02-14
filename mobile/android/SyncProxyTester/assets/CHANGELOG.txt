@@ -1,4 +1,5 @@
 [CW7]
+* Don't drop the connection to the core when pressing the Back button. Now, to disconnect use the Exit options menu item.
 + Show message's correlation ID in the Raw JSON popup.
 * Update the turn list icons.
 * SyncProxyAndroid SDK: when serializing a JSON RPCMessage, serialize hashtable as RPCStruct. Fix for the XML Test feature in SyncProxyTester.
