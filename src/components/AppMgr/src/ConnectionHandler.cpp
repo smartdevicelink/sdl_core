@@ -76,6 +76,16 @@ namespace NsAppManager
         mConnectionHandler->connectToDevice(deviceHandle);
     }
 
+    void ConnectionHandler::startTransportManager()
+    {
+        if(!mConnectionHandler)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, "Connection handler hasn't yet been assigned, but an attempt to access it has been made! Giving up...");
+            return;
+        }
+        mConnectionHandler->startTransportManager();
+    }
+
     /**
      * \brief Default class constructor
      */

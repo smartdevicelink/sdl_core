@@ -4,15 +4,15 @@
  * \author AKara
  */
 
-#ifndef IDEVICESDISCOVERYSTARTER_H 
-#define IDEVICESDISCOVERYSTARTER_H 
+#ifndef IDEVICESDISCOVERYSTARTER_H
+#define IDEVICESDISCOVERYSTARTER_H
 
 #include "ConnectionHandler/CDevice.hpp"
 
 /**
  * \namespace NsConnectionHandler
  * \brief AppLink ConnectionHandler namespace.
- */ 
+ */
 namespace NsConnectionHandler
 {
     /**
@@ -32,6 +32,8 @@ namespace NsConnectionHandler
          * \param deviceHandle Handle of device to connect to
          */
         virtual void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle ) = 0;
+
+        virtual void startTransportManager() = 0;
 
     protected:
         /**
