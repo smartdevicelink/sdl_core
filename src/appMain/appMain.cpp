@@ -42,21 +42,21 @@
 class CTransportManagerListener : public NsAppLink::NsTransportManager::ITransportManagerDeviceListener
 {
 public:
-    
+
     CTransportManagerListener(NsAppLink::NsTransportManager::ITransportManager * transportManager);
-    
+
 private:
-    
+
     virtual void onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList& DeviceList);
-    
+
     NsAppLink::NsTransportManager::ITransportManager * mTransportManager;
 };
- 
+
 CTransportManagerListener::CTransportManagerListener(NsAppLink::NsTransportManager::ITransportManager* transportManager)
 : mTransportManager(transportManager)
 {
 }
- 
+
 void CTransportManagerListener::onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList& DeviceList)
 {
     if(DeviceList.empty())
@@ -108,8 +108,8 @@ int main(int argc, char** argv)
 
     NsAppLink::NsTransportManager::ITransportManager * transportManager = NsAppLink::NsTransportManager::ITransportManager::create();
     CTransportManagerListener tsl(transportManager);
-    
-    
+
+
 
     JSONHandler jsonHandler;
 
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
     pProtocolHandler -> setProtocolObserver( &jsonHandler );
 
     transportManager -> addDataListener( pProtocolHandler );
-    
+
     jsonHandler.setProtocolHandler(pProtocolHandler);
 
     NsConnectionHandler::CConnectionHandler * connectionHandler = NsConnectionHandler::CConnectionHandler::getInstance();
@@ -128,7 +128,7 @@ int main(int argc, char** argv)
     connectionHandler -> setTransportManager( transportManager );
 
     transportManager->addDeviceListener(connectionHandler);
-    transportManager->run();
+    // transportManager->run();
 
     NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
 
@@ -284,12 +284,12 @@ int main(int argc, char** argv)
     {
         sleep(100500);
     }
-    
+
     if (0 != pid_hmi)
     {
       kill(pid_hmi, SIGQUIT);
     }
 
     return EXIT_SUCCESS;
-} 
+}
 

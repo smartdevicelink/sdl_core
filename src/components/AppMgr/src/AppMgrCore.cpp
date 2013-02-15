@@ -36,7 +36,15 @@
 #include "JSONHandler/ALRPCObjects/V2/AppType.h"
 #include "JSONHandler/ALRPCObjects/V2/VehicleDataType.h"
 
+#include "ConnectionHandler/CConnectionHandler.hpp"
+
 namespace {
+    // We wait for some request form HMI:
+    // UI::GetCapabilities, VR::GetCapabilities, TTS::GetCapabilities, Buttons::GetCapabilities
+    // VehicleInfo::GetVehicleType, UI::GetSupportedLanguages, TTS::GetSupportedLanguages
+    // VR::GetSupportedLanguages, UI::GetLanguage, VR::GetLanguage, TTS::GetLanguage
+    // Look for METHOD_NSRPC2COMMUNICATION_UI__ONREADY for details
+    const int HMI_STARTUP_REQUEST_COUNT = 11;
 
     template<typename To, typename From, typename InternalType>
     void convert(const std::vector<From> & from, std::vector<To> & result)
@@ -435,6 +443,7 @@ namespace NsAppManager
         , mDriverDistractionV2(0)
         , mAudioPassThruFlag(false)
         , mPerformInteractionFlag(-1)
+        , mHMIStartupFlag(HMI_STARTUP_REQUEST_COUNT)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " AppMgrCore constructed!");
 
@@ -4147,6 +4156,12 @@ namespace NsAppManager
                 {
                     core->mPresetBankCapabilities = *btnCaps->get_presetBankCapabilities();
                 }
+
+                --core->mHMIStartupFlag;
+                if (!core->mHMIStartupFlag)
+                {
+                    NsConnectionHandler::CConnectionHandler::getInstance()->startTransportManager();
+                }
                 return;
             }
             default:
@@ -4323,6 +4338,13 @@ namespace NsAppManager
                 {
                     core->mSoftButtonCapabilities.set(*uiCaps->get_softButtonCapabilities());
                 }
+
+                --core->mHMIStartupFlag;
+                if (!core->mHMIStartupFlag)
+                {
+                    NsConnectionHandler::CConnectionHandler::getInstance()->startTransportManager();
+                }
+
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETLANGUAGERESPONSE:
@@ -4333,6 +4355,12 @@ namespace NsAppManager
                     static_cast<NsAppLinkRPC::Language::LanguageInternal>(
                         getLang->get_hmiDisplayLanguage().get()));
                 core->mUiLanguageV2 = getLang->get_hmiDisplayLanguage();
+
+                --core->mHMIStartupFlag;
+                if (!core->mHMIStartupFlag)
+                {
+                    NsConnectionHandler::CConnectionHandler::getInstance()->startTransportManager();
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONCOMMAND:
@@ -5291,6 +5319,12 @@ namespace NsAppManager
                 {
                     core->mUISupportedLanguages = languages->get_languages();
                 }
+
+                --core->mHMIStartupFlag;
+                if (!core->mHMIStartupFlag)
+                {
+                    NsConnectionHandler::CConnectionHandler::getInstance()->startTransportManager();
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONLANGUAGECHANGE:
@@ -5516,6 +5550,12 @@ namespace NsAppManager
                 {
                     core->mVRSupportedLanguages = languages->get_languages();
                 }
+
+                --core->mHMIStartupFlag;
+                if (!core->mHMIStartupFlag)
+                {
+                    NsConnectionHandler::CConnectionHandler::getInstance()->startTransportManager();
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__GETCAPABILITIESRESPONSE:
@@ -5525,6 +5565,11 @@ namespace NsAppManager
                     (NsRPC2Communication::VR::GetCapabilitiesResponse*)msg;
                 core->mVrCapabilitiesV2.set(vrCaps->get_capabilities());
 
+                --core->mHMIStartupFlag;
+                if (!core->mHMIStartupFlag)
+                {
+                    NsConnectionHandler::CConnectionHandler::getInstance()->startTransportManager();
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__GETLANGUAGERESPONSE:
@@ -5535,6 +5580,12 @@ namespace NsAppManager
                 NsAppLinkRPC::Language langV1;
                 langV1.set((NsAppLinkRPC::Language::LanguageInternal)getLang->get_language().get());
                 core->mVrLanguageV1 = langV1;
+
+                --core->mHMIStartupFlag;
+                if (!core->mHMIStartupFlag)
+                {
+                    NsConnectionHandler::CConnectionHandler::getInstance()->startTransportManager();
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VR__ADDCOMMANDRESPONSE:
@@ -5784,6 +5835,12 @@ namespace NsAppManager
                 {
                     core->mTTSSupportedLanguages = languages->get_languages();
                 }
+
+                --core->mHMIStartupFlag;
+                if (!core->mHMIStartupFlag)
+                {
+                    NsConnectionHandler::CConnectionHandler::getInstance()->startTransportManager();
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__GETCAPABILITIESRESPONSE:
@@ -5791,6 +5848,12 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetTTSCapabilities response has been income");
                 NsRPC2Communication::TTS::GetCapabilitiesResponse * ttsCaps = (NsRPC2Communication::TTS::GetCapabilitiesResponse*)msg;
                 core->mSpeechCapabilitiesV2.set(ttsCaps->get_capabilities());
+
+                --core->mHMIStartupFlag;
+                if (!core->mHMIStartupFlag)
+                {
+                    NsConnectionHandler::CConnectionHandler::getInstance()->startTransportManager();
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__GETLANGUAGERESPONSE:
@@ -5798,6 +5861,12 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, "GetLanguage Response from TTS is received.");
                 NsRPC2Communication::TTS::GetLanguageResponse* getLang = (NsRPC2Communication::TTS::GetLanguageResponse*)msg;
                 core->mTtsLanguageV2 = getLang->get_language();
+
+                --core->mHMIStartupFlag;
+                if (!core->mHMIStartupFlag)
+                {
+                    NsConnectionHandler::CConnectionHandler::getInstance()->startTransportManager();
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_TTS__SPEAKRESPONSE:
@@ -6232,6 +6301,12 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleType response has been income");
                 NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse* getVehType = (NsRPC2Communication::VehicleInfo::GetVehicleTypeResponse*)msg;
                 core->mVehicleType = getVehType->get_vehicleType();
+
+                --core->mHMIStartupFlag;
+                if (!core->mHMIStartupFlag)
+                {
+                    NsConnectionHandler::CConnectionHandler::getInstance()->startTransportManager();
+                }
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_VEHICLEINFO__GETVEHICLEDATARESPONSE:

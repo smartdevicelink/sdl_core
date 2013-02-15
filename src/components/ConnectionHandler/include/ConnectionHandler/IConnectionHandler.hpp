@@ -4,8 +4,8 @@
  * \author AKara
  */
 
-#ifndef ICONNECTIONHANDLER_H 
-#define ICONNECTIONHANDLER_H 
+#ifndef ICONNECTIONHANDLER_H
+#define ICONNECTIONHANDLER_H
 
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 #include "TransportManager/SDeviceInfo.hpp"
@@ -18,7 +18,7 @@
 /**
  * \namespace NsConnectionHandler
  * \brief AppLink ConnectionHandler namespace.
- */ 
+ */
 namespace NsConnectionHandler
 {
     /**
@@ -39,6 +39,8 @@ namespace NsConnectionHandler
          * \param transportManager Pointer to TransportManager object.
          **/
         virtual void setTransportManager( NsAppLink::NsTransportManager::ITransportManager * transportManager )=0;
+
+        virtual void startTransportManager() = 0;
 
     protected:
         /**

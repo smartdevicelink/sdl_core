@@ -13,7 +13,7 @@
 /**
  * \namespace NsConnectionHandler
  * \brief AppLink ConnectionHandler namespace.
- */ 
+ */
 namespace NsConnectionHandler
 {
 
@@ -34,7 +34,7 @@ namespace NsConnectionHandler
 
     CConnectionHandler::~CConnectionHandler()
     {
-        
+
     }
 
     void CConnectionHandler::setConnectionHandlerObserver(IConnectionHandlerObserver * observer)
@@ -140,8 +140,8 @@ namespace NsConnectionHandler
         }
         return newSessionID;
     }
-    
-    int CConnectionHandler::onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+
+    int CConnectionHandler::onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
                                                unsigned char sessionId,
                                                unsigned int hashCode)
     {
@@ -175,16 +175,16 @@ namespace NsConnectionHandler
         }
         return result;
     }
-    
-    int CConnectionHandler::keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+
+    int CConnectionHandler::keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
                                            unsigned char sessionId)
     {
         int key = connectionHandle|(sessionId << 16);
         LOG4CPLUS_INFO( mLogger, "Key for ConnectionHandle:" << (int)connectionHandle << " Session:" << (int)sessionId << " is: " << (int)key );
         return key;
     }
-    
-    void CConnectionHandler::pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle, 
+
+    void CConnectionHandler::pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle,
                                            unsigned char & sessionId)
     {
         connectionHandle = key & 0xFF00FFFF;
@@ -228,7 +228,19 @@ namespace NsConnectionHandler
         else
         {
             LOG4CPLUS_ERROR(mLogger, "Application Manager wanted to connect to non-existing device");
-        }        
+        }
+    }
+
+    void CConnectionHandler::startTransportManager()
+    {
+        LOG4CPLUS_INFO(mLogger, "CConnectionHandler::startTransportManager()");
+        if (NULL == mpTransportManager)
+        {
+            LOG4CPLUS_ERROR(mLogger, "Null pointer to TransportManager.");
+            return;
+        }
+
+        mpTransportManager->run();
     }
 
 }/* namespace NsConnectionHandler */
