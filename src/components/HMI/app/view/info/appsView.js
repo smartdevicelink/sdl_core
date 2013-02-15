@@ -32,6 +32,13 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 		'listOfApplications'
 	],
 
+	/**
+	 * Method to check registered apps for the first activation
+	 */
+	afterRender: function(){
+		this.showAppList();
+	},
+
     /** 
      * Function to add application to application list
      */

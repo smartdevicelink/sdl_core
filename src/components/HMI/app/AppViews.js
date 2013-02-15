@@ -78,8 +78,6 @@ MFT.AppViews = Em.ContainerView.extend({
 		FFW.AppendScript.pushScript('media');
 		
 		FFW.AppendScript.pushScript('info');
-
-		FFW.AppendScript.pushScript('info.apps');
 		
 		// preload big images
 		// to resolve blinking issue
