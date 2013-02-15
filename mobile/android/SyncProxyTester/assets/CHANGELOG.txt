@@ -1,4 +1,5 @@
 [CW7]
+* Fix displaying the success flag, info, and result code of the messages in the log.
 * Fix displaying long messages in the log on narrow screens.
 * Don't drop the connection to the core when pressing the Back button. Now, to disconnect use the Exit options menu item.
 + Show message's correlation ID in the Raw JSON popup.
