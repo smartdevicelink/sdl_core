@@ -1,4 +1,5 @@
 [CW8]
+* Don't show null in the log if the responses' info is null.
 * AddCommand message: set an existing icon by default.
 
 [CW7]

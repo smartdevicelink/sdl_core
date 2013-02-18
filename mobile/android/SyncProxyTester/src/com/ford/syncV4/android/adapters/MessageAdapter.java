@@ -70,7 +70,7 @@ public class MessageAdapter extends ArrayAdapter<Object> {
 					String info = (String)getInfoMethod.invoke(rpcObj);
 					Result result = (Result)getResultCodeMethod.invoke(rpcObj);
 					
-					lblBottom.setText(result + ": " + info);
+					lblBottom.setText(result + (info != null ? ": " + info : ""));
 					
 				} catch (NoSuchMethodException e) {
 					rowView.removeView(lblBottom);
