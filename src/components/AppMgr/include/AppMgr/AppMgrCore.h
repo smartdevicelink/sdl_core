@@ -25,6 +25,7 @@
 #include "JSONHandler/ALRPCObjects/V1/Language.h"
 #include "JSONHandler/ALRPCObjects/V2/Language.h"
 #include "AppMgr/MessageChaining.hpp"
+#include "AppMgr/DeviceStorage.hpp"
 
 namespace NsAppLinkRPC
 {
@@ -166,13 +167,14 @@ namespace NsAppManager
          * \param sessionKey session/connection key
          * \param device device handler
          */
-        void addDevice( const int& sessionKey, const NsConnectionHandler::tDeviceHandle& device );
+        void addDevice( const NsConnectionHandler::tDeviceHandle &device,
+            const int &sessionKey, int firstSessionKey );
 
         /**
          * \brief remove a device from a mapping
          * \param sessionKey session/connection key
          */
-        void removeDevice(const int& sessionKey);
+        void removeDevice(const int &sessionKey, int firstSessionKey);
 
         bool getAudioPassThruFlag() const;
         void setAudioPassThruFlag(bool flag);
@@ -289,6 +291,8 @@ namespace NsAppManager
          */
         MessageChaining * addChain(MessageChaining * chain, int connectionKey, unsigned int correlationID);
 
+        void differenceBetweenLists( const NsConnectionHandler::tDeviceList &deviceList );
+
         AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
         AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
@@ -308,7 +312,7 @@ namespace NsAppManager
         VehicleDataMapping  mVehicleDataMapping;
         MessageMapping      mMessageMapping;
         RequestMapping      mRequestMapping;
-        DeviceList          mDeviceList;
+        //DeviceList          mDeviceList;
         DeviceHandler       mDeviceHandler;
 
         MessageChains mMessageChaining;
@@ -335,6 +339,10 @@ namespace NsAppManager
         SyncPManager     mSyncPManager;
 
         static log4cplus::Logger mLogger;
+
+        std::map<int, Application*> mApplications;
+        std::map<int, DeviceStorage> mDevices;
+        //NsConnectionHandler::tDeviceList mDevices;
     };
 
 } // namespace NsAppManager

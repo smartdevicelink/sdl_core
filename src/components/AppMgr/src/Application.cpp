@@ -415,4 +415,14 @@ namespace NsAppManager
         return false;
     }
 
+    int Application::getDeviceHandle() const
+    {
+        return mDeviceHandle;
+    }
+
+    void Application::setDeviceHandle(int deviceHandle)
+    {
+        mDeviceHandle = deviceHandle;
+    }
+
 }

@@ -15,6 +15,7 @@ include_directories (
 set (SOURCES
     ./src/AppMgr.cpp
     ./src/MessageChaining.cpp
+    ./src/DeviceStorage.cpp
     ./src/AppMgrRegistry.cpp
     ./src/Application.cpp
     ./src/Application_v1.cpp

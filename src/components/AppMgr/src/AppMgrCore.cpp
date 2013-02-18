@@ -544,14 +544,14 @@ namespace NsAppManager
         }
         AppMgrCore* core = (AppMgrCore*)pThis;
         const unsigned int& protocolVersion = mobileMsg->getProtocolVersion();
-        const NsConnectionHandler::tDeviceHandle& currentDeviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(sessionKey);
+        /*const NsConnectionHandler::tDeviceHandle& currentDeviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(sessionKey);
         const NsConnectionHandler::CDevice* currentDevice = core->mDeviceList.findDeviceByHandle(currentDeviceHandle);
         if(!currentDevice)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " Cannot retreive current device name for the message with session key " << sessionKey << " !");
             return;
         }
-        const std::string& currentDeviceName = currentDevice->getUserFriendlyName();
+        const std::string& currentDeviceName = currentDevice->getUserFriendlyName();*/
 
         LOG4CPLUS_INFO_EXT(mLogger, "Message received is from protocol " << protocolVersion);
         if ( 1 == mobileMsg->getProtocolVersion() )
@@ -648,6 +648,14 @@ namespace NsAppManager
                     hmiApp.set_appName(app->getName());
                     hmiApp.set_appId(app->getAppID());
                     hmiApp.set_isMediaApplication(app->getIsMediaApplication());
+
+                    std::map<int,DeviceStorage>::const_iterator it = core->mDevices.find( app->getDeviceHandle() );
+                    std::string currentDeviceName = "";
+                    if ( core->mDevices.end() != it )
+                    {
+                        currentDeviceName = it->second.getUserFriendlyName();
+                    }
+
                     hmiApp.set_deviceName(currentDeviceName);
                     hmiApp.set_hmiDisplayLanguageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app->getLanguageDesired().get()));
                     hmiApp.set_languageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app->getLanguageDesired().get()));
@@ -694,7 +702,7 @@ namespace NsAppManager
                     }
                     std::string appName = app->getName();
                     int appId = app->getAppID();
-                    core->removeAppFromHmi(app, sessionKey);
+                    //core->removeAppFromHmi(app, sessionKey);
                     core->unregisterApplication( sessionKey );
 
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -702,15 +710,9 @@ namespace NsAppManager
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
 
-                    NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
+                    /*NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
                     msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
-                    MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionKey);
-
-                    NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
-                    appUnregistered->set_appName(appName);
-                    appUnregistered->set_appId(app->getAppID());
-                    appUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
-                    HMIHandler::getInstance().sendNotification(appUnregistered);
+                    MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionKey);*/
 
                     LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
                     break;
@@ -1789,6 +1791,14 @@ namespace NsAppManager
                     hmiApp.set_appName(app->getName());
                     hmiApp.set_appId(app->getAppID());
                     hmiApp.set_isMediaApplication(app->getIsMediaApplication());
+
+                    std::map<int,DeviceStorage>::const_iterator it = core->mDevices.find( app->getDeviceHandle() );
+                    std::string currentDeviceName = "";
+                    if ( core->mDevices.end() != it )
+                    {
+                        currentDeviceName = it->second.getUserFriendlyName();
+                    }
+
                     hmiApp.set_deviceName(currentDeviceName);
                     hmiApp.set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
                     hmiApp.set_languageDesired(app->getLanguageDesired());
@@ -1841,7 +1851,7 @@ namespace NsAppManager
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
 
-                    NsAppLinkRPCV2::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPCV2::OnAppInterfaceUnregistered();
+                    /*NsAppLinkRPCV2::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPCV2::OnAppInterfaceUnregistered();
                     msgUnregistered->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                     msgUnregistered->setMethodId(NsAppLinkRPCV2::FunctionID::OnAppInterfaceUnregisteredID);
                     msgUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
@@ -1854,8 +1864,8 @@ namespace NsAppManager
                     appUnregistered->set_appName(appName);
                     appUnregistered->set_appId(app->getAppID());
                     appUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT);
-                    HMIHandler::getInstance().sendNotification(appUnregistered);
-                    LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
+                    HMIHandler::getInstance().sendNotification(appUnregistered);*/
+                    LOG4CPLUS_INFO_EXT(mLogger, " An application " << app->getName() << " has been unregistered successfully ");
                     core->unregisterApplication( sessionKey );
                     break;
                 }
@@ -5274,12 +5284,22 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnDeviceChosen notification has been income");
                 NsRPC2Communication::UI::OnDeviceChosen* chosen = (NsRPC2Communication::UI::OnDeviceChosen*)msg;
                 const std::string& deviceName = chosen->get_deviceName();
-                const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByName(deviceName);
+                //const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByName(deviceName);
+                for(std::map<int, DeviceStorage>::const_iterator it = core->mDevices.begin();
+                        it != core->mDevices.end();
+                        ++it)
+                {
+                    if ( !it->second.getUserFriendlyName().compare(deviceName) )
+                    {
+                        ConnectionHandler::getInstance().connectToDevice(it->first);
+                        return;
+                    }
+                }/*
                 if (device)
                 {
                     const NsConnectionHandler::tDeviceHandle& handle = device->getDeviceHandle();
                     ConnectionHandler::getInstance().connectToDevice(handle);
-                }
+                }*/
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETSUPPORTEDLANGUAGESRESPONSE:
@@ -6095,18 +6115,26 @@ namespace NsAppManager
                         << " application id " << app->getAppID()
                         << " is media? " << app->getIsMediaApplication() );
 
-                    const NsConnectionHandler::tDeviceHandle& deviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(app->getAppID());
+                    /*const NsConnectionHandler::tDeviceHandle& deviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(app->getAppID());
                     const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByHandle(deviceHandle);
                     if(!device)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Cannot retreive current device name for the message with app ID " << app->getAppID() << " !");
                         return;
-                    }
-                    const std::string& deviceName = device->getUserFriendlyName();
+                    }*/
+                    //const std::string& deviceName = "DEVICE";//device->getUserFriendlyName();
 
                     hmiApp.set_appName(app->getName());
                     hmiApp.set_appId(app->getAppID());
                     hmiApp.set_isMediaApplication(app->getIsMediaApplication());
+
+                    std::map<int,DeviceStorage>::const_iterator it = core->mDevices.find( app->getDeviceHandle() );
+                    std::string deviceName = "";
+                    if ( core->mDevices.end() != it )
+                    {
+                        deviceName = it->second.getUserFriendlyName();
+                    }
+
                     hmiApp.set_deviceName(deviceName);
 
                     if ( 1 == app->getProtocolVersion() )
@@ -6635,6 +6663,27 @@ namespace NsAppManager
 
                 application->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_NONE);
 
+                mApplications.insert( std::pair<int, Application*>(appId, application) );
+                LOG4CPLUS_INFO_EXT(mLogger, "Added application with appid " << appId << 
+                        " to mApplications " << (int)mApplications[appId]);
+                for( std::map<int, DeviceStorage>::iterator it = mDevices.begin();
+                        it != mDevices.end();
+                        ++it )
+                {
+                    if(it->second.getAppId() == appId)
+                    {
+                        application->setDeviceHandle(it->first);
+                        LOG4CPLUS_INFO_EXT(mLogger, "Set for application " << appId << " device handle " << it->first );
+                        for(std::set<int>::const_iterator connectionIt = it->second.getConnectionKeys().begin();
+                                connectionIt != it->second.getConnectionKeys().end();
+                                ++connectionIt)
+                        {
+                            mApplications.insert( std::pair<int, Application*>(*connectionIt, application) );
+                        }
+                        break;
+                    }
+                }
+
                 return AppMgrRegistry::getInstance().registerApplication( application );
             }
             case 1:
@@ -6682,6 +6731,26 @@ namespace NsAppManager
                 application->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_NONE);
 
                 LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
+                mApplications.insert( std::pair<int, Application*>(appId, application) );
+                LOG4CPLUS_INFO_EXT(mLogger, "Added application with appid " << appId << 
+                        " to mApplications " << (int)mApplications[appId]);
+                for( std::map<int, DeviceStorage>::iterator it = mDevices.begin();
+                        it != mDevices.end();
+                        ++it )
+                {
+                    if(it->second.getAppId() == appId)
+                    {
+                        application->setDeviceHandle(it->first);
+                        LOG4CPLUS_INFO_EXT(mLogger, "Set for application " << appId << " device handle " << it->first );
+                        for(std::set<int>::const_iterator connectionIt = it->second.getConnectionKeys().begin();
+                                connectionIt != it->second.getConnectionKeys().end();
+                                ++connectionIt)
+                        {
+                            mApplications.insert( std::pair<int, Application*>(*connectionIt, application) );
+                        }
+                        break;
+                    }
+                }
                 return AppMgrRegistry::getInstance().registerApplication( application );
             }
             default:
@@ -6705,7 +6774,7 @@ namespace NsAppManager
         Application* app = getApplicationFromItemCheckNotNull( item );
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+            LOG4CPLUS_WARN_EXT(mLogger, "No application associated with this registry item!");
             return;
         }
 
@@ -6748,6 +6817,18 @@ namespace NsAppManager
         LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName
             << " application id " << appId
             << "!");
+
+        NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
+        appUnregistered->set_appName(appName);
+        appUnregistered->set_appId(app->getAppID());
+        appUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
+        HMIHandler::getInstance().sendNotification(appUnregistered);
+        mApplications.erase( appId );
+        std::map<int, DeviceStorage>::iterator it = mDevices.find( app->getDeviceHandle() );
+        if (mDevices.end() != it)
+        {
+            it->second.setAppId(0);
+        }
     }
 
     void AppMgrCore::sendHMINotificationToMobile( Application * application )
@@ -6796,7 +6877,7 @@ namespace NsAppManager
             LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application  " << currentApp->getName()
                 << " ID " << currentApp->getAppID()
                 << " - about to remove it from HMI first");
-            removeAppFromHmi(currentApp, appId);
+            //removeAppFromHmi(currentApp, appId);
         }
 
         NsAppLinkRPCV2::HMILevel::HMILevelInternal previousState = app->getApplicationHMIStatusLevel();
@@ -7050,48 +7131,199 @@ namespace NsAppManager
     void AppMgrCore::setDeviceList(const NsConnectionHandler::tDeviceList &deviceList)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Updating device list: " << deviceList.size() << " devices");
-        mDeviceList.setDeviceList(deviceList);
-        NsRPC2Communication::AppLinkCore::OnDeviceListUpdated* deviceListUpdated = new NsRPC2Communication::AppLinkCore::OnDeviceListUpdated;
+        //mDeviceList.setDeviceList(deviceList);
+        differenceBetweenLists(deviceList);
+        NsRPC2Communication::AppLinkCore::OnDeviceListUpdated* deviceListUpdated = 
+                new NsRPC2Communication::AppLinkCore::OnDeviceListUpdated;
         if ( !deviceList.empty() )
         {
-            DeviceNamesList list;
-            const NsConnectionHandler::tDeviceList& devList = mDeviceList.getDeviceList();
-            for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
+            std::vector<std::string> deviceNames;
+            for(std::map<int, DeviceStorage>::const_iterator it = mDevices.begin();
+                it != mDevices.end(); ++it)
             {
-                const NsConnectionHandler::CDevice& device = it->second;
-                list.push_back(device.getUserFriendlyName());
+                deviceNames.push_back(it->second.getUserFriendlyName());
             }
-            deviceListUpdated->set_deviceList(list);
+            deviceListUpdated->set_deviceList(deviceNames);
         }
         HMIHandler::getInstance().sendNotification(deviceListUpdated);
+    }
+
+    void AppMgrCore::differenceBetweenLists( const NsConnectionHandler::tDeviceList &deviceList )
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Start finding diff.");
+        typedef NsConnectionHandler::tDeviceList::const_iterator NewIterator;
+        typedef std::map<int, DeviceStorage>::const_iterator ExistingIterator;
+        typedef std::map<int, Application*>::const_iterator ApplicationIterator;
+
+        for(NewIterator it = deviceList.begin(); it != deviceList.end(); ++it)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tNew device " << it->first);
+        }
+        for(ExistingIterator it = mDevices.begin(); it != mDevices.end(); ++it)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tOld device " << it->first);
+        }
+
+        std::map<int, DeviceStorage> updatedMap;
+
+        ExistingIterator tempIt = mDevices.end();
+        ExistingIterator oldIt = mDevices.begin();
+        NewIterator newIt = deviceList.begin();
+
+        while ( newIt != deviceList.end() )
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Current device " << newIt->first);
+            if ( mDevices.end() == oldIt )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "End of existing devices.");
+                for( NewIterator newItRest = newIt; newItRest != deviceList.end(); ++ newItRest)
+                {
+                    updatedMap.insert( std::pair<int, DeviceStorage>(newItRest->first,
+                        DeviceStorage(newItRest->second.getDeviceHandle(), newItRest->second.getUserFriendlyName())) );                    
+                }
+                LOG4CPLUS_INFO_EXT(mLogger, "Size of updated map " << updatedMap.size());
+                break;
+            }
+
+            while( oldIt != mDevices.end() && newIt != deviceList.end() && newIt->first > oldIt->first )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tRemoving old device " << oldIt->first);
+                if( oldIt->second.getAppId() )
+                {
+                    // The app should be deleted.
+                    ApplicationIterator appIt = mApplications.find( oldIt->second.getAppId() );
+                    if ( mApplications.end() != appIt )
+                    {
+                        if ( appIt->second )
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "Unregistering app " << appIt->first);
+                            unregisterApplication( appIt -> first );
+                            //Application * appToBeRemoved = 
+                            //unregister app
+                        }
+                        //mApplications.erase( appIt );
+                    }
+                }
+                ++oldIt;
+            }
+
+            while( oldIt != mDevices.end() && newIt != deviceList.end() && newIt->first < oldIt->first )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tAdding new device " << newIt->first);
+                updatedMap.insert( std::pair<int, DeviceStorage>(newIt->first,
+                            DeviceStorage(newIt->second.getDeviceHandle(), newIt->second.getUserFriendlyName())) );
+                ++newIt;
+            }
+            if ( oldIt != mDevices.end() && newIt != deviceList.end() && newIt->first == oldIt->first )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tCopying existing device " << oldIt->first);
+                updatedMap.insert( std::pair<int, DeviceStorage>(oldIt->first, oldIt->second) );
+                ++oldIt; ++newIt;
+            }             
+        }
+
+        if ( mDevices.end() != oldIt )
+        {
+            //oldIt = (mDevices.begin() == oldIt ? oldIt : --oldIt);
+            for( ExistingIterator it = oldIt; it != mDevices.end(); ++it )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "Removing old devices");
+                if( it->second.getAppId() )
+                {
+                    // The app should be deleted.
+                    ApplicationIterator appIt = mApplications.find( it->second.getAppId() );
+                    if ( mApplications.end() != appIt )
+                    {
+                        if ( appIt->second )
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "Unregistering app " << appIt->first);
+                            unregisterApplication( appIt -> first );
+                        }
+                    }
+                }
+            }
+        }
+        
+        LOG4CPLUS_INFO_EXT(mLogger, "size of existing devices " << mDevices.size());
+        mDevices = updatedMap;
+        LOG4CPLUS_INFO_EXT(mLogger, "size of existing devices " << mDevices.size());
     }
 
     /**
      * \brief get device list
      * \return device list
      */
-    const NsConnectionHandler::tDeviceList &AppMgrCore::getDeviceList() const
+    /*const NsConnectionHandler::tDeviceList &AppMgrCore::getDeviceList() const
     {
         return mDeviceList.getDeviceList();
-    }
+    }*/
 
     /**
      * \brief add a device to a mapping
      * \param connectionKey session/connection key
      * \param device device handler
      */
-    void AppMgrCore::addDevice(const int &sessionKey, const NsConnectionHandler::tDeviceHandle &device)
+    void AppMgrCore::addDevice(const NsConnectionHandler::tDeviceHandle &device,
+            const int &sessionKey, int firstSessionKey)
     {
-        mDeviceHandler.addDevice(sessionKey, device);
+        //mDeviceHandler.addDevice(sessionKey, device);
+        LOG4CPLUS_INFO_EXT(mLogger, "Adding session to device " << device);
+        if( sessionKey == firstSessionKey )
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Adding first session " << firstSessionKey);
+            std::map<int, DeviceStorage>::iterator it = mDevices.find(device);
+            if ( mDevices.end() != it )
+            {
+                it->second.setAppId(sessionKey);
+                LOG4CPLUS_INFO_EXT(mLogger, "Added session to device " << it->first);
+            }
+        }
+        else
+        {
+            bool flag = true;
+            for(std::map<int, DeviceStorage>::iterator it = mDevices.begin();
+                    it != mDevices.end() && flag; ++it)
+            {
+                if ( it->second.getAppId() == firstSessionKey )
+                {
+                    it->second.addConnectionKey( sessionKey );
+                    flag = false;
+                }
+            }
+        }
     }
 
     /**
      * \brief remove a device from a mapping
      * \param sessionKey session/connection key
      */
-    void AppMgrCore::removeDevice(const int &sessionKey)
+    void AppMgrCore::removeDevice(const int &sessionKey, int firstSessionKey)
     {
-        mDeviceHandler.removeDevice(sessionKey);
+        LOG4CPLUS_INFO_EXT(mLogger, "Removing session " << sessionKey << " from device.");
+        if ( sessionKey == firstSessionKey )
+        {
+            std::map<int, Application *>::iterator it = mApplications.find( firstSessionKey );
+            if ( it != mApplications.end() )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "Removing app from device " << it->second->getDeviceHandle());
+                mDevices.erase( it->second->getDeviceHandle() );
+            }
+            unregisterApplication( firstSessionKey );            
+        }
+        //mDeviceHandler.removeDevice(sessionKey);
+        else
+        {
+            bool flag = true;
+            for(std::map<int, DeviceStorage>::iterator it = mDevices.begin();
+                    it != mDevices.end() && flag; ++it)
+            {
+                if ( it->second.getAppId() == firstSessionKey )
+                {
+                    it->second.removeConnectionKey( sessionKey );
+                    flag = false;
+                }
+            }
+        }
     }
 
     bool AppMgrCore::getAudioPassThruFlag() const
