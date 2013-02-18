@@ -11,8 +11,6 @@
 #include "AppMgr/Application.h"
 #include "AppMgr/ButtonMapping.h"
 #include "AppMgr/VehicleDataMapping.h"
-#include "AppMgr/MessageMapping.h"
-#include "AppMgr/RequestMapping.h"
 #include "AppMgr/CapabilitesContainer.h"
 #include "AppMgr/SyncPManager.h"
 #include "AppMgr/DeviceList.h"
@@ -178,7 +176,7 @@ namespace NsAppManager
         bool getAudioPassThruFlag() const;
         void setAudioPassThruFlag(bool flag);
 
-        const MessageMapping& getMessageMapping() const;
+        //const MessageMapping& getMessageMapping() const;
 
         /**
          * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
@@ -296,6 +294,10 @@ namespace NsAppManager
 
         Application * getActiveItem();
 
+        Application * getApplicationByCommand(const unsigned int &cmdId);
+
+        bool activateApp( Application * appToBeActivated );
+
         AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
         AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
@@ -313,8 +315,8 @@ namespace NsAppManager
         CapabilitiesContainer<NsAppLinkRPCV2::SoftButtonCapabilities> mSoftButtonCapabilities;
         ButtonMapping       mButtonsMapping;
         VehicleDataMapping  mVehicleDataMapping;
-        MessageMapping      mMessageMapping;
-        RequestMapping      mRequestMapping;
+        //MessageMapping      mMessageMapping;
+        //RequestMapping      mRequestMapping;
         //DeviceList          mDeviceList;
         DeviceHandler       mDeviceHandler;
 

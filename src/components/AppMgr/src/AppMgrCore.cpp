@@ -13,13 +13,14 @@
 #include "Utils/SocketException.h"
 #include "Utils/WorkWithOS.h"
 #include "AppMgr/AppMgrCore.h"
-#include "AppMgr/AppMgrRegistry.h"
 #include "AppMgr/AppPolicy.h"
 #include "AppMgr/RegistryItem.h"
 #include "AppMgr/AppMgrCoreQueues.h"
 #include "AppMgr/HMIHandler.h"
 #include "AppMgr/MobileHandler.h"
 #include "AppMgr/ConnectionHandler.h"
+#include "AppMgr/Application_v2.h"
+#include "AppMgr/Application_v1.h"
 #include "JSONHandler/ALRPCMessage.h"
 #include "JSONHandler/ALRPCRequest.h"
 #include "JSONHandler/ALRPCResponse.h"
@@ -770,7 +771,7 @@ namespace NsAppManager
                         return;
                     }
 
-                    core->mButtonsMapping.addButton( btnName, item );
+                    core->mButtonsMapping.addButton( btnName, app );
 
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
@@ -1922,7 +1923,7 @@ namespace NsAppManager
                         return;
                     }
 
-                    core->mButtonsMapping.addButton( object->get_buttonName(), item );
+                    core->mButtonsMapping.addButton( object->get_buttonName(), app );
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -3397,7 +3398,7 @@ namespace NsAppManager
                     std::vector<NsAppLinkRPCV2::VehicleDataType>::iterator it;
                     for (it = vdVector.begin(); it != vdVector.end(); it++)
                     {
-                        if (core->mVehicleDataMapping.addVehicleDataMapping(*it, item))
+                        if (core->mVehicleDataMapping.addVehicleDataMapping(*it, app))
                         {
                             countOfItems--;
                         }
@@ -3464,7 +3465,7 @@ namespace NsAppManager
                     std::vector<NsAppLinkRPCV2::VehicleDataType>::iterator it;
                     for (it = vdVector.begin(); it != vdVector.end(); it++)
                     {
-                        if (core->mVehicleDataMapping.removeVehicleDataMapping(*it, item))
+                        if (core->mVehicleDataMapping.removeVehicleDataMapping(*it, app))
                         {
                             countOfItems--;
                         }
@@ -4093,7 +4094,7 @@ namespace NsAppManager
 
                 for( ButtonMap::const_iterator it=subscribedApps.first; it!=subscribedApps.second; ++it )
                 {
-                    Application* app = core->getApplicationFromItemCheckNotNull( it -> second ) ;
+                    Application* app = it -> second;
                     if (!app)
                     {
                         LOG4CPLUS_WARN(mLogger, "Null pointer to subscribed app.");
@@ -4137,7 +4138,7 @@ namespace NsAppManager
 
                 for( ButtonMap::const_iterator it=subscribedApps.first; it!=subscribedApps.second; ++it )
                 {
-                    Application* app = core->getApplicationFromItemCheckNotNull( it -> second ) ;
+                    Application* app = it -> second;
                     if (!app)
                     {
                         LOG4CPLUS_WARN(mLogger, "Null pointer to subscribed app.");
@@ -4376,7 +4377,7 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand UI notification has been invoked");
                 NsRPC2Communication::UI::OnCommand* object = (NsRPC2Communication::UI::OnCommand*)msg;
-                Application* app = AppMgrRegistry::getInstance().getApplicationByCommand(object->get_commandId());
+                Application* app = core->getApplicationByCommand(object->get_commandId());
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5717,7 +5718,7 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand VR notification has been invoked");
                 NsRPC2Communication::VR::OnCommand* object = (NsRPC2Communication::VR::OnCommand*)msg;
-                Application* app = AppMgrRegistry::getInstance().getApplicationByCommand(object->get_cmdID());
+                Application* app = core->getApplicationByCommand(object->get_cmdID());
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -6462,15 +6463,15 @@ namespace NsAppManager
                 if (object->get_prndl())
                 {
                     NsAppLinkRPCV2::VehicleDataType vehicleDataName = NsAppLinkRPCV2::VehicleDataType(NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal::VEHICLEDATA_PRNDLSTATUS);
-                    std::vector<RegistryItem*> result;
+                    std::vector<Application*> result;
                     result.clear();
                     core->mVehicleDataMapping.findRegistryItemsSubscribedToVehicleData(vehicleDataName, result);
                     if (0 < result.size())
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, " There are " << result.size() <<" subscribers on PRNDL notification!");
-                        for (std::vector<RegistryItem*>::iterator it = result.begin(); it != result.end(); it++)
+                        for (std::vector<Application*>::iterator it = result.begin(); it != result.end(); it++)
                         {
-                            Application_v2* app = (Application_v2*)(*it)->getApplication();
+                            Application_v2* app = (Application_v2*)(*it);
                             if(!app)
                             {
                                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item" );
@@ -6874,7 +6875,7 @@ namespace NsAppManager
             << " application id " << appId
             << "!");
 
-        mButtonsMapping.removeItem(item);
+        mButtonsMapping.removeItem(app);
         //AppMgrRegistry::getInstance().unregisterApplication(item);
 
         LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName
@@ -6945,7 +6946,7 @@ namespace NsAppManager
 
         NsAppLinkRPCV2::HMILevel::HMILevelInternal previousState = app->getApplicationHMIStatusLevel();
 
-        if(!AppMgrRegistry::getInstance().activateApp(app))
+        if(!activateApp(app))
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "Application " << app->getName()
                 << " application id " << appId << " cannot be activated.");
@@ -7004,7 +7005,7 @@ namespace NsAppManager
      * \param currentApp app which components to be removed
      * \param appId application id
      */
-    void AppMgrCore::removeAppFromHmi(Application* currentApp, int appId)
+    /*void AppMgrCore::removeAppFromHmi(Application* currentApp, int appId)
     {
         const Commands& currentCommands = currentApp->getAllCommands();
         LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's commands from HMI");
@@ -7095,7 +7096,7 @@ namespace NsAppManager
                 break;
             }
         }
-    }
+    }*/
 
     /**
      * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
@@ -7343,14 +7344,13 @@ namespace NsAppManager
         }
         else
         {
-            bool flag = true;
             for(std::map<int, DeviceStorage>::iterator it = mDevices.begin();
-                    it != mDevices.end() && flag; ++it)
+                    it != mDevices.end(); ++it)
             {
                 if ( it->second.getAppId() == firstSessionKey )
                 {
                     it->second.addConnectionKey( sessionKey );
-                    flag = false;
+                    break;
                 }
             }
         }
@@ -7376,14 +7376,13 @@ namespace NsAppManager
         //mDeviceHandler.removeDevice(sessionKey);
         else
         {
-            bool flag = true;
             for(std::map<int, DeviceStorage>::iterator it = mDevices.begin();
-                    it != mDevices.end() && flag; ++it)
+                    it != mDevices.end(); ++it)
             {
                 if ( it->second.getAppId() == firstSessionKey )
                 {
                     it->second.removeConnectionKey( sessionKey );
-                    flag = false;
+                    break;
                 }
             }
         }
@@ -7399,10 +7398,10 @@ namespace NsAppManager
         mAudioPassThruFlag = flag;
     }
 
-    const MessageMapping& AppMgrCore::getMessageMapping() const
+    /*const MessageMapping& AppMgrCore::getMessageMapping() const
     {
         return mMessageMapping;
-    }
+    }*/
 
     void AppMgrCore::sendButtonEvent( Application * app, NsRPC2Communication::Buttons::OnButtonEvent * object )
     {
@@ -7544,6 +7543,95 @@ namespace NsAppManager
         {
             return it->second;
         }
+        return 0;
+    }
+
+    bool AppMgrCore::activateApp( Application * appToBeActivated )
+    {
+        if(!appToBeActivated)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " Cannot activate null-application!");
+            return false;
+        }
+        LOG4CPLUS_INFO_EXT(mLogger, "Activating an app " << appToBeActivated->getName() << " application id " << appToBeActivated->getAppID());
+        
+        bool isCurrentAudible = false;
+        for(std::map<int,Application*>::iterator it = mApplications.begin(); 
+                it != mApplications.end(); 
+                ++it)
+        {
+            Application* tempApplication = it->second;
+            if(!tempApplication)
+            {
+                LOG4CPLUS_WARN_EXT(mLogger, "No application for the item!");
+                return false;
+            }
+
+            if ( tempApplication->getAppID() == appToBeActivated->getAppID() )
+            {
+                continue;
+            }
+
+            //TODO (pvysh): at this point it is assumed that behaviour is correct and
+            // when app is not in HMI_FULL/HMI_LIMITED it is not audible.
+            if ( tempApplication->getIsMediaApplication() 
+                    && NsAppLinkRPCV2::AudioStreamingState::AUDIBLE
+                            == tempApplication->getApplicationAudioStreamingState().get()
+                    && appToBeActivated->getIsMediaApplication() )
+            {
+                tempApplication->setApplicationAudioStreamingState(
+                    NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
+            }
+            
+            if ( NsAppLinkRPCV2::HMILevel::HMI_FULL == tempApplication->getApplicationHMIStatusLevel()
+                || ( NsAppLinkRPCV2::HMILevel::HMI_LIMITED == tempApplication->getApplicationHMIStatusLevel()
+                    && appToBeActivated->getIsMediaApplication() ) )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " Deactivating application " << tempApplication->getName());
+                tempApplication -> setApplicationHMIStatusLevel(
+                    NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
+                AppMgrCore::getInstance().sendHMINotificationToMobile(tempApplication);
+            }
+        }
+
+        LOG4CPLUS_INFO_EXT(mLogger, " Activating application " << appToBeActivated->getName());
+        appToBeActivated->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
+        appToBeActivated->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);
+        if ( appToBeActivated->getIsMediaApplication() )
+        {
+            appToBeActivated->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::AUDIBLE);    
+        }
+        else
+        {
+            appToBeActivated->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
+        }
+        AppMgrCore::getInstance().sendHMINotificationToMobile(appToBeActivated);
+
+        return true;
+    }
+
+    Application * AppMgrCore::getApplicationByCommand(const unsigned int &cmdId)
+    {
+        for(std::map<int, Application*>::iterator it = mApplications.begin();
+                it != mApplications.end();
+                ++it)
+        {
+            Application* app = it->second;
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " No application for the item " << it->first);
+                continue;
+            }
+            if(app->getCommandsCount())
+            {
+                const Commands& cmds = app->findCommands(cmdId);
+                if(!cmds.empty())
+                {
+                    return app;
+                }
+            }
+        }
+        LOG4CPLUS_INFO_EXT(mLogger, " No applications found for the command " << cmdId);
         return 0;
     }
 }

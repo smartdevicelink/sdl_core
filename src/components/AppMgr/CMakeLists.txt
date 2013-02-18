@@ -14,25 +14,22 @@ include_directories (
 
 set (SOURCES
     ./src/AppMgr.cpp
+    ./src/AppMgrCore.cpp
     ./src/MessageChaining.cpp
     ./src/DeviceStorage.cpp
-    ./src/AppMgrRegistry.cpp
     ./src/Application.cpp
     ./src/Application_v1.cpp
     ./src/Application_v2.cpp
-    ./src/AppMgrCore.cpp
     ./src/AppMgrCoreQueues.cpp
     ./src/AppPolicy.cpp
     ./src/RegistryItem.cpp
     ./src/ButtonMapping.cpp
     ./src/CommandMapping.cpp
-    ./src/MessageMapping.cpp
     ./src/MenuMapping.cpp
     ./src/CapabilitesContainer.cpp
     ./src/HMIHandler.cpp
     ./src/MobileHandler.cpp
     ./src/ConnectionHandler.cpp
-    ./src/RequestMapping.cpp
     ./src/SyncPManager.cpp
     ./src/AppMenus.cpp
     ./src/AppChoiceSets.cpp

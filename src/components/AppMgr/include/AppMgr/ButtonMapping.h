@@ -20,7 +20,7 @@ namespace log4cplus
 namespace NsAppManager
 {
 
-    class RegistryItem;
+    class Application;
 
     /**
      * \brief Comparer acts as a comparer that allows to create std::map with NsAppLinkRPC::ButtonName as a key
@@ -32,12 +32,12 @@ namespace NsAppManager
     /**
      * \brief a button_name-registered-app map
      */
-    typedef std::multimap<NsAppLinkRPCV2::ButtonName, RegistryItem*, Comparer> ButtonMap;
+    typedef std::multimap<NsAppLinkRPCV2::ButtonName, Application*, Comparer> ButtonMap;
 
     /**
      * \brief a button_name-registered-app map item
      */
-    typedef std::pair<NsAppLinkRPCV2::ButtonName, RegistryItem*> ButtonMapItem;
+    typedef std::pair<NsAppLinkRPCV2::ButtonName, Application*> ButtonMapItem;
 
     /**
       *\brief Iterators of beginning and end of result range
@@ -66,7 +66,7 @@ namespace NsAppManager
          * \param buttonName button name
          * \param app application to map a button to
          */
-        void addButton( const NsAppLinkRPCV2::ButtonName& buttonName, RegistryItem* app );
+        void addButton( const NsAppLinkRPCV2::ButtonName& buttonName, Application* app );
 
         /**
          * \brief remove a button from a mapping
@@ -78,7 +78,7 @@ namespace NsAppManager
          * \brief remove an application from a mapping
          * \param app application to remove all associated buttons from mapping
          */
-        void removeItem( RegistryItem* app );
+        void removeItem( Application* app );
 
         /**
          * \brief cleans all the mapping
@@ -88,9 +88,9 @@ namespace NsAppManager
         /**
          * \brief find a registry item subscribed to button
          * \param btnName button name
-         * \return RegistryItem instance
+         * \return Application instance
          */
-        RegistryItem *findRegistryItemSubscribedToButton(const NsAppLinkRPCV2::ButtonName &btnName) const;
+        Application *findRegistryItemSubscribedToButton(const NsAppLinkRPCV2::ButtonName &btnName) const;
 
         /**
          * \brief Find all apps subscribed to button
