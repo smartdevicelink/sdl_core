@@ -6423,9 +6423,10 @@ namespace NsAppManager
                         response->set_satRadioESN(*(object->get_satRadioESN()));
                     }
                     response->setCorrelationID(it->second->correlationID);
-                    core->decreaseMessageChain(it);
+
                     LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName());
                     MobileHandler::getInstance().sendRPCMessage(response, it->second->connectionKey);
+                    core->decreaseMessageChain(it);
                 } else
                 {
                     LOG4CPLUS_WARN(mLogger, "GetVehicleData is present in Protocol V2 only!!!");
