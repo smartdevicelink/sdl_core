@@ -201,6 +201,8 @@ namespace NsAppManager
          */
         bool performActivitiesForActivatingApp( Application * app );
 
+        Application * getItem( int applicationId );
+
     private:
 
         /**
@@ -234,7 +236,7 @@ namespace NsAppManager
          * \param sessionID an id of the session which will be associated with the application
          * \return A instance of RegistryItem created for application
          */
-        const RegistryItem* registerApplication(NsAppLinkRPC::ALRPCMessage *request , int sessionKey);
+        const Application* registerApplication(NsAppLinkRPC::ALRPCMessage *request , int sessionKey);
 
         /**
          * \brief unregister an application associated with the given session
@@ -291,6 +293,8 @@ namespace NsAppManager
         MessageChaining * addChain(MessageChaining * chain, int connectionKey, unsigned int correlationID);
 
         void differenceBetweenLists( const NsConnectionHandler::tDeviceList &deviceList );
+
+        Application * getActiveItem();
 
         AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
         AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;

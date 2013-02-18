@@ -27,7 +27,7 @@ namespace NsAppManager
      * \brief unregister an application
      * \param item a registry item associated with the aplication being unregistered
      */
-    void AppMgrRegistry::unregisterApplication( RegistryItem* item )
+/*    void AppMgrRegistry::unregisterApplication( RegistryItem* item )
     {
         if(!item)
         {
@@ -37,14 +37,14 @@ namespace NsAppManager
         LOG4CPLUS_INFO_EXT(mLogger, " Unregistering an application " << item->getApplication()->getName() << " app id " << item->getApplication()->getAppID());
         ItemsMap::const_iterator registryItemIterator = mRegistryItems.find(ApplicationUniqueID(item->getApplication()->getAppID()));
         mRegistryItems.erase(registryItemIterator);
-    }
+    }*/
 
     /**
      * \brief get registry item associated with the application
      * \param app application we need to retrieve a registry item for
      * \return RegistryItem instance
      */
-    RegistryItem *AppMgrRegistry::getItem( const Application* app ) const
+/*    RegistryItem *AppMgrRegistry::getItem( const Application* app ) const
     {
         if(!app)
         {
@@ -52,13 +52,13 @@ namespace NsAppManager
             return 0;
         }
         return getItem( app->getAppID() );
-    }
+    }*/
 
     /**
      * \brief get registry item associated with the HMI_FULL application
      * \return Application instance
      */
-    Application *AppMgrRegistry::getActiveItem() const
+    /*Application *AppMgrRegistry::getActiveItem() const
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Searching for the active registered application" );
         for(ItemsMap::const_iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
@@ -107,13 +107,13 @@ namespace NsAppManager
         LOG4CPLUS_WARN(mLogger, " No active application found!");
         return 0;
     }
-
+*/
     /**
      * \brief get registry items associated with the application name
      * \param appName a name of the application we need to retrieve a registry items for
      * \return RegistryItem vector
      */
-    AppMgrRegistry::Items AppMgrRegistry::getItems( const std::string& appName ) const
+    /*AppMgrRegistry::Items AppMgrRegistry::getItems( const std::string& appName ) const
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Searching for registered applications by the name " << appName );
         Items items;
@@ -139,7 +139,7 @@ namespace NsAppManager
         }
 
         return items;
-    }
+    }*/
 
     /**
      * \brief get registry item associated with the application
@@ -147,7 +147,7 @@ namespace NsAppManager
      * \param sessionId id of the session associated with the application we need to retrieve a registry item for
      * \return RegistryItem instance
      */
-    RegistryItem *AppMgrRegistry::getItem(int appId) const
+    /*RegistryItem *AppMgrRegistry::getItem(int appId) const
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Searching for registered application with the app id " << appId);
         ItemsMap::const_iterator it = mRegistryItems.find(ApplicationUniqueID(appId));
@@ -163,23 +163,23 @@ namespace NsAppManager
         }
         LOG4CPLUS_WARN_EXT(mLogger, " No application found with the application id " << appId);
         return 0;
-    }
+    }*/
 
     /**
      * \brief Returns registered applications list
      * \return registered applications list
      */
-    const AppMgrRegistry::ItemsMap &AppMgrRegistry::getItems() const
+    /*const AppMgrRegistry::ItemsMap &AppMgrRegistry::getItems() const
     {
         return mRegistryItems;
-    }
+    }*/
 
     /**
      * \brief Activates a registered app and deactivates currently active one
      * \param item registered application to activate
      * \return result success
      */
-    bool AppMgrRegistry::activateApp(RegistryItem* item)
+    /*bool AppMgrRegistry::activateApp(RegistryItem* item)
     {
         if(!item)
         {
@@ -190,14 +190,14 @@ namespace NsAppManager
         Application* app = item->getApplication();
 
         return activateApp(app);
-    }
+    }*/
 
     /**
      * \brief Activates a registered app and deactivates currently active one
      * \param item registered application to activate
      * \return result success
      */
-    bool AppMgrRegistry::activateApp(Application *appToBeActivated)
+    /*bool AppMgrRegistry::activateApp(Application *appToBeActivated)
     {
         if(!appToBeActivated)
         {
@@ -266,7 +266,7 @@ namespace NsAppManager
         AppMgrCore::getInstance().sendHMINotificationToMobile(appToBeActivated);
 
         return true;
-    }
+    }*/
 
     /**
      * \brief Returns an application from the registry by application connection id and session id
@@ -274,7 +274,7 @@ namespace NsAppManager
      * \param sessionId id of the session associated with the application we need to retrieve
      * \return application, if the specified name found in a registry, NULL otherwise
      */
-    Application *AppMgrRegistry::getApplication(int appId) const
+    /*Application *AppMgrRegistry::getApplication(int appId) const
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Searching for registered application with the application id " << appId );
 
@@ -297,14 +297,14 @@ namespace NsAppManager
             return 0;
         }
         return app;
-    }
+    }*/
 
     /**
      * \brief Gets an application assigned to a command
      * \param cmdId a command
      * \return an application assigned to a command
      */
-    Application *AppMgrRegistry::getApplicationByCommand(const unsigned int &cmdId) const
+    /*Application *AppMgrRegistry::getApplicationByCommand(const unsigned int &cmdId) const
     {
         for(ItemsMap::const_iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
         {
@@ -331,15 +331,15 @@ namespace NsAppManager
         }
         LOG4CPLUS_WARN(mLogger, " No applications found for the command " << cmdId);
         return 0;
-    }
+    }*/
 
     /**
      * \brief cleans all the registry
      */
-    void AppMgrRegistry::clear()
+    /*void AppMgrRegistry::clear()
     {
-        mRegistryItems.clear();
-    }
+        //mRegistryItems.clear();
+    }*/
 
     /**
      * \brief Default class constructor
@@ -362,7 +362,7 @@ namespace NsAppManager
     AppMgrRegistry::~AppMgrRegistry( )
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Destructing a registry!");
-        for(ItemsMap::iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
+        /*for(ItemsMap::iterator it = mRegistryItems.begin(); it != mRegistryItems.end(); it++)
         {
             if( it->second )
             {
@@ -371,7 +371,7 @@ namespace NsAppManager
             }
         }
 
-        mRegistryItems.clear();
+        mRegistryItems.clear();*/
         LOG4CPLUS_INFO_EXT(mLogger, " Destructed a registry!");
     }
 
@@ -380,7 +380,7 @@ namespace NsAppManager
      * \param app application we are registering
      * \return RegistryItem instance created for the application we've just registered
      */
-    const RegistryItem* AppMgrRegistry::registerApplication( Application* app )
+    /*const RegistryItem* AppMgrRegistry::registerApplication( Application* app )
     {
         if(!app)
         {
@@ -390,6 +390,6 @@ namespace NsAppManager
         LOG4CPLUS_INFO_EXT(mLogger, " Registering an application " << app->getName() << " application id " << app->getAppID());
         mRegistryItems.insert(ItemsMapItem(ApplicationUniqueID(app->getAppID()), new RegistryItem(app)));
         return mRegistryItems.find(ApplicationUniqueID(app->getAppID()))->second;
-    }
+    }*/
 
 }

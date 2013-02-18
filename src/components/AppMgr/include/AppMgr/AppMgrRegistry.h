@@ -62,33 +62,33 @@ namespace NsAppManager
          * \param app application we are registering
          * \return RegistryItem instance created for the application we've just registered
          */
-        const RegistryItem* registerApplication(Application *app );
+        //const RegistryItem* registerApplication(Application *app );
 
         /**
          * \brief unregister an application
          * \param item a registry item associated with the aplication being unregistered
          */
-        void unregisterApplication( RegistryItem* item  );
+        //void unregisterApplication( RegistryItem* item  );
 
         /**
          * \brief get registry item associated with the application
          * \param app application we need to retrieve a registry item for
          * \return RegistryItem instance
          */
-        RegistryItem *getItem( const Application* app ) const;
+        //RegistryItem *getItem( const Application* app ) const;
 
         /**
          * \brief get registry item associated with the HMI_FULL application
          * \return Application instance
          */
-        Application *getActiveItem() const;
+        //Application *getActiveItem() const;
 
         /**
          * \brief get registry items associated with the application name
          * \param appName a name of the application we need to retrieve a registry items for
          * \return RegistryItem vector
          */
-        Items getItems(const std::string& appName ) const;
+        //Items getItems(const std::string& appName ) const;
 
         /**
          * \brief get registry item associated with the application
@@ -96,27 +96,27 @@ namespace NsAppManager
          * \param sessionId id of the session associated with the application we need to retrieve a registry item for
          * \return RegistryItem instance
          */
-        RegistryItem *getItem( int appId ) const;
+        //RegistryItem *getItem( int appId ) const;
 
         /**
          * \brief Returns registered applications list
          * \return registered applications list
          */
-        const ItemsMap &getItems() const;
+        //const ItemsMap &getItems() const;
 
         /**
          * \brief Activates a registered app and deactivates currently active one
          * \param item registered application to activate
          * \return result success
          */
-        bool activateApp(RegistryItem* item);
+        //bool activateApp(RegistryItem* item);
 
         /**
          * \brief Activates a registered app and deactivates currently active one
          * \param item registered application to activate
          * \return result success
          */
-        bool activateApp(Application* app);
+        //bool activateApp(Application* app);
 
         /**
          * \brief Returns an application from the registry by application connection id and session id
@@ -124,19 +124,19 @@ namespace NsAppManager
          * \param sessionId id of the session associated with the application we need to retrieve
          * \return application, if the specified name found in a registry, NULL otherwise
          */
-        Application* getApplication( int appId ) const;
+        //Application* getApplication( int appId ) const;
 
         /**
          * \brief Gets an application assigned to a command
          * \param cmdId a command
          * \return an application assigned to a command
          */
-        Application* getApplicationByCommand( const unsigned int& cmdId ) const;
+        //Application* getApplicationByCommand( const unsigned int& cmdId ) const;
 
         /**
          * \brief cleans all the registry
          */
-        void clear( );
+        //void clear( );
 
     private:
 
@@ -150,7 +150,7 @@ namespace NsAppManager
          */
         AppMgrRegistry( const AppMgrRegistry& );
 
-        ItemsMap mRegistryItems;
+        //ItemsMap mRegistryItems;
         static log4cplus::Logger mLogger;
     };
 
