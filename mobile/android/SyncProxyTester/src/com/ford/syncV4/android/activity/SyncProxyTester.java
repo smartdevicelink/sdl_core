@@ -176,7 +176,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * Latest choiceSetId, required to add it to the adapter when a successful
 	 * CreateInteractionChoiceSetResponse comes.
 	 */
-	private int _latestChoiceSetId = CHOICESETID_UNSET;
+	private int _latestCreateChoiceSetId = CHOICESETID_UNSET;
+	/**
+	 * Latest choiceSetId, required to delete it from the adapter when a
+	 * successful DeleteInteractionChoiceSetResponse comes.
+	 */
+	private int _latestDeleteChoiceSetId = CHOICESETID_UNSET;
 	/**
 	 * Latest SyncSubMenu, required to delete the submenu from the adapter
 	 * when a successful DeleteSubMenuResponse comes.
@@ -1564,10 +1569,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										try {
 											_msgAdapter.logMessage(msg, true);
 											ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-											if (_latestChoiceSetId != CHOICESETID_UNSET) {
-												Log.w(logTag, "Latest choiceSetId should be unset, but equals to " + _latestChoiceSetId);
+											if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
+												Log.w(logTag, "Latest createChoiceSetId should be unset, but equals to " + _latestCreateChoiceSetId);
 											}
-											_latestChoiceSetId = choiceSetID;
+											_latestCreateChoiceSetId = choiceSetID;
 										} catch (SyncException e) {
 											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 										}
@@ -1597,11 +1602,13 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									try {
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+										if (_latestDeleteChoiceSetId != CHOICESETID_UNSET) {
+											Log.w(logTag, "Latest deleteChoiceSetId should be unset, but equals to " + _latestDeleteChoiceSetId);
+										}
+										_latestDeleteChoiceSetId = commandSetID;
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
-
-									_choiceSetAdapter.remove(commandSetID);
 								}
 							});
 							AlertDialog dlg = builder.create();
@@ -2841,13 +2848,28 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * adapter.
 	 */
 	public void onCreateChoiceSetResponse(boolean success) {
-		if (_latestChoiceSetId != CHOICESETID_UNSET) {
+		if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
 			if (success) {
-				_choiceSetAdapter.add(_latestChoiceSetId);
+				_choiceSetAdapter.add(_latestCreateChoiceSetId);
 			}
-			_latestChoiceSetId = CHOICESETID_UNSET;
+			_latestCreateChoiceSetId = CHOICESETID_UNSET;
 		} else {
-			Log.w(logTag, "Latest choiceSetId is unset");
+			Log.w(logTag, "Latest createChoiceSetId is unset");
+		}
+	}
+	
+	/**
+	 * Called when a DeleteChoiceSetResponse comes. If successful, remove it
+	 * from the adapter.
+	 */
+	public void onDeleteChoiceSetResponse(boolean success) {
+		if (_latestDeleteChoiceSetId != CHOICESETID_UNSET) {
+			if (success) {
+				_choiceSetAdapter.remove(_latestDeleteChoiceSetId);
+			}
+			_latestDeleteChoiceSetId = CHOICESETID_UNSET;
+		} else {
+			Log.w(logTag, "Latest deleteChoiceSetId is unset");
 		}
 	}
 	

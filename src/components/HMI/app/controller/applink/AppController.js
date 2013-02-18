@@ -25,20 +25,20 @@ MFT.ApplinkAppController = Em.Object.create({
 	 * @param element:	MFT.Button
 	 */
 	onCommand: function( element ) {
-        
+
         // if submenu
         if ( element.menuId ) {
-            
+
             // activate driver destruction if necessary
             if ( MFT.ApplinkController.driverDistractionState ) {
                 MFT.DriverDistraction.activate();
             } else {
                 this.onSubMenu( element.menuId );
             }
-                        
+
             return;
         }
-        
+
 		FFW.UI.onCommand( element.commandId, this.model.appId );
 	},
 	

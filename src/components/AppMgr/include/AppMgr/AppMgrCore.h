@@ -58,7 +58,6 @@ namespace NsConnectionHandler
 
 namespace NsAppManager
 {
-
     class RegistryItem;
     template< class QueueType >
     class AppMgrCoreQueue;
@@ -333,6 +332,7 @@ namespace NsAppManager
         NsAppLinkRPCV2::VehicleType mVehicleType;
         bool mAudioPassThruFlag;
         int mPerformInteractionFlag;
+        int mHMIStartupFlag;
 
         std::map<int, int> menuMapping;  // map<request_id, menu_id>
 

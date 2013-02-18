@@ -210,10 +210,7 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 * @param {Object}
 	 */
 	onPreformInteraction: function( message ) {
-		/* test message
-		message = JSON.parse('{"appId":1,"helpPrompt":[{"text":"help me, Im melting","type":"TEXT"}],"initialPrompt":[{"text":"Pick a command","type":"TEXT"}],"initialText":"Pick number:","interactionChoiceSetIDList":[4]}');
-		*/
-		
+
 		var i = 0,
 			length = message.interactionChoiceSetIDList.length;
 		
@@ -238,6 +235,11 @@ MFT.ApplinkAppModel = Em.Object.extend({
         		MFT.ApplinkModel.onPrompt( message.timeoutPrompt );
         	}
         }, message.timeout);
+
+        //Show VR synonims in VR popUp
+        for( i=0; i < length; i++){
+            MFT.VRPopUp.CreateInteractionChoise( this.interactionChoices[message.interactionChoiceSetIDList[i]]);
+        }
 	},
 	
 	/**
@@ -247,14 +249,9 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 * @param {Object}
 	 */
 	onCreateInteraction: function( message ) {
-		
-		/* test message
-		message = JSON.parse('{"appId":1,"choiceSet":[{"choiceID":10,"menuName":"1st item","vrCommands":["1st item","Command one"]},{"choiceID":11,"menuName":"2nd item","vrCommands":["2nd item","Command two"]},{"choiceID":12,"menuName":"3rd item","vrCommands":["3rd item","Command three"]}],"interactionChoiceSetID":4}');
-		*/
-		
+
 		this.interactionChoices[message.interactionChoiceSetID] = message.choiceSet;
-		
-		MFT.VRPopUp.CreateInteractionChoise(message);
+
 	},
 	
 	/**
@@ -266,8 +263,6 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 */
 	onDeleteInteraction: function( message ) {		
 		delete this.interactionChoices[message.interactionChoiceSetID];
-		
-		MFT.VRPopUp.DeleteInteractionChoise(message.interactionChoiceSetID);
 	},
 	
 	/**

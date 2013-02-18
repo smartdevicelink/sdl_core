@@ -1,4 +1,11 @@
+[CW8]
+* Don't remove interaction choice set from the choiceSets list until a successful DeleteChoiceSetResponse has come.
+* Don't show null in the log if the responses' info is null.
+* AddCommand message: set an existing icon by default.
+
 [CW7]
+* Fix displaying the success flag, info, and result code of the messages in the log.
+* Fix displaying long messages in the log on narrow screens.
 * Don't drop the connection to the core when pressing the Back button. Now, to disconnect use the Exit options menu item.
 + Show message's correlation ID in the Raw JSON popup.
 * Update the turn list icons.

@@ -6,8 +6,8 @@
  * \author AKara
  */
 
-#ifndef CONNECTIONHANDLER_H 
-#define CONNECTIONHANDLER_H 
+#ifndef CONNECTIONHANDLER_H
+#define CONNECTIONHANDLER_H
 
 #include <map>
 
@@ -23,7 +23,7 @@
 /**
  * \namespace NsConnectionHandler
  * \brief AppLink ConnectionHandler namespace.
- */ 
+ */
 namespace NsConnectionHandler
 {
     /**
@@ -81,14 +81,14 @@ namespace NsConnectionHandler
 
         virtual int onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle);
 
-        virtual int onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+        virtual int onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
                                                unsigned char sessionId,
                                                unsigned int hashCode);
 
-        virtual int keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+        virtual int keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
                                                unsigned char sessionId);
 
-        virtual void pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle, 
+        virtual void pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle,
                                                unsigned char & sessionId);
 
         /**
@@ -107,6 +107,8 @@ namespace NsConnectionHandler
          * \param deviceHandle Handle of device to connect to
          */
         virtual void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle );
+
+        void startTransportManager();
 
     private:
         /**

@@ -56,6 +56,8 @@ namespace NsAppManager
          */
         void connectToDevice( NsConnectionHandler::tDeviceHandle deviceHandle );
 
+        void startTransportManager();
+
     private:
 
         /**

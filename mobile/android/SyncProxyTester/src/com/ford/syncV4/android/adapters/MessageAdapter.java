@@ -56,7 +56,7 @@ public class MessageAdapter extends ArrayAdapter<Object> {
             	lblTop.setText(func.getFunctionName() + " (" + func.getMessageType() + ")");
             	
             	try {
-					Method getSuccessMethod = rpcObj.getClass().getDeclaredMethod("getSuccess");
+					Method getSuccessMethod = rpcObj.getClass().getMethod("getSuccess");
 					boolean isSuccess = (Boolean)getSuccessMethod.invoke(func);
 					if (isSuccess) {
 						lblTop.setTextColor(Color.GREEN);
@@ -64,13 +64,13 @@ public class MessageAdapter extends ArrayAdapter<Object> {
 					else {
 						lblTop.setTextColor(Color.RED);
 					}
-					Method getInfoMethod = rpcObj.getClass().getDeclaredMethod("getInfo");
-					Method getResultCodeMethod = rpcObj.getClass().getDeclaredMethod("getResultCode");
+					Method getInfoMethod = rpcObj.getClass().getMethod("getInfo");
+					Method getResultCodeMethod = rpcObj.getClass().getMethod("getResultCode");
 					
 					String info = (String)getInfoMethod.invoke(rpcObj);
 					Result result = (Result)getResultCodeMethod.invoke(rpcObj);
 					
-					lblBottom.setText(result + ": " + info);
+					lblBottom.setText(result + (info != null ? ": " + info : ""));
 					
 				} catch (NoSuchMethodException e) {
 					rowView.removeView(lblBottom);

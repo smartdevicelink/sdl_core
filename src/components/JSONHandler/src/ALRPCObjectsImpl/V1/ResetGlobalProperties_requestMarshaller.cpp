@@ -103,15 +103,14 @@ bool ResetGlobalProperties_requestMarshaller::fromJSON(const Json::Value& js,Res
     {
       const Json::Value& j=json["properties"];
       if(!j.isArray())  return false;
-      c.properties.resize(j.size());
       for(unsigned int i=0;i<j.size();i++)
+      {
+        GlobalProperty t;
+        if(GlobalPropertyMarshaller::fromJSON(j[i],t))
         {
-          GlobalProperty t;
-          if(!GlobalPropertyMarshaller::fromJSON(j[i],t))
-            return false;
-          c.properties[i]=t;
+          c.properties.push_back(t);
         }
-
+      }
     }
 
   }
