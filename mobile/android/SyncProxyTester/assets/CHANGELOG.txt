@@ -1,3 +1,6 @@
+[CW8]
+* AddCommand message: set an existing icon by default.
+
 [CW7]
 * Fix displaying the success flag, info, and result code of the messages in the log.
 * Fix displaying long messages in the log on narrow screens.

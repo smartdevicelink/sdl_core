@@ -508,6 +508,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				sendIconFromResource(R.drawable.turn_left);
 				sendIconFromResource(R.drawable.turn_right);
 				sendIconFromResource(R.drawable.turn_forward);
+				sendIconFromResource(R.drawable.action);
 			} catch (SyncException e) {
 				Log.w(TAG, "Failed to set app icon", e);
 			}

@@ -74,7 +74,7 @@
 		    android:ems="10"
 		    android:freezesText="true"
 		    android:inputType="text"
-		    android:text="iconFilename"
+		    android:text="@string/addcommand_iconFilename"
 		    android:visibility="visible" />
 
 		<Spinner
