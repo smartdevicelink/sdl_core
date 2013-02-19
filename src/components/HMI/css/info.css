@@ -819,8 +819,8 @@
 }
 
 #info_apps .findNewApps img{
-	margin: 5px;
-	width: 40px;
+	margin: 9px;
+	width: 32px;
 }
 
 #info_apps .getDeviceList{
@@ -828,11 +828,8 @@
 }
 
 #info_apps .getDeviceList img{
-	width: 43px;
-	height: 41px;
-	margin-top: 5px;
-	margin-left: 3px;
-	margin-right: 5px;
+	width: 38px;
+	margin: 6px;
 }
 
 #info_apps .list{
