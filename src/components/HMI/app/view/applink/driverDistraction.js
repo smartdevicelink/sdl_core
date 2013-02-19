@@ -46,9 +46,13 @@ MFT.DriverDistraction = Em.ContainerView.create({
 		setTimeout(function(){
 			MFT.DriverDistraction.deactivate();
 		}, 3000);
+
+        MFT.ApplinkController.onSystemContextChange();
 	},
 
 	deactivate: function(){
 		this.set('active', false);
+		
+        MFT.ApplinkController.onSystemContextChange();
 	},
 });
