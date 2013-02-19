@@ -5117,44 +5117,56 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONDRIVERDISTRACTION:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnDriverDistraction UI notification has been invoked");
-                NsRPC2Communication::UI::OnDriverDistraction* object = (NsRPC2Communication::UI::OnDriverDistraction*)msg;
-                Application* app = core->getActiveItem();
-                if(!app)
+                NsRPC2Communication::UI::OnDriverDistraction* object
+                    = static_cast<NsRPC2Communication::UI::OnDriverDistraction*>(msg);
+
+                for(std::map<int,Application*>::const_iterator it = core->mApplications.begin();
+                    it != core->mApplications.end();
+                    ++it)
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "No currently active application found");
-                    return;
-                }
-
-                int appId = app->getAppID();
-
-                // We need two events simultaneously, because we may have applications of more than one protocol version registered on the HMI
-                // and all they need to be notified of an OnDriverDistraction event
-                NsAppLinkRPC::OnDriverDistraction* eventV1 = new NsAppLinkRPC::OnDriverDistraction();
-                eventV1->set_state(
-                    static_cast<NsAppLinkRPC::DriverDistractionState::DriverDistractionStateInternal>(
-                        object->get_state().get()));
-                core->mDriverDistractionV1 = eventV1;
-                NsAppLinkRPCV2::OnDriverDistraction* eventV2 = new NsAppLinkRPCV2::OnDriverDistraction();
-                eventV2->setMethodId(NsAppLinkRPCV2::FunctionID::OnDriverDistractionID);
-                eventV2->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                NsAppLinkRPCV2::DriverDistractionState stateV2;
-                stateV2.set((NsAppLinkRPCV2::DriverDistractionState::DriverDistractionStateInternal)object->get_state().get());
-                eventV2->set_state(stateV2);
-                eventV2->setMethodId(NsAppLinkRPCV2::FunctionID::OnDriverDistractionID);
-                eventV2->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                core->mDriverDistractionV2 = eventV2;
-
-                switch(app->getProtocolVersion())
-                {
-                    case 1:
+                    if (NULL != it->second)
                     {
-                        MobileHandler::getInstance().sendRPCMessage(eventV1, appId);
-                        break;
-                    }
-                    case 2:
-                    {
-                        MobileHandler::getInstance().sendRPCMessage(eventV2, appId);
-                        break;
+                        NsAppLinkRPCV2::HMILevel::HMILevelInternal hmiLevel = it->second->getApplicationHMIStatusLevel();
+                        if(NsAppLinkRPCV2::HMILevel::HMI_FULL == hmiLevel
+                            || NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == hmiLevel)
+                        {
+                            int appId = it->second->getAppID();
+
+                            // We need two events simultaneously, because we may have applications of more than
+                            // one protocol version registered on the HMI and all they need to be notified of
+                            // an OnDriverDistraction event
+                            NsAppLinkRPC::OnDriverDistraction* eventV1 = new NsAppLinkRPC::OnDriverDistraction();
+                            eventV1->set_state(
+                                static_cast<NsAppLinkRPC::DriverDistractionState::DriverDistractionStateInternal>(
+                                    object->get_state().get()));
+                            core->mDriverDistractionV1 = eventV1;
+                            NsAppLinkRPCV2::OnDriverDistraction* eventV2 = new NsAppLinkRPCV2::OnDriverDistraction();
+                            eventV2->setMethodId(NsAppLinkRPCV2::FunctionID::OnDriverDistractionID);
+                            eventV2->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+
+                            NsAppLinkRPCV2::DriverDistractionState stateV2;
+                            stateV2.set(
+                                static_cast<NsAppLinkRPCV2::DriverDistractionState::DriverDistractionStateInternal>(
+                                    object->get_state().get()));
+                            eventV2->set_state(stateV2);
+                            eventV2->setMethodId(NsAppLinkRPCV2::FunctionID::OnDriverDistractionID);
+                            eventV2->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                            core->mDriverDistractionV2 = eventV2;
+
+                            switch(it->second->getProtocolVersion())
+                            {
+                                case 1:
+                                {
+                                    MobileHandler::getInstance().sendRPCMessage(eventV1, appId);
+                                    break;
+                                }
+                                case 2:
+                                {
+                                    MobileHandler::getInstance().sendRPCMessage(eventV2, appId);
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
                 return;
