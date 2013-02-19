@@ -1759,7 +1759,7 @@ namespace NsAppManager
                         response->set_success(false);
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_REGISTERED_ALREADY);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
-                        break;                        
+                        break;
                     }
 
                     Application_v2* app = (Application_v2*)core->registerApplication( object, sessionKey );
@@ -5261,8 +5261,8 @@ namespace NsAppManager
                 response->setCorrelationID(it->second->correlationID);
                 NsAppLinkRPCV2::Result::SUCCESS == resultCode ? response->set_success(true) : response->set_success(false);
 
-                core->decreaseMessageChain(it);
                 MobileHandler::getInstance().sendRPCMessage(response, it->second->connectionKey);
+                core->decreaseMessageChain(it);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SCROLLABLEMESSAGERESPONSE:
@@ -5300,8 +5300,8 @@ namespace NsAppManager
                 response->setCorrelationID(it->second->correlationID);
                 NsAppLinkRPCV2::Result::SUCCESS == resultCode ? response->set_success(true) : response->set_success(false);
 
-                core->decreaseMessageChain(it);
                 MobileHandler::getInstance().sendRPCMessage(response, it->second->connectionKey);
+                core->decreaseMessageChain(it);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONDEVICECHOSEN:
@@ -6552,10 +6552,11 @@ namespace NsAppManager
                         LOG4CPLUS_INFO_EXT(mLogger, " dtcList is present! ");
                         response->set_dtcList(*(object->get_dtcList()));
                     }
-                    core->decreaseMessageChain(it);
+
                     LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                         << " application id " << it->second->connectionKey);
                     MobileHandler::getInstance().sendRPCMessage(response, it->second->connectionKey);
+                    core->decreaseMessageChain(it);
                 } else
                 {
                     LOG4CPLUS_WARN(mLogger, "GetVehicleData is present in Protocol V2 only!!!");
@@ -6733,7 +6734,7 @@ namespace NsAppManager
                 application->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_NONE);
 
                 mApplications.insert( std::pair<int, Application*>(appId, application) );
-                LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdded application with appid " << appId << 
+                LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdded application with appid " << appId <<
                         " to mApplications " << (int)mApplications[appId]);
                 for( std::map<int, DeviceStorage>::iterator it = mDevices.begin();
                         it != mDevices.end();
@@ -6801,7 +6802,7 @@ namespace NsAppManager
 
                 LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
                 mApplications.insert( std::pair<int, Application*>(appId, application) );
-                LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdded application with appid " << appId << 
+                LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdded application with appid " << appId <<
                         " to mApplications " << (int)mApplications[appId]);
                 for( std::map<int, DeviceStorage>::iterator it = mDevices.begin();
                         it != mDevices.end();
@@ -6839,7 +6840,7 @@ namespace NsAppManager
     void AppMgrCore::unregisterApplication(int appId)
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Trying to unregister an application for application id " << appId);
-        
+
         Application* app = getItem(appId);
         if(!app)
         {
@@ -7204,7 +7205,7 @@ namespace NsAppManager
         LOG4CPLUS_INFO_EXT(mLogger, " Updating device list: " << deviceList.size() << " devices");
         //mDeviceList.setDeviceList(deviceList);
         differenceBetweenLists(deviceList);
-        NsRPC2Communication::AppLinkCore::OnDeviceListUpdated* deviceListUpdated = 
+        NsRPC2Communication::AppLinkCore::OnDeviceListUpdated* deviceListUpdated =
                 new NsRPC2Communication::AppLinkCore::OnDeviceListUpdated;
         if ( !deviceList.empty() )
         {
@@ -7250,7 +7251,7 @@ namespace NsAppManager
                 for( NewIterator newItRest = newIt; newItRest != deviceList.end(); ++ newItRest)
                 {
                     updatedMap.insert( std::pair<int, DeviceStorage>(newItRest->first,
-                        DeviceStorage(newItRest->second.getDeviceHandle(), newItRest->second.getUserFriendlyName())) );                    
+                        DeviceStorage(newItRest->second.getDeviceHandle(), newItRest->second.getUserFriendlyName())) );
                 }
                 LOG4CPLUS_INFO_EXT(mLogger, "Size of updated map " << updatedMap.size());
                 break;
@@ -7269,7 +7270,7 @@ namespace NsAppManager
                         {
                             LOG4CPLUS_INFO_EXT(mLogger, "Unregistering app " << appIt->first);
                             unregisterApplication( appIt -> first );
-                            //Application * appToBeRemoved = 
+                            //Application * appToBeRemoved =
                             //unregister app
                         }
                         //mApplications.erase( appIt );
@@ -7291,7 +7292,7 @@ namespace NsAppManager
                 updatedMap.insert( std::pair<int, DeviceStorage>(newIt->first,
                             DeviceStorage(newIt->second.getDeviceHandle(), newIt->second.getUserFriendlyName())) );
                 ++oldIt; ++newIt;
-            }             
+            }
         }
 
         if ( mDevices.end() != oldIt )
@@ -7315,7 +7316,7 @@ namespace NsAppManager
                 }
             }
         }
-        
+
         LOG4CPLUS_INFO_EXT(mLogger, "size of existing devices " << mDevices.size());
         mDevices = updatedMap;
         LOG4CPLUS_INFO_EXT(mLogger, "size of existing devices " << mDevices.size());
@@ -7384,7 +7385,7 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tRemoving app from device " << it->second->getDeviceHandle());
                 mDevices.erase( it->second->getDeviceHandle() );
             }
-            unregisterApplication( firstSessionKey );            
+            unregisterApplication( firstSessionKey );
         }
         //mDeviceHandler.removeDevice(sessionKey);
         else
@@ -7570,10 +7571,10 @@ namespace NsAppManager
             return false;
         }
         LOG4CPLUS_INFO_EXT(mLogger, "Activating an app " << appToBeActivated->getName() << " application id " << appToBeActivated->getAppID());
-        
+
         bool isCurrentAudible = false;
-        for(std::map<int,Application*>::iterator it = mApplications.begin(); 
-                it != mApplications.end(); 
+        for(std::map<int,Application*>::iterator it = mApplications.begin();
+                it != mApplications.end();
                 ++it)
         {
             Application* tempApplication = it->second;
@@ -7590,7 +7591,7 @@ namespace NsAppManager
 
             //TODO (pvysh): at this point it is assumed that behaviour is correct and
             // when app is not in HMI_FULL/HMI_LIMITED it is not audible.
-            if ( tempApplication->getIsMediaApplication() 
+            if ( tempApplication->getIsMediaApplication()
                     && NsAppLinkRPCV2::AudioStreamingState::AUDIBLE
                             == tempApplication->getApplicationAudioStreamingState().get()
                     && appToBeActivated->getIsMediaApplication() )
@@ -7598,7 +7599,7 @@ namespace NsAppManager
                 tempApplication->setApplicationAudioStreamingState(
                     NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
             }
-            
+
             if ( NsAppLinkRPCV2::HMILevel::HMI_FULL == tempApplication->getApplicationHMIStatusLevel()
                 || ( NsAppLinkRPCV2::HMILevel::HMI_LIMITED == tempApplication->getApplicationHMIStatusLevel()
                     && appToBeActivated->getIsMediaApplication() ) )
@@ -7615,7 +7616,7 @@ namespace NsAppManager
         appToBeActivated->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);
         if ( appToBeActivated->getIsMediaApplication() )
         {
-            appToBeActivated->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::AUDIBLE);    
+            appToBeActivated->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::AUDIBLE);
         }
         else
         {
