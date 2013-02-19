@@ -221,7 +221,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		};
 
 		if( MFT.ApplinkModel.sendDataExtend ){
-			JSONMessage.params["url"] = "ftp://appsurv:appsurv@ftp.drivehq.com/";
+			JSONMessage.params["url"] = "ftp://ford-applink.luxoft.com";
 			JSONMessage.params["timeout"] = 10000;
 		}
 
