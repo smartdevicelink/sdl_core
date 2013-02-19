@@ -103,31 +103,36 @@ MFT.VRPopUp = Em.ContainerView.create({
 
     CreateInteractionChoise: function( params ){
 
-        for(var i = 0; i<params.choiceSet.length; i++){
-            for(var j = 0; j<params.choiceSet[i].vrCommands.length; j++){
+        if ( !params ) {
+            return;
+        }
+        
+        for(var i = 0; i<params.length; i++){
+            for(var j = 0; j<params[i].vrCommands.length; j++){
                 this.get('listOfCommands.list.childViews').pushObject(
                     MFT.Button.create({
                         action:                 'onChoiceInteraction',
                         target:                 'MFT.ApplinkAppController',
-                        choiceId:               params.choiceSet[i].choiceID,
-                        interactionChoiceSetID: params.interactionChoiceSetID,
-                        text:                   params.choiceSet[i].vrCommands[j],
+                        choiceId:               params[i].choiceID,
+                        btnType:                'interactionChoice',
+                        text:                   params[i].vrCommands[j],
                         classNames:             'list-item',
                         templateName:           'text'
                     })                                   
                 );
             }
         }
-
     },
 
-    DeleteInteractionChoise: function( choiseSetID ){
+    DeleteInteractionChoise: function(){
 
-        this.get('listOfCommands.list.childViews').removeObjects(
-            this.get('listOfCommands.list.childViews').filterProperty( 'interactionChoiceSetID' , choiseSetID )
-        );
+        if( !MFT.InteractionChoicesView.active ){
+            this.get('listOfCommands.list.childViews').removeObjects(
+                this.get('listOfCommands.list.childViews').filterProperty( 'btnType' , 'interactionChoice' )
+            );
+        }
 
-    },
+    }.observes('MFT.InteractionChoicesView.active'),
 
     activateVRPopUp: function(){
         var self = this;
