@@ -72,7 +72,7 @@ namespace NsAppManager
          * \brief remove a button from a mapping
          * \param buttonName button name
          */
-        void removeButton(const NsAppLinkRPCV2::ButtonName& buttonName);
+        void removeButton(const NsAppLinkRPCV2::ButtonName& buttonName, Application * item);
 
         /**
          * \brief remove an application from a mapping

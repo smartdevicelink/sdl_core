@@ -48,9 +48,19 @@ namespace NsAppManager
      * \brief remove a button from a mapping
      * \param buttonName button name
      */
-    void ButtonMapping::removeButton(const NsAppLinkRPCV2::ButtonName &buttonName)
+    void ButtonMapping::removeButton(const NsAppLinkRPCV2::ButtonName &buttonName, Application * item)
     {
-        mButtonsMapping.erase(buttonName);
+        //mButtonsMapping.erase(buttonName);
+
+        ResultRange result = mButtonsMapping.equal_range(buttonName);
+        for( ButtonMap::const_iterator it=result.first; it!=result.second; ++it )
+        {
+            if ( it->second->getAppID() == item->getAppID() )
+            {
+                mButtonsMapping.erase(it);
+                break;
+            }
+        }
     }
 
     /**
@@ -70,7 +80,6 @@ namespace NsAppManager
             if(it->second->getAppID() == app->getAppID())
             {
                 mButtonsMapping.erase(it);
-                break;
             }
         }
     }
@@ -120,7 +129,16 @@ namespace NsAppManager
 
     bool ButtonMapping::exist(const NsAppLinkRPCV2::ButtonName& buttonName, Application* item)
     {
-        ButtonMap::const_iterator it = mButtonsMapping.find(buttonName);
+        ResultRange result = mButtonsMapping.equal_range(buttonName);
+        for( ButtonMap::const_iterator it=result.first; it!=result.second; ++it )
+        {
+            if ( it->second->getAppID() == item->getAppID() )
+            {
+                return true;
+            }
+        }
+        return false;
+        /*ButtonMap::const_iterator it = mButtonsMapping.find(buttonName);
         if (it != mButtonsMapping.end())
         {
             if (it->second)
@@ -132,7 +150,7 @@ namespace NsAppManager
             }
         }
 
-        return false;
+        return false;*/
     }
 
     /**

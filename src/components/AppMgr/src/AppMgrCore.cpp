@@ -812,7 +812,7 @@ namespace NsAppManager
                         return;
                     }
 
-                    core->mButtonsMapping.removeButton( btnName );
+                    core->mButtonsMapping.removeButton( btnName, app );
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
@@ -1933,7 +1933,6 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An UnsubscribeButton request has been invoked");
                     NsAppLinkRPCV2::UnsubscribeButton_request * object = (NsAppLinkRPCV2::UnsubscribeButton_request*)mobileMsg;
-                    core->mButtonsMapping.removeButton( object->get_buttonName() );
                     NsAppLinkRPCV2::UnsubscribeButton_response* response = new NsAppLinkRPCV2::UnsubscribeButton_response();
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::UnsubscribeButtonID);
@@ -1965,6 +1964,7 @@ namespace NsAppManager
                         return;
                     }
 
+                    core->mButtonsMapping.removeButton( object->get_buttonName(), app );
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
