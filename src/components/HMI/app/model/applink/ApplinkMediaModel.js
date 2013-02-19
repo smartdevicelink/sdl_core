@@ -172,6 +172,7 @@ MFT.ApplinkMediaModel = MFT.ApplinkAppModel.extend({
 
         if(params.updateMode == "CLEAR" ) {
 			this.stopTimer();
+            return 'SUCCESS';
 		}
 
         if(params.updateMode == "COUNTUP"){
