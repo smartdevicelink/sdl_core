@@ -294,7 +294,7 @@ namespace NsAppManager
 
         Application * getActiveItem();
 
-        Application * getApplicationByCommand(const unsigned int &cmdId);
+        Application * getApplicationByCommand(const unsigned int &cmdId, int appId);
 
         bool activateApp( Application * appToBeActivated );
 

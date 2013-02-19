@@ -4377,7 +4377,7 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand UI notification has been invoked");
                 NsRPC2Communication::UI::OnCommand* object = (NsRPC2Communication::UI::OnCommand*)msg;
-                Application* app = core->getApplicationByCommand(object->get_commandId());
+                Application* app = core->getApplicationByCommand(object->get_commandId(), object->get_appId());
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5718,7 +5718,7 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand VR notification has been invoked");
                 NsRPC2Communication::VR::OnCommand* object = (NsRPC2Communication::VR::OnCommand*)msg;
-                Application* app = core->getApplicationByCommand(object->get_cmdID());
+                Application* app = core->getApplicationByCommand(object->get_cmdID(), object->get_appId());
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -7627,9 +7627,27 @@ namespace NsAppManager
         return true;
     }
 
-    Application * AppMgrCore::getApplicationByCommand(const unsigned int &cmdId)
+    Application * AppMgrCore::getApplicationByCommand(const unsigned int &cmdId, int appId)
     {
-        for(std::map<int, Application*>::iterator it = mApplications.begin();
+        std::map<int, Application*>::iterator it = mApplications.find(appId);
+        if ( mApplications.end() != it )
+        {
+            Application* app = it->second;
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " No application for the item " << it->first);
+                return 0;
+            }
+            if(app->getCommandsCount())
+            {
+                const Commands& cmds = app->findCommands(cmdId);
+                if(!cmds.empty())
+                {
+                    return app;
+                }
+            }
+        }
+        /*for(std::map<int, Application*>::iterator it = mApplications.begin();
                 it != mApplications.end();
                 ++it)
         {
@@ -7647,7 +7665,7 @@ namespace NsAppManager
                     return app;
                 }
             }
-        }
+        }*/
         LOG4CPLUS_INFO_EXT(mLogger, " No applications found for the command " << cmdId);
         return 0;
     }
