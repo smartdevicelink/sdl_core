@@ -11,8 +11,6 @@
 #include "AppMgr/Application.h"
 #include "AppMgr/ButtonMapping.h"
 #include "AppMgr/VehicleDataMapping.h"
-#include "AppMgr/MessageMapping.h"
-#include "AppMgr/RequestMapping.h"
 #include "AppMgr/CapabilitesContainer.h"
 #include "AppMgr/SyncPManager.h"
 #include "AppMgr/DeviceList.h"
@@ -25,6 +23,7 @@
 #include "JSONHandler/ALRPCObjects/V1/Language.h"
 #include "JSONHandler/ALRPCObjects/V2/Language.h"
 #include "AppMgr/MessageChaining.hpp"
+#include "AppMgr/DeviceStorage.hpp"
 
 namespace NsAppLinkRPC
 {
@@ -165,18 +164,19 @@ namespace NsAppManager
          * \param sessionKey session/connection key
          * \param device device handler
          */
-        void addDevice( const int& sessionKey, const NsConnectionHandler::tDeviceHandle& device );
+        void addDevice( const NsConnectionHandler::tDeviceHandle &device,
+            const int &sessionKey, int firstSessionKey );
 
         /**
          * \brief remove a device from a mapping
          * \param sessionKey session/connection key
          */
-        void removeDevice(const int& sessionKey);
+        void removeDevice(const int &sessionKey, int firstSessionKey);
 
         bool getAudioPassThruFlag() const;
         void setAudioPassThruFlag(bool flag);
 
-        const MessageMapping& getMessageMapping() const;
+        //const MessageMapping& getMessageMapping() const;
 
         /**
          * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
@@ -198,6 +198,8 @@ namespace NsAppManager
          * \return bool Success of operation
          */
         bool performActivitiesForActivatingApp( Application * app );
+
+        Application * getItem( int applicationId );
 
     private:
 
@@ -232,7 +234,7 @@ namespace NsAppManager
          * \param sessionID an id of the session which will be associated with the application
          * \return A instance of RegistryItem created for application
          */
-        const RegistryItem* registerApplication(NsAppLinkRPC::ALRPCMessage *request , int sessionKey);
+        const Application* registerApplication(NsAppLinkRPC::ALRPCMessage *request , int sessionKey);
 
         /**
          * \brief unregister an application associated with the given session
@@ -288,6 +290,14 @@ namespace NsAppManager
          */
         MessageChaining * addChain(MessageChaining * chain, int connectionKey, unsigned int correlationID);
 
+        void differenceBetweenLists( const NsConnectionHandler::tDeviceList &deviceList );
+
+        Application * getActiveItem();
+
+        Application * getApplicationByCommand(const unsigned int &cmdId, int appId);
+
+        bool activateApp( Application * appToBeActivated );
+
         AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
         AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
@@ -305,9 +315,9 @@ namespace NsAppManager
         CapabilitiesContainer<NsAppLinkRPCV2::SoftButtonCapabilities> mSoftButtonCapabilities;
         ButtonMapping       mButtonsMapping;
         VehicleDataMapping  mVehicleDataMapping;
-        MessageMapping      mMessageMapping;
-        RequestMapping      mRequestMapping;
-        DeviceList          mDeviceList;
+        //MessageMapping      mMessageMapping;
+        //RequestMapping      mRequestMapping;
+        //DeviceList          mDeviceList;
         DeviceHandler       mDeviceHandler;
 
         MessageChains mMessageChaining;
@@ -335,6 +345,10 @@ namespace NsAppManager
         SyncPManager     mSyncPManager;
 
         static log4cplus::Logger mLogger;
+
+        std::map<int, Application*> mApplications;
+        std::map<int, DeviceStorage> mDevices;
+        //NsConnectionHandler::tDeviceList mDevices;
     };
 
 } // namespace NsAppManager

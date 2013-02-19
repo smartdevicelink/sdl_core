@@ -33,14 +33,14 @@ namespace NsAppManager
      * \param buttonName button name
      * \param app application to map a button to
      */
-    void ButtonMapping::addButton(const NsAppLinkRPCV2::ButtonName &buttonName, RegistryItem *app)
+    void ButtonMapping::addButton(const NsAppLinkRPCV2::ButtonName &buttonName, Application *app)
     {
         if(!app)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " Adding a button to a null registry item");
             return;
         }
-        LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to button " << buttonName.get() << " in app " << app->getApplication()->getName() );
+        LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to button " << buttonName.get() << " in app " << app->getName() );
         mButtonsMapping.insert(ButtonMapItem(buttonName, app));
     }
 
@@ -57,18 +57,20 @@ namespace NsAppManager
      * \brief remove an application from a mapping
      * \param app application to remove all associated buttons from mapping
      */
-    void ButtonMapping::removeItem(RegistryItem *app)
+    void ButtonMapping::removeItem(Application *app)
     {
         if(!app)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " Trying to remove a null item");
             return;
         }
-        for(ButtonMap::iterator it = mButtonsMapping.begin(); it != mButtonsMapping.end(); it++)
+        for(ButtonMap::iterator it = mButtonsMapping.begin(); 
+                it != mButtonsMapping.end(); it++)
         {
-            if(it->second->getApplication()->getAppID() == app->getApplication()->getAppID())
+            if(it->second->getAppID() == app->getAppID())
             {
-                mButtonsMapping.erase(it->first);
+                mButtonsMapping.erase(it);
+                break;
             }
         }
     }
@@ -86,19 +88,17 @@ namespace NsAppManager
      * \param btnName button name
      * \return RegistryItem instance
      */
-    RegistryItem* ButtonMapping::findRegistryItemSubscribedToButton( const NsAppLinkRPCV2::ButtonName &btnName ) const
+    Application* ButtonMapping::findRegistryItemSubscribedToButton( const NsAppLinkRPCV2::ButtonName &btnName ) const
     {
         ButtonMap::const_iterator it = mButtonsMapping.find( btnName );
         if ( it != mButtonsMapping.end() )
         {
             if ( !it->second )
-            {
-                LOG4CPLUS_ERROR_EXT(mLogger, "RegistryItem not found" );
-                return 0;
-            }
-            if ( it->second->getApplication() )
-            {
-                LOG4CPLUS_INFO_EXT(mLogger, "An application " << it->second->getApplication()->getName() << " is subscribed to a button " << btnName.get() );
+            {                
+                LOG4CPLUS_INFO_EXT(mLogger, "An application " <<
+                        it->second->getName() << " is subscribed to a button "
+                        << btnName.get() );
+                
                 return it->second;
             }
         }
@@ -123,9 +123,9 @@ namespace NsAppManager
         ButtonMap::const_iterator it = mButtonsMapping.find(buttonName);
         if (it != mButtonsMapping.end())
         {
-            if (it->second && it->second->getApplication())
+            if (it->second)
             {
-                if (*(it->second->getApplication()) == *item)
+                if (*(it->second) == *item)
                 {
                     return true;
                 }

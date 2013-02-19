@@ -294,6 +294,9 @@ namespace NsAppManager
         void removePersistentFile(const std::string& file);
         bool isPersistentFile(const std::string& file);
 
+        int getDeviceHandle() const;
+        void setDeviceHandle(int deviceHandle);
+
 
     protected:
         static log4cplus::Logger mLogger;
@@ -318,6 +321,8 @@ namespace NsAppManager
         NsAppLinkRPCV2::SystemContext mSystemContext;
         NsAppLinkRPCV2::AudioStreamingState mAudioStreamingState;
         NsAppLinkRPCV2::HMILevel::HMILevelInternal mHMIStatusLevel;
+
+        int mDeviceHandle;
     };
 
 } // namespace NsAppManager

@@ -19,22 +19,22 @@ namespace log4cplus
 namespace NsAppManager
 {
 
-    class RegistryItem;
+    class Application;
 
     /**
      * \brief a VehicleData-registered-app map
      */
-    typedef std::multimap<NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal, RegistryItem*> VehicleDataMap;
+    typedef std::multimap<NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal, Application*> VehicleDataMap;
 
     /**
      * \brief a VehicleData-registered-app map iterator
      */
-    typedef std::multimap<NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal, RegistryItem*>::iterator VehicleDataMapIterator;
+    typedef std::multimap<NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal, Application*>::iterator VehicleDataMapIterator;
 
     /**
      * \brief a VehicleData-registered-app map item
      */
-    typedef std::pair<NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal, RegistryItem*> VehicleDataMapItem;
+    typedef std::pair<NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal, Application*> VehicleDataMapItem;
 
     /**
      * \brief VehicleDataMapping acts as a mapping of VehicleData to registered application which subscribes to them
@@ -59,20 +59,20 @@ namespace NsAppManager
          * \param app application to map a button to
          * \return false if such subscribe already exists.
          */
-        bool addVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, RegistryItem* app);
+        bool addVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, Application* app);
 
         /**
          * \brief remove a VehicleData from a mapping
          * \param vehicleDataName button name
          * \return false if no such subscribe found.
          */
-        bool removeVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, RegistryItem* app);
+        bool removeVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, Application* app);
 
         /**
          * \brief remove an application from a mapping
          * \param app application to remove all associated buttons from mapping
          */
-        void removeItem(RegistryItem* app);
+        void removeItem(Application* app);
 
         /**
          * \brief cleans all the mapping
@@ -85,7 +85,7 @@ namespace NsAppManager
          * \param result reference to empty vector to store results.
          * \return count of subscribers
          */
-        int findRegistryItemsSubscribedToVehicleData(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, std::vector<RegistryItem*>& result);
+        int findRegistryItemsSubscribedToVehicleData(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, std::vector<Application*>& result);
 
     private:
 

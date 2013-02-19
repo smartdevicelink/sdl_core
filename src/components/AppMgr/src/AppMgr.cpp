@@ -138,7 +138,7 @@ namespace NsAppManager
      */
     void AppMgr::onSessionStartedCallback(NsConnectionHandler::tDeviceHandle deviceHandle, int sessionKey, int firstSessionKey)
     {
-        AppMgrCore::getInstance().addDevice(sessionKey, deviceHandle);
+        AppMgrCore::getInstance().addDevice(deviceHandle, sessionKey, firstSessionKey);
     }
 
     /**
@@ -147,7 +147,7 @@ namespace NsAppManager
      */
     void AppMgr::onSessionEndedCallback(int sessionKey, int firstSessionKey)
     {
-        AppMgrCore::getInstance().removeDevice(sessionKey);
+        AppMgrCore::getInstance().removeDevice(sessionKey, firstSessionKey);
     }
 
     /**

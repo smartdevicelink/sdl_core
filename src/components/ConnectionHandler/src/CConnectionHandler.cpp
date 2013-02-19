@@ -76,7 +76,8 @@ namespace NsConnectionHandler
         mConnectionList.insert(tConnectionList::value_type(Connection, CConnection(Connection, ConnectedDevice.mDeviceHandle)));
     }
 
-    void CConnectionHandler::onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection)
+    void CConnectionHandler::onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, 
+            const NsAppLink::NsTransportManager::tConnectionHandle Connection)
     {
         LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onApplicationDisconnected()" );
         tDeviceListIterator it = mDeviceList.find(DisconnectedDevice.mDeviceHandle);
@@ -85,6 +86,7 @@ namespace NsConnectionHandler
             LOG4CPLUS_ERROR( mLogger, "Unknown device!");
             return;
         }
+        mDeviceList.erase( it );
         LOG4CPLUS_INFO( mLogger, "Delete Connection:" << (int)Connection << "from the list." );
         tConnectionListIterator itr = mConnectionList.find(Connection);
         if (mConnectionList.end() == itr)
@@ -118,8 +120,8 @@ namespace NsConnectionHandler
             LOG4CPLUS_ERROR( mLogger, "Unknown connection!");
         } else
         {
-            int firstSessionID = (it->second).getFirstSessionID();
             newSessionID = (it->second).addNewSession();
+            int firstSessionID = (it->second).getFirstSessionID();
             if (0 > newSessionID)
             {
                 LOG4CPLUS_ERROR( mLogger, "Not possible to start session!");

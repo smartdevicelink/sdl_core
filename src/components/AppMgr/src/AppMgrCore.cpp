@@ -13,13 +13,14 @@
 #include "Utils/SocketException.h"
 #include "Utils/WorkWithOS.h"
 #include "AppMgr/AppMgrCore.h"
-#include "AppMgr/AppMgrRegistry.h"
 #include "AppMgr/AppPolicy.h"
 #include "AppMgr/RegistryItem.h"
 #include "AppMgr/AppMgrCoreQueues.h"
 #include "AppMgr/HMIHandler.h"
 #include "AppMgr/MobileHandler.h"
 #include "AppMgr/ConnectionHandler.h"
+#include "AppMgr/Application_v2.h"
+#include "AppMgr/Application_v1.h"
 #include "JSONHandler/ALRPCMessage.h"
 #include "JSONHandler/ALRPCRequest.h"
 #include "JSONHandler/ALRPCResponse.h"
@@ -113,7 +114,7 @@ namespace {
         , NsAppLinkRPC::ALRPCMessage * request)
     {
         NsAppManager::Application_v2* app = static_cast<NsAppManager::Application_v2*>(
-            NsAppManager::AppMgrRegistry::getInstance().getApplication(sessionKey));
+            NsAppManager::AppMgrCore::getInstance().getItem(sessionKey));
         if(!app)
         {
             /*LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -224,8 +225,7 @@ namespace {
             return false;
         }
 
-        NsAppManager::Application* app = NsAppManager::AppMgrCore::getInstance().getApplicationFromItemCheckNotNull(
-            NsAppManager::AppMgrRegistry::getInstance().getItem(sessionKey));
+        NsAppManager::Application* app = NsAppManager::AppMgrCore::getInstance().getItem(sessionKey);
         if(!app)
         {
             std::cout << "No application associated with this registry item!" << std::endl;
@@ -553,14 +553,14 @@ namespace NsAppManager
         }
         AppMgrCore* core = (AppMgrCore*)pThis;
         const unsigned int& protocolVersion = mobileMsg->getProtocolVersion();
-        const NsConnectionHandler::tDeviceHandle& currentDeviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(sessionKey);
+        /*const NsConnectionHandler::tDeviceHandle& currentDeviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(sessionKey);
         const NsConnectionHandler::CDevice* currentDevice = core->mDeviceList.findDeviceByHandle(currentDeviceHandle);
         if(!currentDevice)
         {
             LOG4CPLUS_ERROR_EXT(mLogger, " Cannot retreive current device name for the message with session key " << sessionKey << " !");
             return;
         }
-        const std::string& currentDeviceName = currentDevice->getUserFriendlyName();
+        const std::string& currentDeviceName = currentDevice->getUserFriendlyName();*/
 
         LOG4CPLUS_INFO_EXT(mLogger, "Message received is from protocol " << protocolVersion);
         if ( 1 == mobileMsg->getProtocolVersion() )
@@ -577,8 +577,9 @@ namespace NsAppManager
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
                     response->setCorrelationID(object->getCorrelationID());
+                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
 
-                    if(AppMgrRegistry::getInstance().getItem(sessionKey))
+                    if(core->getItem(sessionKey))
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
                         response->set_success(false);
@@ -587,8 +588,7 @@ namespace NsAppManager
                         break;
                     }
 
-                    Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, sessionKey ));
-                    response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                    Application_v1* app = (Application_v1*)core->registerApplication( object, sessionKey );
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " hasn't been registered!");
@@ -657,6 +657,14 @@ namespace NsAppManager
                     hmiApp.set_appName(app->getName());
                     hmiApp.set_appId(app->getAppID());
                     hmiApp.set_isMediaApplication(app->getIsMediaApplication());
+
+                    std::map<int,DeviceStorage>::const_iterator it = core->mDevices.find( app->getDeviceHandle() );
+                    std::string currentDeviceName = "";
+                    if ( core->mDevices.end() != it )
+                    {
+                        currentDeviceName = it->second.getUserFriendlyName();
+                    }
+
                     hmiApp.set_deviceName(currentDeviceName);
                     hmiApp.set_hmiDisplayLanguageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app->getLanguageDesired().get()));
                     hmiApp.set_languageDesired(static_cast<NsAppLinkRPCV2::Language::LanguageInternal>(app->getLanguageDesired().get()));
@@ -689,7 +697,7 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
 
                     NsAppLinkRPC::UnregisterAppInterface_request * object = (NsAppLinkRPC::UnregisterAppInterface_request*)mobileMsg;
-                    Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application* app = core->getItem(sessionKey);
                     NsAppLinkRPC::UnregisterAppInterface_response* response = new NsAppLinkRPC::UnregisterAppInterface_response();
                     response->setCorrelationID(object->getCorrelationID());
                     if(!app)
@@ -703,7 +711,7 @@ namespace NsAppManager
                     }
                     std::string appName = app->getName();
                     int appId = app->getAppID();
-                    core->removeAppFromHmi(app, sessionKey);
+                    //core->removeAppFromHmi(app, sessionKey);
                     core->unregisterApplication( sessionKey );
 
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -711,15 +719,9 @@ namespace NsAppManager
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
 
-                    NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
+                    /*NsAppLinkRPC::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPC::OnAppInterfaceUnregistered();
                     msgUnregistered->set_reason(NsAppLinkRPC::AppInterfaceUnregisteredReason(NsAppLinkRPC::AppInterfaceUnregisteredReason::USER_EXIT));
-                    MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionKey);
-
-                    NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
-                    appUnregistered->set_appName(appName);
-                    appUnregistered->set_appId(app->getAppID());
-                    appUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
-                    HMIHandler::getInstance().sendNotification(appUnregistered);
+                    MobileHandler::getInstance().sendRPCMessage(msgUnregistered, sessionKey);*/
 
                     LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
                     break;
@@ -730,9 +732,9 @@ namespace NsAppManager
 
                     NsAppLinkRPC::SubscribeButton_request * object = (NsAppLinkRPC::SubscribeButton_request*)mobileMsg;
                     NsAppLinkRPC::SubscribeButton_response* response = new NsAppLinkRPC::SubscribeButton_response();
-                    RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
+                    //RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
                     response->setCorrelationID(object->getCorrelationID());
-                    if(!item)
+                    /*if(!item)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
                             << " hasn't been associated with any application!");
@@ -740,8 +742,8 @@ namespace NsAppManager
                         response->set_resultCode(NsAppLinkRPC::Result::APPLICATION_NOT_REGISTERED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
-                    }
-                    Application_v1* app = (Application_v1*)item->getApplication();
+                    }*/
+                    Application_v1* app = (Application_v1*)core->getItem( sessionKey );
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -769,7 +771,7 @@ namespace NsAppManager
                         return;
                     }
 
-                    core->mButtonsMapping.addButton( btnName, item );
+                    core->mButtonsMapping.addButton( btnName, app );
 
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPC::Result::SUCCESS);
@@ -782,7 +784,7 @@ namespace NsAppManager
                     NsAppLinkRPC::UnsubscribeButton_request * object = (NsAppLinkRPC::UnsubscribeButton_request*)mobileMsg;
                     NsAppLinkRPC::UnsubscribeButton_response* response = new NsAppLinkRPC::UnsubscribeButton_response();
                     response->setCorrelationID(object->getCorrelationID());
-                    Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -822,7 +824,7 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " A Show request has been invoked");
                     LOG4CPLUS_INFO_EXT(mLogger, "message " << mobileMsg->getMethodId() );
                     NsAppLinkRPC::Show_request* object = (NsAppLinkRPC::Show_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -884,7 +886,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A Speak request has been invoked");
                     NsAppLinkRPC::Speak_request* object = (NsAppLinkRPC::Speak_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -934,7 +936,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A SetGlobalProperties request has been invoked");
                     NsAppLinkRPC::SetGlobalProperties_request* object = (NsAppLinkRPC::SetGlobalProperties_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -1000,7 +1002,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A ResetGlobalProperties request has been invoked");
                     NsAppLinkRPC::ResetGlobalProperties_request* object = (NsAppLinkRPC::ResetGlobalProperties_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -1042,7 +1044,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An Alert request has been invoked");
                     NsAppLinkRPC::Alert_request* object = (NsAppLinkRPC::Alert_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -1108,7 +1110,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
                     NsAppLinkRPC::AddCommand_request* object = (NsAppLinkRPC::AddCommand_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -1200,7 +1202,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
                     NsAppLinkRPC::DeleteCommand_request* object = (NsAppLinkRPC::DeleteCommand_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Application id " << sessionKey
@@ -1275,7 +1277,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
                     NsAppLinkRPC::AddSubMenu_request* object = (NsAppLinkRPC::AddSubMenu_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -1337,7 +1339,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubmenu request has been invoked");
                     NsAppLinkRPC::DeleteSubMenu_request* object = (NsAppLinkRPC::DeleteSubMenu_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -1387,7 +1389,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet request has been invoked");
                     NsAppLinkRPC::CreateInteractionChoiceSet_request* object = (NsAppLinkRPC::CreateInteractionChoiceSet_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -1446,7 +1448,7 @@ namespace NsAppManager
                         return;
                     }
 
-                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -1497,7 +1499,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction request has been invoked");
                     NsAppLinkRPC::PerformInteraction_request* object = (NsAppLinkRPC::PerformInteraction_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -1608,7 +1610,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
                     NsAppLinkRPC::SetMediaClockTimer_request* object = (NsAppLinkRPC::SetMediaClockTimer_request*)mobileMsg;
-                    Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -1660,7 +1662,7 @@ namespace NsAppManager
                     NsAppLinkRPC::EncodedSyncPData_request* object = (NsAppLinkRPC::EncodedSyncPData_request*)mobileMsg;
                     NsAppLinkRPC::EncodedSyncPData_response* response = new NsAppLinkRPC::EncodedSyncPData_response;
                     response->setCorrelationID(object->getCorrelationID());
-                    Application_v1* app = (Application_v1*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v1* app = (Application_v1*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -1680,7 +1682,7 @@ namespace NsAppManager
 
                     if(object->get_data())
                     {
-                        Application* app = core->getApplicationFromItemCheckNotNull( AppMgrRegistry::getInstance().getItem(sessionKey) );
+                        Application* app = core->getItem(sessionKey);
                         const std::string& name = app->getName();
                         core->mSyncPManager.setPData(*object->get_data(), name, object->getMethodId());
                         response->set_success(true);
@@ -1751,7 +1753,7 @@ namespace NsAppManager
 
                     const std::string& appName = object->get_appName();
 
-                    if(AppMgrRegistry::getInstance().getItem(sessionKey))
+                    if(core->getItem(sessionKey))
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Application " << appName << " is already registered!");
                         response->set_success(false);
@@ -1760,7 +1762,7 @@ namespace NsAppManager
                         break;
                     }
 
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(core->registerApplication( object, sessionKey ));
+                    Application_v2* app = (Application_v2*)core->registerApplication( object, sessionKey );
 
                     if(!app)
                     {
@@ -1798,6 +1800,14 @@ namespace NsAppManager
                     hmiApp.set_appName(app->getName());
                     hmiApp.set_appId(app->getAppID());
                     hmiApp.set_isMediaApplication(app->getIsMediaApplication());
+
+                    std::map<int,DeviceStorage>::const_iterator it = core->mDevices.find( app->getDeviceHandle() );
+                    std::string currentDeviceName = "";
+                    if ( core->mDevices.end() != it )
+                    {
+                        currentDeviceName = it->second.getUserFriendlyName();
+                    }
+
                     hmiApp.set_deviceName(currentDeviceName);
                     hmiApp.set_hmiDisplayLanguageDesired(app->getHMIDisplayLanguageDesired());
                     hmiApp.set_languageDesired(app->getLanguageDesired());
@@ -1830,7 +1840,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An UnregisterAppInterface request has been invoked");
                     NsAppLinkRPCV2::UnregisterAppInterface_request * object = (NsAppLinkRPCV2::UnregisterAppInterface_request*)mobileMsg;
-                    Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application* app = core->getItem(sessionKey);
                     NsAppLinkRPCV2::UnregisterAppInterface_response* response = new NsAppLinkRPCV2::UnregisterAppInterface_response();
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::UnregisterAppInterfaceID);
@@ -1850,7 +1860,7 @@ namespace NsAppManager
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
 
-                    NsAppLinkRPCV2::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPCV2::OnAppInterfaceUnregistered();
+                    /*NsAppLinkRPCV2::OnAppInterfaceUnregistered* msgUnregistered = new NsAppLinkRPCV2::OnAppInterfaceUnregistered();
                     msgUnregistered->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
                     msgUnregistered->setMethodId(NsAppLinkRPCV2::FunctionID::OnAppInterfaceUnregisteredID);
                     msgUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
@@ -1863,8 +1873,8 @@ namespace NsAppManager
                     appUnregistered->set_appName(appName);
                     appUnregistered->set_appId(app->getAppID());
                     appUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT);
-                    HMIHandler::getInstance().sendNotification(appUnregistered);
-                    LOG4CPLUS_INFO_EXT(mLogger, " An application " << appName << " has been unregistered successfully ");
+                    HMIHandler::getInstance().sendNotification(appUnregistered);*/
+                    LOG4CPLUS_INFO_EXT(mLogger, " An application " << app->getName() << " has been unregistered successfully ");
                     core->unregisterApplication( sessionKey );
                     break;
                 }
@@ -1877,7 +1887,7 @@ namespace NsAppManager
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::SubscribeButtonID);
                     response->setCorrelationID(object->getCorrelationID());
 
-                    RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
+                    /*RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
                     if(!item)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -1886,8 +1896,8 @@ namespace NsAppManager
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
-                    }
-                    Application_v2* app = (Application_v2*)item->getApplication();
+                    }*/
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -1913,7 +1923,7 @@ namespace NsAppManager
                         return;
                     }
 
-                    core->mButtonsMapping.addButton( object->get_buttonName(), item );
+                    core->mButtonsMapping.addButton( object->get_buttonName(), app );
                     response->set_success(true);
                     response->set_resultCode(NsAppLinkRPCV2::Result::SUCCESS);
                     MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
@@ -1929,7 +1939,7 @@ namespace NsAppManager
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::UnsubscribeButtonID);
                     response->setCorrelationID(object->getCorrelationID());
 
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -1963,7 +1973,7 @@ namespace NsAppManager
                 case NsAppLinkRPCV2::FunctionID::SetMediaClockTimerID:
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A SetMediaClockTimer request has been invoked");
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2014,7 +2024,7 @@ namespace NsAppManager
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::PutFileID);
                     response->setCorrelationID(object->getCorrelationID());
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2098,7 +2108,7 @@ namespace NsAppManager
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteFileID);
                     response->setCorrelationID(object->getCorrelationID());
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2161,7 +2171,7 @@ namespace NsAppManager
                     response->setCorrelationID(object->getCorrelationID());
                     unsigned long int freeSpace = WorkWithOS::getAvailableSpace();
 
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2209,7 +2219,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A Slider request has been invoked");
                     NsAppLinkRPCV2::Slider_request* request = (NsAppLinkRPCV2::Slider_request*)mobileMsg;
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2260,7 +2270,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A SetAppIcon request has been invoked");
                     NsAppLinkRPCV2::SetAppIcon_request* request = static_cast<NsAppLinkRPCV2::SetAppIcon_request*>(mobileMsg);
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2317,7 +2327,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A ScrollableMessageID request has been invoked");
                     NsAppLinkRPCV2::ScrollableMessage_request* request = static_cast<NsAppLinkRPCV2::ScrollableMessage_request*>(mobileMsg);
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2374,7 +2384,7 @@ namespace NsAppManager
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::EncodedSyncPDataID);
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->setCorrelationID(object->getCorrelationID());
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2412,7 +2422,7 @@ namespace NsAppManager
                     mobileResponse->setMethodId(NsAppLinkRPCV2::FunctionID::SetGlobalPropertiesID);
                     mobileResponse->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     mobileResponse->setCorrelationID(object->getCorrelationID());
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2477,7 +2487,7 @@ namespace NsAppManager
                     mobileResponse->setMethodId(NsAppLinkRPCV2::FunctionID::ResetGlobalPropertiesID);
                     mobileResponse->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     mobileResponse->setCorrelationID(object->getCorrelationID());
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2508,7 +2518,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A CreateInteractionChoiceSet request has been invoked");
                     NsAppLinkRPCV2::CreateInteractionChoiceSet_request* object = (NsAppLinkRPCV2::CreateInteractionChoiceSet_request*)mobileMsg;
-                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -2564,7 +2574,7 @@ namespace NsAppManager
                         return;
                     }
 
-                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -2622,7 +2632,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A PerformInteraction request has been invoked");
                     NsAppLinkRPCV2::PerformInteraction_request* object = (NsAppLinkRPCV2::PerformInteraction_request*)mobileMsg;
-                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -2701,7 +2711,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An Alert request has been invoked");
                     NsAppLinkRPCV2::Alert_request* object = (NsAppLinkRPCV2::Alert_request*)mobileMsg;
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2768,7 +2778,7 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " A Show request has been invoked");
                     LOG4CPLUS_INFO_EXT(mLogger, "message " << mobileMsg->getMethodId() );
                     NsAppLinkRPCV2::Show_request* object = (NsAppLinkRPCV2::Show_request*)mobileMsg;
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2852,7 +2862,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A Speak request has been invoked");
                     NsAppLinkRPCV2::Speak_request* object = (NsAppLinkRPCV2::Speak_request*)mobileMsg;
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -2893,7 +2903,7 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand request has been invoked");
                     NsAppLinkRPCV2::AddCommand_request* object = (NsAppLinkRPCV2::AddCommand_request*)mobileMsg;
 
-                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -2995,7 +3005,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteCommand request has been invoked");
                     NsAppLinkRPCV2::DeleteCommand_request* object = (NsAppLinkRPCV2::DeleteCommand_request*)mobileMsg;
-                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -3077,7 +3087,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " An AddSubmenu request has been invoked");
                     NsAppLinkRPCV2::AddSubMenu_request* object = (NsAppLinkRPCV2::AddSubMenu_request*)mobileMsg;
-                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -3143,7 +3153,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DeleteSubmenu request has been invoked");
                     NsAppLinkRPCV2::DeleteSubMenu_request* object = (NsAppLinkRPCV2::DeleteSubMenu_request*)mobileMsg;
-                    Application_v2* app = (Application_v2*)AppMgrRegistry::getInstance().getApplication(sessionKey);
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -3213,7 +3223,7 @@ namespace NsAppManager
                         break;
                     }
 
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -3356,7 +3366,7 @@ namespace NsAppManager
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::SubscribeVehicleDataID);
                     response->setCorrelationID(object->getCorrelationID());
-                    RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
+                    /*RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
                     if(!item)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -3365,8 +3375,8 @@ namespace NsAppManager
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
-                    }
-                    Application_v2* app = (Application_v2*)item->getApplication();
+                    }*/
+                    Application_v2* app = (Application_v2*)core->getItem( sessionKey );
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -3388,7 +3398,7 @@ namespace NsAppManager
                     std::vector<NsAppLinkRPCV2::VehicleDataType>::iterator it;
                     for (it = vdVector.begin(); it != vdVector.end(); it++)
                     {
-                        if (core->mVehicleDataMapping.addVehicleDataMapping(*it, item))
+                        if (core->mVehicleDataMapping.addVehicleDataMapping(*it, app))
                         {
                             countOfItems--;
                         }
@@ -3423,7 +3433,7 @@ namespace NsAppManager
                     response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                     response->setMethodId(NsAppLinkRPCV2::FunctionID::UnsubscribeVehicleDataID);
                     response->setCorrelationID(object->getCorrelationID());
-                    RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
+                    /*RegistryItem* item = AppMgrRegistry::getInstance().getItem(sessionKey);
                     if(!item)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
@@ -3432,8 +3442,8 @@ namespace NsAppManager
                         response->set_resultCode(NsAppLinkRPCV2::Result::APPLICATION_NOT_REGISTERED);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
-                    }
-                    Application_v2* app = (Application_v2*)item->getApplication();
+                    }*/
+                    Application_v2* app = (Application_v2*)core->getItem( sessionKey );
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -3455,7 +3465,7 @@ namespace NsAppManager
                     std::vector<NsAppLinkRPCV2::VehicleDataType>::iterator it;
                     for (it = vdVector.begin(); it != vdVector.end(); it++)
                     {
-                        if (core->mVehicleDataMapping.removeVehicleDataMapping(*it, item))
+                        if (core->mVehicleDataMapping.removeVehicleDataMapping(*it, app))
                         {
                             countOfItems--;
                         }
@@ -3486,7 +3496,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A GetVehicleData request has been invoked");
                     NsAppLinkRPCV2::GetVehicleData_request* object = static_cast<NsAppLinkRPCV2::GetVehicleData_request*>(mobileMsg);
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -3528,7 +3538,7 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, "ReadDID is received from mobile app.");
                     NsAppLinkRPCV2::ReadDID_request * request = static_cast<NsAppLinkRPCV2::ReadDID_request*>(mobileMsg);
                     NsAppManager::Application_v2* app = static_cast<NsAppManager::Application_v2*>(core->
-                            getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey)));
+                            getItem(sessionKey));
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "An application " << app->getName() << " is not registered." );
@@ -3574,7 +3584,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A GetDTCs request has been invoked");
                     NsAppLinkRPCV2::GetDTCs_request* object = static_cast<NsAppLinkRPCV2::GetDTCs_request*>(mobileMsg);
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -3620,7 +3630,7 @@ namespace NsAppManager
                     LOG4CPLUS_INFO_EXT(mLogger, "A ChangeRegistration request has been invoked." );
 
                     NsAppManager::Application_v2* app = static_cast<NsAppManager::Application_v2*>(
-                    NsAppManager::AppMgrRegistry::getInstance().getApplication(sessionKey));
+                                core->getItem(sessionKey));
                     if(!app)
                     {
                         sendResponse<NsAppLinkRPCV2::ChangeRegistration_response, NsAppLinkRPCV2::Result::ResultInternal>(
@@ -3772,7 +3782,7 @@ namespace NsAppManager
                         = static_cast<NsAppLinkRPCV2::AlertManeuver_request*>(mobileMsg);
 
                     Application_v2* app = static_cast<Application_v2*>(
-                        core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey)));
+                        core->getItem(sessionKey)));
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger,
@@ -3827,7 +3837,7 @@ namespace NsAppManager
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " A DialNumber request has been invoked");
                     NsAppLinkRPCV2::DialNumber_request* object = static_cast<NsAppLinkRPCV2::DialNumber_request*>(mobileMsg);
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -3870,7 +3880,7 @@ namespace NsAppManager
                     NsAppLinkRPCV2::ShowConstantTBT_request* request
                         = static_cast<NsAppLinkRPCV2::ShowConstantTBT_request*>(mobileMsg);
 
-                    Application_v2* app = (Application_v2*)core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(sessionKey));
+                    Application_v2* app = (Application_v2*)core->getItem(sessionKey);
                     if(!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item with session key " << sessionKey );
@@ -4070,7 +4080,7 @@ namespace NsAppManager
                 if(object->get_customButtonID())
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "No subscription for custom buttons is required.");
-                    Application* app = AppMgrRegistry::getInstance().getActiveItem();
+                    Application* app = core->getActiveItem();
                     if (!app)
                     {
                         LOG4CPLUS_WARN_EXT(mLogger, "OnButtonPress came but no app is active.");
@@ -4084,7 +4094,7 @@ namespace NsAppManager
 
                 for( ButtonMap::const_iterator it=subscribedApps.first; it!=subscribedApps.second; ++it )
                 {
-                    Application* app = core->getApplicationFromItemCheckNotNull( it -> second ) ;
+                    Application* app = it -> second;
                     if (!app)
                     {
                         LOG4CPLUS_WARN(mLogger, "Null pointer to subscribed app.");
@@ -4114,7 +4124,7 @@ namespace NsAppManager
                 if(object->get_customButtonID())
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, "No subscription for custom buttons is required.");
-                    Application* app = AppMgrRegistry::getInstance().getActiveItem();
+                    Application* app = core->getActiveItem();
                     if (!app)
                     {
                         LOG4CPLUS_WARN_EXT(mLogger, "OnButtonPress came but no app is active.");
@@ -4128,7 +4138,7 @@ namespace NsAppManager
 
                 for( ButtonMap::const_iterator it=subscribedApps.first; it!=subscribedApps.second; ++it )
                 {
-                    Application* app = core->getApplicationFromItemCheckNotNull( it -> second ) ;
+                    Application* app = it -> second;
                     if (!app)
                     {
                         LOG4CPLUS_WARN(mLogger, "Null pointer to subscribed app.");
@@ -4233,7 +4243,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << response->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_WARN_EXT(mLogger, "No application associated with this registry item!");
@@ -4265,7 +4275,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << response->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -4367,7 +4377,7 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand UI notification has been invoked");
                 NsRPC2Communication::UI::OnCommand* object = (NsRPC2Communication::UI::OnCommand*)msg;
-                Application* app = AppMgrRegistry::getInstance().getApplicationByCommand(object->get_commandId());
+                Application* app = core->getApplicationByCommand(object->get_commandId(), object->get_appId());
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -4415,7 +4425,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -4466,7 +4476,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -4518,7 +4528,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -4570,7 +4580,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -4624,7 +4634,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -4678,8 +4688,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -4731,8 +4740,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -4781,7 +4789,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -4858,7 +4866,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -4917,7 +4925,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -4976,7 +4984,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5057,8 +5065,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_WARN_EXT(mLogger, "No application associated with this registry item!");
@@ -5110,44 +5117,56 @@ namespace NsAppManager
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONDRIVERDISTRACTION:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnDriverDistraction UI notification has been invoked");
-                NsRPC2Communication::UI::OnDriverDistraction* object = (NsRPC2Communication::UI::OnDriverDistraction*)msg;
-                Application* app = AppMgrRegistry::getInstance().getActiveItem();
-                if(!app)
+                NsRPC2Communication::UI::OnDriverDistraction* object
+                    = static_cast<NsRPC2Communication::UI::OnDriverDistraction*>(msg);
+
+                for(std::map<int,Application*>::const_iterator it = core->mApplications.begin();
+                    it != core->mApplications.end();
+                    ++it)
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "No currently active application found");
-                    return;
-                }
-
-                int appId = app->getAppID();
-
-                // We need two events simultaneously, because we may have applications of more than one protocol version registered on the HMI
-                // and all they need to be notified of an OnDriverDistraction event
-                NsAppLinkRPC::OnDriverDistraction* eventV1 = new NsAppLinkRPC::OnDriverDistraction();
-                eventV1->set_state(
-                    static_cast<NsAppLinkRPC::DriverDistractionState::DriverDistractionStateInternal>(
-                        object->get_state().get()));
-                core->mDriverDistractionV1 = eventV1;
-                NsAppLinkRPCV2::OnDriverDistraction* eventV2 = new NsAppLinkRPCV2::OnDriverDistraction();
-                eventV2->setMethodId(NsAppLinkRPCV2::FunctionID::OnDriverDistractionID);
-                eventV2->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                NsAppLinkRPCV2::DriverDistractionState stateV2;
-                stateV2.set((NsAppLinkRPCV2::DriverDistractionState::DriverDistractionStateInternal)object->get_state().get());
-                eventV2->set_state(stateV2);
-                eventV2->setMethodId(NsAppLinkRPCV2::FunctionID::OnDriverDistractionID);
-                eventV2->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
-                core->mDriverDistractionV2 = eventV2;
-
-                switch(app->getProtocolVersion())
-                {
-                    case 1:
+                    if (NULL != it->second)
                     {
-                        MobileHandler::getInstance().sendRPCMessage(eventV1, appId);
-                        break;
-                    }
-                    case 2:
-                    {
-                        MobileHandler::getInstance().sendRPCMessage(eventV2, appId);
-                        break;
+                        NsAppLinkRPCV2::HMILevel::HMILevelInternal hmiLevel = it->second->getApplicationHMIStatusLevel();
+                        if(NsAppLinkRPCV2::HMILevel::HMI_FULL == hmiLevel
+                            || NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND == hmiLevel)
+                        {
+                            int appId = it->second->getAppID();
+
+                            // We need two events simultaneously, because we may have applications of more than
+                            // one protocol version registered on the HMI and all they need to be notified of
+                            // an OnDriverDistraction event
+                            NsAppLinkRPC::OnDriverDistraction* eventV1 = new NsAppLinkRPC::OnDriverDistraction();
+                            eventV1->set_state(
+                                static_cast<NsAppLinkRPC::DriverDistractionState::DriverDistractionStateInternal>(
+                                    object->get_state().get()));
+                            core->mDriverDistractionV1 = eventV1;
+                            NsAppLinkRPCV2::OnDriverDistraction* eventV2 = new NsAppLinkRPCV2::OnDriverDistraction();
+                            eventV2->setMethodId(NsAppLinkRPCV2::FunctionID::OnDriverDistractionID);
+                            eventV2->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+
+                            NsAppLinkRPCV2::DriverDistractionState stateV2;
+                            stateV2.set(
+                                static_cast<NsAppLinkRPCV2::DriverDistractionState::DriverDistractionStateInternal>(
+                                    object->get_state().get()));
+                            eventV2->set_state(stateV2);
+                            eventV2->setMethodId(NsAppLinkRPCV2::FunctionID::OnDriverDistractionID);
+                            eventV2->setMessageType(NsAppLinkRPC::ALRPCMessage::NOTIFICATION);
+                            core->mDriverDistractionV2 = eventV2;
+
+                            switch(it->second->getProtocolVersion())
+                            {
+                                case 1:
+                                {
+                                    MobileHandler::getInstance().sendRPCMessage(eventV1, appId);
+                                    break;
+                                }
+                                case 2:
+                                {
+                                    MobileHandler::getInstance().sendRPCMessage(eventV2, appId);
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
                 return;
@@ -5157,7 +5176,7 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnSystemContext UI notification has been invoked");
                 NsRPC2Communication::UI::OnSystemContext* object = (NsRPC2Communication::UI::OnSystemContext*)msg;
 
-                Application* app = AppMgrRegistry::getInstance().getActiveItem();
+                Application* app = core->getActiveItem();
                 if(!app)
                 {
                     LOG4CPLUS_INFO_EXT(mLogger, " null-application found as an active item!");
@@ -5198,7 +5217,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << uiResponse->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5237,7 +5256,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << uiResponse->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5254,8 +5273,8 @@ namespace NsAppManager
                 response->setCorrelationID(it->second->correlationID);
                 NsAppLinkRPCV2::Result::SUCCESS == resultCode ? response->set_success(true) : response->set_success(false);
 
-                core->decreaseMessageChain(it);
                 MobileHandler::getInstance().sendRPCMessage(response, it->second->connectionKey);
+                core->decreaseMessageChain(it);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__SCROLLABLEMESSAGERESPONSE:
@@ -5270,7 +5289,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << uiResponse->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5293,8 +5312,8 @@ namespace NsAppManager
                 response->setCorrelationID(it->second->correlationID);
                 NsAppLinkRPCV2::Result::SUCCESS == resultCode ? response->set_success(true) : response->set_success(false);
 
-                core->decreaseMessageChain(it);
                 MobileHandler::getInstance().sendRPCMessage(response, it->second->connectionKey);
+                core->decreaseMessageChain(it);
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__ONDEVICECHOSEN:
@@ -5302,12 +5321,22 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnDeviceChosen notification has been income");
                 NsRPC2Communication::UI::OnDeviceChosen* chosen = (NsRPC2Communication::UI::OnDeviceChosen*)msg;
                 const std::string& deviceName = chosen->get_deviceName();
-                const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByName(deviceName);
+                //const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByName(deviceName);
+                for(std::map<int, DeviceStorage>::const_iterator it = core->mDevices.begin();
+                        it != core->mDevices.end();
+                        ++it)
+                {
+                    if ( !it->second.getUserFriendlyName().compare(deviceName) )
+                    {
+                        ConnectionHandler::getInstance().connectToDevice(it->first);
+                        return;
+                    }
+                }/*
                 if (device)
                 {
                     const NsConnectionHandler::tDeviceHandle& handle = device->getDeviceHandle();
                     ConnectionHandler::getInstance().connectToDevice(handle);
-                }
+                }*/
                 return;
             }
             case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_UI__GETSUPPORTEDLANGUAGESRESPONSE:
@@ -5338,16 +5367,19 @@ namespace NsAppManager
                     core->mUiLanguageV2 = languageChange->get_hmiDisplayLanguage();
                     core->mUiLanguageV1.set(static_cast<NsAppLinkRPC::Language::LanguageInternal>(languageChange->get_hmiDisplayLanguage().get()));
 
-                    const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
+                    /*const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
                     for( AppMgrRegistry::ItemsMap::const_iterator it = allRegisteredApplications.begin();
                             it != allRegisteredApplications.end();
-                            ++it )
+                            ++it )*/
+                    for(std::map<int,Application*>::const_iterator it = core->mApplications.begin();
+                                it != core->mApplications.end();
+                                ++it)
                     {
-                        if ( 0 != it->second && 0 != it->second->getApplication() )
+                        if ( 0 != it->second )
                         {
                             if (NsAppLinkRPCV2::HMILevel::HMI_NONE
-                                != it->second->getApplication()->getApplicationHMIStatusLevel() &&
-                                    1 != it->second->getApplication()->getProtocolVersion() )
+                                != it->second->getApplicationHMIStatusLevel() &&
+                                    1 != it->second->getProtocolVersion() )
                             {
                                 NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
                                     new NsAppLinkRPCV2::OnLanguageChange;
@@ -5374,7 +5406,7 @@ namespace NsAppManager
                     return;
                 }
                 Application_v2* app = static_cast<Application_v2*>(
-                    core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey)));
+                    core->getItem(it->second->connectionKey));
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5422,7 +5454,7 @@ namespace NsAppManager
                     return;
                 }
                 Application_v2* app = static_cast<Application_v2*>(
-                    core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey)));
+                    core->getItem(it->second->connectionKey));
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5452,8 +5484,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << response->getId());
                     return;
                 }
-                Application_v2* app = static_cast<Application_v2*>(core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(it->second->connectionKey)));
+                Application_v2* app = static_cast<Application_v2*>(core->getItem(it->second->connectionKey));
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5481,7 +5512,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5513,8 +5544,7 @@ namespace NsAppManager
                 NsRPC2Communication::UI::OnTBTClientState * notification =
                     static_cast<NsRPC2Communication::UI::OnTBTClientState*>(msg);
 
-                Application* app = core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(notification->get_appId()));
+                Application* app = core->getItem(notification->get_appId());
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5598,8 +5628,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5652,8 +5681,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5702,7 +5730,7 @@ namespace NsAppManager
             {
                 LOG4CPLUS_INFO_EXT(mLogger, " An OnCommand VR notification has been invoked");
                 NsRPC2Communication::VR::OnCommand* object = (NsRPC2Communication::VR::OnCommand*)msg;
-                Application* app = AppMgrRegistry::getInstance().getApplicationByCommand(object->get_cmdID());
+                Application* app = core->getApplicationByCommand(object->get_cmdID(), object->get_appId());
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5749,13 +5777,12 @@ namespace NsAppManager
                     core->mVrLanguageV2 = languageChange->get_language();
                     core->mVrLanguageV1.set(static_cast<NsAppLinkRPC::Language::LanguageInternal>(languageChange->get_language().get()));
 
-                    const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
-                    for( AppMgrRegistry::ItemsMap::const_iterator it = allRegisteredApplications.begin();
-                            it != allRegisteredApplications.end();
-                            ++it )
+                    for(std::map<int, Application*>::const_iterator it = core->mApplications.begin();
+                            it != core->mApplications.end();
+                            ++it)
                     {
-                        if ( 0 != it->second && 0 != it->second->getApplication() &&
-                                1 != it->second->getApplication()->getProtocolVersion() )
+                        if ( 0 != it->second &&
+                                1 != it->second->getProtocolVersion() )
                         {
                             NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
                                 new NsAppLinkRPCV2::OnLanguageChange;
@@ -5780,8 +5807,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << response->getId());
                     return;
                 }
-                Application_v2* app = static_cast<Application_v2*>(core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(it->second->connectionKey)));
+                Application_v2* app = static_cast<Application_v2*>(core->getItem(it->second->connectionKey));
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5879,8 +5905,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -5930,13 +5955,12 @@ namespace NsAppManager
                     core->mTtsLanguageV2 = languageChange->get_language();
                     core->mTtsLanguageV1.set(static_cast<NsAppLinkRPC::Language::LanguageInternal>(languageChange->get_language().get()));
 
-                    const AppMgrRegistry::ItemsMap & allRegisteredApplications = AppMgrRegistry::getInstance().getItems();
-                    for( AppMgrRegistry::ItemsMap::const_iterator it = allRegisteredApplications.begin();
-                            it != allRegisteredApplications.end();
+                    for( std::map<int, Application*>::const_iterator it = core->mApplications.begin();
+                            it != core->mApplications.end();
                             ++it )
                     {
-                        if ( 0 != it->second && 0 != it->second->getApplication() &&
-                                1 != it->second->getApplication()->getProtocolVersion() )
+                        if ( 0 != it->second &&
+                                1 != it->second->getProtocolVersion() )
                         {
                             NsAppLinkRPCV2::OnLanguageChange * languageChangeToApp =
                                 new NsAppLinkRPCV2::OnLanguageChange;
@@ -5961,8 +5985,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << response->getId());
                     return;
                 }
-                Application_v2* app = static_cast<Application_v2*>(core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(it->second->connectionKey)));
+                Application_v2* app = static_cast<Application_v2*>(core->getItem(it->second->connectionKey));
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -6018,8 +6041,7 @@ namespace NsAppManager
                     return;
                 }
 
-                Application * app = core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(object->get_appId()));
+                Application * app = core->getItem(object->get_appId());
                 if ( !app )
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application with id " << object->get_appId() << " found!");
@@ -6078,7 +6100,7 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, "SendData request has been received!");
                 NsRPC2Communication::AppLinkCore::SendData* object = static_cast<NsRPC2Communication::AppLinkCore::SendData*>(msg);
                 core->mSyncPManager.setRawData( object->get_data() );
-                Application* app = AppMgrRegistry::getInstance().getActiveItem();
+                Application* app = core->getActiveItem();
                 if(!app)
                 {
                     LOG4CPLUS_WARN(mLogger, " No active application found!");
@@ -6147,16 +6169,21 @@ namespace NsAppManager
                 NsRPC2Communication::AppLinkCore::GetAppList* object = static_cast<NsRPC2Communication::AppLinkCore::GetAppList*>(msg);
                 NsRPC2Communication::AppLinkCore::GetAppListResponse* response = new NsRPC2Communication::AppLinkCore::GetAppListResponse;
                 response->setId(object->getId());
-                const AppMgrRegistry::ItemsMap& registeredApps = AppMgrRegistry::getInstance().getItems();
                 std::vector< NsAppLinkRPCV2::HMIApplication> hmiApps;
 
-                for(AppMgrRegistry::ItemsMap::const_iterator it = registeredApps.begin(); it != registeredApps.end(); it++)
+                for(std::map<int,Application*>::const_iterator it = core->mApplications.begin();
+                        it != core->mApplications.end();
+                        ++ it)
                 {
                     NsAppLinkRPCV2::HMIApplication hmiApp;
-                    Application* app = core->getApplicationFromItemCheckNotNull(it->second);
+                    Application* app = it->second;
                     if(!app)
                     {
                         LOG4CPLUS_WARN(mLogger, " null-application found!");
+                        continue;
+                    }
+                    if(app->getAppID() != it->first)
+                    {
                         continue;
                     }
 
@@ -6164,18 +6191,26 @@ namespace NsAppManager
                         << " application id " << app->getAppID()
                         << " is media? " << app->getIsMediaApplication() );
 
-                    const NsConnectionHandler::tDeviceHandle& deviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(app->getAppID());
+                    /*const NsConnectionHandler::tDeviceHandle& deviceHandle = core->mDeviceHandler.findDeviceAssignedToSession(app->getAppID());
                     const NsConnectionHandler::CDevice* device = core->mDeviceList.findDeviceByHandle(deviceHandle);
                     if(!device)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " Cannot retreive current device name for the message with app ID " << app->getAppID() << " !");
                         return;
-                    }
-                    const std::string& deviceName = device->getUserFriendlyName();
+                    }*/
+                    //const std::string& deviceName = "DEVICE";//device->getUserFriendlyName();
 
                     hmiApp.set_appName(app->getName());
                     hmiApp.set_appId(app->getAppID());
                     hmiApp.set_isMediaApplication(app->getIsMediaApplication());
+
+                    std::map<int,DeviceStorage>::const_iterator it = core->mDevices.find( app->getDeviceHandle() );
+                    std::string deviceName = "";
+                    if ( core->mDevices.end() != it )
+                    {
+                        deviceName = it->second.getUserFriendlyName();
+                    }
+
                     hmiApp.set_deviceName(deviceName);
 
                     if ( 1 == app->getProtocolVersion() )
@@ -6230,7 +6265,7 @@ namespace NsAppManager
                 NsRPC2Communication::AppLinkCore::OnAppDeactivated * appDeacivated =
                     static_cast<NsRPC2Communication::AppLinkCore::OnAppDeactivated*>(msg);
 
-                Application* currentApp = AppMgrRegistry::getInstance().getActiveItem();
+                Application* currentApp = core->getActiveItem();
                 if ( !currentApp )
                 {
                     LOG4CPLUS_INFO(mLogger, "No application is currently acitve.");
@@ -6319,8 +6354,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -6446,15 +6480,15 @@ namespace NsAppManager
                 if (object->get_prndl())
                 {
                     NsAppLinkRPCV2::VehicleDataType vehicleDataName = NsAppLinkRPCV2::VehicleDataType(NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal::VEHICLEDATA_PRNDLSTATUS);
-                    std::vector<RegistryItem*> result;
+                    std::vector<Application*> result;
                     result.clear();
                     core->mVehicleDataMapping.findRegistryItemsSubscribedToVehicleData(vehicleDataName, result);
                     if (0 < result.size())
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, " There are " << result.size() <<" subscribers on PRNDL notification!");
-                        for (std::vector<RegistryItem*>::iterator it = result.begin(); it != result.end(); it++)
+                        for (std::vector<Application*>::iterator it = result.begin(); it != result.end(); it++)
                         {
-                            Application_v2* app = (Application_v2*)(*it)->getApplication();
+                            Application_v2* app = (Application_v2*)(*it);
                             if(!app)
                             {
                                 LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with the registry item" );
@@ -6508,8 +6542,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << object->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(
-                    AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -6531,10 +6564,11 @@ namespace NsAppManager
                         LOG4CPLUS_INFO_EXT(mLogger, " dtcList is present! ");
                         response->set_dtcList(*(object->get_dtcList()));
                     }
-                    core->decreaseMessageChain(it);
+
                     LOG4CPLUS_INFO_EXT(mLogger, " A message will be sent to an app " << app->getName()
                         << " application id " << it->second->connectionKey);
                     MobileHandler::getInstance().sendRPCMessage(response, it->second->connectionKey);
+                    core->decreaseMessageChain(it);
                 } else
                 {
                     LOG4CPLUS_WARN(mLogger, "GetVehicleData is present in Protocol V2 only!!!");
@@ -6552,7 +6586,7 @@ namespace NsAppManager
                     LOG4CPLUS_WARN_EXT(mLogger, "No chain for " << response->getId());
                     return;
                 }
-                Application* app = core->getApplicationFromItemCheckNotNull(AppMgrRegistry::getInstance().getItem(it->second->connectionKey));
+                Application* app = core->getItem(it->second->connectionKey);
                 if(!app)
                 {
                     LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
@@ -6637,7 +6671,7 @@ namespace NsAppManager
      * \param sessionID an id of the session which will be associated with the application
      * \return A instance of RegistryItem created for application
      */
-    const RegistryItem* AppMgrCore::registerApplication(NsAppLinkRPC::ALRPCMessage * request, int appId)
+    const Application* AppMgrCore::registerApplication(NsAppLinkRPC::ALRPCMessage * request, int appId)
     {
         LOG4CPLUS_INFO_EXT(mLogger, __PRETTY_FUNCTION__);
         if(!request)
@@ -6711,7 +6745,28 @@ namespace NsAppManager
 
                 application->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_NONE);
 
-                return AppMgrRegistry::getInstance().registerApplication( application );
+                mApplications.insert( std::pair<int, Application*>(appId, application) );
+                LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdded application with appid " << appId <<
+                        " to mApplications " << (int)mApplications[appId]);
+                for( std::map<int, DeviceStorage>::iterator it = mDevices.begin();
+                        it != mDevices.end();
+                        ++it )
+                {
+                    if(it->second.getAppId() == appId)
+                    {
+                        application->setDeviceHandle(it->first);
+                        LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tSet for application " << appId << " device handle " << it->first );
+                        for(std::set<int>::const_iterator connectionIt = it->second.getConnectionKeys().begin();
+                                connectionIt != it->second.getConnectionKeys().end();
+                                ++connectionIt)
+                        {
+                            mApplications.insert( std::pair<int, Application*>(*connectionIt, application) );
+                        }
+                        break;
+                    }
+                }
+
+                return application;
             }
             case 1:
             {
@@ -6758,7 +6813,27 @@ namespace NsAppManager
                 application->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_NONE);
 
                 LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
-                return AppMgrRegistry::getInstance().registerApplication( application );
+                mApplications.insert( std::pair<int, Application*>(appId, application) );
+                LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdded application with appid " << appId <<
+                        " to mApplications " << (int)mApplications[appId]);
+                for( std::map<int, DeviceStorage>::iterator it = mDevices.begin();
+                        it != mDevices.end();
+                        ++it )
+                {
+                    if(it->second.getAppId() == appId)
+                    {
+                        application->setDeviceHandle(it->first);
+                        LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tSet for application " << appId << " device handle " << it->first );
+                        for(std::set<int>::const_iterator connectionIt = it->second.getConnectionKeys().begin();
+                                connectionIt != it->second.getConnectionKeys().end();
+                                ++connectionIt)
+                        {
+                            mApplications.insert( std::pair<int, Application*>(*connectionIt, application) );
+                        }
+                        break;
+                    }
+                }
+                return application;
             }
             default:
             {
@@ -6777,11 +6852,11 @@ namespace NsAppManager
     void AppMgrCore::unregisterApplication(int appId)
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Trying to unregister an application for application id " << appId);
-        RegistryItem* item = AppMgrRegistry::getInstance().getItem(appId);
-        Application* app = getApplicationFromItemCheckNotNull( item );
+
+        Application* app = getItem(appId);
         if(!app)
         {
-            LOG4CPLUS_ERROR_EXT(mLogger, "No application associated with this registry item!");
+            LOG4CPLUS_WARN_EXT(mLogger, "No application associated with this registry item!");
             return;
         }
 
@@ -6818,12 +6893,26 @@ namespace NsAppManager
             << " application id " << appId
             << "!");
 
-        mButtonsMapping.removeItem(item);
-        AppMgrRegistry::getInstance().unregisterApplication(item);
+        mButtonsMapping.removeItem(app);
+        //AppMgrRegistry::getInstance().unregisterApplication(item);
 
         LOG4CPLUS_INFO_EXT(mLogger, " Unregistered an application " << appName
             << " application id " << appId
             << "!");
+
+        NsRPC2Communication::AppLinkCore::OnAppUnregistered* appUnregistered = new NsRPC2Communication::AppLinkCore::OnAppUnregistered();
+        appUnregistered->set_appName(appName);
+        appUnregistered->set_appId(app->getAppID());
+        appUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
+        HMIHandler::getInstance().sendNotification(appUnregistered);
+        mApplications.erase( appId );
+        LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tRemvoed application " << appId );
+        std::map<int, DeviceStorage>::iterator it = mDevices.find( app->getDeviceHandle() );
+        if (mDevices.end() != it)
+        {
+            it->second.setAppId(0);
+            LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tApplication " << appId << " removed from device " << it->first);
+        }
     }
 
     void AppMgrCore::sendHMINotificationToMobile( Application * application )
@@ -6856,7 +6945,7 @@ namespace NsAppManager
     {
         int appId = app->getAppID();
 
-        Application* currentApp = AppMgrRegistry::getInstance().getActiveItem();
+        Application* currentApp = getActiveItem();
         if (!currentApp)
         {
             LOG4CPLUS_INFO_EXT(mLogger, "No application is currently active");
@@ -6872,12 +6961,12 @@ namespace NsAppManager
             LOG4CPLUS_INFO_EXT(mLogger, "There is a currently active application  " << currentApp->getName()
                 << " ID " << currentApp->getAppID()
                 << " - about to remove it from HMI first");
-            removeAppFromHmi(currentApp, appId);
+            //removeAppFromHmi(currentApp, appId);
         }
 
         NsAppLinkRPCV2::HMILevel::HMILevelInternal previousState = app->getApplicationHMIStatusLevel();
 
-        if(!AppMgrRegistry::getInstance().activateApp(app))
+        if(!activateApp(app))
         {
             LOG4CPLUS_ERROR_EXT(mLogger, "Application " << app->getName()
                 << " application id " << appId << " cannot be activated.");
@@ -6936,7 +7025,7 @@ namespace NsAppManager
      * \param currentApp app which components to be removed
      * \param appId application id
      */
-    void AppMgrCore::removeAppFromHmi(Application* currentApp, int appId)
+    /*void AppMgrCore::removeAppFromHmi(Application* currentApp, int appId)
     {
         const Commands& currentCommands = currentApp->getAllCommands();
         LOG4CPLUS_INFO_EXT(mLogger, "Removing current application's commands from HMI");
@@ -7027,7 +7116,7 @@ namespace NsAppManager
                 break;
             }
         }
-    }
+    }*/
 
     /**
      * \brief retrieve an application instance from the RegistryItrem instance checking for non-null values
@@ -7126,48 +7215,206 @@ namespace NsAppManager
     void AppMgrCore::setDeviceList(const NsConnectionHandler::tDeviceList &deviceList)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Updating device list: " << deviceList.size() << " devices");
-        mDeviceList.setDeviceList(deviceList);
-        NsRPC2Communication::AppLinkCore::OnDeviceListUpdated* deviceListUpdated = new NsRPC2Communication::AppLinkCore::OnDeviceListUpdated;
+        //mDeviceList.setDeviceList(deviceList);
+        differenceBetweenLists(deviceList);
+        NsRPC2Communication::AppLinkCore::OnDeviceListUpdated* deviceListUpdated =
+                new NsRPC2Communication::AppLinkCore::OnDeviceListUpdated;
         if ( !deviceList.empty() )
         {
-            DeviceNamesList list;
-            const NsConnectionHandler::tDeviceList& devList = mDeviceList.getDeviceList();
-            for(NsConnectionHandler::tDeviceList::const_iterator it = devList.begin(); it != devList.end(); it++)
+            std::vector<std::string> deviceNames;
+            for(std::map<int, DeviceStorage>::const_iterator it = mDevices.begin();
+                it != mDevices.end(); ++it)
             {
-                const NsConnectionHandler::CDevice& device = it->second;
-                list.push_back(device.getUserFriendlyName());
+                deviceNames.push_back(it->second.getUserFriendlyName());
             }
-            deviceListUpdated->set_deviceList(list);
+            deviceListUpdated->set_deviceList(deviceNames);
         }
         HMIHandler::getInstance().sendNotification(deviceListUpdated);
+    }
+
+    void AppMgrCore::differenceBetweenLists( const NsConnectionHandler::tDeviceList &deviceList )
+    {
+        LOG4CPLUS_INFO_EXT(mLogger, "Start finding diff.");
+        typedef NsConnectionHandler::tDeviceList::const_iterator NewIterator;
+        typedef std::map<int, DeviceStorage>::const_iterator ExistingIterator;
+        typedef std::map<int, Application*>::const_iterator ApplicationIterator;
+
+        for(NewIterator it = deviceList.begin(); it != deviceList.end(); ++it)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tNew device " << it->first);
+        }
+        for(ExistingIterator it = mDevices.begin(); it != mDevices.end(); ++it)
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tOld device " << it->first);
+        }
+
+        std::map<int, DeviceStorage> updatedMap;
+
+        ExistingIterator tempIt = mDevices.end();
+        ExistingIterator oldIt = mDevices.begin();
+        NewIterator newIt = deviceList.begin();
+
+        while ( newIt != deviceList.end() )
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Current device " << newIt->first);
+            if ( mDevices.end() == oldIt )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "End of existing devices.");
+                for( NewIterator newItRest = newIt; newItRest != deviceList.end(); ++ newItRest)
+                {
+                    updatedMap.insert( std::pair<int, DeviceStorage>(newItRest->first,
+                        DeviceStorage(newItRest->second.getDeviceHandle(), newItRest->second.getUserFriendlyName())) );
+                }
+                LOG4CPLUS_INFO_EXT(mLogger, "Size of updated map " << updatedMap.size());
+                break;
+            }
+
+            while( oldIt != mDevices.end() && newIt != deviceList.end() && newIt->first > oldIt->first )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tRemoving old device " << oldIt->first);
+                if( oldIt->second.getAppId() )
+                {
+                    // The app should be deleted.
+                    ApplicationIterator appIt = mApplications.find( oldIt->second.getAppId() );
+                    if ( mApplications.end() != appIt )
+                    {
+                        if ( appIt->second )
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "Unregistering app " << appIt->first);
+                            unregisterApplication( appIt -> first );
+                            //Application * appToBeRemoved =
+                            //unregister app
+                        }
+                        //mApplications.erase( appIt );
+                    }
+                }
+                ++oldIt;
+            }
+
+            while( oldIt != mDevices.end() && newIt != deviceList.end() && newIt->first < oldIt->first )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tAdding new device " << newIt->first);
+                updatedMap.insert( std::pair<int, DeviceStorage>(newIt->first,
+                            DeviceStorage(newIt->second.getDeviceHandle(), newIt->second.getUserFriendlyName())) );
+                ++newIt;
+            }
+            if ( oldIt != mDevices.end() && newIt != deviceList.end() && newIt->first == oldIt->first )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tCopying existing device " << oldIt->first);
+                updatedMap.insert( std::pair<int, DeviceStorage>(newIt->first,
+                            DeviceStorage(newIt->second.getDeviceHandle(), newIt->second.getUserFriendlyName())) );
+                ++oldIt; ++newIt;
+            }
+        }
+
+        if ( mDevices.end() != oldIt )
+        {
+            //oldIt = (mDevices.begin() == oldIt ? oldIt : --oldIt);
+            for( ExistingIterator it = oldIt; it != mDevices.end(); ++it )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "Removing old devices");
+                if( it->second.getAppId() )
+                {
+                    // The app should be deleted.
+                    ApplicationIterator appIt = mApplications.find( it->second.getAppId() );
+                    if ( mApplications.end() != appIt )
+                    {
+                        if ( appIt->second )
+                        {
+                            LOG4CPLUS_INFO_EXT(mLogger, "Unregistering app " << appIt->first);
+                            unregisterApplication( appIt -> first );
+                        }
+                    }
+                }
+            }
+        }
+
+        LOG4CPLUS_INFO_EXT(mLogger, "size of existing devices " << mDevices.size());
+        mDevices = updatedMap;
+        LOG4CPLUS_INFO_EXT(mLogger, "size of existing devices " << mDevices.size());
     }
 
     /**
      * \brief get device list
      * \return device list
      */
-    const NsConnectionHandler::tDeviceList &AppMgrCore::getDeviceList() const
+    /*const NsConnectionHandler::tDeviceList &AppMgrCore::getDeviceList() const
     {
         return mDeviceList.getDeviceList();
-    }
+    }*/
 
     /**
      * \brief add a device to a mapping
      * \param connectionKey session/connection key
      * \param device device handler
      */
-    void AppMgrCore::addDevice(const int &sessionKey, const NsConnectionHandler::tDeviceHandle &device)
+    void AppMgrCore::addDevice(const NsConnectionHandler::tDeviceHandle &device,
+            const int &sessionKey, int firstSessionKey)
     {
-        mDeviceHandler.addDevice(sessionKey, device);
+        //mDeviceHandler.addDevice(sessionKey, device);
+        LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdding session to device " <<
+                device << " with first session " << firstSessionKey
+                << " session: " << sessionKey);
+        if( sessionKey == firstSessionKey )
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdding first session " << firstSessionKey);
+            std::map<int, DeviceStorage>::iterator it = mDevices.find(device);
+            if ( mDevices.end() != it )
+            {
+                it->second.setAppId(sessionKey);
+                LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdded session to device " << it->first);
+            }
+        }
+        else
+        {
+            for(std::map<int, DeviceStorage>::iterator it = mDevices.begin();
+                    it != mDevices.end(); ++it)
+            {
+                if ( it->second.getAppId() == firstSessionKey )
+                {
+                    it->second.addConnectionKey( sessionKey );
+                    LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tSession "<<sessionKey
+                         << " added to device " << it->first);
+                    break;
+                }
+            }
+        }
     }
 
     /**
      * \brief remove a device from a mapping
      * \param sessionKey session/connection key
      */
-    void AppMgrCore::removeDevice(const int &sessionKey)
+    void AppMgrCore::removeDevice(const int &sessionKey, int firstSessionKey)
     {
-        mDeviceHandler.removeDevice(sessionKey);
+        LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tRemoving session " << sessionKey
+                << " with first session " << firstSessionKey);
+        if ( sessionKey == firstSessionKey )
+        {
+            std::map<int, Application *>::iterator it = mApplications.find( firstSessionKey );
+            if ( it != mApplications.end() )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tRemoving app from device " << it->second->getDeviceHandle());
+                mDevices.erase( it->second->getDeviceHandle() );
+            }
+            unregisterApplication( firstSessionKey );
+        }
+        //mDeviceHandler.removeDevice(sessionKey);
+        else
+        {
+            for(std::map<int, DeviceStorage>::iterator it = mDevices.begin();
+                    it != mDevices.end(); ++it)
+            {
+                if ( it->second.getAppId() == firstSessionKey )
+                {
+                    it->second.removeConnectionKey( sessionKey );
+                    LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tsession " << sessionKey
+                        << " revmoved from device " << it->first);
+                    //TODO pvysh : remove from applist
+                    break;
+                }
+            }
+        }
     }
 
     bool AppMgrCore::getAudioPassThruFlag() const
@@ -7180,10 +7427,10 @@ namespace NsAppManager
         mAudioPassThruFlag = flag;
     }
 
-    const MessageMapping& AppMgrCore::getMessageMapping() const
+    /*const MessageMapping& AppMgrCore::getMessageMapping() const
     {
         return mMessageMapping;
-    }
+    }*/
 
     void AppMgrCore::sendButtonEvent( Application * app, NsRPC2Communication::Buttons::OnButtonEvent * object )
     {
@@ -7302,5 +7549,136 @@ namespace NsAppManager
             chain->counter++;
         }
         return chain;
+    }
+
+    Application * AppMgrCore::getActiveItem()
+    {
+        for(std::map<int,Application*>::const_iterator it = mApplications.begin();
+                it != mApplications.end();
+                ++it)
+        {
+            if( NsAppLinkRPCV2::HMILevel::HMI_FULL == it->second->getApplicationHMIStatusLevel() )
+            {
+                return it->second;
+            }
+        }
+        return 0;
+    }
+
+    Application * AppMgrCore::getItem( int applicationId )
+    {
+        std::map<int, Application*>::iterator it = mApplications.find( applicationId );
+        if( mApplications.end() != it )
+        {
+            return it->second;
+        }
+        return 0;
+    }
+
+    bool AppMgrCore::activateApp( Application * appToBeActivated )
+    {
+        if(!appToBeActivated)
+        {
+            LOG4CPLUS_ERROR_EXT(mLogger, " Cannot activate null-application!");
+            return false;
+        }
+        LOG4CPLUS_INFO_EXT(mLogger, "Activating an app " << appToBeActivated->getName() << " application id " << appToBeActivated->getAppID());
+
+        bool isCurrentAudible = false;
+        for(std::map<int,Application*>::iterator it = mApplications.begin();
+                it != mApplications.end();
+                ++it)
+        {
+            Application* tempApplication = it->second;
+            if(!tempApplication)
+            {
+                LOG4CPLUS_WARN_EXT(mLogger, "No application for the item!");
+                return false;
+            }
+
+            if ( tempApplication->getAppID() == appToBeActivated->getAppID() )
+            {
+                continue;
+            }
+
+            //TODO (pvysh): at this point it is assumed that behaviour is correct and
+            // when app is not in HMI_FULL/HMI_LIMITED it is not audible.
+            if ( tempApplication->getIsMediaApplication()
+                    && NsAppLinkRPCV2::AudioStreamingState::AUDIBLE
+                            == tempApplication->getApplicationAudioStreamingState().get()
+                    && appToBeActivated->getIsMediaApplication() )
+            {
+                tempApplication->setApplicationAudioStreamingState(
+                    NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
+            }
+
+            if ( NsAppLinkRPCV2::HMILevel::HMI_FULL == tempApplication->getApplicationHMIStatusLevel()
+                || ( NsAppLinkRPCV2::HMILevel::HMI_LIMITED == tempApplication->getApplicationHMIStatusLevel()
+                    && appToBeActivated->getIsMediaApplication() ) )
+            {
+                LOG4CPLUS_INFO_EXT(mLogger, " Deactivating application " << tempApplication->getName());
+                tempApplication -> setApplicationHMIStatusLevel(
+                    NsAppLinkRPCV2::HMILevel::HMI_BACKGROUND);
+                AppMgrCore::getInstance().sendHMINotificationToMobile(tempApplication);
+            }
+        }
+
+        LOG4CPLUS_INFO_EXT(mLogger, " Activating application " << appToBeActivated->getName());
+        appToBeActivated->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_FULL);
+        appToBeActivated->setSystemContext(NsAppLinkRPCV2::SystemContext::SYSCTXT_MAIN);
+        if ( appToBeActivated->getIsMediaApplication() )
+        {
+            appToBeActivated->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::AUDIBLE);
+        }
+        else
+        {
+            appToBeActivated->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::NOT_AUDIBLE);
+        }
+        AppMgrCore::getInstance().sendHMINotificationToMobile(appToBeActivated);
+
+        return true;
+    }
+
+    Application * AppMgrCore::getApplicationByCommand(const unsigned int &cmdId, int appId)
+    {
+        std::map<int, Application*>::iterator it = mApplications.find(appId);
+        if ( mApplications.end() != it )
+        {
+            Application* app = it->second;
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " No application for the item " << it->first);
+                return 0;
+            }
+            if(app->getCommandsCount())
+            {
+                const Commands& cmds = app->findCommands(cmdId);
+                if(!cmds.empty())
+                {
+                    return app;
+                }
+            }
+        }
+        /*for(std::map<int, Application*>::iterator it = mApplications.begin();
+                it != mApplications.end();
+                ++it)
+        {
+            Application* app = it->second;
+            if(!app)
+            {
+                LOG4CPLUS_ERROR_EXT(mLogger, " No application for the item " << it->first);
+                continue;
+            }
+            if(app->getCommandsCount())
+            {
+                const Commands& cmds = app->findCommands(cmdId);
+                if(!cmds.empty())
+                {
+                    return app;
+                }
+            }
+        }*/
+        LOG4CPLUS_INFO_EXT(mLogger, " No applications found for the command " << cmdId);
+        return 0;
     }
 }

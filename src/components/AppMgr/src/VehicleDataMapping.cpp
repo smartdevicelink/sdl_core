@@ -22,7 +22,8 @@ namespace NsAppManager
         clear();
     }
 
-    bool VehicleDataMapping::addVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, RegistryItem* app)
+    bool VehicleDataMapping::addVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, 
+            Application* app)
     {
         bool result = true;
         if(!app)
@@ -30,14 +31,17 @@ namespace NsAppManager
             LOG4CPLUS_ERROR_EXT(mLogger, " Adding a VehicleData to a null registry item");
             return false;
         }
-        std::pair<VehicleDataMapIterator, VehicleDataMapIterator> p = mVehicleDataMapping.equal_range(vehicleDataName.get());
+        std::pair<VehicleDataMapIterator, VehicleDataMapIterator> p =
+                mVehicleDataMapping.equal_range(vehicleDataName.get());
         if (p.first != p.second)
         {
             for (VehicleDataMapIterator itr = p.first; itr != p.second; itr++)
             {
-                if (app->getApplication()->getAppID() == itr->second->getApplication()->getAppID())
+                if (app->getAppID() == itr->second->getAppID())
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "Already subscribed to VehicleData " << itr->first << " in app " << itr->second->getApplication()->getName() );
+                    LOG4CPLUS_INFO_EXT(mLogger, "Already subscribed to VehicleData " 
+                            << itr->first << " in app " 
+                            << itr->second->getName() );
                     result = false;
                     break;
                 }
@@ -45,13 +49,16 @@ namespace NsAppManager
         }
         if (result)
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to VehicleData " << vehicleDataName.get() << " in app " << app->getApplication()->getName() );
+            LOG4CPLUS_INFO_EXT(mLogger, "Subscribed to VehicleData " 
+                << vehicleDataName.get() << " in app " 
+                << app->getName() );
+
             mVehicleDataMapping.insert(VehicleDataMapItem(vehicleDataName.get(), app));
         }
         return result;
     }
 
-    bool VehicleDataMapping::removeVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, RegistryItem* app)
+    bool VehicleDataMapping::removeVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, Application* app)
     {
         bool result =false;
         if(!app)
@@ -64,9 +71,12 @@ namespace NsAppManager
         {
             for (VehicleDataMapIterator itr = p.first; itr != p.second; itr++)
             {
-                if (app->getApplication()->getAppID() == itr->second->getApplication()->getAppID())
+                if (app->getAppID() == itr->second->getAppID())
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "UnSubscribed from VehicleData " << itr->first << " in app " << itr->second->getApplication()->getName() );
+                    LOG4CPLUS_INFO_EXT(mLogger, "UnSubscribed from VehicleData "
+                            << itr->first << " in app "
+                            << itr->second->getName() );
+
                     mVehicleDataMapping.erase(itr);
                     result = true;
                     break;
@@ -76,7 +86,7 @@ namespace NsAppManager
         return result;
     }
 
-    void VehicleDataMapping::removeItem(RegistryItem *app)
+    void VehicleDataMapping::removeItem(Application *app)
     {
         if(!app)
         {
@@ -85,9 +95,9 @@ namespace NsAppManager
         }
         for(VehicleDataMap::iterator it = mVehicleDataMapping.begin(); it != mVehicleDataMapping.end(); it++)
         {
-            if(it->second->getApplication()->getAppID() == app->getApplication()->getAppID())
+            if(it->second->getAppID() == app->getAppID())
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "Removed from VehicleData " << it->first << " with app " << it->second->getApplication()->getName() );
+                LOG4CPLUS_INFO_EXT(mLogger, "Removed from VehicleData " << it->first << " with app " << it->second->getName() );
                 mVehicleDataMapping.erase(it);
             }
         }
@@ -98,9 +108,12 @@ namespace NsAppManager
         mVehicleDataMapping.clear();
     }
 
-    int VehicleDataMapping::findRegistryItemsSubscribedToVehicleData(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, std::vector<RegistryItem*>& result)
+    int VehicleDataMapping::findRegistryItemsSubscribedToVehicleData(
+            const NsAppLinkRPCV2::VehicleDataType& vehicleDataName,
+            std::vector<Application*>& result)
     {
-        std::pair<VehicleDataMapIterator, VehicleDataMapIterator> p = mVehicleDataMapping.equal_range(vehicleDataName.get());
+        std::pair<VehicleDataMapIterator, VehicleDataMapIterator> p =
+                mVehicleDataMapping.equal_range(vehicleDataName.get());
         if (p.first != p.second)
         {
             VehicleDataMapIterator itr;
