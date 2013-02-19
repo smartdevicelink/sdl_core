@@ -188,17 +188,23 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             info = "Inormation about reported DTC's",
             result = "";
 
-        for(i = 0; i < 3; i++) {
-            data.push({"identifier": '0', "statusByte": '0'});
-        }
-
         result = "SUCCESS";
 
         if(params.encrypted){
             result = 'ENCRYPTED';
+
+            for(i = 0; i < 3; i++) {
+                data.push("0");
+            }
+
             FFW.AppLinkCoreClient.SendData( data );
             FFW.VehicleInfo.vehicleInfoGetDTCsResponse( null, info, result, id );
         }else{
+
+            for(i = 0; i < 3; i++) {
+                data.push({"identifier": '0', "statusByte": '0'});
+            }
+
             FFW.VehicleInfo.vehicleInfoGetDTCsResponse( data, info, result, id );
         }
     },
@@ -223,22 +229,27 @@ MFT.ApplinkVehicleInfoModel = Em.Object.create({
             result = "INVALID_DATA";
         }
 
-        
-        for(i = 0; i < params.didLocation.length; i++) {
-            if(i < 10){
-                dataResult[i] = 'SUCCESS';
-                data.push('0');
-            }else{
-                dataResult[i] = "INVALID_DATA";
-                data.push('0');
-            }
-        }
-
         if(params.encrypted){
             result = 'ENCRYPTED';
+            
+            for(i = 0; i < 3; i++) {
+                data.push("0");
+            }
+
             FFW.AppLinkCoreClient.SendData( data );
             FFW.VehicleInfo.vehicleInfoReadDIDResponse( null, null, info, result, id );
         }else{
+
+            for(i = 0; i < params.didLocation.length; i++) {
+                if(i < 10){
+                    dataResult[i] = 'SUCCESS';
+                    data.push('0');
+                }else{
+                    dataResult[i] = "INVALID_DATA";
+                    data.push('0');
+                }
+            }
+
             FFW.VehicleInfo.vehicleInfoReadDIDResponse( dataResult, data, info, result, id );
         }
     },
