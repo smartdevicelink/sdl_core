@@ -80,12 +80,6 @@ namespace NsAppLinkRPCV2
 ///  The item to subscribe to is already subscribed to.
       SUBSCRIBED_ALREADY=13,
 
-///  The user has turned off access to vehicle data, and it is globally unavailable to mobile applications.
-      VEHICLE_DATA_NOT_ALLOWED=20,
-
-///  The requested vehicle data is not available on this vehicle or is not published.
-      VEHICLE_DATA_NOT_AVAILABLE=21,
-
 /**
      The requested command was rejected, e.g. because mobile app is in background and cannot perform any HMI commands.
      Or an HMI command (e.g. Speak) is rejected because a higher priority HMI command (e.g. Alert) is playing.
@@ -116,6 +110,12 @@ namespace NsAppLinkRPCV2
 
 ///  Provided data is valid but something went wrong in the lower layers.
       GENERIC_ERROR=19,
+
+///  The user has turned off access to vehicle data, and it is globally unavailable to mobile applications.
+      VEHICLE_DATA_NOT_ALLOWED=20,
+
+///  The requested vehicle data is not available on this vehicle or is not published.
+      VEHICLE_DATA_NOT_AVAILABLE=21,
 
 ///  RPC is not authorized in local policy table.
       DISALLOWED=22,
