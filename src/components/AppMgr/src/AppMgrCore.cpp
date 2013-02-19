@@ -6170,6 +6170,10 @@ namespace NsAppManager
                         LOG4CPLUS_WARN(mLogger, " null-application found!");
                         continue;
                     }
+                    if(app->getAppID() != it->first)
+                    {
+                        continue;
+                    }
 
                     LOG4CPLUS_INFO_EXT(mLogger, "Adding an application " << app->getName()
                         << " application id " << app->getAppID()
@@ -6729,7 +6733,7 @@ namespace NsAppManager
                 application->setApplicationHMIStatusLevel(NsAppLinkRPCV2::HMILevel::HMI_NONE);
 
                 mApplications.insert( std::pair<int, Application*>(appId, application) );
-                LOG4CPLUS_INFO_EXT(mLogger, "Added application with appid " << appId << 
+                LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdded application with appid " << appId << 
                         " to mApplications " << (int)mApplications[appId]);
                 for( std::map<int, DeviceStorage>::iterator it = mDevices.begin();
                         it != mDevices.end();
@@ -6738,7 +6742,7 @@ namespace NsAppManager
                     if(it->second.getAppId() == appId)
                     {
                         application->setDeviceHandle(it->first);
-                        LOG4CPLUS_INFO_EXT(mLogger, "Set for application " << appId << " device handle " << it->first );
+                        LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tSet for application " << appId << " device handle " << it->first );
                         for(std::set<int>::const_iterator connectionIt = it->second.getConnectionKeys().begin();
                                 connectionIt != it->second.getConnectionKeys().end();
                                 ++connectionIt)
@@ -6797,7 +6801,7 @@ namespace NsAppManager
 
                 LOG4CPLUS_INFO_EXT(mLogger, "Application created." );
                 mApplications.insert( std::pair<int, Application*>(appId, application) );
-                LOG4CPLUS_INFO_EXT(mLogger, "Added application with appid " << appId << 
+                LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdded application with appid " << appId << 
                         " to mApplications " << (int)mApplications[appId]);
                 for( std::map<int, DeviceStorage>::iterator it = mDevices.begin();
                         it != mDevices.end();
@@ -6806,7 +6810,7 @@ namespace NsAppManager
                     if(it->second.getAppId() == appId)
                     {
                         application->setDeviceHandle(it->first);
-                        LOG4CPLUS_INFO_EXT(mLogger, "Set for application " << appId << " device handle " << it->first );
+                        LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tSet for application " << appId << " device handle " << it->first );
                         for(std::set<int>::const_iterator connectionIt = it->second.getConnectionKeys().begin();
                                 connectionIt != it->second.getConnectionKeys().end();
                                 ++connectionIt)
@@ -6889,10 +6893,12 @@ namespace NsAppManager
         appUnregistered->set_reason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason(NsAppLinkRPCV2::AppInterfaceUnregisteredReason::USER_EXIT));
         HMIHandler::getInstance().sendNotification(appUnregistered);
         mApplications.erase( appId );
+        LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tRemvoed application " << appId );
         std::map<int, DeviceStorage>::iterator it = mDevices.find( app->getDeviceHandle() );
         if (mDevices.end() != it)
         {
             it->second.setAppId(0);
+            LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tApplication " << appId << " removed from device " << it->first);
         }
     }
 
@@ -7282,7 +7288,8 @@ namespace NsAppManager
             if ( oldIt != mDevices.end() && newIt != deviceList.end() && newIt->first == oldIt->first )
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "\t\t\t\tCopying existing device " << oldIt->first);
-                updatedMap.insert( std::pair<int, DeviceStorage>(oldIt->first, oldIt->second) );
+                updatedMap.insert( std::pair<int, DeviceStorage>(newIt->first,
+                            DeviceStorage(newIt->second.getDeviceHandle(), newIt->second.getUserFriendlyName())) );
                 ++oldIt; ++newIt;
             }             
         }
@@ -7332,15 +7339,17 @@ namespace NsAppManager
             const int &sessionKey, int firstSessionKey)
     {
         //mDeviceHandler.addDevice(sessionKey, device);
-        LOG4CPLUS_INFO_EXT(mLogger, "Adding session to device " << device);
+        LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdding session to device " <<
+                device << " with first session " << firstSessionKey
+                << " session: " << sessionKey);
         if( sessionKey == firstSessionKey )
         {
-            LOG4CPLUS_INFO_EXT(mLogger, "Adding first session " << firstSessionKey);
+            LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdding first session " << firstSessionKey);
             std::map<int, DeviceStorage>::iterator it = mDevices.find(device);
             if ( mDevices.end() != it )
             {
                 it->second.setAppId(sessionKey);
-                LOG4CPLUS_INFO_EXT(mLogger, "Added session to device " << it->first);
+                LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tAdded session to device " << it->first);
             }
         }
         else
@@ -7351,6 +7360,8 @@ namespace NsAppManager
                 if ( it->second.getAppId() == firstSessionKey )
                 {
                     it->second.addConnectionKey( sessionKey );
+                    LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tSession "<<sessionKey
+                         << " added to device " << it->first);
                     break;
                 }
             }
@@ -7363,13 +7374,14 @@ namespace NsAppManager
      */
     void AppMgrCore::removeDevice(const int &sessionKey, int firstSessionKey)
     {
-        LOG4CPLUS_INFO_EXT(mLogger, "Removing session " << sessionKey << " from device.");
+        LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tRemoving session " << sessionKey
+                << " with first session " << firstSessionKey);
         if ( sessionKey == firstSessionKey )
         {
             std::map<int, Application *>::iterator it = mApplications.find( firstSessionKey );
             if ( it != mApplications.end() )
             {
-                LOG4CPLUS_INFO_EXT(mLogger, "Removing app from device " << it->second->getDeviceHandle());
+                LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tRemoving app from device " << it->second->getDeviceHandle());
                 mDevices.erase( it->second->getDeviceHandle() );
             }
             unregisterApplication( firstSessionKey );            
@@ -7383,6 +7395,9 @@ namespace NsAppManager
                 if ( it->second.getAppId() == firstSessionKey )
                 {
                     it->second.removeConnectionKey( sessionKey );
+                    LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tsession " << sessionKey
+                        << " revmoved from device " << it->first);
+                    //TODO pvysh : remove from applist
                     break;
                 }
             }
