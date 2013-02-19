@@ -110,7 +110,7 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 	
 	findNewApps:   MFT.Button.extend({
 		goToState:			'settings.system.installApplications',
-		//icon:				'images/applink/find_new_apps.png',
+		icon:				'images/applink/new_apps.png',
 		textBinding:		'MFT.locale.label.view_info_apps_vehicle_FindNewApplications',
 		elementId:			'infoAppsFindNewApps',
 		classNames:			'button findNewApps leftButtons',
@@ -123,7 +123,7 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 	}),
 
     getDeviceList:   MFT.Button.extend({
-        //icon:				'images/applink/change_devices.gif',
+        icon:				'images/applink/devices.png',
         textBinding:        'MFT.locale.label.view_info_apps_vehicle_GetDeviceList',
         elementId:          'infoAppsGetDeviceList',
         classNames:         'button getDeviceList leftButtons',

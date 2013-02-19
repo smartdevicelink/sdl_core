@@ -818,8 +818,21 @@
 	top: 226px;
 }
 
+#info_apps .findNewApps img{
+	margin: 5px;
+	width: 40px;
+}
+
 #info_apps .getDeviceList{
 	top: 278px;
+}
+
+#info_apps .getDeviceList img{
+	width: 43px;
+	height: 41px;
+	margin-top: 5px;
+	margin-left: 3px;
+	margin-right: 5px;
 }
 
 #info_apps .list{
