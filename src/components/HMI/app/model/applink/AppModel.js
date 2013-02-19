@@ -213,33 +213,29 @@ MFT.ApplinkAppModel = Em.Object.extend({
 
 		var i = 0,
 			length = message.interactionChoiceSetIDList.length;
-		
-		
+
 		MFT.InteractionChoicesView.clean();
-		
+
 		for ( i = 0; i < length; i++ ) {
+            var choiceSetId = message.interactionChoiceSetIDList[i];
 			MFT.InteractionChoicesView.preformChoices(
-				this.interactionChoices[ message.interactionChoiceSetIDList[i] ]
-			);		
+				this.interactionChoices[ choiceSetId ]
+			);
+
+            MFT.VRPopUp.CreateInteractionChoise( this.interactionChoices[ choiceSetId ]);
 		}
-		
+
 		MFT.InteractionChoicesView.activate(message.initialText);
-		
-		
+
 		// Show Initial prompt
 		MFT.ApplinkModel.onPrompt(message.initialPrompt);
-		
+
 		// Show Timeout prompt
         setTimeout(function(){
         	if ( MFT.InteractionChoicesView.active ) {
         		MFT.ApplinkModel.onPrompt( message.timeoutPrompt );
         	}
         }, message.timeout);
-
-        //Show VR synonims in VR popUp
-        for( i=0; i < length; i++){
-            MFT.VRPopUp.CreateInteractionChoise( this.interactionChoices[message.interactionChoiceSetIDList[i]]);
-        }
 	},
 	
 	/**
