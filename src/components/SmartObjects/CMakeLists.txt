@@ -6,7 +6,7 @@ include_directories (
 )
 
 set (SOURCES
-    ./src/SmartObject.cpp
+    ./src/CSmartObject.cpp
 )
 
 add_library("SmartObjects" ${SOURCES})

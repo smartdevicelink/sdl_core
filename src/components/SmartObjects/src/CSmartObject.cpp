@@ -1,52 +1,52 @@
-#include "SmartObjects/SmartObject.hpp"
+#include "SmartObjects/CSmartObject.hpp"
 #include <limits>
 
 
 
-NsAppLink::NsSmartObjects::SmartObject::SmartObject(void)
+NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(void)
 {
     m_type = SmartType_Null;
     m_data.str_value = NULL;
 }
 
 
-NsAppLink::NsSmartObjects::SmartObject::SmartObject(int i)
+NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(int i)
 {
     set_value_integer(i);
 }
 
-NsAppLink::NsSmartObjects::SmartObject::SmartObject(long l)
+NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(long l)
 {
     set_value_integer(l);
 }
 
-NsAppLink::NsSmartObjects::SmartObject::SmartObject(char c)
+NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(char c)
 {
     set_value_char(c);
 }
 
-NsAppLink::NsSmartObjects::SmartObject::SmartObject(bool b)
+NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(bool b)
 {
     set_value_bool(b);
 }
 
-NsAppLink::NsSmartObjects::SmartObject::SmartObject(double d)
+NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(double d)
 {
     set_value_double(d);
 }
 
-NsAppLink::NsSmartObjects::SmartObject::SmartObject(const std::string s)
+NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(const std::string s)
 {
     set_value_string(s);
 }
 
-NsAppLink::NsSmartObjects::SmartObject::SmartObject(char* s)
+NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(char* s)
 {
     set_value_cstr(s);
     return;
 }
 
-void NsAppLink::NsSmartObjects::SmartObject::duplicate(const NsAppLink::NsSmartObjects::SmartObject& object)
+void NsAppLink::NsSmartObjects::CSmartObject::duplicate(const NsAppLink::NsSmartObjects::CSmartObject& object)
 {
     m_type = object.m_type;
 
@@ -76,17 +76,17 @@ void NsAppLink::NsSmartObjects::SmartObject::duplicate(const NsAppLink::NsSmartO
     }
 }
 
-  NsAppLink::NsSmartObjects::SmartObject::SmartObject(const NsAppLink::NsSmartObjects::SmartObject& object)
+  NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(const NsAppLink::NsSmartObjects::CSmartObject& object)
   {
     duplicate(object);
   }
 
-NsAppLink::NsSmartObjects::SmartObject::~SmartObject()
+NsAppLink::NsSmartObjects::CSmartObject::~CSmartObject()
 {
     cleanup_data();
 }
 
-void NsAppLink::NsSmartObjects::SmartObject::cleanup_data()
+void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data()
 {
     switch(m_type) {
     case SmartType_String :
@@ -103,7 +103,7 @@ void NsAppLink::NsSmartObjects::SmartObject::cleanup_data()
     }
 }
 
-void NsAppLink::NsSmartObjects::SmartObject::cleanup_data_if_type_changed_and_set_new_type(SmartType newType)
+void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data_if_type_changed_and_set_new_type(SmartType newType)
 {
     if(m_type != newType)
     {
@@ -112,38 +112,38 @@ void NsAppLink::NsSmartObjects::SmartObject::cleanup_data_if_type_changed_and_se
     }
 }
 
-NsAppLink::NsSmartObjects::SmartObject::operator int(void) const
+NsAppLink::NsSmartObjects::CSmartObject::operator int(void) const
 {
     return convert_int();
 }
 
-NsAppLink::NsSmartObjects::SmartObject::operator double(void) const
+NsAppLink::NsSmartObjects::CSmartObject::operator double(void) const
 {
     return convert_double();
 }
 
-NsAppLink::NsSmartObjects::SmartObject::operator char(void) const
+NsAppLink::NsSmartObjects::CSmartObject::operator char(void) const
 {
     return convert_char();
 }
 
-NsAppLink::NsSmartObjects::SmartObject::operator bool(void) const
+NsAppLink::NsSmartObjects::CSmartObject::operator bool(void) const
 {
     return convert_bool();
 }
 
-NsAppLink::NsSmartObjects::SmartObject::operator long(void) const
+NsAppLink::NsSmartObjects::CSmartObject::operator long(void) const
 {
     return convert_long();
 }
 
-NsAppLink::NsSmartObjects::SmartObject::operator std::string(void) const
+NsAppLink::NsSmartObjects::CSmartObject::operator std::string(void) const
 {
     return convert_string();
 }
 
 
-int NsAppLink::NsSmartObjects::SmartObject::convert_int(void) const
+int NsAppLink::NsSmartObjects::CSmartObject::convert_int(void) const
 {
     long retval;
 
@@ -179,7 +179,7 @@ int NsAppLink::NsSmartObjects::SmartObject::convert_int(void) const
     return retval;
 }
 
-long NsAppLink::NsSmartObjects::SmartObject::convert_long(void) const
+long NsAppLink::NsSmartObjects::CSmartObject::convert_long(void) const
 {
     switch (m_type) {
     case SmartType_Integer :
@@ -205,7 +205,7 @@ long NsAppLink::NsSmartObjects::SmartObject::convert_long(void) const
     return 0L;
 }
 
-std::string NsAppLink::NsSmartObjects::SmartObject::convert_string(void) const
+std::string NsAppLink::NsSmartObjects::CSmartObject::convert_string(void) const
 {
     char buf[32];
 
@@ -240,7 +240,7 @@ std::string NsAppLink::NsSmartObjects::SmartObject::convert_string(void) const
     return std::string("error");
 }
 
-char NsAppLink::NsSmartObjects::SmartObject::convert_char(void) const
+char NsAppLink::NsSmartObjects::CSmartObject::convert_char(void) const
 {
     switch (m_type) {
     case SmartType_Character :
@@ -265,7 +265,7 @@ char NsAppLink::NsSmartObjects::SmartObject::convert_char(void) const
     return '\0';
 }
 
-bool NsAppLink::NsSmartObjects::SmartObject::convert_bool(void) const
+bool NsAppLink::NsSmartObjects::CSmartObject::convert_bool(void) const
 {
     switch (m_type) {
     case SmartType_Boolean :
@@ -296,7 +296,7 @@ bool NsAppLink::NsSmartObjects::SmartObject::convert_bool(void) const
     return false;
 }
 
-double NsAppLink::NsSmartObjects::SmartObject::convert_double(void) const
+double NsAppLink::NsSmartObjects::CSmartObject::convert_double(void) const
 {
     switch (m_type) {
     case SmartType_Double :
@@ -322,7 +322,7 @@ double NsAppLink::NsSmartObjects::SmartObject::convert_double(void) const
     return 0.0;
 }
 
-double NsAppLink::NsSmartObjects::SmartObject::convert_string_to_double(const std::string* s)
+double NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_double(const std::string* s)
 {
     double retval;
     char* ptr;
@@ -335,7 +335,7 @@ double NsAppLink::NsSmartObjects::SmartObject::convert_string_to_double(const st
     return retval;
 }
 
-long NsAppLink::NsSmartObjects::SmartObject::convert_string_to_long(const std::string* s)
+long NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_long(const std::string* s)
 {
     errno = 0;
     long l = strtol(s->c_str(),NULL,10);
@@ -343,37 +343,37 @@ long NsAppLink::NsSmartObjects::SmartObject::convert_string_to_long(const std::s
     return l;
 }
 
-void NsAppLink::NsSmartObjects::SmartObject::set_value_integer(long l)
+void NsAppLink::NsSmartObjects::CSmartObject::set_value_integer(long l)
 {
     cleanup_data_if_type_changed_and_set_new_type(SmartType_Integer);
     m_data.long_value = l;
 }
 
-void NsAppLink::NsSmartObjects::SmartObject::set_value_char(char c)
+void NsAppLink::NsSmartObjects::CSmartObject::set_value_char(char c)
 {
     cleanup_data_if_type_changed_and_set_new_type(SmartType_Character);
     m_data.char_value = c;
 }
 
-void NsAppLink::NsSmartObjects::SmartObject::set_value_double(double d)
+void NsAppLink::NsSmartObjects::CSmartObject::set_value_double(double d)
 {
     cleanup_data_if_type_changed_and_set_new_type(SmartType_Double);
     m_data.double_value = d;
 }
 
-void NsAppLink::NsSmartObjects::SmartObject::set_value_bool(bool b)
+void NsAppLink::NsSmartObjects::CSmartObject::set_value_bool(bool b)
 {
     cleanup_data_if_type_changed_and_set_new_type(SmartType_Boolean);
     m_data.bool_value = b;
 }
 
-void NsAppLink::NsSmartObjects::SmartObject::set_value_string(const std::string& s)
+void NsAppLink::NsSmartObjects::CSmartObject::set_value_string(const std::string& s)
 {
     cleanup_data_if_type_changed_and_set_new_type(SmartType_String);
     m_data.str_value = new std::string(s);
 }
 
-  void NsAppLink::NsSmartObjects::SmartObject::set_value_cstr(const char* s)
+  void NsAppLink::NsSmartObjects::CSmartObject::set_value_cstr(const char* s)
   {
       if (s)
           set_value_string(std::string(s));
@@ -383,31 +383,31 @@ void NsAppLink::NsSmartObjects::SmartObject::set_value_string(const std::string&
       }
   }
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::operator[](const std::string s)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator[](const std::string s)
   {
     return handle_map_access(s);
   }
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::operator[](char* s)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator[](char* s)
   {
     std::string str(s);
     return handle_map_access(str);
   }
 
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::operator[](const char* s)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator[](const char* s)
   {
     std::string str(s);
     return handle_map_access(str);
   }
 
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::operator[](int i)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator[](int i)
   {
       return handle_array_access(i);
   }
 
-  inline NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::handle_array_access(int index)
+  inline NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::handle_array_access(int index)
   {
       if(m_type != SmartType_Array)
       {
@@ -423,7 +423,7 @@ void NsAppLink::NsSmartObjects::SmartObject::set_value_string(const std::string&
       }
       if (index == sz)
       {
-          NsAppLink::NsSmartObjects::SmartObject uc;
+          NsAppLink::NsSmartObjects::CSmartObject uc;
           m_data.array_value->push_back(uc);
       }
       if (index > sz || index < 0)
@@ -433,7 +433,7 @@ void NsAppLink::NsSmartObjects::SmartObject::set_value_string(const std::string&
       return m_data.array_value->at(index);
   }
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::handle_map_access(const std::string s)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::handle_map_access(const std::string s)
   {
       if(m_type != SmartType_Map)
       {
@@ -448,55 +448,55 @@ void NsAppLink::NsSmartObjects::SmartObject::set_value_string(const std::string&
 
 
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::operator=(int i)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(int i)
   {
       set_value_integer(i);
       return *this;
   }
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::operator=(long l)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(long l)
   {
       set_value_integer(l);
       return *this;
   }
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::operator=(double d)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(double d)
   {
       set_value_double(d);
       return *this;
   }
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::operator=(bool b)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(bool b)
   {
       set_value_bool(b);
       return *this;
   }
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::operator=(const std::string& s)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(const std::string& s)
   {
       set_value_string(s);
       return *this;
   }
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::operator=(const char* s)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(const char* s)
   {
       set_value_cstr(s);
       return *this;
   }
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::operator=(char c)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(char c)
   {
       set_value_char(c);
       return *this;
   }
 
-  NsAppLink::NsSmartObjects::SmartObject& NsAppLink::NsSmartObjects::SmartObject::operator=(const NsAppLink::NsSmartObjects::SmartObject& uc)
+  NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject::operator=(const NsAppLink::NsSmartObjects::CSmartObject& uc)
   {
       if (this != &uc) duplicate(uc);
       return *this;
   }
 
-  NsAppLink::NsSmartObjects::SmartType NsAppLink::NsSmartObjects::SmartObject::get_type()
+  NsAppLink::NsSmartObjects::SmartType NsAppLink::NsSmartObjects::CSmartObject::get_type()
   {
       return m_type;
   }

@@ -9,7 +9,7 @@ namespace NsAppLink
 {
     namespace NsSmartObjects
     {
-        class SmartObject;
+        class CSmartObject;
 
         enum SmartType
         {
@@ -30,22 +30,22 @@ namespace NsAppLink
         static const char* true_str = "true";
         static const char* false_str = "false";
 
-        typedef std::vector<SmartObject> SmartArray;
-        typedef std::map<std::string, SmartObject> SmartMap;
+        typedef std::vector<CSmartObject> SmartArray;
+        typedef std::map<std::string, CSmartObject> SmartMap;
 
-        class SmartObject
+        class CSmartObject
         {
         public:
-            SmartObject();
-            SmartObject(int);
-            SmartObject(long);
-            SmartObject(double);
-            SmartObject(bool);
-            SmartObject(char);
-            SmartObject(const std::string);
-            SmartObject(char*);
-            SmartObject(const SmartObject&);
-            ~SmartObject();
+            CSmartObject();
+            CSmartObject(int);
+            CSmartObject(long);
+            CSmartObject(double);
+            CSmartObject(bool);
+            CSmartObject(char);
+            CSmartObject(const std::string);
+            CSmartObject(char*);
+            CSmartObject(const CSmartObject&);
+            ~CSmartObject();
 
             operator int(void) const;
             operator double(void) const;
@@ -56,21 +56,21 @@ namespace NsAppLink
             operator std::string*(void) const;
             const char* c_str(void) const;
 
-            SmartObject& operator[](int);
-            SmartObject& operator[](std::string);
-            SmartObject& operator[](char*);
-            SmartObject& operator[](const char*);
+            CSmartObject& operator[](int);
+            CSmartObject& operator[](const std::string s);
+            CSmartObject& operator[](char* s);
+            CSmartObject& operator[](const char*);
 
-            SmartObject& operator=(long);
-            SmartObject& operator=(int);
-            SmartObject& operator=(double);
-            SmartObject& operator=(bool);
-            SmartObject& operator=(char);
-            SmartObject& operator=(const std::string&);
-            SmartObject& operator=(const char*);
-            SmartObject& operator=(const SmartObject&);
+            CSmartObject& operator=(long);
+            CSmartObject& operator=(int);
+            CSmartObject& operator=(double);
+            CSmartObject& operator=(bool);
+            CSmartObject& operator=(char);
+            CSmartObject& operator=(const std::string&);
+            CSmartObject& operator=(const char*);
+            CSmartObject& operator=(const CSmartObject&);
 
-            bool operator==(const SmartObject&) const;
+            bool operator==(const CSmartObject&) const;
             bool operator==(int) const;
             bool operator==(long) const;
             bool operator==(char) const;
@@ -108,13 +108,13 @@ namespace NsAppLink
             inline long convert_long(void) const;
             inline std::string convert_string(void) const;
 
-            inline SmartObject& handle_map_access(std::string);
-            inline SmartObject& handle_array_access(int index);
+            inline CSmartObject& handle_map_access(std::string);
+            CSmartObject& handle_array_access(int index);
 
             static double convert_string_to_double(const std::string* s);
             static long convert_string_to_long(const std::string* s);
 
-            void duplicate(const SmartObject&);
+            void duplicate(const CSmartObject&);
 
             void cleanup_data();
             void cleanup_data_if_type_changed_and_set_new_type(SmartType newType);
@@ -127,7 +127,7 @@ namespace NsAppLink
         static const std::string invalid_string_value = "";
         static const double      invalid_real_value   = -1;
         static const char*       invalid_cstr_value   = "";
-        static SmartObject       invalid_object_value;
+        static CSmartObject       invalid_object_value;
 
     }
 }
