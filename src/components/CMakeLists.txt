@@ -15,3 +15,6 @@ add_subdirectory(./ConnectionHandler)
 
 # --- Utils
 add_subdirectory(./Utils)
+
+# --- SmartObjects
+add_subdirectory(./SmartObjects)
