@@ -254,11 +254,47 @@ void NsAppLink::NsTransportManager::CBluetoothAdapter::mainThread(void)
                 }
             }
 
+            pthread_mutex_lock(&mConnectionsMutex);
+
+            std::set<tDeviceHandle> connectedDevices;
+
+            for (tConnectionMap::const_iterator connectionIterator = mConnections.begin(); connectionIterator != mConnections.end(); ++connectionIterator)
+            {
+                const SConnection * connection = connectionIterator->second;
+
+                if (0 != connection)
+                {
+                    if (connectedDevices.end() == connectedDevices.find(connection->mDeviceHandle))
+                    {
+                        connectedDevices.insert(connection->mDeviceHandle);
+                    }
+                }
+            }
+
+            pthread_mutex_unlock(&mConnectionsMutex);
+
             pthread_mutex_lock(&mDevicesMutex);
 
             for (tDeviceMap::iterator deviceIterator = mDevices.begin(); deviceIterator != mDevices.end(); ++deviceIterator)
             {
-                delete deviceIterator->second;
+                SDevice * device = deviceIterator->second;
+
+                if (0 != device)
+                {
+                    if (newDevices.end() == newDevices.find(deviceIterator->first))
+                    {
+                        if (connectedDevices.end() != connectedDevices.find(deviceIterator->first))
+                        {
+                            newDevices[deviceIterator->first] = device;
+                            device = 0;
+                        }
+                    }
+
+                    if (0 != device)
+                    {
+                        delete device;
+                    }
+                }
             }
 
             mDevices = newDevices;
