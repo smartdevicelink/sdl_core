@@ -1,4 +1,5 @@
 [CW8]
+* Make the console log scrolling smoother.
 * Don't remove interaction choice set from the choiceSets list until a successful DeleteChoiceSetResponse has come.
 * Don't show null in the log if the responses' info is null.
 * AddCommand message: set an existing icon by default.

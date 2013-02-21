@@ -32,14 +32,39 @@ public class MessageAdapter extends ArrayAdapter<Object> {
 		add(m);
 	}
 	
+	static class ViewHolder {
+		TextView lblTop;
+		TextView lblBottom;
+	}
+	
     public View getView(int position, View convertView, ViewGroup parent) {
-    	ViewGroup rowView = (ViewGroup)convertView;
-        Object rpcObj = getItem(position);
-        rowView = (ViewGroup)vi.inflate(R.layout.row, null);
-        if (rpcObj != null) {
-            TextView lblTop = (TextView) rowView.findViewById(R.id.toptext);
-            TextView lblBottom = (TextView) rowView.findViewById(R.id.bottomtext);
+	    ViewHolder holder = null;
+        TextView lblTop = null;
+        TextView lblBottom = null;
+        
+		ViewGroup rowView = (ViewGroup)convertView;
+    		if (rowView == null) {
+    	        rowView = (ViewGroup)vi.inflate(R.layout.row, null);
+    	        
+            lblTop = (TextView) rowView.findViewById(R.id.toptext);
+            lblBottom = (TextView) rowView.findViewById(R.id.bottomtext);
             
+	        holder = new ViewHolder();
+	        holder.lblTop = lblTop;
+	        holder.lblBottom = lblBottom;
+            rowView.setTag(holder);
+    		} else {
+    			holder = (ViewHolder) rowView.getTag();
+            lblTop = holder.lblTop;
+            lblBottom = holder.lblBottom;
+            
+			lblBottom.setVisibility(View.VISIBLE);
+			lblBottom.setText(null);
+			lblTop.setTextColor(getContext().getResources().getColor(R.color.log_regular_text_color));
+			lblTop.setText(null);
+    		}
+        Object rpcObj = getItem(position);
+        if (rpcObj != null) {
             if (rpcObj instanceof String) {
             	lblTop.setText((String)rpcObj);
             }
@@ -73,7 +98,7 @@ public class MessageAdapter extends ArrayAdapter<Object> {
 					lblBottom.setText(result + (info != null ? ": " + info : ""));
 					
 				} catch (NoSuchMethodException e) {
-					rowView.removeView(lblBottom);
+					lblBottom.setVisibility(View.GONE);
 				} catch (SecurityException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
