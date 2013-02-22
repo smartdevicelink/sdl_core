@@ -4,40 +4,75 @@ android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <Spinner
-        android:id="@+id/spinner2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    
-    <TableLayout android:layout_width="fill_parent"
-		android:layout_height="100dp">
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
 
 		<TableRow
 		    android:id="@+id/LinearLayout01"
 		    android:layout_width="fill_parent"
 		    android:layout_height="match_parent" >
+        	
+        	<Spinner
+        		android:id="@+id/spinner2"
+        		android:layout_width="match_parent"
+        		android:layout_height="wrap_content" />
+        	
+        			<Spinner
+        	android:id="@+id/spinner3"
+        	android:layout_width="match_parent"
+        	android:layout_height="wrap_content" />
+        			
+    </TableRow>
+		
+	</TableLayout>
 
-			<Button 
-			    android:id="@+id/btnSend"
-			    android:text="Send with timeout"
-				android:layout_width="wrap_content"
-				android:layout_height="80dp">   
-			</Button>
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+		<TableRow
+		    android:id="@+id/LinearLayout01"
+		    android:layout_width="fill_parent"
+		    android:layout_height="match_parent" >			
 
 			<EditText
 			    android:id="@+id/timeoutInput"
-			    android:layout_width="80dp"
-			    android:layout_height="80dp"
+			    android:layout_width="60dp"
+			    android:layout_height="match_parent"
 			    android:digits="1234567890"
 			    android:ems="99"
 			    android:inputType="number"
 			    android:maxLength="2"
 			    android:text="99" >
+
 			</EditText>
+			
+			<Button
+			    android:id="@+id/btnSend"
+			    android:layout_width="wrap_content"
+			    android:layout_height="match_parent"
+			    android:text="Send with timeout" >
+   
+			</Button>			
 		</TableRow>
 		
 	</TableLayout>
-	
+	    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+		<TableRow
+		    android:id="@+id/LinearLayout01"
+		    android:layout_width="fill_parent"
+		    android:layout_height="match_parent" >
+        	
+        	<Spinner
+        		android:id="@+id/spinner4"
+        		android:layout_width="match_parent"
+        		android:layout_height="wrap_content" />        			
+    </TableRow>
+		
+	</TableLayout>
     <ScrollView android:layout_width="fill_parent"
         android:layout_height="fill_parent" android:id="@+id/scrollConsole"
         android:visibility="gone">
