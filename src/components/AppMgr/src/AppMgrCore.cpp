@@ -3998,10 +3998,11 @@ namespace NsAppManager
                                 sendResponse<NsAppLinkRPCV2::UpdateTurnList_response
                                     , NsAppLinkRPCV2::Result::ResultInternal>(
                                         NsAppLinkRPCV2::FunctionID::UpdateTurnListID
-                                            , NsAppLinkRPCV2::Result::FILE_NOT_FOUND
+                                            , NsAppLinkRPCV2::Result::INVALID_DATA
                                             , request->getCorrelationID()
                                             , false
                                             , sessionKey);
+                            return;
                         }
 
                         image.set_value(fullFilePath);
