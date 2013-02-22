@@ -32,7 +32,7 @@ MFT.ApplinkController = Em.Object.create({
      * @type {String}
      */
     sysContext: function() {
-        
+
         if ( MFT.VRPopUp.VRActive ) {
             return 'VRSESSION';
         }
@@ -40,8 +40,8 @@ MFT.ApplinkController = Em.Object.create({
         if ( MFT.AlertPopUp.active ) {
             return 'ALERT';
         }
-        
-        if ( MFT.TTSPopUp.active || MFT.TBTClientStateView.active || MFT.VehicleInfo.active || MFT.DriverDistraction.active ) {
+
+        if ( MFT.TBTClientStateView.active || MFT.VehicleInfo.active || MFT.DriverDistraction.active ) {
             return 'HMI_OBSCURED';
         }
 
@@ -58,7 +58,6 @@ MFT.ApplinkController = Em.Object.create({
     }.property(
         'MFT.DriverDistraction.active',
         'MFT.OptionsView.active',
-        'MFT.TTSPopUp.active',
         'MFT.VRPopUp.VRActive',
         'MFT.AlertPopUp.active',
         'MFT.TBTClientStateView.active',
