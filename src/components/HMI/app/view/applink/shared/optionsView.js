@@ -101,9 +101,9 @@ MFT.OptionsView = MFT.ApplinkAbstractView.create({
                 MFT.ApplinkAppController.onSubMenu(0);
             } else {
                 this._super();
+        		MFT.ApplinkController.onSystemContextChange();
             }
         }
 
-        MFT.ApplinkController.onSystemContextChange();
     }
 });
