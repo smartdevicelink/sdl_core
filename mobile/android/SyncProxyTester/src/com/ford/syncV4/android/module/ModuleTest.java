@@ -11,6 +11,22 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import org.xmlpull.v1.XmlPullParser;
+
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Environment;
+import android.util.Log;
+import android.util.Pair;
+import android.util.Xml;
+
+import com.ford.syncV4.android.activity.SyncProxyTester;
+import com.ford.syncV4.android.adapters.logAdapter;
+import com.ford.syncV4.android.constants.AcceptedRPC;
+import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
@@ -54,21 +70,6 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
-import com.ford.syncV4.android.activity.SyncProxyTester;
-import com.ford.syncV4.android.adapters.logAdapter;
-import com.ford.syncV4.android.constants.AcceptedRPC;
-import com.ford.syncV4.android.service.ProxyService;
-
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Environment;
-import android.util.Log;
-import android.util.Pair;
-import android.util.Xml;
 
 public class ModuleTest {
 	private static ModuleTest _instance;
@@ -487,8 +488,6 @@ public class ModuleTest {
 						if (parser.getAttributeName(0) != null) vectorName = parser.getAttributeValue(0);
 
 						eventType = parser.next();
-						while (eventType != XmlPullParser.START_TAG) eventType = parser.next();
-
 						Boolean nestedWhileDone = false;
 						while (eventType != XmlPullParser.END_DOCUMENT && !nestedWhileDone) {
 							tempName = parser.getName();
