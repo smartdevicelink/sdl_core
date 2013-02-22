@@ -446,7 +446,7 @@ public class ModuleTest {
 							eventType = parser.next();
 						}
 						writer.close();
-						
+
 						Intent email = new Intent(Intent.ACTION_SEND);
 						email.setType("plain/text");
 						email.putExtra(Intent.EXTRA_EMAIL, new String[]{"youremail@ford.com"});		  
@@ -492,8 +492,18 @@ public class ModuleTest {
 						
 						if (parser.getAttributeName(0) != null) vectorName = parser.getAttributeValue(0);
 
-						eventType = parser.next();
 						Boolean nestedWhileDone = false;
+						
+						eventType = parser.next();
+						while (eventType != XmlPullParser.START_TAG && !nestedWhileDone) {
+							if (eventType == XmlPullParser.END_TAG) {
+								if (parser.getName().equalsIgnoreCase("Vector")) {
+									Log.e("TESTING", "In Vector Loop, nestedWhileDone == true, END_TAG, name: " + name);
+									nestedWhileDone = true;
+								}
+							} else eventType = parser.next();
+						}
+						
 						while (eventType != XmlPullParser.END_DOCUMENT && !nestedWhileDone) {
 							tempName = parser.getName();
 							logParserDebugInfo("In Vector Loop, tempName: " + tempName);
@@ -509,7 +519,8 @@ public class ModuleTest {
 								if (tempName.equalsIgnoreCase("Integer")) {
 									logParserDebugInfo("In Nested Vector Integer");
 									if (parser.getAttributeName(0) != null) {
-										try {vector.add(Integer.parseInt(parser.getAttributeValue(0)));} 
+										//try {vector.add(Integer.parseInt(parser.getAttributeValue(0)));} 
+										try {vector.add(Double.parseDouble(parser.getAttributeValue(0)));} 
 										catch (Exception e) {Log.e(TAG, "Unable to parse Integer");}
 									}
 								} else if (tempName.equalsIgnoreCase("String")) {
@@ -559,7 +570,8 @@ public class ModuleTest {
 					} else if (tempName.equalsIgnoreCase("Integer")) {
 						logParserDebugInfo("In Integer");
 						if (parser.getAttributeName(0) != null) {
-							try {hash.put(parser.getAttributeName(0), Integer.parseInt(parser.getAttributeValue(0)));} 
+							//try {hash.put(parser.getAttributeName(0), Integer.parseInt(parser.getAttributeValue(0)));} 
+							try {hash.put(parser.getAttributeName(0), Double.parseDouble(parser.getAttributeValue(0)));} 
 							catch (Exception e) {Log.e(TAG, "Unable to parse Integer");}
 						}
 					} else if (tempName.equalsIgnoreCase("Boolean")) {

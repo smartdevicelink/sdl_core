@@ -275,6 +275,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Object listObj = parent.getItemAtPosition(position);
 				if (listObj instanceof RPCMessage) {
+					AlertDialog.Builder builder = new AlertDialog.Builder(SyncProxyTester.this);
 					String rawJSON = "";
 					
 					Integer corrId = -1;
@@ -283,16 +284,16 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 					} else if (listObj instanceof RPCResponse) {
 						corrId = ((RPCResponse) listObj).getCorrelationID();
 					}
-					
+
 					try {
 						rawJSON = ((RPCMessage) listObj).serializeJSON(
 								ProxyService.getInstance().getProxyInstance().getWiProVersion()).toString(2);
-					} catch (JSONException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						builder.setTitle("Raw JSON" + (corrId != -1 ? " (Corr ID " + corrId + ")" : ""));
+					} catch (Exception e) {
+						try {rawJSON = ((RPCMessage) listObj).getFunctionName() + 
+								" (" + ((RPCMessage) listObj).getMessageType() + ")";
+						} catch (Exception e1) {rawJSON = "Undefined";}
 					}
-					AlertDialog.Builder builder = new AlertDialog.Builder(SyncProxyTester.this);
-					builder.setTitle("Raw JSON" + (corrId != -1 ? " (Corr ID " + corrId + ")" : ""));
 					builder.setMessage(rawJSON);
 					builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
@@ -616,7 +617,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 
 	protected void onDestroy() {
 		super.onDestroy();
-//		endSyncProxyInstance();
+		//endSyncProxyInstance();
 		saveMessageSelectCount();
 		_activity = null;
 		ProxyService service = ProxyService.getInstance();
@@ -1430,7 +1431,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										} catch (SyncException e) {
 											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 										}
-	
+
 										if (_latestDeleteSubmenu != null) {
 											Log.w(logTag, "Latest deleteSubmenu should be null, but equals to " + _latestDeleteSubmenu);
 										}
@@ -2845,7 +2846,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	
 	/**
 	 * Called when a CreateChoiceSetResponse comes. If successful, add it to the
-	 * adapter.
+	 * adapter. In any case, remove the key from the map.
 	 */
 	public void onCreateChoiceSetResponse(boolean success) {
 		if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {

@@ -1,8 +1,13 @@
 package com.ford.syncV4.android.service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -16,6 +21,7 @@ import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.Pair;
@@ -190,6 +196,8 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				}
 			}
 		} else {
+			//TODO: This code is commented out for simulator purposes
+			/*
 			Log.d(TAG, "ProxyService. onStartCommand(). Transport = WiFi.");
 			if (hasWiFiConnection() == true) {
 				Log.d(TAG, "ProxyService. onStartCommand(). WiFi enabled.");
@@ -198,6 +206,8 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				Log.w(TAG,
 						"ProxyService. onStartCommand(). WiFi is not enabled.");
 			}
+			*/
+			startProxy();
 		}
 	}
 
@@ -320,7 +330,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 	private void initialize() {
 		playingAudio = true;
 		playAnnoyingRepetitiveAudio();
-
+		
 		try {
 			_syncProxy.show("Sync Proxy", "Tester", null, null, null, null, nextCorrID());
 		} catch (SyncException e) {
@@ -735,6 +745,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 	}
 	@Override
 	public void onEncodedSyncPDataResponse(EncodedSyncPDataResponse response) {
+		Log.i("syncp", response.getInfo() + response.getResultCode() + response.getSuccess());
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
 		else Log.i(TAG, "" + response);
@@ -1183,8 +1194,12 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
 		else Log.i(TAG, "" + notification);
 	}
+	
+	EncodedSyncPDataHeader encodedSyncPDataHeaderfromGPS;
 	@Override
 	public void onOnEncodedSyncPData(OnEncodedSyncPData notification) {
+		Log.i("syncp", "MessageType: "+ notification.getMessageType());
+		
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
 		else Log.i(TAG, "" + notification);
@@ -1193,64 +1208,104 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		encodedSyncPDataHeader = EncodedSyncPDataHeader.parseEncodedSyncPDataHeader(
 				Base64.decode(notification.getData().get(0)));
 
-		Log.i("EncodedSyncPDataHeader", "Protocol Version: " + encodedSyncPDataHeader.getProtocolVersion());
-		Log.i("EncodedSyncPDataHeader", "Response Required: " + encodedSyncPDataHeader.getResponseRequired());
-		Log.i("EncodedSyncPDataHeader", "High Bandwidth: " + encodedSyncPDataHeader.getHighBandwidth());
-		Log.i("EncodedSyncPDataHeader", "Signed: " + encodedSyncPDataHeader.getSigned());
-		Log.i("EncodedSyncPDataHeader", "Encrypted: " + encodedSyncPDataHeader.getEncrypted());
-		Log.i("EncodedSyncPDataHeader", "Payload Size: " + encodedSyncPDataHeader.getPayloadSize());
-		Log.i("EncodedSyncPDataHeader", "Has ESN: " + encodedSyncPDataHeader.getHasESN());
-		Log.i("EncodedSyncPDataHeader", "Service Type: " + encodedSyncPDataHeader.getServiceType());
-		Log.i("EncodedSyncPDataHeader", "Command Type: " + encodedSyncPDataHeader.getCommandType());
-		Log.i("EncodedSyncPDataHeader", "CPU Destination: " + encodedSyncPDataHeader.getCPUDestination());
-		Log.i("EncodedSyncPDataHeader", "Encryption Key Index: " + encodedSyncPDataHeader.getEncryptionKeyIndex());
-		
-		byte[] tempESN = encodedSyncPDataHeader.getESN();
-		String stringESN = "";
-		for (int i = 0; i < 8; i++) stringESN += tempESN[i];
-		Log.i("EncodedSyncPDataHeader", "ESN: " + stringESN);
-		
-		try {Log.i("EncodedSyncPDataHeader", "Module Message ID: " + encodedSyncPDataHeader.getModuleMessageID());}
-		catch (Exception e) {}
-		try {Log.i("EncodedSyncPDataHeader", "Server Message ID: " + encodedSyncPDataHeader.getServerMessageID());}
-		catch (Exception e) {}
-		try {Log.i("EncodedSyncPDataHeader", "Message Status: " + encodedSyncPDataHeader.getMessageStatus());}
-		catch (Exception e) {}
-		
-		if (encodedSyncPDataHeader.getHighBandwidth()) {
-			byte[] tempIV = encodedSyncPDataHeader.getIV();
-			String stringIV = "";
-			for (int i = 0; i < 16; i++) stringIV += tempIV[i];
-			Log.i("EncodedSyncPDataHeader", "IV: " + stringIV);
-
-			byte[] tempPayload = encodedSyncPDataHeader.getPayload();
-			String stringPayload = "";
-			for (int i = 0; i < encodedSyncPDataHeader.getPayloadSize(); i++) stringPayload += tempPayload[i];
-			Log.i("EncodedSyncPDataHeader", "Payload: " + stringPayload);
-
-			byte[] tempSignatureTag = encodedSyncPDataHeader.getSignatureTag();
-			String stringSignatureTag = "";
-			for (int i = 0; i < 16; i++) stringSignatureTag += tempSignatureTag[i];
-			Log.i("EncodedSyncPDataHeader", "Signature Tag: " + stringSignatureTag);
-		} else {
-			byte[] tempIV = encodedSyncPDataHeader.getIV();
-			String stringIV = "";
-			for (int i = 0; i < 8; i++) stringIV += tempIV[i];
-			Log.i("EncodedSyncPDataHeader", "IV: " + stringIV);
-
-			byte[] tempPayload = encodedSyncPDataHeader.getPayload();
-			String stringPayload = "";
-			for (int i = 0; i < encodedSyncPDataHeader.getPayloadSize(); i++) stringPayload += tempPayload[i];
-			Log.i("EncodedSyncPDataHeader", "Payload: " + stringPayload);
-
-			byte[] tempSignatureTag = encodedSyncPDataHeader.getSignatureTag();
-			String stringSignatureTag = "";
-			for (int i = 0; i < 8; i++) stringSignatureTag += tempSignatureTag[i];
-			Log.i("EncodedSyncPDataHeader", "Signature Tag: " + stringSignatureTag);
+		if (encodedSyncPDataHeader.getServiceType() == 3 && encodedSyncPDataHeader.getCommandType() == 1) {
+			writeToFile(encodedSyncPDataHeader.getPayload());
+			
+			Log.i("EncodedSyncPDataHeader", "Protocol Version: " + encodedSyncPDataHeader.getProtocolVersion());
+			Log.i("EncodedSyncPDataHeader", "Response Required: " + encodedSyncPDataHeader.getResponseRequired());
+			Log.i("EncodedSyncPDataHeader", "High Bandwidth: " + encodedSyncPDataHeader.getHighBandwidth());
+			Log.i("EncodedSyncPDataHeader", "Signed: " + encodedSyncPDataHeader.getSigned());
+			Log.i("EncodedSyncPDataHeader", "Encrypted: " + encodedSyncPDataHeader.getEncrypted());
+			Log.i("EncodedSyncPDataHeader", "Payload Size: " + encodedSyncPDataHeader.getPayloadSize());
+			Log.i("EncodedSyncPDataHeader", "Has ESN: " + encodedSyncPDataHeader.getHasESN());
+			Log.i("EncodedSyncPDataHeader", "Service Type: " + encodedSyncPDataHeader.getServiceType());
+			Log.i("EncodedSyncPDataHeader", "Command Type: " + encodedSyncPDataHeader.getCommandType());
+			Log.i("EncodedSyncPDataHeader", "CPU Destination: " + encodedSyncPDataHeader.getCPUDestination());
+			Log.i("EncodedSyncPDataHeader", "Encryption Key Index: " + encodedSyncPDataHeader.getEncryptionKeyIndex());
+			
+			byte[] tempESN = encodedSyncPDataHeader.getESN();
+			String stringESN = "";
+			for (int i = 0; i < 8; i++) stringESN += tempESN[i];
+			Log.i("EncodedSyncPDataHeader", "ESN: " + stringESN);
+			
+			try {Log.i("EncodedSyncPDataHeader", "Module Message ID: " + encodedSyncPDataHeader.getModuleMessageID());}
+			catch (Exception e) {}
+			try {Log.i("EncodedSyncPDataHeader", "Server Message ID: " + encodedSyncPDataHeader.getServerMessageID());}
+			catch (Exception e) {}
+			try {Log.i("EncodedSyncPDataHeader", "Message Status: " + encodedSyncPDataHeader.getMessageStatus());}
+			catch (Exception e) {}
+			
+			//create header for syncp packet
+			if (encodedSyncPDataHeader.getHighBandwidth()) {
+				byte[] tempIV = encodedSyncPDataHeader.getIV();
+				String stringIV = "";
+				for (int i = 0; i < 16; i++) stringIV += tempIV[i];
+				Log.i("EncodedSyncPDataHeader", "IV: " + stringIV);
+	
+				byte[] tempPayload = encodedSyncPDataHeader.getPayload();
+				String stringPayload = "";
+				for (int i = 0; i < encodedSyncPDataHeader.getPayloadSize(); i++) stringPayload += tempPayload[i];
+				Log.i("EncodedSyncPDataHeader", "Payload: " + stringPayload);
+	
+				byte[] tempSignatureTag = encodedSyncPDataHeader.getSignatureTag();
+				String stringSignatureTag = "";
+				for (int i = 0; i < 16; i++) stringSignatureTag += tempSignatureTag[i];
+				Log.i("EncodedSyncPDataHeader", "Signature Tag: " + stringSignatureTag);
+			} else {
+				byte[] tempIV = encodedSyncPDataHeader.getIV();
+				String stringIV = "";
+				for (int i = 0; i < 8; i++) stringIV += tempIV[i];
+				Log.i("EncodedSyncPDataHeader", "IV: " + stringIV);
+	
+				byte[] tempPayload = encodedSyncPDataHeader.getPayload();
+				String stringPayload = "";
+				for (int i = 0; i < encodedSyncPDataHeader.getPayloadSize(); i++) stringPayload += tempPayload[i];
+				Log.i("EncodedSyncPDataHeader", "Payload: " + stringPayload);
+	
+				byte[] tempSignatureTag = encodedSyncPDataHeader.getSignatureTag();
+				String stringSignatureTag = "";
+				for (int i = 0; i < 8; i++) stringSignatureTag += tempSignatureTag[i];
+				Log.i("EncodedSyncPDataHeader", "Signature Tag: " + stringSignatureTag);
+			}
+			
+			encodedSyncPDataHeaderfromGPS = encodedSyncPDataHeader;
+			if (_msgAdapter != null) SyncProxyTester.setESN(tempESN);
+			if(PoliciesTesterActivity.getInstance() != null) {
+				PoliciesTesterActivity.setESN(tempESN);
+				PoliciesTesterActivity.setHeader(encodedSyncPDataHeader);
+			}
 		}
-		
-		if (_msgAdapter != null) SyncProxyTester.setESN(tempESN);
-		if(PoliciesTesterActivity.getInstance() == null) PoliciesTesterActivity.setESN(tempESN);
+	
+		if (encodedSyncPDataHeader.getServiceType() == 7) {
+			writeToFile(encodedSyncPDataHeader.getPayload());
+		}
+	}
+	
+	public void writeToFile(Object writeME) {
+		//FileInputStream fin;
+		try {
+			//fin = new FileInputStream("/sdcard/" + "policiesResults.txt");
+			//InputStreamReader isr = new InputStreamReader(fin);
+			//String outFile = "/sdcard/" + mChosenFile.substring(0, mChosenFile.length() - 4) + ".csv";
+			//String outFile = "/sdcard/" + "policiesResults.txt";
+			String outFile = Environment.getExternalStorageDirectory().getPath() + "/policiesResults.txt";
+			File out = new File(outFile);
+			FileWriter writer = new FileWriter(out);
+			writer.flush();
+			
+			//writer.write("yay" + "\n");
+			writer.write(writeME.toString());
+			//writer.write("double yay" + "\n");
+			
+	
+			writer.close();
+		} catch (FileNotFoundException e) {
+			Log.i("syncp", "FileNotFoundException: " + e);
+			e.printStackTrace();
+		} catch (IOException e) {
+			Log.i("syncp", "IOException: " + e);
+			e.printStackTrace();
+		}
 	}
 
 	@Override

@@ -274,10 +274,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 			if (_proxyHeartBeat != null && _heartBeatEnabled) {
 				_proxyHeartBeat.recordMostRecentIncomingProtocolInterfaceActivity();
 			} // end-if
-
-			if (msg.getData().length > 0) {
-				queueIncomingMessage(msg);
-			} // end-if
+			
+			try {if (msg.getData().length > 0) queueIncomingMessage(msg);}
+			catch (Exception e) {}
+			try {if (msg.getBulkData().length > 0) queueIncomingMessage(msg);}
+			catch (Exception e) {}
 		}
 
 		@Override
@@ -1028,7 +1029,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 	}
 	
 	// Protected isConnected method to allow legacy proxy to poll isConnected state
-	protected Boolean getIsConnected() {
+	public Boolean getIsConnected() {
 		return _syncConnection.getIsConnected();
 	}
 	
