@@ -7400,7 +7400,6 @@ namespace NsAppManager
             }
             unregisterApplication( firstSessionKey );
         }
-        //mDeviceHandler.removeDevice(sessionKey);
         else
         {
             for(std::map<int, DeviceStorage>::iterator it = mDevices.begin();
@@ -7411,7 +7410,8 @@ namespace NsAppManager
                     it->second.removeConnectionKey( sessionKey );
                     LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tsession " << sessionKey
                         << " revmoved from device " << it->first);
-                    //TODO pvysh : remove from applist
+                    //TODO pvysh : remove from applist if all sessions are closed.
+                    mApplications.erase( sessionKey );
                     break;
                 }
             }
