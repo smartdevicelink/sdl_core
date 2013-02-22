@@ -72,6 +72,11 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
 public class ModuleTest {
+	/** Log tag for the class. */
+	private static final String TAG = ModuleTest.class.getSimpleName();
+	/** Specifies whether to display debug info from the XML parser. */
+	private static final boolean DISPLAY_PARSER_DEBUG_INFO = false;
+	
 	private static ModuleTest _instance;
 	private SyncProxyTester _mainInstance;
 	private logAdapter _msgAdapter;
@@ -124,7 +129,7 @@ public class ModuleTest {
 		try{
 			mPath.mkdirs();
 		} catch(SecurityException e) {
-			Log.e("ModuleTest", "unable to write on the sd card " + e.toString());
+			Log.e(TAG, "unable to write on the sd card " + e.toString());
 		}
 		if (mPath.exists()) {
 			FilenameFilter filter = new FilenameFilter() {
@@ -153,7 +158,7 @@ public class ModuleTest {
 					case DIALOG_LOAD_FILE:
 						builder.setTitle("Choose your file");
 						if (mFileList == null) {
-							Log.e("ModuleTest", "Showing file picker before loading the file list");
+							Log.e(TAG, "Showing file picker before loading the file list");
 							dialog = builder.create();
 							//return dialog;
 							synchronized (DialogThreadContext) { DialogThreadContext.notify();}
@@ -188,7 +193,7 @@ public class ModuleTest {
 			case DIALOG_LOAD_FILE:
 				builder.setTitle("Choose your file");
 				if (mFileList == null) {
-					Log.e("ModuleTest", "Showing file picker before loading the file list");
+					Log.e(TAG, "Showing file picker before loading the file list");
 					dialog = builder.create();
 					return dialog;
 				}
@@ -234,10 +239,10 @@ public class ModuleTest {
 							
 							switch (eventType) {
 							case XmlPullParser.START_DOCUMENT:
-								Log.e("TESTING", "START_DOCUMENT, name: " + name);
+								logParserDebugInfo("START_DOCUMENT, name: " + name);
 								break;
 							case XmlPullParser.END_DOCUMENT:
-								Log.e("TESTING", "END_DOCUMENT, name: " + name);
+								logParserDebugInfo("END_DOCUMENT, name: " + name);
 								break;
 							case XmlPullParser.START_TAG:
 								name = parser.getName();
@@ -250,7 +255,7 @@ public class ModuleTest {
 										if (parser.getAttributeName(1) != null) {
 											if (parser.getAttributeName(1).equalsIgnoreCase("iterations")) {
 												try {numIterations = Integer.parseInt(parser.getAttributeValue(1));} 
-												catch (Exception e) {Log.e("parser", "Unable to parse number of iterations");}
+												catch (Exception e) {Log.e(TAG, "Unable to parse number of iterations");}
 											} else numIterations = 1;
 										} else numIterations = 1;
 									} catch (Exception e) {
@@ -366,12 +371,12 @@ public class ModuleTest {
 									if (parser.getAttributeName(0) != null && 
 											parser.getAttributeName(0).equalsIgnoreCase("correlationID")) {
 										try {rpc.setCorrelationID(Integer.parseInt(parser.getAttributeValue(0)));} 
-										catch (Exception e) {Log.e("parser", "Unable to parse Integer");}
+										catch (Exception e) {Log.e(TAG, "Unable to parse Integer");}
 									}
 									
 									//TODO: Set rpc parameters
 									Hashtable hash = setParams(name, parser);
-									Log.e("TESTING", "" + hash);
+									logParserDebugInfo("" + hash);
 									//TODO: Iterate through hash table and add it to parameters
 									for (Object key : hash.keySet()) {
 										rpc.setParameters((String) key, hash.get(key));
@@ -407,7 +412,7 @@ public class ModuleTest {
 										}
 										if (localPass) writer.write("" + testList.get(testList.size()-1).first + ", Pass, " + numPass + ", " + numIterations + "\n");
 										if (!localPass) writer.write("" + testList.get(testList.size()-1).first + ", Fail, " + numPass + ", " + numIterations + "\n");
-										Log.i("Test App Result", "" + testList.get(testList.size()-1).first + ", " + localPass + ", " + numPass + ", " + numIterations);
+										Log.i(TAG, "" + testList.get(testList.size()-1).first + ", " + localPass + ", " + numPass + ", " + numIterations);
 										_msgAdapter.logMessage("" + testList.get(testList.size()-1).first + ", " + localPass + ", " + numPass + ", " + numIterations, true);
 									} catch (Exception e) {
 										_msgAdapter.logMessage("Test " + testList.get(testList.size()-1).first + " Failed! ", Log.ERROR, e);
@@ -415,25 +420,25 @@ public class ModuleTest {
 								}
 								break;
 							case XmlPullParser.TEXT:
-								//Log.e("TESTING", "TEXT, name: " + name);
+								//logParserDebugInfo("TEXT, name: " + name);
 								break;
 							case XmlPullParser.CDSECT:
-								Log.e("TESTING", "CDSECT, name: " + name);
+								logParserDebugInfo("CDSECT, name: " + name);
 								break;
 							case XmlPullParser.ENTITY_REF:
-								Log.e("TESTING", "ENTITY_REF, name: " + name);
+								logParserDebugInfo("ENTITY_REF, name: " + name);
 								break;
 							case XmlPullParser.IGNORABLE_WHITESPACE:
-								Log.e("TESTING", "IGNORABLE_WHITESPACE, name: " + name);
+								logParserDebugInfo("IGNORABLE_WHITESPACE, name: " + name);
 								break;
 							case XmlPullParser.PROCESSING_INSTRUCTION:
-								Log.e("TESTING", "PROCESSING_INSTRUCTION, name: " + name);
+								logParserDebugInfo("PROCESSING_INSTRUCTION, name: " + name);
 								break;
 							case XmlPullParser.COMMENT:
-								Log.e("TESTING", "COMMENT, name: " + name);
+								logParserDebugInfo("COMMENT, name: " + name);
 								break;
 							case XmlPullParser.DOCDECL:
-								Log.e("TESTING", "DOCDECL, name: " + name);
+								logParserDebugInfo("DOCDECL, name: " + name);
 								break;
 							default:
 								break;
@@ -460,7 +465,7 @@ public class ModuleTest {
 	
 	private Hashtable setParams(String name, XmlPullParser parser) {
 
-		Log.e("TESTING", "setParams start name: " + name);
+		logParserDebugInfo("setParams start name: " + name);
 		
 		Hashtable hash = new Hashtable();
 		
@@ -475,14 +480,14 @@ public class ModuleTest {
 				
 				switch (eventType) {
 				case XmlPullParser.START_DOCUMENT:
-					Log.e("TESTING", "START_DOCUMENT, tempName: " + tempName);
+					logParserDebugInfo("START_DOCUMENT, tempName: " + tempName);
 					break;
 				case XmlPullParser.END_DOCUMENT:
-					Log.e("TESTING", "END_DOCUMENT, tempName: " + tempName);
+					logParserDebugInfo("END_DOCUMENT, tempName: " + tempName);
 					break;
 				case XmlPullParser.START_TAG:
 					if (tempName.equalsIgnoreCase("Vector")) {
-						Log.e("TESTING", "In Vector");
+						logParserDebugInfo("In Vector");
 						Vector<Object> vector = new Vector<Object>();
 						
 						if (parser.getAttributeName(0) != null) vectorName = parser.getAttributeValue(0);
@@ -491,24 +496,24 @@ public class ModuleTest {
 						Boolean nestedWhileDone = false;
 						while (eventType != XmlPullParser.END_DOCUMENT && !nestedWhileDone) {
 							tempName = parser.getName();
-							Log.e("TESTING", "In Vector Loop, tempName: " + tempName);
+							logParserDebugInfo("In Vector Loop, tempName: " + tempName);
 
 							switch (eventType) {
 							case XmlPullParser.START_DOCUMENT:
-								Log.e("TESTING", "In Vector Loop, START_DOCUMENT, name: " + name);
+								logParserDebugInfo("In Vector Loop, START_DOCUMENT, name: " + name);
 								break;
 							case XmlPullParser.END_DOCUMENT:
-								Log.e("TESTING", "In Vector Loop, END_DOCUMENT, name: " + name);
+								logParserDebugInfo("In Vector Loop, END_DOCUMENT, name: " + name);
 								break;
 							case XmlPullParser.START_TAG:
 								if (tempName.equalsIgnoreCase("Integer")) {
-									Log.e("TESTING", "In Nested Vector Integer");
+									logParserDebugInfo("In Nested Vector Integer");
 									if (parser.getAttributeName(0) != null) {
 										try {vector.add(Integer.parseInt(parser.getAttributeValue(0)));} 
-										catch (Exception e) {Log.e("parser", "Unable to parse Integer");}
+										catch (Exception e) {Log.e(TAG, "Unable to parse Integer");}
 									}
 								} else if (tempName.equalsIgnoreCase("String")) {
-									Log.e("TESTING", "In Nested Vector String");
+									logParserDebugInfo("In Nested Vector String");
 									if (parser.getAttributeName(0) != null) {
 										vector.add(parser.getAttributeValue(0));
 									}
@@ -517,59 +522,59 @@ public class ModuleTest {
 								}
 								break;
 							case XmlPullParser.END_TAG:
-								Log.e("TESTING", "In Vector Loop, END_TAG, name: " + name);
+								logParserDebugInfo("In Vector Loop, END_TAG, name: " + name);
 								if (tempName.equalsIgnoreCase("Vector")) {
-									Log.e("TESTING", "In Vector Loop, nestedWhileDone == true, END_TAG, name: " + name);
+									logParserDebugInfo("In Vector Loop, nestedWhileDone == true, END_TAG, name: " + name);
 									nestedWhileDone = true;
 								}
 								break;
 							case XmlPullParser.TEXT:
-								//Log.e("TESTING", "TEXT, name: " + name);
+								//logParserDebugInfo("TEXT, name: " + name);
 								break;
 							case XmlPullParser.CDSECT:
-								Log.e("TESTING", "In Vector Loop, CDSECT, name: " + name);
+								logParserDebugInfo("In Vector Loop, CDSECT, name: " + name);
 								break;
 							case XmlPullParser.ENTITY_REF:
-								Log.e("TESTING", "In Vector Loop, ENTITY_REF, name: " + name);
+								logParserDebugInfo("In Vector Loop, ENTITY_REF, name: " + name);
 								break;
 							case XmlPullParser.IGNORABLE_WHITESPACE:
-								Log.e("TESTING", "In Vector Loop, IGNORABLE_WHITESPACE, name: " + name);
+								logParserDebugInfo("In Vector Loop, IGNORABLE_WHITESPACE, name: " + name);
 								break;
 							case XmlPullParser.PROCESSING_INSTRUCTION:
-								Log.e("TESTING", "In Vector Loop, PROCESSING_INSTRUCTION, name: " + name);
+								logParserDebugInfo("In Vector Loop, PROCESSING_INSTRUCTION, name: " + name);
 								break;
 							case XmlPullParser.COMMENT:
-								Log.e("TESTING", "In Vector Loop, COMMENT, name: " + name);
+								logParserDebugInfo("In Vector Loop, COMMENT, name: " + name);
 								break;
 							case XmlPullParser.DOCDECL:
-								Log.e("TESTING", "In Vector Loop, DOCDECL, name: " + name);
+								logParserDebugInfo("In Vector Loop, DOCDECL, name: " + name);
 								break;
 							default:
 								break;
 							}
 							eventType = parser.next();
 						}
-						Log.e("TESTING", "out of Vector loop");
+						logParserDebugInfo("out of Vector loop");
 						hash.put(vectorName, vector);
 					} else if (tempName.equalsIgnoreCase("Integer")) {
-						Log.e("TESTING", "In Integer");
+						logParserDebugInfo("In Integer");
 						if (parser.getAttributeName(0) != null) {
 							try {hash.put(parser.getAttributeName(0), Integer.parseInt(parser.getAttributeValue(0)));} 
-							catch (Exception e) {Log.e("parser", "Unable to parse Integer");}
+							catch (Exception e) {Log.e(TAG, "Unable to parse Integer");}
 						}
 					} else if (tempName.equalsIgnoreCase("Boolean")) {
-						Log.e("TESTING", "In Boolean");
+						logParserDebugInfo("In Boolean");
 						if (parser.getAttributeName(0) != null) {
 							if (parser.getAttributeValue(0).equalsIgnoreCase("true")) hash.put(parser.getAttributeName(0), true);
 							else if (parser.getAttributeValue(0).equalsIgnoreCase("false")) hash.put(parser.getAttributeName(0), false);
 						}
 					} else if (tempName.equalsIgnoreCase("String")) {
-						Log.e("TESTING", "In String");
+						logParserDebugInfo("In String");
 						if (parser.getAttributeName(0) != null) {
 							hash.put(parser.getAttributeName(0), parser.getAttributeValue(0));
 						}
 					} else {
-						Log.e("TESTING", "Returning in else statement");
+						logParserDebugInfo("Returning in else statement");
 						//return setParams(tempName, parser);
 						hash.put(tempName, setParams(tempName, parser));
 					}
@@ -580,25 +585,25 @@ public class ModuleTest {
 					}
 					break;
 				case XmlPullParser.TEXT:
-					//Log.e("TESTING", "TEXT, tempName: " + tempName);
+					//logParserDebugInfo("TEXT, tempName: " + tempName);
 					break;
 				case XmlPullParser.CDSECT:
-					Log.e("TESTING", "CDSECT, tempName: " + tempName);
+					logParserDebugInfo("CDSECT, tempName: " + tempName);
 					break;
 				case XmlPullParser.ENTITY_REF:
-					Log.e("TESTING", "ENTITY_REF, tempName: " + tempName);
+					logParserDebugInfo("ENTITY_REF, tempName: " + tempName);
 					break;
 				case XmlPullParser.IGNORABLE_WHITESPACE:
-					Log.e("TESTING", "IGNORABLE_WHITESPACE, tempName: " + tempName);
+					logParserDebugInfo("IGNORABLE_WHITESPACE, tempName: " + tempName);
 					break;
 				case XmlPullParser.PROCESSING_INSTRUCTION:
-					Log.e("TESTING", "PROCESSING_INSTRUCTION, tempName: " + tempName);
+					logParserDebugInfo("PROCESSING_INSTRUCTION, tempName: " + tempName);
 					break;
 				case XmlPullParser.COMMENT:
-					Log.e("TESTING", "COMMENT, tempName: " + tempName);
+					logParserDebugInfo("COMMENT, tempName: " + tempName);
 					break;
 				case XmlPullParser.DOCDECL:
-					Log.e("TESTING", "DOCDECL, tempName: " + tempName);
+					logParserDebugInfo("DOCDECL, tempName: " + tempName);
 					break;
 				default:
 					break;
@@ -609,7 +614,7 @@ public class ModuleTest {
 			_msgAdapter.logMessage("Parser Failed!!", Log.ERROR, e);
 		}
 		
-		Log.e("TESTING", "Returning at end of setParams function");
+		logParserDebugInfo("Returning at end of setParams function");
 		return hash;
 	}
 	
@@ -703,6 +708,21 @@ public class ModuleTest {
 	
 	public Runnable getThreadContext() {
 		return threadContext;
+	}
+	
+	/**
+	 * Logs debug information during the XML parsing process. Can be turned
+	 * on/off with the DISPLAY_PARSER_DEBUG_INFO constant.
+	 * 
+	 * @param s
+	 *            string to log
+	 */
+	private void logParserDebugInfo(String s) {
+		if (!DISPLAY_PARSER_DEBUG_INFO) {
+			return;
+		}
+		
+		Log.d(TAG, s);
 	}
 }
 

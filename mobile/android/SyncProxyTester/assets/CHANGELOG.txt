@@ -1,4 +1,5 @@
 [CW8]
+* Cut the number of debug logs during the test XML parsing process.
 * Fix empty <Vector> tags parsing in test XML.
 * Make the console log scrolling smoother.
 * Don't remove interaction choice set from the choiceSets list until a successful DeleteChoiceSetResponse has come.
