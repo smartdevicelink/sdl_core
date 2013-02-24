@@ -12,8 +12,8 @@ set (SOURCES_DRAFT_TEST
     ./SmartObjectDraftTest.cpp
 )
 
-set (SOURCES_BASIC_TEST
-    ./SmartObjectBasicTest.cpp
+set (SOURCES_UNIT_TEST
+    ./SmartObjectUnitTest.cpp
 )
 
 # Libraries are the same for all SmartObject test
@@ -30,7 +30,7 @@ add_executable("test_SmartObjectsDraftTest" ${SOURCES_DRAFT_TEST})
 target_link_libraries("test_SmartObjectsDraftTest" ${LIBRARIES})
 add_test(test_SmartObjectsDraftTest test_SmartObjectsDraftTest)
 
-add_executable("test_SmartObjectBasicTest" ${SOURCES_BASIC_TEST})
-target_link_libraries("test_SmartObjectBasicTest" ${LIBRARIES})
-add_test(test_SmartObjectBasicTest test_SmartObjectBasicTest)
+add_executable("test_SmartObjectUnitTest" ${SOURCES_UNIT_TEST})
+target_link_libraries("test_SmartObjectUnitTest" ${LIBRARIES})
+add_test(test_SmartObjectUnitTest test_SmartObjectUnitTest)
 
