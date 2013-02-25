@@ -353,6 +353,56 @@ NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtoco
         if (NsAppLinkRPCV2::FunctionID::FunctionIDInternal::OnAudioPassThruID == message->getMethodId())
         {
             LOG4CPLUS_INFO_EXT(mLogger, "Handling OnAudioPassThru message with 0 length!");
+            // akara
+            // Workaround to have no JSON string in OnAudioPassThru notification
+            // This notification contains audio data only.
+            const uint MAX_HEADER_SIZE = 12;
+            unsigned int jsonSize = 0;
+            unsigned int binarySize = 0;
+            if ( message->getBinaryData() )
+            {
+                binarySize = message->getBinaryData()->size();
+            }
+            unsigned char * dataForSending = new unsigned char[MAX_HEADER_SIZE + jsonSize + binarySize];
+            unsigned char offset = 0;
+
+            unsigned char rpcTypeFlag = RPC_NOTIFICATION;
+
+            unsigned int functionId = message->getMethodId();
+            dataForSending[offset++] = ( (rpcTypeFlag << 4) & 0xF0 ) | (functionId >> 24);
+            dataForSending[offset++] = functionId >> 16;
+            dataForSending[offset++] = functionId >> 8;
+            dataForSending[offset++] = functionId;
+
+            unsigned int correlationId = message->getCorrelationID();
+            LOG4CPLUS_INFO_EXT(mLogger, "\t\t\tCorrelation ID is " << correlationId);
+            dataForSending[offset++] = correlationId >> 24;
+            dataForSending[offset++] = correlationId >> 16;
+            dataForSending[offset++] = correlationId >> 8;
+            dataForSending[offset++] = correlationId;
+
+            dataForSending[offset++] = jsonSize >> 24;
+            dataForSending[offset++] = jsonSize >> 16;
+            dataForSending[offset++] = jsonSize >> 8;
+            dataForSending[offset++] = jsonSize;
+
+            if ( message->getBinaryData() )
+            {
+                const std::vector<unsigned char> & binaryData = *(message->getBinaryData());
+                unsigned char * currentPointer = dataForSending + offset + jsonSize;
+                for( unsigned int i = 0; i < binarySize; ++i )
+                {
+                    currentPointer[i] = binaryData[i];
+                }
+            }
+
+            NsProtocolHandler::AppLinkRawMessage * msgToProtocolHandler = new NsProtocolHandler::AppLinkRawMessage(
+                                connectionKey,
+                                2,
+                                dataForSending,
+                                MAX_HEADER_SIZE + jsonSize + binarySize);
+
+            return msgToProtocolHandler;
         } else
         {
             LOG4CPLUS_ERROR(mLogger, "Failed to serialize ALRPCMessage object version 2.");
@@ -371,14 +421,8 @@ NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtoco
     //LOG4CPLUS_INFO_EXT(mLogger, "message text: " << std::endl << json );                        
     if ( messageString.length() == 0 )
     {
-        if (NsAppLinkRPCV2::FunctionID::FunctionIDInternal::OnAudioPassThruID == message->getMethodId())
-        {
-            LOG4CPLUS_INFO_EXT(mLogger, "Handling OnAudioPassThru message with 0 length!");
-        } else
-        {
             LOG4CPLUS_ERROR(mLogger, "Failed to serialize ALRPCMessage object version 2.");
             return 0;
-        }
     }
 
     const uint MAX_HEADER_SIZE = 12;
