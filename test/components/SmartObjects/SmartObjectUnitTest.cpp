@@ -8,6 +8,67 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
     using namespace NsAppLink::NsSmartObjects;
 
+
+    class TestHelper : public ::testing::Test
+    {
+    protected:
+
+        void makeMapObject(CSmartObject &obj, const int size) const
+        {
+            char i_key[8], j_key[8], k_key[8], value[8];
+
+            for (int i = 0; i < size; i++)
+                for (int j = 0; j < size; j++)
+                    for (int k = 0; k < size; k++)
+                    {
+                        sprintf(i_key, "i_%d", i);
+                        sprintf(j_key, "j_%d", j);
+                        sprintf(k_key, "k_%d", k);
+                        sprintf(value, "%d", i + j + k);
+                        obj[i_key][j_key][k_key] = value;
+                    }
+        }
+
+        void checkMapObject(CSmartObject &obj, const int size) const
+        {
+            char i_key[8], j_key[8], k_key[8], value[8];
+
+            for (int i = 0; i < size; i++)
+                for (int j = 0; j < size; j++)
+                    for (int k = 0; k < size; k++)
+                    {
+                        sprintf(i_key, "i_%d", i);
+                        sprintf(j_key, "j_%d", j);
+                        sprintf(k_key, "k_%d", k);
+                        sprintf(value, "%d", i + j + k);
+
+                        ASSERT_EQ(std::string(value), static_cast<std::string>(obj[i_key][j_key][k_key])) <<
+                                "Wrong value in the map at [" << i_key << "][" << j_key << "][" << k_key << "]";
+                    }
+        }
+
+       void makeArrayObject(CSmartObject &obj, int size, int base=0)
+       {
+           for (int i = 0; i < size; i++)
+               for (int j = 0; j < size; j++)
+                   for (int k = 0; k < size; k++)
+                   {
+                       obj[i][j][k] = base + i + j + k;
+                   }
+       }
+
+       void checkArrayObject(CSmartObject &obj, int size, int base=0)
+       {
+           for (int i = 0; i < size; i++)
+               for (int j = 0; j < size; j++)
+                   for (int k = 0; k < size; k++)
+                   {
+                       ASSERT_EQ(base + i + j + k, static_cast<int>(obj[i][j][k])) <<
+                               "Wrong value in the array at index: " << i << ", " << j << ", " << k;
+                   }
+       }
+    };
+
     /*
      * Tests different types sequentially
      */
@@ -49,9 +110,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         }
     }
 
-
     // TODO: Figure out why the test fails
-    TEST(BasicArray, test_SmartObjectUnitTest)
+    TEST_F(TestHelper, BasicArrayTest)
     {
         CSmartObject obj;
 
@@ -71,26 +131,14 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         obj[0][1][0] = 5;   // FIXME: Segmentation fault
         ASSERT_EQ(4, static_cast<int>(obj[0][0][0])) << "Wrong value at index 0, 0, 0";
 
-        const int size = 2;
-        for (int i = 0; i < size; i++)
-            for (int j = 0; j < size; j++)
-                for (int k = 0; k < size; k++)
-                {
-                    std::cout << "i, j, k: " << i << ", " << j << ", " << k << std::endl;
-                    obj[i][j][k] = i + j + k;
-                }
+        const int size = 32;
+        makeArrayObject(obj, size);
 
-        for (int i = 0; i < size; i++)
-            for (int j = 0; j < size; j++)
-                for (int k = 0; k < size; k++)
-                {
-                    ASSERT_EQ(i + j + k, static_cast<int>(obj[i][j][k])) <<
-                            "Wrong value in the array at index: " << i << ", " << j << ", " << k;
-                }
+        checkArrayObject(obj, size);
     }
 
 
-    TEST(BasicMapTest, test_SmartObjectUnitTest)
+    TEST_F(TestHelper, BasicMapTest)
     {
         CSmartObject obj;
 
@@ -104,30 +152,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ("string test", static_cast<std::string>(obj["123"]["456"]["789"])) << "Wrong value for triple map";
 
         const int size = 32;
-        char i_key[8], j_key[8], k_key[8], value[8];
-        for (int i = 0; i < size; i++)
-            for (int j = 0; j < size; j++)
-                for (int k = 0; k < size; k++)
-                {
-                    sprintf(i_key, "i_%d", i);
-                    sprintf(j_key, "j_%d", j);
-                    sprintf(k_key, "k_%d", k);
-                    sprintf(value, "%d", i + j + k);
-                    obj[i_key][j_key][k_key] = value;
-                }
 
-        for (int i = 0; i < size; i++)
-            for (int j = 0; j < size; j++)
-                for (int k = 0; k < size; k++)
-                {
-                    sprintf(i_key, "i_%d", i);
-                    sprintf(j_key, "j_%d", j);
-                    sprintf(k_key, "k_%d", k);
-                    sprintf(value, "%d", i + j + k);
+        makeMapObject(obj, size);
 
-                    ASSERT_EQ(std::string(value), static_cast<std::string>(obj[i_key][j_key][k_key])) <<
-                            "Wrong value in the map at [" << i_key << "][" << j_key << "][" << k_key << "]";
-                }
+        checkMapObject(obj, size);
     }
 
     TEST(ConstructorsTest, test_SmartObjectUnitTest)
@@ -198,6 +226,69 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         obj = "-43.43.5something";
         ASSERT_EQ(-1, static_cast<double>(obj)) << "Wrong conversion invalid string to double";
+    }
+
+    TEST_F(TestHelper, AssignmentTest)
+    {
+        CSmartObject objSrc, objDst;
+
+        objSrc = -6;
+        objDst = 7;
+        objDst = objSrc;
+        ASSERT_EQ(-6, static_cast<int>(objDst)) << "Wrong assignment for int object";
+
+        objSrc = "Some test string";
+        objDst = "Other string";
+        objDst = objSrc;
+        ASSERT_EQ("Some test string", static_cast<std::string>(objDst)) << "Wrong assignment for std::string object";
+
+        objSrc = 0.5;
+        objDst = 4;
+        objDst = objSrc;
+        ASSERT_EQ(0.5, static_cast<double>(objDst)) << "Wrong assignment for double object";
+
+        objSrc = true;
+        objDst = false;
+        objDst = objSrc;
+        ASSERT_TRUE(static_cast<bool>(objDst)) << "Wrong assignment for bool object";
+
+        const int size = 32;
+        makeMapObject(objSrc, size);
+        objDst["a"]["b"] = 4;
+        objDst = objSrc;
+        checkMapObject(objDst, size);
+
+        makeArrayObject(objSrc, size, 5);
+        makeArrayObject(objDst, 23, 6);
+        objDst = objSrc;
+        checkArrayObject(objDst, size, 5);
+    }
+
+    TEST_F(TestHelper, SizeTest)
+    {
+        CSmartObject obj;
+
+        obj = 1234;
+        ASSERT_EQ(1, obj.size());
+
+        std::string str("Some test very long string");
+        obj = str;
+        ASSERT_EQ(str.size(), obj.size()) << "The size of the object containing string is not correct";
+
+        obj = true;
+        ASSERT_EQ(1, obj.size()) << "Wrong size of the true";
+
+        obj = 0.1234;
+        ASSERT_EQ(1, obj.size()) << "Wrong size of the double";
+
+        obj = 'A';
+        ASSERT_EQ(1, obj.size()) << "Wrong size of the char";
+
+        makeMapObject(obj, 12);
+        ASSERT_EQ(12, obj.size()) << "Wrong size of the object containing map";
+
+        makeArrayObject(obj, 21);
+        ASSERT_EQ(21, obj.size()) << "Wrong size of the object containing array";
     }
 
     int main(int argc, char **argv)
