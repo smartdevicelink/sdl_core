@@ -4,14 +4,14 @@
 
 #include "SmartObjects/CSmartObject.hpp"
 
-namespace test { namespace components { namespace SmartObjects { namespace SmartObjectBasicTest {
+namespace test { namespace components { namespace SmartObjects { namespace SmartObjectUnitTest {
 
     using namespace NsAppLink::NsSmartObjects;
 
     /*
      * Tests different types sequentially
      */
-    TEST(BasicMixtedTypes, test_SmartObjectBasicTest)
+    TEST(BasicMixtedTypes, test_SmartObjectUnitTest)
     {
         CSmartObject obj;
 
@@ -51,7 +51,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
 
     // TODO: Figure out why the test fails
-    TEST(BasicArray, test_SmartObjectBasicTest)
+    TEST(BasicArray, test_SmartObjectUnitTest)
     {
         CSmartObject obj;
 
@@ -89,6 +89,116 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                 }
     }
 
+
+    TEST(BasicMapTest, test_SmartObjectUnitTest)
+    {
+        CSmartObject obj;
+
+        ASSERT_EQ(0, static_cast<int>(obj["non_existent_key"])) << "Wrong value for non existent key";
+
+        obj["abc"]["def"]["ghi"] = 5;
+        ASSERT_EQ(5, static_cast<int>(obj["abc"]["def"]["ghi"])) << "Wrong value for triple map";
+
+        obj["123"]["456"]["789"] = "string test";
+        // FIXME: Test crashes if string is assigned
+        ASSERT_EQ("string test", static_cast<std::string>(obj["123"]["456"]["789"])) << "Wrong value for triple map";
+
+        const int size = 32;
+        char i_key[8], j_key[8], k_key[8], value[8];
+        for (int i = 0; i < size; i++)
+            for (int j = 0; j < size; j++)
+                for (int k = 0; k < size; k++)
+                {
+                    sprintf(i_key, "i_%d", i);
+                    sprintf(j_key, "j_%d", j);
+                    sprintf(k_key, "k_%d", k);
+                    sprintf(value, "%d", i + j + k);
+                    obj[i_key][j_key][k_key] = value;
+                }
+
+        for (int i = 0; i < size; i++)
+            for (int j = 0; j < size; j++)
+                for (int k = 0; k < size; k++)
+                {
+                    sprintf(i_key, "i_%d", i);
+                    sprintf(j_key, "j_%d", j);
+                    sprintf(k_key, "k_%d", k);
+                    sprintf(value, "%d", i + j + k);
+
+                    ASSERT_EQ(std::string(value), static_cast<std::string>(obj[i_key][j_key][k_key])) <<
+                            "Wrong value in the map at [" << i_key << "][" << j_key << "][" << k_key << "]";
+                }
+    }
+
+    TEST(ConstructorsTest, test_SmartObjectUnitTest)
+    {
+        CSmartObject objInt(5678);
+        ASSERT_EQ(5678, static_cast<int>(objInt)) << "Wrong constructor with int param";
+
+        char c_str[] = "test c_string";
+        CSmartObject obj_c_str(c_str);
+        ASSERT_EQ("test c_string", static_cast<std::string>(obj_c_str)) << "Wrong constructor with c_str param";
+
+        CSmartObject obj_std_str(std::string("test std_string"));
+        ASSERT_EQ(std::string("test std_string"), static_cast<std::string>(obj_std_str));
+
+        CSmartObject obj_char('R');
+        ASSERT_EQ('R', static_cast<char>(obj_char)) << "Wrong constructor with char param";
+
+        CSmartObject obj_double(-0.4321);
+        ASSERT_EQ(-0.4321, static_cast<double>(obj_double)) << "Wrong constructor with double param";
+
+        CSmartObject obj_bool(true);
+        ASSERT_TRUE(static_cast<bool>(obj_bool)) << "Wrong constructor with bool param";
+
+        CSmartObject src_obj;
+
+        src_obj["key_1"] = "value_1";     // FIXME: String assignment crashes test
+        src_obj["key_2"]["sub_key_1"] = "value_2";
+
+        CSmartObject dst_obj(src_obj);
+        ASSERT_EQ("value_1", static_cast<std::string>(dst_obj["key_1"])) << "Copy constructor is not correct";
+        ASSERT_EQ("value_2", static_cast<std::string>(dst_obj["key_2"]["sub_key_1"])) << "Copy constructor is not correct";
+    }
+
+    TEST(ConversionTest, test_SmartObjectUnitTest)
+    {
+        CSmartObject obj;
+
+        ASSERT_EQ(0, static_cast<int>(obj)) << "Initial value is not 0";
+        ASSERT_FALSE(static_cast<bool>(obj)) << "Initial value is not false";
+        ASSERT_EQ("null", static_cast<std::string>(obj)) << "Initial value is not an empty string";
+        ASSERT_EQ('\0', static_cast<char>(obj)) << "Initial value of a char is not \\0";
+        ASSERT_EQ(0, static_cast<double>(obj)) << "Initial value of a double is not 0";
+
+        obj = 1;
+        ASSERT_TRUE(static_cast<bool>(obj)) << "1 is not true";
+        ASSERT_EQ("1", static_cast<std::string>(obj)) << "string representation is not correct";
+        ASSERT_EQ('\0', static_cast<char>(obj)) << "char representation is not correct";
+        ASSERT_EQ(1, static_cast<double>(obj)) << "double representation is not correct";
+
+        // FIXME: Conversion from string to int doesn't work
+        obj = "54321";
+        ASSERT_EQ(54321, static_cast<int>(obj)) << "String to int is not correct";
+
+        obj = "-1234";
+        ASSERT_EQ(-1234, static_cast<int>(obj)) << "String to int is not correct";
+
+        obj = "true";
+        ASSERT_TRUE(static_cast<bool>(obj)) << "String to bool is not correct";
+
+        obj = "false";
+        ASSERT_FALSE(static_cast<bool>(obj)) << "String to bool is not correct";
+
+        obj = "TRUE";
+        ASSERT_TRUE(static_cast<bool>(obj)) << "Uppercase TRUE is not recognised as true";
+
+        obj = "-3.1234";
+        ASSERT_EQ(-3.1234, static_cast<double>(obj)) << "String to double is not correct";
+
+        obj = "-43.43.5something";
+        ASSERT_EQ(-1, static_cast<double>(obj)) << "Wrong conversion invalid string to double";
+    }
 
     int main(int argc, char **argv)
     {
