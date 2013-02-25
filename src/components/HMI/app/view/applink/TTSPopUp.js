@@ -49,7 +49,7 @@ MFT.TTSPopUp = Em.ContainerView.create({
 		var self = this;
 				
 		// play audio alert
-		MFT.Audio.play('audio/initial.wav');
+		//MFT.Audio.play('audio/initial.wav');
 		
 		this.set('content', msg);
 		this.set('active', true);
