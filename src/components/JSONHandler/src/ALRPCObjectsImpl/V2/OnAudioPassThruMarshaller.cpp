@@ -57,7 +57,7 @@ Json::Value OnAudioPassThruMarshaller::toJSON(const OnAudioPassThru& e)
   if(!checkIntegrityConst(e))
     return Json::Value(Json::nullValue);
 
-  return json;
+  return json=Json::Value(Json::nullValue);
 }
 
 

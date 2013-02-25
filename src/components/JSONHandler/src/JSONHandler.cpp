@@ -350,8 +350,14 @@ NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtoco
 
     if( json.isNull() )
     {
-        LOG4CPLUS_ERROR(mLogger, "Failed to serialize ALRPCMessage object version 2.");
-        return 0;
+        if (NsAppLinkRPCV2::FunctionID::FunctionIDInternal::OnAudioPassThruID == message->getMethodId())
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Handling OnAudioPassThru message with 0 length!");
+        } else
+        {
+            LOG4CPLUS_ERROR(mLogger, "Failed to serialize ALRPCMessage object version 2.");
+            return 0;
+        }
     }
 
     LOG4CPLUS_INFO_EXT(mLogger, "Message to be sent to mobile app \n" << json["parameters"]);
@@ -365,8 +371,14 @@ NsProtocolHandler::AppLinkRawMessage * JSONHandler::handleOutgoingMessageProtoco
     //LOG4CPLUS_INFO_EXT(mLogger, "message text: " << std::endl << json );                        
     if ( messageString.length() == 0 )
     {
-        LOG4CPLUS_ERROR(mLogger, "Failed to serialize ALRPCMessage object version 2.");
-        return 0;
+        if (NsAppLinkRPCV2::FunctionID::FunctionIDInternal::OnAudioPassThruID == message->getMethodId())
+        {
+            LOG4CPLUS_INFO_EXT(mLogger, "Handling OnAudioPassThru message with 0 length!");
+        } else
+        {
+            LOG4CPLUS_ERROR(mLogger, "Failed to serialize ALRPCMessage object version 2.");
+            return 0;
+        }
     }
 
     const uint MAX_HEADER_SIZE = 12;
