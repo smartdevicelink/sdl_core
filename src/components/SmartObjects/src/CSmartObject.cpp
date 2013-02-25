@@ -56,7 +56,7 @@ void NsAppLink::NsSmartObjects::CSmartObject::duplicate(const NsAppLink::NsSmart
         *m_data.map_value = *object.m_data.map_value;
         break;
     case SmartType_Array :
-        m_data.array_value = object.m_data.array_value;
+        *m_data.array_value = *object.m_data.array_value;
         break;
     case SmartType_Integer:
         m_data.long_value = object.m_data.long_value;
@@ -71,7 +71,7 @@ void NsAppLink::NsSmartObjects::CSmartObject::duplicate(const NsAppLink::NsSmart
         m_data.char_value = object.m_data.char_value;
         break;
     case SmartType_String :
-        m_data.str_value = object.m_data.str_value;
+        *m_data.str_value = *object.m_data.str_value;
         break;
 //    default : ;
     }
@@ -330,24 +330,24 @@ bool NsAppLink::NsSmartObjects::CSmartObject::convert_bool(void) const
 double NsAppLink::NsSmartObjects::CSmartObject::convert_double(void) const
 {
     switch (m_type) {
-    case SmartType_Double :
+    case SmartType_Double:
         return m_data.double_value;
-    case SmartType_Integer :
+    case SmartType_Integer:
         return static_cast<double>(m_data.long_value);
-    case SmartType_Boolean :
+    case SmartType_Boolean:
         if (m_data.bool_value) return 1.0;
         else return 0.0;
-    case SmartType_Character :
+    case SmartType_Character:
         return static_cast<double>(m_data.char_value);
-    case SmartType_String :
+    case SmartType_String:
         return convert_string_to_double(m_data.str_value);
-    case SmartType_Map :
-    case SmartType_Array :
-        return invalid_real_value;
-    case SmartType_Null :
+    case SmartType_Map:
+    case SmartType_Array:
+        return invalid_double_value;
+    case SmartType_Null:
         return 0.0;
-    default :
-        return invalid_real_value;
+    default:
+        return invalid_double_value;
     }
 
     return 0.0;
@@ -362,7 +362,7 @@ double NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_double(const s
     retval = strtod(s->c_str(),&ptr);
     if (errno || (retval == 0.0 &&
         ptr != (s->c_str() + s->length())))
-        return invalid_real_value;
+        return invalid_double_value;
     return retval;
 }
 
@@ -530,4 +530,111 @@ void NsAppLink::NsSmartObjects::CSmartObject::set_value_string(const std::string
   NsAppLink::NsSmartObjects::SmartType NsAppLink::NsSmartObjects::CSmartObject::get_type()
   {
       return m_type;
+  }
+
+
+  bool NsAppLink::NsSmartObjects::CSmartObject::operator==(const NsAppLink::NsSmartObjects::CSmartObject& object) const
+  {
+      if (m_type != object.m_type) return false;
+
+      switch(m_type) {
+          case SmartType_Integer :
+              return m_data.long_value == object.m_data.long_value;
+          case SmartType_Double :
+              return m_data.double_value == object.m_data.double_value;
+          case SmartType_Boolean :
+              return m_data.bool_value == object.m_data.bool_value;
+          case SmartType_Character :
+              return m_data.char_value == object.m_data.char_value;
+          case SmartType_String :
+              return *(m_data.str_value) == *(object.m_data.str_value);
+          case SmartType_Map :
+              if (m_data.map_value == object.m_data.map_value) return true;
+              return std::equal(m_data.map_value->begin(), m_data.map_value->end(), object.m_data.map_value->begin());
+          case SmartType_Array :
+              if (m_data.array_value == object.m_data.array_value) return true;
+              return std::equal(m_data.array_value->begin(), m_data.array_value->end(), object.m_data.array_value->begin());
+          case SmartType_Null :
+              return true;
+      }
+      return false;
+  }
+
+  //equivalance tests for primitives.
+  bool NsAppLink::NsSmartObjects::CSmartObject::operator==(int val) const
+  {
+      int comp = convert_int();
+      if(comp == NsAppLink::NsSmartObjects::invalid_int_value)
+      {
+          return false;
+      }
+      else
+      {
+          return comp == val;
+      }
+  }
+
+  bool NsAppLink::NsSmartObjects::CSmartObject::operator==(long val) const
+  {
+      int comp = convert_long();
+      if(comp == NsAppLink::NsSmartObjects::invalid_int_value)
+      {
+          return false;
+      }
+      else
+      {
+          return comp == val;
+      }
+  }
+
+  bool NsAppLink::NsSmartObjects::CSmartObject::operator==(std::string val) const
+  {
+      std::string comp = convert_string();
+      if(comp == NsAppLink::NsSmartObjects::invalid_string_value)
+      {
+          return false;
+      }
+      else
+      {
+          return comp == val;
+      }
+  }
+
+  bool NsAppLink::NsSmartObjects::CSmartObject::operator==(double val) const
+  {
+      double comp = convert_double();
+      if(comp == NsAppLink::NsSmartObjects::invalid_double_value)
+      {
+          return false;
+      }
+      else
+      {
+          return comp == val;
+      }
+  }
+
+  bool NsAppLink::NsSmartObjects::CSmartObject::operator==(bool val) const
+  {
+      bool comp = convert_bool();
+      if(comp == NsAppLink::NsSmartObjects::invalid_bool_value)
+      {
+          return false;
+      }
+      else
+      {
+          return comp == val;
+      }
+  }
+
+  bool NsAppLink::NsSmartObjects::CSmartObject::operator==(char val) const
+  {
+      char comp = convert_char();
+      if(comp == NsAppLink::NsSmartObjects::invalid_char_value)
+      {
+          return false;
+      }
+      else
+      {
+          return comp == val;
+      }
   }
