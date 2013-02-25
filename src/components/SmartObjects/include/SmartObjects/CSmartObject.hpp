@@ -76,7 +76,6 @@ namespace NsAppLink
             bool operator==(char) const;
             bool operator==(double) const;
             bool operator==(std::string) const;
-            bool operator==(std::wstring) const;
             bool operator==(bool) const;
 
             SmartType get_type();
@@ -129,7 +128,7 @@ namespace NsAppLink
         static const int         invalid_int_value    = -1;
         static const char        invalid_char_value   = 0;
         static const std::string invalid_string_value = "";
-        static const double      invalid_real_value   = -1;
+        static const double      invalid_double_value   = -1;
         static const char*       invalid_cstr_value   = "";
         static CSmartObject      invalid_object_value;
 
