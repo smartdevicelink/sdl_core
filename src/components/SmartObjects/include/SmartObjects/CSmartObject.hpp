@@ -1,5 +1,5 @@
-#ifndef ______________SmartObject
-#define ______________SmartObject
+#ifndef __CSMARTOBJECT_HPP__
+#define __CSMARTOBJECT_HPP__
 
 #include <string>
 #include <vector>
@@ -81,6 +81,9 @@ namespace NsAppLink
 
             SmartType get_type();
 
+            // TODO: Discuss if this method is needed
+            size_t size();
+
         protected:
             SmartType m_type;
 
@@ -117,6 +120,7 @@ namespace NsAppLink
             void duplicate(const CSmartObject&);
 
             void cleanup_data();
+            // TODO: Is it really necessary to be that long? Why not just "set_new_type"
             void cleanup_data_if_type_changed_and_set_new_type(SmartType newType);
 
         };
@@ -127,8 +131,9 @@ namespace NsAppLink
         static const std::string invalid_string_value = "";
         static const double      invalid_real_value   = -1;
         static const char*       invalid_cstr_value   = "";
-        static CSmartObject       invalid_object_value;
+        static CSmartObject      invalid_object_value;
 
     }
 }
-#endif //#define ______________SmartObject
+#endif // __CSMARTOBJECT_HPP__
+

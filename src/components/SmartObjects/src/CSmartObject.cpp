@@ -1,5 +1,6 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include <limits>
+#include <errno.h>
 
 
 
@@ -72,7 +73,7 @@ void NsAppLink::NsSmartObjects::CSmartObject::duplicate(const NsAppLink::NsSmart
     case SmartType_String :
         m_data.str_value = object.m_data.str_value;
         break;
-    default : ;
+//    default : ;
     }
 }
 
@@ -98,10 +99,40 @@ void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data()
     case SmartType_Array :
         delete m_data.array_value;
         break;
-    default :
-        ;
+//    default : ;
     }
 }
+
+size_t NsAppLink::NsSmartObjects::CSmartObject::size()
+{
+    size_t size = 0;
+
+    switch(m_type)
+    {
+    case SmartType_String:
+        size = m_data.str_value->size();
+        break;
+    case SmartType_Array:
+        size = m_data.array_value->size();
+        break;
+    case SmartType_Map:
+        size = m_data.map_value->size();
+        break;
+    case SmartType_Boolean:
+    case SmartType_Character:
+    case SmartType_Double:
+    case SmartType_Integer:
+        // TODO: Discuss what is best to return for single value objects
+        size = 1;
+        break;
+    default:
+        size = 0;
+        break;
+    }
+
+    return size;
+}
+
 
 void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data_if_type_changed_and_set_new_type(SmartType newType)
 {
