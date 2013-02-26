@@ -264,7 +264,7 @@ NsAppLinkRPC::ALRPCMessage* JSONHandler::handleIncomingMessageProtocolV2(
 
     if (message -> getDataSize() > offset + jsonSize)
     {
-        unsigned int binarySize = message->getDataSize() - offset - jsonSize;
+        // unsigned int binarySize = message->getDataSize() - offset - jsonSize;
         std::vector<unsigned char> binaryData(receivedData + offset + jsonSize,
                                               receivedData + message->getDataSize());
         LOG4CPLUS_INFO_EXT(mLogger, "Binary data is present in message.");
@@ -388,8 +388,6 @@ NsProtocolHandler::AppLinkRawMessage* JSONHandler::handleOutgoingMessageProtocol
 
     if (json.isNull())
     {
-        LOG4CPLUS_ERROR(mLogger, "Failed to serialize ALRPCMessage object version 2.");
-        return 0;
         if (NsAppLinkRPCV2::FunctionID::FunctionIDInternal::OnAudioPassThruID == message->getMethodId())
         {
             LOG4CPLUS_INFO_EXT(mLogger, "Handling OnAudioPassThru message with 0 length!");
