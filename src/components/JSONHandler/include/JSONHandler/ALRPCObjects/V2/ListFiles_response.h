@@ -4,81 +4,55 @@
 #include <vector>
 #include <string>
 
-#include "Result.h"
-#include "JSONHandler/ALRPCMessage.h"
+#include "JSONHandler/ALRPCResponse.h"
 
 
 /*
-  interface	Ford Sync RAPI
-  version	2.0O
-  date		2012-11-02
-  generated at	Thu Jan 24 06:36:23 2013
-  source stamp	Thu Jan 24 06:35:41 2013
-  author	robok0der
+  interface Ford Sync RAPI
+  version   2.0O
+  date      2012-11-02
+  generated at  Thu Jan 24 06:36:23 2013
+  source stamp  Thu Jan 24 06:35:41 2013
+  author    robok0der
 */
 
 namespace NsAppLinkRPCV2
 {
+    /**
+         Returns the current list of resident filenames for the registered app along with the current space available
+         Not supported on First generation SYNC vehicles.
+    */
+    class ListFiles_response : public NsAppLinkRPC::ALRPCResponse
+    {
+    public:
+        ListFiles_response(const ListFiles_response& c);
+        ListFiles_response(void);
 
-/**
-     Returns the current list of resident filenames for the registered app along with the current space available
-     Not supported on First generation SYNC vehicles. 
-*/
+        virtual ~ListFiles_response(void);
 
-  class ListFiles_response : public NsAppLinkRPC::ALRPCMessage
-  {
-  public:
-  
-    ListFiles_response(const ListFiles_response& c);
-    ListFiles_response(void);
-    
-    virtual ~ListFiles_response(void);
-  
-    ListFiles_response& operator =(const ListFiles_response&);
-  
-    bool checkIntegrity(void);
+        ListFiles_response& operator =(const ListFiles_response&);
 
-    bool get_success(void) const;
-    const Result& get_resultCode(void) const;
-    const std::vector<std::string>* get_filenames(void) const;
-    unsigned int get_spaceAvailable(void) const;
-    const std::string* get_info(void) const;
+        bool checkIntegrity(void);
 
-    bool set_success(bool success_);
-    bool set_resultCode(const Result& resultCode_);
-    void reset_filenames(void);
-    bool set_filenames(const std::vector<std::string>& filenames_);
-    bool set_spaceAvailable(unsigned int spaceAvailable_);
-    void reset_info(void);
-    bool set_info(const std::string& info_);
+        const std::vector<std::string>* get_filenames(void) const;
+        unsigned int get_spaceAvailable(void) const;
 
-  private:
-  
-    friend class ListFiles_responseMarshaller;
+        void reset_filenames(void);
+        bool set_filenames(const std::vector<std::string>& filenames_);
+        bool set_spaceAvailable(unsigned int spaceAvailable_);
 
+    private:
+        friend class ListFiles_responseMarshaller;
 
-/**
-     true, if successful
-     false, if failed
-*/
-      bool success;
+        /**
+             An array of all filenames resident on SYNC for the given registered app.
+             If omitted, then no files currently reside on the system.
+        */
+        std::vector<std::string>* filenames;  //!<   [%s..%s] (500)
 
-///  See Result
-      Result resultCode;
-
-/**
-     An array of all filenames resident on SYNC for the given registered app.
-     If omitted, then no files currently reside on the system.
-*/
-      std::vector<std::string>* filenames;	//!<   [%s..%s] (500)
-
-///  Provides the total local space available on SYNC for the registered app.
-      unsigned int spaceAvailable;	//!<  (0,2000000000)
-
-///  Provides additional human readable info regarding the result.
-      std::string* info;	//!< (1000)
-  };
-
+        ///  Provides the total local space available on SYNC for the registered app.
+        unsigned int spaceAvailable;  //!<  (0,2000000000)
+    };
 }
 
 #endif

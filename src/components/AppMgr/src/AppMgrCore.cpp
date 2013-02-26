@@ -4023,13 +4023,16 @@ namespace NsAppManager
                 case NsAppLinkRPCV2::FunctionID::INVALID_ENUM:
                 default:
                 {
-                    LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message " << mobileMsg->getMethodId() << " has been received!");
-                    NsAppLinkRPCV2::GenericResponse_response* response = new NsAppLinkRPCV2::GenericResponse_response();
-                    response->setMethodId(NsAppLinkRPCV2::FunctionID::GenericResponseID);
-                    response->set_success(false);
-                    response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
-                    response->setCorrelationID(mobileMsg->getCorrelationID());
-                    MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
+                    LOG4CPLUS_ERROR_EXT(mLogger, " An undefined or invalid RPC message " << mobileMsg->getMethodId()
+                        << " has been received!");
+
+                    sendResponse<NsAppLinkRPCV2::GenericResponse_response
+                        , NsAppLinkRPCV2::Result::ResultInternal>(
+                            NsAppLinkRPCV2::FunctionID::GenericResponseID
+                                , NsAppLinkRPCV2::Result::INVALID_DATA
+                                , mobileMsg->getCorrelationID()
+                                , false
+                                , sessionKey);
                     break;
                 }
             }
