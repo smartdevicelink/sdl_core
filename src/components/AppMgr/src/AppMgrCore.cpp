@@ -3103,7 +3103,8 @@ namespace NsAppManager
                     }
                     if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key "
+                                       << sessionKey << " has not been activated yet!" );
                         NsAppLinkRPCV2::AddSubMenu_response* response = new NsAppLinkRPCV2::AddSubMenu_response;
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::AddSubMenuID);
@@ -3117,18 +3118,20 @@ namespace NsAppManager
                     const MenuValue* menu = app->findMenu(object->get_menuID());
                     if (menu)
                     {
-                        NsAppLinkRPC::AddSubMenu_response* response = new NsAppLinkRPC::AddSubMenu_response;
+                        NsAppLinkRPCV2::AddSubMenu_response* response = new NsAppLinkRPCV2::AddSubMenu_response;
+                        response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
+                        response->setMethodId(NsAppLinkRPCV2::FunctionID::AddSubMenuID);
                         response->set_success(false);
                         response->setCorrelationID(object->getCorrelationID());
 
                         if (menu->first == object->get_menuName())
                         {
-                            response->set_resultCode(NsAppLinkRPC::Result::DUPLICATE_NAME);
+                            response->set_resultCode(NsAppLinkRPCV2::Result::DUPLICATE_NAME);
                             MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                             return;
                         }
 
-                        response->set_resultCode(NsAppLinkRPC::Result::INVALID_ID);
+                        response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_ID);
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         return;
                     }
