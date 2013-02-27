@@ -24,9 +24,6 @@ namespace NsAppLink
             SmartType_Unknown   = -1
         };
 
-
-
-
         static const char* true_str = "true";
         static const char* false_str = "false";
 
@@ -37,46 +34,61 @@ namespace NsAppLink
         {
         public:
             CSmartObject();
-            CSmartObject(int);
-            CSmartObject(long);
-            CSmartObject(double);
-            CSmartObject(bool);
-            CSmartObject(char);
-            CSmartObject(const std::string);
-            CSmartObject(char*);
             CSmartObject(const CSmartObject&);
             ~CSmartObject();
 
-            operator int(void) const;
-            operator double(void) const;
-            operator char(void) const;
-            operator bool(void) const;
-            operator long(void) const;
-            operator std::string(void) const;
-            operator std::string*(void) const;
-            const char* c_str(void) const;
+            CSmartObject& operator=(const CSmartObject&);
+            bool operator==(const CSmartObject&) const;
 
+            // Support of type: int
+            CSmartObject(int);
+            operator int(void) const;
+            CSmartObject& operator=(int);
+            bool operator==(int) const;
+
+            // Support of type: long
+            CSmartObject(long);
+            operator long(void) const;
+            CSmartObject& operator=(long);
+            bool operator==(long) const;
+
+            // Support of type: double
+            CSmartObject(double);
+            operator double(void) const;
+            CSmartObject& operator=(double);
+            bool operator==(double) const;
+
+            // Support of type: bool
+            CSmartObject(bool);
+            operator bool(void) const;
+            CSmartObject& operator=(bool);
+            bool operator==(bool) const;
+
+            // Support of type: char
+            CSmartObject(char);
+            operator char(void) const;
+            CSmartObject& operator=(char);
+            bool operator==(char) const;
+
+            // Support of type: std::string
+            CSmartObject(const std::string);
+            operator std::string(void) const;
+            CSmartObject& operator=(const std::string&);
+            bool operator==(std::string) const;
+
+            // Support of type: char*
+            CSmartObject(char*);
+            //operator char*(void) const;
+            CSmartObject& operator=(const char*);
+            bool operator==(const char*) const;
+
+            // Array interface support
             CSmartObject& operator[](int);
+
+            // Map interface support
             CSmartObject& operator[](const std::string s);
             CSmartObject& operator[](char* s);
             CSmartObject& operator[](const char*);
-
-            CSmartObject& operator=(long);
-            CSmartObject& operator=(int);
-            CSmartObject& operator=(double);
-            CSmartObject& operator=(bool);
-            CSmartObject& operator=(char);
-            CSmartObject& operator=(const std::string&);
-            CSmartObject& operator=(const char*);
-            CSmartObject& operator=(const CSmartObject&);
-
-            bool operator==(const CSmartObject&) const;
-            bool operator==(int) const;
-            bool operator==(long) const;
-            bool operator==(char) const;
-            bool operator==(double) const;
-            bool operator==(std::string) const;
-            bool operator==(bool) const;
 
             SmartType get_type();
 
@@ -96,32 +108,45 @@ namespace NsAppLink
                 SmartMap* map_value;
             } m_data;
 
-            inline void set_value_integer(long);
+            // Support of type: int
+            inline void set_value_integer(int);
+            inline int convert_int(void) const;
+
+            // Support of type: char
             inline void set_value_char(char);
+            inline char convert_char(void) const;
+
+            // Support of type: double
             inline void set_value_double(double);
+            inline double convert_double(void) const;
+
+            // Support of type: bool
             inline void set_value_bool(bool);
+            inline bool convert_bool(void) const;
+
+            // Support of type: string
             inline void set_value_string(const std::string&);
             inline void set_value_cstr(const char*);
-
-            inline int convert_int(void) const;
-            inline char convert_char(void) const;
-            inline double convert_double(void) const;
-            inline bool convert_bool(void) const;
-            inline long convert_long(void) const;
             inline std::string convert_string(void) const;
 
+            // Support of type: long
+            inline void set_value_long(long);
+            inline long convert_long(void) const;
+
+            // Array interface support
             inline CSmartObject& handle_map_access(std::string);
+
+            // Map interface support
             CSmartObject& handle_array_access(int index);
 
+            // Helper methods
             static double convert_string_to_double(const std::string* s);
             static long convert_string_to_long(const std::string* s);
 
             void duplicate(const CSmartObject&);
-
             void cleanup_data();
             // TODO: Is it really necessary to be that long? Why not just "set_new_type"
             void cleanup_data_if_type_changed_and_set_new_type(SmartType newType);
-
         };
 
         static const bool        invalid_bool_value   = false;
