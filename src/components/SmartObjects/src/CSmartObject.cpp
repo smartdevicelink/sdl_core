@@ -12,6 +12,8 @@ NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(void)
 
 NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(const NsAppLink::NsSmartObjects::CSmartObject& object)
 {
+    m_type = SmartType_Null;
+    m_data.str_value = NULL;
     duplicate(object);
 }
 
@@ -121,10 +123,13 @@ int NsAppLink::NsSmartObjects::CSmartObject::convert_int(void) const
 
     if (retval > std::numeric_limits<int>::max() ||
         retval < std::numeric_limits<int>::min())
+    {
         return invalid_int_value;
-    else return static_cast<int>(m_data.long_value);
-
-    return retval;
+    }
+    else
+    {
+        return static_cast<int>(retval);
+    }
 }
 
 // =============================================================
@@ -132,7 +137,7 @@ int NsAppLink::NsSmartObjects::CSmartObject::convert_int(void) const
 // =============================================================
 NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(long l)
 {
-    set_value_integer(l);
+    set_value_long(l);
 }
 
 NsAppLink::NsSmartObjects::CSmartObject::operator long(void) const
@@ -587,14 +592,16 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
 // =============================================================
 void NsAppLink::NsSmartObjects::CSmartObject::duplicate(const NsAppLink::NsSmartObjects::CSmartObject& object)
 {
+    cleanup_data();
+
     m_type = object.m_type;
 
     switch(m_type) {
     case SmartType_Map :
-        *m_data.map_value = *object.m_data.map_value;
+        m_data.map_value = new SmartMap(*object.m_data.map_value);
         break;
     case SmartType_Array :
-        *m_data.array_value = *object.m_data.array_value;
+        m_data.array_value = new SmartArray(*object.m_data.array_value);
         break;
     case SmartType_Integer:
         m_data.long_value = object.m_data.long_value;
@@ -609,7 +616,7 @@ void NsAppLink::NsSmartObjects::CSmartObject::duplicate(const NsAppLink::NsSmart
         m_data.char_value = object.m_data.char_value;
         break;
     case SmartType_String :
-        *m_data.str_value = *object.m_data.str_value;
+        m_data.str_value = new std::string(*object.m_data.str_value);
         break;
 //    default : ;
     }
