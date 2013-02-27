@@ -221,7 +221,7 @@ long NsAppLink::NsSmartObjects::CSmartObject::convert_long(void) const
     case SmartType_Double :
         return static_cast<int>(m_data.double_value);
     case SmartType_Character :
-        return static_cast<char>(m_data.char_value);
+        return static_cast<int>(m_data.char_value);
     case SmartType_String :
         return convert_string_to_long(m_data.str_value);
     case SmartType_Map :
