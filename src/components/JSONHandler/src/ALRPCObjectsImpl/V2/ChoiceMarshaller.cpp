@@ -102,7 +102,7 @@ bool ChoiceMarshaller::fromJSON(const Json::Value& json,Choice& c)
       if(!j.isInt())  return false;
       c.choiceID=j.asInt();
     }
-    if(!json.isMember("image"))  return false;
+    if(json.isMember("image"))
     {
       const Json::Value& j=json["image"];
       if(!ImageMarshaller::fromJSON(j,c.image))
