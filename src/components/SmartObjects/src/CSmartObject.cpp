@@ -312,30 +312,17 @@ bool NsAppLink::NsSmartObjects::CSmartObject::convert_bool(void) const
     switch (m_type) {
         case SmartType_Boolean :
             return m_data.bool_value;
-        case SmartType_Character :
-            if (m_data.char_value != 0) return true;
-            else return false;
         case SmartType_Integer :
             return (m_data.long_value != 0);
             break;
         case SmartType_Double :
             return (m_data.double_value != 0.0);
             break;
-        case SmartType_String :
-            if (!m_data.str_value->compare(true_str)) return true;
-            else if(!m_data.str_value->compare(false_str)) return false;
-            return invalid_bool_value;
-        case SmartType_Map :
-        case SmartType_Array :
-            return invalid_bool_value;
-        case SmartType_Null :
-            return false;
-            break;
         default :
-            return invalid_bool_value;
+            break;
     }
 
-    return false;
+    return invalid_bool_value;
 }
 
 
@@ -452,37 +439,22 @@ void NsAppLink::NsSmartObjects::CSmartObject::set_value_string(const std::string
 
 std::string NsAppLink::NsSmartObjects::CSmartObject::convert_string(void) const
 {
-    char buf[32];
-
     switch (m_type) {
         case SmartType_String :
             return *(m_data.str_value);
-        case SmartType_Integer :
-            snprintf(buf,32,"%ld",m_data.long_value);
-            return std::string(buf);
+        case SmartType_Integer:
+            return std::to_string(m_data.long_value);
             break;
-        case SmartType_Double :
-            snprintf(buf,32,"%g",m_data.double_value);
-            return std::string(buf);
+        case SmartType_Character:
+            return std::string(1, m_data.char_value);
             break;
-        case SmartType_Boolean :
-            if (m_data.bool_value) return std::string(true_str);
-            else return std::string(false_str);
-        case SmartType_Character :
-            snprintf(buf,32,"%c",m_data.char_value);
-            return(buf);
+        case SmartType_Double:
+            return std::to_string(m_data.double_value);
             break;
-        case SmartType_Null :
-            return std::string("null");
+        default:
             break;
-        case SmartType_Map :
-        case SmartType_Array :
-            return invalid_string_value;
-        default :
-            return invalid_string_value;
     }
-
-    return std::string("error");
+    return invalid_string_value;
 }
 
 // =============================================================
