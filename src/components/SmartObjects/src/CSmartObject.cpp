@@ -169,27 +169,22 @@ void NsAppLink::NsSmartObjects::CSmartObject::set_value_long(long l)
 long NsAppLink::NsSmartObjects::CSmartObject::convert_long(void) const
 {
     switch (m_type) {
-        case SmartType_Integer :
-            return m_data.long_value;
-        case SmartType_Boolean :
-            if (m_data.bool_value) return 1;
-            else return 0;
-        case SmartType_Double :
-            return static_cast<int>(m_data.double_value);
-        case SmartType_Character :
-            return static_cast<int>(m_data.char_value);
         case SmartType_String :
             return convert_string_to_long(m_data.str_value);
-        case SmartType_Map :
-        case SmartType_Array :
-            return invalid_int_value;
-        case SmartType_Null :
-            return 0;
+            break;
+        case SmartType_Boolean:
+            return (m_data.bool_value == true) ? 1 : 0;
+        case SmartType_Integer:
+            return m_data.long_value;
+            break;
+        case SmartType_Double:
+            return static_cast<long>(m_data.double_value);
+            break;
         default :
-            return invalid_int_value;
+            break;
     }
 
-    return 0L;
+    return invalid_int_value;
 }
 
 // =============================================================
