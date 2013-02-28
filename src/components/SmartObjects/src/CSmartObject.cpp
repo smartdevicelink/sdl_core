@@ -593,7 +593,7 @@ void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data()
     }
 }
 
-size_t NsAppLink::NsSmartObjects::CSmartObject::size()
+size_t NsAppLink::NsSmartObjects::CSmartObject::length()
 {
     size_t size = 0;
 
@@ -607,13 +607,6 @@ size_t NsAppLink::NsSmartObjects::CSmartObject::size()
         break;
     case SmartType_Map:
         size = m_data.map_value->size();
-        break;
-    case SmartType_Boolean:
-    case SmartType_Character:
-    case SmartType_Double:
-    case SmartType_Integer:
-        // TODO: Discuss what is best to return for single value objects
-        size = 1;
         break;
     default:
         size = 0;

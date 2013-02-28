@@ -92,8 +92,8 @@ namespace NsAppLink
 
             SmartType get_type();
 
-            // TODO: Discuss if this method is needed
-            size_t size();
+
+            size_t length();
 
 
             /**
