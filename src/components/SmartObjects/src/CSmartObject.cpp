@@ -230,27 +230,19 @@ void NsAppLink::NsSmartObjects::CSmartObject::set_value_double(double d)
 double NsAppLink::NsSmartObjects::CSmartObject::convert_double(void) const
 {
     switch (m_type) {
-        case SmartType_Double:
-            return m_data.double_value;
-        case SmartType_Integer:
-            return static_cast<double>(m_data.long_value);
-        case SmartType_Boolean:
-            if (m_data.bool_value) return 1.0;
-            else return 0.0;
-        case SmartType_Character:
-            return static_cast<double>(m_data.char_value);
         case SmartType_String:
             return convert_string_to_double(m_data.str_value);
-        case SmartType_Map:
-        case SmartType_Array:
-            return invalid_double_value;
-        case SmartType_Null:
-            return 0.0;
+        case SmartType_Boolean:
+            return (m_data.bool_value)? 1.0 : 0.0;
+        case SmartType_Integer:
+            return static_cast<double>(m_data.long_value);
+        case SmartType_Double:
+            return m_data.double_value;
         default:
             return invalid_double_value;
     }
 
-    return 0.0;
+    return invalid_double_value;
 }
 
 // =============================================================
@@ -641,15 +633,15 @@ void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data_if_type_changed_and_s
 
 double NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_double(const std::string* s)
 {
-    double retval;
     char* ptr;
     errno = 0;
 
-    retval = strtod(s->c_str(),&ptr);
-    if (errno || (retval == 0.0 &&
-        ptr != (s->c_str() + s->length())))
+    double result = strtod(s->c_str(),&ptr);
+    if (errno ||
+        (result == 0.0 && ptr != (s->c_str() + s->length())))
         return invalid_double_value;
-    return retval;
+
+    return result;
 }
 
 long NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_long(const std::string* s)
