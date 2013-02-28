@@ -1,6 +1,7 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include <limits>
 #include <errno.h>
+#include <algorithm>
 
 
 
@@ -655,4 +656,21 @@ long NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_long(const std::
 NsAppLink::NsSmartObjects::SmartType NsAppLink::NsSmartObjects::CSmartObject::get_type()
 {
     return m_type;
+}
+
+std::vector<std::string> NsAppLink::NsSmartObjects::CSmartObject::enumerate()
+{
+    std::vector<std::string> keys;
+
+    if(m_type == SmartType_Map)
+    {
+        std::transform(
+            m_data.map_value->begin(),
+            m_data.map_value->end(),
+            std::back_inserter(keys),
+            [](const SmartMap::value_type &pair){return pair.first;}
+        );
+    }
+
+    return keys;
 }

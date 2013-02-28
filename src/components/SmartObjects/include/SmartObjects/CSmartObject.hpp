@@ -95,6 +95,14 @@ namespace NsAppLink
             // TODO: Discuss if this method is needed
             size_t size();
 
+
+            /**
+             * @brief Enumerates content of the object when it behaves like map.
+             *
+             * Returns vector of map keys
+             **/
+            std::vector<std::string> enumerate();
+
         protected:
             SmartType m_type;
 
