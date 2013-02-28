@@ -2066,14 +2066,16 @@ namespace NsAppManager
 
                             LOG4CPLUS_INFO(mLogger, "Full path to file " << fullFilePath);
 
-                            if (!WorkWithOS::checkIfFileExists(fullFilePath)) // File doesn't exist
+                            if (WorkWithOS::checkIfFileExists(fullFilePath))
                             {
-                                LOG4CPLUS_INFO_EXT(mLogger, "Saving to file " << fullFilePath);
-                                flag = WorkWithOS::createFileAndWrite(fullFilePath, *fileData);
-                                if (persistentFile)
-                                {
-                                    app->addPersistentFile(syncFileName);
-                                }
+                                WorkWithOS::deleteFile(fullFilePath);
+                            }
+
+                            LOG4CPLUS_INFO_EXT(mLogger, "Saving to file " << fullFilePath);
+                            flag = WorkWithOS::createFileAndWrite(fullFilePath, *fileData);
+                            if (persistentFile)
+                            {
+                                app->addPersistentFile(syncFileName);
                             }
                         }
 
