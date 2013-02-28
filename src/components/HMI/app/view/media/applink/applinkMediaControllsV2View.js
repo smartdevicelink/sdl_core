@@ -94,8 +94,14 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
         elementId: 'applink_media_presetButtons',
         
         classNameBindings:  [
-                                'MFT.ApplinkController.protocolVersion2State::hidden'
-                            ],
+            'hidden'
+        ],
+                            
+        hidden: function() {
+            
+            return !Boolean(MFT.ApplinkAppController.model.get('appInfo.customPresets').length);
+            
+        }.property('MFT.ApplinkAppController.model.appInfo.customPresets.@each'),
         
         classNames: ['main-preset-buttons-wraper'],
         
