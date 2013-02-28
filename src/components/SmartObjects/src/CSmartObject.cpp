@@ -360,26 +360,15 @@ void NsAppLink::NsSmartObjects::CSmartObject::set_value_char(char c)
 char NsAppLink::NsSmartObjects::CSmartObject::convert_char(void) const
 {
     switch (m_type) {
-        case SmartType_Character :
+        case SmartType_String:
+            return (m_data.str_value->length() == 1) ? m_data.str_value->at(0) : invalid_char_value;
+        case SmartType_Character:
             return m_data.char_value;
-        case SmartType_Boolean :
-            if (m_data.bool_value) return 't';
-            else return 'f';
-        case SmartType_String :
-            return m_data.str_value->c_str()[0];
-        case SmartType_Integer :
-        case SmartType_Double :
-            return invalid_char_value;
-        case SmartType_Map :
-        case SmartType_Array :
-            return invalid_char_value;
-        case SmartType_Null :
-            return '\0';
         default :
-            return invalid_char_value;
+            break;
     }
 
-    return '\0';
+    return invalid_char_value;
 }
 
 
