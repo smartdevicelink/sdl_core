@@ -26,9 +26,9 @@ set (LIBRARIES
     log4cplus
 )
 
-add_executable("test_SmartObjectsDraftTest" ${SOURCES_DRAFT_TEST})
-target_link_libraries("test_SmartObjectsDraftTest" ${LIBRARIES})
-add_test(test_SmartObjectsDraftTest test_SmartObjectsDraftTest)
+add_executable("test_SmartObjectDraftTest" ${SOURCES_DRAFT_TEST})
+target_link_libraries("test_SmartObjectDraftTest" ${LIBRARIES})
+add_test(test_SmartObjectDraftTest test_SmartObjectDraftTest)
 
 add_executable("test_SmartObjectUnitTest" ${SOURCES_UNIT_TEST})
 target_link_libraries("test_SmartObjectUnitTest" ${LIBRARIES})

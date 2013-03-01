@@ -24,9 +24,6 @@ namespace NsAppLink
             SmartType_Unknown   = -1
         };
 
-        static const char* true_str = "true";
-        static const char* false_str = "false";
-
         typedef std::vector<CSmartObject> SmartArray;
         typedef std::map<std::string, CSmartObject> SmartMap;
 
@@ -92,8 +89,16 @@ namespace NsAppLink
 
             SmartType get_type();
 
-            // TODO: Discuss if this method is needed
-            size_t size();
+
+            size_t length();
+
+
+            /**
+             * @brief Enumerates content of the object when it behaves like a map.
+             *
+             * Returns vector of map keys
+             **/
+            std::vector<std::string> enumerate();
 
         protected:
             SmartType m_type;

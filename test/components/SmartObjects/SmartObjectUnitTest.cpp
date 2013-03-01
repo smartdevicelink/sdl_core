@@ -270,29 +270,29 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     {
         CSmartObject obj;
 
-        ASSERT_EQ(0, obj.size()) << "Wrong size for the uninitialized object";
+        ASSERT_EQ(0, obj.length()) << "Wrong size for the uninitialized object";
 
         obj = 1234;
-        ASSERT_EQ(1, obj.size()) << "Wrong size for the int object";
+        ASSERT_EQ(1, obj.length()) << "Wrong size for the int object";
 
         std::string str("Some test very long string");
         obj = str;
-        ASSERT_EQ(str.size(), obj.size()) << "The size of the object containing string is not correct";
+        ASSERT_EQ(str.size(), obj.length()) << "The size of the object containing string is not correct";
 
         obj = true;
-        ASSERT_EQ(1, obj.size()) << "Wrong size of the true";
+        ASSERT_EQ(1, obj.length()) << "Wrong size of the true";
 
         obj = 0.1234;
-        ASSERT_EQ(1, obj.size()) << "Wrong size of the double";
+        ASSERT_EQ(1, obj.length()) << "Wrong size of the double";
 
         obj = 'A';
-        ASSERT_EQ(1, obj.size()) << "Wrong size of the char";
+        ASSERT_EQ(1, obj.length()) << "Wrong size of the char";
 
         makeMapObject(obj, 12);
-        ASSERT_EQ(12, obj.size()) << "Wrong size of the object containing map";
+        ASSERT_EQ(12, obj.length()) << "Wrong size of the object containing map";
 
         makeArrayObject(obj, 21);
-        ASSERT_EQ(21, obj.size()) << "Wrong size of the object containing array";
+        ASSERT_EQ(21, obj.length()) << "Wrong size of the object containing array";
     }
 
     class StressTestHelper : public ::testing::Test

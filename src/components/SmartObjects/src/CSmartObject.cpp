@@ -1,6 +1,7 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include <limits>
 #include <errno.h>
+#include <algorithm>
 
 
 
@@ -100,25 +101,17 @@ int NsAppLink::NsSmartObjects::CSmartObject::convert_int(void) const
     long retval;
 
     switch (m_type) {
-        case SmartType_Integer:
-            retval = m_data.long_value;
-            break;
-        case SmartType_Boolean:
-            if (m_data.bool_value == true) return 1;
-            else return 0;
-        case SmartType_Double :
-            retval = static_cast<long>(m_data.double_value);
-            break;
-        case SmartType_Character :
-            return static_cast<long>(m_data.char_value);
         case SmartType_String :
             retval = convert_string_to_long(m_data.str_value);
             break;
-        case SmartType_Null:
-            return 0;
-        case SmartType_Map :
-        case SmartType_Array :
-            return invalid_int_value;
+        case SmartType_Boolean:
+            return (m_data.bool_value == true) ? 1 : 0;
+        case SmartType_Integer:
+            retval = m_data.long_value;
+            break;
+        case SmartType_Double :
+            retval = static_cast<long>(m_data.double_value);
+            break;
         default :
             return invalid_int_value;
     }
@@ -177,27 +170,22 @@ void NsAppLink::NsSmartObjects::CSmartObject::set_value_long(long l)
 long NsAppLink::NsSmartObjects::CSmartObject::convert_long(void) const
 {
     switch (m_type) {
-        case SmartType_Integer :
-            return m_data.long_value;
-        case SmartType_Boolean :
-            if (m_data.bool_value) return 1;
-            else return 0;
-        case SmartType_Double :
-            return static_cast<int>(m_data.double_value);
-        case SmartType_Character :
-            return static_cast<int>(m_data.char_value);
         case SmartType_String :
             return convert_string_to_long(m_data.str_value);
-        case SmartType_Map :
-        case SmartType_Array :
-            return invalid_int_value;
-        case SmartType_Null :
-            return 0;
+            break;
+        case SmartType_Boolean:
+            return (m_data.bool_value == true) ? 1 : 0;
+        case SmartType_Integer:
+            return m_data.long_value;
+            break;
+        case SmartType_Double:
+            return static_cast<long>(m_data.double_value);
+            break;
         default :
-            return invalid_int_value;
+            break;
     }
 
-    return 0L;
+    return invalid_int_value;
 }
 
 // =============================================================
@@ -243,27 +231,19 @@ void NsAppLink::NsSmartObjects::CSmartObject::set_value_double(double d)
 double NsAppLink::NsSmartObjects::CSmartObject::convert_double(void) const
 {
     switch (m_type) {
-        case SmartType_Double:
-            return m_data.double_value;
-        case SmartType_Integer:
-            return static_cast<double>(m_data.long_value);
-        case SmartType_Boolean:
-            if (m_data.bool_value) return 1.0;
-            else return 0.0;
-        case SmartType_Character:
-            return static_cast<double>(m_data.char_value);
         case SmartType_String:
             return convert_string_to_double(m_data.str_value);
-        case SmartType_Map:
-        case SmartType_Array:
-            return invalid_double_value;
-        case SmartType_Null:
-            return 0.0;
+        case SmartType_Boolean:
+            return (m_data.bool_value)? 1.0 : 0.0;
+        case SmartType_Integer:
+            return static_cast<double>(m_data.long_value);
+        case SmartType_Double:
+            return m_data.double_value;
         default:
             return invalid_double_value;
     }
 
-    return 0.0;
+    return invalid_double_value;
 }
 
 // =============================================================
@@ -312,30 +292,17 @@ bool NsAppLink::NsSmartObjects::CSmartObject::convert_bool(void) const
     switch (m_type) {
         case SmartType_Boolean :
             return m_data.bool_value;
-        case SmartType_Character :
-            if (m_data.char_value != 0) return true;
-            else return false;
         case SmartType_Integer :
             return (m_data.long_value != 0);
             break;
         case SmartType_Double :
             return (m_data.double_value != 0.0);
             break;
-        case SmartType_String :
-            if (!m_data.str_value->compare(true_str)) return true;
-            else if(!m_data.str_value->compare(false_str)) return false;
-            return invalid_bool_value;
-        case SmartType_Map :
-        case SmartType_Array :
-            return invalid_bool_value;
-        case SmartType_Null :
-            return false;
-            break;
         default :
-            return invalid_bool_value;
+            break;
     }
 
-    return false;
+    return invalid_bool_value;
 }
 
 
@@ -386,26 +353,15 @@ void NsAppLink::NsSmartObjects::CSmartObject::set_value_char(char c)
 char NsAppLink::NsSmartObjects::CSmartObject::convert_char(void) const
 {
     switch (m_type) {
-        case SmartType_Character :
+        case SmartType_String:
+            return (m_data.str_value->length() == 1) ? m_data.str_value->at(0) : invalid_char_value;
+        case SmartType_Character:
             return m_data.char_value;
-        case SmartType_Boolean :
-            if (m_data.bool_value) return 't';
-            else return 'f';
-        case SmartType_String :
-            return m_data.str_value->c_str()[0];
-        case SmartType_Integer :
-        case SmartType_Double :
-            return invalid_char_value;
-        case SmartType_Map :
-        case SmartType_Array :
-            return invalid_char_value;
-        case SmartType_Null :
-            return '\0';
         default :
-            return invalid_char_value;
+            break;
     }
 
-    return '\0';
+    return invalid_char_value;
 }
 
 
@@ -452,37 +408,22 @@ void NsAppLink::NsSmartObjects::CSmartObject::set_value_string(const std::string
 
 std::string NsAppLink::NsSmartObjects::CSmartObject::convert_string(void) const
 {
-    char buf[32];
-
     switch (m_type) {
         case SmartType_String :
             return *(m_data.str_value);
-        case SmartType_Integer :
-            snprintf(buf,32,"%ld",m_data.long_value);
-            return std::string(buf);
+        case SmartType_Integer:
+            return std::to_string(m_data.long_value);
             break;
-        case SmartType_Double :
-            snprintf(buf,32,"%g",m_data.double_value);
-            return std::string(buf);
+        case SmartType_Character:
+            return std::string(1, m_data.char_value);
             break;
-        case SmartType_Boolean :
-            if (m_data.bool_value) return std::string(true_str);
-            else return std::string(false_str);
-        case SmartType_Character :
-            snprintf(buf,32,"%c",m_data.char_value);
-            return(buf);
+        case SmartType_Double:
+            return std::to_string(m_data.double_value);
             break;
-        case SmartType_Null :
-            return std::string("null");
+        default:
             break;
-        case SmartType_Map :
-        case SmartType_Array :
-            return invalid_string_value;
-        default :
-            return invalid_string_value;
     }
-
-    return std::string("error");
+    return invalid_string_value;
 }
 
 // =============================================================
@@ -652,7 +593,7 @@ void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data()
     }
 }
 
-size_t NsAppLink::NsSmartObjects::CSmartObject::size()
+size_t NsAppLink::NsSmartObjects::CSmartObject::length()
 {
     size_t size = 0;
 
@@ -666,13 +607,6 @@ size_t NsAppLink::NsSmartObjects::CSmartObject::size()
         break;
     case SmartType_Map:
         size = m_data.map_value->size();
-        break;
-    case SmartType_Boolean:
-    case SmartType_Character:
-    case SmartType_Double:
-    case SmartType_Integer:
-        // TODO: Discuss what is best to return for single value objects
-        size = 1;
         break;
     default:
         size = 0;
@@ -693,15 +627,15 @@ void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data_if_type_changed_and_s
 
 double NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_double(const std::string* s)
 {
-    double retval;
     char* ptr;
     errno = 0;
 
-    retval = strtod(s->c_str(),&ptr);
-    if (errno || (retval == 0.0 &&
-        ptr != (s->c_str() + s->length())))
+    double result = strtod(s->c_str(),&ptr);
+    if (errno ||
+        (result == 0.0 && ptr != (s->c_str() + s->length())))
         return invalid_double_value;
-    return retval;
+
+    return result;
 }
 
 long NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_long(const std::string* s)
@@ -715,4 +649,21 @@ long NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_long(const std::
 NsAppLink::NsSmartObjects::SmartType NsAppLink::NsSmartObjects::CSmartObject::get_type()
 {
     return m_type;
+}
+
+std::vector<std::string> NsAppLink::NsSmartObjects::CSmartObject::enumerate()
+{
+    std::vector<std::string> keys;
+
+    if(m_type == SmartType_Map)
+    {
+        std::transform(
+            m_data.map_value->begin(),
+            m_data.map_value->end(),
+            std::back_inserter(keys),
+            [](const SmartMap::value_type &pair){return pair.first;}
+        );
+    }
+
+    return keys;
 }
