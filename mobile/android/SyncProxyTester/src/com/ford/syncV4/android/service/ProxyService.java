@@ -2,12 +2,10 @@ package com.ford.syncV4.android.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -89,6 +87,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
+import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.transport.TCPTransportConfig;
@@ -112,6 +111,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 	protected SyncReceiver mediaButtonReceiver;
 	
 	private boolean firstHMIStatusChange = true;
+	private HMILevel prevHMILevel = HMILevel.HMI_NONE;
 	
 	private static boolean waitingForResponse = false;
 	
@@ -417,7 +417,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 	public static void waiting(boolean waiting) {
 		waitingForResponse = waiting;
 	}
-
+	
 	public void setCurrentActivity(SyncProxyTester currentActivity) {
 		if (this._mainInstance != null) {
 			this._mainInstance.finish();
@@ -439,7 +439,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 		if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
 		else Log.i(TAG, "" + notification);
-
+		
 		switch(notification.getSystemContext()) {
 			case SYSCTXT_MAIN:
 				break;
@@ -462,65 +462,69 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				return;
 		}
 		
-		boolean hmiChange = false;
-		switch(notification.getHmiLevel()) {
-			case HMI_FULL:
-				if (notification.getFirstRun()) {
-					showLockMain();
-					_testerMain = new ModuleTest();
-					_testerMain = ModuleTest.getModuleTestInstance();
-					initialize();
-				}
-				else {
-					try {
-						if (!waitingForResponse && _testerMain.getThreadContext() != null) {
-							_syncProxy.show("Sync Proxy", "Tester Ready", null, null, null, null, nextCorrID());
-						}
-					} catch (SyncException e) {
-						if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-						if (_msgAdapter != null) _msgAdapter.logMessage("Error sending show", Log.ERROR, e, true);
-						else Log.e(TAG, "Error sending show", e);
+		HMILevel curHMILevel = notification.getHmiLevel();
+		if (prevHMILevel != curHMILevel) {
+			boolean hmiChange = false;
+			switch(curHMILevel) {
+				case HMI_FULL:
+					if (notification.getFirstRun()) {
+						showLockMain();
+						_testerMain = new ModuleTest();
+						_testerMain = ModuleTest.getModuleTestInstance();
+						initialize();
 					}
-				}
-				hmiChange = true;
-				break;
-			case HMI_LIMITED:
-				hmiChange = true;
-				break;
-			case HMI_BACKGROUND:
-				hmiChange = true;
-				break;
-			case HMI_NONE:
-				break;
-			default:
-				return;
-		}
-		
-		boolean setAppIconSupported = getCurrentProtocolVersion() >= 2;
-		if (setAppIconSupported && hmiChange && firstHMIStatusChange) {
-			firstHMIStatusChange = false;
+					else {
+						try {
+							if (!waitingForResponse && _testerMain.getThreadContext() != null) {
+								_syncProxy.show("Sync Proxy", "Tester Ready", null, null, null, null, nextCorrID());
+							}
+						} catch (SyncException e) {
+							if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+							if (_msgAdapter != null) _msgAdapter.logMessage("Error sending show", Log.ERROR, e, true);
+							else Log.e(TAG, "Error sending show", e);
+						}
+					}
+					hmiChange = true;
+					break;
+				case HMI_LIMITED:
+					hmiChange = true;
+					break;
+				case HMI_BACKGROUND:
+					hmiChange = true;
+					break;
+				case HMI_NONE:
+					break;
+				default:
+					return;
+			}
+			prevHMILevel = curHMILevel;
 			
-			InputStream is = null;
-			try {
-				PutFile putFile = new PutFile();
-				putFile.setFileType(FileType.GRAPHIC_PNG);
-				putFile.setSyncFileName(ICON_SYNC_FILENAME);
-				putFile.setCorrelationID(nextCorrID());
-				putFile.setBulkData(contentsOfResource(R.raw.fiesta));
-				getProxyInstance().sendRPCRequest(putFile);
+			boolean setAppIconSupported = getCurrentProtocolVersion() >= 2;
+			if (setAppIconSupported && hmiChange && firstHMIStatusChange) {
+				firstHMIStatusChange = false;
 				
-				SetAppIcon setAppIcon = new SetAppIcon();
-				setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-				setAppIcon.setCorrelationID(nextCorrID());
-				getProxyInstance().sendRPCRequest(setAppIcon);
-				
-				// upload turn icons
-				sendIconFromResource(R.drawable.turn_left);
-				sendIconFromResource(R.drawable.turn_right);
-				sendIconFromResource(R.drawable.turn_forward);
-				sendIconFromResource(R.drawable.action);
-			} catch (SyncException e) {
-				Log.w(TAG, "Failed to set app icon", e);
+				InputStream is = null;
+				try {
+					PutFile putFile = new PutFile();
+					putFile.setFileType(FileType.GRAPHIC_PNG);
+					putFile.setSyncFileName(ICON_SYNC_FILENAME);
+					putFile.setCorrelationID(nextCorrID());
+					putFile.setBulkData(contentsOfResource(R.raw.fiesta));
+					getProxyInstance().sendRPCRequest(putFile);
+					
+					SetAppIcon setAppIcon = new SetAppIcon();
+					setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
+					setAppIcon.setCorrelationID(nextCorrID());
+					getProxyInstance().sendRPCRequest(setAppIcon);
+					
+					// upload turn icons
+					sendIconFromResource(R.drawable.turn_left);
+					sendIconFromResource(R.drawable.turn_right);
+					sendIconFromResource(R.drawable.turn_forward);
+					sendIconFromResource(R.drawable.action);
+				} catch (SyncException e) {
+					Log.w(TAG, "Failed to set app icon", e);
+				}
 			}
 		}
 	}
@@ -594,6 +598,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		
 		boolean wasConnected = !firstHMIStatusChange;
 		firstHMIStatusChange = true;
+		prevHMILevel = HMILevel.HMI_NONE;
 		
 		if (wasConnected) {
 			final SyncProxyTester mainActivity = SyncProxyTester.getInstance();

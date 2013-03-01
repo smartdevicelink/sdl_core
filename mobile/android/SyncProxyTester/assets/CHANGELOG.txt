@@ -1,4 +1,5 @@
 [CW9]
+* Fix: don't send a Show request on OnHMIStatus after an Alert response.
 * ModuleTest: add a delay between sending consecutive requests.
 * Ford Commit: XML scripter update, AudioPassThru without JSON, Policies Tester update, other minor bug fixes.
 
