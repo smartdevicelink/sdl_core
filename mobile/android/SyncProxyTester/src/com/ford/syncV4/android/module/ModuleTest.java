@@ -647,6 +647,14 @@ public class ModuleTest {
 					} catch (SyncException e) {
 						_msgAdapter.logMessage("Error sending RPC", Log.ERROR, e, true);
 					}
+					
+					try {
+						synchronized (this) {
+							this.wait(500);
+						}
+					} catch (InterruptedException e) {
+						_msgAdapter.logMessage("InterruptedException", true);
+					}
 				}
 				
 				try {
