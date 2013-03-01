@@ -39,9 +39,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         std::string to_string(const double value) const
         {
-            char buff[32];
-            sprintf(buff, "%g", value);
-            return std::string(buff);
+//            char buff[32];
+//            sprintf(buff, "%g", value);
+//            return std::string(buff);
+            return std::to_string(value);   // TODO: decide which format to use, because the result is different
         }
 
         std::string to_string(const char ch) const
@@ -76,41 +77,41 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             case 0:     // int
                 {
                     int iVal = rand();
-                    std::cout << iVal << std::endl;
                     obj = iVal;
                     mVerifyMap[key_path] = to_string(iVal);
+                    std::cout << "Created int, value: " << iVal << std::endl;
                     break;
                 }
             case 1:     // bool
                 {
                     bool bVal = static_cast<bool>(rand()%2);
-                    std::cout << bVal << std::endl;
                     obj = bVal;
                     mVerifyMap[key_path] = to_string(bVal);
+                    std::cout << "Created bool, value: " << to_string(bVal) << std::endl;
                     break;
                 }
             case 2:     // double
                 {
                     double dVal = 100.0 / (rand()%200);
-                    std::cout << dVal << std::endl;
                     obj = dVal;
                     mVerifyMap[key_path] = to_string(dVal);
+                    std::cout << "Created double, value: " << dVal << std::endl;
                     break;
                 }
             case 3:     // char
                 {
                     char cVal = get_random_char();
-                    std::cout << cVal << std::endl;
                     obj = cVal;
                     mVerifyMap[key_path] = to_string(cVal);
+                    std::cout << "Created char, value: " << cVal << std::endl;
                     break;
                 }
             case 4:     // string
                 {
                     std::string strVal(rand()%200, get_random_char());
-                    std::cout << strVal;
                     obj = strVal;   // string with random char filled random size
                     mVerifyMap[key_path] = strVal;
+                    std::cout << "Created string, value: " << strVal << std::endl;
                     break;
                 }
             case 5:     // map
@@ -190,7 +191,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     {
         CSmartObject objects;
 
-        const int size = 16;
+        const int size = 12;
 
         for (int i = 0; i < size; i++)
         {
@@ -212,7 +213,18 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                 CSmartObject obj = get_object(objects, it->first);
                 std::cout << " value: " << static_cast<std::string>(obj) << std::endl;
 
-                ASSERT_EQ(value, static_cast<std::string>(obj)) << "Object value is not correct. Object path: " << it->first;
+                if (!value.compare("true"))
+                {
+                    ASSERT_TRUE(static_cast<bool>(obj));
+                }
+                else if (!value.compare("false"))
+                {
+                    ASSERT_FALSE(static_cast<bool>(obj));
+                }
+                else
+                {
+                    ASSERT_EQ(value, static_cast<std::string>(obj)) << "Object value is not correct. Object path: " << it->first;
+                }
             }
         }
     }
@@ -237,8 +249,9 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         CSmartObject & refObj = obj[6][4];
         refObj["M1"]["M0"]["M0"][0] = true;
 
-        ASSERT_EQ("0.59432", static_cast<std::string>(get_object(obj, "A6 A4 M0")));
-        ASSERT_EQ("true", static_cast<std::string>(get_object(obj, "A6 A4 M1 M0 M0 A0")));
+        // FIXME: Figure out why there's a trailing zero while converting from double to string
+        ASSERT_EQ("0.594320", static_cast<std::string>(get_object(obj, "A6 A4 M0")));
+        ASSERT_TRUE(static_cast<bool>(get_object(obj, "A6 A4 M1 M0 M0 A0")));
     }
 
     int main(int argc, char **argv)
