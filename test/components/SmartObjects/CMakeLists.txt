@@ -16,6 +16,10 @@ set (SOURCES_UNIT_TEST
     ./SmartObjectUnitTest.cpp
 )
 
+set (SOURCES_STRESS_TEST
+    ./SmartObjectStressTest.cpp
+)
+
 # Libraries are the same for all SmartObject test
 set (LIBRARIES
     gtest
@@ -34,3 +38,6 @@ add_executable("test_SmartObjectUnitTest" ${SOURCES_UNIT_TEST})
 target_link_libraries("test_SmartObjectUnitTest" ${LIBRARIES})
 add_test(test_SmartObjectUnitTest test_SmartObjectUnitTest)
 
+add_executable("test_SmartObjectStressTest" ${SOURCES_STRESS_TEST})
+target_link_libraries("test_SmartObjectStressTest" ${LIBRARIES})
+add_test(test_SmartObjectStressTest test_SmartObjectStressTest)
