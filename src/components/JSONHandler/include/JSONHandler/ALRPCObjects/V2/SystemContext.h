@@ -39,20 +39,22 @@ namespace NsAppLinkRPCV2
       SYSCTXT_HMI_OBSCURED=3,
 
 ///  Broadcast only to whichever app has an alert currently being displayed.
-      SYSCTXT_ALERT=4
+      SYSCTXT_ALERT=4,
+      NOT_AUDIBLE=5,
+      AUDIBLE=6
     };
-  
+
     SystemContext() : mInternal(INVALID_ENUM)				{}
     SystemContext(SystemContextInternal e) : mInternal(e)		{}
-  
+
     SystemContextInternal get(void) const	{ return mInternal; }
     void set(SystemContextInternal e)		{ mInternal=e; }
-  
+
   private:
     SystemContextInternal mInternal;
     friend class SystemContextMarshaller;
   };
-  
+
 }
 
 #endif

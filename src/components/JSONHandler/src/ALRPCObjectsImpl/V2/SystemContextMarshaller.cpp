@@ -38,7 +38,7 @@ bool SystemContextMarshaller::fromJSON(const Json::Value& s,SystemContext& e)
 
 Json::Value SystemContextMarshaller::toJSON(const SystemContext& e)
 {
-  if(e.mInternal==SystemContext::INVALID_ENUM) 
+  if(e.mInternal==SystemContext::INVALID_ENUM)
     return Json::Value(Json::nullValue);
   const char* s=getName(e.mInternal);
   return s ? Json::Value(s) : Json::Value(Json::nullValue);
@@ -69,11 +69,13 @@ const std::string SystemContextMarshaller::toString(const SystemContext& e)
 
 }
 
-const PerfectHashTable SystemContextMarshaller::mHashTable[5]=
+const PerfectHashTable SystemContextMarshaller::mHashTable[7]=
 {
   {"MAIN",0},
   {"VRSESSION",1},
   {"MENU",2},
   {"HMI_OBSCURED",3},
-  {"ALERT",4}
+  {"ALERT",4},
+  {"NOT_AUDIBLE",5},
+  {"AUDIBLE",6}
 };

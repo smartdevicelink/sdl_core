@@ -1,64 +1,34 @@
 #ifndef NSAPPLINKRPC_UNREGISTERAPPINTERFACE_RESPONSE_INCLUDE
 #define NSAPPLINKRPC_UNREGISTERAPPINTERFACE_RESPONSE_INCLUDE
 
-#include <string>
-
-#include "Result.h"
 #include "JSONHandler/ALRPCResponse.h"
 
-
 /*
-  interface	Ford Sync RAPI
-  version	1.2
-  date		2011-05-17
-  generated at	Thu Jan 24 06:36:21 2013
-  source stamp	Thu Jan 24 06:35:34 2013
-  author	robok0der
+  interface Ford Sync RAPI
+  version   1.2
+  date      2011-05-17
+  generated at  Thu Jan 24 06:36:21 2013
+  source stamp  Thu Jan 24 06:35:34 2013
+  author    robok0der
 */
 
 namespace NsAppLinkRPC
 {
+    class UnregisterAppInterface_response : public ALRPCResponse
+    {
+    public:
+        UnregisterAppInterface_response(const UnregisterAppInterface_response& c);
+        UnregisterAppInterface_response(void);
 
-  class UnregisterAppInterface_response : public ALRPCResponse
-  {
-  public:
-  
-    UnregisterAppInterface_response(const UnregisterAppInterface_response& c);
-    UnregisterAppInterface_response(void);
-    
-    virtual ~UnregisterAppInterface_response(void);
-  
-    UnregisterAppInterface_response& operator =(const UnregisterAppInterface_response&);
-  
-    bool checkIntegrity(void);
+        virtual ~UnregisterAppInterface_response(void);
 
-    bool get_success(void) const;
-    const Result& get_resultCode(void) const;
-    const std::string* get_info(void) const;
+        UnregisterAppInterface_response& operator =(const UnregisterAppInterface_response&);
 
-    bool set_success(bool success_);
-    bool set_resultCode(const Result& resultCode_);
-    void reset_info(void);
-    bool set_info(const std::string& info_);
+        bool checkIntegrity(void);
 
-  private:
-  
-    friend class UnregisterAppInterface_responseMarshaller;
-
-
-/**
-     true, if successful
-     false, if failed
-*/
-      bool success;
-
-///  See Result
-      Result resultCode;
-
-///  Provides additional human readable info regarding the result.
-      std::string* info;	//!< (1000)
-  };
-
+    private:
+        friend class UnregisterAppInterface_responseMarshaller;
+    };
 }
 
 #endif

@@ -136,13 +136,12 @@ namespace
             }
 
             NsAppLinkRPC::ALRPCResponse* response = NULL;
-
             switch (methodId)
             {
-            case FunctionID::PerformInteractionID:
+            case Methods::METHOD_PERFORMINTERACTION_RESPONSE:
                 response = new NsAppLinkRPC::PerformInteraction_response();
                 break;
-            case FunctionID::RegisterAppInterfaceID:
+            case Methods::METHOD_REGISTERAPPINTERFACE_RESPONSE:
                 response = new NsAppLinkRPC::RegisterAppInterface_response();
                 break;
             default:

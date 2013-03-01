@@ -14,6 +14,7 @@ set (GENERATED_SOURCES1
 
 )
 set (GENERATED_SOURCES2
+./src/ALRPCObjectsImpl/V1/Result.cpp
 ./src/ALRPCObjectsImpl/V1/AddCommand_request.cpp
 ./src/ALRPCObjectsImpl/V1/AddCommand_requestMarshaller.cpp
 ./src/ALRPCObjectsImpl/V1/AddCommand_response.cpp
@@ -132,6 +133,7 @@ set (GENERATED_SOURCES6
 
 )
 set (GENERATED_SOURCES4
+./src/ALRPCObjectsImpl/V2/Result.cpp
 ./src/ALRPCObjectsImpl/V2/AddCommand_request.cpp
 ./src/ALRPCObjectsImpl/V2/AddCommand_requestMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/AddCommand_response.cpp
