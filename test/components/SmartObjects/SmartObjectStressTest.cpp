@@ -4,6 +4,11 @@
 
 #include "SmartObjects/CSmartObject.hpp"
 
+
+#define NO_INCLUSIVE_MAPS
+#define COPY_SUB_OBJECTS_WORKAROUND
+
+
 namespace test { namespace components { namespace SmartObjects { namespace SmartObjectStressTest {
 
     using namespace NsAppLink::NsSmartObjects;
@@ -11,20 +16,6 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     class StressTestHelper : public ::testing::Test
     {
     private:
-        std::vector<std::string>split(const std::string &s, char delim) const
-        {
-            std::vector<std::string> elems;
-
-            std::stringstream ss(s);
-            std::string item;
-            while(std::getline(ss, item, delim))
-            {
-                elems.push_back(item);
-            }
-
-            return elems;
-        }
-
         char get_random_char() const
         {
             return static_cast<char>('A' + (rand()%52));
@@ -60,6 +51,20 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     protected:
         typedef std::map<std::string, std::string> VerificationMap;
         VerificationMap mVerifyMap;
+
+        std::vector<std::string>split(const std::string &s, char delim) const
+        {
+            std::vector<std::string> elems;
+
+            std::stringstream ss(s);
+            std::string item;
+            while(std::getline(ss, item, delim))
+            {
+                elems.push_back(item);
+            }
+
+            return elems;
+        }
 
         std::string generate_key(const char *pPrefix, const int index) const
         {
@@ -118,32 +123,30 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                 if (size <= 0)
                     break;
 
-                std::cout << "map" << std::endl;
-
+                std::cout << "Creating a map with size: " << size << std::endl;
                 mVerifyMap[key_path] = "map";
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < size; i++)
                 {
                     std::string key = generate_key("M", i);
+#ifdef NO_INCLUSIVE_MAPS
                     obj[key] = key;
-                    //obj[key] = CSmartObject();
-                    //makeRandomObject(obj[key], size - 1, key_path + key);     // recursion
-                    std::cout << "created object: " << static_cast<std::string>(obj[key]) << " key: " << key_path + key << std::endl;
+#else
+                    obj[key] = CSmartObject();
+                    makeRandomObject(obj[key], size - 1, key_path + key);     // recursion
+#endif // MAP_WORKAROUND
                 }
                 break;
             case 6:     // array
                 if (size <= 0)
                     break;
 
-                std::cout << "array" << std::endl;
-
+                std::cout << "Creating an array with size: " << size << std::endl;
                 mVerifyMap[key_path] = "array";
                 for (int i = 0; i < size; i++)
                 {
                     obj[i] = CSmartObject();      // just init it as an array
                     makeRandomObject(obj[i], size - 1, key_path + generate_key("A", i));     // recursion
                 }
-
-
                 break;
             }
         }
@@ -160,15 +163,19 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
                 if (obj_tokens[i][0] == 'A')            // array
                 {
                     int index = atoi(&(obj_tokens[i].c_str()[1]));      // get integer skipping first char
-                    std::cout << " Array index=" << index;
-                    //lastObj = lastObj[index];       // go to the child object
-                    lastObj = CSmartObject(lastObj[index]);        // FIXME:  Workaround!!!
+#ifdef COPY_SUB_OBJECTS_WORKAROUND
+                    lastObj = CSmartObject(lastObj[index]);
+#else
+                    lastObj = lastObj[index];       // go to the child object
+#endif
                 }
                 else if (obj_tokens[i][0] == 'M')       // map
                 {
-                    std::cout << " Map key=" << obj_tokens[i];
-                    //lastObj = lastObj[obj_tokens[i]];       // go to the child object
-                    lastObj = CSmartObject(lastObj[obj_tokens[i]]);     // FIXME: Workaround!!!
+#ifdef COPY_SUB_OBJECTS_WORKAROUND
+                    lastObj = CSmartObject(lastObj[obj_tokens[i]]);
+#else
+                    lastObj = lastObj[obj_tokens[i]];       // go to the child object
+#endif
                 }
                 else
                 {
@@ -191,7 +198,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     {
         CSmartObject objects;
 
-        const int size = 12;
+        const int size = 10;
 
         for (int i = 0; i < size; i++)
         {
@@ -206,12 +213,21 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         for (VerificationMap::const_iterator it = mVerifyMap.begin(); it != mVerifyMap.end(); it++)
         {
             std::string value(it->second);
+            CSmartObject obj = get_object(objects, it->first);
 
+#ifdef NO_INCLUSIVE_MAPS
+            if (!value.compare("map"))
+            {
+                std::vector<std::string> path = split(it->first, ' ');
+
+                std::string map_value = path[path.size()-1];
+                ASSERT_EQ(map_value, static_cast<std::string>(obj));
+            }
+#endif
             if (value.compare("map") && value.compare("array"))
             {
-                std::cout << "Key: " << it->first << " Val: " << value << std::endl;
-                CSmartObject obj = get_object(objects, it->first);
-                std::cout << " value: " << static_cast<std::string>(obj) << std::endl;
+                std::cout << "Verification key: " << it->first << " Value: " << value << std::endl;
+                std::cout << "Object Value: " << static_cast<std::string>(obj) << std::endl;
 
                 if (!value.compare("true"))
                 {
