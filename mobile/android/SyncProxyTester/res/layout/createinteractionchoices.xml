@@ -4,13 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
     
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	<LinearLayout
 	    android:id="@+id/createcommands_Root"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:layout_marginLeft="10dip"
 	    android:layout_marginRight="10dip"
-	    android:minWidth="300px"
+	    android:minWidth="300dp"
 	    android:orientation="vertical"
 	    android:paddingLeft="10dip"
 	    android:paddingRight="10dip" >

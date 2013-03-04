@@ -1,3 +1,6 @@
+[CW10]
+* Fix CreateInteractionChoiceSet, SetGlobalProperties, and Speak layouts.
+
 [CW9]
 * Fix: don't send a Show request on OnHMIStatus after an Alert response.
 * ModuleTest: add a delay between sending consecutive requests.
