@@ -103,7 +103,7 @@ namespace NsAppLink
         protected:
             SmartType m_type;
 
-            union {
+            typedef union {
                 double double_value;
                 bool bool_value;
                 char char_value;
@@ -111,7 +111,9 @@ namespace NsAppLink
                 std::string* str_value;
                 SmartArray* array_value;
                 SmartMap* map_value;
-            } m_data;
+            } SmartData;
+
+            SmartData m_data;
 
             // Support of type: int
             inline void set_value_integer(int);
