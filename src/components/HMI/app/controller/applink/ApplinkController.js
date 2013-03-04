@@ -32,7 +32,7 @@ MFT.ApplinkController = Em.Object.create({
      * @type {String}
      */
     sysContext: function() {
-        
+
         if ( MFT.VRPopUp.VRActive ) {
             return 'VRSESSION';
         }
@@ -40,8 +40,8 @@ MFT.ApplinkController = Em.Object.create({
         if ( MFT.AlertPopUp.active ) {
             return 'ALERT';
         }
-        
-        if ( MFT.TTSPopUp.active || MFT.TBTClientStateView.active || MFT.VehicleInfo.active || MFT.DriverDistraction.active ) {
+
+        if ( MFT.TBTClientStateView.active || MFT.VehicleInfo.active || MFT.DriverDistraction.active ) {
             return 'HMI_OBSCURED';
         }
 
@@ -58,7 +58,6 @@ MFT.ApplinkController = Em.Object.create({
     }.property(
         'MFT.DriverDistraction.active',
         'MFT.OptionsView.active',
-        'MFT.TTSPopUp.active',
         'MFT.VRPopUp.VRActive',
         'MFT.AlertPopUp.active',
         'MFT.TBTClientStateView.active',
@@ -349,12 +348,12 @@ MFT.ApplinkController = Em.Object.create({
 	 */
 	onSoftButtonActionUpCustom: function( element ){
         if(element.time > 0){
-            FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "LONG", element.softButtonID);
             FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
         }else{
             FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONUP", element.softButtonID);
             FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "SHORT", element.softButtonID);
         }
+        clearTimeout( element.timer );
         element.time = 0;
     },
 
@@ -365,7 +364,10 @@ MFT.ApplinkController = Em.Object.create({
 	onSoftButtonActionDownCustom: function( element ){
         FFW.Buttons.buttonEventCustom( "CUSTOM_BUTTON", "BUTTONDOWN", element.softButtonID);
         element.time = 0;
-        setTimeout(function(){ element.time ++; }, 2000);
+        element.timer = setTimeout(function(){
+            FFW.Buttons.buttonPressedCustom( "CUSTOM_BUTTON", "LONG", element.softButtonID);
+            element.time ++;
+        }, 2000);
 	},
 	
 	/**
@@ -375,13 +377,21 @@ MFT.ApplinkController = Em.Object.create({
 	 */
 	onSoftButtonActionUp: function( name, element ){
         if(element.time > 0){
-            FFW.Buttons.buttonPressed( name, "LONG" );
             FFW.Buttons.buttonEvent( name, "BUTTONUP" );
         }else{
             FFW.Buttons.buttonEvent( name, "BUTTONUP" );
             FFW.Buttons.buttonPressed( name, "SHORT" );
         }
+        clearTimeout( element.timer );
         element.time = 0;
+    },
+
+    /**
+     * Method sent softButtons Ok pressed and event status to RPC 
+     * @param {String}
+     */
+    onSoftButtonOkActionDown: function( name ){
+        FFW.Buttons.buttonEvent( name, "BUTTONDOWN" );
     },
 
     /**
@@ -403,7 +413,10 @@ MFT.ApplinkController = Em.Object.create({
 	onSoftButtonActionDown: function( name, element ){
         FFW.Buttons.buttonEvent( name, "BUTTONDOWN" );
         element.time = 0;
-        setTimeout(function(){ element.time ++; }, 2000);
+        element.timer = setTimeout(function(){
+            FFW.Buttons.buttonPressed( name, "LONG" );
+            element.time ++;
+        }, 2000);
 	},
 	
 	/**

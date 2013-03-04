@@ -48,7 +48,7 @@ const std::string DeleteCommand_responseMarshaller::toString(const DeleteCommand
 
 bool DeleteCommand_responseMarshaller::checkIntegrityConst(const DeleteCommand_response& s)
 {
-  if(!ResultMarshaller::checkIntegrityConst(s.resultCode))  return false;
+  if(!ResultMarshaller::checkIntegrityConst(static_cast<NsAppLinkRPCV2::Result>(s.resultCode)))  return false;
   if(s.info && s.info->length()>1000)  return false;
   return true;
 }
@@ -67,7 +67,7 @@ Json::Value DeleteCommand_responseMarshaller::toJSON(const DeleteCommand_respons
 
   j["success"]=Json::Value(e.success);
 
-  j["resultCode"]=ResultMarshaller::toJSON(e.resultCode);
+  j["resultCode"]=ResultMarshaller::toJSON(static_cast<NsAppLinkRPCV2::Result>(e.resultCode));
 
   if(e.info)
     j["info"]=Json::Value(*e.info);
@@ -107,8 +107,10 @@ bool DeleteCommand_responseMarshaller::fromJSON(const Json::Value& js,DeleteComm
     if(!json.isMember("resultCode"))  return false;
     {
       const Json::Value& j=json["resultCode"];
-      if(!ResultMarshaller::fromJSON(j,c.resultCode))
+      NsAppLinkRPC::Result result = static_cast<NsAppLinkRPC::Result>(c.resultCode);
+      if(!ResultMarshaller::fromJSON(j, result))
         return false;
+      c.resultCode = static_cast<NsAppLinkRPCV2::Result>(result);
     }
     if(json.isMember("info"))
     {

@@ -1,4 +1,12 @@
+[CW9]
+* Fix: don't send a Show request on OnHMIStatus after an Alert response.
+* ModuleTest: add a delay between sending consecutive requests.
+* Ford Commit: XML scripter update, AudioPassThru without JSON, Policies Tester update, other minor bug fixes.
+
 [CW8]
+* Cut the number of debug logs during the test XML parsing process.
+* Fix empty <Vector> tags parsing in test XML.
+* Make the console log scrolling smoother.
 * Don't remove interaction choice set from the choiceSets list until a successful DeleteChoiceSetResponse has come.
 * Don't show null in the log if the responses' info is null.
 * AddCommand message: set an existing icon by default.

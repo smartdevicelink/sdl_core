@@ -53,8 +53,8 @@ MFT.TTSPopUp = Em.ContainerView.create({
 		
 		this.set('content', msg);
 		this.set('active', true);
-		
-		this.onStateChange();
+
+		FFW.UI.OnSystemContext( 'NOT_AUDIBLE' );
 		
         clearTimeout(this.timer);
 		this.timer = setTimeout(function(){
@@ -66,7 +66,7 @@ MFT.TTSPopUp = Em.ContainerView.create({
 	// send context notification
 	onStateChange: function() {
         if ( !MFT.AlertPopUp.active ) {
-            MFT.ApplinkController.onSystemContextChange();
+			FFW.UI.OnSystemContext( 'AUDIBLE' );
         }
 	}
 });

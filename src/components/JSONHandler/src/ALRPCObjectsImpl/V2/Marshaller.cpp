@@ -394,17 +394,13 @@ NsAppLinkRPC::ALRPCMessage* Marshaller::fromJSON(const Json::Value& json,Functio
     case FunctionID::GenericResponseID:
       if(mt==messageType::request)
       {
-        RegisterAppInterface_request* rv=new RegisterAppInterface_request;
-        if(RegisterAppInterface_requestMarshaller::fromJSON(j,*rv))
-          return rv;
-        delete rv;
         return NULL;
       }
 
       if(mt==messageType::response)
       {
-        RegisterAppInterface_response* rv=new RegisterAppInterface_response;
-        if(RegisterAppInterface_responseMarshaller::fromJSON(j,*rv))
+        GenericResponse_response* rv=new GenericResponse_response;
+        if(GenericResponse_responseMarshaller::fromJSON(j,*rv))
           return rv;
         delete rv;
         return NULL;
@@ -1068,9 +1064,9 @@ Json::Value Marshaller::toJSONparam(const NsAppLinkRPC::ALRPCMessage* msg,Functi
       return j;
     case FunctionID::GenericResponseID:
       if(mt==messageType::request)
-        return RegisterAppInterface_requestMarshaller::toJSON(* static_cast<const RegisterAppInterface_request*>(msg));
+        return Json::nullValue;
       if(mt==messageType::response)
-         return RegisterAppInterface_responseMarshaller::toJSON(* static_cast<const RegisterAppInterface_response*>(msg));
+        return GenericResponse_responseMarshaller::toJSON(* static_cast<const GenericResponse_response*>(msg));
       return j;
     case FunctionID::GetDTCsID:
       if(mt==messageType::request)

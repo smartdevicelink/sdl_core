@@ -10,6 +10,7 @@
 
 #include <string>
 #include "ALRPCMessage.h"
+#include "JSONHandler/ALRPCObjects/V2/Result.h"
 
 /**
   *\namespace NsAppLinkRPC
@@ -28,14 +29,14 @@ namespace NsAppLinkRPC
          * \brief Constructor
          * \param protocolVersion Version of AppLink protocol in message.
         */
-        ALRPCResponse( unsigned int protocolVersion );
+        ALRPCResponse(unsigned int protocolVersion);
 
         /**
          * \brief Constructor
          * \param protocolVersion Version of AppLink protocol in message.
          * \param methodID ID of RPC called by message.
         */
-        ALRPCResponse( unsigned int protocolVersion, int methodID );
+        ALRPCResponse(unsigned int protocolVersion, int methodID);
 
         /**
          * \brief Default Constructor
@@ -57,14 +58,35 @@ namespace NsAppLinkRPC
          * \brief Setter for correlation id.
          * \param correlationID Correlation ID of Json message
          */
-        virtual void setCorrelationID( unsigned int correlationID );
+        virtual void setCorrelationID(unsigned int correlationID);
 
-    private:
+        bool get_success(void) const;
+        const NsAppLinkRPCV2::Result& get_resultCode(void) const;
+        const std::string* get_info(void) const;
+
+        bool set_success(bool success_);
+        bool set_resultCode(const NsAppLinkRPCV2::Result& resultCode_);
+
+        void reset_info(void);
+        bool set_info(const std::string& info_);
+
+    protected:
         /**
           *\brief Correlation Id of Json message.
         */
-        unsigned int 	mCorrelationID;
+        unsigned int    mCorrelationID;
 
+        /**
+        true, if successful
+        false, if failed
+        */
+        bool success;
+
+        ///  See Result
+        NsAppLinkRPCV2::Result resultCode;
+
+        ///  Provides additional human readable info regarding the result.
+        std::string* info;    //!< (1000)
     };
 }
 

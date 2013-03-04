@@ -35,7 +35,7 @@ namespace NsAppLinkRPC
          * \param protocolVersion Version of AppLink protocol (currently 1,2)
          * \param messageType Type of AppLink message
         */
-        ALRPCMessage( unsigned int protocolVersion, MessageType messageType = UNDEFINED );
+        ALRPCMessage(unsigned int protocolVersion, MessageType messageType = UNDEFINED);
 
         /**
          * \brief Constructor
@@ -43,7 +43,7 @@ namespace NsAppLinkRPC
          * \param messageType Type of AppLink message.
          * \param methodID ID of RPC in message.
         */
-        ALRPCMessage( unsigned int protocolVersion, MessageType messageType,int methodID);
+        ALRPCMessage(unsigned int protocolVersion, MessageType messageType, int methodID);
         /**
          * \brief Destructor
         */
@@ -67,29 +67,29 @@ namespace NsAppLinkRPC
         /**
          * \breif Setter for protocol version.
         */
-        virtual void setProtocolVersion( unsigned int protocolVersion );
+        virtual void setProtocolVersion(unsigned int protocolVersion);
 
         /**
          * \brief setter for type of message.
         */
-        virtual void setMessageType( MessageType messageType );
+        virtual void setMessageType(MessageType messageType);
 
         /**
          * \brief setter for id of RPC.
         */
-        virtual void setMethodId( int packetID );
+        virtual void setMethodId(int packetID);
 
         /**
          * \brief setter of binary data
          * \param binaryData Vector of binary.
          */
-        virtual void setBinaryData( const std::vector<unsigned char> & binaryData );
+        virtual void setBinaryData(const std::vector<unsigned char>& binaryData);
 
         /**
          * \brief Getter of binary data
          * \return Pointer to binary data or NULL if doesn't exist.
          */
-        virtual const std::vector<unsigned char> * getBinaryData() const;
+        virtual const std::vector<unsigned char>* getBinaryData() const;
 
         /**
          * \brief Getter for correlation id of JSON message.
@@ -104,7 +104,7 @@ namespace NsAppLinkRPC
          * \param correlationID Correlation ID of JSON message.
          * \return type description
          */
-        virtual void setCorrelationID( unsigned int correlationID );
+        virtual void setCorrelationID(unsigned int correlationID);
     private:
         /**
          * \brief Applink protocol version (currently 1,2)
@@ -112,7 +112,7 @@ namespace NsAppLinkRPC
         unsigned int mProtocolVersion;
 
         /**
-         * \brief Type of Message 
+         * \brief Type of Message
          * \sa enum MessageType
         */
         MessageType mMessageType;
@@ -121,15 +121,15 @@ namespace NsAppLinkRPC
          * \brief Id of RPC called in message
          * function name + "_" + MessageType+ "Id"
         */
-        int mMethodId;   
+        int mMethodId;
 
         /**
           *\brief Array of binary data if it exists
         */
-        std::vector<unsigned char> * mBinaryData;
+        std::vector<unsigned char>* mBinaryData;
 
         /**
-          *\brief Correlation id of JSON message 
+          *\brief Correlation id of JSON message
           * TODO not supposed to be in base class.
         */
         unsigned int    mCorrelationID;

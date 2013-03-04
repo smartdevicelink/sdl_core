@@ -64,12 +64,15 @@ MFT.ApplinkMediaControllsV2 = Em.ContainerView.create({
                 icon:               'images/media/ico_prew.png',
                 presetName:         'SEEKLEFT'
             }),
-            PlayButton: MFT.Button.extend(MFT.PresetEvents, {
+            PlayButton: MFT.Button.extend({
                 elementId:          'app_view_controlls_play_button_v2',
                 classNames:         ['bc-item-big', 'playcd'],
                 presetName:         'OK',
                 actionUp: function(){
                     MFT.ApplinkController.onSoftButtonOkActionUp( this.presetName );
+                },
+                actionDown: function(){
+                    MFT.ApplinkController.onSoftButtonOkActionDown( this.presetName );
                 },
                 /** Define button template */
                 template: Ember.Handlebars.compile(

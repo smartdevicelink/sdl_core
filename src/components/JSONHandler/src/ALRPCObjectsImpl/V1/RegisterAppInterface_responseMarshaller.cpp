@@ -55,7 +55,7 @@ const std::string RegisterAppInterface_responseMarshaller::toString(const Regist
 
 bool RegisterAppInterface_responseMarshaller::checkIntegrityConst(const RegisterAppInterface_response& s)
 {
-  if(!ResultMarshaller::checkIntegrityConst(s.resultCode))  return false;
+  if(!ResultMarshaller::checkIntegrityConst(static_cast<NsAppLinkRPCV2::Result>(s.resultCode)))  return false;
   if(s.info && s.info->length()>1000)  return false;
   if(s.syncMsgVersion && !SyncMsgVersionMarshaller::checkIntegrityConst(*s.syncMsgVersion))  return false;
   if(s.autoActivateID && s.autoActivateID->length()>16)  return false;
@@ -114,7 +114,7 @@ Json::Value RegisterAppInterface_responseMarshaller::toJSON(const RegisterAppInt
 
   j["success"]=Json::Value(e.success);
 
-  j["resultCode"]=ResultMarshaller::toJSON(e.resultCode);
+  j["resultCode"]=ResultMarshaller::toJSON(static_cast<NsAppLinkRPCV2::Result>(e.resultCode));
 
   if(e.info)
     j["info"]=Json::Value(*e.info);
@@ -226,8 +226,10 @@ bool RegisterAppInterface_responseMarshaller::fromJSON(const Json::Value& js,Reg
     if(!json.isMember("resultCode"))  return false;
     {
       const Json::Value& j=json["resultCode"];
-      if(!ResultMarshaller::fromJSON(j,c.resultCode))
+      NsAppLinkRPC::Result result = static_cast<NsAppLinkRPC::Result>(c.resultCode);
+      if(!ResultMarshaller::fromJSON(j, result))
         return false;
+      c.resultCode = static_cast<NsAppLinkRPCV2::Result>(result);
     }
     if(json.isMember("info"))
     {

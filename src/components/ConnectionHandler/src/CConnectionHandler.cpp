@@ -76,7 +76,7 @@ namespace NsConnectionHandler
         mConnectionList.insert(tConnectionList::value_type(Connection, CConnection(Connection, ConnectedDevice.mDeviceHandle)));
     }
 
-    void CConnectionHandler::onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, 
+    void CConnectionHandler::onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice,
             const NsAppLink::NsTransportManager::tConnectionHandle Connection)
     {
         LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onApplicationDisconnected()" );
@@ -86,14 +86,14 @@ namespace NsConnectionHandler
             LOG4CPLUS_ERROR( mLogger, "Unknown device!");
             return;
         }
-        mDeviceList.erase( it );
         LOG4CPLUS_INFO( mLogger, "Delete Connection:" << (int)Connection << "from the list." );
         tConnectionListIterator itr = mConnectionList.find(Connection);
         if (mConnectionList.end() == itr)
         {
             LOG4CPLUS_ERROR( mLogger, "Connection not found!");
             return;
-        } else
+        }
+        else
         {
             if (0 != mpConnectionHandlerObserver)
             {
@@ -107,6 +107,11 @@ namespace NsConnectionHandler
                 }
             }
             mConnectionList.erase(itr);
+        }
+
+        if (mConnectionList.empty())
+        {
+            mDeviceList.erase( it );
         }
     }
 
