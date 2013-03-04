@@ -188,45 +188,211 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ("value_2", static_cast<std::string>(dst_obj["key_2"]["sub_key_1"])) << "Copy constructor is not correct";
     }
 
-    // TODO: Fix test agains conversion table
-//     TEST(ConversionTest, test_SmartObjectUnitTest)
-//     {
-//         CSmartObject obj;
-// 
-//         ASSERT_EQ(0, static_cast<int>(obj)) << "Initial value is not 0";
-//         ASSERT_FALSE(static_cast<bool>(obj)) << "Initial value is not false";
-//         ASSERT_EQ("null", static_cast<std::string>(obj)) << "Initial value is not an empty string";
-//         ASSERT_EQ('\0', static_cast<char>(obj)) << "Initial value of a char is not \\0";
-//         ASSERT_EQ(0, static_cast<double>(obj)) << "Initial value of a double is not 0";
-// 
-//         obj = 1;
-//         ASSERT_TRUE(static_cast<bool>(obj)) << "1 is not true";
-//         ASSERT_EQ("1", static_cast<std::string>(obj)) << "string representation is not correct";
-//         ASSERT_EQ('\0', static_cast<char>(obj)) << "char representation is not correct";
-//         ASSERT_EQ(1, static_cast<double>(obj)) << "double representation is not correct";
-// 
-//         // FIXME: Conversion from string to int doesn't work
-//         obj = "54321";
-//         ASSERT_EQ(54321, static_cast<int>(obj)) << "String to int is not correct";
-// 
-//         obj = "-1234";
-//         ASSERT_EQ(-1234, static_cast<int>(obj)) << "String to int is not correct";
-// 
-//         obj = "true";
-//         ASSERT_TRUE(static_cast<bool>(obj)) << "String to bool is not correct";
-// 
-//         obj = "false";
-//         ASSERT_FALSE(static_cast<bool>(obj)) << "String to bool is not correct";
-// 
-//         obj = "TRUE";
-//         ASSERT_TRUE(static_cast<bool>(obj)) << "Uppercase TRUE is not recognised as true";
-// 
-//         obj = "-3.1234";
-//         ASSERT_EQ(-3.1234, static_cast<double>(obj)) << "String to double is not correct";
-// 
-//         obj = "-43.43.5something";
-//         ASSERT_EQ(-1, static_cast<double>(obj)) << "Wrong conversion invalid string to double";
-//     }
+    TEST(FromString, TypeConversion)
+    {
+        {   // String to bool
+            CSmartObject obj;
+            ASSERT_EQ(invalid_bool_value, static_cast<bool>(obj));
+            obj = "true";
+            ASSERT_EQ(invalid_bool_value, static_cast<bool>(obj));
+            obj = "false";
+            ASSERT_EQ(invalid_bool_value, static_cast<bool>(obj));
+            obj = true;
+            ASSERT_TRUE(static_cast<bool>(obj));
+        }
+        {   // String to int
+            CSmartObject obj;
+            ASSERT_EQ(invalid_int_value, static_cast<int>(obj));
+            obj = "0";
+            ASSERT_EQ(0, static_cast<int>(obj));
+            obj = "-34323";
+            ASSERT_EQ(-34323, static_cast<int>(obj));
+            obj = "+1234";
+            ASSERT_EQ(1234, static_cast<int>(obj));
+            obj = "3232.0";
+            ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
+            obj = "123wtf";
+            ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
+            obj = "";
+            ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
+            obj = " 123 ";
+            ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
+        }
+        {   // String to char
+            CSmartObject obj;
+            ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+            obj = "C";
+            ASSERT_EQ('C', static_cast<char>(obj));
+            obj = "\n";
+            ASSERT_EQ('\n', static_cast<char>(obj));
+            obj = " A";
+            ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+            obj = "";
+            ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+        }
+        {   // String to double
+            CSmartObject obj;
+            ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
+            obj = "1234";
+            ASSERT_EQ(1234, static_cast<double>(obj));
+            obj = "-0.1234";
+            ASSERT_EQ(-0.1234, static_cast<double>(obj));
+            obj = ".54321";
+            ASSERT_EQ(.54321, static_cast<double>(obj));
+            obj = "123.45.6";
+            ASSERT_EQ(invalid_double_value, static_cast<double>(obj));        // FIXME:
+            obj = "123 wtf";
+            ASSERT_EQ(invalid_double_value, static_cast<double>(obj));        // FIXME:
+            obj = " 0.5";
+            ASSERT_EQ(invalid_double_value, static_cast<double>(obj));        // FIXME:
+        }
+        {   // String to Map
+            CSmartObject obj;
+            ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
+            obj = "this is not a map";
+            ASSERT_EQ(invalid_char_value, static_cast<char>(obj["some_key"]));
+        }
+        {   // String to Array
+            CSmartObject obj;
+            ASSERT_EQ(invalid_bool_value, static_cast<bool>(obj[0]));
+            obj = "this is not an array";
+            ASSERT_EQ(invalid_double_value, static_cast<double>(obj[0]));
+        }
+    }
+
+    TEST(FromBool, TypeConversion)
+    {
+        CSmartObject obj;
+
+        obj = true;
+
+        ASSERT_EQ(invalid_string_value, static_cast<std::string>(obj));
+        ASSERT_TRUE(static_cast<bool>(obj));
+        ASSERT_EQ(1, static_cast<int>(obj));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+        ASSERT_EQ(1.0, static_cast<double>(obj));
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+
+        obj = false;
+
+        ASSERT_EQ(invalid_string_value, static_cast<std::string>(obj));
+        ASSERT_FALSE(static_cast<bool>(obj));
+        ASSERT_EQ(0, static_cast<int>(obj));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+        ASSERT_EQ(0, static_cast<double>(obj));
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+    }
+
+    TEST(FromInt, TypeConversion)
+    {
+        CSmartObject obj;
+
+        obj = 123;
+
+        ASSERT_EQ("123", static_cast<std::string>(obj));
+        ASSERT_TRUE(static_cast<bool>(obj));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+        ASSERT_EQ(123.0, static_cast<double>(obj));
+
+        obj = 5;
+        ASSERT_EQ("5", static_cast<std::string>(obj));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+
+        obj = 0;
+        ASSERT_EQ("0", static_cast<std::string>(obj));
+        ASSERT_FALSE(static_cast<bool>(obj));
+
+        obj = 1;
+        ASSERT_TRUE(static_cast<bool>(obj));
+
+        obj = -1234;
+        ASSERT_EQ(-1234, static_cast<int>(obj));
+        ASSERT_EQ("-1234", static_cast<std::string>(obj));
+        ASSERT_EQ(-1234.0, static_cast<double>(obj));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+        ASSERT_TRUE(static_cast<bool>(obj));
+    }
+
+    TEST(FromChar, TypeConversion)
+    {
+        CSmartObject obj;
+
+        obj = '1';
+
+        ASSERT_EQ("1", static_cast<std::string>(obj));
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj));
+        ASSERT_EQ('1', static_cast<char>(obj));
+        ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+
+        obj = '0';
+
+        ASSERT_EQ("0", static_cast<std::string>(obj));
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj));
+        ASSERT_EQ('0', static_cast<char>(obj));
+        ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key"]));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+    }
+
+    TEST(FromDouble, TypeConversion)
+    {
+        CSmartObject obj;
+
+        obj = 0.1;
+        ASSERT_EQ("0.1", static_cast<std::string>(obj));        // FIXME: result 0.100000
+        ASSERT_EQ(0, static_cast<int>(obj));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+        ASSERT_EQ(0.1, static_cast<double>(obj));
+        ASSERT_TRUE(static_cast<bool>(obj));
+
+        obj = 0.9;
+        ASSERT_EQ("0.9", static_cast<std::string>(obj));
+        ASSERT_EQ(0, static_cast<int>(obj));
+        ASSERT_TRUE(static_cast<bool>(obj));
+
+        obj = -12323.999;
+        ASSERT_EQ("-12323.999", static_cast<std::string>(obj));
+        ASSERT_EQ(-12323, static_cast<int>(obj));
+        ASSERT_TRUE(static_cast<bool>(obj));
+
+        obj = 0.0;
+        ASSERT_EQ("0", static_cast<std::string>(obj));
+        ASSERT_EQ(0, static_cast<int>(obj));
+        ASSERT_FALSE(static_cast<bool>(obj));
+    }
+
+    TEST(FromMap, TypeConversion)
+    {
+        CSmartObject obj;
+
+        obj["key1"] = 123;
+
+        ASSERT_EQ(invalid_string_value, static_cast<std::string>(obj));
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+        ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
+        ASSERT_EQ(123, static_cast<int>(obj["key1"]));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj[0]));
+    }
+
+    TEST(FromArray, TypeConversion)
+    {
+        CSmartObject obj;
+
+        obj[0] = 'A';
+        obj[1] = -123;
+
+        ASSERT_EQ(invalid_string_value, static_cast<std::string>(obj));
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj));
+        ASSERT_EQ(invalid_char_value, static_cast<char>(obj));
+        ASSERT_EQ(invalid_double_value, static_cast<double>(obj));
+        ASSERT_EQ('A', static_cast<char>(obj[0]));
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["key1"]));
+    }
 
     TEST_F(TestHelper, AssignmentTest)
     {
@@ -314,6 +480,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         
         ASSERT_EQ("test string", static_cast<std::string>(dstObj));
     }
+
+    // TODO: Add a test to check accessing an array at strange indexes.
 
 
 
