@@ -76,8 +76,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     {
         CSmartObject obj;
 
-        // TODO: Use invalid values
-        ASSERT_EQ(0, static_cast<int>(obj)) << "Wrong cast to int just after construction";
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj)) << "Wrong cast to int just after construction";
 
         obj = 10;
         ASSERT_EQ(10, static_cast<int>(obj)) << "Wrong cast to int";
@@ -111,13 +110,12 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         }
     }
 
-    // TODO: Figure out why the test fails
     TEST_F(TestHelper, BasicArrayTest)
     {
         CSmartObject obj;
 
-        ASSERT_EQ(0, static_cast<int>(obj[0])) << "Wrong value at accessing non existent index";
-        ASSERT_EQ(0, static_cast<int>(obj["non_existent_key"])) << "Wrong value at accessing non existent key";
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj[0])) << "Wrong value at accessing non existent index";
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["non_existent_key"])) << "Wrong value at accessing non existent key";
 
         obj[0] = 1;
         ASSERT_EQ(1, static_cast<int>(obj[0])) << "Wrong value at 0 index";
@@ -129,7 +127,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(3, static_cast<int>(obj[0][0])) << "Wrong value at index 0, 0";
 
         obj[0][0][0] = 4;
-        obj[0][1][0] = 5;   // FIXME: Segmentation fault
+        obj[0][1][0] = 5;
         ASSERT_EQ(4, static_cast<int>(obj[0][0][0])) << "Wrong value at index 0, 0, 0";
 
         const int size = 32;
@@ -143,13 +141,13 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     {
         CSmartObject obj;
 
-        ASSERT_EQ(0, static_cast<int>(obj["non_existent_key"])) << "Wrong value for non existent key";
+        ASSERT_EQ(invalid_int_value, static_cast<int>(obj["non_existent_key"])) << "Wrong value for non existent key";
 
         obj["abc"]["def"]["ghi"] = 5;
         ASSERT_EQ(5, static_cast<int>(obj["abc"]["def"]["ghi"])) << "Wrong value for triple map";
 
         obj["123"]["456"]["789"] = "string test";
-        // FIXME: Test crashes if string is assigned
+
         ASSERT_EQ("string test", static_cast<std::string>(obj["123"]["456"]["789"])) << "Wrong value for triple map";
 
         const int size = 32;
@@ -273,20 +271,20 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         ASSERT_EQ(0, obj.length()) << "Wrong size for the uninitialized object";
 
         obj = 1234;
-        ASSERT_EQ(1, obj.length()) << "Wrong size for the int object";
+        ASSERT_EQ(0, obj.length()) << "Wrong size for the int object";
 
         std::string str("Some test very long string");
         obj = str;
         ASSERT_EQ(str.size(), obj.length()) << "The size of the object containing string is not correct";
 
         obj = true;
-        ASSERT_EQ(1, obj.length()) << "Wrong size of the true";
+        ASSERT_EQ(0, obj.length()) << "Wrong size of the true";
 
         obj = 0.1234;
-        ASSERT_EQ(1, obj.length()) << "Wrong size of the double";
+        ASSERT_EQ(0, obj.length()) << "Wrong size of the double";
 
         obj = 'A';
-        ASSERT_EQ(1, obj.length()) << "Wrong size of the char";
+        ASSERT_EQ(0, obj.length()) << "Wrong size of the char";
 
         makeMapObject(obj, 12);
         ASSERT_EQ(12, obj.length()) << "Wrong size of the object containing map";
