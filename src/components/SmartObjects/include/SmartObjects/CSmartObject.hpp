@@ -100,6 +100,8 @@ namespace NsAppLink
              **/
             std::vector<std::string> enumerate();
 
+            //TODO: Implement method keyExist(const char*) for checking key in map availability
+
         protected:
             SmartType m_type;
 
