@@ -547,34 +547,38 @@ NsAppLink::NsSmartObjects::CSmartObject& NsAppLink::NsSmartObjects::CSmartObject
 // =============================================================
 void NsAppLink::NsSmartObjects::CSmartObject::duplicate(const NsAppLink::NsSmartObjects::CSmartObject& object)
 {
+    SmartData newData;
+    SmartType newType = object.m_type;
+
+    switch(newType) {
+        case SmartType_Map :
+            newData.map_value = new SmartMap(*object.m_data.map_value);
+            break;
+        case SmartType_Array :
+            newData.array_value = new SmartArray(*object.m_data.array_value);
+            break;
+        case SmartType_Integer:
+            newData.long_value = object.m_data.long_value;
+            break;
+        case SmartType_Double :
+            newData.double_value = object.m_data.double_value;
+            break;
+        case SmartType_Boolean :
+            newData.bool_value = object.m_data.bool_value;
+            break;
+        case SmartType_Character :
+            newData.char_value = object.m_data.char_value;
+            break;
+        case SmartType_String :
+            newData.str_value = new std::string(*object.m_data.str_value);
+            break;
+            //    default : ;
+    }
+
     cleanup_data();
 
-    m_type = object.m_type;
-
-    switch(m_type) {
-    case SmartType_Map :
-        m_data.map_value = new SmartMap(*object.m_data.map_value);
-        break;
-    case SmartType_Array :
-        m_data.array_value = new SmartArray(*object.m_data.array_value);
-        break;
-    case SmartType_Integer:
-        m_data.long_value = object.m_data.long_value;
-        break;
-    case SmartType_Double :
-        m_data.double_value = object.m_data.double_value;
-        break;
-    case SmartType_Boolean :
-        m_data.bool_value = object.m_data.bool_value;
-        break;
-    case SmartType_Character :
-        m_data.char_value = object.m_data.char_value;
-        break;
-    case SmartType_String :
-        m_data.str_value = new std::string(*object.m_data.str_value);
-        break;
-//    default : ;
-    }
+    m_type = newType;
+    m_data = newData;
 }
 
 void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data()
