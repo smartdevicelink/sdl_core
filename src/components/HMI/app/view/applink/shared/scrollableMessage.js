@@ -18,6 +18,12 @@ MFT.ScrollableMessage = MFT.ApplinkAbstractView.create({
 
     classNameBindings:  ['active:active'],
 
+    /**
+     * Id of current request
+     * @type {Number}
+     */
+    messageRequestId:     null,
+
     active:             false,
 
     appId:              null,
@@ -34,22 +40,28 @@ MFT.ScrollableMessage = MFT.ApplinkAbstractView.create({
     /**
      * Deactivate View
      */
-    deactivate: function() {
+    deactivate: function( ABORTED ) {
         clearTimeout(this.timer);
         this.set('active',false);
+
+        MFT.ApplinkController.scrollableMessageResponse( ABORTED ? 'ABORTED' : 'SUCCESS', this.messageRequestId );
     },
 
-    activate: function( appName, params ){
+    activate: function( appName, params, messageRequestId ){
         if(appName){
             
             var self = this;
             
+            this.set( 'messageRequestId', messageRequestId );
             this.set('captionText.content',appName);
             this.softButtons.addItems( params.softButtons, params.appId );
             this.set('listOfCommands.items', params.scrollableMessageBody );
             this.set('active',true);
             clearTimeout(this.timer);
-            this.timer = setTimeout(function(){self.set('active', false);}, params.timeout);
+            this.timer = setTimeout(
+                function(){
+                    self.deactivate();
+                }, params.timeout);
         }
     },
 

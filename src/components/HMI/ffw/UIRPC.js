@@ -31,11 +31,6 @@ FFW.UI = FFW.RPCObserver.create({
  	performInteractionRequestId: -1,
 
 	/*
-	 *	id for request Alert
- 	 */
- 	alertRequestId: -1,
-
-	/*
 	 *	ids for requests AudioPassThru
  	 */
 	performAudioPassThruRequestId:		-1,
@@ -142,9 +137,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.Alert":{
 
-				MFT.ApplinkModel.onUIAlert( request.params );
-
-				this.alertRequestId = request.id;
+				MFT.ApplinkModel.onUIAlert( request.params, request.id );
 
 		    	break;
 		    }
@@ -243,9 +236,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.ScrollableMessage":{
 
-				MFT.ApplinkModel.onApplinkScrolableMessage( request.params );
-
-				this.sendUIResult("SUCCESS", request.id, request.method);
+				MFT.ApplinkModel.onApplinkScrolableMessage( request.params, request.id );
 
 		    	break;
 		    }
@@ -422,6 +413,8 @@ FFW.UI = FFW.RPCObserver.create({
 	 */
 	sendUIResult: function(resultCode, id, method) {
 
+		Em.Logger.log("FFW.UI." + method + "Response");
+
 		if(resultCode){
 
 			// send repsonse
@@ -503,25 +496,6 @@ FFW.UI = FFW.RPCObserver.create({
 		if( commandId ){
 			JSONMessage.result.choiceID = commandId;
 		}
-
-		this.client.send(JSONMessage);
-	},
-
-	/*
-	 * send notification when alert was closed
- 	 */
-	alertResponse: function( resultCode ) {
-		Em.Logger.log("FFW.UI.AlertResponse");
-
-		// send repsonse
-		var JSONMessage = {
-			"jsonrpc"	:	"2.0",
-			"id"		: 	this.alertRequestId,
-			"result":	{
-				"resultCode":		resultCode,
-				"method":			"UI.AlertResponse"
-			}
-		};
 
 		this.client.send(JSONMessage);
 	},

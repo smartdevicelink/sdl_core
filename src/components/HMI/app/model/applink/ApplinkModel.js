@@ -256,14 +256,19 @@ MFT.ApplinkModel = Em.Object.create({
     /**
      * Applink UI ScrolableMessage activation function
      * dependent of Driver Distraction toggle state
-     * @param {Object} Object with parameters come from ApplinkCore.
+     * @param {Object} params Object with parameters come from ApplinkCore.
+     * @param {Number} id Identification of unique request
      */
-    onApplinkScrolableMessage: function(params){
+    onApplinkScrolableMessage: function( params, messageRequestId ){
 
-        if( MFT.ApplinkController.driverDistractionState ){
-            MFT.DriverDistraction.activate();
+        if( !MFT.ScrollableMessage.active ){    
+            if( MFT.ApplinkController.driverDistractionState ){
+                MFT.DriverDistraction.activate();
+            }else{
+                MFT.ScrollableMessage.activate( MFT.ApplinkController.getApplicationModel(params.appId).appName , params, messageRequestId );
+            }
         }else{
-            MFT.ScrollableMessage.activate( MFT.ApplinkController.getApplicationModel(params.appId).appName , params );
+            MFT.ApplinkController.scrollableMessageResponse( 'REJECTED', messageRequestId );
         }
 
     },
@@ -357,9 +362,13 @@ MFT.ApplinkModel = Em.Object.create({
      *
      * @param {Object} message Object with parameters come from ApplinkCore.
      */
-    onUIAlert: function( message ) {
+    onUIAlert: function( message, alertRequestId ) {
 
-        MFT.AlertPopUp.AlertActive( message );
+        if( !MFT.AlertPopUp.active ){
+            MFT.AlertPopUp.AlertActive( message, alertRequestId );
+        }else{
+            MFT.ApplinkController.alertResponse( 'REJECTED', alertRequestId );
+        }
     },
 
     /**

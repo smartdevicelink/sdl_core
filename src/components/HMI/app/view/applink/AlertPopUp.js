@@ -27,11 +27,17 @@ MFT.AlertPopUp = Em.ContainerView.create({
         'softbuttons'
     ],
 
+    /**
+     * Id of current request
+     * @type {Number}
+     */
+    alertRequestId:     null,
+
     content1:         	'Title',
 
     content2:           'Text',
 
-    active:           false,
+    active:             false,
 
     timer:              null,
 
@@ -87,7 +93,7 @@ MFT.AlertPopUp = Em.ContainerView.create({
         this.set('active',false);
         clearTimeout(this.timer);
         
-        MFT.ApplinkController.alertResponse( ABORTED ? 'ABORTED' : 'SUCCESS' );
+        MFT.ApplinkController.alertResponse( ABORTED ? 'ABORTED' : 'SUCCESS', this.alertRequestId );
         
         MFT.ApplinkController.onSystemContextChange();
     },
@@ -157,13 +163,15 @@ MFT.AlertPopUp = Em.ContainerView.create({
         }
     },
 
-    AlertActive: function( message ){
+    AlertActive: function( message, alertRequestId ){
         var self = this;
         
         // play audio alert
         if ( message.playTone ) {
             MFT.Audio.play('audio/alert.wav');
         }
+
+        this.set('alertRequestId', alertRequestId);
 
         this.addSoftButtons( message.softButtons, message.appId );
 

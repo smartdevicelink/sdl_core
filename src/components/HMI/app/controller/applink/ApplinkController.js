@@ -185,8 +185,15 @@ MFT.ApplinkController = Em.Object.create({
     /**
      * Method to sent notification for Alert
      */
-    alertResponse: function( result ){
-        FFW.UI.alertResponse( result );
+    alertResponse: function( result, alertRequestId ){
+        FFW.UI.sendUIResult( result, alertRequestId, 'Alert' );
+    },
+
+    /**
+     * Method to sent notification for Scrollable Message
+     */
+    scrollableMessageResponse: function( result, messageRequestId ){
+        FFW.UI.sendUIResult( result, messageRequestId, 'ScrollableMessage' );
     },
 
     /**
