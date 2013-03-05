@@ -1,4 +1,5 @@
 [CW10]
+* SetGlobalProperties dialog: allow to send helpPrompt and timeoutPrompt as arrays.
 * Fix CreateInteractionChoiceSet, SetGlobalProperties, and Speak layouts.
 
 [CW9]

@@ -20,8 +20,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-import org.json.JSONException;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -2614,16 +2612,27 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 								SetGlobalProperties msg = new SetGlobalProperties();
 								int numberOfChoices = 0;
 								
+								// string to join/split help and timeout prompts
+								final String joinString = ",";
+								
 								if (choiceHelpPrompt.isChecked()) {
 									Vector<TTSChunk> help = new Vector<TTSChunk>();
-									help.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, helpPrompt.getText().toString()));
+									String helpString = helpPrompt.getText().toString();
+									for (String ttsChunk : helpString.split(joinString)) {
+										TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, ttsChunk);
+										help.add(chunk);
+									}
 									msg.setHelpPrompt(help);
 									++numberOfChoices;
 								}
 
 								if (choiceTimeoutPrompt.isChecked()) {
 									Vector<TTSChunk> timeout = new Vector<TTSChunk>();
-									timeout.add(TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, timeoutPrompt.getText().toString()));
+									String timeoutString = timeoutPrompt.getText().toString();
+									for (String ttsChunk : timeoutString.split(joinString)) {
+										TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, ttsChunk);
+										timeout.add(chunk);
+									}
 									msg.setTimeoutPrompt(timeout);
 									++numberOfChoices;
 								}

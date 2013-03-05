@@ -20,7 +20,7 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:checked="true"
-	        android:text="Help prompt" />
+	        android:text="Help prompt (comma-separated)" />
 	
 	    <EditText
 	        android:id="@+id/setglobalproperties_helpPrompt"
@@ -28,7 +28,7 @@
 	        android:layout_height="wrap_content"
 	        android:freezesText="true"
 	        android:inputType="textCapSentences"
-	        android:text="This is the help prompt"
+	        android:text="Help prompt 1,Second help prompt"
 	        android:visibility="visible" >
 	    </EditText>
 	
@@ -37,7 +37,7 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:checked="true"
-	        android:text="Timeout prompt" />
+	        android:text="Timeout prompt (comma-separated)" />
 	
 	    <EditText
 	        android:id="@+id/setglobalproperties_timeoutPrompt"
@@ -45,7 +45,7 @@
 	        android:layout_height="wrap_content"
 	        android:freezesText="true"
 	        android:inputType="textCapSentences"
-	        android:text="This is the timeout prompt"
+	        android:text="First timeout prompt,Another timeout prompt"
 	        android:visibility="visible" >
 	    </EditText>
 	
