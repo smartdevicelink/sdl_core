@@ -39,7 +39,9 @@ bool Slider_response::checkIntegrity(void)
     return Slider_responseMarshaller::checkIntegrity(*this);
 }
 
-Slider_response::Slider_response(void) : NsAppLinkRPC::ALRPCResponse(PROTOCOL_VERSION)
+Slider_response::Slider_response(void)
+  : NsAppLinkRPC::ALRPCResponse(PROTOCOL_VERSION)
+  , sliderPosition(1)
 {}
 
 bool Slider_response::set_sliderPosition(unsigned int sliderPosition_)
