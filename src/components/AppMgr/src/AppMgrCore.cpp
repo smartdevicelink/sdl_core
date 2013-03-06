@@ -5195,8 +5195,6 @@ namespace NsAppManager
                     return;
                 }
 
-                int appId = app->getAppID();
-
                 if ( (NsAppLinkRPCV2::SystemContext::SYSCTXT_HMI_OBSCURED == object->get_systemContext().get() ||
                      NsAppLinkRPCV2::SystemContext::SYSCTXT_ALERT == object->get_systemContext().get()) &&
                      1 == app->getProtocolVersion() )
@@ -5216,6 +5214,7 @@ namespace NsAppManager
                 }
                 else
                 {
+                    app->setSystemContext(object->get_systemContext());
                     app->setApplicationAudioStreamingState(NsAppLinkRPCV2::AudioStreamingState::AUDIBLE);
                     core->sendHMINotificationToMobile(app);
                     return;
