@@ -2906,10 +2906,10 @@ namespace NsAppManager
                     NsAppLinkRPCV2::AddCommand_request* object = (NsAppLinkRPCV2::AddCommand_request*)mobileMsg;
 
                     Application_v2* app = (Application_v2*)core->getItem(sessionKey);
-                    if(!app)
+                    if (!app)
                     {
                         LOG4CPLUS_ERROR_EXT(mLogger, " session key " << sessionKey
-                            << " hasn't been associated with any application!");
+                                            << " hasn't been associated with any application!");
                         NsAppLinkRPCV2::AddCommand_response* response = new NsAppLinkRPCV2::AddCommand_response();
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::AddCommandID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -2919,9 +2919,10 @@ namespace NsAppManager
                         MobileHandler::getInstance().sendRPCMessage(response, sessionKey);
                         break;
                     }
-                    if(NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
+                    if (NsAppLinkRPCV2::HMILevel::HMI_NONE == app->getApplicationHMIStatusLevel())
                     {
-                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key " << sessionKey << " has not been activated yet!" );
+                        LOG4CPLUS_WARN(mLogger, "An application " << app->getName() << " with session key "
+                                       << sessionKey << " has not been activated yet!");
                         NsAppLinkRPCV2::AddCommand_response* response = new NsAppLinkRPCV2::AddCommand_response;
                         response->setMethodId(NsAppLinkRPCV2::FunctionID::AddCommandID);
                         response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
@@ -2932,71 +2933,73 @@ namespace NsAppManager
                         break;
                     }
 
-                    const unsigned int& cmdId = object->get_cmdID();
-                    MessageChaining * chain = 0;
-                    if(object->get_menuParams())
+                    const int cmdId = object->get_cmdID();
+
+                    LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand UI request has been invoked");
+                    NsRPC2Communication::UI::AddCommand* addCmd = new NsRPC2Communication::UI::AddCommand();
+                    addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
+                    addCmd->set_cmdId(cmdId);
+                    addCmd->set_appId(app->getAppID());
+
+                    MessageChaining* chain = NULL;
+                    chain = core->addChain(chain, sessionKey, object->getCorrelationID());
+                    core->mMessageChaining[addCmd->getId()] = chain;
+
+                    if (object->get_menuParams())
                     {
-                        LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand UI request has been invoked");
-                        NsRPC2Communication::UI::AddCommand * addCmd = new NsRPC2Communication::UI::AddCommand();
-                        addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                        CommandType cmdType = CommandType::UI;
-                        const NsAppLinkRPCV2::MenuParams* menuParams = object->get_menuParams();
                         addCmd->set_menuParams(*object->get_menuParams());
-                        addCmd->set_cmdId(cmdId);
-                        addCmd->set_appId(app->getAppID());
-                        if(object->get_menuParams()->get_parentID())
+                        if (object->get_menuParams()->get_parentID())
                         {
                             const unsigned int& menuId = *object->get_menuParams()->get_parentID();
                             app->addMenuCommand(cmdId, menuId);
                         }
-                        chain = core->addChain(chain,
-                            sessionKey,
-                            object->getCorrelationID());
-                        core->mMessageChaining[addCmd->getId()] = chain;
-
-                        if(object->get_cmdIcon())
-                        {
-                            NsAppLinkRPCV2::Image* cmdIcon = const_cast<NsAppLinkRPCV2::Image*>(object->get_cmdIcon());
-
-                            char currentAppPath[FILENAME_MAX];
-                            char fullPathToIcon[FILENAME_MAX];
-
-                            memset(currentAppPath, 0, FILENAME_MAX);
-                            memset(fullPathToIcon, 0, FILENAME_MAX);
-
-                            getcwd(currentAppPath, FILENAME_MAX);
-                            snprintf(fullPathToIcon, FILENAME_MAX - 1, "%s/%s/%s"
-                                , currentAppPath, app->getName().c_str(), cmdIcon->get_value().c_str());
-
-                            LOG4CPLUS_INFO_EXT(mLogger, "Full path to sync file name: " << fullPathToIcon);
-
-                            cmdIcon->set_value(fullPathToIcon);
-                            addCmd->set_cmdIcon(*cmdIcon);
-                        }
-
-                        CommandParams params;
-                        params.menuParamsV2 = object->get_menuParams();
-                        app->addCommand(cmdId, cmdType, params);
-                        app->incrementUnrespondedRequestCount(cmdId);
-                        HMIHandler::getInstance().sendRequest(addCmd);
-
                     }
-                    if(object->get_vrCommands())
+
+                    if (object->get_cmdIcon())
+                    {
+                        NsAppLinkRPCV2::Image* cmdIcon = const_cast<NsAppLinkRPCV2::Image*>(object->get_cmdIcon());
+
+                        char currentAppPath[FILENAME_MAX];
+                        char fullPathToIcon[FILENAME_MAX];
+
+                        memset(currentAppPath, 0, FILENAME_MAX);
+                        memset(fullPathToIcon, 0, FILENAME_MAX);
+
+                        getcwd(currentAppPath, FILENAME_MAX);
+                        snprintf(fullPathToIcon, FILENAME_MAX - 1, "%s/%s/%s"
+                                 , currentAppPath, app->getName().c_str(), cmdIcon->get_value().c_str());
+
+                        LOG4CPLUS_INFO_EXT(mLogger, "Full path to sync file name: " << fullPathToIcon);
+
+                        cmdIcon->set_value(fullPathToIcon);
+                        addCmd->set_cmdIcon(*cmdIcon);
+                    }
+
+                    CommandType cmdType = CommandType::UI;
+                    CommandParams params;
+                    params.menuParamsV2 = object->get_menuParams();
+
+                    app->addCommand(cmdId, cmdType, params);
+                    app->incrementUnrespondedRequestCount(cmdId);
+                    HMIHandler::getInstance().sendRequest(addCmd);
+
+                    if (object->get_vrCommands())
                     {
                         LOG4CPLUS_INFO_EXT(mLogger, " An AddCommand VR request has been invoked");
-                        NsRPC2Communication::VR::AddCommand * addCmd = new NsRPC2Communication::VR::AddCommand();
+                        NsRPC2Communication::VR::AddCommand* addCmd = new NsRPC2Communication::VR::AddCommand();
                         addCmd->setId(HMIHandler::getInstance().getJsonRPC2Handler()->getNextMessageId());
-                        CommandType cmdType = CommandType::VR;
                         addCmd->set_vrCommands(*object->get_vrCommands());
                         addCmd->set_cmdId(cmdId);
                         addCmd->set_appId(app->getAppID());
+
+                        CommandType cmdType = CommandType::VR;
                         CommandParams params;
                         params.vrCommands = object->get_vrCommands();
+
                         app->addCommand(cmdId, cmdType, params);
                         app->incrementUnrespondedRequestCount(cmdId);
-                        chain = core->addChain(chain,
-                            sessionKey,
-                            object->getCorrelationID());
+
+                        chain = core->addChain(chain, sessionKey, object->getCorrelationID());
                         core->mMessageChaining[addCmd->getId()] = chain;
                         HMIHandler::getInstance().sendRequest(addCmd);
                     }
