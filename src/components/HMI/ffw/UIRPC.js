@@ -26,11 +26,6 @@ FFW.UI = FFW.RPCObserver.create({
 	onVRChoiseNotification:		"VR.OnChoise",
 
 	/*
-	 *	id for request Perform Interaction
- 	 */
- 	performInteractionRequestId: -1,
-
-	/*
 	 *	ids for requests AudioPassThru
  	 */
 	performAudioPassThruRequestId:		-1,
@@ -208,9 +203,7 @@ FFW.UI = FFW.RPCObserver.create({
 		    }
 		    case "UI.PerformInteraction":{
 
-				this.performInteractionRequestId = request.id;
-
-				MFT.ApplinkController.getApplicationModel(request.params.appId).onPreformInteraction(request.params);
+				MFT.ApplinkModel.uiPerformInteraction( request.params, request.id );
 
 		    	break;
 		    }
@@ -480,13 +473,13 @@ FFW.UI = FFW.RPCObserver.create({
 	/*
 	 * send notification when command was triggered
  	 */
-	interactionResponse: function( resultCode, commandId ) {
+	interactionResponse: function( resultCode, performInteractionRequestId, commandId ) {
 		Em.Logger.log("FFW.UI.PerformInteractionResponse");
 
 		// send repsonse
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
-			"id"		: 	this.performInteractionRequestId,
+			"id"		: 	performInteractionRequestId,
 			"result":	{
 				"resultCode":		resultCode,
 				"method":			"UI.PerformInteractionResponse"

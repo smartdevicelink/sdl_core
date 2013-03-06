@@ -209,7 +209,7 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 *
 	 * @param {Object}
 	 */
-	onPreformInteraction: function( message ) {
+	onPreformInteraction: function( message, performInteractionRequestId ) {
 
 		var i = 0,
 			length = message.interactionChoiceSetIDList.length;
@@ -219,13 +219,14 @@ MFT.ApplinkAppModel = Em.Object.extend({
 		for ( i = 0; i < length; i++ ) {
             var choiceSetId = message.interactionChoiceSetIDList[i];
 			MFT.InteractionChoicesView.preformChoices(
-				this.interactionChoices[ choiceSetId ]
+				this.interactionChoices[ choiceSetId ],
+                performInteractionRequestId
 			);
 
             MFT.VRPopUp.CreateInteractionChoise( this.interactionChoices[ choiceSetId ]);
 		}
 
-		MFT.InteractionChoicesView.activate(message.initialText);
+		MFT.InteractionChoicesView.activate( message.initialText );
 
 		// Show Initial prompt
 		MFT.ApplinkModel.onPrompt(message.initialPrompt);

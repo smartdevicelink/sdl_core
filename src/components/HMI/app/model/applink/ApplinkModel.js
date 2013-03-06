@@ -372,6 +372,21 @@ MFT.ApplinkModel = Em.Object.create({
     },
 
     /**
+     * Applink UI Alert response handeler
+     * show popup window 
+     *
+     * @param {Object} message Object with parameters come from ApplinkCore.
+     */
+    uiPerformInteraction: function( message, performInteractionRequestId ) {
+
+        if( !MFT.InteractionChoicesView.active ){
+            MFT.ApplinkController.getApplicationModel( message.appId ).onPreformInteraction( message, performInteractionRequestId );
+        }else{
+            MFT.ApplinkController.interactionChoiseCloseResponse( 'ABORTED', performInteractionRequestId );
+        }
+    },    
+
+    /**
      * Applink UI AudioPassThru response handeler
      * show popup window 
      *

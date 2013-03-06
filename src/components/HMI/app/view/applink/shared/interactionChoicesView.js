@@ -25,6 +25,8 @@ MFT.InteractionChoicesView = MFT.ApplinkAbstractView.create({
         itemsOnPage:5,
         items:		[]
     }),
+
+    performInteractionRequestId: null,
     
     /**
      * Deactivate window
@@ -42,7 +44,7 @@ MFT.InteractionChoicesView = MFT.ApplinkAbstractView.create({
         icon:       'images/media/ico_back.png',
         onDown:     false,
         click: function(){
-            MFT.ApplinkController.interactionChoiseCloseResponse();
+            MFT.ApplinkController.interactionChoiseCloseResponse( 'ABORTED', this.get( 'parentView.performInteractionRequestId' ) );
         }
     }),
     
@@ -60,12 +62,14 @@ MFT.InteractionChoicesView = MFT.ApplinkAbstractView.create({
      *
      * @param data: Array
      */
-    preformChoices: function( data ){
+    preformChoices: function( data, performInteractionRequestId ){
 		
 		if ( !data ) {
 			Em.Logger.error('No choices to preform')
 			return;
 		}
+
+        this.set( 'performInteractionRequestId', performInteractionRequestId );
     	
     	var i=0,
     		length = data.length;
@@ -76,10 +80,11 @@ MFT.InteractionChoicesView = MFT.ApplinkAbstractView.create({
     			{
 					type: MFT.Button,
 					params:{
-						text:			data[i].menuName,
-						choiceId:		data[i].choiceID,
-						action:			'onChoiceInteraction',
-						target:			'MFT.ApplinkAppController',
+						text:			              data[i].menuName,
+						choiceId:		              data[i].choiceID,
+						action:			              'onChoiceInteraction',
+						target:                       'MFT.ApplinkAppController',
+                        performInteractionRequestId:  performInteractionRequestId,
 						templateName:	'text'
 					}
 				} 

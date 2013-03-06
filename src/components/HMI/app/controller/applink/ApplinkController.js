@@ -178,8 +178,8 @@ MFT.ApplinkController = Em.Object.create({
     /**
      * Method to sent notification ABORTED for PerformInteractionChoise
      */
-    interactionChoiseCloseResponse: function(){
-        FFW.UI.interactionResponse( "ABORTED" );
+    interactionChoiseCloseResponse: function( result, performInteractionRequestId ){
+        FFW.UI.interactionResponse( result, performInteractionRequestId );
     },
 
     /**
