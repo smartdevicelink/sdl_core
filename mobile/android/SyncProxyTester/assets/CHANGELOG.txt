@@ -1,4 +1,5 @@
 [CW10]
+* ModuleTest: increase the delay between sending consecutive requests to 1 sec.
 + Display the requests sent by the app on connection in the log.
 * SetGlobalProperties dialog: allow to send helpPrompt and timeoutPrompt as arrays.
 * Fix CreateInteractionChoiceSet, SetGlobalProperties, and Speak layouts.
