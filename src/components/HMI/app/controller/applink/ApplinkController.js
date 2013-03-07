@@ -78,6 +78,7 @@ MFT.ApplinkController = Em.Object.create({
 
     /**
      * Handler for SoftButtons default action
+     * @param {Object}
      */
     defaultActionSoftButton: function( element ){
         switch( element.groupName ){
@@ -108,6 +109,7 @@ MFT.ApplinkController = Em.Object.create({
 
     /**
      * Handler for SoftButtons stealFocus action
+     * @param {Object}
      */
     stealFocusSoftButton: function( element ){
         switch( element.groupName ){
@@ -128,6 +130,7 @@ MFT.ApplinkController = Em.Object.create({
 
     /**
      * Handler for SoftButtons keepContext action
+     * @param {Object}
      */
     keepContextSoftButton: function( element ){
         switch( element.groupName ){
@@ -184,6 +187,8 @@ MFT.ApplinkController = Em.Object.create({
 
     /**
      * Method to sent notification for Alert
+     * @param {String} result
+     * @param {Number} alertRequestId
      */
     alertResponse: function( result, alertRequestId ){
         FFW.UI.sendUIResult( result, alertRequestId, 'UI.Alert' );
@@ -191,9 +196,20 @@ MFT.ApplinkController = Em.Object.create({
 
     /**
      * Method to sent notification for Scrollable Message
+     * @param {String} result
+     * @param {Number} messageRequestId
      */
     scrollableMessageResponse: function( result, messageRequestId ){
         FFW.UI.sendUIResult( result, messageRequestId, 'UI.ScrollableMessage' );
+    },
+
+    /**
+     * Method to sent notification for Slider
+     * @param {String} result
+     * @param {Number} sliderRequestId
+     */
+    sliderResponse: function( result, sliderRequestId ){
+        FFW.UI.sendUIResult( result, sliderRequestId, 'UI.Slider' );
     },
 
     /**
@@ -206,7 +222,7 @@ MFT.ApplinkController = Em.Object.create({
 
     /**
      * Method close PerformAudioPassThruPopUp and call response from UIRPC back to ApplinkCore
-     * @param {string} result Result code
+     * @param {String} result Result code
      */
 	performAudioPassThruResponse: function( result ){
         MFT.ApplinkModel.set('AudioPassThruState', false);
@@ -215,7 +231,7 @@ MFT.ApplinkController = Em.Object.create({
 
     /**
      * Method to set language for UI component with parameters sent from ApplinkCore to UIRPC
-     * @param {string} lang Language code
+     * @param {String} lang Language code
      */
     onLanguageChangeUI: function( lang ){
         FFW.UI.OnLanguageChange( lang );
@@ -223,7 +239,7 @@ MFT.ApplinkController = Em.Object.create({
 
     /**
      * Method to set language for TTS and VR components with parameters sent from ApplinkCore to UIRPC
-     * @param {string} lang Language code
+     * @param {String} lang Language code
      */
     onLanguageChangeTTSVR: function( lang ){
         FFW.TTS.OnLanguageChange( lang );
@@ -257,7 +273,7 @@ MFT.ApplinkController = Em.Object.create({
      * 
      * @param {Boolean}
      */
-    selectDriverDistraction: function(checked){
+    selectDriverDistraction: function( checked ){
         if(checked){
             FFW.UI.onDriverDistraction( "DD_ON" );
             this.set('driverDistractionState', true);
@@ -281,7 +297,7 @@ MFT.ApplinkController = Em.Object.create({
      * 
      * @param {Boolean}
      */
-    selectProtocolVersion: function(checked){
+    selectProtocolVersion: function( checked ){
         if(checked){
             FFW.AppLinkCoreClient.OnVersionChanged( 2 );
         }else{
@@ -292,14 +308,14 @@ MFT.ApplinkController = Em.Object.create({
 	/**
 	 * Get application model
 	 *
-	 * @param {Number} Application id
-	 * @return {Object} Application model
+	 * @param {Number}
 	 */
 	getApplicationModel: function( applicationId ) {
 		return MFT.ApplinkModel.registeredApps[ applicationId ];
 	},
 
-	/* Function returns ChangeDeviceView 
+	/**
+     * Function returns ChangeDeviceView 
 	 * back to previous state
 	 */
 	turnChangeDeviceViewBack: function(){
@@ -308,9 +324,8 @@ MFT.ApplinkController = Em.Object.create({
 
 	/**
 	 * Enter screen vith list of devices application model
-	 * 
 	 */
-	onGetDeviceList: function(  ) {
+	onGetDeviceList: function() {
 		MFT.States.goToState('info.devicelist');
 		FFW.AppLinkCoreClient.getDeviceList();
 	},
@@ -345,7 +360,7 @@ MFT.ApplinkController = Em.Object.create({
 	 * Method activates selected registered application
 	 * @param {Object}
 	 */
-	onActivateApplinkApp: function(element){
+	onActivateApplinkApp: function( element ){
 		this.getApplicationModel(element.appId).turnOnApplink();
 	},
 

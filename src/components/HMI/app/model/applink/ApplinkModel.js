@@ -257,7 +257,7 @@ MFT.ApplinkModel = Em.Object.create({
      * Applink UI ScrolableMessage activation function
      * dependent of Driver Distraction toggle state
      * @param {Object} params Object with parameters come from ApplinkCore.
-     * @param {Number} id Identification of unique request
+     * @param {Number} messageRequestId Identification of unique request
      */
     onApplinkScrolableMessage: function( params, messageRequestId ){
 
@@ -273,8 +273,8 @@ MFT.ApplinkModel = Em.Object.create({
 
     },
 
-    /*
-     * resetGlobalProperties
+    /**
+     * Handler for reset globalProperties
      * @param {String} propertyName Name of propety to reset.
      */
     resetProperties: function( params ) {
@@ -296,13 +296,18 @@ MFT.ApplinkModel = Em.Object.create({
      * setGlobalProperties
      * @param {Object} message Object with parameters come from ApplinkCore.
      */
-    setProperties: function(message) {
+    setProperties: function( message ) {
 
         this.set('globalProperties.helpPrompt', message.helpPrompt);
         this.set('globalProperties.timeoutPrompt', message.timeoutPrompt);
 
     },
 
+    /**
+     * Method to call handler from model to show
+     * list of avaliable applications
+     * @param {Object} appList
+     */
     onGetAppList: function( appList ){
 
         var i=0,
@@ -315,6 +320,11 @@ MFT.ApplinkModel = Em.Object.create({
 
     },
 
+    /**
+     * Method to call function from DeviceListView to show
+     * list of connected devices
+     * @param {Object} params
+     */
     onGetDeviceList: function( params ){
         if (null == params.resultCode || (null != params.resultCode && "SUCCESS" == params.resultCode)) {
             if( MFT.States.info.devicelist.active && params.deviceList && params.deviceList.length){
@@ -325,9 +335,9 @@ MFT.ApplinkModel = Em.Object.create({
 
     /**
      * Applink UI SetAppIcon handler
-     * @param {Object} message Object with parameters come from ApplinkCore.
-     * @param {Number}
-     * @param {String}
+     * @param {Object} message
+     * @param {Number} id
+     * @param {String} method
      */
     onApplinkSetAppIcon: function( message, id, method ){
         var img = new Image();
@@ -346,10 +356,10 @@ MFT.ApplinkModel = Em.Object.create({
     },
 
     /**
-     * Applink UI Alert Maneuver response handeler
+     * Applink UI Alert Maneuver response handler
      * show popup window 
      *
-     * @param {Object} message Object with parameters come from ApplinkCore.
+     * @param {Object} message Object with parameters come from ApplinkCore
      */
     onUIAlertManeuver: function( message ) {
 
@@ -357,10 +367,11 @@ MFT.ApplinkModel = Em.Object.create({
     },
 
     /**
-     * Applink UI Alert response handeler
+     * Applink UI Alert response handler
      * show popup window 
      *
-     * @param {Object} message Object with parameters come from ApplinkCore.
+     * @param {Object} message Object with parameters come from ApplinkCore
+     * @param {Number} alertRequestId Id of current handled request
      */
     onUIAlert: function( message, alertRequestId ) {
 
@@ -372,10 +383,11 @@ MFT.ApplinkModel = Em.Object.create({
     },
 
     /**
-     * Applink UI Alert response handeler
+     * Applink UI PerformInteraction response handler
      * show popup window 
      *
-     * @param {Object} message Object with parameters come from ApplinkCore.
+     * @param {Object} message Object with parameters come from ApplinkCore
+     * @param {Number} performInteractionRequestId Id of current handled request
      */
     uiPerformInteraction: function( message, performInteractionRequestId ) {
 
@@ -384,10 +396,25 @@ MFT.ApplinkModel = Em.Object.create({
         }else{
             MFT.ApplinkController.interactionChoiseCloseResponse( 'ABORTED', performInteractionRequestId );
         }
-    },    
+    },
 
     /**
-     * Applink UI AudioPassThru response handeler
+     * Applink UI Slider response handler
+     * show popup window 
+     *
+     * @param {Object} message Object with parameters come from ApplinkCore
+     */
+    uiSlider: function( message ) {
+
+        if( !MFT.SliderView.active ){
+            MFT.ApplinkController.getApplicationModel(message.params.appId).onSlider( message );
+        }else{
+            FFW.UI.sendSliderResult( 'ABORTED', message.id );
+        }
+    },
+
+    /**
+     * Applink UI AudioPassThru response handler
      * show popup window 
      *
      * @param {Object} message Object with parameters come from ApplinkCore.
@@ -399,7 +426,7 @@ MFT.ApplinkModel = Em.Object.create({
 
     /**
      * Method ends processing of AudioPassThru
-     * and call AudioPassThru UI response handeler
+     * and call AudioPassThru UI response handler
      */
     UIEndAudioPassThru: function() {
         if( this.AudioPassThruState ){
@@ -426,7 +453,7 @@ MFT.ApplinkModel = Em.Object.create({
     },
   
     /**
-    * Applink VR AddCommand response handeler
+    * Applink VR AddCommand response handler
     * add command to voice recognition window
     *
     *  @param {Object}
@@ -436,7 +463,7 @@ MFT.ApplinkModel = Em.Object.create({
     },
   
     /**
-    * Applink VR DeleteCommand response handeler
+    * Applink VR DeleteCommand response handler
     * delete command from voice recognition window
     *
     * @param {Number}

@@ -207,7 +207,8 @@ MFT.ApplinkAppModel = Em.Object.extend({
 	 * Applink UI PreformInteraction response handeler
 	 * open Perform Interaction screen and show choices
 	 *
-	 * @param {Object}
+	 * @param {Object} message
+     * @param {Number} performInteractionRequestId
 	 */
 	onPreformInteraction: function( message, performInteractionRequestId ) {
 
@@ -273,12 +274,12 @@ MFT.ApplinkAppModel = Em.Object.extend({
 		MFT.SliderView.loadData( message );
 		
 		MFT.SliderView.activate( this.appName );
-			 
+
 		setTimeout( function() {
 			if ( MFT.SliderView.active ) {
 				MFT.SliderView.deactivate();
 			}
-		}, message.timeout );
+		}, message.params.timeout );
 	}
 });
  

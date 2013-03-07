@@ -39,6 +39,7 @@ MFT.ScrollableMessage = MFT.ApplinkAbstractView.create({
 
     /**
      * Deactivate View
+     * @param {Object} ABORTED Parameter to indicate status for UI.ScrollableMessageResponse
      */
     deactivate: function( ABORTED ) {
         clearTimeout(this.timer);
