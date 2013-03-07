@@ -46,7 +46,7 @@ bool SliderMarshaller::checkIntegrityConst(const Slider& s)
 {
   if(s.numTicks<2 || s.numTicks>26)  return false;
 
-  if(s.position<1 || s.position>16)  return false;
+  if(s.position<1 || s.position>26)  return false;
 
   if(s.sliderHeader.length()>500)  return false;
 
@@ -152,7 +152,7 @@ bool SliderMarshaller::fromJSON(const Json::Value& json,Slider& c)
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;
     c.appId=js["appId"].asInt();
-    
+
   }
   catch(...)
   {
