@@ -103,13 +103,14 @@ class InterfaceItemBase:
 
     """
 
-    def __init__(self, name, description=[], design_description=[],
-                 issues=[], todos=[]):
+    def __init__(self, name, description=None, design_description=None,
+                 issues=None, todos=None):
         self.name = name
-        self.description = description
-        self.design_description = design_description
-        self.issues = issues
-        self.todos = todos
+        self.description = description if description is not None else []
+        self.design_description = \
+            design_description if design_description is not None else []
+        self.issues = issues if issues is not None else []
+        self.todos = todos if todos is not None else []
 
 
 class EnumElement(InterfaceItemBase):
@@ -123,8 +124,8 @@ class EnumElement(InterfaceItemBase):
 
     """
 
-    def __init__(self, name, description=[], design_description=[],
-                 issues=[], todos=[], internal_name=None, value=None):
+    def __init__(self, name, description=None, design_description=None,
+                 issues=None, todos=None, internal_name=None, value=None):
         super(InterfaceItemBase, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
@@ -142,14 +143,14 @@ class Enum(InterfaceItemBase):
 
     """
 
-    def __init__(self, name, description=[], design_description=[],
-                 issues=[], todos=[], internal_scope=None, elements=[]):
+    def __init__(self, name, description=None, design_description=None,
+                 issues=None, todos=None, internal_scope=None, elements=None):
         super(InterfaceItemBase, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
         self.internal_scope = internal_scope
-        self.elements = elements
+        self.elements = elements if elements is not None else []
 
 
 class EnumSubset(InterfaceItemBase):
@@ -163,14 +164,15 @@ class EnumSubset(InterfaceItemBase):
 
     """
 
-    def __init__(self, name, enum, description=[], design_description=[],
-                 issues=[], todos=[], allowed_elements=[]):
+    def __init__(self, name, enum, description=None, design_description=None,
+                 issues=None, todos=None, allowed_elements=None):
         super(InterfaceItemBase, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
         self.enum = enum
-        self.allowed_elements = allowed_elements
+        self.allowed_elements = \
+            allowed_elements if allowed_elements is not None else []
 
 
 class Param(InterfaceItemBase):
@@ -184,8 +186,8 @@ class Param(InterfaceItemBase):
 
     """
 
-    def __init__(self, name, param_type, description=[],
-                 design_description=[], issues=[], todos=[],
+    def __init__(self, name, param_type, description=None,
+                 design_description=None, issues=None, todos=None,
                  is_mandatory=True):
         super(InterfaceItemBase, self).__init__(
             name, description=description,
@@ -205,8 +207,8 @@ class FunctionParam(Param):
 
     """
 
-    def __init__(self, name, param_type, description=[],
-                 design_description=[], issues=[], todos=[],
+    def __init__(self, name, param_type, description=None,
+                 design_description=None, issues=None, todos=None,
                  is_mandatory=True, platform=None, default_value=None):
         super(InterfaceItemBase, self).__init__(
             name, description=description,
@@ -225,13 +227,13 @@ class Struct(InterfaceItemBase):
 
     """
 
-    def __init__(self, name, description=[], design_description=[],
-                 issues=[], todos=[], members=[]):
+    def __init__(self, name, description=None, design_description=None,
+                 issues=None, todos=None, members=None):
         super(InterfaceItemBase, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
-        self.members = members
+        self.members = members if members is not None else []
 
 
 class Function(InterfaceItemBase):
@@ -247,9 +249,9 @@ class Function(InterfaceItemBase):
 
     """
 
-    def __init__(self, name, function_id, message_type, description=[],
-                 design_description=[], issues=[], todos=[], members=[],
-                 platform=None, params=[]):
+    def __init__(self, name, function_id, message_type, description=None,
+                 design_description=None, issues=None, todos=None,
+                 platform=None, params=None):
         super(InterfaceItemBase, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
@@ -257,7 +259,7 @@ class Function(InterfaceItemBase):
         self.function_id = function_id
         self.message_type = message_type
         self.platform = platform
-        self.params = params
+        self.params = params if params is not None else []
 
 
 class Interface:
@@ -272,8 +274,8 @@ class Interface:
 
     """
 
-    def __init__(self, enums=[], structs=[], functions=[], params={}):
-        self.enums = enums
-        self.structs = structs
-        self.functions = functions
-        self.params = params
+    def __init__(self, enums=None, structs=None, functions=None, params=None):
+        self.enums = enums if enums is not None else []
+        self.structs = structs if structs is not None else []
+        self.functions = functions if functions is not None else []
+        self.params = params if params is not None else []
