@@ -4,6 +4,8 @@ import pep257
 import os.path
 import fnmatch
 import os
+import pylint.lint
+import sys
 
 class TestCodeFormatAndQuality(unittest.TestCase):
 
@@ -39,6 +41,16 @@ class TestCodeFormatAndQuality(unittest.TestCase):
                     print(error)
                 print
         self.assertEqual(len(errors), 0, "Found Docstring Conventions violations.")
+
+    def test_pylint_conformance(self):
+        original_exit = sys.exit
+        def no_exit(arg):
+            sys.exit = original_exit
+            self.assertEqual(0, arg, "Found Pylint violations")
+
+        sys.exit = no_exit
+        pylint.lint.Run(['--rcfile=pylint.cfg','generator', 'Generator.py'])
+        sys.exit = original_exit
 
 if __name__ == '__main__':
     unittest.main()
