@@ -8,14 +8,14 @@ output files.
 """
 
 
-class Boolean:
+class Boolean(object):
 
     """Boolean type."""
 
     pass
 
 
-class Integer:
+class Integer(object):
 
     """Integer type.
 
@@ -30,7 +30,7 @@ class Integer:
         self.max_value = max_value
 
 
-class Double:
+class Double(object):
 
     """Floating-point type.
 
@@ -45,7 +45,7 @@ class Double:
         self.max_value = max_value
 
 
-class String:
+class String(object):
 
     """String type.
 
@@ -58,7 +58,7 @@ class String:
         self.max_length = max_length
 
 
-class Array:
+class Array(object):
 
     """Array type.
 
@@ -75,7 +75,7 @@ class Array:
         self.element_type = element_type
 
 
-class Issue:
+class Issue(object):
 
     """Issue.
 
@@ -90,7 +90,7 @@ class Issue:
         self.value = value
 
 
-class InterfaceItemBase:
+class InterfaceItemBase(object):
 
     """Base class for interface item.
 
@@ -126,7 +126,7 @@ class EnumElement(InterfaceItemBase):
 
     def __init__(self, name, description=None, design_description=None,
                  issues=None, todos=None, internal_name=None, value=None):
-        super(InterfaceItemBase, self).__init__(
+        super(EnumElement, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
         self.internal_name = internal_name
@@ -145,7 +145,7 @@ class Enum(InterfaceItemBase):
 
     def __init__(self, name, description=None, design_description=None,
                  issues=None, todos=None, internal_scope=None, elements=None):
-        super(InterfaceItemBase, self).__init__(
+        super(Enum, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
@@ -166,7 +166,7 @@ class EnumSubset(InterfaceItemBase):
 
     def __init__(self, name, enum, description=None, design_description=None,
                  issues=None, todos=None, allowed_elements=None):
-        super(InterfaceItemBase, self).__init__(
+        super(EnumSubset, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
@@ -189,7 +189,7 @@ class Param(InterfaceItemBase):
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
                  is_mandatory=True):
-        super(InterfaceItemBase, self).__init__(
+        super(Param, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
@@ -210,7 +210,7 @@ class FunctionParam(Param):
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
                  is_mandatory=True, platform=None, default_value=None):
-        super(InterfaceItemBase, self).__init__(
+        super(FunctionParam, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
@@ -229,7 +229,7 @@ class Struct(InterfaceItemBase):
 
     def __init__(self, name, description=None, design_description=None,
                  issues=None, todos=None, members=None):
-        super(InterfaceItemBase, self).__init__(
+        super(Struct, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
@@ -252,7 +252,7 @@ class Function(InterfaceItemBase):
     def __init__(self, name, function_id, message_type, description=None,
                  design_description=None, issues=None, todos=None,
                  platform=None, params=None):
-        super(InterfaceItemBase, self).__init__(
+        super(Function, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
@@ -262,7 +262,7 @@ class Function(InterfaceItemBase):
         self.params = params if params is not None else {}
 
 
-class Interface:
+class Interface(object):
 
     """Interface.
 
