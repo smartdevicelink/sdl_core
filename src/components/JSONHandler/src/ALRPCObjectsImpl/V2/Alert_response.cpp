@@ -40,7 +40,9 @@ bool Alert_response::checkIntegrity(void)
     return Alert_responseMarshaller::checkIntegrity(*this);
 }
 
-Alert_response::Alert_response(void) : NsAppLinkRPC::ALRPCResponse(PROTOCOL_VERSION)
+Alert_response::Alert_response(void)
+    : NsAppLinkRPC::ALRPCResponse(PROTOCOL_VERSION)
+    , tryAgainTime(0)
 {}
 
 bool Alert_response::set_tryAgainTime(unsigned int tryAgainTime_)

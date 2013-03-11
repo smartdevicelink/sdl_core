@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -37,6 +36,7 @@ import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
@@ -54,6 +54,7 @@ import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
+import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
@@ -77,10 +78,12 @@ import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
 import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
 import com.ford.syncV4.proxy.rpc.SetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimerResponse;
+import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.ShowConstantTBTResponse;
 import com.ford.syncV4.proxy.rpc.ShowResponse;
 import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
+import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
@@ -100,6 +103,9 @@ public class ProxyService extends Service implements IProxyListenerALM {
 	
 	private static final String ICON_SYNC_FILENAME = "icon.png";
 	private static final String ICON_FILENAME_SUFFIX = ".png";
+	
+	private static final int XML_TEST_COMMAND = 100;
+	private static final int POLICIES_TEST_COMMAND = 101;
 
 	private static SyncProxyTester _mainInstance;	
 	private static ProxyService _instance;
@@ -333,7 +339,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		playAnnoyingRepetitiveAudio();
 		
 		try {
-			_syncProxy.show("Sync Proxy", "Tester", null, null, null, null, nextCorrID());
+			show("Sync Proxy", "Tester");
 		} catch (SyncException e) {
 			if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 			if (_msgAdapter != null) _msgAdapter.logMessage("Error sending show", Log.ERROR, e, true);
@@ -341,11 +347,11 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		}
 
 		try { 
-			_syncProxy.subscribeButton(ButtonName.OK, nextCorrID());
-			_syncProxy.subscribeButton(ButtonName.SEEKLEFT, nextCorrID());
-			_syncProxy.subscribeButton(ButtonName.SEEKRIGHT, nextCorrID());
-			_syncProxy.subscribeButton(ButtonName.TUNEUP, nextCorrID());
-			_syncProxy.subscribeButton(ButtonName.TUNEDOWN, nextCorrID());
+			subscribeToButton(ButtonName.OK);
+			subscribeToButton(ButtonName.SEEKLEFT);
+			subscribeToButton(ButtonName.SEEKRIGHT);
+			subscribeToButton(ButtonName.TUNEUP);
+			subscribeToButton(ButtonName.TUNEDOWN);
 			Vector<ButtonName> buttons = new Vector<ButtonName>(Arrays.asList(new ButtonName[] {
 					ButtonName.OK, ButtonName.SEEKLEFT, ButtonName.SEEKRIGHT, ButtonName.TUNEUP,
 					ButtonName.TUNEDOWN }));
@@ -358,13 +364,43 @@ public class ProxyService extends Service implements IProxyListenerALM {
 
 		
 		try {
-			_syncProxy.addCommand(100, "XML Test", new Vector<String>(Arrays.asList(new String[] {"XML Test", "XML"})), nextCorrID());
-			_syncProxy.addCommand(101, "Policies Test", new Vector<String>(Arrays.asList(new String[] {"Policies Test", "Policies"})), nextCorrID());
+			addCommand(XML_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[] {"XML Test", "XML"})), "XML Test");
+			addCommand(POLICIES_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[] {"Policies Test", "Policies"})), "Policies Test");
 		} catch (SyncException e) {
 			if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
 			if (_msgAdapter != null) _msgAdapter.logMessage("Error adding AddCommands", Log.ERROR, e, true);
 			else Log.e(TAG, "Error adding AddCommands", e);
 		}
+	}
+
+	private void show(String mainField1, String mainField2) throws SyncException {
+		Show msg = new Show();
+		msg.setCorrelationID(nextCorrID());
+		msg.setMainField1(mainField1);
+		msg.setMainField2(mainField2);
+		_msgAdapter.logMessage(msg, true);
+		_syncProxy.sendRPCRequest(msg);
+	}
+
+	private void addCommand(Integer cmdId, Vector<String> vrCommands,
+			String menuName) throws SyncException {
+		AddCommand addCommand = new AddCommand();
+		addCommand.setCorrelationID(nextCorrID());
+		addCommand.setCmdID(cmdId);
+		addCommand.setVrCommands(vrCommands);
+		MenuParams menuParams = new MenuParams();
+		menuParams.setMenuName(menuName);
+		addCommand.setMenuParams(menuParams);
+		_msgAdapter.logMessage(addCommand, true);
+		_syncProxy.sendRPCRequest(addCommand);
+	}
+	
+	private void subscribeToButton(ButtonName buttonName) throws SyncException {
+		SubscribeButton msg = new SubscribeButton();
+		msg.setCorrelationID(nextCorrID());
+		msg.setButtonName(buttonName);
+		_msgAdapter.logMessage(msg, true);
+		_syncProxy.sendRPCRequest(msg);
 	}
 	
 	public void playPauseAnnoyingRepetitiveAudio() {
@@ -477,7 +513,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 					else {
 						try {
 							if (!waitingForResponse && _testerMain.getThreadContext() != null) {
-								_syncProxy.show("Sync Proxy", "Tester Ready", null, null, null, null, nextCorrID());
+								show("Sync Proxy", "Tester Ready");
 							}
 						} catch (SyncException e) {
 							if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
@@ -511,11 +547,13 @@ public class ProxyService extends Service implements IProxyListenerALM {
 					putFile.setSyncFileName(ICON_SYNC_FILENAME);
 					putFile.setCorrelationID(nextCorrID());
 					putFile.setBulkData(contentsOfResource(R.raw.fiesta));
+					_msgAdapter.logMessage(putFile, true);
 					getProxyInstance().sendRPCRequest(putFile);
 					
 					SetAppIcon setAppIcon = new SetAppIcon();
 					setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
 					setAppIcon.setCorrelationID(nextCorrID());
+					_msgAdapter.logMessage(setAppIcon, true);
 					getProxyInstance().sendRPCRequest(setAppIcon);
 					
 					// upload turn icons
@@ -569,6 +607,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 				+ ICON_FILENAME_SUFFIX);
 		putFile.setCorrelationID(nextCorrID());
 		putFile.setBulkData(contentsOfResource(resource));
+		_msgAdapter.logMessage(putFile, true);
 		getProxyInstance().sendRPCRequest(putFile);
 	}
 	
@@ -580,10 +619,10 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		
 		switch(notification.getCmdID())
 		{
-			case 100: //XML Test
+			case XML_TEST_COMMAND:
 				_testerMain.restart();
 				break;
-			case 101: //Policies Test
+			case POLICIES_TEST_COMMAND:
 				PoliciesTest.runPoliciesTest();
 				break;
 			default:

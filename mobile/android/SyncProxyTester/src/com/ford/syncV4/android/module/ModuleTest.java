@@ -650,7 +650,7 @@ public class ModuleTest {
 					
 					try {
 						synchronized (this) {
-							this.wait(500);
+							this.wait(1000);
 						}
 					} catch (InterruptedException e) {
 						_msgAdapter.logMessage("InterruptedException", true);

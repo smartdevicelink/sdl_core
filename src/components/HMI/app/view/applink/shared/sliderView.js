@@ -32,6 +32,11 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 		content:	'Footer Label',
 		data:       []
 	}),
+
+	/**
+     * Identifier of current request
+     */
+	sliderRequestId:	null,
 	
 	/**
 	 * Extend deactivate method
@@ -39,7 +44,7 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 	 */
 	deactivate: function() {
 		this._super();
-		FFW.UI.sendSliderResult( "SUCCESS", this.get('adjustControl.sliderValue.value') );
+		FFW.UI.sendSliderResult( "SUCCESS", this.get( 'sliderRequestId' ), this.get('adjustControl.sliderValue.value') );
 	},
 		
 	adjustControl: Em.ContainerView.extend({
@@ -80,7 +85,12 @@ MFT.SliderView = MFT.ApplinkAbstractView.create({
 		})
 	}),
 	
-    loadData: function( data ){
+    loadData: function( message ){
+
+    	var data = message.params;
+
+    	this.set( 'sliderRequestId', message.id);
+
         this.set( 'headerLabel.content', data.sliderHeader );
         this.set( 'footerLabel.content', data.sliderFooter[0] );
 		this.get( 'adjustControl.sliderValue').set('range',data.numTicks);

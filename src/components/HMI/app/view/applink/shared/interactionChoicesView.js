@@ -26,6 +26,9 @@ MFT.InteractionChoicesView = MFT.ApplinkAbstractView.create({
         items:		[]
     }),
 
+    /**
+     * Identifier of current request
+     */
     performInteractionRequestId: null,
     
     /**
