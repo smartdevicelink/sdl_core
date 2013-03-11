@@ -150,7 +150,7 @@ class Enum(InterfaceItemBase):
             design_description=design_description, issues=issues, todos=todos)
 
         self.internal_scope = internal_scope
-        self.elements = elements if elements is not None else []
+        self.elements = elements if elements is not None else {}
 
 
 class EnumSubset(InterfaceItemBase):
@@ -159,7 +159,7 @@ class EnumSubset(InterfaceItemBase):
 
     Instance variables:
     enum -- enumeration
-    allowed_elements -- list of elements of enumeration
+    allowed_elements -- dictionary of elements of enumeration
                         which are allowed in this subset
 
     """
@@ -172,7 +172,7 @@ class EnumSubset(InterfaceItemBase):
 
         self.enum = enum
         self.allowed_elements = \
-            allowed_elements if allowed_elements is not None else []
+            allowed_elements if allowed_elements is not None else {}
 
 
 class Param(InterfaceItemBase):
@@ -223,7 +223,7 @@ class Struct(InterfaceItemBase):
     """Structure.
 
     Instance variables:
-    members -- list of structure members (instances of Param class)
+    members -- dictionary of structure members (instances of Param class)
 
     """
 
@@ -233,7 +233,7 @@ class Struct(InterfaceItemBase):
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
-        self.members = members if members is not None else []
+        self.members = members if members is not None else {}
 
 
 class Function(InterfaceItemBase):
@@ -259,7 +259,7 @@ class Function(InterfaceItemBase):
         self.function_id = function_id
         self.message_type = message_type
         self.platform = platform
-        self.params = params if params is not None else []
+        self.params = params if params is not None else {}
 
 
 class Interface:
@@ -267,15 +267,15 @@ class Interface:
     """Interface.
 
     Instance variables:
-    enums -- list of enumerations
-    structs -- list of structures
-    functions -- list of functions
+    enums -- dictionary of enumerations
+    structs -- dictionary of structures
+    functions -- dictionary of functions
     params -- dictionary of interface parameters (name, version, etc.)
 
     """
 
     def __init__(self, enums=None, structs=None, functions=None, params=None):
-        self.enums = enums if enums is not None else []
-        self.structs = structs if structs is not None else []
-        self.functions = functions if functions is not None else []
-        self.params = params if params is not None else []
+        self.enums = enums if enums is not None else {}
+        self.structs = structs if structs is not None else {}
+        self.functions = functions if functions is not None else {}
+        self.params = params if params is not None else {}
