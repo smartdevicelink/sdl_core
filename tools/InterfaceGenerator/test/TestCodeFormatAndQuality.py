@@ -43,6 +43,7 @@ class TestCodeFormatAndQuality(unittest.TestCase):
         self.assertEqual(len(errors), 0, "Found Docstring Conventions violations.")
 
     def test_pylint_conformance(self):
+        print
         original_exit = sys.exit
         def no_exit(arg):
             sys.exit = original_exit
