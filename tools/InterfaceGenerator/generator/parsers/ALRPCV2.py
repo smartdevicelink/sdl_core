@@ -20,7 +20,7 @@ class ParseError(Exception):
     pass
 
 
-class Parser:
+class Parser(object):
 
     """ALRPCV2 Parser."""
 
