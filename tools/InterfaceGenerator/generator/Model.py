@@ -211,7 +211,7 @@ class FunctionParam(Param):
                  design_description=None, issues=None, todos=None,
                  is_mandatory=True, platform=None, default_value=None):
         super(FunctionParam, self).__init__(
-            name, description=description,
+            name, param_type=param_type, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
         self.platform = platform
