@@ -162,7 +162,7 @@ namespace {
         std::string url = my_data->url;
         NsAppManager::SyncPManager::PData pData = my_data->pdata;
         LOG4CPLUS_INFO_EXT(logger, " Sending params: url " << url << " timeout " << timeout << " data of " << pData.size() << " lines");
-        sleep(timeout);  // TODO(akandul): Why we use it?
+        sleep(timeout);  // TODO(AK): Why we use it?
         int port = 80;
         size_t pos = url.find(":");
         if(pos != std::string::npos)
@@ -272,7 +272,7 @@ namespace {
         }
         else if (data_->bitsPerSample.get() == NsAppLinkRPCV2::AudioCaptureQuality::FIX_16_BIT)
         {
-            filename = "";  //TODO(akandul): Add file name here.
+            filename = "";  // TODO(AK): Add file name here.
             audioLength = static_cast<unsigned int>(1000 * 60 * 2.7); // 3 minute audio.
         }
         else
@@ -2308,8 +2308,8 @@ namespace NsAppManager
 
                     getcwd(currentAppPath, FILENAME_MAX);
                     const std::string& syncFileName = request->get_syncFileName();
-                    // TODO(akandul): We look for icon in current app dir.
-                    // (pvysh): and that is correct, why todo?
+                    // TODO(AK): We look for icon in current app dir.
+                    // TODO(PV): and that is correct, why todo?
                     snprintf(fullPathToSyncFileName, FILENAME_MAX - 1, "%s/%s/%s"
                         , currentAppPath, app->getName().c_str(), syncFileName.c_str());
 
@@ -5391,7 +5391,7 @@ namespace NsAppManager
                     static_cast<NsRPC2Communication::UI::OnLanguageChange*>(msg);
                 if ( languageChange->get_hmiDisplayLanguage().get() != core->mUiLanguageV2.get() )
                 {
-                    //TODO (pVysh): clear mess around versions up.
+                    // TODO(PV): clear mess around versions up.
                     core->mUiLanguageV2 = languageChange->get_hmiDisplayLanguage();
                     core->mUiLanguageV1.set(static_cast<NsAppLinkRPC::Language::LanguageInternal>(languageChange->get_hmiDisplayLanguage().get()));
 
@@ -5441,7 +5441,7 @@ namespace NsAppManager
                     return;
                 }
 
-                //TODO: exchange when result is not succes.
+                // TODO: exchange when result is not succes.
                 if(core->decreaseMessageChain(it))
                 {
                     if ( NsAppLinkRPCV2::Result::SUCCESS != response->getResult() )
@@ -5452,7 +5452,7 @@ namespace NsAppManager
                                 , it->second->correlationID
                                 , false
                                 , it->second->connectionKey);
-                        //TODO (pvysh): not sure if this is correct behaviour
+                        // TODO(PV): not sure if this is correct behaviour
                         app->setHMIDisplayLanguageDesired(core->mUiLanguageV2);
                     }
                     else
@@ -5728,7 +5728,7 @@ namespace NsAppManager
                         case 1:
                         {
                             NsAppLinkRPC::DeleteCommand_response* response = new NsAppLinkRPC::DeleteCommand_response();
-                            //TODO (pvysh): use here result from message chain.
+                            // TODO(PV): use here result from message chain.
                             response->set_success(true);
                             response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                             response->setCorrelationID(correlationID);
@@ -5741,7 +5741,7 @@ namespace NsAppManager
                             NsAppLinkRPCV2::DeleteCommand_response* response = new NsAppLinkRPCV2::DeleteCommand_response();
                             response->setMethodId(NsAppLinkRPCV2::FunctionID::DeleteCommandID);
                             response->setMessageType(NsAppLinkRPC::ALRPCMessage::RESPONSE);
-                            //TODO (pvysh): use here result from message chain.
+                            // TODO(PV): use here result from message chain.
                             response->set_success(true);
                             response->set_resultCode(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(object->getResult()));
                             response->setCorrelationID(correlationID);
@@ -5801,7 +5801,7 @@ namespace NsAppManager
                     static_cast<NsRPC2Communication::VR::OnLanguageChange*>(msg);
                 if ( languageChange->get_language().get() != core->mVrLanguageV2.get() )
                 {
-                    //TODO(pvysh): clear mess around versions up.
+                    // TODO(PV): clear mess around versions up.
                     core->mVrLanguageV2 = languageChange->get_language();
                     core->mVrLanguageV1.set(static_cast<NsAppLinkRPC::Language::LanguageInternal>(languageChange->get_language().get()));
 
@@ -5842,7 +5842,7 @@ namespace NsAppManager
                     return;
                 }
 
-                //TODO (pvysh): exchange when result is not succes.
+                // TODO(PV): exchange when result is not succes.
                 int connectionKey = it->second->connectionKey;
                 unsigned int correlationID = it->second->correlationID;
 
@@ -5856,7 +5856,7 @@ namespace NsAppManager
                                 , correlationID
                                 , false
                                 , connectionKey);
-                        //TODO (pvysh): not sure if this is correct behaviour
+                        // TODO(PV): not sure if this is correct behaviour
                         app->setLanguageDesired(core->mVrLanguageV2);
                     }
                     else
@@ -5979,7 +5979,7 @@ namespace NsAppManager
                     static_cast<NsRPC2Communication::TTS::OnLanguageChange*>(msg);
                 if ( languageChange->get_language().get() != core->mTtsLanguageV2.get() )
                 {
-                    //TODO (pvysh): clear mess around versions up.
+                    // TODO(PV): clear mess around versions up.
                     core->mTtsLanguageV2 = languageChange->get_language();
                     core->mTtsLanguageV1.set(static_cast<NsAppLinkRPC::Language::LanguageInternal>(languageChange->get_language().get()));
 
@@ -6033,7 +6033,7 @@ namespace NsAppManager
                                 , correlationID
                                 , false
                                 , connectionKey);
-                        //TODO(pvysh): not sure if this is correct behaviour
+                        // TODO(PV): not sure if this is correct behaviour
                         app->setLanguageDesired(core->mVrLanguageV2);
                     }
                     else
@@ -6305,7 +6305,7 @@ namespace NsAppManager
                     return;
                 }
 
-                // TODO (pvysh): don't forget after refactoring: get to this switch only if not in NONE
+                // TODO(PV): don't forget after refactoring: get to this switch only if not in NONE
                 switch ( appDeacivated->get_reason().get() )
                 {
                     case NsAppLinkRPCV2::DeactivateReason::AUDIO:
@@ -6328,7 +6328,7 @@ namespace NsAppManager
                     {
                         if ( currentApp->getIsMediaApplication() )
                         {
-                            // TODO (pvysh): for media it seems for FULL it is neccessarily that its audio is AUDIBLE.
+                            // TODO(PV): for media it seems for FULL it is neccessarily that its audio is AUDIBLE.
                             if ( NsAppLinkRPCV2::HMILevel::HMI_FULL ==
                                 currentApp->getApplicationHMIStatusLevel() )
                             {
@@ -6345,7 +6345,7 @@ namespace NsAppManager
                     }
                     default:
                     {
-                        // TODO (pvysh): what should be done in this case?
+                        // TODO(PV): what should be done in this case?
                         return;
                     }
                 }
@@ -6740,7 +6740,7 @@ namespace NsAppManager
                 bool isMediaApplication = registerRequest->get_isMediaApplication();
                 if (mVrLanguageV2.get() != mTtsLanguageV2.get())
                 {
-                    //TODO: posibly notify application that VR&TTS have different languages.
+                    // TODO: posibly notify application that VR&TTS have different languages.
                     LOG4CPLUS_WARN(mLogger, "VR and TTS have different active languages. Unspecified behaviour.");
                 }
                 application->setLanguageDesired(mVrLanguageV2);
@@ -7437,7 +7437,7 @@ namespace NsAppManager
                     it->second.removeConnectionKey( sessionKey );
                     LOG4CPLUS_INFO_EXT(mLogger, "\n\t\t\t\tsession " << sessionKey
                         << " revmoved from device " << it->first);
-                    //TODO pvysh : remove from applist if all sessions are closed.
+                    // TODO(PV): remove from applist if all sessions are closed.
                     mApplications.erase( sessionKey );
                     break;
                 }
@@ -7629,7 +7629,7 @@ namespace NsAppManager
                 continue;
             }
 
-            //TODO (pvysh): at this point it is assumed that behaviour is correct and
+            // TODO(PV): at this point it is assumed that behaviour is correct and
             // when app is not in HMI_FULL/HMI_LIMITED it is not audible.
             if ( tempApplication->getIsMediaApplication()
                     && NsAppLinkRPCV2::AudioStreamingState::AUDIBLE
