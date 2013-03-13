@@ -12,6 +12,35 @@ set(CMAKE_CXX_FLAGS_RELEASE "-s") #It will be appended to CMAKE_CXX_FLAGS in rel
 
 option( BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 
+
+# --- Interface generator
+
+find_package(PythonInterp)
+if(NOT PYTHONINTERP_FOUND)
+    message(ERROR "Python interpreter is not found")
+    message(ERROR "To install it type in the command line:")
+    message(ERROR "sudo apt-get install python")
+endif(NOT PYTHONINTERP_FOUND)
+
+set(INTEFRACE_GENERATOR "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
+set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE}  ${INTEFRACE_GENERATOR})
+
+macro (GenerateInterface arg_namespace arg_xml_name)
+    string(REGEX MATCH "^[a-zA-Z_]*[^.]" file_name ${arg_xml_name})     # TODO: make expression more robust
+    
+    set(hpp_file "${file_name}.hpp")
+    set(cpp_file "${file_name}.cpp")
+    set(full_xml_name "${CMAKE_CURRENT_SOURCE_DIR}/${arg_xml_name}")
+    
+    add_custom_command( OUTPUT ${hpp_file} ${cpp_file}
+                        COMMAND ${INTEFRACE_GENERATOR_CMD} ${arg_namespace} ${full_xml_name} ${CMAKE_CURRENT_BINARY_DIR}
+                        DEPENDS ${INTEFRACE_GENERATOR}
+                        COMMENT "Generating files ${hpp_file} ${cpp_file} from ${arg_xml_name} ..."
+                        VERBATIM 
+                      )
+endmacro(GenerateInterface)
+
+
 # Building application
 
 # --- ThirdPartyLibs
