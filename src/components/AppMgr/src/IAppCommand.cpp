@@ -1,8 +1,6 @@
-/**
- * \file IAppCommand.cpp
- * \brief IAppCommand interface
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/IAppCommand.h"
 #include "LoggerHelper.hpp"

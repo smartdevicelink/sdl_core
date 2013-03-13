@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #ifndef APPLICATION_V2_H
 #define APPLICATION_V2_H
 

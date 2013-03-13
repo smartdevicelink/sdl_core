@@ -1,8 +1,6 @@
-/**
- * \file ConnectionHandler.h
- * \brief connection handler
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef APPCONNECTIONHANDLER_H
 #define APPCONNECTIONHANDLER_H

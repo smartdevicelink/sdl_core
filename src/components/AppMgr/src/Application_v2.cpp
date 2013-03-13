@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #include "AppMgr/Application_v2.h"
 #include "LoggerHelper.hpp"
 

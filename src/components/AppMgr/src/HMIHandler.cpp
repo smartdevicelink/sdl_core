@@ -1,8 +1,6 @@
-/**
- * \file HMIHandler.cpp
- * \brief HMI handler
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/HMIHandler.h"
 #include "JSONHandler/JSONRPC2Handler.h"

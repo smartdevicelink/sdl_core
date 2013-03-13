@@ -1,8 +1,6 @@
-/**
- * \file DeviceList.cpp
- * \brief Device list
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/DeviceList.h"
 

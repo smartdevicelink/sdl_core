@@ -1,8 +1,6 @@
-/**
- * \file Application.cpp
- * \brief Application metaphor
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/Application.h"
 #include "LoggerHelper.hpp"

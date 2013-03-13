@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #ifndef MESSAGE_CHAINING_CLASS
 #define MESSAGE_CHAINING_CLASS
 

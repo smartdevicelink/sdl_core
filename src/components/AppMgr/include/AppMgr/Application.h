@@ -1,8 +1,6 @@
-/**
- * \file Application.h
- * \brief Application metaphor
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef APPLICATION_H_
 #define APPLICATION_H_

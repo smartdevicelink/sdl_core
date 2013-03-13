@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #ifndef DEVICEHANDLER_H
 #define DEVICEHANDLER_H
 

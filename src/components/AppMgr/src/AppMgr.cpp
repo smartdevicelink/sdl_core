@@ -1,8 +1,6 @@
-/**
- * \file AppMgr.cpp
- * \brief Application manager main component
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/AppMgr.h"
 #include "AppMgr/AppMgrCore.h"

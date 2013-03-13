@@ -1,8 +1,6 @@
-/**
- * \file MobileHandler.cpp
- * \brief Mobile handler
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/MobileHandler.h"
 #include "JSONHandler/JSONHandler.h"

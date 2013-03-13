@@ -1,8 +1,6 @@
-/**
- * \file MenuMapping.cpp
- * \brief Menu mapping
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/MenuMapping.h"
 #include "LoggerHelper.hpp"

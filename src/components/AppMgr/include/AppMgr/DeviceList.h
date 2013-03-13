@@ -1,8 +1,6 @@
-/**
- * \file DeviceList.h
- * \brief Device list
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef DEVICELIST_H
 #define DEVICELIST_H

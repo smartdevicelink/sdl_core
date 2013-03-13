@@ -1,8 +1,6 @@
-/**
- * \file ConnectionHandler.cpp
- * \brief connection handler
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/ConnectionHandler.h"
 #include "ConnectionHandler/IDevicesDiscoveryStarter.hpp"

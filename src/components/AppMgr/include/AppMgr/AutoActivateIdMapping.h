@@ -1,8 +1,6 @@
-/**
- * \file AutoActivateIdMapping.h
- * \brief AutoActivateId mapping
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef AUTOACTIVATEIDMAPPING_H
 #define AUTOACTIVATEIDMAPPING_H

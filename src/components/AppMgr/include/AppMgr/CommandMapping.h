@@ -1,8 +1,6 @@
-/**
- * \file CommandMapping.h
- * \brief Command mapping
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef COMMANDMAPPING_H
 #define COMMANDMAPPING_H

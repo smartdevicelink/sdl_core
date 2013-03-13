@@ -1,8 +1,7 @@
-/**
- * \file AppMgrCore.cpp
- * \brief App manager core functionality
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #include <sys/socket.h>
 #include <signal.h>
 #include <pthread.h>

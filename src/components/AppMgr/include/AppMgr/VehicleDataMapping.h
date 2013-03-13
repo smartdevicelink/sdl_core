@@ -1,8 +1,6 @@
-/**
- * \file VehicleDataMapping.h
- * \brief VehicleData mapping
- * \author akara
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef VEHICLEDATAMAPPING_H
 #define VEHICLEDATAMAPPING_H

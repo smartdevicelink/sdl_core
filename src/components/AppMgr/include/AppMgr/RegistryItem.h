@@ -1,8 +1,6 @@
-/**
- * \file RegistryItem.h
- * \brief Registered application in a registry
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef REGISTRYITEM_H_
 #define REGISTRYITEM_H_

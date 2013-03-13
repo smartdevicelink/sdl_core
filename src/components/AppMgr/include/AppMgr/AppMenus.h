@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #ifndef APPMENUS_H
 #define APPMENUS_H
 

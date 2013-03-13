@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #include "AppMgr/AppChoiceSets.h"
 #include "LoggerHelper.hpp"
 

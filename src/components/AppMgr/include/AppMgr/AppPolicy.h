@@ -1,8 +1,6 @@
-/**
- * \file AppPolicy.cpp
- * \brief Application policy representation
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef APPPOLICY_H_
 #define APPPOLICY_H_

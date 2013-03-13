@@ -1,8 +1,6 @@
-/**
- * \file MobileHandler.h
- * \brief Mobile handler
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef MOBILEHANDLER_H
 #define MOBILEHANDLER_H

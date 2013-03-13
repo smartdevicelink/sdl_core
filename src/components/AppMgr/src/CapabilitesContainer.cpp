@@ -1,8 +1,6 @@
-/**
- * \file CapabilitiesContainer.cpp
- * \brief Capabilities container
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/CapabilitesContainer.h"
 #include "LoggerHelper.hpp"

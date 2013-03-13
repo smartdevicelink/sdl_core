@@ -1,8 +1,6 @@
-/**
- * \file AppMgrCoreQueues.h
- * \brief Application manager queues
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef APPMGRCOREQUEUES_H
 #define APPMGRCOREQUEUES_H

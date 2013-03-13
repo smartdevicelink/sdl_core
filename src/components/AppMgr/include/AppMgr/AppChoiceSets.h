@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #ifndef APPCHOICESETS_H
 #define APPCHOICESETS_H
 

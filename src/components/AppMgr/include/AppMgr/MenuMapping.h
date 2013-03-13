@@ -1,8 +1,6 @@
-/**
- * \file MenuMapping.h
- * \brief Menu mapping
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef MENUMAPPING_H
 #define MENUMAPPING_H

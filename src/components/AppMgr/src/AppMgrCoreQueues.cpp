@@ -1,8 +1,6 @@
-/**
- * \file AppMgrCoreQueues.cpp
- * \brief Application manager queues
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/AppMgrCoreQueues.h"
 #include "LoggerHelper.hpp"

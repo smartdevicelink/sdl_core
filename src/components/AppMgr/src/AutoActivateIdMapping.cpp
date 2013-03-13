@@ -1,12 +1,6 @@
-/**
- * \file AutoActivateIdMapping.cpp
- * \brief AutoActivateId mapping
- * \author vsalo
- */
-
-#include "AppMgr/AutoActivateIdMapping.h"
-#include <sstream>
-#include "LoggerHelper.hpp"
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 namespace NsAppManager
 {

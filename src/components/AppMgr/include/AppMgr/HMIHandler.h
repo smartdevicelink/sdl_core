@@ -1,8 +1,6 @@
-/**
- * \file HMIHandler.h
- * \brief HMI handler
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef HMIHANDLER_H
 #define HMIHANDLER_H

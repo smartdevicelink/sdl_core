@@ -1,8 +1,6 @@
-/**
- * \file VehicleDataMapping.cpp
- * \brief VehicleData mapping
- * \author akara
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/VehicleDataMapping.h"
 #include "AppMgr/RegistryItem.h"

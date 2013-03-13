@@ -1,8 +1,6 @@
-/**
- * \file SyncPManager.h
- * \brief SyncP manager
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef SYNCPMANAGER_H
 #define SYNCPMANAGER_H

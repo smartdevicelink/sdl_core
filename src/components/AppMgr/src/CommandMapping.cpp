@@ -1,8 +1,6 @@
-/**
- * \file CommandMapping.cpp
- * \brief Command mapping
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/CommandMapping.h"
 #include "AppMgr/RegistryItem.h"

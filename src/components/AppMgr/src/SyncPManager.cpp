@@ -1,8 +1,6 @@
-/**
- * \file SyncPManager.cpp
- * \brief SyncP manager
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/SyncPManager.h"
 #include "Utils/Base64.h"

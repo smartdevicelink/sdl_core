@@ -1,8 +1,6 @@
-/**
- * \file RegistryItem.cpp
- * \brief Registered application in a registry
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/RegistryItem.h"
 #include "LoggerHelper.hpp"

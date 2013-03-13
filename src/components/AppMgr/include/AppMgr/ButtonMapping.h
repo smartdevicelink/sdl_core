@@ -1,8 +1,6 @@
-/**
- * \file ButtonMapping.h
- * \brief Buttons mapping
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef BUTTONMAPPING_H
 #define BUTTONMAPPING_H

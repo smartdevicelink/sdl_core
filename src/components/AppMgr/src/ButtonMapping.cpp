@@ -1,8 +1,6 @@
-/**
- * \file ButtonMapping.cpp
- * \brief Buttons mapping
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #include "AppMgr/ButtonMapping.h"
 #include "AppMgr/RegistryItem.h"

@@ -1,8 +1,6 @@
-/**
- * \file AppMgrCore.h
- * \brief App manager core functionality
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef APPMGR_H_
 #define APPMGR_H_

@@ -1,8 +1,6 @@
-/**
- * \file CapabilitiesContainer.h
- * \brief Capabilities container
- * \author vsalo
- */
+//
+// Copyright (c) 2013 Ford Motor Company
+//
 
 #ifndef CAPABILITESCONTAINER_H
 #define CAPABILITESCONTAINER_H
