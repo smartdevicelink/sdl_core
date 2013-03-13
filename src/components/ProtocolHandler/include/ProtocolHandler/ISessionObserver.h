@@ -27,7 +27,7 @@ namespace NsProtocolHandler
          * \param connectionHandle Connection identifier whithin which session has to be started.
          * \return int Id (number) of new session if successful otherwise -1.
          */
-        virtual int onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle) = 0;
+        virtual int onSessionStartedCallback(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle) = 0;
 
         /**
          * \brief Callback function used by ProtocolHandler
@@ -38,7 +38,7 @@ namespace NsProtocolHandler
          * If not equal to hash assigned to session on start then operation fails.
          * \return int -1 if operation fails session key otherwise
          */
-        virtual int onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+        virtual int onSessionEndedCallback(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                                unsigned char sessionId,
                                                unsigned int hashCode) = 0;
 
@@ -50,7 +50,7 @@ namespace NsProtocolHandler
          * \param sessionId Identifier of the session
          * \return int Unique key for session
          */
-        virtual int keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+        virtual int keyFromPair(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                                unsigned char sessionId) = 0;
 
         /**
@@ -59,7 +59,7 @@ namespace NsProtocolHandler
          * \param connectionHandle Returned: Connection identifier whithin which session exists
          * \param sessionId Returned: Number of session
          */
-        virtual void pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle, 
+        virtual void pairFromKey(int key, NsSmartDeviceLink::NsTransportManager::tConnectionHandle & connectionHandle,
                                                unsigned char & sessionId) = 0;
     protected:
 

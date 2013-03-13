@@ -16,7 +16,7 @@ using namespace NsProtocolHandler;
 
 log4cplus::Logger ProtocolHandler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ProtocolHandler"));
 
-ProtocolHandler::ProtocolHandler( NsAppLink::NsTransportManager::ITransportManager * transportManager ) :
+ProtocolHandler::ProtocolHandler( NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager ) :
  mProtocolObserver( 0 )
 ,mSessionObserver( 0 )
 ,mTransportManager( transportManager )
@@ -58,7 +58,7 @@ void ProtocolHandler::setSessionObserver( ISessionObserver * observer )
     mSessionObserver = observer;
 }
 
-void ProtocolHandler::sendEndSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+void ProtocolHandler::sendEndSessionNAck( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned int sessionID,
               unsigned char serviceType )
 {
@@ -83,7 +83,7 @@ void ProtocolHandler::sendEndSessionNAck( NsAppLink::NsTransportManager::tConnec
     }
 }
 
-void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+void ProtocolHandler::sendStartSessionAck( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned char sessionID,
               unsigned char protocolVersion,
               unsigned int hashCode,
@@ -111,7 +111,7 @@ void ProtocolHandler::sendStartSessionAck( NsAppLink::NsTransportManager::tConne
     }
 }
 
-void ProtocolHandler::sendStartSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+void ProtocolHandler::sendStartSessionNAck( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned char serviceType )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -149,7 +149,7 @@ void ProtocolHandler::sendData(const AppLinkRawMessage * message)
     mMessagesToMobileApp.push(message);
 }
 
-void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+void ProtocolHandler::onFrameReceived(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
     const uint8_t * data, size_t dataSize)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -169,16 +169,16 @@ void ProtocolHandler::onFrameReceived(NsAppLink::NsTransportManager::tConnection
     }
 }
 
-void ProtocolHandler::onFrameSendCompleted(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
-            int userData, NsAppLink::NsTransportManager::ESendStatus sendStatus)
+void ProtocolHandler::onFrameSendCompleted(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+            int userData, NsSmartDeviceLink::NsTransportManager::ESendStatus sendStatus)
 {
-    if ( NsAppLink::NsTransportManager::SendStatusOK != sendStatus )
+    if ( NsSmartDeviceLink::NsTransportManager::SendStatusOK != sendStatus )
     {
         LOG4CPLUS_ERROR(mLogger, "Failed to send frame with number " << userData);
     }
 }
 
-RESULT_CODE ProtocolHandler::sendFrame( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+RESULT_CODE ProtocolHandler::sendFrame( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
         const ProtocolPacket & packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -203,7 +203,7 @@ RESULT_CODE ProtocolHandler::sendFrame( NsAppLink::NsTransportManager::tConnecti
     return RESULT_OK;
 }
 
-RESULT_CODE ProtocolHandler::sendSingleFrameMessage(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+RESULT_CODE ProtocolHandler::sendSingleFrameMessage(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                       const unsigned char sessionID,
                                       unsigned int protocolVersion,
                                       const unsigned char servType,
@@ -232,7 +232,7 @@ RESULT_CODE ProtocolHandler::sendSingleFrameMessage(NsAppLink::NsTransportManage
     return sendFrame( connectionHandle, packet );
 }
 
-RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                          const unsigned char sessionID,
                                          unsigned int protocolVersion,
                                          const unsigned char servType,
@@ -342,7 +342,7 @@ RESULT_CODE ProtocolHandler::sendMultiFrameMessage(NsAppLink::NsTransportManager
     return retVal;
 }
 
-RESULT_CODE ProtocolHandler::handleMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+RESULT_CODE ProtocolHandler::handleMessage( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                     ProtocolPacket * packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -394,7 +394,7 @@ RESULT_CODE ProtocolHandler::handleMessage( NsAppLink::NsTransportManager::tConn
     return RESULT_OK;
 }
 
-RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               ProtocolPacket * packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -467,7 +467,7 @@ RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsAppLink::NsTransportMana
     return RESULT_OK;
 }
 
-RESULT_CODE ProtocolHandler::handleControlMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+RESULT_CODE ProtocolHandler::handleControlMessage( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               const ProtocolPacket * packet )
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
@@ -610,7 +610,7 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
             else if ( PROTOCOL_VERSION_2 == message -> getProtocolVersion() )
                 maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V2_SIZE;
 
-            NsAppLink::NsTransportManager::tConnectionHandle connectionHandle = 0;
+            NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle = 0;
             unsigned char sessionID = 0;
 
             if ( !handler -> mSessionObserver )

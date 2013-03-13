@@ -30,14 +30,14 @@ namespace NsProtocolHandler
      * parsing results (version number, start/end session etc) and if needed passes message 
      * to JSON Handler or notifies Connection Handler about activities around sessions.
     */
-    class ProtocolHandler : public NsAppLink::NsTransportManager::ITransportManagerDataListener
+    class ProtocolHandler : public NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener
     {
     public:
         /**
          * \brief Constructor
          * \param transportManager Pointer to Transport layer handler for message exchange.
         */
-        ProtocolHandler( NsAppLink::NsTransportManager::ITransportManager * transportManager );
+        ProtocolHandler( NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager );
 
         /**
          * \brief Destructor
@@ -82,7 +82,7 @@ namespace NsProtocolHandler
          * \param sessionID ID of session ment to be ended
          * \param serviceType Type of session: RPC or BULK Data. RPC by default.
          */
-        void sendEndSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        void sendEndSessionNAck( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned int sessionID,
               unsigned char serviceType = SERVICE_TYPE_RPC );
 
@@ -96,7 +96,7 @@ namespace NsProtocolHandler
          * mobile app for using when ending session.
          * \param serviceType Type of session: RPC or BULK Data. RPC by default.
          */
-        void sendStartSessionAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        void sendStartSessionAck( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned char sessionID,
               unsigned char protocolVersion,
               unsigned int hashCode = 0,
@@ -107,7 +107,7 @@ namespace NsProtocolHandler
          * \param connectionHandle Identifier of connection whithin which session ment to be started
          * \param serviceType Type of session: RPC or BULK Data. RPC by default.
          */
-        void sendStartSessionNAck( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        void sendStartSessionNAck( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               unsigned char serviceType = SERVICE_TYPE_RPC );
 
     private:
@@ -121,7 +121,7 @@ namespace NsProtocolHandler
           /**
            * \brief Identifier of connection through which message is transported.
            */
-          NsAppLink::NsTransportManager::tConnectionHandle mConnectionHandle;
+          NsSmartDeviceLink::NsTransportManager::tConnectionHandle mConnectionHandle;
           /**
            * \brief Message string.
            */
@@ -139,7 +139,7 @@ namespace NsProtocolHandler
          * @param Data Received frame payload data.
          * @param DataSize Size of data in bytes.
         **/
-        virtual void onFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
+        virtual void onFrameReceived(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
             const uint8_t * data, size_t dataSize);
 
         /**
@@ -149,8 +149,8 @@ namespace NsProtocolHandler
          * @param UserData User data that was previously passed to ITransportManager::sendFrame.
          * @param SendStatus Result status.
          **/
-        virtual void onFrameSendCompleted(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle, 
-            int userData, NsAppLink::NsTransportManager::ESendStatus sendStatus);
+        virtual void onFrameSendCompleted(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
+            int userData, NsSmartDeviceLink::NsTransportManager::ESendStatus sendStatus);
     
         /**
          * \brief Sends message which size permits to send it in one frame.
@@ -163,7 +163,7 @@ namespace NsProtocolHandler
          * \param compress Compression flag
          * \return \saRESULT_CODE Status of operation
          */
-        RESULT_CODE sendSingleFrameMessage(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        RESULT_CODE sendSingleFrameMessage(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                       const unsigned char sessionID,
                                       unsigned int protocolVersion,
                                       const unsigned char servType,
@@ -183,7 +183,7 @@ namespace NsProtocolHandler
          * \param maxDataSize Maximum allowed size of single frame.
          * \return \saRESULT_CODE Status of operation
          */
-        RESULT_CODE sendMultiFrameMessage(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        RESULT_CODE sendMultiFrameMessage(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                          const unsigned char sessionID,
                                          unsigned int protocolVersion,
                                          const unsigned char servType,
@@ -198,7 +198,7 @@ namespace NsProtocolHandler
          * \param packet Message with protocol header.
          * \return \saRESULT_CODE Status of operation
          */
-        RESULT_CODE sendFrame( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        RESULT_CODE sendFrame( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               const ProtocolPacket & packet );
 
         /**
@@ -207,7 +207,7 @@ namespace NsProtocolHandler
          * \param packet Received message with protocol header.
          * \return \saRESULT_CODE Status of operation
          */
-        RESULT_CODE handleMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        RESULT_CODE handleMessage( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               ProtocolPacket * packet );
 
         /**
@@ -216,7 +216,7 @@ namespace NsProtocolHandler
          * \param packet Current frame of message with protocol header. 
          * \return \saRESULT_CODE Status of operation
          */
-        RESULT_CODE handleMultiFrameMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        RESULT_CODE handleMultiFrameMessage( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               ProtocolPacket * packet );
 
         /**
@@ -225,7 +225,7 @@ namespace NsProtocolHandler
          * \param packet Received message with protocol header. 
          * \return \saRESULT_CODE Status of operation
          */
-        RESULT_CODE handleControlMessage( NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        RESULT_CODE handleControlMessage( NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
               const ProtocolPacket * packet );
         
         /**
@@ -246,7 +246,7 @@ namespace NsProtocolHandler
         /**
           *\brief Pointer on instance of Transport layer handler for message exchange.
         */
-        NsAppLink::NsTransportManager::ITransportManager * mTransportManager;
+        NsSmartDeviceLink::NsTransportManager::ITransportManager * mTransportManager;
 
         /**
           *\brief Queue for message from Mobile side.
