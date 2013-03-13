@@ -138,7 +138,20 @@ class Parser(object):
 
         for a in attrib:
             if a == "functionID":
-                function_id = attrib[a]
+                function_id_string = attrib[a]
+
+                if "FunctionID" not in self._types:
+                    raise ParseError("Enumeration 'FunctionID' must be" +
+                                     " declared before function '" +
+                                     params["name"] + "'")
+
+                function_id_enum = self._types["FunctionID"]
+
+                if function_id_string not in function_id_enum.elements:
+                    raise ParseError("'" + function_id_string +
+                                     "' is not a member of enum 'FunctionID'")
+
+                function_id = function_id_enum.elements[function_id_string]
             elif a == "messagetype":
                 message_type = attrib[a]
             elif a == "platform":
