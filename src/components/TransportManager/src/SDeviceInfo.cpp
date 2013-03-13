@@ -1,6 +1,12 @@
+/**
+ * \file SDeviceInfo.cpp
+ * \brief Class SDeviceInfo.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #include "TransportManager/SDeviceInfo.hpp"
 
-NsAppLink::NsTransportManager::SDeviceInfo::SDeviceInfo()
+NsSmartDeviceLink::NsTransportManager::SDeviceInfo::SDeviceInfo()
 : mDeviceHandle()
 , mDeviceType()
 , mUserFriendlyName()
@@ -8,7 +14,7 @@ NsAppLink::NsTransportManager::SDeviceInfo::SDeviceInfo()
 {
 }
 
-NsAppLink::NsTransportManager::SDeviceInfo::SDeviceInfo(tDeviceHandle DeviceHandle, EDeviceType DeviceType, std::string UserFriendlyName, std::string UniqueDeviceId)
+NsSmartDeviceLink::NsTransportManager::SDeviceInfo::SDeviceInfo(tDeviceHandle DeviceHandle, EDeviceType DeviceType, std::string UserFriendlyName, std::string UniqueDeviceId)
 : mDeviceHandle(DeviceHandle)
 , mDeviceType(DeviceType)
 , mUserFriendlyName(UserFriendlyName)
@@ -16,7 +22,7 @@ NsAppLink::NsTransportManager::SDeviceInfo::SDeviceInfo(tDeviceHandle DeviceHand
 {
 }
 
-NsAppLink::NsTransportManager::SDeviceInfo::SDeviceInfo(const SDeviceInfo& other)
+NsSmartDeviceLink::NsTransportManager::SDeviceInfo::SDeviceInfo(const SDeviceInfo& other)
 : mDeviceHandle(other.mDeviceHandle)
 , mDeviceType(other.mDeviceType)
 , mUserFriendlyName(other.mUserFriendlyName)
@@ -24,7 +30,7 @@ NsAppLink::NsTransportManager::SDeviceInfo::SDeviceInfo(const SDeviceInfo& other
 {
 }
 
-bool NsAppLink::NsTransportManager::SDeviceInfo::operator==( const SDeviceInfo& i_other ) const
+bool NsSmartDeviceLink::NsTransportManager::SDeviceInfo::operator==( const SDeviceInfo& i_other ) const
 {
     return ( (mDeviceHandle == i_other.mDeviceHandle)
           && (mDeviceType == i_other.mDeviceType)

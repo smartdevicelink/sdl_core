@@ -1,3 +1,9 @@
+/**
+ * \file TransportManagerLoggerHelpers.hpp
+ * \brief Class TransportManagerLoggerHelpers header.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #ifndef __TRANSPORTMANAGER_TRANSPORTMANAGERLOGGERHELPERS_HPP__
 #define __TRANSPORTMANAGER_TRANSPORTMANAGERLOGGERHELPERS_HPP__
 

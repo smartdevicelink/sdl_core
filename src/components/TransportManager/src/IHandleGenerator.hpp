@@ -1,9 +1,15 @@
+/**
+ * \file IHandleGenerator.hpp
+ * \brief Class IHandleGenerator.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #ifndef __TRANSPORTMANAGER_IHANDLEGENERATOR_HPP__
 #define __TRANSPORTMANAGER_IHANDLEGENERATOR_HPP__
 
 #include "TransportManager/ITransportManager.hpp"
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsTransportManager
     {

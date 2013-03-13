@@ -1,3 +1,9 @@
+/**
+ * \file CBluetoothAdapter.hpp
+ * \brief Class CBluetoothAdapter header.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #ifndef __TRANSPORTMANAGER_CBLUETOOTHADAPTER_HPP__
 #define __TRANSPORTMANAGER_CBLUETOOTHADAPTER_HPP__
 
@@ -11,7 +17,7 @@
 
 #include "CDeviceAdapter.hpp"
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsTransportManager
     {
@@ -59,9 +65,9 @@ namespace NsAppLink
                  *
                  * @param Address Bluetooth address.
                  * @param Name User-friendly device name.
-                 * @param AppLinkRFCOMMChannels List of RFCOMM channels where AppLink service has been discovered.
+                 * @param SmartDeviceLinkRFCOMMChannels List of RFCOMM channels where SmartDeviceLink service has been discovered.
                  **/
-                SBluetoothDevice(const bdaddr_t & Address, const char * Name, const tRFCOMMChannelVector & AppLinkRFCOMMChannels);
+                SBluetoothDevice(const bdaddr_t & Address, const char * Name, const tRFCOMMChannelVector & SmartDeviceLinkRFCOMMChannels);
 
                 /**
                  * @brief Compare devices.
@@ -81,9 +87,9 @@ namespace NsAppLink
                 bdaddr_t mAddress;
 
                 /**
-                 * @brief List of RFCOMM channels where AppLink service has been discovered.
+                 * @brief List of RFCOMM channels where SmartDeviceLink service has been discovered.
                  **/
-                tRFCOMMChannelVector mAppLinkRFCOMMChannels;
+                tRFCOMMChannelVector mSmartDeviceLinkRFCOMMChannels;
             };
 
             /**
@@ -95,7 +101,7 @@ namespace NsAppLink
                  * @brief Constructor.
                  *
                  * @param DeviceHandle Device handle.
-                 * @param RFCOMMChannel RFCOMM channel of AppLink service on remote device.
+                 * @param RFCOMMChannel RFCOMM channel of SmartDeviceLink service on remote device.
                  **/
                 SRFCOMMConnection(const tDeviceHandle DeviceHandle, const uint8_t RFCOMMChannel);
 
@@ -122,7 +128,7 @@ namespace NsAppLink
              *
              * This method is called from connectDevice(). This implementation will
              * perform service discovery and create connection structures for all
-             * RFCOMM channels where AppLink service is discovered.
+             * RFCOMM channels where SmartDeviceLink service is discovered.
              *
              * @param DeviceHandle Device handle.
              * @param ConnectionsList Reference to connections list that must be filled.
@@ -165,25 +171,25 @@ namespace NsAppLink
             static std::string getUniqueDeviceId(const bdaddr_t & DeviceAddress);
 
             /**
-             * @brief Discover AppLink RFCOMM channels.
+             * @brief Discover SmartDeviceLink RFCOMM channels.
              *
              * Run service discovery for specified remote bluetooth device
-             * and discover RFCOMM channels with AppLink service.
+             * and discover RFCOMM channels with SmartDeviceLink service.
              *
              * @param DeviceAddress Address of device.
-             * @param AppLinkRFCOMMChannels Reference to variable that will
+             * @param SmartDeviceLinkRFCOMMChannels Reference to variable that will
              *                              receive list of RFCOMM channels
-             *                              with AppLink service discovered.
+             *                              with SmartDeviceLink service discovered.
              *
              * @see @ref components_transportmanager_internal_design_device_adapters_bluetooth_adapter_discovery
              * @see @ref components_transportmanager_internal_design_device_adapters_bluetooth_adapter_connecting_devices
              **/
-            void discoverAppLinkRFCOMMChannels(const bdaddr_t & DeviceAddress, tRFCOMMChannelVector & AppLinkRFCOMMChannels);
+            void discoverSmartDeviceLinkRFCOMMChannels(const bdaddr_t & DeviceAddress, tRFCOMMChannelVector & SmartDeviceLinkRFCOMMChannels);
 
             /**
-             * @brief UUID of AppLink service.
+             * @brief UUID of SmartDeviceLink service.
              **/
-            uuid_t mAppLinkServiceUUID;
+            uuid_t mSmartDeviceLinkServiceUUID;
         };
     }
 }

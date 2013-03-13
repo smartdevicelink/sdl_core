@@ -1,10 +1,16 @@
+/**
+ * \file SDeviceInfo.hpp
+ * \brief Structure SDeviceInfo header.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #ifndef __TRANSPORTMANAGER_SDEVICEINFO_HPP__
 #define __TRANSPORTMANAGER_SDEVICEINFO_HPP__
 
 #include <string>
 #include <vector>
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsTransportManager
     {

@@ -1,3 +1,9 @@
+/**
+ * \file SInternalDeviceInfo.hpp
+ * \brief Class SInternalDeviceInfo header.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #ifndef __TRANSPORTMANAGER_SINTERNALDEVICEINFO_HPP__
 #define __TRANSPORTMANAGER_SINTERNALDEVICEINFO_HPP__
 
@@ -5,7 +11,7 @@
 
 #include "TransportManager/SDeviceInfo.hpp"
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsTransportManager
     {

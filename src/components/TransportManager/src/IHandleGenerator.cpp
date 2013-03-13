@@ -1,5 +1,11 @@
+/**
+ * \file IHandleGenerator.cpp
+ * \brief Class IHandleGenerator.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #include "IHandleGenerator.hpp"
 
-NsAppLink::NsTransportManager::IHandleGenerator::~IHandleGenerator(void)
+NsSmartDeviceLink::NsTransportManager::IHandleGenerator::~IHandleGenerator(void)
 {
 }

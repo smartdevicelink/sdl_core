@@ -1,3 +1,9 @@
+/**
+ * \file CDeviceAdapter.hpp
+ * \brief Class CDeviceAdapter header.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #ifndef __TRANSPORTMANAGER_CDEVICEADAPTER_HPP__
 #define __TRANSPORTMANAGER_CDEVICEADAPTER_HPP__
 
@@ -11,7 +17,7 @@
 
 #define LOG4CPLUS_ERROR_WITH_ERRNO(logger, message) LOG4CPLUS_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsTransportManager
     {

@@ -1,10 +1,16 @@
+/**
+ * \file ITransportManager.cpp
+ * \brief Class ITransportManager.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #include "CTransportManager.hpp"
 
-NsAppLink::NsTransportManager::ITransportManager * NsAppLink::NsTransportManager::ITransportManager::create(void)
+NsSmartDeviceLink::NsTransportManager::ITransportManager * NsSmartDeviceLink::NsTransportManager::ITransportManager::create(void)
 {
     return new CTransportManager();
 }
 
-NsAppLink::NsTransportManager::ITransportManager::~ITransportManager(void)
+NsSmartDeviceLink::NsTransportManager::ITransportManager::~ITransportManager(void)
 {
 }

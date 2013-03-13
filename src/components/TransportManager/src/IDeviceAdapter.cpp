@@ -1,5 +1,11 @@
+/**
+ * \file IDeviceAdapter.cpp
+ * \brief Class IDeviceAdapter.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #include "IDeviceAdapter.hpp"
 
-NsAppLink::NsTransportManager::IDeviceAdapter::~IDeviceAdapter(void)
+NsSmartDeviceLink::NsTransportManager::IDeviceAdapter::~IDeviceAdapter(void)
 {
 }

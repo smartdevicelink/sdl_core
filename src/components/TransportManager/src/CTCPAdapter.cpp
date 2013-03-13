@@ -1,3 +1,9 @@
+/**
+ * \file CTCPAdapter.cpp
+ * \brief Class CTCPAdapter.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #include <memory.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -8,17 +14,17 @@
 #include "CTCPAdapter.hpp"
 #include "IHandleGenerator.hpp"
 
-NsAppLink::NsTransportManager::CTCPAdapter::STCPDevice::STCPDevice(const char* Name, const in_addr_t & Address):
+NsSmartDeviceLink::NsTransportManager::CTCPAdapter::STCPDevice::STCPDevice(const char* Name, const in_addr_t & Address):
 SDevice(Name),
 mAddress(Address)
 {
 }
 
-NsAppLink::NsTransportManager::CTCPAdapter::STCPDevice::~STCPDevice(void)
+NsSmartDeviceLink::NsTransportManager::CTCPAdapter::STCPDevice::~STCPDevice(void)
 {
 }
 
-bool NsAppLink::NsTransportManager::CTCPAdapter::STCPDevice::isSameAs(const NsAppLink::NsTransportManager::CDeviceAdapter::SDevice * OtherDevice) const
+bool NsSmartDeviceLink::NsTransportManager::CTCPAdapter::STCPDevice::isSameAs(const NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SDevice * OtherDevice) const
 {
     bool result = false;
 
@@ -35,18 +41,18 @@ bool NsAppLink::NsTransportManager::CTCPAdapter::STCPDevice::isSameAs(const NsAp
     return result;
 }
 
-NsAppLink::NsTransportManager::CTCPAdapter::STCPConnection::STCPConnection(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, int ConnectionSocket, const in_port_t Port):
+NsSmartDeviceLink::NsTransportManager::CTCPAdapter::STCPConnection::STCPConnection(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle, int ConnectionSocket, const in_port_t Port):
 SConnection(DeviceHandle),
 mPort(Port)
 {
     mConnectionSocket = ConnectionSocket;
 }
 
-NsAppLink::NsTransportManager::CTCPAdapter::STCPConnection::~STCPConnection(void)
+NsSmartDeviceLink::NsTransportManager::CTCPAdapter::STCPConnection::~STCPConnection(void)
 {
 }
 
-bool NsAppLink::NsTransportManager::CTCPAdapter::STCPConnection::isSameAs(const NsAppLink::NsTransportManager::CDeviceAdapter::SConnection* OtherConnection) const
+bool NsSmartDeviceLink::NsTransportManager::CTCPAdapter::STCPConnection::isSameAs(const NsSmartDeviceLink::NsTransportManager::CDeviceAdapter::SConnection* OtherConnection) const
 {
     bool result = false;
 
@@ -63,22 +69,22 @@ bool NsAppLink::NsTransportManager::CTCPAdapter::STCPConnection::isSameAs(const 
     return result;
 }
 
-NsAppLink::NsTransportManager::CTCPAdapter::CTCPAdapter(NsAppLink::NsTransportManager::IDeviceAdapterListener & Listener, NsAppLink::NsTransportManager::IHandleGenerator & HandleGenerator):
+NsSmartDeviceLink::NsTransportManager::CTCPAdapter::CTCPAdapter(NsSmartDeviceLink::NsTransportManager::IDeviceAdapterListener & Listener, NsSmartDeviceLink::NsTransportManager::IHandleGenerator & HandleGenerator):
 CDeviceAdapter(Listener, HandleGenerator)
 {
 }
 
-NsAppLink::NsTransportManager::CTCPAdapter::~CTCPAdapter(void)
+NsSmartDeviceLink::NsTransportManager::CTCPAdapter::~CTCPAdapter(void)
 {
     waitForThreadsTermination();
 }
 
-NsAppLink::NsTransportManager::EDeviceType NsAppLink::NsTransportManager::CTCPAdapter::getDeviceType(void) const
+NsSmartDeviceLink::NsTransportManager::EDeviceType NsSmartDeviceLink::NsTransportManager::CTCPAdapter::getDeviceType(void) const
 {
     return DeviceWiFi;
 }
 
-void NsAppLink::NsTransportManager::CTCPAdapter::mainThread(void)
+void NsSmartDeviceLink::NsTransportManager::CTCPAdapter::mainThread(void)
 {
     LOG4CPLUS_INFO(mLogger, "Main thread initialized");
 
@@ -213,7 +219,7 @@ void NsAppLink::NsTransportManager::CTCPAdapter::mainThread(void)
     LOG4CPLUS_INFO(mLogger, "Main thread finished");
 }
 
-void NsAppLink::NsTransportManager::CTCPAdapter::connectionThread(const NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle)
+void NsSmartDeviceLink::NsTransportManager::CTCPAdapter::connectionThread(const NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle)
 {
     handleCommunication(ConnectionHandle);
 

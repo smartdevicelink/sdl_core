@@ -1,3 +1,9 @@
+/**
+ * \file IDeviceAdapterListener.hpp
+ * \brief Class IDeviceAdapterListener.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #ifndef __TRANSPORTMANAGER_IDEVICEADAPTERLISTENER_HPP__
 #define __TRANSPORTMANAGER_IDEVICEADAPTERLISTENER_HPP__
 
@@ -11,7 +17,7 @@
 
 #include "SInternalDeviceInfo.hpp"
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsTransportManager
     {

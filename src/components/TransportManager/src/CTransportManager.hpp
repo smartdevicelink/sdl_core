@@ -1,3 +1,9 @@
+/**
+ * \file CTransportManager.hpp
+ * \brief Class CTransportManager header.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #ifndef __TRANSPORTMANAGER_CTRANSPORTMANAGER_HPP__
 #define __TRANSPORTMANAGER_CTRANSPORTMANAGER_HPP__
 
@@ -9,7 +15,7 @@
 #include <pthread.h>
 #include <vector>
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsTransportManager
     {
@@ -299,7 +305,7 @@ namespace NsAppLink
                  * @param Data Data
                  * @param DataSize Size of the data
                  **/
-                SDataListenerCallback(NsAppLink::NsTransportManager::CTransportManager::EDataListenerCallbackType CallbackType, NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize);
+                SDataListenerCallback(NsSmartDeviceLink::NsTransportManager::CTransportManager::EDataListenerCallbackType CallbackType, NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize);
 
                 /**
                  * @brief Constructor for creating FrameSendCompleted callback
@@ -374,7 +380,7 @@ namespace NsAppLink
                  * @param TransportManager Pointer to the Transport Manager
                  * @param ConnectionHandle Connection Handle
                  **/
-                SDataThreadStartupParams(NsAppLink::NsTransportManager::CTransportManager* TransportManager, NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle);
+                SDataThreadStartupParams(NsSmartDeviceLink::NsTransportManager::CTransportManager* TransportManager, NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle);
 
                 /**
                  * @brief Pointer to Transport Manager
@@ -648,7 +654,7 @@ namespace NsAppLink
              * @param DeviceAdapter Device adapter to add
              * @return void
              **/
-            void addDeviceAdapter(NsAppLink::NsTransportManager::IDeviceAdapter* DeviceAdapter);
+            void addDeviceAdapter(NsSmartDeviceLink::NsTransportManager::IDeviceAdapter* DeviceAdapter);
 
             /**
              * @brief Removes device adapter
@@ -658,7 +664,7 @@ namespace NsAppLink
              * @param DeviceAdapter Device adapter to remove
              * @return void
              **/
-            void removeDeviceAdapter(NsAppLink::NsTransportManager::IDeviceAdapter* DeviceAdapter);
+            void removeDeviceAdapter(NsSmartDeviceLink::NsTransportManager::IDeviceAdapter* DeviceAdapter);
 
             /**
              * @brief All device adapters initialized here
@@ -682,7 +688,7 @@ namespace NsAppLink
              * @param Connect Flag of device operation: true for connect, false for disconnect. Defaults to true.
              * @return void
              **/
-            void connectDisconnectDevice(const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle, bool Connect = true);
+            void connectDisconnectDevice(const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle, bool Connect = true);
 
             /**
              * @brief Sends data callback

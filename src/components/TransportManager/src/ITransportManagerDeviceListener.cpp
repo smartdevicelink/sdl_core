@@ -1,18 +1,24 @@
+/**
+ * \file ITransportManagerDeviceListener.cpp
+ * \brief Class ITransportManagerDeviceListener.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 
-NsAppLink::NsTransportManager::ITransportManagerDeviceListener::~ITransportManagerDeviceListener()
+NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener::~ITransportManagerDeviceListener()
 {
 
 }
 
-void NsAppLink::NsTransportManager::ITransportManagerDeviceListener::onDeviceListUpdated(const tDeviceList & DeviceList)
+void NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener::onDeviceListUpdated(const tDeviceList & DeviceList)
 {
 }
 
-void NsAppLink::NsTransportManager::ITransportManagerDeviceListener::onApplicationConnected(const SDeviceInfo & ConnectedDevice, const tConnectionHandle Connection)
+void NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener::onApplicationConnected(const SDeviceInfo & ConnectedDevice, const tConnectionHandle Connection)
 {
 }
 
-void NsAppLink::NsTransportManager::ITransportManagerDeviceListener::onApplicationDisconnected(const SDeviceInfo & DisconnectedDevice, const tConnectionHandle Connection)
+void NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener::onApplicationDisconnected(const SDeviceInfo & DisconnectedDevice, const tConnectionHandle Connection)
 {
 }

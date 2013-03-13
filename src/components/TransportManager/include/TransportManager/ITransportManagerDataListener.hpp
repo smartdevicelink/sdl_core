@@ -1,3 +1,9 @@
+/**
+ * \file ITransportManagerDataListener.hpp
+ * \brief Class ITransportManagerDataListener header.
+ * Copyright (c) 2013 Ford Motor Company
+ */
+
 #ifndef __TRANSPORTMANAGER_ITRANSPORTMANAGERDATALISTENER_HPP__
 #define __TRANSPORTMANAGER_ITRANSPORTMANAGERDATALISTENER_HPP__
 
@@ -6,7 +12,7 @@
 
 #include "TransportManager/ITransportManager.hpp"
 
-namespace NsAppLink
+namespace NsSmartDeviceLink
 {
     namespace NsTransportManager
     {
