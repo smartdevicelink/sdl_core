@@ -14,6 +14,7 @@ MFT.SDLVehicleInfoModel = Em.Object.create({
 
     /**
      * Stored VehicleInfo transmission state Data
+     * @type {Array}
      */
     vehicleInfoPRNDL: [
         {
@@ -37,9 +38,17 @@ MFT.SDLVehicleInfoModel = Em.Object.create({
             id:     4
         }
     ],
+    
+    /**
+     * PRNDL state value
+     * 
+     * @type {String}
+     */
+    prndlSelectState: 'EN-US',
 
     /**
      * Stored VehicleInfo Data
+     * @type {Array}
      */
     ecuDIDData:[
         {
@@ -64,6 +73,7 @@ MFT.SDLVehicleInfoModel = Em.Object.create({
 
     /**
      * Stored VehicleInfo Data
+     * @type {Object}
      */
     vehicleData: {
         'VEHICLEDATA_SPEED':{
@@ -167,6 +177,13 @@ MFT.SDLVehicleInfoModel = Em.Object.create({
             type:   'tirePressure'
         }*/
     },
+
+    /**
+     * Method to set selected state of vehicle transmission to vehicleData
+     */
+    onPRNDLSelected: function(){
+        this.set('vehicleData.VEHICLEDATA_PRNDLSTATUS.data', this.prndlSelectState);
+    }.observes('this.prndlSelectState'),
 
     /**
      * Method calls GetVehicleType response

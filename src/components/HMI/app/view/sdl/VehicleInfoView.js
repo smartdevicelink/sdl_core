@@ -140,14 +140,7 @@ MFT.VehicleInfo = Em.ContainerView.create({
 
         optionLabelPath:    'content.name',
 
-        /**
-         * Selected data sent on model for further processing
-         */
-        click: function(){
-
-            MFT.SDLController.onPRNDLSelected( this.selection.name );
-
-        }
+        valeuBinding:       'MFT.SDLVehicleInfoModel.prndlSelectState'
     }),
 
     /**
