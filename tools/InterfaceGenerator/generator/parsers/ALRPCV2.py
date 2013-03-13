@@ -65,7 +65,7 @@ class Parser(object):
             elif element.tag == "function":
                 function = self._parse_function(element)
                 self._add_item(functions, function,
-                               (function.name, function.message_type))
+                               (function.function_id, function.message_type))
             else:
                 raise ParseError("Unexpected element: " + element.tag)
 
@@ -138,22 +138,13 @@ class Parser(object):
 
         for a in attrib:
             if a == "functionID":
-                function_id_string = attrib[a]
-
-                if "FunctionID" not in self._types:
-                    raise ParseError("Enumeration 'FunctionID' must be" +
-                                     " declared before function '" +
-                                     params["name"] + "'")
-
-                function_id_enum = self._types["FunctionID"]
-
-                if function_id_string not in function_id_enum.elements:
-                    raise ParseError("'" + function_id_string +
-                                     "' is not a member of enum 'FunctionID'")
-
-                function_id = function_id_enum.elements[function_id_string]
+                function_id = \
+                    self._get_enum_element_for_function("FunctionID",
+                                                        attrib[a])
             elif a == "messagetype":
-                message_type = attrib[a]
+                message_type = \
+                    self._get_enum_element_for_function("messageType",
+                                                        attrib[a])
             elif a == "platform":
                 platform = attrib[a]
             else:
@@ -465,3 +456,19 @@ class Parser(object):
                              bool_string + "'")
 
         return value
+
+    def _get_enum_element_for_function(self, enum_name, element_name):
+        if enum_name not in self._types:
+            raise ParseError("Enumeration '" + enum_name +
+                             "' must be declared before any function")
+
+        enum = self._types[enum_name]
+
+        if type(enum) is not Model.Enum:
+            raise ParseError("'" + enum_name + "' is not an enumeration")
+
+        if element_name not in enum.elements:
+            raise ParseError("'" + element_name +
+                             "' is not a member of enum '" + enum_name + "'")
+
+        return enum.elements[element_name]
