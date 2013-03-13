@@ -70,13 +70,16 @@ class SmartSchema(object):
                                                  enum_items = self._generate_enum_elements(enum))
 
     def _generate_enum_elements(self, enum):
-        pass
+        return ",\n".join(self._generate_enum_element(enum.elements))
 
     def _generate_enum_element(self, enum_element):
-        return self._enum_element_template.substitute(comment = self._generate_comment(enum_element),
-                                                      name = enum_element.internal_name if enum_element.internal_name is not None else enum_element.name,
-                                                      value = enum_element.value)
-
+        if enum_element.value is not None:
+            return self._enum_element_with_value_template.substitute(comment = self._generate_comment(enum_element),
+                                                                     name = enum_element.internal_name if enum_element.internal_name is not None else enum_element.name,
+                                                                     value = enum_element.value)
+        else:
+            return self._enum_element_with_no_value_template.substitute(comment = self._generate_comment(enum_element),
+                                                                        name = enum_element.internal_name if enum_element.internal_name is not None else enum_element.name)
     def _generate_comment(self, interface_item_base):
         brief_type_title = None
         interface_item_base_classname = interface_item_base.__class__.__name__ 
@@ -87,33 +90,27 @@ class SmartSchema(object):
                                 interface_item_base_classname)
         
         name = interface_item_base.internal_name if type(interface_item_base) is Model.EnumElement and interface_item_base.internal_name is not None else interface_item_base.name
-        brief_description = " * @brief {0}{1}.".format(brief_type_title, name)
-        
-        if  interface_item_base.description or \
-            interface_item_base.design_description or \
-            interface_item_base.issues  or \
-            interface_item_base.todos:
-            brief_description = "".join([brief_description, "\n *\n"])
-        else:
-            brief_description = "".join([brief_description, "\n"])
-        
+        brief_description = " * @brief {0}{1}.\n".format(brief_type_title, name)
+                
         description = "".join(map(lambda x: " * {0}\n".format(x),
                                   interface_item_base.description))
         if description is not "":
-            description = "".join([description, " *\n"])
+            description = "".join([" *\n", description])
         
         design_description = "".join(map(lambda x: " * {0}\n".format(x),
                                          interface_item_base.design_description))
         if design_description is not "":
-            design_description = "".join([design_description, " *\n"])
+            design_description = "".join([" *\n", design_description])
         
         issues = "".join(map(lambda x: " * @note {0}\n".format(x),
                              interface_item_base.issues))
         if issues is not "":
-            issues = "".join([issues, " *\n"])
+            issues = "".join([" *\n", issues])
         
         todos = "".join(map(lambda x: " * @todo {0}\n".format(x),
                             interface_item_base.todos))
+        if todos is not "":
+            todos = "".join([" *\n", todos])
 
         return self._comment_template.substitute(brief_description = brief_description,
                                                  description = description,
@@ -136,7 +133,11 @@ enum $name
 }
 """)
     
-    _enum_element_template = string.Template(
+    _enum_element_with_value_template = string.Template(
 """$comment
 $name = $value""")
+    
+    _enum_element_with_no_value_template = string.Template(
+"""$comment
+$name""")
     
