@@ -1,7 +1,7 @@
 /**
  * \file appMain.cpp
- * \brief AppLink main application sources
- * \author AKara
+ * \brief SmartDeviceLink main application sources
+ * \Copiright (c) 2013 Ford Motor Company
  */
 
 #include <cstdio>
@@ -39,29 +39,29 @@
 #include "TransportManager/ITransportManager.hpp"
 #include "TransportManager/ITransportManagerDeviceListener.hpp"
 
-class CTransportManagerListener : public NsAppLink::NsTransportManager::ITransportManagerDeviceListener
+class CTransportManagerListener : public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener
 {
 public:
 
-    CTransportManagerListener(NsAppLink::NsTransportManager::ITransportManager * transportManager);
+    CTransportManagerListener(NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager);
 
 private:
 
-    virtual void onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList& DeviceList);
+    virtual void onDeviceListUpdated(const NsSmartDeviceLink::NsTransportManager::tDeviceList& DeviceList);
 
-    NsAppLink::NsTransportManager::ITransportManager * mTransportManager;
+    NsSmartDeviceLink::NsTransportManager::ITransportManager * mTransportManager;
 };
 
-CTransportManagerListener::CTransportManagerListener(NsAppLink::NsTransportManager::ITransportManager* transportManager)
+CTransportManagerListener::CTransportManagerListener(NsSmartDeviceLink::NsTransportManager::ITransportManager* transportManager)
 : mTransportManager(transportManager)
 {
 }
 
-void CTransportManagerListener::onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList& DeviceList)
+void CTransportManagerListener::onDeviceListUpdated(const NsSmartDeviceLink::NsTransportManager::tDeviceList& DeviceList)
 {
     if(DeviceList.empty())
     {
-        printf("Device list is updated. No devices with AppLink service are available\n");
+        printf("Device list is updated. No devices with SmartDeviceLink service are available\n");
     }
     else
     {
@@ -69,9 +69,9 @@ void CTransportManagerListener::onDeviceListUpdated(const NsAppLink::NsTransport
         printf("If You don\'t want to connect to any device enter 0\n\n");
 
         int i = 1;
-        for(NsAppLink::NsTransportManager::tDeviceList::const_iterator it = DeviceList.begin(); it != DeviceList.end(); it++)
+        for(NsSmartDeviceLink::NsTransportManager::tDeviceList::const_iterator it = DeviceList.begin(); it != DeviceList.end(); it++)
         {
-            NsAppLink::NsTransportManager::SDeviceInfo device = *it;
+          NsSmartDeviceLink::NsTransportManager::SDeviceInfo device = *it;
             printf("%d: %s (%s)\n", i++, device.mUniqueDeviceId.c_str(), device.mUserFriendlyName.c_str());
         }
 
@@ -79,7 +79,7 @@ void CTransportManagerListener::onDeviceListUpdated(const NsAppLink::NsTransport
 
         if ((0 < i) && (i <= DeviceList.size()))
         {
-            NsAppLink::NsTransportManager::SDeviceInfo device = DeviceList[i-1];
+          NsSmartDeviceLink::NsTransportManager::SDeviceInfo device = DeviceList[i-1];
             printf("Performing connect to: %s (%s)\n", device.mUniqueDeviceId.c_str(), device.mUserFriendlyName.c_str());
             mTransportManager->connectDevice(device.mDeviceHandle);
         }
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
     PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
     LOG4CPLUS_INFO(logger, " Application started!");
 
-    NsAppLink::NsTransportManager::ITransportManager * transportManager = NsAppLink::NsTransportManager::ITransportManager::create();
+    NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager = NsSmartDeviceLink::NsTransportManager::ITransportManager::create();
     CTransportManagerListener tsl(transportManager);
 
 
