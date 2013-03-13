@@ -196,7 +196,7 @@ class Parser(object):
             elif subelement.tag == "todo":
                 todos.append(self._parse_simple_element(subelement))
             elif subelement.tag == "issue":
-                todos.append(self._parse_issue(subelement))
+                issues.append(self._parse_issue(subelement))
             else:
                 subelements.append(subelement)
 
