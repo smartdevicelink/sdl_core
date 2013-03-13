@@ -1,7 +1,7 @@
 /**
  * \file IConnectionHandlerObserver.hpp
  * \brief IConnectionHandlerObserver class.
- * \author AKara
+ * Copyright (c) 2013 Ford Motor Company
  */
 
 #ifndef CONNECTIONHANDLEROBSERVER_H 
@@ -14,7 +14,7 @@
 
 /**
  * \namespace NsConnectionHandler
- * \brief AppLink ConnectionHandler namespace.
+ * \brief SmartDeviceLink ConnectionHandler namespace.
  */ 
 namespace NsConnectionHandler
 {

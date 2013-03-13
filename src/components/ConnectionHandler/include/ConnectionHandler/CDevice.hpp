@@ -2,7 +2,7 @@
  * \file CDevice.hpp
  * \brief CDevice class.
  * Stores device information
- * \author AKara
+ * Copyright (c) 2013 Ford Motor Company
  */
 
 #ifndef DEVICE_H 
@@ -14,7 +14,7 @@
 
 /**
  * \namespace NsConnectionHandler
- * \brief AppLink ConnectionHandler namespace.
+ * \brief SmartDeviceLink ConnectionHandler namespace.
  */ 
 namespace NsConnectionHandler
 {

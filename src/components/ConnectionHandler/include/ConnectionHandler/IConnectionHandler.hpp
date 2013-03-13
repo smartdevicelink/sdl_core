@@ -1,7 +1,7 @@
 /**
  * \file IConnectionHandler.hpp
  * \brief Connection handler interface class.
- * \author AKara
+ * Copyright (c) 2013 Ford Motor Company
  */
 
 #ifndef ICONNECTIONHANDLER_H
@@ -17,13 +17,13 @@
 
 /**
  * \namespace NsConnectionHandler
- * \brief AppLink ConnectionHandler namespace.
+ * \brief SmartDeviceLink ConnectionHandler namespace.
  */
 namespace NsConnectionHandler
 {
     /**
     * \class IConnectionHandler
-    * \brief AppLink ConnectionHandler interface class
+    * \brief SmartDeviceLink ConnectionHandler interface class
     */
     class IConnectionHandler
     {
@@ -38,7 +38,7 @@ namespace NsConnectionHandler
          * \brief Sets pointer to TransportManager.
          * \param transportManager Pointer to TransportManager object.
          **/
-        virtual void setTransportManager( NsAppLink::NsTransportManager::ITransportManager * transportManager )=0;
+        virtual void setTransportManager( NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager )=0;
 
         virtual void startTransportManager() = 0;
 

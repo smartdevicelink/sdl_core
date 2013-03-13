@@ -1,7 +1,7 @@
 /**
  * \file IDevicesDiscoveryStarter.hpp
  * \brief Starter of devices discovering process.
- * \author AKara
+ * Copyright (c) 2013 Ford Motor Company
  */
 
 #ifndef IDEVICESDISCOVERYSTARTER_H
@@ -11,7 +11,7 @@
 
 /**
  * \namespace NsConnectionHandler
- * \brief AppLink ConnectionHandler namespace.
+ * \brief SmartDeviceLink ConnectionHandler namespace.
  */
 namespace NsConnectionHandler
 {

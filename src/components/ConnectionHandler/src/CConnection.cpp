@@ -1,7 +1,7 @@
 /**
  * \file CConnection.cpp
  * \brief Connection class implementation.
- * \author AKara
+ * Copyright (c) 2013 Ford Motor Company
  */
 
 #include "Logger.hpp"
@@ -12,7 +12,7 @@
 
 /**
  * \namespace NsConnectionHandler
- * \brief AppLink ConnectionHandler namespace.
+ * \brief SmartDeviceLink ConnectionHandler namespace.
  */ 
 namespace NsConnectionHandler
 {

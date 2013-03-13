@@ -3,7 +3,7 @@
  * \brief Connection handler class.
  * \Observes TransportManager and ProtocolHandler, stores information regarding connections
  * \and sessions and provides it to AppManager.
- * \author AKara
+ * Copyright (c) 2013 Ford Motor Company
  */
 
 #include "Logger.hpp"
@@ -12,7 +12,7 @@
 
 /**
  * \namespace NsConnectionHandler
- * \brief AppLink ConnectionHandler namespace.
+ * \brief SmartDeviceLink ConnectionHandler namespace.
  */
 namespace NsConnectionHandler
 {
@@ -48,10 +48,10 @@ namespace NsConnectionHandler
         mpConnectionHandlerObserver = observer;
     }
 
-    void CConnectionHandler::onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList & DeviceList)
+    void CConnectionHandler::onDeviceListUpdated(const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList)
     {
         LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onDeviceListUpdated()" );
-        NsAppLink::NsTransportManager::tDeviceList::const_iterator it_in;
+        NsSmartDeviceLink::NsTransportManager::tDeviceList::const_iterator it_in;
         mDeviceList.clear();
         for (it_in = DeviceList.begin(); it_in != DeviceList.end(); it_in++)
         {
@@ -63,7 +63,7 @@ namespace NsConnectionHandler
         }
     }
 
-    void CConnectionHandler::onApplicationConnected(const NsAppLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection)
+    void CConnectionHandler::onApplicationConnected(const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection)
     {
         LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onApplicationConnected()" );
         tDeviceListIterator it = mDeviceList.find(ConnectedDevice.mDeviceHandle);
@@ -76,8 +76,8 @@ namespace NsConnectionHandler
         mConnectionList.insert(tConnectionList::value_type(Connection, CConnection(Connection, ConnectedDevice.mDeviceHandle)));
     }
 
-    void CConnectionHandler::onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice,
-            const NsAppLink::NsTransportManager::tConnectionHandle Connection)
+    void CConnectionHandler::onApplicationDisconnected(const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & DisconnectedDevice,
+            const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection)
     {
         LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onApplicationDisconnected()" );
         tDeviceListIterator it = mDeviceList.find(DisconnectedDevice.mDeviceHandle);
@@ -115,7 +115,7 @@ namespace NsConnectionHandler
         }
     }
 
-    int CConnectionHandler::onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle)
+    int CConnectionHandler::onSessionStartedCallback(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle)
     {
         LOG4CPLUS_INFO( mLogger, "CConnectionHandler::onSessionStartedCallback()" );
         int newSessionID = -1;
@@ -148,7 +148,7 @@ namespace NsConnectionHandler
         return newSessionID;
     }
 
-    int CConnectionHandler::onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+    int CConnectionHandler::onSessionEndedCallback(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                                unsigned char sessionId,
                                                unsigned int hashCode)
     {
@@ -183,7 +183,7 @@ namespace NsConnectionHandler
         return result;
     }
 
-    int CConnectionHandler::keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+    int CConnectionHandler::keyFromPair(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                            unsigned char sessionId)
     {
         int key = connectionHandle|(sessionId << 16);
@@ -191,7 +191,7 @@ namespace NsConnectionHandler
         return key;
     }
 
-    void CConnectionHandler::pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle,
+    void CConnectionHandler::pairFromKey(int key, NsSmartDeviceLink::NsTransportManager::tConnectionHandle & connectionHandle,
                                            unsigned char & sessionId)
     {
         connectionHandle = key & 0xFF00FFFF;
@@ -199,7 +199,7 @@ namespace NsConnectionHandler
         LOG4CPLUS_INFO( mLogger, "ConnectionHandle:" << (int)connectionHandle << " Session:" << (int)sessionId << " for key:" << (int)key );
     }
 
-    void CConnectionHandler::setTransportManager( NsAppLink::NsTransportManager::ITransportManager * transportManager )
+    void CConnectionHandler::setTransportManager( NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager )
     {
         LOG4CPLUS_INFO( mLogger, "CConnectionHandler::setTransportManager()" );
         if ( !transportManager )

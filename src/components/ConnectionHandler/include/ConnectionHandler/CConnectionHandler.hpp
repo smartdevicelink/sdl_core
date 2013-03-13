@@ -3,7 +3,7 @@
  * \brief Connection handler class.
  * Observes TransportManager and ProtocolHandler, stores information regarding connections
  * and sessions and provides it to AppManager.
- * \author AKara
+ * Copyright (c) 2013 Ford Motor Company
  */
 
 #ifndef CONNECTIONHANDLER_H
@@ -22,15 +22,15 @@
 #include "ConnectionHandler/IConnectionHandler.hpp"
 /**
  * \namespace NsConnectionHandler
- * \brief AppLink ConnectionHandler namespace.
+ * \brief SmartDeviceLink ConnectionHandler namespace.
  */
 namespace NsConnectionHandler
 {
     /**
     * \class CConnectionHandler
-    * \brief AppLink ConnectionHandler main class
+    * \brief SmartDeviceLink ConnectionHandler main class
     */
-    class CConnectionHandler: public NsAppLink::NsTransportManager::ITransportManagerDeviceListener,
+    class CConnectionHandler: public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener,
                               public NsProtocolHandler::ISessionObserver,
                               public IDevicesDiscoveryStarter,
                               public IConnectionHandler
@@ -61,7 +61,7 @@ namespace NsConnectionHandler
          *
          * \param DeviceList New list of available devices.
          **/
-        virtual void onDeviceListUpdated(const NsAppLink::NsTransportManager::tDeviceList & DeviceList);
+        virtual void onDeviceListUpdated(const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList);
 
         /**
          * \brief Application connected.
@@ -69,7 +69,7 @@ namespace NsConnectionHandler
          * \param ConnectedDevice DeviceInfo of connected device.
          * \param Connection Connection handle.
          **/
-        virtual void onApplicationConnected(const NsAppLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection);
+        virtual void onApplicationConnected(const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection);
 
         /**
          * \brief Application disconnected.
@@ -77,25 +77,25 @@ namespace NsConnectionHandler
          * \param DisconnectedDevice DeviceInfo of disconnected device.
          * \param Connection Connection handle.
          **/
-        virtual void onApplicationDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection);
+        virtual void onApplicationDisconnected(const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection);
 
-        virtual int onSessionStartedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle);
+        virtual int onSessionStartedCallback(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle);
 
-        virtual int onSessionEndedCallback(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        virtual int onSessionEndedCallback(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                                unsigned char sessionId,
                                                unsigned int hashCode);
 
-        virtual int keyFromPair(NsAppLink::NsTransportManager::tConnectionHandle connectionHandle,
+        virtual int keyFromPair(NsSmartDeviceLink::NsTransportManager::tConnectionHandle connectionHandle,
                                                unsigned char sessionId);
 
-        virtual void pairFromKey(int key, NsAppLink::NsTransportManager::tConnectionHandle & connectionHandle,
+        virtual void pairFromKey(int key, NsSmartDeviceLink::NsTransportManager::tConnectionHandle & connectionHandle,
                                                unsigned char & sessionId);
 
         /**
          * \brief Sets pointer to TransportManager.
          * \param transportManager Pointer to TransportManager object.
          **/
-        void setTransportManager( NsAppLink::NsTransportManager::ITransportManager * transportManager );
+        void setTransportManager( NsSmartDeviceLink::NsTransportManager::ITransportManager * transportManager );
 
         /**
          * \brief Method which should start devices discoveryng
@@ -129,7 +129,7 @@ namespace NsConnectionHandler
         /**
          * \brief Pointer to TransportManager
          */
-        NsAppLink::NsTransportManager::ITransportManager * mpTransportManager;
+        NsSmartDeviceLink::NsTransportManager::ITransportManager * mpTransportManager;
 
         /**
          * \brief List of devices
