@@ -128,7 +128,6 @@ int main(int argc, char** argv)
     connectionHandler -> setTransportManager( transportManager );
 
     transportManager->addDeviceListener(connectionHandler);
-    // transportManager->run();
 
     NsAppManager::AppMgr& appMgr = NsAppManager::AppMgr::getInstance();
 
@@ -279,17 +278,9 @@ int main(int argc, char** argv)
     }
     /**********************************/
 
-//    transportManager->scanForNewDevices();
     while(true)
     {
         sleep(100500);
     }
-
-    if (0 != pid_hmi)
-    {
-      kill(pid_hmi, SIGQUIT);
-    }
-
-    return EXIT_SUCCESS;
 }
 
