@@ -241,9 +241,8 @@ class Function(InterfaceItemBase):
     """Function.
 
     Instance variables:
-    function_id -- function identifier (string)
-    message_type -- message type must be "request",
-                    "response" or "notification"
+    function_id -- function identifier (EnumElement from Enum "FunctionID")
+    message_type -- message type (EnumElement from Enum "messageType")
     platform -- optional platform (string or None)
     params -- function parameters
 

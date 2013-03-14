@@ -20,7 +20,7 @@ class ParseError(Exception):
     pass
 
 
-class Parser:
+class Parser(object):
 
     """ALRPCV2 Parser."""
 
@@ -65,7 +65,7 @@ class Parser:
             elif element.tag == "function":
                 function = self._parse_function(element)
                 self._add_item(functions, function,
-                               (function.name, function.message_type))
+                               (function.function_id, function.message_type))
             else:
                 raise ParseError("Unexpected element: " + element.tag)
 
@@ -138,9 +138,13 @@ class Parser:
 
         for a in attrib:
             if a == "functionID":
-                function_id = attrib[a]
+                function_id = \
+                    self._get_enum_element_for_function("FunctionID",
+                                                        attrib[a])
             elif a == "messagetype":
-                message_type = attrib[a]
+                message_type = \
+                    self._get_enum_element_for_function("messageType",
+                                                        attrib[a])
             elif a == "platform":
                 platform = attrib[a]
             else:
@@ -192,7 +196,7 @@ class Parser:
             elif subelement.tag == "todo":
                 todos.append(self._parse_simple_element(subelement))
             elif subelement.tag == "issue":
-                todos.append(self._parse_issue(subelement))
+                issues.append(self._parse_issue(subelement))
             else:
                 subelements.append(subelement)
 
@@ -332,17 +336,17 @@ class Parser:
             param_type = Model.Boolean()
         elif type_name == "Integer" or \
                 type_name == "Float":
-            min_value = self._get_and_remove_optional_int_attrib(
-                attrib, "minvalue")
-            max_value = self._get_and_remove_optional_int_attrib(
-                attrib, "maxvalue")
+            min_value = self._get_and_remove_optional_number_attrib(
+                attrib, "minvalue", int if type_name == "Integer" else float)
+            max_value = self._get_and_remove_optional_number_attrib(
+                attrib, "maxvalue", int if type_name == "Integer" else float)
 
             param_type = \
                 (Model.Integer if type_name == "Integer" else Model.Double)(
                     min_value=min_value,
                     max_value=max_value)
         elif type_name == "String":
-            max_length = self._get_and_remove_optional_int_attrib(
+            max_length = self._get_and_remove_optional_number_attrib(
                 attrib, "maxlength")
             param_type = Model.String(max_length=max_length)
         else:
@@ -352,10 +356,10 @@ class Parser:
                 raise ParseError("Unknown type '" + type_name + "'")
 
         if self._get_and_remove_optional_bool_attrib(attrib, "array", False):
-            min_size = self._get_and_remove_optional_int_attrib(attrib,
-                                                                "minsize")
-            max_size = self._get_and_remove_optional_int_attrib(attrib,
-                                                                "maxsize")
+            min_size = self._get_and_remove_optional_number_attrib(attrib,
+                                                                   "minsize")
+            max_size = self._get_and_remove_optional_number_attrib(attrib,
+                                                                   "maxsize")
             param_type = Model.Array(element_type=param_type,
                                      min_size=min_size,
                                      max_size=max_size)
@@ -417,15 +421,15 @@ class Parser:
 
         return value
 
-    def _get_and_remove_optional_int_attrib(self, attrib, name):
+    def _get_and_remove_optional_number_attrib(self, attrib, name, _type=int):
         value = self._get_and_remove_attrib(attrib, name)
 
         if value is not None:
             try:
-                value = int(value)
+                value = _type(value)
             except:
-                raise ParseError("Invlaid value for int: '" +
-                                 value + "'")
+                raise ParseError("Invlaid value for " + _type.__name__ +
+                                 ": '" + value + "'")
 
         return value
 
@@ -452,3 +456,19 @@ class Parser:
                              bool_string + "'")
 
         return value
+
+    def _get_enum_element_for_function(self, enum_name, element_name):
+        if enum_name not in self._types:
+            raise ParseError("Enumeration '" + enum_name +
+                             "' must be declared before any function")
+
+        enum = self._types[enum_name]
+
+        if type(enum) is not Model.Enum:
+            raise ParseError("'" + enum_name + "' is not an enumeration")
+
+        if element_name not in enum.elements:
+            raise ParseError("'" + element_name +
+                             "' is not a member of enum '" + enum_name + "'")
+
+        return enum.elements[element_name]
