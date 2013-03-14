@@ -211,7 +211,7 @@ class FunctionParam(Param):
                  design_description=None, issues=None, todos=None,
                  is_mandatory=True, platform=None, default_value=None):
         super(FunctionParam, self).__init__(
-            name, description=description,
+            name, param_type=param_type, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
         self.platform = platform
@@ -241,9 +241,8 @@ class Function(InterfaceItemBase):
     """Function.
 
     Instance variables:
-    function_id -- function identifier (string)
-    message_type -- message type must be "request",
-                    "response" or "notification"
+    function_id -- function identifier (EnumElement from Enum "FunctionID")
+    message_type -- message type (EnumElement from Enum "messageType")
     platform -- optional platform (string or None)
     params -- function parameters
 
