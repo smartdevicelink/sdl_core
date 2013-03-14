@@ -365,18 +365,22 @@ class Parser(object):
                                      min_size=min_size,
                                      max_size=max_size)
 
+        base_type = \
+            param_type.element_type if isinstance(param_type, Model.Array) \
+            else param_type
+
         other_subelements = []
         for subelement in subelements:
             if subelement.tag == "element":
-                if type(param_type) is not Model.Enum and \
-                   type(param_type) is not Model.EnumSubset:
+                if type(base_type) is not Model.Enum and \
+                   type(base_type) is not Model.EnumSubset:
                     raise ParseError("Elements specified for parameter '" +
                                      params["name"] + "' of type " +
-                                     type(param_type).__name__)
-                if type(param_type) is Model.Enum:
-                    param_type = Model.EnumSubset(
+                                     type(base_type).__name__)
+                if type(base_type) is Model.Enum:
+                    base_type = Model.EnumSubset(
                         name=params["name"],
-                        enum=param_type,
+                        enum=base_type,
                         description=params["description"],
                         design_description=params["design_description"],
                         issues=params["issues"],
@@ -395,18 +399,23 @@ class Parser(object):
                     raise ParseError("Unexpected subelements for element '" +
                                      element_name + "' of parameter '" +
                                      params["name"])
-                if element_name in param_type.allowed_elements:
+                if element_name in base_type.allowed_elements:
                     raise ParseError("Element '" + element_name +
                                      "' is specified more than once for" +
                                      " parameter '" + params["name"] + "'")
-                if element_name not in param_type.enum.elements:
+                if element_name not in base_type.enum.elements:
                     raise ParseError("Element '" + element_name +
                                      "' is not a member of enum '" +
-                                     param_type.enum.name + "'")
-                param_type.allowed_elements[element_name] = \
-                    param_type.enum.elements[element_name]
+                                     base_type.enum.name + "'")
+                base_type.allowed_elements[element_name] = \
+                    base_type.enum.elements[element_name]
             else:
                 other_subelements.append(subelement)
+
+        if isinstance(param_type, Model.Array):
+            param_type.element_type = base_type
+        else:
+            param_type = base_type
 
         params["param_type"] = param_type
 
