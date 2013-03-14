@@ -65,11 +65,11 @@ class SmartSchema(object):
         with open(os.path.join(destination_dir, header_file_name) , "w") as f:
             f.write(self._hpp_file_tempalte.substitute(guard = guard,
                                                        namespace_open = namespace_open,
-                                                       enums_content = self._indent_code(self._generate_enums(interface.enums), indent_level),
+                                                       enums_content = self._indent_code(self._generate_enums(interface.enums.values()), indent_level),
                                                        class_content = self._indent_code(self._generate_hpp_class(class_name,
-                                                                                                                  interface.params, 
-                                                                                                                  interface.functions, 
-                                                                                                                  interface.structs), indent_level),
+                                                                                                                  interface.params,
+                                                                                                                  interface.functions.values(),
+                                                                                                                  interface.structs.values()), indent_level),
                                                        namespace_close = namespace_close))
         
         with open(os.path.join(destination_dir, "".join("{0}.cpp".format(class_name))), "w") as f:
@@ -103,7 +103,7 @@ class SmartSchema(object):
     def _generate_enum(self, enum):
         return self._enum_template.substitute(comment = self._generate_comment(enum),
                                                  name = enum.name,
-                                                 enum_items = self._indent_code(self._generate_enum_elements(enum.elements), 1))
+                                                 enum_items = self._indent_code(self._generate_enum_elements(enum.elements.values()), 1))
 
     def _generate_enum_elements(self, enum_elements):
         return ",\n\n".join(map(lambda x: self._generate_enum_element(x), enum_elements))
