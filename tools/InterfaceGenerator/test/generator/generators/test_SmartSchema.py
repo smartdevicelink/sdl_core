@@ -179,6 +179,24 @@ class TestSmartSchema(unittest.TestCase):
         self.assertEqual(smart_schema_generator._generate_enums(enums), 
                          "{0}\n{1}".format(expected_result_enum1, expected_result_enum2)
                          ,"Generated enums are invalid")
+        
+    def test_full_generation(self):
+        smart_schema_generator = SmartSchema()
+        
+        elements1 = [Model.EnumElement("name1", None, design_description, None, todos, None, "1"),
+                     Model.EnumElement("name2", description, None, issues, None, "internal_name2", None)]
+        enum1 = Model.Enum("Enum1", None, None, None, todos, None, elements1)
+        
+        elements2 = [Model.EnumElement("xxx", None, None, None, None, "val_1", None),
+                     Model.EnumElement("yyy", None, None, None, None, "val_2", "100"),
+                     Model.EnumElement("val_3", None, None, None, None, None, None)]
+        enum2 = Model.Enum("E2", None, None, None, None, None, elements2)
+        
+        enums = [enum1, enum2]
+        
+        interface = Model.Interface(enums, None, None, None)
+        
+        smart_schema_generator.generate(interface, "Test.xml", "AAA::BBB", "/home/eftin/gen_test")
 
 if __name__ == '__main__':
     unittest.main()
