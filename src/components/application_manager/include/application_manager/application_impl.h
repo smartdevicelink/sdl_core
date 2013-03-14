@@ -50,25 +50,34 @@ namespace application_manager {
 
 namespace mobile_api = NsSmartDeviceLinkRPC::V2;
 
-struct InitialApplicationData {
-  InitialApplicationData();
-  ~InitialApplicationData();
+class InitialApplicationData {
+  public:
+    InitialApplicationData();
+    ~InitialApplicationData();
 
-  mobile_api::Language::eType language_;
-  mobile_api::Language::eType ui_language_;
-  smart_objects::CSmartObject* app_types_;
-  smart_objects::CSmartObject* vr_synonyms_;
-  smart_objects::CSmartObject* ngn_media_screen_name_;
-  smart_objects::CSmartObject* mobile_app_id_;
-  smart_objects::CSmartObject* tts_name_;
-};
+    const smart_objects::CSmartObject* app_types() const;
+    const smart_objects::CSmartObject* vr_synonyms() const;
+    const smart_objects::CSmartObject* mobile_app_id() const;
+    const smart_objects::CSmartObject* tts_name() const;
+    const smart_objects::CSmartObject* ngn_media_screen_name() const;
+    const mobile_api::Language::eType& language() const;
+    const mobile_api::Language::eType& ui_language() const;
+    void set_app_types(const smart_objects::CSmartObject& app_types);
+    void set_vr_synonyms(const smart_objects::CSmartObject& vr_synonyms);
+    void set_mobile_app_id(const smart_objects::CSmartObject& mobile_app_id);
+    void set_tts_name(const smart_objects::CSmartObject& tts_name);
+    void set_ngn_media_screen_name(const smart_objects::CSmartObject& ngn_name);
+    void set_language(const mobile_api::Language::eType& language);
+    void set_ui_language(const mobile_api::Language::eType& ui_language);
 
-struct AppFile {
-  AppFile(const std::string& name, bool persistent)
-    : is_persistent(persistent),
-      file_name(name) {}
-  std::string file_name;
-  bool is_persistent;
+  protected:
+    smart_objects::CSmartObject* app_types_;
+    smart_objects::CSmartObject* vr_synonyms_;
+    smart_objects::CSmartObject* mobile_app_id_;
+    smart_objects::CSmartObject* tts_name_;
+    smart_objects::CSmartObject* ngn_media_screen_name_;
+    mobile_api::Language::eType language_;
+    mobile_api::Language::eType ui_language_;
 };
 
 /*
@@ -86,57 +95,25 @@ typedef std::map<unsigned int, smart_objects::CSmartObject*> SubMenuMap;
  */
 typedef std::map<unsigned int, smart_objects::CSmartObject*> ChoiceSetMap;
 
-class ApplicationImpl : public Application {
+class DynamicApplicationData {
   public:
-    explicit ApplicationImpl(int app_id);
-    ~ApplicationImpl();
-
-    void ProcessMessage(smart_objects::CSmartObject* message);
-    void ReportError(smart_objects::CSmartObject* message,
-                     ErrorCode error_code);
-    const smart_objects::CSmartObject* active_message() const;
-    void CloseActiveMessage();
-    const Version& version() const;
-    int app_id() const;
-    const std::string& name() const;
-    bool IsFullscreen() const;
-    bool IsAudible() const;
-    bool HasbeenActivated() const;
-
-    bool is_media_application() const;
-    const smart_objects::CSmartObject* app_types() const;
-    const smart_objects::CSmartObject* vr_synonyms() const;
-    const smart_objects::CSmartObject* mobile_app_id() const;
-    const smart_objects::CSmartObject* tts_name() const;
-    const smart_objects::CSmartObject* ngn_media_screen_name() const;
-    const mobile_api::HMILevel::eType& hmi_level() const;
-    const mobile_api::SystemContext::eType& system_context() const;
-    const mobile_api::Language::eType& language() const;
-    const mobile_api::Language::eType& ui_language() const;
+    DynamicApplicationData();
+    ~DynamicApplicationData();
     const smart_objects::CSmartObject* help_promt() const;
     const smart_objects::CSmartObject* timeout_promt() const;
     const smart_objects::CSmartObject* vr_help_title() const;
     const smart_objects::CSmartObject* vr_help() const;
     const mobile_api::TBTState::eType& tbt_state() const;
+    const smart_objects::CSmartObject* show_command() const;
+    const smart_objects::CSmartObject* tbt_show_command() const;
 
-    void set_version(const Version& version);
-    void set_name(const std::string& name);
-    void set_is_media_application(bool is_media);
-    void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
-    void set_system_context(
-      const mobile_api::SystemContext::eType& system_context);
-    void set_language(const mobile_api::Language::eType& language);
-    void set_ui_language(const mobile_api::Language::eType& ui_language);
-    void set_app_types(const smart_objects::CSmartObject& app_types);
-    void set_vr_synonyms(const smart_objects::CSmartObject& vr_synonyms);
-    void set_mobile_app_id(const smart_objects::CSmartObject& mobile_app_id);
-    void set_tts_name(const smart_objects::CSmartObject& tts_name);
-    void set_ngn_media_screen_name(const smart_objects::CSmartObject& ngn_name);
     void set_help_prompt(const smart_objects::CSmartObject& help_promt);
     void set_timeout_prompt(const smart_objects::CSmartObject& timeout_promt);
     void set_vr_help_title(const smart_objects::CSmartObject& vr_help_title);
     void set_vr_help(const smart_objects::CSmartObject& vr_help);
     void set_tbt_state(const mobile_api::TBTState::eType& tbt_state);
+    void set_show_command(const smart_objects::CSmartObject& show_command);
+    void set_tbt_show_command(const smart_objects::CSmartObject& tbt_show);
 
     /*
      * @brief Adds a command to the in application menu
@@ -171,14 +148,14 @@ class ApplicationImpl : public Application {
     smart_objects::CSmartObject*  FindSubMenu(unsigned int menu_id);
 
     /*
+     * @brief Returns true if sub menu with such name already exist
+     */
+    bool IsSubMenuNameAlreadyExist(const std::string& name);
+
+    /*
      * @brief Retrieve application commands
      */
     inline const CommandsMap& commands_map() const;
-
-  /*
-   * @brief Returns true if sub menu with such name already exist
-   */
- bool IsSubMenuNameAlreadyExist(const std::string& name);
     /*
      * @brief Adds a interaction choice set to the application
      *
@@ -186,7 +163,7 @@ class ApplicationImpl : public Application {
      * @param choice_set SmartObject that represent choice set
      */
     void AddChoiceSet(unsigned int choice_set_id,
-                        const smart_objects::CSmartObject& choice_set);
+                      const smart_objects::CSmartObject& choice_set);
 
     /*
      * @brief Deletes choice set from the application
@@ -202,6 +179,63 @@ class ApplicationImpl : public Application {
      */
     smart_objects::CSmartObject*  FindChoiceSet(unsigned int choice_set_id);
 
+  protected:
+    smart_objects::CSmartObject* help_promt_;
+    smart_objects::CSmartObject* timeout_promt_;
+    smart_objects::CSmartObject* vr_help_title_;
+    smart_objects::CSmartObject* vr_help_;
+    mobile_api::TBTState::eType tbt_state_;
+    smart_objects::CSmartObject* show_command_;
+    smart_objects::CSmartObject* tbt_show_command_;
+
+    CommandsMap   commands_;
+    SubMenuMap    sub_menu_;
+    ChoiceSetMap  choice_set_map_;
+};
+
+struct AppFile {
+  AppFile(const std::string& name, bool persistent)
+    : is_persistent(persistent),
+      file_name(name) {}
+  std::string file_name;
+  bool is_persistent;
+};
+
+class ApplicationImpl : public Application,
+  public InitialApplicationData,
+  public DynamicApplicationData {
+  public:
+    explicit ApplicationImpl(int app_id);
+    ~ApplicationImpl();
+
+    void ProcessMessage(smart_objects::CSmartObject* message);
+    void ReportError(smart_objects::CSmartObject* message,
+                     ErrorCode error_code);
+    void CloseActiveMessage();
+    bool IsFullscreen() const;
+    bool IsAudible() const;
+    bool HasbeenActivated() const;
+
+    const smart_objects::CSmartObject* active_message() const;
+    const Version& version() const;
+    int app_id() const;
+    const std::string& name() const;
+    bool is_media_application() const;
+    const mobile_api::HMILevel::eType& hmi_level() const;
+    const mobile_api::SystemContext::eType& system_context() const;
+    const std::string& app_icon_path() const;
+
+    void set_version(const Version& version);
+    void set_name(const std::string& name);
+    void set_is_media_application(bool is_media);
+    void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
+    void set_system_context(
+      const mobile_api::SystemContext::eType& system_context);
+    bool set_app_icon_path(const std::string& file_name);
+
+    bool AddFile(const std::string& file_name, bool is_persistent);
+    bool DeleteFile(const std::string& file_name);
+
     bool SubscribeToButton(unsigned int btn_name);
     bool IsSubscribedToButton(unsigned int btn_name);
     bool UnsubscribeFromButton(unsigned int btn_name);
@@ -210,39 +244,27 @@ class ApplicationImpl : public Application {
     bool IsSubscribedToIVI(unsigned int vehicle_info_type_);
     bool UnsubscribeFromIVI(unsigned int vehicle_info_type_);
 
-    bool AddFile(const std::string& file_name, bool is_persistent);
-    bool DeleteFile(const std::string& file_name);
-
   protected:
     void CleanupFiles();
 
   private:
+    smart_objects::CSmartObject* active_message_;
+
     Version version_;
     int app_id_;
     std::string app_name_;
-
-    smart_objects::CSmartObject* active_message_;
-    InitialApplicationData initial_app_data_;
-
     bool is_media_;
+
     mobile_api::HMILevel::eType hmi_level_;
     mobile_api::SystemContext::eType system_context_;
+    std::string app_icon_path_;
 
-    mobile_api::TBTState::eType tbt_state_;
-    smart_objects::CSmartObject* help_promt_;
-    smart_objects::CSmartObject* timeout_promt_;
-    smart_objects::CSmartObject* vr_help_title_;
-    smart_objects::CSmartObject* vr_help_;
-
-    CommandsMap   commands_;
-    SubMenuMap    sub_menu_;
-    ChoiceSetMap  choice_set_map_;
+    std::vector<AppFile> app_files_;
     std::set<unsigned int> subscribed_buttons_;
     std::set<unsigned int> subscribed_vehicle_info_;
-    std::vector<AppFile> app_files_;
 };
 
-const CommandsMap& ApplicationImpl::commands_map() const {
+const CommandsMap& DynamicApplicationData::commands_map() const {
   return commands_;
 }
 

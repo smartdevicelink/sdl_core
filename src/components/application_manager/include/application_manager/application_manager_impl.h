@@ -109,10 +109,10 @@ class ApplicationManagerImpl : public ApplicationManager
      * @return pointer to MessageChaining
      */
     MessageChaining* AddMessageChain(MessageChaining* chain,
-        unsigned int connection_key,
-        unsigned int correlation_id,
-        unsigned int function_id,
-        const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
+                                     unsigned int connection_key,
+                                     unsigned int correlation_id,
+                                     unsigned int function_id,
+                                     const NsSmartDeviceLink::NsSmartObjects::CSmartObject* data = NULL);
 
     /*
      * @brief Decrease chain for correlation ID
@@ -158,8 +158,8 @@ class ApplicationManagerImpl : public ApplicationManager
      * @param audio_type      Type of audio data
      */
     void StartAudioPassThruThread(int session_key, int correlation_id,
-                                   int max_duration, int sampling_rate,
-                                   int bits_per_sample, int audio_type);
+                                  int max_duration, int sampling_rate,
+                                  int bits_per_sample, int audio_type);
 
     /*
      * @brief Terminates audio pass thru thread
@@ -175,11 +175,6 @@ class ApplicationManagerImpl : public ApplicationManager
     void set_connection_handler(
       connection_handler::ConnectionHandler* handler);
     void set_watchdog(request_watchdog::Watchdog* watchdog);
-
-    /*TODO(PV): set or create?*/
-    void set_hmi_matrix(HMIMatrix* matrix);
-    /*TODO(PV): set or create?*/
-    void set_policies_manager(PoliciesManager* managaer);
 
     ///////////////////////////////////////////////////////
 
@@ -207,6 +202,11 @@ class ApplicationManagerImpl : public ApplicationManager
 
   private:
     ApplicationManagerImpl();
+
+    void CreateHMIMatrix(HMIMatrix* matrix);
+
+    void CreatePoliciesManager(PoliciesManager* managaer);
+
     /**
        * \brief Performs check using PoliciesManager of availability
        * of the message for the application. If error occured it is sent
