@@ -46,15 +46,17 @@ class SmartSchema(object):
 
         if not os.path.exists(destination_dir):
             os.makedirs(destination_dir)
-                
-        parts = namespace.split("::")
+                        
         indent_level = 0
         namespace_open = ""
         namespace_close = ""
-        for part in parts:
-            namespace_open = "".join([namespace_open, self._indent_code(self._namespace_open_template.substitute(name = part), indent_level)])
-            namespace_close = "".join([namespace_close, self._indent_code("}\n", len(parts) - indent_level - 1)])            
-            indent_level = indent_level + 1 
+        
+        if namespace:
+            parts = namespace.split("::")
+            for part in parts:
+                namespace_open = "".join([namespace_open, self._indent_code(self._namespace_open_template.substitute(name = part), indent_level)])
+                namespace_close = "\n".join([namespace_close, self._indent_code("}", len(parts) - indent_level - 1)])            
+                indent_level = indent_level + 1 
         
         class_name = os.path.splitext(filename)[0]
         guard = "__CSMARTFACTORY_{0}_{1}_HPP__".format(class_name.upper(), uuid.uuid1().hex.capitalize())
@@ -78,8 +80,20 @@ class SmartSchema(object):
                                                        init_function_impls = ""))
 
     def _generate_hpp_class(self, class_name, params, functions, structs):
-        return ""
+        return self._class_hpp_template.substitute(comment = self._generate_class_comment(class_name, params),
+                                                   class_name = class_name,
+                                                   init_function_decls = self._generate_function_decls(functions))
         
+    def _generate_function_decls(self, functions):
+        if functions is None:
+            raise GenerateError("Functions is None")
+        
+        return "\n".join(map(lambda x: self._indent_code(self._generate_function_decl(x), 1), functions))
+    
+    def _generate_function_decl(self, function):
+        return self._function_decl_template.substitute(comment = "",
+                                                       function_name = function.name)
+    
     def _generate_enums(self, enums):
         if enums is None:
             raise GenerateError("Enums is None")
@@ -102,6 +116,10 @@ class SmartSchema(object):
         else:
             return self._enum_element_with_no_value_template.substitute(comment = self._generate_comment(enum_element),
                                                                         name = enum_element.internal_name if enum_element.internal_name is not None else enum_element.name)
+
+    def _generate_class_comment(self, class_name, params):
+        return self._class_comment_template.substitute(class_name = class_name,
+                                                       class_params = "".join(map(lambda x: " *     {0} - {1}\n".format(x[0], x[1]), params.items())) if params else " *    none\n")
 
     def _generate_comment(self, interface_item_base):
         brief_type_title = None
@@ -160,6 +178,7 @@ $enums_content
 $class_content
 $namespace_close
 #endif //$guard
+
 ''')
 
     _namespace_open_template = string.Template(
@@ -203,19 +222,20 @@ protected:
      * @brief Initializes all schemas.     
      */
     void initSchemas();
-    
-$init_function_decls   
-};
+
+$init_function_decls};
 """)
+
+    _function_decl_template = string.Template(
+"""$comment
+static NsAppLink::NsSmartObjects::CSmartSchema initFunction_$function_name();""")
 
     _class_comment_template = string.Template(
 """/**
  * @brief Class $class_name.
  *
  * Params:
-$class_params
- */ 
-""")
+$class_params */""")
 
     _comment_template = string.Template(
 """/**
