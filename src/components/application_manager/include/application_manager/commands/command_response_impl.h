@@ -46,13 +46,13 @@ namespace application_manager {
 namespace commands {
 
 class CommandResponseImpl : public CommandImpl {
- public:
-  explicit CommandResponseImpl(const MessageSharedPtr& message);
-  virtual ~CommandResponseImpl();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
-  void SendResponse();
+  public:
+    explicit CommandResponseImpl(const MessageSharedPtr& message);
+    virtual ~CommandResponseImpl();
+    virtual bool Init();
+    virtual bool CleanUp();
+    virtual void Run();
+    void SendResponse();
 };
 
 }  // namespace commands

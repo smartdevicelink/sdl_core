@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
 
 #include "application_manager/commands/command_impl.h"
-#include "v4_protocol_v2_0_revT.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -75,15 +75,15 @@ enum TextFieldName {
 
 
 class CommandRequestImpl : public CommandImpl {
- public:
-  explicit CommandRequestImpl(const MessageSharedPtr& message);
-  virtual ~CommandRequestImpl();
-  virtual bool Init();
-  virtual bool CleanUp();
-  virtual void Run();
-  void SendResponse(const bool success,
-      const NsSmartDeviceLinkRPC::V2::Result::eType& result_code,
-      const char* info = NULL);
+  public:
+    explicit CommandRequestImpl(const MessageSharedPtr& message);
+    virtual ~CommandRequestImpl();
+    virtual bool Init();
+    virtual bool CleanUp();
+    virtual void Run();
+    void SendResponse(const bool success,
+                      const NsSmartDeviceLinkRPC::V2::Result::eType& result_code,
+                      const char* info = NULL);
 };
 
 }  // namespace commands

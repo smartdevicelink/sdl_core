@@ -34,7 +34,7 @@
 #include "application_manager/commands/subscribe_vehicle_data_response_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "v4_protocol_v2_0_revT.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -45,7 +45,7 @@ log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 SubscribeVehicleDataCommandResponse::SubscribeVehicleDataCommandResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 SubscribeVehicleDataCommandResponse::~SubscribeVehicleDataCommandResponse() {

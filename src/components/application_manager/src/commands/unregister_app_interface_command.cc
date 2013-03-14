@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/unregister_app_interface_command.h"
 #include "application_manager/application_manager_impl.h"
-#include "v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 

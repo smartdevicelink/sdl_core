@@ -11,7 +11,7 @@ include_directories (
   ../TransportManager/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
-  ${CMAKE_BINARY_DIR}/src/components/Interfaces
+  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (SOURCES
@@ -20,6 +20,7 @@ set (SOURCES
 ./src/message_chaining.cc
 ./src/application_impl.cc
 ./src/basic_command_factory.cc
+./src/application_command_factory.cc
 ./src/audio_pass_thru_thread_impl.cc
 ./src/commands/command_impl.cc
 ./src/commands/command_request_impl.cc

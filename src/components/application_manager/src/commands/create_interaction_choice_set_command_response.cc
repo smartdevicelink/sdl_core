@@ -35,14 +35,14 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
-#include "v4_protocol_v2_0_revT.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
 namespace commands {
 
 CreateInteractionChoiceSetResponseCommand::CreateInteractionChoiceSetResponseCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 CreateInteractionChoiceSetResponseCommand::~CreateInteractionChoiceSetResponseCommand() {
@@ -58,18 +58,18 @@ void CreateInteractionChoiceSetResponseCommand::Run() {
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(hmi_request_id)) {
     smart_objects::CSmartObject data = ApplicationManagerImpl::instance()->
-        GetMessageChain(hmi_request_id)->data();
+                                       GetMessageChain(hmi_request_id)->data();
 
     ApplicationImpl* app = static_cast<ApplicationImpl*>(
-        ApplicationManagerImpl::instance()->
-          application(data[strings::params][strings::connection_key]));
+                             ApplicationManagerImpl::instance()->
+                             application(data[strings::params][strings::connection_key]));
 
     app->AddChoiceSet(data[strings::msg_params][strings::interaction_choice_set_id].asInt(),
-                   data[strings::msg_params]);
+                      data[strings::msg_params]);
 
     (*message_)[strings::params][strings::success] = true;
     (*message_)[strings::params][strings::result_code] =
-          NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+      NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
     SendResponse();
   }
 }

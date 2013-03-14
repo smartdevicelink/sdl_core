@@ -98,31 +98,31 @@
 
 
 // TODO(AK): Include the directory when naming .h files
-#include "v4_protocol_v2_0_revT.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
 CommandSharedPtr BasicCommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
+  const MessageSharedPtr& message) {
   CommandSharedPtr command(NULL);
 
   switch (static_cast<int>((*message)[strings::params][strings::function_id])) {
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::RegisterAppInterfaceID: {
       if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kRequest)
+          MessageType::kRequest) {
         command.reset(new commands::RegisterAppInterfaceCommand(message));
-      else
+      } else
         command.reset(
-            new commands::RegisterAppInterfaceResponseCommand(message));
+          new commands::RegisterAppInterfaceResponseCommand(message));
       break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::UnregisterAppInterfaceID: {
       if ((*message)[strings::params][strings::message_type] ==
-          MessageType::kRequest)
+          MessageType::kRequest) {
         command.reset(new commands::UnregisterAppInterfaceCommand(message));
-      else
+      } else
         command.reset(
-            new commands::UnregisterAppInterfaceResponseCommand(message));
+          new commands::UnregisterAppInterfaceResponseCommand(message));
       break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SetGlobalPropertiesID: {
@@ -230,108 +230,108 @@ CommandSharedPtr BasicCommandFactory::CreateCommand(
       break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::ListFilesID: {
-        if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-          command.reset(new commands::ListFilesResponseCommand(message));
-        } else {
-          command.reset(new commands::ListFilesCommand(message));
-        }
-        break;
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::ListFilesResponseCommand(message));
+      } else {
+        command.reset(new commands::ListFilesCommand(message));
+      }
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SubscribeButtonID: {
-        if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-          command.reset(new commands::SubscribeButtonCommandResponse(message));
-        } else {
-          command.reset(new commands::SubscribeButtonCommandRequest(message));
-        }
-        break;
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::SubscribeButtonCommandResponse(message));
+      } else {
+        command.reset(new commands::SubscribeButtonCommandRequest(message));
+      }
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::UnsubscribeButtonID: {
-        if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-          command.reset(new commands::UnsubscribeButtonCommandResponse(message));
-        } else {
-          command.reset(new commands::UnsubscribeButtonCommandRequest(message));
-        }
-        break;
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::UnsubscribeButtonCommandResponse(message));
+      } else {
+        command.reset(new commands::UnsubscribeButtonCommandRequest(message));
+      }
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::ShowConstantTBTID: {
-         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-           command.reset(new commands::ShowConstantTBTResponseCommand(message));
-         } else {
-           command.reset(new commands::ShowConstantTBTCommand(message));
-         }
-         break;
-     }
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::ShowConstantTBTResponseCommand(message));
+      } else {
+        command.reset(new commands::ShowConstantTBTCommand(message));
+      }
+      break;
+    }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SubscribeVehicleDataID: {
-         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-           command.reset(new commands::SubscribeVehicleDataCommandResponse(message));
-         } else {
-           command.reset(new commands::SubscribeVehicleDataCommandRequest(message));
-         }
-         break;
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::SubscribeVehicleDataCommandResponse(message));
+      } else {
+        command.reset(new commands::SubscribeVehicleDataCommandRequest(message));
+      }
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::UnsubscribeVehicleDataID: {
-         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-           command.reset(new commands::UnsubscribeVehicleDataCommandResponse(message));
-         } else {
-           command.reset(new commands::UnsubscribeVehicleDataCommandRequest(message));
-         }
-         break;
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::UnsubscribeVehicleDataCommandResponse(message));
+      } else {
+        command.reset(new commands::UnsubscribeVehicleDataCommandRequest(message));
+      }
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::ReadDIDID: {
-         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-           command.reset(new commands::ReadDIDCommandResponse(message));
-         } else {
-           command.reset(new commands::ReadDIDCommandRequest(message));
-         }
-         break;
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::ReadDIDCommandResponse(message));
+      } else {
+        command.reset(new commands::ReadDIDCommandRequest(message));
+      }
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::GetVehicleDataID: {
-         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-           command.reset(new commands::GetVehicleDataCommandResponse(message));
-         } else {
-           command.reset(new commands::GetVehicleDataCommandRequest(message));
-         }
-         break;
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::GetVehicleDataCommandResponse(message));
+      } else {
+        command.reset(new commands::GetVehicleDataCommandRequest(message));
+      }
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::AlertManeuverID: {
-         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-           command.reset(new commands::AlertManeuverResponseCommand(message));
-         } else {
-           command.reset(new commands::AlertManeuverCommand(message));
-         }
-         break;
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::AlertManeuverResponseCommand(message));
+      } else {
+        command.reset(new commands::AlertManeuverCommand(message));
+      }
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SetAppIconID: {
-         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-           command.reset(new commands::SetIconResponseCommand(message));
-         } else {
-           command.reset(new commands::SetIconCommand(message));
-         }
-         break;
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::SetIconResponseCommand(message));
+      } else {
+        command.reset(new commands::SetIconCommand(message));
+      }
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::SetDisplayLayoutID: {
-         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-           command.reset(new commands::SetDisplayLayoutResponseCommand(message));
-         } else {
-           command.reset(new commands::SetDisplayLayoutCommand(message));
-         }
-         break;
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::SetDisplayLayoutResponseCommand(message));
+      } else {
+        command.reset(new commands::SetDisplayLayoutCommand(message));
+      }
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::UpdateTurnListID: {
-         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-           command.reset(new commands::UpdateTurnListResponseCommand(message));
-         } else {
-           command.reset(new commands::UpdateTurnListCommand(message));
-         }
-         break;
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::UpdateTurnListResponseCommand(message));
+      } else {
+        command.reset(new commands::UpdateTurnListCommand(message));
+      }
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::ChangeRegistrationID: {
-         if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
-           command.reset(new commands::ChangeRegistrationResponseCommand(message));
-         } else {
-           command.reset(new commands::ChangeRegistrationCommand(message));
-         }
-         break;
+      if ((*message)[strings::params][strings::message_type] == MessageType::kResponse) {
+        command.reset(new commands::ChangeRegistrationResponseCommand(message));
+      } else {
+        command.reset(new commands::ChangeRegistrationCommand(message));
+      }
+      break;
     }
     case NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnButtonEventID: {
       command.reset(new commands::OnButtonEventCommand(message));

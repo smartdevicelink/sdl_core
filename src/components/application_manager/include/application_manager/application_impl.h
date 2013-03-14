@@ -43,8 +43,7 @@
 #include "application_manager/application.h"
 #include "application_manager/commands/command.h"
 
-// TODO(AK): Include the directory when naming .h files
-#include "v4_protocol_v2_0_revT.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 

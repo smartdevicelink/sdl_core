@@ -43,39 +43,39 @@ namespace commands {
  * @brief Class is intended to encapsulate RPC as an object
  **/
 class CommandImpl : public Command {
- public:
-  /**
-   * @brief CommandImpl class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit CommandImpl(const MessageSharedPtr& message)
-  : message_(message) {
-  }
+  public:
+    /**
+     * @brief CommandImpl class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit CommandImpl(const MessageSharedPtr& message)
+      : message_(message) {
+    }
 
-  /**
-   * @brief CommandImpl class destructor
-   *
-   **/
-  virtual ~CommandImpl();
+    /**
+     * @brief CommandImpl class destructor
+     *
+     **/
+    virtual ~CommandImpl();
 
-  /**
-   * @brief Init required by command resources
-   **/
-  virtual bool Init();
+    /**
+     * @brief Init required by command resources
+     **/
+    virtual bool Init();
 
-  /**
-   * @brief Cleanup all resources used by command
-   **/
-  virtual bool CleanUp();
+    /**
+     * @brief Cleanup all resources used by command
+     **/
+    virtual bool CleanUp();
 
-  /**
-   * @brief Execute corresponding command by calling the action on reciever
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute corresponding command by calling the action on reciever
+     **/
+    virtual void Run();
 
- protected:
-  MessageSharedPtr message_;
+  protected:
+    MessageSharedPtr message_;
 };
 
 }  // namespace commands

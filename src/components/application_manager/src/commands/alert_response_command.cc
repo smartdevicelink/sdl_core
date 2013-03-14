@@ -35,7 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
-#include "v4_protocol_v2_0_revT.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -46,7 +46,7 @@ log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 AlertCommandResponse::AlertCommandResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 AlertCommandResponse::~AlertCommandResponse() {
@@ -65,21 +65,21 @@ void AlertCommandResponse::Run() {
 
   // TODO(DK) HMI Request Id
   const int function_id =
-      (*message_)[strings::params][strings::function_id].asInt();
+    (*message_)[strings::params][strings::function_id].asInt();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(function_id)) {
     // TODO(DK): HMI code Id
     const int code =
-        (*message_)[strings::msg_params][hmi_response::code].asInt();
+      (*message_)[strings::msg_params][hmi_response::code].asInt();
 
     if (code) {
       (*message_)[strings::msg_params][strings::success] = true;
       (*message_)[strings::msg_params][strings::result_code] =
-          NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
     } else {
       (*message_)[strings::msg_params][strings::success] = false;
       (*message_)[strings::msg_params][strings::result_code] =
-          NsSmartDeviceLinkRPC::V2::Result::IGNORED;
+        NsSmartDeviceLinkRPC::V2::Result::IGNORED;
     }
     SendResponse();
   }

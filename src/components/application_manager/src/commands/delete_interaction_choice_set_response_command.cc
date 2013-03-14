@@ -35,7 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_chaining.h"
-#include "v4_protocol_v2_0_revT.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -46,7 +46,7 @@ log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 DeleteInteractionChoiceSetResponse::DeleteInteractionChoiceSetResponse(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 DeleteInteractionChoiceSetResponse::~DeleteInteractionChoiceSetResponse() {
@@ -63,35 +63,35 @@ void DeleteInteractionChoiceSetResponse::Run() {
 
   // TODO(DK): HMI Request Id
   const int function_id =
-      (*message_)[strings::params]["function_id"].asInt();
+    (*message_)[strings::params]["function_id"].asInt();
 
   // TODO(DK): HMI code Id
   const int code =
-      (*message_)[strings::msg_params][hmi_response::code].asInt();
+    (*message_)[strings::msg_params][hmi_response::code].asInt();
 
   const MessageChaining* msg_chain =
-  ApplicationManagerImpl::instance()->GetMessageChain(function_id);
+    ApplicationManagerImpl::instance()->GetMessageChain(function_id);
 
   if (NULL == msg_chain) {
     return;
   }
 
   smart_objects::CSmartObject data =
-      msg_chain->data();
+    msg_chain->data();
 
   if (ApplicationManagerImpl::instance()->DecreaseMessageChain(
-      (*message_)[strings::params]["function_id"].asInt())) {
+        (*message_)[strings::params]["function_id"].asInt())) {
     if (true == code) {
       ApplicationImpl* app = static_cast<ApplicationImpl*>(
-            ApplicationManagerImpl::instance()->
-            application((*message_)[strings::params][strings::connection_key]));
+                               ApplicationManagerImpl::instance()->
+                               application((*message_)[strings::params][strings::connection_key]));
 
       app->RemoveChoiceSet(
         data[strings::msg_params][strings::interaction_choice_set_id].asInt());
 
       (*message_)[strings::msg_params][strings::success] = true;
       (*message_)[strings::msg_params][strings::result_code] =
-          NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+        NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
     }
     SendResponse();
   }

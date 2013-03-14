@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/reset_global_properties_response_command.h"
-#include "v4_protocol_v2_0_revT.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -43,7 +43,7 @@ log4cxx::LoggerPtr logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Commands"));
 
 ResetGlobalPropertiesResponseCommand::ResetGlobalPropertiesResponseCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 ResetGlobalPropertiesResponseCommand::~ResetGlobalPropertiesResponseCommand() {
@@ -60,7 +60,7 @@ void ResetGlobalPropertiesResponseCommand::Run() {
 
   (*message_)[strings::msg_params][strings::success] = true;
   (*message_)[strings::msg_params][strings::result_code] =
-      NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
+    NsSmartDeviceLinkRPC::V2::Result::SUCCESS;
   SendResponse();
 }
 
