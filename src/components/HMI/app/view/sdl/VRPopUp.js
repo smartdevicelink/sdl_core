@@ -1,0 +1,171 @@
+/**
+ * @name MFT.VRPopUp
+ * 
+ * @desc VRPopUp module visual representation
+ * 
+ * @category    View
+ * @filesource  app/view/sdl/VRPopUp.js
+ * @version     2.0
+ *
+ * @author      Andriy Melnik
+ */
+
+MFT.VRPopUp = Em.ContainerView.create({
+
+    elementId:          'VRPopUp',
+
+    classNames:         'VRPopUp',
+
+    classNameBindings:      ['VRActive:active'],
+
+    childViews: [
+        'popUp',
+        'VRLabel',
+        'VRImage',
+        'listOfCommands'
+    ],
+
+
+    VRImage : Em.View.extend({
+
+        elementId:          'VRImage',
+
+        classNames:         'VRImage',
+    }),
+
+    VRLabel:    MFT.Label.extend({
+
+        elementId:      'VRLabel',
+
+        classNames:     'VRLabel',
+
+        content:        'Speak the command'
+    }),
+
+    VRActive:           false,
+
+    popUp : Em.View.extend({
+
+        elementId:          'popUp',
+
+        classNames:         'popUp',
+    }),
+
+    AddActivateApp: function( appId, appName ){
+
+        this.get('listOfCommands.list.childViews').pushObject(
+            MFT.Button.create({
+                action:                 'onActivateSDLApp',
+                target:                 'MFT.SDLController',
+                text:                   appName,
+                appName:                appName,
+                appId:                  appId,
+                classNames:             'list-item',
+                templateName:           'text'
+            })
+        );
+
+    },
+
+    DeleteActivateApp: function( appId ){
+
+        this.get('listOfCommands.list.childViews').removeObjects(
+            this.get('listOfCommands.list.childViews').filterProperty( 'activeAppId' , appId )
+        );
+
+    },
+
+   AddCommand: function( commandId, vrCommands, appId ){
+
+        for(var j = 0; j < vrCommands.length; j++){
+            this.get('listOfCommands.list.childViews').pushObject(
+                MFT.Button.create({
+                    action:                 'onVRCommand',
+                    target:                 'MFT.SDLAppController',
+                    appId:					appId,
+                    commandId:              commandId,
+                    text:                   vrCommands[j],
+                    classNames:             'list-item',
+                    templateName:           'text'
+                })
+            );
+        }
+
+    },
+
+    DeleteCommand: function( commandId ){
+
+        this.get('listOfCommands.list.childViews').removeObjects(
+            this.get('listOfCommands.list.childViews').filterProperty( 'commandId' , commandId )
+        );
+
+    },
+
+    CreateInteractionChoise: function( params ){
+
+        if ( !params ) {
+            return;
+        }
+        
+        for(var i = 0; i<params.length; i++){
+            for(var j = 0; j<params[i].vrCommands.length; j++){
+                this.get('listOfCommands.list.childViews').pushObject(
+                    MFT.Button.create({
+                        action:                 'onChoiceInteraction',
+                        target:                 'MFT.SDLAppController',
+                        choiceId:               params[i].choiceID,
+                        btnType:                'interactionChoice',
+                        text:                   params[i].vrCommands[j],
+                        classNames:             'list-item',
+                        templateName:           'text'
+                    })                                   
+                );
+            }
+        }
+    },
+
+    DeleteInteractionChoise: function(){
+
+        if( !MFT.InteractionChoicesView.active ){
+            this.get('listOfCommands.list.childViews').removeObjects(
+                this.get('listOfCommands.list.childViews').filterProperty( 'btnType' , 'interactionChoice' )
+            );
+        }
+
+    }.observes('MFT.InteractionChoicesView.active'),
+
+    activateVRPopUp: function(){
+        var self = this;
+        
+        if(this.VRActive){
+            this.set('VRActive', false);          
+        }else{
+        	// play audio alert
+			MFT.Audio.play('audio/say.wav');
+            
+            this.set('VRActive', true);
+        }
+
+        MFT.SDLController.onSystemContextChange();
+    },
+
+     /**
+      * List for option on SDLOptionsView screen
+      */
+    listOfCommands: MFT.List.extend({
+
+        elementId:      'VR_list',
+
+        itemsOnPage:    5,
+                
+        /** Items array */
+        items:          new Array()
+    }),
+    
+    // deactivate VR on change application state
+    onStateChange: function() {
+        if ( this.VRActive ) {
+            this.set('VRActive', false);
+        }
+    }.observes('MFT.TransitionIterator.ready'),
+});

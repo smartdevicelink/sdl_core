@@ -14,7 +14,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 	
 	elementId: 'info_nonMedia',
 	
-	controller: MFT.ApplinkAppController,
+	controller: MFT.SDLAppController,
 	
 	childViews: [
 		'content'
@@ -42,7 +42,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 		
 			classNames: ['app_title'],
 			
-			contentBinding: 'MFT.ApplinkAppController.model.deviceName'
+			contentBinding: 'MFT.SDLAppController.model.deviceName'
 		}),
 
 		image: Em.View.extend({
@@ -50,7 +50,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 			classNames: ['app_image'],
 			
 			template: Ember.Handlebars.compile(
-				'<img width="150px" {{bindAttr src="MFT.ApplinkAppController.model.appInfo.trackIcon"}}>'
+				'<img width="150px" {{bindAttr src="MFT.SDLAppController.model.appInfo.trackIcon"}}>'
 			)
 		}),
 		
@@ -86,10 +86,10 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 		innerMenu: MFT.MenuList.extend({
 			
 			refreshItems: function() {
-                if ( MFT.ApplinkAppController.model.appId == MFT.NonMediaController.currentAppId ) {
-                    this.addItems(MFT.ApplinkAppController.model.softButtons, MFT.ApplinkAppController.model.appId );
+                if ( MFT.SDLAppController.model.appId == MFT.NonMediaController.currentAppId ) {
+                    this.addItems(MFT.SDLAppController.model.softButtons, MFT.SDLAppController.model.appId );
                 }                    
-            }.observes('MFT.ApplinkAppController.model.softButtons.@each'),
+            }.observes('MFT.SDLAppController.model.softButtons.@each'),
 
         	groupName:      "info_nonMedia",
 			
@@ -109,7 +109,7 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
 					templateName: 'arrow',
 					
 					action:		'openCommandsList',
-					target:		'MFT.ApplinkAppController'
+					target:		'MFT.SDLAppController'
 				})
 			})
 		}),
@@ -121,9 +121,9 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
             
             hidden: function() {
             
-                return !Boolean(MFT.ApplinkAppController.model.get('appInfo.customPresets').length);
+                return !Boolean(MFT.SDLAppController.model.get('appInfo.customPresets').length);
             
-            }.property('MFT.ApplinkAppController.model.appInfo.customPresets.@each'),
+            }.property('MFT.SDLAppController.model.appInfo.customPresets.@each'),
             
             childViews: [
     			'perset1',
@@ -134,12 +134,12 @@ MFT.InfoNonMedia = Em.ContainerView.create( MFT.LoadableView, {
     			'perset6'
             ],
             
-            perset1: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.0', presetName: 'PRESET_1'}),
-            perset2: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.1', presetName: 'PRESET_2'}),
-            perset3: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.2', presetName: 'PRESET_3'}),
-            perset4: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.3', presetName: 'PRESET_4'}),
-            perset5: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.4', presetName: 'PRESET_5'}),
-            perset6: MFT.ApplinkPresetButton.extend({textBinding: 'MFT.ApplinkAppController.model.appInfo.customPresets.5', presetName: 'PRESET_6'})
+            perset1: MFT.SDLPresetButton.extend({textBinding: 'MFT.SDLAppController.model.appInfo.customPresets.0', presetName: 'PRESET_1'}),
+            perset2: MFT.SDLPresetButton.extend({textBinding: 'MFT.SDLAppController.model.appInfo.customPresets.1', presetName: 'PRESET_2'}),
+            perset3: MFT.SDLPresetButton.extend({textBinding: 'MFT.SDLAppController.model.appInfo.customPresets.2', presetName: 'PRESET_3'}),
+            perset4: MFT.SDLPresetButton.extend({textBinding: 'MFT.SDLAppController.model.appInfo.customPresets.3', presetName: 'PRESET_4'}),
+            perset5: MFT.SDLPresetButton.extend({textBinding: 'MFT.SDLAppController.model.appInfo.customPresets.4', presetName: 'PRESET_5'}),
+            perset6: MFT.SDLPresetButton.extend({textBinding: 'MFT.SDLAppController.model.appInfo.customPresets.5', presetName: 'PRESET_6'})
 		})
 	})
 });

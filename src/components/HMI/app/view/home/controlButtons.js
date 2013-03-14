@@ -44,7 +44,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 
 		classNames:			'appUILang',
 
-		contentBinding:		'MFT.ApplinkAppController.model.UILanguage'
+		contentBinding:		'MFT.SDLAppController.model.UILanguage'
 	}),
 
 	/*
@@ -56,7 +56,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 
 		classNames:			'appTTSVRLang',
 
-		contentBinding:		'MFT.ApplinkAppController.model.TTSVRLanguage'
+		contentBinding:		'MFT.SDLAppController.model.TTSVRLanguage'
 	}),	
 
 	/*
@@ -116,13 +116,13 @@ MFT.ControlButtons = Em.ContainerView.create({
 
         classNames:         'languageSelect',
 
-        contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
+        contentBinding:     'MFT.SDLModel.sdlLanguagesList',
 
-        valeuBinding:		'MFT.ApplinkModel.hmiUILanguage',
+        valeuBinding:		'MFT.SDLModel.hmiUILanguage',
 
         click: function(){
 
-    		MFT.ApplinkController.onLanguageChangeUI( this.selection );
+    		MFT.SDLController.onLanguageChangeUI( this.selection );
 
         }
     }),
@@ -136,19 +136,19 @@ MFT.ControlButtons = Em.ContainerView.create({
 
         classNames:         'languageSelect',
 
-        contentBinding:     'MFT.ApplinkModel.applinkLanguagesList',
+        contentBinding:     'MFT.SDLModel.sdlLanguagesList',
 
-        valeuBinding:		'MFT.ApplinkModel.hmiTTSVRLanguage',
+        valeuBinding:		'MFT.SDLModel.hmiTTSVRLanguage',
 
         click: function(){
 
-            MFT.ApplinkController.onLanguageChangeTTSVR( this.selection );
+            MFT.SDLController.onLanguageChangeTTSVR( this.selection );
 
         }
     }),
 
 	/**
-	 * Sending data from HMI for processing in ApplinkCore
+	 * Sending data from HMI for processing in SDLCore
 	 */
 	sendData: MFT.Button.create({
 		elementId:	'sendData',
@@ -169,7 +169,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 		classNames:			'sendDataCheckBox',
 
 		onCheckBoxSelected:	function(){
-			MFT.ApplinkController.selectSendData(this.checked);
+			MFT.SDLController.selectSendData(this.checked);
 		}.observes('this.checked')
 
 	}),
@@ -237,52 +237,52 @@ MFT.ControlButtons = Em.ContainerView.create({
 
 		globalPropertiesLabel : MFT.Label.extend({
 
-			elementId:			'applinkGPLabel',
+			elementId:			'sdlGPLabel',
 
-			classNames:			'applinkGPLabel',
+			classNames:			'sdlGPLabel',
 
 			content:			'HELP_PROMPT: TIMEOUT_PROMPT:'
 		}),		
 
 		gpHelpData : MFT.Label.extend({
 
-			elementId:			'applinkGPHData',
+			elementId:			'sdlGPHData',
 
-			classNames:			'applinkGPData',
+			classNames:			'sdlGPData',
 
 			contentBinding:		'this.propertiesData',
 			
 			propertiesData: function(){
 				var str='';
-				if( MFT.ApplinkModel.globalProperties.helpPrompt ){
+				if( MFT.SDLModel.globalProperties.helpPrompt ){
 					var i=0;
 					
-					for(i = 0; i < MFT.ApplinkModel.globalProperties.helpPrompt.length; i++){
-						str += MFT.ApplinkModel.globalProperties.helpPrompt[i].text + ' ';
+					for(i = 0; i < MFT.SDLModel.globalProperties.helpPrompt.length; i++){
+						str += MFT.SDLModel.globalProperties.helpPrompt[i].text + ' ';
 					}}
 				return str;
-			}.property( 'MFT.ApplinkModel.globalProperties.helpPrompt.@each.text' )
+			}.property( 'MFT.SDLModel.globalProperties.helpPrompt.@each.text' )
 		}),
 
 		gpTimeoutData : MFT.Label.extend({
 
-			elementId:			'applinkGPTData',
+			elementId:			'sdlGPTData',
 
-			classNames:			'applinkGPData',
+			classNames:			'sdlGPData',
 
 			contentBinding:		'this.propertiesData',
 			
 			propertiesData: function(){
 				var str='';
-				if( MFT.ApplinkModel.globalProperties.timeoutPrompt ){
+				if( MFT.SDLModel.globalProperties.timeoutPrompt ){
 					var i=0;
-					for(i = 0; i < MFT.ApplinkModel.globalProperties.timeoutPrompt.length; i++){
-						str += MFT.ApplinkModel.globalProperties.timeoutPrompt[i].text + ' ';
+					for(i = 0; i < MFT.SDLModel.globalProperties.timeoutPrompt.length; i++){
+						str += MFT.SDLModel.globalProperties.timeoutPrompt[i].text + ' ';
 					}
 				}
 				
 				return str;
-			}.property( 'MFT.ApplinkModel.globalProperties.timeoutPrompt.@each.text' )
+			}.property( 'MFT.SDLModel.globalProperties.timeoutPrompt.@each.text' )
 		})
 	}),
 
@@ -312,7 +312,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:			'driverDistractionControlCheckBox',
 
 			onCheckBoxSelected:	function(){
-				MFT.ApplinkController.selectDriverDistraction(this.checked);
+				MFT.SDLController.selectDriverDistraction(this.checked);
 			}.observes('this.checked')
 
 		})
@@ -345,7 +345,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 			classNames:			'protocolVersionCheckBox',
 
 			onCheckBoxSelected:	function(){
-				MFT.ApplinkController.selectProtocolVersion(this.checked);
+				MFT.SDLController.selectProtocolVersion(this.checked);
 			}.observes('this.checked')
 
 		})

@@ -1,22 +1,22 @@
 MFT.PresetEventsCustom = Ember.Mixin.create({
     actionDown:        function(){
         this._super();
-        MFT.ApplinkController.onSoftButtonActionDownCustom( this );
+        MFT.SDLController.onSoftButtonActionDownCustom( this );
     },
     actionUp:        function(){
         this._super();
-        MFT.ApplinkController.onSoftButtonActionUpCustom( this );
+        MFT.SDLController.onSoftButtonActionUpCustom( this );
         if( this.systemAction == 'DEFAULT_ACTION' ){
 
-            MFT.ApplinkController.defaultActionSoftButton( this );
+            MFT.SDLController.defaultActionSoftButton( this );
 
         }else if( this.systemAction == 'STEAL_FOCUS' ){
 
-            MFT.ApplinkController.stealFocusSoftButton( this );
+            MFT.SDLController.stealFocusSoftButton( this );
 
         }else if( this.systemAction == 'KEEP_CONTEXT' ){
 
-            MFT.ApplinkController.keepContextSoftButton( this );
+            MFT.SDLController.keepContextSoftButton( this );
 
         }
     },

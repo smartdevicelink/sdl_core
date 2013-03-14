@@ -2,8 +2,8 @@
  * Reference implementation of VehicleInfo component.
  * 
  * Interface to get or set some essential information
- * sent from ApplinkCore. VehicleInfo is responsible for sending a data
- * about the condition of the vehicle between ApplinkCore and CAN network.
+ * sent from SDLCore. VehicleInfo is responsible for sending a data
+ * about the condition of the vehicle between SDLCore and CAN network.
  * Instead CAN network used VehicleInfoModel.
  *
  * @author Andriy Melnik
@@ -90,7 +90,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
 
         if (request.method == "VehicleInfo.GetVehicleData") {
 
-            var vehicleData = MFT.ApplinkVehicleInfoModel.getVehicleData(request.params),
+            var vehicleData = MFT.SDLVehicleInfoModel.getVehicleData(request.params),
                 resultCode;
 
             if( vehicleData ){
@@ -109,25 +109,25 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                     //request.params.dataType:    vehicleData
                 }
             };
-            JSONMessage.result[MFT.ApplinkVehicleInfoModel.vehicleData[request.params.dataType].type] = vehicleData;
+            JSONMessage.result[MFT.SDLVehicleInfoModel.vehicleData[request.params.dataType].type] = vehicleData;
             this.client.send(JSONMessage);
         }
 
         if (request.method == "VehicleInfo.ReadDID") {
 
-            MFT.ApplinkVehicleInfoModel.vehicleInfoReadDID( request.params, request.id );
+            MFT.SDLVehicleInfoModel.vehicleInfoReadDID( request.params, request.id );
 
         }
 
         if (request.method == "VehicleInfo.GetDTCs") {
 
-            MFT.ApplinkVehicleInfoModel.vehicleInfoGetDTCs( request.params, request.id );
+            MFT.SDLVehicleInfoModel.vehicleInfoGetDTCs( request.params, request.id );
 
         }
 
         if (request.method == "VehicleInfo.GetVehicleType") {
 
-            MFT.ApplinkVehicleInfoModel.getVehicleType( request.id );
+            MFT.SDLVehicleInfoModel.getVehicleType( request.id );
 
         }
     },
