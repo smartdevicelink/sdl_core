@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 
+#include "CSmartSchema.hpp"
+
 namespace NsAppLink
 {
     namespace NsSmartObjects
@@ -100,7 +102,31 @@ namespace NsAppLink
              **/
             std::vector<std::string> enumerate();
 
+            bool keyExists(const char * key);
+
             //TODO: Implement method keyExist(const char*) for checking key in map availability
+
+            /**
+             * @brief Validates object according to attached schema
+             *
+             * @return bool
+             **/
+            bool validate();
+
+            /**
+             * @brief Sets new schema
+             *
+             * @param schema Schema for object validation
+             * @return void
+             **/
+            void setSchema(CSmartSchema schema);
+
+            /**
+             * @brief Returns attached schema
+             *
+             * @return :NsSmartObjects::CSmartSchema
+             **/
+            CSmartSchema getSchema();
 
         protected:
             SmartType m_type;
@@ -116,6 +142,8 @@ namespace NsAppLink
             } SmartData;
 
             SmartData m_data;
+            CSmartSchema m_schema;
+            bool m_schemaAvailable;
 
             // Support of type: int
             inline void set_value_integer(int);
