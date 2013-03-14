@@ -299,9 +299,9 @@ MFT.SDLController = Em.Object.create({
      */
     selectProtocolVersion: function( checked ){
         if(checked){
-            FFW.AppLinkCoreClient.OnVersionChanged( 2 );
+            FFW.BasicCommunication.OnVersionChanged( 2 );
         }else{
-            FFW.AppLinkCoreClient.OnVersionChanged( 1 );
+            FFW.BasicCommunication.OnVersionChanged( 1 );
         }
     },
 
@@ -327,7 +327,7 @@ MFT.SDLController = Em.Object.create({
 	 */
 	onGetDeviceList: function() {
 		MFT.States.goToState('info.devicelist');
-		FFW.AppLinkCoreClient.getDeviceList();
+		FFW.BasicCommunication.getDeviceList();
 	},
 
 	/**
@@ -353,7 +353,7 @@ MFT.SDLController = Em.Object.create({
 	 * Method call's request to get list of applications
 	 */
 	findNewApps: function(){
-		FFW.AppLinkCoreClient.getAppList();
+		FFW.BasicCommunication.getAppList();
 	},
 
 	/**

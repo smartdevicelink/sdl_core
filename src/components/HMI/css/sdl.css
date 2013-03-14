@@ -1,5 +1,5 @@
 /**
- * CSS for AppLink aplications
+ * CSS for sdl aplications
  */
  
 .ffw_list_menu {
@@ -656,14 +656,14 @@
 	top: 120px;
 	width: 372px;
 }
-#info_leftMenu_appLink{
+#info_leftMenu_sdl{
 	font-size: 18px;
 	line-height: 48px;
 }
-#info_leftMenu_appLink img{
+#info_leftMenu_sdl img{
 	float: left;
 }
-#info_leftMenu_appLink span{
+#info_leftMenu_sdl span{
 	float: left;
 	position: relative;
 	width: 100px;

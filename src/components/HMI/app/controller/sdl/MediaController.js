@@ -58,7 +58,7 @@ MFT.SDLMediaController = Em.Object.create({
         // set active model
         MFT.SDLAppController.set('model',applicationModel);
                 
-        //FFW.AppLinkCoreClient.ActivateApp( applicationModel.appId );
+        //FFW.BasicCommunication.ActivateApp( applicationModel.appId );
 
         MFT.MediaController.listDown();
 
@@ -72,7 +72,7 @@ MFT.SDLMediaController = Em.Object.create({
     restoreCurrentApp: function() {
 
         if ( MFT.SDLAppController.model.appId === this.currentAppId ) {
-            FFW.AppLinkCoreClient.ActivateApp( this.currentAppId );
+            FFW.BasicCommunication.ActivateApp( this.currentAppId );
             return;
         }
         this.activateApp( MFT.SDLController.getApplicationModel( this.currentAppId ) );

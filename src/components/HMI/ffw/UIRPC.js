@@ -267,7 +267,7 @@ FFW.UI = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method" : "UI.GetSupportedLanguagesResponse",
 						"languages" : MFT.SDLModel.sdlLanguagesList
 					}
@@ -282,7 +282,7 @@ FFW.UI = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method" : "UI.GetLanguageResponse",
 						"hmiDisplayLanguage" : MFT.SDLModel.hmiUILanguage
 					}
@@ -383,7 +383,7 @@ FFW.UI = FFW.RPCObserver.create({
 							"imageSupported":		true
 						}],
 						"method"	:	"UI.GetCapabilitiesResponse",
-						"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS" //  type (enum) from SDL protocol
 					}
 				};
 
@@ -413,7 +413,7 @@ FFW.UI = FFW.RPCObserver.create({
 				"jsonrpc"	:	"2.0",
 				"id"		:	id,
 				"result":	{
-					"resultCode" : resultCode, //  type (enum) from AppLink protocol
+					"resultCode" : resultCode, //  type (enum) from SDL protocol
 					"method" : method + "Response"
 				}
 			};
@@ -426,7 +426,7 @@ FFW.UI = FFW.RPCObserver.create({
 				"jsonrpc"	:	"2.0",
 				"id"		: 	sliderRequestId,
 				"result":	{
-					"resultCode" : resultCode, //  type (enum) from AppLink protocol
+					"resultCode" : resultCode, //  type (enum) from SDL protocol
 					"method" : "UI.SliderResponse"
 				}
 			};
@@ -497,7 +497,7 @@ FFW.UI = FFW.RPCObserver.create({
 
 	/*
 	 * notification that UI is ready
-	 * AppLinkCore should be sunscribed to this notification
+	 * BasicCommunication should be sunscribed to this notification
  	 */
 	onReady: function() {
 		Em.Logger.log("FFW.UI.onReady");

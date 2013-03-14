@@ -112,7 +112,7 @@ FFW.VR = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result"	: 	{
-						"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" 	:  "SUCCESS", //  type (enum) from SDL protocol
 						"method" 	:  request.method + "Response"
 					}
 				};
@@ -129,7 +129,7 @@ FFW.VR = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result"	: 	{
-						"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" 	:  "SUCCESS", //  type (enum) from SDL protocol
 						"method" 	:  request.method + "Response"
 					}
 				};
@@ -143,7 +143,7 @@ FFW.VR = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method" : "VR.GetSupportedLanguagesResponse",
 						"languages" : MFT.SDLModel.sdlLanguagesList
 					}
@@ -158,7 +158,7 @@ FFW.VR = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method" : "VR.GetLanguageResponse",
 						"language" : MFT.SDLModel.hmiTTSVRLanguage
 					}
@@ -176,7 +176,7 @@ FFW.VR = FFW.RPCObserver.create({
 					"result"	:	{
 						"capabilities": ["TEXT"],
 						"method"	:	"VR.GetCapabilitiesResponse",
-						"resultCode" : "SUCCESS" //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS" //  type (enum) from SDL protocol
 					}
 				};
 				this.client.send(JSONMessage);
@@ -192,7 +192,7 @@ FFW.VR = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result"	: 	{
-						"resultCode" 	:  "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" 	:  "SUCCESS", //  type (enum) from SDL protocol
 						"method" 	:  request.method + "Response"
 					}
 				};

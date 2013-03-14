@@ -500,6 +500,6 @@ MFT.SDLModel = Em.Object.create({
             }
         }
 
-        FFW.AppLinkCoreClient.DeactivateApp( appName, reason, appId );
+        FFW.BasicCommunication.DeactivateApp( appName, reason, appId );
     }
 });

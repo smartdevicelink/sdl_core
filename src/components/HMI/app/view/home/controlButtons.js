@@ -154,7 +154,7 @@ MFT.ControlButtons = Em.ContainerView.create({
 		elementId:	'sendData',
 		classNames:	'sendData btnNotPressed',
 		action:		function(){
-			FFW.AppLinkCoreClient.SendData( null );
+			FFW.BasicCommunication.SendData( null );
 		},
 		text:		'Send Data'
 	}),

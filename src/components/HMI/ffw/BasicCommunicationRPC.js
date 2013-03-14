@@ -1,20 +1,20 @@
 /*
- * Reference implementation of AppLinkCoreClient component.
+ * Reference implementation of BasicCommunication component.
  * 
  * Interface to get or set some essential information from OS.
- * AppLinkCoreClient responsible for handling the basic commands of non-graphical part
+ * BasicCommunication responsible for handling the basic commands of non-graphical part
  * such as the registration of mobile apps, geting the list of devices and applications
  * and data transfer.
  * 
  * @author Andriy Melnik
  */
 
-FFW.AppLinkCoreClient = FFW.RPCObserver.create({
+FFW.BasicCommunication = FFW.RPCObserver.create({
 		
 	/*
 	 *	access to basic RPC functionality
  	 */		
-	 client:		FFW.RPCClient.create({ componentName: "AppLinkCoreClient" }),
+	 client:		FFW.RPCClient.create({ componentName: "BasicCommunication" }),
 
 	getAppListRequestId: 						-1,
 	getDeviceListRequestId: 					-1,
@@ -25,9 +25,9 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	onAppUnregisteredUnsubscribeRequestId:		-1,
 
 	// const
-	onAppRegisteredNotification:		"AppLinkCore.OnAppRegistered",
-	onAppUnregisteredNotification:		"AppLinkCore.OnAppUnregistered",
-	onDeviceListUpdatedNotification:	"AppLinkCore.OnDeviceListUpdated",
+	onAppRegisteredNotification:		"BasicCommunication.OnAppRegistered",
+	onAppUnregisteredNotification:		"BasicCommunication.OnAppUnregistered",
+	onDeviceListUpdatedNotification:	"BasicCommunication.OnDeviceListUpdated",
 
 	/*
    	 * init object
@@ -54,7 +54,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
          * Client is registered - we can send request starting from this point of time
  	 */	
 	onRPCRegistered: function () {
-		Em.Logger.log("FFW.AppLinkCoreClientRPC.onRPCRegistered");
+		Em.Logger.log("FFW.BasicCommunicationRPC.onRPCRegistered");
 		this._super();
 
 		// subscribe to notifications
@@ -67,7 +67,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
      * Client is unregistered - no more requests
  	 */	
 	onRPCUnregistered: function () {
-		Em.Logger.log("FFW.AppLinkCoreClientRPC.onRPCUnregistered");
+		Em.Logger.log("FFW.BasicCommunicationRPC.onRPCUnregistered");
 		this._super();
 
 		// unsubscribe from notifications
@@ -91,17 +91,17 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * Please use previously store reuqestID to determine to which request repsonse belongs to
  	 */	
 	onRPCResult: function(response) {
-		Em.Logger.log("FFW.AppLinkCoreClientRPC.onRPCResult");
+		Em.Logger.log("FFW.BasicCommunicationRPC.onRPCResult");
 		this._super();
 
-		if (response.result.method == "AppLinkCore.GetAppListResponse")
+		if (response.result.method == "BasicCommunication.GetAppListResponse")
 		{
 			if(MFT.States.info.active){
 				MFT.SDLController.onGetAppList(response.result.appList);
 			}
 		}
 
-		if (response.result.method == "AppLinkCore.GetDeviceListResponse")
+		if (response.result.method == "BasicCommunication.GetDeviceListResponse")
 		{
 			if(MFT.States.info.active){
 				MFT.SDLModel.onGetDeviceList(response.result);
@@ -118,7 +118,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * handle RPC erros here
  	 */	
 	onRPCError: function(error) {
-		Em.Logger.log("FFW.AppLinkCoreClientRPC.onRPCError");
+		Em.Logger.log("FFW.BasicCommunicationRPC.onRPCError");
 		this._super();
 	},
 
@@ -126,7 +126,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * handle RPC notifications here 
  	 */	
 	onRPCNotification: function(notification) {
-		Em.Logger.log("FFW.AppLinkCoreClientRPC.onRPCNotification");
+		Em.Logger.log("FFW.BasicCommunicationRPC.onRPCNotification");
 		this._super();
 
 		if (notification.method == this.onAppRegisteredNotification)
@@ -151,7 +151,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * handle RPC requests here
  	 */	
 	onRPCRequest: function(request) {
-		Em.Logger.log("FFW.AppLinkCoreClientRPC.onRPCRequest");
+		Em.Logger.log("FFW.BasicCommunicationRPC.onRPCRequest");
 		this._super();
 		
 		// nothing to do, it is client
@@ -166,7 +166,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
 			"id": 		this.getAppListRequestId,
-			"method":	"AppLinkCore.GetAppList",
+			"method":	"BasicCommunication.GetAppList",
 			"params":	{}
 		};
 		this.client.send(JSONMessage);
@@ -176,12 +176,12 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * send notification when DriverDistraction PopUp is visible
  	 */	
 	OnVersionChanged: function( version ) {
-		Em.Logger.log("FFW.AppLinkCore.OnVersionChanged");
+		Em.Logger.log("FFW.BasicCommunication.OnVersionChanged");
 
 		// send repsonse
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
-			"method":	"AppLinkCore.OnVersionChanged",
+			"method":	"BasicCommunication.OnVersionChanged",
 			"params":	{"versionNumber":	version}
 		};
 		this.client.send(JSONMessage);
@@ -196,15 +196,15 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		var JSONMessage = {
 			"jsonrpc":	"2.0",
 			"id": 		this.getDeviceListRequestId,
-			"method":	"AppLinkCore.GetDeviceList",
+			"method":	"BasicCommunication.GetDeviceList",
 			"params":	{}
 		};
 		this.client.send(JSONMessage);
 	},
 
-    /** Sending data from HMI for processing in SDLCore */
+    /** Sending data from HMI for processing in BasicCommunication */
     SendData: function( data ){
-    	Em.Logger.log("FFW.SDLCore.SendData");
+    	Em.Logger.log("FFW.BasicCommunication.SendData");
 
     	if(!data){
     		data = ["Data for sending from HMI to Mobile application."];
@@ -214,7 +214,7 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.client.idStart,
-			"method"	:	"AppLinkCore.SendData",
+			"method"	:	"BasicCommunication.SendData",
 			"params"	:	{
 				"data": 	data
 			}
@@ -232,14 +232,14 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * handle RPC requests here
  	 */	
 	ActivateApp: function( appId ) {
-		Em.Logger.log("FFW.SDLCore.ActivateApp");
+		Em.Logger.log("FFW.BasicCommunication.ActivateApp");
 
 		// send request
 
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
 			"id"		: 	this.client.idStart,
-			"method"	:	"AppLinkCore.ActivateApp",
+			"method"	:	"BasicCommunication.ActivateApp",
 			"params"	:	{
 				"appName":	MFT.SDLController.getApplicationModel(appId).appName,
 				"appId":	appId
@@ -252,13 +252,13 @@ FFW.AppLinkCoreClient = FFW.RPCObserver.create({
 	 * handle RPC requests here
  	 */	
 	DeactivateApp: function( appName, reason, appId ) {
-		Em.Logger.log("FFW.SDLCore.OnAppDeactivated");
+		Em.Logger.log("FFW.BasicCommunication.OnAppDeactivated");
 
 		// send request
 
 		var JSONMessage = {
 			"jsonrpc"	:	"2.0",
-			"method"	:	"AppLinkCore.OnAppDeactivated",
+			"method"	:	"BasicCommunication.OnAppDeactivated",
 			"params"	:	{
 				"appName":	appName,
 				"appId":	appId,

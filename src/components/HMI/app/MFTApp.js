@@ -39,7 +39,7 @@ MFT = Em.Application.create({
         	FFW.Buttons.connect();
 	        FFW.TTS.connect();
 	        FFW.VR.connect();
-	        FFW.AppLinkCoreClient.connect();
+	        FFW.BasicCommunication.connect();
         	FFW.UI.connect();
             FFW.VehicleInfo.connect();
 

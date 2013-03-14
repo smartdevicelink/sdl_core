@@ -19,7 +19,7 @@ MFT.InfoAppsView = Em.ContainerView.create(MFT.LoadableView,{
 
     appsActive: function(){
         if(MFT.States.info.apps.active == true){
-            FFW.AppLinkCoreClient.getAppList();
+            FFW.BasicCommunication.getAppList();
         }
     }.observes('MFT.States.info.apps.active'),
 

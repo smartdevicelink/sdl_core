@@ -95,7 +95,7 @@ FFW.TTS = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method"   :    "TTS.SpeakResponse"
 					}
 				};
@@ -112,7 +112,7 @@ FFW.TTS = FFW.RPCObserver.create({
 					"result"	:	{
 						"capabilities":["TEXT"],
 
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method" : "TTS.GetCapabilitiesResponse"
 					}
 				};
@@ -126,7 +126,7 @@ FFW.TTS = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method" : "TTS.GetSupportedLanguagesResponse",
 						"languages" : MFT.SDLModel.sdlLanguagesList
 					}
@@ -141,7 +141,7 @@ FFW.TTS = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method" : "TTS.GetLanguageResponse",
 						"language" : MFT.SDLModel.hmiTTSVRLanguage
 					}
@@ -159,7 +159,7 @@ FFW.TTS = FFW.RPCObserver.create({
 					"jsonrpc"	:	"2.0",
 					"id"		: 	request.id,
 					"result":	{
-						"resultCode" : "SUCCESS", //  type (enum) from AppLink protocol
+						"resultCode" : "SUCCESS", //  type (enum) from SDL protocol
 						"method"   :    "TTS.ChangeRegistrationResponse"
 					}
 				};

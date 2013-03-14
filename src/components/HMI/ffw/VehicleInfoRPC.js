@@ -104,7 +104,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "jsonrpc"   :   "2.0",
                 "id"        :   request.id,
                 "result":   {
-                    "resultCode" :              resultCode, //  type (enum) from AppLink protocol
+                    "resultCode" :              resultCode, //  type (enum) from SDL protocol
                     "method"   :                "VehicleInfo.GetVehicleDataResponse",
                     //request.params.dataType:    vehicleData
                 }
@@ -161,7 +161,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "jsonrpc"   :   "2.0",
                 "id"        :   id,
                 "result":   {
-                    "resultCode":       "SUCCESS", //  type (enum) from AppLink protocol
+                    "resultCode":       "SUCCESS", //  type (enum) from SDL protocol
                     "method":           "VehicleInfo.GetVehicleTypeResponse",
                     "vehicleType":      vehicleType
                 }
@@ -188,7 +188,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "jsonrpc"   :   "2.0",
                 "id"        :   id,
                 "result":   {
-                    "resultCode":       result, //  type (enum) from AppLink protocol
+                    "resultCode":       result, //  type (enum) from SDL protocol
                     "method":           "VehicleInfo.ReadDIDResponse",
                     "info":         info,
                     "dataResult":   dataResult,
@@ -200,7 +200,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "jsonrpc"   :   "2.0",
                 "id"        :   id,
                 "result":   {
-                    "resultCode":       result, //  type (enum) from AppLink protocol
+                    "resultCode":       result, //  type (enum) from SDL protocol
                     "method":           "VehicleInfo.ReadDIDResponse",
                     "info":         info
                 }
@@ -226,7 +226,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "jsonrpc"   :   "2.0",
                 "id"        :   id,
                 "result":   {
-                    "resultCode":       result, //  type (enum) from AppLink protocol
+                    "resultCode":       result, //  type (enum) from SDL protocol
                     "method":           "VehicleInfo.GetDTCsResponse",
                     "info":         info,
                     "dtcList":      data
@@ -237,7 +237,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create({
                 "jsonrpc"   :   "2.0",
                 "id"        :   id,
                 "result":   {
-                    "resultCode":       result, //  type (enum) from AppLink protocol
+                    "resultCode":       result, //  type (enum) from SDL protocol
                     "method":           "VehicleInfo.GetDTCsResponse",
                     "info":         info
                 }

@@ -53,7 +53,7 @@ MFT.NonMediaController = Em.Object.create({
         MFT.SDLAppController.set('model',applicationModel);
         
         // send response
-        //FFW.AppLinkCoreClient.ActivateApp( applicationModel.appId );
+        //FFW.BasicCommunication.ActivateApp( applicationModel.appId );
         
         // Go to SDL state
         MFT.States.goToState('info.nonMedia');
@@ -64,7 +64,7 @@ MFT.NonMediaController = Em.Object.create({
      */
     restoreCurrentApp: function() {
         if ( MFT.SDLAppController.model.appId === this.currentAppId ) {
-            FFW.AppLinkCoreClient.ActivateApp( this.currentAppId );
+            FFW.BasicCommunication.ActivateApp( this.currentAppId );
             return;
         }
         this.activateApp( MFT.SDLController.getApplicationModel( this.currentAppId ) );

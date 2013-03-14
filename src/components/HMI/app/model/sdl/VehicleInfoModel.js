@@ -196,7 +196,7 @@ MFT.SDLVehicleInfoModel = Em.Object.create({
 
         if(params.encrypted){
             result = 'ENCRYPTED';
-            FFW.AppLinkCoreClient.SendData( data );
+            FFW.BasicCommunication.SendData( data );
             FFW.VehicleInfo.vehicleInfoGetDTCsResponse( null, info, result, id );
         }else{
             FFW.VehicleInfo.vehicleInfoGetDTCsResponse( data, info, result, id );
@@ -236,7 +236,7 @@ MFT.SDLVehicleInfoModel = Em.Object.create({
 
         if(params.encrypted){
             result = 'ENCRYPTED';
-            FFW.AppLinkCoreClient.SendData( data );
+            FFW.BasicCommunication.SendData( data );
             FFW.VehicleInfo.vehicleInfoReadDIDResponse( null, null, info, result, id );
         }else{
             FFW.VehicleInfo.vehicleInfoReadDIDResponse( dataResult, data, info, result, id );
