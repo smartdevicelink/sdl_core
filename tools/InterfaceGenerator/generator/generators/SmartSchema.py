@@ -65,12 +65,12 @@ class SmartSchema(object):
             self._enums_content = self._enums_content.join(self._generate_enum(enum))
             
     def _generate_enum(self, enum):
-        return self._comment_template.substitute(comment = self._generate_comment(enum),
+        return self._enum_template.substitute(comment = self._generate_comment(enum),
                                                  name = enum.name,
-                                                 enum_items = self._generate_enum_elements(enum))
+                                                 enum_items = self._indent_code(self._generate_enum_elements(enum.elements), 1))
 
-    def _generate_enum_elements(self, enum):
-        return ",\n".join(self._generate_enum_element(enum.elements))
+    def _generate_enum_elements(self, enum_elements):
+        return ",\n\n".join(map(lambda x: self._generate_enum_element(x), enum_elements))
 
     def _generate_enum_element(self, enum_element):
         if enum_element.value is not None:
@@ -80,6 +80,7 @@ class SmartSchema(object):
         else:
             return self._enum_element_with_no_value_template.substitute(comment = self._generate_comment(enum_element),
                                                                         name = enum_element.internal_name if enum_element.internal_name is not None else enum_element.name)
+
     def _generate_comment(self, interface_item_base):
         brief_type_title = None
         interface_item_base_classname = interface_item_base.__class__.__name__ 
@@ -117,10 +118,15 @@ class SmartSchema(object):
                                                  design_description = design_description,
                                                  issues = issues,
                                                  todos = todos)
+    def _indent_code(self, code, indent_level):
+        code_lines = code.split("\n")
+        return "".join(map(lambda x: "{0}{1}\n".format(self._indent_template * indent_level, x), code_lines))
         
     _model_types_briefs = dict({"EnumElement" : "", 
                                 "Enum" : "Enumeration "})
-                
+              
+    _indent_template = "    "
+                    
     _comment_template = string.Template(
 """/**
 $brief_description$description$design_description$issues$todos */""")
@@ -129,8 +135,7 @@ $brief_description$description$design_description$issues$todos */""")
 """$comment
 enum $name
 {
-    $enum_items
-}
+$enum_items};
 """)
     
     _enum_element_with_value_template = string.Template(

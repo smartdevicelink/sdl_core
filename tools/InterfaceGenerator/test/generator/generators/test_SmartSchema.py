@@ -10,7 +10,7 @@ import unittest
 from generator.generators.SmartSchema import SmartSchema
 from generator import Model
 
-expected_result_enum1 = """/**
+expected_result_full_comment = """/**
  * @brief Enumeration Test Name.
  *
  * Description Line1
@@ -41,6 +41,59 @@ expected_result_enum_element2 = """/**
  */
 NO_VALUE_ELEMENT"""
 
+expected_result_enum_elements1 = """/**
+ * @brief name1.
+ *
+ * Design Line1
+ *
+ * @todo Do1
+ * @todo Do2
+ */
+name1 = 1,
+
+/**
+ * @brief internal_name2.
+ *
+ * Description Line1
+ * Description Line2
+ *
+ * @note Issue1
+ * @note Issue2
+ * @note Issue3
+ */
+internal_name2"""
+
+expected_result_enum1 = """/**
+ * @brief Enumeration Enum1.
+ *
+ * @todo Do1
+ * @todo Do2
+ */
+enum Enum1
+{
+    /**
+     * @brief name1.
+     *
+     * Design Line1
+     *
+     * @todo Do1
+     * @todo Do2
+     */
+    name1 = 1,
+    
+    /**
+     * @brief internal_name2.
+     *
+     * Description Line1
+     * Description Line2
+     *
+     * @note Issue1
+     * @note Issue2
+     * @note Issue3
+     */
+    internal_name2
+};
+"""
 description = ["Description Line1", "Description Line2"]
 design_description = ["Design Line1"]
 issues = ["Issue1", "Issue2", "Issue3"]
@@ -50,12 +103,10 @@ class TestSmartSchema(unittest.TestCase):
     
     def test_generate_comment(self):
         smart_schema_generator = SmartSchema()
-        
-
-        
+                
         enum = Model.Enum("Test Name", description, design_description, issues, todos)
         self.assertEqual(smart_schema_generator._generate_comment(enum),
-                         expected_result_enum1, 
+                         expected_result_full_comment, 
                          "Full comment for enum is invalid")
 
     def test_generate_enum_element(self):
@@ -74,15 +125,24 @@ class TestSmartSchema(unittest.TestCase):
                         expected_result_enum_element2,
                         "Enum element with no value is invalid")
         
-    #def test_generate_enum_elements(self):
-        #smart_schema_generator = SmartSchema()
+    def test_generate_enum_elements(self):
+        smart_schema_generator = SmartSchema()
         
-        #elements = [Model.EnumElement("name1", None, design_description, None, todos, None, "1")]
-        #enum1 = Model.Enum("Enum Name", description, None, issues, None, None, elements)
+        elements = [Model.EnumElement("name1", None, design_description, None, todos, None, "1"),
+                    Model.EnumElement("name2", description, None, issues, None, "internal_name2", None)]        
+        self.assertEqual(smart_schema_generator._generate_enum_elements(elements),
+                         expected_result_enum_elements1,
+                         "Simple enum elements are invalid")
         
-        #self.assertEqual(smart_schema_generator._generate_enum_elements(enum1),
-        #                 expected_result_enum_elements1,
-        #                 "Simple enum elements are invalid")
+    def test_generate_enum(self):
+        smart_schema_generator = SmartSchema()
+        
+        elements = [Model.EnumElement("name1", None, design_description, None, todos, None, "1"),
+                    Model.EnumElement("name2", description, None, issues, None, "internal_name2", None)]
+        enum = Model.Enum("Enum1", None, None, None, todos, None, elements)
+        self.assertEqual(smart_schema_generator._generate_enum(enum),
+                         expected_result_enum1,
+                         "Simple enum is invalid")
 
 if __name__ == '__main__':
     unittest.main()
