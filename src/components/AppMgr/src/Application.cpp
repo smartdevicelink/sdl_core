@@ -337,7 +337,7 @@ namespace NsAppManager
      * \brief retrieve application audio streaming state
      * \return application audio streaming state
      */
-    const NsAppLinkRPCV2::AudioStreamingState& Application::getApplicationAudioStreamingState( ) const
+    const NsSmartDeviceLinkRPCV2::AudioStreamingState& Application::getApplicationAudioStreamingState( ) const
     {
         return mAudioStreamingState;
     }
@@ -346,7 +346,7 @@ namespace NsAppManager
      * \brief retrieve application system context
      * \return application system context
      */
-    const NsAppLinkRPCV2::SystemContext &Application::getSystemContext() const
+    const NsSmartDeviceLinkRPCV2::SystemContext &Application::getSystemContext() const
     {
         return mSystemContext;
     }
@@ -355,7 +355,7 @@ namespace NsAppManager
      * \brief retrieve aplication HMI status level
      * \return HMI status level of application
      */
-    const NsAppLinkRPCV2::HMILevel::HMILevelInternal& Application::getApplicationHMIStatusLevel( ) const
+    const NsSmartDeviceLinkRPCV2::HMILevel::HMILevelInternal& Application::getApplicationHMIStatusLevel( ) const
     {
         return mHMIStatusLevel;
     }
@@ -364,7 +364,7 @@ namespace NsAppManager
      * \brief Set application audio streaming state
      * \param streamingState audio streaming state of application
      */
-    void Application::setApplicationAudioStreamingState( const NsAppLinkRPCV2::AudioStreamingState& streamingState )
+    void Application::setApplicationAudioStreamingState( const NsSmartDeviceLinkRPCV2::AudioStreamingState& streamingState )
     {
         mAudioStreamingState = streamingState;
     }
@@ -373,7 +373,7 @@ namespace NsAppManager
      * \brief set application system context
      * \param application system context
      */
-    void Application::setSystemContext(NsAppLinkRPCV2::SystemContext value)
+    void Application::setSystemContext(NsSmartDeviceLinkRPCV2::SystemContext value)
     {
         mSystemContext = value;
     }
@@ -382,7 +382,7 @@ namespace NsAppManager
      * \brief Set application HMI status level
      * \param hmiLevel HMI status level of application
      */
-    void Application::setApplicationHMIStatusLevel( const NsAppLinkRPCV2::HMILevel::HMILevelInternal& hmiLevel )
+    void Application::setApplicationHMIStatusLevel( const NsSmartDeviceLinkRPCV2::HMILevel::HMILevelInternal& hmiLevel )
     {
         mHMIStatusLevel = hmiLevel;
     }

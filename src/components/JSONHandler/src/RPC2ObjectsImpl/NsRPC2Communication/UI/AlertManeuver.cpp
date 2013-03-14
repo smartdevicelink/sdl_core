@@ -38,23 +38,23 @@ AlertManeuver::AlertManeuver(const AlertManeuver& c) : RPC2Request(Marshaller::M
 }
 
 
-const std::vector< NsAppLinkRPCV2::TTSChunk>& AlertManeuver::get_ttsChunks(void)
+const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& AlertManeuver::get_ttsChunks(void)
 {
   return ttsChunks;
 }
 
-bool AlertManeuver::set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks_)
+bool AlertManeuver::set_ttsChunks(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& ttsChunks_)
 {
   ttsChunks=ttsChunks_;
   return true;
 }
 
-const std::vector< NsAppLinkRPCV2::SoftButton>& AlertManeuver::get_softButtons(void)
+const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& AlertManeuver::get_softButtons(void)
 {
   return softButtons;
 }
 
-bool AlertManeuver::set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons_)
+bool AlertManeuver::set_softButtons(const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& softButtons_)
 {
   softButtons=softButtons_;
   return true;

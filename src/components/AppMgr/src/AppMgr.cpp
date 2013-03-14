@@ -90,7 +90,7 @@ namespace NsAppManager
     * \param message the received message
     * \param connectionKey key of a connection associated with application that sent the message
     */
-    void AppMgr::onMessageReceivedCallback(NsAppLinkRPC::ALRPCMessage * message, int connectionKey)
+    void AppMgr::onMessageReceivedCallback(NsSmartDeviceLinkRPC::SDLRPCMessage * message, int connectionKey)
     {
         if(!message)
         {

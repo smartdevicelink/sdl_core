@@ -4,9 +4,9 @@
 #include <vector>
 #include "JSONHandler/RPC2Response.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/DisplayCapabilities.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/HmiZoneCapabilities.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/SoftButtonCapabilities.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/DisplayCapabilities.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/HmiZoneCapabilities.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/SoftButtonCapabilities.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -35,20 +35,20 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const NsAppLinkRPCV2::DisplayCapabilities& get_displayCapabilities(void);
+      const NsSmartDeviceLinkRPCV2::DisplayCapabilities& get_displayCapabilities(void);
 
-      const std::vector< NsAppLinkRPCV2::HmiZoneCapabilities>& get_hmiZoneCapabilities(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::HmiZoneCapabilities>& get_hmiZoneCapabilities(void);
 
-      const std::vector< NsAppLinkRPCV2::SoftButtonCapabilities>* get_softButtonCapabilities(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::SoftButtonCapabilities>* get_softButtonCapabilities(void);
 
 // setters
-      bool set_displayCapabilities(const NsAppLinkRPCV2::DisplayCapabilities& displayCapabilities);
+      bool set_displayCapabilities(const NsSmartDeviceLinkRPCV2::DisplayCapabilities& displayCapabilities);
 
 /// 1 <= size <= 100
-      bool set_hmiZoneCapabilities(const std::vector< NsAppLinkRPCV2::HmiZoneCapabilities>& hmiZoneCapabilities);
+      bool set_hmiZoneCapabilities(const std::vector< NsSmartDeviceLinkRPCV2::HmiZoneCapabilities>& hmiZoneCapabilities);
 
 /// 1 <= size <= 100
-      bool set_softButtonCapabilities(const std::vector< NsAppLinkRPCV2::SoftButtonCapabilities>& softButtonCapabilities);
+      bool set_softButtonCapabilities(const std::vector< NsSmartDeviceLinkRPCV2::SoftButtonCapabilities>& softButtonCapabilities);
 
       void reset_softButtonCapabilities(void);
 
@@ -57,9 +57,9 @@ namespace NsRPC2Communication
 
       friend class GetCapabilitiesResponseMarshaller;
 
-      NsAppLinkRPCV2::DisplayCapabilities displayCapabilities;
-      std::vector< NsAppLinkRPCV2::HmiZoneCapabilities> hmiZoneCapabilities;
-      std::vector< NsAppLinkRPCV2::SoftButtonCapabilities>* softButtonCapabilities;
+      NsSmartDeviceLinkRPCV2::DisplayCapabilities displayCapabilities;
+      std::vector< NsSmartDeviceLinkRPCV2::HmiZoneCapabilities> hmiZoneCapabilities;
+      std::vector< NsSmartDeviceLinkRPCV2::SoftButtonCapabilities>* softButtonCapabilities;
 
     };
   }

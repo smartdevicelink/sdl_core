@@ -1,5 +1,5 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/DeleteSubMenuResponse.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/DeleteSubMenuResponseMarshaller.h"
 
 /*
@@ -57,8 +57,8 @@ Json::Value DeleteSubMenuResponseMarshaller::toJSON(const DeleteSubMenuResponse&
   json["jsonrpc"]=Json::Value("2.0");
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
-  NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
-  json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
+  NsSmartDeviceLinkRPCV2::Result r(static_cast<NsSmartDeviceLinkRPCV2::Result::ResultInternal>(e.getResult()));
+  json["result"]["resultCode"]=NsSmartDeviceLinkRPCV2::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("UI.DeleteSubMenuResponse");
 
   return json;
@@ -79,12 +79,12 @@ bool DeleteSubMenuResponseMarshaller::fromJSON(const Json::Value& json,DeleteSub
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    NsAppLinkRPCV2::Result r;
+    NsSmartDeviceLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("UI.DeleteSubMenuResponse")) return false;
 
-    if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
+    if(!NsSmartDeviceLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
   }
   catch(...)

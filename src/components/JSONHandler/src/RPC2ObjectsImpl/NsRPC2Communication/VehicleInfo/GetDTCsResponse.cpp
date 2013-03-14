@@ -15,7 +15,7 @@ using namespace NsRPC2Communication::VehicleInfo;
 GetDTCsResponse& GetDTCsResponse::operator =(const GetDTCsResponse& c)
 {
   if(dtcList)  delete dtcList;
-  dtcList= c.dtcList ? new std::vector<NsAppLinkRPCV2::DTC>(c.dtcList[0]) : 0;
+  dtcList= c.dtcList ? new std::vector<NsSmartDeviceLinkRPCV2::DTC>(c.dtcList[0]) : 0;
   return *this;
 }
 
@@ -39,15 +39,15 @@ GetDTCsResponse::GetDTCsResponse(const GetDTCsResponse& c) : RPC2Response(Marsha
 }
 
 
-const std::vector< NsAppLinkRPCV2::DTC>* GetDTCsResponse::get_dtcList(void)
+const std::vector< NsSmartDeviceLinkRPCV2::DTC>* GetDTCsResponse::get_dtcList(void)
 {
   return dtcList;
 }
 
-bool GetDTCsResponse::set_dtcList(const std::vector< NsAppLinkRPCV2::DTC>& dtcList_)
+bool GetDTCsResponse::set_dtcList(const std::vector< NsSmartDeviceLinkRPCV2::DTC>& dtcList_)
 {
   if(dtcList)  delete dtcList;
-  dtcList=new std::vector< NsAppLinkRPCV2::DTC>(dtcList_);
+  dtcList=new std::vector< NsSmartDeviceLinkRPCV2::DTC>(dtcList_);
   return true;
 }
 

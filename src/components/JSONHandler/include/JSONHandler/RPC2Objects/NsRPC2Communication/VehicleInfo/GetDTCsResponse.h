@@ -4,7 +4,7 @@
 #include <vector>
 #include "JSONHandler/RPC2Response.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/DTC.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/DTC.h"
 
 /*
   interface	NsRPC2Communication::VehicleInfo
@@ -33,11 +33,11 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const std::vector< NsAppLinkRPCV2::DTC>* get_dtcList(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::DTC>* get_dtcList(void);
 
 // setters
 /// 1 <= size <= 100
-      bool set_dtcList(const std::vector< NsAppLinkRPCV2::DTC>& dtcList);
+      bool set_dtcList(const std::vector< NsSmartDeviceLinkRPCV2::DTC>& dtcList);
 
       void reset_dtcList(void);
 
@@ -46,7 +46,7 @@ namespace NsRPC2Communication
 
       friend class GetDTCsResponseMarshaller;
 
-      std::vector< NsAppLinkRPCV2::DTC>* dtcList;
+      std::vector< NsSmartDeviceLinkRPCV2::DTC>* dtcList;
 
     };
   }

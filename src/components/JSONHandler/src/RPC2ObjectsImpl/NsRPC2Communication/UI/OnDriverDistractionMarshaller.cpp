@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/OnDriverDistraction.h"
-#include "../src/ALRPCObjectsImpl/V2/DriverDistractionStateMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/DriverDistractionStateMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnDriverDistractionMarshaller.h"
 
 /*
@@ -45,7 +45,7 @@ const std::string OnDriverDistractionMarshaller::toString(const OnDriverDistract
 
 bool OnDriverDistractionMarshaller::checkIntegrityConst(const OnDriverDistraction& s)
 {
-  if(!NsAppLinkRPCV2::DriverDistractionStateMarshaller::checkIntegrityConst(s.state))  return false;
+  if(!NsSmartDeviceLinkRPCV2::DriverDistractionStateMarshaller::checkIntegrityConst(s.state))  return false;
 
   return true;
 }
@@ -61,7 +61,7 @@ Json::Value OnDriverDistractionMarshaller::toJSON(const OnDriverDistraction& e)
   json["method"]=Json::Value("UI.OnDriverDistraction");
   json["params"]=Json::Value(Json::objectValue);
 
-  json["params"]["state"]=NsAppLinkRPCV2::DriverDistractionStateMarshaller::toJSON(e.state);;
+  json["params"]["state"]=NsSmartDeviceLinkRPCV2::DriverDistractionStateMarshaller::toJSON(e.state);;
   return json;
 }
 
@@ -78,7 +78,7 @@ bool OnDriverDistractionMarshaller::fromJSON(const Json::Value& json,OnDriverDis
     Json::Value js=json["params"];
     if(!js.isObject())  return false;
 
-    if(!js.isMember("state") || !NsAppLinkRPCV2::DriverDistractionStateMarshaller::fromJSON(js["state"],c.state))  return false;
+    if(!js.isMember("state") || !NsSmartDeviceLinkRPCV2::DriverDistractionStateMarshaller::fromJSON(js["state"],c.state))  return false;
 
   }
   catch(...)

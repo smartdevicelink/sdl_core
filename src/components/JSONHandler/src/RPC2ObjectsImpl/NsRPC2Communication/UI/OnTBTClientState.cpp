@@ -36,12 +36,12 @@ OnTBTClientState::OnTBTClientState(const OnTBTClientState& c) : RPC2Notification
 }
 
 
-const NsAppLinkRPCV2::TBTState& OnTBTClientState::get_state(void)
+const NsSmartDeviceLinkRPCV2::TBTState& OnTBTClientState::get_state(void)
 {
   return state;
 }
 
-bool OnTBTClientState::set_state(const NsAppLinkRPCV2::TBTState& state_)
+bool OnTBTClientState::set_state(const NsSmartDeviceLinkRPCV2::TBTState& state_)
 {
   state=state_;
   return true;

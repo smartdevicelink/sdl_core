@@ -36,12 +36,12 @@ OnSystemContext::OnSystemContext(const OnSystemContext& c) : RPC2Notification(Ma
 }
 
 
-const NsAppLinkRPCV2::SystemContext& OnSystemContext::get_systemContext(void)
+const NsSmartDeviceLinkRPCV2::SystemContext& OnSystemContext::get_systemContext(void)
 {
   return systemContext;
 }
 
-bool OnSystemContext::set_systemContext(const NsAppLinkRPCV2::SystemContext& systemContext_)
+bool OnSystemContext::set_systemContext(const NsSmartDeviceLinkRPCV2::SystemContext& systemContext_)
 {
   systemContext=systemContext_;
   return true;

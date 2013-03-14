@@ -49,12 +49,12 @@ PerformAudioPassThru::PerformAudioPassThru(const PerformAudioPassThru& c) : RPC2
 }
 
 
-const std::vector< NsAppLinkRPCV2::TTSChunk>& PerformAudioPassThru::get_initialPrompt(void)
+const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& PerformAudioPassThru::get_initialPrompt(void)
 {
   return initialPrompt;
 }
 
-bool PerformAudioPassThru::set_initialPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& initialPrompt_)
+bool PerformAudioPassThru::set_initialPrompt(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& initialPrompt_)
 {
   initialPrompt=initialPrompt_;
   return true;
@@ -96,12 +96,12 @@ void PerformAudioPassThru::reset_audioPassThruDisplayText2(void)
   audioPassThruDisplayText2=0;
 }
 
-const NsAppLinkRPCV2::SamplingRate& PerformAudioPassThru::get_samplingRate(void)
+const NsSmartDeviceLinkRPCV2::SamplingRate& PerformAudioPassThru::get_samplingRate(void)
 {
   return samplingRate;
 }
 
-bool PerformAudioPassThru::set_samplingRate(const NsAppLinkRPCV2::SamplingRate& samplingRate_)
+bool PerformAudioPassThru::set_samplingRate(const NsSmartDeviceLinkRPCV2::SamplingRate& samplingRate_)
 {
   samplingRate=samplingRate_;
   return true;
@@ -118,23 +118,23 @@ bool PerformAudioPassThru::set_maxDuration(unsigned int maxDuration_)
   return true;
 }
 
-const NsAppLinkRPCV2::AudioCaptureQuality& PerformAudioPassThru::get_bitsPerSample(void)
+const NsSmartDeviceLinkRPCV2::AudioCaptureQuality& PerformAudioPassThru::get_bitsPerSample(void)
 {
   return bitsPerSample;
 }
 
-bool PerformAudioPassThru::set_bitsPerSample(const NsAppLinkRPCV2::AudioCaptureQuality& bitsPerSample_)
+bool PerformAudioPassThru::set_bitsPerSample(const NsSmartDeviceLinkRPCV2::AudioCaptureQuality& bitsPerSample_)
 {
   bitsPerSample=bitsPerSample_;
   return true;
 }
 
-const NsAppLinkRPCV2::AudioType& PerformAudioPassThru::get_audioType(void)
+const NsSmartDeviceLinkRPCV2::AudioType& PerformAudioPassThru::get_audioType(void)
 {
   return audioType;
 }
 
-bool PerformAudioPassThru::set_audioType(const NsAppLinkRPCV2::AudioType& audioType_)
+bool PerformAudioPassThru::set_audioType(const NsSmartDeviceLinkRPCV2::AudioType& audioType_)
 {
   audioType=audioType_;
   return true;

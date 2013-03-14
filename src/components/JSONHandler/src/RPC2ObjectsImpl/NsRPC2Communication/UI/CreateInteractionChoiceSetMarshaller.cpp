@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/CreateInteractionChoiceSet.h"
-#include "../src/ALRPCObjectsImpl/V2/ChoiceMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ChoiceMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/CreateInteractionChoiceSetMarshaller.h"
 
 /*
@@ -74,7 +74,7 @@ Json::Value CreateInteractionChoiceSetMarshaller::toJSON(const CreateInteraction
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::ChoiceMarshaller::toJSON(e.choiceSet[i]);
+      j[i]=NsSmartDeviceLinkRPCV2::ChoiceMarshaller::toJSON(e.choiceSet[i]);
 
     json["params"]["choiceSet"]=j;
   }
@@ -109,8 +109,8 @@ bool CreateInteractionChoiceSetMarshaller::fromJSON(const Json::Value& json,Crea
       c.choiceSet.resize(i);
       while(i--)
       {
-        NsAppLinkRPCV2::Choice t;
-        if(!NsAppLinkRPCV2::ChoiceMarshaller::fromJSON(js["choiceSet"][i],t))
+        NsSmartDeviceLinkRPCV2::Choice t;
+        if(!NsSmartDeviceLinkRPCV2::ChoiceMarshaller::fromJSON(js["choiceSet"][i],t))
           return false;
          c.choiceSet[i]=t;
       }

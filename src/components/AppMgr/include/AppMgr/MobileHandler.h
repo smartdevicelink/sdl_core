@@ -12,9 +12,9 @@ namespace log4cplus
     class Logger;
 }
 
-namespace NsAppLinkRPC
+namespace NsSmartDeviceLinkRPC
 {
-    class ALRPCMessage;
+    class SDLRPCMessage;
 }
 
 namespace NsAppManager
@@ -37,7 +37,7 @@ namespace NsAppManager
          * \brief send a message via associated handler
          * \param message message to send
          */
-        void sendRPCMessage(const NsAppLinkRPC::ALRPCMessage * message, int appId );
+        void sendRPCMessage(const NsSmartDeviceLinkRPC::SDLRPCMessage * message, int appId );
 
         /**
          * \brief set mobile Json handler

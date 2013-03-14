@@ -5,9 +5,9 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/TextAlignment.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/Image.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/SoftButton.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/TextAlignment.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/Image.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/SoftButton.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -40,12 +40,12 @@ namespace NsRPC2Communication
       const std::string* get_mainField2(void);
       const std::string* get_mainField3(void);
       const std::string* get_mainField4(void);
-      const NsAppLinkRPCV2::TextAlignment* get_alignment(void);
+      const NsSmartDeviceLinkRPCV2::TextAlignment* get_alignment(void);
       const std::string* get_statusBar(void);
       const std::string* get_mediaClock(void);
       const std::string* get_mediaTrack(void);
-      const NsAppLinkRPCV2::Image* get_graphic(void);
-      const std::vector< NsAppLinkRPCV2::SoftButton>* get_softButtons(void);
+      const NsSmartDeviceLinkRPCV2::Image* get_graphic(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>* get_softButtons(void);
       const std::vector< std::string>* get_customPresets(void);
       int get_appId(void);
 
@@ -71,7 +71,7 @@ namespace NsRPC2Communication
 
       void reset_mainField4(void);
 
-      bool set_alignment(const NsAppLinkRPCV2::TextAlignment& alignment);
+      bool set_alignment(const NsSmartDeviceLinkRPCV2::TextAlignment& alignment);
 
       void reset_alignment(void);
 
@@ -90,12 +90,12 @@ namespace NsRPC2Communication
 
       void reset_mediaTrack(void);
 
-      bool set_graphic(const NsAppLinkRPCV2::Image& graphic);
+      bool set_graphic(const NsSmartDeviceLinkRPCV2::Image& graphic);
 
       void reset_graphic(void);
 
 /// 0 <= size <= 8
-      bool set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons);
+      bool set_softButtons(const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& softButtons);
 
       void reset_softButtons(void);
 
@@ -115,12 +115,12 @@ namespace NsRPC2Communication
       std::string* mainField2;
       std::string* mainField3;
       std::string* mainField4;
-      NsAppLinkRPCV2::TextAlignment* alignment;
+      NsSmartDeviceLinkRPCV2::TextAlignment* alignment;
       std::string* statusBar;
       std::string* mediaClock;
       std::string* mediaTrack;
-      NsAppLinkRPCV2::Image* graphic;
-      std::vector< NsAppLinkRPCV2::SoftButton>* softButtons;
+      NsSmartDeviceLinkRPCV2::Image* graphic;
+      std::vector< NsSmartDeviceLinkRPCV2::SoftButton>* softButtons;
       std::vector< std::string>* customPresets;
       int appId;
 

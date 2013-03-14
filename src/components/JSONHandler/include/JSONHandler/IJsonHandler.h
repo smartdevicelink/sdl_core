@@ -40,7 +40,7 @@ public:
      * to be serialized to Json message and sent to mobile App.
      * \param sessionId ID of the session the message was received within.
      */
-    virtual void sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, int connectionKey ) = 0;
+    virtual void sendRPCMessage( const NsSmartDeviceLinkRPC::SDLRPCMessage * message, int connectionKey ) = 0;
     
 };
 

@@ -8,22 +8,22 @@
 #include "AppMgr/Application.h"
 #include "AppMgr/AppChoiceSets.h"
 
-#include "JSONHandler/ALRPCObjects/V2/Language.h"
-#include "JSONHandler/ALRPCObjects/V2/AppType.h"
-#include "JSONHandler/ALRPCObjects/V2/SyncMsgVersion.h"
-#include "JSONHandler/ALRPCObjects/V2/TTSChunk.h"
+#include "JSONHandler/SDLRPCObjects/V2/Language.h"
+#include "JSONHandler/SDLRPCObjects/V2/AppType.h"
+#include "JSONHandler/SDLRPCObjects/V2/SyncMsgVersion.h"
+#include "JSONHandler/SDLRPCObjects/V2/TTSChunk.h"
 
 namespace NsAppManager
 {
     /**
      * \brief Application types
      */
-    typedef std::vector<NsAppLinkRPCV2::AppType> AppTypes;
+    typedef std::vector<NsSmartDeviceLinkRPCV2::AppType> AppTypes;
 
     /**
      * \brief TTS name
      */
-    typedef std::vector<NsAppLinkRPCV2::TTSChunk> TTSName;
+    typedef std::vector<NsSmartDeviceLinkRPCV2::TTSChunk> TTSName;
 
     /**
      * \brief class Application acts as a metaphor for every mobile application of protocol v2 being registered on HMI
@@ -48,25 +48,25 @@ namespace NsAppManager
          * \brief Set application desired languuage
          * \param value application desired language
          */
-        void setLanguageDesired(NsAppLinkRPCV2::Language value);
+        void setLanguageDesired(NsSmartDeviceLinkRPCV2::Language value);
 
         /**
          * \brief retrieve application desired language
          * \return application desired language
          */
-        const NsAppLinkRPCV2::Language& getLanguageDesired( ) const;
+        const NsSmartDeviceLinkRPCV2::Language& getLanguageDesired( ) const;
 
         /**
          * \brief Set application HMI desired display language
          * \param value application HMI desired display language
          */
-        void setHMIDisplayLanguageDesired( NsAppLinkRPCV2::Language value );
+        void setHMIDisplayLanguageDesired( NsSmartDeviceLinkRPCV2::Language value );
 
         /**
          * \brief retrieve application HMI desired display language
          * \return application HMI desired display language
          */
-        const NsAppLinkRPCV2::Language& getHMIDisplayLanguageDesired( ) const;
+        const NsSmartDeviceLinkRPCV2::Language& getHMIDisplayLanguageDesired( ) const;
 
         /**
          * \brief Set application type
@@ -84,13 +84,13 @@ namespace NsAppManager
          * \brief Set application sync message version
          * \param value application sync message version
          */
-        void setSyncMsgVersion(NsAppLinkRPCV2::SyncMsgVersion value);
+        void setSyncMsgVersion(NsSmartDeviceLinkRPCV2::SyncMsgVersion value);
 
         /**
          * \brief retrieve application sync message version
          * \return application sync msg version
          */
-        const NsAppLinkRPCV2::SyncMsgVersion& getSyncMsgVersion( ) const;
+        const NsSmartDeviceLinkRPCV2::SyncMsgVersion& getSyncMsgVersion( ) const;
 
         /**
          * \brief Set application text-to-speech name
@@ -143,11 +143,11 @@ namespace NsAppManager
          */
         Application_v2(const Application_v2& );
 
-        NsAppLinkRPCV2::Language mLanguageDesired;
+        NsSmartDeviceLinkRPCV2::Language mLanguageDesired;
         
-        NsAppLinkRPCV2::Language mHMIDisplayLanguageDesired;
+        NsSmartDeviceLinkRPCV2::Language mHMIDisplayLanguageDesired;
 
-        NsAppLinkRPCV2::SyncMsgVersion mSyncMsgVersion;
+        NsSmartDeviceLinkRPCV2::SyncMsgVersion mSyncMsgVersion;
 
    //     std::string mAppID;
         AppTypes mAppType;

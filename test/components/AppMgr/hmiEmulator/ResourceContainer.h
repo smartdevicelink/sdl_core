@@ -7,18 +7,18 @@
 #include <map>
 #include <vector>
 
-#include "JSONHandler/ALRPCObjects/ButtonCapabilities.h"
-#include "JSONHandler/ALRPCObjects/DisplayCapabilities.h"
-#include "JSONHandler/ALRPCObjects/HmiZoneCapabilities.h"
-#include "JSONHandler/ALRPCObjects/VrCapabilities.h"
-#include "JSONHandler/ALRPCObjects/SpeechCapabilities.h"
-#include "JSONHandler/ALRPCObjects/GlobalProperty.h"
-#include "JSONHandler/ALRPCObjects/TTSChunk.h"
-#include "JSONHandler/ALRPCObjects/MenuParams.h"
-#include "JSONHandler/ALRPCObjects/Choice.h"
-#include "JSONHandler/ALRPCObjects/MediaClockFormat.h"
-#include "JSONHandler/ALRPCObjects/StartTime.h"
-#include "JSONHandler/ALRPCObjects/UpdateMode.h"
+#include "JSONHandler/SDLRPCObjects/ButtonCapabilities.h"
+#include "JSONHandler/SDLRPCObjects/DisplayCapabilities.h"
+#include "JSONHandler/SDLRPCObjects/HmiZoneCapabilities.h"
+#include "JSONHandler/SDLRPCObjects/VrCapabilities.h"
+#include "JSONHandler/SDLRPCObjects/SpeechCapabilities.h"
+#include "JSONHandler/SDLRPCObjects/GlobalProperty.h"
+#include "JSONHandler/SDLRPCObjects/TTSChunk.h"
+#include "JSONHandler/SDLRPCObjects/MenuParams.h"
+#include "JSONHandler/SDLRPCObjects/Choice.h"
+#include "JSONHandler/SDLRPCObjects/MediaClockFormat.h"
+#include "JSONHandler/SDLRPCObjects/StartTime.h"
+#include "JSONHandler/SDLRPCObjects/UpdateMode.h"
 #include "LoggerHelper.hpp"
 
 /**
@@ -40,47 +40,47 @@ namespace NsHMIEmulator
     /**
      * \brief ButtonCapabilities container
      */
-    typedef std::vector<NsAppLinkRPC::ButtonCapabilities> ButtonCapabilities;
+    typedef std::vector<NsSmartDeviceLinkRPC::ButtonCapabilities> ButtonCapabilities;
 
     /**
      * \brief HmiZoneCapabilities container
      */
-    typedef std::vector<NsAppLinkRPC::HmiZoneCapabilities> HmiZoneCapabilities;
+    typedef std::vector<NsSmartDeviceLinkRPC::HmiZoneCapabilities> HmiZoneCapabilities;
 
     /**
      * \brief VrCapabilities container
      */
-    typedef std::vector<NsAppLinkRPC::VrCapabilities> VrCapabilities;
+    typedef std::vector<NsSmartDeviceLinkRPC::VrCapabilities> VrCapabilities;
 
     /**
      * \brief SpeechCapabilities container
      */
-    typedef std::vector<NsAppLinkRPC::SpeechCapabilities> SpeechCapabilities;
+    typedef std::vector<NsSmartDeviceLinkRPC::SpeechCapabilities> SpeechCapabilities;
 
     /**
      * \brief HelpPrompt container
      */
-    typedef std::vector<NsAppLinkRPC::TTSChunk> HelpPrompt;
+    typedef std::vector<NsSmartDeviceLinkRPC::TTSChunk> HelpPrompt;
 
     /**
      * \brief TimeoutPrompt container
      */
-    typedef std::vector<NsAppLinkRPC::TTSChunk> TimeoutPrompt;
+    typedef std::vector<NsSmartDeviceLinkRPC::TTSChunk> TimeoutPrompt;
 
     /**
      * \brief InitialPrompt container
      */
-    typedef std::vector<NsAppLinkRPC::TTSChunk> InitialPrompt;
+    typedef std::vector<NsSmartDeviceLinkRPC::TTSChunk> InitialPrompt;
 
     /**
      * \brief GlobalProperties container
      */
-    typedef std::vector<NsAppLinkRPC::GlobalProperty> GlobalProperties;
+    typedef std::vector<NsSmartDeviceLinkRPC::GlobalProperty> GlobalProperties;
 
     /**
      * \brief ChoiceSet container
      */
-    typedef std::vector<NsAppLinkRPC::Choice> ChoiceSet;
+    typedef std::vector<NsSmartDeviceLinkRPC::Choice> ChoiceSet;
 
     /**
      * \brief VrCommands container
@@ -90,12 +90,12 @@ namespace NsHMIEmulator
     /**
      * \brief A command_id - menu_params mapping (command id is a key)
      */
-    typedef std::map<unsigned int, NsAppLinkRPC::MenuParams> UICommands;
+    typedef std::map<unsigned int, NsSmartDeviceLinkRPC::MenuParams> UICommands;
 
     /**
      * \brief A command_id - menu_params mapping item (command id is a key)
      */
-    typedef std::pair<unsigned int, NsAppLinkRPC::MenuParams> UICommand;
+    typedef std::pair<unsigned int, NsSmartDeviceLinkRPC::MenuParams> UICommand;
 
     /**
      * \brief A command_id - VR commands mapping (command id is a key)
@@ -182,7 +182,7 @@ namespace NsHMIEmulator
          * \param id
          * \param menuParams
          */
-        void addUiCommand(const unsigned int& id, const NsAppLinkRPC::MenuParams& menuParams);
+        void addUiCommand(const unsigned int& id, const NsSmartDeviceLinkRPC::MenuParams& menuParams);
 
         /**
          * \brief remove a command from a list of registered commands
@@ -195,7 +195,7 @@ namespace NsHMIEmulator
          * \param id
          * \return command
          */
-        const NsAppLinkRPC::MenuParams *findUiCommand(const unsigned int& id) const;
+        const NsSmartDeviceLinkRPC::MenuParams *findUiCommand(const unsigned int& id) const;
 
         /**
          * \brief add a command to a list of registered commands
@@ -274,7 +274,7 @@ namespace NsHMIEmulator
          * \brief gets display capabilities
          * \return display capabilities
          */
-        const NsAppLinkRPC::DisplayCapabilities& getDisplayCapabilities() const;
+        const NsSmartDeviceLinkRPC::DisplayCapabilities& getDisplayCapabilities() const;
 
         /**
          * \brief gets HMI zone capabilities
@@ -328,25 +328,25 @@ namespace NsHMIEmulator
          * \brief sets timer start time
          * \param time timer start time
          */
-        void setStartTime(const NsAppLinkRPC::StartTime& time);
+        void setStartTime(const NsSmartDeviceLinkRPC::StartTime& time);
 
         /**
          * \brief gets timer start time
          * \return timer start time
          */
-        const NsAppLinkRPC::StartTime& getStartTime() const;
+        const NsSmartDeviceLinkRPC::StartTime& getStartTime() const;
 
         /**
          * \brief sets timer update mode
          * \param mode timer update mode
          */
-        void setTimerUpdateMode(const NsAppLinkRPC::UpdateMode& mode);
+        void setTimerUpdateMode(const NsSmartDeviceLinkRPC::UpdateMode& mode);
 
         /**
          * \brief gets timer update mode
          * \return timer update mode
          */
-        const NsAppLinkRPC::UpdateMode& getTimerUpdateMode() const;
+        const NsSmartDeviceLinkRPC::UpdateMode& getTimerUpdateMode() const;
 
     private:
         /**
@@ -361,7 +361,7 @@ namespace NsHMIEmulator
 
         RegisteredApplications mApplications;
         ButtonCapabilities mButtonCapabilities;
-        NsAppLinkRPC::DisplayCapabilities mDisplayCapabilities;
+        NsSmartDeviceLinkRPC::DisplayCapabilities mDisplayCapabilities;
         HmiZoneCapabilities mHmiZoneCapabilities;
         VrCapabilities mVrCapabilities;
         SpeechCapabilities mSpeechCapabilities;
@@ -372,8 +372,8 @@ namespace NsHMIEmulator
         VrCommands mVrCommands;
         Menu mMenuItems;
         InteractionChoiceSet mInteractionChoiceSet;
-        NsAppLinkRPC::StartTime mStartTime;
-        NsAppLinkRPC::UpdateMode mUpdateMode;
+        NsSmartDeviceLinkRPC::StartTime mStartTime;
+        NsSmartDeviceLinkRPC::UpdateMode mUpdateMode;
         std::string mActiveApplication;
 
         static log4cplus::Logger mLogger;

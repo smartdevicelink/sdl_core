@@ -15,7 +15,7 @@ namespace NsTest
      * \param connectionId ID of the connection the message was received within.
      * \param sessionId ID of the session the message was received within.
      */
-    void TestEnvironment::sendRPCMessageToHmi(NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId)
+    void TestEnvironment::sendRPCMessageToHmi(NsSmartDeviceLinkRPC::SDLRPCMessage *message, int connectionId, unsigned char sessionId)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Sending to HMI a message " << message->getMethodId() << " connection " << connectionId << " session " << (uint)sessionId);
         getRPCMessageObserver()->onMessageReceivedCallback( message, connectionId, sessionId );
@@ -27,7 +27,7 @@ namespace NsTest
      * \param connectionId ID of the connection the message was received within.
      * \param sessionId ID of the session the message was received within.
      */
-    void TestEnvironment::messageReceivedFromHmiCallback(const NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId)
+    void TestEnvironment::messageReceivedFromHmiCallback(const NsSmartDeviceLinkRPC::SDLRPCMessage *message, int connectionId, unsigned char sessionId)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Received from HMI a message " << message->getMethodId() << " connection " << connectionId << " session " << (uint)sessionId);
         if(mOnMobileMessageReceivedCallback)

@@ -101,17 +101,17 @@ RPC(address, port, std::string("TTS"))
               NsRPC2Communication::TTS::Speak* object = (NsRPC2Communication::TTS::Speak*)msg;
               LOG4CPLUS_INFO_EXT(mLogger, " Speaking: ");
 
-              const std::vector<NsAppLinkRPC::TTSChunk>& tts = object->get_ttsChunks();
-              for(std::vector<NsAppLinkRPC::TTSChunk>::const_iterator it = tts.begin(); it != tts.end(); it++)
+              const std::vector<NsSmartDeviceLinkRPC::TTSChunk>& tts = object->get_ttsChunks();
+              for(std::vector<NsSmartDeviceLinkRPC::TTSChunk>::const_iterator it = tts.begin(); it != tts.end(); it++)
               {
-                  const NsAppLinkRPC::TTSChunk& chunk = *it;
+                  const NsSmartDeviceLinkRPC::TTSChunk& chunk = *it;
                   LOG4CPLUS_INFO_EXT(mLogger, chunk.get_text());
               }
               LOG4CPLUS_INFO_EXT(mLogger, " Speech finished!");
 
               NsRPC2Communication::TTS::SpeakResponse* response = new NsRPC2Communication::TTS::SpeakResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }

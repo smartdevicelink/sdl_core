@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "JSONHandler/ALRPCObjects/Language.h"
+#include "JSONHandler/SDLRPCObjects/Language.h"
 
 namespace NsHMIEmulator
 {
@@ -65,13 +65,13 @@ namespace NsHMIEmulator
          * \brief set app desired language
          * \param language
          */
-        void setLanguageDesired(const NsAppLinkRPC::Language& language);
+        void setLanguageDesired(const NsSmartDeviceLinkRPC::Language& language);
 
         /**
          * \brief get app desired languages
          * \return app desired languages
          */
-        const NsAppLinkRPC::Language& getLanguageDesired() const;
+        const NsSmartDeviceLinkRPC::Language& getLanguageDesired() const;
 
         /**
          * \brief set app VR synonyms
@@ -96,7 +96,7 @@ namespace NsHMIEmulator
         std::string mIcon;
         std::string mDeviceName;
         bool m_bIsMedia;
-        NsAppLinkRPC::Language mLanguageDesired;
+        NsSmartDeviceLinkRPC::Language mLanguageDesired;
         Synonyms mVrSynonyms;
     };
 }

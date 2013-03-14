@@ -1,8 +1,8 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/SetGlobalProperties.h"
-#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/VrHelpItemMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/TTSChunkMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/TTSChunkMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/VrHelpItemMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetGlobalPropertiesMarshaller.h"
 
 /*
@@ -91,7 +91,7 @@ Json::Value SetGlobalPropertiesMarshaller::toJSON(const SetGlobalProperties& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.helpPrompt[0][i]);
+      j[i]=NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::toJSON(e.helpPrompt[0][i]);
 
     json["params"]["helpPrompt"]=j;
   }
@@ -101,7 +101,7 @@ Json::Value SetGlobalPropertiesMarshaller::toJSON(const SetGlobalProperties& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.timeoutPrompt[0][i]);
+      j[i]=NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::toJSON(e.timeoutPrompt[0][i]);
 
     json["params"]["timeoutPrompt"]=j;
   }
@@ -113,7 +113,7 @@ Json::Value SetGlobalPropertiesMarshaller::toJSON(const SetGlobalProperties& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::VrHelpItemMarshaller::toJSON(e.vrHelp[0][i]);
+      j[i]=NsSmartDeviceLinkRPCV2::VrHelpItemMarshaller::toJSON(e.vrHelp[0][i]);
 
     json["params"]["vrHelp"]=j;
   }
@@ -145,11 +145,11 @@ bool SetGlobalPropertiesMarshaller::fromJSON(const Json::Value& json,SetGlobalPr
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.helpPrompt=new std::vector<NsAppLinkRPCV2::TTSChunk>();
+      c.helpPrompt=new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>();
       c.helpPrompt->resize(js["helpPrompt"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["helpPrompt"][i],c.helpPrompt[0][i]))  return false;
+        if(!NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::fromJSON(js["helpPrompt"][i],c.helpPrompt[0][i]))  return false;
     }
 
 
@@ -162,11 +162,11 @@ bool SetGlobalPropertiesMarshaller::fromJSON(const Json::Value& json,SetGlobalPr
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.timeoutPrompt=new std::vector<NsAppLinkRPCV2::TTSChunk>();
+      c.timeoutPrompt=new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>();
       c.timeoutPrompt->resize(js["timeoutPrompt"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["timeoutPrompt"][i],c.timeoutPrompt[0][i]))  return false;
+        if(!NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::fromJSON(js["timeoutPrompt"][i],c.timeoutPrompt[0][i]))  return false;
     }
 
 
@@ -190,11 +190,11 @@ bool SetGlobalPropertiesMarshaller::fromJSON(const Json::Value& json,SetGlobalPr
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.vrHelp=new std::vector<NsAppLinkRPCV2::VrHelpItem>();
+      c.vrHelp=new std::vector<NsSmartDeviceLinkRPCV2::VrHelpItem>();
       c.vrHelp->resize(js["vrHelp"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::VrHelpItemMarshaller::fromJSON(js["vrHelp"][i],c.vrHelp[0][i]))  return false;
+        if(!NsSmartDeviceLinkRPCV2::VrHelpItemMarshaller::fromJSON(js["vrHelp"][i],c.vrHelp[0][i]))  return false;
     }
 
 

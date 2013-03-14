@@ -1,7 +1,7 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/GetCapabilitiesResponse.h"
-#include "../src/ALRPCObjectsImpl/V2/ButtonCapabilitiesMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/PresetBankCapabilitiesMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ButtonCapabilitiesMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/PresetBankCapabilitiesMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/GetCapabilitiesResponseMarshaller.h"
 
 /*
@@ -52,7 +52,7 @@ bool GetCapabilitiesResponseMarshaller::checkIntegrityConst(const GetCapabilitie
     if(i>100)  return false;
   }
 
-  if(s.presetBankCapabilities && (!NsAppLinkRPCV2::PresetBankCapabilitiesMarshaller::checkIntegrityConst(s.presetBankCapabilities[0])))  return false;
+  if(s.presetBankCapabilities && (!NsSmartDeviceLinkRPCV2::PresetBankCapabilitiesMarshaller::checkIntegrityConst(s.presetBankCapabilities[0])))  return false;
 
   return true;
 }
@@ -67,8 +67,8 @@ Json::Value GetCapabilitiesResponseMarshaller::toJSON(const GetCapabilitiesRespo
   json["jsonrpc"]=Json::Value("2.0");
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
-  NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
-  json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
+  NsSmartDeviceLinkRPCV2::Result r(static_cast<NsSmartDeviceLinkRPCV2::Result::ResultInternal>(e.getResult()));
+  json["result"]["resultCode"]=NsSmartDeviceLinkRPCV2::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("Buttons.GetCapabilitiesResponse");
 
   {
@@ -76,12 +76,12 @@ Json::Value GetCapabilitiesResponseMarshaller::toJSON(const GetCapabilitiesRespo
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::ButtonCapabilitiesMarshaller::toJSON(e.capabilities[i]);
+      j[i]=NsSmartDeviceLinkRPCV2::ButtonCapabilitiesMarshaller::toJSON(e.capabilities[i]);
 
     json["result"]["capabilities"]=j;
   }
   if(e.presetBankCapabilities)
-    json["result"]["presetBankCapabilities"]=NsAppLinkRPCV2::PresetBankCapabilitiesMarshaller::toJSON(e.presetBankCapabilities[0]);;
+    json["result"]["presetBankCapabilities"]=NsSmartDeviceLinkRPCV2::PresetBankCapabilitiesMarshaller::toJSON(e.presetBankCapabilities[0]);;
   return json;
 }
 
@@ -100,12 +100,12 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    NsAppLinkRPCV2::Result r;
+    NsSmartDeviceLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("Buttons.GetCapabilitiesResponse")) return false;
 
-    if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
+    if(!NsSmartDeviceLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
     if(!js.isMember("capabilities") || !js["capabilities"].isArray())  return false;
     {
@@ -115,8 +115,8 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
       c.capabilities.resize(i);
       while(i--)
       {
-        NsAppLinkRPCV2::ButtonCapabilities t;
-        if(!NsAppLinkRPCV2::ButtonCapabilitiesMarshaller::fromJSON(js["capabilities"][i],t))
+        NsSmartDeviceLinkRPCV2::ButtonCapabilities t;
+        if(!NsSmartDeviceLinkRPCV2::ButtonCapabilitiesMarshaller::fromJSON(js["capabilities"][i],t))
           return false;
          c.capabilities[i]=t;
       }
@@ -126,8 +126,8 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
     c.presetBankCapabilities=0;
     if(js.isMember("presetBankCapabilities"))
     {
-      c.presetBankCapabilities=new NsAppLinkRPCV2::PresetBankCapabilities();
-      if(!NsAppLinkRPCV2::PresetBankCapabilitiesMarshaller::fromJSON(js["presetBankCapabilities"],c.presetBankCapabilities[0]))  return false;
+      c.presetBankCapabilities=new NsSmartDeviceLinkRPCV2::PresetBankCapabilities();
+      if(!NsSmartDeviceLinkRPCV2::PresetBankCapabilitiesMarshaller::fromJSON(js["presetBankCapabilities"],c.presetBankCapabilities[0]))  return false;
     }
 
   }

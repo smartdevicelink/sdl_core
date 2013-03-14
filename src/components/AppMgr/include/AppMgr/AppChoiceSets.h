@@ -5,8 +5,8 @@
 #ifndef APPCHOICESETS_H
 #define APPCHOICESETS_H
 
-#include "JSONHandler/ALRPCObjects/V1/Choice.h"
-#include "JSONHandler/ALRPCObjects/V2/Choice.h"
+#include "JSONHandler/SDLRPCObjects/V1/Choice.h"
+#include "JSONHandler/SDLRPCObjects/V2/Choice.h"
 #include <vector>
 #include <string>
 #include <map>
@@ -21,12 +21,12 @@ namespace NsAppManager
     /**
      * \brief interaction choice sets protocol v1
      */
-    typedef std::vector<NsAppLinkRPC::Choice> ChoiceSetV1;
+    typedef std::vector<NsSmartDeviceLinkRPC::Choice> ChoiceSetV1;
 
     /**
      * \brief interaction choice sets protocol v2
      */
-    typedef std::vector<NsAppLinkRPCV2::Choice> ChoiceSetV2;
+    typedef std::vector<NsSmartDeviceLinkRPCV2::Choice> ChoiceSetV2;
 
     /**
      * \brief interaction choice sets

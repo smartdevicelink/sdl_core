@@ -3,7 +3,7 @@
 
 #include "JSONHandler/RPC2Notification.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/DriverDistractionState.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/DriverDistractionState.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -32,18 +32,18 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const NsAppLinkRPCV2::DriverDistractionState& get_state(void);
+      const NsSmartDeviceLinkRPCV2::DriverDistractionState& get_state(void);
 
 
 // setters
-      bool set_state(const NsAppLinkRPCV2::DriverDistractionState& state);
+      bool set_state(const NsSmartDeviceLinkRPCV2::DriverDistractionState& state);
 
 
     private:
 
       friend class OnDriverDistractionMarshaller;
 
-      NsAppLinkRPCV2::DriverDistractionState state;
+      NsSmartDeviceLinkRPCV2::DriverDistractionState state;
 
     };
   }

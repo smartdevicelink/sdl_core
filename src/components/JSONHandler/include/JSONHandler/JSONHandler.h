@@ -10,7 +10,7 @@
 
 #include "Logger.hpp"
 #include "JSONHandler/MessageQueue.h"
-#include "JSONHandler/ALRPCMessage.h"
+#include "JSONHandler/SDLRPCMessage.h"
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/IJsonHandler.h"
 #include "ProtocolHandler/AppLinkRawMessage.h"
@@ -70,7 +70,7 @@ public:
      * to be serialized to Json message and sent to mobile App.
      * \param sessionId ID of the session the message was received within.
      */
-    void sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, int connectionKey );
+    void sendRPCMessage( const NsSmartDeviceLinkRPC::SDLRPCMessage * message, int connectionKey );
     /*End of methods for IRPCMessagesObserver*/
        
 protected:
@@ -94,17 +94,17 @@ protected:
      */
     std::string clearEmptySpaces( const std::string & input );
 
-    NsAppLinkRPC::ALRPCMessage * handleIncomingMessageProtocolV1(
+    NsSmartDeviceLinkRPC::SDLRPCMessage * handleIncomingMessageProtocolV1(
             const NsProtocolHandler::AppLinkRawMessage * message );
 
-    NsAppLinkRPC::ALRPCMessage * handleIncomingMessageProtocolV2(
+    NsSmartDeviceLinkRPC::SDLRPCMessage * handleIncomingMessageProtocolV2(
             const NsProtocolHandler::AppLinkRawMessage * message );
 
     NsProtocolHandler::AppLinkRawMessage * handleOutgoingMessageProtocolV1( 
-            int connectionKey, const NsAppLinkRPC::ALRPCMessage *  message );
+            int connectionKey, const NsSmartDeviceLinkRPC::SDLRPCMessage *  message );
 
     NsProtocolHandler::AppLinkRawMessage * handleOutgoingMessageProtocolV2( 
-            int connectionKey, const NsAppLinkRPC::ALRPCMessage *  message );
+            int connectionKey, const NsSmartDeviceLinkRPC::SDLRPCMessage *  message );
     
 private:
     /**
@@ -140,7 +140,7 @@ private:
       *\brief Queue of messages to Mobile Application.
       *\sa MessageQueue
     */
-    MessageQueue<std::pair<int,const NsAppLinkRPC::ALRPCMessage*>>    mOutgoingMessages;
+    MessageQueue<std::pair<int,const NsSmartDeviceLinkRPC::SDLRPCMessage*>>    mOutgoingMessages;
 
     /**
       *\brief Thread for handling messages to Mobile Application.

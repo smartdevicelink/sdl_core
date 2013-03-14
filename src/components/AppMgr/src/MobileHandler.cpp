@@ -27,7 +27,7 @@ namespace NsAppManager
      * \param connectionID id of a connection associated with application that sent the message
      * \param sessionId id of a session associated with application that sent the message
      */
-    void MobileHandler::sendRPCMessage(const NsAppLinkRPC::ALRPCMessage *message, int appId)
+    void MobileHandler::sendRPCMessage(const NsSmartDeviceLinkRPC::SDLRPCMessage *message, int appId)
     {
         if(mJSONHandler)
         {

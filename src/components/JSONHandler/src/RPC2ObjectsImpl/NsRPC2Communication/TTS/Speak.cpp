@@ -37,12 +37,12 @@ Speak::Speak(const Speak& c) : RPC2Request(Marshaller::METHOD_NSRPC2COMMUNICATIO
 }
 
 
-const std::vector< NsAppLinkRPCV2::TTSChunk>& Speak::get_ttsChunks(void)
+const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& Speak::get_ttsChunks(void)
 {
   return ttsChunks;
 }
 
-bool Speak::set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks_)
+bool Speak::set_ttsChunks(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& ttsChunks_)
 {
   ttsChunks=ttsChunks_;
   return true;

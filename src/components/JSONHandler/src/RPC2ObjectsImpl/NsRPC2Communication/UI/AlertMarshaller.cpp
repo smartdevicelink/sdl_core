@@ -1,7 +1,7 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/Alert.h"
-#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/SoftButtonMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/TTSChunkMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/SoftButtonMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AlertMarshaller.h"
 
 /*
@@ -95,7 +95,7 @@ Json::Value AlertMarshaller::toJSON(const Alert& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.ttsChunks[0][i]);
+      j[i]=NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::toJSON(e.ttsChunks[0][i]);
 
     json["params"]["ttsChunks"]=j;
   }
@@ -109,7 +109,7 @@ Json::Value AlertMarshaller::toJSON(const Alert& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
+      j[i]=NsSmartDeviceLinkRPCV2::SoftButtonMarshaller::toJSON(e.softButtons[0][i]);
 
     json["params"]["softButtons"]=j;
   }
@@ -174,11 +174,11 @@ bool AlertMarshaller::fromJSON(const Json::Value& json,Alert& c)
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.ttsChunks=new std::vector<NsAppLinkRPCV2::TTSChunk>();
+      c.ttsChunks=new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>();
       c.ttsChunks->resize(js["ttsChunks"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["ttsChunks"][i],c.ttsChunks[0][i]))  return false;
+        if(!NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::fromJSON(js["ttsChunks"][i],c.ttsChunks[0][i]))  return false;
     }
 
 
@@ -212,11 +212,11 @@ bool AlertMarshaller::fromJSON(const Json::Value& json,Alert& c)
       if(i<0)  return false;
       if(i>4)  return false;
 
-      c.softButtons=new std::vector<NsAppLinkRPCV2::SoftButton>();
+      c.softButtons=new std::vector<NsSmartDeviceLinkRPCV2::SoftButton>();
       c.softButtons->resize(js["softButtons"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::SoftButtonMarshaller::fromJSON(js["softButtons"][i],c.softButtons[0][i]))  return false;
+        if(!NsSmartDeviceLinkRPCV2::SoftButtonMarshaller::fromJSON(js["softButtons"][i],c.softButtons[0][i]))  return false;
     }
 
 

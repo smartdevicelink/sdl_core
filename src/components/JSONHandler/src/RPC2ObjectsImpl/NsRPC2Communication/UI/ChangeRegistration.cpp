@@ -37,12 +37,12 @@ ChangeRegistration::ChangeRegistration(const ChangeRegistration& c) : RPC2Reques
 }
 
 
-const NsAppLinkRPCV2::Language& ChangeRegistration::get_hmiDisplayLanguage(void)
+const NsSmartDeviceLinkRPCV2::Language& ChangeRegistration::get_hmiDisplayLanguage(void)
 {
   return hmiDisplayLanguage;
 }
 
-bool ChangeRegistration::set_hmiDisplayLanguage(const NsAppLinkRPCV2::Language& hmiDisplayLanguage_)
+bool ChangeRegistration::set_hmiDisplayLanguage(const NsSmartDeviceLinkRPCV2::Language& hmiDisplayLanguage_)
 {
   hmiDisplayLanguage=hmiDisplayLanguage_;
   return true;

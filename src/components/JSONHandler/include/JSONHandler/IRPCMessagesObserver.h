@@ -8,7 +8,7 @@
 #ifndef IRPCMESSAGES_OBSERVER_CLASS
 #define IRPCMESSAGES_OBSERVER_CLASS 
 
-#include "JSONHandler/ALRPCMessage.h"
+#include "JSONHandler/SDLRPCMessage.h"
 
 /**
  * \class IRPCMessagesObserver
@@ -24,7 +24,7 @@ public:
      * when new AppLink Json message is received from Mobile Application.
      * \param message AppLink Json message
      */
-    virtual void onMessageReceivedCallback( NsAppLinkRPC::ALRPCMessage * message, int connectionKey ) = 0;
+    virtual void onMessageReceivedCallback( NsSmartDeviceLinkRPC::SDLRPCMessage * message, int connectionKey ) = 0;
 
 protected:
     /**

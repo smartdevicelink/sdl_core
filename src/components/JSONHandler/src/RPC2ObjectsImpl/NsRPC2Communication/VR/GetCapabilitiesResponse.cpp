@@ -36,12 +36,12 @@ GetCapabilitiesResponse::GetCapabilitiesResponse(const GetCapabilitiesResponse& 
 }
 
 
-const std::vector< NsAppLinkRPCV2::VrCapabilities>& GetCapabilitiesResponse::get_capabilities(void)
+const std::vector< NsSmartDeviceLinkRPCV2::VrCapabilities>& GetCapabilitiesResponse::get_capabilities(void)
 {
   return capabilities;
 }
 
-bool GetCapabilitiesResponse::set_capabilities(const std::vector< NsAppLinkRPCV2::VrCapabilities>& capabilities_)
+bool GetCapabilitiesResponse::set_capabilities(const std::vector< NsSmartDeviceLinkRPCV2::VrCapabilities>& capabilities_)
 {
   capabilities=capabilities_;
   return true;

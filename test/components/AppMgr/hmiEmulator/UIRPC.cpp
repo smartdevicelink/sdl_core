@@ -154,7 +154,7 @@ RPC(address, port, std::string("UI"))
 
               NsRPC2Communication::UI::ShowResponse* response = new NsRPC2Communication::UI::ShowResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }
@@ -172,7 +172,7 @@ RPC(address, port, std::string("UI"))
               }
               NsRPC2Communication::UI::SetGlobalPropertiesResponse* response = new NsRPC2Communication::UI::SetGlobalPropertiesResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }
@@ -183,7 +183,7 @@ RPC(address, port, std::string("UI"))
               rc.setGlobalProperties( object->get_properties() );
               NsRPC2Communication::UI::ResetGlobalPropertiesResponse* response = new NsRPC2Communication::UI::ResetGlobalPropertiesResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }
@@ -211,7 +211,7 @@ RPC(address, port, std::string("UI"))
               LOG4CPLUS_INFO_EXT(mLogger, " End of alert ");
               NsRPC2Communication::UI::AlertResponse* response = new NsRPC2Communication::UI::AlertResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }
@@ -222,7 +222,7 @@ RPC(address, port, std::string("UI"))
               rc.addUiCommand( object->get_cmdId(), object->get_menuParams() );
               NsRPC2Communication::UI::AddCommandResponse* response = new NsRPC2Communication::UI::AddCommandResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }
@@ -233,7 +233,7 @@ RPC(address, port, std::string("UI"))
               rc.removeUiCommand(object->get_cmdId());
               NsRPC2Communication::UI::DeleteCommandResponse* response = new NsRPC2Communication::UI::DeleteCommandResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }
@@ -244,7 +244,7 @@ RPC(address, port, std::string("UI"))
               rc.addMenuItem(object->get_menuId(), object->get_menuName(), object->get_position() ? *object->get_position() : -1 );
               NsRPC2Communication::UI::AddSubMenuResponse* response = new NsRPC2Communication::UI::AddSubMenuResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }
@@ -255,7 +255,7 @@ RPC(address, port, std::string("UI"))
               rc.removeMenuItem(object->get_menuId());
               NsRPC2Communication::UI::DeleteSubMenuResponse* response = new NsRPC2Communication::UI::DeleteSubMenuResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }
@@ -266,7 +266,7 @@ RPC(address, port, std::string("UI"))
               rc.addInteractionChoiceSet( object->get_interactionChoiceSetID(), object->get_choiceSet() );
               NsRPC2Communication::UI::CreateInteractionChoiceSetResponse* response = new NsRPC2Communication::UI::CreateInteractionChoiceSetResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }
@@ -277,7 +277,7 @@ RPC(address, port, std::string("UI"))
               rc.removeInteractionChoiceSet(object->get_interactionChoiceSetID());
               NsRPC2Communication::UI::DeleteInteractionChoiceSetResponse* response = new NsRPC2Communication::UI::DeleteInteractionChoiceSetResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }
@@ -293,7 +293,7 @@ RPC(address, port, std::string("UI"))
                   if(rc.findInteractionChoiceSet(*it).empty())
                   {
                       LOG4CPLUS_ERROR_EXT(mLogger, "An interaction choice set id " << *it << " has not been found in a list of registered interaction choice sets!");
-                      response->setResult(NsAppLinkRPC::Result::INVALID_ID);
+                      response->setResult(NsSmartDeviceLinkRPC::Result::INVALID_ID);
                       sendRPC2MessageToMobileSide(response);
                       return;
                   }
@@ -303,7 +303,7 @@ RPC(address, port, std::string("UI"))
               {
                   for(HelpPrompt::const_iterator it = object->get_helpPrompt()->begin(); it != object->get_helpPrompt()->end(); it++)
                   {
-                      const NsAppLinkRPC::TTSChunk& chunk = *it;
+                      const NsSmartDeviceLinkRPC::TTSChunk& chunk = *it;
                       LOG4CPLUS_INFO_EXT(mLogger, " Help prompt: " << chunk.get_text() << " of type " << chunk.get_type().get());
                   }
               }
@@ -311,13 +311,13 @@ RPC(address, port, std::string("UI"))
               {
                   for(TimeoutPrompt::const_iterator it = object->get_timeoutPrompt()->begin(); it != object->get_timeoutPrompt()->end(); it++)
                   {
-                      const NsAppLinkRPC::TTSChunk& chunk = *it;
+                      const NsSmartDeviceLinkRPC::TTSChunk& chunk = *it;
                       LOG4CPLUS_INFO_EXT(mLogger, " Timeout prompt: " << chunk.get_text() << " of type " << chunk.get_type().get());
                   }
               }
               for(InitialPrompt::const_iterator it = object->get_initialPrompt().begin(); it != object->get_initialPrompt().end(); it++)
               {
-                  const NsAppLinkRPC::TTSChunk& chunk = *it;
+                  const NsSmartDeviceLinkRPC::TTSChunk& chunk = *it;
                   LOG4CPLUS_INFO_EXT(mLogger, " Initial prompt: " << chunk.get_text() << " of type " << chunk.get_type().get());
               }
               LOG4CPLUS_INFO_EXT(mLogger, " Initial text: " << object->get_initialText());
@@ -331,7 +331,7 @@ RPC(address, port, std::string("UI"))
               }
               LOG4CPLUS_INFO_EXT(mLogger, " Interaction mode: " << object->get_interactionMode().get());
               LOG4CPLUS_INFO_EXT(mLogger, " Interaction performed!");
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }
@@ -346,7 +346,7 @@ RPC(address, port, std::string("UI"))
               rc.setTimerUpdateMode(object->get_updateMode());
               NsRPC2Communication::UI::SetMediaClockTimerResponse* response = new NsRPC2Communication::UI::SetMediaClockTimerResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }

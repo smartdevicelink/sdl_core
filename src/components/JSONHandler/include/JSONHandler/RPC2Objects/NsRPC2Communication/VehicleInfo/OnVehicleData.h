@@ -4,9 +4,9 @@
 #include <string>
 #include "JSONHandler/RPC2Notification.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/GPSData.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/PRNDL.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/TireStatus.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/GPSData.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/PRNDL.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/TireStatus.h"
 
 /*
   interface	NsRPC2Communication::VehicleInfo
@@ -35,7 +35,7 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const NsAppLinkRPCV2::GPSData* get_gps(void);
+      const NsSmartDeviceLinkRPCV2::GPSData* get_gps(void);
       const float* get_speed(void);
       const unsigned int* get_rpm(void);
       const float* get_fuelLevel(void);
@@ -43,8 +43,8 @@ namespace NsRPC2Communication
       const float* get_batteryVoltage(void);
       const float* get_externalTemperature(void);
       const std::string* get_vin(void);
-      const NsAppLinkRPCV2::PRNDL* get_prndl(void);
-      const NsAppLinkRPCV2::TireStatus* get_tirePressure(void);
+      const NsSmartDeviceLinkRPCV2::PRNDL* get_prndl(void);
+      const NsSmartDeviceLinkRPCV2::TireStatus* get_tirePressure(void);
       const float* get_batteryPackVoltage(void);
       const float* get_batteryPackCurrent(void);
       const int* get_batteryPackTemperature(void);
@@ -54,7 +54,7 @@ namespace NsRPC2Communication
       const std::string* get_genericbinary(void);
 
 // setters
-      bool set_gps(const NsAppLinkRPCV2::GPSData& gps);
+      bool set_gps(const NsSmartDeviceLinkRPCV2::GPSData& gps);
 
       void reset_gps(void);
 
@@ -93,11 +93,11 @@ namespace NsRPC2Communication
 
       void reset_vin(void);
 
-      bool set_prndl(const NsAppLinkRPCV2::PRNDL& prndl);
+      bool set_prndl(const NsSmartDeviceLinkRPCV2::PRNDL& prndl);
 
       void reset_prndl(void);
 
-      bool set_tirePressure(const NsAppLinkRPCV2::TireStatus& tirePressure);
+      bool set_tirePressure(const NsSmartDeviceLinkRPCV2::TireStatus& tirePressure);
 
       void reset_tirePressure(void);
 
@@ -141,7 +141,7 @@ namespace NsRPC2Communication
 
       friend class OnVehicleDataMarshaller;
 
-      NsAppLinkRPCV2::GPSData* gps;
+      NsSmartDeviceLinkRPCV2::GPSData* gps;
       float* speed;
       unsigned int* rpm;
       float* fuelLevel;
@@ -149,8 +149,8 @@ namespace NsRPC2Communication
       float* batteryVoltage;
       float* externalTemperature;
       std::string* vin;
-      NsAppLinkRPCV2::PRNDL* prndl;
-      NsAppLinkRPCV2::TireStatus* tirePressure;
+      NsSmartDeviceLinkRPCV2::PRNDL* prndl;
+      NsSmartDeviceLinkRPCV2::TireStatus* tirePressure;
       float* batteryPackVoltage;
       float* batteryPackCurrent;
       int* batteryPackTemperature;

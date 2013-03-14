@@ -4,8 +4,8 @@
 #include <vector>
 #include "JSONHandler/RPC2Response.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/ButtonCapabilities.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/PresetBankCapabilities.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/ButtonCapabilities.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/PresetBankCapabilities.h"
 
 /*
   interface	NsRPC2Communication::Buttons
@@ -34,15 +34,15 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const std::vector< NsAppLinkRPCV2::ButtonCapabilities>& get_capabilities(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::ButtonCapabilities>& get_capabilities(void);
 
-      const NsAppLinkRPCV2::PresetBankCapabilities* get_presetBankCapabilities(void);
+      const NsSmartDeviceLinkRPCV2::PresetBankCapabilities* get_presetBankCapabilities(void);
 
 // setters
 /// 1 <= size <= 100
-      bool set_capabilities(const std::vector< NsAppLinkRPCV2::ButtonCapabilities>& capabilities);
+      bool set_capabilities(const std::vector< NsSmartDeviceLinkRPCV2::ButtonCapabilities>& capabilities);
 
-      bool set_presetBankCapabilities(const NsAppLinkRPCV2::PresetBankCapabilities& presetBankCapabilities);
+      bool set_presetBankCapabilities(const NsSmartDeviceLinkRPCV2::PresetBankCapabilities& presetBankCapabilities);
 
       void reset_presetBankCapabilities(void);
 
@@ -51,8 +51,8 @@ namespace NsRPC2Communication
 
       friend class GetCapabilitiesResponseMarshaller;
 
-      std::vector< NsAppLinkRPCV2::ButtonCapabilities> capabilities;
-      NsAppLinkRPCV2::PresetBankCapabilities* presetBankCapabilities;
+      std::vector< NsSmartDeviceLinkRPCV2::ButtonCapabilities> capabilities;
+      NsSmartDeviceLinkRPCV2::PresetBankCapabilities* presetBankCapabilities;
 
     };
   }

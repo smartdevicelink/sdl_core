@@ -110,7 +110,7 @@ RPC(address, port, std::string("AppLinkCoreClient"))
           case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPREGISTERED:
           {
               LOG4CPLUS_INFO_EXT(mLogger, " An OnAppRegistered notification has been income");
-              NsRPC2Communication::AppLinkCore::OnAppRegistered * object = (NsRPC2Communication::AppLinkCore::OnAppRegistered*)msg;
+              NsRPC2Communication::BasicCommunication::OnAppRegistered * object = (NsRPC2Communication::BasicCommunication::OnAppRegistered*)msg;
               Application* app = new Application(object->get_appName());
               app->setDeviceName(object->get_deviceName());
               app->setIcon(object->get_appIcon());
@@ -126,14 +126,14 @@ RPC(address, port, std::string("AppLinkCoreClient"))
           case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPUNREGISTERED:
           {
               LOG4CPLUS_INFO_EXT(mLogger, " An OnAppUnregistered notification has been income");
-              NsRPC2Communication::AppLinkCore::OnAppUnregistered * object = (NsRPC2Communication::AppLinkCore::OnAppUnregistered*)msg;
+              NsRPC2Communication::BasicCommunication::OnAppUnregistered * object = (NsRPC2Communication::BasicCommunication::OnAppUnregistered*)msg;
               rc.removeApplication(object->get_appName());
               return;
           }
           case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPPRESPONSE:
           {
               LOG4CPLUS_INFO_EXT(mLogger, "ActivateApp response has been received!");
-              NsRPC2Communication::AppLinkCore::ActivateAppResponse* object = static_cast<NsRPC2Communication::AppLinkCore::ActivateAppResponse*>(msg);
+              NsRPC2Communication::BasicCommunication::ActivateAppResponse* object = static_cast<NsRPC2Communication::BasicCommunication::ActivateAppResponse*>(msg);
               if ( !object )
               {
                   LOG4CPLUS_ERROR_EXT(mLogger, "Couldn't cast object to ActivateApp type");
@@ -145,14 +145,14 @@ RPC(address, port, std::string("AppLinkCoreClient"))
           case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATARESPONSE:
           {
               LOG4CPLUS_INFO_EXT(mLogger, "SendData response has been received!");
-              NsRPC2Communication::AppLinkCore::SendDataResponse* object = static_cast<NsRPC2Communication::AppLinkCore::SendDataResponse*>(msg);
+              NsRPC2Communication::BasicCommunication::SendDataResponse* object = static_cast<NsRPC2Communication::BasicCommunication::SendDataResponse*>(msg);
               LOG4CPLUS_INFO_EXT(mLogger, "Result " << object->getResult());
               return;
           }
           case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLISTRESPONSE:
           {
               LOG4CPLUS_INFO_EXT(mLogger, "GetAppList response has been received!");
-              NsRPC2Communication::AppLinkCore::GetAppListResponse* object = static_cast<NsRPC2Communication::AppLinkCore::GetAppListResponse*>(msg);
+              NsRPC2Communication::BasicCommunication::GetAppListResponse* object = static_cast<NsRPC2Communication::BasicCommunication::GetAppListResponse*>(msg);
               LOG4CPLUS_INFO_EXT(mLogger, "Found " << object->get_appList().size() << " applications!");
               return;
           }

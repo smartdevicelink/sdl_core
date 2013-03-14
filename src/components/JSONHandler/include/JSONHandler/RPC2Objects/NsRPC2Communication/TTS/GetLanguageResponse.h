@@ -3,7 +3,7 @@
 
 #include "JSONHandler/RPC2Response.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/Language.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/Language.h"
 
 /*
   interface	NsRPC2Communication::TTS
@@ -32,18 +32,18 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const NsAppLinkRPCV2::Language& get_language(void);
+      const NsSmartDeviceLinkRPCV2::Language& get_language(void);
 
 
 // setters
-      bool set_language(const NsAppLinkRPCV2::Language& language);
+      bool set_language(const NsSmartDeviceLinkRPCV2::Language& language);
 
 
     private:
 
       friend class GetLanguageResponseMarshaller;
 
-      NsAppLinkRPCV2::Language language;
+      NsSmartDeviceLinkRPCV2::Language language;
 
     };
   }

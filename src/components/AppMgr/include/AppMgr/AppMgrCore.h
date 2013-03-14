@@ -13,28 +13,28 @@
 #include "AppMgr/SyncPManager.h"
 #include "AppMgr/DeviceList.h"
 #include "AppMgr/DeviceHandler.h"
-#include "JSONHandler/ALRPCObjects/V2/DisplayCapabilities.h"
-#include "JSONHandler/ALRPCObjects/V2/OnDriverDistraction.h"
+#include "JSONHandler/SDLRPCObjects/V2/DisplayCapabilities.h"
+#include "JSONHandler/SDLRPCObjects/V2/OnDriverDistraction.h"
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/OnButtonEvent.h"
 #include "JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/OnButtonPress.h"
-#include "JSONHandler/ALRPCObjects/V2/VehicleType.h"
-#include "JSONHandler/ALRPCObjects/V1/Language.h"
-#include "JSONHandler/ALRPCObjects/V2/Language.h"
+#include "JSONHandler/SDLRPCObjects/V2/VehicleType.h"
+#include "JSONHandler/SDLRPCObjects/V1/Language.h"
+#include "JSONHandler/SDLRPCObjects/V2/Language.h"
 #include "AppMgr/MessageChaining.hpp"
 #include "AppMgr/DeviceStorage.hpp"
 
-namespace NsAppLinkRPC
+namespace NsSmartDeviceLinkRPC
 {
-    class ALRPCMessage;
+    class SDLRPCMessage;
 }
 class JSONHandler;
 class JSONRPC2Handler;
 
-namespace NsAppLinkRPC
+namespace NsSmartDeviceLinkRPC
 {
     class RegisterAppInterface_request;
     class OnDriverDistraction;
-    class ALRPCRequest;
+    class SDLRPCRequest;
 }
 
 namespace NsRPC2Communication
@@ -61,7 +61,7 @@ namespace NsAppManager
     /**
      * \brief a connection between a mobile RPC message and a session
      */
-    typedef std::pair<NsAppLinkRPC::ALRPCMessage*, int> Message;
+    typedef std::pair<NsSmartDeviceLinkRPC::SDLRPCMessage*, int> Message;
 
     /**
      * \brief a list of device names
@@ -96,7 +96,7 @@ namespace NsAppManager
          * \brief push mobile RPC message to a queue
          * \param message a message to be pushed
          */
-        void pushMobileRPCMessage(NsAppLinkRPC::ALRPCMessage * message , int appId);
+        void pushMobileRPCMessage(NsSmartDeviceLinkRPC::SDLRPCMessage * message , int appId);
 
         /**
          * \brief push HMI RPC2 message to a queue
@@ -232,7 +232,7 @@ namespace NsAppManager
          * \param sessionID an id of the session which will be associated with the application
          * \return A instance of RegistryItem created for application
          */
-        const Application* registerApplication(NsAppLinkRPC::ALRPCMessage *request , int sessionKey);
+        const Application* registerApplication(NsSmartDeviceLinkRPC::SDLRPCMessage *request , int sessionKey);
 
         /**
          * \brief unregister an application associated with the given session
@@ -299,18 +299,18 @@ namespace NsAppManager
         AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
         AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
-        //CapabilitiesContainer<NsAppLinkRPC::ButtonCapabilities> mButtonCapabilitiesV1;
-        CapabilitiesContainer<NsAppLinkRPCV2::ButtonCapabilities> mButtonCapabilitiesV2;
-        NsAppLinkRPC::DisplayCapabilities mDisplayCapabilitiesV1;
-        NsAppLinkRPCV2::DisplayCapabilities mDisplayCapabilitiesV2;
-        NsAppLinkRPCV2::PresetBankCapabilities mPresetBankCapabilities;
-        //CapabilitiesContainer<NsAppLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilitiesV1;
-        CapabilitiesContainer<NsAppLinkRPCV2::HmiZoneCapabilities> mHmiZoneCapabilitiesV2;
-        //CapabilitiesContainer<NsAppLinkRPC::VrCapabilities> mVrCapabilitiesV1;
-        //CapabilitiesContainer<NsAppLinkRPC::SpeechCapabilities> mSpeechCapabilitiesV1;
-        CapabilitiesContainer<NsAppLinkRPCV2::VrCapabilities> mVrCapabilitiesV2;
-        CapabilitiesContainer<NsAppLinkRPCV2::SpeechCapabilities> mSpeechCapabilitiesV2;
-        CapabilitiesContainer<NsAppLinkRPCV2::SoftButtonCapabilities> mSoftButtonCapabilities;
+        //CapabilitiesContainer<NsSmartDeviceLinkRPC::ButtonCapabilities> mButtonCapabilitiesV1;
+        CapabilitiesContainer<NsSmartDeviceLinkRPCV2::ButtonCapabilities> mButtonCapabilitiesV2;
+        NsSmartDeviceLinkRPC::DisplayCapabilities mDisplayCapabilitiesV1;
+        NsSmartDeviceLinkRPCV2::DisplayCapabilities mDisplayCapabilitiesV2;
+        NsSmartDeviceLinkRPCV2::PresetBankCapabilities mPresetBankCapabilities;
+        //CapabilitiesContainer<NsSmartDeviceLinkRPC::HmiZoneCapabilities> mHmiZoneCapabilitiesV1;
+        CapabilitiesContainer<NsSmartDeviceLinkRPCV2::HmiZoneCapabilities> mHmiZoneCapabilitiesV2;
+        //CapabilitiesContainer<NsSmartDeviceLinkRPC::VrCapabilities> mVrCapabilitiesV1;
+        //CapabilitiesContainer<NsSmartDeviceLinkRPC::SpeechCapabilities> mSpeechCapabilitiesV1;
+        CapabilitiesContainer<NsSmartDeviceLinkRPCV2::VrCapabilities> mVrCapabilitiesV2;
+        CapabilitiesContainer<NsSmartDeviceLinkRPCV2::SpeechCapabilities> mSpeechCapabilitiesV2;
+        CapabilitiesContainer<NsSmartDeviceLinkRPCV2::SoftButtonCapabilities> mSoftButtonCapabilities;
         ButtonMapping       mButtonsMapping;
         VehicleDataMapping  mVehicleDataMapping;
         //MessageMapping      mMessageMapping;
@@ -320,20 +320,20 @@ namespace NsAppManager
 
         MessageChains mMessageChaining;
 
-        NsAppLinkRPC::OnDriverDistraction* mDriverDistractionV1;
-        NsAppLinkRPCV2::OnDriverDistraction* mDriverDistractionV2;
+        NsSmartDeviceLinkRPC::OnDriverDistraction* mDriverDistractionV1;
+        NsSmartDeviceLinkRPCV2::OnDriverDistraction* mDriverDistractionV2;
 
-        NsAppLinkRPC::Language mUiLanguageV1;
-        NsAppLinkRPC::Language mVrLanguageV1;
-        NsAppLinkRPC::Language mTtsLanguageV1;
-        NsAppLinkRPCV2::Language mUiLanguageV2;
-        NsAppLinkRPCV2::Language mVrLanguageV2;
-        NsAppLinkRPCV2::Language mTtsLanguageV2;
-        std::vector<NsAppLinkRPCV2::Language> mUISupportedLanguages;
-        std::vector<NsAppLinkRPCV2::Language> mVRSupportedLanguages;
-        std::vector<NsAppLinkRPCV2::Language> mTTSSupportedLanguages;
+        NsSmartDeviceLinkRPC::Language mUiLanguageV1;
+        NsSmartDeviceLinkRPC::Language mVrLanguageV1;
+        NsSmartDeviceLinkRPC::Language mTtsLanguageV1;
+        NsSmartDeviceLinkRPCV2::Language mUiLanguageV2;
+        NsSmartDeviceLinkRPCV2::Language mVrLanguageV2;
+        NsSmartDeviceLinkRPCV2::Language mTtsLanguageV2;
+        std::vector<NsSmartDeviceLinkRPCV2::Language> mUISupportedLanguages;
+        std::vector<NsSmartDeviceLinkRPCV2::Language> mVRSupportedLanguages;
+        std::vector<NsSmartDeviceLinkRPCV2::Language> mTTSSupportedLanguages;
 
-        NsAppLinkRPCV2::VehicleType mVehicleType;
+        NsSmartDeviceLinkRPCV2::VehicleType mVehicleType;
         bool mAudioPassThruFlag;
         int mPerformInteractionFlag;
         int mHMIStartupFlag;

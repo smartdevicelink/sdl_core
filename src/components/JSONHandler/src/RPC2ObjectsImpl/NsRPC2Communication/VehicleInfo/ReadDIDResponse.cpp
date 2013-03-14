@@ -15,7 +15,7 @@ using namespace NsRPC2Communication::VehicleInfo;
 ReadDIDResponse& ReadDIDResponse::operator =(const ReadDIDResponse& c)
 {
   if(dataResult)  delete dataResult;
-  dataResult= c.dataResult ? new std::vector<NsAppLinkRPCV2::VehicleDataResultCode>(c.dataResult[0]) : 0;
+  dataResult= c.dataResult ? new std::vector<NsSmartDeviceLinkRPCV2::VehicleDataResultCode>(c.dataResult[0]) : 0;
   if(data)  delete data;
   data= c.data ? new std::vector<std::string>(c.data[0]) : 0;
   return *this;
@@ -43,15 +43,15 @@ ReadDIDResponse::ReadDIDResponse(const ReadDIDResponse& c) : RPC2Response(Marsha
 }
 
 
-const std::vector< NsAppLinkRPCV2::VehicleDataResultCode>* ReadDIDResponse::get_dataResult(void)
+const std::vector< NsSmartDeviceLinkRPCV2::VehicleDataResultCode>* ReadDIDResponse::get_dataResult(void)
 {
   return dataResult;
 }
 
-bool ReadDIDResponse::set_dataResult(const std::vector< NsAppLinkRPCV2::VehicleDataResultCode>& dataResult_)
+bool ReadDIDResponse::set_dataResult(const std::vector< NsSmartDeviceLinkRPCV2::VehicleDataResultCode>& dataResult_)
 {
   if(dataResult)  delete dataResult;
-  dataResult=new std::vector< NsAppLinkRPCV2::VehicleDataResultCode>(dataResult_);
+  dataResult=new std::vector< NsSmartDeviceLinkRPCV2::VehicleDataResultCode>(dataResult_);
   return true;
 }
 

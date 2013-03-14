@@ -3,7 +3,7 @@
 
 #include "JSONHandler/RPC2Notification.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/TBTState.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/TBTState.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -32,17 +32,17 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
 
 // getters
-      const NsAppLinkRPCV2::TBTState& get_state(void);
+      const NsSmartDeviceLinkRPCV2::TBTState& get_state(void);
       int get_appId(void);
 
 // setters
-      bool set_state(const NsAppLinkRPCV2::TBTState& state);
+      bool set_state(const NsSmartDeviceLinkRPCV2::TBTState& state);
       bool set_appId(int appId);
 
     private:
       friend class OnTBTClientStateMarshaller;
 
-      NsAppLinkRPCV2::TBTState state;
+      NsSmartDeviceLinkRPCV2::TBTState state;
       int appId;
 
     };

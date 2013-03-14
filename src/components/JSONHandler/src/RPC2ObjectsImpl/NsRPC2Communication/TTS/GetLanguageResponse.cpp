@@ -36,12 +36,12 @@ GetLanguageResponse::GetLanguageResponse(const GetLanguageResponse& c) : RPC2Res
 }
 
 
-const NsAppLinkRPCV2::Language& GetLanguageResponse::get_language(void)
+const NsSmartDeviceLinkRPCV2::Language& GetLanguageResponse::get_language(void)
 {
   return language;
 }
 
-bool GetLanguageResponse::set_language(const NsAppLinkRPCV2::Language& language_)
+bool GetLanguageResponse::set_language(const NsSmartDeviceLinkRPCV2::Language& language_)
 {
   language=language_;
   return true;

@@ -5,7 +5,7 @@
 
 namespace NsTest
 {
-    typedef void (*OnMobileMessageReceived)(const NsAppLinkRPC::ALRPCMessage*, int, unsigned char);
+    typedef void (*OnMobileMessageReceived)(const NsSmartDeviceLinkRPC::SDLRPCMessage*, int, unsigned char);
 
     /**
      * \brief The TestEnvironment class acts as a main spot of sending/receiving mobile RPC messages
@@ -25,7 +25,7 @@ namespace NsTest
          * \param connectionId ID of the connection the message was received within.
          * \param sessionId ID of the session the message was received within.
          */
-        void sendRPCMessageToHmi(NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId );
+        void sendRPCMessageToHmi(NsSmartDeviceLinkRPC::SDLRPCMessage *message, int connectionId, unsigned char sessionId );
 
         /**
          * \brief Gets invoked upon a mobile RPC message gets received from HMI
@@ -33,7 +33,7 @@ namespace NsTest
          * \param connectionId ID of the connection the message was received within.
          * \param sessionId ID of the session the message was received within.
          */
-        virtual void messageReceivedFromHmiCallback( const NsAppLinkRPC::ALRPCMessage * message, int connectionId, unsigned char sessionId );
+        virtual void messageReceivedFromHmiCallback( const NsSmartDeviceLinkRPC::SDLRPCMessage * message, int connectionId, unsigned char sessionId );
 
         /**
          * \brief Register a callback function to be called upon a new mobile message from HMI arrival

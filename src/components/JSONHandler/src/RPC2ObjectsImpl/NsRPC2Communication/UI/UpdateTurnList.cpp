@@ -38,23 +38,23 @@ UpdateTurnList::UpdateTurnList(const UpdateTurnList& c) : RPC2Request(Marshaller
 }
 
 
-const std::vector< NsAppLinkRPCV2::Turn>& UpdateTurnList::get_turnList(void)
+const std::vector< NsSmartDeviceLinkRPCV2::Turn>& UpdateTurnList::get_turnList(void)
 {
   return turnList;
 }
 
-bool UpdateTurnList::set_turnList(const std::vector< NsAppLinkRPCV2::Turn>& turnList_)
+bool UpdateTurnList::set_turnList(const std::vector< NsSmartDeviceLinkRPCV2::Turn>& turnList_)
 {
   turnList=turnList_;
   return true;
 }
 
-const std::vector< NsAppLinkRPCV2::SoftButton>& UpdateTurnList::get_softButtons(void)
+const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& UpdateTurnList::get_softButtons(void)
 {
   return softButtons;
 }
 
-bool UpdateTurnList::set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons_)
+bool UpdateTurnList::set_softButtons(const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& softButtons_)
 {
   softButtons=softButtons_;
   return true;

@@ -1,5 +1,5 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/GetCapabilities.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/GetCapabilitiesMarshaller.h"
 
 /*

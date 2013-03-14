@@ -21,13 +21,13 @@ Alert& Alert::operator =(const Alert& c)
   if(AlertText3)  delete AlertText3;
   AlertText3= c.AlertText3 ? new std::string(c.AlertText3[0]) : 0;
   if(ttsChunks)  delete ttsChunks;
-  ttsChunks= c.ttsChunks ? new std::vector<NsAppLinkRPCV2::TTSChunk>(c.ttsChunks[0]) : 0;
+  ttsChunks= c.ttsChunks ? new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>(c.ttsChunks[0]) : 0;
   if(duration)  delete duration;
   duration= c.duration ? new unsigned int(c.duration[0]) : 0;
   if(playTone)  delete playTone;
   playTone= c.playTone ? new bool(c.playTone[0]) : 0;
   if(softButtons)  delete softButtons;
-  softButtons= c.softButtons ? new std::vector<NsAppLinkRPCV2::SoftButton>(c.softButtons[0]) : 0;
+  softButtons= c.softButtons ? new std::vector<NsSmartDeviceLinkRPCV2::SoftButton>(c.softButtons[0]) : 0;
   appId=c.appId;
   return *this;
 }
@@ -118,15 +118,15 @@ void Alert::reset_AlertText3(void)
   AlertText3=0;
 }
 
-const std::vector< NsAppLinkRPCV2::TTSChunk>* Alert::get_ttsChunks(void)
+const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* Alert::get_ttsChunks(void)
 {
   return ttsChunks;
 }
 
-bool Alert::set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks_)
+bool Alert::set_ttsChunks(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& ttsChunks_)
 {
   if(ttsChunks)  delete ttsChunks;
-  ttsChunks=new std::vector< NsAppLinkRPCV2::TTSChunk>(ttsChunks_);
+  ttsChunks=new std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>(ttsChunks_);
   return true;
 }
 
@@ -172,15 +172,15 @@ void Alert::reset_playTone(void)
   playTone=0;
 }
 
-const std::vector< NsAppLinkRPCV2::SoftButton>* Alert::get_softButtons(void)
+const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>* Alert::get_softButtons(void)
 {
   return softButtons;
 }
 
-bool Alert::set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons_)
+bool Alert::set_softButtons(const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& softButtons_)
 {
   if(softButtons)  delete softButtons;
-  softButtons=new std::vector< NsAppLinkRPCV2::SoftButton>(softButtons_);
+  softButtons=new std::vector< NsSmartDeviceLinkRPCV2::SoftButton>(softButtons_);
   return true;
 }
 

@@ -15,13 +15,13 @@ using namespace NsRPC2Communication::UI;
 SetGlobalProperties& SetGlobalProperties::operator =(const SetGlobalProperties& c)
 {
   if(helpPrompt)  delete helpPrompt;
-  helpPrompt= c.helpPrompt ? new std::vector<NsAppLinkRPCV2::TTSChunk>(c.helpPrompt[0]) : 0;
+  helpPrompt= c.helpPrompt ? new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>(c.helpPrompt[0]) : 0;
   if(timeoutPrompt)  delete timeoutPrompt;
-  timeoutPrompt= c.timeoutPrompt ? new std::vector<NsAppLinkRPCV2::TTSChunk>(c.timeoutPrompt[0]) : 0;
+  timeoutPrompt= c.timeoutPrompt ? new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>(c.timeoutPrompt[0]) : 0;
   if(vrHelpTitle)  delete vrHelpTitle;
   vrHelpTitle= c.vrHelpTitle ? new std::string(c.vrHelpTitle[0]) : 0;
   if(vrHelp)  delete vrHelp;
-  vrHelp= c.vrHelp ? new std::vector<NsAppLinkRPCV2::VrHelpItem>(c.vrHelp[0]) : 0;
+  vrHelp= c.vrHelp ? new std::vector<NsSmartDeviceLinkRPCV2::VrHelpItem>(c.vrHelp[0]) : 0;
   appId=c.appId;
   return *this;
 }
@@ -52,15 +52,15 @@ SetGlobalProperties::SetGlobalProperties(const SetGlobalProperties& c) : RPC2Req
 }
 
 
-const std::vector< NsAppLinkRPCV2::TTSChunk>* SetGlobalProperties::get_helpPrompt(void)
+const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* SetGlobalProperties::get_helpPrompt(void)
 {
   return helpPrompt;
 }
 
-bool SetGlobalProperties::set_helpPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& helpPrompt_)
+bool SetGlobalProperties::set_helpPrompt(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& helpPrompt_)
 {
   if(helpPrompt)  delete helpPrompt;
-  helpPrompt=new std::vector< NsAppLinkRPCV2::TTSChunk>(helpPrompt_);
+  helpPrompt=new std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>(helpPrompt_);
   return true;
 }
 
@@ -70,15 +70,15 @@ void SetGlobalProperties::reset_helpPrompt(void)
   helpPrompt=0;
 }
 
-const std::vector< NsAppLinkRPCV2::TTSChunk>* SetGlobalProperties::get_timeoutPrompt(void)
+const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* SetGlobalProperties::get_timeoutPrompt(void)
 {
   return timeoutPrompt;
 }
 
-bool SetGlobalProperties::set_timeoutPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& timeoutPrompt_)
+bool SetGlobalProperties::set_timeoutPrompt(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& timeoutPrompt_)
 {
   if(timeoutPrompt)  delete timeoutPrompt;
-  timeoutPrompt=new std::vector< NsAppLinkRPCV2::TTSChunk>(timeoutPrompt_);
+  timeoutPrompt=new std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>(timeoutPrompt_);
   return true;
 }
 
@@ -106,15 +106,15 @@ void SetGlobalProperties::reset_vrHelpTitle(void)
   vrHelpTitle=0;
 }
 
-const std::vector< NsAppLinkRPCV2::VrHelpItem>* SetGlobalProperties::get_vrHelp(void)
+const std::vector< NsSmartDeviceLinkRPCV2::VrHelpItem>* SetGlobalProperties::get_vrHelp(void)
 {
   return vrHelp;
 }
 
-bool SetGlobalProperties::set_vrHelp(const std::vector< NsAppLinkRPCV2::VrHelpItem>& vrHelp_)
+bool SetGlobalProperties::set_vrHelp(const std::vector< NsSmartDeviceLinkRPCV2::VrHelpItem>& vrHelp_)
 {
   if(vrHelp)  delete vrHelp;
-  vrHelp=new std::vector< NsAppLinkRPCV2::VrHelpItem>(vrHelp_);
+  vrHelp=new std::vector< NsSmartDeviceLinkRPCV2::VrHelpItem>(vrHelp_);
   return true;
 }
 

@@ -36,12 +36,12 @@ OnLanguageChange::OnLanguageChange(const OnLanguageChange& c) : RPC2Notification
 }
 
 
-const NsAppLinkRPCV2::Language& OnLanguageChange::get_language(void)
+const NsSmartDeviceLinkRPCV2::Language& OnLanguageChange::get_language(void)
 {
   return language;
 }
 
-bool OnLanguageChange::set_language(const NsAppLinkRPCV2::Language& language_)
+bool OnLanguageChange::set_language(const NsSmartDeviceLinkRPCV2::Language& language_)
 {
   language=language_;
   return true;

@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/VehicleInfo/GetVehicleData.h"
-#include "../src/ALRPCObjectsImpl/V2/VehicleDataTypeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/VehicleDataTypeMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetVehicleDataMarshaller.h"
 
 /*
@@ -45,7 +45,7 @@ const std::string GetVehicleDataMarshaller::toString(const GetVehicleData& e)
 
 bool GetVehicleDataMarshaller::checkIntegrityConst(const GetVehicleData& s)
 {
-  if(!NsAppLinkRPCV2::VehicleDataTypeMarshaller::checkIntegrityConst(s.dataType))  return false;
+  if(!NsSmartDeviceLinkRPCV2::VehicleDataTypeMarshaller::checkIntegrityConst(s.dataType))  return false;
 
   return true;
 }
@@ -62,7 +62,7 @@ Json::Value GetVehicleDataMarshaller::toJSON(const GetVehicleData& e)
 
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
-  json["params"]["dataType"]=NsAppLinkRPCV2::VehicleDataTypeMarshaller::toJSON(e.dataType);;
+  json["params"]["dataType"]=NsSmartDeviceLinkRPCV2::VehicleDataTypeMarshaller::toJSON(e.dataType);;
   json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
@@ -82,7 +82,7 @@ bool GetVehicleDataMarshaller::fromJSON(const Json::Value& json,GetVehicleData& 
 
     Json::Value js=json["params"];
     if(!js.isObject())  return false;
-    if(!js.isMember("dataType") || !NsAppLinkRPCV2::VehicleDataTypeMarshaller::fromJSON(js["dataType"],c.dataType))  return false;
+    if(!js.isMember("dataType") || !NsSmartDeviceLinkRPCV2::VehicleDataTypeMarshaller::fromJSON(js["dataType"],c.dataType))  return false;
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;
     c.appId=js["appId"].asInt();

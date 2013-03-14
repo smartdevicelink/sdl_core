@@ -3,7 +3,7 @@
 
 #include "JSONHandler/RPC2Notification.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/SystemContext.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/SystemContext.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -32,18 +32,18 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const NsAppLinkRPCV2::SystemContext& get_systemContext(void);
+      const NsSmartDeviceLinkRPCV2::SystemContext& get_systemContext(void);
 
 
 // setters
-      bool set_systemContext(const NsAppLinkRPCV2::SystemContext& systemContext);
+      bool set_systemContext(const NsSmartDeviceLinkRPCV2::SystemContext& systemContext);
 
 
     private:
 
       friend class OnSystemContextMarshaller;
 
-      NsAppLinkRPCV2::SystemContext systemContext;
+      NsSmartDeviceLinkRPCV2::SystemContext systemContext;
 
     };
   }

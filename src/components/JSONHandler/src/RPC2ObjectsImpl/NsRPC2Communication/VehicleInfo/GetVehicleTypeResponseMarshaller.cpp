@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/VehicleInfo/GetVehicleTypeResponse.h"
-#include "../src/ALRPCObjectsImpl/V2/VehicleTypeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/VehicleTypeMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetVehicleTypeResponseMarshaller.h"
 
 /*
@@ -45,7 +45,7 @@ const std::string GetVehicleTypeResponseMarshaller::toString(const GetVehicleTyp
 
 bool GetVehicleTypeResponseMarshaller::checkIntegrityConst(const GetVehicleTypeResponse& s)
 {
-  if(!NsAppLinkRPCV2::VehicleTypeMarshaller::checkIntegrityConst(s.vehicleType))  return false;
+  if(!NsSmartDeviceLinkRPCV2::VehicleTypeMarshaller::checkIntegrityConst(s.vehicleType))  return false;
 
   return true;
 }
@@ -60,11 +60,11 @@ Json::Value GetVehicleTypeResponseMarshaller::toJSON(const GetVehicleTypeRespons
   json["jsonrpc"]=Json::Value("2.0");
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
-  NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
-  json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
+  NsSmartDeviceLinkRPCV2::Result r(static_cast<NsSmartDeviceLinkRPCV2::Result::ResultInternal>(e.getResult()));
+  json["result"]["resultCode"]=NsSmartDeviceLinkRPCV2::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("VehicleInfo.GetVehicleTypeResponse");
 
-  json["result"]["vehicleType"]=NsAppLinkRPCV2::VehicleTypeMarshaller::toJSON(e.vehicleType);;
+  json["result"]["vehicleType"]=NsSmartDeviceLinkRPCV2::VehicleTypeMarshaller::toJSON(e.vehicleType);;
   return json;
 }
 
@@ -83,14 +83,14 @@ bool GetVehicleTypeResponseMarshaller::fromJSON(const Json::Value& json,GetVehic
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    NsAppLinkRPCV2::Result r;
+    NsSmartDeviceLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("VehicleInfo.GetVehicleTypeResponse")) return false;
 
-    if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
+    if(!NsSmartDeviceLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
-    if(!js.isMember("vehicleType") || !NsAppLinkRPCV2::VehicleTypeMarshaller::fromJSON(js["vehicleType"],c.vehicleType))  return false;
+    if(!js.isMember("vehicleType") || !NsSmartDeviceLinkRPCV2::VehicleTypeMarshaller::fromJSON(js["vehicleType"],c.vehicleType))  return false;
 
   }
   catch(...)

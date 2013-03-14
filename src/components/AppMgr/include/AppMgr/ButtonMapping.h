@@ -6,8 +6,8 @@
 #define BUTTONMAPPING_H
 
 #include <map>
-#include "JSONHandler/ALRPCObjects/V1/ButtonName.h"
-#include "JSONHandler/ALRPCObjects/V2/ButtonName.h"
+#include "JSONHandler/SDLRPCObjects/V1/ButtonName.h"
+#include "JSONHandler/SDLRPCObjects/V2/ButtonName.h"
 #include "AppMgr/Application.h"
 
 namespace log4cplus
@@ -24,18 +24,18 @@ namespace NsAppManager
      * \brief Comparer acts as a comparer that allows to create std::map with NsAppLinkRPC::ButtonName as a key
      */
     struct Comparer {
-        bool operator() (const NsAppLinkRPCV2::ButtonName &b1, const NsAppLinkRPCV2::ButtonName &b2) const;
+        bool operator() (const NsSmartDeviceLinkRPCV2::ButtonName &b1, const NsSmartDeviceLinkRPCV2::ButtonName &b2) const;
     };
 
     /**
      * \brief a button_name-registered-app map
      */
-    typedef std::multimap<NsAppLinkRPCV2::ButtonName, Application*, Comparer> ButtonMap;
+    typedef std::multimap<NsSmartDeviceLinkRPCV2::ButtonName, Application*, Comparer> ButtonMap;
 
     /**
      * \brief a button_name-registered-app map item
      */
-    typedef std::pair<NsAppLinkRPCV2::ButtonName, Application*> ButtonMapItem;
+    typedef std::pair<NsSmartDeviceLinkRPCV2::ButtonName, Application*> ButtonMapItem;
 
     /**
       *\brief Iterators of beginning and end of result range
@@ -64,13 +64,13 @@ namespace NsAppManager
          * \param buttonName button name
          * \param app application to map a button to
          */
-        void addButton( const NsAppLinkRPCV2::ButtonName& buttonName, Application* app );
+        void addButton( const NsSmartDeviceLinkRPCV2::ButtonName& buttonName, Application* app );
 
         /**
          * \brief remove a button from a mapping
          * \param buttonName button name
          */
-        void removeButton(const NsAppLinkRPCV2::ButtonName& buttonName, Application * item);
+        void removeButton(const NsSmartDeviceLinkRPCV2::ButtonName& buttonName, Application * item);
 
         /**
          * \brief remove an application from a mapping
@@ -88,16 +88,16 @@ namespace NsAppManager
          * \param btnName button name
          * \return Application instance
          */
-        Application *findRegistryItemSubscribedToButton(const NsAppLinkRPCV2::ButtonName &btnName) const;
+        Application *findRegistryItemSubscribedToButton(const NsSmartDeviceLinkRPCV2::ButtonName &btnName) const;
 
         /**
          * \brief Find all apps subscribed to button
          * \param btnName Button name
          * \return @ResultRange Results range
          */
-        ResultRange findSubscribedToButton(const NsAppLinkRPCV2::ButtonName &btnName) const;
+        ResultRange findSubscribedToButton(const NsSmartDeviceLinkRPCV2::ButtonName &btnName) const;
 
-        bool exist(const NsAppLinkRPCV2::ButtonName& buttonName, Application* item);
+        bool exist(const NsSmartDeviceLinkRPCV2::ButtonName& buttonName, Application* item);
     private:
 
         /**

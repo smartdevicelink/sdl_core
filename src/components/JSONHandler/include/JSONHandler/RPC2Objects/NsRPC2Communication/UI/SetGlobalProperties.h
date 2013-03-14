@@ -5,9 +5,9 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/VrHelpItem.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/TTSChunk.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/TTSChunk.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/VrHelpItem.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -36,21 +36,21 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const std::vector< NsAppLinkRPCV2::TTSChunk>* get_helpPrompt(void);
-      const std::vector< NsAppLinkRPCV2::TTSChunk>* get_timeoutPrompt(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* get_helpPrompt(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* get_timeoutPrompt(void);
       const std::string* get_vrHelpTitle(void);
-      const std::vector< NsAppLinkRPCV2::VrHelpItem>* get_vrHelp(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::VrHelpItem>* get_vrHelp(void);
       int get_appId(void);
 
 
 // setters
 /// 1 <= size <= 100
-      bool set_helpPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& helpPrompt);
+      bool set_helpPrompt(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& helpPrompt);
 
       void reset_helpPrompt(void);
 
 /// 1 <= size <= 100
-      bool set_timeoutPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& timeoutPrompt);
+      bool set_timeoutPrompt(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& timeoutPrompt);
 
       void reset_timeoutPrompt(void);
 
@@ -60,7 +60,7 @@ namespace NsRPC2Communication
       void reset_vrHelpTitle(void);
 
 /// 1 <= size <= 100
-      bool set_vrHelp(const std::vector< NsAppLinkRPCV2::VrHelpItem>& vrHelp);
+      bool set_vrHelp(const std::vector< NsSmartDeviceLinkRPCV2::VrHelpItem>& vrHelp);
 
       void reset_vrHelp(void);
 
@@ -71,10 +71,10 @@ namespace NsRPC2Communication
 
       friend class SetGlobalPropertiesMarshaller;
 
-      std::vector< NsAppLinkRPCV2::TTSChunk>* helpPrompt;
-      std::vector< NsAppLinkRPCV2::TTSChunk>* timeoutPrompt;
+      std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* helpPrompt;
+      std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* timeoutPrompt;
       std::string* vrHelpTitle;
-      std::vector< NsAppLinkRPCV2::VrHelpItem>* vrHelp;
+      std::vector< NsSmartDeviceLinkRPCV2::VrHelpItem>* vrHelp;
       int appId;
 
     };

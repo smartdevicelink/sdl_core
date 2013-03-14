@@ -78,7 +78,7 @@ namespace NsHMIEmulator
      * \brief set app desired language
      * \param language
      */
-    void Application::setLanguageDesired(const NsAppLinkRPC::Language &language)
+    void Application::setLanguageDesired(const NsSmartDeviceLinkRPC::Language &language)
     {
         mLanguageDesired = language;
     }
@@ -87,7 +87,7 @@ namespace NsHMIEmulator
      * \brief get app desired languages
      * \return app desired languages
      */
-    const NsAppLinkRPC::Language &Application::getLanguageDesired() const
+    const NsSmartDeviceLinkRPC::Language &Application::getLanguageDesired() const
     {
         return mLanguageDesired;
     }

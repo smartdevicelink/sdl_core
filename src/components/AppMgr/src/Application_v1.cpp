@@ -58,7 +58,7 @@ namespace NsAppManager
      * \brief retrieve application desired language
      * \return application desired language
      */
-    const NsAppLinkRPC::Language& Application_v1::getLanguageDesired( ) const
+    const NsSmartDeviceLinkRPC::Language& Application_v1::getLanguageDesired( ) const
     {
         return mLanguageDesired;
     }
@@ -67,7 +67,7 @@ namespace NsAppManager
      * \brief Set application desired languuage
      * \param value application desired language
      */
-    void Application_v1::setLanguageDesired(NsAppLinkRPC::Language value)
+    void Application_v1::setLanguageDesired(NsSmartDeviceLinkRPC::Language value)
     {
         mLanguageDesired = value;
     }
@@ -76,7 +76,7 @@ namespace NsAppManager
      * \brief retrieve application HMI desired display language
      * \return application HMI desired display language
      */
-    const NsAppLinkRPC::Language &Application_v1::getHMIDisplayLanguageDesired() const
+    const NsSmartDeviceLinkRPC::Language &Application_v1::getHMIDisplayLanguageDesired() const
     {
         return mHMIDisplayLanguageDesired;
     }
@@ -85,7 +85,7 @@ namespace NsAppManager
      * \brief Set application HMI desired display language
      * \param value application HMI desired display language
      */
-    void Application_v1::setHMIDisplayLanguageDesired(NsAppLinkRPC::Language value)
+    void Application_v1::setHMIDisplayLanguageDesired(NsSmartDeviceLinkRPC::Language value)
     {
         mHMIDisplayLanguageDesired = value;
     }
@@ -95,7 +95,7 @@ namespace NsAppManager
      * \brief retrieve application sync message version
      * \return application sync msg version
      */
-    const NsAppLinkRPC::SyncMsgVersion& Application_v1::getSyncMsgVersion( ) const
+    const NsSmartDeviceLinkRPC::SyncMsgVersion& Application_v1::getSyncMsgVersion( ) const
     {
         return mSyncMsgVersion;
     }
@@ -104,7 +104,7 @@ namespace NsAppManager
      * \brief Set application sync message version
      * \param value application sync message version
      */
-    void Application_v1::setSyncMsgVersion(NsAppLinkRPC::SyncMsgVersion value)
+    void Application_v1::setSyncMsgVersion(NsSmartDeviceLinkRPC::SyncMsgVersion value)
     {
         mSyncMsgVersion = value;
     }

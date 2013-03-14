@@ -10,8 +10,8 @@
 #include <vector>
 #include <set>
 #include <cstddef>
-#include "JSONHandler/ALRPCObjects/V1/MenuParams.h"
-#include "JSONHandler/ALRPCObjects/V2/MenuParams.h"
+#include "JSONHandler/SDLRPCObjects/V1/MenuParams.h"
+#include "JSONHandler/SDLRPCObjects/V2/MenuParams.h"
 
 namespace log4cplus
 {
@@ -143,8 +143,8 @@ namespace NsAppManager
      */
     union CommandParams
     {
-        const NsAppLinkRPCV2::MenuParams* menuParamsV2;
-        const NsAppLinkRPC::MenuParams* menuParams;
+        const NsSmartDeviceLinkRPCV2::MenuParams* menuParamsV2;
+        const NsSmartDeviceLinkRPC::MenuParams* menuParams;
         const std::vector<std::string>* vrCommands;
     };
 
@@ -179,7 +179,7 @@ namespace NsAppManager
     typedef std::pair<unsigned int, unsigned int> RequestAwaitingResponse;
 
     /**
-     * \brief CommandMapping acts as a mapping of command to const NsAppLinkRPC::MenuParams that are contained in some of them
+     * \brief CommandMapping acts as a mapping of command to const NsSmartDeviceLinkRPC::MenuParams that are contained in some of them
      */
     class CommandMapping
     {

@@ -132,12 +132,12 @@ void ShowConstantTBT::reset_totalDistance(void)
   totalDistance=0;
 }
 
-const NsAppLinkRPCV2::Image& ShowConstantTBT::get_turnIcon(void)
+const NsSmartDeviceLinkRPCV2::Image& ShowConstantTBT::get_turnIcon(void)
 {
   return turnIcon;
 }
 
-bool ShowConstantTBT::set_turnIcon(const NsAppLinkRPCV2::Image& turnIcon_)
+bool ShowConstantTBT::set_turnIcon(const NsSmartDeviceLinkRPCV2::Image& turnIcon_)
 {
   turnIcon=turnIcon_;
   return true;
@@ -183,12 +183,12 @@ void ShowConstantTBT::reset_maneuverComplete(void)
   maneuverComplete=0;
 }
 
-const std::vector< NsAppLinkRPCV2::SoftButton>& ShowConstantTBT::get_softButtons(void)
+const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& ShowConstantTBT::get_softButtons(void)
 {
   return softButtons;
 }
 
-bool ShowConstantTBT::set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons_)
+bool ShowConstantTBT::set_softButtons(const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& softButtons_)
 {
   softButtons=softButtons_;
   return true;

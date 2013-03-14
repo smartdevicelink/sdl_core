@@ -92,7 +92,7 @@ namespace NsHMIEmulator
      * \param id
      * \param menuParams
      */
-    void ResourceContainer::addUiCommand(const unsigned int &id, const NsAppLinkRPC::MenuParams &menuParams)
+    void ResourceContainer::addUiCommand(const unsigned int &id, const NsSmartDeviceLinkRPC::MenuParams &menuParams)
     {
         LOG4CPLUS_INFO_EXT(mLogger, "Adding UI command " << id);
         mUiCommands.insert(UICommand(id, menuParams));
@@ -113,7 +113,7 @@ namespace NsHMIEmulator
      * \param id
      * \return command
      */
-    const NsAppLinkRPC::MenuParams* ResourceContainer::findUiCommand(const unsigned int &id) const
+    const NsSmartDeviceLinkRPC::MenuParams* ResourceContainer::findUiCommand(const unsigned int &id) const
     {
         UICommands::const_iterator it = mUiCommands.find(id);
         if(it != mUiCommands.end())
@@ -258,7 +258,7 @@ namespace NsHMIEmulator
      * \brief gets display capabilities
      * \return display capabilities
      */
-    const NsAppLinkRPC::DisplayCapabilities &ResourceContainer::getDisplayCapabilities() const
+    const NsSmartDeviceLinkRPC::DisplayCapabilities &ResourceContainer::getDisplayCapabilities() const
     {
         return mDisplayCapabilities;
     }
@@ -339,7 +339,7 @@ namespace NsHMIEmulator
      * \brief sets timer start time
      * \param time timer start time
      */
-    void ResourceContainer::setStartTime(const NsAppLinkRPC::StartTime &time)
+    void ResourceContainer::setStartTime(const NsSmartDeviceLinkRPC::StartTime &time)
     {
         mStartTime = time;
     }
@@ -348,7 +348,7 @@ namespace NsHMIEmulator
      * \brief gets timer start time
      * \return timer start time
      */
-    const NsAppLinkRPC::StartTime &ResourceContainer::getStartTime() const
+    const NsSmartDeviceLinkRPC::StartTime &ResourceContainer::getStartTime() const
     {
         return mStartTime;
     }
@@ -357,7 +357,7 @@ namespace NsHMIEmulator
      * \brief sets timer update mode
      * \param mode timer update mode
      */
-    void ResourceContainer::setTimerUpdateMode(const NsAppLinkRPC::UpdateMode &mode)
+    void ResourceContainer::setTimerUpdateMode(const NsSmartDeviceLinkRPC::UpdateMode &mode)
     {
         mUpdateMode = mode;
     }
@@ -366,7 +366,7 @@ namespace NsHMIEmulator
      * \brief gets timer update mode
      * \return timer update mode
      */
-    const NsAppLinkRPC::UpdateMode &ResourceContainer::getTimerUpdateMode() const
+    const NsSmartDeviceLinkRPC::UpdateMode &ResourceContainer::getTimerUpdateMode() const
     {
         return mUpdateMode;
     }

@@ -31,7 +31,7 @@ namespace NsAppManager
      * \param buttonName button name
      * \param app application to map a button to
      */
-    void ButtonMapping::addButton(const NsAppLinkRPCV2::ButtonName &buttonName, Application *app)
+    void ButtonMapping::addButton(const NsSmartDeviceLinkRPCV2::ButtonName &buttonName, Application *app)
     {
         if(!app)
         {
@@ -46,7 +46,7 @@ namespace NsAppManager
      * \brief remove a button from a mapping
      * \param buttonName button name
      */
-    void ButtonMapping::removeButton(const NsAppLinkRPCV2::ButtonName &buttonName, Application * item)
+    void ButtonMapping::removeButton(const NsSmartDeviceLinkRPCV2::ButtonName &buttonName, Application * item)
     {
         //mButtonsMapping.erase(buttonName);
 
@@ -95,7 +95,7 @@ namespace NsAppManager
      * \param btnName button name
      * \return RegistryItem instance
      */
-    Application* ButtonMapping::findRegistryItemSubscribedToButton( const NsAppLinkRPCV2::ButtonName &btnName ) const
+    Application* ButtonMapping::findRegistryItemSubscribedToButton( const NsSmartDeviceLinkRPCV2::ButtonName &btnName ) const
     {
         ButtonMap::const_iterator it = mButtonsMapping.find( btnName );
         if ( it != mButtonsMapping.end() )
@@ -113,7 +113,7 @@ namespace NsAppManager
         return 0;
     }
 
-    ResultRange ButtonMapping::findSubscribedToButton(const NsAppLinkRPCV2::ButtonName &btnName) const
+    ResultRange ButtonMapping::findSubscribedToButton(const NsSmartDeviceLinkRPCV2::ButtonName &btnName) const
     {
         return mButtonsMapping.equal_range(btnName);
     }
@@ -125,7 +125,7 @@ namespace NsAppManager
     {
     }
 
-    bool ButtonMapping::exist(const NsAppLinkRPCV2::ButtonName& buttonName, Application* item)
+    bool ButtonMapping::exist(const NsSmartDeviceLinkRPCV2::ButtonName& buttonName, Application* item)
     {
         ResultRange result = mButtonsMapping.equal_range(buttonName);
         for( ButtonMap::const_iterator it=result.first; it!=result.second; ++it )
@@ -157,7 +157,7 @@ namespace NsAppManager
      * \param b2 button name 2
      * \return comparison result
      */
-    bool Comparer::operator ()(const NsAppLinkRPCV2::ButtonName &b1, const NsAppLinkRPCV2::ButtonName &b2) const
+    bool Comparer::operator ()(const NsSmartDeviceLinkRPCV2::ButtonName &b1, const NsSmartDeviceLinkRPCV2::ButtonName &b2) const
     {
         return b1.get() < b2.get();
     }

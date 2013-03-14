@@ -19,13 +19,13 @@ PerformInteraction& PerformInteraction::operator =(const PerformInteraction& c)
   interactionMode=c.interactionMode;
   interactionChoiceSetIDList=c.interactionChoiceSetIDList;
   if(helpPrompt)  delete helpPrompt;
-  helpPrompt= c.helpPrompt ? new std::vector<NsAppLinkRPCV2::TTSChunk>(c.helpPrompt[0]) : 0;
+  helpPrompt= c.helpPrompt ? new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>(c.helpPrompt[0]) : 0;
   if(timeoutPrompt)  delete timeoutPrompt;
-  timeoutPrompt= c.timeoutPrompt ? new std::vector<NsAppLinkRPCV2::TTSChunk>(c.timeoutPrompt[0]) : 0;
+  timeoutPrompt= c.timeoutPrompt ? new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>(c.timeoutPrompt[0]) : 0;
   if(timeout)  delete timeout;
   timeout= c.timeout ? new unsigned int(c.timeout[0]) : 0;
   if(vrHelp)  delete vrHelp;
-  vrHelp= c.vrHelp ? new std::vector<NsAppLinkRPCV2::VrHelpItem>(c.vrHelp[0]) : 0;
+  vrHelp= c.vrHelp ? new std::vector<NsSmartDeviceLinkRPCV2::VrHelpItem>(c.vrHelp[0]) : 0;
   appId=c.appId;
   return *this;
 }
@@ -67,23 +67,23 @@ bool PerformInteraction::set_initialText(const std::string& initialText_)
   return true;
 }
 
-const std::vector< NsAppLinkRPCV2::TTSChunk>& PerformInteraction::get_initialPrompt(void)
+const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& PerformInteraction::get_initialPrompt(void)
 {
   return initialPrompt;
 }
 
-bool PerformInteraction::set_initialPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& initialPrompt_)
+bool PerformInteraction::set_initialPrompt(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& initialPrompt_)
 {
   initialPrompt=initialPrompt_;
   return true;
 }
 
-const NsAppLinkRPCV2::InteractionMode& PerformInteraction::get_interactionMode(void)
+const NsSmartDeviceLinkRPCV2::InteractionMode& PerformInteraction::get_interactionMode(void)
 {
   return interactionMode;
 }
 
-bool PerformInteraction::set_interactionMode(const NsAppLinkRPCV2::InteractionMode& interactionMode_)
+bool PerformInteraction::set_interactionMode(const NsSmartDeviceLinkRPCV2::InteractionMode& interactionMode_)
 {
   interactionMode=interactionMode_;
   return true;
@@ -100,15 +100,15 @@ bool PerformInteraction::set_interactionChoiceSetIDList(const std::vector< unsig
   return true;
 }
 
-const std::vector< NsAppLinkRPCV2::TTSChunk>* PerformInteraction::get_helpPrompt(void)
+const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* PerformInteraction::get_helpPrompt(void)
 {
   return helpPrompt;
 }
 
-bool PerformInteraction::set_helpPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& helpPrompt_)
+bool PerformInteraction::set_helpPrompt(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& helpPrompt_)
 {
   if(helpPrompt)  delete helpPrompt;
-  helpPrompt=new std::vector< NsAppLinkRPCV2::TTSChunk>(helpPrompt_);
+  helpPrompt=new std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>(helpPrompt_);
   return true;
 }
 
@@ -118,15 +118,15 @@ void PerformInteraction::reset_helpPrompt(void)
   helpPrompt=0;
 }
 
-const std::vector< NsAppLinkRPCV2::TTSChunk>* PerformInteraction::get_timeoutPrompt(void)
+const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* PerformInteraction::get_timeoutPrompt(void)
 {
   return timeoutPrompt;
 }
 
-bool PerformInteraction::set_timeoutPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& timeoutPrompt_)
+bool PerformInteraction::set_timeoutPrompt(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& timeoutPrompt_)
 {
   if(timeoutPrompt)  delete timeoutPrompt;
-  timeoutPrompt=new std::vector< NsAppLinkRPCV2::TTSChunk>(timeoutPrompt_);
+  timeoutPrompt=new std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>(timeoutPrompt_);
   return true;
 }
 
@@ -154,15 +154,15 @@ void PerformInteraction::reset_timeout(void)
   timeout=0;
 }
 
-const std::vector< NsAppLinkRPCV2::VrHelpItem>* PerformInteraction::get_vrHelp(void)
+const std::vector< NsSmartDeviceLinkRPCV2::VrHelpItem>* PerformInteraction::get_vrHelp(void)
 {
   return vrHelp;
 }
 
-bool PerformInteraction::set_vrHelp(const std::vector< NsAppLinkRPCV2::VrHelpItem>& vrHelp_)
+bool PerformInteraction::set_vrHelp(const std::vector< NsSmartDeviceLinkRPCV2::VrHelpItem>& vrHelp_)
 {
   if(vrHelp)  delete vrHelp;
-  vrHelp=new std::vector< NsAppLinkRPCV2::VrHelpItem>(vrHelp_);
+  vrHelp=new std::vector< NsSmartDeviceLinkRPCV2::VrHelpItem>(vrHelp_);
   return true;
 }
 

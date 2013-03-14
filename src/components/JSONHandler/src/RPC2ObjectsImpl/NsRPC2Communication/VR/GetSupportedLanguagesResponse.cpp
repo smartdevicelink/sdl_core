@@ -36,12 +36,12 @@ GetSupportedLanguagesResponse::GetSupportedLanguagesResponse(const GetSupportedL
 }
 
 
-const std::vector< NsAppLinkRPCV2::Language>& GetSupportedLanguagesResponse::get_languages(void)
+const std::vector< NsSmartDeviceLinkRPCV2::Language>& GetSupportedLanguagesResponse::get_languages(void)
 {
   return languages;
 }
 
-bool GetSupportedLanguagesResponse::set_languages(const std::vector< NsAppLinkRPCV2::Language>& languages_)
+bool GetSupportedLanguagesResponse::set_languages(const std::vector< NsSmartDeviceLinkRPCV2::Language>& languages_)
 {
   languages=languages_;
   return true;

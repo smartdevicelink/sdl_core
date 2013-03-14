@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/GetCapabilitiesResponse.h"
-#include "../src/ALRPCObjectsImpl/V2/SpeechCapabilitiesMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/SpeechCapabilitiesMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/GetCapabilitiesResponseMarshaller.h"
 
 /*
@@ -64,8 +64,8 @@ Json::Value GetCapabilitiesResponseMarshaller::toJSON(const GetCapabilitiesRespo
   json["jsonrpc"]=Json::Value("2.0");
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
-  NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
-  json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
+  NsSmartDeviceLinkRPCV2::Result r(static_cast<NsSmartDeviceLinkRPCV2::Result::ResultInternal>(e.getResult()));
+  json["result"]["resultCode"]=NsSmartDeviceLinkRPCV2::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("TTS.GetCapabilitiesResponse");
 
   {
@@ -73,7 +73,7 @@ Json::Value GetCapabilitiesResponseMarshaller::toJSON(const GetCapabilitiesRespo
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::SpeechCapabilitiesMarshaller::toJSON(e.capabilities[i]);
+      j[i]=NsSmartDeviceLinkRPCV2::SpeechCapabilitiesMarshaller::toJSON(e.capabilities[i]);
 
     json["result"]["capabilities"]=j;
   }
@@ -95,12 +95,12 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    NsAppLinkRPCV2::Result r;
+    NsSmartDeviceLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("TTS.GetCapabilitiesResponse")) return false;
 
-    if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
+    if(!NsSmartDeviceLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
     if(!js.isMember("capabilities") || !js["capabilities"].isArray())  return false;
     {
@@ -110,8 +110,8 @@ bool GetCapabilitiesResponseMarshaller::fromJSON(const Json::Value& json,GetCapa
       c.capabilities.resize(i);
       while(i--)
       {
-        NsAppLinkRPCV2::SpeechCapabilities t;
-        if(!NsAppLinkRPCV2::SpeechCapabilitiesMarshaller::fromJSON(js["capabilities"][i],t))
+        NsSmartDeviceLinkRPCV2::SpeechCapabilities t;
+        if(!NsSmartDeviceLinkRPCV2::SpeechCapabilitiesMarshaller::fromJSON(js["capabilities"][i],t))
           return false;
          c.capabilities[i]=t;
       }

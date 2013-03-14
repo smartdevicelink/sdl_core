@@ -5,7 +5,7 @@
 #include <vector>
 #include "JSONHandler/RPC2Response.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/VehicleDataResultCode.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/VehicleDataResultCode.h"
 
 /*
   interface	NsRPC2Communication::VehicleInfo
@@ -34,12 +34,12 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const std::vector< NsAppLinkRPCV2::VehicleDataResultCode>* get_dataResult(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::VehicleDataResultCode>* get_dataResult(void);
       const std::vector< std::string>* get_data(void);
 
 // setters
 /// 0 <= size <= 1000
-      bool set_dataResult(const std::vector< NsAppLinkRPCV2::VehicleDataResultCode>& dataResult);
+      bool set_dataResult(const std::vector< NsSmartDeviceLinkRPCV2::VehicleDataResultCode>& dataResult);
 
       void reset_dataResult(void);
 
@@ -53,7 +53,7 @@ namespace NsRPC2Communication
 
       friend class ReadDIDResponseMarshaller;
 
-      std::vector< NsAppLinkRPCV2::VehicleDataResultCode>* dataResult;
+      std::vector< NsSmartDeviceLinkRPCV2::VehicleDataResultCode>* dataResult;
       std::vector< std::string>* data;
 
     };

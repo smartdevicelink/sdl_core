@@ -36,12 +36,12 @@ OnDriverDistraction::OnDriverDistraction(const OnDriverDistraction& c) : RPC2Not
 }
 
 
-const NsAppLinkRPCV2::DriverDistractionState& OnDriverDistraction::get_state(void)
+const NsSmartDeviceLinkRPCV2::DriverDistractionState& OnDriverDistraction::get_state(void)
 {
   return state;
 }
 
-bool OnDriverDistraction::set_state(const NsAppLinkRPCV2::DriverDistractionState& state_)
+bool OnDriverDistraction::set_state(const NsSmartDeviceLinkRPCV2::DriverDistractionState& state_)
 {
   state=state_;
   return true;

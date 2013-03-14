@@ -3,8 +3,8 @@
 
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/MenuParams.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/Image.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/MenuParams.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/Image.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -35,9 +35,9 @@ namespace NsRPC2Communication
 // getters
       unsigned int get_cmdId(void);
 
-      const NsAppLinkRPCV2::MenuParams& get_menuParams(void);
+      const NsSmartDeviceLinkRPCV2::MenuParams& get_menuParams(void);
 
-      const NsAppLinkRPCV2::Image* get_cmdIcon(void);
+      const NsSmartDeviceLinkRPCV2::Image* get_cmdIcon(void);
       int get_appId(void);
 
 
@@ -45,9 +45,9 @@ namespace NsRPC2Communication
 /// cmdId <= 2000000000
       bool set_cmdId(unsigned int cmdId);
 
-      bool set_menuParams(const NsAppLinkRPCV2::MenuParams& menuParams);
+      bool set_menuParams(const NsSmartDeviceLinkRPCV2::MenuParams& menuParams);
 
-      bool set_cmdIcon(const NsAppLinkRPCV2::Image& cmdIcon);
+      bool set_cmdIcon(const NsSmartDeviceLinkRPCV2::Image& cmdIcon);
 
       void reset_cmdIcon(void);
 
@@ -59,8 +59,8 @@ namespace NsRPC2Communication
       friend class AddCommandMarshaller;
 
       unsigned int cmdId;
-      NsAppLinkRPCV2::MenuParams menuParams;
-      NsAppLinkRPCV2::Image* cmdIcon;
+      NsSmartDeviceLinkRPCV2::MenuParams menuParams;
+      NsSmartDeviceLinkRPCV2::Image* cmdIcon;
       int appId;
 
     };

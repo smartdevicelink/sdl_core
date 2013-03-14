@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/OnLanguageChange.h"
-#include "../src/ALRPCObjectsImpl/V2/LanguageMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/LanguageMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnLanguageChangeMarshaller.h"
 
 /*
@@ -45,7 +45,7 @@ const std::string OnLanguageChangeMarshaller::toString(const OnLanguageChange& e
 
 bool OnLanguageChangeMarshaller::checkIntegrityConst(const OnLanguageChange& s)
 {
-  if(!NsAppLinkRPCV2::LanguageMarshaller::checkIntegrityConst(s.hmiDisplayLanguage))  return false;
+  if(!NsSmartDeviceLinkRPCV2::LanguageMarshaller::checkIntegrityConst(s.hmiDisplayLanguage))  return false;
 
   return true;
 }
@@ -61,7 +61,7 @@ Json::Value OnLanguageChangeMarshaller::toJSON(const OnLanguageChange& e)
   json["method"]=Json::Value("UI.OnLanguageChange");
   json["params"]=Json::Value(Json::objectValue);
 
-  json["params"]["hmiDisplayLanguage"]=NsAppLinkRPCV2::LanguageMarshaller::toJSON(e.hmiDisplayLanguage);;
+  json["params"]["hmiDisplayLanguage"]=NsSmartDeviceLinkRPCV2::LanguageMarshaller::toJSON(e.hmiDisplayLanguage);;
   return json;
 }
 
@@ -78,7 +78,7 @@ bool OnLanguageChangeMarshaller::fromJSON(const Json::Value& json,OnLanguageChan
     Json::Value js=json["params"];
     if(!js.isObject())  return false;
 
-    if(!js.isMember("hmiDisplayLanguage") || !NsAppLinkRPCV2::LanguageMarshaller::fromJSON(js["hmiDisplayLanguage"],c.hmiDisplayLanguage))  return false;
+    if(!js.isMember("hmiDisplayLanguage") || !NsSmartDeviceLinkRPCV2::LanguageMarshaller::fromJSON(js["hmiDisplayLanguage"],c.hmiDisplayLanguage))  return false;
 
   }
   catch(...)

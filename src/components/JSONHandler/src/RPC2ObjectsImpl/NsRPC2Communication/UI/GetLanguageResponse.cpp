@@ -36,12 +36,12 @@ GetLanguageResponse::GetLanguageResponse(const GetLanguageResponse& c) : RPC2Res
 }
 
 
-const NsAppLinkRPCV2::Language& GetLanguageResponse::get_hmiDisplayLanguage(void)
+const NsSmartDeviceLinkRPCV2::Language& GetLanguageResponse::get_hmiDisplayLanguage(void)
 {
   return hmiDisplayLanguage;
 }
 
-bool GetLanguageResponse::set_hmiDisplayLanguage(const NsAppLinkRPCV2::Language& hmiDisplayLanguage_)
+bool GetLanguageResponse::set_hmiDisplayLanguage(const NsSmartDeviceLinkRPCV2::Language& hmiDisplayLanguage_)
 {
   hmiDisplayLanguage=hmiDisplayLanguage_;
   return true;

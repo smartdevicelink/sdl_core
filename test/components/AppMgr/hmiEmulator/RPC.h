@@ -14,7 +14,7 @@
 #include "JSONHandler/RPC2Response.h"
 #include "JSONHandler/RPC2Request.h"
 #include "JSONHandler/RPC2Objects/Marshaller.h"
-#include "JSONHandler/ALRPCObjects/Result.h"
+#include "JSONHandler/SDLRPCObjects/Result.h"
 
 /**
  * \namespace NsHMIEmulator

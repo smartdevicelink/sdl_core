@@ -1,7 +1,7 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/SetMediaClockTimer.h"
-#include "../src/ALRPCObjectsImpl/V2/StartTimeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/UpdateModeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/StartTimeMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/UpdateModeMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SetMediaClockTimerMarshaller.h"
 
 /*
@@ -46,9 +46,9 @@ const std::string SetMediaClockTimerMarshaller::toString(const SetMediaClockTime
 
 bool SetMediaClockTimerMarshaller::checkIntegrityConst(const SetMediaClockTimer& s)
 {
-  if(s.startTime && (!NsAppLinkRPCV2::StartTimeMarshaller::checkIntegrityConst(s.startTime[0])))  return false;
+  if(s.startTime && (!NsSmartDeviceLinkRPCV2::StartTimeMarshaller::checkIntegrityConst(s.startTime[0])))  return false;
 
-  if(!NsAppLinkRPCV2::UpdateModeMarshaller::checkIntegrityConst(s.updateMode))  return false;
+  if(!NsSmartDeviceLinkRPCV2::UpdateModeMarshaller::checkIntegrityConst(s.updateMode))  return false;
 
   return true;
 }
@@ -66,8 +66,8 @@ Json::Value SetMediaClockTimerMarshaller::toJSON(const SetMediaClockTimer& e)
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
   if(e.startTime)
-    json["params"]["startTime"]=NsAppLinkRPCV2::StartTimeMarshaller::toJSON(e.startTime[0]);;
-  json["params"]["updateMode"]=NsAppLinkRPCV2::UpdateModeMarshaller::toJSON(e.updateMode);;
+    json["params"]["startTime"]=NsSmartDeviceLinkRPCV2::StartTimeMarshaller::toJSON(e.startTime[0]);;
+  json["params"]["updateMode"]=NsSmartDeviceLinkRPCV2::UpdateModeMarshaller::toJSON(e.updateMode);;
   json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
@@ -91,11 +91,11 @@ bool SetMediaClockTimerMarshaller::fromJSON(const Json::Value& json,SetMediaCloc
     c.startTime=0;
     if(js.isMember("startTime"))
     {
-      c.startTime=new NsAppLinkRPCV2::StartTime();
-      if(!NsAppLinkRPCV2::StartTimeMarshaller::fromJSON(js["startTime"],c.startTime[0]))  return false;
+      c.startTime=new NsSmartDeviceLinkRPCV2::StartTime();
+      if(!NsSmartDeviceLinkRPCV2::StartTimeMarshaller::fromJSON(js["startTime"],c.startTime[0]))  return false;
     }
 
-    if(!js.isMember("updateMode") || !NsAppLinkRPCV2::UpdateModeMarshaller::fromJSON(js["updateMode"],c.updateMode))  return false;
+    if(!js.isMember("updateMode") || !NsSmartDeviceLinkRPCV2::UpdateModeMarshaller::fromJSON(js["updateMode"],c.updateMode))  return false;
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;
     c.appId=js["appId"].asInt();

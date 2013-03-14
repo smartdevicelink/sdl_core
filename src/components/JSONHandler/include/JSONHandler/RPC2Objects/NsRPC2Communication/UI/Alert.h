@@ -5,8 +5,8 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/SoftButton.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/TTSChunk.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/SoftButton.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -38,10 +38,10 @@ namespace NsRPC2Communication
       const std::string* get_AlertText1(void);
       const std::string* get_AlertText2(void);
       const std::string* get_AlertText3(void);
-      const std::vector< NsAppLinkRPCV2::TTSChunk>* get_ttsChunks(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* get_ttsChunks(void);
       const unsigned int* get_duration(void);
       const bool* get_playTone(void);
-      const std::vector< NsAppLinkRPCV2::SoftButton>* get_softButtons(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>* get_softButtons(void);
       int get_appId(void);
 
 
@@ -62,7 +62,7 @@ namespace NsRPC2Communication
       void reset_AlertText3(void);
 
 /// 1 <= size <= 100
-      bool set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks);
+      bool set_ttsChunks(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& ttsChunks);
 
       void reset_ttsChunks(void);
 
@@ -76,7 +76,7 @@ namespace NsRPC2Communication
       void reset_playTone(void);
 
 /// 0 <= size <= 4
-      bool set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons);
+      bool set_softButtons(const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& softButtons);
 
       void reset_softButtons(void);
 
@@ -90,10 +90,10 @@ namespace NsRPC2Communication
       std::string* AlertText1;
       std::string* AlertText2;
       std::string* AlertText3;
-      std::vector< NsAppLinkRPCV2::TTSChunk>* ttsChunks;
+      std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* ttsChunks;
       unsigned int* duration;
       bool* playTone;
-      std::vector< NsAppLinkRPCV2::SoftButton>* softButtons;
+      std::vector< NsSmartDeviceLinkRPCV2::SoftButton>* softButtons;
       int appId;
 
     };

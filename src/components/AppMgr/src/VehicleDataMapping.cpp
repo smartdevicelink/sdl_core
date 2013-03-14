@@ -20,7 +20,7 @@ namespace NsAppManager
         clear();
     }
 
-    bool VehicleDataMapping::addVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, 
+    bool VehicleDataMapping::addVehicleDataMapping(const NsSmartDeviceLinkRPCV2::VehicleDataType& vehicleDataName, 
             Application* app)
     {
         bool result = true;
@@ -56,7 +56,7 @@ namespace NsAppManager
         return result;
     }
 
-    bool VehicleDataMapping::removeVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, Application* app)
+    bool VehicleDataMapping::removeVehicleDataMapping(const NsSmartDeviceLinkRPCV2::VehicleDataType& vehicleDataName, Application* app)
     {
         bool result =false;
         if(!app)
@@ -107,7 +107,7 @@ namespace NsAppManager
     }
 
     int VehicleDataMapping::findRegistryItemsSubscribedToVehicleData(
-            const NsAppLinkRPCV2::VehicleDataType& vehicleDataName,
+            const NsSmartDeviceLinkRPCV2::VehicleDataType& vehicleDataName,
             std::vector<Application*>& result)
     {
         std::pair<VehicleDataMapIterator, VehicleDataMapIterator> p =

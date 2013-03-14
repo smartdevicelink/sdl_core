@@ -1,7 +1,7 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/Buttons/OnButtonEvent.h"
-#include "../src/ALRPCObjectsImpl/V2/ButtonNameMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ButtonEventModeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ButtonNameMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ButtonEventModeMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/OnButtonEventMarshaller.h"
 
 /*
@@ -46,9 +46,9 @@ const std::string OnButtonEventMarshaller::toString(const OnButtonEvent& e)
 
 bool OnButtonEventMarshaller::checkIntegrityConst(const OnButtonEvent& s)
 {
-  if(!NsAppLinkRPCV2::ButtonNameMarshaller::checkIntegrityConst(s.name))  return false;
+  if(!NsSmartDeviceLinkRPCV2::ButtonNameMarshaller::checkIntegrityConst(s.name))  return false;
 
-  if(!NsAppLinkRPCV2::ButtonEventModeMarshaller::checkIntegrityConst(s.mode))  return false;
+  if(!NsSmartDeviceLinkRPCV2::ButtonEventModeMarshaller::checkIntegrityConst(s.mode))  return false;
 
   if(s.customButtonID && (s.customButtonID[0]>65536))  return false;
 
@@ -66,8 +66,8 @@ Json::Value OnButtonEventMarshaller::toJSON(const OnButtonEvent& e)
   json["method"]=Json::Value("Buttons.OnButtonEvent");
   json["params"]=Json::Value(Json::objectValue);
 
-  json["params"]["name"]=NsAppLinkRPCV2::ButtonNameMarshaller::toJSON(e.name);;
-  json["params"]["mode"]=NsAppLinkRPCV2::ButtonEventModeMarshaller::toJSON(e.mode);;
+  json["params"]["name"]=NsSmartDeviceLinkRPCV2::ButtonNameMarshaller::toJSON(e.name);;
+  json["params"]["mode"]=NsSmartDeviceLinkRPCV2::ButtonEventModeMarshaller::toJSON(e.mode);;
   if(e.customButtonID)
     json["params"]["customButtonID"]=Json::Value(e.customButtonID[0]);;
   return json;
@@ -86,9 +86,9 @@ bool OnButtonEventMarshaller::fromJSON(const Json::Value& json,OnButtonEvent& c)
     Json::Value js=json["params"];
     if(!js.isObject())  return false;
 
-    if(!js.isMember("name") || !NsAppLinkRPCV2::ButtonNameMarshaller::fromJSON(js["name"],c.name))  return false;
+    if(!js.isMember("name") || !NsSmartDeviceLinkRPCV2::ButtonNameMarshaller::fromJSON(js["name"],c.name))  return false;
 
-    if(!js.isMember("mode") || !NsAppLinkRPCV2::ButtonEventModeMarshaller::fromJSON(js["mode"],c.mode))  return false;
+    if(!js.isMember("mode") || !NsSmartDeviceLinkRPCV2::ButtonEventModeMarshaller::fromJSON(js["mode"],c.mode))  return false;
 
     if(c.customButtonID)  delete c.customButtonID;
     c.customButtonID=0;

@@ -5,7 +5,7 @@
 #include "AppMgr/AppMgrCoreQueues.h"
 #include "LoggerHelper.hpp"
 #include "JSONHandler/RPC2Command.h"
-#include "JSONHandler/ALRPCMessage.h"
+#include "JSONHandler/SDLRPCMessage.h"
 #include "AppMgr/AppMgrCore.h"
 
 namespace NsAppManager
@@ -139,6 +139,6 @@ namespace NsAppManager
 
     template class AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>;
     template class AppMgrCoreQueue<Message>;
-    template class AppMgrCoreQueue<NsAppLinkRPC::ALRPCMessage*>;
+    template class AppMgrCoreQueue<NsSmartDeviceLinkRPC::SDLRPCMessage*>;
 
 }

@@ -11,19 +11,19 @@
 
 #include "JSONHandler/RPC2ErrorMarshaller.h"
 
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/ActivateAppMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/ActivateAppResponseMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/GetAppListMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/GetAppListResponseMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/GetDeviceListMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/GetDeviceListResponseMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppDeactivatedMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppDeactivatedResponseMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppRegisteredMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnAppUnregisteredMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/OnDeviceListUpdatedMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/SendDataMarshaller.h"
-#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/AppLinkCore/SendDataResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/ActivateAppMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/ActivateAppResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/GetAppListMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/GetAppListResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/GetDeviceListMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/GetDeviceListResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/OnAppDeactivatedMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/OnAppDeactivatedResponseMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/OnAppRegisteredMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/OnAppUnregisteredMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/OnDeviceListUpdatedMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/SendDataMarshaller.h"
+#include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/BasicCommunication/SendDataResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/GetCapabilitiesMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/GetCapabilitiesResponseMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/Buttons/OnButtonEventMarshaller.h"
@@ -137,19 +137,19 @@ public:
   enum Methods
   {
     METHOD_INVALID=-1,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPP,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ACTIVATEAPPRESPONSE,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLIST,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETAPPLISTRESPONSE,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELIST,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__GETDEVICELISTRESPONSE,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPDEACTIVATED,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPDEACTIVATEDRESPONSE,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPREGISTERED,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONAPPUNREGISTERED,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__ONDEVICELISTUPDATED,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATA,
-    METHOD_NSRPC2COMMUNICATION_APPLINKCORE__SENDDATARESPONSE,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ACTIVATEAPP,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ACTIVATEAPPRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__GETAPPLIST,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__GETAPPLISTRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__GETDEVICELIST,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__GETDEVICELISTRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONAPPDEACTIVATED,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONAPPDEACTIVATEDRESPONSE,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONAPPREGISTERED,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONAPPUNREGISTERED,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__ONDEVICELISTUPDATED,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__SENDDATA,
+    METHOD_NSRPC2COMMUNICATION_BASICCOMMUNICATION__SENDDATARESPONSE,
     METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIES,
     METHOD_NSRPC2COMMUNICATION_BUTTONS__GETCAPABILITIESRESPONSE,
     METHOD_NSRPC2COMMUNICATION_BUTTONS__ONBUTTONEVENT,
@@ -261,147 +261,147 @@ public:
 
 protected:
 
-// NsRPC2Communication::AppLinkCore::ActivateApp
-  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::ActivateApp& res)
+// NsRPC2Communication::BasicCommunication::ActivateApp
+  static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::ActivateApp& res)
   {
-    return mNsRPC2Communication_AppLinkCore__ActivateApp.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__ActivateApp.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::ActivateApp& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::ActivateApp& res)
   {
-    return mNsRPC2Communication_AppLinkCore__ActivateApp.toString(res);
+    return mNsRPC2Communication_BasicCommunication__ActivateApp.toString(res);
   }
 
-// NsRPC2Communication::AppLinkCore::ActivateAppResponse
-  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::ActivateAppResponse& res)
+// NsRPC2Communication::BasicCommunication::ActivateAppResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::ActivateAppResponse& res)
   {
-    return mNsRPC2Communication_AppLinkCore__ActivateAppResponse.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__ActivateAppResponse.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::ActivateAppResponse& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::ActivateAppResponse& res)
   {
-    return mNsRPC2Communication_AppLinkCore__ActivateAppResponse.toString(res);
+    return mNsRPC2Communication_BasicCommunication__ActivateAppResponse.toString(res);
   }
 
-// NsRPC2Communication::AppLinkCore::GetAppList
-  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::GetAppList& res)
+// NsRPC2Communication::BasicCommunication::GetAppList
+  static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::GetAppList& res)
   {
-    return mNsRPC2Communication_AppLinkCore__GetAppList.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__GetAppList.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::GetAppList& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::GetAppList& res)
   {
-    return mNsRPC2Communication_AppLinkCore__GetAppList.toString(res);
+    return mNsRPC2Communication_BasicCommunication__GetAppList.toString(res);
   }
 
-// NsRPC2Communication::AppLinkCore::GetAppListResponse
-  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::GetAppListResponse& res)
+// NsRPC2Communication::BasicCommunication::GetAppListResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::GetAppListResponse& res)
   {
-    return mNsRPC2Communication_AppLinkCore__GetAppListResponse.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__GetAppListResponse.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::GetAppListResponse& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::GetAppListResponse& res)
   {
-    return mNsRPC2Communication_AppLinkCore__GetAppListResponse.toString(res);
+    return mNsRPC2Communication_BasicCommunication__GetAppListResponse.toString(res);
   }
 
-// NsRPC2Communication::AppLinkCore::GetDeviceList
-  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::GetDeviceList& res)
+// NsRPC2Communication::BasicCommunication::GetDeviceList
+  static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::GetDeviceList& res)
   {
-    return mNsRPC2Communication_AppLinkCore__GetDeviceList.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__GetDeviceList.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::GetDeviceList& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::GetDeviceList& res)
   {
-    return mNsRPC2Communication_AppLinkCore__GetDeviceList.toString(res);
+    return mNsRPC2Communication_BasicCommunication__GetDeviceList.toString(res);
   }
 
-// NsRPC2Communication::AppLinkCore::GetDeviceListResponse
-  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::GetDeviceListResponse& res)
+// NsRPC2Communication::BasicCommunication::GetDeviceListResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::GetDeviceListResponse& res)
   {
-    return mNsRPC2Communication_AppLinkCore__GetDeviceListResponse.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__GetDeviceListResponse.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::GetDeviceListResponse& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::GetDeviceListResponse& res)
   {
-    return mNsRPC2Communication_AppLinkCore__GetDeviceListResponse.toString(res);
+    return mNsRPC2Communication_BasicCommunication__GetDeviceListResponse.toString(res);
   }
 
-// NsRPC2Communication::AppLinkCore::OnAppDeactivated
-  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::OnAppDeactivated& res)
+// NsRPC2Communication::BasicCommunication::OnAppDeactivated
+  static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::OnAppDeactivated& res)
   {
-    return mNsRPC2Communication_AppLinkCore__OnAppDeactivated.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__OnAppDeactivated.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::OnAppDeactivated& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::OnAppDeactivated& res)
   {
-    return mNsRPC2Communication_AppLinkCore__OnAppDeactivated.toString(res);
+    return mNsRPC2Communication_BasicCommunication__OnAppDeactivated.toString(res);
   }
 
-// NsRPC2Communication::AppLinkCore::OnAppDeactivatedResponse
-  /*static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::OnAppDeactivatedResponse& res)
+// NsRPC2Communication::BasicCommunication::OnAppDeactivatedResponse
+  /*static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::OnAppDeactivatedResponse& res)
   {
-    return mNsRPC2Communication_AppLinkCore__OnAppDeactivatedResponse.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__OnAppDeactivatedResponse.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::OnAppDeactivatedResponse& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::OnAppDeactivatedResponse& res)
   {
-    return mNsRPC2Communication_AppLinkCore__OnAppDeactivatedResponse.toString(res);
+    return mNsRPC2Communication_BasicCommunication__OnAppDeactivatedResponse.toString(res);
   }*/
 
-// NsRPC2Communication::AppLinkCore::OnAppRegistered
-  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::OnAppRegistered& res)
+// NsRPC2Communication::BasicCommunication::OnAppRegistered
+  static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::OnAppRegistered& res)
   {
-    return mNsRPC2Communication_AppLinkCore__OnAppRegistered.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__OnAppRegistered.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::OnAppRegistered& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::OnAppRegistered& res)
   {
-    return mNsRPC2Communication_AppLinkCore__OnAppRegistered.toString(res);
+    return mNsRPC2Communication_BasicCommunication__OnAppRegistered.toString(res);
   }
 
-// NsRPC2Communication::AppLinkCore::OnAppUnregistered
-  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::OnAppUnregistered& res)
+// NsRPC2Communication::BasicCommunication::OnAppUnregistered
+  static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::OnAppUnregistered& res)
   {
-    return mNsRPC2Communication_AppLinkCore__OnAppUnregistered.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__OnAppUnregistered.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::OnAppUnregistered& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::OnAppUnregistered& res)
   {
-    return mNsRPC2Communication_AppLinkCore__OnAppUnregistered.toString(res);
+    return mNsRPC2Communication_BasicCommunication__OnAppUnregistered.toString(res);
   }
 
-// NsRPC2Communication::AppLinkCore::OnDeviceListUpdated
-  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::OnDeviceListUpdated& res)
+// NsRPC2Communication::BasicCommunication::OnDeviceListUpdated
+  static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::OnDeviceListUpdated& res)
   {
-    return mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__OnDeviceListUpdated.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::OnDeviceListUpdated& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::OnDeviceListUpdated& res)
   {
-    return mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated.toString(res);
+    return mNsRPC2Communication_BasicCommunication__OnDeviceListUpdated.toString(res);
   }
 
-// NsRPC2Communication::AppLinkCore::SendData
-  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::SendData& res)
+// NsRPC2Communication::BasicCommunication::SendData
+  static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::SendData& res)
   {
-    return mNsRPC2Communication_AppLinkCore__SendData.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__SendData.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::SendData& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::SendData& res)
   {
-    return mNsRPC2Communication_AppLinkCore__SendData.toString(res);
+    return mNsRPC2Communication_BasicCommunication__SendData.toString(res);
   }
 
-// NsRPC2Communication::AppLinkCore::SendDataResponse
-  static bool fromString(const std::string& str, NsRPC2Communication::AppLinkCore::SendDataResponse& res)
+// NsRPC2Communication::BasicCommunication::SendDataResponse
+  static bool fromString(const std::string& str, NsRPC2Communication::BasicCommunication::SendDataResponse& res)
   {
-    return mNsRPC2Communication_AppLinkCore__SendDataResponse.fromString(str, res);
+    return mNsRPC2Communication_BasicCommunication__SendDataResponse.fromString(str, res);
   }
 
-  static std::string toString(const NsRPC2Communication::AppLinkCore::SendDataResponse& res)
+  static std::string toString(const NsRPC2Communication::BasicCommunication::SendDataResponse& res)
   {
-    return mNsRPC2Communication_AppLinkCore__SendDataResponse.toString(res);
+    return mNsRPC2Communication_BasicCommunication__SendDataResponse.toString(res);
   }
 
 // NsRPC2Communication::Buttons::GetCapabilities
@@ -1497,19 +1497,19 @@ private:
 
   static ::NsRPC2Communication::RPC2ErrorMarshaller mRPC2ErrorInternal;
 
-  static NsRPC2Communication::AppLinkCore::ActivateAppMarshaller mNsRPC2Communication_AppLinkCore__ActivateApp;
-  static NsRPC2Communication::AppLinkCore::ActivateAppResponseMarshaller mNsRPC2Communication_AppLinkCore__ActivateAppResponse;
-  static NsRPC2Communication::AppLinkCore::GetAppListMarshaller mNsRPC2Communication_AppLinkCore__GetAppList;
-  static NsRPC2Communication::AppLinkCore::GetAppListResponseMarshaller mNsRPC2Communication_AppLinkCore__GetAppListResponse;
-  static NsRPC2Communication::AppLinkCore::GetDeviceListMarshaller mNsRPC2Communication_AppLinkCore__GetDeviceList;
-  static NsRPC2Communication::AppLinkCore::GetDeviceListResponseMarshaller mNsRPC2Communication_AppLinkCore__GetDeviceListResponse;
-  static NsRPC2Communication::AppLinkCore::OnAppDeactivatedMarshaller mNsRPC2Communication_AppLinkCore__OnAppDeactivated;
-  //static NsRPC2Communication::AppLinkCore::OnAppDeactivatedResponseMarshaller mNsRPC2Communication_AppLinkCore__OnAppDeactivatedResponse;
-  static NsRPC2Communication::AppLinkCore::OnAppRegisteredMarshaller mNsRPC2Communication_AppLinkCore__OnAppRegistered;
-  static NsRPC2Communication::AppLinkCore::OnAppUnregisteredMarshaller mNsRPC2Communication_AppLinkCore__OnAppUnregistered;
-  static NsRPC2Communication::AppLinkCore::OnDeviceListUpdatedMarshaller mNsRPC2Communication_AppLinkCore__OnDeviceListUpdated;
-  static NsRPC2Communication::AppLinkCore::SendDataMarshaller mNsRPC2Communication_AppLinkCore__SendData;
-  static NsRPC2Communication::AppLinkCore::SendDataResponseMarshaller mNsRPC2Communication_AppLinkCore__SendDataResponse;
+  static NsRPC2Communication::BasicCommunication::ActivateAppMarshaller mNsRPC2Communication_BasicCommunication__ActivateApp;
+  static NsRPC2Communication::BasicCommunication::ActivateAppResponseMarshaller mNsRPC2Communication_BasicCommunication__ActivateAppResponse;
+  static NsRPC2Communication::BasicCommunication::GetAppListMarshaller mNsRPC2Communication_BasicCommunication__GetAppList;
+  static NsRPC2Communication::BasicCommunication::GetAppListResponseMarshaller mNsRPC2Communication_BasicCommunication__GetAppListResponse;
+  static NsRPC2Communication::BasicCommunication::GetDeviceListMarshaller mNsRPC2Communication_BasicCommunication__GetDeviceList;
+  static NsRPC2Communication::BasicCommunication::GetDeviceListResponseMarshaller mNsRPC2Communication_BasicCommunication__GetDeviceListResponse;
+  static NsRPC2Communication::BasicCommunication::OnAppDeactivatedMarshaller mNsRPC2Communication_BasicCommunication__OnAppDeactivated;
+  //static NsRPC2Communication::BasicCommunication::OnAppDeactivatedResponseMarshaller mNsRPC2Communication_BasicCommunication__OnAppDeactivatedResponse;
+  static NsRPC2Communication::BasicCommunication::OnAppRegisteredMarshaller mNsRPC2Communication_BasicCommunication__OnAppRegistered;
+  static NsRPC2Communication::BasicCommunication::OnAppUnregisteredMarshaller mNsRPC2Communication_BasicCommunication__OnAppUnregistered;
+  static NsRPC2Communication::BasicCommunication::OnDeviceListUpdatedMarshaller mNsRPC2Communication_BasicCommunication__OnDeviceListUpdated;
+  static NsRPC2Communication::BasicCommunication::SendDataMarshaller mNsRPC2Communication_BasicCommunication__SendData;
+  static NsRPC2Communication::BasicCommunication::SendDataResponseMarshaller mNsRPC2Communication_BasicCommunication__SendDataResponse;
   static NsRPC2Communication::Buttons::GetCapabilitiesMarshaller mNsRPC2Communication_Buttons__GetCapabilities;
   static NsRPC2Communication::Buttons::GetCapabilitiesResponseMarshaller mNsRPC2Communication_Buttons__GetCapabilitiesResponse;
   static NsRPC2Communication::Buttons::OnButtonEventMarshaller mNsRPC2Communication_Buttons__OnButtonEvent;

@@ -15,7 +15,7 @@ using namespace NsRPC2Communication::VehicleInfo;
 OnVehicleData& OnVehicleData::operator =(const OnVehicleData& c)
 {
   if(gps)  delete gps;
-  gps= c.gps ? new NsAppLinkRPCV2::GPSData(c.gps[0]) : 0;
+  gps= c.gps ? new NsSmartDeviceLinkRPCV2::GPSData(c.gps[0]) : 0;
   if(speed)  delete speed;
   speed= c.speed ? new float(c.speed[0]) : 0;
   if(rpm)  delete rpm;
@@ -31,9 +31,9 @@ OnVehicleData& OnVehicleData::operator =(const OnVehicleData& c)
   if(vin)  delete vin;
   vin= c.vin ? new std::string(c.vin[0]) : 0;
   if(prndl)  delete prndl;
-  prndl= c.prndl ? new NsAppLinkRPCV2::PRNDL(c.prndl[0]) : 0;
+  prndl= c.prndl ? new NsSmartDeviceLinkRPCV2::PRNDL(c.prndl[0]) : 0;
   if(tirePressure)  delete tirePressure;
-  tirePressure= c.tirePressure ? new NsAppLinkRPCV2::TireStatus(c.tirePressure[0]) : 0;
+  tirePressure= c.tirePressure ? new NsSmartDeviceLinkRPCV2::TireStatus(c.tirePressure[0]) : 0;
   if(batteryPackVoltage)  delete batteryPackVoltage;
   batteryPackVoltage= c.batteryPackVoltage ? new float(c.batteryPackVoltage[0]) : 0;
   if(batteryPackCurrent)  delete batteryPackCurrent;
@@ -103,15 +103,15 @@ OnVehicleData::OnVehicleData(const OnVehicleData& c) : RPC2Notification(Marshall
 }
 
 
-const NsAppLinkRPCV2::GPSData* OnVehicleData::get_gps(void)
+const NsSmartDeviceLinkRPCV2::GPSData* OnVehicleData::get_gps(void)
 {
   return gps;
 }
 
-bool OnVehicleData::set_gps(const NsAppLinkRPCV2::GPSData& gps_)
+bool OnVehicleData::set_gps(const NsSmartDeviceLinkRPCV2::GPSData& gps_)
 {
   if(gps)  delete gps;
-  gps=new NsAppLinkRPCV2::GPSData(gps_);
+  gps=new NsSmartDeviceLinkRPCV2::GPSData(gps_);
   return true;
 }
 
@@ -247,15 +247,15 @@ void OnVehicleData::reset_vin(void)
   vin=0;
 }
 
-const NsAppLinkRPCV2::PRNDL* OnVehicleData::get_prndl(void)
+const NsSmartDeviceLinkRPCV2::PRNDL* OnVehicleData::get_prndl(void)
 {
   return prndl;
 }
 
-bool OnVehicleData::set_prndl(const NsAppLinkRPCV2::PRNDL& prndl_)
+bool OnVehicleData::set_prndl(const NsSmartDeviceLinkRPCV2::PRNDL& prndl_)
 {
   if(prndl)  delete prndl;
-  prndl=new NsAppLinkRPCV2::PRNDL(prndl_);
+  prndl=new NsSmartDeviceLinkRPCV2::PRNDL(prndl_);
   return true;
 }
 
@@ -265,15 +265,15 @@ void OnVehicleData::reset_prndl(void)
   prndl=0;
 }
 
-const NsAppLinkRPCV2::TireStatus* OnVehicleData::get_tirePressure(void)
+const NsSmartDeviceLinkRPCV2::TireStatus* OnVehicleData::get_tirePressure(void)
 {
   return tirePressure;
 }
 
-bool OnVehicleData::set_tirePressure(const NsAppLinkRPCV2::TireStatus& tirePressure_)
+bool OnVehicleData::set_tirePressure(const NsSmartDeviceLinkRPCV2::TireStatus& tirePressure_)
 {
   if(tirePressure)  delete tirePressure;
-  tirePressure=new NsAppLinkRPCV2::TireStatus(tirePressure_);
+  tirePressure=new NsSmartDeviceLinkRPCV2::TireStatus(tirePressure_);
   return true;
 }
 

@@ -16,7 +16,7 @@ GetCapabilitiesResponse& GetCapabilitiesResponse::operator =(const GetCapabiliti
 {
   capabilities=c.capabilities;
   if(presetBankCapabilities)  delete presetBankCapabilities;
-  presetBankCapabilities= c.presetBankCapabilities ? new NsAppLinkRPCV2::PresetBankCapabilities(c.presetBankCapabilities[0]) : 0;
+  presetBankCapabilities= c.presetBankCapabilities ? new NsSmartDeviceLinkRPCV2::PresetBankCapabilities(c.presetBankCapabilities[0]) : 0;
   return *this;
 }
 
@@ -40,26 +40,26 @@ GetCapabilitiesResponse::GetCapabilitiesResponse(const GetCapabilitiesResponse& 
 }
 
 
-const std::vector< NsAppLinkRPCV2::ButtonCapabilities>& GetCapabilitiesResponse::get_capabilities(void)
+const std::vector< NsSmartDeviceLinkRPCV2::ButtonCapabilities>& GetCapabilitiesResponse::get_capabilities(void)
 {
   return capabilities;
 }
 
-bool GetCapabilitiesResponse::set_capabilities(const std::vector< NsAppLinkRPCV2::ButtonCapabilities>& capabilities_)
+bool GetCapabilitiesResponse::set_capabilities(const std::vector< NsSmartDeviceLinkRPCV2::ButtonCapabilities>& capabilities_)
 {
   capabilities=capabilities_;
   return true;
 }
 
-const NsAppLinkRPCV2::PresetBankCapabilities* GetCapabilitiesResponse::get_presetBankCapabilities(void)
+const NsSmartDeviceLinkRPCV2::PresetBankCapabilities* GetCapabilitiesResponse::get_presetBankCapabilities(void)
 {
   return presetBankCapabilities;
 }
 
-bool GetCapabilitiesResponse::set_presetBankCapabilities(const NsAppLinkRPCV2::PresetBankCapabilities& presetBankCapabilities_)
+bool GetCapabilitiesResponse::set_presetBankCapabilities(const NsSmartDeviceLinkRPCV2::PresetBankCapabilities& presetBankCapabilities_)
 {
   if(presetBankCapabilities)  delete presetBankCapabilities;
-  presetBankCapabilities=new NsAppLinkRPCV2::PresetBankCapabilities(presetBankCapabilities_);
+  presetBankCapabilities=new NsSmartDeviceLinkRPCV2::PresetBankCapabilities(presetBankCapabilities_);
   return true;
 }
 

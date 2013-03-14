@@ -49,12 +49,12 @@ bool CreateInteractionChoiceSet::set_interactionChoiceSetID(unsigned int interac
   return true;
 }
 
-const std::vector< NsAppLinkRPCV2::Choice>& CreateInteractionChoiceSet::get_choiceSet(void)
+const std::vector< NsSmartDeviceLinkRPCV2::Choice>& CreateInteractionChoiceSet::get_choiceSet(void)
 {
   return choiceSet;
 }
 
-bool CreateInteractionChoiceSet::set_choiceSet(const std::vector< NsAppLinkRPCV2::Choice>& choiceSet_)
+bool CreateInteractionChoiceSet::set_choiceSet(const std::vector< NsSmartDeviceLinkRPCV2::Choice>& choiceSet_)
 {
   choiceSet=choiceSet_;
   return true;

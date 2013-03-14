@@ -4,7 +4,7 @@
 #include <vector>
 #include "JSONHandler/RPC2Response.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/SpeechCapabilities.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/SpeechCapabilities.h"
 
 /*
   interface	NsRPC2Communication::TTS
@@ -33,19 +33,19 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const std::vector< NsAppLinkRPCV2::SpeechCapabilities>& get_capabilities(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::SpeechCapabilities>& get_capabilities(void);
 
 
 // setters
 /// 1 <= size <= 100
-      bool set_capabilities(const std::vector< NsAppLinkRPCV2::SpeechCapabilities>& capabilities);
+      bool set_capabilities(const std::vector< NsSmartDeviceLinkRPCV2::SpeechCapabilities>& capabilities);
 
 
     private:
 
       friend class GetCapabilitiesResponseMarshaller;
 
-      std::vector< NsAppLinkRPCV2::SpeechCapabilities> capabilities;
+      std::vector< NsSmartDeviceLinkRPCV2::SpeechCapabilities> capabilities;
 
     };
   }

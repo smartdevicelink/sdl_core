@@ -41,23 +41,23 @@ OnButtonPress::OnButtonPress(const OnButtonPress& c) : RPC2Notification(Marshall
 }
 
 
-const NsAppLinkRPCV2::ButtonName& OnButtonPress::get_name(void)
+const NsSmartDeviceLinkRPCV2::ButtonName& OnButtonPress::get_name(void)
 {
   return name;
 }
 
-bool OnButtonPress::set_name(const NsAppLinkRPCV2::ButtonName& name_)
+bool OnButtonPress::set_name(const NsSmartDeviceLinkRPCV2::ButtonName& name_)
 {
   name=name_;
   return true;
 }
 
-const NsAppLinkRPCV2::ButtonPressMode& OnButtonPress::get_mode(void)
+const NsSmartDeviceLinkRPCV2::ButtonPressMode& OnButtonPress::get_mode(void)
 {
   return mode;
 }
 
-bool OnButtonPress::set_mode(const NsAppLinkRPCV2::ButtonPressMode& mode_)
+bool OnButtonPress::set_mode(const NsSmartDeviceLinkRPCV2::ButtonPressMode& mode_)
 {
   mode=mode_;
   return true;

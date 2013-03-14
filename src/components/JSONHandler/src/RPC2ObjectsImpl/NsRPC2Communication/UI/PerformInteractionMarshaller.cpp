@@ -1,10 +1,10 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/PerformInteraction.h"
-#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/InteractionModeMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/TTSChunkMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/VrHelpItemMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/TTSChunkMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/InteractionModeMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/TTSChunkMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/TTSChunkMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/VrHelpItemMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/PerformInteractionMarshaller.h"
 
 /*
@@ -57,7 +57,7 @@ bool PerformInteractionMarshaller::checkIntegrityConst(const PerformInteraction&
     if(i>100)  return false;
   }
 
-  if(!NsAppLinkRPCV2::InteractionModeMarshaller::checkIntegrityConst(s.interactionMode))  return false;
+  if(!NsSmartDeviceLinkRPCV2::InteractionModeMarshaller::checkIntegrityConst(s.interactionMode))  return false;
 
   {
     unsigned int i=s.interactionChoiceSetIDList.size();
@@ -113,11 +113,11 @@ Json::Value PerformInteractionMarshaller::toJSON(const PerformInteraction& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.initialPrompt[i]);
+      j[i]=NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::toJSON(e.initialPrompt[i]);
 
     json["params"]["initialPrompt"]=j;
   }
-  json["params"]["interactionMode"]=NsAppLinkRPCV2::InteractionModeMarshaller::toJSON(e.interactionMode);;
+  json["params"]["interactionMode"]=NsSmartDeviceLinkRPCV2::InteractionModeMarshaller::toJSON(e.interactionMode);;
   {
     unsigned int i=e.interactionChoiceSetIDList.size();
     Json::Value j=Json::Value(Json::arrayValue);
@@ -133,7 +133,7 @@ Json::Value PerformInteractionMarshaller::toJSON(const PerformInteraction& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.helpPrompt[0][i]);
+      j[i]=NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::toJSON(e.helpPrompt[0][i]);
 
     json["params"]["helpPrompt"]=j;
   }
@@ -143,7 +143,7 @@ Json::Value PerformInteractionMarshaller::toJSON(const PerformInteraction& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::TTSChunkMarshaller::toJSON(e.timeoutPrompt[0][i]);
+      j[i]=NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::toJSON(e.timeoutPrompt[0][i]);
 
     json["params"]["timeoutPrompt"]=j;
   }
@@ -155,7 +155,7 @@ Json::Value PerformInteractionMarshaller::toJSON(const PerformInteraction& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::VrHelpItemMarshaller::toJSON(e.vrHelp[0][i]);
+      j[i]=NsSmartDeviceLinkRPCV2::VrHelpItemMarshaller::toJSON(e.vrHelp[0][i]);
 
     json["params"]["vrHelp"]=j;
   }
@@ -190,14 +190,14 @@ bool PerformInteractionMarshaller::fromJSON(const Json::Value& json,PerformInter
       c.initialPrompt.resize(i);
       while(i--)
       {
-        NsAppLinkRPCV2::TTSChunk t;
-        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["initialPrompt"][i],t))
+        NsSmartDeviceLinkRPCV2::TTSChunk t;
+        if(!NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::fromJSON(js["initialPrompt"][i],t))
           return false;
          c.initialPrompt[i]=t;
       }
     }
 
-    if(!js.isMember("interactionMode") || !NsAppLinkRPCV2::InteractionModeMarshaller::fromJSON(js["interactionMode"],c.interactionMode))  return false;
+    if(!js.isMember("interactionMode") || !NsSmartDeviceLinkRPCV2::InteractionModeMarshaller::fromJSON(js["interactionMode"],c.interactionMode))  return false;
 
     if(!js.isMember("interactionChoiceSetIDList") || !js["interactionChoiceSetIDList"].isArray())
       return false;
@@ -227,11 +227,11 @@ bool PerformInteractionMarshaller::fromJSON(const Json::Value& json,PerformInter
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.helpPrompt=new std::vector<NsAppLinkRPCV2::TTSChunk>();
+      c.helpPrompt=new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>();
       c.helpPrompt->resize(js["helpPrompt"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["helpPrompt"][i],c.helpPrompt[0][i]))  return false;
+        if(!NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::fromJSON(js["helpPrompt"][i],c.helpPrompt[0][i]))  return false;
     }
 
 
@@ -244,11 +244,11 @@ bool PerformInteractionMarshaller::fromJSON(const Json::Value& json,PerformInter
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.timeoutPrompt=new std::vector<NsAppLinkRPCV2::TTSChunk>();
+      c.timeoutPrompt=new std::vector<NsSmartDeviceLinkRPCV2::TTSChunk>();
       c.timeoutPrompt->resize(js["timeoutPrompt"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::TTSChunkMarshaller::fromJSON(js["timeoutPrompt"][i],c.timeoutPrompt[0][i]))  return false;
+        if(!NsSmartDeviceLinkRPCV2::TTSChunkMarshaller::fromJSON(js["timeoutPrompt"][i],c.timeoutPrompt[0][i]))  return false;
     }
 
 
@@ -272,11 +272,11 @@ bool PerformInteractionMarshaller::fromJSON(const Json::Value& json,PerformInter
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.vrHelp=new std::vector<NsAppLinkRPCV2::VrHelpItem>();
+      c.vrHelp=new std::vector<NsSmartDeviceLinkRPCV2::VrHelpItem>();
       c.vrHelp->resize(js["vrHelp"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::VrHelpItemMarshaller::fromJSON(js["vrHelp"][i],c.vrHelp[0][i]))  return false;
+        if(!NsSmartDeviceLinkRPCV2::VrHelpItemMarshaller::fromJSON(js["vrHelp"][i],c.vrHelp[0][i]))  return false;
     }
 
 

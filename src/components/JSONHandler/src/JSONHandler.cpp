@@ -12,8 +12,8 @@
 #include <json/reader.h>
 #include <json/writer.h>
 #include "JSONHandler/JSONHandler.h"
-#include "JSONHandler/ALRPCObjects/V1/Marshaller.h"
-#include "JSONHandler/ALRPCObjects/V2/Marshaller.h"
+#include "JSONHandler/SDLRPCObjects/V1/Marshaller.h"
+#include "JSONHandler/SDLRPCObjects/V2/Marshaller.h"
 
 namespace
 {
@@ -28,67 +28,67 @@ namespace
     class InvalidResponseFactory
     {
     public:
-        typedef std::map<std::string, NsAppLinkRPC::Marshaller::Methods> Responses;
+        typedef std::map<std::string, NsSmartDeviceLinkRPC::Marshaller::Methods> Responses;
 
-        typedef NsAppLinkRPCV2::FunctionID::FunctionIDInternal FunctionID;
-        typedef NsAppLinkRPC::Marshaller::Methods Methods;
+        typedef NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal FunctionID;
+        typedef NsSmartDeviceLinkRPC::Marshaller::Methods Methods;
 
-        static NsAppLinkRPC::ALRPCResponse* getResponse(FunctionID functionId,
+        static NsSmartDeviceLinkRPC::SDLRPCResponse* getResponse(FunctionID functionId,
                                                         int correlationId)
         {
-            NsAppLinkRPC::ALRPCResponse* response = NULL;
+            NsSmartDeviceLinkRPC::SDLRPCResponse* response = NULL;
 
             switch (functionId)
             {
             case FunctionID::AlertID:
-                response = new NsAppLinkRPCV2::Alert_response();
+                response = new NsSmartDeviceLinkRPCV2::Alert_response();
                 break;
             case FunctionID::DeleteFileID:
-                response = new NsAppLinkRPCV2::DeleteFile_response();
+                response = new NsSmartDeviceLinkRPCV2::DeleteFile_response();
                 break;
             case FunctionID::GetDTCsID:
-                response = new NsAppLinkRPCV2::GetDTCs_response();
+                response = new NsSmartDeviceLinkRPCV2::GetDTCs_response();
                 break;
             case FunctionID::GetVehicleDataID:
-                response = new NsAppLinkRPCV2::GetVehicleData_response();
+                response = new NsSmartDeviceLinkRPCV2::GetVehicleData_response();
                 break;
             case FunctionID::ListFilesID:
-                response = new NsAppLinkRPCV2::ListFiles_response();
+                response = new NsSmartDeviceLinkRPCV2::ListFiles_response();
                 break;
             case FunctionID::PerformInteractionID:
-                response = new NsAppLinkRPCV2::PerformInteraction_response();
+                response = new NsSmartDeviceLinkRPCV2::PerformInteraction_response();
                 break;
             case FunctionID::PutFileID:
-                response = new NsAppLinkRPCV2::PutFile_response();
+                response = new NsSmartDeviceLinkRPCV2::PutFile_response();
                 break;
             case FunctionID::ReadDIDID:
-                response = new NsAppLinkRPCV2::ReadDID_response();
+                response = new NsSmartDeviceLinkRPCV2::ReadDID_response();
                 break;
             case FunctionID::RegisterAppInterfaceID:
-                response = new NsAppLinkRPCV2::RegisterAppInterface_response();
+                response = new NsSmartDeviceLinkRPCV2::RegisterAppInterface_response();
                 break;
             case FunctionID::SliderID:
-                response = new NsAppLinkRPCV2::Slider_response();
+                response = new NsSmartDeviceLinkRPCV2::Slider_response();
                 break;
             case FunctionID::SubscribeVehicleDataID:
-                response = new NsAppLinkRPCV2::SubscribeVehicleData_response();
+                response = new NsSmartDeviceLinkRPCV2::SubscribeVehicleData_response();
                 break;
             case FunctionID::UnsubscribeVehicleDataID:
-                response = new NsAppLinkRPCV2::UnsubscribeVehicleData_response();
+                response = new NsSmartDeviceLinkRPCV2::UnsubscribeVehicleData_response();
                 break;
             default:
-                response = new NsAppLinkRPC::ALRPCResponse(V2, functionId);
+                response = new NsSmartDeviceLinkRPC::SDLRPCResponse(V2, functionId);
                 break;
             }
 
             response->setMethodId(static_cast<FunctionID>(functionId));
             response->setCorrelationID(correlationId);
             response->set_success(false);
-            response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+            response->set_resultCode(NsSmartDeviceLinkRPCV2::Result::INVALID_DATA);
             return response;
         }
 
-        static NsAppLinkRPC::ALRPCResponse* getResponse(const std::string& jsonString)
+        static NsSmartDeviceLinkRPC::SDLRPCResponse* getResponse(const std::string& jsonString)
         {
             Responses responses;
             responses.insert(std::make_pair("PerformInteraction", Methods::METHOD_PERFORMINTERACTION_RESPONSE));
@@ -135,22 +135,22 @@ namespace
                 methodId = item->second;
             }
 
-            NsAppLinkRPC::ALRPCResponse* response = NULL;
+            NsSmartDeviceLinkRPC::SDLRPCResponse* response = NULL;
             switch (methodId)
             {
             case Methods::METHOD_PERFORMINTERACTION_RESPONSE:
-                response = new NsAppLinkRPC::PerformInteraction_response();
+                response = new NsSmartDeviceLinkRPC::PerformInteraction_response();
                 break;
             case Methods::METHOD_REGISTERAPPINTERFACE_RESPONSE:
-                response = new NsAppLinkRPC::RegisterAppInterface_response();
+                response = new NsSmartDeviceLinkRPC::RegisterAppInterface_response();
                 break;
             default:
-                response = new NsAppLinkRPC::ALRPCResponse(V1, methodId);
+                response = new NsSmartDeviceLinkRPC::SDLRPCResponse(V1, methodId);
                 break;
             }
 
             response->set_success(false);
-            response->set_resultCode(NsAppLinkRPCV2::Result::INVALID_DATA);
+            response->set_resultCode(NsSmartDeviceLinkRPCV2::Result::INVALID_DATA);
             response->setCorrelationID(correlationID);
             return response;
         }
@@ -189,7 +189,7 @@ void JSONHandler::setRPCMessagesObserver(IRPCMessagesObserver* messagesObserver)
     mMessagesObserver = messagesObserver;
 }
 
-void JSONHandler::sendRPCMessage(const NsAppLinkRPC::ALRPCMessage* message, int connectionKey)
+void JSONHandler::sendRPCMessage(const NsSmartDeviceLinkRPC::SDLRPCMessage* message, int connectionKey)
 {
     LOG4CPLUS_INFO(mLogger, "An outgoing message has been received");
     if (message)
@@ -245,7 +245,7 @@ void* JSONHandler::waitForIncomingMessages(void* params)
             LOG4CPLUS_INFO(mLogger, "Incoming mobile message received.");
             const NsProtocolHandler::AppLinkRawMessage* message = handler -> mIncomingMessages.pop();
 
-            NsAppLinkRPC::ALRPCMessage* currentMessage = 0;
+            NsSmartDeviceLinkRPC::SDLRPCMessage* currentMessage = 0;
 
             LOG4CPLUS_INFO_EXT(mLogger, "Message of protocol version " << message -> getProtocolVersion());
 
@@ -285,7 +285,7 @@ void* JSONHandler::waitForIncomingMessages(void* params)
     }
 }
 
-NsAppLinkRPC::ALRPCMessage* JSONHandler::handleIncomingMessageProtocolV1(
+NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV1(
     const NsProtocolHandler::AppLinkRawMessage* message)
 {
     std::string jsonMessage = std::string((const char*)message->getData(), message->getDataSize());
@@ -298,15 +298,15 @@ NsAppLinkRPC::ALRPCMessage* JSONHandler::handleIncomingMessageProtocolV1(
 
     std::string jsonCleanMessage = clearEmptySpaces(jsonMessage);
 
-    NsAppLinkRPC::ALRPCMessage* messageObject = NsAppLinkRPC::Marshaller::fromString(jsonCleanMessage);
+    NsSmartDeviceLinkRPC::SDLRPCMessage* messageObject = NsSmartDeviceLinkRPC::Marshaller::fromString(jsonCleanMessage);
     LOG4CPLUS_INFO_EXT(mLogger, "Received a message from mobile side: "
-                       << std::endl << NsAppLinkRPC::Marshaller::toJSON(messageObject));
+                       << std::endl << NsSmartDeviceLinkRPC::Marshaller::toJSON(messageObject));
 
     if (!messageObject)
     {
         LOG4CPLUS_WARN(mLogger, "Invalid mobile message received.");
 
-        NsAppLinkRPC::ALRPCResponse* response = InvalidResponseFactory::getResponse(jsonMessage);
+        NsSmartDeviceLinkRPC::SDLRPCResponse* response = InvalidResponseFactory::getResponse(jsonMessage);
         if (!response)
         {
             LOG4CPLUS_ERROR(mLogger, "new NsAppLinkRPC::ALRPCMessage failed...");
@@ -320,7 +320,7 @@ NsAppLinkRPC::ALRPCMessage* JSONHandler::handleIncomingMessageProtocolV1(
     return messageObject;
 }
 
-NsAppLinkRPC::ALRPCMessage* JSONHandler::handleIncomingMessageProtocolV2(
+NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV2(
     const NsProtocolHandler::AppLinkRawMessage* message)
 {
     unsigned char* receivedData = message->getData();
@@ -397,20 +397,20 @@ NsAppLinkRPC::ALRPCMessage* JSONHandler::handleIncomingMessageProtocolV2(
 
     LOG4CPLUS_INFO_EXT(mLogger, "Added params: " << std::endl << tempSolution);
 
-    /*NsAppLinkRPC::ALRPCMessage * messageObject = NsAppLinkRPCV2::Marshaller::fromString(
+    /*NsSmartDeviceLinkRPC::SDLRPCMessage * messageObject = NsSmartDeviceLinkRPCV2::Marshaller::fromString(
         jsonCleanMessage,
-        static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(functionId),
-        static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(rpcType) );*/
+        static_cast<NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal>(functionId),
+        static_cast<NsSmartDeviceLinkRPCV2::messageType::messageTypeInternal>(rpcType) );*/
 
-    NsAppLinkRPC::ALRPCMessage* messageObject = NsAppLinkRPCV2::Marshaller::fromJSON(
+    NsSmartDeviceLinkRPC::SDLRPCMessage* messageObject = NsSmartDeviceLinkRPCV2::Marshaller::fromJSON(
                 tempSolution,
-                static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(functionId),
-                static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(rpcType));
+                static_cast<NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal>(functionId),
+                static_cast<NsSmartDeviceLinkRPCV2::messageType::messageTypeInternal>(rpcType));
 
     //LOG4CPLUS_INFO_EXT(mLogger, "Received a message from mobile side: " <<
-    // std::endl << NsAppLinkRPCV2::Marshaller::toJSON(
-    //   messageObject, static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(functionId),
-    //   static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(rpcType)));
+    // std::endl << NsSmartDeviceLinkRPCV2::Marshaller::toJSON(
+    //   messageObject, static_cast<NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal>(functionId),
+    //   static_cast<NsSmartDeviceLinkRPCV2::messageType::messageTypeInternal>(rpcType)));
 
     if (message -> getDataSize() > offset + jsonSize)
     {
@@ -424,8 +424,8 @@ NsAppLinkRPC::ALRPCMessage* JSONHandler::handleIncomingMessageProtocolV2(
     if (!messageObject)
     {
         LOG4CPLUS_WARN(mLogger, "Invalid mobile message received.");
-        NsAppLinkRPC::ALRPCResponse* response = InvalidResponseFactory::getResponse(
-                static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(functionId), correlationId);
+        NsSmartDeviceLinkRPC::SDLRPCResponse* response = InvalidResponseFactory::getResponse(
+                static_cast<NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal>(functionId), correlationId);
         if (!response)
         {
             LOG4CPLUS_ERROR(mLogger, "new NsAppLinkRPC::ALRPCMessage failed...");
@@ -459,8 +459,8 @@ void* JSONHandler::waitForOutgoingMessages(void* params)
     {
         while (! handler -> mOutgoingMessages.empty())
         {
-            std::pair<int, const NsAppLinkRPC::ALRPCMessage*> messagePair = handler -> mOutgoingMessages.pop();
-            const NsAppLinkRPC::ALRPCMessage*   message = messagePair.second;
+            std::pair<int, const NsSmartDeviceLinkRPC::SDLRPCMessage*> messagePair = handler -> mOutgoingMessages.pop();
+            const NsSmartDeviceLinkRPC::SDLRPCMessage*   message = messagePair.second;
             LOG4CPLUS_INFO(mLogger, "Outgoing mobile message " << message->getMethodId() << " received.");
 
             NsProtocolHandler::AppLinkRawMessage* msgToProtocolHandler = 0;
@@ -471,9 +471,9 @@ void* JSONHandler::waitForOutgoingMessages(void* params)
             else if (message -> getProtocolVersion() == 2)
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "method id "
-                   << static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId())
+                   << static_cast<NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId())
                    << "; message type "
-                   << static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()));
+                   << static_cast<NsSmartDeviceLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()));
 
                 msgToProtocolHandler = handler -> handleOutgoingMessageProtocolV2(messagePair.first, message);
             }
@@ -502,11 +502,11 @@ void* JSONHandler::waitForOutgoingMessages(void* params)
 }
 
 NsProtocolHandler::AppLinkRawMessage* JSONHandler::handleOutgoingMessageProtocolV1(int connectionKey,
-        const NsAppLinkRPC::ALRPCMessage*   message)
+        const NsSmartDeviceLinkRPC::SDLRPCMessage*   message)
 {
     LOG4CPLUS_INFO_EXT(mLogger, "handling a message " << message->getMethodId() << " protocol 1");
-    LOG4CPLUS_INFO_EXT(mLogger, "message text: " << std::endl << NsAppLinkRPC::Marshaller::toJSON(message));
-    std::string messageString = NsAppLinkRPC::Marshaller::toString(message);
+    LOG4CPLUS_INFO_EXT(mLogger, "message text: " << std::endl << NsSmartDeviceLinkRPC::Marshaller::toJSON(message));
+    std::string messageString = NsSmartDeviceLinkRPC::Marshaller::toString(message);
 
     if (messageString.length() == 0)
     {
@@ -527,16 +527,16 @@ NsProtocolHandler::AppLinkRawMessage* JSONHandler::handleOutgoingMessageProtocol
 }
 
 NsProtocolHandler::AppLinkRawMessage* JSONHandler::handleOutgoingMessageProtocolV2(int connectionKey,
-        const NsAppLinkRPC::ALRPCMessage*   message)
+        const NsSmartDeviceLinkRPC::SDLRPCMessage*   message)
 {
     LOG4CPLUS_INFO_EXT(mLogger, "handling a message " << message->getMethodId() << " protocol 2");
-    Json::Value json = NsAppLinkRPCV2::Marshaller::toJSON(message,
-                       static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId()),
-                       static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()));
+    Json::Value json = NsSmartDeviceLinkRPCV2::Marshaller::toJSON(message,
+                       static_cast<NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId()),
+                       static_cast<NsSmartDeviceLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()));
 
     if (json.isNull())
     {
-        if (NsAppLinkRPCV2::FunctionID::FunctionIDInternal::OnAudioPassThruID == message->getMethodId())
+        if (NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal::OnAudioPassThruID == message->getMethodId())
         {
             LOG4CPLUS_INFO_EXT(mLogger, "Handling OnAudioPassThru message with 0 length!");
             // akara
@@ -601,9 +601,9 @@ NsProtocolHandler::AppLinkRawMessage* JSONHandler::handleOutgoingMessageProtocol
 
     //TODO (pvysh): temporary solution, will be fixed after changes to codegeneration
     Json::FastWriter writer;
-    std::string messageString = writer.write(json["parameters"]);/*NsAppLinkRPCV2::Marshaller::toString( message,
-                        static_cast<NsAppLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId()),
-                        static_cast<NsAppLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()) );*/
+    std::string messageString = writer.write(json["parameters"]);/*NsSmartDeviceLinkRPCV2::Marshaller::toString( message,
+                        static_cast<NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId()),
+                        static_cast<NsSmartDeviceLinkRPCV2::messageType::messageTypeInternal>(message -> getMessageType()) );*/
 
     //LOG4CPLUS_INFO_EXT(mLogger, "message text: " << std::endl << json );
     if (messageString.length() == 0)

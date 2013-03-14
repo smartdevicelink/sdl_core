@@ -1,7 +1,7 @@
 #ifndef ALRPC_H
 #define ALRPC_H
 
-#include "JSONHandler/ALRPCObjects/Marshaller.h"
+#include "JSONHandler/SDLRPCObjects/Marshaller.h"
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/JSONHandler.h"
 #include "LoggerHelper.hpp"
@@ -49,7 +49,7 @@ namespace NsMobileEmulator
          * \param connectionId ID of the connection the message was received within.
          * \param sessionId ID of the session the message was received within.
          */
-        virtual void messageReceivedFromHmiCallback( const NsAppLinkRPC::ALRPCMessage * message, int connectionId, unsigned char sessionId )=0;
+        virtual void messageReceivedFromHmiCallback( const NsSmartDeviceLinkRPC::SDLRPCMessage * message, int connectionId, unsigned char sessionId )=0;
 
     protected:
 
@@ -60,7 +60,7 @@ namespace NsMobileEmulator
          * \param connectionId ID of the connection the message was received within.
          * \param sessionId ID of the session the message was received within.
          */
-        virtual void sendRPCMessage( const NsAppLinkRPC::ALRPCMessage * message, int connectionId, unsigned char sessionId );
+        virtual void sendRPCMessage( const NsSmartDeviceLinkRPC::SDLRPCMessage * message, int connectionId, unsigned char sessionId );
 
         /**
           *\brief For logging.

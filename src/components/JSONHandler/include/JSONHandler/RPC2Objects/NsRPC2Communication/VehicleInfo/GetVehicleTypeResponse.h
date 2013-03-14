@@ -3,7 +3,7 @@
 
 #include "JSONHandler/RPC2Response.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/VehicleType.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/VehicleType.h"
 
 /*
   interface	NsRPC2Communication::VehicleInfo
@@ -32,18 +32,18 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const NsAppLinkRPCV2::VehicleType& get_vehicleType(void);
+      const NsSmartDeviceLinkRPCV2::VehicleType& get_vehicleType(void);
 
 
 // setters
-      bool set_vehicleType(const NsAppLinkRPCV2::VehicleType& vehicleType);
+      bool set_vehicleType(const NsSmartDeviceLinkRPCV2::VehicleType& vehicleType);
 
 
     private:
 
       friend class GetVehicleTypeResponseMarshaller;
 
-      NsAppLinkRPCV2::VehicleType vehicleType;
+      NsSmartDeviceLinkRPCV2::VehicleType vehicleType;
 
     };
   }

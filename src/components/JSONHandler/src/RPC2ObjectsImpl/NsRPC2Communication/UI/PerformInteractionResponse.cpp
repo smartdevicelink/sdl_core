@@ -17,7 +17,7 @@ PerformInteractionResponse& PerformInteractionResponse::operator =(const Perform
   if(choiceID)  delete choiceID;
   choiceID= c.choiceID ? new unsigned int(c.choiceID[0]) : 0;
   if(triggerSource)  delete triggerSource;
-  triggerSource= c.triggerSource ? new NsAppLinkRPCV2::TriggerSource(c.triggerSource[0]) : 0;
+  triggerSource= c.triggerSource ? new NsSmartDeviceLinkRPCV2::TriggerSource(c.triggerSource[0]) : 0;
   return *this;
 }
 
@@ -61,15 +61,15 @@ void PerformInteractionResponse::reset_choiceID(void)
   choiceID=0;
 }
 
-const NsAppLinkRPCV2::TriggerSource* PerformInteractionResponse::get_triggerSource(void)
+const NsSmartDeviceLinkRPCV2::TriggerSource* PerformInteractionResponse::get_triggerSource(void)
 {
   return triggerSource;
 }
 
-bool PerformInteractionResponse::set_triggerSource(const NsAppLinkRPCV2::TriggerSource& triggerSource_)
+bool PerformInteractionResponse::set_triggerSource(const NsSmartDeviceLinkRPCV2::TriggerSource& triggerSource_)
 {
   if(triggerSource)  delete triggerSource;
-  triggerSource=new NsAppLinkRPCV2::TriggerSource(triggerSource_);
+  triggerSource=new NsSmartDeviceLinkRPCV2::TriggerSource(triggerSource_);
   return true;
 }
 

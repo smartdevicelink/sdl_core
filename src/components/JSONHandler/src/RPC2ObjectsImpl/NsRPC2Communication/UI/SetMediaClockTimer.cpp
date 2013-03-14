@@ -15,7 +15,7 @@ using namespace NsRPC2Communication::UI;
 SetMediaClockTimer& SetMediaClockTimer::operator =(const SetMediaClockTimer& c)
 {
   if(startTime)  delete startTime;
-  startTime= c.startTime ? new NsAppLinkRPCV2::StartTime(c.startTime[0]) : 0;
+  startTime= c.startTime ? new NsSmartDeviceLinkRPCV2::StartTime(c.startTime[0]) : 0;
   updateMode=c.updateMode;
   appId=c.appId;
   return *this;
@@ -41,15 +41,15 @@ SetMediaClockTimer::SetMediaClockTimer(const SetMediaClockTimer& c) : RPC2Reques
 }
 
 
-const NsAppLinkRPCV2::StartTime* SetMediaClockTimer::get_startTime(void)
+const NsSmartDeviceLinkRPCV2::StartTime* SetMediaClockTimer::get_startTime(void)
 {
   return startTime;
 }
 
-bool SetMediaClockTimer::set_startTime(const NsAppLinkRPCV2::StartTime& startTime_)
+bool SetMediaClockTimer::set_startTime(const NsSmartDeviceLinkRPCV2::StartTime& startTime_)
 {
   if(startTime)  delete startTime;
-  startTime=new NsAppLinkRPCV2::StartTime(startTime_);
+  startTime=new NsSmartDeviceLinkRPCV2::StartTime(startTime_);
   return true;
 }
 
@@ -59,12 +59,12 @@ void SetMediaClockTimer::reset_startTime(void)
   startTime=0;
 }
 
-const NsAppLinkRPCV2::UpdateMode& SetMediaClockTimer::get_updateMode(void)
+const NsSmartDeviceLinkRPCV2::UpdateMode& SetMediaClockTimer::get_updateMode(void)
 {
   return updateMode;
 }
 
-bool SetMediaClockTimer::set_updateMode(const NsAppLinkRPCV2::UpdateMode& updateMode_)
+bool SetMediaClockTimer::set_updateMode(const NsSmartDeviceLinkRPCV2::UpdateMode& updateMode_)
 {
   updateMode=updateMode_;
   return true;

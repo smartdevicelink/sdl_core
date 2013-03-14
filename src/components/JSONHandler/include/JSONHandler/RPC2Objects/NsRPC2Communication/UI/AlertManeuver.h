@@ -4,8 +4,8 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/SoftButton.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/TTSChunk.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/SoftButton.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -34,19 +34,19 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
 
 // getters
-      const std::vector< NsAppLinkRPCV2::TTSChunk>& get_ttsChunks(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& get_ttsChunks(void);
 
-      const std::vector< NsAppLinkRPCV2::SoftButton>& get_softButtons(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& get_softButtons(void);
 
       int get_appId(void);
 
 
 // setters
 /// 1 <= size <= 100
-      bool set_ttsChunks(const std::vector< NsAppLinkRPCV2::TTSChunk>& ttsChunks);
+      bool set_ttsChunks(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& ttsChunks);
 
 /// 0 <= size <= 3
-      bool set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons);
+      bool set_softButtons(const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& softButtons);
 
       bool set_appId(int appId);
 
@@ -55,8 +55,8 @@ namespace NsRPC2Communication
 
       friend class AlertManeuverMarshaller;
 
-      std::vector< NsAppLinkRPCV2::TTSChunk> ttsChunks;
-      std::vector< NsAppLinkRPCV2::SoftButton> softButtons;
+      std::vector< NsSmartDeviceLinkRPCV2::TTSChunk> ttsChunks;
+      std::vector< NsSmartDeviceLinkRPCV2::SoftButton> softButtons;
       int appId;
 
     };

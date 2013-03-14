@@ -10,7 +10,7 @@
 #include "ConnectionHandler/IConnectionHandlerObserver.hpp"
 
 class JSONHandler;
-class ALRPCMessage;
+class SDLRPCMessage;
 class JSONRPC2Handler;
 
 namespace log4cplus
@@ -52,7 +52,7 @@ namespace NsAppManager
          * \param message the received message
          * \param connectionKey key of a connection associated with application that sent the message
          */
-        virtual void onMessageReceivedCallback( NsAppLinkRPC::ALRPCMessage * message, int connectionKey );
+        virtual void onMessageReceivedCallback( NsSmartDeviceLinkRPC::SDLRPCMessage * message, int connectionKey );
 
         /**
          * \brief callback to proceed received RPC2 command

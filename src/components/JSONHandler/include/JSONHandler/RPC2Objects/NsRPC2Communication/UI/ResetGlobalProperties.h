@@ -4,7 +4,7 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/GlobalProperty.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/GlobalProperty.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -33,14 +33,14 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const std::vector< NsAppLinkRPCV2::GlobalProperty>& get_properties(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::GlobalProperty>& get_properties(void);
 
       int get_appId(void);
 
 
 // setters
 /// 1 <= size <= 100
-      bool set_properties(const std::vector< NsAppLinkRPCV2::GlobalProperty>& properties);
+      bool set_properties(const std::vector< NsSmartDeviceLinkRPCV2::GlobalProperty>& properties);
 
       bool set_appId(int appId);
 
@@ -49,7 +49,7 @@ namespace NsRPC2Communication
 
       friend class ResetGlobalPropertiesMarshaller;
 
-      std::vector< NsAppLinkRPCV2::GlobalProperty> properties;
+      std::vector< NsSmartDeviceLinkRPCV2::GlobalProperty> properties;
       int appId;
 
     };

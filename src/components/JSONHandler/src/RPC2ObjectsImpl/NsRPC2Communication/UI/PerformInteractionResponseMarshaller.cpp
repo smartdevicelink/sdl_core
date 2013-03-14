@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/PerformInteractionResponse.h"
-#include "../src/ALRPCObjectsImpl/V2/TriggerSourceMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/TriggerSourceMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/PerformInteractionResponseMarshaller.h"
 
 /*
@@ -47,7 +47,7 @@ bool PerformInteractionResponseMarshaller::checkIntegrityConst(const PerformInte
 {
   if(s.choiceID && (s.choiceID[0]>2000000000))  return false;
 
-  if(s.triggerSource && (!NsAppLinkRPCV2::TriggerSourceMarshaller::checkIntegrityConst(s.triggerSource[0])))  return false;
+  if(s.triggerSource && (!NsSmartDeviceLinkRPCV2::TriggerSourceMarshaller::checkIntegrityConst(s.triggerSource[0])))  return false;
 
   return true;
 }
@@ -62,14 +62,14 @@ Json::Value PerformInteractionResponseMarshaller::toJSON(const PerformInteractio
   json["jsonrpc"]=Json::Value("2.0");
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
-  NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
-  json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
+  NsSmartDeviceLinkRPCV2::Result r(static_cast<NsSmartDeviceLinkRPCV2::Result::ResultInternal>(e.getResult()));
+  json["result"]["resultCode"]=NsSmartDeviceLinkRPCV2::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("UI.PerformInteractionResponse");
 
   if(e.choiceID)
     json["result"]["choiceID"]=Json::Value(e.choiceID[0]);;
   if(e.triggerSource)
-    json["result"]["triggerSource"]=NsAppLinkRPCV2::TriggerSourceMarshaller::toJSON(e.triggerSource[0]);;
+    json["result"]["triggerSource"]=NsSmartDeviceLinkRPCV2::TriggerSourceMarshaller::toJSON(e.triggerSource[0]);;
   return json;
 }
 
@@ -88,12 +88,12 @@ bool PerformInteractionResponseMarshaller::fromJSON(const Json::Value& json,Perf
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    NsAppLinkRPCV2::Result r;
+    NsSmartDeviceLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("UI.PerformInteractionResponse")) return false;
 
-    if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
+    if(!NsSmartDeviceLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
     if(c.choiceID)  delete c.choiceID;
     c.choiceID=0;
@@ -110,8 +110,8 @@ bool PerformInteractionResponseMarshaller::fromJSON(const Json::Value& json,Perf
     c.triggerSource=0;
     if(js.isMember("triggerSource"))
     {
-      c.triggerSource=new NsAppLinkRPCV2::TriggerSource();
-      if(!NsAppLinkRPCV2::TriggerSourceMarshaller::fromJSON(js["triggerSource"],c.triggerSource[0]))  return false;
+      c.triggerSource=new NsSmartDeviceLinkRPCV2::TriggerSource();
+      if(!NsSmartDeviceLinkRPCV2::TriggerSourceMarshaller::fromJSON(js["triggerSource"],c.triggerSource[0]))  return false;
     }
 
   }

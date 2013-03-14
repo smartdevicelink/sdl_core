@@ -5,7 +5,7 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/SoftButton.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/SoftButton.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -37,7 +37,7 @@ namespace NsRPC2Communication
       const std::string& get_scrollableMessageBody(void);
 
       const unsigned int* get_timeout(void);
-      const std::vector< NsAppLinkRPCV2::SoftButton>* get_softButtons(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>* get_softButtons(void);
       int get_appId(void);
 
 
@@ -51,7 +51,7 @@ namespace NsRPC2Communication
       void reset_timeout(void);
 
 /// 0 <= size <= 8
-      bool set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons);
+      bool set_softButtons(const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& softButtons);
 
       void reset_softButtons(void);
 
@@ -64,7 +64,7 @@ namespace NsRPC2Communication
 
       std::string scrollableMessageBody;
       unsigned int* timeout;
-      std::vector< NsAppLinkRPCV2::SoftButton>* softButtons;
+      std::vector< NsSmartDeviceLinkRPCV2::SoftButton>* softButtons;
       int appId;
 
     };

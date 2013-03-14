@@ -5,11 +5,11 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/InteractionMode.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/TTSChunk.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/VrHelpItem.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/TTSChunk.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/InteractionMode.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/TTSChunk.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/TTSChunk.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/VrHelpItem.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -40,16 +40,16 @@ namespace NsRPC2Communication
 // getters
       const std::string& get_initialText(void);
 
-      const std::vector< NsAppLinkRPCV2::TTSChunk>& get_initialPrompt(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& get_initialPrompt(void);
 
-      const NsAppLinkRPCV2::InteractionMode& get_interactionMode(void);
+      const NsSmartDeviceLinkRPCV2::InteractionMode& get_interactionMode(void);
 
       const std::vector< unsigned int>& get_interactionChoiceSetIDList(void);
 
-      const std::vector< NsAppLinkRPCV2::TTSChunk>* get_helpPrompt(void);
-      const std::vector< NsAppLinkRPCV2::TTSChunk>* get_timeoutPrompt(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* get_helpPrompt(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* get_timeoutPrompt(void);
       const unsigned int* get_timeout(void);
-      const std::vector< NsAppLinkRPCV2::VrHelpItem>* get_vrHelp(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::VrHelpItem>* get_vrHelp(void);
       int get_appId(void);
 
 
@@ -58,20 +58,20 @@ namespace NsRPC2Communication
       bool set_initialText(const std::string& initialText);
 
 /// 1 <= size <= 100
-      bool set_initialPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& initialPrompt);
+      bool set_initialPrompt(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& initialPrompt);
 
-      bool set_interactionMode(const NsAppLinkRPCV2::InteractionMode& interactionMode);
+      bool set_interactionMode(const NsSmartDeviceLinkRPCV2::InteractionMode& interactionMode);
 
 /// interactionChoiceSetIDList[] <= 2000000000 ; 1 <= size <= 100
       bool set_interactionChoiceSetIDList(const std::vector< unsigned int>& interactionChoiceSetIDList);
 
 /// 1 <= size <= 100
-      bool set_helpPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& helpPrompt);
+      bool set_helpPrompt(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& helpPrompt);
 
       void reset_helpPrompt(void);
 
 /// 1 <= size <= 100
-      bool set_timeoutPrompt(const std::vector< NsAppLinkRPCV2::TTSChunk>& timeoutPrompt);
+      bool set_timeoutPrompt(const std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>& timeoutPrompt);
 
       void reset_timeoutPrompt(void);
 
@@ -81,7 +81,7 @@ namespace NsRPC2Communication
       void reset_timeout(void);
 
 /// 1 <= size <= 100
-      bool set_vrHelp(const std::vector< NsAppLinkRPCV2::VrHelpItem>& vrHelp);
+      bool set_vrHelp(const std::vector< NsSmartDeviceLinkRPCV2::VrHelpItem>& vrHelp);
 
       void reset_vrHelp(void);
 
@@ -93,13 +93,13 @@ namespace NsRPC2Communication
       friend class PerformInteractionMarshaller;
 
       std::string initialText;
-      std::vector< NsAppLinkRPCV2::TTSChunk> initialPrompt;
-      NsAppLinkRPCV2::InteractionMode interactionMode;
+      std::vector< NsSmartDeviceLinkRPCV2::TTSChunk> initialPrompt;
+      NsSmartDeviceLinkRPCV2::InteractionMode interactionMode;
       std::vector< unsigned int> interactionChoiceSetIDList;
-      std::vector< NsAppLinkRPCV2::TTSChunk>* helpPrompt;
-      std::vector< NsAppLinkRPCV2::TTSChunk>* timeoutPrompt;
+      std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* helpPrompt;
+      std::vector< NsSmartDeviceLinkRPCV2::TTSChunk>* timeoutPrompt;
       unsigned int* timeout;
-      std::vector< NsAppLinkRPCV2::VrHelpItem>* vrHelp;
+      std::vector< NsSmartDeviceLinkRPCV2::VrHelpItem>* vrHelp;
       int appId;
 
     };

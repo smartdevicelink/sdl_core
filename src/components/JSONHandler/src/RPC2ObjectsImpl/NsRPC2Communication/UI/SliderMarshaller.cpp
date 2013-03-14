@@ -1,5 +1,5 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/Slider.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/SliderMarshaller.h"
 
 /*

@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/VehicleInfo/GetDTCsResponse.h"
-#include "../src/ALRPCObjectsImpl/V2/DTCMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/DTCMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/VehicleInfo/GetDTCsResponseMarshaller.h"
 
 /*
@@ -65,8 +65,8 @@ Json::Value GetDTCsResponseMarshaller::toJSON(const GetDTCsResponse& e)
   json["jsonrpc"]=Json::Value("2.0");
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
-  NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
-  json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
+  NsSmartDeviceLinkRPCV2::Result r(static_cast<NsSmartDeviceLinkRPCV2::Result::ResultInternal>(e.getResult()));
+  json["result"]["resultCode"]=NsSmartDeviceLinkRPCV2::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("VehicleInfo.GetDTCsResponse");
 
   if(e.dtcList)
@@ -75,7 +75,7 @@ Json::Value GetDTCsResponseMarshaller::toJSON(const GetDTCsResponse& e)
     Json::Value j=Json::Value(Json::arrayValue);
     j.resize(i);
     while(i--)
-      j[i]=NsAppLinkRPCV2::DTCMarshaller::toJSON(e.dtcList[0][i]);
+      j[i]=NsSmartDeviceLinkRPCV2::DTCMarshaller::toJSON(e.dtcList[0][i]);
 
     json["result"]["dtcList"]=j;
   }
@@ -97,12 +97,12 @@ bool GetDTCsResponseMarshaller::fromJSON(const Json::Value& json,GetDTCsResponse
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    NsAppLinkRPCV2::Result r;
+    NsSmartDeviceLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("VehicleInfo.GetDTCsResponse")) return false;
 
-    if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
+    if(!NsSmartDeviceLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
     if(c.dtcList)  delete c.dtcList;
     c.dtcList=0;
@@ -113,11 +113,11 @@ bool GetDTCsResponseMarshaller::fromJSON(const Json::Value& json,GetDTCsResponse
       if(i<1)  return false;
       if(i>100)  return false;
 
-      c.dtcList=new std::vector<NsAppLinkRPCV2::DTC>();
+      c.dtcList=new std::vector<NsSmartDeviceLinkRPCV2::DTC>();
       c.dtcList->resize(js["dtcList"].size());
 
       while(i--)
-        if(!NsAppLinkRPCV2::DTCMarshaller::fromJSON(js["dtcList"][i],c.dtcList[0][i]))  return false;
+        if(!NsSmartDeviceLinkRPCV2::DTCMarshaller::fromJSON(js["dtcList"][i],c.dtcList[0][i]))  return false;
     }
 
 

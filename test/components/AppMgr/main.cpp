@@ -7,7 +7,7 @@
 #include "JSONHandler/ALRPCRequest.h"
 #include "JSONHandler/ALRPCResponse.h"
 #include "JSONHandler/ALRPCNotification.h"
-#include "JSONHandler/ALRPCObjects/Marshaller.h"
+#include "JSONHandler/SDLRPCObjects/Marshaller.h"
 #include "JSONHandler/RPC2Command.h"
 #include "JSONHandler/RPC2Request.h"
 #include "JSONHandler/RPC2Response.h"
@@ -33,17 +33,17 @@
 
 Logger logger = Logger::getInstance(LOG4CPLUS_TEXT("testAppMgr"));
 
-void OnMobileMessageReceived(const NsAppLinkRPC::ALRPCMessage* msg, int connectionId, unsigned char sessionId)
+void OnMobileMessageReceived(const NsSmartDeviceLinkRPC::SDLRPCMessage* msg, int connectionId, unsigned char sessionId)
 {
     LOG4CPLUS_INFO_EXT(logger, " Mobile RPC message received: message " << msg->getMethodId() << " connection " << connectionId << " session " << (uint)sessionId);
 }
 
 int basicWorkflow(NsTest::TestEnvironment& jsonHandler)
 {
-    NsAppLinkRPC::RegisterAppInterface_request* registerApp = new NsAppLinkRPC::RegisterAppInterface_request();
+    NsSmartDeviceLinkRPC::RegisterAppInterface_request* registerApp = new NsSmartDeviceLinkRPC::RegisterAppInterface_request();
     registerApp->set_appName("MyNewFuckingTestApp");
     registerApp->set_isMediaApplication(true);
-    registerApp->set_languageDesired(NsAppLinkRPC::Language::EN_US);
+    registerApp->set_languageDesired(NsSmartDeviceLinkRPC::Language::EN_US);
     registerApp->set_ngnMediaScreenAppName("NgnMediaScreenAppName");
     registerApp->set_usesVehicleData(false);
     std::vector<std::string> vrSynonyms;

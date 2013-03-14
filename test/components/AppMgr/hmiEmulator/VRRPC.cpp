@@ -105,7 +105,7 @@ RPC(address, port, std::string("VR"))
               rc.addVrCommand( object->get_cmdId(), object->get_vrCommands() );
               NsRPC2Communication::VR::AddCommandResponse* response = new NsRPC2Communication::VR::AddCommandResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }
@@ -116,7 +116,7 @@ RPC(address, port, std::string("VR"))
               rc.removeVrCommand(object->get_cmdId());
               NsRPC2Communication::VR::DeleteCommandResponse* response = new NsRPC2Communication::VR::DeleteCommandResponse;
               response->setId(object->getId());
-              response->setResult(NsAppLinkRPC::Result::SUCCESS);
+              response->setResult(NsSmartDeviceLinkRPC::Result::SUCCESS);
               sendRPC2MessageToMobileSide(response);
               return;
           }

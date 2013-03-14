@@ -37,12 +37,12 @@ GetVehicleData::GetVehicleData(const GetVehicleData& c) : RPC2Request(Marshaller
 }
 
 
-const NsAppLinkRPCV2::VehicleDataType& GetVehicleData::get_dataType(void)
+const NsSmartDeviceLinkRPCV2::VehicleDataType& GetVehicleData::get_dataType(void)
 {
   return dataType;
 }
 
-bool GetVehicleData::set_dataType(const NsAppLinkRPCV2::VehicleDataType& dataType_)
+bool GetVehicleData::set_dataType(const NsSmartDeviceLinkRPCV2::VehicleDataType& dataType_)
 {
   dataType=dataType_;
   return true;

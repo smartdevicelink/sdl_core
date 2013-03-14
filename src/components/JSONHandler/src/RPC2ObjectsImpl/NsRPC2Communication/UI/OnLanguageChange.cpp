@@ -36,12 +36,12 @@ OnLanguageChange::OnLanguageChange(const OnLanguageChange& c) : RPC2Notification
 }
 
 
-const NsAppLinkRPCV2::Language& OnLanguageChange::get_hmiDisplayLanguage(void)
+const NsSmartDeviceLinkRPCV2::Language& OnLanguageChange::get_hmiDisplayLanguage(void)
 {
   return hmiDisplayLanguage;
 }
 
-bool OnLanguageChange::set_hmiDisplayLanguage(const NsAppLinkRPCV2::Language& hmiDisplayLanguage_)
+bool OnLanguageChange::set_hmiDisplayLanguage(const NsSmartDeviceLinkRPCV2::Language& hmiDisplayLanguage_)
 {
   hmiDisplayLanguage=hmiDisplayLanguage_;
   return true;

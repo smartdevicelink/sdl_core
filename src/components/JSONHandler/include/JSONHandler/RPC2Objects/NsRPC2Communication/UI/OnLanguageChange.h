@@ -3,7 +3,7 @@
 
 #include "JSONHandler/RPC2Notification.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/Language.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/Language.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -32,18 +32,18 @@ namespace NsRPC2Communication
       bool checkIntegrity(void);
     
 // getters
-      const NsAppLinkRPCV2::Language& get_hmiDisplayLanguage(void);
+      const NsSmartDeviceLinkRPCV2::Language& get_hmiDisplayLanguage(void);
 
 
 // setters
-      bool set_hmiDisplayLanguage(const NsAppLinkRPCV2::Language& hmiDisplayLanguage);
+      bool set_hmiDisplayLanguage(const NsSmartDeviceLinkRPCV2::Language& hmiDisplayLanguage);
 
 
     private:
 
       friend class OnLanguageChangeMarshaller;
 
-      NsAppLinkRPCV2::Language hmiDisplayLanguage;
+      NsSmartDeviceLinkRPCV2::Language hmiDisplayLanguage;
 
     };
   }

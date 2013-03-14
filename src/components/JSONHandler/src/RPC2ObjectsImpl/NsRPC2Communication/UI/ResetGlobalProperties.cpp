@@ -37,12 +37,12 @@ ResetGlobalProperties::ResetGlobalProperties(const ResetGlobalProperties& c) : R
 }
 
 
-const std::vector< NsAppLinkRPCV2::GlobalProperty>& ResetGlobalProperties::get_properties(void)
+const std::vector< NsSmartDeviceLinkRPCV2::GlobalProperty>& ResetGlobalProperties::get_properties(void)
 {
   return properties;
 }
 
-bool ResetGlobalProperties::set_properties(const std::vector< NsAppLinkRPCV2::GlobalProperty>& properties_)
+bool ResetGlobalProperties::set_properties(const std::vector< NsSmartDeviceLinkRPCV2::GlobalProperty>& properties_)
 {
   properties=properties_;
   return true;

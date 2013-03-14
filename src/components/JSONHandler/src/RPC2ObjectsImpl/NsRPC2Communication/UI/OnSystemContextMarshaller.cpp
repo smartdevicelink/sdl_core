@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/OnSystemContext.h"
-#include "../src/ALRPCObjectsImpl/V2/SystemContextMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/SystemContextMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/OnSystemContextMarshaller.h"
 
 /*
@@ -45,7 +45,7 @@ const std::string OnSystemContextMarshaller::toString(const OnSystemContext& e)
 
 bool OnSystemContextMarshaller::checkIntegrityConst(const OnSystemContext& s)
 {
-  if(!NsAppLinkRPCV2::SystemContextMarshaller::checkIntegrityConst(s.systemContext))  return false;
+  if(!NsSmartDeviceLinkRPCV2::SystemContextMarshaller::checkIntegrityConst(s.systemContext))  return false;
 
   return true;
 }
@@ -61,7 +61,7 @@ Json::Value OnSystemContextMarshaller::toJSON(const OnSystemContext& e)
   json["method"]=Json::Value("UI.OnSystemContext");
   json["params"]=Json::Value(Json::objectValue);
 
-  json["params"]["systemContext"]=NsAppLinkRPCV2::SystemContextMarshaller::toJSON(e.systemContext);;
+  json["params"]["systemContext"]=NsSmartDeviceLinkRPCV2::SystemContextMarshaller::toJSON(e.systemContext);;
   return json;
 }
 
@@ -78,7 +78,7 @@ bool OnSystemContextMarshaller::fromJSON(const Json::Value& json,OnSystemContext
     Json::Value js=json["params"];
     if(!js.isObject())  return false;
 
-    if(!js.isMember("systemContext") || !NsAppLinkRPCV2::SystemContextMarshaller::fromJSON(js["systemContext"],c.systemContext))  return false;
+    if(!js.isMember("systemContext") || !NsSmartDeviceLinkRPCV2::SystemContextMarshaller::fromJSON(js["systemContext"],c.systemContext))  return false;
 
   }
   catch(...)

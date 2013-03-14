@@ -39,7 +39,7 @@ namespace NsMobileEmulator
      * \param connectionId ID of the connection the message was received within.
      * \param sessionId ID of the session the message was received within.
      */
-    void ALRPC::sendRPCMessage(const NsAppLinkRPC::ALRPCMessage *message, int connectionId, unsigned char sessionId)
+    void ALRPC::sendRPCMessage(const NsSmartDeviceLinkRPC::SDLRPCMessage *message, int connectionId, unsigned char sessionId)
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Sending an RPC message " << message->getMethodId() << " connection " << connectionId << " session " << (uint)sessionId);
         messageReceivedFromHmiCallback(message, connectionId, sessionId);

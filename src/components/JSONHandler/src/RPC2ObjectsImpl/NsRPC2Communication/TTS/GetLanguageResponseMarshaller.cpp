@@ -1,6 +1,6 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/TTS/GetLanguageResponse.h"
-#include "../src/ALRPCObjectsImpl/V2/LanguageMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/LanguageMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/TTS/GetLanguageResponseMarshaller.h"
 
 /*
@@ -45,7 +45,7 @@ const std::string GetLanguageResponseMarshaller::toString(const GetLanguageRespo
 
 bool GetLanguageResponseMarshaller::checkIntegrityConst(const GetLanguageResponse& s)
 {
-  if(!NsAppLinkRPCV2::LanguageMarshaller::checkIntegrityConst(s.language))  return false;
+  if(!NsSmartDeviceLinkRPCV2::LanguageMarshaller::checkIntegrityConst(s.language))  return false;
 
   return true;
 }
@@ -60,11 +60,11 @@ Json::Value GetLanguageResponseMarshaller::toJSON(const GetLanguageResponse& e)
   json["jsonrpc"]=Json::Value("2.0");
   json["id"]=Json::Value(e.getId());
   json["result"]=Json::Value(Json::objectValue);
-  NsAppLinkRPCV2::Result r(static_cast<NsAppLinkRPCV2::Result::ResultInternal>(e.getResult()));
-  json["result"]["resultCode"]=NsAppLinkRPCV2::ResultMarshaller::toJSON(r);
+  NsSmartDeviceLinkRPCV2::Result r(static_cast<NsSmartDeviceLinkRPCV2::Result::ResultInternal>(e.getResult()));
+  json["result"]["resultCode"]=NsSmartDeviceLinkRPCV2::ResultMarshaller::toJSON(r);
   json["result"]["method"]=Json::Value("TTS.GetLanguageResponse");
 
-  json["result"]["language"]=NsAppLinkRPCV2::LanguageMarshaller::toJSON(e.language);;
+  json["result"]["language"]=NsSmartDeviceLinkRPCV2::LanguageMarshaller::toJSON(e.language);;
   return json;
 }
 
@@ -83,14 +83,14 @@ bool GetLanguageResponseMarshaller::fromJSON(const Json::Value& json,GetLanguage
     Json::Value js=json["result"];
     if(!js.isObject())  return false;
 
-    NsAppLinkRPCV2::Result r;
+    NsSmartDeviceLinkRPCV2::Result r;
     if(!js.isMember("resultCode") || !js["resultCode"].isString())  return false;
     if(!js.isMember("method") || !js["method"].isString())  return false;
     if(js["method"].asString().compare("TTS.GetLanguageResponse")) return false;
 
-    if(!NsAppLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
+    if(!NsSmartDeviceLinkRPCV2::ResultMarshaller::fromJSON(js["resultCode"],r))  return false;
     c.setResult(r.get());
-    if(!js.isMember("language") || !NsAppLinkRPCV2::LanguageMarshaller::fromJSON(js["language"],c.language))  return false;
+    if(!js.isMember("language") || !NsSmartDeviceLinkRPCV2::LanguageMarshaller::fromJSON(js["language"],c.language))  return false;
 
   }
   catch(...)

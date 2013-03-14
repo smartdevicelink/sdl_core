@@ -18,7 +18,7 @@ ScrollableMessage& ScrollableMessage::operator =(const ScrollableMessage& c)
   if(timeout)  delete timeout;
   timeout= c.timeout ? new unsigned int(c.timeout[0]) : 0;
   if(softButtons)  delete softButtons;
-  softButtons= c.softButtons ? new std::vector<NsAppLinkRPCV2::SoftButton>(c.softButtons[0]) : 0;
+  softButtons= c.softButtons ? new std::vector<NsSmartDeviceLinkRPCV2::SoftButton>(c.softButtons[0]) : 0;
   appId=c.appId;
   return *this;
 }
@@ -74,15 +74,15 @@ void ScrollableMessage::reset_timeout(void)
   timeout=0;
 }
 
-const std::vector< NsAppLinkRPCV2::SoftButton>* ScrollableMessage::get_softButtons(void)
+const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>* ScrollableMessage::get_softButtons(void)
 {
   return softButtons;
 }
 
-bool ScrollableMessage::set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons_)
+bool ScrollableMessage::set_softButtons(const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& softButtons_)
 {
   if(softButtons)  delete softButtons;
-  softButtons=new std::vector< NsAppLinkRPCV2::SoftButton>(softButtons_);
+  softButtons=new std::vector< NsSmartDeviceLinkRPCV2::SoftButton>(softButtons_);
   return true;
 }
 

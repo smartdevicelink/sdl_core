@@ -1,7 +1,7 @@
 #include "../src/../include/JSONHandler/RPC2Objects/NsRPC2Communication/UI/AddCommand.h"
-#include "../src/ALRPCObjectsImpl/V2/MenuParamsMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ImageMarshaller.h"
-#include "../src/ALRPCObjectsImpl/V2/ResultMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/MenuParamsMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ImageMarshaller.h"
+#include "../src/SDLRPCObjectsImpl/V2/ResultMarshaller.h"
 #include "../src/../src/RPC2ObjectsImpl//NsRPC2Communication/UI/AddCommandMarshaller.h"
 
 /*
@@ -48,9 +48,9 @@ bool AddCommandMarshaller::checkIntegrityConst(const AddCommand& s)
 {
   if(s.cmdId>2000000000)  return false;
 
-  if(!NsAppLinkRPCV2::MenuParamsMarshaller::checkIntegrityConst(s.menuParams))  return false;
+  if(!NsSmartDeviceLinkRPCV2::MenuParamsMarshaller::checkIntegrityConst(s.menuParams))  return false;
 
-  if(s.cmdIcon && (!NsAppLinkRPCV2::ImageMarshaller::checkIntegrityConst(s.cmdIcon[0])))  return false;
+  if(s.cmdIcon && (!NsSmartDeviceLinkRPCV2::ImageMarshaller::checkIntegrityConst(s.cmdIcon[0])))  return false;
 
   return true;
 }
@@ -68,9 +68,9 @@ Json::Value AddCommandMarshaller::toJSON(const AddCommand& e)
   json["id"]=Json::Value(e.getId());
   json["params"]=Json::Value(Json::objectValue);
   json["params"]["cmdId"]=Json::Value(e.cmdId);;
-  json["params"]["menuParams"]=NsAppLinkRPCV2::MenuParamsMarshaller::toJSON(e.menuParams);;
+  json["params"]["menuParams"]=NsSmartDeviceLinkRPCV2::MenuParamsMarshaller::toJSON(e.menuParams);;
   if(e.cmdIcon)
-    json["params"]["cmdIcon"]=NsAppLinkRPCV2::ImageMarshaller::toJSON(e.cmdIcon[0]);;
+    json["params"]["cmdIcon"]=NsSmartDeviceLinkRPCV2::ImageMarshaller::toJSON(e.cmdIcon[0]);;
   json["params"]["appId"]=Json::Value(e.appId);;
   return json;
 }
@@ -94,14 +94,14 @@ bool AddCommandMarshaller::fromJSON(const Json::Value& json,AddCommand& c)
     c.cmdId=js["cmdId"].asInt();
     if(c.cmdId>2000000000)  return false;
 
-    if(!js.isMember("menuParams") || !NsAppLinkRPCV2::MenuParamsMarshaller::fromJSON(js["menuParams"],c.menuParams))  return false;
+    if(!js.isMember("menuParams") || !NsSmartDeviceLinkRPCV2::MenuParamsMarshaller::fromJSON(js["menuParams"],c.menuParams))  return false;
 
     if(c.cmdIcon)  delete c.cmdIcon;
     c.cmdIcon=0;
     if(js.isMember("cmdIcon"))
     {
-      c.cmdIcon=new NsAppLinkRPCV2::Image();
-      if(!NsAppLinkRPCV2::ImageMarshaller::fromJSON(js["cmdIcon"],c.cmdIcon[0]))  return false;
+      c.cmdIcon=new NsSmartDeviceLinkRPCV2::Image();
+      if(!NsSmartDeviceLinkRPCV2::ImageMarshaller::fromJSON(js["cmdIcon"],c.cmdIcon[0]))  return false;
     }
 
     if(!js.isMember("appId") || !js["appId"].isInt())  return false;

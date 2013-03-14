@@ -3,7 +3,7 @@
 
 #include "JSONHandler/RPC2Response.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/TriggerSource.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/TriggerSource.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -33,7 +33,7 @@ namespace NsRPC2Communication
     
 // getters
       const unsigned int* get_choiceID(void);
-      const NsAppLinkRPCV2::TriggerSource* get_triggerSource(void);
+      const NsSmartDeviceLinkRPCV2::TriggerSource* get_triggerSource(void);
 
 // setters
 /// choiceID <= 2000000000
@@ -41,7 +41,7 @@ namespace NsRPC2Communication
 
       void reset_choiceID(void);
 
-      bool set_triggerSource(const NsAppLinkRPCV2::TriggerSource& triggerSource);
+      bool set_triggerSource(const NsSmartDeviceLinkRPCV2::TriggerSource& triggerSource);
 
       void reset_triggerSource(void);
 
@@ -51,7 +51,7 @@ namespace NsRPC2Communication
       friend class PerformInteractionResponseMarshaller;
 
       unsigned int* choiceID;
-      NsAppLinkRPCV2::TriggerSource* triggerSource;
+      NsSmartDeviceLinkRPCV2::TriggerSource* triggerSource;
 
     };
   }

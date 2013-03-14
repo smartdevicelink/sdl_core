@@ -5,8 +5,8 @@
 #include <vector>
 #include "JSONHandler/RPC2Request.h"
 
-#include "../include/JSONHandler/ALRPCObjects/V2/Image.h"
-#include "../include/JSONHandler/ALRPCObjects/V2/SoftButton.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/Image.h"
+#include "../include/JSONHandler/SDLRPCObjects/V2/SoftButton.h"
 
 /*
   interface	NsRPC2Communication::UI
@@ -39,14 +39,14 @@ namespace NsRPC2Communication
       const std::string* get_navigationText2(void);
       const std::string* get_eta(void);
       const std::string* get_totalDistance(void);
-      const NsAppLinkRPCV2::Image& get_turnIcon(void);
+      const NsSmartDeviceLinkRPCV2::Image& get_turnIcon(void);
 
       float get_distanceToManeuver(void);
 
       float get_distanceToManeuverScale(void);
 
       const bool* get_maneuverComplete(void);
-      const std::vector< NsAppLinkRPCV2::SoftButton>& get_softButtons(void);
+      const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& get_softButtons(void);
 
       int get_appId(void);
 
@@ -72,7 +72,7 @@ namespace NsRPC2Communication
 
       void reset_totalDistance(void);
 
-      bool set_turnIcon(const NsAppLinkRPCV2::Image& turnIcon);
+      bool set_turnIcon(const NsSmartDeviceLinkRPCV2::Image& turnIcon);
 
 /// 0 <= distanceToManeuver <= 1000000000
       bool set_distanceToManeuver(float distanceToManeuver);
@@ -85,7 +85,7 @@ namespace NsRPC2Communication
       void reset_maneuverComplete(void);
 
 /// 0 <= size <= 3
-      bool set_softButtons(const std::vector< NsAppLinkRPCV2::SoftButton>& softButtons);
+      bool set_softButtons(const std::vector< NsSmartDeviceLinkRPCV2::SoftButton>& softButtons);
 
       bool set_appId(int appId);
 
@@ -98,11 +98,11 @@ namespace NsRPC2Communication
       std::string* navigationText2;
       std::string* eta;
       std::string* totalDistance;
-      NsAppLinkRPCV2::Image turnIcon;
+      NsSmartDeviceLinkRPCV2::Image turnIcon;
       float distanceToManeuver;
       float distanceToManeuverScale;
       bool* maneuverComplete;
-      std::vector< NsAppLinkRPCV2::SoftButton> softButtons;
+      std::vector< NsSmartDeviceLinkRPCV2::SoftButton> softButtons;
       int appId;
 
     };

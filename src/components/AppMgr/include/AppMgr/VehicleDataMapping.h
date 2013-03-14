@@ -7,7 +7,7 @@
 
 #include <map>
 #include <vector>
-#include "JSONHandler/ALRPCObjects/V2/VehicleDataType.h"
+#include "JSONHandler/SDLRPCObjects/V2/VehicleDataType.h"
 
 namespace log4cplus
 {
@@ -22,17 +22,17 @@ namespace NsAppManager
     /**
      * \brief a VehicleData-registered-app map
      */
-    typedef std::multimap<NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal, Application*> VehicleDataMap;
+    typedef std::multimap<NsSmartDeviceLinkRPCV2::VehicleDataType::VehicleDataTypeInternal, Application*> VehicleDataMap;
 
     /**
      * \brief a VehicleData-registered-app map iterator
      */
-    typedef std::multimap<NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal, Application*>::iterator VehicleDataMapIterator;
+    typedef std::multimap<NsSmartDeviceLinkRPCV2::VehicleDataType::VehicleDataTypeInternal, Application*>::iterator VehicleDataMapIterator;
 
     /**
      * \brief a VehicleData-registered-app map item
      */
-    typedef std::pair<NsAppLinkRPCV2::VehicleDataType::VehicleDataTypeInternal, Application*> VehicleDataMapItem;
+    typedef std::pair<NsSmartDeviceLinkRPCV2::VehicleDataType::VehicleDataTypeInternal, Application*> VehicleDataMapItem;
 
     /**
      * \brief VehicleDataMapping acts as a mapping of VehicleData to registered application which subscribes to them
@@ -57,14 +57,14 @@ namespace NsAppManager
          * \param app application to map a button to
          * \return false if such subscribe already exists.
          */
-        bool addVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, Application* app);
+        bool addVehicleDataMapping(const NsSmartDeviceLinkRPCV2::VehicleDataType& vehicleDataName, Application* app);
 
         /**
          * \brief remove a VehicleData from a mapping
          * \param vehicleDataName button name
          * \return false if no such subscribe found.
          */
-        bool removeVehicleDataMapping(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, Application* app);
+        bool removeVehicleDataMapping(const NsSmartDeviceLinkRPCV2::VehicleDataType& vehicleDataName, Application* app);
 
         /**
          * \brief remove an application from a mapping
@@ -83,7 +83,7 @@ namespace NsAppManager
          * \param result reference to empty vector to store results.
          * \return count of subscribers
          */
-        int findRegistryItemsSubscribedToVehicleData(const NsAppLinkRPCV2::VehicleDataType& vehicleDataName, std::vector<Application*>& result);
+        int findRegistryItemsSubscribedToVehicleData(const NsSmartDeviceLinkRPCV2::VehicleDataType& vehicleDataName, std::vector<Application*>& result);
 
     private:
 
