@@ -1,3 +1,6 @@
+[CW11]
++ (Experimental) ModuleTest: allow to test the responses to Register/UnregisterAppInterface requests. The SyncProxyAndroid SDK had to be patched to let the responses propagate to the SyncProxyTester app.
+
 [CW10]
 * ModuleTest: increase the delay between sending consecutive requests to 1 sec.
 + Display the requests sent by the app on connection in the log.

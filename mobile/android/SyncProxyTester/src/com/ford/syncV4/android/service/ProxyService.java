@@ -35,7 +35,7 @@ import com.ford.syncV4.android.receivers.SyncReceiver;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.proxy.SyncProxyALM;
-import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
@@ -71,6 +71,7 @@ import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
+import com.ford.syncV4.proxy.rpc.RegisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
 import com.ford.syncV4.proxy.rpc.SetAppIcon;
@@ -86,6 +87,7 @@ import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
+import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
@@ -97,7 +99,7 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.util.Base64;
 
-public class ProxyService extends Service implements IProxyListenerALM {	
+public class ProxyService extends Service implements IProxyListenerALMTesting {
 	static final String TAG = "SyncProxyTester";
 	private Integer autoIncCorrId = 1;
 	
@@ -504,7 +506,7 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			boolean hmiChange = false;
 			switch(curHMILevel) {
 				case HMI_FULL:
-					if (notification.getFirstRun()) {
+					if (firstHMIStatusChange) {
 						showLockMain();
 						_testerMain = new ModuleTest();
 						_testerMain = ModuleTest.getModuleTestInstance();
@@ -654,9 +656,11 @@ public class ProxyService extends Service implements IProxyListenerALM {
 			}
 		}
 		
-		if(((SyncException) e).getSyncExceptionCause() != SyncExceptionCause.SYNC_PROXY_CYCLED
-				&& ((SyncException) e).getSyncExceptionCause() != SyncExceptionCause.BLUETOOTH_DISABLED) {
-			reset();
+		if (!( waitingForResponse && _testerMain.getThreadContext() != null )) {
+			if(((SyncException) e).getSyncExceptionCause() != SyncExceptionCause.SYNC_PROXY_CYCLED
+					&& ((SyncException) e).getSyncExceptionCause() != SyncExceptionCause.BLUETOOTH_DISABLED) {
+				reset();
+			}
 		}
 	}
 	
@@ -1371,5 +1375,31 @@ public class ProxyService extends Service implements IProxyListenerALM {
 		if (_msgAdapter != null) _msgAdapter.logMessage("Service on Bind");
 		else Log.i(TAG, "Service on Bind");
 		return new Binder();
+	}
+
+	@Override
+	public void onRegisterAppInterfaceResponse(
+			RegisterAppInterfaceResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
+	}
+
+	@Override
+	public void onUnregisterAppInterfaceResponse(
+			UnregisterAppInterfaceResponse response) {
+		if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+		if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+		else Log.i(TAG, "" + response);
+		
+		if (waitingForResponse && _testerMain.getThreadContext() != null) {
+			ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+			synchronized (_testerMain.getThreadContext()) { _testerMain.getThreadContext().notify();};
+		}
 	}
 }
