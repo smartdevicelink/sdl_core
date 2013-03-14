@@ -25,7 +25,6 @@ class SmartSchema(object):
     
     def __init__(self):
         """Constructor"""
-        self._enums_content = ""
         
     def generate(self, model, filename, namespace, destination_dir):
         """Generate SmartObject source files.
@@ -61,8 +60,7 @@ class SmartSchema(object):
         if enums is None:
             raise GenerateError("Enums is None")
 
-        for enum in enums:
-            self._enums_content = self._enums_content.join(self._generate_enum(enum))
+        return "\n".join(map(lambda x: self._generate_enum(x), enums))
             
     def _generate_enum(self, enum):
         return self._enum_template.substitute(comment = self._generate_comment(enum),
@@ -118,13 +116,19 @@ class SmartSchema(object):
                                                  design_description = design_description,
                                                  issues = issues,
                                                  todos = todos)
+
     def _indent_code(self, code, indent_level):
         code_lines = code.split("\n")
-        return "".join(map(lambda x: "{0}{1}\n".format(self._indent_template * indent_level, x), code_lines))
+        return "".join(map(lambda x: "{0}{1}\n".format(self._indent_template * indent_level, x) if x is not "" else "\n", code_lines))
         
     _model_types_briefs = dict({"EnumElement" : "", 
                                 "Enum" : "Enumeration "})
-              
+    
+    _hpp_file_tempalte = """#ifndef $guard
+#define $guard
+
+#
+"""          
     _indent_template = "    "
                     
     _comment_template = string.Template(

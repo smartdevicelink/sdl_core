@@ -80,7 +80,7 @@ enum Enum1
      * @todo Do2
      */
     name1 = 1,
-    
+
     /**
      * @brief internal_name2.
      *
@@ -94,6 +94,29 @@ enum Enum1
     internal_name2
 };
 """
+
+expected_result_enum2 = """/**
+ * @brief Enumeration E2.
+ */
+enum E2
+{
+    /**
+     * @brief val_1.
+     */
+    val_1,
+
+    /**
+     * @brief val_2.
+     */
+    val_2 = 100,
+
+    /**
+     * @brief val_3.
+     */
+    val_3
+};
+"""
+
 description = ["Description Line1", "Description Line2"]
 design_description = ["Design Line1"]
 issues = ["Issue1", "Issue2", "Issue3"]
@@ -137,12 +160,25 @@ class TestSmartSchema(unittest.TestCase):
     def test_generate_enum(self):
         smart_schema_generator = SmartSchema()
         
-        elements = [Model.EnumElement("name1", None, design_description, None, todos, None, "1"),
+        elements1 = [Model.EnumElement("name1", None, design_description, None, todos, None, "1"),
                     Model.EnumElement("name2", description, None, issues, None, "internal_name2", None)]
-        enum = Model.Enum("Enum1", None, None, None, todos, None, elements)
-        self.assertEqual(smart_schema_generator._generate_enum(enum),
+        enum1 = Model.Enum("Enum1", None, None, None, todos, None, elements1)
+        self.assertEqual(smart_schema_generator._generate_enum(enum1),
                          expected_result_enum1,
                          "Simple enum is invalid")
+        
+        elements2 = [Model.EnumElement("xxx", None, None, None, None, "val_1", None),
+                     Model.EnumElement("yyy", None, None, None, None, "val_2", "100"),
+                     Model.EnumElement("val_3", None, None, None, None, None, None)]
+        enum2 = Model.Enum("E2", None, None, None, None, None, elements2)
+        self.assertEqual(smart_schema_generator._generate_enum(enum2),
+                         expected_result_enum2,
+                         "Long enum is invalid")
+        
+        enums = [enum1, enum2]
+        self.assertEqual(smart_schema_generator._generate_enums(enums), 
+                         "{0}\n{1}".format(expected_result_enum1, expected_result_enum2)
+                         ,"Generated enums are invalid")
 
 if __name__ == '__main__':
     unittest.main()
