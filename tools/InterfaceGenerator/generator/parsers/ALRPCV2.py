@@ -336,17 +336,17 @@ class Parser(object):
             param_type = Model.Boolean()
         elif type_name == "Integer" or \
                 type_name == "Float":
-            min_value = self._get_and_remove_optional_int_attrib(
-                attrib, "minvalue")
-            max_value = self._get_and_remove_optional_int_attrib(
-                attrib, "maxvalue")
+            min_value = self._get_and_remove_optional_number_attrib(
+                attrib, "minvalue", int if type_name == "Integer" else float)
+            max_value = self._get_and_remove_optional_number_attrib(
+                attrib, "maxvalue", int if type_name == "Integer" else float)
 
             param_type = \
                 (Model.Integer if type_name == "Integer" else Model.Double)(
                     min_value=min_value,
                     max_value=max_value)
         elif type_name == "String":
-            max_length = self._get_and_remove_optional_int_attrib(
+            max_length = self._get_and_remove_optional_number_attrib(
                 attrib, "maxlength")
             param_type = Model.String(max_length=max_length)
         else:
@@ -356,10 +356,10 @@ class Parser(object):
                 raise ParseError("Unknown type '" + type_name + "'")
 
         if self._get_and_remove_optional_bool_attrib(attrib, "array", False):
-            min_size = self._get_and_remove_optional_int_attrib(attrib,
-                                                                "minsize")
-            max_size = self._get_and_remove_optional_int_attrib(attrib,
-                                                                "maxsize")
+            min_size = self._get_and_remove_optional_number_attrib(attrib,
+                                                                   "minsize")
+            max_size = self._get_and_remove_optional_number_attrib(attrib,
+                                                                   "maxsize")
             param_type = Model.Array(element_type=param_type,
                                      min_size=min_size,
                                      max_size=max_size)
@@ -421,15 +421,15 @@ class Parser(object):
 
         return value
 
-    def _get_and_remove_optional_int_attrib(self, attrib, name):
+    def _get_and_remove_optional_number_attrib(self, attrib, name, _type=int):
         value = self._get_and_remove_attrib(attrib, name)
 
         if value is not None:
             try:
-                value = int(value)
+                value = _type(value)
             except:
-                raise ParseError("Invlaid value for int: '" +
-                                 value + "'")
+                raise ParseError("Invlaid value for " + _type.__name__ +
+                                 ": '" + value + "'")
 
         return value
 
