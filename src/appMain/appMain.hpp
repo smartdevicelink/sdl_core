@@ -1,19 +1,18 @@
 /**
  * \file appMain.hpp
- * \brief AppLink main application header
- * \author AKara
+ * \brief SmartDeviceLink main application header
  */
 
-#ifndef APPLINKMAINAPP_H
-#define APPLINKMAINAPP_H
+#ifndef SMARTDEVICELINKMAINAPP_H
+#define SMARTDEVICELINKMAINAPP_H
 
 /**
- * \namespace NsAppLink
- * \brief AppLink main Application related functions.
+ * \namespace NsSmartDeviceLink
+ * \brief SmartDeviceLink main Application related functions.
  */ 
-namespace NsAppLink 
+namespace NsSmartDeviceLink
 {
 
-} /* namespace NsAppLink */
+} /* namespace NsSmartDeviceLink */
 
-#endif /* APPLINKMAINAPP_H */
+#endif /* SMARTDEVICELINKMAINAPP_H */
