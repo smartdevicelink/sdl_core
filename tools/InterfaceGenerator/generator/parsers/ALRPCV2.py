@@ -215,7 +215,7 @@ class Parser(object):
         if len(element.attrib) != 0:
             raise ParseError("Unexpected attributes in '" +
                              element.tag + "'")
-        return element.text
+        return element.text if element.text is not None else ""
 
     @staticmethod
     def _parse_issue(element):
@@ -226,8 +226,9 @@ class Parser(object):
         if len(element.attrib) != 1:
             raise ParseError("Unexpected attributes in issue")
 
-        return Model.Issue(creator=element.attrib["creator"],
-                           value=element.text)
+        return Model.Issue(
+            creator=element.attrib["creator"],
+            value=element.text if element.text is not None else "")
 
     def _parse_enum_element(self, element):
         params, subelements, attrib = self._parse_base_item(element)
