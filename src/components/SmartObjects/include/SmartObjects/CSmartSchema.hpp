@@ -21,7 +21,6 @@ namespace NsAppLink
 
         protected:
             NsAppLink::NsSmartObjects::Validation::IValidator mValidator;
-            bool mValidatorAvailable;
         };
     }
 }
