@@ -1,3 +1,21 @@
+"""
+Generator application that generates c++ interfaces code from xml description
+
+usage: Generator.py [-h] --parser-type {alrpcv2}
+                    source-xml namespace output-dir
+
+SmartSchema interface generator
+
+positional arguments:
+  source-xml
+  namespace
+  output-dir
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --parser-type {alrpcv2}
+"""
+
 import os.path
 import argparse
 
@@ -5,46 +23,55 @@ import generator.parsers.ALRPCV2
 import generator.Model
 import generator.generators.SmartSchema
 
-_supported_parsers = {
+SUPPORTED_PARSERS = {
     "alrpcv2": generator.parsers.ALRPCV2.Parser
 }
 
 def _create_parser():
-    parser = argparse.ArgumentParser(description="SmartSchema interface generator")
+    """
+    Creates parser for parsing command-line arguments
+
+    Returns an instance of argparse.ArgumentParser
+    """
+    parser = argparse.ArgumentParser(
+        description="SmartSchema interface generator"
+    )
     parser.add_argument("source-xml")
     parser.add_argument("namespace")
     parser.add_argument("output-dir")
-    parser.add_argument("--parser-type", choices=_supported_parsers.keys(), required=True)
+    parser.add_argument("--parser-type",
+        choices=SUPPORTED_PARSERS.keys(),
+        required=True)
     return parser
 
+def main():
+    """
+    Main function of the generator that does actual work
+    """
 
-def _print_introduction(sourceXml, namespace, outputDir, parserType):
+    args = vars(_create_parser().parse_args())
+
+    source_xml = args["source-xml"]
+    source_xml_name = os.path.splitext(os.path.basename(source_xml))[0]
+    namespace = args["namespace"]
+    output_dir = args["output-dir"]
+    parser_type = args["parser_type"]
+
     print("""
 Generating interface source code with following parameters:
     Source xml      : {0}
     Namespace       : {1}
     Output directory: {2}
     Parser type     : {3}
-""".format(sourceXml, namespace, outputDir, parserType))
-
-def main():
-    args = vars(_create_parser().parse_args())
-
-    sourceXml = args["source-xml"]
-    sourceXmlName = os.path.splitext(os.path.basename(sourceXml))[0]
-    namespace = args["namespace"]
-    outputDir = args["output-dir"]
-    parserType = args["parser_type"]
-
-    _print_introduction(sourceXml, namespace, outputDir, parserType)
+""".format(source_xml, namespace, output_dir, parser_type))
 
     # Converting incoming xml to internal model
-    parser = _supported_parsers[parserType]()
+    parser = SUPPORTED_PARSERS[parser_type]()
     interface = parser.parse(args["source-xml"])
 
     # There is only one generator available now
-    schemaGenerator = generator.generators.SmartSchema.SmartSchema()
-    schemaGenerator.generate(interface, sourceXmlName, namespace, outputDir)
+    schema_generator = generator.generators.SmartSchema.SmartSchema()
+    schema_generator.generate(interface, source_xml_name, namespace, output_dir)
 
     print("Done.")
 
