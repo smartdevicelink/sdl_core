@@ -76,8 +76,11 @@ class SmartSchema(object):
             f.write(self._cpp_file_template.substitute(header_file_name = header_file_name,
                                                        namespace = namespace,
                                                        class_name = class_name,
-                                                       function_schemas = "",
-                                                       init_function_impls = ""))
+                                                       function_schemas = self._generate_function_schemas(interface.functions.values(), 
+                                                                                                          class_name),
+                                                       init_function_impls = self._generate_function_impls(interface.functions.values(), 
+                                                                                                           namespace,
+                                                                                                           class_name)))
 
     def _generate_hpp_class(self, class_name, params, functions, structs):
         return self._class_hpp_template.substitute(comment = self._generate_class_comment(class_name, params),
@@ -93,7 +96,30 @@ class SmartSchema(object):
     def _generate_function_decl(self, function):
         return self._function_decl_template.substitute(comment = "",
                                                        function_name = function.name)
+
+    def _generate_function_schemas(self, functions, class_name):
+        if functions is None:
+            raise GenerateError("Functions is None")
+        
+        return "".join(map(lambda x: self._indent_code(self._generate_function_schema(x, class_name), 1), functions))
     
+    def _generate_function_schema(self, function, class_name):
+        return self._function_schemas_template.substitute(class_name = class_name,
+                                                          function_name = function.name,
+                                                          function_id = function.function_id.internal_name if function.function_id.internal_name is not None else function.function_id.name,
+                                                          message_type = function.message_type.internal_name if function.message_type.internal_name is not None else function.message_type.name)
+
+    def _generate_function_impls(self, functions, namespace, class_name):
+        if functions is None:
+            raise GenerateError("Functions is None")
+        
+        return "\n".join(map(lambda x: self._generate_function_impl(x, namespace, class_name), functions))
+    
+    def _generate_function_impl(self, function, namespace, class_name):
+        return self._function_impl_template.substitute(namespace = namespace, 
+                                                       class_name = class_name, 
+                                                       function_name = function.name)
+        
     def _generate_enums(self, enums):
         if enums is None:
             raise GenerateError("Enums is None")
@@ -199,13 +225,21 @@ $namespace::$class_name::$class_name()
 
 void $namespace::$class_name::initSchemas()
 {
-$function_schemas
-}
+$function_schemas}
 
 $init_function_impls
 ''')
-#mSchemas.insert(std::make_pair(NsAppLink::JSONHandler::SmartSchemaKey<FunctionID, messageType>())
+    
+    _function_schemas_template = string.Template(
+"""mSchemas.insert(std::make_pair(NsAppLink::JSONHandler::SmartSchemaKey<FunctionID, messageType>($function_id, $message_type), $class_name::initFunction_$function_name()));""")
 
+    _function_impl_template = string.Template(
+"""CSmartSchema $namespace::$class_name::initFunction_$function_name()
+{
+    return CSmartSchema(Validation::CAlwaysTrueValidator());
+}
+""")
+    
     _class_hpp_template = string.Template(
 """$comment
 class $class_name : public NsAppLink::JSONHandler::CSmartFactory<FunctionID, messageType>
