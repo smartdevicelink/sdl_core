@@ -134,6 +134,16 @@ class EnumElement(InterfaceItemBase):
         self.internal_name = internal_name
         self.value = value
 
+    @property
+    def primary_name(self):
+        """Primary name of the EnumElement.
+
+        Equals the 'internal_name' property if presented or 'name' property
+        otherwise.
+
+        """
+        return self.name if self.internal_name is None else self.internal_name
+
 
 class Enum(InterfaceItemBase):
 
