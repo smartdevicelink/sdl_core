@@ -11,7 +11,7 @@
 log4cplus::Logger JSONRPC2Handler::mLogger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("JSONRPC2Handler"));
 
 JSONRPC2Handler::JSONRPC2Handler( const std::string& address, uint16_t port ) :
-NsMessageBroker::CMessageBrokerController( address, port, "AppLinkCore" )
+NsMessageBroker::CMessageBrokerController( address, port, "BasicCommunication" )
 {
     pthread_create( &mWaitForCommandsFromHMI, NULL, &JSONRPC2Handler::waitForCommandsFromHMI, (void *)this );
     pthread_create( &mWaitForRequestsToHMI, NULL, &JSONRPC2Handler::waitForRequestsToHMI, (void *)this );
@@ -55,7 +55,7 @@ void JSONRPC2Handler::subscribeToNotifications()
     subscribeTo( "UI.OnDriverDistraction" );
     subscribeTo( "UI.OnSystemContext" );
     subscribeTo( "UI.OnAppActivated" );
-    subscribeTo( "AppLinkCore.OnAppDeactivated" );
+    subscribeTo( "BasicCommunication.OnAppDeactivated" );
     subscribeTo( "UI.OnDeviceChosen");
     subscribeTo( "UI.OnLanguageChange" );
     subscribeTo( "VR.OnLanguageChange" );

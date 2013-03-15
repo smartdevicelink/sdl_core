@@ -229,10 +229,8 @@ Marshaller_intHash::getPointer (register const char *str, register unsigned int 
       {""}, {""},
 #line 76 "./src/components/JSONHandler/src/RPC2ObjectsImpl/Marshaller.gp"
       {"UI.OnDriverDistraction",58,&Marshaller::mNsRPC2Communication_UI__OnDriverDistraction},
-/*
 #line 25 "./src/components/JSONHandler/src/RPC2ObjectsImpl/Marshaller.gp"
-      {"BasicCommunication.OnAppDeactivatedResponse",7,&Marshaller::mNsRPC2Communication_BasicCommunication__OnAppDeactivatedResponse},
-      */
+      {"BasicCommunication.OnAppDeactivatedResponse",7,&Marshaller::mNsRPC2Communication_UI__OnDriverDistraction},  // TODO(AK): remove in new code generation
 #line 119 "./src/components/JSONHandler/src/RPC2ObjectsImpl/Marshaller.gp"
       {"VehicleInfo.GetDTCs",101,&Marshaller::mNsRPC2Communication_VehicleInfo__GetDTCs},
       {""},

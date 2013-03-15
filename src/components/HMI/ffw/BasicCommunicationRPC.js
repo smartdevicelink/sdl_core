@@ -14,7 +14,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create({
 	/*
 	 *	access to basic RPC functionality
  	 */		
-	 client:		FFW.RPCClient.create({ componentName: "BasicCommunication" }),
+	 client:		FFW.RPCClient.create({ componentName: "BasicCommunicationClient" }),
 
 	getAppListRequestId: 						-1,
 	getDeviceListRequestId: 					-1,
