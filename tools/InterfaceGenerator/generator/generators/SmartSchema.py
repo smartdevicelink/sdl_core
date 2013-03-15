@@ -95,7 +95,7 @@ class SmartSchema(object):
     
     def _generate_function_decl(self, function):
         return self._function_decl_template.substitute(comment = "",
-                                                       function_name = function.name)
+                                                       function_name = "{0}_{1}".format(function.function_id.name,function.message_type.name))
 
     def _generate_function_schemas(self, functions, class_name):
         if functions is None:
@@ -105,7 +105,7 @@ class SmartSchema(object):
     
     def _generate_function_schema(self, function, class_name):
         return self._function_schemas_template.substitute(class_name = class_name,
-                                                          function_name = function.name,
+                                                          function_name = "{0}_{1}".format(function.function_id.name,function.message_type.name),
                                                           function_id = function.function_id.internal_name if function.function_id.internal_name is not None else function.function_id.name,
                                                           message_type = function.message_type.internal_name if function.message_type.internal_name is not None else function.message_type.name)
 
@@ -118,7 +118,7 @@ class SmartSchema(object):
     def _generate_function_impl(self, function, namespace, class_name):
         return self._function_impl_template.substitute(namespace = namespace, 
                                                        class_name = class_name, 
-                                                       function_name = function.name)
+                                                       function_name = "{0}_{1}".format(function.function_id.name,function.message_type.name))
         
     def _generate_enums(self, enums):
         if enums is None:
@@ -196,7 +196,7 @@ class SmartSchema(object):
 '''#ifndef $guard
 #define $guard
 
-#include "CSmartFactory.hpp"
+#include "JSONHandler/CSmartFactory.hpp"
 #include "SmartObjects/CSmartSchema.hpp"
 
 $namespace_open
@@ -231,7 +231,7 @@ $init_function_impls
 ''')
     
     _function_schemas_template = string.Template(
-"""mSchemas.insert(std::make_pair(NsAppLink::JSONHandler::SmartSchemaKey<FunctionID, messageType>($function_id, $message_type), $class_name::initFunction_$function_name()));""")
+"""mSchemas.insert(std::make_pair(NsAppLink::NsJSONHandler::SmartSchemaKey<FunctionID, messageType>($function_id, $message_type), $class_name::initFunction_$function_name()));""")
 
     _function_impl_template = string.Template(
 """CSmartSchema $namespace::$class_name::initFunction_$function_name()
@@ -242,7 +242,7 @@ $init_function_impls
     
     _class_hpp_template = string.Template(
 """$comment
-class $class_name : public NsAppLink::JSONHandler::CSmartFactory<FunctionID, messageType>
+class $class_name : public NsAppLink::NsJSONHandler::CSmartFactory<FunctionID, messageType>
 {
 public:
     /**
