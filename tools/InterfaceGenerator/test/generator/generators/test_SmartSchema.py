@@ -1,8 +1,8 @@
+import collections
 import sys
 import os.path
 
 projectRootDir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
-print projectRootDir
 sys.path.append(projectRootDir)
 
 import unittest
@@ -135,7 +135,7 @@ class TestSmartSchema(unittest.TestCase):
     def test_generate_enum_element(self):
         smart_schema_generator = SmartSchema()
         
-        enum_element1 = Model.EnumElement("Element with internal name",
+        enum_element1 = Model.EnumElement("Element1",
                                           None, None, None, None, "InternalName", "10")
         self.assertEqual(smart_schema_generator._generate_enum_element(enum_element1),
                          expected_result_enum_element1,
@@ -160,43 +160,31 @@ class TestSmartSchema(unittest.TestCase):
     def test_generate_enum(self):
         smart_schema_generator = SmartSchema()
         
-        elements1 = [Model.EnumElement("name1", None, design_description, None, todos, None, "1"),
-                    Model.EnumElement("name2", description, None, issues, None, "internal_name2", None)]
+        elements1 = collections.OrderedDict()
+        elements1["name1"] = Model.EnumElement("name1", None, design_description, None, todos, None, "1")
+        elements1["name2"] = Model.EnumElement("name2", description, None, issues, None, "internal_name2", None)
+        
         enum1 = Model.Enum("Enum1", None, None, None, todos, None, elements1)
         self.assertEqual(smart_schema_generator._generate_enum(enum1),
                          expected_result_enum1,
                          "Simple enum is invalid")
         
-        elements2 = [Model.EnumElement("xxx", None, None, None, None, "val_1", None),
-                     Model.EnumElement("yyy", None, None, None, None, "val_2", "100"),
-                     Model.EnumElement("val_3", None, None, None, None, None, None)]
+        elements2 = collections.OrderedDict() 
+        elements2["xxx"] = Model.EnumElement("xxx", None, None, None, None, "val_1", None)
+        elements2["yyy"] = Model.EnumElement("yyy", None, None, None, None, "val_2", "100")
+        elements2["zzz"] = Model.EnumElement("val_3", None, None, None, None, None, None)
+        
         enum2 = Model.Enum("E2", None, None, None, None, None, elements2)
         self.assertEqual(smart_schema_generator._generate_enum(enum2),
                          expected_result_enum2,
                          "Long enum is invalid")
         
-        enums = [enum1, enum2]
-        self.assertEqual(smart_schema_generator._generate_enums(enums), 
+        enums = collections.OrderedDict()
+        enums["Enum1"] = enum1
+        enums["Enum2"] = enum2
+        self.assertEqual(smart_schema_generator._generate_enums(enums.values()), 
                          "{0}\n{1}".format(expected_result_enum1, expected_result_enum2)
                          ,"Generated enums are invalid")
-        
-    def test_full_generation(self):
-        smart_schema_generator = SmartSchema()
-        
-        elements1 = [Model.EnumElement("name1", None, design_description, None, todos, None, "1"),
-                     Model.EnumElement("name2", description, None, issues, None, "internal_name2", None)]
-        enum1 = Model.Enum("Enum1", None, None, None, todos, None, elements1)
-        
-        elements2 = [Model.EnumElement("xxx", None, None, None, None, "val_1", None),
-                     Model.EnumElement("yyy", None, None, None, None, "val_2", "100"),
-                     Model.EnumElement("val_3", None, None, None, None, None, None)]
-        enum2 = Model.Enum("E2", None, None, None, None, None, elements2)
-        
-        enums = [enum1, enum2]
-        
-        interface = Model.Interface(enums, None, None, None)
-        
-        smart_schema_generator.generate(interface, "Test.xml", "AAA::BBB", "/home/eftin/gen_test")
 
 if __name__ == '__main__':
     unittest.main()
