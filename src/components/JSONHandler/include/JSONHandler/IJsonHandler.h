@@ -1,7 +1,7 @@
 /**
 * \file IJsonHandler.h
 * \brief IJsonHandler class header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 #ifndef IJSONHANDLER_INCLUDE
@@ -36,7 +36,7 @@ public:
 
     /**
      * \brief Method for sending message to Mobile Application. 
-     * \param message Pointer to base class of AppLink Json object 
+     * \param message Pointer to base class of SmartDeviceLink Json object
      * to be serialized to Json message and sent to mobile App.
      * \param sessionId ID of the session the message was received within.
      */

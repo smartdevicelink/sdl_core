@@ -1,7 +1,6 @@
 /**
  * \file Socket.h
  * \brief Definition of the Socket class
- * \author vsalo
  */
 
 #ifndef Socket_class

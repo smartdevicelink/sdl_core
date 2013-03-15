@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPCV2_DELETECOMMAND_RESPONSE_INCLUDE
-#define NSAPPLINKRPCV2_DELETECOMMAND_RESPONSE_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKKRPCV2_DELETECOMMAND_RESPONSE_INCLUDE
+#define NSSMARTDEVICELINKKRPCV2_DELETECOMMAND_RESPONSE_INCLUDE
 
 #include "JSONHandler/SDLRPCResponse.h"
 
@@ -9,7 +13,7 @@
   date      2012-11-02
   generated at  Thu Jan 24 06:36:23 2013
   source stamp  Thu Jan 24 06:35:41 2013
-  author    robok0der
+  author    RC
 */
 
 namespace NsSmartDeviceLinkRPCV2

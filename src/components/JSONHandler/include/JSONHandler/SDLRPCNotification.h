@@ -1,7 +1,7 @@
 /**
 * \file SDLRPCNotification.hpp
 * \brief Class SDLRPCNotification header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 
@@ -12,13 +12,13 @@
 
 /**
  * \namespace NsSmartDeviceLinkRPC
- * \brief Namespace for AppLink JSON protocol related functionality.
+ * \brief Namespace for SmartDeviceLink JSON protocol related functionality.
 */ 
 namespace NsSmartDeviceLinkRPC
 {
     /**
      * \class SDLRPCNotification
-     * \brief Base class for AppLink Json notification messages.
+     * \brief Base class for SmartDeviceLink Json notification messages.
      */
     class SDLRPCNotification : public SDLRPCMessage
     {

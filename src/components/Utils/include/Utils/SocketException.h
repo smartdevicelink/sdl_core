@@ -1,7 +1,6 @@
 /**
  * \file SocketException.h
  * \brief Definition of the SocketException class
- * \author vsalo
  */
 
 #ifndef SocketException_class

@@ -1,7 +1,7 @@
 /**
 * \file IJSONRPC2Handler.h
 * \brief IJSONRPC2Handler class header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 #ifndef IJSONRPC2HANDLER_INCLUDE

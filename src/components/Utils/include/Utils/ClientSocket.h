@@ -1,7 +1,6 @@
 /**
  * \file ClientSocket.h
  * \brief Definition of the ClientSocket class
- * \author vsalo
  */
 
 #ifndef ClientSocket_class

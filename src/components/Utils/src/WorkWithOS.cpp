@@ -1,7 +1,6 @@
 /**
 * \file WorkWithOS.cpp
 * \brief Implementation of general functions for work with OS.
-* \author PVyshnevska
 */
 
 #include <iostream>

@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #include "../include/JSONHandler/SDLRPCObjects/V2/Choice.h"
 #include "ImageMarshaller.h"
 
@@ -10,7 +14,7 @@
   date		2012-11-02
   generated at	Thu Jan 24 06:36:23 2013
   source stamp	Thu Jan 24 06:35:41 2013
-  author	robok0der
+  author	RC
 */
 
 using namespace NsSmartDeviceLinkRPCV2;
@@ -50,7 +54,7 @@ bool ChoiceMarshaller::checkIntegrityConst(const Choice& s)
 {
   if(s.choiceID>65535)  return false;
 
-  // TODO(akandul): Quick fix for HMI communication with app(v1)
+  // TODO(AK): Quick fix for HMI communication with app(v1)
   if (s.image.get_imageType().get() != NsSmartDeviceLinkRPCV2::ImageType::INVALID_ENUM)
     if(!ImageMarshaller::checkIntegrityConst(s.image))  return false;
 
@@ -74,7 +78,7 @@ Json::Value ChoiceMarshaller::toJSON(const Choice& e)
 
   json["choiceID"]=Json::Value(e.choiceID);
 
-  // TODO(akandul): Quick fix for HMI communication with app(v1)
+  // TODO(AK): Quick fix for HMI communication with app(v1)
   if (e.image.get_imageType().get() != NsSmartDeviceLinkRPCV2::ImageType::INVALID_ENUM)
     json["image"]=ImageMarshaller::toJSON(e.image);
 

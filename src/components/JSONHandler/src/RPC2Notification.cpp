@@ -1,7 +1,7 @@
 /**
 * \file RPC2Notification.cpp
 * \brief RPC2Notification class source file.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 

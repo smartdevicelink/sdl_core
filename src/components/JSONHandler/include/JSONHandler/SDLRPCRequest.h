@@ -1,7 +1,7 @@
 /**
 * \file SDLRPCRequest.hpp
 * \brief Class SDLRPCRequest header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 
@@ -12,13 +12,13 @@
 
 /**
   *\namespace NsSmartDeviceLinkRPC
-  *\brief Namespace for AppLink JSON protocol related functionality.
+  *\brief Namespace for SmartDeviceLink JSON protocol related functionality.
 */
 namespace NsSmartDeviceLinkRPC
 {
     /**
      * \class SDLRPCRequest
-     * \brief Base class for AppLink Json request messages.
+     * \brief Base class for SmartDeviceLink Json request messages.
     */
     class SDLRPCRequest : public SDLRPCMessage
     {

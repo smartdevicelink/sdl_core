@@ -1,7 +1,7 @@
 /**
 * \file RPC2ErrorMarshaller.hpp
 * \brief RPC2ErrorMarshaller class header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 

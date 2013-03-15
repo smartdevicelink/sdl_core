@@ -1,7 +1,6 @@
 /**
 * \file MessageQueue.hpp
 * \brief Template MessageQueue class header.
-* \author PVyshnevska
 */
 
 

@@ -1,7 +1,7 @@
 /**
 * \file RPC2Command.cpp
 * \brief RPC2Command class source file.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 

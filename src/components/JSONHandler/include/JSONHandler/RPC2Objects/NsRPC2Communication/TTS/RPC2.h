@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #ifndef NSRPC2COMMUNICATION_TTS_RPC2_INCLUDE
 #define NSRPC2COMMUNICATION_TTS_RPC2_INCLUDE
 
@@ -24,7 +28,6 @@
   version	1.2
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
 */
 
 

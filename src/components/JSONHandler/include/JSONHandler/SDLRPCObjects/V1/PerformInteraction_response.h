@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPC_PERFORMINTERACTION_RESPONSE_INCLUDE
-#define NSAPPLINKRPC_PERFORMINTERACTION_RESPONSE_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKKRPC_PERFORMINTERACTION_RESPONSE_INCLUDE
+#define NSSMARTDEVICELINKKRPC_PERFORMINTERACTION_RESPONSE_INCLUDE
 
 #include "TriggerSource.h"
 #include "JSONHandler/SDLRPCResponse.h"
@@ -10,7 +14,7 @@
   date      2011-05-17
   generated at  Thu Jan 24 06:36:21 2013
   source stamp  Thu Jan 24 06:35:34 2013
-  author    robok0der
+  author    RC
 */
 
 namespace NsSmartDeviceLinkRPC

@@ -1,7 +1,6 @@
 /**
  * \file ServerSocket.h
  * \brief Definition of the ServerSocket class
- * \author vsalo
  */
 
 #ifndef ServerSocket_class

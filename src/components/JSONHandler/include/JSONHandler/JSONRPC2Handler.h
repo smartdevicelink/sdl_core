@@ -1,7 +1,7 @@
 /**
 * \file JSONRPC2Handler.hpp
 * \brief JSONRPC2Handler class header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 

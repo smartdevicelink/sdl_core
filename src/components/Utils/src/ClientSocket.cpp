@@ -1,7 +1,6 @@
 /**
  * \file ClientSocket.cpp
  * \brief Implementation of the ClientSocket class
- * \author vsalo
  */
 
 #include "Utils/ClientSocket.h"

@@ -1,7 +1,6 @@
 /**
  * \file ServerSocket.cpp
  * \brief Implementation of the ServerSocket class
- * \author vsalo
  */
 
 #include "Utils/ServerSocket.h"

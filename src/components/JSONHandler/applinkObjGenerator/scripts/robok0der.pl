@@ -439,7 +439,7 @@ sub getfort
   return sprintf "/*\n%s*/\n",$x;
 }
 
-my $hat=sprintf "\n/*\n  interface\t%s\n  version\t%s\n  date\t\t%s\n  generated at\t%s\n  source stamp\t%s\n  author\trobok0der\n*/\n\n",
+my $hat=sprintf "\n/*\n  interface\t%s\n  version\t%s\n  date\t\t%s\n  generated at\t%s\n  source stamp\t%s\n  author\tRC\n*/\n\n",
         $exts{'name'},$exts{'version'},$exts{'date'},$timestamp,$timemod;
 
 my $dd=`ddate`;

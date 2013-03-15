@@ -1,7 +1,7 @@
 /**
 * \file IRPCMessagesObserver.hpp
 * \brief Abstract class IRPCMessagesObserver header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 
@@ -21,8 +21,8 @@ class IRPCMessagesObserver
 public:
     /**
      * \brief Callback function which is called by JSONHandler 
-     * when new AppLink Json message is received from Mobile Application.
-     * \param message AppLink Json message
+     * when new SmartDeviceLink Json message is received from Mobile Application.
+     * \param message SmartDeviceLink Json message
      */
     virtual void onMessageReceivedCallback( NsSmartDeviceLinkRPC::SDLRPCMessage * message, int connectionKey ) = 0;
 

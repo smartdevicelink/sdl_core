@@ -21,7 +21,7 @@ namespace NsAppManager
     class Application;
 
     /**
-     * \brief Comparer acts as a comparer that allows to create std::map with NsAppLinkRPC::ButtonName as a key
+     * \brief Comparer acts as a comparer that allows to create std::map with NsSmartDeviceLinkRPC::ButtonName as a key
      */
     struct Comparer {
         bool operator() (const NsSmartDeviceLinkRPCV2::ButtonName &b1, const NsSmartDeviceLinkRPCV2::ButtonName &b2) const;

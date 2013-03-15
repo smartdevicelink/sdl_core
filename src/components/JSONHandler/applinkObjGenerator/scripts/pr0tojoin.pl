@@ -42,8 +42,8 @@ die 'no input' if not exists $config{'xml2'};
 $config{'path'}='include' if not exists $config{'path'};
 $config{'pimpl'}='src' if not exists $config{'pimpl'};
 
-$config{'ns1'}='NsAppLinkRPCV1' if not exists $config{'ns1'};
-$config{'ns2'}='NsAppLinkRPCV2' if not exists $config{'ns2'};
+$config{'ns1'}='NsSmartDeviceLinkRPCV1' if not exists $config{'ns1'};
+$config{'ns2'}='NsSmartDeviceLinkRPCV2' if not exists $config{'ns2'};
 
 my %itypes= map { $_ => 1} qw(Boolean Integer String Float);
 

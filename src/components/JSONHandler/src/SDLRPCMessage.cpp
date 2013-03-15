@@ -1,7 +1,7 @@
 /**
 * \file SDLRPCMessage.cpp
 * \brief SDLRPCMessage class source file.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 

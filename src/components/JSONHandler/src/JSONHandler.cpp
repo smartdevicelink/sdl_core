@@ -1,7 +1,7 @@
 /**
 * \file JSONHandler.cpp
 * \brief JSONHandler class source file.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 #include <stdio.h>
@@ -24,7 +24,7 @@ namespace
         V2 = 2
     };
 
-    // TODO(akandul): Remove this after new code generation.
+    // TODO(AK): Remove this after new code generation.
     class InvalidResponseFactory
     {
     public:
@@ -309,7 +309,7 @@ NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV
         NsSmartDeviceLinkRPC::SDLRPCResponse* response = InvalidResponseFactory::getResponse(jsonMessage);
         if (!response)
         {
-            LOG4CPLUS_ERROR(mLogger, "new NsAppLinkRPC::ALRPCMessage failed...");
+            LOG4CPLUS_ERROR(mLogger, "new NsSmartDeviceLinkRPC::ALRPCMessage failed...");
             return NULL;
         }
 
@@ -389,7 +389,7 @@ NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV
         LOG4CPLUS_ERROR(mLogger, "Received invalid json string.");
         return 0;
     }
-    //TODO (pvysh): temporary solution, will be fixed after changes to codegeneration
+    //TODO (PV): temporary solution, will be fixed after changes to codegeneration
     LOG4CPLUS_INFO_EXT(mLogger, "Received from mobile side: " << std::endl << json);
 
     Json::Value tempSolution;
@@ -428,7 +428,7 @@ NsSmartDeviceLinkRPC::SDLRPCMessage* JSONHandler::handleIncomingMessageProtocolV
                 static_cast<NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal>(functionId), correlationId);
         if (!response)
         {
-            LOG4CPLUS_ERROR(mLogger, "new NsAppLinkRPC::ALRPCMessage failed...");
+            LOG4CPLUS_ERROR(mLogger, "new NsSmartDeviceLinkRPC::ALRPCMessage failed...");
             return NULL;
         }
 
@@ -599,7 +599,7 @@ NsProtocolHandler::SmartDeviceLinkRawMessage* JSONHandler::handleOutgoingMessage
 
     LOG4CPLUS_INFO_EXT(mLogger, "Message to be sent to mobile app \n" << json["parameters"]);
 
-    //TODO (pvysh): temporary solution, will be fixed after changes to codegeneration
+    //TODO (PV): temporary solution, will be fixed after changes to codegeneration
     Json::FastWriter writer;
     std::string messageString = writer.write(json["parameters"]);/*NsSmartDeviceLinkRPCV2::Marshaller::toString( message,
                         static_cast<NsSmartDeviceLinkRPCV2::FunctionID::FunctionIDInternal>(message -> getMethodId()),

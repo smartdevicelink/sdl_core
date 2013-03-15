@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPC_TEXTFIELD_INCLUDE
-#define NSAPPLINKRPC_TEXTFIELD_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKKRPC_TEXTFIELD_INCLUDE
+#define NSSMARTDEVICELINKKRPC_TEXTFIELD_INCLUDE
 
 
 #include "CharacterSet.h"
@@ -12,7 +16,7 @@
   date		2011-05-17
   generated at	Thu Jan 24 06:36:21 2013
   source stamp	Thu Jan 24 06:35:34 2013
-  author	robok0der
+  author	RC
 */
 
 

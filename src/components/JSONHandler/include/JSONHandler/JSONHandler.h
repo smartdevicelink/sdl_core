@@ -1,7 +1,7 @@
 /**
 * \file JSONHandler.hpp
 * \brief JSONHandler class header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 
@@ -25,8 +25,8 @@ const unsigned char RPC_UNKNOWN = 0xF;
 /**
  * \class JSONHandler
  * \brief Class for handling message exchange between protocol layer and Application Manager.
- * Receives AppLink Json message from Protocol layer, creates corresponding object and sends it to Application Manager.
- * Receives AppLink message object from Application manager, serializes it into Json string and sends to Protocol Layer.
+ * Receives SmartDeviceLink Json message from Protocol layer, creates corresponding object and sends it to Application Manager.
+ * Receives SmartDeviceLink message object from Application manager, serializes it into Json string and sends to Protocol Layer.
 */
 class JSONHandler : public IJsonHandler, public NsProtocolHandler::IProtocolObserver
 {
@@ -66,7 +66,7 @@ public:
 
     /**
      * \brief Method for sending message to Mobile Application. 
-     * \param message Pointer to base class of AppLink Json object 
+     * \param message Pointer to base class of SmartDeviceLink Json object
      * to be serialized to Json message and sent to mobile App.
      * \param sessionId ID of the session the message was received within.
      */

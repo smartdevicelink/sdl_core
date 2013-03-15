@@ -1,7 +1,6 @@
 /**
  * \file Socket.cpp
  * \brief Implementation of the Socket class
- * \author vsalo
  */
 
 #include "Utils/Socket.h"

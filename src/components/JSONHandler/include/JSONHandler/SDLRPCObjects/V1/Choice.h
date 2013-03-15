@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPC_CHOICE_INCLUDE
-#define NSAPPLINKRPC_CHOICE_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKKRPC_CHOICE_INCLUDE
+#define NSSMARTDEVICELINKKRPC_CHOICE_INCLUDE
 
 #include <string>
 #include <vector>
@@ -12,7 +16,7 @@
   date		2011-05-17
   generated at	Thu Jan 24 06:36:21 2013
   source stamp	Thu Jan 24 06:35:34 2013
-  author	robok0der
+  author	RC
 */
 
 

@@ -1,15 +1,15 @@
-#ifndef NSRPC2COMMUNICATION_APPLINKCORE_SENDDATARESPONSE_INCLUDE
-#define NSRPC2COMMUNICATION_APPLINKCORE_SENDDATARESPONSE_INCLUDE
+#ifndef NSRPC2COMMUNICATION_SMARTDEVICELINKCORE_SENDDATARESPONSE_INCLUDE
+#define NSRPC2COMMUNICATION_SMARTDEVICELINKCORE_SENDDATARESPONSE_INCLUDE
 
 #include "JSONHandler/RPC2Response.h"
 
 
 /*
-  interface	NsRPC2Communication::AppLinkCore
+  interface	NsRPC2Communication::SmartDeviceLinkCore
   version	1.2
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
+  author	RC
 */
 
 namespace NsRPC2Communication

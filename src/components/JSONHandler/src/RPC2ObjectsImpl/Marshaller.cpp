@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #include <cstring>
 #include "../src/../include/JSONHandler/RPC2Objects/Marshaller.h"
 
@@ -116,7 +120,7 @@
 /*
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
+  author	RC
 */
 
 using namespace NsRPC2Communication;

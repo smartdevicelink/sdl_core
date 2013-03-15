@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPC_TRIGGERSOURCE_INCLUDE
-#define NSAPPLINKRPC_TRIGGERSOURCE_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKKRPC_TRIGGERSOURCE_INCLUDE
+#define NSSMARTDEVICELINKKRPC_TRIGGERSOURCE_INCLUDE
 
 
 /*
@@ -8,7 +12,7 @@
   date		2011-05-17
   generated at	Thu Jan 24 06:36:21 2013
   source stamp	Thu Jan 24 06:35:34 2013
-  author	robok0der
+  author	RC
 */
 
 namespace NsSmartDeviceLinkRPC

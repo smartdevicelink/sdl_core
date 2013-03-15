@@ -1,7 +1,7 @@
 /**
 * \file RPC2Error.cpp
 * \brief RPC2Error class source file.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 

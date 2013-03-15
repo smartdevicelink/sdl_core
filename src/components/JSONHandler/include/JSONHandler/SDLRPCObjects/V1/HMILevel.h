@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPC_HMILEVEL_INCLUDE
-#define NSAPPLINKRPC_HMILEVEL_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKKRPC_HMILEVEL_INCLUDE
+#define NSSMARTDEVICELINKKRPC_HMILEVEL_INCLUDE
 
 
 /*
@@ -8,7 +12,7 @@
   date		2011-05-17
   generated at	Thu Jan 24 06:36:21 2013
   source stamp	Thu Jan 24 06:35:34 2013
-  author	robok0der
+  author	RC
 */
 
 namespace NsSmartDeviceLinkRPC

@@ -296,7 +296,7 @@ namespace NsAppManager
 
         bool activateApp( Application * appToBeActivated );
 
-        AppMgrCoreQueue<Message>* mQueueRPCAppLinkObjectsIncoming;
+        AppMgrCoreQueue<Message>* mQueueRPCSmartDeviceLinkObjectsIncoming;
         AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>* mQueueRPCBusObjectsIncoming;
 
         //CapabilitiesContainer<NsSmartDeviceLinkRPC::ButtonCapabilities> mButtonCapabilitiesV1;

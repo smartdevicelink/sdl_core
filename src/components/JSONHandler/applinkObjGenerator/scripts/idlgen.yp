@@ -582,7 +582,7 @@ $nsa=$config{'nsa'};
 `mkdir -p $pimpl`;
 
 
-my $hat=sprintf "\n/*\n  interface\t%s\n  version\t%s\n  generated at\t%s\n  source stamp\t%s\n  author\trobok0der\n*/\n\n",
+my $hat=sprintf "\n/*\n  interface\t%s\n  version\t%s\n  generated at\t%s\n  source stamp\t%s\n  author\tRC\n*/\n\n",
         $global{'interface'},$global{'version'},$timestamp,$timemod;
 
 $hat= sprintf "\n// %s%s",$dd,$hat if exists $config{'ee'} and $dd ne '';
@@ -649,7 +649,7 @@ foreach(sort keys %funcs)
   my $d=$_;
   if($funcs{$d}->[0]==0)
   {
-    my $r=[$d,$d,0,0,0,[]];  # method name, class name, type, hasstr,hasarr, list of external entities from AppLink
+    my $r=[$d,$d,0,0,0,[]];  # method name, class name, type, hasstr,hasarr, list of external entities from SmartDeviceLink
 
     foreach(@{$funcs{$d}->[2]})
     {
@@ -1282,7 +1282,7 @@ if(@nss2)
 my $ind= @nss2 ?  '  ' x @nss2 : '';
 
 
-my $hat=sprintf "\n/*\n  generated at\t%s\n  source stamp\t%s\n  author\trobok0der\n*/\n\n",$timestamp,$timemod;
+my $hat=sprintf "\n/*\n  generated at\t%s\n  source stamp\t%s\n  author\tRC\n*/\n\n",$timestamp,$timemod;
 
 $hat= sprintf "\n// %s%s",$dd,$hat if exists $config{'ee'} and $dd ne '';
 
@@ -1482,7 +1482,7 @@ qq#    switch(m)\n    {\n#;
   my @tx;
   my @rx;
 # notification
-#    my $r=[$d,$d,0,0,0,[]];  # method name, class name, type, hasstr,hasarr, list of external entities from AppLink
+#    my $r=[$d,$d,0,0,0,[]];  # method name, class name, type, hasstr,hasarr, list of external entities from SmartDeviceLink
 
   foreach(@gnclasses)
   {

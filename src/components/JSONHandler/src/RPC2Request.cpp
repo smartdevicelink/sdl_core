@@ -1,7 +1,7 @@
 /**
 * \file RPC2Request.cpp
 * \brief RPC2Request class source file.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 

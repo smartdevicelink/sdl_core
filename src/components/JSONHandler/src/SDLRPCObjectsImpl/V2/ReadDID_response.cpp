@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #include "../include/JSONHandler/SDLRPCObjects/V2/ReadDID_response.h"
 #include "ReadDID_responseMarshaller.h"
 #include "VehicleDataResultCodeMarshaller.h"
@@ -13,7 +17,7 @@ namespace
   date      2012-11-02
   generated at  Thu Jan 24 06:36:23 2013
   source stamp  Thu Jan 24 06:35:41 2013
-  author    robok0der
+  author    RC
 */
 
 using namespace NsSmartDeviceLinkRPCV2;
@@ -60,7 +64,7 @@ ReadDID_response::ReadDID_response(void)
 bool ReadDID_response::set_dataResult(const std::vector<VehicleDataResultCode>& dataResult_)
 {
     unsigned int i = dataResult_.size();
-    if (i > 1000 || i < 0)  // TODO(akandul): unsigned int i < 0
+    if (i > 1000 || i < 0)  // TODO(AK): unsigned int i < 0
     {
         return false;
     }
@@ -90,7 +94,7 @@ void ReadDID_response::reset_dataResult(void)
 bool ReadDID_response::set_data(const std::vector<std::string>& data_)
 {
     unsigned int i = data_.size();
-    if (i > 1000 || i < 0)  // TODO(akandul): unsigned int i < 0
+    if (i > 1000 || i < 0)  // TODO(AK): unsigned int i < 0
     {
         return false;
     }

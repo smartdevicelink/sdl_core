@@ -1,7 +1,7 @@
 /**
 * \file SDLRPCRequest.cpp
 * \brief SDLRPCRequest class source file.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 

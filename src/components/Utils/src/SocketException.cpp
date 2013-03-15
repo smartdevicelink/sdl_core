@@ -1,7 +1,6 @@
 /**
  * \file SocketException.cpp
  * \brief Implementation of the SocketException class
- * \author vsalo
  */
 
 #include "Utils/SocketException.h"

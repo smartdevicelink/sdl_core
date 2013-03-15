@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPCV2_RESULT_INCLUDE
-#define NSAPPLINKRPCV2_RESULT_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKKRPCV2_RESULT_INCLUDE
+#define NSSMARTDEVICELINKKRPCV2_RESULT_INCLUDE
 
 namespace NsSmartDeviceLinkRPC
 {
@@ -12,7 +16,7 @@ namespace NsSmartDeviceLinkRPC
   date      2012-11-02
   generated at  Thu Jan 24 06:36:23 2013
   source stamp  Thu Jan 24 06:35:41 2013
-  author    robok0der
+  author    RC
 */
 
 namespace NsSmartDeviceLinkRPCV2
@@ -155,7 +159,7 @@ namespace NsSmartDeviceLinkRPCV2
         ResultInternal get(void) const;
         void set(ResultInternal e);
 
-        // TODO(akandul): remove this after new code generation
+        // TODO(AK): remove this after new code generation
         operator NsSmartDeviceLinkRPC::Result();
         Result& operator= (const Result& result);
 

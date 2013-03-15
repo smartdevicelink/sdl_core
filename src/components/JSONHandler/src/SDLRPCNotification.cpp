@@ -1,7 +1,7 @@
 /**
 * \file SDLRPCNotification.cpp
 * \brief SDLRPCNotification class source file.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 

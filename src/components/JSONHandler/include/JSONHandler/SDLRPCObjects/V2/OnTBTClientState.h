@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPCV2_ONTBTCLIENTSTATE_INCLUDE
-#define NSAPPLINKRPCV2_ONTBTCLIENTSTATE_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKKRPCV2_ONTBTCLIENTSTATE_INCLUDE
+#define NSSMARTDEVICELINKKRPCV2_ONTBTCLIENTSTATE_INCLUDE
 
 
 #include "TBTState.h"
@@ -12,7 +16,7 @@
   date		2012-11-02
   generated at	Thu Jan 24 06:36:23 2013
   source stamp	Thu Jan 24 06:35:41 2013
-  author	robok0der
+  author	RC
 */
 
 namespace NsSmartDeviceLinkRPCV2

@@ -572,7 +572,7 @@
   </enum>   
 
   <enum name="TBTState">
-    <description>Enumeration that describes possible states of turn-by-turn client or AppLink app.</description>
+    <description>Enumeration that describes possible states of turn-by-turn client or SmartDeviceLink app.</description>
     <element name="ROUTE_UPDATE_REQUEST" />
     <element name="ROUTE_ACCEPTED" />
     <element name="ROUTE_REFUSED" />

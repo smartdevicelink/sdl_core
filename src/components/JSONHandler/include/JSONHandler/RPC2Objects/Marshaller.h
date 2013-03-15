@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #ifndef MARSHALLER_INCLUDE
 #define MARSHALLER_INCLUDE
 
@@ -125,7 +129,7 @@
 /*
   generated at	Thu Jan 24 06:41:15 2013
   source stamp	Wed Jan 23 13:56:28 2013
-  author	robok0der
+  author	RC
 */
 namespace NsRPC2Communication
 {

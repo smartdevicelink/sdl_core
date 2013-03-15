@@ -1,7 +1,7 @@
 /**
 * \file SDLRPCMessage.hpp
 * \brief SDLRPCMessage class header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 
@@ -12,35 +12,35 @@
 
 /**
   *\namespace NsSmartDeviceLinkRPC
-  *\brief Namespace for AppLink JSON protocol related functionality.
+  *\brief Namespace for SmartDeviceLink JSON protocol related functionality.
 */
 namespace NsSmartDeviceLinkRPC
 {
     /**
      * \class SDLRPCMessage
-     * \brief Base class for AppLink Json messages classes.
+     * \brief Base class for SmartDeviceLink Json messages classes.
     */
     class SDLRPCMessage
     {
     public:
         /**
          *\enum MessageType
-         *\brief AppLink message types.
+         *\brief SmartDeviceLink message types.
         */
         enum MessageType { REQUEST = 0x0, RESPONSE = 0x1, NOTIFICATION = 0x2, UNDEFINED };
 
     public:
         /**
          * \brief Constructor
-         * \param protocolVersion Version of AppLink protocol (currently 1,2)
-         * \param messageType Type of AppLink message
+         * \param protocolVersion Version of SmartDeviceLink protocol (currently 1,2)
+         * \param messageType Type of SmartDeviceLink message
         */
         SDLRPCMessage(unsigned int protocolVersion, MessageType messageType = UNDEFINED);
 
         /**
          * \brief Constructor
-         * \param protocolVersion Version of AppLink protocol (currently 1,2).
-         * \param messageType Type of AppLink message.
+         * \param protocolVersion Version of SmartDeviceLink protocol (currently 1,2).
+         * \param messageType Type of SmartDeviceLink message.
          * \param methodID ID of RPC in message.
         */
         SDLRPCMessage(unsigned int protocolVersion, MessageType messageType, int methodID);
@@ -93,21 +93,21 @@ namespace NsSmartDeviceLinkRPC
 
         /**
          * \brief Getter for correlation id of JSON message.
-         * TODO (pvysh) it is not supposed to be in base class.
+         * TODO (PV) it is not supposed to be in base class.
          * \return correlation id of JSON message.
          */
         virtual unsigned int getCorrelationID() const;
 
         /**
          * \brief Setter for correlation id of JSON message.
-         * TODO (pvysh) it is not supposed to be in base class.
+         * TODO (PV) it is not supposed to be in base class.
          * \param correlationID Correlation ID of JSON message.
          * \return type description
          */
         virtual void setCorrelationID(unsigned int correlationID);
     private:
         /**
-         * \brief Applink protocol version (currently 1,2)
+         * \brief SmartDeviceLink protocol version (currently 1,2)
         */
         unsigned int mProtocolVersion;
 

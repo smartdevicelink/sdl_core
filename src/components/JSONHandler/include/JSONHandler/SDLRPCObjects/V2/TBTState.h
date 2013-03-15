@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPCV2_TBTSTATE_INCLUDE
-#define NSAPPLINKRPCV2_TBTSTATE_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKKRPCV2_TBTSTATE_INCLUDE
+#define NSSMARTDEVICELINKKRPCV2_TBTSTATE_INCLUDE
 
 
 /*
@@ -8,13 +12,13 @@
   date		2012-11-02
   generated at	Thu Jan 24 06:36:23 2013
   source stamp	Thu Jan 24 06:35:41 2013
-  author	robok0der
+  author	RC
 */
 
 namespace NsSmartDeviceLinkRPCV2
 {
 
-///  Enumeration that describes possible states of turn-by-turn client or AppLink app.
+///  Enumeration that describes possible states of turn-by-turn client or SmartDeviceLink app.
 
   class TBTState
   {

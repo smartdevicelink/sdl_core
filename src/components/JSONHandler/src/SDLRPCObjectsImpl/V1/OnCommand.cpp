@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #include "../include/JSONHandler/SDLRPCObjects/V1/OnCommand.h"
 #include "OnCommandMarshaller.h"
 #include "../include/JSONHandler/SDLRPCObjects/V1/Marshaller.h"
@@ -12,7 +16,7 @@
   date		2011-05-17
   generated at	Thu Jan 24 06:36:21 2013
   source stamp	Thu Jan 24 06:35:34 2013
-  author	robok0der
+  author	RC
 */
 
 using namespace NsSmartDeviceLinkRPC;

@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPC_ONCOMMANDMARSHALLER_INCLUDE
-#define NSAPPLINKRPC_ONCOMMANDMARSHALLER_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKRPC_ONCOMMANDMARSHALLER_INCLUDE
+#define NSSMARTDEVICELINKRPC_ONCOMMANDMARSHALLER_INCLUDE
 
 #include <string>
 #include <json/json.h>
@@ -13,7 +17,7 @@
   date		2011-05-17
   generated at	Thu Jan 24 06:36:21 2013
   source stamp	Thu Jan 24 06:35:34 2013
-  author	robok0der
+  author	RC
 */
 
 namespace NsSmartDeviceLinkRPC

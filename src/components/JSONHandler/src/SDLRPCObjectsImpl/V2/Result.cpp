@@ -1,7 +1,11 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #include "../include/JSONHandler/SDLRPCObjects/V2/Result.h"
 #include "ResetGlobalProperties_responseMarshaller.h"
 
-// TODO(akandul): remove this after new code generation
+// TODO(AK): remove this after new code generation
 #include "../include/JSONHandler/SDLRPCObjects/V1/Result.h"
 
 namespace
@@ -31,14 +35,14 @@ void Result::set(ResultInternal e)
     mInternal = e;
 }
 
-// TODO(akandul): remove this after new code generation
+// TODO(AK): remove this after new code generation
 Result::operator NsSmartDeviceLinkRPC::Result()
 {
     return NsSmartDeviceLinkRPC::Result(
                static_cast<NsSmartDeviceLinkRPC::Result::ResultInternal>(mInternal));
 }
 
-// TODO(akandul): remove this after new code generation
+// TODO(AK): remove this after new code generation
 Result& Result::operator= (const Result& result)
 {
     mInternal = result.mInternal;

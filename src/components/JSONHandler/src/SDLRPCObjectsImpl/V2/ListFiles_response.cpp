@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #include "../include/JSONHandler/SDLRPCObjects/V2/ListFiles_response.h"
 #include "ListFiles_responseMarshaller.h"
 
@@ -12,7 +16,7 @@ namespace
   date      2012-11-02
   generated at  Thu Jan 24 06:36:23 2013
   source stamp  Thu Jan 24 06:35:41 2013
-  author    robok0der
+  author    RC
 */
 
 using namespace NsSmartDeviceLinkRPCV2;
@@ -53,7 +57,7 @@ ListFiles_response::ListFiles_response(void)
 bool ListFiles_response::set_filenames(const std::vector<std::string>& filenames_)
 {
     unsigned int i = filenames_.size();
-    if (i > 1000 || i < 0) // TODO(akandul): unsigned int i < 0
+    if (i > 1000 || i < 0) // TODO(AK): unsigned int i < 0
     {
         return false;
     }

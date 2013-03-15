@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPCV2_ADDSUBMENU_RESPONSEMARSHALLER_INCLUDE
-#define NSAPPLINKRPCV2_ADDSUBMENU_RESPONSEMARSHALLER_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKRPCV2_ADDSUBMENU_RESPONSEMARSHALLER_INCLUDE
+#define NSSMARTDEVICELINKRPCV2_ADDSUBMENU_RESPONSEMARSHALLER_INCLUDE
 
 #include <string>
 #include <json/json.h>
@@ -13,7 +17,7 @@
   date		2012-11-02
   generated at	Thu Jan 24 06:36:23 2013
   source stamp	Thu Jan 24 06:35:41 2013
-  author	robok0der
+  author	RC
 */
 
 namespace NsSmartDeviceLinkRPCV2

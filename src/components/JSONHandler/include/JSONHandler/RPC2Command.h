@@ -1,7 +1,7 @@
 /**
 * \file RPC2Command.hpp
 * \brief RPC2Command class header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 

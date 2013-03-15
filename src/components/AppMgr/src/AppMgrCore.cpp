@@ -371,7 +371,7 @@ namespace {
             NsSmartDeviceLinkRPCV2::OnAudioPassThru* onAudioPassThru = new NsSmartDeviceLinkRPCV2::OnAudioPassThru;
             if (!onAudioPassThru)
             {
-                std::cout << "OUT_OF_MEMORY: new NsAppLinkRPCV2::OnAudioPassThru." << std::endl;
+                std::cout << "OUT_OF_MEMORY: new NsSmartDeviceLinkRPCV2::OnAudioPassThru." << std::endl;
                 if (sendEndAudioPassThruToHMI(data_->sessionKey, data_->id))
                 {
                     sendResponse<NsSmartDeviceLinkRPCV2::PerformAudioPassThru_response
@@ -436,7 +436,7 @@ namespace NsAppManager
      * \brief Default class constructor
      */
     AppMgrCore::AppMgrCore()
-        : mQueueRPCAppLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
+        : mQueueRPCSmartDeviceLinkObjectsIncoming(new AppMgrCoreQueue<Message>(&AppMgrCore::handleMobileRPCMessage, this))
         , mQueueRPCBusObjectsIncoming(new AppMgrCoreQueue<NsRPC2Communication::RPC2Command*>(&AppMgrCore::handleBusRPCMessageIncoming, this))
         , mDriverDistractionV1(0)
         , mDriverDistractionV2(0)
@@ -454,7 +454,7 @@ namespace NsAppManager
      * \brief Copy constructor
      */
     AppMgrCore::AppMgrCore(const AppMgrCore &)
-        :mQueueRPCAppLinkObjectsIncoming(0)
+        :mQueueRPCSmartDeviceLinkObjectsIncoming(0)
         ,mQueueRPCBusObjectsIncoming(0)
         ,mDriverDistractionV1(0)
         ,mDriverDistractionV2(0)
@@ -466,8 +466,8 @@ namespace NsAppManager
      */
     AppMgrCore::~AppMgrCore()
     {
-        if(mQueueRPCAppLinkObjectsIncoming)
-            delete mQueueRPCAppLinkObjectsIncoming;
+        if(mQueueRPCSmartDeviceLinkObjectsIncoming)
+            delete mQueueRPCSmartDeviceLinkObjectsIncoming;
         if(mQueueRPCBusObjectsIncoming)
             delete mQueueRPCBusObjectsIncoming;
         if(mDriverDistractionV1)
@@ -493,7 +493,7 @@ namespace NsAppManager
             return;
         }
 
-        mQueueRPCAppLinkObjectsIncoming->pushMessage(Message(message, appId));
+        mQueueRPCSmartDeviceLinkObjectsIncoming->pushMessage(Message(message, appId));
 
         LOG4CPLUS_INFO_EXT(mLogger, " Pushed mobile RPC message " << message->getMethodId() << " for application id " << appId);
     }
@@ -523,7 +523,7 @@ namespace NsAppManager
     {
         LOG4CPLUS_INFO_EXT(mLogger, " Threads are being started!");
 
-        mQueueRPCAppLinkObjectsIncoming->executeThreads();
+        mQueueRPCSmartDeviceLinkObjectsIncoming->executeThreads();
         mQueueRPCBusObjectsIncoming->executeThreads();
 
         LOG4CPLUS_INFO_EXT(mLogger, " Threads have been started!");
@@ -670,7 +670,7 @@ namespace NsAppManager
 
                     appRegistered->set_application(hmiApp);
                     HMIHandler::getInstance().sendNotification(appRegistered);
-                    LOG4CPLUS_INFO_EXT(mLogger, " An AppLinkCore::OnAppRegistered notofocation for the app " << app->getName()
+                    LOG4CPLUS_INFO_EXT(mLogger, " An SmartDeviceLinkCore::OnAppRegistered notofocation for the app " << app->getName()
                         << " application id " << app->getAppID()
                         << " gets sent to an HMI side... ");
                     LOG4CPLUS_INFO_EXT(mLogger, " A RegisterAppInterface request was successful: registered an app " << app->getName()
@@ -1741,7 +1741,7 @@ namespace NsAppManager
             {
                 case NsSmartDeviceLinkRPCV2::FunctionID::RegisterAppInterfaceID:
                 {
-                    LOG4CPLUS_INFO_EXT(mLogger, "Message id is NsAppLinkRPCV2::FunctionID::RegisterAppInterfaceID");
+                    LOG4CPLUS_INFO_EXT(mLogger, "Message id is NsSmartDeviceLinkRPCV2::FunctionID::RegisterAppInterfaceID");
                     NsSmartDeviceLinkRPCV2::RegisterAppInterface_request * object = (NsSmartDeviceLinkRPCV2::RegisterAppInterface_request*)mobileMsg;
                     NsSmartDeviceLinkRPCV2::RegisterAppInterface_response* response = new NsSmartDeviceLinkRPCV2::RegisterAppInterface_response();
                     response->setMessageType(NsSmartDeviceLinkRPC::SDLRPCMessage::RESPONSE);
@@ -6092,7 +6092,7 @@ namespace NsAppManager
                 LOG4CPLUS_INFO_EXT(mLogger, "New app  " << app->getName() << " id " << app->getAppID() << " activated!");
                 return;
             }
-            /*case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_APPLINKCORE__DEACTIVATEAPP:
+            /*case NsRPC2Communication::Marshaller::METHOD_NSRPC2COMMUNICATION_SmartDeviceLinkCORE__DEACTIVATEAPP:
             {
                 LOG4CPLUS_INFO_EXT(mLogger, "DeactivateApp has been received!");
                 NsRPC2Communication::BasicCommunication::DeactivateApp* object = static_cast<NsRPC2Communication::BasicCommunication::DeactivateApp*>(msg);
@@ -6354,7 +6354,7 @@ namespace NsAppManager
                 return;
             }
             default:
-                LOG4CPLUS_INFO_EXT(mLogger, " Not AppLinkCore RPC message " << msg->getMethod() << " has been received!");
+                LOG4CPLUS_INFO_EXT(mLogger, " Not SmartDeviceLinkCore RPC message " << msg->getMethod() << " has been received!");
         }
 
         switch(msg->getMethod())

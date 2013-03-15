@@ -2,12 +2,12 @@
  *
  * @name RPC2Spec
  *
- * @desc UI, VR, TTS, Buttons, ApplinkCore functionality
+ * @desc UI, VR, TTS, Buttons, SmartDeviceLinkCore functionality
  *
  * @category    HMI
  * @version 1.0
  *
- * @author  PVyshnevska
+ * Copyright (c) 2013 Ford Motor Company
  *
  */
 
@@ -21,7 +21,7 @@ all classes derived from xml searches in namespace xx.
 this directive is optional and may be overwriten by generator flag -n
 */
 
-//using AppLinkRPC;
+//using SmartDeviceLinkRPC;
 
 // all method names will be prefixed by 'test.', prefix append on wire only, not in C++ names
 // using of full power of c string notation possible, i.e. "some\tclass\b\x02#$#$\"\\" is valid prefix
@@ -51,7 +51,7 @@ Show(string(500) * mainField1,
     string(500) * mainField2,
     string(500) * mainField3,
     string(500) * mainField4,
-    TextAlignment * alignment,  //data type from AppLink protocol specification
+    TextAlignment * alignment,  //data type from SmartDeviceLink protocol specification
     string(500) * statusBar,
     string(500) *mediaClock,
     string(500) *mediaTrack,
@@ -90,8 +90,8 @@ Alert(
    *  result code
    */
 AddCommand(
-  unsigned int (2000000000) cmdId,  // cmdID from addCommand request in AppLink protocol
-  MenuParams menuParams,   //data type from AppLink protocol specification
+  unsigned int (2000000000) cmdId,  // cmdID from addCommand request in SmartDeviceLink protocol
+  MenuParams menuParams,   //data type from SmartDeviceLink protocol specification
   Image * cmdIcon, // Image struct determining whether static or dynamic icon
   int appId
   -> ); // return value is provided in corresponding response object, id of request and response should be equal
@@ -104,7 +104,7 @@ AddCommand(
    *  result code
    */
 DeleteCommand(
-  unsigned int (2000000000) cmdId,  // cmdID from addCommand request in AppLink protocol
+  unsigned int (2000000000) cmdId,  // cmdID from addCommand request in SmartDeviceLink protocol
   int appId
   -> );  // return value is provided in corresponding response object, id of request and response should be equal
 
@@ -112,7 +112,7 @@ DeleteCommand(
 /*
    * @descr
    *      add sub menu
-   *      parameters are copied from AddSubMenu in AppLink protocol
+   *      parameters are copied from AddSubMenu in SmartDeviceLink protocol
    *
    * @returns
    *  result code
@@ -127,7 +127,7 @@ AddSubMenu(
 /*
    * @descr
    *      delete sub menu
-   *      parameters are copied from DeleteSubMenu in AppLink protocol
+   *      parameters are copied from DeleteSubMenu in SmartDeviceLink protocol
    *
    * @returns
    *  result code
@@ -140,7 +140,7 @@ DeleteSubMenu(
 /*
    * @descr
    *      create new interaction choice set
-   *      parameters are copied from CreateInteractionChoiceSet in AppLink protocol
+   *      parameters are copied from CreateInteractionChoiceSet in SmartDeviceLink protocol
    *  // TODO: clarify if it is correct approach
    *
    * @returns
@@ -148,14 +148,14 @@ DeleteSubMenu(
    */
 CreateInteractionChoiceSet(
   unsigned int (2000000000) interactionChoiceSetID,
-  Choice choiceSet[1:100],   // data type from AppLink protocol specification
+  Choice choiceSet[1:100],   // data type from SmartDeviceLink protocol specification
   int appId
   -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
    * @descr
    *      delete new interaction choice set
-   *      parameters are copied from DeleteInteractionChoiceSet in AppLink protocol
+   *      parameters are copied from DeleteInteractionChoiceSet in SmartDeviceLink protocol
    *  // TODO: clarify if it is correct approach
    *
    * @returns
@@ -169,7 +169,7 @@ DeleteInteractionChoiceSet(
 /*
    * @descr
    *      Triggers an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow
-   *      parameters are copied from PerformInteraction in AppLink protocol
+   *      parameters are copied from PerformInteraction in SmartDeviceLink protocol
    *
    *  // TODO: clarify if it is correct approach
    *
@@ -178,23 +178,23 @@ DeleteInteractionChoiceSet(
    */
 PerformInteraction(
   string(500) initialText,
-  TTSChunk initialPrompt[1:100], //data type from AppLink protocol specification
-  InteractionMode interactionMode, // data type from AppLink protocol specification
+  TTSChunk initialPrompt[1:100], //data type from SmartDeviceLink protocol specification
+  InteractionMode interactionMode, // data type from SmartDeviceLink protocol specification
   unsigned int (2000000000)  interactionChoiceSetIDList[1:100],// List of interaction choice set IDs to use with an interaction
-  TTSChunk * helpPrompt[1:100], //data type from AppLink protocol specification
-  TTSChunk * timeoutPrompt[1:100], // data type from AppLink protocol specification
+  TTSChunk * helpPrompt[1:100], //data type from SmartDeviceLink protocol specification
+  TTSChunk * timeoutPrompt[1:100], // data type from SmartDeviceLink protocol specification
   unsigned int (5000:100000) * timeout, //in milliseconds
   VrHelpItem * vrHelp[1:100], // Ability to send suggested VR Help Items to display on-screen during Perform Interaction
   int appId
   ->
   unsigned int (2000000000) * choiceID, // ID of the choice that was selected in response to PerformInteraction
-  TriggerSource * triggerSource //data type from AppLink protocol specification
+  TriggerSource * triggerSource //data type from SmartDeviceLink protocol specification
   );
 
 /*
    * @descr
    *      start media clock timer
-   *      parameters are copied from SetMediaClockTimer in AppLink protocol
+   *      parameters are copied from SetMediaClockTimer in SmartDeviceLink protocol
    *
    *  // TODO: clarify if it is correct approach
    *
@@ -202,15 +202,15 @@ PerformInteraction(
    *  result code
    */
 SetMediaClockTimer(
-  StartTime * startTime, // data type from AppLink protocol specification
-  UpdateMode updateMode,  // data type from AppLink protocol specification
+  StartTime * startTime, // data type from SmartDeviceLink protocol specification
+  UpdateMode updateMode,  // data type from SmartDeviceLink protocol specification
   int appId
   -> );// return value is provided in corresponding response object, id of request and response should be equal
 
 /*
    * @descr
    *      set global properties for timeout prompt and help prompt
-   *      parameters are copied from SetGlobalProperties in AppLink protocol
+   *      parameters are copied from SetGlobalProperties in SmartDeviceLink protocol
    *
    *  // TODO: clarify if it is correct approach
    *
@@ -218,8 +218,8 @@ SetMediaClockTimer(
    *  result code
    */
 SetGlobalProperties(
-  TTSChunk * helpPrompt[1:100], // data type from AppLink protocol specification
-  TTSChunk * timeoutPrompt[1:100], // data type from AppLink protocol specification
+  TTSChunk * helpPrompt[1:100], // data type from SmartDeviceLink protocol specification
+  TTSChunk * timeoutPrompt[1:100], // data type from SmartDeviceLink protocol specification
   string(500) * vrHelpTitle, // VR Help Title text
   VrHelpItem * vrHelp[1:100], // VR Help Items
   int appId
@@ -228,7 +228,7 @@ SetGlobalProperties(
 /*
    * @descr
    *      reset global properties for timeout prompt and help prompt
-   *      parameters are copied from SetGlobalProperties in AppLink protocol
+   *      parameters are copied from SetGlobalProperties in SmartDeviceLink protocol
    *
    *  // TODO: clarify if it is correct approach
    *
@@ -236,12 +236,12 @@ SetGlobalProperties(
    *  result code
    */
 ResetGlobalProperties(
-  GlobalProperty properties[1:100], // enum, data type from AppLink protocol specification
+  GlobalProperty properties[1:100], // enum, data type from SmartDeviceLink protocol specification
   int appId
   -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
-   * @descr Notifies AppLink core about command trigerred by UI
+   * @descr Notifies SmartDeviceLink core about command trigerred by UI
    */
 notification  OnCommand (
   unsigned int (2000000000) commandId, // id of triggered command
@@ -268,8 +268,8 @@ notification OnSystemContext(
    */
 GetCapabilities(
   ->
-  DisplayCapabilities displayCapabilities, // data type from AppLink protocol specification
-  HmiZoneCapabilities hmiZoneCapabilities[1:100], // data type from AppLink protocol specification
+  DisplayCapabilities displayCapabilities, // data type from SmartDeviceLink protocol specification
+  HmiZoneCapabilities hmiZoneCapabilities[1:100], // data type from SmartDeviceLink protocol specification
   SoftButtonCapabilities * softButtonCapabilities[1:100] // If returned, the platform supports on-screen SoftButtons
   );
 
@@ -292,7 +292,7 @@ GetSupportedLanguages(
    *
    */
 notification OnDriverDistraction(
-    DriverDistractionState state // data type from AppLink protocol specification
+    DriverDistractionState state // data type from SmartDeviceLink protocol specification
   );
 
 /*
@@ -306,19 +306,19 @@ notification OnReady(
 
 /*
   * @descr
-   *      Request from AppLink to HMI to change display language for app.
+   *      Request from SmartDeviceLink to HMI to change display language for app.
    *  to user.
    *
    */
 ChangeRegistration(
-  Language hmiDisplayLanguage, //  data type from AppLink protocol specification
+  Language hmiDisplayLanguage, //  data type from SmartDeviceLink protocol specification
   int appId
   ->
 );
 
 /*
   * @descr
-   *      Request from Applink to HMI to get the currently active  UI language
+   *      Request from SmartDeviceLink to HMI to get the currently active  UI language
    *
    */
 GetLanguage(
@@ -338,17 +338,17 @@ SetAppIcon(
 
 /*
   * @descr
-   *      Notification from HMI to AppLink about change of display language for app.
+   *      Notification from HMI to SmartDeviceLink about change of display language for app.
    *  to user.
    *
    */
 notification OnLanguageChange(
-  Language hmiDisplayLanguage //  data type from AppLink protocol specification
+  Language hmiDisplayLanguage //  data type from SmartDeviceLink protocol specification
 );
 
 /*
   * @descr
-   *      Notification from HMI to AppLink when user chooses device
+   *      Notification from HMI to SmartDeviceLink when user chooses device
    *
    */
 notification OnDeviceChosen(
@@ -357,7 +357,7 @@ notification OnDeviceChosen(
 
 /*
   * @descr
-   *      Request from AppLink to HMI to show slider. Returns position.
+   *      Request from SmartDeviceLink to HMI to show slider. Returns position.
    *
    */
 Slider(
@@ -373,7 +373,7 @@ Slider(
 
 /*
   * @descr
-   *      Request from AppLink to HMI:
+   *      Request from SmartDeviceLink to HMI:
    * Creates a full screen overlay containing a large block of
    * formatted text that can be scrolled with up to 8 SoftButtons defined
    */
@@ -387,7 +387,7 @@ ScrollableMessage(
 
 /*
   * @descr
-   *      Request from AppLink to HMI:
+   *      Request from SmartDeviceLink to HMI:
    * Used to set an alternate display layou
    * If not sent, default screen for given platform will be shown
    */
@@ -399,7 +399,7 @@ SetDisplayLayout(
 
 /*
   * @descr
-   *      Request from AppLink to HMI to start audio pass through session
+   *      Request from SmartDeviceLink to HMI to start audio pass through session
    *  to user.
    *
    */
@@ -417,7 +417,7 @@ PerformAudioPassThru(
 
 /*
   * @descr
-   *      Request from AppLink to HMI: when this request is invoked, the audio capture stops
+   *      Request from SmartDeviceLink to HMI: when this request is invoked, the audio capture stops
    *  to user.
    *
    */
@@ -427,7 +427,7 @@ EndAudioPassThru(
 );
 
 /*
-     * @descr Request from ApplinkCore to HMI to show info about navigation.
+     * @descr Request from SmartDeviceLinkCore to HMI to show info about navigation.
      */
 ShowConstantTBT(
   string (500) * navigationText1,
@@ -444,7 +444,7 @@ ShowConstantTBT(
 );
 
 /*
-     * @descr Request from ApplinkCore to HMI to announce navigation maneuver
+     * @descr Request from SmartDeviceLinkCore to HMI to announce navigation maneuver
      */
 AlertManeuver(
   TTSChunk ttsChunks[1:100],
@@ -454,7 +454,7 @@ AlertManeuver(
 );
 
 /*
-     * @descr Request from ApplinkCore to HMI to update turn list.
+     * @descr Request from SmartDeviceLinkCore to HMI to update turn list.
      */
 UpdateTurnList(
   Turn turnList[1:100],
@@ -464,7 +464,7 @@ UpdateTurnList(
 );
 
 /*
-     * @descr Notification from HMI to ApplinkCore
+     * @descr Notification from HMI to SmartDeviceLinkCore
      * Provides applications with notifications specific to the current TBT client status on the module
      */
 notification OnTBTClientState(
@@ -473,7 +473,7 @@ notification OnTBTClientState(
 );
 
 /*
-     * @descr Request from ApplinkCore to HMI to make a call.
+     * @descr Request from SmartDeviceLinkCore to HMI to make a call.
      */
 DialNumber(
   string(500) number, //Phone number is a string consisting of only the digits and "+", which can be up to 40 chars
@@ -489,7 +489,7 @@ DialNumber(
 
  version "1.2";
 
-// using AppLinkRPC;
+// using SmartDeviceLinkRPC;
 
 prefix "VR.";
 
@@ -515,7 +515,7 @@ envelope "JSON-RPC 2.0";
      */
 GetCapabilities(
     ->
-    VrCapabilities capabilities[1:100] // data type from AppLink protocol specification
+    VrCapabilities capabilities[1:100] // data type from SmartDeviceLink protocol specification
 );
 
 /*
@@ -526,7 +526,7 @@ GetCapabilities(
      *  result code
      */
 AddCommand(
-    unsigned int (2000000000) cmdId, // cmdID from addCommand request in AppLink protocol
+    unsigned int (2000000000) cmdId, // cmdID from addCommand request in SmartDeviceLink protocol
     string (99) vrCommands [1:100], //An array of strings to be used as VR sysnonyms for this command
     int appId
     -> ); // return value is provided in corresponding response object, id of request and response should be equal
@@ -539,12 +539,12 @@ AddCommand(
      *  result code
      */
 DeleteCommand(
-    unsigned int (2000000000) cmdId, // cmdID from addCommand request in AppLink protocol
+    unsigned int (2000000000) cmdId, // cmdID from addCommand request in SmartDeviceLink protocol
     int appId
     -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
 /*
-     * @descr Notifies AppLink core about command trigerred by VR
+     * @descr Notifies SmartDeviceLink core about command trigerred by VR
      */
 notification OnCommand(
     unsigned int (2000000000) cmdID, // id of triggered command
@@ -553,23 +553,23 @@ notification OnCommand(
 
   /*
   * @descr
-   *      Request from AppLink to HMI to change language for app.
+   *      Request from SmartDeviceLink to HMI to change language for app.
    *  to user.
    *
    */
 ChangeRegistration(
-  Language language, //  data type from AppLink protocol specification
+  Language language, //  data type from SmartDeviceLink protocol specification
   int appId
   ->
 );
 /*
   * @descr
-   *      Notification from HMI to AppLink about change of  language for app.
+   *      Notification from HMI to SmartDeviceLink about change of  language for app.
    *  to user.
    *
    */
 notification OnLanguageChange(
-  Language language //  data type from AppLink protocol specification
+  Language language //  data type from SmartDeviceLink protocol specification
 );
 
 /*
@@ -586,7 +586,7 @@ GetSupportedLanguages(
 
 /*
   * @descr
-   *      Request from Applink to HMI to get currently active  VR language
+   *      Request from SmartDeviceLink to HMI to get currently active  VR language
    *
    */
 GetLanguage(
@@ -601,7 +601,7 @@ interface NsRPC2Communication::TTS
 
 version "1.2";
 
-//using AppLinkRPC;
+//using SmartDeviceLinkRPC;
 
 prefix "TTS.";
 
@@ -627,7 +627,7 @@ envelope "JSON-RPC 2.0";
      */
 GetCapabilities(
     ->
-    SpeechCapabilities capabilities[1:100] // data type from AppLink protocol specification
+    SpeechCapabilities capabilities[1:100] // data type from SmartDeviceLink protocol specification
     );
 
 /*
@@ -638,34 +638,34 @@ GetCapabilities(
      *      result code of execution
      */
 Speak(
-    TTSChunk ttsChunks [1:100], // data type from AppLink protocol specification
+    TTSChunk ttsChunks [1:100], // data type from SmartDeviceLink protocol specification
     int appId
     -> ); // return value is provided in corresponding response object, id of request and response should be equal
 
  /*
   * @descr
-   *      Request from AppLink to HMI to change language for app.
+   *      Request from SmartDeviceLink to HMI to change language for app.
    *  to user.
    *
    */
 ChangeRegistration(
-  Language language, //  data type from AppLink protocol specification
+  Language language, //  data type from SmartDeviceLink protocol specification
   int appId
   -> // return value is provided in corresponding response object, id of request and response should be equal
 );
 /*
   * @descr
-   *      Notification from HMI to AppLink about change of  language for app.
+   *      Notification from HMI to SmartDeviceLink about change of  language for app.
    *  to user.
    *
    */
 notification OnLanguageChange(
-  Language language //  data type from AppLink protocol specification
+  Language language //  data type from SmartDeviceLink protocol specification
 );
 
 /*
   * @descr
-   *      Request from Applink to HMI to get currently active TTS language
+   *      Request from SmartDeviceLink to HMI to get currently active TTS language
    *
    */
 GetLanguage(
@@ -693,7 +693,7 @@ interface NsRPC2Communication::Buttons
 
 version "1.2";
 
-//using AppLinkRPC;
+//using SmartDeviceLinkRPC;
 
 prefix "Buttons.";
 
@@ -720,7 +720,7 @@ envelope "JSON-RPC 2.0";
      */
 GetCapabilities(
     ->
-    ButtonCapabilities capabilities[1:100], // data type from AppLink protocol specification
+    ButtonCapabilities capabilities[1:100], // data type from SmartDeviceLink protocol specification
     PresetBankCapabilities * presetBankCapabilities // If returned, the platform supports custom on-screen Presets
 );
 
@@ -728,8 +728,8 @@ GetCapabilities(
      * @descr Notifies application of UP/DOWN events for buttons
      */
 notification OnButtonEvent(
-    ButtonName name,  // data type from AppLink protocol specification
-    ButtonEventMode mode,  // data type from AppLink protocol specification
+    ButtonName name,  // data type from SmartDeviceLink protocol specification
+    ButtonEventMode mode,  // data type from SmartDeviceLink protocol specification
     unsigned int (65536) * customButtonID // If ButtonName is “CUSTOM_BUTTON", this references the integer ID passed by a custom button. (e.g. softButtonName)
 );
 
@@ -737,20 +737,20 @@ notification OnButtonEvent(
      * @descr Notifies application of LONG/SHORT press events for buttons
      */
 notification OnButtonPress(
-    ButtonName name,  // data type from AppLink protocol specification
-    ButtonPressMode mode,  // data type from AppLink protocol specification
+    ButtonName name,  // data type from SmartDeviceLink protocol specification
+    ButtonPressMode mode,  // data type from SmartDeviceLink protocol specification
     unsigned int (65536) * customButtonID // If ButtonName is “CUSTOM_BUTTON", this references the string passed by a custom button. (e.g. softButtonName)
 );
 }
 
- interface NsRPC2Communication::AppLinkCore
+ interface NsRPC2Communication::SmartDeviceLinkCore
  {
 
 version "1.2";
 
-//using AppLinkRPC;
+//using SmartDeviceLinkRPC;
 
-prefix "AppLinkCore.";
+prefix "SmartDeviceLinkCore.";
 
 #if 0
 /*
@@ -780,7 +780,7 @@ GetAppList(
 
     /*
   * @descr
-   *      Request from HMI to AppLink to get the list of devices.
+   *      Request from HMI to SmartDeviceLink to get the list of devices.
    *
    */
 GetDeviceList(
@@ -790,7 +790,7 @@ GetDeviceList(
 
 /*
   * @descr
-   *      Notification from AppLink to HMI about changes in device list.
+   *      Notification from SmartDeviceLink to HMI about changes in device list.
    *
    */
 notification OnDeviceListUpdated(
@@ -854,7 +854,7 @@ notification OnAppRegistered(
      */
 notification OnAppUnregistered(
     string(100) appName,
-    AppInterfaceUnregisteredReason * reason,  // data type from AppLink protocol specification
+    AppInterfaceUnregisteredReason * reason,  // data type from SmartDeviceLink protocol specification
     int appId
 );
 }
@@ -863,11 +863,11 @@ interface NsRPC2Communication::VehicleInfo
 {
 version "1.2";
 
-//using AppLinkRPC;
+//using SmartDeviceLinkRPC;
 
 prefix "VehicleInfo.";
  /*
-     * @descr Request from ApplinkCore to HMI to get info about the vehicle.
+     * @descr Request from SmartDeviceLinkCore to HMI to get info about the vehicle.
     */
 GetVehicleType(
     ->
@@ -876,7 +876,7 @@ GetVehicleType(
 
 
 /*
-  * @descr Request from ApplinkCore to HMI
+  * @descr Request from SmartDeviceLinkCore to HMI
   * Non periodic vehicle data read request
   */
 GetVehicleData(
@@ -903,7 +903,7 @@ GetVehicleData(
 );
 
 /*
-  * @descr Notification from HMI to Applink
+  * @descr Notification from HMI to SmartDeviceLink
   * Callback for the periodic and non periodic vehicle data read function.
   */
 notification OnVehicleData(
@@ -927,7 +927,7 @@ notification OnVehicleData(
 );
 
 /*
-  * @descr Request from ApplinkCore to HMI
+  * @descr Request from SmartDeviceLinkCore to HMI
   * Non periodic vehicle data read request
   */
 ReadDID(
@@ -941,7 +941,7 @@ ReadDID(
 );
 
 /*
-  * @descr Request from ApplinkCore to HMI
+  * @descr Request from SmartDeviceLinkCore to HMI
   * Vehicle module diagnostic trouble code request.
   */
 GetDTCs(

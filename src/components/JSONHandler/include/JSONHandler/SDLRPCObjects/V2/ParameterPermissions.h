@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPCV2_PARAMETERPERMISSIONS_INCLUDE
-#define NSAPPLINKRPCV2_PARAMETERPERMISSIONS_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKKRPCV2_PARAMETERPERMISSIONS_INCLUDE
+#define NSSMARTDEVICELINKKRPCV2_PARAMETERPERMISSIONS_INCLUDE
 
 #include <string>
 #include <vector>
@@ -12,7 +16,7 @@
   date		2012-11-02
   generated at	Thu Jan 24 06:36:23 2013
   source stamp	Thu Jan 24 06:35:41 2013
-  author	robok0der
+  author	RC
 */
 
 

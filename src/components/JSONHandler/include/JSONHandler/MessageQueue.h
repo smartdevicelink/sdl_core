@@ -1,7 +1,7 @@
 /**
 * \file MessageQueue.hpp
 * \brief Template MessageQueue class header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 

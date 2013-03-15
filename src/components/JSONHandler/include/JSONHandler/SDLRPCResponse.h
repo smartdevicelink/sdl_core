@@ -1,7 +1,7 @@
 /**
 * \file SDLRPCResponse.h
 * \brief Class SDLRPCResponse header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 
@@ -14,13 +14,13 @@
 
 /**
   *\namespace NsSmartDeviceLinkRPC
-  *\brief Namespace for AppLink JSON protocol related functionality.
+  *\brief Namespace for SmartDeviceLink JSON protocol related functionality.
 */
 namespace NsSmartDeviceLinkRPC
 {
     /**
      * \class SDLRPCResponse
-     * \brief Base class for AppLink Json response message classes.
+     * \brief Base class for SmartDeviceLink Json response message classes.
     */
     class SDLRPCResponse : public SDLRPCMessage
     {

@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #include "../include/JSONHandler/SDLRPCObjects/V2/GetVehicleData_response.h"
 #include "GetVehicleData_responseMarshaller.h"
 #include "GPSDataMarshaller.h"
@@ -15,7 +19,7 @@ namespace
   date      2012-11-02
   generated at  Thu Jan 24 06:36:23 2013
   source stamp  Thu Jan 24 06:35:41 2013
-  author    robok0der
+  author    RC
 */
 
 using namespace NsSmartDeviceLinkRPCV2;

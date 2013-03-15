@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 #include <cstring>
 #include "../include/JSONHandler/SDLRPCObjects/V2/AudioType.h"
 #include "AudioTypeMarshaller.h"
@@ -10,7 +14,7 @@
   date		2012-11-02
   generated at	Thu Jan 24 06:36:23 2013
   source stamp	Thu Jan 24 06:35:41 2013
-  author	robok0der
+  author	RC
 */
 
 using namespace NsSmartDeviceLinkRPCV2;

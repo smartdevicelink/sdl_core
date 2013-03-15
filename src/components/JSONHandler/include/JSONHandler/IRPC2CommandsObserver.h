@@ -1,7 +1,7 @@
 /**
 * \file IRPC2CommandsObserver.hpp
 * \brief Abstract class IRPC2CommandsObserver header.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 

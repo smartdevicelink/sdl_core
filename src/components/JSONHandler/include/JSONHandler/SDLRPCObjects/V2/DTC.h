@@ -1,5 +1,9 @@
-#ifndef NSAPPLINKRPCV2_DTC_INCLUDE
-#define NSAPPLINKRPCV2_DTC_INCLUDE
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
+#ifndef NSSMARTDEVICELINKKRPCV2_DTC_INCLUDE
+#define NSSMARTDEVICELINKKRPCV2_DTC_INCLUDE
 
 #include <string>
 
@@ -11,7 +15,7 @@
   date		2012-11-02
   generated at	Thu Jan 24 06:36:23 2013
   source stamp	Thu Jan 24 06:35:41 2013
-  author	robok0der
+  author	RC
 */
 
 

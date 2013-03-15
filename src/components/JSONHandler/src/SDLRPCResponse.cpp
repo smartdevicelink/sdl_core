@@ -1,7 +1,7 @@
 /**
 * \file SDLRPCResponse.cpp
 * \brief SDLRPCResponse class source file.
-* \author PVyshnevska
+* Copyright (c) 2013 Ford Motor Company
 */
 
 
@@ -70,7 +70,7 @@ bool SDLRPCResponse::set_success(bool success_)
 
 bool SDLRPCResponse::set_resultCode(const NsSmartDeviceLinkRPCV2::Result& resultCode_)
 {
-    /*if (!NsAppLinkRPC::ResultMarshaller::checkIntegrityConst(resultCode_))
+    /*if (!NsSmartDeviceLinkRPC::ResultMarshaller::checkIntegrityConst(resultCode_))
     {
         return false;
     }*/
