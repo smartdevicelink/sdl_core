@@ -25,20 +25,24 @@ endif(NOT PYTHONINTERP_FOUND)
 set(INTEFRACE_GENERATOR "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
 set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE}  ${INTEFRACE_GENERATOR})
 
-macro (GenerateInterface arg_namespace arg_xml_name)
-    string(REGEX MATCH "^[a-zA-Z_]*[^.]" file_name ${arg_xml_name})     # TODO: make expression more robust
-    
-    set(hpp_file "${file_name}.hpp")
-    set(cpp_file "${file_name}.cpp")
+macro (GenerateInterface arg_xml_name arg_namespace parser_type)
+    string(REGEX MATCH "^[a-zA-Z_0-9]*[^.]" file_name ${arg_xml_name})     # TODO: make expression more robust
+
+
+    set(hpp_file "${CMAKE_CURRENT_BINARY_DIR}/${file_name}.hpp")
+    set(cpp_file "${CMAKE_CURRENT_BINARY_DIR}/${file_name}.cpp")
     set(full_xml_name "${CMAKE_CURRENT_SOURCE_DIR}/${arg_xml_name}")
-    
+
     add_custom_command( OUTPUT ${hpp_file} ${cpp_file}
-                        COMMAND ${INTEFRACE_GENERATOR_CMD} ${arg_namespace} ${full_xml_name} ${CMAKE_CURRENT_BINARY_DIR}
+                        COMMAND ${INTEFRACE_GENERATOR_CMD} ${full_xml_name} ${arg_namespace} ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "${parser_type}"
                         DEPENDS ${INTEFRACE_GENERATOR}
-                        COMMENT "Generating files ${hpp_file} ${cpp_file} from ${arg_xml_name} ..."
-                        VERBATIM 
+                        COMMENT "Generating files:\n   ${hpp_file}\n   ${cpp_file}\nfrom:\n   ${arg_xml_name} ..."
+                        VERBATIM
                       )
+
+    add_library("${file_name}" ${cpp_file})
 endmacro(GenerateInterface)
+
 
 
 # Building application
@@ -55,7 +59,7 @@ add_subdirectory(./src/appMain)
 # Building tests
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 if(BUILD_TESTS)
-    enable_testing()    
+    enable_testing()
     # Framework GoogleTest is also integrated together gmock
     # and must not be added separately
     add_subdirectory(./src/thirdPartyLibs/gmock-1.6.0)
@@ -70,7 +74,7 @@ endif()
 FIND_PACKAGE(Doxygen)
   IF(DOXYGEN_FOUND)
     option(DOXYGEN_ENABLE_DIAGRAMS "Enable graphical diagram generation" ON)
-        
+
     if(DOXYGEN_ENABLE_DIAGRAMS)
       set(DOXYGEN_ENABLE_DIAGRAMS_PARAM "YES")
     else(DOXYGEN_ENABLE_DIAGRAMS)
@@ -86,4 +90,5 @@ FIND_PACKAGE(Doxygen)
     MESSAGE(STATUS "To enable processing of MscGen comments please install mscgen")
     MESSAGE(STATUS "sudo apt-get install mscgen")
 ENDIF(DOXYGEN_FOUND)
- 
+
+
