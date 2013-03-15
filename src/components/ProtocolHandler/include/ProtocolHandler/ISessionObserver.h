@@ -1,7 +1,8 @@
 /**
 * \file ISessionObserver.h
 * \brief ISessionObserver class header file.
-* \author PVyshnevska
+* 
+* Copyright (c) 2013 Ford Motor Company
 */
 
 #ifndef ISESSIONOBSERVER_CLASS
@@ -9,7 +10,7 @@
 
 /**
   *\namespace NsProtocolHandler
-  *\brief Namespace for AppLink ProtocolHandler related functionality.
+  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
 */
 namespace NsProtocolHandler
 {
@@ -34,7 +35,7 @@ namespace NsProtocolHandler
          * when Mobile Application initiates session ending.
          * \param connectionHandle Connection identifier whithin which session exists
          * \param sessionId Identifier of the session to be ended
-         * \param hashCode Hash used only in second version of Applink protocol.
+         * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
          * If not equal to hash assigned to session on start then operation fails.
          * \return int -1 if operation fails session key otherwise
          */

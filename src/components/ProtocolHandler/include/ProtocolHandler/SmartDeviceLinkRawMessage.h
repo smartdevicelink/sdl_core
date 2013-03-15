@@ -1,24 +1,25 @@
 /**
-* \file AppLinkRawMessage.h
-* \brief AppLinkRawMessage class header file.
-* \author PVyshnevska
+* \file SmartDeviceLinkRawMessage.h
+* \brief SmartDeviceLinkRawMessage class header file.
+* 
+* Copyright (c) 2013 Ford Motor Company
 */
 
-#ifndef APPLINKRAWMESSAGE_CLASS
-#define APPLINKRAWMESSAGE_CLASS
+#ifndef SMARTDEVICELINKRAWMESSAGE_CLASS
+#define SMARTDEVICELINKRAWMESSAGE_CLASS
 
 /**
   *\namespace NsProtocolHandler
-  *\brief Namespace for AppLink ProtocolHandler related functionality.
+  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
 */
 
 namespace NsProtocolHandler
 {
     /**
-     * \class AppLinkRawMessage
+     * \class SmartDeviceLinkRawMessage
      * \brief Class-wraper for information about message for interchanging between components.
     */
-    class AppLinkRawMessage
+    class SmartDeviceLinkRawMessage
     {
     public:
         /**
@@ -28,7 +29,7 @@ namespace NsProtocolHandler
          * \param data Message string
          * \param dataSize Message size 
         */
-        AppLinkRawMessage(int connectionKey,
+        SmartDeviceLinkRawMessage(int connectionKey,
                             unsigned int protocolVersion,
                             unsigned char * data,
                             unsigned int dataSize);
@@ -36,7 +37,7 @@ namespace NsProtocolHandler
         /**
          * \brief Destructor
         */
-        ~AppLinkRawMessage();
+        ~SmartDeviceLinkRawMessage();
 
         /**
          * \brief Getter for connection identifier
@@ -77,11 +78,11 @@ namespace NsProtocolHandler
         unsigned int mDataSize;
 
         /**
-         * \brief Version of Applink protocol (currently 1,2)
+         * \brief Version of SmartDeviceLink protocol (currently 1,2)
          * used for tranferring message.
          */
         unsigned int mProtocolVersion;
     };
 }
 
-#endif //  APPLINKRAWMESSAGE_CLASS
+#endif //  SMARTDEVICELINKRAWMESSAGE_CLASS

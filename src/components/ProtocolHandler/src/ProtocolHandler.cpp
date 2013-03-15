@@ -1,7 +1,8 @@
 /**
 * \file ProtocolHandler.cpp
 * \brief ProtocolHandler class source file.
-* \author PVyshnevska
+* 
+* Copyright (c) 2013 Ford Motor Company
 */
 
 #include <pthread.h>
@@ -138,7 +139,7 @@ void ProtocolHandler::sendStartSessionNAck( NsSmartDeviceLink::NsTransportManage
 
 }
 
-void ProtocolHandler::sendData(const AppLinkRawMessage * message)
+void ProtocolHandler::sendData(const SmartDeviceLinkRawMessage * message)
 {
     LOG4CPLUS_TRACE_METHOD(mLogger, __PRETTY_FUNCTION__);
     if ( !message )
@@ -368,7 +369,7 @@ RESULT_CODE ProtocolHandler::handleMessage( NsSmartDeviceLink::NsTransportManage
             int connectionKey = mSessionObserver -> keyFromPair( connectionHandle,
                                         packet -> getSessionId() );
 
-            AppLinkRawMessage * rawMessage = new AppLinkRawMessage( connectionKey,
+            SmartDeviceLinkRawMessage * rawMessage = new SmartDeviceLinkRawMessage( connectionKey,
                                         packet -> getVersion(),
                                         packet -> getData(),
                                         packet -> getDataSize() );
@@ -452,7 +453,7 @@ RESULT_CODE ProtocolHandler::handleMultiFrameMessage( NsSmartDeviceLink::NsTrans
             }
 
             ProtocolPacket * completePacket = it->second;
-            AppLinkRawMessage * rawMessage = new AppLinkRawMessage( key,
+            SmartDeviceLinkRawMessage * rawMessage = new SmartDeviceLinkRawMessage( key,
                                         completePacket -> getVersion(),
                                         completePacket -> getData(),
                                         completePacket -> getTotalDataBytes() );
@@ -600,7 +601,7 @@ void * ProtocolHandler::handleMessagesToMobileApp( void * params )
     {
         while ( ! handler -> mMessagesToMobileApp.empty() )
         {
-            const AppLinkRawMessage * message = handler -> mMessagesToMobileApp.pop();
+            const SmartDeviceLinkRawMessage * message = handler -> mMessagesToMobileApp.pop();
             LOG4CPLUS_INFO_EXT(mLogger, "Message to mobile app: connection " << message->getConnectionKey()
                     << "; dataSize: " << message->getDataSize() << " ; protocolVersion " << message -> getProtocolVersion());
 

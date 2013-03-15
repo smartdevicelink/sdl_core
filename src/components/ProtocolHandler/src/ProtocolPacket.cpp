@@ -1,7 +1,8 @@
 /**
 * \file ProtocolPacket.cpp
 * \brief ProtocolPacket class source file.
-* \author PVyshnevska
+* 
+* Copyright (c) 2013 Ford Motor Company
 */
 
 #include <memory.h>

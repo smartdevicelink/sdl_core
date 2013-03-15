@@ -13,7 +13,7 @@
 #include "JSONHandler/SDLRPCMessage.h"
 #include "JSONHandler/IRPCMessagesObserver.h"
 #include "JSONHandler/IJsonHandler.h"
-#include "ProtocolHandler/AppLinkRawMessage.h"
+#include "ProtocolHandler/SmartDeviceLinkRawMessage.h"
 #include "ProtocolHandler/IProtocolObserver.h"
 #include "ProtocolHandler/ProtocolHandler.h"
 
@@ -53,7 +53,7 @@ public:
      * \brief Callback for Protocol layer handler to notify of message received.
      * \param message Object containing received data, size of it and connection key.
      */
-    void onDataReceivedCallback( const NsProtocolHandler::AppLinkRawMessage * message );
+    void onDataReceivedCallback( const NsProtocolHandler::SmartDeviceLinkRawMessage * message );
     /*end of methods from IProtocolObserver*/
 
     /*Methods for IRPCMessagesObserver*/
@@ -95,15 +95,15 @@ protected:
     std::string clearEmptySpaces( const std::string & input );
 
     NsSmartDeviceLinkRPC::SDLRPCMessage * handleIncomingMessageProtocolV1(
-            const NsProtocolHandler::AppLinkRawMessage * message );
+            const NsProtocolHandler::SmartDeviceLinkRawMessage * message );
 
     NsSmartDeviceLinkRPC::SDLRPCMessage * handleIncomingMessageProtocolV2(
-            const NsProtocolHandler::AppLinkRawMessage * message );
+            const NsProtocolHandler::SmartDeviceLinkRawMessage * message );
 
-    NsProtocolHandler::AppLinkRawMessage * handleOutgoingMessageProtocolV1( 
+    NsProtocolHandler::SmartDeviceLinkRawMessage * handleOutgoingMessageProtocolV1( 
             int connectionKey, const NsSmartDeviceLinkRPC::SDLRPCMessage *  message );
 
-    NsProtocolHandler::AppLinkRawMessage * handleOutgoingMessageProtocolV2( 
+    NsProtocolHandler::SmartDeviceLinkRawMessage * handleOutgoingMessageProtocolV2( 
             int connectionKey, const NsSmartDeviceLinkRPC::SDLRPCMessage *  message );
     
 private:
@@ -129,7 +129,7 @@ private:
       *\brief Queue of messages from Mobile Application.
       *\sa MessageQueue
     */
-    MessageQueue<const NsProtocolHandler::AppLinkRawMessage*>          mIncomingMessages;
+    MessageQueue<const NsProtocolHandler::SmartDeviceLinkRawMessage*>          mIncomingMessages;
 
     /**
       *\brief Thread for handling messages from Mobile Application.

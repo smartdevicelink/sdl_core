@@ -1,7 +1,8 @@
 /**
 * \file ProtocolHandler.h
 * \brief ProtocolHandler class header file.
-* \author PVyshnevska
+*
+* Copyright (c) 2013 Ford Motor Company
 */
 
 #ifndef PROTOCOLHANDLER_CLASS
@@ -10,13 +11,13 @@
 #include <map>
 #include "Logger.hpp"
 #include "Utils/MessageQueue.h"
-#include "ProtocolHandler/AppLinkRawMessage.h"
+#include "ProtocolHandler/SmartDeviceLinkRawMessage.h"
 #include "ProtocolHandler/ProtocolPacket.h"
 #include "TransportManager/ITransportManagerDataListener.hpp"
 
 /**
   *\namespace NsProtocolHandler
-  *\brief Namespace for AppLink ProtocolHandler related functionality.
+  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
 */
 namespace NsProtocolHandler
 {
@@ -60,7 +61,7 @@ namespace NsProtocolHandler
          * \brief Method for sending message to Mobile Application.
          * \param message Message with params to be sent to Mobile App.
          */
-        void sendData(const AppLinkRawMessage * message);
+        void sendData(const SmartDeviceLinkRawMessage * message);
     
     protected:
 
@@ -261,7 +262,7 @@ namespace NsProtocolHandler
         /**
           *\brief Queue for message to Mobile side.
         */
-        MessageQueue<const AppLinkRawMessage *> mMessagesToMobileApp;
+        MessageQueue<const SmartDeviceLinkRawMessage *> mMessagesToMobileApp;
 
         /**
           *\brief Thread for handling message to Mobile side.

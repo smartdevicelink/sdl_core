@@ -1,7 +1,8 @@
 /**
 * \file ProtocolPacket.h
 * \brief ProtocolPacket class header file.
-* \author PVyshnevska
+* 
+* Copyright (c) 2013 Ford Motor Company
 */
 
 #ifndef PROTOCOLPACKET_CLASS
@@ -9,7 +10,7 @@
 
 /**
   *\namespace NsProtocolHandler
-  *\brief Namespace for AppLink ProtocolHandler related functionality.
+  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
 */
 namespace NsProtocolHandler
 {

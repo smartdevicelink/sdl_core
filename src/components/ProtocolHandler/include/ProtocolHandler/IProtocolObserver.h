@@ -1,7 +1,8 @@
 /**
 * \file IProtocolObserver.h
 * \brief IProtocolObserver class header.
-* \author PVyshnevska
+* 
+* Copyright (c) 2013 Ford Motor Company
 */
 
 #ifndef IPROTOCOLOBSERVER_CLASS
@@ -9,11 +10,11 @@
 
 /**
   *\namespace NsProtocolHandler
-  *\brief Namespace for AppLink ProtocolHandler related functionality.
+  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
 */
 namespace NsProtocolHandler
 {
-    class AppLinkRawMessage;
+    class SmartDeviceLinkRawMessage;
     
     /**
      * \class IProtocolObserver
@@ -29,7 +30,7 @@ namespace NsProtocolHandler
          * when new message is received from Mobile Application. 
          * \param message Message with supporting params received
          */
-        virtual void onDataReceivedCallback( const AppLinkRawMessage * message ) = 0;
+        virtual void onDataReceivedCallback( const SmartDeviceLinkRawMessage * message ) = 0;
 
     protected:
         /**

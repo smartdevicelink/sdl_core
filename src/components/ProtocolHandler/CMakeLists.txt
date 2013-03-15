@@ -8,7 +8,7 @@ include_directories (
 )
 
 set (SOURCES
-    ./src/AppLinkRawMessage.cpp
+    ./src/SmartDeviceLinkRawMessage.cpp
     ./src/ProtocolHandler.cpp
     ./src/ProtocolPacket.cpp
 )
