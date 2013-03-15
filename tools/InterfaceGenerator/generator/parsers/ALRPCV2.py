@@ -4,6 +4,7 @@ Containser parser for ALRPCV2 XML format.
 
 """
 
+import collections
 import xml.etree.ElementTree
 
 from generator import Model
@@ -46,9 +47,9 @@ class Parser(object):
         if root.tag != "interface":
             raise ParseError("Invalid root tag: " + root.tag)
 
-        enums = {}
-        structs = {}
-        functions = {}
+        enums = collections.OrderedDict()
+        structs = collections.OrderedDict()
+        functions = collections.OrderedDict()
         params = root.attrib
 
         self._types = {}
@@ -101,7 +102,7 @@ class Parser(object):
                                  "' in enum '" + params["name"] + "'")
         params["internal_scope"] = internal_scope
 
-        elements = {}
+        elements = collections.OrderedDict()
         for subelement in subelements:
             if subelement.tag == "element":
                 self._add_item(elements, self._parse_enum_element(subelement))
@@ -118,7 +119,7 @@ class Parser(object):
         if len(attrib) != 0:
             raise ParseError("Unexpected attributes for struct")
 
-        members = {}
+        members = collections.OrderedDict()
         for subelement in subelements:
             if subelement.tag == "param":
                 self._add_item(members, self._parse_param(subelement))
@@ -155,7 +156,7 @@ class Parser(object):
         params["message_type"] = message_type
         params["platform"] = platform
 
-        function_params = {}
+        function_params = collections.OrderedDict()
         for subelement in subelements:
             if subelement.tag == "param":
                 function_param = self._parse_function_param(subelement)

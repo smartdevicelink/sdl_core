@@ -7,6 +7,8 @@ Generator must take an instance of this model as input for generating
 output files.
 """
 
+import collections
+
 
 class Boolean(object):
 
@@ -150,7 +152,8 @@ class Enum(InterfaceItemBase):
             design_description=design_description, issues=issues, todos=todos)
 
         self.internal_scope = internal_scope
-        self.elements = elements if elements is not None else {}
+        self.elements = \
+            elements if elements is not None else collections.OrderedDict()
 
 
 class EnumSubset(InterfaceItemBase):
@@ -234,7 +237,8 @@ class Struct(InterfaceItemBase):
             name, description=description,
             design_description=design_description, issues=issues, todos=todos)
 
-        self.members = members if members is not None else {}
+        self.members = \
+            members if members is not None else collections.OrderedDict()
 
 
 class Function(InterfaceItemBase):
@@ -259,7 +263,8 @@ class Function(InterfaceItemBase):
         self.function_id = function_id
         self.message_type = message_type
         self.platform = platform
-        self.params = params if params is not None else {}
+        self.params = \
+            params if params is not None else collections.OrderedDict()
 
 
 class Interface(object):
@@ -275,7 +280,9 @@ class Interface(object):
     """
 
     def __init__(self, enums=None, structs=None, functions=None, params=None):
-        self.enums = enums if enums is not None else {}
-        self.structs = structs if structs is not None else {}
-        self.functions = functions if functions is not None else {}
+        self.enums = enums if enums is not None else collections.OrderedDict()
+        self.structs = \
+            structs if structs is not None else collections.OrderedDict()
+        self.functions = \
+            functions if functions is not None else collections.OrderedDict()
         self.params = params if params is not None else {}
