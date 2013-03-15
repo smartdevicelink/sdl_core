@@ -33,14 +33,14 @@
 
 #include "application_manager/commands/on_app_interface_unregistered_command.h"
 #include "application_manager/message.h"
-#include "v4_protocol_v2_0_revT.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
 namespace commands {
 
 OnAppInterfaceUnregisteredCommand::OnAppInterfaceUnregisteredCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 OnAppInterfaceUnregisteredCommand::~OnAppInterfaceUnregisteredCommand() {
@@ -49,10 +49,10 @@ OnAppInterfaceUnregisteredCommand::~OnAppInterfaceUnregisteredCommand() {
 void OnAppInterfaceUnregisteredCommand::Run() {
 
   (*message_)[strings::params][strings::message_type] =
-          MessageType::kNotification;
+    MessageType::kNotification;
 
   (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAppInterfaceUnregisteredID;
+    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnAppInterfaceUnregisteredID;
 
   SendResponse();
 }

@@ -34,14 +34,14 @@
 #include "application_manager/commands/on_tbt_client_state_command.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "v4_protocol_v2_0_revT.h"
+#include "interfaces/v4_protocol_v2_0_revT.h"
 
 namespace application_manager {
 
 namespace commands {
 
 OnTBTClientStateCommand::OnTBTClientStateCommand(
-    const MessageSharedPtr& message): CommandResponseImpl(message) {
+  const MessageSharedPtr& message): CommandResponseImpl(message) {
 }
 
 OnTBTClientStateCommand::~OnTBTClientStateCommand() {
@@ -50,16 +50,16 @@ OnTBTClientStateCommand::~OnTBTClientStateCommand() {
 void OnTBTClientStateCommand::Run() {
 
   (*message_)[strings::params][strings::message_type] =
-          MessageType::kNotification;
+    MessageType::kNotification;
 
   (*message_)[strings::params][strings::function_id] =
-      NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnTBTClientStateID;
+    NsSmartDeviceLinkRPC::V2::FunctionID::eType::OnTBTClientStateID;
 
   std::vector<Application*> applications =
-      ApplicationManagerImpl::instance()->applications_with_navi();
+    ApplicationManagerImpl::instance()->applications_with_navi();
 
   for (std::vector<Application*>::iterator it = applications.begin();
-      applications.end() != it; ++it) {
+       applications.end() != it; ++it) {
     if (NsSmartDeviceLinkRPC::V2::HMILevel::eType::HMI_NONE !=
         static_cast<ApplicationImpl*>(*it)->hmi_level()) {
       (*message_)[strings::params][strings::connection_key] = (*it)->app_id();
