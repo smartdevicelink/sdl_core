@@ -670,3 +670,7 @@ add_library("JSONHandler" ${SOURCES}
 ./src/ALRPCObjectsImpl/V1/Marshaller.cpp
 ./src/ALRPCObjectsImpl/V2/Marshaller.cpp
     ./src/RPC2ObjectsImpl/Marshaller.cpp)
+
+
+# Including directory with interface xml's
+add_subdirectory(./applinkObjGenerator)
