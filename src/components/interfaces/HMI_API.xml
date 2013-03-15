@@ -713,6 +713,38 @@
   </element>
 </enum>
 
+<enum name="VehicleDataResultCode">
+  <description>Enumeration that describes possible result codes of a vehicle data entry request.</description>
+  <element name="SUCCESS" internal_name="VDRC_SUCCESS"/>
+  <element name="TRUNCATED_DATA" internal_name="VDRC_TRUNCATED_DATA"/>
+  <element name="DISALLOWED" internal_name="VDRC_DISALLOWED"/>
+  <element name="USER_DISALLOWED" internal_name="VDRC_USER_DISALLOWED"/>
+  <element name="INVALID_ID" internal_name="VDRC_INVALID_ID"/>
+  <element name="VEHICLE_DATA_NOT_AVAILABLE" internal_name="VDRC_DATA_NOT_AVAILABLE"/>
+  <element name="DATA_ALREADY_SUBSCRIBED" internal_name="VDRC_DATA_ALREADY_SUBSCRIBED"/>
+  <element name="DATA_NOT_SUBSCRIBED" internal_name="VDRC_DATA_NOT_SUBSCRIBED"/>
+  <element name="IGNORED" internal_name="VDRC_IGNORED"/>
+</enum>
+
+<enum name="WiperStatus">
+  <description>Reflects the status of the wipers.</description>
+  <element name="OFF" />
+  <element name="AUTO_OFF" />
+  <element name="OFF_MOVING" />
+  <element name="MAN_INT_OFF" />
+  <element name="MAN_INT_ON" />
+  <element name="MAN_LOW" />
+  <element name="MAN_HIGH" />
+  <element name="MAN_FLICK" />
+  <element name="WASH" />
+  <element name="AUTO_LOW" />
+  <element name="AUTO_HIGH" />
+  <element name="COURTESYWIPE" />
+  <element name="AUTO_ADJUST" />
+  <element name="STALLED" />
+  <element name="NO_DATA_EXISTS" />
+</enum>
+
 <!-- End of IVI part-->
 
 <struct name="ButtonCapabilities">
@@ -987,6 +1019,28 @@
 </param>
 </struct>
 
+<struct name="DIDResult">
+  <description>Individual requested DID result and data</description>
+  <param name="resultCode" type="VehicleDataResultCode">
+    <description>Individual DID result code.</description>
+  </param>
+  <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+    <description>Location of raw data from vehicle data DID</description>
+  </param>
+  <param name="data" type="String" maxlength="5000" mandatory="false">
+    <description>Raw DID-based data returned for requested element.</description>
+  </param>
+</struct>
+
+<struct name="HeadLampStatus">
+  <param name="lowBeamsOn" type="Boolean">
+    <description>Status of the low beam lamps.  References signal "HeadLampLoActv_B_Stat".</description>
+</param>
+  <param name="highBeamsOn" type="Boolean">
+    <description>Status of the high beam lamps.  References signal "HeadLghtHiOn_B_Stat".</description>
+</param>
+</struct>
+
 <struct name="TireStatus">
 <description>The status and pressure of the tires.</description>
 <param name="pressureTelltale" type="WarningLightStatus">
@@ -1105,78 +1159,6 @@
 </param>
   <param name="eCallEventActive" type="Boolean">
     <description>References signal "eCall_Event".</description>
-</param>
-</struct>
-
-<struct name="ECallInfo" scope="internal">
-  <param name="eCallNotificationStatus" type="VehicleDataNotificationStatus">
-    <description>References signal "eCallNotification_4A". See VehicleDataNotificationStatus.</description>
-</param>
-  <param name="auxECallNotificationStatus" type="VehicleDataNotificationStatus">
-    <description>References signal "eCallNotification". See VehicleDataNotificationStatus.</description>
-</param>
-  <param name="eCallConfirmationStatus" type="ECallConfirmationStatus">
-    <description>References signal "eCallConfirmation". See ECallConfirmationStatus.</description>
-</param>
-</struct>
-
-<struct name="AirbagStatus" scope="internal">
-  <param name="driverAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
-</param>
-  <param name="driverSideAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsDrvSideBag_D_Ltchd". See VehicleDataEventStatus.</description>
-</param>
-  <param name="driverCurtainAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsDrvCrtnBag_D_Ltchd". See VehicleDataEventStatus.</description>
-</param>
-  <param name="passengerAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsPasBag_D_Ltchd". See VehicleDataEventStatus.</description>
-</param>
-  <param name="passengerCurtainAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsPasCrtnBag_D_Ltchd". See VehicleDataEventStatus.</description>
-</param>
-  <param name="driverKneeAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsKneeDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
-</param>
-  <param name="passengerSideAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsPasSideBag_D_Ltchd". See VehicleDataEventStatus.</description>
-</param>
-  <param name="passengerKneeAirbagDeployed" type="VehicleDataEventStatus">
-    <description>References signal "VedsKneePasBag_D_Ltchd". See VehicleDataEventStatus.</description>
-</param>
-</struct>
-
-<struct name="EmergencyEvent" scope="internal">
-  <param name="emergencyEventType" type="EmergencyEventType">
-    <description>References signal "VedsEvntType_D_Ltchd". See EmergencyEventType.</description>
-</param>
-  <param name="fuelCutoffStatus" type="FuelCutoffStatus">
-    <description>References signal "RCM_FuelCutoff". See FuelCutoffStatus.</description>
-</param>
-  <param name="rolloverEvent" type="VehicleDataEventStatus">
-    <description>References signal "VedsEvntRoll_D_Ltchd". See VehicleDataEventStatus.</description>
-</param>
-  <param name="maximumChangeVelocity" type="VehicleDataEventStatus">
-    <description>References signal "VedsMaxDeltaV_D_Ltchd". See VehicleDataEventStatus.</description>
-</param>
-  <param name="multipleEvents" type="VehicleDataEventStatus">
-    <description>References signal "VedsMultiEvnt_D_Ltchd". See VehicleDataEventStatus.</description>
-</param>
-</struct>
-
-<struct name="ClusterModeStatus" scope="internal">
-  <param name="powerModeActive" type="Boolean">
-    <description>References signal "PowerMode_UB".</description>
-</param>
-  <param name="powerModeQualificationStatus" type="PowerModeQualificationStatus">
-    <description>References signal "PowerModeQF". See PowerModeQualificationStatus.</description>
-</param>
-  <param name="carModeStatus" type="CarModeStatus">
-    <description>References signal "CarMode". See CarMode.</description>
-</param>
-  <param name="powerModeStatus" type="PowerModeStatus">
-    <description>References signal "PowerMode". See PowerMode.</description>
 </param>
 </struct>
 
@@ -1301,7 +1283,7 @@
     <description>Method should be invoked at system startup. Response provides information about presence of VR module and its readiness to cooperate with SDL.</description>
   </function>
   <function name="IsReady" messagetype="response">
-    <param name="availabe" type="Boolean" mandatory="true">
+    <param name="available" type="Boolean" mandatory="true">
       <description>If true then VR is present and ready to communicate with SDL.</description>
     </param>
   </function>
@@ -1384,7 +1366,7 @@
     <description>Method should be invoked at system startup. Response provides information about presence of TTS module and its readiness to cooperate with SDL.</description>
   </function>
   <function name="IsReady" messagetype="response">
-    <param name="availabe" type="Boolean" mandatory="true">
+    <param name="available" type="Boolean" mandatory="true">
       <description>If true then TTS is present and ready to communicate with SDL.</description>
     </param>
   </function>
@@ -1779,7 +1761,7 @@
       <description>Method should be invoked at system startup. Response provides information about presence of UI module and its readiness to cooperate with SDL.</description>
     </function>
     <function name="IsReady" messagetype="response">
-      <param name="availabe" type="Boolean" mandatory="true">
+      <param name="available" type="Boolean" mandatory="true">
         <description>If true then UI is present and ready to communicate with SDL.</description>
       </param>
     </function>
@@ -1796,7 +1778,7 @@
       <description>Method should be invoked at system startup. Response provides information about presence of UINavigation module and its readiness to cooperate with SDL.</description>
     </function>
     <function name="IsReady" messagetype="response">
-      <param name="availabe" type="Boolean" mandatory="true">
+      <param name="available" type="Boolean" mandatory="true">
         <description>If true then Navigation is present and ready to communicate with SDL.</description>
       </param>
     </function>
@@ -1860,6 +1842,14 @@
 </interface>
 
 <interface name="VehicleInfo" version="1.0" date="2013-04-21">
+  <function name="IsReady" messagetype="request">
+    <description>Method should be invoked at system startup. Response provides information about presence of UI module and its readiness to cooperate with SDL.</description>
+  </function>
+  <function name="IsReady" messagetype="response">
+    <param name="available" type="Boolean" mandatory="true">
+      <description>If true then UI is present and ready to communicate with SDL.</description>
+    </param>
+  </function>
   <function name="GetVehicleType" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to get info about the vehicle.</description>
   </function>
@@ -1879,8 +1869,8 @@
     </param>
   </function>
   <function name="ReadDID" messagetype="response">
-    <param name="didData" type="String" maxlength="5000" minsize="0" maxsize="1000" array="true" mandatory="false">
-      <description>Raw DID-based data returned for requested element.</description>
+    <param name="didResult" type="DIDResult" minsize="0" maxsize="1000" array="true" mandatory="false">
+      <description>Array of requested DID results (with data if available).</description>
     </param>
   </function>
   <function name="GetDTCs" messagetype="request">
@@ -1888,23 +1878,26 @@
     <param name="ecuName" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
       <description>Name of ECU.</description>
     </param>
-      <param name="appId" type="Integer" mandatory="true">
-        <description>Id of application that requested this RPC.</description>
-      </param>
+    <param name="dtcMask" type="Integer" minvalue="0" maxvalue="255" mandatory="false">
+      <description>DTC Mask Byte to be sent in diagnostic request to module .</description>
+    </param>
+    <param name="appId" type="Integer" mandatory="true">
+      <description>Id of application that requested this RPC.</description>
+    </param>
   </function>
   <function name="GetDTCs" messagetype="response">
     <param name="ecuHeader" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
       <description>2 byte ECU Header for DTC response (as defined in VHR_Layout_Specification_DTCs.pdf)</description>
     </param>
-    <param name="dtc" type="Integer" mandatory="false" array="true" minsize="1" maxsize="15" minvalue="0" maxvalue="4294967295">
-      <description>Array of all reported DTCs on module (ecuHeader contains information if list is truncated).
+    <param name="dtc" type="String" mandatory="false" minsize="1" maxsize="15" maxlength="10" array="true">
+      <description>
+        Array of all reported DTCs on module (ecuHeader contains information if list is truncated).
         Each DTC is represented by 4 bytes (3 bytes of data and 1 byte status as defined in VHR_Layout_Specification_DTCs.pdf).
       </description>
     </param>
   </function>
   <function name="GetVehicleData" messagetype="request">
     <description>Non periodic vehicle data read request.</description>
-
     <param name="gps" type="Boolean" mandatory="false">
       <description>See GPSData</description>
     </param>
@@ -1950,25 +1943,24 @@
     <param name="driverBraking" type="Boolean" mandatory="false">
       <description>The status of the brake pedal</description>
     </param>
-
-  <!-- Ford Specific Data Items -->
-    <param name="eCallInfo" type="Boolean" mandatory="false" scope="internal">
-      <description>Emergency Call notification and confirmation data</description>
+    <param name="wiperStatus" type="Boolean" mandatory="false">
+      <description>The status of the wipers</description>
     </param>
-    <param name="airbagStatus" type="Boolean" mandatory="false" scope="internal">
-      <description>The status of the air bags</description>
+    <param name="headLampStatus" type="Boolean" mandatory="false">
+      <description>Status of the head lamps</description>
     </param>
-    <param name="emergencyEvent" type="Boolean" mandatory="false" scope="internal">
-      <description>Information related to an emergency event (and if it occurred)</description>
+    <param name="engineTorque" type="Boolean" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
     </param>
-    <param name="clusterModeStatus" type="Boolean" mandatory="false" scope="internal">
-      <description>The status modes of the cluster</description>
+    <param name="accPedalPosition" type="Boolean" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Boolean" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
     </param>
     <param name="myKey" type="Boolean" mandatory="false" scope="partner">
       <description>Information related to the MyKey feature</description>
     </param>
-  <!-- / Ford Specific Data Items -->
-
   </function>
 
   <function name="GetVehicleData" messagetype="response">
@@ -2017,25 +2009,24 @@
     <param name="driverBraking" type="Common.VehicleDataEventStatus" mandatory="false">
       <description>The status of the brake pedal</description>
     </param>
-
-  <!-- Ford Specific Data Items -->
-    <param name="eCallInfo" type="Common.ECallInfo" mandatory="false" scope="internal">
-      <description>Emergency Call notification and confirmation data</description>
+    <param name="wiperStatus" type="Common.WiperStatus" mandatory="false">
+      <description>The status of the wipers</description>
     </param>
-    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="false" scope="internal">
-      <description>The status of the air bags</description>
+    <param name="headLampStatus" type="Common.HeadLampStatus" mandatory="false">
+      <description>Status of the head lamps</description>
     </param>
-    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="false" scope="internal">
-      <description>Information related to an emergency event (and if it occurred)</description>
+    <param name="engineTorque" type="Float" minvalue="-1000" maxvalue="2000" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
     </param>
-    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="false" scope="internal">
-      <description>The status modes of the cluster</description>
+    <param name="accPedalPosition" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
     </param>
     <param name="myKey" type="Common.MyKey" mandatory="false" scope="partner">
       <description>Information related to the MyKey feature</description>
     </param>
-  <!-- / Ford Specific Data Items -->
-
   </function>
 
   <function name="OnVehicleData" messagetype="notification">
@@ -2085,23 +2076,24 @@
     <param name="driverBraking" type="Common.VehicleDataEventStatus" mandatory="false">
       <description>The status of the brake pedal</description>
     </param>
-    <!-- Ford Specific Vehicle Data -->
-    <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
-      <description>Emergency Call notification and confirmation data</description>
+    <param name="wiperStatus" type="Common.WiperStatus" mandatory="false">
+      <description>The status of the wipers</description>
     </param>
-    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="false">
-      <description>The status of the air bags</description>
+    <param name="headLampStatus" type="Common.HeadLampStatus" mandatory="false">
+      <description>Status of the head lamps</description>
     </param>
-    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="false">
-      <description>Information related to an emergency event (and if it occurred)</description>
+    <param name="engineTorque" type="Float" minvalue="-1000" maxvalue="2000" mandatory="false">
+      <description>Torque value for engine (in Nm) on non-diesel variants</description>
     </param>
-    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="false">
-      <description>The status modes of the cluster</description>
+    <param name="accPedalPosition" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>Accelerator pedal position (percentage depressed)</description>
+    </param>
+    <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
+      <description>Current angle of the steering wheel (in deg)</description>
     </param>
     <param name="myKey" type="Common.MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-    <!-- / Ford Specific Vehicle Data -->
   </function>
 </interface>
 
