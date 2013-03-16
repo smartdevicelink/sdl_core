@@ -508,98 +508,6 @@
   </element>
 </enum>
 
-<enum name="PowerModeStatus" scope="internal">
-  <description>Reflects the status of the current power mode.</description>
-  <element name="KEY_OUT">
-  </element>
-  <element name="KEY_RECENTLY_OUT">
-  </element>
-  <element name="KEY_APPROVED_0">
-  </element>
-  <element name="POST_ACCESORY_0">
-  </element>
-  <element name="ACCESORY_1">
-  </element>
-  <element name="POST_IGNITION_1">
-  </element>
-  <element name="IGNITION_ON_2">
-  </element>
-  <element name="RUNNING_2">
-  </element>
-  <element name="CRANK_3">
-  </element>
-</enum>
-
-<enum name="FuelCutoffStatus" scope="internal">
-  <description>Reflects the status of the RCM fuel cutoff.</description>
-  <element name="TERMINATE_FUEL" internal_name="FCS_TERMINATE_FUEL">
-  </element>
-  <element name="NORMAL_OPERATION" internal_name="FCS_NORMAL_OPERATION">
-  </element>
-  <element name="FAULT" internal_name="FCS_FAULT">
-  </element>
-</enum>
-
-<enum name="PowerModeQualificationStatus" scope="internal">
-  <description>Reflects the status of the current power mode qualification.</description>
-  <element name="POWER_MODE_UNDEFINED">
-  </element>
-  <element name="POWER_MODE_EVALUATION_IN_PROGRESS">
-  </element>
-  <element name="NOT_DEFINED">
-  </element>
-  <element name="POWER_MODE_OK">
-  </element>
-</enum>
-
-<enum name="CarModeStatus" scope="internal">
-  <description>Reflects the status of the current car mode.</description>
-  <element name="NORMAL" internal_name="CMS_NORMAL">
-  </element>
-  <element name="FACTORY" internal_name="CMS_FACTORY">
-  </element>
-  <element name="TRANSPORT" internal_name="CMS_TRANSPORT">
-  </element>
-  <element name="CRASH" internal_name="CMS_CRASH">
-  </element>
-</enum>
-
-<enum name="ECallConfirmationStatus" scope="internal">
-  <description>Reflects the status of the eCall Notification.</description>
-  <element name="NORMAL" internal_name="ECCS_NORMAL">
-  </element>
-  <element name="CALL_IN_PROGRESS" internal_name="ECCS_CALL_IN_PROGRESS">
-  </element>
-  <element name="CALL_CANCELLED" internal_name="ECCS_CALL_CANCELLED">
-  </element>
-  <element name="CALL_COMPLETED">
-  </element>
-  <element name="CALL_UNSUCCESSFUL" internal_name="ECCS_CALL_UNSUCCESSFUL">
-  </element>
-  <element name="ECALL_CONFIGURED_OFF" internal_name="ECCS_ECALL_CONFIGURED_OFF">
-  </element>
-  <element name="CALL_COMPLETE_DTMF_TIMEOUT" internal_name="ECCS_CALL_COMPLETE_DTMF_TIMEOUT">
-  </element>
-</enum>
-
-<enum name="EmergencyEventType" scope="internal">
-  <description>Reflects the emergency event status of the vehicle.</description>
-  <element name="NO_EVENT" internal_name="EET_NO_EVENT">
-  </element>
-  <element name="FRONTAL" internal_name="EET_FRONTAL">
-  </element>
-  <element name="SIDE" internal_name="EET_SIDE">
-  </element>
-  <element name="REAR" internal_name="EET_REAR">
-  </element>
-  <element name="ROLLOVER" internal_name="EET_ROLLOVER">
-  </element>
-  <element name="NOT_SUPPORTED" internal_name="EET_NOT_SUPPORTED">
-  </element>
-  <element name="FAULT" internal_name="EET_FAULT">
-  </element>
-</enum>
-
 <enum name="IgnitionStableStatus">
   <description>Reflects the ignition switch stability.</description>
   <element name="IGNITION_SWITCH_NOT_STABLE">
@@ -692,13 +600,13 @@
 
 <enum name="Dimension">
   <description>The supported dimensions of the GPS</description>
-  <element name="NO_FIX">
+  <element name="NO_FIX" internal_name="Dimension_NO_FIX">
     <description>No GPS at all</description>
   </element>
-  <element name="2D">
+  <element name="2D" internal_name="Dimension_2D">
     <description>Longitude and lattitude</description>
   </element>
-  <element name="3D">
+  <element name="3D" internal_name="Dimension_3D">
     <description>Longitude and lattitude and altitude</description>
   </element>
 </enum>
@@ -1162,7 +1070,7 @@
 </param>
 </struct>
 
-<struct name="MyKey" scope="partner">
+<struct name="MyKey">
   <param name="e911Override" type="VehicleDataStatus">
     <description>Indicates whether e911 override is on.  References signal "MyKey_e911Override_St". See VehicleDataStatus.</description>
 </param>
@@ -1869,7 +1777,7 @@
     </param>
   </function>
   <function name="ReadDID" messagetype="response">
-    <param name="didResult" type="DIDResult" minsize="0" maxsize="1000" array="true" mandatory="false">
+    <param name="didResult" type="Common.DIDResult" minsize="0" maxsize="1000" array="true" mandatory="false">
       <description>Array of requested DID results (with data if available).</description>
     </param>
   </function>
@@ -1958,7 +1866,7 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-    <param name="myKey" type="Boolean" mandatory="false" scope="partner">
+    <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
@@ -2024,7 +1932,7 @@
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-    <param name="myKey" type="Common.MyKey" mandatory="false" scope="partner">
+    <param name="myKey" type="Common.MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
   </function>

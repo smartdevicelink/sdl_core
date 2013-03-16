@@ -41,7 +41,7 @@ namespace application_manager {
 namespace commands {
 
 CommandResponseImpl::CommandResponseImpl(const MessageSharedPtr& message)
-: CommandImpl(message) {
+  : CommandImpl(message) {
 }
 
 CommandResponseImpl::~CommandResponseImpl() {
@@ -59,9 +59,10 @@ void CommandResponseImpl::Run() {
 }
 
 void CommandResponseImpl::SendResponse() {
-  Message message = SmartObjectToMessage(&(*message_));
+  //TODO(PV)
+  /*Message message = SmartObjectToMessage(&(*message_));
   mobile_message_handler::MobileMessageHandlerImpl::instance()->
-      SendMessageToMobileApp(&message);
+      SendMessageToMobileApp(&message);*/
 }
 
 }  // namespace commands

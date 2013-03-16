@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/message_conversion.h"
+/*#include "application_manager/message_conversion.h"
 #include "application_manager/smart_object_keys.h"
 #include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
 #include "JSONHandler/formatters/CFormatterJsonALRPCv1.hpp"
@@ -111,3 +111,4 @@ NsSmartDeviceLink::NsSmartObjects::CSmartObject MessageToSmartObject
   return smart_object;
 }
 }  // namespace application_manager
+*/

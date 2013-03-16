@@ -100,12 +100,6 @@ class CodeGenerator(object):
                 enums_content=self._gen_enums(
                     interface.enums.values(),
                     interface.structs.values()),
-
-                class_content=self._gen_h_class(
-                    class_name,
-                    interface.params,
-                    interface.functions.values(),
-                    interface.structs.values()),
                 namespace_close=namespace_close))
 
         self._gen_struct_schema_items(interface.structs.values())
@@ -142,13 +136,11 @@ class CodeGenerator(object):
                 guard=guard,
                 header_file_name=unicode("".join("{0}.h".format(class_name))),
                 namespace_open=namespace_open,
-                enums_content=self._indent_code(self._gen_enums(
-                    interface.enums.values()), indent_level),
-                class_content=self._indent_code(self._gen_hpp_class(
+                class_content=self._gen_h_class(
                     class_name,
                     interface.params,
                     interface.functions.values(),
-                    interface.structs.values()), indent_level),
+                    interface.structs.values()),
                 namespace_close=namespace_close))
 
         with codecs.open(os.path.join(destination_dir,
@@ -1454,7 +1446,7 @@ class CodeGenerator(object):
         u'''${enum_name}::${enum_value}, "${string}"));''')
 
     _struct_schema_item_template = string.Template(
-        u'''TSharedPtr<ISchemaItem> struct_schema_item_${name} = '''
+        u'''utils::SharedPtr<ISchemaItem> struct_schema_item_${name} = '''
         u'''InitStructSchemaItem_${name}(struct_schema_items);\n'''
         u'''struct_schema_items.insert(std::make_pair('''
         u'''StructIdentifiers::${name}, struct_schema_item_${name}));\n'''
