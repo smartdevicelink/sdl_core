@@ -6,7 +6,7 @@ include_directories (
   ../../../src/components/JSONHandler/include/
   ../../../src/components/utils/include/
   ../../../src//thirdPartyLibs/jsoncpp/include/
-    ${CMAKE_BINARY_DIR}/src/components/Interfaces/
+    ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set(LIBRARIES
@@ -14,13 +14,15 @@ set(LIBRARIES
     gtest_main
     gmock
     gmock_main
-#    ApplicationManager
-    log4cplus
+    ApplicationManager
     JSONHandler
     jsoncpp
-    v4_protocol_v1_2_no_extra
     v4_protocol_v2_0_revT
+    HMI_API
     SmartObjects
 )
 
-create_test("test_APIVersionConverterV1Test" "./api_converter_v1_test.cpp" "${LIBRARIES}")
+#create_test("test_APIVersionConverterV1Test" "./api_converter_v1_test.cpp" "${LIBRARIES}")
+
+create_test("test_formatters_commands" "./formatters_commands.cc" "${LIBRARIES}")
+# target_link_libraries ("test_show_command" log4cxx)
