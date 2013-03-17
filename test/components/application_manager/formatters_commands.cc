@@ -53,8 +53,12 @@ namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace mobile_api = NsSmartDeviceLinkRPC::V2;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
+
 TEST(add_command, general) {
-  std::string incoming_string = "{\"parameters\":{\"cmdID\": 1, \"menuParams\" : {\"menuName\":\"Vasya\" }}}";
+  std::string incoming_string =
+    "{\"parameters\": \
+    {\"cmdID\": 1, \"menuParams\" : \
+    {\"menuName\":\"Vasya\" }}}";
   smart_objects::CSmartObject incoming_message;
 
   formatters::CFormatterJsonSDLRPCv2::fromString<mobile_api::FunctionID::eType, mobile_api::messageType::eType>(
@@ -69,16 +73,7 @@ TEST(add_command, general) {
 
 }
 
-/*{
-  "jsonrpc" : "2.0",
-  "method" : "BasicCommunication.OnDeviceListUpdated",
-  "params" :
-  {
-    "deviceList" : [ "XT910", "GT-I9300", "HTC Explorer A310e" ]
-  }
-}*/
-
-TEST(json2_command, general1) {
+TEST(json2_command, notification) {
   std::string incoming_string = "{\"jsonrpc\" : \"2.0\",\"method\" : \"BasicCommunication.OnDeviceListUpdated\", \"params\" : { \"deviceList\" : [ \"XT910\", \"GT-I9300\", \"HTC Explorer A310e\" ] }}";
   smart_objects::CSmartObject incoming_message;
 
@@ -86,9 +81,16 @@ TEST(json2_command, general1) {
     incoming_string,
     incoming_message);
 
+  std::cout << "Internal message parameters: " << std::endl;
+  std::set<std::string> internal_params = incoming_message["params"].enumerate();
+  for (std::set<std::string>::const_iterator i = internal_params.begin(); i != internal_params.end(); ++i) {
+    std::cout << (*i) << " : " << incoming_message["params"][*i].asString() << std::endl;
+  }
+
+  std::cout << "API parameters:" << std::endl;
+
   std::set<std::string> elements = incoming_message["msg_params"].enumerate();
-  std::set<std::string>::const_iterator i = elements.begin();
-  for (; i != elements.end(); ++i) {
+  for (std::set<std::string>::const_iterator i = elements.begin(); i != elements.end(); ++i) {
     std::cout << (*i) << std::endl;
   }
 
@@ -96,10 +98,105 @@ TEST(json2_command, general1) {
     std::cout << incoming_message["msg_params"]["deviceList"][i].asString() << std::endl;
   }
 
+  std::cout << "Formatted message string: " << std::endl;
+
   std::string str;
   formatters::FormatterJsonRpc::ToString(incoming_message, str);
   std::cout << str << std::endl;
 }
+
+TEST(json2_command, request_no_params) {
+  std::string incoming_string = "{\"id\" : 19,\"jsonrpc\" : \"2.0\",\"method\" : \"Buttons.GetCapabilities\"}";
+
+  smart_objects::CSmartObject incoming_message;
+
+  formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
+    incoming_string,
+    incoming_message);
+
+  std::cout << "Internal message parameters: " << std::endl;
+  std::set<std::string> internal_params = incoming_message["params"].enumerate();
+  for (std::set<std::string>::const_iterator i = internal_params.begin(); i != internal_params.end(); ++i) {
+    std::cout << (*i) << " : " << incoming_message["params"][*i].asString() << std::endl;
+  }
+
+  std::cout << "API parameters:" << std::endl;
+
+  std::set<std::string> elements = incoming_message["msg_params"].enumerate();
+  for (std::set<std::string>::const_iterator i = elements.begin(); i != elements.end(); ++i) {
+    std::cout << (*i) << std::endl;
+  }
+
+  for (int i = 0; i < incoming_message["msg_params"]["deviceList"].length(); ++i) {
+    std::cout << incoming_message["msg_params"]["deviceList"][i].asString() << std::endl;
+  }
+
+  std::cout << "Formatted message string: " << std::endl;
+
+  std::string str;
+  formatters::FormatterJsonRpc::ToString(incoming_message, str);
+  std::cout << str << std::endl;
+}
+
+TEST(json2_command, response_params) {
+  std::string incoming_string = "{\"id\" : 19,\"jsonrpc\" : \"2.0\",\"result\" : {\"capabilities\" : [{\
+          \"longPressAvailable\" : true,\
+          \"name\" : \"PRESET_0\",\
+          \"shortPressAvailable\" : true,\
+          \"upDownAvailable\" : true\
+        },\
+        {\
+          \"longPressAvailable\" : true,\
+          \"name\" : \"PRESET_1\",\
+          \"shortPressAvailable\" : true,\
+          \"upDownAvailable\" : true\
+        }\
+      ],\
+      \"presetBankCapabilities\" : \
+      {\
+        \"onScreenPresetsAvailable\" : true\
+      },\
+      \"code\" : 0,\
+      \"method\" : \"Buttons.GetCapabilities\"\
+    }\
+  }";
+
+  smart_objects::CSmartObject incoming_message;
+
+  formatters::FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType, hmi_apis::messageType::eType>(
+    incoming_string,
+    incoming_message);
+
+  std::cout << "Internal message parameters: " << std::endl;
+  std::set<std::string> internal_params = incoming_message["params"].enumerate();
+  for (std::set<std::string>::const_iterator i = internal_params.begin(); i != internal_params.end(); ++i) {
+    std::cout << (*i) << " : " << incoming_message["params"][*i].asString() << std::endl;
+  }
+
+  std::cout << "API parameters:" << std::endl;
+
+  std::set<std::string> elements = incoming_message["msg_params"].enumerate();
+  for (std::set<std::string>::const_iterator i = elements.begin(); i != elements.end(); ++i) {
+    std::cout << (*i) << std::endl;
+    std::set<std::string> sub_params = incoming_message["msg_params"][*i].enumerate();
+    for (std::set<std::string>::const_iterator j = sub_params.begin();
+         sub_params.end() != j;
+         ++j) {
+      std::cout << (*j) << " : " << incoming_message["msg_params"][*i][*j].asString() << std::endl;
+    }
+  }
+
+  for (int i = 0; i < incoming_message["msg_params"]["deviceList"].length(); ++i) {
+    std::cout << incoming_message["msg_params"]["deviceList"][i].asString() << std::endl;
+  }
+
+  std::cout << "Formatted message string: " << std::endl;
+
+  std::string str;
+  formatters::FormatterJsonRpc::ToString(incoming_message, str);
+  std::cout << str << std::endl;
+}
+
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleMock(&argc, argv);
