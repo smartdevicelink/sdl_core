@@ -50,7 +50,7 @@ MFT.StatusMediaView =  Em.ContainerView.extend({
 						'<span {{bindAttr class="MFT.BTModel.active:visible_display"}}>{{MFT.locale.label.view_mediaStatus_bluetooth}}</span>'+  // BLUETOOTH
 						'<span {{bindAttr class="view.isAV:visible_display"}}{{MFT.locale.label.view_mediaStatus_avIn}}</span>'+ 		//AV IN
 						'<span {{bindAttr class="MFT.SiriusModel.active:visible_display MFT.AmModel.active:visible_display MFT.FmModel.active:visible_display"}}>{{view.controler.currentActiveData.frequency}}</span>'+   // frequency
-						'<span {{bindAttr class="MFT.SDLAppController.model.active:visible_display"}}>{{MFT.SDLAppController.model.statusText}}</span>'+ 		//SDL
+						'<span {{bindAttr class="MFT.SDLAppController.model.appInfo.statusText:visible_display"}}>{{MFT.SDLAppController.model.statusText}}</span>'+ 		//SDL
 					'</div>'+
 					'<div class="icon  antenaIco"'+
 						'{{bindAttr class="MFT.CDModel.active:cdIco"}}'+ // CD icon
@@ -61,7 +61,7 @@ MFT.StatusMediaView =  Em.ContainerView.extend({
 						'{{bindAttr class="view.isAV:avIco"}}'+ // AVIN icon
 						'{{bindAttr class="view.controler.currentModuleData.selectedItem.isHd:statushdicon"}}'+ // HD icon
 						'{{bindAttr class="MFT.SiriusModel.active:siriusIco"}}'+ // Sirius icon
-						'{{bindAttr class="MFT.SDLAppController.model.active:appIco"}}>'+ // SDL
+						'{{bindAttr class="MFT.SDLAppController.model.appInfo.statusText:appIco"}}>'+ // SDL
 					'</div>'+
 				'</div>'
 			)

@@ -1,13 +1,10 @@
 /**
  * @name MFT.DeviceListView
- * 
  * @desc Media App Options module visual representation
- * 
- * @category    View
- * @filesource  app/view/media/devicelistView.js
- * @version     2.0
- *
- * @author      Andriy Melnik
+ * @category View
+ * @filesource app/view/media/devicelistView.js
+ * @version 2.0
+ * @author Andriy Melnik
  */
  
 MFT.DeviceListView = Em.ContainerView.create(MFT.LoadableView,{
@@ -28,7 +25,7 @@ MFT.DeviceListView = Em.ContainerView.create(MFT.LoadableView,{
                             'deviceListLabel'
                         ],
 
-    /** 
+    /**
      * Button to return to previous view
      */
     backButton: MFT.Button.extend({
@@ -38,7 +35,7 @@ MFT.DeviceListView = Em.ContainerView.create(MFT.LoadableView,{
         icon:              'images/media/ico_back.png',   
     }),
 
-    /** 
+    /**
      * Label in title
      */
     deviceListLabel:    MFT.Label.extend({
@@ -51,8 +48,8 @@ MFT.DeviceListView = Em.ContainerView.create(MFT.LoadableView,{
     }),
 
     /*
-     * Function calls when notification from RPC comes
-     * and creates buttons to choose devices
+     * Function calls when notification from RPC comes and creates buttons to
+     * choose devices
      */
     ShowDeviceList: function( params ){
 
@@ -75,8 +72,8 @@ MFT.DeviceListView = Em.ContainerView.create(MFT.LoadableView,{
     },
 
     /*
-     * Function calls each time when user enters Change Device menu
-     * and clear all old data about devices
+     * Function calls each time when user enters Change Device menu and clear
+     * all old data about devices
      */
     clearDeviceList: function(){
         this.get('listOfDevices.list').removeAllChildren();
@@ -84,8 +81,8 @@ MFT.DeviceListView = Em.ContainerView.create(MFT.LoadableView,{
     }.observes('this.stateObj.active'),
 
     /**
-      * List for option on DeviceListView screen
-      */
+     * List for option on DeviceListView screen
+     */
     listOfDevices: MFT.List.extend({
 
         elementId:      'info_apps_deviceList_list',

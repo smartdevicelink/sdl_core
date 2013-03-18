@@ -38,13 +38,15 @@ MFT.SDLModel = Em.Object.create( {
             [{
                 "text": "Some text for help prompt",
                 "type": "TEXT"
-            }],
+            }
+            ],
 
         timeoutPrompt:
             [{
                 "text": "Some text for timeout prompt",
                 "type": "TEXT"
-            }]
+            }
+            ]
     },
 
     /**
@@ -91,7 +93,8 @@ MFT.SDLModel = Em.Object.create( {
             {
                 name: "ROUTE_UPDATE_REQUEST_TIMEOUT",
                 id: 9
-            }],
+            }
+        ],
 
     /**
      * Data for AudioPassThruPopUp that contains params for visualisation
@@ -182,17 +185,18 @@ MFT.SDLModel = Em.Object.create( {
             'ZH-TW',
             'JA-JP',
             'AR',
-            'KO-KR'],
+            'KO-KR'
+        ],
 
     /**
      * Method to open Phone view and dial phone number
      * 
      * @param {Object}
      */
-    dialNumber: function(params) {
-        this.set('phoneCall', true);
-        MFT.States.goToState('phone.dialpad');
-        MFT.PhoneModel.set('dialpadNumber', params.number);
+    dialNumber: function( params ) {
+        this.set( 'phoneCall', true );
+        MFT.States.goToState( 'phone.dialpad' );
+        MFT.PhoneModel.set( 'dialpadNumber', params.number );
         MFT.PhoneController.onDialCall();
     },
 
@@ -201,8 +205,8 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Object}
      */
-    tbtActivate: function(params) {
-        MFT.TurnByTurnView.activate(params);
+    tbtActivate: function( params ) {
+        MFT.TurnByTurnView.activate( params );
     },
 
     /**
@@ -210,19 +214,19 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Object}
      */
-    tbtTurnListUpdate: function(params) {
-        MFT.SDLController.getApplicationModel(params.appId).turnList = params.turnList;
-        MFT.TBTTurnList.updateList(params.appId);
+    tbtTurnListUpdate: function( params ) {
+        MFT.SDLController.getApplicationModel( params.appId ).turnList = params.turnList;
+        MFT.TBTTurnList.updateList( params.appId );
     },
 
     /**
-     * Method to set language for UI component with parameters sent from
-     * SDLCore to UIRPC
+     * Method to set language for UI component with parameters sent from SDLCore
+     * to UIRPC
      * 
      * @type {String} lang
      */
-    changeRegistrationUI: function(lang) {
-        MFT.SDLAppController.model.set('UILanguage', lang);
+    changeRegistrationUI: function( lang ) {
+        MFT.SDLAppController.model.set( 'UILanguage', lang );
     },
 
     /**
@@ -231,8 +235,8 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @type {String} lang
      */
-    changeRegistrationTTSVR: function(lang) {
-        MFT.SDLAppController.model.set('TTSVRLanguage', lang);
+    changeRegistrationTTSVR: function( lang ) {
+        MFT.SDLAppController.model.set( 'TTSVRLanguage', lang );
     },
 
     /**
@@ -241,11 +245,11 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Object}
      */
-    onAppRegistered: function(params) {
-        if (params.isMediaApplication) {
-            MFT.SDLController.registerApplication(params, 0);
-        } else {
-            MFT.SDLController.registerApplication(params, 1);
+    onAppRegistered: function( params ) {
+        if( params.isMediaApplication ){
+            MFT.SDLController.registerApplication( params, 0 );
+        }else{
+            MFT.SDLController.registerApplication( params, 1 );
         }
     },
 
@@ -255,16 +259,16 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Object}
      */
-    onAppUnregistered: function(params) {
-        if (this.registeredApps[params.appId]) {
+    onAppUnregistered: function( params ) {
+        if( this.registeredApps[params.appId] ){
 
-            MFT.VRPopUp.DeleteActivateApp(params.appId);
+            MFT.VRPopUp.DeleteActivateApp( params.appId );
 
-            MFT.SDLController.getApplicationModel(params.appId).onDeleteApplication(params.appId);
+            MFT.SDLController.getApplicationModel( params.appId ).onDeleteApplication( params.appId );
 
             delete MFT.SDLModel.registeredApps[params.appId];
 
-            MFT.SDLModel.get('applicationsList').shiftObject(params.appId);
+            MFT.SDLModel.get( 'applicationsList' ).shiftObject( params.appId );
         }
     },
 
@@ -275,16 +279,16 @@ MFT.SDLModel = Em.Object.create( {
      * @param {Object} params Object with parameters come from SDLCore.
      * @param {Number} messageRequestId Identification of unique request
      */
-    onSDLScrolableMessage: function(params, messageRequestId) {
+    onSDLScrolableMessage: function( params, messageRequestId ) {
 
-        if (!MFT.ScrollableMessage.active) {
-            if (MFT.SDLController.driverDistractionState) {
+        if( !MFT.ScrollableMessage.active ){
+            if( MFT.SDLController.driverDistractionState ){
                 MFT.DriverDistraction.activate();
-            } else {
-                MFT.ScrollableMessage.activate(MFT.SDLController.getApplicationModel(params.appId).appName, params, messageRequestId);
+            }else{
+                MFT.ScrollableMessage.activate( MFT.SDLController.getApplicationModel( params.appId ).appName, params, messageRequestId );
             }
-        } else {
-            MFT.SDLController.scrollableMessageResponse('REJECTED', messageRequestId);
+        }else{
+            MFT.SDLController.scrollableMessageResponse( 'REJECTED', messageRequestId );
         }
 
     },
@@ -294,16 +298,16 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Object}
      */
-    resetProperties: function(params) {
+    resetProperties: function( params ) {
 
         var i, len = params.properties.length;
-        for (i = 0; i < len; i++) {
-            if (params.properties[i] == "HELPPROMPT") {
-                this.set('globalProperties.helpPrompt', this.globalPropertiesDefault.helpPrompt);
+        for( i = 0; i < len; i++ ){
+            if( params.properties[i] == "HELPPROMPT" ){
+                this.set( 'globalProperties.helpPrompt', this.globalPropertiesDefault.helpPrompt );
             }
 
-            if (params.properties[i] == "TIMEOUTPROMPT") {
-                this.set('globalProperties.timeoutPrompt', this.globalPropertiesDefault.timeoutPrompt);
+            if( params.properties[i] == "TIMEOUTPROMPT" ){
+                this.set( 'globalProperties.timeoutPrompt', this.globalPropertiesDefault.timeoutPrompt );
             }
         }
     },
@@ -313,10 +317,10 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Object} message Object with parameters come from SDLCore.
      */
-    setProperties: function(message) {
+    setProperties: function( message ) {
 
-        this.set('globalProperties.helpPrompt', message.helpPrompt);
-        this.set('globalProperties.timeoutPrompt', message.timeoutPrompt);
+        this.set( 'globalProperties.helpPrompt', message.helpPrompt );
+        this.set( 'globalProperties.timeoutPrompt', message.timeoutPrompt );
 
     },
 
@@ -325,12 +329,12 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Object} appList
      */
-    onGetAppList: function(appList) {
+    onGetAppList: function( appList ) {
 
         var i = 0, len = appList.length;
-        for (i = 0; i < len; i++) {
-            if (appList[i]) {
-                MFT.SDLModel.onAppRegistered(appList[i]);
+        for( i = 0; i < len; i++ ){
+            if( appList[i] ){
+                MFT.SDLModel.onAppRegistered( appList[i] );
             }
         }
 
@@ -342,10 +346,10 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Object} params
      */
-    onGetDeviceList: function(params) {
-        if (null == params.resultCode || (null != params.resultCode && "SUCCESS" == params.resultCode)) {
-            if (MFT.States.info.devicelist.active && params.deviceList && params.deviceList.length) {
-                MFT.DeviceListView.ShowDeviceList(params);
+    onGetDeviceList: function( params ) {
+        if( null == params.resultCode || ( null != params.resultCode && "SUCCESS" == params.resultCode ) ){
+            if( MFT.States.info.devicelist.active && params.deviceList && params.deviceList.length ){
+                MFT.DeviceListView.ShowDeviceList( params );
             }
         }
     },
@@ -357,16 +361,16 @@ MFT.SDLModel = Em.Object.create( {
      * @param {Number} id
      * @param {String} method
      */
-    onSDLSetAppIcon: function(message, id, method) {
+    onSDLSetAppIcon: function( message, id, method ) {
         var img = new Image();
         img.onload = function() {
             // code to set the src on success
-            MFT.SDLController.getApplicationModel(message.appId).set('appIcon', message.syncFileName);
-            FFW.UI.sendUIResult("SUCCESS", id, method);
+            MFT.SDLController.getApplicationModel( message.appId ).set( 'appIcon', message.syncFileName );
+            FFW.UI.sendUIResult( "SUCCESS", id, method );
         };
-        img.onerror = function(ev) {
+        img.onerror = function( ev ) {
             // doesn't exist or error loading
-            FFW.UI.sendUIResult("INVALID_DATA", id, method);
+            FFW.UI.sendUIResult( "INVALID_DATA", id, method );
             return false;
         };
 
@@ -378,9 +382,9 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Object} message Object with parameters come from SDLCore
      */
-    onUIAlertManeuver: function(message) {
+    onUIAlertManeuver: function( message ) {
 
-        MFT.AlertManeuverPopUp.AlertManeuverActive(message);
+        MFT.AlertManeuverPopUp.AlertManeuverActive( message );
     },
 
     /**
@@ -389,12 +393,12 @@ MFT.SDLModel = Em.Object.create( {
      * @param {Object} message Object with parameters come from SDLCore
      * @param {Number} alertRequestId Id of current handled request
      */
-    onUIAlert: function(message, alertRequestId) {
+    onUIAlert: function( message, alertRequestId ) {
 
-        if (!MFT.AlertPopUp.active) {
-            MFT.AlertPopUp.AlertActive(message, alertRequestId);
-        } else {
-            MFT.SDLController.alertResponse('REJECTED', alertRequestId);
+        if( !MFT.AlertPopUp.active ){
+            MFT.AlertPopUp.AlertActive( message, alertRequestId );
+        }else{
+            MFT.SDLController.alertResponse( 'REJECTED', alertRequestId );
         }
     },
 
@@ -404,12 +408,12 @@ MFT.SDLModel = Em.Object.create( {
      * @param {Object} message Object with parameters come from SDLCore
      * @param {Number} performInteractionRequestId Id of current handled request
      */
-    uiPerformInteraction: function(message, performInteractionRequestId) {
+    uiPerformInteraction: function( message, performInteractionRequestId ) {
 
-        if (!MFT.InteractionChoicesView.active) {
-            MFT.SDLController.getApplicationModel(message.appId).onPreformInteraction(message, performInteractionRequestId);
-        } else {
-            MFT.SDLController.interactionChoiseCloseResponse('ABORTED', performInteractionRequestId);
+        if( !MFT.InteractionChoicesView.active ){
+            MFT.SDLController.getApplicationModel( message.appId ).onPreformInteraction( message, performInteractionRequestId );
+        }else{
+            MFT.SDLController.interactionChoiseCloseResponse( 'ABORTED', performInteractionRequestId );
         }
     },
 
@@ -418,12 +422,12 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Object} message Object with parameters come from SDLCore
      */
-    uiSlider: function(message) {
+    uiSlider: function( message ) {
 
-        if (!MFT.SliderView.active) {
-            MFT.SDLController.getApplicationModel(message.params.appId).onSlider(message);
-        } else {
-            FFW.UI.sendSliderResult('ABORTED', message.id);
+        if( !MFT.SliderView.active ){
+            MFT.SDLController.getApplicationModel( message.params.appId ).onSlider( message );
+        }else{
+            FFW.UI.sendSliderResult( 'ABORTED', message.id );
         }
     },
 
@@ -432,9 +436,9 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Object} message Object with parameters come from SDLCore.
      */
-    UIPerformAudioPassThru: function(message) {
-        this.set('AudioPassThruData', message);
-        this.set('AudioPassThruState', true);
+    UIPerformAudioPassThru: function( message ) {
+        this.set( 'AudioPassThruData', message );
+        this.set( 'AudioPassThruState', true );
     },
 
     /**
@@ -442,11 +446,11 @@ MFT.SDLModel = Em.Object.create( {
      * response handler
      */
     UIEndAudioPassThru: function() {
-        if (this.AudioPassThruState) {
-            FFW.UI.sendUIResult("SUCCESS", FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru");
-            MFT.SDLController.performAudioPassThruResponse("SUCCESS");
-        } else {
-            FFW.UI.sendUIResult("GENERIC_ERROR", FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru");
+        if( this.AudioPassThruState ){
+            FFW.UI.sendUIResult( "SUCCESS", FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru" );
+            MFT.SDLController.performAudioPassThruResponse( "SUCCESS" );
+        }else{
+            FFW.UI.sendUIResult( "GENERIC_ERROR", FFW.UI.endAudioPassThruRequestId, "UI.EndAudioPassThru" );
         }
     },
 
@@ -456,13 +460,13 @@ MFT.SDLModel = Em.Object.create( {
      * @param {Object}
      * @param {Number}
      */
-    onPrompt: function(ttsChunks, delay) {
+    onPrompt: function( ttsChunks, delay ) {
         var message = '';
-        if (ttsChunks) {
-            for ( var i = 0; i < ttsChunks.length; i++) {
+        if( ttsChunks ){
+            for( var i = 0; i < ttsChunks.length; i++ ){
                 message += ttsChunks[i].text + '\n';
             }
-            MFT.TTSPopUp.ActivateTTS(message, delay);
+            MFT.TTSPopUp.ActivateTTS( message, delay );
         }
     },
 
@@ -472,8 +476,8 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Object}
      */
-    addCommandVR: function(message) {
-        MFT.VRPopUp.AddCommand(message.cmdId, message.vrCommands, message.appId);
+    addCommandVR: function( message ) {
+        MFT.VRPopUp.AddCommand( message.cmdId, message.vrCommands, message.appId );
     },
 
     /**
@@ -482,15 +486,15 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @param {Number}
      */
-    deleteCommandVR: function(commandId) {
-        MFT.VRPopUp.DeleteCommand(commandId);
+    deleteCommandVR: function( commandId ) {
+        MFT.VRPopUp.DeleteCommand( commandId );
     },
 
-    onDeactivateApp: function(target, appId, appName) {
+    onDeactivateApp: function( target, appId, appName ) {
 
-        var dest = target.split('.'), reason;
+        var dest = target.split( '.' ), reason;
 
-        switch (dest[0]) {
+        switch( dest[0] ){
             case 'media': {
                 reason = 'AUDIO';
                 break;
@@ -513,6 +517,6 @@ MFT.SDLModel = Em.Object.create( {
             }
         }
 
-        FFW.BasicCommunication.DeactivateApp(appName, reason, appId);
+        FFW.BasicCommunication.DeactivateApp( appName, reason, appId );
     }
-});
+} );
