@@ -19,7 +19,6 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
             field2: '<field2>',
             field3: '<field3>',
             mediaClock: '<mediaClock>',
-            //statusText: '<statusBar>',
             trackIcon: 'images/sdl/audio_icon.jpg',
             customPresets:
                 [
@@ -31,8 +30,6 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
                     '<no definition>'
                 ]
         } ) );
-
-        this.appInfo.set('statusText', '<statusBar>'); 
         
         this.set( 'isPlaying', true );
 
