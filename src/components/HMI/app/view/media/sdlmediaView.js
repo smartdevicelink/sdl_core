@@ -24,7 +24,7 @@ MFT.sdlView = Em.ContainerView.create(MFT.LoadableView,{
 		'controlls'
 	],
 	
-	controlls: MFT.SDLMediaControllsV2,
+	controlls: MFT.SDLMediaControlls,
 
     /**
      * Deactivate View
@@ -42,7 +42,7 @@ MFT.sdlView = Em.ContainerView.create(MFT.LoadableView,{
 			this.get('childViews').removeObjects(
                 this.get('childViews').filterProperty( 'sdlMediaControlls' , 'V1' )
             );
-			MFT.sdlView.get('childViews').pushObject(MFT.SDLMediaControllsV2);
+			MFT.sdlView.get('childViews').pushObject(MFT.SDLMediaControlls);
 		}else{
 			this.get('childViews').removeObjects(
                 this.get('childViews').filterProperty( 'sdlMediaControlls' , 'V2' )
