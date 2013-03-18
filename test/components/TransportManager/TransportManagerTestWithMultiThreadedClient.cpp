@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 /*
     Tests Transport Manager behavior with single TM client which sents a lot of data from many different threads (more than 200).
     Sent data was sent back from device adapter to TM client and validated
@@ -27,7 +31,7 @@ using ::testing::ContainerEq;
 using ::testing::Eq;
 using ::testing::InSequence;
 
-using namespace NsAppLink::NsTransportManager;
+using namespace NsSmartDeviceLink::NsTransportManager;
 
 namespace test { namespace components { namespace TransportManager { namespace TestWithMultiThreadedClient {
 

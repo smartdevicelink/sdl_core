@@ -1,3 +1,7 @@
+//
+// Copiright (c) 2013 Ford Motor Company
+//
+
 #ifndef NSRPC2COMMUNICATION_SMARTDEVICELINKCORE_SENDDATARESPONSE_INCLUDE
 #define NSRPC2COMMUNICATION_SMARTDEVICELINKCORE_SENDDATARESPONSE_INCLUDE
 
@@ -20,16 +24,16 @@ namespace NsRPC2Communication
     class SendDataResponse : public ::NsRPC2Communication::RPC2Response
     {
     public:
-    
+
       SendDataResponse(const SendDataResponse& c);
       SendDataResponse(void);
-    
+
       SendDataResponse& operator =(const SendDataResponse&);
-    
+
       virtual ~SendDataResponse(void);
-    
+
       bool checkIntegrity(void);
-    
+
 
     private:
 

@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 /*
     Tests transport manager functionality with single device adapter that behaves correctly and single client
     Following sequence is tested:
@@ -38,7 +42,7 @@ using ::testing::ContainerEq;
 using ::testing::Eq;
 using ::testing::InSequence;
 
-using namespace NsAppLink::NsTransportManager;
+using namespace NsSmartDeviceLink::NsTransportManager;
 
 namespace test { namespace components { namespace TransportManager { namespace TestWithCorrectDeviceAdapter {
 

@@ -1,6 +1,6 @@
 * Introduction
   ================
-  appLinkCore is an application which manages the transport, connection and communication between a head unit and mobile device.
+  smartDeviceCore is an application which manages the transport, connection and communication between a head unit and mobile device.
 
 * OS and Hardware
   =========
@@ -22,19 +22,19 @@
   For HMI autostart please create in the executable folder file named hmi_link.
   This file should contain one string with full path to HMI index.html file.
   For example:
-  /home/user/projects/applink/src/components/HMI/index.html
+  /home/user/projects/smart_device_link/src/components/HMI/index.html
 
 * Running application
   ====================
   Plug USB-dongle in.
   Switch Bluetooth on a mobile device ON and make the device discoverable.
   Pair mobile device with PC using Ubuntu tools.
-  Device should contain AppLink compatible application installed.
+  Device should contain SmartDeviceLink compatible application installed.
   Start application with command:
-  ./appLinkCore
+  ./smartDeviceLinkCore
   Application starts to search devices and starts HMI in cromium-browser.
   In case HMI has not been started please start web-based HMI manually in browser opening src/components/HMI/index.html.
-  AppLinkCore is searching Bluetooth devices with a correspondibg service.
+  SmartDeviceLinkCore is searching Bluetooth devices with a correspondibg service.
   Go to info menu in HMI and press App button.
   Press change Devices button.
   Select the device from a list.
@@ -43,7 +43,7 @@
 
 * Colorized logs
   ==============
-  You can have colorized log output of appLinkCore's messages in the terminal with the help of grc:
+  You can have colorized log output of smartDeviceLinkCore's messages in the terminal with the help of grc:
 
   1. Make sure grc is installed:
   sudo apt-get install grc
@@ -60,8 +60,8 @@
   or
   source ~/.zshrc
 
-  4. Start the applink core with the following command:
-  grca ./appLinkCore
+  4. Start the smartDeviceLink core with the following command:
+  grca ./smartDeviceLinkCore
 
   5. PROFIT
 

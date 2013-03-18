@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 /*
     Tests transport manager with multiple TM clients.
 
@@ -29,7 +33,7 @@ using ::testing::ContainerEq;
 using ::testing::Eq;
 using ::testing::InSequence;
 
-using namespace NsAppLink::NsTransportManager;
+using namespace NsSmartDeviceLink::NsTransportManager;
 
 namespace test { namespace components { namespace TransportManager { namespace TestWithMultipleClients {
 

@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 /*
     Test application that connects to the Transport Manager using TCP and sends predefined data.
     There are two possible usages of application:
@@ -238,7 +242,7 @@ void CTranspMgrTcpClient::send(const void* pData, size_t dataSize)
 static void makePacketHeader(size_t version, PacketHeaderV1 *& phv1, PacketHeaderV2 *& phv2, int8_t servicetype, int8_t sessionId);
 
 /**
- * @brief   class providing paylod data for testing of appLinkCore via TCP(WiFi) link
+ * @brief   class providing paylod data for testing of smartDeviceLinkCore via TCP(WiFi) link
  * 
  */
 class CAppTester
@@ -332,7 +336,7 @@ public:
    }
     
      /**
-        * \brief Sends data from file to appLinkCore 
+        * \brief Sends data from file to smartDeviceLinkCore
         * \param fileName name of file with json messages
         * \return Error code (-1 in case of any errors)
         */
