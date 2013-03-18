@@ -22,7 +22,7 @@ class Integer(object):
     """Integer type.
 
     Instance variables:
-    min_value -- minunum allowed value
+    min_value -- minimum allowed value
     max_value -- maximum allowed value
 
     """
@@ -37,7 +37,7 @@ class Double(object):
     """Floating-point type.
 
     Instance variables:
-    min_value -- minunum allowed value
+    min_value -- minimum allowed value
     max_value -- maximum allowed value
 
     """
@@ -138,7 +138,7 @@ class EnumElement(InterfaceItemBase):
     def primary_name(self):
         """Primary name of the EnumElement.
 
-        Equals the 'internal_name' property if presented or 'name' property
+        Return the 'internal_name' property if presented or 'name' property
         otherwise.
 
         """
