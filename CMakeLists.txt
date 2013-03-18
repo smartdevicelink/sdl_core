@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-set (PROJECT appLinkCore)
+set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
 
 # Please do not change compiler/linker flags if You do not know how particular
