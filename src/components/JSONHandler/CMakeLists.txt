@@ -607,10 +607,15 @@ set (SOURCES
     ./src/RPC2ErrorMarshaller.cpp
 )
 
+set (FORMATTER_SOURCES
+    ./src/formatters/CFormatterJsonALRPCv2.cpp
+)
+
 add_library("JSONHandler" ${SOURCES}
         ${GENERATED_SOURCES2}
         ${GENERATED_SOURCES4}
         ${GENERATED_RPC_SOURCES}
+        ${FORMATTER_SOURCES}
 ./src/ALRPCObjectsImpl/V2/OnDriverDistraction.cpp
 ./src/ALRPCObjectsImpl/V2/OnDriverDistractionMarshaller.cpp
 ./src/ALRPCObjectsImpl/V2/OnCommand.cpp
