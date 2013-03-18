@@ -1,44 +1,36 @@
-cmake_minimum_required(VERSION 2.8)
-project (testJsonHandler) 
+# Generating interface
+GenerateInterface("test_v4_protocol_v2_0_revP.xml" "Gen::test::components::JSONHandler" "alrpcv2")
 
-link_directories(
-			../../../src/thirdPartyLibs/jsoncpp 
-			../../../src/components/JSONHandler 
-			../../../src/thirdPartyLibs/axisCore/bin
-			../../../src/thirdPartyLibs/logger/bin
-		)
 
-include_directories (../../../src/components/JSONHandler/include/ 
-			../../../src/thirdPartyLibs/jsoncpp/include/ 
-			../../../src/thirdPartyLibs/axisCore/include 
-			../../../src/thirdPartyLibs/axisCore/ 
-			../../../src/thirdPartyLibs/axisCore/src
-			../../../src/appMain
-			../../../src/thirdPartyLibs/axisCore/utils/misc
-			../../../src/thirdPartyLibs/axisCore/transport/bt
-			../../../src/thirdPartyLibs/logger/include
-	                ../../../src/thirdPartyLibs/logger/log4cplus-1.1.0/include
-		    )
- 
-add_executable(testJsonHandler main.cpp TestJSONHandler.cpp)
-target_link_libraries(testJsonHandler jsonCpp jsonHandler ProtocolHandler bluetooth pthread log4cplus rt)
-#CBTAdapter.cpp 
-
-include(ExternalProject)
-ExternalProject_Add(
-   jsonHandler
-   SOURCE_DIR ../../../src/components/JSONHandler
-   DOWNLOAD_COMMAND ""
-   CMAKE_COMMAND cmake
-   BUILD_IN_SOURCE 1 
-#   BINARY_DIR ../../../src/components/JSONHandler/bin  
-   BUILD_COMMAND make
-   INSTALL_DIR ../../../src/components/JSONHandler/bin
-   INSTALL_COMMAND make install
+include_directories (
+  ../../../src/thirdPartyLibs/gmock-1.6.0/include
+  ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
+  ../../../src/components/SmartObjects/include
+  ../../../src/thirdPartyLibs/logger/include/
+  ../../../src/thirdPartyLibs/logger/log4cplus-1.1.0/include/
+  ../../../src//thirdPartyLibs/jsoncpp/include/
+  ../../../src/components/JSONHandler/include/
+  ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
+  ${CMAKE_BINARY_DIR}
 )
 
-ADD_DEPENDENCIES(testJsonHandler jsonHandler)
+set (SOURCES_DRAFT_TEST
+    ./SmartSchemaDraftTest.cpp
+)
 
-set(CMAKE_INSTALL_PREFIX .)
-install (TARGETS testJsonHandler DESTINATION bin)
+set(LIBRARIES
+    gtest
+    gtest_main
+    gmock
+    gmock_main
+    test_v4_protocol_v2_0_revP
+    SmartObjects
+    log4cplus
+    JSONHandler
+    jsoncpp
+  #v4_protocol_v2_0_revP
+)
 
+add_executable("test_SmartSchemaDraftTest" ${SOURCES_DRAFT_TEST})
+target_link_libraries("test_SmartSchemaDraftTest" ${LIBRARIES})
+add_test(test_SmartSchemaDraftTest test_SmartSchemaDraftTest)
