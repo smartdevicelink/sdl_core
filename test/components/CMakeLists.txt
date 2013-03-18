@@ -9,3 +9,6 @@ add_subdirectory(./AppMgr)
 
 # --- SmartObjects
 add_subdirectory(./SmartObjects)
+
+# --- JSONHandler/formatters
+add_subdirectory(./JSONHandler/formatters)
