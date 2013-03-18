@@ -2,11 +2,12 @@
 // Copyright (c) 2013 Ford Motor Company
 //
 
-#include "AppMgr/SyncPManager.h"
-#include "Utils/Base64.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "encryption/Base64.h"
+#include "AppMgr/SyncPManager.h"
+
 
 namespace NsAppManager
 {

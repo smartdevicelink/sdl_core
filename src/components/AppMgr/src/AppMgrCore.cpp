@@ -8,8 +8,6 @@
 #include <sys/time.h>
 
 #include "LoggerHelper.hpp"
-#include "Utils/ClientSocket.h"
-#include "Utils/SocketException.h"
 #include "Utils/WorkWithOS.h"
 #include "AppMgr/AppMgrCore.h"
 #include "AppMgr/AppPolicy.h"
@@ -175,25 +173,7 @@ namespace {
         }
         std::string host = url.substr(0, pos);
         LOG4CPLUS_INFO_EXT(logger, " Sending at " << host << " port " << port);
-        try
-        {
-            ClientSocket client_socket( host, port );
-      //      std::string reply;
-            for(NsAppManager::SyncPManager::PData::iterator it = pData.begin(); it != pData.end(); it++)
-            {
-                LOG4CPLUS_INFO_EXT(logger, " Sending data " << *it);
-                client_socket << *it;
-      //          client_socket >> reply;
-            }
-        }
-        catch (SocketException& ex)
-        {
-            LOG4CPLUS_ERROR_EXT(logger, "ClientSocket error: " << ex.description());
-        }
-        catch (...)
-        {
-            LOG4CPLUS_ERROR_EXT(logger, "Unknown ClientSocket error...");
-        }
+        // TODO (pv): change implementation.
         LOG4CPLUS_INFO_EXT(logger, " All data sent to host " << host << " port " << port);
         pthread_exit(NULL);
     }

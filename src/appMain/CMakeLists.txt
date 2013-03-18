@@ -8,6 +8,7 @@ set(LIBRARIES
   MessageBrokerClient
   MessageBrokerServer
   Utils
+  encryption
   jsoncpp
   bluetooth
   pthread
@@ -27,6 +28,7 @@ include_directories (
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/logger/include
   ../thirdPartyLibs/logger/log4cplus-1.1.0/include
+  ../thirdPartyLibs/encryption/include
   ${CMAKE_BINARY_DIR}/src/thirdPartyLibs/logger/log4cplus-1.1.0/include
 )
 

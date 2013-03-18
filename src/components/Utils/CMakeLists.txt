@@ -6,11 +6,6 @@ include_directories (
 )
 
 set (SOURCES
-    ./src/ClientSocket.cpp
-    ./src/ServerSocket.cpp
-    ./src/Socket.cpp
-    ./src/SocketException.cpp
-    ./src/Base64.cpp
     ./src/WorkWithOS.cpp
 )
 
