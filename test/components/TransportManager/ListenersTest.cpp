@@ -29,25 +29,25 @@ namespace test
                 /**
                  * @brief Class to check data listener callbacks calling
                  **/
-                class MockDataListener: public NsAppLink::NsTransportManager::ITransportManagerDataListener
+                class MockDataListener: public NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener
                 {
                 public:
-                    //MOCK_METHOD2(onFrameReceived, void(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const Blob & Data));
-                    MOCK_METHOD3(onFrameSendCompleted, void(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, int FrameSequenceNumber, NsAppLink::NsTransportManager::ESendStatus SendStatus));
+                    //MOCK_METHOD2(onFrameReceived, void(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle, const Blob & Data));
+                    MOCK_METHOD3(onFrameSendCompleted, void(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle, int FrameSequenceNumber, NsSmartDeviceLink::NsTransportManager::ESendStatus SendStatus));
                 };
 
                 /**
                  * @brief Class to check device listener callbacks calling
                  **/
-                class MockDeviceListener: public NsAppLink::NsTransportManager::ITransportManagerDeviceListener
+                class MockDeviceListener: public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener
                 {
                 public:
-                    MOCK_METHOD1(onDeviceListUpdated, void(const NsAppLink::NsTransportManager::tDeviceList & DeviceList));
-                    MOCK_METHOD2(onApplicationConnected, void(const NsAppLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection));
-                    MOCK_METHOD2(onApplicationDisconnected, void(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection));
+                    MOCK_METHOD1(onDeviceListUpdated, void(const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList));
+                    MOCK_METHOD2(onApplicationConnected, void(const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection));
+                    MOCK_METHOD2(onApplicationDisconnected, void(const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection));
                 };
 
-                class TestTransportManager: public NsAppLink::NsTransportManager::CTransportManager
+                class TestTransportManager: public NsSmartDeviceLink::NsTransportManager::CTransportManager
                 {
                 public:
                     void run()
@@ -60,20 +60,20 @@ namespace test
                     {
                         //Calling callbacks on all listeners
 
-                        NsAppLink::NsTransportManager::tConnectionHandle dummyConnectionHandle = 1;
-                        std::vector<NsAppLink::NsTransportManager::ITransportManagerDataListener*>::const_iterator dataListenersIterator;                        
+                        NsSmartDeviceLink::NsTransportManager::tConnectionHandle dummyConnectionHandle = 1;
+                        std::vector<NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener*>::const_iterator dataListenersIterator;
 
                         for (dataListenersIterator = mDataListeners.begin(); dataListenersIterator != mDataListeners.end(); ++dataListenersIterator)
                         {
-                            (*dataListenersIterator)->onFrameSendCompleted(dummyConnectionHandle, 0, NsAppLink::NsTransportManager::SendStatusOK);
+                            (*dataListenersIterator)->onFrameSendCompleted(dummyConnectionHandle, 0, NsSmartDeviceLink::NsTransportManager::SendStatusOK);
                         }
 
-                        NsAppLink::NsTransportManager::SDeviceInfo dummyDeviceInfo;
-                        std::vector<NsAppLink::NsTransportManager::ITransportManagerDeviceListener*>::const_iterator deviceListenersIterator;
+                        NsSmartDeviceLink::NsTransportManager::SDeviceInfo dummyDeviceInfo;
+                        std::vector<NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener*>::const_iterator deviceListenersIterator;
 
                         for (deviceListenersIterator = mDeviceListeners.begin(); deviceListenersIterator != mDeviceListeners.end(); ++deviceListenersIterator)
                         {
-                            (*deviceListenersIterator)->onApplicationConnected(dummyDeviceInfo, NsAppLink::NsTransportManager::InvalidConnectionHandle);
+                            (*deviceListenersIterator)->onApplicationConnected(dummyDeviceInfo, NsSmartDeviceLink::NsTransportManager::InvalidConnectionHandle);
                         }
                     }
                 };

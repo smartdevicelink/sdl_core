@@ -23,60 +23,60 @@ namespace test
             {
                 const size_t cNumberOfMockDeviceAdapters = 256u;
 
-                class MockDataListener: public NsAppLink::NsTransportManager::ITransportManagerDataListener
+                class MockDataListener: public NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener
                 {
                 public:
                     MockDataListener(pthread_mutex_t & Mutex);
 
-                    MOCK_METHOD3(onFrameReceived, void(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize));
-                    MOCK_METHOD3(onFrameSendCompleted, void(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, int UserData, NsAppLink::NsTransportManager::ESendStatus SendStatus));
+                    MOCK_METHOD3(onFrameReceived, void(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize));
+                    MOCK_METHOD3(onFrameSendCompleted, void(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle, int UserData, NsSmartDeviceLink::NsTransportManager::ESendStatus SendStatus));
 
-                    void unlockMutexAfterFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle, const uint8_t *, size_t);
-                    void unlockMutexAfterFrameSendCompleted(NsAppLink::NsTransportManager::tConnectionHandle, int, NsAppLink::NsTransportManager::ESendStatus);
+                    void unlockMutexAfterFrameReceived(NsSmartDeviceLink::NsTransportManager::tConnectionHandle, const uint8_t *, size_t);
+                    void unlockMutexAfterFrameSendCompleted(NsSmartDeviceLink::NsTransportManager::tConnectionHandle, int, NsSmartDeviceLink::NsTransportManager::ESendStatus);
 
                 private:
                     pthread_mutex_t & mMutex;
                 };
 
-                class MockDeviceListener: public NsAppLink::NsTransportManager::ITransportManagerDeviceListener
+                class MockDeviceListener: public NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener
                 {
                 public:
                     MockDeviceListener(pthread_mutex_t & Mutex);
 
-                    MOCK_METHOD1(onDeviceListUpdated, void(const NsAppLink::NsTransportManager::tDeviceList & DeviceList));
-                    MOCK_METHOD2(onApplicationConnected, void(const NsAppLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection));
-                    MOCK_METHOD2(onApplicationDisconnected, void(const NsAppLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsAppLink::NsTransportManager::tConnectionHandle Connection));
+                    MOCK_METHOD1(onDeviceListUpdated, void(const NsSmartDeviceLink::NsTransportManager::tDeviceList & DeviceList));
+                    MOCK_METHOD2(onApplicationConnected, void(const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & ConnectedDevice, const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection));
+                    MOCK_METHOD2(onApplicationDisconnected, void(const NsSmartDeviceLink::NsTransportManager::SDeviceInfo & DisconnectedDevice, const NsSmartDeviceLink::NsTransportManager::tConnectionHandle Connection));
 
-                    void unlockMutexAfterDeviceListUpdate(const NsAppLink::NsTransportManager::tDeviceList &);
-                    void unlockMutexAfterApplicationConnectedDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo &, const NsAppLink::NsTransportManager::tConnectionHandle);
+                    void unlockMutexAfterDeviceListUpdate(const NsSmartDeviceLink::NsTransportManager::tDeviceList &);
+                    void unlockMutexAfterApplicationConnectedDisconnected(const NsSmartDeviceLink::NsTransportManager::SDeviceInfo &, const NsSmartDeviceLink::NsTransportManager::tConnectionHandle);
 
                 private:
                     pthread_mutex_t & mMutex;
                 };
 
-                class MockDeviceAdapter: public NsAppLink::NsTransportManager::IDeviceAdapter
+                class MockDeviceAdapter: public NsSmartDeviceLink::NsTransportManager::IDeviceAdapter
                 {
                 public:
                     MockDeviceAdapter(pthread_mutex_t & Mutex);
-                    virtual NsAppLink::NsTransportManager::EDeviceType getDeviceType(void) const;
+                    virtual NsSmartDeviceLink::NsTransportManager::EDeviceType getDeviceType(void) const;
 
-                    MOCK_METHOD1(connectDevice, void (const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle));
-                    MOCK_METHOD1(disconnectDevice, void (const NsAppLink::NsTransportManager::tDeviceHandle DeviceHandle));
+                    MOCK_METHOD1(connectDevice, void (const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle));
+                    MOCK_METHOD1(disconnectDevice, void (const NsSmartDeviceLink::NsTransportManager::tDeviceHandle DeviceHandle));
                     MOCK_METHOD0(run, void());
                     MOCK_METHOD0(scanForNewDevices, void());
-                    MOCK_METHOD4(sendFrame, void(NsAppLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData));
+                    MOCK_METHOD4(sendFrame, void(NsSmartDeviceLink::NsTransportManager::tConnectionHandle ConnectionHandle, const uint8_t * Data, size_t DataSize, int UserData));
 
-                    void unlockMutexAfterSendFrame(NsAppLink::NsTransportManager::tConnectionHandle, const uint8_t *, size_t, int UserData);
+                    void unlockMutexAfterSendFrame(NsSmartDeviceLink::NsTransportManager::tConnectionHandle, const uint8_t *, size_t, int UserData);
 
-                    NsAppLink::NsTransportManager::SDeviceInfo mMockDeviceInfo;
-                    NsAppLink::NsTransportManager::tConnectionHandle mMockConnectionHandle;
+                    NsSmartDeviceLink::NsTransportManager::SDeviceInfo mMockDeviceInfo;
+                    NsSmartDeviceLink::NsTransportManager::tConnectionHandle mMockConnectionHandle;
                     int mMockUserData;
 
                 private:
                     pthread_mutex_t & mMutex;
                 };
 
-                class TestTransportManager: public NsAppLink::NsTransportManager::CTransportManager
+                class TestTransportManager: public NsSmartDeviceLink::NsTransportManager::CTransportManager
                 {
                 public:
                     TestTransportManager(test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceAdapter * (& DeviceAdapters)[cNumberOfMockDeviceAdapters]);
@@ -109,12 +109,12 @@ mMutex(Mutex)
 {
 }
 
-void test::components::TransportManager::MultipleDeviceAdaptersTest::MockDataListener::unlockMutexAfterFrameReceived(NsAppLink::NsTransportManager::tConnectionHandle, const uint8_t *, size_t)
+void test::components::TransportManager::MultipleDeviceAdaptersTest::MockDataListener::unlockMutexAfterFrameReceived(NsSmartDeviceLink::NsTransportManager::tConnectionHandle, const uint8_t *, size_t)
 {
     pthread_mutex_unlock(&mMutex);
 }
 
-void test::components::TransportManager::MultipleDeviceAdaptersTest::MockDataListener::unlockMutexAfterFrameSendCompleted(NsAppLink::NsTransportManager::tConnectionHandle, int, NsAppLink::NsTransportManager::ESendStatus)
+void test::components::TransportManager::MultipleDeviceAdaptersTest::MockDataListener::unlockMutexAfterFrameSendCompleted(NsSmartDeviceLink::NsTransportManager::tConnectionHandle, int, NsSmartDeviceLink::NsTransportManager::ESendStatus)
 {
     pthread_mutex_unlock(&mMutex);
 }
@@ -124,32 +124,32 @@ mMutex(Mutex)
 {
 }
 
-void test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceListener::unlockMutexAfterDeviceListUpdate(const NsAppLink::NsTransportManager::tDeviceList &)
+void test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceListener::unlockMutexAfterDeviceListUpdate(const NsSmartDeviceLink::NsTransportManager::tDeviceList &)
 {
     pthread_mutex_unlock(&mMutex);
 }
 
-void test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceListener::unlockMutexAfterApplicationConnectedDisconnected(const NsAppLink::NsTransportManager::SDeviceInfo &, const NsAppLink::NsTransportManager::tConnectionHandle)
+void test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceListener::unlockMutexAfterApplicationConnectedDisconnected(const NsSmartDeviceLink::NsTransportManager::SDeviceInfo &, const NsSmartDeviceLink::NsTransportManager::tConnectionHandle)
 {
     pthread_mutex_unlock(&mMutex);
 }
 
 test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceAdapter::MockDeviceAdapter(pthread_mutex_t & Mutex):
 mMockDeviceInfo(),
-mMockConnectionHandle(NsAppLink::NsTransportManager::InvalidConnectionHandle),
+mMockConnectionHandle(NsSmartDeviceLink::NsTransportManager::InvalidConnectionHandle),
 mMockUserData(-1),
 mMutex(Mutex)
 {
-    mMockDeviceInfo.mDeviceHandle = NsAppLink::NsTransportManager::InvalidDeviceHandle;
-    mMockDeviceInfo.mDeviceType = NsAppLink::NsTransportManager::DeviceBluetooth;
+    mMockDeviceInfo.mDeviceHandle = NsSmartDeviceLink::NsTransportManager::InvalidDeviceHandle;
+    mMockDeviceInfo.mDeviceType = NsSmartDeviceLink::NsTransportManager::DeviceBluetooth;
 }
 
-NsAppLink::NsTransportManager::EDeviceType test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceAdapter::getDeviceType(void) const
+NsSmartDeviceLink::NsTransportManager::EDeviceType test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceAdapter::getDeviceType(void) const
 {
     return mMockDeviceInfo.mDeviceType;
 }
 
-void test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceAdapter::unlockMutexAfterSendFrame(NsAppLink::NsTransportManager::tConnectionHandle, const uint8_t *, size_t, int UserData)
+void test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceAdapter::unlockMutexAfterSendFrame(NsSmartDeviceLink::NsTransportManager::tConnectionHandle, const uint8_t *, size_t, int UserData)
 {
     pthread_mutex_unlock(&mMutex);
 }
@@ -253,10 +253,10 @@ TEST(TransportManager, MultipleDeviceAdapters)
     transportManager.addDeviceListener(&mockDeviceListener);
     transportManager.addDataListener(&mockDataListener);
 
-    NsAppLink::NsTransportManager::tDeviceHandle lastUsedDeviceHandle = 0;
-    NsAppLink::NsTransportManager::tConnectionHandle lastUsedConnectionHandle = 0;
+    NsSmartDeviceLink::NsTransportManager::tDeviceHandle lastUsedDeviceHandle = 0;
+    NsSmartDeviceLink::NsTransportManager::tConnectionHandle lastUsedConnectionHandle = 0;
 
-    NsAppLink::NsTransportManager::tDeviceList deviceList;
+    NsSmartDeviceLink::NsTransportManager::tDeviceList deviceList;
 
     EXPECT_CALL(mockDeviceListener, onDeviceListUpdated(::testing::_)).Times(0);
     EXPECT_CALL(mockDeviceListener, onApplicationConnected(::testing::_, ::testing::_)).Times(0);
@@ -269,7 +269,7 @@ TEST(TransportManager, MultipleDeviceAdapters)
         size_t deviceAdapterIndex = static_cast<size_t>(rand()) % test::components::TransportManager::MultipleDeviceAdaptersTest::cNumberOfMockDeviceAdapters;
         test::components::TransportManager::MultipleDeviceAdaptersTest::MockDeviceAdapter & mockDeviceAdapter = *mockDeviceAdapters[deviceAdapterIndex];
 
-        if (NsAppLink::NsTransportManager::InvalidDeviceHandle == mockDeviceAdapter.mMockDeviceInfo.mDeviceHandle)
+        if (NsSmartDeviceLink::NsTransportManager::InvalidDeviceHandle == mockDeviceAdapter.mMockDeviceInfo.mDeviceHandle)
         {
             mockDeviceAdapter.mMockDeviceInfo.mDeviceHandle = ++lastUsedDeviceHandle;
 
@@ -279,8 +279,8 @@ TEST(TransportManager, MultipleDeviceAdapters)
             mockDeviceAdapter.mMockDeviceInfo.mUniqueDeviceId = std::string("id-") + deviceNumberString;
             mockDeviceAdapter.mMockDeviceInfo.mUserFriendlyName = std::string("Name ") + deviceNumberString;
 
-            NsAppLink::NsTransportManager::tInternalDeviceList internalDeviceList;
-            internalDeviceList.push_back(NsAppLink::NsTransportManager::SInternalDeviceInfo(mockDeviceAdapter.mMockDeviceInfo.mDeviceHandle, mockDeviceAdapter.mMockDeviceInfo.mUserFriendlyName, mockDeviceAdapter.mMockDeviceInfo.mUniqueDeviceId));
+            NsSmartDeviceLink::NsTransportManager::tInternalDeviceList internalDeviceList;
+            internalDeviceList.push_back(NsSmartDeviceLink::NsTransportManager::SInternalDeviceInfo(mockDeviceAdapter.mMockDeviceInfo.mDeviceHandle, mockDeviceAdapter.mMockDeviceInfo.mUserFriendlyName, mockDeviceAdapter.mMockDeviceInfo.mUniqueDeviceId));
 
             TRY_LOCK_AND_FAIL_ON_TIMEOUT(callbacksMutex);
 
@@ -293,7 +293,7 @@ TEST(TransportManager, MultipleDeviceAdapters)
 
             transportManager.onDeviceListUpdated(&mockDeviceAdapter, internalDeviceList);
         }
-        else if (NsAppLink::NsTransportManager::InvalidConnectionHandle == mockDeviceAdapter.mMockConnectionHandle)
+        else if (NsSmartDeviceLink::NsTransportManager::InvalidConnectionHandle == mockDeviceAdapter.mMockConnectionHandle)
         {
             if (0 == rand() % 2)
             {
@@ -308,9 +308,9 @@ TEST(TransportManager, MultipleDeviceAdapters)
                     }
                 }
 
-                mockDeviceAdapter.mMockDeviceInfo.mDeviceHandle = NsAppLink::NsTransportManager::InvalidDeviceHandle;
+                mockDeviceAdapter.mMockDeviceInfo.mDeviceHandle = NsSmartDeviceLink::NsTransportManager::InvalidDeviceHandle;
 
-                NsAppLink::NsTransportManager::tInternalDeviceList internalDeviceList;
+                NsSmartDeviceLink::NsTransportManager::tInternalDeviceList internalDeviceList;
 
                 EXPECT_CALL(mockDeviceListener, onDeviceListUpdated(ContainsSameElements(deviceList)))
                     .Times(1)
@@ -365,12 +365,12 @@ TEST(TransportManager, MultipleDeviceAdapters)
 
                 TRY_LOCK_AND_FAIL_ON_TIMEOUT(callbacksMutex);
 
-                EXPECT_CALL(mockDataListener, onFrameSendCompleted(mockDeviceAdapter.mMockConnectionHandle, mockDeviceAdapter.mMockUserData, NsAppLink::NsTransportManager::SendStatusOK))
+                EXPECT_CALL(mockDataListener, onFrameSendCompleted(mockDeviceAdapter.mMockConnectionHandle, mockDeviceAdapter.mMockUserData, NsSmartDeviceLink::NsTransportManager::SendStatusOK))
                     .Times(1)
                     .WillOnce(::testing::Invoke(&mockDataListener, &test::components::TransportManager::MultipleDeviceAdaptersTest::MockDataListener::unlockMutexAfterFrameSendCompleted))
                     .RetiresOnSaturation();
 
-                transportManager.onFrameSendCompleted(&mockDeviceAdapter, mockDeviceAdapter.mMockConnectionHandle, mockDeviceAdapter.mMockUserData, NsAppLink::NsTransportManager::SendStatusOK);
+                transportManager.onFrameSendCompleted(&mockDeviceAdapter, mockDeviceAdapter.mMockConnectionHandle, mockDeviceAdapter.mMockUserData, NsSmartDeviceLink::NsTransportManager::SendStatusOK);
             }
             else
             {
@@ -383,7 +383,7 @@ TEST(TransportManager, MultipleDeviceAdapters)
 
                 transportManager.onApplicationDisconnected(&mockDeviceAdapter, mockDeviceAdapter.mMockDeviceInfo, mockDeviceAdapter.mMockConnectionHandle);
 
-                mockDeviceAdapter.mMockConnectionHandle = NsAppLink::NsTransportManager::InvalidConnectionHandle;
+                mockDeviceAdapter.mMockConnectionHandle = NsSmartDeviceLink::NsTransportManager::InvalidConnectionHandle;
             }
         }
     }

@@ -27,7 +27,7 @@ using ::testing::ContainerEq;
 using ::testing::Eq;
 using ::testing::InSequence;
 
-using namespace NsAppLink::NsTransportManager;
+using namespace NsSmartDeviceLink::NsTransportManager;
 
 namespace test { namespace components { namespace TransportManager { namespace TestWithMultiThreadedClient {
 

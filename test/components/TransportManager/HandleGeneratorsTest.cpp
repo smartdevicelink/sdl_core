@@ -20,7 +20,7 @@ namespace test
             namespace HandleGeneratorsTest
             {
 
-                class TestTransportManager: public NsAppLink::NsTransportManager::CTransportManager
+                class TestTransportManager: public NsSmartDeviceLink::NsTransportManager::CTransportManager
                 {
                 public:
                     void run()
@@ -37,42 +37,42 @@ namespace test
 TEST(test_TransportManagerHandleGenerators, singleDeviceHandleCanBeGenerated)
 {
     test::components::TransportManager::HandleGeneratorsTest::TestTransportManager tm;
-    NsAppLink::NsTransportManager::tDeviceHandle handle;
+    NsSmartDeviceLink::NsTransportManager::tDeviceHandle handle;
 
     handle = tm.generateNewDeviceHandle();
-    ASSERT_NE(handle, NsAppLink::NsTransportManager::InvalidDeviceHandle);
+    ASSERT_NE(handle, NsSmartDeviceLink::NsTransportManager::InvalidDeviceHandle);
 }
 
 TEST(test_TransportManagerHandleGenerators, manyDeviceHandlesCanBeGenerated)
 {
     test::components::TransportManager::HandleGeneratorsTest::TestTransportManager tm;
-    NsAppLink::NsTransportManager::tDeviceHandle handle;
+    NsSmartDeviceLink::NsTransportManager::tDeviceHandle handle;
 
     for (int i = 0; i < 10000; i++)
     {
         handle = tm.generateNewDeviceHandle();
-        ASSERT_NE(handle, NsAppLink::NsTransportManager::InvalidDeviceHandle);
+        ASSERT_NE(handle, NsSmartDeviceLink::NsTransportManager::InvalidDeviceHandle);
     }
 }
 
 TEST(test_TransportManagerHandleGenerators, singleConnectionHandleCanBeGenerated)
 {
     test::components::TransportManager::HandleGeneratorsTest::TestTransportManager tm;
-    NsAppLink::NsTransportManager::tConnectionHandle handle;
+    NsSmartDeviceLink::NsTransportManager::tConnectionHandle handle;
 
     handle = tm.generateNewConnectionHandle();
-    ASSERT_NE(handle, NsAppLink::NsTransportManager::InvalidConnectionHandle);
+    ASSERT_NE(handle, NsSmartDeviceLink::NsTransportManager::InvalidConnectionHandle);
 }
 
 TEST(test_TransportManagerHandleGenerators, manyConnectionHandlesCanBeGenerated)
 {
     test::components::TransportManager::HandleGeneratorsTest::TestTransportManager tm;
-    NsAppLink::NsTransportManager::tConnectionHandle handle;
+    NsSmartDeviceLink::NsTransportManager::tConnectionHandle handle;
 
     for (int i = 0; i < 10000; i++)
     {
         handle = tm.generateNewConnectionHandle();
-        ASSERT_NE(handle, NsAppLink::NsTransportManager::InvalidConnectionHandle);
+        ASSERT_NE(handle, NsSmartDeviceLink::NsTransportManager::InvalidConnectionHandle);
     }
 }
 
