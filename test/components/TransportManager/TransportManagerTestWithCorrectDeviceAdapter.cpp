@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 /*
     Tests transport manager functionality with single device adapter that behaves correctly and single client
     Following sequence is tested:

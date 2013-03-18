@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 /*
     Test application that connects to the Transport Manager using TCP and sends predefined data.
     There are two possible usages of application:

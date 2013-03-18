@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 /*
     Tests correct registration/removal of various TransportManager listeners.
         - tests that all registered device listeners received callbacks

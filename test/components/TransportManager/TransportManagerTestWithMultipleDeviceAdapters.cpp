@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 /*
     Tests Transport Manager functionality with multiple (256) device adapters that connects/disconnects/sents data
  */

@@ -1,3 +1,5 @@
+/* Copyright (c) 2013 Ford Motor Company */
+
 /* C++ code produced by gperf version 3.0.3 */
 /* Command-line: gperf --output-file=./src/components/JSONHandler/src/SDLRPCObjectsImpl/V2/InteractionModeMarshaller.inc ./src/components/JSONHandler/src/SDLRPCObjectsImpl/V2/InteractionModeMarshaller.gp  */
 /* Computed positions: -k'' */

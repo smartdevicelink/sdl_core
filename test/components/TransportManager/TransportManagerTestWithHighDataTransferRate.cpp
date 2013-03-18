@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 /*
     Tests huge amount of data tranfer through Transport Manager. Currently there are 10000 iterations, on each iteration
     data randomly sent from TM client to device or from device to TM client. Size of sent data is up to 1 MiB.

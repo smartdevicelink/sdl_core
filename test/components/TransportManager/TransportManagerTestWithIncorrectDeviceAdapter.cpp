@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 /*
     Tests TransportManager behavior when device adapter behaves completely incorrectly.
     Tested cases are:

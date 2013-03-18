@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2013 Ford Motor Company
+//
+
 /*
     Tests correct generation of Device and Connection handles used in TransportManager.
         - tests that generated handles are valid
