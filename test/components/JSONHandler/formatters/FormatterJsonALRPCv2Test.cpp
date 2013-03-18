@@ -18,22 +18,26 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         std::string str;
         NsAppLink::NsSmartObjects::CSmartObject obj;
 
-        obj["appId"] = "APP ID";
-        obj["appName"] = "APP NAME";
-        obj["appType"][0] = "SYSTEM";
-        obj["appType"][1] = "COMMUNICATION";
-        obj["hmiDisplayLanguageDesired"] = "RU-RU";
-        obj["isMediaApplication"] = true;
-        obj["languageDesired"] = "EN-US";
-        obj["ngnMediaScreenAppName"] = "SCREEN NAME";
-        obj["syncMsgVersion"]["majorVersion"] = 2;
-        obj["syncMsgVersion"]["minorVersion"] = 10;
-        obj["ttsName"][0]["text"] = "ABC";
-        obj["ttsName"][0]["type"] = "TEXT";
-        obj["vrSynonyms"][0] = "Synonym1";
-        obj["vrSynonyms"][1] = "Synonym2";
+        obj["params"]["MessageType"] = 0;
+        obj["params"]["CorrelationId"] = 0;
+        obj["msg_params"]["appId"] = "APP ID";
+        obj["msg_params"]["appName"] = "APP NAME";
+        obj["msg_params"]["appType"][0] = "SYSTEM";
+        obj["msg_params"]["appType"][1] = "COMMUNICATION";
+        obj["msg_params"]["hmiDisplayLanguageDesired"] = "RU-RU";
+        obj["msg_params"]["isMediaApplication"] = true;
+        obj["msg_params"]["languageDesired"] = "EN-US";
+        obj["msg_params"]["ngnMediaScreenAppName"] = "SCREEN NAME";
+        obj["msg_params"]["syncMsgVersion"]["majorVersion"] = 2;
+        obj["msg_params"]["syncMsgVersion"]["minorVersion"] = 10;
+        obj["msg_params"]["ttsName"][0]["text"] = "ABC";
+        obj["msg_params"]["ttsName"][0]["type"] = "TEXT";
+        obj["msg_params"]["vrSynonyms"][0] = "Synonym1";
+        obj["msg_params"]["vrSynonyms"][1] = "Synonym2";
+        obj["msg_params"]["null"] = NsAppLink::NsSmartObjects::CSmartObject();
+        obj["msg_params"]["double"] = -0.1234;
 
-        NsAppLink::NsJSONHandler::CFormatterJsonALRPCv2::toString(obj, str);
+        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(obj, str);
 
         std::cout << str;
     }

@@ -4,13 +4,13 @@
 #include "json/json.h"
 
 
-bool NsAppLink::NsJSONHandler::CFormatterJsonALRPCv2::toString(
+bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(
         NsAppLink::NsSmartObjects::CSmartObject& obj,
         std::string& outStr)
 {
     Json::Value root(Json::objectValue);
 
-    objToJsonValue(obj, root);
+    objToJsonValue(obj["msg_params"], root);
 
     outStr = root.toStyledString();
 
@@ -19,7 +19,7 @@ bool NsAppLink::NsJSONHandler::CFormatterJsonALRPCv2::toString(
 
 // ----------------------------------------------------------------------------
 
-void NsAppLink::NsJSONHandler::CFormatterJsonALRPCv2::objToJsonValue(
+void NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::objToJsonValue(
         NsAppLink::NsSmartObjects::CSmartObject &obj,
         Json::Value &item)
 {
@@ -46,6 +46,22 @@ void NsAppLink::NsJSONHandler::CFormatterJsonALRPCv2::objToJsonValue(
 
             item[keys[i]] = value;
         }
+    }
+    else if (NsAppLink::NsSmartObjects::SmartType_Boolean == obj.get_type())
+    {
+        item = static_cast<bool>(obj);
+    }
+    else if (NsAppLink::NsSmartObjects::SmartType_Integer == obj.get_type())
+    {
+        item = static_cast<int>(obj);
+    }
+    else if (NsAppLink::NsSmartObjects::SmartType_Double == obj.get_type())
+    {
+        item = static_cast<double>(obj);
+    }
+    else if (NsAppLink::NsSmartObjects::SmartType_Null == obj.get_type())
+    {
+        item = Json::nullValue;
     }
     else
     {

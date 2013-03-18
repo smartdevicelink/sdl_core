@@ -4,7 +4,7 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include "json/json.h"
 
-namespace NsAppLink { namespace NsJSONHandler {
+namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
 
 
     class CFormatterJsonALRPCv2
@@ -41,11 +41,11 @@ namespace NsAppLink { namespace NsJSONHandler {
                 MessageType messageType);
     };
 
-} } // namespace NsAppLink::NsJSONHandler
+} } } // namespace NsAppLink::NsJSONHandler::Formatters
 
 
 template<typename FunctionId, typename MessageType>
-inline bool NsAppLink::NsJSONHandler::CFormatterJsonALRPCv2::fromString(
+inline bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::fromString(
         const std::string& str,
         NsAppLink::NsSmartObjects::CSmartObject& out,
         FunctionId functionId,
