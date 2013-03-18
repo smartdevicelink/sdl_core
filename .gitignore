@@ -14,3 +14,6 @@ install_manifest.txt
 *.la
 *.kdev4
 
+# ctags-generated
+tags
+
