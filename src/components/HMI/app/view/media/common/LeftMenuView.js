@@ -141,7 +141,7 @@ MFT.LeftMenuView = Em.ContainerView.extend({
 			target:				'MFT.MediaController',
 			textBinding:		   Ember.Binding.oneWay('MFT.locale.label.view_media_avi')
 		}),
-		/** APPLINK Button*/
+		/** SDL Button*/
 		sdlButton:  MFT.Button.extend({
 			classNameBindings:	[
 									'MFT.States.media.sdlmedia.active:active_state',
