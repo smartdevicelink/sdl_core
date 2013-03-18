@@ -55,7 +55,7 @@ class SmartSchema(object):
             parts = namespace.split("::")
             for part in parts:
                 namespace_open = "".join([namespace_open, self._indent_code(self._namespace_open_template.substitute(name = part), indent_level)])
-                namespace_close = "\n".join([namespace_close, self._indent_code("}", len(parts) - indent_level - 1)])            
+                namespace_close = "".join([namespace_close, self._indent_code("}", len(parts) - indent_level - 1)])            
                 indent_level = indent_level + 1 
         
         class_name = os.path.splitext(filename)[0]
@@ -94,8 +94,9 @@ class SmartSchema(object):
         return "\n".join(map(lambda x: self._indent_code(self._generate_function_decl(x), 1), functions))
     
     def _generate_function_decl(self, function):
-        return self._function_decl_template.substitute(comment = "",
-                                                       function_name = "{0}_{1}".format(function.function_id.name,function.message_type.name))
+        return self._function_decl_template.substitute(comment = self._generate_comment(function),
+                                                       function_id = function.function_id.primary_name,
+                                                       message_type = function.message_type.primary_name)
 
     def _generate_function_schemas(self, functions, class_name):
         if functions is None:
@@ -105,9 +106,8 @@ class SmartSchema(object):
     
     def _generate_function_schema(self, function, class_name):
         return self._function_schemas_template.substitute(class_name = class_name,
-                                                          function_name = "{0}_{1}".format(function.function_id.name,function.message_type.name),
-                                                          function_id = function.function_id.internal_name if function.function_id.internal_name is not None else function.function_id.name,
-                                                          message_type = function.message_type.internal_name if function.message_type.internal_name is not None else function.message_type.name)
+                                                          function_id = function.function_id.primary_name,
+                                                          message_type = function.message_type.primary_name)
 
     def _generate_function_impls(self, functions, namespace, class_name):
         if functions is None:
@@ -116,9 +116,10 @@ class SmartSchema(object):
         return "\n".join(map(lambda x: self._generate_function_impl(x, namespace, class_name), functions))
     
     def _generate_function_impl(self, function, namespace, class_name):
-        return self._function_impl_template.substitute(namespace = namespace, 
-                                                       class_name = class_name, 
-                                                       function_name = "{0}_{1}".format(function.function_id.name,function.message_type.name))
+        return self._function_impl_template.substitute(namespace = namespace,
+                                                       class_name = class_name,
+                                                       function_id = function.function_id.primary_name,
+                                                       message_type = function.message_type.primary_name)
         
     def _generate_enums(self, enums):
         if enums is None:
@@ -127,9 +128,11 @@ class SmartSchema(object):
         return "\n".join(map(lambda x: self._generate_enum(x), enums))
             
     def _generate_enum(self, enum):
+        enum_elements = enum.elements.values()
+        enum_elements.insert(0, Model.EnumElement("INVALID_ENUM", None, None, None, None, None, "-1"))
         return self._enum_template.substitute(comment = self._generate_comment(enum),
-                                                 name = enum.name,
-                                                 enum_items = self._indent_code(self._generate_enum_elements(enum.elements.values()), 1))
+                                              name = enum.name,
+                                              enum_items = self._indent_code(self._generate_enum_elements(enum_elements), 1))
 
     def _generate_enum_elements(self, enum_elements):
         return ",\n\n".join(map(lambda x: self._generate_enum_element(x), enum_elements))
@@ -137,11 +140,11 @@ class SmartSchema(object):
     def _generate_enum_element(self, enum_element):
         if enum_element.value is not None:
             return self._enum_element_with_value_template.substitute(comment = self._generate_comment(enum_element),
-                                                                     name = enum_element.internal_name if enum_element.internal_name is not None else enum_element.name,
+                                                                     name = enum_element.primary_name,
                                                                      value = enum_element.value)
         else:
             return self._enum_element_with_no_value_template.substitute(comment = self._generate_comment(enum_element),
-                                                                        name = enum_element.internal_name if enum_element.internal_name is not None else enum_element.name)
+                                                                        name = enum_element.primary_name)
 
     def _generate_class_comment(self, class_name, params):
         return self._class_comment_template.substitute(class_name = class_name,
@@ -156,7 +159,7 @@ class SmartSchema(object):
             raise GenerateError("Unable to create comment for unknown type " +
                                 interface_item_base_classname)
         
-        name = interface_item_base.internal_name if type(interface_item_base) is Model.EnumElement and interface_item_base.internal_name is not None else interface_item_base.name
+        name = interface_item_base.primary_name if type(interface_item_base) is Model.EnumElement else interface_item_base.name
         brief_description = " * @brief {0}{1}.\n".format(brief_type_title, name)
                 
         description = "".join(map(lambda x: " * {0}\n".format(x),
@@ -179,18 +182,24 @@ class SmartSchema(object):
         if todos is not "":
             todos = "".join([" *\n", todos])
 
+        returns = ""
+        if type(interface_item_base) is Model.Function:
+            returns = "".join([" *\n", self._function_return_comment])
+        
         return self._comment_template.substitute(brief_description = brief_description,
                                                  description = description,
                                                  design_description = design_description,
                                                  issues = issues,
-                                                 todos = todos)
+                                                 todos = todos,
+                                                 returns = returns)
 
     def _indent_code(self, code, indent_level):
         code_lines = code.split("\n")
         return "".join(map(lambda x: "{0}{1}\n".format(self._indent_template * indent_level, x) if x is not "" else "\n", code_lines))
 
     _model_types_briefs = dict({"EnumElement" : "", 
-                                "Enum" : "Enumeration "})
+                                "Enum" : "Enumeration ",
+                                "Function" : "Method that generates schema for function "})
 
     _hpp_file_tempalte = string.Template(
 '''#ifndef $guard
@@ -199,10 +208,7 @@ class SmartSchema(object):
 #include "JSONHandler/CSmartFactory.hpp"
 #include "SmartObjects/CSmartSchema.hpp"
 
-$namespace_open
-$enums_content
-$class_content
-$namespace_close
+$namespace_open$enums_content$class_content$namespace_close
 #endif //$guard
 
 ''')
@@ -231,10 +237,10 @@ $init_function_impls
 ''')
     
     _function_schemas_template = string.Template(
-"""mSchemas.insert(std::make_pair(NsAppLink::NsJSONHandler::SmartSchemaKey<FunctionID, messageType>($function_id, $message_type), $class_name::initFunction_$function_name()));""")
+"""mSchemas.insert(std::make_pair(NsAppLink::NsJSONHandler::SmartSchemaKey<FunctionID, messageType>($function_id, $message_type), $class_name::initFunction_${function_id}_${message_type}()));""")
 
     _function_impl_template = string.Template(
-"""CSmartSchema $namespace::$class_name::initFunction_$function_name()
+"""CSmartSchema $namespace::$class_name::initFunction_${function_id}_${message_type}()
 {
     return CSmartSchema(Validation::CAlwaysTrueValidator());
 }
@@ -245,6 +251,7 @@ $init_function_impls
 class $class_name : public NsAppLink::NsJSONHandler::CSmartFactory<FunctionID, messageType>
 {
 public:
+
     /**
      * @brief Constructor.
      */
@@ -257,12 +264,13 @@ protected:
      */
     void initSchemas();
 
-$init_function_decls};
-""")
+$init_function_decls};""")
+
+    _function_return_comment = " * @return NsAppLink::NsSmartObjects::CSmartSchema\n"
 
     _function_decl_template = string.Template(
 """$comment
-static NsAppLink::NsSmartObjects::CSmartSchema initFunction_$function_name();""")
+static NsAppLink::NsSmartObjects::CSmartSchema initFunction_${function_id}_${message_type}();""")
 
     _class_comment_template = string.Template(
 """/**
@@ -273,7 +281,7 @@ $class_params */""")
 
     _comment_template = string.Template(
 """/**
-$brief_description$description$design_description$issues$todos */""")
+$brief_description$description$design_description$issues$todos$returns */""")
 
     _enum_template = string.Template(
 """$comment

@@ -72,6 +72,11 @@ expected_result_enum1 = """/**
 enum Enum1
 {
     /**
+     * @brief INVALID_ENUM.
+     */
+    INVALID_ENUM = -1,
+
+    /**
      * @brief name1.
      *
      * Design Line1
@@ -100,6 +105,11 @@ expected_result_enum2 = """/**
  */
 enum E2
 {
+    /**
+     * @brief INVALID_ENUM.
+     */
+    INVALID_ENUM = -1,
+
     /**
      * @brief val_1.
      */
@@ -163,8 +173,8 @@ class TestSmartSchema(unittest.TestCase):
         elements1 = collections.OrderedDict()
         elements1["name1"] = Model.EnumElement("name1", None, design_description, None, todos, None, "1")
         elements1["name2"] = Model.EnumElement("name2", description, None, issues, None, "internal_name2", None)
-        
-        enum1 = Model.Enum("Enum1", None, None, None, todos, None, elements1)
+
+        enum1 = Model.Enum("Enum1", None, None, None, todos, None, elements1)                                
         self.assertEqual(smart_schema_generator._generate_enum(enum1),
                          expected_result_enum1,
                          "Simple enum is invalid")
@@ -183,33 +193,5 @@ class TestSmartSchema(unittest.TestCase):
                          "{0}\n{1}".format(expected_result_enum1, expected_result_enum2)
                          ,"Generated enums are invalid")
         
-    def test_full_generation(self):
-        smart_schema_generator = SmartSchema()
-        
-        elements1 = collections.OrderedDict()
-        elements1["name1"] = Model.EnumElement("name1", None, design_description, None, todos, None, "1")
-        elements1["name2"] = Model.EnumElement("name2", description, None, issues, None, "internal_name2", None)
-        
-        enum1 = Model.Enum("Enum1", None, None, None, todos, None, elements1)
-        
-        elements2 = collections.OrderedDict() 
-        elements2["xxx"] = Model.EnumElement("xxx", None, None, None, None, "val_1", None)
-        elements2["yyy"] = Model.EnumElement("yyy", None, None, None, None, "val_2", "100")
-        elements2["zzz"] = Model.EnumElement("val_3", None, None, None, None, None, None)
-        
-        enum2 = Model.Enum("E2", None, None, None, None, None, elements2)
-        
-        enums = collections.OrderedDict()
-        enums["Enum1"] = enum1
-        enums["Enum2"] = enum2
-        
-        functions = collections.OrderedDict()
-        functions["Function1"] = Model.Function("Function1", elements1["name1"], elements1["name2"], None, None, None, None, None, None)
-        functions["Function2"] = Model.Function("Function2", elements2["xxx"], elements2["yyy"], None, None, None, None, None, None)
-        
-        interface = Model.Interface(enums, None, functions, {"param1" : "value1", "param2" : "value2"})
-        
-        smart_schema_generator.generate(interface, "Test.xml", "XXX::YYY::ZZZ", "/home/eftin/gen_test")
-
 if __name__ == '__main__':
     unittest.main()
