@@ -1,169 +1,166 @@
 /**
  * @name MFT.AlertManeuverPopUp
- * 
  * @desc AlertManeuverPopUp module visual representation
- * 
- * @category    View
- * @filesource    app/view/sdl/AlertManeuverPopUp.js
- * @version        2.0
- *
- * @author        Andriy Melnik
+ * @category View
+ * @filesource app/view/sdl/AlertManeuverPopUp.js
+ * @version 2.0
+ * @author Andriy Melnik
  */
 
-MFT.AlertManeuverPopUp = Em.ContainerView.create({
+MFT.AlertManeuverPopUp = Em.ContainerView.create( {
 
-    elementId:              'AlertManeuverPopUp',
+    elementId: 'AlertManeuverPopUp',
 
-    classNames:             'AlertManeuverPopUp',
+    classNames: 'AlertManeuverPopUp',
 
-    classNameBindings:      ['activate:AlertManeuverActive'],
+    classNameBindings:
+        ['activate:AlertManeuverActive'
+        ],
 
-    childViews: [
-        'applicationName',
-        //'image',
-        //'message1',
-        //'message2',
-        //'message3',
-        'softbuttons',
-        'closeButton'
-    ],
+    childViews:
+        [
+            'applicationName',
+            // 'image',
+            // 'message1',
+            // 'message2',
+            // 'message3',
+            'softbuttons',
+            'closeButton'
+        ],
 
-    content1:           'Title',
+    content1: 'Title',
 
-    content2:           'Text',
+    content2: 'Text',
 
-    activate:           false,
+    activate: false,
 
-    timer:              null,
+    timer: null,
 
     /**
      * Wagning image on Alert Maneuver PopUp
      */
-    image:  Em.View.extend({
-        elementId:              'alertManeuverPopUpImage',
+    image: Em.View.extend( {
+        elementId: 'alertManeuverPopUpImage',
 
-        classNames:             'alertManeuverPopUpImage'
-    }),
+        classNames: 'alertManeuverPopUpImage'
+    } ),
 
-    applicationName :    MFT.Label.extend({
+    applicationName: MFT.Label.extend( {
 
-        elementId:              'applicationName',
+        elementId: 'applicationName',
 
-        classNames:             'applicationName',
+        classNames: 'applicationName',
 
-        contentBinding:         'parentView.appName'
-    }),
+        contentBinding: 'parentView.appName'
+    } ),
 
-    message1 : MFT.Label.extend({
+    message1: MFT.Label.extend( {
 
-        elementId:              'message1',
+        elementId: 'message1',
 
-        classNames:             'message1',
+        classNames: 'message1',
 
-        contentBinding:         'parentView.content1'
-    }),
+        contentBinding: 'parentView.content1'
+    } ),
 
-    message2 : MFT.Label.extend({
+    message2: MFT.Label.extend( {
 
-        elementId:              'message2',
+        elementId: 'message2',
 
-        classNames:             'message2',
+        classNames: 'message2',
 
-        contentBinding:         'parentView.content2'
-    }),
+        contentBinding: 'parentView.content2'
+    } ),
 
-    message3 : MFT.Label.extend({
+    message3: MFT.Label.extend( {
 
-        elementId:              'message3',
+        elementId: 'message3',
 
-        classNames:             'message3',
+        classNames: 'message3',
 
-        contentBinding:         'parentView.content3'
-    }),
+        contentBinding: 'parentView.content3'
+    } ),
 
     /**
      * Container for softbuttons
      */
-    softbuttons: Em.ContainerView.extend({
-        elementId:      'alertManeuverSoftButtons',
+    softbuttons: Em.ContainerView.extend( {
+        elementId: 'alertManeuverSoftButtons',
 
-        classNames:     'alertManeuverSoftButtons'
-    }),
+        classNames: 'alertManeuverSoftButtons'
+    } ),
 
     /**
      * Close button
      */
-    closeButton: MFT.Button.create({
-        text:                   'Close',
-        classNames:             'closeButton softButton',
-        action:                 'closeAlertMeneuverPopUp',
-        target:                 'MFT.SDLController',
-        templateName:           'text'
-    }),
+    closeButton: MFT.Button.create( {
+        text: 'Close',
+        classNames: 'closeButton softButton',
+        action: 'closeAlertMeneuverPopUp',
+        target: 'MFT.SDLController',
+        templateName: 'text'
+    } ),
 
     /**
-     *
      * @desc Function creates Soft Buttons on AlertPoUp
-     * 
      * @param {Object} params
      */
-    addSoftButtons: function( params ){
+    addSoftButtons: function( params ) {
 
-        var count = this.get('softbuttons.childViews').length - 1;
-        for(var i = count; i>=0; i--){
-            this.get('softbuttons.childViews').removeObject(
-                this.get('softbuttons.childViews')[0]
-            );
-        }
+        var count = this.get( 'softbuttons' ).removeAllChildren();
 
         if( params ){
 
             var softButtonsClass;
-            switch(params.length){
-                case 1 : softButtonsClass = 'one';
+            switch( params.length ){
+                case 1:
+                    softButtonsClass = 'one';
                     break;
-                case 2 : softButtonsClass = 'two';
+                case 2:
+                    softButtonsClass = 'two';
                     break;
-                case 3 : softButtonsClass = 'three';
+                case 3:
+                    softButtonsClass = 'three';
                     break;
-                case 4 : softButtonsClass = 'four';
+                case 4:
+                    softButtonsClass = 'four';
                     break;
             }
 
-            for(var i=0; i<params.length; i++){
-                this.get('softbuttons.childViews').pushObject(
-                    MFT.Button.create(MFT.PresetEventsCustom, {
-                        softButtonID:           params[i].softButtonID,
-                        icon:                   params[i].image,
-                        text:                   params[i].text,
-                        classNames:             'list-item softButton ' + softButtonsClass,
-                        elementId:              'softButton' + i,
-                        templateName:           params[i].image ? 'rightIcon' : 'text',
-                        systemAction:           params[i].systemAction
-                    })
-                );
+            for( var i = 0; i < params.length; i++ ){
+                this.get( 'softbuttons.childViews' ).pushObject( MFT.Button.create( MFT.PresetEventsCustom, {
+                    softButtonID: params[i].softButtonID,
+                    icon: params[i].image,
+                    text: params[i].text,
+                    classNames: 'list-item softButton ' + softButtonsClass,
+                    elementId: 'softButton' + i,
+                    templateName: params[i].image ? 'rightIcon' : 'text',
+                    systemAction: params[i].systemAction
+                } ) );
             }
         }
     },
 
-    AlertManeuverActive: function( message ){
+    AlertManeuverActive: function( message ) {
         var self = this;
 
         // play audio alert
-        if ( message.playTone ) {
-            MFT.Audio.play('audio/alert.wav');
+        if( message.playTone ){
+            MFT.Audio.play( 'audio/alert.wav' );
         }
 
-        this.addSoftButtons(message.softButtons);
+        this.addSoftButtons( message.softButtons );
         if( message.ttsChunks ){
-            MFT.SDLModel.onPrompt(message.ttsChunks.ttsChunks);
+            MFT.SDLModel.onPrompt( message.ttsChunks.ttsChunks );
         }
 
-        this.set('appName',    MFT.SDLController.getApplicationModel(message.appId).appName);
+        this.set( 'appName', MFT.SDLController.getApplicationModel( message.appId ).appName );
 
-        this.set('activate',    true);
-        
-        clearTimeout(this.timer);
-        this.timer = setTimeout(function(){self.set('activate', false);}, 5000);
+        this.set( 'activate', true );
+
+        clearTimeout( this.timer );
+        this.timer = setTimeout( function() {
+            self.set( 'activate', false );
+        }, 5000 );
     }
-});
+} );
