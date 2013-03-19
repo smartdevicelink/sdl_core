@@ -1,12 +1,15 @@
 package com.ford.syncV4.android.activity;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -30,9 +33,6 @@ import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
@@ -1831,28 +1831,26 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
-									String syncFileName = txtSyncFileName.getText().toString();
-									try {
-										PutFile msg = new PutFile();
-										msg.setSyncFileName(syncFileName);
-										msg.setFileType((FileType) spnFileType.getSelectedItem());
-										msg.setPersistentFile(chkPersistentFile.isChecked());
-										msg.setCorrelationID(autoIncCorrId++);
-										
-									    Bitmap photo = BitmapFactory.decodeResource(getResources(), R.drawable.fiesta);
-								        ByteArrayOutputStream bas = new ByteArrayOutputStream();
-									    photo.compress(CompressFormat.JPEG, 100, bas);
-								        byte[] data = new byte[bas.toByteArray().length];
-								        data = bas.toByteArray();
-								        
-								        msg.setBulkData(data);
-										
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									byte[] data = contentsOfFile(txtLocalFileName.getText().toString());
+									if (data != null) {
+										String syncFileName = txtSyncFileName.getText().toString();
+										try {
+											PutFile msg = new PutFile();
+											msg.setSyncFileName(syncFileName);
+											msg.setFileType((FileType) spnFileType.getSelectedItem());
+											msg.setPersistentFile(chkPersistentFile.isChecked());
+											msg.setCorrelationID(autoIncCorrId++);
+											msg.setBulkData(data);
+											
+											_msgAdapter.logMessage(msg, true);
+											ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+										} catch (SyncException e) {
+											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+										}
+										_putFileAdapter.add(syncFileName);
+									} else {
+										Toast.makeText(mContext, "Can't read data from file", Toast.LENGTH_LONG).show();
 									}
-									_putFileAdapter.add(syncFileName);
 									txtLocalFileName = null;
 								}
 							});
@@ -3145,6 +3143,39 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		List<ButtonName> buttonNames = Arrays.asList(ButtonName.values());
 		for (ButtonName buttonName : buttons) {
 			isButtonSubscribed[buttonNames.indexOf(buttonName)] = true;
+		}
+	}
+
+	/**
+	 * Returns the file contents from the specified file.
+	 * 
+	 * @param filename
+	 *            Name of the file to open.
+	 * @return The file's contents or null in case of an error
+	 */
+	private byte[] contentsOfFile(String filename) {
+		InputStream is = null;
+		try {
+			is = new BufferedInputStream(new FileInputStream(filename));
+			ByteArrayOutputStream os = new ByteArrayOutputStream(is.available());
+			final int buffersize = 4096;
+			final byte[] buffer = new byte[buffersize];
+			int available = 0;
+			while ((available = is.read(buffer)) >= 0) {
+				os.write(buffer, 0, available);
+			}
+			return os.toByteArray();
+		} catch (IOException e) {
+			Log.w(logTag, "Can't read file " + filename, e);
+			return null;
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 }
