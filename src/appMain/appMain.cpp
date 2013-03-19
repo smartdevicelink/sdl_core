@@ -1,7 +1,7 @@
 /**
  * \file appMain.cpp
  * \brief SmartDeviceLink main application sources
- * \Copiright (c) 2013 Ford Motor Company
+ * \Copyright (c) 2013 Ford Motor Company
  */
 
 #include <cstdio>

@@ -1,7 +1,7 @@
 /**
  * \file appMain.hpp
  * \brief SmartDeviceLink main application header
- * Copiright (c) 2013 Ford Motor Company
+ * Copyright (c) 2013 Ford Motor Company
  */
 
 #ifndef SMARTDEVICELINKMAINAPP_H
