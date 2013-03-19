@@ -4,21 +4,16 @@
 #include "SmartObjects/CSmartObject.hpp"
 #include "json/json.h"
 
+#include "CFormatterJsonBase.hpp"
+
 namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
 
 
-    class CFormatterJsonALRPCv2
+    class CFormatterJsonALRPCv2 : public CFormatterJsonBase
     {
     private:
         CFormatterJsonALRPCv2();
         CFormatterJsonALRPCv2(const CFormatterJsonALRPCv2&);
-
-        static void objToJsonValue(NsAppLink::NsSmartObjects::CSmartObject &obj,
-                Json::Value &value);
-
-        static void jsonValueToObj(const Json::Value &value,
-                NsAppLink::NsSmartObjects::CSmartObject &obj);
-
 
     public:
 
