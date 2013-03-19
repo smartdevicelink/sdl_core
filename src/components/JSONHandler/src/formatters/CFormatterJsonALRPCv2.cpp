@@ -3,6 +3,45 @@
 
 #include "json/json.h"
 
+void NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::jsonValueToObj(
+        const Json::Value& value, NsAppLink::NsSmartObjects::CSmartObject& obj)
+{
+    if (value.type() == Json::objectValue)
+    {
+        Json::Value::Members members = value.getMemberNames();
+
+        for (int i = 0; i < members.size(); i++)
+        {
+            jsonValueToObj(value[members[i]], obj[members[i]]);
+        }
+    }
+    else if (value.type() == Json::arrayValue)
+    {
+        for (int i = 0; i < value.size(); i++)
+        {
+            jsonValueToObj(value[i], obj[i]);
+        }
+    }
+    else if (value.type() == Json::intValue || value.type() == Json::uintValue)
+    {
+        obj = value.asInt();
+    }
+    else if (value.type() == Json::realValue)
+    {
+        obj = value.asDouble();
+    }
+    else if (value.type() == Json::booleanValue)
+    {
+        obj = value.asBool();
+    }
+    else if (value.type() == Json::stringValue)
+    {
+        obj = value.asString();
+    }
+    // There's nothing for nullValue because Uninitialized object is already a null object
+}
+
+// ----------------------------------------------------------------------------
 
 bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(
         NsAppLink::NsSmartObjects::CSmartObject& obj,

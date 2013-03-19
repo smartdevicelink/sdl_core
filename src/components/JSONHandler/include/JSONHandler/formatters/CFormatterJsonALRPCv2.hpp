@@ -16,6 +16,9 @@ namespace NsAppLink { namespace NsJSONHandler { namespace Formatters {
         static void objToJsonValue(NsAppLink::NsSmartObjects::CSmartObject &obj,
                 Json::Value &value);
 
+        static void jsonValueToObj(const Json::Value &value,
+                NsAppLink::NsSmartObjects::CSmartObject &obj);
+
 
     public:
 
@@ -51,7 +54,21 @@ inline bool NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::fromStr
         FunctionId functionId,
         MessageType messageType)
 {
-    return true;
+    Json::Value root;
+    Json::Reader reader;
+
+    // TODO: Check correct keys and values
+    out["params"]["MessageType"] = messageType;
+    out["params"]["FunctionId"] = functionId;
+
+    bool parsingSuccessful = reader.parse(str, root);
+
+    if (true == parsingSuccessful)
+    {
+        jsonValueToObj(root, out["msg_params"]);
+    }
+
+    return parsingSuccessful;
 }
 
 #endif // __CFORMATTERJSONALRPCV2_HPP__
