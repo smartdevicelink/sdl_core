@@ -285,10 +285,10 @@ class SmartSchema(object):
         enum_elements.insert(0, Model.EnumElement(
             "INVALID_ENUM", None, None, None, None, None, "-1"))
         return self._enum_template.substitute(
-            comment=self._generate_comment(enum),
+            comment=self._indent_code(self._generate_comment(enum), 1),
             name=enum.name,
             enum_items=self._indent_code(self._generate_enum_elements(
-                enum_elements), 1))
+                enum_elements), 2))
 
     def _generate_enum_elements(self, enum_elements):
         """Generate enum elements for header file.
@@ -536,10 +536,13 @@ class SmartSchema(object):
         '''$returns */''')
 
     _enum_template = string.Template(
-        '''$comment\n'''
-        '''enum $name\n'''
+        '''namespace $name\n'''
         '''{\n'''
-        '''$enum_items};\n''')
+        '''$comment'''
+        '''    enum eType\n'''
+        '''    {\n'''
+        '''$enum_items    };\n'''
+        '''}\n''')
 
     _enum_element_with_value_template = string.Template(
         '''$comment\n'''
