@@ -132,6 +132,8 @@ import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.transport.TransportType;
+import com.lamerman.FileDialog;
+import com.lamerman.SelectionMode;
 
 public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final String VERSION = "$Version:$";
@@ -154,6 +156,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final int ALERTMANEUVER_MAXSOFTBUTTONS = 3;
 	private static final int SHOWCONSTANTTBT_MAXSOFTBUTTONS = 3;
 	private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
+
+	private static final int REQUEST_PUTFILE_OPEN = 42;
 
     private static SyncProxyTester _activity;
     private static ArrayList<Object> _logMessages = new ArrayList<Object>();
@@ -216,6 +220,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * check it when the user has explicitly set the soft buttons.
 	 */
 	private CheckBox chkIncludeSoftButtons;
+	/**
+	 * Reference to PutFile dialog's local filename text field, so that the
+	 * filename is set after choosing.
+	 */
+	private EditText txtLocalFileName;
 	
 	/**
 	 * Stores the number of selections of each message to sort them by
@@ -1790,10 +1799,24 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
 							
-							Context mContext = adapter.getContext();
+							final Context mContext = adapter.getContext();
 							LayoutInflater inflater = (LayoutInflater) mContext
 									.getSystemService(LAYOUT_INFLATER_SERVICE);
 							View layout = inflater.inflate(R.layout.putfile, null);
+							
+							txtLocalFileName = (EditText) layout.findViewById(R.id.putfile_localFileName);
+							final Button btnSelectLocalFile = (Button) layout.findViewById(R.id.putfile_selectFileButton);
+							btnSelectLocalFile.setOnClickListener(new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									// show Choose File dialog
+									Intent intent = new Intent(mContext, FileDialog.class);
+									intent.putExtra(FileDialog.START_PATH, "/sdcard");
+									intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
+									intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
+									startActivityForResult(intent, REQUEST_PUTFILE_OPEN);
+								}
+							});
 							
 							final EditText txtSyncFileName = (EditText) layout.findViewById(R.id.syncFileName);
 							
@@ -1830,10 +1853,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
 									_putFileAdapter.add(syncFileName);
+									txtLocalFileName = null;
 								}
 							});
 							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
+									txtLocalFileName = null;
 									dialog.cancel();
 								}
 							});
@@ -3091,6 +3116,16 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			}
 			IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
 			break;
+
+		case REQUEST_PUTFILE_OPEN:
+			if (resultCode == RESULT_OK) {
+				String fileName = data.getStringExtra(FileDialog.RESULT_PATH);
+				if (txtLocalFileName != null) {
+					txtLocalFileName.setText(fileName);
+				}
+			}
+			break;
+			
 		default:
 			Log.i(logTag, "Unknown request code: " + requestCode);
 			break;

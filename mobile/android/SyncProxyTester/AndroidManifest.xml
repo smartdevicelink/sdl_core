@@ -50,6 +50,9 @@
             android:label="@string/title_activity_soft_button_edit"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
+        
+        <activity android:label="@string/app_name" android:name="com.lamerman.FileDialog">
+        </activity>
     </application>
 
     <uses-sdk android:minSdkVersion="5" />
