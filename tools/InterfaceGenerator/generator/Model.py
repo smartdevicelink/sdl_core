@@ -7,6 +7,9 @@ Generator must take an instance of this model as input for generating
 output files.
 """
 
+# In this module there are classes that are used as data container
+# pylint: disable=R0903
+
 import collections
 
 
