@@ -23,7 +23,7 @@ if(NOT PYTHONINTERP_FOUND)
 endif(NOT PYTHONINTERP_FOUND)
 
 set(INTEFRACE_GENERATOR "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
-set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE}  ${INTEFRACE_GENERATOR})
+set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE} -B ${INTEFRACE_GENERATOR})
 
 macro (GenerateInterface arg_xml_name arg_namespace parser_type)
     string(REGEX MATCH "^[a-zA-Z_0-9]*[^.]" file_name ${arg_xml_name})     # TODO: make expression more robust
