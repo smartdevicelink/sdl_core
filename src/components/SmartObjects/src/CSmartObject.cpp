@@ -700,7 +700,7 @@ bool NsAppLink::NsSmartObjects::CSmartObject::keyExists(const char * key)
     return m_data.map_value->count(key);
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::validate()
+bool NsAppLink::NsSmartObjects::CSmartObject::isValid()
 {
     if(m_schemaAvailable)
     {

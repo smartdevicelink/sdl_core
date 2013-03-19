@@ -111,7 +111,7 @@ namespace NsAppLink
              *
              * @return bool
              **/
-            bool validate();
+            bool isValid();
 
             /**
              * @brief Sets new schema
