@@ -1,23 +1,23 @@
 #include "SmartObjects/CSmartSchema.hpp"
-#include "SmartObjects/validation/CAlwaysTrueValidator.hpp"
+#include "SmartObjects/CAlwaysTrueSchemaItem.hpp"
 
 NsAppLink::NsSmartObjects::CSmartSchema::CSmartSchema()
-: mValidator(NsAppLink::NsSmartObjects::Validation::CAlwaysTrueValidator::create())
+: mSchemaItem(NsAppLink::NsSmartObjects::CAlwaysTrueSchemaItem::create())
 {
 }
 
-NsAppLink::NsSmartObjects::CSmartSchema::CSmartSchema(NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::Validation::IValidator> validator)
-: mValidator(validator)
+NsAppLink::NsSmartObjects::CSmartSchema::CSmartSchema(NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> SchemaItem)
+: mSchemaItem(SchemaItem)
 {
 
 }
 
 bool NsAppLink::NsSmartObjects::CSmartSchema::validate(const NsAppLink::NsSmartObjects::CSmartObject& object)
 {
-    return mValidator->validate(object);
+    return mSchemaItem->validate(object);
 }
 
-void NsAppLink::NsSmartObjects::CSmartSchema::setValidator(NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::Validation::IValidator> validator)
+void NsAppLink::NsSmartObjects::CSmartSchema::setSchemaItem(NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::NsSmartObjects::ISchemaItem> SchemaItem)
 {
-    mValidator = validator;
+    mSchemaItem = SchemaItem;
 }

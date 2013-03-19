@@ -8,8 +8,8 @@ include_directories (
 set (SOURCES
     ./src/CSmartObject.cpp
     ./src/CSmartSchema.cpp
-    ./src/validation/IValidator.cpp
-    ./src/validation/CAlwaysTrueValidator.cpp
+    ./src/ISchemaItem.cpp
+    ./src/CAlwaysTrueSchemaItem.cpp
 )
 
 add_library("SmartObjects" ${SOURCES})
