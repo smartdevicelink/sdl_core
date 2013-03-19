@@ -457,8 +457,8 @@ class SmartSchema(object):
         '''{''')
 
     _cpp_file_template = string.Template(
-        '''#include "$header_file_name\n"'''
-        '''#include "SmartObjects/validation/CAlwaysTrueValidator.hpp\n"'''
+        '''#include "$header_file_name"\n'''
+        '''#include "SmartObjects/validation/CAlwaysTrueValidator.hpp"\n'''
         '''\n'''
         '''using namespace NsAppLink::NsSmartObjects;\n'''
         '''\n'''
