@@ -1,6 +1,7 @@
 #ifndef __CSMARTSCHEMA_HPP__
 #define __CSMARTSCHEMA_HPP__
 
+#include "SmartObjects/TSharedPtr.hpp"
 #include "SmartObjects/validation/IValidator.hpp"
 
 namespace NsAppLink
@@ -14,13 +15,13 @@ namespace NsAppLink
         public:
 
             CSmartSchema();
-            CSmartSchema(NsAppLink::NsSmartObjects::Validation::IValidator validator);
+            CSmartSchema(TSharedPtr<NsAppLink::NsSmartObjects::Validation::IValidator> validator);
 
             bool validate(const NsAppLink::NsSmartObjects::CSmartObject& object);
-            void setValidator(NsAppLink::NsSmartObjects::Validation::IValidator validator);
+            void setValidator(TSharedPtr<NsAppLink::NsSmartObjects::Validation::IValidator> validator);
 
         protected:
-            NsAppLink::NsSmartObjects::Validation::IValidator mValidator;
+            TSharedPtr<NsAppLink::NsSmartObjects::Validation::IValidator> mValidator;
         };
     }
 }
