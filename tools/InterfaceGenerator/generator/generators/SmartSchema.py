@@ -463,7 +463,7 @@ class SmartSchema(object):
         '''using namespace NsAppLink::NsSmartObjects;\n'''
         '''\n'''
         '''$namespace::$class_name::$class_name()\n'''
-        ''': CSmartFactory<FunctionID, messageType>()\n'''
+        ''': CSmartFactory<FunctionID::eType, messageType::eType>()\n'''
         '''{\n'''
         '''    initSchemas();\n'''
         '''}\n'''
@@ -478,9 +478,9 @@ class SmartSchema(object):
 
     _function_schema_template = string.Template(
         '''mSchemas.insert(std::make_pair(NsAppLink::NsJSONHandler::'''
-        '''SmartSchemaKey<FunctionID, messageType>($function_id, '''
-        '''$message_type), $class_name::initFunction_${function_id}_'''
-        '''${message_type}()));''')
+        '''SmartSchemaKey<FunctionID::eType, messageType::eType>'''
+        '''(FunctionID::$function_id, messageType::$message_type), '''
+        '''$class_name::initFunction_${function_id}_${message_type}()));''')
 
     _function_impl_template = string.Template(
         '''CSmartSchema $namespace::$class_name::'''
@@ -492,7 +492,7 @@ class SmartSchema(object):
     _class_hpp_template = string.Template(
         '''$comment\n'''
         '''class $class_name : public NsAppLink::NsJSONHandler::'''
-        '''CSmartFactory<FunctionID, messageType>\n'''
+        '''CSmartFactory<FunctionID::eType, messageType::eType>\n'''
         '''{\n'''
         '''public:\n'''
         '''\n'''
