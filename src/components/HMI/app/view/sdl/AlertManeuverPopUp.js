@@ -42,7 +42,7 @@ MFT.AlertManeuverPopUp = Em.ContainerView.create({
     image:  Em.View.extend({
         elementId:              'alertManeuverPopUpImage',
 
-        classNames:             'alertManeuverPopUpImage',
+        classNames:             'alertManeuverPopUpImage'
     }),
 
     applicationName :    MFT.Label.extend({

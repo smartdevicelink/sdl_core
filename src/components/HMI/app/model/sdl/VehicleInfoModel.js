@@ -187,7 +187,7 @@ MFT.SDLVehicleInfoModel = Em.Object.create( {
     /**
      * Method calls GetVehicleType response
      * 
-     * @type {int}
+     * @type {Number}
      */
     getVehicleType: function( id ) {
         FFW.VehicleInfo.GetVehicleTypeResponse( this.vehicleType, id );
@@ -198,7 +198,7 @@ MFT.SDLVehicleInfoModel = Em.Object.create( {
      * errors
      * 
      * @type {Object} params
-     * @type {int} id
+     * @type {Number} id
      */
     vehicleInfoGetDTCs: function( params, id ) {
         var data = [], i = 0, info = "Inormation about reported DTC's", result = "";
@@ -225,7 +225,7 @@ MFT.SDLVehicleInfoModel = Em.Object.create( {
      * SDL VehicleInfo.ReadDID handler send response about vehicle conditions
      * 
      * @type {Object} params
-     * @type {int} id
+     * @type {Number} id
      */
     vehicleInfoReadDID: function( params, id ) {
         var data = [], i = 0, info = '', dataResult = [], resultCode = "";
