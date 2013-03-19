@@ -136,9 +136,14 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
         }else{
             number = this.duration - this.currTime;
         }
-        str = ( parseInt( number / 3600 ) < 10 ? '0' : '' ) + parseInt( number / 3600 ) + ':'; // hours
-        str += ( parseInt( number / 60 ) % 60 < 10 ? '0' : '' ) + parseInt( number / 60 ) % 60 + ":"; // minutes
-        str += ( ( number % 60 ) < 10 ? '0' : '' ) + ( number % 60 ); // seconds
+        
+        var hrs = parseInt( number / 3600 ), // hours
+            min = parseInt( number / 60 ) % 60, // minutes
+            sec = number % 60; // seconds
+        
+        str = ( hrs < 10 ? '0' : '' ) + hrs + ':'; 
+        str += ( min < 10 ? '0' : '' ) + min + ":"; 
+        str += ( sec < 10 ? '0' : '' ) + sec; 
         this.appInfo.set( 'mediaClock', str );
 
         if( !this.get( 'countUp' ) && this.duration == this.currTime ){
