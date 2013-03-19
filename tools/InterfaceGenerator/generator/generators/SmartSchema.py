@@ -3,7 +3,7 @@
 Generator for SmartObjects schema source code.
 
 """
-
+# pylint: disable=W0402
 import os
 import string
 import uuid
@@ -25,10 +25,15 @@ class GenerateError(Exception):
 
 class SmartSchema(object):
 
-    """SmartSchema generator."""
+    """SmartSchema generator.
+
+    This class provides service which allows to generate pair of *.hpp and
+    *.cpp file by given interface model.
+
+    """
 
     def __init__(self):
-        """Constructor"""
+        """Constructs new object."""
 
     def generate(self, interface, filename, namespace, destination_dir):
         """Generate SmartObject source files.
@@ -45,7 +50,7 @@ class SmartSchema(object):
         """
 
         if interface is None:
-            raise GenerateError("Given interface is None")
+            raise GenerateError("Given interface is None.")
 
         if not os.path.exists(destination_dir):
             os.makedirs(destination_dir)
@@ -110,6 +115,9 @@ class SmartSchema(object):
         functions -- list of functions to generate methods for.
         structs -- structures to generate methods for.
 
+        Returns:
+        String with complete *.hpp file source code.
+
         """
 
         return self._class_hpp_template.substitute(
@@ -126,13 +134,16 @@ class SmartSchema(object):
         Keyword arguments:
         functions -- list of functions to generate methods for.
 
+        Returns:
+        String with function declarations source code.
+
         """
 
         if functions is None:
             raise GenerateError("Functions is None")
 
-        return "\n".join(map(lambda x: self._indent_code(
-            self._generate_function_decl(x), 1), functions))
+        return "\n".join([self._indent_code(
+            self._generate_function_decl(x), 1) for x in functions])
 
     def _generate_function_decl(self, function):
         """Generate method prototype for function for header file.
@@ -142,6 +153,9 @@ class SmartSchema(object):
 
         Keyword arguments:
         function -- function to generate method for.
+
+        Returns:
+        String with function declaration source code.
 
         """
 
@@ -160,13 +174,17 @@ class SmartSchema(object):
         functions -- list of functions to generate methods for.
         class_name -- Name of the class to generate.
 
+        Returns:
+        String with functions schema initialization source code.
+
         """
 
         if functions is None:
             raise GenerateError("Functions is None")
 
-        return "".join(map(lambda x: self._indent_code(
-            self._generate_function_schema(x, class_name), 1), functions))
+        return "".join([self._indent_code(
+            self._generate_function_schema(x, class_name), 1)
+            for x in functions])
 
     def _generate_function_schema(self, function, class_name):
         """Generate function initialization code for source file.
@@ -177,6 +195,9 @@ class SmartSchema(object):
         Keyword arguments:
         function -- function to generate method for.
         class_name -- Name of the class to generate.
+
+        Returns:
+        String with function schema initialization source code.
 
         """
 
@@ -194,15 +215,18 @@ class SmartSchema(object):
         Keyword arguments:
         functions -- list of functions to generate methods for.
         namespace -- name of destination namespace.
-        class_name -- Name of the class to generate.        
+        class_name -- Name of the class to generate.
+
+        Returns:
+        String with functions implementation source code.
 
         """
 
         if functions is None:
             raise GenerateError("Functions is None")
 
-        return "\n".join(map(lambda x: self._generate_function_impl(
-            x, namespace, class_name), functions))
+        return "\n".join([self._generate_function_impl(
+            x, namespace, class_name) for x in functions])
 
     def _generate_function_impl(self, function, namespace, class_name):
         """Generate function implementation for source file.
@@ -214,6 +238,9 @@ class SmartSchema(object):
         function -- function to generate method for.
         namespace -- name of destination namespace.
         class_name -- Name of the class to generate.
+
+        Returns:
+        String with function implementation source code.
 
         """
 
@@ -231,12 +258,15 @@ class SmartSchema(object):
         Keyword arguments:
         enums -- list of enums to generate.
 
+        Returns:
+        String with enums declaration source code.
+
         """
 
         if enums is None:
             raise GenerateError("Enums is None")
 
-        return "\n".join(map(lambda x: self._generate_enum(x), enums))
+        return "\n".join([self._generate_enum(x) for x in enums])
 
     def _generate_enum(self, enum):
         """Generate enum for header file.
@@ -246,11 +276,14 @@ class SmartSchema(object):
         Keyword arguments:
         enum -- enum to generate.
 
+        Returns:
+        String with enum declaration source code.
+
         """
 
         enum_elements = enum.elements.values()
-        #enum_elements.insert(0, Model.EnumElement(
-        #    "INVALID_ENUM", None, None, None, None, None, "-1"))
+        enum_elements.insert(0, Model.EnumElement(
+            "INVALID_ENUM", None, None, None, None, None, "-1"))
         return self._enum_template.substitute(
             comment=self._generate_comment(enum),
             name=enum.name,
@@ -265,10 +298,13 @@ class SmartSchema(object):
         Keyword arguments:
         enum_elements -- list of enum elements to generate.
 
+        Returns:
+        String with enum elements declaration source code.
+
         """
 
-        return ",\n\n".join(map(lambda x: self._generate_enum_element(x),
-                                enum_elements))
+        return ",\n\n".join([self._generate_enum_element(x)
+                             for x in enum_elements])
 
     def _generate_enum_element(self, enum_element):
         """Generate enum element for header file.
@@ -277,6 +313,9 @@ class SmartSchema(object):
 
         Keyword arguments:
         enum_element -- enum element to generate.
+
+        Returns:
+        String with enum element declaration source code.
 
         """
 
@@ -293,30 +332,36 @@ class SmartSchema(object):
     def _generate_class_comment(self, class_name, params):
         """Generate doxygen comment to the class for header file.
 
-        Generates doxygen comment for the class that should be used in 
+        Generates doxygen comment for the class that should be used in
         the header file.
 
         Keyword arguments:
         class_name -- Name of the class.
         params -- Class parameters.
+
+        Returns:
+        String with generated doxygen class comment.
 
         """
 
         return self._class_comment_template.substitute(
             class_name=class_name,
-            class_params="".join(map(
-                lambda x: " *     {0} - {1}\n".format(x[0], x[1]),
-                params.items())) if params else " *    none\n")
+            class_params="".join(
+                [" *     {0} - {1}\n".format(x[0],
+                                             x[1]) for x in params.items()])
+            if params else " *    none\n")
 
     def _generate_comment(self, interface_item_base):
-        """Generate doxygen comment for iterface_item_base.
+        """Generate doxygen comment for iterface_item_base for header file.
 
-        Generates doxygen comment for the class that should be used in 
-        the header file.
+        Generates doxygen comment for any iterface_item_base for the header
+        file.
 
         Keyword arguments:
-        class_name -- Name of the class.
-        params -- Class parameters.
+        interface_item_base -- Object to generate doxygen comment for.
+
+        Returns:
+        String with generated doxygen comment.
 
         """
 
@@ -335,24 +380,24 @@ class SmartSchema(object):
         brief_description = " * @brief {0}{1}.\n".format(
             brief_type_title, name)
 
-        description = "".join(map(lambda x: " * {0}\n".format(x),
-                                  interface_item_base.description))
+        description = "".join([" * {0}\n".format(x)
+                              for x in interface_item_base.description])
         if description is not "":
             description = "".join([" *\n", description])
 
-        design_description = "".join(map(
-            lambda x: " * {0}\n".format(x),
-            interface_item_base.design_description))
+        design_description = "".join([" * {0}\n".format(x)
+                                     for x in
+                                     interface_item_base.design_description])
         if design_description is not "":
             design_description = "".join([" *\n", design_description])
 
-        issues = "".join(map(lambda x: " * @note {0}\n".format(x),
-                             interface_item_base.issues))
+        issues = "".join([" * @note {0}\n".format(x)
+                         for x in interface_item_base.issues])
         if issues is not "":
             issues = "".join([" *\n", issues])
 
-        todos = "".join(map(lambda x: " * @todo {0}\n".format(x),
-                            interface_item_base.todos))
+        todos = "".join([" * @todo {0}\n".format(x)
+                        for x in interface_item_base.todos])
         if todos is not "":
             todos = "".join([" *\n", todos])
 
@@ -369,111 +414,140 @@ class SmartSchema(object):
             returns=returns)
 
     def _indent_code(self, code, indent_level):
+        """Indent given source code.
+
+        Indents given source code right by given indentation level.
+
+        Keyword arguments:
+        code -- Given source code.
+        indent_level -- Desired indentation level.
+
+        Returns:
+        String with processed code.
+
+        """
+
         code_lines = code.split("\n")
-        return "".join(map(lambda x: "{0}{1}\n".format(
-            self._indent_template * indent_level, x) if x is not "" else "\n",
-            code_lines))
+        return ["".join(
+            "{0}{1}\n".format(
+                self._indent_template * indent_level,
+                x))
+            if x is not "" else "\n" for x in code_lines]
 
     _model_types_briefs = dict(
-        {"EnumElement": "", 
+        {"EnumElement": "",
          "Enum": "Enumeration ",
          "Function": "Method that generates schema for function "})
 
     _hpp_file_tempalte = string.Template(
-'''#ifndef $guard
-#define $guard
-
-#include "JSONHandler/CSmartFactory.hpp"
-#include "SmartObjects/CSmartSchema.hpp"
-
-$namespace_open$enums_content$class_content$namespace_close
-#endif //$guard
-
-''')
+        '''#ifndef $guard\n'''
+        '''#define $guard\n'''
+        '''\n'''
+        '''#include "JSONHandler/CSmartFactory.hpp"\n'''
+        '''#include "SmartObjects/CSmartSchema.hpp"\n'''
+        '''\n'''
+        '''$namespace_open'''
+        '''$enums_content'''
+        '''$class_content'''
+        '''$namespace_close'''
+        '''#endif //$guard\n'''
+        '''\n''')
 
     _namespace_open_template = string.Template(
-"""namespace $name
-{""")
+        '''namespace $name\n'''
+        '''{''')
 
     _cpp_file_template = string.Template(
-'''#include "$header_file_name"
-#include "SmartObjects/validation/CAlwaysTrueValidator.hpp"
-
-using namespace NsAppLink::NsSmartObjects;
-
-$namespace::$class_name::$class_name()
-: CSmartFactory<FunctionID, messageType>()
-{
-    initSchemas();
-}
-
-void $namespace::$class_name::initSchemas()
-{
-$function_schemas}
-
-$init_function_impls
-''')
+        '''#include "$header_file_name\n"'''
+        '''#include "SmartObjects/validation/CAlwaysTrueValidator.hpp\n"'''
+        '''\n'''
+        '''using namespace NsAppLink::NsSmartObjects;\n'''
+        '''\n'''
+        '''$namespace::$class_name::$class_name()\n'''
+        ''': CSmartFactory<FunctionID, messageType>()\n'''
+        '''{\n'''
+        '''    initSchemas();\n'''
+        '''}\n'''
+        '''\n'''
+        '''void $namespace::$class_name::initSchemas()\n'''
+        '''{\n'''
+        '''$function_schemas'''
+        '''}\n'''
+        '''\n'''
+        '''$init_function_impls'''
+        '''\n''')
 
     _function_schema_template = string.Template(
-"""mSchemas.insert(std::make_pair(NsAppLink::NsJSONHandler::SmartSchemaKey<FunctionID, messageType>($function_id, $message_type), $class_name::initFunction_${function_id}_${message_type}()));""")
+        '''mSchemas.insert(std::make_pair(NsAppLink::NsJSONHandler::'''
+        '''SmartSchemaKey<FunctionID, messageType>($function_id, '''
+        '''$message_type), $class_name::initFunction_${function_id}_'''
+        '''${message_type}()));''')
 
     _function_impl_template = string.Template(
-"""CSmartSchema $namespace::$class_name::initFunction_${function_id}_${message_type}()
-{
-    return CSmartSchema(new Validation::CAlwaysTrueValidator());
-}
-""")
+        '''CSmartSchema $namespace::$class_name::'''
+        '''initFunction_${function_id}_${message_type}()\n'''
+        '''{\n'''
+        '''    return CSmartSchema(Validation::CAlwaysTrueValidator());\n'''
+        '''}\n''')
 
     _class_hpp_template = string.Template(
-"""$comment
-class $class_name : public NsAppLink::NsJSONHandler::CSmartFactory<FunctionID, messageType>
-{
-public:
+        '''$comment\n'''
+        '''class $class_name : public NsAppLink::NsJSONHandler::'''
+        '''CSmartFactory<FunctionID, messageType>\n'''
+        '''{\n'''
+        '''public:\n'''
+        '''\n'''
+        '''    /**\n'''
+        '''     * @brief Constructor.\n'''
+        '''     */\n'''
+        '''    $class_name();\n'''
+        '''\n'''
+        '''protected:\n'''
+        '''\n'''
+        '''    /**\n'''
+        '''     * @brief Initializes all schemas.\n'''
+        '''     */\n'''
+        '''    void initSchemas();\n'''
+        '''\n'''
+        '''$init_function_decls};''')
 
-    /**
-     * @brief Constructor.
-     */
-    $class_name();
-
-protected:
-
-    /**
-     * @brief Initializes all schemas.     
-     */
-    void initSchemas();
-
-$init_function_decls};""")
-
-    _function_return_comment = " * @return NsAppLink::NsSmartObjects::CSmartSchema\n"
+    _function_return_comment = ''' * @return NsAppLink::NsSmartObjects::''' \
+                               '''CSmartSchema\n'''
 
     _function_decl_template = string.Template(
-"""$comment
-static NsAppLink::NsSmartObjects::CSmartSchema initFunction_${function_id}_${message_type}();""")
+        '''$comment\n'''
+        '''static NsAppLink::NsSmartObjects::CSmartSchema '''
+        '''initFunction_${function_id}_${message_type}();''')
 
     _class_comment_template = string.Template(
-"""/**
- * @brief Class $class_name.
- *
- * Params:
-$class_params */""")
+        '''/**\n'''
+        ''' * @brief Class $class_name.\n'''
+        ''' *\n'''
+        ''' * Params:\n'''
+        '''$class_params'''
+        ''' */''')
 
     _comment_template = string.Template(
-"""/**
-$brief_description$description$design_description$issues$todos$returns */""")
+        '''/**\n'''
+        '''$brief_description'''
+        '''$description'''
+        '''$design_description'''
+        '''$issues'''
+        '''$todos'''
+        '''$returns */''')
 
     _enum_template = string.Template(
-"""$comment
-enum $name
-{
-$enum_items};
-""")
+        '''$comment\n'''
+        '''enum $name\n'''
+        '''{'''
+        '''    $enum_items};\n''')
 
     _enum_element_with_value_template = string.Template(
-"""$comment
-$name = $value""")
+        '''$comment\n'''
+        '''$name = $value''')
 
     _enum_element_with_no_value_template = string.Template(
-"""$comment
-$name""")
+        '''$comment\n'''
+        '''$name''')
 
     _indent_template = "    "
