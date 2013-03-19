@@ -33,7 +33,7 @@ class SmartSchema(object):
     """
 
     def __init__(self):
-        """Constructs new object."""
+        """Construct new object."""
 
     def generate(self, interface, filename, namespace, destination_dir):
         """Generate SmartObject source files.
@@ -428,11 +428,10 @@ class SmartSchema(object):
         """
 
         code_lines = code.split("\n")
-        return ["".join(
-            "{0}{1}\n".format(
+        return "".join(
+            ["{0}{1}\n".format(
                 self._indent_template * indent_level,
-                x))
-            if x is not "" else "\n" for x in code_lines]
+                x) if x is not "" else "\n" for x in code_lines])
 
     _model_types_briefs = dict(
         {"EnumElement": "",
@@ -539,8 +538,8 @@ class SmartSchema(object):
     _enum_template = string.Template(
         '''$comment\n'''
         '''enum $name\n'''
-        '''{'''
-        '''    $enum_items};\n''')
+        '''{\n'''
+        '''$enum_items};\n''')
 
     _enum_element_with_value_template = string.Template(
         '''$comment\n'''
