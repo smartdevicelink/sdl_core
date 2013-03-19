@@ -1,3 +1,4 @@
+import subprocess
 import unittest
 import flake8.main
 import pep257
@@ -10,15 +11,15 @@ import sys
 class TestCodeFormatAndQuality(unittest.TestCase):
 
     def setUp(self):
-        projectRootDir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        projectTestsDir = os.path.join(projectRootDir, "test")
+        self.projectRootDir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        projectTestsDir = os.path.join(self.projectRootDir, "test")
         self.filesToAnalyze = []
-        for root, dirnames, filenames in os.walk(projectRootDir):
+        for root, dirnames, filenames in os.walk(self.projectRootDir):
             if root.startswith(projectTestsDir):
                 continue # Currently we skipping test files
             for filename in fnmatch.filter(filenames, '*.py'):
                 fullFileName = os.path.join(root, filename)
-                relativeFileName = os.path.relpath(fullFileName, projectRootDir)
+                relativeFileName = os.path.relpath(fullFileName, self.projectRootDir)
                 self.filesToAnalyze.append(relativeFileName)
 
     def test_pep8_conformance(self):
@@ -44,14 +45,14 @@ class TestCodeFormatAndQuality(unittest.TestCase):
 
     def test_pylint_conformance(self):
         print
-        original_exit = sys.exit
-        def no_exit(arg):
-            sys.exit = original_exit
-            self.assertEqual(0, arg, "Found Pylint violations")
-
-        sys.exit = no_exit
-        pylint.lint.Run(['--rcfile=pylint.cfg','generator', 'Generator.py'])
-        sys.exit = original_exit
+        self.assertEqual(0,
+                         subprocess.call(
+                             ["pylint",
+                              '--rcfile=pylint.cfg',
+                              'generator',
+                              'Generator.py']
+                         ), "Found Pylint violations")
+        return
 
 if __name__ == '__main__':
     unittest.main()
