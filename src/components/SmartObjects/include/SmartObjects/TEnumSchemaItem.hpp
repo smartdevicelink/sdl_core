@@ -1,7 +1,9 @@
 #ifndef __SMARTOBJECT_TENUMSCHEMAITEM_HPP__
 #define __SMARTOBJECT_TENUMSCHEMAITEM_HPP__
 
+#include <map>
 #include <set>
+#include <string>
 
 #include "TSharedPtr.hpp"
 #include "ISchemaItem.hpp"
@@ -65,6 +67,13 @@ namespace NsAppLink
              * @return Not implemented.
              **/
             TEnumSchemaItem & operator =(const TEnumSchemaItem<EnumType> & Other);
+
+            /**
+             * @brief Get string representation of enumeration elements.
+             *
+             * @return Map of enum element to its string representation.
+             **/
+            static const std::map<EnumType, std::string> & getEnumElementsStringRepresentation(void);
         };
     }
 }
