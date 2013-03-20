@@ -1,5 +1,6 @@
 [CW12]
 + ModuleTest: the user can now specify the source data for a PutFile request as a filename (with path starting at "/sdcard/") or a Base64-encoded string (starting with "base64:").
+* Fix crash when integer fields are empty in the following dialogs: Alert, PerformAudioPassThru, ReadDID, GetDTCs, ShowConstantTBT, Slider, and SetGlobalProperties.
 
 [CW11]
 + (Experimental) ModuleTest: allow to test the responses to Register/UnregisterAppInterface requests. The SyncProxyAndroid SDK had to be patched to let the responses propagate to the SyncProxyTester app.

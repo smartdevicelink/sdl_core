@@ -1055,13 +1055,15 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 												(currentSoftButtons.size() > 0)) {
 											msg.setSoftButtons(currentSoftButtons);
 										}
-										currentSoftButtons = null;
-										chkIncludeSoftButtons = null;
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (NumberFormatException e) {
+										Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
+									currentSoftButtons = null;
+									chkIncludeSoftButtons = null;
 								}
 							});
 							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -1935,7 +1937,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
 
-							Context mContext = adapter.getContext();
+							final Context mContext = adapter.getContext();
 							LayoutInflater inflater = (LayoutInflater) mContext
 									.getSystemService(LAYOUT_INFLATER_SERVICE);
 							View layout = inflater.inflate(R.layout.performaudiopassthru, null);
@@ -1984,6 +1986,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										latestPerformAudioPassThruMsg = msg;
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (NumberFormatException e) {
+										Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
@@ -2033,7 +2037,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
 							
-							Context mContext = adapter.getContext();
+							final Context mContext = adapter.getContext();
 							LayoutInflater inflater = (LayoutInflater) mContext
 									.getSystemService(LAYOUT_INFLATER_SERVICE);
 							View layout = inflater.inflate(R.layout.readdid, null);
@@ -2045,9 +2049,10 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
-									Vector<Integer> didlocations = new Vector<Integer>();
-									didlocations.add(Integer.parseInt(txtDIDLocation.getText().toString()));
 									try {
+										Vector<Integer> didlocations = new Vector<Integer>();
+										didlocations.add(Integer.parseInt(txtDIDLocation.getText().toString()));
+										
 										ReadDID msg = new ReadDID();
 										msg.setEcuName(Integer.parseInt(txtECUNameDID.getText().toString()));
 										msg.setDidLocation(didlocations);
@@ -2055,6 +2060,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setCorrelationID(autoIncCorrId++);
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (NumberFormatException e) {
+										Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
@@ -2073,7 +2080,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
 							
-							Context mContext = adapter.getContext();
+							final Context mContext = adapter.getContext();
 							LayoutInflater inflater = (LayoutInflater) mContext
 									.getSystemService(LAYOUT_INFLATER_SERVICE);
 							View layout = inflater.inflate(R.layout.getdtcs, null);
@@ -2091,6 +2098,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										msg.setCorrelationID(autoIncCorrId++);
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (NumberFormatException e) {
+										Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
@@ -2175,12 +2184,14 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 										} else {
 											msg.setSoftButtons(new Vector<SoftButton>());
 										}
-										currentSoftButtons = null;
 										_msgAdapter.logMessage(msg, true);
 										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+									} catch (NumberFormatException e) {
+										Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
 									} catch (SyncException e) {
 										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 									}
+									currentSoftButtons = null;
 								}
 							});
 							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -2438,7 +2449,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 					private void sendSlider() {
 						AlertDialog.Builder builder;
 
-						Context mContext = adapter.getContext();
+						final Context mContext = adapter.getContext();
 						LayoutInflater inflater = (LayoutInflater) mContext
 								.getSystemService(LAYOUT_INFLATER_SERVICE);
 						View layout = inflater.inflate(R.layout.slider, null);
@@ -2476,30 +2487,32 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 						builder = new AlertDialog.Builder(mContext);
 						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								if (chkDynamicFooter.isChecked()) {
-									updateDynamicFooter(txtNumTicks, txtSliderFooter, joinString);
-								}
-								
-								Slider msg = new Slider();
-								msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
-								msg.setNumTicks(Integer.parseInt(txtNumTicks.getText().toString()));
-								msg.setSliderHeader(txtSliderHeader.getText().toString());
-								
-								Vector<String> footerelements = null;
-								String footer = txtSliderFooter.getText().toString();
-								if (chkDynamicFooter.isChecked()) {
-									footerelements = new Vector<String>(Arrays.asList(footer.split(joinString)));
-								} else {
-									footerelements = new Vector<String>();
-									footerelements.add(footer);
-								}
-								msg.setSliderFooter(footerelements);
-								
-								msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
-								msg.setCorrelationID(autoIncCorrId++);
-								_msgAdapter.logMessage(msg, true);
 								try {
+									if (chkDynamicFooter.isChecked()) {
+										updateDynamicFooter(txtNumTicks, txtSliderFooter, joinString);
+									}
+									
+									Slider msg = new Slider();
+									msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
+									msg.setNumTicks(Integer.parseInt(txtNumTicks.getText().toString()));
+									msg.setSliderHeader(txtSliderHeader.getText().toString());
+									
+									Vector<String> footerelements = null;
+									String footer = txtSliderFooter.getText().toString();
+									if (chkDynamicFooter.isChecked()) {
+										footerelements = new Vector<String>(Arrays.asList(footer.split(joinString)));
+									} else {
+										footerelements = new Vector<String>();
+										footerelements.add(footer);
+									}
+									msg.setSliderFooter(footerelements);
+									
+									msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
+									msg.setCorrelationID(autoIncCorrId++);
+									_msgAdapter.logMessage(msg, true);
 									ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+								} catch (NumberFormatException e) {
+									Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
 								} catch (SyncException e) {
 									_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 								}
@@ -2670,7 +2683,12 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 									
 									VrHelpItem helpItem = new VrHelpItem();
 									helpItem.setText(vrHelpItemText.getText().toString());
-									helpItem.setPosition(Integer.parseInt(vrHelpItemPosition.getText().toString()));
+									try {
+										helpItem.setPosition(Integer.parseInt(vrHelpItemPosition.getText().toString()));
+									} catch (NumberFormatException e) {
+										// set something default
+										helpItem.setPosition(1);
+									}
 									Image image = new Image();
 									image.setValue(vrHelpItemImage.getText().toString());
 									image.setImageType(ImageType.STATIC);
