@@ -9,6 +9,7 @@ set (SOURCES
     ./src/CSmartObject.cpp
     ./src/CSmartSchema.cpp
     ./src/ISchemaItem.cpp
+    ./src/CAlwaysFalseSchemaItem.cpp
     ./src/CAlwaysTrueSchemaItem.cpp
     ./src/CBoolSchemaItem.cpp
     ./src/TNumberSchemaItem.cpp
