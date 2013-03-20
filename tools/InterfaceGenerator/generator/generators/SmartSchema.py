@@ -35,6 +35,9 @@ class SmartSchema(object):
     def __init__(self):
         """Construct new object."""
 
+        self._generated_structs = []
+        self._structs_add_code = ""
+
     def generate(self, interface, filename, namespace, destination_dir):
         """Generate SmartObject source files.
 
@@ -51,6 +54,9 @@ class SmartSchema(object):
 
         if interface is None:
             raise GenerateError("Given interface is None.")
+
+        self._generated_structs = []
+        self._structs_add_code = ""
 
         if not os.path.exists(destination_dir):
             os.makedirs(destination_dir)
@@ -88,6 +94,8 @@ class SmartSchema(object):
                     interface.structs.values()), indent_level),
                 namespace_close=namespace_close))
 
+        self._generate_struct_schema_items(interface.structs.values())
+
         with open(os.path.join(destination_dir,
                                "".join("{0}.cpp".format(class_name))),
                   "w") as f_s:
@@ -95,11 +103,15 @@ class SmartSchema(object):
                 header_file_name=header_file_name,
                 namespace=namespace,
                 class_name=class_name,
+                struct_schema_items=self._structs_add_code,
                 function_schemas=self._generate_function_schemas(
-                    interface.functions.values(),
-                    class_name),
+                    interface.functions.values()),
                 init_function_impls=self._generate_function_impls(
                     interface.functions.values(),
+                    namespace,
+                    class_name),
+                init_structs_impls=self._generate_sturct_impls(
+                    interface.structs.values(),
                     namespace,
                     class_name)))
 
@@ -110,7 +122,7 @@ class SmartSchema(object):
         header file.
 
         Keyword arguments:
-        class_name -- Name of the class to generate.
+        class_name -- name of the class to generate.
         params -- class parameters.
         functions -- list of functions to generate methods for.
         structs -- structures to generate methods for.
@@ -123,7 +135,46 @@ class SmartSchema(object):
         return self._class_hpp_template.substitute(
             comment=self._generate_class_comment(class_name, params),
             class_name=class_name,
-            init_function_decls=self._generate_function_decls(functions))
+            init_function_decls=self._generate_function_decls(functions),
+            init_struct_decls=self._generate_structs_decls(structs))
+
+    def _generate_structs_decls(self, structs):
+        """Generate method prototypes for structs for header file.
+
+        Generates method prototypes for structs that should be used in the
+        header file.
+
+        Keyword arguments:
+        structs -- list of structs to generate methods for.
+
+        Returns:
+        String with structs init methods declarations source code.
+
+        """
+
+        if structs is None:
+            raise GenerateError("Structs is None")
+
+        return "\n".join([self._indent_code(
+            self._generate_struct_decl(x), 1) for x in structs])
+
+    def _generate_struct_decl(self, struct):
+        """Generate method prototype for struct for header file.
+
+        Generates method prototype for struct that should be used in the
+        header file.
+
+        Keyword arguments:
+        struct -- struct to generate method for.
+
+        Returns:
+        String with struct inin method declaration source code.
+
+        """
+
+        return self._struct_decl_template.substitute(
+            comment=self._generate_comment(struct),
+            struct_name=struct.name)
 
     def _generate_function_decls(self, functions):
         """Generate method prototypes for functions for header file.
@@ -135,7 +186,7 @@ class SmartSchema(object):
         functions -- list of functions to generate methods for.
 
         Returns:
-        String with function declarations source code.
+        String with function init methods declarations source code.
 
         """
 
@@ -164,15 +215,70 @@ class SmartSchema(object):
             function_id=function.function_id.primary_name,
             message_type=function.message_type.primary_name)
 
-    def _generate_function_schemas(self, functions, class_name):
+    def _generate_struct_schema_items(self, structs):
+        """Generate struct schema items initialization code for source file.
+
+        Generates struct schema items initialization code that should be used
+        in the source file.
+
+        Keyword arguments:
+        structs -- list of structs to generate code for.
+
+        Returns:
+        String with struct schema items initialization source code.
+
+        """
+
+        if structs is None:
+            raise GenerateError("Structs is None")
+
+        for struct in structs:
+            self._process_struct(struct)            
+        
+    def _process_struct(self, struct):
+        if struct.name in self._generated_structs:
+            return
+
+        for member in struct.members.values():
+            self._process_struct_member(member)
+
+        self._structs_add_code = "".join([self._structs_add_code, self._indent_code(self._generate_struct_schema_item(struct), 1)]) 
+        self._generated_structs.append(struct.name)
+
+    def _process_struct_member(self, member):
+        if type(member.param_type) is Model.Struct:
+            self._ensure_struct_generated(member.param_type)
+
+    def _ensure_struct_generated(self, struct):
+        if struct.name in self._generated_structs:
+            return
+        
+        self._process_struct(struct)
+
+    def _generate_struct_schema_item(self, struct):
+        """Generate struct schema item initialization code for source file.
+
+        Generates struct schema item initialization code that should be used
+        in the source file.
+
+        Keyword arguments:
+        struct -- struct to generate code for.
+
+        Returns:
+        String with struct schema item initialization source code.
+
+        """
+
+        return self._struct_schema_item_template.substitute(name=struct.name)
+
+    def _generate_function_schemas(self, functions):
         """Generate functions initialization code for source file.
 
         Generates functions schema initialization code that should be used
         in the source file.
 
         Keyword arguments:
-        functions -- list of functions to generate methods for.
-        class_name -- Name of the class to generate.
+        functions -- list of functions to generate code for.
 
         Returns:
         String with functions schema initialization source code.
@@ -183,10 +289,10 @@ class SmartSchema(object):
             raise GenerateError("Functions is None")
 
         return "".join([self._indent_code(
-            self._generate_function_schema(x, class_name), 1)
+            self._generate_function_schema(x), 1)
             for x in functions])
 
-    def _generate_function_schema(self, function, class_name):
+    def _generate_function_schema(self, function):
         """Generate function initialization code for source file.
 
         Generates function schema initialization code that should be used
@@ -194,7 +300,6 @@ class SmartSchema(object):
 
         Keyword arguments:
         function -- function to generate method for.
-        class_name -- Name of the class to generate.
 
         Returns:
         String with function schema initialization source code.
@@ -202,9 +307,52 @@ class SmartSchema(object):
         """
 
         return self._function_schema_template.substitute(
-            class_name=class_name,
             function_id=function.function_id.primary_name,
             message_type=function.message_type.primary_name)
+
+    def _generate_sturct_impls(self, structs, namespace, class_name):
+        """Generate structs implementation for source file.
+
+        Generates implementation code of methods that provide schema items for
+        structs. This code should be used in the source file.
+
+        Keyword arguments:
+        structs -- list of structs to generate methods for.
+        namespace -- name of destination namespace.
+        class_name -- name of the parent class.
+
+        Returns:
+        String with structs implementation source code.
+
+        """
+
+        if structs is None:
+            raise GenerateError("Structs is None")
+
+        return "\n".join([self._generate_struct_impl(
+            x, namespace, class_name) for x in structs])
+
+    def _generate_struct_impl(self, struct, namespace, class_name):
+        """Generate struct implementation for source file.
+
+        Generates implementation code of method that provide schema item for
+        struct. This code should be used in the source file.
+
+        Keyword arguments:
+        struct -- struct to generate method for.
+        namespace -- name of destination namespace.
+        class_name -- name of the parent class.
+
+        Returns:
+        String with structs implementation source code.
+
+        """
+
+        return self._struct_impl_template.substitute(
+            namespace=namespace,
+            class_name=class_name,
+            struct_name=struct.name,
+            code="")
 
     def _generate_function_impls(self, functions, namespace, class_name):
         """Generate functions implementation for source file.
@@ -215,7 +363,7 @@ class SmartSchema(object):
         Keyword arguments:
         functions -- list of functions to generate methods for.
         namespace -- name of destination namespace.
-        class_name -- Name of the class to generate.
+        class_name -- name of the parent class.
 
         Returns:
         String with functions implementation source code.
@@ -237,7 +385,7 @@ class SmartSchema(object):
         Keyword arguments:
         function -- function to generate method for.
         namespace -- name of destination namespace.
-        class_name -- Name of the class to generate.
+        class_name -- name of the parent class.
 
         Returns:
         String with function implementation source code.
@@ -336,8 +484,8 @@ class SmartSchema(object):
         the header file.
 
         Keyword arguments:
-        class_name -- Name of the class.
-        params -- Class parameters.
+        class_name -- name of the class.
+        params -- class parameters.
 
         Returns:
         String with generated doxygen class comment.
@@ -358,7 +506,7 @@ class SmartSchema(object):
         file.
 
         Keyword arguments:
-        interface_item_base -- Object to generate doxygen comment for.
+        interface_item_base -- object to generate doxygen comment for.
 
         Returns:
         String with generated doxygen comment.
@@ -419,8 +567,8 @@ class SmartSchema(object):
         Indents given source code right by given indentation level.
 
         Keyword arguments:
-        code -- Given source code.
-        indent_level -- Desired indentation level.
+        code -- given source code.
+        indent_level -- desired indentation level.
 
         Returns:
         String with processed code.
@@ -436,7 +584,8 @@ class SmartSchema(object):
     _model_types_briefs = dict(
         {"EnumElement": "",
          "Enum": "Enumeration ",
-         "Function": "Method that generates schema for function "})
+         "Function": "Method that generates schema for function ",
+         "Struct": "Method that generates schema item for structure "})
 
     _hpp_file_tempalte = string.Template(
         '''#ifndef $guard\n'''
@@ -463,9 +612,16 @@ class SmartSchema(object):
         '''using namespace NsAppLink::NsSmartObjects;\n'''
         '''\n'''
         '''$namespace::$class_name::$class_name()\n'''
-        ''': CSmartFactory<FunctionID::eType, messageType::eType>()\n'''
+        ''' : CSmartFactory<FunctionID::eType, messageType::eType>(),\n'''
+        '''   mStructSchemaItems()\n'''
         '''{\n'''
+        '''    initStructSchemaItems();\n'''
         '''    initSchemas();\n'''
+        '''}\n'''
+        '''\n'''
+        '''void $namespace::$class_name::initStructSchemaItems()\n'''
+        '''{\n'''
+        '''$struct_schema_items'''
         '''}\n'''
         '''\n'''
         '''void $namespace::$class_name::initSchemas()\n'''
@@ -473,14 +629,31 @@ class SmartSchema(object):
         '''$function_schemas'''
         '''}\n'''
         '''\n'''
+        '''//------------- Functions schema initialization ---------------\n'''
+        '''\n'''
         '''$init_function_impls'''
+        '''\n'''
+        '''//---------- Structs schema items initialization --------------\n'''
+        '''\n'''
+        '''$init_structs_impls'''
         '''\n''')
+
+    _struct_schema_item_template = string.Template(
+        '''mStructSchemaItems.insert(std::make_pair("${name}", '''
+        '''initStructSchemaItem_${name}());''')
 
     _function_schema_template = string.Template(
         '''mSchemas.insert(std::make_pair(NsAppLink::NsJSONHandler::'''
         '''SmartSchemaKey<FunctionID::eType, messageType::eType>'''
         '''(FunctionID::$function_id, messageType::$message_type), '''
-        '''$class_name::initFunction_${function_id}_${message_type}()));''')
+        '''initFunction_${function_id}_${message_type}()));''')
+
+    _struct_impl_template = string.Template(
+        '''CObjectValidator $namespace::$class_name::'''
+        '''initStructSchemaItem_${struct_name}()\n'''
+        '''{\n'''
+        '''$code\n'''
+        '''}\n''')
 
     _function_impl_template = string.Template(
         '''CSmartSchema $namespace::$class_name::'''
@@ -504,11 +677,29 @@ class SmartSchema(object):
         '''protected:\n'''
         '''\n'''
         '''    /**\n'''
+        '''     * @brief Initializes all struct schema items.\n'''
+        '''     */\n'''
+        '''    void initStructSchemaItems();\n'''
+        '''\n'''
+        '''    /**\n'''
         '''     * @brief Initializes all schemas.\n'''
         '''     */\n'''
         '''    void initSchemas();\n'''
         '''\n'''
-        '''$init_function_decls};''')
+        '''$init_function_decls'''
+        '''\n'''
+        '''$init_struct_decls'''
+        '''\n'''
+        '''    /**\n'''
+        '''     * @brief Type that maps of struct names to schema items.\n'''
+        '''     */\n'''
+        '''    typedef std::map<std::string, OBJ_VAL> TStructsSchemaItems;\n'''
+        '''\n'''
+        '''    /**\n'''
+        '''     * @brief Map of struct names to their schema items.\n'''
+        '''     */\n'''
+        '''    TStructsSchemaItems mStructSchemaItems;\n'''
+        '''};''')
 
     _function_return_comment = ''' * @return NsAppLink::NsSmartObjects::''' \
                                '''CSmartSchema\n'''
@@ -517,6 +708,11 @@ class SmartSchema(object):
         '''$comment\n'''
         '''static NsAppLink::NsSmartObjects::CSmartSchema '''
         '''initFunction_${function_id}_${message_type}();''')
+
+    _struct_decl_template = string.Template(
+        '''$comment\n'''
+        '''static NsAppLink::NsSmartObjects::CObjectValidator '''
+        '''initStructSchemaItem_${struct_name}();''')
 
     _class_comment_template = string.Template(
         '''/**\n'''
