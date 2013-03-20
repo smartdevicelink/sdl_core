@@ -31,7 +31,7 @@ namespace NsAppLink
              *
              * @param ParameterValue Value of a parameter.
              **/
-            TSchemaItemParameter(ParameterType ParameterValue);
+            TSchemaItemParameter(const ParameterType & ParameterValue);
 
             /**
              * @brief Get parameter value.
@@ -46,8 +46,44 @@ namespace NsAppLink
              *         has been stored in Value variable, false otherwise.
              **/
             bool getValue(ParameterType & Value) const;
+
+        private:
+            /**
+             * @brief true if parameter is specified, false otherwise.
+             **/
+            const bool mIsSpecified;
+
+            /**
+             * @brief Parameter value.
+             **/
+            const ParameterType mValue;
         };
     }
+}
+
+template <typename ParameterType>
+NsAppLink::NsSmartObjects::TSchemaItemParameter<ParameterType>::TSchemaItemParameter(void):
+mIsSpecified(false),
+mValue()
+{
+}
+
+template <typename ParameterType>
+NsAppLink::NsSmartObjects::TSchemaItemParameter<ParameterType>::TSchemaItemParameter(const ParameterType & ParameterValue):
+mIsSpecified(true),
+mValue(ParameterValue)
+{
+}
+
+template <typename ParameterType>
+bool NsAppLink::NsSmartObjects::TSchemaItemParameter<ParameterType>::getValue(ParameterType & Value) const
+{
+    if (true == mIsSpecified)
+    {
+        Value = mValue;
+    }
+
+    return mIsSpecified;
 }
 
 #endif
