@@ -352,7 +352,84 @@ class SmartSchema(object):
             namespace=namespace,
             class_name=class_name,
             struct_name=struct.name,
-            code="")
+            code=self._indent_code(
+                self._struct_impl_code_tempate.substitute(
+                    schema_items_decl=self._generate_struct_items_decls(
+                        struct.members.values()),
+                    schema_item_fill=self._generate_struct_items_fill(
+                        struct.members.values())),
+                1))
+
+    def _generate_struct_items_decls(self, members):
+        result = "\n".join(
+            [self._generate_schema_item_decl(x) for x in members])
+
+        return "".join([result, "\n\n"]) if result else ""  
+    
+    def _generate_schema_item_decl(self, member):
+        code = ""
+        
+        if type(member.param_type) is Model.Boolean:
+            code = self._impl_code_bool_item_template.substitute(params="")
+        elif type(member.param_type) is Model.Integer:    
+            code = self._impl_code_integer_item_template.substitute(
+                type="int",
+                params=self._generate_schema_item_param_values(
+                    [["int", member.param_type.min_value],
+                    ["int", member.param_type.max_value]]))
+        elif type(member.param_type) is Model.Double:
+            code = self._impl_code_integer_item_template.substitute(
+                type="double",
+                params=self._generate_schema_item_param_values(
+                    [["double", member.param_type.min_value],
+                    ["double", member.param_type.max_value]]))
+        elif type(member.param_type) is Model.String:
+            code = self._impl_code_string_item_template.safe_substitute(
+                param=self._generate_schema_item_param_values(
+                    [["size_t", member.param_type.max_length]]))
+        elif type(member.param_type) is Model.Array:
+            code = "ARRAY"
+        elif type(member.param_type) is Model.Struct:
+            code = self._impl_code_struct_item_template.substitute(
+                name=member.param_type.name)
+        elif type(member.param_type) is Model.Enum:
+            code = "ENUM"
+        elif type(member.param_type) is Model.EnumSubset:
+            code = "ENUM SUBSET"
+        else:
+            raise GenerateError("Unexpected type of parameter: " + 
+                                str(type(member.param_type)))
+        
+        return self._impl_code_item_decl_temlate.substitute(
+            var_name=self._generate_schema_item_var_name(member),
+            item_decl=code)
+
+    def _generate_schema_item_param_values(self, params):
+        result = ""
+        for param in params:
+            value = self._impl_code_item_param_value_template.substitute(
+                type=param[0],
+                value=str(param[1] if param[1] is not None else ""))
+            result = "".join([result, "".join(
+                [", ", value])
+                if result else value])
+        
+        return result
+         
+    def _generate_struct_items_fill(self, members):
+        result = "\n".join(
+            [self._generate_schema_item_fill(x) for x in members])
+
+        return "".join([result, "\n\n"]) if result else ""
+    
+    def _generate_schema_item_fill(self, member):
+        return self._impl_code_item_fill_template.substitute(
+            name=member.name,
+            var_name=self._generate_schema_item_var_name(member),
+            is_mandatory=member.is_mandatory)
+    
+    def _generate_schema_item_var_name(self, member):
+        return "".join([member.name, "_SchemaItem"]) 
 
     def _generate_function_impls(self, functions, namespace, class_name):
         """Generate functions implementation for source file.
@@ -619,6 +696,20 @@ class SmartSchema(object):
         '''    initSchemas();\n'''
         '''}\n'''
         '''\n'''
+        '''TSharedPtr<CObjectSchemaItem> $namespace::$class_name::'''
+        '''provideObjectSchemaItemForStruct('''
+        '''const std::string & StructName) const\n'''
+        '''{\n'''
+        '''    const TStructsSchemaItems::const_iterator it = '''
+        '''mStructSchemaItems.find(StructName);\n'''
+        '''    if (it != mStructSchemaItems.end())\n'''
+        '''    {\n'''
+        '''        return it->second;\n'''
+        '''    }\n'''
+        '''\n'''
+        '''    return NsAppLink::NsSmartObjects::CAlwaysFalse();\n'''
+        '''}\n'''
+        '''\n'''
         '''void $namespace::$class_name::initStructSchemaItems()\n'''
         '''{\n'''
         '''$struct_schema_items'''
@@ -652,8 +743,43 @@ class SmartSchema(object):
         '''CObjectValidator $namespace::$class_name::'''
         '''initStructSchemaItem_${struct_name}()\n'''
         '''{\n'''
-        '''$code\n'''
+        '''$code'''
         '''}\n''')
+
+    _struct_impl_code_tempate = string.Template(
+        '''${schema_items_decl}'''
+        '''std::map<std::string, CObjectSchemaItem::SMember> '''
+        '''schemaMembersMap;\n\n'''
+        '''${schema_item_fill}'''
+        '''return CObjectSchemaItem::create(schemaMembersMap);''')
+
+    _impl_code_item_decl_temlate = string.Template(
+        '''TSharedPtr<ISchemaItem> $var_name = $item_decl''')
+
+    _impl_code_integer_item_template = string.Template(
+        '''TNumberSchemaItem<${type}>::create(${params});''')
+
+    _impl_code_bool_item_template = string.Template(
+        '''CBoolSchemaItem::create(${params});''')
+
+    _impl_code_string_item_template = string.Template(
+        '''CStringSchemaItem::create(${params})''')
+
+    _impl_code_array_item_template = string.Template(
+        '''CArraySchemaItem::create(${params})''')
+    
+    _impl_code_struct_item_template = string.Template(
+        '''provideObjectSchemaItemForStruct("${name}");''')
+
+    _impl_code_enum_item_template = string.Template(
+        '''TEnumSchemaItem<${type}>::create(${params})''')
+    
+    _impl_code_item_param_value_template = string.Template(
+        '''TSchemaItemParameter<$type>($value)''')
+
+    _impl_code_item_fill_template = string.Template(
+        '''schemaMembersMap["${name}"] = CObjectSchemaItem::'''
+        '''SMember(${var_name}, ${is_mandatory});''')
 
     _function_impl_template = string.Template(
         '''CSmartSchema $namespace::$class_name::'''
@@ -676,6 +802,18 @@ class SmartSchema(object):
         '''\n'''
         '''protected:\n'''
         '''\n'''
+        '''   /**\n'''
+        '''    * @brief Helper method that allows to make reference to struct\n'''
+        '''    *\n'''
+        '''    * @param StructName Name of structure to provide.\n'''
+        '''    *\n'''
+        '''    * @return TSharedPtr of strucute\n'''
+        '''    */\n'''
+        '''    NsAppLink::NsSmartObjects::TSharedPtr<NsAppLink::'''
+        '''NsSmartObjects::CObjectSchemaItem> '''
+        '''provideObjectSchemaItemForStruct(const std::string & '''
+        '''StructName) const;\n'''
+        '''\n'''
         '''    /**\n'''
         '''     * @brief Initializes all struct schema items.\n'''
         '''     */\n'''
@@ -693,7 +831,8 @@ class SmartSchema(object):
         '''    /**\n'''
         '''     * @brief Type that maps of struct names to schema items.\n'''
         '''     */\n'''
-        '''    typedef std::map<std::string, OBJ_VAL> TStructsSchemaItems;\n'''
+        '''    typedef std::map<std::string, NsAppLink::NsSmartObjects::'''
+        '''TSharedPtr<CObjectSchemaItem> > TStructsSchemaItems;\n'''
         '''\n'''
         '''    /**\n'''
         '''     * @brief Map of struct names to their schema items.\n'''
