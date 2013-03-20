@@ -39,6 +39,8 @@ void NsAppLink::NsJSONHandler::Formatters::CFormatterJsonBase::jsonValueToObj(
     {
         obj = value.asString();
     }
+
+    //TODO: Passed object can be not null
     // There's nothing for nullValue because Uninitialized object is already a null object
 }
 
