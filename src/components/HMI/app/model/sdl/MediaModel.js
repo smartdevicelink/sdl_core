@@ -30,7 +30,7 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
                     '<no definition>'
                 ]
         } ) );
-        
+
         this.set( 'isPlaying', true );
 
         this.set( 'commandsList', [] );
@@ -130,20 +130,20 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
 
     setDuration: function() {
 
-        var number, str = '';
+        var number, str = '', hrs = 0, min = 0, sec = 0;
         if( this.countUp ){
             number = this.duration + this.currTime;
         }else{
             number = this.duration - this.currTime;
         }
-        
-        var hrs = parseInt( number / 3600 ), // hours
-            min = parseInt( number / 60 ) % 60, // minutes
-            sec = number % 60; // seconds
-        
-        str = ( hrs < 10 ? '0' : '' ) + hrs + ':'; 
-        str += ( min < 10 ? '0' : '' ) + min + ":"; 
-        str += ( sec < 10 ? '0' : '' ) + sec; 
+
+        hrs = parseInt( number / 3600 ), // hours
+        min = parseInt( number / 60 ) % 60, // minutes
+        sec = number % 60; // seconds
+
+        str = ( hrs < 10 ? '0' : '' ) + hrs + ':';
+        str += ( min < 10 ? '0' : '' ) + min + ":";
+        str += ( sec < 10 ? '0' : '' ) + sec;
         this.appInfo.set( 'mediaClock', str );
 
         if( !this.get( 'countUp' ) && this.duration == this.currTime ){
