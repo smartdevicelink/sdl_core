@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<file>
+    <type type="unit"/>
+
+    <test testName="PutFile_Success">
+        <PutFile correlationID="42">
+            <String syncFileName="testImage1" />
+            <String fileType="GRAPHIC_PNG" />
+            <Boolean persistentFile="false" />
+            <Binary bulkData="/sdcard/testImage1.png" />
+        </PutFile>
+
+        <result correlationID="42" return="SUCCESS"/>
+    </test>
+
+</file>

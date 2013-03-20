@@ -3153,7 +3153,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 *            Name of the file to open.
 	 * @return The file's contents or null in case of an error
 	 */
-	private byte[] contentsOfFile(String filename) {
+	public static byte[] contentsOfFile(String filename) {
 		InputStream is = null;
 		try {
 			is = new BufferedInputStream(new FileInputStream(filename));
