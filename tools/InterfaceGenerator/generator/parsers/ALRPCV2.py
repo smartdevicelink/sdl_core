@@ -75,6 +75,12 @@ class Parser(object):
 
     @staticmethod
     def _add_item(items, item, key=None):
+        """Add new item in the items dictionary with given key.
+
+        Performs additional check for presence in the dictionary and throws
+        ParseError exception if key already exist.
+
+        """
         if key is None:
             key = item.name
 
@@ -84,6 +90,12 @@ class Parser(object):
         items[key] = item
 
     def _add_type(self, _type):
+        """Add new type in the internal types dictionary.
+
+        Performs additional check for presence type with same name in the
+        dictionary and throws ParseError exception if key already exist.
+
+        """
         if _type.name in self._types:
             raise ParseError("Type '" + _type.name +
                              "' is declared as both struct and enum")
@@ -91,14 +103,19 @@ class Parser(object):
         self._types[_type.name] = _type
 
     def _parse_enum(self, element):
-        params, subelements, attrib = self._parse_base_item(element)
+        """Parse element as enumeration.
+
+        Returns an instance of generator.Model.Enum
+
+        """
+        params, subelements, attributes = self._parse_base_item(element)
 
         internal_scope = None
-        for a in attrib:
-            if a == "internal_scope":
-                internal_scope = attrib[a]
+        for attribute in attributes:
+            if attribute == "internal_scope":
+                internal_scope = attributes[attribute]
             else:
-                raise ParseError("Unexpected attribute '" + a +
+                raise ParseError("Unexpected attribute '" + attribute +
                                  "' in enum '" + params["name"] + "'")
         params["internal_scope"] = internal_scope
 
@@ -111,9 +128,16 @@ class Parser(object):
                                  "' in enum '" + params["name"] + "'")
         params["elements"] = elements
 
+        # Magic usage is correct
+        # pylint: disable=W0142
         return Model.Enum(**params)
 
     def _parse_struct(self, element):
+        """Parse element as structure.
+
+        Returns an instance of generator.Model.Struct
+
+        """
         params, subelements, attrib = self._parse_base_item(element)
 
         if len(attrib) != 0:
@@ -128,28 +152,35 @@ class Parser(object):
                                  "' in struct '" + params["name"] + "'")
         params["members"] = members
 
+        # Magic usage is correct
+        # pylint: disable=W0142
         return Model.Struct(**params)
 
     def _parse_function(self, element):
-        params, subelements, attrib = self._parse_base_item(element)
+        """Parse element as function.
+
+        Returns an instance of generator.Model.Function
+
+        """
+        params, subelements, attributes = self._parse_base_item(element)
 
         function_id = None
         message_type = None
         platform = None
 
-        for a in attrib:
-            if a == "functionID":
+        for attrubute in attributes:
+            if attrubute == "functionID":
                 function_id = \
                     self._get_enum_element_for_function("FunctionID",
-                                                        attrib[a])
-            elif a == "messagetype":
+                                                        attributes[attrubute])
+            elif attrubute == "messagetype":
                 message_type = \
                     self._get_enum_element_for_function("messageType",
-                                                        attrib[a])
-            elif a == "platform":
-                platform = attrib[a]
+                                                        attributes[attrubute])
+            elif attrubute == "platform":
+                platform = attributes[attrubute]
             else:
-                raise ParseError("Unexpected attribute '" + a +
+                raise ParseError("Unexpected attribute '" + attrubute +
                                  "' in function '" + params["name"] + "'")
 
         params["function_id"] = function_id
@@ -170,9 +201,16 @@ class Parser(object):
                                  "' in function '" + params["name"] + "'")
         params["params"] = function_params
 
+        # Magic usage is correct
+        # pylint: disable=W0142
         return Model.Function(**params)
 
     def _parse_base_item(self, element):
+        """Parse element as base item.
+
+        Returns an params, sub-elements and attributes of the element
+
+        """
         params = {}
 
         description = []
@@ -210,6 +248,13 @@ class Parser(object):
 
     @staticmethod
     def _parse_simple_element(element):
+        """Parse element as simple element and returns it's text.
+
+        Element is simple when it contains no subelements and attributes.
+
+        Returns element text if present or empty string if not
+
+        """
         if len(element) != 0:
             raise ParseError("Unexpected subelements in '" +
                              element.tag + "'")
@@ -220,6 +265,13 @@ class Parser(object):
 
     @staticmethod
     def _parse_issue(element):
+        """Parse element as issue.
+
+        Issue must not contain subelements and attributes.
+
+        Returns an instance of generator.Model.Issue
+
+        """
         if len(element) != 0:
             raise ParseError("Unexpected subelements in issue")
         if "creator" not in element.attrib:
@@ -232,31 +284,43 @@ class Parser(object):
             value=element.text if element.text is not None else "")
 
     def _parse_enum_element(self, element):
-        params, subelements, attrib = self._parse_base_item(element)
+        """Parse element as element of enumeration.
+
+        Returns an instance of generator.Model.EnumElement
+
+        """
+        params, subelements, attributes = self._parse_base_item(element)
 
         if len(subelements) != 0:
             raise ParseError("Unexpected subelements in enum element")
 
         internal_name = None
         value = None
-        for a in attrib:
-            if a == "internal_name":
-                internal_name = attrib[a]
-            elif a == "value":
+        for attribute in attributes:
+            if attribute == "internal_name":
+                internal_name = attributes[attribute]
+            elif attribute == "value":
                 try:
-                    value = int(attrib[a])
+                    value = int(attributes[attribute])
                 except:
                     raise ParseError("Invalid value for enum element: '" +
-                                     attrib[a] + "'")
+                                     attributes[attribute] + "'")
             else:
                 raise ParseError("Unexpected attribute '" +
-                                 a + "' in enum element")
+                                 attribute + "' in enum element")
         params["internal_name"] = internal_name
         params["value"] = value
 
+        # Magic usage is correct
+        # pylint: disable=W0142
         return Model.EnumElement(**params)
 
     def _parse_param(self, element):
+        """Parse element as structure parameter.
+
+        Returns an instance of generator.Model.Param
+
+        """
         params, subelements, attrib = self._parse_param_base_item(element)
 
         if len(attrib) != 0:
@@ -267,15 +331,22 @@ class Parser(object):
             raise ParseError("Unknown subelements in param '" +
                              params["name"] + "'")
 
+        # Magic usage is correct
+        # pylint: disable=W0142
         return Model.Param(**params)
 
     def _parse_function_param(self, element):
+        """Parse element as function parameter.
+
+        Returns an instance of generator.Model.FunctionParam
+
+        """
         params, subelements, attrib = self._parse_param_base_item(element)
 
-        params["platform"] = self._get_and_remove_attrib(attrib, "platform")
+        params["platform"] = self._extract_attrib(attrib, "platform")
 
         default_value = None
-        default_value_string = self._get_and_remove_attrib(attrib, "defvalue")
+        default_value_string = self._extract_attrib(attrib, "defvalue")
         if default_value_string is not None:
             param_type = params["param_type"]
             if type(param_type) is Model.Boolean:
@@ -321,16 +392,23 @@ class Parser(object):
             raise ParseError("Unexpected subelements in parameter '" +
                              params["name"] + "'")
 
+        # Magic usage is correct
+        # pylint: disable=W0142
         return Model.FunctionParam(**params)
 
     def _parse_param_base_item(self, element):
+        """Parse base param items.
+
+        Returns params, other subelements and attributes.
+
+        """
         params, subelements, attrib = self._parse_base_item(element)
 
-        params["is_mandatory"] = self._get_and_remove_optional_bool_attrib(
+        params["is_mandatory"] = self._extract_optional_bool_attrib(
             attrib, "mandatory", True)
 
         param_type = None
-        type_name = self._get_and_remove_attrib(attrib, "type")
+        type_name = self._extract_attrib(attrib, "type")
         if type_name is None:
             raise ParseError("Type is not specified for parameter '" +
                              params["name"] + "'")
@@ -338,9 +416,9 @@ class Parser(object):
             param_type = Model.Boolean()
         elif type_name == "Integer" or \
                 type_name == "Float":
-            min_value = self._get_and_remove_optional_number_attrib(
+            min_value = self._extract_optional_number_attrib(
                 attrib, "minvalue", int if type_name == "Integer" else float)
-            max_value = self._get_and_remove_optional_number_attrib(
+            max_value = self._extract_optional_number_attrib(
                 attrib, "maxvalue", int if type_name == "Integer" else float)
 
             param_type = \
@@ -348,7 +426,7 @@ class Parser(object):
                     min_value=min_value,
                     max_value=max_value)
         elif type_name == "String":
-            max_length = self._get_and_remove_optional_number_attrib(
+            max_length = self._extract_optional_number_attrib(
                 attrib, "maxlength")
             param_type = Model.String(max_length=max_length)
         else:
@@ -357,11 +435,11 @@ class Parser(object):
             else:
                 raise ParseError("Unknown type '" + type_name + "'")
 
-        if self._get_and_remove_optional_bool_attrib(attrib, "array", False):
-            min_size = self._get_and_remove_optional_number_attrib(attrib,
-                                                                   "minsize")
-            max_size = self._get_and_remove_optional_number_attrib(attrib,
-                                                                   "maxsize")
+        if self._extract_optional_bool_attrib(attrib, "array", False):
+            min_size = self._extract_optional_number_attrib(attrib,
+                                                            "minsize")
+            max_size = self._extract_optional_number_attrib(attrib,
+                                                            "maxsize")
             param_type = Model.Array(element_type=param_type,
                                      min_size=min_size,
                                      max_size=max_size)
@@ -422,8 +500,13 @@ class Parser(object):
 
         return params, other_subelements, attrib
 
-    def _get_and_remove_optional_bool_attrib(self, attrib, name, default):
-        value = self._get_and_remove_attrib(attrib, name)
+    def _extract_optional_bool_attrib(self, attrib, name, default):
+        """Extract boolean attribute with given name.
+
+        Returns value of the attribute.
+
+        """
+        value = self._extract_attrib(attrib, name)
 
         if value is None:
             value = default
@@ -432,8 +515,13 @@ class Parser(object):
 
         return value
 
-    def _get_and_remove_optional_number_attrib(self, attrib, name, _type=int):
-        value = self._get_and_remove_attrib(attrib, name)
+    def _extract_optional_number_attrib(self, attrib, name, _type=int):
+        """Extract number attribute with given name.
+
+        Returns value of the attribute.
+
+        """
+        value = self._extract_attrib(attrib, name)
 
         if value is not None:
             try:
@@ -445,7 +533,12 @@ class Parser(object):
         return value
 
     @staticmethod
-    def _get_and_remove_attrib(attrib, name):
+    def _extract_attrib(attrib, name):
+        """Extract attribute with given name.
+
+        Returns value of the attribute.
+
+        """
         value = None
 
         if name in attrib:
@@ -456,6 +549,11 @@ class Parser(object):
 
     @staticmethod
     def _get_bool_from_string(bool_string):
+        """Convert string representation of boolean to real bool value.
+
+        Returns converted value.
+
+        """
         value = None
 
         if bool_string in ['0', 'false']:
@@ -469,6 +567,11 @@ class Parser(object):
         return value
 
     def _get_enum_element_for_function(self, enum_name, element_name):
+        """Get enum element with given name from given enumeration.
+
+        Returns an instance of generator.Model.EnumElement.
+
+        """
         if enum_name not in self._types:
             raise ParseError("Enumeration '" + enum_name +
                              "' must be declared before any function")
