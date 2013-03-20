@@ -170,7 +170,16 @@ NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::TNumberSchem
 template <typename NumberType>
 bool NsAppLink::NsSmartObjects::TNumberSchemaItem<NumberType>::setDefaultValue(CSmartObject & Object)
 {
-    return false;
+    bool result = false;
+    NumberType value;
+
+    if (true == mDefaultValue.getValue(value))
+    {
+        Object = value;
+        result = true;
+    }
+
+    return result;
 }
 
 template <typename NumberType>
