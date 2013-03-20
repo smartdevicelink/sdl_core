@@ -32,6 +32,13 @@ namespace NsAppLink
              * @return true if default value was successfully set, false otherwise.
              **/
             virtual bool setDefaultValue(CSmartObject & Object);
+
+            /**
+             * @brief Apply schema.
+             *
+             * @param Object Object to apply schema.
+             **/
+            virtual void applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object);
         };
     }
 }
