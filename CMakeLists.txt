@@ -24,6 +24,7 @@ endif(NOT PYTHONINTERP_FOUND)
 
 set(INTEFRACE_GENERATOR "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
 set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE} -B ${INTEFRACE_GENERATOR})
+file(GLOB_RECURSE INTERFACE_GENERATOR_DEPENDENCIES "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/*.*")
 
 macro (GenerateInterface arg_xml_name arg_namespace parser_type)
     string(REGEX MATCH "^[a-zA-Z_0-9]*[^.]" file_name ${arg_xml_name})     # TODO: make expression more robust
@@ -35,7 +36,7 @@ macro (GenerateInterface arg_xml_name arg_namespace parser_type)
 
     add_custom_command( OUTPUT ${hpp_file} ${cpp_file}
                         COMMAND ${INTEFRACE_GENERATOR_CMD} ${full_xml_name} ${arg_namespace} ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "${parser_type}"
-                        DEPENDS ${INTEFRACE_GENERATOR}
+                        DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES}
                         COMMENT "Generating files:\n   ${hpp_file}\n   ${cpp_file}\nfrom:\n   ${arg_xml_name} ..."
                         VERBATIM
                       )
