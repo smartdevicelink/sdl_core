@@ -12,6 +12,7 @@ set (SOURCES
     ./src/CAlwaysFalseSchemaItem.cpp
     ./src/CAlwaysTrueSchemaItem.cpp
     ./src/CBoolSchemaItem.cpp
+    ./src/CStringSchemaItem.cpp
     ./src/TNumberSchemaItem.cpp
 )
 

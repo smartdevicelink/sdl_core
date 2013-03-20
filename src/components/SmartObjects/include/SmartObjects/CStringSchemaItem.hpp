@@ -38,11 +38,24 @@ namespace NsAppLink
              **/
             virtual Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject & Object);
 
+            /**
+             * @brief Set default value to an object.
+             *
+             * @param Object Object to set default value.
+             *
+             * @return true if default value was successfully set, false otherwise.
+             **/
+            virtual bool setDefaultValue(CSmartObject & Object);
+
         private:
             /**
              * @brief Constructor.
+             *
+             * @param MaxLength Maximum allowed string length.
+             * @param DefaultValue Default value.
              **/
-            CStringSchemaItem(void);
+            CStringSchemaItem(const TSchemaItemParameter<size_t> & MaxLength,
+                              const TSchemaItemParameter<std::string> & DefaultValue);
 
             /**
              * @brief Copy constructor.
@@ -63,6 +76,16 @@ namespace NsAppLink
              * @return Not implemented.
              **/
             CStringSchemaItem & operator =(const CStringSchemaItem & Other);
+
+            /**
+             * @brief Maximum allowed string length.
+             **/
+            const TSchemaItemParameter<size_t> mMaxLength;
+
+            /**
+             * @brief Default value.
+             **/
+            const TSchemaItemParameter<std::string> mDefaultValue;
         };
     }
 }
