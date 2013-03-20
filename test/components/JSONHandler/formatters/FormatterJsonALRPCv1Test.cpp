@@ -14,6 +14,7 @@ namespace test { namespace components { namespace JSONHandler { namespace format
     TEST(test_SimpleTwoWaysTest, test_JsonALRPCv1)
     {
         Json::Value value;  // just a quick workaround to avoid undefined reference to Json
+        Json::Reader reader;    // the same thing
 
         std::string str;
         NsAppLink::NsSmartObjects::CSmartObject srcObj;
