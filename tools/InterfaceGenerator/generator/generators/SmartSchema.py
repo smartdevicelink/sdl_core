@@ -368,7 +368,17 @@ class SmartSchema(object):
         result = ""
         for member in members:
             if type(member.param_type) is Model.Enum:
-                result = "".join([result, self._generate_schema_local_emum_var_name(member)])
+                local_var = self._generate_schema_local_emum_var_name(member)
+                result = "".join(
+                    [result, self._impl_code_local_decl_enum_template.substitute(
+                        type=member.param_type.name,
+                        var_name=local_var)])
+                result = "\n".join([result, "\n".join(
+                    [self._impl_code_local_decl_enum_insert_template.
+                    substitute(
+                        var_name=local_var,
+                        value=x.primary_name) for x in
+                        member.param_type.elements.values()])])
                 
         return "".join([result, "\n\n"]) if result else ""
     
@@ -772,6 +782,12 @@ class SmartSchema(object):
         '''schemaMembersMap;\n\n'''
         '''${schema_item_fill}'''
         '''return CObjectSchemaItem::create(schemaMembersMap);''')
+
+    _impl_code_local_decl_enum_template = string.Template(
+        '''std::set<${type}> ${var_name};''')
+    
+    _impl_code_local_decl_enum_insert_template = string.Template(
+        '''${var_name}.isert(${value});''')
 
     _impl_code_item_decl_temlate = string.Template(
         '''TSharedPtr<ISchemaItem> $var_name = $item_decl''')
