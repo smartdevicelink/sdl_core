@@ -668,7 +668,7 @@ long NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_long(const std::
     return l;
 }
 
-NsAppLink::NsSmartObjects::SmartType NsAppLink::NsSmartObjects::CSmartObject::get_type()
+NsAppLink::NsSmartObjects::SmartType NsAppLink::NsSmartObjects::CSmartObject::get_type() const
 {
     return m_type;
 }

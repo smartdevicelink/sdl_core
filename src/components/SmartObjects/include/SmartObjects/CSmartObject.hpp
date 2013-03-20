@@ -89,7 +89,7 @@ namespace NsAppLink
             CSmartObject& operator[](char* s);
             CSmartObject& operator[](const char*);
 
-            SmartType get_type();
+            SmartType get_type() const;
 
 
             size_t length();
