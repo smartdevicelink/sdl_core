@@ -22,6 +22,11 @@ namespace NsAppLink
                 INVALID_VALUE,
 
                 /**
+                 * @brief Value is out of allowed range.
+                 **/
+                OUT_OF_RANGE,
+
+                /**
                  * @brief General validation error
                  **/
                 ERROR
