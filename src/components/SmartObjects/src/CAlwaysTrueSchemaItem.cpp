@@ -1,6 +1,6 @@
 #include "SmartObjects/CAlwaysTrueSchemaItem.hpp"
 
-bool NsAppLink::NsSmartObjects::CAlwaysTrueSchemaItem::validate(const NsAppLink::NsSmartObjects::CSmartObject& object)
+NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::CAlwaysTrueSchemaItem::validate(const NsAppLink::NsSmartObjects::CSmartObject& object)
 {
-    return true;
+    return NsAppLink::NsSmartObjects::Errors::OK;
 }

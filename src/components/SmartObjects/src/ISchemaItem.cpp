@@ -1,8 +1,8 @@
 #include "SmartObjects/ISchemaItem.hpp"
 
-bool NsAppLink::NsSmartObjects::ISchemaItem::validate(const NsAppLink::NsSmartObjects::CSmartObject& object)
+NsAppLink::NsSmartObjects::Errors::eType NsAppLink::NsSmartObjects::ISchemaItem::validate(const NsAppLink::NsSmartObjects::CSmartObject& object)
 {
-    return false;
+    return NsAppLink::NsSmartObjects::Errors::ERROR;
 }
 
 bool NsAppLink::NsSmartObjects::ISchemaItem::setDefaultValue(CSmartObject & Object)

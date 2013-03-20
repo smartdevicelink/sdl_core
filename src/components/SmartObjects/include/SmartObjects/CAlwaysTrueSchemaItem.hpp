@@ -26,9 +26,9 @@ namespace NsAppLink
              *
              * @param Object Object to validate.
              *
-             * @return true if Object is valid, false otherwise.
+             * @return NsSmartObjects::Errors::eType
              **/
-            virtual bool validate(const NsAppLink::NsSmartObjects::CSmartObject & Object);
+            virtual Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject & Object);
 
         private:
             /**

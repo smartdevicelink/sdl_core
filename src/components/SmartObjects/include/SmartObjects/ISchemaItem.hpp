@@ -1,6 +1,8 @@
 #ifndef __SMARTOBJECT_ISCHEMA_ITEM_HPP__
 #define __SMARTOBJECT_ISCHEMA_ITEM_HPP__
 
+#include "Errors.hpp"
+
 namespace NsAppLink
 {
     namespace NsSmartObjects
@@ -18,9 +20,9 @@ namespace NsAppLink
              *
              * @param Object Object to validate.
              *
-             * @return true if object is valid, false otherwise.
+             * @return NsSmartObjects::Errors::eType
              **/
-            virtual bool validate(const CSmartObject & Object);
+            virtual Errors::eType validate(const CSmartObject & Object);
 
             /**
              * @brief Set default value to an object.
