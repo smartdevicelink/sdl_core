@@ -1,1 +1,1 @@
-GenerateInterface("v4_protocol_v2_0_revP.xml" "Gen::NsApplink" "alrpcv2")
+#GenerateInterface("v4_protocol_v2_0_revP.xml" "Gen::NsApplink" "alrpcv2")
