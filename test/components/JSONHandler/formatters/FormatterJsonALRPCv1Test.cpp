@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "JSONHandler/formatters/CFormatterJsonALRPCv2.hpp"
+#include "JSONHandler/formatters/CFormatterJsonALRPCv1.hpp"
 
 #include "json/json.h"
 
@@ -11,7 +11,7 @@
 
 namespace test { namespace components { namespace JSONHandler { namespace formatters {
 
-    TEST(test_SimpleTwoWaysTest, test_JsonALRPCv2)
+    TEST(test_SimpleTwoWaysTest, test_JsonALRPCv1)
     {
         Json::Value value;  // just a quick workaround to avoid undefined reference to Json
 
@@ -39,10 +39,12 @@ namespace test { namespace components { namespace JSONHandler { namespace format
         srcObj["msg_params"]["double"] = -0.1234;
 
         // SmartObjects --> JSON
-        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::toString(srcObj, str);
+        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::toString(srcObj, str);
+
+        std::cout << str << std::endl;
 
         // JSON --> SmartObjects
-        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv2::fromString<int, int>(str, dstObj, 0, 0);
+        NsAppLink::NsJSONHandler::Formatters::CFormatterJsonALRPCv1::fromString(str, dstObj);
 
         // Compare SmartObjects
         ASSERT_EQ("APP NAME",  static_cast<std::string>(dstObj["msg_params"]["appName"]));
@@ -60,4 +62,3 @@ int main(int argc, char **argv)
   ::testing::InitGoogleMock(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
