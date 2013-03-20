@@ -26,6 +26,7 @@ import android.util.Xml;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.AcceptedRPC;
+import com.ford.syncV4.android.module.reader.BinaryDataReaderFactory;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCRequest;
@@ -107,6 +108,9 @@ public class ModuleTest {
 	private ArrayList<Pair<String, ArrayList<RPCRequest>>> testList = new ArrayList<Pair<String, ArrayList<RPCRequest>>> ();
 	
 	public static ArrayList<Pair<Integer, Result>> responses = new ArrayList<Pair<Integer, Result>>();
+	
+	/** Factory that is used to return a reader for the binary data in tests. */
+	private BinaryDataReaderFactory binaryDataReaderFactory = new BinaryDataReaderFactory();
 	
 	public ModuleTest() {
 		this._mainInstance = SyncProxyTester.getInstance();
@@ -604,8 +608,8 @@ public class ModuleTest {
 						}
 					} else if (tempName.equalsIgnoreCase(BINARY_TAG_NAME)) {
 						logParserDebugInfo("In " + BINARY_TAG_NAME);
-						String filename = parser.getAttributeValue(0);
-						byte[] data = SyncProxyTester.contentsOfFile(filename);
+						String srcData = parser.getAttributeValue(0);
+						byte[] data = binaryDataReaderFactory.getReaderForString(srcData).read(srcData);
 						if (data != null) {
 							hash.put(BULK_DATA_ATTR, data);
 						}

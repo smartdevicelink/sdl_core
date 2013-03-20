@@ -2,6 +2,11 @@
 <file>
     <type type="unit"/>
 
+    <!-- While testing PutFile requests, the binary data to send is specified
+         in the <Binary> tag. It's attribute bulkData should contain either a
+         filename (with path starting at "/sdcard/") or a Base64-encoded string
+         (starting with "base64:"). -->
+
     <test testName="PutFile_Success">
         <PutFile correlationID="42">
             <String syncFileName="testImage1" />
@@ -11,6 +16,17 @@
         </PutFile>
 
         <result correlationID="42" return="SUCCESS"/>
+    </test>
+
+    <test testName="PutFile_Base64_Success">
+        <PutFile correlationID="43">
+            <String syncFileName="testTurnRight" />
+            <String fileType="GRAPHIC_PNG" />
+            <Boolean persistentFile="false" />
+            <Binary bulkData="base64:iVBORw0KGgoAAAANSUhEUgAAACoAAAAkCAYAAAD/yagrAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAmJJREFUeNrsWD1M21AQPiMGOiWdCAt1FqQsEbCBFJGRn4UKCYZUKhOKSYduJkykUh3o1CUkTHSAge4lTCVSJNggigSRWKBZErqQCIZs5jtEJCjg2PWLRSSfdPLPu/fu87173/k9Sdd16gTpog4RF6ho6bY7gCRJtvqbXSPu1D8jsuNTj+lmp9PQMai3hXkaGu7vf6eUy3/4PgG9tOzTCo8C4AAun73et0ogECBZ9lNPzxvDPtnsL6pWK3R9fUPJpEapVIrq9bqKpm9WctQq0PXxiSllZGSUarUrKpVKVMe1AiAvSbVSoUajcQeUBVElTUvS9vZWjqMN/z+FAgXIhaGh4Y3p9zO0hygdHh5ceDweORgMmuq/u5t99JzP52lpSaViscjp8B04zlrSgxmFHCuLn3QA5YfN1dU1HVGyrTwOPpjH1Iz8W1n1gz5fHxUKR4QozsdiMSFUwOOcnJxSJPIhjlnbh84KoaeL83NCBITyFo+XyWQ4PcKhUGgHYMOvmvABEpGN8O3HVwuUF9fk5ARFo9Ef99wrttbbFXAqqarakq7aAhROwZflR+/i8eUndkz+XAQANgmAy6LoSU98+co3OnLJkHK4HXbrbNu8PmzHotHBHM22ATP+25mjCj6MZL9fab7gqoQc5FzMgejn8GqxJdE7laNMZ5x7mGLl3zrv6I+zSUlomvb3fjVf/s8ATgFlcCvu5s4F6gLtMKDp3P5veu6HQZC9sK1IL1cbdoz/x6rRFgRVh4nd17Q34s62bO4egOYt8qCBSQFaE3lSItk9dnSPdESXUKcOgl0eFS23AgwAYifQ6pO019YAAAAASUVORK5CYII=" />
+        </PutFile>
+
+        <result correlationID="43" return="SUCCESS"/>
     </test>
 
 </file>
