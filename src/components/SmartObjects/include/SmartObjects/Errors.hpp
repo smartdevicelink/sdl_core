@@ -17,6 +17,11 @@ namespace NsAppLink
                 OK = 0,
 
                 /**
+                 * @brief Invalid value.
+                 **/
+                INVALID_VALUE,
+
+                /**
                  * @brief General validation error
                  **/
                 ERROR

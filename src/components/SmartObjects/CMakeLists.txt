@@ -10,6 +10,7 @@ set (SOURCES
     ./src/CSmartSchema.cpp
     ./src/ISchemaItem.cpp
     ./src/CAlwaysTrueSchemaItem.cpp
+    ./src/CBoolSchemaItem.cpp
 )
 
 add_library("SmartObjects" ${SOURCES})

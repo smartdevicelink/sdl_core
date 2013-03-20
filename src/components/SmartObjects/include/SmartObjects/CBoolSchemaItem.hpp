@@ -33,11 +33,22 @@ namespace NsAppLink
              **/
             virtual Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject & Object);
 
+            /**
+             * @brief Set default value to an object.
+             *
+             * @param Object Object to set default value.
+             *
+             * @return true if default value was successfully set, false otherwise.
+             **/
+            virtual bool setDefaultValue(CSmartObject & Object);
+
         private:
             /**
              * @brief Constructor.
+             *
+             * @param DefaultValue Default value of a parameter.
              **/
-            CBoolSchemaItem(void);
+            CBoolSchemaItem(const TSchemaItemParameter<bool> & DefaultValue);
 
             /**
              * @brief Copy constructor.
@@ -58,6 +69,11 @@ namespace NsAppLink
              * @return Not implemented.
              **/
             CBoolSchemaItem & operator =(const CBoolSchemaItem & Other);
+
+            /**
+             * @param DefaultValue Default value of a parameter.
+             */
+            const TSchemaItemParameter<bool> mDefaultValue;
         };
     }
 }
