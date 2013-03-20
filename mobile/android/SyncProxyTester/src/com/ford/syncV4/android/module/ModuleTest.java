@@ -26,9 +26,11 @@ import android.util.Xml;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.AcceptedRPC;
+import com.ford.syncV4.android.module.reader.BinaryDataReaderFactory;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
@@ -77,6 +79,18 @@ public class ModuleTest {
 	/** Specifies whether to display debug info from the XML parser. */
 	private static final boolean DISPLAY_PARSER_DEBUG_INFO = false;
 	
+	/**
+	 * The tag name used to specify where to get binary data from (e.g., for
+	 * PutFile message).
+	 */
+	private final static String BINARY_TAG_NAME = "Binary";
+	/**
+	 * Attribute name for binary data, because it requires special handling when
+	 * creating certain messages (e.g. calling PutFile's
+	 * {@link RPCStruct#setBulkData(byte[])} method).
+	 */
+	private final static String BULK_DATA_ATTR = "bulkData";
+	
 	private static ModuleTest _instance;
 	private SyncProxyTester _mainInstance;
 	private logAdapter _msgAdapter;
@@ -94,6 +108,9 @@ public class ModuleTest {
 	private ArrayList<Pair<String, ArrayList<RPCRequest>>> testList = new ArrayList<Pair<String, ArrayList<RPCRequest>>> ();
 	
 	public static ArrayList<Pair<Integer, Result>> responses = new ArrayList<Pair<Integer, Result>>();
+	
+	/** Factory that is used to return a reader for the binary data in tests. */
+	private BinaryDataReaderFactory binaryDataReaderFactory = new BinaryDataReaderFactory();
 	
 	public ModuleTest() {
 		this._mainInstance = SyncProxyTester.getInstance();
@@ -379,7 +396,11 @@ public class ModuleTest {
 									logParserDebugInfo("" + hash);
 									//TODO: Iterate through hash table and add it to parameters
 									for (Object key : hash.keySet()) {
-										rpc.setParameters((String) key, hash.get(key));
+										if (((String)key).equals(BULK_DATA_ATTR)) {
+											rpc.setBulkData((byte[]) hash.get(key));
+										} else {
+											rpc.setParameters((String) key, hash.get(key));
+										}
 									}
 									
 								    Iterator it = hash.entrySet().iterator();
@@ -584,6 +605,13 @@ public class ModuleTest {
 						logParserDebugInfo("In String");
 						if (parser.getAttributeName(0) != null) {
 							hash.put(parser.getAttributeName(0), parser.getAttributeValue(0));
+						}
+					} else if (tempName.equalsIgnoreCase(BINARY_TAG_NAME)) {
+						logParserDebugInfo("In " + BINARY_TAG_NAME);
+						String srcData = parser.getAttributeValue(0);
+						byte[] data = binaryDataReaderFactory.getReaderForString(srcData).read(srcData);
+						if (data != null) {
+							hash.put(BULK_DATA_ATTR, data);
 						}
 					} else {
 						logParserDebugInfo("Returning in else statement");

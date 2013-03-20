@@ -1,12 +1,15 @@
 package com.ford.syncV4.android.activity;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -30,9 +33,6 @@ import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
@@ -132,6 +132,8 @@ import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.transport.TransportType;
+import com.lamerman.FileDialog;
+import com.lamerman.SelectionMode;
 
 public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final String VERSION = "$Version:$";
@@ -154,6 +156,8 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private static final int ALERTMANEUVER_MAXSOFTBUTTONS = 3;
 	private static final int SHOWCONSTANTTBT_MAXSOFTBUTTONS = 3;
 	private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
+
+	private static final int REQUEST_PUTFILE_OPEN = 42;
 
     private static SyncProxyTester _activity;
     private static ArrayList<Object> _logMessages = new ArrayList<Object>();
@@ -216,6 +220,11 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	 * check it when the user has explicitly set the soft buttons.
 	 */
 	private CheckBox chkIncludeSoftButtons;
+	/**
+	 * Reference to PutFile dialog's local filename text field, so that the
+	 * filename is set after choosing.
+	 */
+	private EditText txtLocalFileName;
 	
 	/**
 	 * Stores the number of selections of each message to sort them by
@@ -1790,10 +1799,24 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							AlertDialog.Builder builder;
 							AlertDialog dlg;
 							
-							Context mContext = adapter.getContext();
+							final Context mContext = adapter.getContext();
 							LayoutInflater inflater = (LayoutInflater) mContext
 									.getSystemService(LAYOUT_INFLATER_SERVICE);
 							View layout = inflater.inflate(R.layout.putfile, null);
+							
+							txtLocalFileName = (EditText) layout.findViewById(R.id.putfile_localFileName);
+							final Button btnSelectLocalFile = (Button) layout.findViewById(R.id.putfile_selectFileButton);
+							btnSelectLocalFile.setOnClickListener(new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									// show Choose File dialog
+									Intent intent = new Intent(mContext, FileDialog.class);
+									intent.putExtra(FileDialog.START_PATH, "/sdcard");
+									intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
+									intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
+									startActivityForResult(intent, REQUEST_PUTFILE_OPEN);
+								}
+							});
 							
 							final EditText txtSyncFileName = (EditText) layout.findViewById(R.id.syncFileName);
 							
@@ -1808,32 +1831,32 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 							builder = new AlertDialog.Builder(mContext);
 							builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
-									String syncFileName = txtSyncFileName.getText().toString();
-									try {
-										PutFile msg = new PutFile();
-										msg.setSyncFileName(syncFileName);
-										msg.setFileType((FileType) spnFileType.getSelectedItem());
-										msg.setPersistentFile(chkPersistentFile.isChecked());
-										msg.setCorrelationID(autoIncCorrId++);
-										
-									    Bitmap photo = BitmapFactory.decodeResource(getResources(), R.drawable.fiesta);
-								        ByteArrayOutputStream bas = new ByteArrayOutputStream();
-									    photo.compress(CompressFormat.JPEG, 100, bas);
-								        byte[] data = new byte[bas.toByteArray().length];
-								        data = bas.toByteArray();
-								        
-								        msg.setBulkData(data);
-										
-										_msgAdapter.logMessage(msg, true);
-										ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
-									} catch (SyncException e) {
-										_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+									byte[] data = contentsOfFile(txtLocalFileName.getText().toString());
+									if (data != null) {
+										String syncFileName = txtSyncFileName.getText().toString();
+										try {
+											PutFile msg = new PutFile();
+											msg.setSyncFileName(syncFileName);
+											msg.setFileType((FileType) spnFileType.getSelectedItem());
+											msg.setPersistentFile(chkPersistentFile.isChecked());
+											msg.setCorrelationID(autoIncCorrId++);
+											msg.setBulkData(data);
+											
+											_msgAdapter.logMessage(msg, true);
+											ProxyService.getInstance().getProxyInstance().sendRPCRequest(msg);
+										} catch (SyncException e) {
+											_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+										}
+										_putFileAdapter.add(syncFileName);
+									} else {
+										Toast.makeText(mContext, "Can't read data from file", Toast.LENGTH_LONG).show();
 									}
-									_putFileAdapter.add(syncFileName);
+									txtLocalFileName = null;
 								}
 							});
 							builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int id) {
+									txtLocalFileName = null;
 									dialog.cancel();
 								}
 							});
@@ -3091,6 +3114,16 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			}
 			IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_SOFTBUTTONSLIST);
 			break;
+
+		case REQUEST_PUTFILE_OPEN:
+			if (resultCode == RESULT_OK) {
+				String fileName = data.getStringExtra(FileDialog.RESULT_PATH);
+				if (txtLocalFileName != null) {
+					txtLocalFileName.setText(fileName);
+				}
+			}
+			break;
+			
 		default:
 			Log.i(logTag, "Unknown request code: " + requestCode);
 			break;
@@ -3110,6 +3143,39 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		List<ButtonName> buttonNames = Arrays.asList(ButtonName.values());
 		for (ButtonName buttonName : buttons) {
 			isButtonSubscribed[buttonNames.indexOf(buttonName)] = true;
+		}
+	}
+
+	/**
+	 * Returns the file contents from the specified file.
+	 * 
+	 * @param filename
+	 *            Name of the file to open.
+	 * @return The file's contents or null in case of an error
+	 */
+	public static byte[] contentsOfFile(String filename) {
+		InputStream is = null;
+		try {
+			is = new BufferedInputStream(new FileInputStream(filename));
+			ByteArrayOutputStream os = new ByteArrayOutputStream(is.available());
+			final int buffersize = 4096;
+			final byte[] buffer = new byte[buffersize];
+			int available = 0;
+			while ((available = is.read(buffer)) >= 0) {
+				os.write(buffer, 0, available);
+			}
+			return os.toByteArray();
+		} catch (IOException e) {
+			Log.w(logTag, "Can't read file " + filename, e);
+			return null;
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 }
