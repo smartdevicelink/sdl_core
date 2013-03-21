@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Required to check if WiFi is enabled -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Required to make the device stay awake while doing XML tests -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     
     <application
         android:debuggable="true"

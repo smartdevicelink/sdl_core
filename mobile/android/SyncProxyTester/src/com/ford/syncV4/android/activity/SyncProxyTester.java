@@ -672,6 +672,7 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 	private final int MNU_UNREGISTER = 14;
 	private final int MNU_APP_VERSION = 15;
 	private final int MNU_CLEAR_FUNCTIONS_USAGE = 16;
+	private final int MNU_WAKELOCK = 17;
 
 	
 	/* Creates the menu items */
@@ -691,10 +692,22 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 			menu.add(0, MNU_CLEAR_FUNCTIONS_USAGE, 0, "Reset functions usage");
 			menu.add(0, XML_TEST, 0, "XML Test");
 			menu.add(0, POLICIES_TEST, 0, "Policies Test");
+			MenuItem menuitem = menu.add(0, MNU_WAKELOCK, 0, "Lock screen while testing");
+			menuitem.setCheckable(true);
+			menuitem.setChecked(!getDisableLockFlag());
 			return true;
 		} else {
 			return false;
 		}
+	}
+	
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		MenuItem menuItem = menu.findItem(MNU_WAKELOCK);
+		if (menuItem != null) {
+			menuItem.setChecked(!getDisableLockFlag());
+		}
+		return super.onPrepareOptionsMenu(menu);
 	}
 	
 	private int getCurrentProtocolVersion() {
@@ -830,11 +843,40 @@ public class SyncProxyTester extends Activity implements OnClickListener {
 		case MNU_CLEAR_FUNCTIONS_USAGE:
 			clearMessageSelectCount();
 			break;
+		case MNU_WAKELOCK:
+			toggleDisableLock();
+			break;
 		}
 		
 		return false;
 	}
-	
+
+	/**
+	 * Toggles the current state of the disable lock when testing flag, and
+	 * writes it to the preferences.
+	 */
+	private void toggleDisableLock() {
+		SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
+		boolean disableLock = prefs.getBoolean(
+				Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING,
+				Const.PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING);
+		disableLock = !disableLock;
+		prefs.edit()
+				.putBoolean(Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING,
+						disableLock).commit();
+	}
+
+	/**
+	 * Returns the current state of the disable lock when testing flag.
+	 * 
+	 * @return true if the screen lock is disabled
+	 */
+	public boolean getDisableLockFlag() {
+		return getSharedPreferences(Const.PREFS_NAME, 0).getBoolean(
+				Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING,
+				Const.PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING);
+	}
+
 	/** Closes the activity and stops the proxy service. */
 	private void exitApp() {
 		stopService(new Intent(this, ProxyService.class));

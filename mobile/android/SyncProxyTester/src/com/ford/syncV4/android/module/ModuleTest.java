@@ -15,10 +15,13 @@ import org.xmlpull.v1.XmlPullParser;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Xml;
@@ -111,6 +114,9 @@ public class ModuleTest {
 	
 	/** Factory that is used to return a reader for the binary data in tests. */
 	private BinaryDataReaderFactory binaryDataReaderFactory = new BinaryDataReaderFactory();
+	
+	/** WakeLock to keep screen on while testing. */
+	private WakeLock wakeLock = null;
 	
 	public ModuleTest() {
 		this._mainInstance = SyncProxyTester.getInstance();
@@ -238,6 +244,10 @@ public class ModuleTest {
 					XmlPullParser parser = Xml.newPullParser();
 					RPCRequest rpc;
 					try {
+						if (_mainInstance.getDisableLockFlag()) {
+							acquireWakeLock();
+						}
+						
 						//FileInputStream fin = new FileInputStream("/sdcard/test.xml");
 						FileInputStream fin = new FileInputStream("/sdcard/" + mChosenFile);
 						InputStreamReader isr = new InputStreamReader(fin);
@@ -478,6 +488,8 @@ public class ModuleTest {
 						
 					} catch (Exception e) {
 						_msgAdapter.logMessage("Parser Failed!!", Log.ERROR, e);
+					} finally {
+						releaseWakeLock();
 					}
 				}
 			}
@@ -771,6 +783,35 @@ public class ModuleTest {
 		}
 		
 		Log.d(TAG, s);
+	}
+	
+	private void acquireWakeLock() {
+		if (wakeLock != null) {
+			wakeLock.release();
+			wakeLock = null;
+		}
+		
+		try {
+			PowerManager pm = (PowerManager) _mainInstance
+					.getSystemService(Context.POWER_SERVICE);
+			wakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK
+					| PowerManager.ACQUIRE_CAUSES_WAKEUP
+					| PowerManager.ON_AFTER_RELEASE, TAG);
+			wakeLock.setReferenceCounted(false);
+			wakeLock.acquire();
+		} catch (NullPointerException e) {
+			Log.w(TAG, "Can't acquire wakelock", e);
+			wakeLock = null;
+		}
+	}
+
+	private void releaseWakeLock() {
+		if (wakeLock != null) {
+			wakeLock.release();
+			wakeLock = null;
+		} else {
+			Log.d(TAG, "Can't release wakeLock, it's null");
+		}
 	}
 }
 
