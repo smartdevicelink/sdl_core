@@ -73,34 +73,12 @@ MFT.SDLMediaModel = MFT.SDLAppModel.extend( {
     currTime: 0,
 
     /**
-     * Notification of deactivation of current application model initiated in
-     * StateManager
-     */
-    deactivateApp: function() {
-
-        MFT.SDLModel.onDeactivateApp( MFT.TransitionIterator.finalPath, this.appId, this.appName );
-
-    },
-
-    /**
-     * Method hides sdl activation button
+     * Method hides sdl activation button and sdl application
      * 
      * @param {Number}
      */
     onDeleteApplication: function( appId ) {
-        if( MFT.SDLMediaController.currentAppId == appId ){
-
-            MFT.SDLMediaController.set( 'currentAppId', 0 );
-
-            if( MFT.sdlView.stateObj.active || MFT.SDLAppController.model.active ){
-
-                MFT.States.goToState( 'info.apps' );
-
-                MFT.SDLAppController.model.set( 'active', false );
-
-                MFT.MediaController.set( 'activeState', 'media.avin' );
-            }
-        }
+        MFT.SDLMediaController.onDeleteApplication( appId );
     },
 
     /**

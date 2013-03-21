@@ -109,7 +109,7 @@ MFT.SDLModel = Em.Object.create( {
      * 
      * @type object
      */
-    registeredApps: {},
+    registeredApps: [],
 
     /**
      * List of icons
@@ -246,11 +246,19 @@ MFT.SDLModel = Em.Object.create( {
      * @param {Object}
      */
     onAppRegistered: function( params ) {
-        if( params.isMediaApplication ){
-            MFT.SDLController.registerApplication( params, 0 );
-        }else{
-            MFT.SDLController.registerApplication( params, 1 );
+        var applicationType = 1;
+
+        if( MFT.SDLController.getApplicationModel( params.appId ) ){
+            return;
         }
+
+        if( params.isMediaApplication ){
+            applicationType = 0;
+        }
+
+        MFT.SDLController.registerApplication( params, applicationType );
+
+        MFT.VRPopUp.AddActivateApp( params.appId, params.appName );
     },
 
     /**
@@ -260,15 +268,11 @@ MFT.SDLModel = Em.Object.create( {
      * @param {Object}
      */
     onAppUnregistered: function( params ) {
-        if( this.registeredApps[params.appId] ){
+        if( MFT.SDLController.getApplicationModel( params.appId ) ){
 
             MFT.VRPopUp.DeleteActivateApp( params.appId );
 
-            MFT.SDLController.getApplicationModel( params.appId ).onDeleteApplication( params.appId );
-
-            delete MFT.SDLModel.registeredApps[params.appId];
-
-            MFT.SDLModel.get( 'applicationsList' ).shiftObject( params.appId );
+            MFT.SDLController.unregisterApplication( params.appId );
         }
     },
 

@@ -245,19 +245,26 @@ MFT.SDLController = Em.Object.create( {
      * @param {Number} applicationType
      */
     registerApplication: function( params, applicationType ) {
-        if( MFT.SDLModel.registeredApps[params.appId] ){
-            return;
-        }
 
-        MFT.SDLModel.registeredApps[params.appId] = this.applicationModels[applicationType].create( {
+        MFT.SDLModel.get( 'registeredApps' ).pushObject( MFT.SDLController.applicationModels[applicationType].create( {
             appId: params.appId,
             appName: params.appName,
             deviceName: params.deviceName
-        } );
+        } ) );
 
-        MFT.SDLModel.get( 'applicationsList' ).pushObject( params.appId );
+    },
 
-        MFT.VRPopUp.AddActivateApp( params.appId, params.appName );
+    /**
+     * Unregister application
+     * 
+     * @param {Number} appId
+     */
+    unregisterApplication: function( appId ) {
+        
+        this.getApplicationModel( appId ).onDeleteApplication( appId );
+        
+        MFT.SDLModel.get( 'registeredApps' ).shiftObject( MFT.SDLModel.registeredApps.filterProperty( 'appId', appId )[0] );
+        
     },
 
     /**
@@ -303,7 +310,7 @@ MFT.SDLController = Em.Object.create( {
      * @param {Number}
      */
     getApplicationModel: function( applicationId ) {
-        return MFT.SDLModel.registeredApps[applicationId];
+        return MFT.SDLModel.registeredApps.filterProperty( 'appId', applicationId )[0];
     },
 
     /**

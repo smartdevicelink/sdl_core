@@ -68,5 +68,18 @@ MFT.NonMediaController = Em.Object.create({
             return;
         }
         this.activateApp( MFT.SDLController.getApplicationModel( this.currentAppId ) );
+    },
+
+    /**
+     * Method hides sdl activation button and sdl application
+     * @param {Number}
+     */
+    onDeleteApplication: function( appId ){
+        if( this.currentAppId == appId ){
+            if( MFT.InfoNonMedia.stateObj.active ){
+                MFT.States.goToState('info.apps');
+            }
+            this.set('currentAppId', 0);
+        }
     }
 });

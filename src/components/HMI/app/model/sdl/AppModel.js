@@ -88,6 +88,16 @@ MFT.SDLAppModel = Em.Object.extend({
     commandsList: [],
     
     /**
+     * Notification of deactivation of current application model initiated in
+     * StateManager
+     */
+    deactivateApp: function() {
+
+        MFT.SDLModel.onDeactivateApp( MFT.TransitionIterator.finalPath, this.appId, this.appName );
+
+    },
+    
+    /**
      * Return current menu commands
      *
      * @return {Array}

@@ -1,4 +1,4 @@
-/*
+/**
  * Reference implementation of BasicCommunication component.
  * 
  * Interface to get or set some essential information from OS.
@@ -11,7 +11,7 @@
 
 FFW.BasicCommunication = FFW.RPCObserver.create( {
 
-    /*
+    /**
      * access to basic RPC functionality
      */
     client: FFW.RPCClient.create( {
@@ -31,13 +31,13 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
     onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
     onDeviceListUpdatedNotification: "BasicCommunication.OnDeviceListUpdated",
 
-    /*
+    /**
      * init object
      */
     init: function() {
     },
 
-    /*
+    /**
      * connect to RPC bus
      */
     connect: function() {
@@ -45,14 +45,14 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this.client.connect( this, 600 );
     },
 
-    /*
+    /**
      * disconnect from RPC bus
      */
     disconnect: function() {
         this.client.disconnect();
     },
 
-    /*
+    /**
      * Client is registered - we can send request starting from this point of
      * time
      */
@@ -66,7 +66,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this.onDeviceListUpdatedNotificationId = this.client.subscribeToNotification( this.onDeviceListUpdatedNotification );
     },
 
-    /*
+    /**
      * Client is unregistered - no more requests
      */
     onRPCUnregistered: function() {
@@ -79,7 +79,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this.onDeviceListUpdatedNotificationId = this.client.unsubscribeFromNotification( this.onDeviceListUpdatedNotification );
     },
 
-    /*
+    /**
      * Client disconnected.
      */
     onRPCDisconnected: function() {
@@ -88,7 +88,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         }
     },
 
-    /*
+    /**
      * when result is received from RPC component this function is called It is
      * the propriate place to check results of reuqest execution Please use
      * previously store reuqestID to determine to which request repsonse belongs
@@ -115,7 +115,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         }
     },
 
-    /*
+    /**
      * handle RPC erros here
      */
     onRPCError: function( error ) {
@@ -123,7 +123,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         this._super();
     },
 
-    /*
+    /**
      * handle RPC notifications here
      */
     onRPCNotification: function( notification ) {
@@ -145,7 +145,7 @@ FFW.BasicCommunication = FFW.RPCObserver.create( {
         }
     },
 
-    /*
+    /**
      * handle RPC requests here
      */
     onRPCRequest: function( request ) {

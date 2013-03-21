@@ -134,7 +134,7 @@ var StateManager = Em.StateManager.extend({
             exit: function() {
                 this._super();
                 
-		     	MFT.SDLAppController.model.deactivateApp();
+		     	MFT.NonMediaController.deactivateApp();
             }
 		})
 	}),
@@ -344,7 +344,7 @@ var StateManager = Em.StateManager.extend({
             exit: function() {
                 this._super();
                 
-		     	MFT.SDLAppController.model.deactivateApp();
+		     	MFT.SDLMediaController.deactivateApp();
             }
 
 		}),
