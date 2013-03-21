@@ -233,8 +233,8 @@ class SmartSchema(object):
             raise GenerateError("Structs is None")
 
         for struct in structs:
-            self._process_struct(struct)            
-        
+            self._process_struct(struct)
+
     def _process_struct(self, struct):
         if struct.name in self._generated_structs:
             return
@@ -244,7 +244,7 @@ class SmartSchema(object):
 
         self._structs_add_code = "".join(
             [self._structs_add_code, self._indent_code(
-                self._generate_struct_schema_item(struct), 1)]) 
+                self._generate_struct_schema_item(struct), 1)])
         self._generated_structs.append(struct.name)
 
     def _process_struct_member(self, member):
@@ -254,7 +254,7 @@ class SmartSchema(object):
     def _ensure_struct_generated(self, struct):
         if struct.name in self._generated_structs:
             return
-        
+
         self._process_struct(struct)
 
     def _generate_struct_schema_item(self, struct):
@@ -366,45 +366,51 @@ class SmartSchema(object):
 
     def _generate_schema_local_decls(self, members):
         result = ""
+        processed_enums = []
         for member in members:
-            if type(member.param_type) is Model.Enum:
+            if type(member.param_type) is Model.Enum and \
+               member.param_type.name not in processed_enums:
                 local_var = self._generate_schema_local_emum_var_name(member)
-                result = "".join(
-                    [result, self._impl_code_local_decl_enum_template.substitute(
-                        type=member.param_type.name,
-                        var_name=local_var)])
-                result = "\n".join([result, "\n".join(
-                    [self._impl_code_local_decl_enum_insert_template.
-                    substitute(
-                        var_name=local_var,
-                        value=x.primary_name) for x in
-                        member.param_type.elements.values()])])
-                
+                result = "\n".join(
+                    ["".join(
+                        [result, self._impl_code_local_decl_enum_template.
+                            substitute(
+                                type=member.param_type.name,
+                                var_name=local_var)]),
+                        "\n".join(
+                            [self._impl_code_local_decl_enum_insert_template.
+                                substitute(
+                                    var_name=local_var,
+                                    value=x.primary_name)
+                             for x in member.param_type.elements.values()])])
+                processed_enums.append(member.param_type.name)
+            # if type(member.param_type) is Model.EnumSubset:
+
         return "".join([result, "\n\n"]) if result else ""
-    
+
     def _generate_schema_items_decls(self, members):
         result = "\n".join(
             [self._generate_schema_item_decl(x) for x in members])
 
-        return "".join([result, "\n\n"]) if result else ""  
-    
+        return "".join([result, "\n\n"]) if result else ""
+
     def _generate_schema_item_decl(self, member):
         code = ""
-        
+
         if type(member.param_type) is Model.Boolean:
             code = self._impl_code_bool_item_template.substitute(params="")
-        elif type(member.param_type) is Model.Integer:    
+        elif type(member.param_type) is Model.Integer:
             code = self._impl_code_integer_item_template.substitute(
                 type="int",
                 params=self._generate_schema_item_param_values(
                     [["int", member.param_type.min_value],
-                    ["int", member.param_type.max_value]]))
+                     ["int", member.param_type.max_value]]))
         elif type(member.param_type) is Model.Double:
             code = self._impl_code_integer_item_template.substitute(
                 type="double",
                 params=self._generate_schema_item_param_values(
                     [["double", member.param_type.min_value],
-                    ["double", member.param_type.max_value]]))
+                     ["double", member.param_type.max_value]]))
         elif type(member.param_type) is Model.String:
             code = self._impl_code_string_item_template.safe_substitute(
                 param=self._generate_schema_item_param_values(
@@ -423,9 +429,9 @@ class SmartSchema(object):
                 type=member.param_type.name,
                 params="")
         else:
-            raise GenerateError("Unexpected type of parameter: " + 
+            raise GenerateError("Unexpected type of parameter: " +
                                 str(type(member.param_type)))
-        
+
         return self._impl_code_item_decl_temlate.substitute(
             var_name=self._generate_schema_item_var_name(member),
             item_decl=code)
@@ -439,21 +445,21 @@ class SmartSchema(object):
             result = "".join([result, "".join(
                 [", ", value])
                 if result else value])
-        
+
         return result
-         
+
     def _generate_struct_items_fill(self, members):
         result = "\n".join(
             [self._generate_schema_item_fill(x) for x in members])
 
         return "".join([result, "\n\n"]) if result else ""
-    
+
     def _generate_schema_item_fill(self, member):
         return self._impl_code_item_fill_template.substitute(
             name=member.name,
             var_name=self._generate_schema_item_var_name(member),
             is_mandatory=member.is_mandatory)
-    
+
     def _generate_schema_item_var_name(self, member):
         return "".join([member.name, "_SchemaItem"])
 
@@ -785,7 +791,7 @@ class SmartSchema(object):
 
     _impl_code_local_decl_enum_template = string.Template(
         '''std::set<${type}> ${var_name};''')
-    
+
     _impl_code_local_decl_enum_insert_template = string.Template(
         '''${var_name}.isert(${value});''')
 
@@ -803,13 +809,13 @@ class SmartSchema(object):
 
     _impl_code_array_item_template = string.Template(
         '''CArraySchemaItem::create(${params})''')
-    
+
     _impl_code_struct_item_template = string.Template(
         '''provideObjectSchemaItemForStruct("${name}");''')
 
     _impl_code_enum_item_template = string.Template(
         '''TEnumSchemaItem<${type}::eType>::create(${params});''')
-    
+
     _impl_code_item_param_value_template = string.Template(
         '''TSchemaItemParameter<$type>($value)''')
 
@@ -839,7 +845,7 @@ class SmartSchema(object):
         '''protected:\n'''
         '''\n'''
         '''   /**\n'''
-        '''    * @brief Helper method that allows to make reference to struct\n'''
+        '''    * @brief Helper that allows to make reference to struct\n'''
         '''    *\n'''
         '''    * @param StructName Name of structure to provide.\n'''
         '''    *\n'''
