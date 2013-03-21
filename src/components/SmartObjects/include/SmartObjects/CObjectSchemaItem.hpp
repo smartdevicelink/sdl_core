@@ -68,11 +68,21 @@ namespace NsAppLink
              **/
             virtual Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject & Object);
 
+            /**
+             * @brief Apply schema.
+             *
+             * @param Object Object to apply schema.
+             **/
+            virtual void applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object);
+
         private:
             /**
              * @brief Constructor.
+             *
+             * @param Members Map of member name to SMember structure
+             *                describing the object member.
              **/
-            CObjectSchemaItem(void);
+            CObjectSchemaItem(const std::map<std::string, SMember> & Members);
 
             /**
              * @brief Copy constructor.
@@ -93,6 +103,11 @@ namespace NsAppLink
              * @return Not implemented.
              **/
             CObjectSchemaItem & operator =(const CObjectSchemaItem & Other);
+
+            /**
+             * @brief Map of member name to SMember structure describing the object member.
+             **/
+            const std::map<std::string, SMember> mMembers;
         };
     }
 }

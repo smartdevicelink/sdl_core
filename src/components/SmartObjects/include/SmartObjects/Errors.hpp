@@ -27,6 +27,16 @@ namespace NsAppLink
                 OUT_OF_RANGE,
 
                 /**
+                 * @brief Mandatory parameter is missing.
+                 **/
+                MISSING_MANDATORY_PARAMETER,
+
+                /**
+                 * @brief Unexpected parameter.
+                 **/
+                UNEXPECTED_PARAMETER,
+
+                /**
                  * @brief General validation error
                  **/
                 ERROR
