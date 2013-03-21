@@ -350,6 +350,7 @@ class SmartSchema(object):
 
         """
 
+        processed_enums = []
         return self._struct_impl_template.substitute(
             namespace=namespace,
             class_name=class_name,
@@ -357,16 +358,15 @@ class SmartSchema(object):
             code=self._indent_code(
                 self._struct_impl_code_tempate.substitute(
                     schema_local_decl=self._gen_schema_local_decls(
-                        struct.members.values()),
+                        struct.members.values(), processed_enums),
                     schema_items_decl=self._gen_schema_items_decls(
                         struct.members.values()),
                     schema_item_fill=self._gen_struct_items_fill(
                         struct.members.values())),
                 1))
 
-    def _gen_schema_local_decls(self, members):
+    def _gen_schema_local_decls(self, members, processed_enums):
         result = ""
-        processed_enums = []
         for member in members:
             if type(member.param_type) is Model.Enum and \
                member.param_type.name not in processed_enums:
@@ -393,7 +393,7 @@ class SmartSchema(object):
                     ["".join(
                         [result, self._impl_code_local_decl_enum_template.
                             substitute(
-                                type=member.param_type.name,
+                                type=member.param_type.enum.name,
                                 var_name=local_var)]),
                         "\n".join(
                             [self._impl_code_local_decl_enum_insert_template.
@@ -404,6 +404,14 @@ class SmartSchema(object):
                              for x in member.param_type.
                              allowed_elements.values()])])
                 result = "".join([result, "\n\n"]) if result else ""
+            elif type(member.param_type) is Model.Array:
+                result = "".join(
+                    [result, self._gen_schema_local_decls(
+                        [Model.Param(member.param_type.element_type.name if type(
+                            member.param_type.element_type) is
+                                Model.EnumSubset else "",
+                            member.param_type.element_type)],
+                        processed_enums)])
 
         return result
 
@@ -441,16 +449,13 @@ class SmartSchema(object):
                 params=self._gen_schema_item_param_values(
                     [["size_t", param.max_length]]))
         elif type(param) is Model.Array:
-            new_name = ""
-            if (type(param.element_type) is Model.Enum) or (
-               type(param.element_type) is Model.EnumSubset):
-                new_name = param.element_type.name
             code = self._impl_code_array_item_template.substitute(
                 params="".join(
                     ["".join(
                         [self._gen_schema_item_decl_code(
                             param.element_type,
-                            new_name),
+                            param.element_type.name if type(param.element_type)
+                                is Model.EnumSubset else ""),
                             ", "]),
                         self._gen_schema_item_param_values(
                             [["size_t", param.min_size],
@@ -464,7 +469,7 @@ class SmartSchema(object):
                 params=self._gen_schema_local_emum_var_name(param))
         elif type(param) is Model.EnumSubset:
             code = self._impl_code_enum_item_template.substitute(
-                type=param.name,
+                type=param.enum.name,
                 params=self._gen_schema_local_emum_s_var_name(member_name))
         else:
             raise GenerateError("Unexpected type of parameter: " +
@@ -831,7 +836,7 @@ class SmartSchema(object):
         '''return CObjectSchemaItem::create(schemaMembersMap);''')
 
     _impl_code_local_decl_enum_template = string.Template(
-        '''std::set<${type}> ${var_name};''')
+        '''std::set<${type}::eType> ${var_name};''')
 
     _impl_code_local_decl_enum_insert_template = string.Template(
         '''${var_name}.insert(${enum}::${value});''')
