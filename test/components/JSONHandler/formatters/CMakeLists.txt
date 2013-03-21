@@ -17,6 +17,9 @@ set (SOURCES_JSONALRPCV1_TEST
     ./FormatterJsonALRPCv1Test.cpp
 )
 
+set (SOURCES_JSONRPC2_TEST
+    ./FormatterJsonRPC2Test.cpp
+)
 
 
 # Libraries are the same for all SmartObject test
@@ -38,3 +41,7 @@ add_test(test_FormatterJsonALRPCv2Test test_FormatterJsonALRPCv2Test)
 add_executable("test_FormatterJsonALRPCv1Test" ${SOURCES_JSONALRPCV1_TEST})
 target_link_libraries("test_FormatterJsonALRPCv1Test" ${LIBRARIES})
 add_test(test_FormatterJsonALRPCv1Test test_FormatterJsonALRPCv1Test)
+
+add_executable("test_FormatterJsonRPC2Test" ${SOURCES_JSONRPC2_TEST})
+target_link_libraries("test_FormatterJsonRPC2Test" ${LIBRARIES})
+add_test(test_FormatterJsonRPC2Test test_FormatterJsonRPC2Test)
