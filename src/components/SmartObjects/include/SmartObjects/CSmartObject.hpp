@@ -1,6 +1,7 @@
 #ifndef __CSMARTOBJECT_HPP__
 #define __CSMARTOBJECT_HPP__
 
+#include <set>
 #include <string>
 #include <vector>
 #include <map>
@@ -124,9 +125,9 @@ namespace NsAppLink
             /**
              * @brief Enumerates content of the object when it behaves like a map.
              *
-             * Returns vector of map keys
+             * Returns set of map keys
              **/
-            std::vector<std::string> enumerate();
+            std::set<std::string> enumerate() const;
 
             bool keyExists(const char * key);
 

@@ -692,16 +692,16 @@ NsAppLink::NsSmartObjects::SmartType NsAppLink::NsSmartObjects::CSmartObject::ge
     return m_type;
 }
 
-std::vector<std::string> NsAppLink::NsSmartObjects::CSmartObject::enumerate()
+std::set<std::string> NsAppLink::NsSmartObjects::CSmartObject::enumerate() const
 {
-    std::vector<std::string> keys;
+    std::set<std::string> keys;
 
     if(m_type == SmartType_Map)
     {
         std::transform(
             m_data.map_value->begin(),
             m_data.map_value->end(),
-            std::back_inserter(keys),
+            std::inserter(keys, keys.end()),
             [](const SmartMap::value_type &pair){return pair.first;}
         );
     }
