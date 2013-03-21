@@ -22,8 +22,8 @@ namespace NsAppLink
              * @brief Create a new schema item.
              *
              * @param ElementSchemaItem SchemaItem for array elements.
-             * @param MinSize Minimum allowed value.
-             * @param MaxSize Maximum allowed value.
+             * @param MinSize Minimum allowed size.
+             * @param MaxSize Maximum allowed size.
              *
              * @return Shared pointer to a new schema item.
              **/
@@ -40,11 +40,24 @@ namespace NsAppLink
              **/
             virtual Errors::eType validate(const NsAppLink::NsSmartObjects::CSmartObject & Object);
 
+            /**
+             * @brief Apply schema.
+             *
+             * @param Object Object to apply schema.
+             **/
+            virtual void applySchema(NsAppLink::NsSmartObjects::CSmartObject & Object);
+
         private:
             /**
              * @brief Constructor.
+             *
+             * @param ElementSchemaItem SchemaItem for array elements.
+             * @param MinSize Minimum allowed size.
+             * @param MaxSize Maximum allowed size.
              **/
-            CArraySchemaItem(void);
+            CArraySchemaItem(const TSharedPtr<ISchemaItem> & ElementSchemaItem,
+                             const TSchemaItemParameter<size_t> & MinSize,
+                             const TSchemaItemParameter<size_t> & MaxSize);
 
             /**
              * @brief Copy constructor.
@@ -65,6 +78,21 @@ namespace NsAppLink
              * @return Not implemented.
              **/
             CArraySchemaItem & operator =(const CArraySchemaItem & Other);
+
+            /**
+             * @brief SchemaItem for array elements.
+             **/
+            const TSharedPtr<ISchemaItem> mElementSchemaItem;
+
+            /**
+             * @brief Minimum allowed size.
+             **/
+            const TSchemaItemParameter<size_t> mMinSize;
+
+            /**
+             * @brief Maximum allowed size.
+             **/
+            const TSchemaItemParameter<size_t> mMaxSize;
         };
     }
 }

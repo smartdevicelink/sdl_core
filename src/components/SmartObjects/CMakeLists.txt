@@ -11,6 +11,7 @@ set (SOURCES
     ./src/ISchemaItem.cpp
     ./src/CAlwaysFalseSchemaItem.cpp
     ./src/CAlwaysTrueSchemaItem.cpp
+    ./src/CArraySchemaItem.cpp
     ./src/CBoolSchemaItem.cpp
     ./src/CStringSchemaItem.cpp
     ./src/TEnumSchemaItem.cpp
