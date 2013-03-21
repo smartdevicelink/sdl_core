@@ -2,8 +2,8 @@
 #include <limits>
 #include <errno.h>
 #include <algorithm>
-
-
+#include <sstream>
+#include <iomanip>
 
 NsAppLink::NsSmartObjects::CSmartObject::CSmartObject(void)
 : m_type(SmartType_Null)
@@ -426,7 +426,7 @@ std::string NsAppLink::NsSmartObjects::CSmartObject::convert_string(void) const
             return std::string(1, m_data.char_value);
             break;
         case SmartType_Double:
-            return std::to_string(m_data.double_value);
+            return convert_double_to_string(m_data.double_value);
             break;
         default:
             break;
@@ -691,6 +691,19 @@ double NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_double(const s
     }
 
     return result;
+}
+
+
+std::string NsAppLink::NsSmartObjects::CSmartObject::convert_double_to_string(const double& value)
+{
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(10) << value;         //convert double to string w fixed notation, hi precision
+    std::string s = ss.str();                                   //output to std::string
+    s.erase(s.find_last_not_of('0') + 1, std::string::npos);    //remove trailing 000s    (123.1200 => 123.12,  123.000 => 123.)
+    if(s[s.size()-1] == '.') {
+        s.erase(s.end()-1);                                     //remove dangling decimal (123. => 123)
+    }
+    return s;
 }
 
 long NsAppLink::NsSmartObjects::CSmartObject::convert_string_to_long(const std::string* s)

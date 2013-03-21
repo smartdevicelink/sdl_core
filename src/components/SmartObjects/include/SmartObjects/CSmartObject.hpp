@@ -205,6 +205,7 @@ namespace NsAppLink
             // Helper methods
             static double convert_string_to_double(const std::string* s);
             static long convert_string_to_long(const std::string* s);
+            static std::string convert_double_to_string(const double& value);
 
             void duplicate(const CSmartObject&);
             void cleanup_data();
