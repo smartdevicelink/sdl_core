@@ -217,6 +217,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
             ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
             obj = " 123 ";
             ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
+            obj = " 123";
+            ASSERT_EQ(invalid_int_value, static_cast<int>(obj));        // FIXME:
         }
         {   // String to char
             CSmartObject obj;
