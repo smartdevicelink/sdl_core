@@ -92,7 +92,7 @@ namespace NsAppLink
             SmartType get_type() const;
 
 
-            size_t length();
+            size_t length() const;
 
 
             /**

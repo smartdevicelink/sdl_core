@@ -606,7 +606,7 @@ void NsAppLink::NsSmartObjects::CSmartObject::cleanup_data()
     }
 }
 
-size_t NsAppLink::NsSmartObjects::CSmartObject::length()
+size_t NsAppLink::NsSmartObjects::CSmartObject::length() const
 {
     size_t size = 0;
 
