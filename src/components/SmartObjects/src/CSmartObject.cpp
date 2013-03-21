@@ -709,14 +709,14 @@ std::set<std::string> NsAppLink::NsSmartObjects::CSmartObject::enumerate() const
     return keys;
 }
 
-bool NsAppLink::NsSmartObjects::CSmartObject::keyExists(const char * key)
+bool NsAppLink::NsSmartObjects::CSmartObject::keyExists(const std::string & Key) const
 {
     if(m_type != SmartType_Map)
     {
         return false;
     }
 
-    return m_data.map_value->count(key);
+    return m_data.map_value->count(Key);
 }
 
 bool NsAppLink::NsSmartObjects::CSmartObject::isValid()

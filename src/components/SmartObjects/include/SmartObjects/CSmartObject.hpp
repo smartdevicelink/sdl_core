@@ -129,7 +129,7 @@ namespace NsAppLink
              **/
             std::set<std::string> enumerate() const;
 
-            bool keyExists(const char * key);
+            bool keyExists(const std::string & Key) const;
 
             //TODO: Implement method keyExist(const char*) for checking key in map availability
 
